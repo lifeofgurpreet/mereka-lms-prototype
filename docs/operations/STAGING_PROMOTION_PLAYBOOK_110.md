@@ -23,7 +23,7 @@ Scope: Promotion execution checklist once operator signal is given.
   - post blocker status to `#110` with current evidence links
 - Do not touch `bbi-infrastructure` overlays or Argo resources in blocked mode.
 
-## Latest Repo-Local Baseline (2026-03-02T035438Z)
+## Latest Repo-Local Baseline (2026-03-02T040727Z)
 
 - All repo-local pre-promotion checks are green:
   - `capture-branding-screenshots.sh --env dev --mfe-only` (`exit=0`)
@@ -34,8 +34,8 @@ Scope: Promotion execution checklist once operator signal is given.
   - `verify-a11y-contrast-focus.sh` (`PASS=29 WARN=2 FAIL=0`)
   - `verify-wcag-contrast-v2.sh` (`28 PASS / 0 FAIL`)
 - Evidence artifacts:
-  - `var/qa/staging-prepromotion-dev-baseline-20260302T035438Z.summary.log`
-  - `var/screenshots/dev/20260302T035438Z/`
+  - `var/qa/frontend-stability-sweep-20260302T040727Z.summary.log`
+  - `var/screenshots/dev/20260302T040827Z/`
 
 ## Rollback Contract Validation (Repo-Local)
 

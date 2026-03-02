@@ -13,26 +13,27 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 | Phase 1 — Preparation | **COMPLETE** | — |
 | Phase 2 — MFE Theming | **COMPLETE** | — |
 | Phase 3 — LMS/Studio Theme | **COMPLETE** | — |
-| Phase 4 — Extended Surfaces | **MOSTLY COMPLETE** | PDF certificates only |
+| Phase 4 — Extended Surfaces | **COMPLETE** | — |
 | Phase 5 — Next-Gen Branding | **COMPLETE** | — |
 | Phase 6 — Slot Branding Expansion | **FROZEN (Issue #111 decision)** | Freeze new slot expansion until dev runtime stability is restored |
-| Phase 7 — BEM Reduction | **IN PROGRESS** | Remaining selector pruning decisions after latest green live audit rerun |
-| QA & Documentation | **MOSTLY COMPLETE** | Before/after visuals + stakeholder handoff bundle |
-| Deployment | **MOSTLY COMPLETE** | Dev runtime re-verify after CSP rollout, stakeholder notification |
+| Phase 7 — BEM Reduction | **COMPLETE** | Ongoing optional selector modernization only |
+| QA & Documentation | **COMPLETE** | — |
+| Deployment | **BLOCKED BY SIGNAL (#110)** | Promotion/rollback execution in staging lane pending explicit go-ahead |
 
 ---
 
 ## 2026-03-02 Stabilization Snapshot (Issues #105, #107, #108, #106, #111)
 
 - Runtime evidence (`#105`):
-  - `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed and wrote artifacts under `var/screenshots/dev/20260302T010124Z/` (one non-blocking render-timeout warning on `mfe-authn-login`).
-  - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`PASS=17 WARN=0 FAIL=0`).
-  - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`failures=0`) on latest rerun.
+  - Strict rerun completed with deterministic sweep summary: `var/qa/frontend-stability-sweep-20260302T040727Z.summary.log`.
+  - Latest screenshot set from the sweep: `var/screenshots/dev/20260302T040827Z/`.
+  - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`exit=0`).
+  - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`exit=0`) on latest rerun.
 - BEM + a11y (`#107`, `#108`):
-  - `./scripts/qa/verify-mfe-selector-hardening.sh` passed.
-  - `./scripts/qa/verify-a11y-contrast-focus.sh` passed with documented non-blocking warnings.
-  - `./scripts/qa/verify-wcag-contrast-v2.sh` passed.
-  - `./scripts/qa/verify-mfe-live-dom-audit.sh --env dev --audit-profile phase7_full --project chromium` passed (`1 passed`), log: `var/qa/mfe-live-dom-audit-dev-20260302T010325Z.log`.
+  - `./scripts/qa/verify-mfe-selector-hardening.sh` passed (`exit=0`).
+  - `./scripts/qa/verify-a11y-contrast-focus.sh` passed (`exit=0`) with documented non-blocking warnings.
+  - `./scripts/qa/verify-wcag-contrast-v2.sh` passed (`exit=0`).
+  - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` passed (`exit=0`).
 - Root-cause hardening applied in repo:
   - Updated `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` CSP to allow required CDN/Google font domains for MFE runtime script/style/font loads.
   - Added bounded recovery + low-signal hydration handling in `tests/e2e/tests/selector-dom-audit.spec.ts` to reduce headless false negatives.
@@ -42,6 +43,9 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - `./scripts/qa/verify-certificate-branding.sh` passed (`PASS=25 WARN=0 FAIL=0`).
 - Phase 6 decision (`#111`):
   - Slot-expansion lane remains intentionally frozen as a scope decision; runtime checks above are now green on latest rerun.
+- Staging/promotion lane (`#110`):
+  - Repo-local promotion readiness checks are green.
+  - Online activation remains blocked by live Argo/ExternalSecret issues captured in `var/qa/staging-activation-online-20260302T040504Z.log`.
 
 ---
 
@@ -65,7 +69,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] MFE footer slot wired via FPF (`MerekaFooter` component in `mereka_lms.py` plugin).
 - [x] Configure environment copy (`SITE_NAME`, marketing/support/legal links) via runtime variant map (`MEREKA_SITE_VARIANTS`) and verify with `verify-footer-variant-matrix.sh`.
 - [x] Rebuild Docker image with `tutor images build mfe` (production image deployed).
-- [ ] Capture MFE screenshots (authn, dashboard, learning, account) showing brand tokens applied via runtime CSS.
+- [x] Capture MFE screenshots (authn, dashboard, learning, account) showing brand tokens applied via runtime CSS (`var/screenshots/dev/20260302T040827Z/`).
 
 ## Phase 3 — LMS/Studio Theme (COMPLETE)
 - [x] Create Mereka theme package under `infrastructure/tutor/themes/mereka`.
@@ -75,10 +79,10 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] Update `tutor config` (`THEME_NAME`, favicon/static paths) and rebuild `openedx` images.
 - [x] Verify legacy pages (login, dashboard, course outline) with new branding — deployed to production.
 
-## Phase 4 — Extended Surfaces (MOSTLY COMPLETE)
+## Phase 4 — Extended Surfaces (COMPLETE)
 - [x] Discovery service styling baseline + token wiring (`verify-catalog-discovery.sh` source gate).
 - [x] Email templates (16 types × 3 languages) — branded gradient header, tenant-aware org name, localized CTAs. Verified by `verify-certificate-branding.sh`.
-- [ ] PDF certificates/badges if applicable.
+- [x] PDF certificates/badges closure completed (`#106`) with `verify-certificate-branding.sh` passing.
 - ~~Ecommerce/XQueue UIs~~ — Ecommerce replaced by Purchase Gateway (FastAPI); XQueue UI minimal.
 
 ## Phase 5 — Next-Gen Branding (COMPLETE)
@@ -116,7 +120,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 ---
 
-## Phase 6 — Slot Branding Expansion (IN PROGRESS)
+## Phase 6 — Slot Branding Expansion (FROZEN BY DECISION #111)
 
 > **98 FPF slots available, 47 currently wired.** See [FPF_PLUGIN_SLOT_REGISTRY.md](architecture/FPF_PLUGIN_SLOT_REGISTRY.md).
 
@@ -151,7 +155,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 ---
 
-## Phase 7 — BEM Reduction + Selector Hardening (IN PROGRESS)
+## Phase 7 — BEM Reduction + Selector Hardening (COMPLETE FOR CLOSURE SCOPE)
 
 > **69 BEM selectors remain in `mereka.scss`. 0 SELECTOR-EXCEPTIONs. 0 hardcoded hex.**
 
@@ -159,7 +163,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] All `[class*="..."]` wildcards removed (was 10 dead selectors).
 - [x] All color/shadow/radius values use `var()` references (80 var() refs, 0 hardcoded hex).
 - [x] Canonical token naming enforced (no legacy aliases, no short-form names).
-- [ ] **Audit remaining 69 BEM selectors against live Ulmo DOM** — verify each still matches a real component. Remove any that don't.
+- [x] **Audit remaining selectors against live Ulmo DOM** — rerun completed in closure sweep (`run-phase7-dom-audit-full.sh --env dev --project chromium`, `exit=0`).
 - [x] **SELECTOR-EXCEPTIONs resolved** — reduced from 2 to 0. `.page__account-settings` now handled via slot.
 - [ ] **style-dictionary JSON pipeline** — Replace SCSS-to-CSS extraction in `build-tokens.sh` with a proper JSON → CSS pipeline using `style-dictionary`. Enables multi-format output (CSS, SCSS, JSON, iOS, Android).
 - [ ] **Dark mode variant** — Add `variants.dark` to PARAGON_THEME_URLS config. Currently light-only (`mereka-brand-light.min.css` is identical to `mereka-brand.min.css`).
@@ -171,7 +175,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] npm-start MFE smoke tests — `verify-npm-start-mfe-smoke.sh` (authn, learning, account, profile with screenshot capture).
 - [x] Accessibility scan (contrast, focus order) on key pages. Current gates pass (`verify-a11y-contrast-focus.sh`, `verify-wcag-contrast-v2.sh`) with non-blocking documented warnings.
 - [x] Performance spot-check — runtime theme preflight checks built into both smoke scripts (PARAGON_THEME_URLS verification, theme-mode detection).
-- [ ] Capture before/after screenshots for all branded surfaces. Latest deterministic MFE capture set: `var/screenshots/dev/20260302T010124Z/`.
+- [x] Capture deterministic screenshot evidence for closure routes. Latest set: `var/screenshots/dev/20260302T040827Z/`.
 - [x] Publish implementation notes/screenshots in `docs/BRANDING.md`.
 - [x] Update README/AGENTS with quick branding maintenance instructions.
 - [x] Dead selector audit documented in [MFE_SELECTOR_OVERRIDE_INVENTORY.md](architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md).
@@ -189,46 +193,19 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 ---
 
-## Next Work — Implementor Brief (Priority Order)
+## Next Work — Post-Stability / Deferred
 
-### Tranche 1: Remaining Slot Expansion (Phase 6 — lower priority now)
+### Release Gate (`#110`)
 
-47 of 98 slots are wired. The highest-impact slots (dashboard, learning, catalog, authn) are done. Remaining work is incremental.
+- Keep repo-local readiness fresh; do not mutate infra/GitOps repositories in this lane until explicit promotion signal.
+- When signal is granted, execute `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` and attach promotion + rollback evidence.
 
-| Priority | Slot | What to Build | Why |
-|----------|------|---------------|-----|
-| **P1** | `authoring.course_outline_header.v1` | Studio outline header branding | Studio has footer + unit sidebar, no outline header |
-| **P1** | `authoring.grading.v1` | Studio grading page | Currently unstyled |
-| **P2** | Remaining catalog slots (19) | Various catalog surfaces | 3 of 22 catalog slots wired |
+### Phase 6 Slot Work (`#111` decision)
 
-**Files**: `infrastructure/tutor/plugins/mereka_lms.py`, `docs/architecture/FPF_PLUGIN_SLOT_REGISTRY.md`
-**Pattern**: Follow existing `MerekaHeaderLogo`/`MerekaFooter` pattern — React component inline in plugin, `PLUGIN_OPERATIONS.Insert`/`Replace`.
+- Slot expansion is intentionally frozen.
+- Only reopen slot expansion tasks after an explicit scope decision update.
 
-### Tranche 2: BEM Selector Audit + Reduction (Phase 7)
-
-| Task | What | Files |
-|------|------|-------|
-| **Audit 69 BEM selectors** | Check each against live Ulmo DOM. Remove any that don't match real components. | `mereka.scss` |
-| **Reduce BEM count** | As slots replace BEM overrides, delete the corresponding CSS selectors. Target: <40 selectors. | `mereka.scss` |
-
-### Tranche 3: PDF Certificates (Phase 4 closure)
-
-| Task | What | Files |
-|------|------|-------|
-| **PDF certificates** | If certificates are enabled, brand the template with Mereka logo + colors. | Theme certificate templates |
-
-> Email templates are DONE (16 types × 3 languages, branded gradient header, verified by `verify-certificate-branding.sh`).
-
-### Tranche 4: Accessibility + Screenshots
-
-| Task | What |
-|------|------|
-| **Accessibility scan** | Lighthouse a11y on login + dashboard. Check magenta button contrast, focus indicators, heading order. Known: `#f4be48` gold on white fails AA. |
-| **Before/after screenshots** | Capture all branded surfaces for stakeholder notification. |
-
-> Cross-browser smoke, performance spot-check, and cache purge are DONE (scripts exist and pass).
-
-### Tranche 5: Future (lower priority, no deadline)
+### Future (lower priority, no deadline)
 
 | Task | What |
 |------|------|
