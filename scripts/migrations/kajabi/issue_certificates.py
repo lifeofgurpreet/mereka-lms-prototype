@@ -22,9 +22,7 @@ import argparse
 import csv
 import json
 import os
-import sys
 import uuid
-from pathlib import Path
 
 
 def load_mapping(path: str) -> dict[str, list[str]]:
@@ -76,8 +74,8 @@ def main():
         import django
         django.setup()
         from django.contrib.auth import get_user_model
+        from lms.djangoapps.certificates.models import CertificateStatuses, GeneratedCertificate
         from opaque_keys.edx.keys import CourseKey
-        from lms.djangoapps.certificates.models import GeneratedCertificate, CertificateStatuses
         User = get_user_model()
 
     pairs_seen: set[tuple[str, str]] = set()

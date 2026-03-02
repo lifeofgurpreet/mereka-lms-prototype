@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Validate that infrastructure/tutor/config.example.yml is valid YAML."""
 import sys
+
 import yaml
 
 with open("infrastructure/tutor/config.example.yml") as f:

@@ -250,7 +250,7 @@ def main():
     else:
         # Human-readable
         print(f"{'='*60}")
-        print(f"  Bead Quality Report (Outcome Rubric v3)")
+        print("  Bead Quality Report (Outcome Rubric v3)")
         print(f"{'='*60}")
         print()
         print(f"  Beads scanned:    {len(results)}")

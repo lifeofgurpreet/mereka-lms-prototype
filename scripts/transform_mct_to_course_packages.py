@@ -18,7 +18,7 @@ from pathlib import Path
 
 def load_ndjson(filepath):
     """Load NDJSON file (one JSON object per line)."""
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding='utf-8') as f:
         lines = f.readlines()
         return [json.loads(line) for line in lines]
 
@@ -184,7 +184,7 @@ def main():
         print(f"  {cat}: {count} courses")
 
     print(f"\nTotal: {len(course_structure)} courses across {len(category_counts)} categories")
-    print(f"\nFiles created:")
+    print("\nFiles created:")
     print(f"  - {structure_file}")
     print(f"  - {csv_file}")
 

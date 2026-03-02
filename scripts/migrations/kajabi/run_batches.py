@@ -5,9 +5,8 @@ from __future__ import annotations
 
 import argparse
 import subprocess
-import sys
-from pathlib import Path
 import time
+from pathlib import Path
 
 
 def sh(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:

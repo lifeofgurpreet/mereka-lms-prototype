@@ -1,7 +1,7 @@
 # @covers AC-004, AC-006, AC-007, AC-008, AC-015, AC-016, AC-017, AC-018
 # @spec: ecommerce-purchase-gateway_spec.md
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import stripe
 import structlog
@@ -248,7 +248,7 @@ async def stripe_webhook(
             logger.info("webhook.unhandled_event_type", event_type=event_type)
 
         stripe_event_record.processing_status = ProcessingStatus.processed
-        stripe_event_record.processed_at = datetime.now(timezone.utc)
+        stripe_event_record.processed_at = datetime.now(UTC)
         await db.commit()
 
     except Exception as e:

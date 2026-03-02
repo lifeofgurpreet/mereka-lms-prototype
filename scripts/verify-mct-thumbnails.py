@@ -48,7 +48,7 @@ def main():
         sys.exit(1)
 
     # Load manifest
-    with open(manifest_path, 'r', encoding='utf-8') as f:
+    with open(manifest_path, encoding='utf-8') as f:
         manifest = json.load(f)
 
     downloaded = manifest.get('downloaded', {})
@@ -79,7 +79,7 @@ def main():
             invalid_count += 1
 
     print(f"\n{'='*80}")
-    print(f"Verification Summary:")
+    print("Verification Summary:")
     print(f"{'='*80}")
     print(f"  Total files in manifest: {len(downloaded)}")
     print(f"  ✅ Valid images:         {valid_count}")

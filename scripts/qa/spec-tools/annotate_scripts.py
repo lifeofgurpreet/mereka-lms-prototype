@@ -11,7 +11,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -38,8 +37,7 @@ def iter_testmap_files(testmaps_dir: Path):
     files = set()
     for pattern in ("*.testmap.yml", "*.testmap.yaml", "*_testmap.yaml"):
         files.update(testmaps_dir.glob(pattern))
-    for tm_path in sorted(files):
-        yield tm_path
+    yield from sorted(files)
 
 
 def build_file_index(testmaps_dir: Path) -> dict[str, dict]:
@@ -195,7 +193,7 @@ def main():
 
     print()
     print("=" * 60)
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Files {'annotated' if args.apply else 'to annotate'}: {annotated}")
     print(f"  Files skipped (already annotated):  {skipped}")
     print(f"  Files missing on disk:              {missing}")

@@ -23,6 +23,8 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
@@ -34,7 +36,12 @@ select = [
 ]
 ignore = [
     "E501",  # line too long (handled by formatter)
+    "E402",  # module-import-not-at-top (common in scripts with sys.path manipulation)
+    "E722",  # bare-except (acceptable in resilient scripts)
+    "E741",  # ambiguous-variable-name (e.g., 'l' in loops)
     "B008",  # do not perform function calls in argument defaults
+    "B904",  # raise-without-from-inside-except (style preference)
+    "UP031", # printf-string-formatting (% formatting still readable)
 ]
 
 [tool.ruff.format]
@@ -50,4 +57,3 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-

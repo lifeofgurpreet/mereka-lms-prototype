@@ -28,13 +28,13 @@ Usage:
     python scripts/migrations/mct/upload_videos_to_mux.py --category "AI Fluency"
 """
 
+import argparse
+import json
 import os
 import sys
-import json
 import time
-import argparse
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Check for mux_python
 try:
@@ -68,7 +68,7 @@ def get_mux_client():
 
 def load_videos(videos_file):
     """Load video data from extraction output."""
-    with open(videos_file, 'r') as f:
+    with open(videos_file) as f:
         data = json.load(f)
     return data['videos'], data['statistics']
 
@@ -227,7 +227,7 @@ def main():
         json.dump(results, f, indent=2)
 
     print("=" * 60)
-    print(f"Upload complete!")
+    print("Upload complete!")
     print(f"  Successful: {len(results['successful'])}")
     print(f"  Failed: {len(results['failed'])}")
     print(f"  Results saved to: {output_file}")

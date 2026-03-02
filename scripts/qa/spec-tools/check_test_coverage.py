@@ -17,7 +17,6 @@ from __future__ import annotations
 import argparse
 import re
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 COVERS_RE = re.compile(r"(?://|#)\s*@covers\s+((?:AC-[A-Z]*-?\d+(?:\s*,\s*)*)+)")
 SPEC_RE = re.compile(r"(?://|#)\s*@spec:\s*(\S+)")
@@ -27,7 +26,7 @@ SCAN_EXTENSIONS = {".sh", ".py", ".ts", ".js", ".tsx", ".jsx", ".yaml", ".yml"}
 SKIP_FILES = {"INDEX.md", "README.md", "_TEMPLATE.md"}
 
 
-def scan_file_for_covers(path: Path) -> Dict[str, str]:
+def scan_file_for_covers(path: Path) -> dict[str, str]:
     """Returns {ac_id: spec_name_or_empty} for all @covers annotations in file."""
     try:
         content = path.read_text(encoding="utf-8")
@@ -38,7 +37,7 @@ def scan_file_for_covers(path: Path) -> Dict[str, str]:
     for m in SPEC_RE.finditer(content):
         spec_name = m.group(1)
 
-    covers: Dict[str, str] = {}
+    covers: dict[str, str] = {}
     for m in COVERS_RE.finditer(content):
         ids = [s.strip() for s in m.group(1).split(",") if s.strip()]
         for raw_id in ids:
@@ -48,12 +47,12 @@ def scan_file_for_covers(path: Path) -> Dict[str, str]:
     return covers
 
 
-def scan_dirs_for_covers(dirs: List[Path]) -> Dict[str, List[Tuple[Path, str]]]:
+def scan_dirs_for_covers(dirs: list[Path]) -> dict[str, list[tuple[Path, str]]]:
     """Scan directories for @covers annotations.
 
     Returns {ac_id: [(file_path, spec_name), ...]}
     """
-    result: Dict[str, List[Tuple[Path, str]]] = {}
+    result: dict[str, list[tuple[Path, str]]] = {}
     for d in dirs:
         if not d.exists():
             continue
@@ -66,7 +65,7 @@ def scan_dirs_for_covers(dirs: List[Path]) -> Dict[str, List[Tuple[Path, str]]]:
     return result
 
 
-def extract_ac_ids_from_spec(spec_path: Path) -> List[str]:
+def extract_ac_ids_from_spec(spec_path: Path) -> list[str]:
     """Extract AC IDs from checkbox lines in a spec."""
     content = spec_path.read_text(encoding="utf-8")
     ids = []
@@ -79,7 +78,7 @@ def extract_ac_ids_from_spec(spec_path: Path) -> List[str]:
     return ids
 
 
-def find_spec_files(specs_root: Path) -> List[Path]:
+def find_spec_files(specs_root: Path) -> list[Path]:
     """Find all spec markdown files."""
     if not specs_root.exists() or not specs_root.is_dir():
         return []

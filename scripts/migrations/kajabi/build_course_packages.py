@@ -28,10 +28,9 @@ import json
 import re
 import shutil
 import tarfile
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
-
 
 DEFAULT_START = "2025-01-01T00:00:00Z"
 
@@ -55,8 +54,8 @@ class CourseKey:
         return f"{self.slug}.tar.gz"
 
 
-def load_course_metadata(csv_path: Path) -> Dict[str, dict]:
-    metadata: Dict[str, dict] = {}
+def load_course_metadata(csv_path: Path) -> dict[str, dict]:
+    metadata: dict[str, dict] = {}
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
@@ -96,7 +95,7 @@ def html_block_for_lesson(lesson: dict) -> str:
     """
     Generate HTML content for a lesson, using real content if available,
     otherwise falling back to a placeholder with metadata.
-    
+
     Note: content_html is used as-is (not escaped) since it's already HTML from Kajabi.
     This is safe because Kajabi is a trusted source.
     """
@@ -104,10 +103,10 @@ def html_block_for_lesson(lesson: dict) -> str:
     body = lesson.get("body")
     video_url = lesson.get("video_url")
     download_url = lesson.get("download_url")
-    
+
     # Build the HTML block
     rows = []
-    
+
     # Add main content
     if content_html:
         # content_html is already HTML from Kajabi - use it directly
@@ -132,7 +131,7 @@ def html_block_for_lesson(lesson: dict) -> str:
                 attrs["Media Kind"] = media_attrs.get("kind", "")
                 attrs["Media Duration"] = media_attrs.get("duration", "")
                 attrs["Media State"] = media_attrs.get("upload_state", "")
-        
+
         rows.append("<ul>")
         for key, value in attrs.items():
             if value:
@@ -140,34 +139,34 @@ def html_block_for_lesson(lesson: dict) -> str:
                     f"  <li><strong>{html.escape(key)}:</strong> {html.escape(str(value))}</li>"
                 )
         rows.append("</ul>")
-    
+
     # Add media/download links if available (always add these, even if we have content_html)
     if video_url:
         rows.append(f'<p><a href="{html.escape(video_url)}" target="_blank">Watch Video</a></p>')
-    
+
     if download_url:
         rows.append(f'<p><a href="{html.escape(download_url)}" download>Download Content</a></p>')
-    
+
     # Handle included resources (media, downloads from API)
     included_resources = lesson.get("included_resources", [])
     if included_resources:
         for resource in included_resources:
             resource_type = resource.get("type")
             resource_attrs = resource.get("attributes", {})
-            
+
             if resource_type == "media":
                 # Media resource - check for streaming/download URLs
                 stream_url = resource_attrs.get("stream_url") or resource_attrs.get("video_url")
                 if stream_url:
                     rows.append(f'<p><a href="{html.escape(stream_url)}" target="_blank">Stream Media</a></p>')
-            
+
             elif resource_type == "downloads":
                 # Download resource
                 download_link = resource_attrs.get("download_url") or resource_attrs.get("url")
                 if download_link:
                     filename = resource_attrs.get("filename", "Download")
                     rows.append(f'<p><a href="{html.escape(download_link)}" download>{html.escape(filename)}</a></p>')
-    
+
     return "\n".join(rows)
 
 
@@ -184,7 +183,7 @@ def create_course_package(
     output_dir: Path,
     language: str,
     keep_build: bool,
-) -> Tuple[Path, int, int]:
+) -> tuple[Path, int, int]:
     course_dir = output_dir / key.slug
     build_root = course_dir / "build"
     ensure_clean_dir(build_root)
@@ -215,7 +214,7 @@ def create_course_package(
     write_text(overview_path, course_desc or "<p>No description provided.</p>")
     write_text(policy_path, build_policy_json(metadata.get("title", key.title)))
 
-    chapter_refs: List[str] = []
+    chapter_refs: list[str] = []
 
     modules = structure if structure else [
         {
@@ -240,7 +239,7 @@ def create_course_package(
     for module_index, module in enumerate(modules, start=1):
         chapter_url = f"module{module_index}"
         chapter_refs.append(f"  <chapter url_name=\"{chapter_url}\" />")
-        sequential_refs: List[str] = []
+        sequential_refs: list[str] = []
         lessons = module.get("lessons", [])
         if not lessons:
             lessons = [
@@ -371,7 +370,7 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest_rows: List[dict] = []
+    manifest_rows: list[dict] = []
 
     for course in structure_data:
         course_id = course["course_id"]

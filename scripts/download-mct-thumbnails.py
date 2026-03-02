@@ -16,11 +16,10 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Set
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse
 
 
-def extract_urls_from_ndjson(file_path: Path, id_field: str, type_prefix: str) -> Dict[str, str]:
+def extract_urls_from_ndjson(file_path: Path, id_field: str, type_prefix: str) -> dict[str, str]:
     """
     Extract Logo URLs from NDJSON file.
 
@@ -31,7 +30,7 @@ def extract_urls_from_ndjson(file_path: Path, id_field: str, type_prefix: str) -
     url_map = {}
     count = 0
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         for line_num, line in enumerate(f, 1):
             line = line.strip()
             if not line:
@@ -156,7 +155,7 @@ def main():
         sys.exit(1)
 
     # Download images
-    print(f"\n⬇️  Starting downloads...\n")
+    print("\n⬇️  Starting downloads...\n")
 
     success_count = 0
     failed_count = 0
@@ -211,20 +210,20 @@ def main():
         json.dump(manifest, f, indent=2, ensure_ascii=False)
 
     print(f"\n{'='*60}")
-    print(f"📊 Download Summary:")
+    print("📊 Download Summary:")
     print(f"{'='*60}")
     print(f"  Total URLs:        {len(all_urls)}")
     print(f"  ✅ Downloaded:     {success_count}")
     print(f"  ⏭️  Skipped:        {skipped_count}")
     print(f"  ❌ Failed:         {failed_count}")
     print(f"{'='*60}")
-    print(f"\n📁 Output:")
+    print("\n📁 Output:")
     print(f"  Images:   {output_dir}")
     print(f"  Manifest: {manifest_path}")
 
     # List failed URLs if any
     if failed_count > 0:
-        print(f"\n⚠️  Failed downloads:")
+        print("\n⚠️  Failed downloads:")
         for filename, url in manifest['failed'].items():
             print(f"    - {filename}: {url[:80]}...")
 

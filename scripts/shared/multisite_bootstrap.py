@@ -7,12 +7,11 @@ import argparse
 import json
 import os
 import pathlib
+import textwrap
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import pymysql
-import textwrap
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_ENV_PATH = REPO_ROOT / "tutor_env" / "env" / "apps" / "openedx" / "config" / "lms.env.yml"
@@ -23,11 +22,11 @@ DEFAULT_DEFINITIONS_PATH = REPO_ROOT / "infrastructure" / "tutor" / "multisite-s
 class SiteDefinition:
     domain: str
     name: str
-    orgs: List[str]
-    site_values: Dict[str, object]
+    orgs: list[str]
+    site_values: dict[str, object]
 
 
-def _load_yaml(path: pathlib.Path) -> Dict[str, object]:
+def _load_yaml(path: pathlib.Path) -> dict[str, object]:
     import yaml  # type: ignore
     payload = yaml.safe_load(path.read_text()) or {}
     assert isinstance(payload, dict)
@@ -49,12 +48,12 @@ def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, prim
     ).strip()
 
 
-def load_definitions() -> tuple[List[Dict[str, object]], List[SiteDefinition]]:
+def load_definitions() -> tuple[list[dict[str, object]], list[SiteDefinition]]:
     path = pathlib.Path(os.environ.get("MULTISITE_DEFINITIONS_PATH") or DEFAULT_DEFINITIONS_PATH)
     payload = _load_yaml(path)
     orgs = payload.get("organizations") or []
     sites = payload.get("sites") or []
-    definitions: List[SiteDefinition] = []
+    definitions: list[SiteDefinition] = []
     for s in sites:
         if not isinstance(s, dict):
             continue
@@ -82,7 +81,7 @@ def load_definitions() -> tuple[List[Dict[str, object]], List[SiteDefinition]]:
 ORGANIZATIONS, SITE_DEFINITIONS = load_definitions()
 
 
-def load_db_settings(path: pathlib.Path) -> Dict[str, object]:
+def load_db_settings(path: pathlib.Path) -> dict[str, object]:
     raw = path.read_text()
     try:
         payload = json.loads(raw)
@@ -100,7 +99,7 @@ def load_db_settings(path: pathlib.Path) -> Dict[str, object]:
     }
 
 
-def upsert_sites(connection, definitions: List[SiteDefinition], dry_run: bool) -> None:
+def upsert_sites(connection, definitions: list[SiteDefinition], dry_run: bool) -> None:
     with connection.cursor() as cursor:
         for definition in definitions:
             if dry_run:
@@ -189,11 +188,11 @@ def upsert_organizations(connection, dry_run: bool) -> None:
 
 
 def connect_database(
-    settings: Dict[str, object],
+    settings: dict[str, object],
     use_connector: bool,
-    instance_connection_name: Optional[str],
+    instance_connection_name: str | None,
     ip_type: str,
-) -> Tuple[object, Optional[object]]:
+) -> tuple[object, object | None]:
     """
     Return a DB connection plus optional connector handle (when using Cloud SQL).
     """

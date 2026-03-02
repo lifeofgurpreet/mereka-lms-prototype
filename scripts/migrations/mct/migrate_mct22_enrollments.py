@@ -19,11 +19,12 @@ Usage:
     kubectl exec -n mereka-lms lms-pod -- python manage.py lms shell < /tmp/migrate_mct22_enrollments.py
 """
 
+import sys
+
 from common.djangoapps.student.models import CourseEnrollment
+from django.db import transaction
 from opaque_keys.edx.keys import CourseKey
 from xmodule.modulestore.django import modulestore
-from django.db import transaction
-import sys
 
 OLD_COURSE_ID = 'course-v1:SKILLOURFUTURE+MCT-22+course'
 NEW_COURSE_ID = 'course-v1:SKILLOURFUTURE+MCT-22+RUN-22'
@@ -116,7 +117,6 @@ def migrate_enrollments(dry_run=True, batch_size=1000):
                     enrollment.is_active = False
                     enrollment.save()
                 skipped += 1
-                action = "Would skip (already enrolled)" if dry_run else "Deactivated old enrollment"
             else:
                 # Migrate enrollment to new course
                 if not dry_run:
@@ -124,7 +124,6 @@ def migrate_enrollments(dry_run=True, batch_size=1000):
                         enrollment.course_id = new_key
                         enrollment.save()
                 migrated += 1
-                action = "Would migrate" if dry_run else "Migrated"
 
             # Progress report every 1000 enrollments
             if (i + 1) % 1000 == 0:

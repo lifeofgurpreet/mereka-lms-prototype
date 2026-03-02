@@ -32,12 +32,11 @@ Usage:
     python scripts/qa/verify-mux-asset-status.py --dry-run
 """
 
+import argparse
+import json
 import os
 import sys
-import json
-import argparse
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 # Check for mux_python
 try:
@@ -64,13 +63,13 @@ def get_mux_client():
     return mux_python.ApiClient(configuration)
 
 
-def load_video_mapping(mapping_file: Path) -> Dict:
+def load_video_mapping(mapping_file: Path) -> dict:
     """Load video mapping from JSON file."""
-    with open(mapping_file, 'r') as f:
+    with open(mapping_file) as f:
         return json.load(f)
 
 
-def extract_playback_ids(mapping_data: Dict) -> Set[str]:
+def extract_playback_ids(mapping_data: dict) -> set[str]:
     """Extract all playback IDs from mapping file."""
     playback_ids = set()
 
@@ -83,13 +82,13 @@ def extract_playback_ids(mapping_data: Dict) -> Set[str]:
     return playback_ids
 
 
-def get_mux_assets(api_client, limit: int = 100) -> List[Dict]:
+def get_mux_assets(api_client, limit: int = 100) -> list[dict]:
     """Fetch all Mux assets via API."""
     assets_api = mux_python.AssetsApi(api_client)
     all_assets = []
     page = 1
 
-    print(f"Fetching Mux assets...")
+    print("Fetching Mux assets...")
 
     while True:
         try:
@@ -116,10 +115,10 @@ def get_mux_assets(api_client, limit: int = 100) -> List[Dict]:
 
 
 def verify_playback_ids(
-    playback_ids: Set[str],
+    playback_ids: set[str],
     api_client,
     dry_run: bool = False
-) -> Tuple[List[str], List[str], Dict]:
+) -> tuple[list[str], list[str], dict]:
     """
     Verify playback IDs against Mux API.
 

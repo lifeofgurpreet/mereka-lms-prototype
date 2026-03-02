@@ -13,7 +13,6 @@ Run in Discovery pod:
 
 import os
 import sys
-import json
 import uuid
 from datetime import datetime
 
@@ -21,11 +20,12 @@ from datetime import datetime
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'course_discovery.settings.production')
 
 import django
+
 django.setup()
 
-from django.db import connection, transaction
-from course_discovery.apps.course_metadata.models import Course, Program, Organization
 from course_discovery.apps.core.models import Partner
+from course_discovery.apps.course_metadata.models import Organization, Program
+from django.db import connection
 
 # Program to course mapping
 PROGRAM_COURSE_MAPPING = {
@@ -227,7 +227,7 @@ def main():
         print(f"\n[{program_name}]")
 
         if program_name not in programs:
-            print(f"  WARNING: Program not found in Discovery, skipping")
+            print("  WARNING: Program not found in Discovery, skipping")
             stats['errors'].append(f"Program not found: {program_name}")
             continue
 
@@ -252,7 +252,7 @@ def main():
                 if linked:
                     stats['links_created'] += 1
                     program_updated = True
-                    print(f"  -> Linked to program")
+                    print("  -> Linked to program")
                 else:
                     stats['links_existing'] += 1
 

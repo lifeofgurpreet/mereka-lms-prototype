@@ -34,11 +34,10 @@ import http.server
 import json
 import logging
 import os
-import sys
 import threading
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from base64 import b64encode
 from datetime import datetime, timezone
 

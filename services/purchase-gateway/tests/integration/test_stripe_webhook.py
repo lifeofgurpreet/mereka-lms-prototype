@@ -68,7 +68,6 @@ def _checkout_completed_event(session_id: str = "cs_test_integ") -> dict:
 async def test_webhook_duplicate_already_processed_returns_duplicate(mock_stripe, client):
     """Webhook returns {status: duplicate} when event was already processed."""
     import stripe as stripe_lib
-
     from app.database import get_db
     from app.main import app
     from app.models.stripe_event import ProcessingStatus, StripeEvent

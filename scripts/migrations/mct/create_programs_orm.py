@@ -11,19 +11,16 @@ Or via kubectl:
     kubectl exec -n mereka-lms deploy/discovery -- python /tmp/create_programs_orm.py
 """
 import os
-import sys
-import json
+
 import django
 
 # Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'course_discovery.settings.production')
 django.setup()
 
-from django.db import transaction
 from course_discovery.apps.core.models import Partner
-from course_discovery.apps.course_metadata.models import (
-    Organization, Program, ProgramType, Course
-)
+from course_discovery.apps.course_metadata.models import Course, Organization, Program, ProgramType
+from django.db import transaction
 
 # Programs mapping (embedded for portability)
 PROGRAMS_DATA = {
@@ -327,7 +324,7 @@ def create_programs():
 
     print(f"\n--- Creating {len(ALL_PROGRAMS)} Programs ---\n")
 
-    for mct_id, prog_data in ALL_PROGRAMS.items():
+    for _mct_id, prog_data in ALL_PROGRAMS.items():
         program_type = get_program_type(prog_data["program_type"])
         slug = prog_data["marketing_slug"]
         status = STATUS_MAP.get(prog_data.get("status", "active"), "active")

@@ -13,7 +13,6 @@ from __future__ import annotations
 import argparse
 import csv
 import os
-import sys
 from pathlib import Path
 
 
@@ -38,7 +37,7 @@ def main():
             img = Path(args.thumbs_dir) / row["image_filename"]
             exists = img.exists()
             status = "OK" if exists else "MISSING"
-            print("  %s %s -> %s" % (status, row["course_key"], row["image_filename"]))
+            print("  {} {} -> {}".format(status, row["course_key"], row["image_filename"]))
         return
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", args.settings)
@@ -47,9 +46,9 @@ def main():
     django.setup()
 
     from opaque_keys.edx.keys import CourseKey
-    from xmodule.modulestore.django import modulestore
-    from xmodule.contentstore.django import contentstore
     from xmodule.contentstore.content import StaticContent
+    from xmodule.contentstore.django import contentstore
+    from xmodule.modulestore.django import modulestore
 
     store = modulestore()
     stats = {"uploaded": 0, "skipped": 0, "failed": 0}
@@ -60,7 +59,7 @@ def main():
         image_path = Path(args.thumbs_dir) / image_filename
 
         if not image_path.exists():
-            print("  SKIP %s: %s not found" % (course_key_str, image_filename))
+            print(f"  SKIP {course_key_str}: {image_filename} not found")
             stats["skipped"] += 1
             continue
 
@@ -96,11 +95,11 @@ def main():
                 if stats["uploaded"] % 10 == 0:
                     print("  Uploaded %d..." % stats["uploaded"])
             else:
-                print("  FAIL %s: course not found in modulestore" % course_key_str)
+                print(f"  FAIL {course_key_str}: course not found in modulestore")
                 stats["failed"] += 1
 
         except Exception as e:
-            print("  FAIL %s: %s" % (course_key_str, e))
+            print(f"  FAIL {course_key_str}: {e}")
             stats["failed"] += 1
 
     print("Results: uploaded=%d skipped=%d failed=%d" % (

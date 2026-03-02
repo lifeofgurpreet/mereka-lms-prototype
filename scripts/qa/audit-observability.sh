@@ -25,7 +25,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 PROJECT="${GCP_PROJECT:-mereka-lms}"
-COMPUTE_QUOTA_PROJECT="${COMPUTE_QUOTA_PROJECT:-bbi-k8}"
+COMPUTE_QUOTA_PROJECT="${COMPUTE_QUOTA_PROJECT:-$PROJECT}"
 K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 APP_NS="${APP_NS:-mereka-lms}"
 VELERO_NS="${VELERO_NS:-velero}"

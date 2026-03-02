@@ -7,7 +7,6 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from app.database import get_db
 from app.main import app
 from app.models.offering import Offering, OfferingType
@@ -23,20 +22,20 @@ OFFERING_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
 
 
 def _make_offering(**overrides) -> Offering:
-    defaults = dict(
-        id=OFFERING_ID,
-        tenant_id=TENANT_ID,
-        offering_type=OfferingType.course_seat,
-        title="Test Course",
-        price_cents=9900,
-        currency="USD",
-        stripe_price_id="price_test_123",
-        lms_resource_id="course-v1:Test+101+2024",
-        active=True,
-        metadata_json=None,
-        created_at=datetime(2024, 1, 1, tzinfo=UTC),
-        updated_at=datetime(2024, 1, 1, tzinfo=UTC),
-    )
+    defaults = {
+        "id": OFFERING_ID,
+        "tenant_id": TENANT_ID,
+        "offering_type": OfferingType.course_seat,
+        "title": "Test Course",
+        "price_cents": 9900,
+        "currency": "USD",
+        "stripe_price_id": "price_test_123",
+        "lms_resource_id": "course-v1:Test+101+2024",
+        "active": True,
+        "metadata_json": None,
+        "created_at": datetime(2024, 1, 1, tzinfo=UTC),
+        "updated_at": datetime(2024, 1, 1, tzinfo=UTC),
+    }
     defaults.update(overrides)
     return Offering(**defaults)
 

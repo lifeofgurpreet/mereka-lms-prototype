@@ -6,11 +6,10 @@ Replaces expired SAS tokens with new one and downloads to local directory.
 
 import json
 import os
+import ssl
 import sys
 import urllib.parse
 import urllib.request
-import ssl
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Config
@@ -24,7 +23,7 @@ def extract_thumbnails():
     """Extract lesson thumbnails from course content."""
     thumbnails = []
 
-    with open(INPUT_FILE, 'r') as f:
+    with open(INPUT_FILE) as f:
         for line in f:
             if not line.strip():
                 continue

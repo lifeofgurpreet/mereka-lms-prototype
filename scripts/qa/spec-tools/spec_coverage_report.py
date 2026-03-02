@@ -19,9 +19,8 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 try:
     import yaml
@@ -45,7 +44,7 @@ class SpecCoverage:
     unmapped: int = 0
 
 
-def extract_ac_ids(md: str) -> List[str]:
+def extract_ac_ids(md: str) -> list[str]:
     """Extract AC IDs from checkbox lines."""
     ids = []
     for line in md.splitlines():
@@ -57,14 +56,14 @@ def extract_ac_ids(md: str) -> List[str]:
     return ids
 
 
-def scan_dirs_for_covers(dirs: List[Path]) -> Dict[Tuple[str, str], List[Path]]:
+def scan_dirs_for_covers(dirs: list[Path]) -> dict[tuple[str, str], list[Path]]:
     """Scan directories for @covers annotations.
 
     Returns {(spec_filename, ac_id): [file_paths]}.
     The spec_filename comes from @spec: annotations in the same file.
     Files without @spec: use empty string as spec key (matches any spec).
     """
-    result: Dict[Tuple[str, str], List[Path]] = {}
+    result: dict[tuple[str, str], list[Path]] = {}
     for d in dirs:
         if not d.exists():
             continue
@@ -89,13 +88,13 @@ def scan_dirs_for_covers(dirs: List[Path]) -> Dict[Tuple[str, str], List[Path]]:
     return result
 
 
-def load_manual_entries(manual_file: Optional[Path]) -> Dict[Tuple[str, str], dict]:
+def load_manual_entries(manual_file: Path | None) -> dict[tuple[str, str], dict]:
     """Load all manual/monitoring entries. Returns {(spec_filename, ac_id): entry}."""
     if not manual_file or not manual_file.exists():
         return {}
     data = yaml.safe_load(manual_file.read_text(encoding="utf-8")) or {}
     entries = data.get("entries", [])
-    result: Dict[Tuple[str, str], dict] = {}
+    result: dict[tuple[str, str], dict] = {}
     for entry in entries:
         if isinstance(entry, dict) and "id" in entry:
             spec = entry.get("spec", "")
@@ -106,7 +105,7 @@ def load_manual_entries(manual_file: Optional[Path]) -> Dict[Tuple[str, str], di
 def is_ac_automated(
     ac_id: str,
     spec_filename: str,
-    automated_index: Dict[Tuple[str, str], List[Path]],
+    automated_index: dict[tuple[str, str], list[Path]],
 ) -> bool:
     """Check if an AC is covered by @covers annotations scoped to the right spec.
 
@@ -138,8 +137,8 @@ def is_ac_automated(
 def find_manual_entry(
     ac_id: str,
     spec_filename: str,
-    manual_index: Dict[Tuple[str, str], dict],
-) -> Optional[dict]:
+    manual_index: dict[tuple[str, str], dict],
+) -> dict | None:
     """Find a manual entry scoped to the spec. Handles prefixed AC IDs as global."""
     has_prefix = bool(re.match(r"AC-[A-Z]+-\d+", ac_id))
 
@@ -161,8 +160,8 @@ def find_manual_entry(
 def categorize_ac(
     ac_id: str,
     spec_filename: str,
-    automated_index: Dict[Tuple[str, str], List[Path]],
-    manual_index: Dict[Tuple[str, str], dict],
+    automated_index: dict[tuple[str, str], list[Path]],
+    manual_index: dict[tuple[str, str], dict],
 ) -> str:
     """Categorize an AC based on annotations and manual entries."""
     if is_ac_automated(ac_id, spec_filename, automated_index):
@@ -184,8 +183,8 @@ def categorize_ac(
 
 def analyze_spec(
     spec_path: Path,
-    automated_index: Dict[Tuple[str, str], List[Path]],
-    manual_index: Dict[str, dict],
+    automated_index: dict[tuple[str, str], list[Path]],
+    manual_index: dict[str, dict],
 ) -> SpecCoverage:
     """Analyze coverage for a single spec."""
     md = spec_path.read_text(encoding="utf-8")
@@ -213,7 +212,7 @@ def analyze_spec(
     return cov
 
 
-def format_text(specs: List[SpecCoverage]) -> str:
+def format_text(specs: list[SpecCoverage]) -> str:
     """Format as aligned text table."""
     lines = []
     header = f"{'Spec':<45s} {'ACs':>4s} {'Auto':>6s} {'Manual':>7s} {'Monitor':>8s} {'Unmapped':>9s}"
@@ -250,7 +249,7 @@ def format_text(specs: List[SpecCoverage]) -> str:
     return "\n".join(lines)
 
 
-def format_json(specs: List[SpecCoverage]) -> str:
+def format_json(specs: list[SpecCoverage]) -> str:
     """Format as JSON."""
     total_acs = sum(s.total_acs for s in specs)
     total_auto = sum(s.automated for s in specs)
@@ -285,7 +284,7 @@ def format_json(specs: List[SpecCoverage]) -> str:
     return json.dumps(output, indent=2)
 
 
-def format_markdown(specs: List[SpecCoverage]) -> str:
+def format_markdown(specs: list[SpecCoverage]) -> str:
     """Format as markdown table."""
     lines = ["# Spec Coverage Report", ""]
     lines.append("| Spec | ACs | Automated | Manual | Monitor | Unmapped |")

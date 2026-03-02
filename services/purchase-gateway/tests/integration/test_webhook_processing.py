@@ -10,7 +10,6 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from app.database import get_db
 from app.main import app
 from app.models.order import Order, OrderStatus

@@ -5,15 +5,14 @@ from __future__ import annotations
 
 import argparse
 import csv
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable
 
 
 def read_csv(path: Path) -> Iterable[dict]:
     with path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
-        for row in reader:
-            yield row
+        yield from reader
 
 
 def write_csv(path: Path, fieldnames, rows: Iterable[dict]) -> None:
@@ -25,9 +24,9 @@ def write_csv(path: Path, fieldnames, rows: Iterable[dict]) -> None:
             writer.writerow(row)
 
 
-def build_user_map(users_csv: Path) -> Dict[str, dict]:
+def build_user_map(users_csv: Path) -> dict[str, dict]:
     """Build a map of email -> user data."""
-    by_email: Dict[str, dict] = {}
+    by_email: dict[str, dict] = {}
     for row in read_csv(users_csv):
         email = row.get("email", "").strip().lower()
         if email:
@@ -35,9 +34,9 @@ def build_user_map(users_csv: Path) -> Dict[str, dict]:
     return by_email
 
 
-def build_course_key_map(manifest_csv: Path) -> Dict[str, str]:
+def build_course_key_map(manifest_csv: Path) -> dict[str, str]:
     """Build a map of MCT course_id -> Open edX course key."""
-    mapping: Dict[str, str] = {}
+    mapping: dict[str, str] = {}
     for row in read_csv(manifest_csv):
         mct_id = row["mct_course_id"]
         course_key = f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
@@ -52,7 +51,7 @@ def create_users_import(users_csv: Path, output_csv: Path) -> None:
         email = row.get("email", "").strip()
         if not email:
             continue
-        
+
         rows.append(
             {
                 "email": email,
@@ -73,8 +72,8 @@ def create_users_import(users_csv: Path, output_csv: Path) -> None:
 
 def create_enrollments_import(
     enrollments_csv: Path,
-    user_map: Dict[str, dict],
-    course_map: Dict[str, str],
+    user_map: dict[str, dict],
+    course_map: dict[str, str],
     output_csv: Path,
 ) -> None:
     """Create Open edX enrollments import CSV."""
@@ -85,12 +84,12 @@ def create_enrollments_import(
         if not course_id or course_id not in course_map:
             skipped += 1
             continue
-        
+
         email = row.get("email", "").strip().lower()
         if not email or email not in user_map:
             skipped += 1
             continue
-        
+
         user = user_map[email]
         rows.append(
             {

@@ -8,17 +8,17 @@ from pathlib import Path
 
 
 def get_pod(namespace: str, service: str) -> str:
-    cmd = ['kubectl', 'get', 'pod', '-n', namespace, '-l', f'app.kubernetes.io/name={service}', 
+    cmd = ['kubectl', 'get', 'pod', '-n', namespace, '-l', f'app.kubernetes.io/name={service}',
            '-o', 'jsonpath={.items[0].metadata.name}']
     return subprocess.check_output(cmd, text=True).strip()
 
 
 def import_course(namespace: str, pod: str, row: dict, package_path: Path) -> tuple[bool, str]:
-    course_id = row['mct_course_id']
-    course_key = f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
+    row['mct_course_id']
+    f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
     slug = Path(row['package_path']).parent.name
-    
-    print(f"   📤 Copying tarball to pod...")
+
+    print("   📤 Copying tarball to pod...")
     sys.stdout.flush()
     copy_result = subprocess.run(
         ['kubectl', 'cp', str(package_path), f'{namespace}/{pod}:/tmp/course.tgz'],
@@ -26,10 +26,10 @@ def import_course(namespace: str, pod: str, row: dict, package_path: Path) -> tu
     )
     if copy_result.returncode != 0:
         return False, f"Failed to copy: {copy_result.stderr}"
-    
-    print(f"   🔧 Extracting and importing...")
+
+    print("   🔧 Extracting and importing...")
     sys.stdout.flush()
-    
+
     # Extract and import - import expects parent dir and subdir name
     cmd = f"""
 set -euo pipefail
@@ -49,12 +49,12 @@ echo "Cleaning up..."
 rm -rf /tmp/course_import_base /tmp/course.tgz
 echo "Import complete!"
 """
-    
+
     result = subprocess.run(
         ['kubectl', 'exec', '-n', namespace, pod, '--', 'bash', '-c', cmd],
         capture_output=True, text=True, timeout=300
     )
-    
+
     if result.returncode == 0:
         # Print output for visibility
         if result.stdout:
@@ -69,36 +69,36 @@ def main():
     manifest = Path('scripts/migrations/mct/output/course_packages_categories/course_packages_manifest.csv')
     packages_root = Path('scripts/migrations/mct/output/course_packages_categories')
     namespace = 'mereka-lms'
-    
+
     pod = get_pod(namespace, 'cms')
     print(f"🚀 Importing courses to CMS pod: {pod}\n")
-    
+
     with manifest.open() as f:
         reader = csv.DictReader(f)
         courses = list(reader)
-    
+
     # Only import first 2 courses as requested
     courses = courses[:2]
     print(f"📚 Importing {len(courses)} courses (limited to 2 for testing)\n")
-    
+
     success = 0
     failed = 0
-    
+
     for i, row in enumerate(courses, 1):
         course_id = row['mct_course_id']
         course_key = f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
         package_path = packages_root / row['package_path']
-        
+
         if not package_path.exists():
             print(f"⚠️  [{i}/{len(courses)}] Skipping {course_id}: {package_path} not found")
             failed += 1
             continue
-            
+
         print(f"📦 [{i}/{len(courses)}] Importing {row['title']} ({course_id}) -> {course_key}")
         sys.stdout.flush()
-        
+
         ok, error = import_course(namespace, pod, row, package_path)
-        
+
         if ok:
             print(f"✅ [{i}/{len(courses)}] Successfully imported {row['title']}\n")
             success += 1
@@ -107,7 +107,7 @@ def main():
             error_lines = error.split('\n')
             print(f"   Error: {' '.join(error_lines[-10:])}\n")
             failed += 1
-    
+
     print(f"\n✅ Import complete! Success: {success}, Failed: {failed}")
 
 

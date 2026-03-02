@@ -20,7 +20,6 @@ from __future__ import annotations
 import argparse
 import re
 from pathlib import Path
-from typing import List, Tuple
 
 try:
     import yaml
@@ -28,10 +27,10 @@ except ImportError:
     yaml = None
 
 from lint_core import (
+    SKIP_FILES,
+    gather_markdown_files,
     parse_frontmatter,
     read_text,
-    gather_markdown_files,
-    SKIP_FILES,
 )
 
 CROSS_CUTTING_SPEC = "specs/cross-cutting-requirements_spec.md"
@@ -55,7 +54,7 @@ def extract_highest_ac_num(content: str) -> int:
     return highest
 
 
-def add_ac_ids_to_bare_checkboxes(content: str) -> Tuple[str, int]:
+def add_ac_ids_to_bare_checkboxes(content: str) -> tuple[str, int]:
     """Add AC-NNN: prefix to bare checkboxes. Returns (new_content, count_fixed)."""
     lines = content.splitlines(keepends=True)
     next_num = extract_highest_ac_num(content) + 1
@@ -80,7 +79,7 @@ def add_ac_ids_to_bare_checkboxes(content: str) -> Tuple[str, int]:
     return "".join(result), count_fixed
 
 
-def add_nfr_section(content: str) -> Tuple[str, bool]:
+def add_nfr_section(content: str) -> tuple[str, bool]:
     """Add '### Non-Functional Requirements' section if missing. Returns (new_content, was_added)."""
     nfr_re = re.compile(r"^###\s+Non-Functional Requirements\s*$", re.MULTILINE)
     if nfr_re.search(content):
@@ -102,7 +101,7 @@ def add_nfr_section(content: str) -> Tuple[str, bool]:
     return new_content, True
 
 
-def add_cross_cutting_reference(content: str) -> Tuple[str, bool]:
+def add_cross_cutting_reference(content: str) -> tuple[str, bool]:
     """Add cross-cutting spec to related_specs in frontmatter. Returns (new_content, was_added)."""
     if yaml is None:
         return content, False
@@ -137,10 +136,9 @@ def fix_file(
     add_ac_ids: bool,
     apply_fixes: bool,
     dry_run: bool
-) -> Tuple[int, List[str]]:
+) -> tuple[int, list[str]]:
     """Fix a single spec file. Returns (fix_count, messages)."""
     content = read_text(path)
-    original_content = content
     messages = []
     fix_count = 0
 

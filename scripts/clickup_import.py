@@ -13,9 +13,10 @@ Usage:
 
 import argparse
 import csv
-import requests
 import time
 from datetime import datetime
+
+import requests
 
 # Priority mapping (ClickUp uses 1-4)
 PRIORITY_MAP = {
@@ -99,7 +100,7 @@ def main():
 
     tag_cache = {}
 
-    with open(args.csv, "r", encoding="utf-8") as f:
+    with open(args.csv, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         tasks = list(reader)
 
@@ -127,7 +128,7 @@ def main():
 
         if response.status_code == 200:
             success += 1
-            print(f"   ✅ Created")
+            print("   ✅ Created")
         else:
             failed += 1
             print(f"   ❌ Failed: {response.text}")
@@ -135,7 +136,7 @@ def main():
         # Rate limiting
         time.sleep(0.5)
 
-    print(f"\n=== Import Complete ===")
+    print("\n=== Import Complete ===")
     print(f"✅ Success: {success}")
     print(f"❌ Failed: {failed}")
 

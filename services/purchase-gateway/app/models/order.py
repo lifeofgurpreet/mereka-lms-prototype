@@ -2,14 +2,14 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, Uuid, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Uuid, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TenantMixin, TimestampMixin
 
 
-class OrderStatus(str, enum.Enum):
+class OrderStatus(enum.StrEnum):
     pending = "pending"
     paid = "paid"
     fulfilling = "fulfilling"
@@ -23,7 +23,7 @@ class OrderStatus(str, enum.Enum):
     canceled = "canceled"
 
 
-class FulfillmentStatus(str, enum.Enum):
+class FulfillmentStatus(enum.StrEnum):
     pending = "pending"
     fulfilled = "fulfilled"
     failed = "failed"

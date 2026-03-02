@@ -14,11 +14,10 @@ Usage:
 import argparse
 import csv
 import sys
-from collections import defaultdict
 from datetime import timedelta
 
 import django
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils import timezone
 
 # Django setup

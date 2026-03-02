@@ -4,10 +4,9 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.order import FulfillmentStatus, LineItem, Order, OrderStatus
 from app.services.refund import process_refund, revoke_enrollment
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture

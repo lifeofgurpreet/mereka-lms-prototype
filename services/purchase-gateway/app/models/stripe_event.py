@@ -2,14 +2,14 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, String, Text, Uuid, func
+from sqlalchemy import DateTime, Enum, String, Uuid, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 
 
-class ProcessingStatus(str, enum.Enum):
+class ProcessingStatus(enum.StrEnum):
     received = "received"
     processing = "processing"
     processed = "processed"

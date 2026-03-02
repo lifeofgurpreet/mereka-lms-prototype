@@ -14,9 +14,8 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 try:
     import yaml
@@ -30,7 +29,7 @@ class Violation:
     rule_id: str           # e.g., SPEC-FM-001
     severity: str          # error | warn | info
     file: str
-    line: Optional[int] = None
+    line: int | None = None
     message: str = ""
     autofix: bool = False
 
@@ -42,7 +41,7 @@ class Violation:
 class LintResult:
     """Result of linting a single file."""
     file: str
-    violations: List[Violation] = field(default_factory=list)
+    violations: list[Violation] = field(default_factory=list)
 
     @property
     def passed(self) -> bool:
@@ -72,8 +71,8 @@ class ClassificationResult:
     doc_score: float = 0.0
     classification: str = "UNKNOWN"   # SPEC | DOC | HYBRID | UNKNOWN
     confidence: float = 0.0
-    violations: List[Violation] = field(default_factory=list)
-    remediation: Optional[str] = None  # MOVE | CONVERT | SPLIT | LEAVE | None
+    violations: list[Violation] = field(default_factory=list)
+    remediation: str | None = None  # MOVE | CONVERT | SPLIT | LEAVE | None
 
     def to_dict(self) -> dict:
         return {
@@ -94,7 +93,7 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def parse_frontmatter(md: str) -> Tuple[Optional[Dict], str]:
+def parse_frontmatter(md: str) -> tuple[dict | None, str]:
     """Parse YAML frontmatter from markdown. Returns (frontmatter_dict_or_none, body)."""
     if not md.lstrip().startswith("---"):
         return None, md
@@ -132,7 +131,7 @@ def extract_section(body: str, section: str) -> str:
     return body[start:end].strip()
 
 
-def gather_markdown_files(p: Path) -> List[Path]:
+def gather_markdown_files(p: Path) -> list[Path]:
     """Gather markdown files from a path (file or directory)."""
     if p.is_file():
         return [p]
@@ -143,7 +142,7 @@ def gather_markdown_files(p: Path) -> List[Path]:
 
 SKIP_FILES = {"INDEX.md", "README.md", "_TEMPLATE.md"}
 
-def format_results_text(results: List[LintResult], show_pass: bool = True) -> str:
+def format_results_text(results: list[LintResult], show_pass: bool = True) -> str:
     """Format lint results as human-readable text."""
     lines = []
     for r in results:
@@ -158,7 +157,7 @@ def format_results_text(results: List[LintResult], show_pass: bool = True) -> st
     return "\n".join(lines)
 
 
-def format_results_json(results: List[LintResult]) -> str:
+def format_results_json(results: list[LintResult]) -> str:
     """Format lint results as JSON."""
     total_violations = sum(len(r.violations) for r in results)
     errors = sum(r.error_count for r in results)
@@ -174,7 +173,7 @@ def format_results_json(results: List[LintResult]) -> str:
     return json.dumps(output, indent=2)
 
 
-def format_classifications_text(results: List[ClassificationResult]) -> str:
+def format_classifications_text(results: list[ClassificationResult]) -> str:
     """Format classification results as human-readable text."""
     lines = []
     for r in results:
@@ -187,7 +186,7 @@ def format_classifications_text(results: List[ClassificationResult]) -> str:
     return "\n".join(lines)
 
 
-def format_classifications_json(results: List[ClassificationResult]) -> str:
+def format_classifications_json(results: list[ClassificationResult]) -> str:
     """Format classification results as JSON."""
     output = {
         "total": len(results),

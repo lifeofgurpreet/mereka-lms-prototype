@@ -20,7 +20,6 @@ import json
 import shutil
 import tarfile
 from pathlib import Path
-from typing import List
 
 
 def ensure_clean_dir(path: Path) -> None:
@@ -124,7 +123,7 @@ def build_course_package(category_id: str, category_data: dict, output_dir: Path
     # Sort courses by ID
     courses = sorted(category_data['courses'].items(), key=lambda x: int(x[0]))
 
-    for chapter_idx, (course_id, course_data) in enumerate(courses, start=1):
+    for chapter_idx, (_course_id, course_data) in enumerate(courses, start=1):
         chapter_url = f"chapter{chapter_idx}"
         chapter_refs.append(f'  <chapter url_name="{chapter_url}" />')
 
@@ -216,12 +215,12 @@ def main():
     output_dir = base_dir / args.output_dir
 
     # Load mapping
-    with open(mapping_path, 'r') as f:
+    with open(mapping_path) as f:
         mapping = json.load(f)
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Building course packages with Mux videos")
+    print("Building course packages with Mux videos")
     print(f"  Mapping: {mapping_path}")
     print(f"  Output: {output_dir}")
     print(f"  Categories: {len(mapping['categories'])}")

@@ -2,11 +2,11 @@
 """
 Export MCT courses from production MongoDB to JSON files
 """
-import pymongo
-import json
 import os
-import sys
-from bson import ObjectId, json_util
+
+import pymongo
+from bson import json_util
+
 
 def main():
     # Connect to MongoDB
@@ -40,7 +40,7 @@ def main():
     structure_ids = set()
     for course in courses:
         versions = course.get('versions', {})
-        for branch, struct_id in versions.items():
+        for _branch, struct_id in versions.items():
             if struct_id and struct_id not in structure_ids:
                 structure_ids.add(struct_id)
                 struct = db.modulestore.structures.find_one({'_id': struct_id})
@@ -53,7 +53,7 @@ def main():
     definition_ids = set()
     for struct in export_data['structures']:
         blocks = struct.get('blocks', {})
-        for block_id, block_data in blocks.items():
+        for _block_id, block_data in blocks.items():
             def_id = block_data.get('definition')
             if def_id and def_id not in definition_ids:
                 definition_ids.add(def_id)
@@ -61,7 +61,7 @@ def main():
                 if definition:
                     export_data['definitions'].append(definition)
 
-    print(f"\nExport summary:")
+    print("\nExport summary:")
     print(f"  Active versions: {len(export_data['active_versions'])}")
     print(f"  Structures: {len(export_data['structures'])}")
     print(f"  Definitions: {len(export_data['definitions'])}")

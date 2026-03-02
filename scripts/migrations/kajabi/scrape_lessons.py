@@ -26,17 +26,17 @@ import argparse
 import json
 import os
 import time
+from collections.abc import Iterable, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence, Tuple
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeout
 from playwright.sync_api import sync_playwright
 
 
-def load_structure(path: Path) -> List[dict]:
+def load_structure(path: Path) -> list[dict]:
     data = json.loads(path.read_text(encoding="utf-8"))
-    lessons: List[dict] = []
+    lessons: list[dict] = []
     for course in data:
         course_id = course.get("course_id")
         for module in course.get("modules", []):
@@ -56,7 +56,7 @@ def resolve_url(template: str, lesson: dict, site_id: str, base_url: str) -> str
     )
 
 
-def extract_lesson_html(page, selectors: Sequence[str], iframe_filters: Sequence[str]) -> Tuple[str, str]:
+def extract_lesson_html(page, selectors: Sequence[str], iframe_filters: Sequence[str]) -> tuple[str, str]:
     for selector in selectors:
         try:
             page.wait_for_selector(selector, timeout=2000)
@@ -106,7 +106,7 @@ def scrape_lessons(
     ndjson_path: Path | None,
 ):
     output_dir.mkdir(parents=True, exist_ok=True)
-    failures: Dict[str, str] = {}
+    failures: dict[str, str] = {}
     ndjson_handle = None
     if ndjson_path:
         ndjson_path.parent.mkdir(parents=True, exist_ok=True)

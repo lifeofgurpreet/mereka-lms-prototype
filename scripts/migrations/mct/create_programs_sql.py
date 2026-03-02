@@ -2,8 +2,8 @@
 """
 Programs creation via raw SQL to bypass Celery signals.
 """
-import sys
 import os
+import sys
 import uuid
 from datetime import datetime
 
@@ -12,6 +12,7 @@ os.chdir('/openedx/discovery')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'course_discovery.settings.production')
 
 import django
+
 django.setup()
 
 from django.db import connection
