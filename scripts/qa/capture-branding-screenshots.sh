@@ -191,7 +191,7 @@ capture_route() {
   local url=$2
   local file=$3
   local summary_file=$4
-  local attempt current_url title text_len node_count min_nodes
+  local attempt current_url title text_len node_count min_nodes auth_state
 
   min_nodes=20
   case "$label" in
@@ -210,16 +210,18 @@ capture_route() {
     text_len="$(ab eval '(() => (document.body?.innerText || "").trim().length)()' 2>/dev/null || true)"
     node_count="$(ab eval '(() => document.querySelectorAll("body *").length)()' 2>/dev/null || true)"
 
+    auth_state="$(classify_auth_state "$label" "$current_url")"
+
     if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$node_count" =~ ^[0-9]+$ ]]; then
       if [[ "$text_len" -ge 20 ]] && [[ "$node_count" -ge "$min_nodes" ]]; then
         ab screenshot --full "$file" >/dev/null
-        printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$current_url" "$text_len" "$node_count" "$title" | tr '\n' ' ' >>"$summary_file"
+        printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "$current_url" "$text_len" "$node_count" "$title" | tr '\n' ' ' >>"$summary_file"
         printf "\n" >>"$summary_file"
         return 0
       fi
     fi
 
-    printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$current_url" "${text_len:-na}" "${node_count:-na}" "${title:-}" | tr '\n' ' ' >>"$summary_file"
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "$current_url" "${text_len:-na}" "${node_count:-na}" "${title:-}" | tr '\n' ' ' >>"$summary_file"
     printf "\n" >>"$summary_file"
     if [[ "$attempt" -lt "$CAPTURE_RETRIES" ]]; then
       echo "WARN: low-content capture probe for $label (attempt $attempt/$CAPTURE_RETRIES), retrying" >&2
@@ -230,6 +232,35 @@ capture_route() {
   echo "WARN: capturing fallback screenshot for $label after $CAPTURE_RETRIES attempts" >&2
   ab screenshot --full "$file" >/dev/null
   return 0
+}
+
+classify_auth_state() {
+  local label=$1
+  local final_url=${2:-}
+
+  if [[ "$label" == "mfe-authn-login" || "$label" == "biji-mfe-authn-login" ]]; then
+    if [[ "$final_url" == *"/authn/login"* ]]; then
+      echo "login_page"
+    else
+      echo "unexpected_non_login"
+    fi
+    return 0
+  fi
+
+  if [[ "$label" == "mfe-account" || "$label" == "mfe-account-settings" || "$label" == "mfe-learner-dashboard" || "$label" == "biji-mfe-account" ]]; then
+    if [[ "$final_url" == *"/authn/login"* ]]; then
+      echo "redirected_to_login"
+    else
+      echo "session_or_public"
+    fi
+    return 0
+  fi
+
+  if [[ "$final_url" == *"/authn/login"* ]]; then
+    echo "authn_redirect"
+  else
+    echo "resolved"
+  fi
 }
 
 base_lms="$LMS_DOMAIN"
@@ -318,7 +349,7 @@ sanitize() {
 echo "Capturing screenshots to: $OUT_DIR (mfe_only=$MFE_ONLY)"
 ab set viewport 1440 900 >/dev/null
 SUMMARY_FILE="$OUT_DIR/capture-summary.tsv"
-echo -e "label\tattempt\tfinal_url\ttext_len\tnode_count\ttitle" >"$SUMMARY_FILE"
+echo -e "label\tattempt\tauth_state\tfinal_url\ttext_len\tnode_count\ttitle" >"$SUMMARY_FILE"
 
 for entry in "${URLS[@]}"; do
   label="${entry%%|*}"

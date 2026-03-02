@@ -50,7 +50,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers`
     - `./scripts/qa/verify-studio-authoring-branding.sh dev`
-  - Latest capture artifact set: `var/screenshots/dev/20260302T054228Z/` (`capture-summary.tsv` confirms deterministic non-blank renders for authn/login + studio, and unauthenticated redirects for account/learner-dashboard).
+  - Latest capture artifact set: `var/screenshots/dev/20260302T055206Z/` (`capture-summary.tsv` now includes `auth_state` classification and confirms deterministic non-blank renders for authn/login + studio, plus unauthenticated redirects for account/learner-dashboard).
   - Latest Phase 7 + a11y sweep on dev:
     - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260302T054715Z.log`)
     - `./scripts/qa/verify-mfe-selector-hardening.sh` (PASS)
