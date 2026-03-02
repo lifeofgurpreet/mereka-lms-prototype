@@ -50,6 +50,20 @@ images:
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
     newTag: nreum-clean-202602200416
+  # Enterprise backend services — pin to 21.0.0 (matches production overlay)
+  # Update newTag after next image rebuild with build-specific tag
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-catalog
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-catalog
+    newTag: "21.0.0"
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy
+    newTag: "21.0.0"
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access
+    newTag: "21.0.0"
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager
+    newTag: "21.0.0"
 
 generatorOptions:
   disableNameSuffixHash: true
