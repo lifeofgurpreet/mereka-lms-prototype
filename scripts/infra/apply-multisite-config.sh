@@ -15,6 +15,7 @@ NAMESPACE="${NAMESPACE:-mereka-lms}"
 DRY_RUN="${DRY_RUN:-true}"
 ENVIRONMENT="${ENVIRONMENT:-prod}"
 DEFINITIONS_PATH=""
+ALLOWLIST_PATH="$REPO_ROOT/infrastructure/tutor/multisite-shared-host-allowlist.txt"
 SERVICE_TARGET="${SERVICE_TARGET:-lms}"
 
 log_info() {
@@ -166,24 +167,35 @@ for service in "${SERVICES[@]}"; do
   log_info "Copying multisite definitions to $service pod: $DEFINITIONS_PATH"
   kubectl --context "$K8S_CONTEXT" cp "$DEFINITIONS_PATH" \
     "$NAMESPACE/$SERVICE_POD:/tmp/multisite-sites.yml"
+  if [[ -f "$ALLOWLIST_PATH" ]]; then
+    log_info "Copying multisite host allowlist to $service pod: $ALLOWLIST_PATH"
+    kubectl --context "$K8S_CONTEXT" cp "$ALLOWLIST_PATH" \
+      "$NAMESPACE/$SERVICE_POD:/tmp/multisite-shared-host-allowlist.txt"
+  else
+    log_info "No multisite host allowlist file found at $ALLOWLIST_PATH (continuing without it)"
+  fi
 
   if [[ "$DRY_RUN" == "true" ]]; then
     log_info "Running in DRY RUN mode for $service (no changes will be made)"
     kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$SERVICE_POD" -- \
-      env DJANGO_SETTINGS_MODULE="$settings_module" MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
+      env DJANGO_SETTINGS_MODULE="$settings_module" \
+      MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
+      MULTISITE_SHARED_HOST_ALLOWLIST_FILE=/tmp/multisite-shared-host-allowlist.txt \
       python /tmp/multisite_bootstrap.py \
       --dry-run $scope_arg
   else
     log_info "Applying multisite configuration for $service (context=$K8S_CONTEXT namespace=$NAMESPACE)..."
     kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$SERVICE_POD" -- \
-      env DJANGO_SETTINGS_MODULE="$settings_module" MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
+      env DJANGO_SETTINGS_MODULE="$settings_module" \
+      MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
+      MULTISITE_SHARED_HOST_ALLOWLIST_FILE=/tmp/multisite-shared-host-allowlist.txt \
       python /tmp/multisite_bootstrap.py \
       $APPLY_FLAG $scope_arg
   fi
 
   log_info "Cleaning up temporary files for $service..."
   kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$SERVICE_POD" -- \
-    rm -f /tmp/multisite_bootstrap.py /tmp/multisite-sites.yml
+    rm -f /tmp/multisite_bootstrap.py /tmp/multisite-sites.yml /tmp/multisite-shared-host-allowlist.txt
 done
 
 log_info "Done!"
