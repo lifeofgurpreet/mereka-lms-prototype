@@ -88,13 +88,13 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `./scripts/qa/verify-auth-surfaces.sh prod`
       - `./scripts/qa/verify-auth-surfaces.sh dev`
       - `./scripts/qa/verify-credentials-readiness.sh --cluster` (dev-only)
-    - Latest run: `var/qa/frontend-runtime-blocker-sweep-both-20260302T112113Z.summary.log` (`PASS=1 FAIL=2 SKIP=0`) with machine-readable summary `var/qa/frontend-runtime-blocker-sweep-both-20260302T112113Z.summary.json` and per-check logs:
-      - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260302T112113Z.log` (PASS)
-      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260302T112113Z.log` (FAIL on credentials login redirects `500`)
-      - `var/qa/frontend-runtime-blocker-credentials-dev-20260302T112113Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
+    - Latest run: `var/qa/frontend-runtime-blocker-sweep-both-20260302T113717Z.summary.log` (`PASS=1 FAIL=2 SKIP=0`) with machine-readable summary `var/qa/frontend-runtime-blocker-sweep-both-20260302T113717Z.summary.json` and per-check logs:
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260302T113717Z.log` (PASS)
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260302T113717Z.log` (FAIL on credentials login redirects `500`)
+      - `var/qa/frontend-runtime-blocker-credentials-dev-20260302T113717Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
     - Latest diagnostics-labeled run:
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T112714Z.summary.json`
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T112714Z.diagnostics.tsv`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T113717Z.summary.json`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T113717Z.diagnostics.tsv`
       - diagnosis labels emitted:
         - `auth-surfaces:dev` -> `credentials_dev_login_500`
         - `credentials-readiness:dev:cluster` -> `credentials_timezone_tzdata_missing`
