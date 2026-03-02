@@ -1,0 +1,37 @@
+name: Build Purchase Gateway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/purchase-gateway/**"
+      - ".github/workflows/build-purchase-gateway.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build:
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@main
+    with:
+      app_name: purchase-gateway
+      dockerfile: services/purchase-gateway/Dockerfile
+      context: services/purchase-gateway
+
+  update-dev:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@main
+    with:
+      app_name: mereka-lms
+      image_tag: ${{ needs.build.outputs.image_tag }}
+      image_digest: ${{ needs.build.outputs.image_digest }}
+    secrets:
+      GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
