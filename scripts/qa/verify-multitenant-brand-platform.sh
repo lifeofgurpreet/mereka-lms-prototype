@@ -25,6 +25,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 LIVE_MODE="${BRAND_LIVE:-0}"
 
@@ -55,7 +57,6 @@ BRAND_PLATFORM_DOC="$REPO_ROOT/docs/operations/MULTITENANT_BRAND_PLATFORM.md"
 SOF_MIGRATION_DOC="$REPO_ROOT/docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md"
 MULTISITE_GOV="$REPO_ROOT/docs/operations/MULTISITE_GOVERNANCE.md"
 TENANT_MODEL="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy/models.py"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 FOOTER_MATRIX_SCRIPT="$REPO_ROOT/scripts/qa/verify-footer-variant-matrix.sh"
 BRANDING_CONTRACT_SCRIPT="$REPO_ROOT/scripts/qa/verify-tenant-branding-contract.sh"
 ISOLATION_SCRIPT="$REPO_ROOT/scripts/qa/verify-tenant-isolation-evidence.sh"
@@ -309,21 +310,21 @@ else
   fail "AC-MB-004: verify-tenant-isolation-evidence.sh missing — no isolation contract"
 fi
 
-# SITE_VARIANTS in plugin covers all domains (leakage guard)
-if [[ -f "$PLUGIN_FILE" ]]; then
+# SITE_VARIANTS in plugin contract sources covers all domains (leakage guard)
+if mereka_plugin_has_any "$REPO_ROOT"; then
   DOMAIN_COUNT=0
   for domain in "${TENANT_DOMAINS[@]}"; do
-    if grep -qF "'${domain}'" "$PLUGIN_FILE" || grep -qF "\"${domain}\"" "$PLUGIN_FILE"; then
+    if mereka_plugin_has_fixed "$REPO_ROOT" "'${domain}'" || mereka_plugin_has_fixed "$REPO_ROOT" "\"${domain}\""; then
       DOMAIN_COUNT=$((DOMAIN_COUNT + 1))
     fi
   done
   if [[ "$DOMAIN_COUNT" -ge 3 ]]; then
-    pass "AC-MB-004: SITE_VARIANTS in mereka_lms.py covers all 3 tenant domains (leakage guard)"
+    pass "AC-MB-004: SITE_VARIANTS in plugin contract sources covers all 3 tenant domains (leakage guard)"
   else
     fail "AC-MB-004: SITE_VARIANTS only covers $DOMAIN_COUNT/3 tenant domains"
   fi
 else
-  warn "AC-MB-004: infrastructure/tutor/plugins/mereka_lms.py not found — cannot check SITE_VARIANTS"
+  warn "AC-MB-004: plugin contract sources not found (expected at least $PLUGIN_MAIN) — cannot check SITE_VARIANTS"
 fi
 
 echo ""

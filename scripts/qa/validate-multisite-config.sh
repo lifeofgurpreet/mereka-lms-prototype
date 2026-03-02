@@ -9,9 +9,20 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+source "${REPO_ROOT}/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 PASS=0
 FAIL=0
+PLUGIN_FILE=""
+PLUGIN_BUNDLE=""
+
+cleanup() {
+  if [[ -n "${PLUGIN_BUNDLE:-}" && -f "${PLUGIN_BUNDLE}" ]]; then
+    rm -f "${PLUGIN_BUNDLE}"
+  fi
+}
+trap cleanup EXIT
 
 pass() { echo "  PASS $*"; PASS=$((PASS + 1)); }
 fail() { echo "  FAIL $*" >&2; FAIL=$((FAIL + 1)); }
@@ -164,18 +175,27 @@ done
 echo ""
 echo "=== 5. SITE_VARIANTS key coverage ==="
 
-PLUGIN_FILE="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
 PROD_YAML="${REPO_ROOT}/infrastructure/tutor/multisite-sites.yml"
 
-if [[ ! -f "$PLUGIN_FILE" ]]; then
-  fail "Plugin file not found: infrastructure/tutor/plugins/mereka_lms.py"
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp "${TMPDIR:-/tmp}/mereka-plugin-contract.XXXXXX.py")"
+  while IFS= read -r plugin_src; do
+    [[ -f "$plugin_src" ]] || continue
+    cat "$plugin_src" >> "$PLUGIN_BUNDLE"
+    printf "\n" >> "$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN_FILE="$PLUGIN_BUNDLE"
+fi
+
+if [[ -z "$PLUGIN_FILE" || ! -f "$PLUGIN_FILE" ]]; then
+  fail "Plugin contract sources not found (expected at least ${PLUGIN_MAIN})"
 else
   # Extract SITE_VARIANTS keys from the JS literal embedded in the Python file.
   # Pattern: lines of the form  'domain.tld': {
   site_variants_keys=$(grep -oP "'\K[a-zA-Z0-9][a-zA-Z0-9.\-]+(?=':\s*\{)" "${PLUGIN_FILE}" || true)
 
   if [[ -z "$site_variants_keys" ]]; then
-    fail "Could not extract any SITE_VARIANTS keys from ${PLUGIN_FILE}"
+    fail "Could not extract any SITE_VARIANTS keys from plugin contract sources"
   else
     # Convert to newline-separated for comparison
     mapfile -t sv_keys <<< "$site_variants_keys"
@@ -234,10 +254,11 @@ required = ["brand", "copyrightHolder", "whatsapp", "supportEmail",
 with open(path) as f:
     content = f.read()
 
-# Find the SITE_VARIANTS block: from "const SITE_VARIANTS = {" to the closing "};"
-match = re.search(r'const SITE_VARIANTS\s*=\s*\{(.+?)\n  \};', content, re.DOTALL)
+# Find the SITE_VARIANTS block: from "const SITE_VARIANTS = {" (or MEREKA_SITE_VARIANTS)
+# to the closing "};".
+match = re.search(r'const\s+(?:MEREKA_)?SITE_VARIANTS\s*=\s*\{(.+?)\n\s*\};', content, re.DOTALL)
 if not match:
-    print("ERROR: Could not locate SITE_VARIANTS block in plugin file")
+    print("ERROR: Could not locate (MEREKA_)SITE_VARIANTS block in plugin contract sources")
     sys.exit(0)
 
 block = match.group(1)

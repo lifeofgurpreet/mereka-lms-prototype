@@ -22,8 +22,8 @@ warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 POLICY_DOC="$REPO_ROOT/docs/operations/FOOTER_SLOT_ONLY_POLICY.md"
 
 echo "========================================"
@@ -74,13 +74,13 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-FTR-302: mereka_lms.py uses PLUGIN_SLOTS for footer (footer.v1 slot reference)
+# AC-FTR-302: plugin contract sources use PLUGIN_SLOTS for footer (footer.v1 slot reference)
 #             and env.config.jsx is generated deterministically
 # -----------------------------------------------------------------------
 echo "AC-FTR-302: Plugin uses PLUGIN_SLOTS for footer; env.config.jsx generated deterministically"
 
-if [[ ! -f "$PLUGIN" ]] && ! mereka_plugin_has_any "$REPO_ROOT"; then
-  fail "AC-FTR-302: plugin contract sources not found (expected at least infrastructure/tutor/plugins/mereka_lms.py)"
+if ! mereka_plugin_has_any "$REPO_ROOT"; then
+  fail "AC-FTR-302: plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 else
   # Must have a footer.v1 / footer_slot reference in the plugin
   SLOT_REF="$(mereka_plugin_count_regex "$REPO_ROOT" "footer_slot|footer\\.v1|footer.v1")"

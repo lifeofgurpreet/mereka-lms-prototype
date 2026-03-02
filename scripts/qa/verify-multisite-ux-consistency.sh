@@ -17,6 +17,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # Source shared config
 # shellcheck source=../shared/config.sh
 source "$SCRIPT_DIR/../shared/config.sh"
+source "$SCRIPT_DIR/../shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 # Colors
 RED='\033[0;31m'
@@ -97,7 +99,7 @@ echo
 SCAN_FILES=(
   "deploy/k8s/base/apps/openedx/settings/lms/production.py"
   "deploy/k8s/base/apps/openedx/settings/cms/production.py"
-  "infrastructure/tutor/plugins/mereka_lms.py"
+  "$PLUGIN_MAIN"
   "deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 )
 
@@ -156,22 +158,21 @@ fi
 
 echo
 
-# Section 2.2: Scan mereka_lms.py for hardcoded domains
-echo "Checking mereka_lms.py plugin for hardcoded domains..."
-PLUGIN_PY="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+# Section 2.2: Scan plugin contract sources for hardcoded domains
+echo "Checking plugin contract sources for hardcoded domains..."
 
-if [[ -f "$PLUGIN_PY" ]]; then
+if mereka_plugin_has_any "$REPO_ROOT"; then
   # Check for hardcoded DISCUSSIONS_MICROFRONTEND_URL (FAIL if hardcoded)
-  if grep -q 'DISCUSSIONS_MICROFRONTEND_URL\s*=\s*"https://apps\.academyv2\.mereka\.io' "$PLUGIN_PY"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" 'DISCUSSIONS_MICROFRONTEND_URL\s*=\s*"https://apps\.academyv2\.mereka\.io'; then
     do_warn "AC-MSUX-002: DISCUSSIONS_MICROFRONTEND_URL hardcoded to academyv2.mereka.io (tracked quick-win)"
   else
     do_pass "AC-MSUX-002: DISCUSSIONS_MICROFRONTEND_URL not hardcoded (or uses dynamic URL)"
   fi
 
   # Check Caddy config for hardcoded domains (local Tutor Caddy — K8s Caddyfile is clean)
-  if grep -q '^apps\.academyv2\.mereka\.io\s*{' "$PLUGIN_PY"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" '^apps\.academyv2\.mereka\.io\s*\{'; then
     # Hardcoded Caddy block found — check if it's templated
-    if grep -q '{%\s*for\s*host\s*in' "$PLUGIN_PY"; then
+    if mereka_plugin_has_regex "$REPO_ROOT" '{%\s*for\s*host\s*in'; then
       do_pass "AC-MSUX-002: Caddy config uses template loop for multi-domain support"
     else
       do_warn "AC-MSUX-002: Local Tutor Caddy profile API block hardcodes apps.academyv2.mereka.io (K8s Caddyfile is clean — local-only impact)"
@@ -181,20 +182,20 @@ if [[ -f "$PLUGIN_PY" ]]; then
   fi
 
   # Check Nginx config for hardcoded Host header
-  if grep -q 'proxy_set_header Host academyv2\.mereka\.io' "$PLUGIN_PY"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" 'proxy_set_header Host academyv2\.mereka\.io'; then
     do_warn "AC-MSUX-002: Nginx proxy_set_header hardcodes academyv2.mereka.io (tracked quick-win)"
   else
     do_pass "AC-MSUX-002: Nginx proxy_set_header not hardcoded (or uses dynamic host)"
   fi
 
   # Check cookie domain defaults (WARN if hardcoded)
-  if grep -q 'MEREKA_SESSION_COOKIE_DOMAIN.*\.academyv2\.mereka\.io' "$PLUGIN_PY"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" 'MEREKA_SESSION_COOKIE_DOMAIN.*\.academyv2\.mereka\.io'; then
     do_warn "AC-MSUX-002: Plugin has .academyv2.mereka.io SESSION_COOKIE_DOMAIN default (overridden in production.py)"
   else
     do_pass "AC-MSUX-002: No hardcoded session cookie domain default in plugin"
   fi
 else
-  do_fail "AC-MSUX-002: mereka_lms.py plugin not found at $PLUGIN_PY"
+  do_fail "AC-MSUX-002: Plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 fi
 
 echo

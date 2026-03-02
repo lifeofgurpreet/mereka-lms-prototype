@@ -2,14 +2,14 @@
 # verify-plugin-slot-wiring.sh — Comprehensive FPF plugin-slot wiring verification
 #
 # Validates that the Mereka plugin-slot configuration chain is consistent:
-#   mereka_lms.py → render-time MFE env.config.jsx template values → runtime slots
+#   plugin contract sources → render-time MFE env.config.jsx template values → runtime slots
 #
 # Usage: ./scripts/qa/verify-plugin-slot-wiring.sh
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 INVENTORY="$REPO_ROOT/docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
 ADR014="$REPO_ROOT/docs/adr/014-mfe-branding-strategy.md"
@@ -40,12 +40,12 @@ done
 if mereka_plugin_has_any "$REPO_ROOT"; then
   do_pass "Plugin contract source exists (mereka_lms.py and/or split modules)"
 else
-  do_fail "Plugin contract source missing (expected infrastructure/tutor/plugins/mereka_lms.py)"
+  do_fail "Plugin contract source missing (expected at least $PLUGIN_MAIN)"
 fi
 
 # ── 2. Plugin: slot registration chain ────────────────────────────────
 echo ""
-echo "--- Plugin slot registration (mereka_lms.py) ---"
+echo "--- Plugin slot registration (plugin contract sources) ---"
 
 # 2a. Forward-compatible PLUGIN_SLOTS registration
 if plugin_has_regex 'from tutormfe.hooks import PLUGIN_SLOTS'; then
@@ -92,7 +92,7 @@ fi
 
 # ── 3. Plugin: MerekaFooter component ─────────────────────────────────
 echo ""
-echo "--- MerekaFooter component (mereka_lms.py) ---"
+echo "--- MerekaFooter component (plugin contract sources) ---"
 
 if plugin_has_regex 'const MerekaFooter'; then
   do_pass "MerekaFooter component defined in plugin"

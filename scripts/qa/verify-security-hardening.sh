@@ -18,6 +18,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -40,7 +41,7 @@ do_warn() {
   fi
 }
 
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_FILE="$PLUGIN_MAIN"
 MFE_CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 PROD_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 
@@ -96,7 +97,7 @@ pattern_present() {
 }
 
 printf "${BLUE}=== Security Hardening Gate (T119)${NC}\n"
-printf "  plugin:         infrastructure/tutor/plugins/mereka_lms.py\n"
+printf "  plugin source:  %s\n" "$PLUGIN_MAIN"
 printf "  mfe caddyfile:  deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile\n"
 printf "  django settings: deploy/k8s/base/apps/openedx/settings/lms/production.py\n\n"
 
