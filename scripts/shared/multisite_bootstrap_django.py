@@ -11,7 +11,7 @@ import sys
 import json
 import textwrap
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Set
 from urllib.parse import urlparse
 
 
@@ -25,6 +25,9 @@ class SiteDefinition:
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEFAULT_DEFINITIONS_PATH = os.path.join(REPO_ROOT, "infrastructure", "tutor", "multisite-sites.yml")
+DEFAULT_SHARED_HOST_ALLOWLIST_PATH = os.path.join(
+    REPO_ROOT, "infrastructure", "tutor", "multisite-shared-host-allowlist.txt"
+)
 
 
 def _load_yaml(path: str) -> dict:
@@ -88,6 +91,112 @@ ORGANIZATIONS, SITE_DEFINITIONS = load_definitions()
 OIDC_PROVIDER_DISPLAY_NAME = os.environ.get("OIDC_PROVIDER_DISPLAY_NAME", "Sign in with Mereka")
 
 
+def _extract_host(url_or_host: object) -> str:
+    value = str(url_or_host or "").strip()
+    if not value:
+        return ""
+    parsed = urlparse(value if "://" in value else f"https://{value}")
+    return (parsed.netloc or parsed.path or "").strip().lower()
+
+
+def _load_shared_host_allowlist() -> set[str]:
+    """
+    Optional allowlist for temporary shared hosts.
+
+    Sources:
+      - MULTISITE_SHARED_HOST_ALLOWLIST: comma-separated hosts
+      - MULTISITE_SHARED_HOST_ALLOWLIST_FILE: newline-separated hosts, '#' comments allowed
+    """
+    allowed: set[str] = set()
+    inline = os.environ.get("MULTISITE_SHARED_HOST_ALLOWLIST", "")
+    for raw in inline.split(","):
+        host = _extract_host(raw)
+        if host:
+            allowed.add(host)
+
+    allowlist_file = (
+        os.environ.get("MULTISITE_SHARED_HOST_ALLOWLIST_FILE", "").strip()
+        or DEFAULT_SHARED_HOST_ALLOWLIST_PATH
+    )
+    if allowlist_file and os.path.exists(allowlist_file):
+        with open(allowlist_file, "r", encoding="utf-8") as f:
+            for line in f:
+                token = line.split("#", 1)[0].strip()
+                host = _extract_host(token)
+                if host:
+                    allowed.add(host)
+    return allowed
+
+
+def _collect_host_owners(definitions: List[SiteDefinition], field: str) -> Dict[str, Set[str]]:
+    owners: Dict[str, Set[str]] = {}
+    for definition in definitions:
+        raw = definition.domain if field == "domain" else (definition.site_values.get(field) or "")
+        host = _extract_host(raw)
+        if not host:
+            continue
+        owners.setdefault(host, set()).add(definition.domain)
+    return owners
+
+
+def _is_non_enterprise_domain(domain: str) -> bool:
+    domain = (domain or "").strip().lower()
+    if not domain:
+        return False
+    return (
+        domain.endswith(".mereka.dev")
+        or ".staging." in domain
+        or domain.startswith("preview.")
+        or domain.startswith("staging.")
+    )
+
+
+def validate_site_host_ownership(definitions: List[SiteDefinition], allow_shared_hosts: set[str]) -> List[str]:
+    errors: List[str] = []
+
+    for field in ("domain", "LMS_ROOT_URL", "CMS_ROOT_URL", "MFE_BASE_URL"):
+        owners = _collect_host_owners(definitions, field)
+        for host, tenant_domains in sorted(owners.items()):
+            domains = sorted(tenant_domains)
+            if len(domains) <= 1:
+                continue
+            if field in ("CMS_ROOT_URL", "MFE_BASE_URL") and host in allow_shared_hosts:
+                if any(not _is_non_enterprise_domain(d) for d in domains):
+                    errors.append(
+                        f"{field} host '{host}' allowlisted but used by enterprise domains {domains} "
+                        "(allowlist is preview/dev/staging only)"
+                    )
+                    continue
+                continue
+            errors.append(
+                f"{field} host '{host}' is shared by tenants {domains} (must be unique or allowlisted)"
+            )
+    return errors
+
+
+def select_shared_mfe_host_owners(
+    definitions: List[SiteDefinition], allow_shared_hosts: set[str]
+) -> Dict[str, str]:
+    """
+    Pick one canonical tenant domain to manage each allowlisted shared MFE host.
+
+    Preference order:
+      1. non-preview tenant domain
+      2. first sorted domain as deterministic fallback
+    """
+    host_owners = _collect_host_owners(definitions, "MFE_BASE_URL")
+    selected: Dict[str, str] = {}
+    for host in sorted(allow_shared_hosts):
+        domains = sorted(host_owners.get(host, set()))
+        if not domains:
+            continue
+        selected[host] = next(
+            (domain for domain in domains if not domain.startswith("preview.")),
+            domains[0],
+        )
+    return selected
+
+
 def setup_django():
     """Initialize Django environment."""
     # In K8s we run with Tutor settings, which include OIDC settings and other overrides.
@@ -118,11 +227,20 @@ def upsert_organizations(dry_run: bool) -> None:
         print(f"{action} organization: {org.short_name} - {org.name}")
 
 
-def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
+def upsert_sites(
+    definitions: List[SiteDefinition],
+    dry_run: bool,
+    unique_mfe_hosts: set[str],
+    shared_mfe_host_owners: Dict[str, str],
+) -> None:
     """Create or update Site and SiteConfiguration records."""
     from django.contrib.sites.models import Site
     from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
     from django.conf import settings
+    try:
+        from enterprise.models import EnterpriseCustomer
+    except Exception:
+        EnterpriseCustomer = None
 
     for definition in definitions:
         if dry_run:
@@ -141,6 +259,21 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
         # Prepare site values
         rendered_values = dict(definition.site_values)
         rendered_values["course_org_filter"] = definition.orgs
+        existing_site_config = SiteConfiguration.objects.filter(site=site).order_by("-id").first()
+        existing_values = dict((existing_site_config.site_values or {})) if existing_site_config else {}
+        enterprise_uuid = str(existing_values.get("ENTERPRISE_CUSTOMER_UUID") or "").strip()
+        if EnterpriseCustomer is not None:
+            ec_qs = EnterpriseCustomer.objects.filter(site=site)
+            if hasattr(EnterpriseCustomer, "created"):
+                ec = ec_qs.order_by("-created").first()
+            elif hasattr(EnterpriseCustomer, "modified"):
+                ec = ec_qs.order_by("-modified").first()
+            else:
+                ec = ec_qs.first()
+            if ec is not None:
+                enterprise_uuid = str(ec.uuid)
+        if enterprise_uuid:
+            rendered_values["ENTERPRISE_CUSTOMER_UUID"] = enterprise_uuid
 
         # MFE config API returns `settings.MFE_CONFIG` unless the current site's
         # SiteConfiguration provides `MFE_CONFIG` overrides. For multisite, we
@@ -160,13 +293,35 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
                     mfe_host = ""
 
             default_cfg = dict(getattr(settings, "MFE_CONFIG", {}) or {})
-            # Tenant-specific core URLs.
+            # Some deployments treat SiteConfiguration.MFE_CONFIG as authoritative and
+            # do not reliably merge missing keys from settings.MFE_CONFIG. Keep the
+            # auth/session contract explicit here so runtime behavior stays deterministic.
             overrides["LMS_BASE_URL"] = lms_root
             overrides["LOGIN_URL"] = f"{lms_root}/login"
             overrides["LOGOUT_URL"] = f"{lms_root}/logout"
             overrides["MARKETING_SITE_BASE_URL"] = lms_root
-            # Keep token refresh same-origin for MFEs to avoid cross-origin credential drops.
             overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = "/login_refresh"
+            overrides["DISABLE_ENTERPRISE_LOGIN"] = default_cfg.get("DISABLE_ENTERPRISE_LOGIN", True)
+            overrides["ACCESS_TOKEN_COOKIE_NAME"] = (
+                default_cfg.get("ACCESS_TOKEN_COOKIE_NAME")
+                or "edx-jwt-cookie-header-payload"
+            )
+            overrides["USER_INFO_COOKIE_NAME"] = (
+                default_cfg.get("USER_INFO_COOKIE_NAME")
+                or "user-info"
+            )
+            overrides["SESSION_COOKIE_SAMESITE"] = (
+                default_cfg.get("SESSION_COOKIE_SAMESITE")
+                or "None"
+            )
+            overrides["CSRF_COOKIE_SAMESITE"] = (
+                default_cfg.get("CSRF_COOKIE_SAMESITE")
+                or "None"
+            )
+            for domain_key in ("SESSION_COOKIE_DOMAIN", "CSRF_COOKIE_DOMAIN"):
+                domain_value = default_cfg.get(domain_key)
+                if domain_value:
+                    overrides[domain_key] = domain_value
             theme_name = (
                 rendered_values.get("THEME_NAME")
                 or rendered_values.get("DEFAULT_SITE_THEME")
@@ -190,11 +345,18 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
                 overrides["STUDIO_BASE_URL"] = cms_root
             if mfe_host:
                 overrides["BASE_URL"] = mfe_host
-                # Keep AUTHN MFE URLs in sync when the MFE host changes.
-                if "AUTHN_MICROFRONTEND_URL" in default_cfg:
-                    overrides["AUTHN_MICROFRONTEND_URL"] = f"https://{mfe_host}/authn"
+                authn_url = f"https://{mfe_host}/authn"
+                overrides["AUTHN_MICROFRONTEND_URL"] = authn_url
+                overrides["AUTHN_MICROFRONTEND_DOMAIN"] = authn_url
+            else:
+                authn_url = default_cfg.get("AUTHN_MICROFRONTEND_URL")
+                authn_domain = default_cfg.get("AUTHN_MICROFRONTEND_DOMAIN")
+                if authn_url:
+                    overrides["AUTHN_MICROFRONTEND_URL"] = authn_url
+                if authn_domain:
+                    overrides["AUTHN_MICROFRONTEND_DOMAIN"] = authn_domain
 
-            # Store overrides only; the API merges with settings.MFE_CONFIG.
+            # Store explicit contract keys so runtime does not depend on merge behavior.
             rendered_values["MFE_CONFIG"] = overrides
 
         # Create or update SiteConfiguration
@@ -210,6 +372,7 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
         print(f"  - platform_name: {rendered_values.get('platform_name')}")
         print(f"  - theme: {rendered_values.get('THEME_NAME')}")
         print(f"  - organizations: {rendered_values.get('course_org_filter')}")
+        print(f"  - enterprise_uuid: {rendered_values.get('ENTERPRISE_CUSTOMER_UUID', 'unset')}")
 
         # Ensure MFE host itself resolves through SiteConfiguration overrides.
         # Without this, requests to apps.<domain> can miss tenant MFE_CONFIG and
@@ -223,7 +386,12 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
                 mfe_host = urlparse(mfe_base).netloc or ""
             except Exception:
                 mfe_host = ""
-            if mfe_host and mfe_host != definition.domain:
+            canonical_owner = shared_mfe_host_owners.get(mfe_host, "")
+            should_manage_shared_host = (
+                mfe_host in unique_mfe_hosts
+                or canonical_owner == definition.domain
+            )
+            if mfe_host and mfe_host != definition.domain and should_manage_shared_host:
                 mfe_site, mfe_site_created = Site.objects.update_or_create(
                     domain=mfe_host,
                     defaults={"name": f"{definition.name} Apps"},
@@ -244,6 +412,17 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
                 )
                 mfe_sc_action = "Created" if mfe_sc_created else "Updated"
                 print(f"{mfe_sc_action} site configuration for: {mfe_site.domain}")
+            elif mfe_host and mfe_host != definition.domain:
+                if canonical_owner and canonical_owner != definition.domain:
+                    print(
+                        f"Skipped MFE host SiteConfiguration upsert for shared host '{mfe_host}' "
+                        f"(tenant: {definition.domain}; canonical owner: {canonical_owner})"
+                    )
+                    continue
+                print(
+                    f"Skipped MFE host SiteConfiguration upsert for shared host '{mfe_host}' "
+                    f"(tenant: {definition.domain})"
+                )
 
 
 def upsert_oidc_provider_configs(definitions: List[SiteDefinition], dry_run: bool) -> None:
@@ -368,11 +547,36 @@ def main() -> None:
 
     dry_run = not args.apply
     sites_only = args.scope == "sites"
+    strict_host_ownership = os.environ.get("STRICT_TENANT_HOST_OWNERSHIP", "1") != "0"
+    allow_shared_hosts = _load_shared_host_allowlist()
+
+    ownership_errors = validate_site_host_ownership(SITE_DEFINITIONS, allow_shared_hosts)
+    unique_mfe_hosts = {
+        host for host, owners in _collect_host_owners(SITE_DEFINITIONS, "MFE_BASE_URL").items()
+        if len(owners) == 1
+    }
+    shared_mfe_host_owners = select_shared_mfe_host_owners(SITE_DEFINITIONS, allow_shared_hosts)
 
     if dry_run:
         print("=" * 60)
         print("DRY RUN MODE - No changes will be made")
         print("=" * 60)
+
+    if allow_shared_hosts:
+        print(f"Shared host allowlist active: {sorted(allow_shared_hosts)}")
+        if shared_mfe_host_owners:
+            print(f"Shared MFE host canonical owners: {shared_mfe_host_owners}")
+    else:
+        print("Shared host allowlist active: []")
+
+    if ownership_errors:
+        print("\nHost ownership validation errors:")
+        for err in ownership_errors:
+            print(f"  - {err}")
+        if strict_host_ownership:
+            print("\nAborting due to STRICT_TENANT_HOST_OWNERSHIP=1")
+            sys.exit(1)
+        print("\nContinuing with STRICT_TENANT_HOST_OWNERSHIP=0")
 
     # Initialize Django
     setup_django()
@@ -401,11 +605,21 @@ def main() -> None:
 
     # Apply changes
     if sites_only:
-        upsert_sites(SITE_DEFINITIONS, dry_run=False)
+        upsert_sites(
+            SITE_DEFINITIONS,
+            dry_run=False,
+            unique_mfe_hosts=unique_mfe_hosts,
+            shared_mfe_host_owners=shared_mfe_host_owners,
+        )
     else:
         upsert_organizations(dry_run=False)
         print()
-        upsert_sites(SITE_DEFINITIONS, dry_run=False)
+        upsert_sites(
+            SITE_DEFINITIONS,
+            dry_run=False,
+            unique_mfe_hosts=unique_mfe_hosts,
+            shared_mfe_host_owners=shared_mfe_host_owners,
+        )
         print()
         upsert_oidc_provider_configs(SITE_DEFINITIONS, dry_run=False)
         print()
