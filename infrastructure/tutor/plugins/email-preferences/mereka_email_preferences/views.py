@@ -9,19 +9,19 @@ AC-022: One-click unsubscribe (GET with HMAC token)
 AC-023: Audit log for preference changes
 """
 
+from django.db import transaction
+from django.http import HttpResponse
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from django.http import HttpResponse
-from django.db import transaction
 
 from .models import NotificationPreference, PreferenceAuditLog
 from .serializers import NotificationPreferenceSerializer, PreferencesUpdateSerializer
 from .utils import (
     get_default_preferences,
-    validate_unsubscribe_token,
     hash_ip_address,
+    validate_unsubscribe_token,
 )
 
 

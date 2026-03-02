@@ -12,8 +12,6 @@ import hashlib
 import hmac
 import os
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-
 
 # Default preferences: all enabled except bulk_campaign email (AC-043 GDPR)
 DEFAULT_PREFERENCES = {
@@ -91,7 +89,7 @@ def generate_unsubscribe_token(user_id: int, email: str) -> str:
     return base64.urlsafe_b64encode(token.encode('utf-8')).decode('utf-8')
 
 
-def validate_unsubscribe_token(token: str) -> Optional[Dict[str, any]]:
+def validate_unsubscribe_token(token: str) -> dict[str, any] | None:
     """
     Validate HMAC-SHA256 unsubscribe token.
 
@@ -156,7 +154,7 @@ def hash_ip_address(ip_address: str) -> str:
     return hashlib.sha256(ip_address.encode('utf-8')).hexdigest()
 
 
-def get_default_preferences(user_id: int) -> List[Dict]:
+def get_default_preferences(user_id: int) -> list[dict]:
     """
     Get default preferences for a user.
 

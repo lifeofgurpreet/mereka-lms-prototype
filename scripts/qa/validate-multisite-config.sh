@@ -263,6 +263,16 @@ if not match:
 
 block = match.group(1)
 
+# Resolve spread bases: extract fields from "const <NAME> = { ... };" blocks
+# so that "...NAME" in a tenant block inherits those fields.
+spread_bases = {}
+for bm in re.finditer(r'const\s+(\w+)\s*=\s*\{([^}]+)\}', content):
+    base_name = bm.group(1)
+    base_body = bm.group(2)
+    spread_bases[base_name] = {
+        fm.group(1) for fm in re.finditer(r"(\w+)\s*:", base_body)
+    }
+
 # Find each tenant block: 'domain': { ... }
 # We look for the key, then grab up to the closing brace of its object.
 tenant_pattern = re.compile(r"'([^']+)':\s*\{([^}]+)\}", re.DOTALL)
@@ -270,9 +280,13 @@ errors = []
 for m in tenant_pattern.finditer(block):
     domain = m.group(1)
     body = m.group(2)
+    # Collect fields directly present in the tenant block
+    tenant_fields = {fm.group(1) for fm in re.finditer(r"(\w+)\s*:", body)}
+    # Resolve spread operators: ...SOME_BASE adds that base's fields
+    for spread in re.findall(r'\.\.\.\s*(\w+)', body):
+        tenant_fields |= spread_bases.get(spread, set())
     for field in required:
-        # Field must appear as a key in the object body
-        if not re.search(rf'\b{re.escape(field)}\s*:', body):
+        if field not in tenant_fields:
             errors.append(f"SITE_VARIANTS['{domain}'] missing field '{field}'")
 print("\n".join(errors))
 PY

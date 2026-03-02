@@ -2,7 +2,7 @@
 Setup configuration for mereka_tenancy Django app.
 """
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='mereka_tenancy',

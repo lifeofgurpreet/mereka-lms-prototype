@@ -11,8 +11,6 @@ AC-043: GDPR compliance (bulk_campaign disabled by default)
 """
 
 from django.db import models
-from django.utils import timezone
-
 
 # 15 ACE message types as defined in the spec
 MESSAGE_TYPE_CHOICES = [

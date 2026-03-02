@@ -3,6 +3,7 @@ URL patterns for notification preferences API.
 """
 
 from django.urls import path
+
 from .views import PreferencesListView, PreferencesUpdateView, UnsubscribeView
 
 app_name = 'mereka_email_preferences'

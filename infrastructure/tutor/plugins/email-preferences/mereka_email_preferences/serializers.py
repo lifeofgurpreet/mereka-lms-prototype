@@ -8,7 +8,8 @@ AC-021: User preference update
 """
 
 from rest_framework import serializers
-from .models import NotificationPreference, SYSTEM_CRITICAL_TYPES
+
+from .models import SYSTEM_CRITICAL_TYPES, NotificationPreference
 
 
 class NotificationPreferenceSerializer(serializers.ModelSerializer):

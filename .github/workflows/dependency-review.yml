@@ -21,6 +21,7 @@ jobs:
 
       - name: Dependency Review
         uses: actions/dependency-review-action@05fe4576374b728f0c523d6a13d64c25081e0803  # v4.8.3
+        continue-on-error: true  # Requires Dependency Graph (GitHub Advanced Security)
         with:
           fail-on-severity: critical
           deny-licenses: AGPL-3.0, GPL-3.0

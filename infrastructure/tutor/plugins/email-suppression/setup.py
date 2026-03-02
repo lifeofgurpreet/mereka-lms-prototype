@@ -2,7 +2,7 @@
 Setup configuration for mereka_email_suppression Django app.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name='mereka_email_suppression',

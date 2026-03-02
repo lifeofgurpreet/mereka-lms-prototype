@@ -5,8 +5,8 @@ Creates the TenantConfig model that extends EnterpriseCustomer
 with branding, SSO, and feature flag configuration.
 """
 
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):

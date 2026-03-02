@@ -18,7 +18,7 @@ def test_import():
     """Test that the plugin can be imported."""
     try:
         import mereka_lms
-        print(f"✓ Plugin imported successfully")
+        print("✓ Plugin imported successfully")
         print(f"  Version: {mereka_lms.__version__}")
         return True
     except Exception as e:

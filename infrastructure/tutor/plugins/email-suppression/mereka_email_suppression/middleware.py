@@ -9,7 +9,6 @@ Skips check for critical transactional emails (password_reset, account_activatio
 
 import logging
 
-from django.core.mail import EmailMultiAlternatives
 from django.core.mail.backends.base import BaseEmailBackend
 
 from mereka_email_suppression.models import EmailSuppression

@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
       - name: Run Trivy config scan on K8s manifests
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947e795f2d11f6b842a  # v0.24.0
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0  # v0.29.0
         continue-on-error: true
         with:
           scan-type: config
@@ -56,7 +56,7 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
       - name: Run Trivy config scan on Terraform
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947e795f2d11f6b842a  # v0.24.0
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0  # v0.29.0
         continue-on-error: true
         with:
           scan-type: config

@@ -3,6 +3,7 @@ Django admin configuration for email preferences.
 """
 
 from django.contrib import admin
+
 from .models import NotificationPreference, PreferenceAuditLog
 
 

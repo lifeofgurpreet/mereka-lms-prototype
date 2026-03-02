@@ -25,8 +25,8 @@ Usage:
 
 from __future__ import annotations
 
-from tutor import hooks
 from mereka_lms_mfe_slots import register_mfe_plugin_slots
+from tutor import hooks
 
 # Plugin metadata
 __version__ = "1.0.0"
