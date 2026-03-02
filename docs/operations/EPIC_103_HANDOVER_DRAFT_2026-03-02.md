@@ -2,13 +2,15 @@
 
 Issue: `#103` Frontend/runtime closure umbrella
 
+Status matrix: `docs/operations/FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md`
+
 ## Runtime Proofs (dev)
 
 Latest verification runs (all from `mereka-lms` repo):
 
 - `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only`  
   Result: PASS  
-  Artifacts: `var/screenshots/dev/20260302T005256Z/`
+  Artifacts: `var/screenshots/dev/20260302T010124Z/` (one non-blocking render-timeout warning on `mfe-authn-login`)
 
 - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers`  
   Result: PASS (`PASS=17 WARN=0 FAIL=0`)
@@ -27,7 +29,7 @@ Latest verification runs (all from `mereka-lms` repo):
 
 - `./scripts/qa/verify-mfe-live-dom-audit.sh --env dev --audit-profile phase7_full --project chromium`  
   Result: PASS (`1 passed`)  
-  Log: `var/qa/mfe-live-dom-audit-dev-20260302T005354Z.log`
+  Log: `var/qa/mfe-live-dom-audit-dev-20260302T010325Z.log`
 
 - `./scripts/qa/verify-certificate-branding.sh`  
   Result: PASS (`PASS=25 WARN=0 FAIL=0`)

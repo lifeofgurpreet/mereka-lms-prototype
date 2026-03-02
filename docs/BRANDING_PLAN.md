@@ -25,18 +25,19 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 ## 2026-03-02 Stabilization Snapshot (Issues #105, #107, #108, #106, #111)
 
 - Runtime evidence (`#105`):
-  - `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed and wrote artifacts under `var/screenshots/dev/20260302T005256Z/`.
+  - `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed and wrote artifacts under `var/screenshots/dev/20260302T010124Z/` (one non-blocking render-timeout warning on `mfe-authn-login`).
   - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`PASS=17 WARN=0 FAIL=0`).
   - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`failures=0`) on latest rerun.
 - BEM + a11y (`#107`, `#108`):
   - `./scripts/qa/verify-mfe-selector-hardening.sh` passed.
   - `./scripts/qa/verify-a11y-contrast-focus.sh` passed with documented non-blocking warnings.
   - `./scripts/qa/verify-wcag-contrast-v2.sh` passed.
-  - `./scripts/qa/verify-mfe-live-dom-audit.sh --env dev --audit-profile phase7_full --project chromium` passed (`1 passed`), log: `var/qa/mfe-live-dom-audit-dev-20260302T005354Z.log`.
+  - `./scripts/qa/verify-mfe-live-dom-audit.sh --env dev --audit-profile phase7_full --project chromium` passed (`1 passed`), log: `var/qa/mfe-live-dom-audit-dev-20260302T010325Z.log`.
 - Root-cause hardening applied in repo:
   - Updated `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` CSP to allow required CDN/Google font domains for MFE runtime script/style/font loads.
   - Added bounded recovery + low-signal hydration handling in `tests/e2e/tests/selector-dom-audit.spec.ts` to reduce headless false negatives.
   - Detailed stabilization log: `docs/operations/FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md`.
+  - Issue closure matrix: `docs/operations/FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md`.
 - Certificate closure (`#106`):
   - `./scripts/qa/verify-certificate-branding.sh` passed (`PASS=25 WARN=0 FAIL=0`).
 - Phase 6 decision (`#111`):
@@ -170,7 +171,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] npm-start MFE smoke tests — `verify-npm-start-mfe-smoke.sh` (authn, learning, account, profile with screenshot capture).
 - [x] Accessibility scan (contrast, focus order) on key pages. Current gates pass (`verify-a11y-contrast-focus.sh`, `verify-wcag-contrast-v2.sh`) with non-blocking documented warnings.
 - [x] Performance spot-check — runtime theme preflight checks built into both smoke scripts (PARAGON_THEME_URLS verification, theme-mode detection).
-- [ ] Capture before/after screenshots for all branded surfaces. Latest deterministic MFE capture set: `var/screenshots/dev/20260302T005256Z/`.
+- [ ] Capture before/after screenshots for all branded surfaces. Latest deterministic MFE capture set: `var/screenshots/dev/20260302T010124Z/`.
 - [x] Publish implementation notes/screenshots in `docs/BRANDING.md`.
 - [x] Update README/AGENTS with quick branding maintenance instructions.
 - [x] Dead selector audit documented in [MFE_SELECTOR_OVERRIDE_INVENTORY.md](architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md).
