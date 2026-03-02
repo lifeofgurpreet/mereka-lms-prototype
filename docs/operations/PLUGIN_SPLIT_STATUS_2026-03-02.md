@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `73` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `48` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -114,13 +114,38 @@ Validation after phase 5:
 - `./scripts/qa/verify-mfe-footer-slot-migration.sh` PASS (`PASS=53 FAIL=0 WARN=0`)
 - `./scripts/qa/verify-mfe-footer-fallbacks.sh` PASS (`PASS=14 FAIL=0 WARN=2 SKIP=0`)
 
+## Progress Update (Phase 6, tenant/assessment verifier tranche)
+
+- Extended compatibility-layer adoption to additional tenant/assessment QA verifiers:
+  - `scripts/qa/verify-assessment-bulk.sh`
+  - `scripts/qa/verify-advanced-xblocks.sh`
+  - `scripts/qa/verify-tenant-footer-variant-lane.sh`
+  - `scripts/qa/verify-tenant-branding-matrix.sh`
+  - `scripts/qa/verify-tenant-isolation-evidence.sh`
+  - `scripts/qa/verify-tenant-isolation-gates.sh`
+- Outcome:
+  - direct path-coupling reduced from `73` to `48`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - no helper/regression breakage introduced; remaining failures reflect existing verifier expectation drift against current plugin contracts.
+
+Validation after phase 6:
+- `./scripts/qa/verify-assessment-bulk.sh` baseline FAIL (`FAILED_CHECKS=1`):
+  - missing `ASSESSMENT_LANGUAGES` marker in plugin contract source
+- `./scripts/qa/verify-advanced-xblocks.sh` PASS (`64 PASS / 0 FAIL`)
+- `./scripts/qa/verify-tenant-footer-variant-lane.sh` baseline FAIL (`38 PASS / 9 FAIL / 2 WARN`):
+  - expects legacy `SITE_VARIANTS` naming/shape that diverges from current plugin contract markers
+- `./scripts/qa/verify-tenant-branding-matrix.sh` baseline FAIL (`20 PASS / 11 FAIL / 1 WARN`):
+  - expects legacy `SITE_VARIANTS` markers/fallback pattern not matching current plugin contract markers
+- `./scripts/qa/verify-tenant-isolation-evidence.sh` PASS (`39 PASS / 0 FAIL / 3 WARN`)
+- `./scripts/qa/verify-tenant-isolation-gates.sh` PASS (`30 PASS / 0 FAIL / 0 SKIP`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 

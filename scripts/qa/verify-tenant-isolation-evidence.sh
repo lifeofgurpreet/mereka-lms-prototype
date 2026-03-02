@@ -24,6 +24,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 LIVE_MODE="${TENANT_ISOLATION_LIVE:-0}"
 
@@ -52,10 +53,28 @@ echo ""
 EVIDENCE_DOC="$REPO_ROOT/docs/operations/TENANT_ISOLATION_EVIDENCE.md"
 BRANDING_MATRIX="$REPO_ROOT/docs/operations/TENANT_BRANDING_MATRIX.md"
 HOSTNAMES_DOC="$REPO_ROOT/docs/operations/OPENEDX_HOSTNAMES.md"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN_FILE="$PLUGIN_MAIN"
 MULTISITE_LMS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 # The three canonical production tenant domains
 declare -a TENANT_DOMAINS=(
@@ -144,7 +163,7 @@ if [[ -f "$PLUGIN_FILE" ]]; then
     do_fail "AC-UI-201: SITE_VARIANTS only covers $PLUGIN_DOMAIN_COUNT/3 tenant domains"
   fi
 else
-  do_warn "AC-UI-201: infrastructure/tutor/plugins/mereka_lms.py not found — skipping SITE_VARIANTS check"
+  do_warn "AC-UI-201: plugin contract source not found ($PLUGIN_MAIN) — skipping SITE_VARIANTS check"
 fi
 
 echo ""

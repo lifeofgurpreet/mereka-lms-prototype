@@ -33,18 +33,37 @@ SKIP_COUNT=0
 # Paths
 # ---------------------------------------------------------------------------
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 MULTI_TENANCY_PLUGIN="${REPO_ROOT}/infrastructure/tutor/plugins/multi-tenancy"
 MIDDLEWARE_FILE="${MULTI_TENANCY_PLUGIN}/middleware.py"
 MODELS_FILE="${MULTI_TENANCY_PLUGIN}/models.py"
 MIGRATIONS_DIR="${MULTI_TENANCY_PLUGIN}/migrations"
 APPLY_PATCHES="${REPO_ROOT}/infrastructure/tutor/apply-patches.sh"
-MEREKA_PLUGIN="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+MEREKA_PLUGIN="$PLUGIN_MAIN"
 TENANT_REGISTRY="${REPO_ROOT}/deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml"
 TENANT_THEMES="${REPO_ROOT}/infrastructure/tutor/themes/mereka/tenants"
 ISOLATION_CRONJOB="${REPO_ROOT}/deploy/k8s/base/monitoring/cronjob-tenant-isolation.yaml"
 ISOLATION_PROMETHEUSRULE="${REPO_ROOT}/deploy/k8s/base/monitoring/prometheusrule-tenant-isolation.yaml"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
 KUBE_CONTEXT="${KUBE_CONTEXT:-}"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  MEREKA_PLUGIN="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 # ---------------------------------------------------------------------------
 # Helper functions

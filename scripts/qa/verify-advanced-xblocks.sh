@@ -33,6 +33,28 @@ if [[ "${1:-}" == "--verbose" ]]; then
     VERBOSE=true
 fi
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN_CONTRACT_FILE="$PLUGIN_MAIN"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+    PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+    while IFS= read -r plugin_file; do
+        cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+        printf '\n' >>"$PLUGIN_BUNDLE"
+    done < <(mereka_plugin_contract_files "$REPO_ROOT")
+    PLUGIN_CONTRACT_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+    if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+        rm -f "$PLUGIN_BUNDLE"
+    fi
+}
+trap cleanup EXIT
+
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
@@ -449,27 +471,27 @@ echo "10. Checking Tutor plugin integration..."
 echo ""
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "openedx_advanced_xblocks" \
     "Advanced XBlocks app in INSTALLED_APPS"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ENABLE_ADVANCED_XBLOCKS" \
     "Feature flag for advanced XBlocks"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "RANDOMIZED_POOL_DEFAULT_SIZE" \
     "Randomized pool configuration (AC-ASS-024)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ENABLE_ANSWER_SHUFFLING" \
     "Answer shuffling configuration (AC-ASS-027)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ENABLE_KEYBOARD_ACCESSIBILITY" \
     "Keyboard accessibility configuration (AC-ASS-028)"
 

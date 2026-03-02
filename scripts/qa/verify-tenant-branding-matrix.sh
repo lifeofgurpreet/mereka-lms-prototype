@@ -15,10 +15,29 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN="$PLUGIN_MAIN"
 MATRIX_DOC="$REPO_ROOT/docs/operations/TENANT_BRANDING_MATRIX.md"
 FOOTER_MATRIX="$REPO_ROOT/docs/operations/FOOTER_VARIANT_MATRIX.md"
 TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 PRODUCTION_DOMAINS=(
   "academyv2.mereka.io"
@@ -84,7 +103,7 @@ echo "AC-TEN-002: Override inheritance — SITE_VARIANTS entries + fallback + gl
 if [[ ! -f "$PLUGIN" ]]; then
   fail "Plugin file missing: $PLUGIN"
 else
-  pass "Plugin file exists: infrastructure/tutor/plugins/mereka_lms.py"
+  pass "Plugin contract source exists: $PLUGIN_MAIN"
 
   # Extract SITE_VARIANTS block (handle CRLF line endings)
   VARIANTS_BLOCK=$(awk '/const SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")

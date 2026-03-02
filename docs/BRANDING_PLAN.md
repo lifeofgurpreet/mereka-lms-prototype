@@ -236,7 +236,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 | **Dark mode** | Add `variants.dark` to PARAGON_THEME_URLS. Currently light-only. |
 | **Performance budgets in CI** | Lighthouse CI with LCP < 2.5s, bundle < 300KB gzip, theme CSS < 50KB. |
 | **CI Phase 5 — ARC migration** | Migrate heavy builds to `mereka-k8s-heavy-builders`. See `CI_OPTIMIZATION_TRACKER.md`. Requires ARC deployed to rke2-nonprod. |
-| **Plugin file splitting** | Extract 47 React component strings from `mereka_lms.py` into separate file(s). Status: staged/in-progress (`#109` phase 1 + phase 2 + phase 3 + phase 4 + phase 5 complete; verifier compatibility layer expanded, QA coupling reduced 98→73). See `docs/operations/PLUGIN_SPLIT_STATUS_2026-03-02.md`. |
+| **Plugin file splitting** | Extract 47 React component strings from `mereka_lms.py` into separate file(s). Status: staged/in-progress (`#109` phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 complete; verifier compatibility layer expanded, QA coupling reduced 98→48). See `docs/operations/PLUGIN_SPLIT_STATUS_2026-03-02.md`. |
 | **Hardcoded brand name** | Replace "Mereka Academy" literals in enterprise profile fields with `{variant.brand}`. |
 
 ---

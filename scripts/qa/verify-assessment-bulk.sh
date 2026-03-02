@@ -30,6 +30,28 @@ if [[ "${1:-}" == "--verbose" ]]; then
     VERBOSE=true
 fi
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN_CONTRACT_FILE="$PLUGIN_MAIN"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+    PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+    while IFS= read -r plugin_file; do
+        cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+        printf '\n' >>"$PLUGIN_BUNDLE"
+    done < <(mereka_plugin_contract_files "$REPO_ROOT")
+    PLUGIN_CONTRACT_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+    if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+        rm -f "$PLUGIN_BUNDLE"
+    fi
+}
+trap cleanup EXIT
+
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
@@ -268,7 +290,7 @@ check_contains \
     "Simplified Chinese support (AC-ASS-031)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ASSESSMENT_LANGUAGES" \
     "Multi-language configuration (AC-ASS-031)"
 
@@ -296,12 +318,12 @@ check_contains \
     "past_due timing check (AC-ASS-032)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "SHOW_CORRECTNESS_ENFORCE_PAST_DUE" \
     "show_correctness configuration (AC-ASS-032)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ShowCorrectnessMiddleware" \
     "Middleware integration (AC-ASS-032)"
 
@@ -445,12 +467,12 @@ check_contains \
     "IP logging method (AC-ASS-035)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ENABLE_EXAM_IP_LOGGING" \
     "IP logging configuration (AC-ASS-035)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ExamIPLoggingMiddleware" \
     "Middleware integration (AC-ASS-035)"
 
@@ -493,12 +515,12 @@ check_contains \
     "Response validation (AC-ASS-036: prevent leakage)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ENABLE_GRADE_ACCESS_LOGGING" \
     "Grade access logging config (AC-ASS-036)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "GradeAccessControlMiddleware" \
     "Middleware integration (AC-ASS-036)"
 
@@ -511,22 +533,22 @@ echo "11. Checking Tutor plugin integration..."
 echo ""
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "openedx_assessment_bulk" \
     "Assessment bulk app in INSTALLED_APPS"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "ENABLE_ASSESSMENT_BULK_OPS" \
     "Feature flag for bulk operations"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "BULK_REGRADE_BATCH_SIZE" \
     "Bulk regrade performance config (AC-ASS-029)"
 
 check_contains \
-    "infrastructure/tutor/plugins/mereka_lms.py" \
+    "$PLUGIN_CONTRACT_FILE" \
     "BULK_REGRADE_CHECKPOINT_INTERVAL" \
     "Checkpoint interval config (AC-ASS-029)"
 

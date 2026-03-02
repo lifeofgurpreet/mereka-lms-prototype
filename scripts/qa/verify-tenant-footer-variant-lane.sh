@@ -25,6 +25,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 LIVE_MODE="${TENANT_FOOTER_LIVE:-0}"
 
@@ -50,10 +51,28 @@ echo ""
 # ---------------------------------------------------------------------------
 # Key file paths
 # ---------------------------------------------------------------------------
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN_FILE="$PLUGIN_MAIN"
 BRAND_SCHEMA="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json"
 FOOTER_MATRIX_DOC="$REPO_ROOT/docs/operations/FOOTER_VARIANT_MATRIX.md"
 TENANT_FOOTER_LANE_DOC="$REPO_ROOT/docs/operations/TENANT_FOOTER_VARIANT_LANE.md"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 declare -a PRODUCTION_DOMAINS=(
   "academyv2.mereka.io"
@@ -69,9 +88,9 @@ echo ""
 
 
 if [[ ! -f "$PLUGIN_FILE" ]]; then
-  fail "AC-TF-001: Plugin file not found: infrastructure/tutor/plugins/mereka_lms.py"
+  fail "AC-TF-001: Plugin contract source not found: $PLUGIN_MAIN"
 else
-  pass "AC-TF-001: Plugin file exists (infrastructure/tutor/plugins/mereka_lms.py)"
+  pass "AC-TF-001: Plugin contract source exists: $PLUGIN_MAIN"
 
   # SITE_VARIANTS map must be present
   if grep -q "const SITE_VARIANTS = {" "$PLUGIN_FILE"; then
@@ -426,7 +445,7 @@ echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Action required: Fix FAIL items above."
-  echo "  - AC-TF-001: Ensure SITE_VARIANTS in infrastructure/tutor/plugins/mereka_lms.py"
+  echo "  - AC-TF-001: Ensure SITE_VARIANTS is present in plugin contract sources"
   echo "               covers all 3 domains + brand-config-schema.json has footer.variant"
   echo "  - AC-TF-002: Document variant selection chain in docs/operations/TENANT_FOOTER_VARIANT_LANE.md"
   echo "  - AC-TF-003: Ensure verify-footer-variant-matrix.sh and verify-tenant-branding-runtime.sh"
