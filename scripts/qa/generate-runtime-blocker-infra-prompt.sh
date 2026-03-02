@@ -10,13 +10,15 @@ PREFERRED_DEFAULTS=(
   "$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-prod.summary.json"
 )
 INPUT_JSON=""
+OUTPUT_FILE=""
 
 usage() {
   cat <<'USAGE'
-Usage: generate-runtime-blocker-infra-prompt.sh [--input <summary.json>]
+Usage: generate-runtime-blocker-infra-prompt.sh [--input <summary.json>] [--output <path>]
 
 Options:
   --input <path>   Explicit blocker sweep summary JSON. If omitted, latest matching file is used.
+  --output <path>  Also write rendered prompt to this file path.
   -h, --help       Show help.
 USAGE
 }
@@ -26,6 +28,11 @@ while [[ $# -gt 0 ]]; do
     --input)
       [[ $# -lt 2 ]] && { echo "ERROR: --input requires a value" >&2; exit 2; }
       INPUT_JSON="$2"
+      shift 2
+      ;;
+    --output)
+      [[ $# -lt 2 ]] && { echo "ERROR: --output requires a value" >&2; exit 2; }
+      OUTPUT_FILE="$2"
       shift 2
       ;;
     -h|--help)
@@ -63,13 +70,15 @@ if [[ ! -f "$INPUT_JSON" ]]; then
   exit 1
 fi
 
-python3 - "$INPUT_JSON" <<'PY'
+python3 - "$INPUT_JSON" "$OUTPUT_FILE" <<'PY'
 import json
+import io
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
 
 p = Path(sys.argv[1])
+output_file = sys.argv[2].strip() if len(sys.argv) > 2 else ""
 data = json.loads(p.read_text())
 summary = data.get("summary", {})
 diags = data.get("artifacts", {}).get("diagnostics", [])
@@ -78,23 +87,33 @@ diagnostics_tsv = data.get("artifacts", {}).get("diagnostics_tsv")
 fails = [d for d in diags if d.get("status") == "fail"]
 now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
-print("Infra Action Prompt")
-print(f"Generated: {now}")
-print(f"Source summary: {p}")
-print("")
-print("Please execute runtime remediation for dev credentials blocker based on this canonical sweep output.")
-print("")
-print("Current status")
-print(f"- pass={summary.get('pass', 'na')} fail={summary.get('fail', 'na')} skip={summary.get('skip', 'na')}")
+buf = io.StringIO()
+def line(s=""):
+    print(s, file=buf)
+
+line("Infra Action Prompt")
+line(f"Generated: {now}")
+line(f"Source summary: {p}")
+line("")
+line("Please execute runtime remediation for dev credentials blocker based on this canonical sweep output.")
+line("")
+line("Current status")
+line(f"- pass={summary.get('pass', 'na')} fail={summary.get('fail', 'na')} skip={summary.get('skip', 'na')}")
 if diagnostics_tsv:
-  print(f"- diagnostics_tsv={diagnostics_tsv}")
+    line(f"- diagnostics_tsv={diagnostics_tsv}")
 
 if not fails:
-  print("- No failing diagnostics found in summary JSON.")
-  sys.exit(0)
+    line("- No failing diagnostics found in summary JSON.")
+    rendered = buf.getvalue()
+    print(rendered, end="")
+    if output_file:
+        op = Path(output_file)
+        op.parent.mkdir(parents=True, exist_ok=True)
+        op.write_text(rendered)
+    sys.exit(0)
 
-print("")
-print("Required actions (in order)")
+line("")
+line("Required actions (in order)")
 seen = set()
 for d in fails:
   diagnosis = d.get("diagnosis", "unknown")
@@ -105,28 +124,35 @@ for d in fails:
   if key in seen:
     continue
   seen.add(key)
-  print(f"- diagnosis={diagnosis}")
-  print(f"  owner={owner}")
-  print(f"  next_action={next_action}")
-  print(f"  evidence_log={log}")
+  line(f"- diagnosis={diagnosis}")
+  line(f"  owner={owner}")
+  line(f"  next_action={next_action}")
+  line(f"  evidence_log={log}")
 
-print("")
-print("Execution contract (infra lane)")
-print("- Build and roll out the credentials-serving runtime that includes python tzdata + UTC zoneinfo in dev.")
-print("- Do not mutate app code in this step; apply runtime/GitOps rollout only.")
-print("- After rollout, run these exact verifiers from this repo:")
-print("  1) ./scripts/qa/verify-auth-surfaces.sh dev")
-print("  2) ./scripts/qa/verify-credentials-readiness.sh --cluster")
-print("  3) make qa-frontend-runtime-blocker-sweep-both")
-print("- Capture artifacts from the rerun and attach them in the issue handoff.")
-print("")
-print("Rollback contract")
-print("- If credentials login still returns 500 after rollout, revert to last known-good image tag and rerun the three verifiers above.")
-print("- Keep rollback evidence as logs plus blocker sweep summary JSON.")
-print("")
-print("Acceptance criteria")
-print("- credentials dev /login and /login/edx-oauth2 return 302 in auth-surfaces dev check")
-print("- credentials readiness cluster check passes ZoneInfo('UTC') and tzdata checks")
-print("- rerun: make qa-frontend-runtime-blocker-sweep-both")
-print("- expected summary: fail=0")
+line("")
+line("Execution contract (infra lane)")
+line("- Build and roll out the credentials-serving runtime that includes python tzdata + UTC zoneinfo in dev.")
+line("- Do not mutate app code in this step; apply runtime/GitOps rollout only.")
+line("- After rollout, run these exact verifiers from this repo:")
+line("  1) ./scripts/qa/verify-auth-surfaces.sh dev")
+line("  2) ./scripts/qa/verify-credentials-readiness.sh --cluster")
+line("  3) make qa-frontend-runtime-blocker-sweep-both")
+line("- Capture artifacts from the rerun and attach them in the issue handoff.")
+line("")
+line("Rollback contract")
+line("- If credentials login still returns 500 after rollout, revert to last known-good image tag and rerun the three verifiers above.")
+line("- Keep rollback evidence as logs plus blocker sweep summary JSON.")
+line("")
+line("Acceptance criteria")
+line("- credentials dev /login and /login/edx-oauth2 return 302 in auth-surfaces dev check")
+line("- credentials readiness cluster check passes ZoneInfo('UTC') and tzdata checks")
+line("- rerun: make qa-frontend-runtime-blocker-sweep-both")
+line("- expected summary: fail=0")
+
+rendered = buf.getvalue()
+print(rendered, end="")
+if output_file:
+    op = Path(output_file)
+    op.parent.mkdir(parents=True, exist_ok=True)
+    op.write_text(rendered)
 PY
