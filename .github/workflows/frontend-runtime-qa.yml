@@ -79,8 +79,14 @@ jobs:
             var/qa/frontend-runtime-blocker-sweep-*.summary.json
             var/qa/frontend-runtime-blocker-sweep-*.records.tsv
             var/qa/frontend-runtime-blocker-sweep-*.diagnostics.tsv
+            var/qa/frontend-runtime-blocker-sweep-latest-*.summary.log
+            var/qa/frontend-runtime-blocker-sweep-latest-*.summary.json
+            var/qa/frontend-runtime-blocker-sweep-latest-*.records.tsv
+            var/qa/frontend-runtime-blocker-sweep-latest-*.diagnostics.tsv
             var/qa/frontend-runtime-blocker-auth-surfaces-*.log
             var/qa/frontend-runtime-blocker-credentials-*.log
+            var/qa/frontend-runtime-blocker-auth-surfaces-*-latest.log
+            var/qa/frontend-runtime-blocker-credentials-dev-latest.log
             var/qa/frontend-runtime-blocker-infra-prompt.txt
             var/branding-screenshots/**
           if-no-files-found: warn

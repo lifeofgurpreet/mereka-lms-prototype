@@ -73,6 +73,7 @@ p = Path(sys.argv[1])
 data = json.loads(p.read_text())
 summary = data.get("summary", {})
 diags = data.get("artifacts", {}).get("diagnostics", [])
+diagnostics_tsv = data.get("artifacts", {}).get("diagnostics_tsv")
 
 fails = [d for d in diags if d.get("status") == "fail"]
 now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -85,6 +86,8 @@ print("Please execute runtime remediation for dev credentials blocker based on t
 print("")
 print("Current status")
 print(f"- pass={summary.get('pass', 'na')} fail={summary.get('fail', 'na')} skip={summary.get('skip', 'na')}")
+if diagnostics_tsv:
+  print(f"- diagnostics_tsv={diagnostics_tsv}")
 
 if not fails:
   print("- No failing diagnostics found in summary JSON.")
