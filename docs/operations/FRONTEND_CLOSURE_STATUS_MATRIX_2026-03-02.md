@@ -82,6 +82,14 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `CAPTURE_RETRIES=1 AGENT_BROWSER_TIMEOUT_SECONDS=30 ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` (PASS; screenshots `var/screenshots/dev/20260302T105625Z/`, log `var/qa/capture-branding-screenshots-dev-mfe-20260302T105625Z.log`)
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` (PASS; log `var/qa/paragon-runtime-dev-20260302T105604Z.log`)
     - `./scripts/qa/verify-studio-authoring-branding.sh dev` (PASS; log `var/qa/studio-authoring-branding-dev-20260302T105604Z.log`)
+  - Canonical blocker tracking lane added:
+    - `make qa-frontend-runtime-blocker-sweep-dev`
+    - Runs only high-signal blocker checks in one pass:
+      - `./scripts/qa/verify-auth-surfaces.sh dev`
+      - `./scripts/qa/verify-credentials-readiness.sh --cluster`
+    - Latest run: `var/qa/frontend-runtime-blocker-sweep-dev-20260302T111043Z.summary.log` (`PASS=0 FAIL=2 SKIP=0`) with per-check logs:
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260302T111043Z.log`
+      - `var/qa/frontend-runtime-blocker-credentials-dev-20260302T111043Z.log`
   - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `23`, WARN `1`, FAIL `0`; warning is expected when `frontend-app-profile` source checkout is absent on runner).
   - Latest #104 consolidation contract reruns:
     - `./scripts/qa/verify-frontend-qa-make-targets.sh` (PASS)
@@ -98,6 +106,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - Capture wrapper strips daemon-warning noise from command stdout so `capture-summary.tsv` fields remain parseable and stable.
     - `verify-paragon-runtime.sh` and `verify-studio-authoring-branding.sh` now auto-allow insecure TLS only for dev runtime checks (configurable via `PARAGON_RUNTIME_CURL_INSECURE` and `STUDIO_CURL_INSECURE`) to prevent self-signed cert false failures.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` and defaults to TLS-ignore only in `dev` (prod stays strict), reducing false auth/session canary failures from non-prod cert trust.
+    - New canonical wrapper script `scripts/qa/run-frontend-runtime-blocker-sweep.sh` and Make target `qa-frontend-runtime-blocker-sweep-dev` provide one-command blocker regression tracking for ongoing runtime convergence.
   - `verify-auth-surfaces.sh` now applies TLS-insecure curl mode only for non-prod (`dev`/`staging`) so self-signed certs do not create false failures.
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.
   - Direct pod inspection confirms timezone data is missing in dev credentials runtime (`/usr/share/zoneinfo/UTC` absent; `python -m pip show tzdata` not found), narrowing remediation to image/runtime package composition.
