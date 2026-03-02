@@ -56,6 +56,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 # ---------------------------------------------------------------------------
 # Argument parsing
@@ -64,6 +65,11 @@ TENANT=""
 ENV="prod"
 MODE="all"       # repo | cluster | all
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+NAMESPACE_OVERRIDE=""
 
 usage() {
   cat <<EOF
@@ -91,7 +97,11 @@ while [[ $# -gt 0 ]]; do
     --env) ENV="$2"; shift 2 ;;
     --tenant) TENANT="$2"; shift 2 ;;
     --mode) MODE="$2"; shift 2 ;;
-    -n|--namespace) NAMESPACE="$2"; shift 2 ;;
+    -n|--namespace)
+      NAMESPACE="$2"
+      NAMESPACE_OVERRIDE="$NAMESPACE"
+      shift 2
+      ;;
     -h|--help) usage ;;
     *) echo "Unknown option: $1" >&2; usage ;;
   esac
@@ -111,10 +121,16 @@ fi
 # K8s context and URL selection
 # ---------------------------------------------------------------------------
 if [[ "$ENV" == "prod" ]]; then
-  KUBE_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+  KUBE_CTX="$CONTEXT_PROD"
+  if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
+    NAMESPACE="$NAMESPACE_PROD"
+  fi
   LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
 else
-  KUBE_CTX="kind-dev"
+  KUBE_CTX="$CONTEXT_DEV"
+  if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
+    NAMESPACE="$NAMESPACE_DEV"
+  fi
   LMS_URL="https://${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
 fi
 
@@ -179,16 +195,15 @@ if [[ "$MODE" == "repo" || "$MODE" == "all" ]]; then
     done
   fi
 
-  # --- ENABLE_ENTERPRISE_INTEGRATION in plugin ---
-  PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
-  if [[ -f "$PLUGIN_FILE" ]]; then
-    if grep -q 'ENABLE_ENTERPRISE_INTEGRATION.*=.*True' "$PLUGIN_FILE"; then
-      pass "ENABLE_ENTERPRISE_INTEGRATION = True in mereka_lms.py"
+  # --- ENABLE_ENTERPRISE_INTEGRATION in plugin contract sources ---
+  if mereka_plugin_has_any "$REPO_ROOT"; then
+    if mereka_plugin_has_regex "$REPO_ROOT" 'ENABLE_ENTERPRISE_INTEGRATION.*=.*True'; then
+      pass "ENABLE_ENTERPRISE_INTEGRATION = True found in plugin contract sources"
     else
-      fail "ENABLE_ENTERPRISE_INTEGRATION = True NOT found in mereka_lms.py"
+      fail "ENABLE_ENTERPRISE_INTEGRATION = True NOT found in plugin contract sources"
     fi
   else
-    fail "mereka_lms.py not found at $PLUGIN_FILE"
+    fail "No plugin contract sources found (mereka_lms*.py)"
   fi
 
   # DISABLE_ENTERPRISE_LOGIN lives in LMS settings (MFE_CONFIG), not the Tutor plugin
