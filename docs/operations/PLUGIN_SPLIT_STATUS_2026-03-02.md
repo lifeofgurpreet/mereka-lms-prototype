@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `10` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `4` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -253,13 +253,35 @@ Validation after phase 11:
 - `./scripts/qa/verify-mfe-first-policy.sh` PASS (`PASS=22 / WARN=0 / FAIL=0`)
 - `./scripts/qa/verify-mfe-analytics-plugin-parity.sh` PASS (`PASS=25 / FAIL=0 / WARN=0`)
 
+## Progress Update (Phase 12, governance/branding/tenancy verifier tranche)
+
+- Extended compatibility-layer adoption to additional governance/branding/tenancy QA verifiers:
+  - `scripts/qa/verify-certificate-branding.sh`
+  - `scripts/qa/verify-postmerge-governance-closure.sh`
+  - `scripts/qa/verify-legacy-ecommerce-ui-refs.sh`
+  - `scripts/qa/verify-paragon-theme-urls.sh`
+  - `scripts/qa/verify-cross-cutting-requirements.sh`
+  - `scripts/qa/verify-mereka-tenancy.sh`
+- Outcome:
+  - direct path-coupling reduced from `10` to `4`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - 5/6 verifiers pass post-migration; 1/6 remains failing due existing tenancy/apply-patches expectation drift unrelated to plugin-path migration.
+
+Validation after phase 12:
+- `./scripts/qa/verify-certificate-branding.sh` PASS (`PASS=25 / WARN=0 / FAIL=0`)
+- `./scripts/qa/verify-postmerge-governance-closure.sh` PASS (`PASS=23 / FAIL=0 / WARN=0`)
+- `./scripts/qa/verify-legacy-ecommerce-ui-refs.sh` PASS (`PASS=10 / WARN=8 / FAIL=0`)
+- `./scripts/qa/verify-paragon-theme-urls.sh` PASS (`PASS=27 / WARN=0 / FAIL=0`)
+- `./scripts/qa/verify-cross-cutting-requirements.sh --skip-cluster` PASS (`Passed: 42 / Failed: 0 / Skipped: 2`)
+- `./scripts/qa/verify-mereka-tenancy.sh` FAIL (`PASS=12 / FAIL=4 / WARN=0`) — existing apply-patches tenancy wiring expectations not met in current baseline
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 + phase 12 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 
