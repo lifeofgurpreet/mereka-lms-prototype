@@ -52,6 +52,10 @@ jobs:
               ;;
           esac
 
+          # Canonical blocker regression lane (prod+dev auth surfaces + dev credentials cluster).
+          make qa-frontend-runtime-blocker-sweep-both \
+            | tee -a var/qa/frontend-runtime-qa.log
+
           if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
             ./scripts/qa/capture-branding-screenshots.sh --env "$TARGET_ENV" --mfe-only \
               | tee -a var/qa/frontend-runtime-qa.log
@@ -66,5 +70,8 @@ jobs:
             var/qa/frontend-runtime-qa.log
             var/qa/cross-browser-branding-smoke-*.log
             var/qa/frontend-performance-spotcheck-*.log
+            var/qa/frontend-runtime-blocker-sweep-*.summary.log
+            var/qa/frontend-runtime-blocker-auth-surfaces-*.log
+            var/qa/frontend-runtime-blocker-credentials-*.log
             var/branding-screenshots/**
           if-no-files-found: warn
