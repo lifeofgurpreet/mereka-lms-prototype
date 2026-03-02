@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-frontend-runtime-blocker-sweep qa-frontend-runtime-blocker-sweep-both qa-frontend-runtime-blocker-sweep-dev qa-frontend-runtime-blocker-sweep-prod qa-runtime-blocker-refresh qa-runtime-blocker-handoff-md qa-runtime-blocker-infra-prompt qa-runtime-blocker-status qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-frontend-runtime-blocker-sweep qa-frontend-runtime-blocker-sweep-both qa-frontend-runtime-blocker-sweep-dev qa-frontend-runtime-blocker-sweep-prod qa-runtime-blocker-refresh qa-runtime-blocker-handoff-md qa-runtime-blocker-handoff-bundle qa-runtime-blocker-infra-prompt qa-runtime-blocker-status qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -206,6 +206,7 @@ qa-runtime-blocker-refresh: ## Run blocker sweep + always emit prompt/status art
 	$(MAKE) qa-runtime-blocker-status OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt; \
 	$(MAKE) qa-runtime-blocker-status OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.md FORMAT=markdown; \
 	$(MAKE) qa-runtime-blocker-handoff-md OUTPUT_FILE=var/qa/frontend-runtime-blocker-handoff.md; \
+	$(MAKE) qa-runtime-blocker-handoff-bundle OUTPUT_FILE=var/qa/frontend-runtime-blocker-handoff-bundle.tar.gz; \
 	exit $$sweep_exit
 
 qa-runtime-blocker-handoff-md: ## Build single markdown handoff from prompt/status markdown artifacts
@@ -229,6 +230,10 @@ qa-runtime-blocker-handoff-md: ## Build single markdown handoff from prompt/stat
 		if [ -f "$$prompt_md" ]; then cat "$$prompt_md"; else echo "_missing prompt markdown: $$prompt_md_"; fi; \
 	} > "$$out_file"; \
 	echo "wrote $$out_file"
+
+qa-runtime-blocker-handoff-bundle: ## Package canonical runtime blocker artifacts into one tar.gz
+	@out_file="$(if $(OUTPUT_FILE),$(OUTPUT_FILE),var/qa/frontend-runtime-blocker-handoff-bundle.tar.gz)"; \
+	./scripts/qa/build-runtime-blocker-handoff-bundle.sh --output "$$out_file"
 
 qa-runtime-blocker-infra-prompt: ## Generate infra prompt (INPUT_JSON/OUTPUT_FILE optional; FORMAT=text|markdown)
 	@args=""; \
