@@ -38,7 +38,8 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - prod: `var/qa/auth-surfaces-prod-20260302T101515Z.log` (`OK`)
   - Auth-surface checker is now non-prod TLS tolerant (`-k` for `dev`/`staging`) to prevent self-signed certificate noise from masking real auth/runtime failures.
   - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`). Direct pod inspection confirms `/usr/share/zoneinfo/UTC` is absent and `python -m pip show tzdata` returns not found.
-  - Repo-side remediation is now in place: `infrastructure/tutor/plugins/mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1` alongside cryptography; readiness contract updated in `scripts/qa/verify-credentials-readiness.sh` and rerun offline PASS (`PASS=48 FAIL=0 SKIP=7`).
+  - Repo-side remediation is now in place: `infrastructure/tutor/plugins/mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1` alongside cryptography; readiness contract updated in `scripts/qa/verify-credentials-readiness.sh` and rerun offline PASS (`PASS=48 FAIL=0 SKIP=9`).
+  - `verify-credentials-readiness.sh --cluster` now includes runtime checks for `ZoneInfo('UTC')` resolution and python `tzdata` package presence, so rollout validation can confirm the exact failure mode is removed.
   - Remaining action is runtime rollout only (rebuild/push/redeploy credentials-serving image path) to validate that dev credentials login endpoints return `302` instead of `500`.
   - Local-login replay canary support added in repo (`RUN_LOCAL_LOGIN_CANARY=1` mode in `verify-authenticated-sso-canary.sh`), but this runner currently has no canary secrets injected (`SSO_CANARY_*`/`LOCAL_CANARY_*` unset).
 - BEM + a11y (`#107`, `#108`):
