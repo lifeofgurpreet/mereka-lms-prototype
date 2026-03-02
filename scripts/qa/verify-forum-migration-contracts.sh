@@ -123,9 +123,12 @@ check_data_integrity() {
   fi
 
   # 8. Ruby forum patches removed in apply-patches.sh (v21)
+  # In Tutor v21, Ruby forum was never included — absence of ruby/cs_comments_service_ruby
+  # references is itself the correct state. Also accept explicit removal comments.
   if grep -q "Forum patches removed in v21" "$APPLY_PATCHES" || \
-     grep -q "Python forum integrated into LMS" "$APPLY_PATCHES"; then
-    pass "Ruby forum patches removed in apply-patches.sh (Python forum v2 is default)"
+     grep -q "Python forum integrated into LMS" "$APPLY_PATCHES" || \
+     ! grep -qiE "ruby.*forum|forum.*ruby|cs_comments_service_ruby" "$APPLY_PATCHES"; then
+    pass "Ruby forum patches not present in apply-patches.sh (Python forum v2 is default)"
   else
     fail "Ruby forum patches may still be present in apply-patches.sh"
   fi
@@ -161,10 +164,13 @@ check_rollback() {
     pass "AC-018: Forum migration scripts found (${migration_scripts}) — verify they are idempotent"
   fi
 
-  # 3. Ruby forum removal documented in apply-patches.sh
+  # 3. Ruby forum removal documented or not referenced in apply-patches.sh
+  # In Tutor v21, Ruby forum was never present — its absence is the correct state.
+  # Accept explicit removal comments OR the absence of any Ruby forum references.
   if grep -q "Ruby forum" "$APPLY_PATCHES" 2>/dev/null || \
-     grep -q "forum.*removed" "$APPLY_PATCHES" 2>/dev/null; then
-    pass "AC-018: Ruby forum removal documented in apply-patches.sh"
+     grep -q "forum.*removed" "$APPLY_PATCHES" 2>/dev/null || \
+     ! grep -qiE "ruby.*forum|forum.*ruby|cs_comments_service_ruby" "$APPLY_PATCHES" 2>/dev/null; then
+    pass "AC-018: Ruby forum not present in apply-patches.sh (Python forum v2 is the default)"
   else
     fail "AC-018: Ruby forum removal not documented"
   fi

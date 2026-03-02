@@ -60,6 +60,7 @@ scripts/qa/verify-mfe-build-contract.sh
 scripts/qa/verify-mfe-build-prereqs.sh
 scripts/qa/verify-mfe-config-contract.sh
 scripts/qa/verify-mfe-footer-slot.sh
+scripts/qa/verify-plugin-slot-wiring.sh
 scripts/qa/verify-mfe-route-drift.sh
 scripts/qa/verify-mfe-route-contract.sh
 scripts/qa/verify-mfe-footer-slot-migration.sh

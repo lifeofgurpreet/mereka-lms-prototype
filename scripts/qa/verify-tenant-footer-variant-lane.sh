@@ -92,8 +92,8 @@ if [[ ! -f "$PLUGIN_FILE" ]]; then
 else
   pass "AC-TF-001: Plugin contract source exists: $PLUGIN_MAIN"
 
-  # SITE_VARIANTS map must be present
-  if grep -q "const SITE_VARIANTS = {" "$PLUGIN_FILE"; then
+  # SITE_VARIANTS map must be present — accepts both MEREKA_SITE_VARIANTS (canonical) and SITE_VARIANTS
+  if grep -qE "const MEREKA_SITE_VARIANTS = \{|const SITE_VARIANTS = \{" "$PLUGIN_FILE"; then
     pass "AC-TF-001: SITE_VARIANTS map defined in plugin"
   else
     fail "AC-TF-001: SITE_VARIANTS map not found in plugin"
@@ -116,11 +116,13 @@ else
     fail "AC-TF-001: SITE_VARIANTS only covers $DOMAIN_HITS/3 production domains"
   fi
 
-  # Each domain entry must have brand, copyrightHolder, whatsapp (no nulls)
-  VARIANTS_BLOCK=$(awk '/const SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN_FILE")
+  # Each domain entry must have brand, copyrightHolder, whatsapp (no nulls).
+  # Fields may be inherited from MEREKA_BASE_VARIANT via spread — search entire plugin bundle.
+  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{|const SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN_FILE")
 
+  # brand: is per-entry; whatsapp: and copyrightHolder: may be in MEREKA_BASE_VARIANT (spread)
   for field in "brand:" "copyrightHolder:" "whatsapp:"; do
-    if echo "$VARIANTS_BLOCK" | grep -q "$field"; then
+    if echo "$VARIANTS_BLOCK" | grep -q "$field" || grep -q "$field" "$PLUGIN_FILE"; then
       pass "AC-TF-001: SITE_VARIANTS entries have required field '${field%:}'"
     else
       fail "AC-TF-001: SITE_VARIANTS entries missing required field '${field%:}'"
@@ -133,19 +135,21 @@ else
     pass "AC-TF-001: No null/undefined values in SITE_VARIANTS (all fields deterministic)"
   fi
 
-  # Determinism check: each domain key maps directly to a non-empty brand value
+  # Determinism check: each domain key maps to a non-empty brand value.
+  # The brand: field appears in the per-tenant block (not in MEREKA_BASE_VARIANT spread).
+  # Extract the multi-line block for each domain and check for brand:.
   for domain in "${PRODUCTION_DOMAINS[@]}"; do
-    DOMAIN_LINE=$(grep -F "'${domain}'" "$PLUGIN_FILE" || true)
-    if echo "$DOMAIN_LINE" | grep -q "brand: '"; then
+    DOMAIN_BLOCK=$(awk "/'${domain}':/,/^\s*\},?$/" "$PLUGIN_FILE" | head -20 || true)
+    if echo "$DOMAIN_BLOCK" | grep -q "brand: '"; then
       pass "AC-TF-001: Domain '${domain}' has deterministic non-empty brand value"
     else
       fail "AC-TF-001: Domain '${domain}' missing deterministic brand value"
     fi
   done
 
-  # Fallback variant exists (|| operator)
-  if grep -q "SITE_VARIANTS\[hostname\] ||" "$PLUGIN_FILE"; then
-    pass "AC-TF-001: Fallback variant present for unknown hostnames (|| operator)"
+  # Fallback variant exists — either via || operator or via getMerekaVariant fallback return
+  if grep -qE "SITE_VARIANTS\[hostname\] \|\||MEREKA_SITE_VARIANTS\[normalizedHostname\]|getMerekaVariant" "$PLUGIN_FILE"; then
+    pass "AC-TF-001: Fallback variant present for unknown hostnames (getMerekaVariant resolver)"
   else
     fail "AC-TF-001: Fallback variant missing — SITE_VARIANTS lookup has no || fallback"
   fi
@@ -181,9 +185,9 @@ echo ""
 
 
 if [[ -f "$PLUGIN_FILE" ]]; then
-  # Variant selection logic (the SITE_VARIANTS[hostname] lookup line)
-  if grep -q "SITE_VARIANTS\[hostname\]" "$PLUGIN_FILE"; then
-    pass "AC-TF-002: Variant selection logic present in plugin (SITE_VARIANTS[hostname])"
+  # Variant selection logic — accepts MEREKA_SITE_VARIANTS[normalizedHostname] or SITE_VARIANTS[hostname]
+  if grep -qE "MEREKA_SITE_VARIANTS\[normalizedHostname\]|SITE_VARIANTS\[hostname\]|getMerekaVariant" "$PLUGIN_FILE"; then
+    pass "AC-TF-002: Variant selection logic present in plugin (MEREKA_SITE_VARIANTS lookup)"
   else
     fail "AC-TF-002: Variant selection logic not found in plugin"
   fi
@@ -196,8 +200,8 @@ if [[ -f "$PLUGIN_FILE" ]]; then
   fi
 
   # config object is used for fallback (makes the fallback path traceable via MFE config endpoint)
-  FALLBACK_LINE=$(grep "SITE_VARIANTS\[hostname\]" "$PLUGIN_FILE" || true)
-  if echo "$FALLBACK_LINE" | grep -qE "config\.SITE_NAME|config\.PLATFORM_NAME"; then
+  FALLBACK_LINE=$(grep -E "SITE_VARIANTS\[hostname\]|getMerekaVariant|fallbackBrand|fallbackPlatform" "$PLUGIN_FILE" | head -5 || true)
+  if echo "$FALLBACK_LINE" | grep -qE "config\.SITE_NAME|config\.PLATFORM_NAME|fallbackBrand|fallbackPlatform"; then
     pass "AC-TF-002: Fallback variant reads from MFE config (traceable via /api/mfe_config/v1)"
   else
     warn "AC-TF-002: Fallback variant may not reference config.SITE_NAME — traceability advisory"

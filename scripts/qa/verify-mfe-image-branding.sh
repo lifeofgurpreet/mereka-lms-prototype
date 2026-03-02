@@ -16,7 +16,13 @@ Examples:
 EOF
 }
 
-if [[ $# -lt 1 || $# -gt 2 ]]; then
+if [[ $# -eq 0 ]]; then
+  echo "SKIP: No image_ref provided (requires a locally-present built Docker image)"
+  echo "  Usage: $0 <image_ref> [expected_mfe_branding_rev]"
+  exit 0
+fi
+
+if [[ $# -gt 2 ]]; then
   usage
   exit 1
 fi
