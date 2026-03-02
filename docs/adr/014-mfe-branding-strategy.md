@@ -9,7 +9,7 @@
 
 ---
 
-## Executive Summary
+## Context
 
 **Current State**: We use a custom SCSS-based theming approach that works but doesn't follow Open edX industry standards (OEP-48).
 
@@ -287,6 +287,23 @@ Plugin delivers configuration and component injection via Tutor hooks. Branding 
 **When to choose**: When branding is stable but you want to move toward standards eventually.
 
 ---
+
+## Consequences
+
+**Positive**:
+- Preserves existing working brand customizations (SCSS + Tutor plugin)
+- Avoids risky full migration while team is small
+- Plugin-First Migration (FPF) path provides incremental OEP-48 adoption
+- MFE Plugin Slots enable runtime branding without image rebuilds
+
+**Negative**:
+- Dual-mode complexity during transition (legacy SCSS + brand-openedx coexist)
+- Custom Paragon overrides may need manual updates on major Paragon upgrades
+- Not fully OEP-48 compliant until FPF migration completes
+
+**Neutral**:
+- Brand package can be adopted incrementally per-MFE
+- Existing theme assets remain the source of truth until full migration
 
 ## Decision Criteria
 
