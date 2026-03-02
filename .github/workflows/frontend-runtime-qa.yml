@@ -98,5 +98,6 @@ jobs:
             var/qa/frontend-runtime-blocker-infra-prompt.md
             var/qa/frontend-runtime-blocker-status.txt
             var/qa/frontend-runtime-blocker-status.md
+            var/qa/frontend-runtime-blocker-handoff.md
             var/branding-screenshots/**
           if-no-files-found: warn
