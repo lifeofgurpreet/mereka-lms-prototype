@@ -93,3 +93,56 @@ git status --short --branch
 ```
 
 Expected HEAD: `origin/start/next-implementor-2026-03-01` (at least `24176afa` or newer).
+
+---
+
+## Addendum (2026-03-02 Runtime Stabilization Follow-on)
+
+### Latest Heads
+
+- `start/next-implementor-2026-03-01`: `50881e2f`
+- `main`: `f82491e1`
+
+Both include the same frontend/runtime stabilization deltas (branch-local SHAs differ due cherry-picks).
+
+### What Changed in This Tranche
+
+- Deterministic dev screenshot/runtime checks hardened:
+  - `scripts/qa/capture-branding-screenshots.sh`
+    - fresh agent-browser daemon start before capture
+    - dev TLS tolerance via `--ignore-https-errors`
+    - daemon warning noise stripped so `capture-summary.tsv` remains parseable
+  - `scripts/qa/verify-paragon-runtime.sh`
+    - dev TLS auto-tolerance (`PARAGON_RUNTIME_CURL_INSECURE=auto|0|1`)
+  - `scripts/qa/verify-studio-authoring-branding.sh`
+    - dev TLS auto-tolerance (`STUDIO_CURL_INSECURE=auto|0|1`) for curl + agent-browser
+- Authenticated canary TLS hardening:
+  - `scripts/qa/verify-authenticated-sso-canary.sh`
+    - new env: `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1`
+    - default `auto`: dev ignores TLS errors, prod stays strict
+- Status docs refreshed:
+  - `docs/BRANDING_PLAN.md`
+  - `docs/operations/FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md`
+
+### Latest Verification Evidence
+
+- Runtime gates:
+  - `var/qa/paragon-runtime-dev-20260302T105604Z.log` (PASS)
+  - `var/qa/studio-authoring-branding-dev-20260302T105604Z.log` (PASS)
+- Deterministic screenshot capture:
+  - `var/screenshots/dev/20260302T105625Z/`
+  - `var/qa/capture-branding-screenshots-dev-mfe-20260302T105625Z.log` (PASS)
+- Consolidated frontend pipeline (repo-only lane):
+  - `var/evidence/branding/20260302-110344/SUMMARY.md` (`ALL GATES PASSED`)
+- Auth/runtime blocker still present:
+  - `var/qa/auth-surfaces-dev-20260302T110223Z-post-canary-tls.log`
+    - fails only on credentials `/login` and `/login/edx-oauth2` returning `500`
+  - `var/qa/credentials-readiness-cluster-20260302T110629Z-post-canary-tls.log`
+    - `PASS=54 FAIL=1` (canonical fail: `ZoneInfo('UTC')` / missing `tzdata`)
+
+### Remaining Blocker (Still Canonical)
+
+- Dev runtime credentials service is still failing timezone initialization:
+  - `ZoneInfoNotFoundError: No time zone found with key UTC`
+  - `ModuleNotFoundError: No module named 'tzdata'`
+- Source-side remediation is already in repo (`mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1`); remaining work is runtime rollout convergence.
