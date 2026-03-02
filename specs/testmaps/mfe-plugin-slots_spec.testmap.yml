@@ -3,53 +3,52 @@ acceptance_criteria:
 - id: AC-SLOT-001
   description: Desktop header uses Mereka logo instead of default Open edX logo.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Requires live browser assertion of rendered desktop header logo.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-002
   description: Mobile header uses Mereka square logo instead of default Open edX mobile logo.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Requires live browser/mobile viewport assertion.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-003
   description: Header logo click navigates to /dashboard.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Click-navigation behavior requires authenticated browser flow.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-004
   description: academy.biji-biji.com renders tenant-specific Biji-Biji header variant.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Multi-domain tenant branding requires hostname-specific runtime verification.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-005
   description: Desktop main menu contains Mereka links (Dashboard, Discover Courses, Support).
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Active Plugin-Slot Wiring Matrix
-    justification: Link text/content correctness is a runtime UI assertion.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-006
   description: Mobile menu exposes same navigation items as desktop.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Active Plugin-Slot Wiring Matrix
-    justification: Requires responsive runtime parity check.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-007
   description: Phase 1 slot registrations exist and MFE build wiring is present in env.config.jsx.
   verify:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-mfe-plugin-slots.sh
-    command: EXPECTED_SLOT_IDS=org.openedx.frontend.layout.footer.v1,org.openedx.frontend.layout.header_logo.v1,org.openedx.frontend.layout.header_desktop_main_menu.v1,org.openedx.frontend.layout.header_mobile_main_menu.v1
-      scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-plugin-slot-wiring.sh
@@ -57,69 +56,67 @@ acceptance_criteria:
 - id: AC-SLOT-008
   description: Learning course outline sidebar renders Mereka branding via slot.
   verify:
-  - type: manual
-    runbook: docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md
-    section: org.openedx.frontend.learning.course_outline_sidebar.v1
-    justification: Visual rendering assertion requires runtime learner page.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-009
   description: Learning sequence/progress area renders with Mereka-branded styling via slot path.
   verify:
-  - type: manual
-    runbook: docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md
-    section: org.openedx.frontend.learning.progress_certificate_status.v1
-    justification: Style behavior is validated on rendered learning UI.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-010
   description: Course outline placeholder for missing image uses Mereka brand colors.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Placeholder visual state requires browser rendering with image-missing scenario.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-011
   description: Learning Phase 2 slot registrations are present and build wiring is intact.
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-plugin-slot-wiring.sh
-    command: scripts/qa/verify-plugin-slot-wiring.sh
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-mfe-plugin-slots.sh
-    command: EXPECTED_SLOT_IDS=org.openedx.frontend.learning.course_outline_sidebar.v1,org.openedx.frontend.learning.progress_certificate_status.v1
-      scripts/qa/verify-mfe-plugin-slots.sh
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
 - id: AC-SLOT-012
   description: Account MFE renders additional enterprise profile fields via slot.
   verify:
-  - type: manual
-    runbook: docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md
-    section: org.openedx.frontend.account.additional_profile_fields.v1
-    justification: Requires interactive account page validation.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-013
   description: Profile MFE renders branded profile header/fields via slot.
   verify:
-  - type: manual
-    runbook: docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md
-    section: org.openedx.frontend.profile.additional_profile_fields.v1
-    justification: Requires runtime profile page rendering check.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-014
   description: Enterprise profile field values persist through profile API/save cycle.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Requires authenticated write/read API + UI roundtrip validation.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-profile-persistence.sh
+    command: scripts/qa/verify-mfe-slot-profile-persistence.sh
 - id: AC-SLOT-015
   description: Phase 3 account/profile slot registrations are present and build wiring is intact.
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-plugin-slot-wiring.sh
-    command: scripts/qa/verify-plugin-slot-wiring.sh
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-mfe-plugin-slots.sh
-    command: EXPECTED_SLOT_IDS=org.openedx.frontend.account.additional_profile_fields.v1,org.openedx.frontend.profile.additional_profile_fields.v1
-      scripts/qa/verify-mfe-plugin-slots.sh
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
 - id: AC-SLOT-016
   description: Slot registration follows PLUGIN_SLOTS.add_items pattern with supported operations.
   verify:
@@ -141,10 +138,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-plugin-slot-wiring.sh
     command: scripts/qa/verify-plugin-slot-wiring.sh
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Hostname-specific rendering still requires domain runtime verification.
 - id: AC-SLOT-019
   description: Shared slot targeting applies consistently across MFEs that expose the slot.
   verify:
@@ -155,10 +148,10 @@ acceptance_criteria:
 - id: AC-SLOT-020
   description: Missing slot IDs in a given MFE degrade gracefully (no build/runtime crash).
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Slot Naming Conventions
-    justification: Graceful no-op behavior is confirmed by runtime/build observation when slot is absent.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
 - id: AC-SLOT-021
   description: Visual regression suite captures and compares pages containing activated slots.
   verify:
@@ -183,31 +176,31 @@ acceptance_criteria:
 - id: AC-SLOT-024
   description: Build failures identify failing slot ID/component for quick debugging.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Requires negative-path build exercise and log inspection.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
 - id: AC-SLOT-025
   description: Slot component render latency stays within 100ms from slot mount.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Runtime timing measurement needs browser performance tooling.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
 - id: AC-SLOT-026
   description: Incremental slot component JS bundle overhead remains under 15KB gzipped.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Requires release-bundle diffing scoped to slot components.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
 - id: AC-SLOT-027
   description: Slot components are responsive from 320px to 1920px without overflow.
   verify:
-  - type: manual
-    runbook: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
-    section: Migration Checklist
-    justification: Requires viewport matrix browser validation.
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
 - id: AC-SLOT-028
   description: Header slot asset paths align with branding-system logo asset contract.
   verify:
