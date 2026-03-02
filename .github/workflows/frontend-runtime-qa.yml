@@ -53,8 +53,15 @@ jobs:
           esac
 
           # Canonical blocker regression lane (prod+dev auth surfaces + dev credentials cluster).
+          set +e
           make qa-frontend-runtime-blocker-sweep-both \
             | tee -a var/qa/frontend-runtime-qa.log
+          blocker_sweep_exit="${PIPESTATUS[0]}"
+          set -e
+          if [[ "$blocker_sweep_exit" -ne 0 ]]; then
+            echo "WARN: blocker sweep reported active blockers (exit=$blocker_sweep_exit); continuing to emit prompt/status artifacts." \
+              | tee -a var/qa/frontend-runtime-qa.log
+          fi
 
           # Generate infra-ready remediation prompt from latest blocker sweep JSON.
           make qa-runtime-blocker-infra-prompt \
@@ -67,6 +74,11 @@ jobs:
           if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
             ./scripts/qa/capture-branding-screenshots.sh --env "$TARGET_ENV" --mfe-only \
               | tee -a var/qa/frontend-runtime-qa.log
+          fi
+
+          # Preserve blocker sweep failure semantics after artifacts are emitted.
+          if [[ "$blocker_sweep_exit" -ne 0 ]]; then
+            exit "$blocker_sweep_exit"
           fi
 
       - name: Upload runtime frontend QA artifacts
