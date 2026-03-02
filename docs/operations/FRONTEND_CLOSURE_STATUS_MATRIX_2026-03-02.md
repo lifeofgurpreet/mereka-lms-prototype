@@ -135,6 +135,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `var/qa/frontend-runtime-blocker-auth-surfaces-*-latest.log`
       - `var/qa/frontend-runtime-blocker-credentials-dev-latest.log`
       - `var/qa/frontend-runtime-blocker-infra-prompt.txt`
+      - `var/qa/frontend-runtime-blocker-status.txt`
   - Infra handoff prompt generation (deterministic from latest sweep JSON):
     - `make qa-runtime-blocker-infra-prompt`
     - optional explicit input: `make qa-runtime-blocker-infra-prompt INPUT_JSON=<path-to-summary.json>`
@@ -145,6 +146,9 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `var/qa/frontend-runtime-blocker-sweep-latest-prod.summary.json`
     - summary JSON now embeds `artifacts.latest.*` pointers (summary/records/diagnostics/auth logs) for downstream automation.
     - blocker sweep now also writes stable latest pointers for summary log, records TSV, diagnostics TSV, and auth/credentials logs.
+  - Canonical concise status view (human + CI):
+    - `make qa-runtime-blocker-status`
+    - canonical file output mode: `make qa-runtime-blocker-status OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt`
     - prompt now embeds deterministic infra execution + verification + rollback contract commands for dev credentials blocker handoff.
   - `verify-auth-surfaces.sh` now applies TLS-insecure curl mode only for non-prod (`dev`/`staging`) so self-signed certs do not create false failures.
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.

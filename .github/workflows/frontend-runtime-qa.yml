@@ -60,6 +60,9 @@ jobs:
           make qa-runtime-blocker-infra-prompt \
             OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt
           cat var/qa/frontend-runtime-blocker-infra-prompt.txt >> var/qa/frontend-runtime-qa.log
+          make qa-runtime-blocker-status \
+            OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt
+          cat var/qa/frontend-runtime-blocker-status.txt >> var/qa/frontend-runtime-qa.log
 
           if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
             ./scripts/qa/capture-branding-screenshots.sh --env "$TARGET_ENV" --mfe-only \
@@ -88,5 +91,6 @@ jobs:
             var/qa/frontend-runtime-blocker-auth-surfaces-*-latest.log
             var/qa/frontend-runtime-blocker-credentials-dev-latest.log
             var/qa/frontend-runtime-blocker-infra-prompt.txt
+            var/qa/frontend-runtime-blocker-status.txt
             var/branding-screenshots/**
           if-no-files-found: warn
