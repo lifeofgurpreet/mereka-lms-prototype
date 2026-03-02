@@ -23,6 +23,20 @@ Scope: Promotion execution checklist once operator signal is given.
   - post blocker status to `#110` with current evidence links
 - Do not touch `bbi-infrastructure` overlays or Argo resources in blocked mode.
 
+## Latest Repo-Local Baseline (2026-03-02T035438Z)
+
+- All repo-local pre-promotion checks are green:
+  - `capture-branding-screenshots.sh --env dev --mfe-only` (`exit=0`)
+  - `verify-paragon-runtime.sh ... --require-slot-markers` (`PASS=17 WARN=0 FAIL=0`)
+  - `verify-studio-authoring-branding.sh dev` (`failures=0`)
+  - `run-phase7-dom-audit-full.sh --env dev --project chromium` (`1 passed`)
+  - `verify-mfe-selector-hardening.sh` (`PASS=31 FAIL=0 WARN=0`)
+  - `verify-a11y-contrast-focus.sh` (`PASS=29 WARN=2 FAIL=0`)
+  - `verify-wcag-contrast-v2.sh` (`28 PASS / 0 FAIL`)
+- Evidence artifacts:
+  - `var/qa/staging-prepromotion-dev-baseline-20260302T035438Z.summary.log`
+  - `var/screenshots/dev/20260302T035438Z/`
+
 ## Promotion Run Sequence
 
 1. Validate source branch state in `mereka-lms`:

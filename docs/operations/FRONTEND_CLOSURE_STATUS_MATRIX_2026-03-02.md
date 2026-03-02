@@ -15,7 +15,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 | `#108` Accessibility closure (contrast + focus) | CLOSED | `verify-a11y-contrast-focus.sh` + `verify-wcag-contrast-v2.sh` PASS |
 | `#109` `mereka_lms.py` maintainability split | CLOSED | Phase-14 extraction complete (`issuecomment-3981834322`): `mereka_lms.py` `3426 -> 2226`, new `mereka_lms_mfe_slots.py` (`1110`), QA path coupling `98 -> 0` |
 | `#111` Phase 6 slot decision (freeze vs continue) | CLOSED | Freeze decision recorded in `docs/BRANDING_PLAN.md` and issue thread |
-| `#110` staging promotion + rollback evidence | OPEN (BLOCKED BY SIGNAL) | Blocking note posted (`issuecomment-3981835559`); offline preflight `verify-staging-activation.sh --offline` (`30 PASS / 0 FAIL / 3 SKIP`); execution playbook: `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` |
+| `#110` staging promotion + rollback evidence | OPEN (BLOCKED BY SIGNAL) | Blocking notes posted (`issuecomment-3981835559`, `issuecomment-3981860415`); offline preflight `verify-staging-activation.sh --offline` (`30 PASS / 0 FAIL / 3 SKIP`); latest repo-local baseline bundle `var/qa/staging-prepromotion-dev-baseline-20260302T035438Z.summary.log` + `var/screenshots/dev/20260302T035438Z/`; execution playbook: `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` |
 
 ## Current Blocker
 
