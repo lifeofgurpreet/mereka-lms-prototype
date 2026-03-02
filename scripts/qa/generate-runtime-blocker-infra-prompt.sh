@@ -11,14 +11,16 @@ PREFERRED_DEFAULTS=(
 )
 INPUT_JSON=""
 OUTPUT_FILE=""
+FORMAT="text"
 
 usage() {
   cat <<'USAGE'
-Usage: generate-runtime-blocker-infra-prompt.sh [--input <summary.json>] [--output <path>]
+Usage: generate-runtime-blocker-infra-prompt.sh [--input <summary.json>] [--output <path>] [--format text|markdown]
 
 Options:
   --input <path>   Explicit blocker sweep summary JSON. If omitted, latest matching file is used.
   --output <path>  Also write rendered prompt to this file path.
+  --format <mode>  Output format: text (default) or markdown.
   -h, --help       Show help.
 USAGE
 }
@@ -33,6 +35,11 @@ while [[ $# -gt 0 ]]; do
     --output)
       [[ $# -lt 2 ]] && { echo "ERROR: --output requires a value" >&2; exit 2; }
       OUTPUT_FILE="$2"
+      shift 2
+      ;;
+    --format)
+      [[ $# -lt 2 ]] && { echo "ERROR: --format requires a value" >&2; exit 2; }
+      FORMAT="$2"
       shift 2
       ;;
     -h|--help)
@@ -70,7 +77,12 @@ if [[ ! -f "$INPUT_JSON" ]]; then
   exit 1
 fi
 
-python3 - "$INPUT_JSON" "$OUTPUT_FILE" <<'PY'
+if [[ "$FORMAT" != "text" && "$FORMAT" != "markdown" ]]; then
+  echo "ERROR: --format must be text or markdown (got: $FORMAT)" >&2
+  exit 2
+fi
+
+python3 - "$INPUT_JSON" "$OUTPUT_FILE" "$FORMAT" <<'PY'
 import json
 import io
 import sys
@@ -79,6 +91,7 @@ from datetime import datetime, timezone
 
 p = Path(sys.argv[1])
 output_file = sys.argv[2].strip() if len(sys.argv) > 2 else ""
+fmt = sys.argv[3].strip() if len(sys.argv) > 3 else "text"
 data = json.loads(p.read_text())
 summary = data.get("summary", {})
 diags = data.get("artifacts", {}).get("diagnostics", [])
@@ -92,19 +105,34 @@ buf = io.StringIO()
 def line(s=""):
     print(s, file=buf)
 
-line("Infra Action Prompt")
-line(f"Generated: {now}")
-line(f"Source summary: {p}")
-line("")
-line("Please execute runtime remediation for dev credentials blocker based on this canonical sweep output.")
-line("")
-line("Current status")
-line(f"- pass={summary.get('pass', 'na')} fail={summary.get('fail', 'na')} skip={summary.get('skip', 'na')}")
-if diagnostics_tsv:
-    line(f"- diagnostics_tsv={diagnostics_tsv}")
+if fmt == "markdown":
+    line("## Infra Action Prompt")
+    line(f"- generated: `{now}`")
+    line(f"- source summary: `{p}`")
+    line("")
+    line("Execute runtime remediation for the dev credentials blocker based on this canonical sweep output.")
+    line("")
+    line("### Current Status")
+    line(f"- summary: `pass={summary.get('pass', 'na')} fail={summary.get('fail', 'na')} skip={summary.get('skip', 'na')}`")
+    if diagnostics_tsv:
+        line(f"- diagnostics_tsv: `{diagnostics_tsv}`")
+else:
+    line("Infra Action Prompt")
+    line(f"Generated: {now}")
+    line(f"Source summary: {p}")
+    line("")
+    line("Please execute runtime remediation for dev credentials blocker based on this canonical sweep output.")
+    line("")
+    line("Current status")
+    line(f"- pass={summary.get('pass', 'na')} fail={summary.get('fail', 'na')} skip={summary.get('skip', 'na')}")
+    if diagnostics_tsv:
+        line(f"- diagnostics_tsv={diagnostics_tsv}")
 
 if not fails:
-    line("- No failing diagnostics found in summary JSON.")
+    if fmt == "markdown":
+        line("- no failing diagnostics found in summary JSON.")
+    else:
+        line("- No failing diagnostics found in summary JSON.")
     rendered = buf.getvalue()
     print(rendered, end="")
     if output_file:
@@ -114,7 +142,10 @@ if not fails:
     sys.exit(0)
 
 line("")
-line("Required actions (in order)")
+if fmt == "markdown":
+    line("### Required Actions (in order)")
+else:
+    line("Required actions (in order)")
 seen = set()
 for d in fails:
   diagnosis = d.get("diagnosis", "unknown")
@@ -125,26 +156,41 @@ for d in fails:
   if key in seen:
     continue
   seen.add(key)
-  line(f"- diagnosis={diagnosis}")
-  line(f"  owner={owner}")
-  line(f"  next_action={next_action}")
-  line(f"  evidence_log={log}")
+  if fmt == "markdown":
+      line(f"- diagnosis: `{diagnosis}`")
+      line(f"  owner: `{owner}`")
+      line(f"  next_action: `{next_action}`")
+      line(f"  evidence_log: `{log}`")
+  else:
+      line(f"- diagnosis={diagnosis}")
+      line(f"  owner={owner}")
+      line(f"  next_action={next_action}")
+      line(f"  evidence_log={log}")
 
 line("")
-line("Execution contract (infra lane)")
+if fmt == "markdown":
+    line("### Execution Contract (infra lane)")
+else:
+    line("Execution contract (infra lane)")
 line("- Build and roll out the credentials-serving runtime that includes python tzdata + UTC zoneinfo in dev.")
 line("- Do not mutate app code in this step; apply runtime/GitOps rollout only.")
 line("- After rollout, run these exact verifiers from this repo:")
-line("  1) ./scripts/qa/verify-auth-surfaces.sh dev")
-line("  2) ./scripts/qa/verify-credentials-readiness.sh --cluster")
-line("  3) make qa-frontend-runtime-blocker-sweep-both")
+line("  1. `./scripts/qa/verify-auth-surfaces.sh dev`")
+line("  2. `./scripts/qa/verify-credentials-readiness.sh --cluster`")
+line("  3. `make qa-frontend-runtime-blocker-sweep-both`")
 line("- Capture artifacts from the rerun and attach them in the issue handoff.")
 line("")
-line("Rollback contract")
+if fmt == "markdown":
+    line("### Rollback Contract")
+else:
+    line("Rollback contract")
 line("- If credentials login still returns 500 after rollout, revert to last known-good image tag and rerun the three verifiers above.")
 line("- Keep rollback evidence as logs plus blocker sweep summary JSON.")
 line("")
-line("Acceptance criteria")
+if fmt == "markdown":
+    line("### Acceptance Criteria")
+else:
+    line("Acceptance criteria")
 line("- credentials dev /login and /login/edx-oauth2 return 302 in auth-surfaces dev check")
 line("- credentials readiness cluster check passes ZoneInfo('UTC') and tzdata checks")
 line("- rerun: make qa-frontend-runtime-blocker-sweep-both")
