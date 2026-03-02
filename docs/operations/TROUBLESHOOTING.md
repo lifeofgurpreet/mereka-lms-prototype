@@ -60,6 +60,34 @@ See [`MFE_LOGIN_FIX.md`](MFE_LOGIN_FIX.md) for MFE-specific login issues (white 
 
 See [`ECOMMERCE_OAUTH_TROUBLESHOOTING.md`](ECOMMERCE_OAUTH_TROUBLESHOOTING.md) for Ecommerce OAuth client configuration issues.
 
+## Credentials Login Returns 500 (Dev Runtime Drift)
+
+**Symptom**: `https://credentials.academyv2.mereka.dev/login/` and `/login/edx-oauth2/` return `500` instead of `302`.
+
+**Current signal (2026-03-02)**:
+- `deployment/credentials` logs show:
+  - `ZoneInfoNotFoundError: 'No time zone found with key UTC'`
+  - `ModuleNotFoundError: No module named 'tzdata'`
+
+**Why this breaks auth checks**: credentials renders Django templates/context even on failure paths; timezone initialization fails when timezone data is missing, causing `500` responses on login/health endpoints.
+
+**Verification commands**:
+```bash
+./scripts/qa/verify-auth-surfaces.sh dev
+curl -I https://credentials.academyv2.mereka.dev/login/
+curl -I https://credentials.academyv2.mereka.dev/login/edx-oauth2/
+kubectl -n mereka-lms logs deploy/credentials --tail=200 | rg -n "ZoneInfoNotFoundError|tzdata|UTC"
+```
+
+**Expected healthy behavior**:
+- `/login/` -> `302` to `/login/edx-oauth2/`
+- `/login/edx-oauth2/` -> `302` to LMS `/oauth2/authorize`
+- `/admin/login` -> `302` to `/login/`
+
+**Notes**:
+- `scripts/qa/verify-auth-surfaces.sh` now prints `diag{...}` metadata on failures (status/location/content-type/body snippet) to speed runtime triage.
+- Production credentials currently returns expected `302` redirects; this has been observed as a dev-specific runtime drift.
+
 ## Cloud IPs in Local Config
 
 **Symptom**: Local services fail to connect (MySQL, MongoDB, Redis timeouts).
