@@ -240,6 +240,29 @@ code=\$(awk 'BEGIN{code=\"000\"} /^  HTTP\\//{code=\$2} END{print code}' \"\$tmp
 body=\$(cat \"\$tmp_body\"); \
 rm -f \"\$tmp_body\" \"\$tmp_hdr\"; \
 printf '%s\n${split_token}:%s\n' \"\$body\" \"\${code:-000}\"; \
+elif command -v python3 >/dev/null 2>&1; then \
+tmp_body=\$(mktemp); \
+tmp_status=\$(python3 - <<'PY' '${target}' '${RUNTIME_CMD_TIMEOUT}' '${metrics_host:-__EMPTY__}' \"\$tmp_body\" 2>/dev/null \
+import sys, urllib.request \
+url=sys.argv[1] \
+timeout=int(sys.argv[2]) \
+host=sys.argv[3] \
+out_path=sys.argv[4] \
+headers={} \
+if host and host != '__EMPTY__': \
+    headers['Host']=host \
+req=urllib.request.Request(url, headers=headers) \
+try: \
+    with urllib.request.urlopen(req, timeout=timeout) as resp: \
+        with open(out_path,'wb') as f: \
+            f.write(resp.read()) \
+        print(resp.getcode()) \
+except Exception as exc: \
+    print(getattr(exc,'code',0) or 0) \
+PY); \
+body=\$(cat \"\$tmp_body\" 2>/dev/null || true); \
+rm -f \"\$tmp_body\"; \
+printf '%s\n${split_token}:%s\n' \"\$body\" \"\${tmp_status:-000}\"; \
 else \
 printf '${split_token}:000\n'; \
 fi"

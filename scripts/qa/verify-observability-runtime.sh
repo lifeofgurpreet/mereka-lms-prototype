@@ -207,8 +207,8 @@ check_openedx_settings_metrics_wiring() {
         checked_count=$((checked_count + 1))
         local marker_count
         local marker_file_csv=""
-        marker_count="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware"))] | length' 2>/dev/null | tr -d '[:space:]' )"
-        marker_file_csv="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.key == "production.py" or .key == "development.py" or .key == "test.py") | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware")) | .key] | unique | join(",")' 2>/dev/null | tr -d '[:space:]')"
+        marker_count="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware") or contains("openedx_prometheus"))] | length' 2>/dev/null | tr -d '[:space:]' )"
+        marker_file_csv="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.key == "production.py" or .key == "development.py" or .key == "test.py") | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware") or contains("openedx_prometheus")) | .key] | unique | join(",")' 2>/dev/null | tr -d '[:space:]')"
         if [[ -z "$marker_file_csv" || "$marker_file_csv" == "null" ]]; then
             marker_file_csv=""
         fi
@@ -656,6 +656,30 @@ if command -v curl >/dev/null 2>&1; then
   tmp_status=$(curl -s -m __TIMEOUT__s __HOST_HEADER__ -o "$tmp_body" -D "$tmp_hdr" -w '%{http_code}' '__URL__' 2>/dev/null || echo 000)
 elif command -v wget >/dev/null 2>&1; then
   tmp_status=$(wget --server-response --quiet __HOST_HEADER_WGET__ --timeout=__TIMEOUT__ -O - '__URL__' >"$tmp_body" 2>"$tmp_hdr" && awk 'BEGIN{code="000"} /^  HTTP\// {code=$2} END{print code}' "$tmp_hdr" 2>/dev/null | tr -d '[:space:]' || echo 000)
+elif command -v python3 >/dev/null 2>&1; then
+  tmp_status=$(python3 - <<'PY' "__URL__" "__TIMEOUT__" "__METRICS_HOST__" "$tmp_body"
+import sys
+import urllib.request
+
+url = sys.argv[1]
+timeout = int(sys.argv[2])
+host = sys.argv[3]
+out_path = sys.argv[4]
+headers = {}
+if host and host != "__EMPTY__":
+    headers["Host"] = host
+req = urllib.request.Request(url, headers=headers)
+try:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        body = resp.read()
+        with open(out_path, "wb") as f:
+            f.write(body)
+        print(resp.getcode())
+except Exception as exc:
+    code = getattr(exc, "code", 0) or 0
+    print(code)
+PY
+)
 else
   tmp_status=000
 fi
@@ -671,6 +695,7 @@ EOF
         remote_script="${remote_script/__HOST_HEADER__/$host_header}"
         remote_script="${remote_script/__HOST_HEADER_WGET__/$host_header_wget}"
         remote_script="${remote_script/__URL__/$fetch_url}"
+        remote_script="${remote_script/__METRICS_HOST__/${metrics_host:-__EMPTY__}}"
         remote_script="${remote_script/__SPLIT__/$split_token}"
 
         result="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- sh -lc "$remote_script" 2>/dev/null || true)"
