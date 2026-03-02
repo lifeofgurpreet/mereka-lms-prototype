@@ -191,7 +191,7 @@ capture_route() {
   local url=$2
   local file=$3
   local summary_file=$4
-  local attempt current_url title text_len node_count min_nodes auth_state
+  local attempt current_url title text_len node_count nav_ms min_nodes auth_state
 
   min_nodes=20
   case "$label" in
@@ -209,19 +209,20 @@ capture_route() {
     title="$(ab get title 2>/dev/null || true)"
     text_len="$(ab eval '(() => (document.body?.innerText || "").trim().length)()' 2>/dev/null || true)"
     node_count="$(ab eval '(() => document.querySelectorAll("body *").length)()' 2>/dev/null || true)"
+    nav_ms="$(ab eval '(() => { const n = performance.getEntriesByType("navigation")[0]; if (!n) return "na"; const dcl = Number(n.domContentLoadedEventEnd || 0); const dur = Number(n.duration || 0); if (dcl > 0) return Math.round(dcl); if (dur > 0) return Math.round(dur); return "na"; })()' 2>/dev/null || true)"
 
     auth_state="$(classify_auth_state "$label" "$current_url")"
 
     if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$node_count" =~ ^[0-9]+$ ]]; then
       if [[ "$text_len" -ge 20 ]] && [[ "$node_count" -ge "$min_nodes" ]]; then
         ab screenshot --full "$file" >/dev/null
-        printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "$current_url" "$text_len" "$node_count" "$title" | tr '\n' ' ' >>"$summary_file"
+        printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "${nav_ms:-na}" "$current_url" "$text_len" "$node_count" "$title" | tr '\n' ' ' >>"$summary_file"
         printf "\n" >>"$summary_file"
         return 0
       fi
     fi
 
-    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "$current_url" "${text_len:-na}" "${node_count:-na}" "${title:-}" | tr '\n' ' ' >>"$summary_file"
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "${nav_ms:-na}" "$current_url" "${text_len:-na}" "${node_count:-na}" "${title:-}" | tr '\n' ' ' >>"$summary_file"
     printf "\n" >>"$summary_file"
     if [[ "$attempt" -lt "$CAPTURE_RETRIES" ]]; then
       echo "WARN: low-content capture probe for $label (attempt $attempt/$CAPTURE_RETRIES), retrying" >&2
@@ -349,7 +350,7 @@ sanitize() {
 echo "Capturing screenshots to: $OUT_DIR (mfe_only=$MFE_ONLY)"
 ab set viewport 1440 900 >/dev/null
 SUMMARY_FILE="$OUT_DIR/capture-summary.tsv"
-echo -e "label\tattempt\tauth_state\tfinal_url\ttext_len\tnode_count\ttitle" >"$SUMMARY_FILE"
+echo -e "label\tattempt\tauth_state\tnav_ms\tfinal_url\ttext_len\tnode_count\ttitle" >"$SUMMARY_FILE"
 
 for entry in "${URLS[@]}"; do
   label="${entry%%|*}"
