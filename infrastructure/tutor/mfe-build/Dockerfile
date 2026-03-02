@@ -132,6 +132,10 @@ COPY indigo/env.config.jsx /openedx/app/
 COPY indigo/mereka /openedx/app/mereka
 COPY --from=authn-src / /openedx/app
 
+# Remove external iframe-resizer dependency from authn shell to avoid
+# third-party script fetch/CSP variance causing client-side white screens.
+RUN perl -0pi -e 's#\s*<script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4\.4\.4/iframeResizer\.contentWindow\.min\.js"[^<]*</script>\s*##s' /openedx/app/public/index.html
+
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
 
 EXPOSE 1999
@@ -911,4 +915,3 @@ COPY --from=ora-grading-prod /openedx/app/dist /openedx/dist/ora-grading
 COPY --from=profile-prod /openedx/app/dist /openedx/dist/profile
 
 COPY --from=learner-record-prod /openedx/app/dist /openedx/dist/learner-record
-
