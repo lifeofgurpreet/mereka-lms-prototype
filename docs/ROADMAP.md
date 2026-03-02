@@ -1,12 +1,12 @@
 # Mereka Academy — Platform Roadmap
 
-> Last updated: 2026-03-02 | Status: **Production (Core)**
+> Last updated: 2026-03-02 (audit-revised) | Status: **Production (Core)**
 
 ## Platform Health Snapshot
 
 | Metric | Value |
 |--------|-------|
-| Tracker completion | 147/154 (95.5%) |
+| Tracker completion | 150/154 (97.4%) |
 | CI pass rate | 148/162 (91.4%) |
 | Specs written | 40 (1,162 ACs) |
 | Services in production | 13 (LMS, CMS, 2 workers, 5 enterprise, MFE, Discovery, Forum, Notes, Ecommerce) |
@@ -63,36 +63,37 @@
 
 **Goal**: Fill functional gaps, activate analytics, complete email/video pipelines.
 
-| # | Task | Spec | ACs | Est. |
-|---|------|------|-----|------|
-| 3.1 | Deploy Tempo tracing to K8s | `observability-stack_spec.md` | 8 | 1 wk |
-| | — Install Tempo Helm chart | | | |
-| | — Wire OpenTelemetry in LMS/CMS | | | |
-| | — 10% head-based + 100% error sampling | | | |
-| 3.2 | Activate analytics pipeline | `analytics-pipeline_spec.md` | 8 | 1 wk |
-| | — Aspects/ClickHouse/Superset (images exist, ADR accepted) | | | |
-| | — Wire Grafana datasource | | | |
-| 3.3 | Complete email pipeline | `email-notifications-pipeline_spec.md` | ~30 | 2 wks |
-| | — In-app notifications | | | |
-| | — Push notifications (FCM) | | | |
-| | — Email preferences management | | | |
-| | — Multi-language templates | | | |
-| | — Delivery analytics + bounce handling | | | |
-| 3.4 | Complete video pipeline | `video-pipeline-delivery_spec.md` | ~23 | 2 wks |
-| | — Transcoding status tracking | | | |
-| | — Fallback encoding | | | |
-| | — Analytics integration | | | |
-| | — Offline downloads | | | |
-| 3.5 | Verifiable Credentials MVP | 5 specs (approved) | TBD | 3–4 wks |
-| | — Credentials Service (`did:web`, Ed25519 signing) | | | |
-| | — Issuance pipeline + Learner Record MFE | | | |
-| | — Open Badges 3.0 types | | | |
-| | — Verification flows | | | |
-| 3.6 | Frontend Phase 2 specs | 4 draft specs | ~126 | 2–3 wks |
-| | — OEP-48 Brand Package (37 ACs) | | | |
-| | — Paragon Design Tokens v25 migration (41 ACs) | | | |
-| | — Studio Customization (28 ACs) | | | |
-| | — Frontend Performance Budgets (30 ACs) | | | |
+> **Audit update (2026-03-02)**: Deep audit reveals many items further along than initially estimated. Adjusted estimates below.
+
+| # | Task | Spec | ACs | Progress | Remaining |
+|---|------|------|-----|----------|-----------|
+| 3.1 | Deploy Tempo tracing to K8s | `observability-stack_spec.md` | 8 | ~20% | 1 wk |
+| | — Install Tempo Helm chart | | | | |
+| | — Wire OpenTelemetry in LMS/CMS | | | | |
+| | — 10% head-based + 100% error sampling | | | | |
+| 3.2 | Activate analytics pipeline | `analytics-pipeline_spec.md` | 8 | 100% scaffold, 0% deployed | Decision only |
+| | — **All manifests complete** (Aspects, ClickHouse, Superset wired in kustomization) | | | | |
+| | — **ADR-017 Accepted**, spec approved — deployment is an operator action | | | | |
+| | — Wire Grafana datasource + run init jobs | | | | |
+| 3.3 | Complete email pipeline (**70% done**) | `email-notifications-pipeline_spec.md` | ~30 | 70% | 3–5 days |
+| | — ✅ SES SMTP live, ACE channels live, bounce/complaint handling, preferences | | | | |
+| | — Push notifications (FCM) | | | | |
+| | — Multi-language templates (5 locales exist in HubSpot, need Open edX integration) | | | | |
+| 3.4 | Complete video pipeline (**65% done**) | `video-pipeline-delivery_spec.md` | ~23 | 65% | 3–5 days |
+| | — ✅ 503 MCT videos migrated to Mux, HLS delivery live, cost monitoring exporter | | | | |
+| | — Enable Studio upload (scaffold exists, needs feature flag) | | | | |
+| | — Signed URLs + xAPI analytics + subtitle management | | | | |
+| 3.5 | Verifiable Credentials MVP (**81% done**) | 5 specs (approved) | TBD | 81% | 1 wk |
+| | — ✅ Credentials Service deployed, DID document endpoint, Ed25519 signing infra | | | | |
+| | — ✅ ExternalSecrets wired, Open Badges 3.0 types defined | | | | |
+| | — Add `/learner-record` MFE route | | | | |
+| | — Wire issuance pipeline event consumer | | | | |
+| | — Verification endpoint + claim flow | | | | |
+| 3.6 | Frontend Phase 2 specs | 4 draft specs | ~126 | Specs written | 2–3 wks |
+| | — OEP-48 Brand Package (37 ACs) | | | | |
+| | — Paragon Design Tokens v25 migration (41 ACs) | | | | |
+| | — Studio Customization (28 ACs) | | | | |
+| | — Frontend Performance Budgets (30 ACs) | | | | |
 
 **Exit criteria**: Full observability (metrics + logs + traces). Analytics dashboards live. Email/video pipelines feature-complete. Verifiable Credentials issuing.
 
@@ -102,25 +103,28 @@
 
 **Goal**: Build out advanced learning features, assessment, and content management.
 
-| # | Task | Spec | ACs | Est. |
-|---|------|------|-----|------|
-| 4.1 | Advanced Assessment | `advanced-assessment-xqueue_spec.md` | 39 | 3–4 wks |
-| | — ORA2 (Open Response Assessment) | | | |
-| | — XQueue + CodeJail sandbox | | | |
-| | — Peer assessment workflows | | | |
-| 4.2 | Badges & Credentials Enterprise | `badges-credentials-enterprise_spec.md` | 33 | 2–3 wks |
-| | — Open Badges 3.0 issuer management | | | |
-| | — Badge pathway design | | | |
-| | — Enterprise credential templates | | | |
-| 4.3 | Content Libraries v2 | `content-libraries-v2_spec.md` | 33 | 2–3 wks |
-| | — CLX library management | | | |
-| | — Enterprise content sharing | | | |
-| | — Version control + publishing workflows | | | |
-| 4.4 | Enterprise SSO Phase 2 | `auth-sso-enterprise_spec.md` | remaining | 2 wks |
-| | — SCIM user provisioning | | | |
-| | — SSO audit trail | | | |
-| | — Session management | | | |
-| | — Enterprise consent flows | | | |
+> **Audit update (2026-03-02)**: Assessment and Libraries have infrastructure scaffolds but need significant integration wiring.
+
+| # | Task | Spec | ACs | Progress | Est. |
+|---|------|------|-----|----------|------|
+| 4.1 | Advanced Assessment | `advanced-assessment-xqueue_spec.md` | 39 | 5–10% | 3–4 wks |
+| | — ORA2 (5-10% — K8s manifests exist, needs integration wiring) | | | | |
+| | — XQueue (10-15% — service scaffold, needs base kustomization entry) | | | | |
+| | — CodeJail sandbox (2-5% — manifest only, no AppArmor/seccomp profiles) | | | | |
+| | — Peer assessment workflows | | | | |
+| 4.2 | Badges & Credentials Enterprise | `badges-credentials-enterprise_spec.md` | 33 | ~15% | 2–3 wks |
+| | — Open Badges 3.0 issuer management (← depends on VC MVP 3.5) | | | | |
+| | — Badge pathway design | | | | |
+| | — Enterprise credential templates | | | | |
+| 4.3 | Content Libraries v2 | `content-libraries-v2_spec.md` | 33 | 15–20% | 2–3 wks |
+| | — CLX library management (scaffold exists) | | | | |
+| | — Enterprise content sharing | | | | |
+| | — Version control + publishing workflows | | | | |
+| 4.4 | Enterprise SSO Phase 2 | `auth-sso-enterprise_spec.md` | remaining | 0% | 2 wks |
+| | — SCIM user provisioning | | | | |
+| | — SSO audit trail | | | | |
+| | — Session management | | | | |
+| | — Enterprise consent flows | | | | |
 
 **Exit criteria**: Full assessment suite. Badges issuing. Content libraries operational. Enterprise SSO complete.
 
