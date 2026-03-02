@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `36` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `28` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -163,13 +163,36 @@ Validation after phase 7:
 - `./scripts/qa/verify-multitenant-brand-platform.sh` PASS (`63 PASS / 0 FAIL / 1 WARN`)
 - `./scripts/qa/validate-multisite-config.sh` PASS after parser fix (`12 PASS / 0 FAIL`)
 
+## Progress Update (Phase 8, resilience/visual/slot verifier tranche)
+
+- Extended compatibility-layer adoption to additional resilience/visual/slot QA verifiers:
+  - `scripts/qa/verify-tutor-resilience-full.sh`
+  - `scripts/qa/verify-tutor-patches-inventory.sh`
+  - `scripts/qa/verify-visual-parity-checkpoints.sh`
+  - `scripts/qa/verify-slot-migration-readiness.sh`
+  - `scripts/qa/verify-selector-to-slot-migration.sh`
+  - `scripts/qa/verify-performance-budget.sh`
+- Outcome:
+  - direct path-coupling reduced from `36` to `28`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - all six verifiers pass post-migration (no regression introduced)
+  - visual parity verifier now enforces canonical plugin-contract path only (legacy apply-patches fallback removed).
+
+Validation after phase 8:
+- `./scripts/qa/verify-tutor-resilience-full.sh --skip-cluster` PASS (`Passed: 45 / Failed: 0 / Skipped: 0`)
+- `./scripts/qa/verify-tutor-patches-inventory.sh` PASS (`23 PASS / 0 FAIL / 0 SKIP`)
+- `./scripts/qa/verify-visual-parity-checkpoints.sh` PASS (`42 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-slot-migration-readiness.sh` PASS (`11 PASS / 0 FAIL / 2 WARN`)
+- `./scripts/qa/verify-selector-to-slot-migration.sh` PASS (`60 PASS / 0 FAIL`)
+- `./scripts/qa/verify-performance-budget.sh` PASS (`46 PASS / 0 FAIL / 0 WARN`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 
