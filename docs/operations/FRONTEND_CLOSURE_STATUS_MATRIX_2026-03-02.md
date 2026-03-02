@@ -88,13 +88,13 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `./scripts/qa/verify-auth-surfaces.sh prod`
       - `./scripts/qa/verify-auth-surfaces.sh dev`
       - `./scripts/qa/verify-credentials-readiness.sh --cluster` (dev-only)
-    - Latest run: `var/qa/frontend-runtime-blocker-sweep-both-20260302T114710Z.summary.log` (`PASS=1 FAIL=2 SKIP=0`) with machine-readable summary `var/qa/frontend-runtime-blocker-sweep-both-20260302T114710Z.summary.json` and per-check logs:
-      - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260302T114710Z.log` (PASS)
-      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260302T114710Z.log` (FAIL on credentials login redirects `500`)
-      - `var/qa/frontend-runtime-blocker-credentials-dev-20260302T114710Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
+    - Latest run: `var/qa/frontend-runtime-blocker-sweep-both-20260302T115445Z.summary.log` (`PASS=1 FAIL=2 SKIP=0`) with machine-readable summary `var/qa/frontend-runtime-blocker-sweep-both-20260302T115445Z.summary.json` and per-check logs:
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260302T115445Z.log` (PASS)
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260302T115445Z.log` (FAIL on credentials login redirects `500`)
+      - `var/qa/frontend-runtime-blocker-credentials-dev-20260302T115445Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
     - Latest diagnostics-labeled run:
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T114710Z.summary.json`
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T114710Z.diagnostics.tsv`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T115445Z.summary.json`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T115445Z.diagnostics.tsv`
       - diagnosis labels emitted:
         - `auth-surfaces:dev` -> `credentials_dev_login_500`
         - `credentials-readiness:dev:cluster` -> `credentials_timezone_tzdata_missing`
@@ -150,6 +150,9 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
   - Canonical concise status view (human + CI):
     - `make qa-runtime-blocker-status`
     - canonical file output mode: `make qa-runtime-blocker-status OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt`
+  - Canonical local refresh lane (artifact-first, CI-parity semantics):
+    - `make qa-runtime-blocker-refresh`
+    - runs blocker sweep, always writes `frontend-runtime-blocker-infra-prompt.txt` + `frontend-runtime-blocker-status.txt`, then exits with sweep status.
     - prompt now embeds deterministic infra execution + verification + rollback contract commands for dev credentials blocker handoff.
   - `verify-auth-surfaces.sh` now applies TLS-insecure curl mode only for non-prod (`dev`/`staging`) so self-signed certs do not create false failures.
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.
