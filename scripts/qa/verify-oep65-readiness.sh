@@ -20,6 +20,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 # ---------------------------------------------------------------------------
 # CLI options
@@ -53,7 +55,7 @@ section() { echo ""; echo "── $1 ──"; }
 # Paths
 DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
 ENV_CONFIG_JSX="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
-PLUGIN_PY="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_PY="$PLUGIN_MAIN"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 READINESS_DOC="$REPO_ROOT/docs/architecture/OEP65_MODULE_READINESS.md"
 RUNTIME_CONFIG_DOC="$REPO_ROOT/docs/architecture/MFE_RUNTIME_CONFIG.md"

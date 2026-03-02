@@ -13,6 +13,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 ENV="prod"
 [[ "${1:-}" == "--env" ]] && ENV="${2:-prod}"
@@ -63,7 +65,7 @@ echo ""
 
 echo "── AC-TF-001: Deterministic footer variants for 3+ domains ──"
 
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN="$PLUGIN_MAIN"
 if [[ -f "$PLUGIN" ]]; then
   DOMAIN_COUNT=$(grep -c "mereka.io\|biji-biji.com" "$PLUGIN" | head -1 || echo "0")
   # Count entries in SITE_VARIANTS block

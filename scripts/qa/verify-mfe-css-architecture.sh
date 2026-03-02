@@ -11,6 +11,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -27,7 +29,7 @@ warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
 
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 TOKENS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_FILE="$PLUGIN_MAIN"
 PATCHES_DIR="$REPO_ROOT/infrastructure/tutor/patches"
 BRAND_PACKAGE_JSON="$REPO_ROOT/infrastructure/tutor/brand-mereka/package.json"
 

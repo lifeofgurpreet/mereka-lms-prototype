@@ -19,6 +19,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 cd "$REPO_ROOT"
 
 GREEN='\033[0;32m'
@@ -161,7 +163,7 @@ fi
 # ---------------------------------------------------------------------------
 section "3. Tutor plugin multi-site config"
 
-PLUGIN="infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN="$PLUGIN_MAIN"
 
 if [[ ! -f "$PLUGIN" ]]; then
   fail "mereka_lms.py plugin not found at $PLUGIN"
