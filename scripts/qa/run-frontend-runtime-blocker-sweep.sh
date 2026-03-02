@@ -62,6 +62,7 @@ auth_log_prod="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-prod-${t
 cred_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-credentials-dev-${ts}.log"
 summary_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.summary.log"
 summary_json="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.summary.json"
+summary_json_latest="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-${ENVIRONMENT}.summary.json"
 records_file="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.records.tsv"
 diagnostics_file="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.diagnostics.tsv"
 
@@ -247,5 +248,8 @@ payload = {
 
 Path(summary_json).write_text(json.dumps(payload, indent=2) + "\n")
 PY
+
+# Keep stable pointers for downstream prompt generation and CI artifact consumers.
+cp "$summary_json" "$summary_json_latest"
 
 [[ "$fail" -eq 0 ]]
