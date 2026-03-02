@@ -359,6 +359,15 @@ if [[ -f "$MEREKA_PLUGIN" ]]; then
   fi
 fi
 
+# 5.7 tzdata package installed so ZoneInfo("UTC") works in minimal images
+if [[ -f "$MEREKA_PLUGIN" ]]; then
+  if grep -q 'tzdata>=2024.1' "$MEREKA_PLUGIN"; then
+    pass_ "Tutor plugin installs tzdata>=2024.1 for credentials timezone stability"
+  else
+    fail_ "tzdata>=2024.1 NOT installed by Tutor plugin (credentials ZoneInfo lookups may fail)"
+  fi
+fi
+
 # ============================================================================
 echo ""
 echo "── Section 6: LMS → Credentials Wiring ───────────────────────────────"
