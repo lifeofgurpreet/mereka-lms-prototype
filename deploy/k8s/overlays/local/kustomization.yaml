@@ -13,6 +13,15 @@ resources:
 generatorOptions:
   disableNameSuffixHash: true
 
+configMapGenerator:
+  - name: enterprise-mfe-env
+    behavior: replace
+    files:
+      - env.config.js=enterprise-mfe-env.js
+    options:
+      labels:
+        app.kubernetes.io/component: enterprise
+
 secretGenerator:
   - name: ses-smtp-credentials
     literals:
