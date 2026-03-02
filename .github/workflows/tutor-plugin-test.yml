@@ -49,6 +49,7 @@ jobs:
         run: |
           source .venv/bin/activate
           # Copy example config BEFORE enabling plugin (enable saves to config.yml)
+          mkdir -p tutor_env
           cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor plugins enable mfe_oauth_fix
           tutor config save
@@ -156,6 +157,7 @@ jobs:
       - name: Test enable
         run: |
           source .venv/bin/activate
+          mkdir -p tutor_env
           cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor plugins enable mfe_oauth_fix
 
@@ -268,6 +270,7 @@ jobs:
       - name: Enable plugin and generate config
         run: |
           source .venv/bin/activate
+          mkdir -p tutor_env
           cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor plugins enable mfe_oauth_fix
           tutor config save
