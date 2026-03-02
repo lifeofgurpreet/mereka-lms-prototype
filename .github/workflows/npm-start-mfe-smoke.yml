@@ -1,5 +1,8 @@
 name: NPM Start MFE Smoke
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

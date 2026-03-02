@@ -248,7 +248,7 @@ FEATURES["ENABLE_DISCUSSION_HOME_PANEL"] = False  # Disable legacy in-LMS panel
 # Ensure all courses use MFE by default
 DISCUSSIONS_MFE_ENABLED = True
 if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
-    _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://apps.academyv2.mereka.io")
+    _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://{{ MFE_HOST }}")
     DISCUSSIONS_MICROFRONTEND_URL = f"{_mfe_base}/discussions"
 if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
     DISCUSSIONS_MFE_FEEDBACK_URL = None
@@ -2120,7 +2120,7 @@ hooks.Filters.ENV_PATCHES.add_item(
 {% endfor %}
 
 # MFE proxy: Forward selected MFE API paths to LMS for correct host context
-apps.academyv2.mereka.io{$default_site_port} {
+{{ MFE_HOST }}{$default_site_port} {
     import security_headers
 
     reverse_proxy /profile/api/* lms:8000 {
@@ -2223,4 +2223,5 @@ hooks.Filters.ENV_PATCHES.add_item(
 @hooks.Actions.PLUGIN_LOADED.add()
 def _print_loading_message(plugin_name: str):
     """Print a message when the plugin is loaded."""
-    print(f"Mereka LMS plugin v{__version__} loaded")
+    if plugin_name == "mereka_lms":
+        print(f"Mereka LMS plugin v{__version__} loaded")

@@ -1306,8 +1306,8 @@ body:not(.courseware) button.btn.btn-primary:focus {
 }
 
 .alert-warning {
-  background: rgba(244, 190, 72, 0.14);
-  border-color: rgba(244, 190, 72, 0.55);
+  background: rgba(153, 107, 0, 0.14);
+  border-color: rgba(153, 107, 0, 0.55);
 }
 
 .alert-danger,

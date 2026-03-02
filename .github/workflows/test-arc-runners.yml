@@ -2,6 +2,9 @@
 # DELETE after confirming runners work
 name: Test ARC Runners
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
 
