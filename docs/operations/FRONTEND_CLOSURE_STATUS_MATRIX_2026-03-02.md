@@ -24,6 +24,9 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `eefe8b5b` — runtime evidence hardening (`#105`): capture `login_refresh_status` as `GET:<code>,POST:<code>` and refresh closure artifacts/docs
+- `1ace06ea` — auth canary diagnostics (`#105`): add `login_refresh_probe=GET:<code>,POST:<code>` to local/OIDC failure paths
+- `1b3d33d2` — runtime evidence hardening (`#105`): add per-route `me_status` + `login_refresh_status` to screenshot summary
 - `63614879` — warning contrast hardening (`#108`): promote warning token to `#996b00`, enforce warning pair in a11y gate, refresh token provenance + docs
 - `7668e3e8` — auth stability hardening (`#105`): add optional native `/authn/login` local-session canary mode to `verify-authenticated-sso-canary.sh`
 - `f224e375` — source hardening + status docs (`#105/#107/#108`, staged notes for `#109/#111`)
