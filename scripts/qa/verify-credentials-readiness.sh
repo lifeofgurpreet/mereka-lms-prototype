@@ -542,8 +542,19 @@ else
 
     # 10.5 Credentials health endpoint reachable
     if [[ -n "$CRED_POD" ]]; then
-      HEALTH_STATUS="$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
-        python -c "import sys, urllib.request; host=sys.argv[1]; req=urllib.request.Request('http://127.0.0.1:8000/health/', headers={'Host': host}); print(urllib.request.urlopen(req, timeout=10).read().decode('utf-8', errors='replace')[:500])" "$CRED_INTERNAL_HOST" 2>/dev/null || echo "FAILED"
+      HEALTH_STATUS="$(kubectl exec -i "$CRED_POD" -n "$NAMESPACE" -- \
+        python - "$CRED_INTERNAL_HOST" <<'PY' || echo "FAILED"
+import sys
+import urllib.request
+
+host = sys.argv[1]
+req = urllib.request.Request(
+    "http://127.0.0.1:8000/health/",
+    headers={"Host": host},
+)
+with urllib.request.urlopen(req, timeout=10) as resp:
+    print(resp.read().decode("utf-8", errors="replace")[:500])
+PY
 )"
       if echo "$HEALTH_STATUS" | grep -qi '"overall_status"[[:space:]]*:[[:space:]]*"OK"\|ok\|healthy'; then
         pass_ "Credentials health endpoint responds OK (Host: ${CRED_INTERNAL_HOST})"
@@ -556,15 +567,36 @@ else
 
     # 10.6 DID document endpoint returns valid JSON
     if [[ -n "$CRED_POD" ]]; then
-      DID_RESPONSE="$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
-        python -c "import sys, urllib.request; host=sys.argv[1]; req=urllib.request.Request('http://127.0.0.1:8000/.well-known/did.json', headers={'Host': host}); print(urllib.request.urlopen(req, timeout=10).read().decode('utf-8', errors='replace')[:1000])" "$CRED_INTERNAL_HOST" 2>/dev/null || echo "FAILED"
+      DID_RESPONSE="$(kubectl exec -i "$CRED_POD" -n "$NAMESPACE" -- \
+        python - "$CRED_INTERNAL_HOST" <<'PY' || echo "ERROR|0|FAILED"
+import sys
+import urllib.error
+import urllib.request
+
+host = sys.argv[1]
+req = urllib.request.Request(
+    "http://127.0.0.1:8000/.well-known/did.json",
+    headers={"Host": host},
+)
+try:
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        body = resp.read().decode("utf-8", errors="replace")[:1000]
+        print(f"OK|{resp.status}|{body}")
+except urllib.error.HTTPError as exc:
+    body = exc.read().decode("utf-8", errors="replace")[:1000]
+    print(f"HTTPERR|{exc.code}|{body}")
+except Exception as exc:
+    print(f"ERROR|0|{exc}")
+PY
 )"
-      if echo "$DID_RESPONSE" | grep -q '"id".*did:web:'; then
+      DID_MODE="$(printf "%s" "$DID_RESPONSE" | cut -d'|' -f1)"
+      DID_STATUS="$(printf "%s" "$DID_RESPONSE" | cut -d'|' -f2)"
+      DID_BODY="$(printf "%s" "$DID_RESPONSE" | cut -d'|' -f3-)"
+      DID_BODY_PREVIEW="$(printf "%s" "$DID_BODY" | tr '\r\n' ' ' | sed 's/[[:space:]]\+/ /g' | cut -c1-220)"
+      if [[ "$DID_MODE" == "OK" ]] && echo "$DID_BODY" | grep -q '"id".*did:web:'; then
         pass_ "DID document endpoint returns valid DID document (Host: ${CRED_INTERNAL_HOST})"
-      elif echo "$DID_RESPONSE" | grep -qi 'error\|FAILED'; then
-        fail_ "DID document endpoint returned error (Host: ${CRED_INTERNAL_HOST}; VC signing key may be missing)"
       else
-        fail_ "DID document endpoint did not return expected did:web document (Host: ${CRED_INTERNAL_HOST})"
+        fail_ "DID document endpoint invalid (Host: ${CRED_INTERNAL_HOST}; mode=${DID_MODE}; status=${DID_STATUS}; body='${DID_BODY_PREVIEW}')"
       fi
     else
       skip_ "DID document check skipped (credentials pod not found)"
