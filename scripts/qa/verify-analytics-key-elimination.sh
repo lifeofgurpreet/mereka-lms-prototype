@@ -23,6 +23,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 PASS=0
 FAIL=0
@@ -36,7 +38,24 @@ warn() {
   WARN=$((WARN + 1))
 }
 
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_BUNDLE=""
+cleanup() {
+  if [[ -n "${PLUGIN_BUNDLE:-}" && -f "${PLUGIN_BUNDLE}" ]]; then
+    rm -f "${PLUGIN_BUNDLE}"
+  fi
+}
+trap cleanup EXIT
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp "${TMPDIR:-/tmp}/mereka-plugin-contract.analytics-key.XXXXXX.py")"
+  while IFS= read -r plugin_src; do
+    [[ -f "$plugin_src" ]] || continue
+    cat "$plugin_src" >> "$PLUGIN_BUNDLE"
+    printf "\n" >> "$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+fi
+
+PLUGIN="${PLUGIN_BUNDLE:-$PLUGIN_MAIN}"
 FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
 EVIDENCE_DOC="$REPO_ROOT/docs/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md"
 CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
@@ -112,7 +131,7 @@ if [[ -f "$PLUGIN" ]]; then
     fail_check "mereka_lms.py reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
   fi
 else
-  warn "mereka_lms.py not found at $PLUGIN"
+  warn "Plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 fi
 
 # Check 7: Plugin defaults SEGMENT_KEY to empty string (safe disabled-by-default)

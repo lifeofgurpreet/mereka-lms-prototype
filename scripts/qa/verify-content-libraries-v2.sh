@@ -43,6 +43,8 @@ check_skip() {
 }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 # ────────────────────────────────────────────────────────────────
 # Argument parsing
@@ -85,7 +87,6 @@ if [[ "$MODE" == "local" || "$MODE" == "all" ]]; then
 
   LMS_PROD="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
   CMS_PROD="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
-  PLUGIN_PY="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
   PROM_RULE="$REPO_ROOT/deploy/k8s/base/monitoring/prometheusrule-libraries.yaml"
   PROM_KUST="$REPO_ROOT/deploy/k8s/base/monitoring/kustomization.yaml"
   CRONJOB="$REPO_ROOT/deploy/k8s/base/monitoring/cronjob-library-export.yaml"
@@ -183,10 +184,10 @@ if [[ "$MODE" == "local" || "$MODE" == "all" ]]; then
 
   # ── 11. Custom app listed in mereka_lms Dockerfile hook ─────────
   echo "[11] openedx_content_libraries in mereka_lms.py Dockerfile hook..."
-  if [[ -f "$PLUGIN_PY" ]] && grep -q '"openedx_content_libraries"' "$PLUGIN_PY"; then
+  if mereka_plugin_has_any "$REPO_ROOT" && mereka_plugin_has_fixed "$REPO_ROOT" '"openedx_content_libraries"'; then
     check_pass "openedx_content_libraries included in _CUSTOM_APPS list (mereka_lms.py)"
   else
-    check_fail "openedx_content_libraries NOT in _CUSTOM_APPS list (mereka_lms.py)"
+    check_fail "openedx_content_libraries NOT in _CUSTOM_APPS list (plugin contract sources; expected at least $PLUGIN_MAIN)"
   fi
 
   # ── 12. backup_libraries management command exists ───────────────

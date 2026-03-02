@@ -18,10 +18,11 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/apps/caddy/Caddyfile"
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 
 PASS=0
 FAIL=0
@@ -82,19 +83,19 @@ else
 fi
 
 # ---- Check 5: Content libraries app in mereka_lms plugin ----
-if [[ ! -f "$PLUGIN" ]]; then
-  fail "mereka_lms plugin not found: $PLUGIN"
+if ! mereka_plugin_has_any "$REPO_ROOT"; then
+  fail "Plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 else
-  if grep -q "content_libraries" "$PLUGIN"; then
+  if mereka_plugin_has_fixed "$REPO_ROOT" "content_libraries"; then
     pass "Content libraries app listed in plugin settings"
   else
-    fail "content_libraries not found in mereka_lms plugin — Admin Console library management will fail"
+    fail "content_libraries not found in plugin contract sources — Admin Console library management will fail"
   fi
 fi
 
 # ---- Check 6: CSRF trusted origins include apps subdomain ----
-if [[ -f "$PLUGIN" ]]; then
-  if grep -q "apps\.academyv2\.mereka\.io" "$PLUGIN"; then
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" "apps\\.academyv2\\.mereka\\.io"; then
     pass "CSRF trusted origins include apps subdomain"
   else
     # apps.academyv2.mereka.io may be implied by the wildcard cookie domain; treat as SKIP

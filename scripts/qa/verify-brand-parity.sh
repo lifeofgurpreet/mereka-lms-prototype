@@ -37,6 +37,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../shared/config.sh" 2>/dev/null || true
+source "${SCRIPT_DIR}/../shared/mereka_plugin_contract.sh"
 
 PASS=0
 FAIL=0
@@ -70,6 +71,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 # Theme paths
 THEME_ROOT="$REPO_ROOT/infrastructure/tutor/themes/mereka"
@@ -101,7 +103,6 @@ MFE_IMAGE_DIR="$THEME_ROOT/mfe/images"
 MFE_FONT_DIR="$THEME_ROOT/mfe/fonts"
 
 # Plugin and patches
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 FOOTER_PATCH="$REPO_ROOT/infrastructure/tutor/patches/footer-component.sh"
 
@@ -383,12 +384,14 @@ else
   echo "$GOOGLE_FONTS_HIT" | sed 's/^/    /'
 fi
 
-if [[ -f "$PLUGIN" ]]; then
-  if grep -vE '^\s*#|^\s*//|^\s*/\*|^\s*\*' "$PLUGIN" | grep -q "fonts.googleapis.com\|fonts.gstatic.com"; then
-    fail "Plugin (mereka_lms.py) references Google Fonts"
+if [[ -f "$PLUGIN_MAIN" ]]; then
+  if grep -vE '^\s*#|^\s*//|^\s*/\*|^\s*\*' "$PLUGIN_MAIN" | grep -q "fonts.googleapis.com\|fonts.gstatic.com"; then
+    fail "Plugin references Google Fonts"
   else
     pass "Plugin has no active Google Fonts references"
   fi
+else
+  warn "Plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 fi
 
 echo ""

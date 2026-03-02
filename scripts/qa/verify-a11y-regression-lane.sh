@@ -15,10 +15,11 @@ set -euo pipefail
 #               summary and follow-up blockers section
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 PARENT_SCRIPT="$REPO_ROOT/scripts/qa/verify-authenticated-smoke-a11y.sh"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
-MEREKA_PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 A11Y_RUNBOOK="$REPO_ROOT/docs/operations/A11Y_REGRESSION_LANE.md"
 EVIDENCE_REPORT="$REPO_ROOT/docs/operations/evidence/a11y-regression-lane-report.md"
 
@@ -112,21 +113,21 @@ echo "  -- /authn/login: landmark and focus checks --"
 
 # Check the footer plugin has role="contentinfo" (landmark) as an indicator that
 # the MFE plugin injects proper landmark roles
-if [[ -f "$MEREKA_PLUGIN" ]]; then
-  if grep -q 'role="contentinfo"' "$MEREKA_PLUGIN"; then
-    pass_check "AC-FRONT-073: mereka_lms.py injects role=\"contentinfo\" landmark in footer"
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  if mereka_plugin_has_fixed "$REPO_ROOT" 'role="contentinfo"'; then
+    pass_check "AC-FRONT-073: plugin contract sources inject role=\"contentinfo\" landmark in footer"
   else
-    fail_check "AC-FRONT-073: mereka_lms.py missing role=\"contentinfo\" landmark in footer"
+    fail_check "AC-FRONT-073: plugin contract sources missing role=\"contentinfo\" landmark in footer"
   fi
 
   # Check that injected footer has aria-label or aria-labelledby on nav element
-  if grep -q '<nav ' "$MEREKA_PLUGIN"; then
-    pass_check "AC-FRONT-073: mereka_lms.py injects <nav> landmark element"
+  if mereka_plugin_has_fixed "$REPO_ROOT" "<nav "; then
+    pass_check "AC-FRONT-073: plugin contract sources inject <nav> landmark element"
   else
-    warn_check "AC-FRONT-073: mereka_lms.py does not inject <nav> element (may be in MFE source)"
+    warn_check "AC-FRONT-073: plugin contract sources do not inject <nav> element (may be in MFE source)"
   fi
 else
-  fail_check "AC-FRONT-073: mereka_lms.py not found at $MEREKA_PLUGIN"
+  fail_check "AC-FRONT-073: plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 fi
 
 # --- Dashboard route (/dashboard) ---
