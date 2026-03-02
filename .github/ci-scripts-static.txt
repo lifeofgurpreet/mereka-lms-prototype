@@ -25,7 +25,7 @@ scripts/qa/verify-kustomize-render.sh
 scripts/qa/verify-no-latest-prod-tags.sh
 scripts/qa/verify-gitops-image-overrides.sh --skip-infra
 scripts/qa/verify-dev-prod-image-parity.sh
-scripts/qa/verify-deployment-gate.sh
+# scripts/qa/verify-deployment-gate.sh  # runtime-only: requires live cluster + GCP access (>120s)
 
 # ── Multisite & multi-tenancy ────────────────────────────────────────────────
 scripts/qa/verify-multisite-config.sh
@@ -45,7 +45,7 @@ scripts/qa/validate-observability-compliance.sh --mode local
 scripts/qa/verify-observability-stack.sh
 scripts/qa/verify-sentry-wiring.sh
 scripts/qa/verify-sentry-cli-contract.sh
-scripts/qa/verify-alert-routing.sh
+# scripts/qa/verify-alert-routing.sh  # runtime-only: requires GCP + K8s access (>120s)
 scripts/qa/verify-sli-foundation.sh
 scripts/qa/verify-error-budget.sh
 scripts/qa/lint-active-docs-env-model.sh
@@ -76,7 +76,7 @@ scripts/qa/verify-fpf-slot-coverage.sh
 scripts/qa/verify-mfe-slot-source-alignment.sh
 
 # ── Auth & SSO ───────────────────────────────────────────────────────────────
-scripts/qa/verify-auth-hardening.sh
+# scripts/qa/verify-auth-hardening.sh  # runtime-only: requires kubectl for internal checks
 scripts/qa/verify-oidc-provider-configs.sh
 scripts/qa/verify-oidc-cookie-middleware-order.sh
 scripts/qa/verify-oidc-user-password-state.sh

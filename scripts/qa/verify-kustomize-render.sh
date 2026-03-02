@@ -111,21 +111,21 @@ verify_overlay() {
         print_error "Failed to render overlay: ${overlay}"
         cat "${render_file}" | sed 's/^/  /' >&2
         rm -f "${render_file}"
-        ((fail_count++))
+        fail_count=$((fail_count + 1))
         echo -e "\n${RED}FAILED${NC}: ${overlay} (1 checks failed)\n"
         return 1
     fi
     print_success "kubectl kustomize renders successfully"
-    ((pass_count++))
+    pass_count=$((pass_count + 1))
     local render_output; render_output=$(cat "${render_file}")
 
     # Check 4: No empty documents
     if echo "${render_output}" | grep -q '^---$' && ! echo "${render_output}" | grep -qv '^---$'; then
         print_error "Output contains only empty documents"
-        ((fail_count++))
+        fail_count=$((fail_count + 1))
     else
         print_success "No empty documents in output"
-        ((pass_count++))
+        pass_count=$((pass_count + 1))
     fi
 
     # Check 5: All resources have namespace: mereka-lms (except cluster-scoped resources)
@@ -141,10 +141,10 @@ verify_overlay() {
     if [[ ${namespace_count} -lt ${total_namespaced} ]]; then
         local missing=$((total_namespaced - namespace_count))
         print_error "Found ${missing} resources without namespace: ${EXPECTED_NAMESPACE}"
-        ((fail_count++))
+        fail_count=$((fail_count + 1))
     else
         print_success "All namespaced resources have namespace: ${EXPECTED_NAMESPACE}"
-        ((pass_count++))
+        pass_count=$((pass_count + 1))
     fi
 
     # Check 6: Expected resource types present
@@ -160,7 +160,7 @@ verify_overlay() {
         # This is a warning, not a failure
     else
         print_success "All expected resource types present"
-        ((pass_count++))
+        pass_count=$((pass_count + 1))
     fi
 
     # Check 7: Count resources
@@ -234,9 +234,9 @@ main() {
         verify_overlay "${overlay}"
         local result=$?
         if [[ ${result} -eq 0 ]]; then
-            ((total_pass++))
+            total_pass=$((total_pass + 1))
         else
-            ((total_fail++))
+            total_fail=$((total_fail + 1))
         fi
         echo ""
     done
