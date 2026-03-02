@@ -60,6 +60,14 @@ configMapGenerator:
     files:
       - config/cms.env.yml
       - config/lms.env.yml
+  # Override enterprise MFE env.config.js with dev domains (*.mereka.dev)
+  - name: enterprise-mfe-env
+    behavior: replace
+    files:
+      - env.config.js=enterprise-mfe-env.js
+    options:
+      labels:
+        app.kubernetes.io/component: enterprise
 
 patches:
   # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store

@@ -115,18 +115,45 @@ bash scripts/infra/verify-release-preflight.sh
 
 ---
 
+## Action 5: Build Custom Credentials Image (tzdata fix)
+
+**Why**: The upstream `overhangio/openedx-credentials:21.0.0` image is missing the `tzdata` Python package, causing `ZoneInfo("UTC")` failures at runtime. This breaks the Verifiable Credentials issuer module.
+
+**Steps**:
+```bash
+# In mereka-lms repo (after PR #123 is merged to main)
+bash scripts/infra/build-credentials-image.sh
+```
+
+The script will:
+1. Build a wrapper image that adds `tzdata>=2024.1` and `cryptography>=41.0.0`
+2. Verify `ZoneInfo("UTC")` resolves correctly inside the container
+3. Push to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-credentials:21.0.0-tzdata`
+4. Print the deployment manifest update instructions
+
+**Then update** `deploy/k8s/base/deployments.yml` (credentials section):
+```yaml
+# Change:
+image: docker.io/overhangio/openedx-credentials:21.0.0
+# To:
+image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-credentials:21.0.0-tzdata
+```
+
+---
+
 ## Execution Order
 
 1. Merge PR #123 (mereka-lms `main`)
 2. Rebuild openedx image from `main`
 3. Rebuild MFE image from `main`
-4. Update bbi-infrastructure overlay (image tags + Caddyfile)
-5. Commit and push bbi-infrastructure changes
-6. Wait for ArgoCD sync (3 min)
-7. Run verification scripts
+4. Build credentials image with tzdata fix
+5. Update bbi-infrastructure overlay (image tags + Caddyfile)
+6. Commit and push bbi-infrastructure changes
+7. Wait for ArgoCD sync (3 min)
+8. Run verification scripts
 
 ---
 
 ## Expected Final State
 
-After all 4 actions, the full CI suite should reach **152/162 PASS** (the remaining 10 are timeouts from network-dependent scripts that need timeout tuning, not functional failures).
+After all 5 actions, the full CI suite should reach **155+/162 PASS**. Credentials service timezone errors resolved. Branding live in production.
