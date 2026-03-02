@@ -24,6 +24,13 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `8f05f9d9` — docs update (`#110`): add staging auth-surface pre-signal baseline evidence
+- `db39572e` — docs update (`#105/#110`): add latest dev/prod auth-surface evidence log references
+- `4afb0bcd` — docs update (`#104/#106`): refresh closure evidence with latest CI/certificate gate reruns
+- `cd9511b1` — troubleshooting docs (`#105`): add dev credentials tzdata/zoneinfo failure runbook
+- `4e026762` — auth-surface hardening (`#105`): add enriched failure diagnostics (`diag{...}`) for runtime triage
+- `91043ae3` — docs update (`#105`): narrow remaining blocker to dev credentials runtime only
+- `a88200fa` — docs update (`#105/#104`): refresh closure evidence references after auth-surface stabilization
 - `c0f0d9a2` — auth-surface contract stabilization (`#105`): accept branded notes marker; require forum `/heartbeat` in prod while allowing non-prod `/healthz` fallback
 - `e2937e6b` — #104 follow-on completion: remove `policy-checks.yml`, delete 18 `verify-*-workflow.sh` wrappers, retarget Make/CI contracts to direct scripts
 - `fe2944f1` — runtime evidence hardening (`#105`): normalize probe values (`me_status`, `login_refresh_status`) for deterministic TSV parsing
