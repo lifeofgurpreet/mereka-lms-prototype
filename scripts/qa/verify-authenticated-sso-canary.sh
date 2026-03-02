@@ -19,6 +19,8 @@
 # Env:
 #   REQUIRE_SECRETS=1                        Fail when primary creds are missing (default: 1)
 #   REQUIRE_STUDIO_CANARY=0                  Fail when Studio staff creds are missing (default: 0)
+#   RUN_OIDC_CANARY=1                        Run primary OIDC canary flow (default: 1)
+#   RUN_STUDIO_CANARY=1                      Run Studio OIDC canary flow (default: 1)
 #   RUN_LOCAL_LOGIN_CANARY=0                 Also run native /authn/login credential canary (default: 0)
 #   REQUIRE_LOCAL_CANARY=0                   Fail when local-login creds are missing (default: 0)
 #   SSO_CANARY_TIMEOUT_SECONDS=180           Per-run timeout
@@ -38,6 +40,8 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 ENV_SCOPE="prod" # prod|dev|both
 REQUIRE_SECRETS="${REQUIRE_SECRETS:-1}"
 REQUIRE_STUDIO_CANARY="${REQUIRE_STUDIO_CANARY:-0}"
+RUN_OIDC_CANARY="${RUN_OIDC_CANARY:-1}"
+RUN_STUDIO_CANARY="${RUN_STUDIO_CANARY:-1}"
 RUN_LOCAL_LOGIN_CANARY="${RUN_LOCAL_LOGIN_CANARY:-0}"
 REQUIRE_LOCAL_CANARY="${REQUIRE_LOCAL_CANARY:-0}"
 SSO_CANARY_TIMEOUT_SECONDS="${SSO_CANARY_TIMEOUT_SECONDS:-180}"
@@ -52,6 +56,8 @@ Usage: ./scripts/qa/verify-authenticated-sso-canary.sh [--env prod|dev|both]
 Env:
   REQUIRE_SECRETS=1                        Fail when primary creds are missing (default: 1)
   REQUIRE_STUDIO_CANARY=0                  Fail when Studio staff creds are missing (default: 0)
+  RUN_OIDC_CANARY=1                        Run primary OIDC canary flow (default: 1)
+  RUN_STUDIO_CANARY=1                      Run Studio OIDC canary flow (default: 1)
   RUN_LOCAL_LOGIN_CANARY=0                 Also run native /authn/login credential canary (default: 0)
   REQUIRE_LOCAL_CANARY=0                   Fail when local-login creds are missing (default: 0)
   SSO_CANARY_TIMEOUT_SECONDS=180           Per-run timeout (seconds)
@@ -747,16 +753,24 @@ run_local_login_env() {
 }
 
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
-  run_primary_env "prod"
-  run_studio_env "prod"
+  if [[ "$RUN_OIDC_CANARY" == "1" ]]; then
+    run_primary_env "prod"
+  fi
+  if [[ "$RUN_STUDIO_CANARY" == "1" ]]; then
+    run_studio_env "prod"
+  fi
   if [[ "$RUN_LOCAL_LOGIN_CANARY" == "1" ]]; then
     run_local_login_env "prod"
   fi
 fi
 
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
-  run_primary_env "dev"
-  run_studio_env "dev"
+  if [[ "$RUN_OIDC_CANARY" == "1" ]]; then
+    run_primary_env "dev"
+  fi
+  if [[ "$RUN_STUDIO_CANARY" == "1" ]]; then
+    run_studio_env "dev"
+  fi
   if [[ "$RUN_LOCAL_LOGIN_CANARY" == "1" ]]; then
     run_local_login_env "dev"
   fi
