@@ -58,7 +58,7 @@ jobs:
 
           # Generate infra-ready remediation prompt from latest blocker sweep JSON.
           make qa-runtime-blocker-infra-prompt \
-            | tee var/qa/frontend-runtime-blocker-infra-prompt.txt
+            OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt
           cat var/qa/frontend-runtime-blocker-infra-prompt.txt >> var/qa/frontend-runtime-qa.log
 
           if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then

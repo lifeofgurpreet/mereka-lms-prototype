@@ -195,12 +195,11 @@ qa-frontend-runtime-blocker-sweep-dev: ## Run canonical frontend runtime blocker
 qa-frontend-runtime-blocker-sweep-prod: ## Run canonical frontend runtime blocker sweep (prod)
 	$(MAKE) qa-frontend-runtime-blocker-sweep QA_ENV=prod
 
-qa-runtime-blocker-infra-prompt: ## Generate infra-ready prompt from latest blocker sweep JSON (or INPUT_JSON=<path>)
-	@if [ -n "$(INPUT_JSON)" ]; then \
-		./scripts/qa/generate-runtime-blocker-infra-prompt.sh --input "$(INPUT_JSON)"; \
-	else \
-		./scripts/qa/generate-runtime-blocker-infra-prompt.sh; \
-	fi
+qa-runtime-blocker-infra-prompt: ## Generate infra-ready prompt (INPUT_JSON=<path> optional, OUTPUT_FILE=<path> optional)
+	@args=""; \
+	if [ -n "$(INPUT_JSON)" ]; then args="$$args --input \"$(INPUT_JSON)\""; fi; \
+	if [ -n "$(OUTPUT_FILE)" ]; then args="$$args --output \"$(OUTPUT_FILE)\""; fi; \
+	eval "./scripts/qa/generate-runtime-blocker-infra-prompt.sh $$args"
 
 qa-npm-start-smoke-local: ## Run local npm-start MFE smoke (authn, learning, account, profile)
 	./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://localhost --require-branding-markers

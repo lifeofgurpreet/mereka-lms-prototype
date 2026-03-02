@@ -138,6 +138,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
   - Infra handoff prompt generation (deterministic from latest sweep JSON):
     - `make qa-runtime-blocker-infra-prompt`
     - optional explicit input: `make qa-runtime-blocker-infra-prompt INPUT_JSON=<path-to-summary.json>`
+    - canonical file output mode: `make qa-runtime-blocker-infra-prompt OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt`
     - canonical default input now prefers stable sweep pointers:
       - `var/qa/frontend-runtime-blocker-sweep-latest-both.summary.json`
       - `var/qa/frontend-runtime-blocker-sweep-latest-dev.summary.json`
