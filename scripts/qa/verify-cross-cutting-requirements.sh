@@ -13,6 +13,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 source "${SCRIPT_DIR}/../shared/config.sh"
 
 # Colors
@@ -94,7 +96,7 @@ echo ""
 echo "--- AC-CCR-002: Prometheus Metrics Endpoints ---"
 
 # Check for prometheus integration in plugin
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_FILE="$PLUGIN_MAIN"
 check "AC-CCR-002" "Tutor plugin integrates django_prometheus" \
   grep -q "django_prometheus\|openedx_prometheus" "$PLUGIN_FILE"
 

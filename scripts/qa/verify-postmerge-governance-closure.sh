@@ -20,6 +20,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 cd "$REPO_ROOT"
 
 GREEN='\033[0;32m'
@@ -121,7 +123,7 @@ else
 fi
 
 # No undefined token patterns in Tutor plugin config
-PLUGIN="infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN="$PLUGIN_MAIN"
 if [[ -f "$PLUGIN" ]]; then
   UNDEFINED_SEGMENT_COUNT=$(grep -c 'SEGMENT_KEY.*=.*"undefined"' "$PLUGIN" || true)
   if [[ "$UNDEFINED_SEGMENT_COUNT" -eq 0 ]]; then

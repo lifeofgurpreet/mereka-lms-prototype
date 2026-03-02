@@ -67,7 +67,7 @@ if mereka_plugin_has_any "$REPO_ROOT"; then
     fail "Certificate slot widget id missing in Tutor plugin contract sources"
   fi
 else
-  fail "Tutor plugin contract sources missing: infrastructure/tutor/plugins/mereka_lms.py"
+  fail "Tutor plugin contract sources missing"
 fi
 
 if [[ -f "$MFE_SCSS" ]]; then

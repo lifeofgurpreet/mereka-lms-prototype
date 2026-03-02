@@ -16,7 +16,9 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PLUGIN_PY="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_PY="$PLUGIN_MAIN"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 TENANCY_SRC="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy"
 # setup.py uses package_dir={'mereka_tenancy': '.'} — package root IS the multi-tenancy/ dir

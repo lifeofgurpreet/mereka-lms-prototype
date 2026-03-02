@@ -47,7 +47,7 @@ echo "=== PARAGON_THEME_URLS verification ==="
 echo ""
 echo "1) Tutor plugin config"
 if ! mereka_plugin_has_any "$REPO_ROOT"; then
-  fail "Plugin contract sources missing (expected at least infrastructure/tutor/plugins/mereka_lms.py)"
+  fail "Plugin contract sources missing (expected at least one main plugin contract file)"
 else
   if mereka_plugin_has_regex "$REPO_ROOT" "PARAGON_THEME_URLS"; then
     pass "Plugin contract sources contain PARAGON_THEME_URLS"
