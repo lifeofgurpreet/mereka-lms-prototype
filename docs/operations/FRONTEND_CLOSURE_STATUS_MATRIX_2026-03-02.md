@@ -88,7 +88,8 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - env-specific closure targets now delegate to `qa-frontend-closure` with explicit `QA_*` flags
     - verifier updated: `scripts/qa/verify-frontend-qa-make-targets.sh` and rerun PASS
   - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) now passes notes-root banner and forum health contracts (forum non-prod fallback `/healthz=200`) and still fails on one non-authn runtime blocker (`credentials` `/login`, `/login/edx-oauth2`, `/admin/login` returning `500`), so local login/session runtime validation remains infra-convergence dependent. Equivalent prod credentials checks return `302`, confirming dev-runtime drift.
-  - Latest auth-surface evidence logs: dev `var/qa/auth-surfaces-dev-20260302T070747Z.log` (`FAILED` with 2 checks) vs prod `var/qa/auth-surfaces-prod-20260302T070747Z.log` (`OK`).
+  - Latest auth-surface evidence logs: dev `var/qa/auth-surfaces-dev-20260302T101424Z.log` (`FAILED` with 2 checks) vs prod `var/qa/auth-surfaces-prod-20260302T101515Z.log` (`OK`).
+  - `verify-auth-surfaces.sh` now applies TLS-insecure curl mode only for non-prod (`dev`/`staging`) so self-signed certs do not create false failures.
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.
   - Direct pod inspection confirms timezone data is missing in dev credentials runtime (`/usr/share/zoneinfo/UTC` absent; `python -m pip show tzdata` not found), narrowing remediation to image/runtime package composition.
   - Repo-side remediation is committed in this lane: credentials Docker hook now installs `tzdata>=2024.1` in `infrastructure/tutor/plugins/mereka_lms.py`; verification contract updated via `scripts/qa/verify-credentials-readiness.sh` and rerun PASS (`PASS=48 FAIL=0 SKIP=7`).

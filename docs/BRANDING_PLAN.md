@@ -34,8 +34,9 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Full Playwright matrix rerun now passes after preflight hardening in `verify-cross-browser-branding-smoke.sh`: `./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser` -> `15 passed`; log `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`.
   - Auth runtime probe status: `./scripts/qa/verify-auth-surfaces.sh dev` now passes notes + forum health checks (forum accepts `/healthz` fallback in non-prod) and reports one remaining non-authn blocker (`credentials` login endpoints returning 500). Equivalent prod checks return expected `302` redirects, so the failure is dev-runtime specific.
   - Latest auth-surface evidence logs:
-    - dev: `var/qa/auth-surfaces-dev-20260302T070747Z.log` (`FAILED` with 2 checks, both credentials login redirects returning 500)
-    - prod: `var/qa/auth-surfaces-prod-20260302T070747Z.log` (`OK`)
+    - dev: `var/qa/auth-surfaces-dev-20260302T101424Z.log` (`FAILED` with 2 checks, both credentials login redirects returning 500)
+    - prod: `var/qa/auth-surfaces-prod-20260302T101515Z.log` (`OK`)
+  - Auth-surface checker is now non-prod TLS tolerant (`-k` for `dev`/`staging`) to prevent self-signed certificate noise from masking real auth/runtime failures.
   - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`). Direct pod inspection confirms `/usr/share/zoneinfo/UTC` is absent and `python -m pip show tzdata` returns not found.
   - Repo-side remediation is now in place: `infrastructure/tutor/plugins/mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1` alongside cryptography; readiness contract updated in `scripts/qa/verify-credentials-readiness.sh` and rerun offline PASS (`PASS=48 FAIL=0 SKIP=7`).
   - Remaining action is runtime rollout only (rebuild/push/redeploy credentials-serving image path) to validate that dev credentials login endpoints return `302` instead of `500`.
