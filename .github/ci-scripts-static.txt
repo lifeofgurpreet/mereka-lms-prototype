@@ -41,6 +41,7 @@ scripts/qa/verify-atlas-data-persistence.sh
 scripts/qa/verify-atlas-modulestore-path.sh
 
 # ── Observability & monitoring (static) ─────────────────────────────────────
+scripts/qa/validate-observability-compliance.sh --mode local
 scripts/qa/verify-observability-stack.sh
 scripts/qa/verify-sentry-wiring.sh
 scripts/qa/verify-sentry-cli-contract.sh
