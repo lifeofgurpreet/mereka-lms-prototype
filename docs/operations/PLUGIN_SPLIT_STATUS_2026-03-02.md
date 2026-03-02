@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `4` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `1` reference inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -275,15 +275,32 @@ Validation after phase 12:
 - `./scripts/qa/verify-cross-cutting-requirements.sh --skip-cluster` PASS (`Passed: 42 / Failed: 0 / Skipped: 2`)
 - `./scripts/qa/verify-mereka-tenancy.sh` FAIL (`PASS=12 / FAIL=4 / WARN=0`) — existing apply-patches tenancy wiring expectations not met in current baseline
 
+## Progress Update (Phase 13, final clean-file verifier tranche)
+
+- Extended compatibility-layer adoption to the final clean-file QA verifiers in this lane:
+  - `scripts/qa/verify-analytics-hardening.sh`
+  - `scripts/qa/verify-footer-slot-evidence-rollback.sh`
+  - `scripts/qa/verify-fpf-slot-coverage.sh`
+- Outcome:
+  - direct path-coupling reduced from `4` to `1`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - 1/3 verifiers pass post-migration; 2/3 remain failing due existing baseline expectation drift unrelated to plugin-path migration.
+
+Validation after phase 13:
+- `./scripts/qa/verify-analytics-hardening.sh` FAIL (`PASS=23 / FAIL=3 / WARN=0`) — existing analytics hardening gaps in current baseline
+- `./scripts/qa/verify-footer-slot-evidence-rollback.sh` FAIL (`PASS=13 / FAIL=9 / WARN=0`) — existing slot/rollback expectation mismatch in current baseline
+- `./scripts/qa/verify-fpf-slot-coverage.sh` PASS (`PASS=35 / WARN=0 / FAIL=0`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 + phase 12 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 + phase 12 + phase 13 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
+- One remaining direct reference is in `scripts/qa/verify-enterprise-sso-readiness.sh`; that file is currently modified in another active lane and must be reconciled via coordination before final migration.
 
 ## Safe Staged Plan (post-stability)
 
