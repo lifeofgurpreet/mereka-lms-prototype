@@ -3,7 +3,9 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_FILE="$PLUGIN_MAIN"
 REGISTRY_DOC="$REPO_ROOT/docs/architecture/FPF_PLUGIN_SLOT_REGISTRY.md"
 
 PASS=0

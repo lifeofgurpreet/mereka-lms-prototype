@@ -26,8 +26,10 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_FILE="$PLUGIN_MAIN"
 EXCEPTIONS_FILE="$REPO_ROOT/docs/operations/MFE_SELECTOR_EXCEPTIONS.md"
 LEGACY_FOOTER_DOC="$REPO_ROOT/docs/operations/LEGACY_FOOTER_REMOVAL.md"
 INVENTORY_FILE="$REPO_ROOT/docs/operations/evidence/mfe-surface-inventory.md"

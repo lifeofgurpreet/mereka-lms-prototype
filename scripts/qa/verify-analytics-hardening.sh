@@ -70,7 +70,7 @@ echo "AC-FRONT-051: Case-insensitive sentinel filtering and key casing preservat
 
 # Check 1: Plugin file exists
 if [[ ! -f "$PLUGIN" ]]; then
-  fail_check "plugin contract sources not found (expected infrastructure/tutor/plugins/mereka_lms.py)"
+  fail_check "plugin contract sources not found"
 else
   pass_check "plugin contract sources exist"
 
