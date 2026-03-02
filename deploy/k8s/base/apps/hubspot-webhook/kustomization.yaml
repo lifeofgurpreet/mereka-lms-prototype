@@ -6,6 +6,8 @@ resources:
 - deployment.yaml
 - service.yaml
 
-commonLabels:
-  app.kubernetes.io/managed-by: kustomize
-  app.kubernetes.io/instance: hubspot-webhook-production
+labels:
+- pairs:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/instance: hubspot-webhook-production
+  includeSelectors: false
