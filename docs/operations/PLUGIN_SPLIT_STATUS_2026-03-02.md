@@ -6,9 +6,10 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 
 ## Current State
 
-- Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `1` reference inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
-- Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
+- Main plugin file length: `2226` lines.
+- Extracted module length: `1110` lines (`infrastructure/tutor/plugins/mereka_lms_mfe_slots.py`).
+- Direct QA coupling to concrete plugin path is now `0` references in `scripts/qa/*`.
+- Many checks still rely on text-based contract assertions across plugin sources; compatibility helper keeps those checks split-safe.
 
 ## Progress Update (Phase 1, no-behavior-change)
 
@@ -291,27 +292,43 @@ Validation after phase 13:
 - `./scripts/qa/verify-footer-slot-evidence-rollback.sh` FAIL (`PASS=13 / FAIL=9 / WARN=0`) — existing slot/rollback expectation mismatch in current baseline
 - `./scripts/qa/verify-fpf-slot-coverage.sh` PASS (`PASS=35 / WARN=0 / FAIL=0`)
 
+## Progress Update (Phase 14, first structural extraction)
+
+- Performed first no-behavior-change structural split in plugin sources:
+  - moved the full MFE slot registration block into `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py`
+  - added `register_mfe_plugin_slots()` entrypoint in the new module
+  - wired `mereka_lms.py` to import and invoke `register_mfe_plugin_slots()`
+- Outcome:
+  - `mereka_lms.py` reduced from `3426` to `2226` lines (1200-line reduction)
+  - direct QA path coupling reduced from `1` to `0`
+  - runtime/source contract checks remain green
+
+Validation after phase 14:
+- `./infrastructure/tutor/apply-patches.sh` PASS
+- `./scripts/qa/verify-mfe-build-prereqs.sh` PASS
+- `./scripts/qa/verify-paragon-theme-urls.sh` PASS (`PASS=27 WARN=0 FAIL=0`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 + phase 12 + phase 13 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 + phase 12 + phase 13 + phase 14 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
-- One remaining direct reference is in `scripts/qa/verify-enterprise-sso-readiness.sh`; that file is currently modified in another active lane and must be reconciled via coordination before final migration.
+- No direct QA reference to `infrastructure/tutor/plugins/mereka_lms.py` remains in `scripts/qa/*`.
 
 ## Safe Staged Plan (post-stability)
 
 1. [x] Add a compatibility contract layer for QA checks (allow `mereka_lms.py` + split modules).
-2. [ ] Move one section at a time (e.g., footer/component slot definitions first), preserving exported symbols and behavior.
+2. [x] Move one section at a time (phase 14 moved MFE slot definitions to `mereka_lms_mfe_slots.py`), preserving exported symbols and behavior.
 3. Run targeted gates after each section move (`verify-plugin-slot-wiring.sh`, `verify-paragon-theme-urls.sh`, `verify-analytics-hardening.sh`, etc.).
 4. Keep one logical move per commit; avoid mixed runtime changes in split commits.
 
 ## Evidence Commands
 
 ```bash
-wc -l infrastructure/tutor/plugins/mereka_lms.py
+wc -l infrastructure/tutor/plugins/mereka_lms.py infrastructure/tutor/plugins/mereka_lms_mfe_slots.py
 rg -n "infrastructure/tutor/plugins/mereka_lms.py" scripts/qa | wc -l
 ```
