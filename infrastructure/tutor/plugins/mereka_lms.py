@@ -55,6 +55,64 @@ hooks.Filters.CONFIG_DEFAULTS.add_items([
     ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
 ])
 
+# Shared patch snippets to reduce duplication in ENV_PATCHES payloads.
+_REDWOOD_OPTIONAL_APPS_SNIPPET = """
+# Ensure optional Redwood apps exist when collecting assets
+if "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:
+    INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]
+if "openedx.core.djangoapps.bookmarks.apps.BookmarksConfig" not in INSTALLED_APPS:
+    INSTALLED_APPS += ["openedx.core.djangoapps.bookmarks.apps.BookmarksConfig"]
+if "openedx.core.djangoapps.discussions.apps.DiscussionsConfig" not in INSTALLED_APPS:
+    INSTALLED_APPS += ["openedx.core.djangoapps.discussions.apps.DiscussionsConfig"]
+if "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:
+    INSTALLED_APPS += ["openedx.core.djangoapps.theming.apps.ThemingConfig"]
+""".strip()
+
+_SAFE_JOIN_MONKEYPATCH_SNIPPET = """
+import sys as _sys
+import os.path as _osp
+import django.utils._os as _os_mod
+_orig_safe_join = _os_mod.safe_join
+def _build_safe_join(base, *paths):
+    return _osp.abspath(_osp.join(base, *paths))
+_os_mod.safe_join = _build_safe_join
+for _m in list(_sys.modules.values()):
+    try:
+        if getattr(_m, 'safe_join', None) is _orig_safe_join:
+            _m.safe_join = _build_safe_join
+    except Exception:
+        pass
+""".strip()
+
+_CMS_PROMETHEUS_METRICS_SNIPPET = """
+# Safe module loading helper for CMS
+def _safe_add_app(app_name):
+    if app_name not in INSTALLED_APPS:
+        try:
+            __import__(app_name.split('.')[0])
+            INSTALLED_APPS.append(app_name)
+        except ImportError:
+            pass
+
+# Prometheus metrics + URL exposure for CMS
+try:
+    __import__('django_prometheus')
+    if "django_prometheus" not in INSTALLED_APPS:
+        INSTALLED_APPS.insert(0, "django_prometheus")
+except ImportError:
+    pass
+
+_safe_add_app("openedx_prometheus")
+
+if "django_prometheus" in INSTALLED_APPS:
+    if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
+    if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
+
+# NOTE: Prometheus URLs are registered via PluginURLs in openedx_prometheus/apps.py.
+""".strip()
+
 ###############################################################################
 # LMS Production Settings Patches
 ###############################################################################
@@ -398,33 +456,13 @@ if "{{ MEREKA_PARAGON_THEME_ENABLED }}".lower() == "true":
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-lms-assets-settings",
-        """
-# Ensure optional Redwood apps exist when collecting assets
-if "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:
-    INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]
-if "openedx.core.djangoapps.bookmarks.apps.BookmarksConfig" not in INSTALLED_APPS:
-    INSTALLED_APPS += ["openedx.core.djangoapps.bookmarks.apps.BookmarksConfig"]
-if "openedx.core.djangoapps.discussions.apps.DiscussionsConfig" not in INSTALLED_APPS:
-    INSTALLED_APPS += ["openedx.core.djangoapps.discussions.apps.DiscussionsConfig"]
-if "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:
-    INSTALLED_APPS += ["openedx.core.djangoapps.theming.apps.ThemingConfig"]
+        f"""
+{_REDWOOD_OPTIONAL_APPS_SNIPPET}
 
 # Monkey-patch safe_join to be permissive during asset build.
 # This fixes collectstatic SuspiciousFileOperation errors when CSS files
 # reference relative paths like ../../css/images/correct-icon.png
-import sys as _sys
-import os.path as _osp
-import django.utils._os as _os_mod
-_orig_safe_join = _os_mod.safe_join
-def _build_safe_join(base, *paths):
-    return _osp.abspath(_osp.join(base, *paths))
-_os_mod.safe_join = _build_safe_join
-for _m in list(_sys.modules.values()):
-    try:
-        if getattr(_m, 'safe_join', None) is _orig_safe_join:
-            _m.safe_join = _build_safe_join
-    except Exception:
-        pass
+{_SAFE_JOIN_MONKEYPATCH_SNIPPET}
 """,
     )
 )
@@ -436,31 +474,11 @@ for _m in list(_sys.modules.values()):
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-cms-assets-settings",
-        """
-# Ensure optional Redwood apps exist when collecting assets
-if "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:
-    INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]
-if "openedx.core.djangoapps.bookmarks.apps.BookmarksConfig" not in INSTALLED_APPS:
-    INSTALLED_APPS += ["openedx.core.djangoapps.bookmarks.apps.BookmarksConfig"]
-if "openedx.core.djangoapps.discussions.apps.DiscussionsConfig" not in INSTALLED_APPS:
-    INSTALLED_APPS += ["openedx.core.djangoapps.discussions.apps.DiscussionsConfig"]
-if "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:
-    INSTALLED_APPS += ["openedx.core.djangoapps.theming.apps.ThemingConfig"]
+        f"""
+{_REDWOOD_OPTIONAL_APPS_SNIPPET}
 
 # Same safe_join patch for CMS
-import sys as _sys
-import os.path as _osp
-import django.utils._os as _os_mod
-_orig_safe_join = _os_mod.safe_join
-def _build_safe_join(base, *paths):
-    return _osp.abspath(_osp.join(base, *paths))
-_os_mod.safe_join = _build_safe_join
-for _m in list(_sys.modules.values()):
-    try:
-        if getattr(_m, 'safe_join', None) is _orig_safe_join:
-            _m.safe_join = _build_safe_join
-    except Exception:
-        pass
+{_SAFE_JOIN_MONKEYPATCH_SNIPPET}
 """,
     )
 )
@@ -3382,33 +3400,8 @@ RUN pip install cryptography>=41.0.0
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-cms-production-settings",
-        """
-# Safe module loading helper for CMS
-def _safe_add_app(app_name):
-    if app_name not in INSTALLED_APPS:
-        try:
-            __import__(app_name.split('.')[0])
-            INSTALLED_APPS.append(app_name)
-        except ImportError:
-            pass
-
-# Prometheus metrics + URL exposure for CMS
-try:
-    __import__('django_prometheus')
-    if "django_prometheus" not in INSTALLED_APPS:
-        INSTALLED_APPS.insert(0, "django_prometheus")
-except ImportError:
-    pass
-
-_safe_add_app("openedx_prometheus")
-
-if "django_prometheus" in INSTALLED_APPS:
-    if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
-        MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
-    if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
-        MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
-
-# NOTE: Prometheus URLs are registered via PluginURLs in openedx_prometheus/apps.py.
+        f"""
+{_CMS_PROMETHEUS_METRICS_SNIPPET}
 # No manual ROOT_URLCONF_OVERRIDES needed.
 """,
     )
@@ -3419,34 +3412,7 @@ if "django_prometheus" in INSTALLED_APPS:
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-cms-development-settings",
-        """
-# Safe module loading helper for CMS
-def _safe_add_app(app_name):
-    if app_name not in INSTALLED_APPS:
-        try:
-            __import__(app_name.split('.')[0])
-            INSTALLED_APPS.append(app_name)
-        except ImportError:
-            pass
-
-# Prometheus metrics + URL exposure for CMS
-try:
-    __import__('django_prometheus')
-    if "django_prometheus" not in INSTALLED_APPS:
-        INSTALLED_APPS.insert(0, "django_prometheus")
-except ImportError:
-    pass
-
-_safe_add_app("openedx_prometheus")
-
-if "django_prometheus" in INSTALLED_APPS:
-    if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
-        MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
-    if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
-        MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
-
-# NOTE: Prometheus URLs are registered via PluginURLs in openedx_prometheus/apps.py.
-""",
+        _CMS_PROMETHEUS_METRICS_SNIPPET,
     )
 )
 

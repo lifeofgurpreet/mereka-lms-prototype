@@ -6,9 +6,23 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 
 ## Current State
 
-- Plugin file length: `3460` lines.
+- Plugin file length: `3426` lines.
 - Direct QA coupling: `96` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
+
+## Progress Update (Phase 1, no-behavior-change)
+
+- Introduced shared snippet constants in `mereka_lms.py` for duplicated ENV patch payloads:
+  - Redwood optional apps asset wiring
+  - `safe_join` monkeypatch block
+  - CMS Prometheus metrics/settings block
+- Reused these snippets across LMS/CMS asset patches and CMS production/development settings patches.
+- This reduced duplication without changing runtime behavior or moving contract markers out of the canonical plugin file.
+
+Validation after refactor:
+- `python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py` PASS
+- `./scripts/qa/verify-paragon-theme-urls.sh` PASS
+- `./scripts/qa/verify-tutor-patches-inventory.sh` PASS
 
 ## Why Full Split Is Blocked Right Now
 
