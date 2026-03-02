@@ -1,0 +1,6 @@
+# Temporary shared-host allowlist for non-enterprise preview lanes only.
+# Production enterprise tenant hosts MUST remain unique.
+studio.academyv2.mereka.dev
+apps.academyv2.mereka.dev
+studio.staging.academyv2.mereka.io
+apps.staging.academyv2.mereka.io
