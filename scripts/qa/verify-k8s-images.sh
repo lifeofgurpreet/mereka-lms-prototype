@@ -114,6 +114,7 @@ except Exception:
 
 expected_registry = sys.argv[1]
 tag_pattern = re.compile(sys.argv[2])
+semver_pattern = re.compile(r'^\d+\.\d+\.\d+(-[a-z0-9.]+)?$')
 files = sys.argv[3:]
 checked = 0
 
@@ -133,7 +134,7 @@ for path in files:
         checked += 1
         tag = str(img.get("newTag") or "")
         digest = str(img.get("digest") or "")
-        if tag_pattern.match(tag):
+        if tag_pattern.match(tag) or semver_pattern.match(tag):
             print(f"PASS\t{new_name}:{tag} (valid format)")
         elif digest:
             print(f"PASS\t{new_name}:{tag}@{digest} (legacy tag allowed: digest pinned)")

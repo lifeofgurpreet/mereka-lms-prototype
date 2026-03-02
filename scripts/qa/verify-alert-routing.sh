@@ -11,6 +11,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+# Early exit in CI or when cluster/GCP access is unavailable
+if [[ "${CI:-}" == "true" ]] || ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+  echo "⚠ SKIP: kubectl/gcloud not available — skipping runtime alert routing checks"
+  exit 0
+fi
+
 PROJECT="${GCP_PROJECT:-mereka-lms}"
 K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"

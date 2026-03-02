@@ -66,6 +66,15 @@ if [[ "$MODE" != "public" && "$MODE" != "internal" && "$MODE" != "all" ]]; then
   exit 1
 fi
 
+if ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+  if [[ "$MODE" == "internal" ]]; then
+    echo "⚠ SKIP: kubectl not available — cannot run internal-only checks"
+    exit 0
+  fi
+  echo "⚠ INFO: kubectl not available — running public checks only"
+  MODE="public"
+fi
+
 require_bool_01() {
   local var_name="$1"
   local value="$2"

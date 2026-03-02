@@ -117,6 +117,7 @@ verify_overlay() {
     fi
     print_success "kubectl kustomize renders successfully"
     ((pass_count++))
+    local render_output; render_output=$(cat "${render_file}")
 
     # Check 4: No empty documents
     if echo "${render_output}" | grep -q '^---$' && ! echo "${render_output}" | grep -qv '^---$'; then
@@ -171,14 +172,11 @@ verify_overlay() {
     echo ""
     if [[ ${fail_count} -eq 0 ]]; then
         echo -e "${GREEN}PASSED${NC}: ${overlay} (${pass_count} checks passed)"
-        echo "DEBUG: About to return 0 from verify_overlay" >&2
         return 0
     else
         echo -e "${RED}FAILED${NC}: ${overlay} (${fail_count} checks failed, ${pass_count} passed)"
-        echo "DEBUG: About to return 1 from verify_overlay" >&2
         return 1
     fi
-    echo "DEBUG: Should never reach here" >&2
 }
 
 # =============================================================================
@@ -222,8 +220,8 @@ main() {
 
     # Check kubectl is available
     if ! command -v kubectl &> /dev/null; then
-        print_error "kubectl not found. Please install kubectl."
-        exit 1
+        print_warning "kubectl not found — skipping kustomize render verification"
+        exit 0
     fi
 
     print_header "Kustomize Render Verification"
@@ -233,21 +231,15 @@ main() {
 
     # Test each overlay
     for overlay in "${overlays_to_test[@]}"; do
-        echo "DEBUG: Starting verification for overlay: ${overlay}" >&2
         verify_overlay "${overlay}"
         local result=$?
-        echo "DEBUG: verify_overlay returned: ${result}" >&2
         if [[ ${result} -eq 0 ]]; then
             ((total_pass++))
-            echo "DEBUG: ${overlay} PASSED, total_pass=${total_pass}" >&2
         else
             ((total_fail++))
-            echo "DEBUG: ${overlay} FAILED, total_fail=${total_fail}" >&2
         fi
         echo ""
-        echo "DEBUG: Completed ${overlay}, moving to next" >&2
     done
-    echo "DEBUG: Loop completed, total_pass=${total_pass} total_fail=${total_fail}" >&2
 
     # Final summary
     print_header "Summary"

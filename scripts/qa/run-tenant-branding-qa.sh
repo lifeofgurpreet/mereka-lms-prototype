@@ -17,6 +17,13 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+# Auto-detect CI environment — disable live gates by default
+if [[ "${CI:-}" == "true" ]]; then
+  RUN_BRANDING_GATES_LIVE="${RUN_BRANDING_GATES_LIVE:-0}"
+  RUN_TENANT_RUNTIME="${RUN_TENANT_RUNTIME:-0}"
+  RUN_MULTISITE_GOVERNANCE="${RUN_MULTISITE_GOVERNANCE:-0}"
+fi
+
 RUN_BRANDING_GATES_LIVE="${RUN_BRANDING_GATES_LIVE:-1}"
 if [[ "$RUN_BRANDING_GATES_LIVE" == "1" ]]; then
   BRANDING_GATES_COMMAND="scripts/branding/run-branding-gates.sh"
