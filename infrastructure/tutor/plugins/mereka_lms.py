@@ -35,26 +35,34 @@ __version__ = "1.0.0"
 # Configuration Defaults
 ###############################################################################
 
-hooks.Filters.CONFIG_DEFAULTS.add_items([
-    ("MEREKA_LMS_VERSION", __version__),
-    ("MEREKA_LMS_EXTRA_HOSTS", [
-        "admin.academyv2.mereka.io",
-        "academy.biji-biji.com",
-        "enterprise.academyv2.mereka.io",
-        "skillourfuture.academy.mereka.io",
-    ]),
-    ("MEREKA_LMS_EXTRA_CSRF_ORIGINS", [
-        "https://admin.academyv2.mereka.io",
-        "https://academy.biji-biji.com",
-        "https://enterprise.academyv2.mereka.io",
-        "https://skillourfuture.academy.mereka.io",
-        "https://apps.academy.biji-biji.com",
-    ]),
-    ("MEREKA_PARAGON_THEME_ENABLED", True),
-    ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
-    ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
-    ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
-])
+hooks.Filters.CONFIG_DEFAULTS.add_items(
+    [
+        ("MEREKA_LMS_VERSION", __version__),
+        (
+            "MEREKA_LMS_EXTRA_HOSTS",
+            [
+                "admin.academyv2.mereka.io",
+                "academy.biji-biji.com",
+                "enterprise.academyv2.mereka.io",
+                "skillourfuture.academy.mereka.io",
+            ],
+        ),
+        (
+            "MEREKA_LMS_EXTRA_CSRF_ORIGINS",
+            [
+                "https://admin.academyv2.mereka.io",
+                "https://academy.biji-biji.com",
+                "https://enterprise.academyv2.mereka.io",
+                "https://skillourfuture.academy.mereka.io",
+                "https://apps.academy.biji-biji.com",
+            ],
+        ),
+        ("MEREKA_PARAGON_THEME_ENABLED", True),
+        ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
+        ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
+        ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
+    ]
+)
 
 # Shared patch snippets to reduce duplication in ENV_PATCHES payloads.
 _REDWOOD_OPTIONAL_APPS_SNIPPET = """
@@ -581,9 +589,7 @@ _copy_lines = "\n".join(
     f"COPY --chown=app:app ./infrastructure/tutor/custom-apps/{app} /openedx/{app}"
     for app in _CUSTOM_APPS
 )
-_install_lines = "\n".join(
-    f"RUN pip install -e /openedx/{app}" for app in _CUSTOM_APPS
-)
+_install_lines = "\n".join(f"RUN pip install -e /openedx/{app}" for app in _CUSTOM_APPS)
 
 hooks.Filters.ENV_PATCHES.add_item(
     (
@@ -2215,6 +2221,7 @@ hooks.Filters.ENV_PATCHES.add_item(
 ###############################################################################
 # Plugin Initialization Hook
 ###############################################################################
+
 
 @hooks.Actions.PLUGIN_LOADED.add()
 def _print_loading_message(plugin_name: str):

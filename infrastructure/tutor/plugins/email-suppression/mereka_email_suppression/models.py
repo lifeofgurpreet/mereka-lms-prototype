@@ -23,9 +23,9 @@ class EmailSuppression(models.Model):
     """
 
     REASON_CHOICES = [
-        ('hard_bounce', 'Hard Bounce'),
-        ('soft_bounce', 'Soft Bounce'),
-        ('complaint', 'Complaint'),
+        ("hard_bounce", "Hard Bounce"),
+        ("soft_bounce", "Soft Bounce"),
+        ("complaint", "Complaint"),
     ]
 
     email = models.EmailField(
@@ -63,8 +63,8 @@ class EmailSuppression(models.Model):
         verbose_name_plural = "Email Suppressions"
         db_table = "mereka_email_suppression"
         indexes = [
-            models.Index(fields=['email', 'reason']),
-            models.Index(fields=['bounced_at']),
+            models.Index(fields=["email", "reason"]),
+            models.Index(fields=["bounced_at"]),
         ]
 
     def __str__(self):
@@ -72,11 +72,11 @@ class EmailSuppression(models.Model):
 
     def is_suppressed(self):
         """Check if this email address is currently suppressed."""
-        if self.reason in ['hard_bounce', 'complaint']:
+        if self.reason in ["hard_bounce", "complaint"]:
             return True
 
         # Soft bounce: suppress if count >= 3 within last 7 days
-        if self.reason == 'soft_bounce':
+        if self.reason == "soft_bounce":
             if self.bounce_count >= 3:
                 # Check if last bounce was within 7 days
                 if self.bounced_at and (timezone.now() - self.bounced_at).days <= 7:

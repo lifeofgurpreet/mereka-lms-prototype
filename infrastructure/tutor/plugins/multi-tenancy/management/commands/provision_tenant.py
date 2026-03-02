@@ -111,9 +111,7 @@ class Command(BaseCommand):
         self._get_or_create_oauth2_application(slug, name, domain)
         self._get_or_create_waffle_switches(slug)
 
-        self.stdout.write(self.style.SUCCESS(
-            f"\nTenant '{slug}' provisioned successfully."
-        ))
+        self.stdout.write(self.style.SUCCESS(f"\nTenant '{slug}' provisioned successfully."))
         self.stdout.write(f"  UUID: {enterprise_customer.uuid}")
         self.stdout.write(f"  Domain: {domain}")
         self.stdout.write(f"  Site ID: {site.id}")
@@ -136,9 +134,7 @@ class Command(BaseCommand):
             )
 
         if len(slug) > 63:
-            raise CommandError(
-                f"Slug '{slug}' too long: max 63 characters."
-            )
+            raise CommandError(f"Slug '{slug}' too long: max 63 characters.")
 
         # Check for duplicate domain belonging to a DIFFERENT tenant's site.
         existing_site = Site.objects.filter(domain__iexact=domain).first()
@@ -313,9 +309,7 @@ class Command(BaseCommand):
             self.stdout.write(f"  Created OAuth2 Application: {client_id}")
             return app
         except ImportError:
-            self.stdout.write(
-                self.style.WARNING("  SKIP: django-oauth-toolkit not installed")
-            )
+            self.stdout.write(self.style.WARNING("  SKIP: django-oauth-toolkit not installed"))
             return None
 
     def _get_or_create_waffle_switches(self, slug):
@@ -335,6 +329,4 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write(f"  Waffle Switch already exists: {switch_name}")
         except ImportError:
-            self.stdout.write(
-                self.style.WARNING("  SKIP: django-waffle not installed")
-            )
+            self.stdout.write(self.style.WARNING("  SKIP: django-waffle not installed"))

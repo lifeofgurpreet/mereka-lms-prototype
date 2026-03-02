@@ -14,10 +14,12 @@ from pathlib import Path
 plugins_dir = Path(__file__).parent
 sys.path.insert(0, str(plugins_dir))
 
+
 def test_import():
     """Test that the plugin can be imported."""
     try:
         import mereka_lms
+
         print("✓ Plugin imported successfully")
         print(f"  Version: {mereka_lms.__version__}")
         return True
@@ -25,16 +27,19 @@ def test_import():
         print(f"✗ Failed to import plugin: {e}")
         return False
 
+
 def test_hooks():
     """Test that hooks are registered."""
     try:
         import mereka_lms
+
         # This would normally be done by Tutor, but we can't test that without Tutor installed
         print(f"✓ Plugin defines {mereka_lms.__name__}")
         return True
     except Exception as e:
         print(f"✗ Failed to check hooks: {e}")
         return False
+
 
 def test_syntax():
     """Test Python syntax is valid."""
@@ -46,6 +51,7 @@ def test_syntax():
     except SyntaxError as e:
         print(f"✗ Syntax error: {e}")
         return False
+
 
 if __name__ == "__main__":
     print("Testing Mereka LMS Tutor Plugin")

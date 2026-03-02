@@ -39,7 +39,7 @@ class TenantResolutionMiddleware:
                 # Strip common prefixes (apps., studio., preview.) and retry.
                 for prefix in ("apps.", "studio.", "preview."):
                     if host.startswith(prefix):
-                        bare = host[len(prefix):]
+                        bare = host[len(prefix) :]
                         site = Site.objects.filter(domain__iexact=bare).first()
                         if site is not None:
                             break
@@ -47,9 +47,7 @@ class TenantResolutionMiddleware:
             if site is not None:
                 site_config = getattr(site, "configuration", None)
                 if site_config is not None:
-                    enterprise_uuid = site_config.site_values.get(
-                        "ENTERPRISE_CUSTOMER_UUID"
-                    )
+                    enterprise_uuid = site_config.site_values.get("ENTERPRISE_CUSTOMER_UUID")
                     if enterprise_uuid:
                         tenant_uuid = str(enterprise_uuid)
                         request.tenant_uuid = tenant_uuid

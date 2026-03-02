@@ -10,11 +10,12 @@ def register_mfe_plugin_slots() -> None:
     for _mfe in [
         "all",
     ]:
-        PLUGIN_SLOTS.add_items([
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_logo.v1",
-                """
+        PLUGIN_SLOTS.add_items(
+            [
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_logo.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Replace,
                     widget: {
@@ -25,11 +26,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.footer.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.footer.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Hide,
                     widgetId: 'default_contents',
@@ -44,11 +45,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.studio_footer.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.studio_footer.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -59,22 +60,22 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.studio_header_search_button_slot.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.studio_header_search_button_slot.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaStudioHeaderSearchButton(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.course_unit_sidebar.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.course_unit_sidebar.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -85,11 +86,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.course_outline_sidebar.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.course_outline_sidebar.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -100,11 +101,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.course_outline_header_actions.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.course_outline_header_actions.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -115,11 +116,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.course_unit_header_actions.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.course_unit_header_actions.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -130,11 +131,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.course_outline_page_alerts.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.course_outline_page_alerts.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -145,11 +146,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.edit_video_alerts.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.edit_video_alerts.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -160,11 +161,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.edit_file_alerts.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.edit_file_alerts.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -175,11 +176,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.additional_course_plugin.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.additional_course_plugin.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -190,11 +191,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.additional_course_content_plugin.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.additional_course_content_plugin.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -205,11 +206,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -220,11 +221,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -235,11 +236,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.course_unit_sidebar.v2",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.course_unit_sidebar.v2",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -250,11 +251,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.files_upload_page_table.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.files_upload_page_table.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -265,11 +266,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.videos_upload_page_table.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.videos_upload_page_table.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -280,11 +281,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -295,11 +296,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.authn.login_component.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.authn.login_component.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -310,11 +311,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learner_dashboard.widget_sidebar.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learner_dashboard.widget_sidebar.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -325,11 +326,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learner_dashboard.no_courses_view.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learner_dashboard.no_courses_view.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Replace,
                     widget: {
@@ -340,11 +341,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learner_dashboard.course_list.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learner_dashboard.course_list.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -355,11 +356,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learner_dashboard.course_card_banner.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learner_dashboard.course_card_banner.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -370,11 +371,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learner_dashboard.course_card_action.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learner_dashboard.course_card_action.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -385,11 +386,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learner_dashboard.dashboard_modal.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learner_dashboard.dashboard_modal.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -400,11 +401,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_outline_sidebar.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_outline_sidebar.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -415,11 +416,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.progress_certificate_status.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.progress_certificate_status.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -430,11 +431,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_learning.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_learning.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -445,11 +446,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_tab_links.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_tab_links.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -460,11 +461,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_breadcrumbs.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_breadcrumbs.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -475,11 +476,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.learner_tools.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.learner_tools.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -490,11 +491,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.progress_tab_course_grade.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.progress_tab_course_grade.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -505,11 +506,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.progress_tab_related_links.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.progress_tab_related_links.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -520,11 +521,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -535,11 +536,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -550,11 +551,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.progress_tab_grade_breakdown.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.progress_tab_grade_breakdown.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -565,11 +566,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.unit_title.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.unit_title.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -580,11 +581,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.sequence_navigation.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.sequence_navigation.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -595,11 +596,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_outline_sidebar_trigger.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_outline_sidebar_trigger.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -610,11 +611,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -625,11 +626,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_home_section_outline.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_home_section_outline.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -640,11 +641,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_recommendations.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_recommendations.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -655,11 +656,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.content_iframe_loader.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.content_iframe_loader.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -670,11 +671,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.content_iframe_error.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.content_iframe_error.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -685,11 +686,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.sequence_container.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.sequence_container.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -700,11 +701,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.gated_unit_content_message.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.gated_unit_content_message.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -715,11 +716,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.next_unit_top_nav_trigger.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.next_unit_top_nav_trigger.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -730,11 +731,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_outline_tab_notifications.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_outline_tab_notifications.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -745,11 +746,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.notification_widget.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.notification_widget.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -760,11 +761,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.notification_tray.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.notification_tray.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -775,11 +776,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -790,11 +791,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.notifications_discussions_sidebar.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.notifications_discussions_sidebar.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -805,11 +806,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_exit_view_courses.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_exit_view_courses.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -820,11 +821,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -835,11 +836,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.account.id_verification_page.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.account.id_verification_page.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -850,11 +851,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.account.additional_profile_fields.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.account.additional_profile_fields.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -865,11 +866,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.profile.additional_profile_fields.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.profile.additional_profile_fields.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Insert,
                     widget: {
@@ -880,11 +881,11 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_desktop_main_menu.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_desktop_main_menu.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
@@ -905,11 +906,11 @@ def register_mfe_plugin_slots() -> None:
                     ),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_mobile_main_menu.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_mobile_main_menu.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
@@ -930,11 +931,11 @@ def register_mfe_plugin_slots() -> None:
                     ),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_desktop_logged_out_items.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_desktop_logged_out_items.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
@@ -950,11 +951,11 @@ def register_mfe_plugin_slots() -> None:
                     ),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_mobile_logged_out_items.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_mobile_logged_out_items.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
@@ -970,55 +971,55 @@ def register_mfe_plugin_slots() -> None:
                     ),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_desktop_secondary_menu.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_desktop_secondary_menu.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaMenuItems(widget, []),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_desktop.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_desktop.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaHeaderDesktopShell(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_mobile.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_mobile.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaHeaderMobileShell(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_learning_course_info.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_learning_course_info.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaHeaderLearningCourseInfo(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_learning_help.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_learning_help.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Replace,
                     widget: {
@@ -1029,82 +1030,83 @@ def register_mfe_plugin_slots() -> None:
                     },
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_learning_logged_out_items.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_learning_logged_out_items.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaLearningLoggedOutItems(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_desktop_user_menu.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_desktop_user_menu.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaHeaderUserMenuSupport(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_mobile_user_menu.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_mobile_user_menu.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaHeaderUserMenuSupport(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_learning_user_menu.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_learning_user_menu.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaLearningUserMenuSupport(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_desktop_user_menu_toggle.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_desktop_user_menu_toggle.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaHeaderUserMenuToggle(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_mobile_user_menu_trigger.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_mobile_user_menu_trigger.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaMobileUserMenuTrigger(widget),
                 },
                 """,
-            ),
-            (
-                _mfe,
-                "org.openedx.frontend.layout.header_learning_user_menu_toggle.v1",
-                """
+                ),
+                (
+                    _mfe,
+                    "org.openedx.frontend.layout.header_learning_user_menu_toggle.v1",
+                    """
                 {
                     op: PLUGIN_OPERATIONS.Modify,
                     widgetId: 'default_contents',
                     fn: (widget) => withMerekaLearningUserMenuToggle(widget),
                 },
                 """,
-            ),
-        ])
+                ),
+            ]
+        )

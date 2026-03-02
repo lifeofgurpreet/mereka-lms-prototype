@@ -47,8 +47,8 @@ class ListUnsubscribeMiddleware:
             List-Unsubscribe: <https://academyv2.mereka.io/api/notifications/v1/unsubscribe/?token=...>
             List-Unsubscribe-Post: List-Unsubscribe=One-Click
         """
-        if hasattr(message, 'extra_headers'):
+        if hasattr(message, "extra_headers"):
             message.extra_headers = message.extra_headers or {}
-            message.extra_headers['List-Unsubscribe'] = f'<{unsubscribe_url}>'
-            message.extra_headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
+            message.extra_headers["List-Unsubscribe"] = f"<{unsubscribe_url}>"
+            message.extra_headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
             logger.info(f"Added List-Unsubscribe header: {unsubscribe_url}")
