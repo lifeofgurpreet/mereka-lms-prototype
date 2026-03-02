@@ -58,6 +58,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - canonical file output mode: `make qa-runtime-blocker-infra-prompt OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt`.
     - default prompt input now resolves via stable latest sweep pointers (`frontend-runtime-blocker-sweep-latest-{both,dev,prod}.summary.json`).
     - generated prompt now includes fixed execution/verification/rollback command contract for infra remediation.
+    - canonical concise status command: `make qa-runtime-blocker-status` (or `OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt`).
     - `.github/workflows/frontend-runtime-qa.yml` now emits `var/qa/frontend-runtime-blocker-infra-prompt.txt` as a runtime QA artifact for direct infra handoff.
     - latest result remains stable and isolated to the known dev credentials runtime blockers (`prod auth-surfaces` passes; `dev auth-surfaces` credentials 500 + credentials cluster timezone/tzdata fail).
   - Auth-surface checker is now non-prod TLS tolerant (`-k` for `dev`/`staging`) to prevent self-signed certificate noise from masking real auth/runtime failures.
