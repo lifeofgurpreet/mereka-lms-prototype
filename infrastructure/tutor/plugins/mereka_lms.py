@@ -111,7 +111,10 @@ if "django_prometheus" in INSTALLED_APPS:
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
 
-# NOTE: Prometheus URLs are registered via PluginURLs in openedx_prometheus/apps.py.
+# Ensure /metrics URL wiring even when PluginURLs auto-discovery is unavailable.
+ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
+    ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
 """.strip()
 
 ###############################################################################
@@ -298,7 +301,11 @@ if 'django_prometheus' in INSTALLED_APPS:
 # NOTE: URL patterns for custom modules are registered via Open edX's plugin
 # URL system (PluginURLs in each app's AppConfig.plugin_app). This uses
 # get_plugin_url_patterns(ProjectType.LMS) in lms/urls.py to auto-discover
-# URLs from INSTALLED_APPS. No manual URL wiring needed here.
+# URLs from INSTALLED_APPS.
+# Keep explicit URL override to preserve /metrics even on mixed plugin-app revisions.
+ROOT_URLCONF_OVERRIDES = globals().get('ROOT_URLCONF_OVERRIDES', [])
+if 'openedx_prometheus.urls' not in ROOT_URLCONF_OVERRIDES:
+    ROOT_URLCONF_OVERRIDES.insert(0, 'openedx_prometheus.urls')
 
 # In-App Notifications (Email Phase 3)
 _safe_add_app('openedx_notifications')
@@ -2191,7 +2198,7 @@ hooks.Filters.ENV_PATCHES.add_item(
         "openedx-cms-production-settings",
         f"""
 {_CMS_PROMETHEUS_METRICS_SNIPPET}
-# No manual ROOT_URLCONF_OVERRIDES needed.
+# Explicit ROOT_URLCONF_OVERRIDES keeps /metrics stable across plugin API variations.
 """,
     )
 )
