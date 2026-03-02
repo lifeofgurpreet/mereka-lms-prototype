@@ -43,6 +43,21 @@ images:
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
     newTag: nreum-clean-202602200416
     digest: sha256:185bbcc3fa70df166a0c9c17cc72ecad643e690f5dba330682556ea79dbba0c8
+  # Enterprise backend services: pin away from :latest.
+  # newTag should be updated to a build-specific tag (e.g. git-SHA or CI timestamp)
+  # after images are rebuilt; digests should be added at that point.
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-catalog
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-catalog
+    newTag: "21.0.0"
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy
+    newTag: "21.0.0"
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access
+    newTag: "21.0.0"
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager
+    newTag: "21.0.0"
 
 # Production replica counts (higher for availability)
 replicas:
