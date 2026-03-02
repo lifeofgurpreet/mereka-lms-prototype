@@ -19,11 +19,15 @@
 # Env:
 #   REQUIRE_SECRETS=1                        Fail when primary creds are missing (default: 1)
 #   REQUIRE_STUDIO_CANARY=0                  Fail when Studio staff creds are missing (default: 0)
+#   RUN_LOCAL_LOGIN_CANARY=0                 Also run native /authn/login credential canary (default: 0)
+#   REQUIRE_LOCAL_CANARY=0                   Fail when local-login creds are missing (default: 0)
 #   SSO_CANARY_TIMEOUT_SECONDS=180           Per-run timeout
 #   SSO_CANARY_EMAIL[_PROD|_DEV]             Primary canary email
 #   SSO_CANARY_PASSWORD[_PROD|_DEV]          Primary canary password
 #   SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV]      Optional Studio-access canary email (staff)
 #   SSO_CANARY_STUDIO_PASSWORD[_PROD|_DEV]   Optional Studio-access canary password
+#   LOCAL_CANARY_EMAIL[_PROD|_DEV]           Optional native authn canary email/user
+#   LOCAL_CANARY_PASSWORD[_PROD|_DEV]        Optional native authn canary password
 #   SSO_CANARY_DEBUG=1                       Emit extra diagnostics
 #
 set -euo pipefail
@@ -34,6 +38,8 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 ENV_SCOPE="prod" # prod|dev|both
 REQUIRE_SECRETS="${REQUIRE_SECRETS:-1}"
 REQUIRE_STUDIO_CANARY="${REQUIRE_STUDIO_CANARY:-0}"
+RUN_LOCAL_LOGIN_CANARY="${RUN_LOCAL_LOGIN_CANARY:-0}"
+REQUIRE_LOCAL_CANARY="${REQUIRE_LOCAL_CANARY:-0}"
 SSO_CANARY_TIMEOUT_SECONDS="${SSO_CANARY_TIMEOUT_SECONDS:-180}"
 SSO_CANARY_DEBUG="${SSO_CANARY_DEBUG:-0}"
 OUT_DIR="${OUT_DIR:-$REPO_ROOT/var/auth-sso-canary}"
@@ -46,11 +52,15 @@ Usage: ./scripts/qa/verify-authenticated-sso-canary.sh [--env prod|dev|both]
 Env:
   REQUIRE_SECRETS=1                        Fail when primary creds are missing (default: 1)
   REQUIRE_STUDIO_CANARY=0                  Fail when Studio staff creds are missing (default: 0)
+  RUN_LOCAL_LOGIN_CANARY=0                 Also run native /authn/login credential canary (default: 0)
+  REQUIRE_LOCAL_CANARY=0                   Fail when local-login creds are missing (default: 0)
   SSO_CANARY_TIMEOUT_SECONDS=180           Per-run timeout (seconds)
   SSO_CANARY_EMAIL[_PROD|_DEV]             Primary canary email
   SSO_CANARY_PASSWORD[_PROD|_DEV]          Primary canary password
   SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV]      Optional Studio-access canary email (staff)
   SSO_CANARY_STUDIO_PASSWORD[_PROD|_DEV]   Optional Studio-access canary password
+  LOCAL_CANARY_EMAIL[_PROD|_DEV]           Optional native authn canary email/user
+  LOCAL_CANARY_PASSWORD[_PROD|_DEV]        Optional native authn canary password
   SSO_CANARY_DEBUG=1                       Enable debug logging
 USAGE_EOF
 }
@@ -86,6 +96,7 @@ run_playwright_canary() {
   local password="$6"
   local run_id="$7"
   local require_studio_access="$8" # 0|1
+  local login_flow="${9:-oidc}" # oidc|local
 
   if ! CANARY_ENV_NAME="$env_name" \
     CANARY_LMS_DOMAIN="$lms_domain" \
@@ -95,6 +106,7 @@ run_playwright_canary() {
     CANARY_PASSWORD="$password" \
     CANARY_RUN_ID="$run_id" \
     CANARY_REQUIRE_STUDIO_ACCESS="$require_studio_access" \
+    CANARY_LOGIN_FLOW="$login_flow" \
     OUT_DIR="$OUT_DIR" \
     SSO_CANARY_DEBUG="$SSO_CANARY_DEBUG" \
     timeout "${SSO_CANARY_TIMEOUT_SECONDS}s" python3 - <<'PY'
@@ -110,6 +122,9 @@ mfe_domain = os.environ["CANARY_MFE_DOMAIN"]
 email = os.environ["CANARY_EMAIL"]
 password = os.environ["CANARY_PASSWORD"]
 require_studio_access = os.environ.get("CANARY_REQUIRE_STUDIO_ACCESS", "0") == "1"
+login_flow = os.environ.get("CANARY_LOGIN_FLOW", "oidc").strip().lower()
+if login_flow not in {"oidc", "local"}:
+    login_flow = "oidc"
 debug = os.environ.get("SSO_CANARY_DEBUG", "0") == "1"
 out_dir = Path(os.environ["OUT_DIR"])
 run_id = os.environ["CANARY_RUN_ID"]
@@ -118,11 +133,14 @@ _http_trace = []
 _studio_cookie_names = set()
 
 base_url = f"https://{lms_domain}"
-login_url = f"{base_url}/auth/login/oidc/"
+oidc_login_url = f"{base_url}/auth/login/oidc/"
+local_login_url = f"https://{mfe_domain}/authn/login?next=%2F"
+login_url = local_login_url if login_flow == "local" else oidc_login_url
 dashboard_url = f"{base_url}/dashboard"
 studio_url = f"https://{studio_domain}/"
 studio_home_url = f"https://{studio_domain}/home/"
 sso_mfe_learner_dashboard_url = f"https://{mfe_domain}/learner-dashboard"
+home_mfe_url = f"https://{mfe_domain}/"
 
 screenshot_path = out_dir / f"{run_id}-failure.png"
 studio_failure_path = out_dir / f"{run_id}-studio-failure.png"
@@ -370,32 +388,117 @@ with sync_playwright() as p:
 
     try:
         if debug:
+            log(f"login_flow={login_flow}")
+        if debug:
             log(f"goto={login_url}")
         page.goto(login_url, wait_until="domcontentloaded", timeout=60000)
-        assert_not_auth_error_page(page, "oidc_entrypoint")
+        assert_not_auth_error_page(page, "login_entrypoint")
 
-        page.get_by_placeholder("Email or Username").fill(email, timeout=30000)
-        page.get_by_role("button", name=re.compile(r"Log in", re.I)).click(timeout=20000)
-        page.wait_for_load_state("domcontentloaded", timeout=60000)
-        assert_not_auth_error_page(page, "authentik_username_submitted")
+        if login_flow == "oidc":
+            page.get_by_placeholder("Email or Username").fill(email, timeout=30000)
+            page.get_by_role("button", name=re.compile(r"Log in", re.I)).click(timeout=20000)
+            page.wait_for_load_state("domcontentloaded", timeout=60000)
+            assert_not_auth_error_page(page, "authentik_username_submitted")
 
-        page.get_by_placeholder("Password").fill(password, timeout=30000)
-        page.get_by_role("button", name=re.compile(r"Continue", re.I)).click(timeout=20000)
-        page.wait_for_load_state("domcontentloaded", timeout=60000)
-        assert_not_auth_error_page(page, "authentik_password_submitted")
+            page.get_by_placeholder("Password").fill(password, timeout=30000)
+            page.get_by_role("button", name=re.compile(r"Continue", re.I)).click(timeout=20000)
+            page.wait_for_load_state("domcontentloaded", timeout=60000)
+            assert_not_auth_error_page(page, "authentik_password_submitted")
 
-        wait_for_app_return(page)
-        assert_not_auth_error_page(page, "post_callback")
-        if debug:
-            log(f"post_callback_url={page.url}")
+            wait_for_app_return(page)
+            assert_not_auth_error_page(page, "post_callback")
+            if debug:
+                log(f"post_callback_url={page.url}")
+        else:
+            username_input = page.locator(
+                "input[name='emailOrUsername'], "
+                "input[name='email'], "
+                "input[name='username'], "
+                "input[type='email'], "
+                "input[autocomplete='username'], "
+                "input[id*='email' i], "
+                "input[id*='username' i]"
+            ).first
+            password_input = page.locator(
+                "input[name='password'], input[type='password'], input[autocomplete='current-password']"
+            ).first
 
-        me_resp = context.request.get(f"{base_url}/api/user/v1/me")
+            try:
+                username_input.wait_for(state="visible", timeout=30000)
+                username_input.fill(email, timeout=30000)
+            except Exception as exc:
+                fail(f"local_authn_username_input_not_ready: {exc}", page=page)
+
+            try:
+                password_input.wait_for(state="visible", timeout=30000)
+                password_input.fill(password, timeout=30000)
+            except Exception as exc:
+                fail(f"local_authn_password_input_not_ready: {exc}", page=page)
+
+            submit_clicked = False
+            try:
+                page.get_by_role("button", name=re.compile(r"log in|sign in|continue", re.I)).first.click(timeout=20000)
+                submit_clicked = True
+            except Exception:
+                pass
+            if not submit_clicked:
+                try:
+                    password_input.press("Enter")
+                except Exception as exc:
+                    fail(f"local_authn_submit_failed: {exc}", page=page)
+
+            page.wait_for_load_state("domcontentloaded", timeout=60000)
+            if "/authn/login" in (page.url or ""):
+                try:
+                    page.wait_for_url(
+                        re.compile(rf"^https://({re.escape(lms_domain)}|{re.escape(mfe_domain)})/(?!authn/login).*"),
+                        timeout=30000,
+                    )
+                except PWTimeout:
+                    pass
+            if "/authn/login" in (page.url or ""):
+                fail(
+                    f"local_authn_submit_still_on_login url={page.url} "
+                    "(credentials rejected or session cookie not set)",
+                    page=page,
+                )
+            assert_not_auth_error_page(page, "local_authn_submitted")
+
+        session_api_base = f"https://{mfe_domain}" if login_flow == "local" else base_url
+        me_resp = context.request.get(f"{session_api_base}/api/user/v1/me")
         me_status = me_resp.status
         me_body = me_resp.text() or ""
         if me_status != 200:
-            fail(f"/api/user/v1/me status={me_status} (expected 200)", page=page)
+            fail(f"/api/user/v1/me status={me_status} (expected 200) base={session_api_base}", page=page)
         if "username" not in me_body:
             fail("/api/user/v1/me response missing username marker", page=page)
+
+        if login_flow == "local":
+            if debug:
+                log(f"goto={home_mfe_url}")
+            page.goto(home_mfe_url, wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_load_state("domcontentloaded", timeout=60000)
+            if "/authn/login" in (page.url or ""):
+                fail(
+                    f"local_home_redirected_to_authn_login url={page.url} "
+                    "(login seemed successful but session did not persist)",
+                    page=page,
+                )
+            assert_not_auth_error_page(page, "local_home_navigation")
+
+            if debug:
+                log(f"goto={sso_mfe_learner_dashboard_url}")
+            page.goto(sso_mfe_learner_dashboard_url, wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_load_state("domcontentloaded", timeout=60000)
+            if "/authn/login" in (page.url or ""):
+                fail(
+                    f"local_learner_dashboard_redirected_to_authn_login url={page.url} "
+                    "(likely login_refresh 401 / cookie domain drift)",
+                    page=page,
+                )
+            assert_not_auth_error_page(page, "local_mfe_learner_dashboard")
+            log("OK local authn session validated")
+            raise SystemExit(0)
 
         # Studio SSO is sensitive to cookie/session churn if we touch the Authn MFE
         # first (it can trigger refresh flows that overwrite/clear session state).
@@ -559,7 +662,8 @@ run_primary_env() {
     "$email" \
     "$password" \
     "$(date -u +%Y%m%dT%H%M%SZ)-${env_name}" \
-    "0"
+    "0" \
+    "oidc"
 }
 
 run_studio_env() {
@@ -598,17 +702,64 @@ run_studio_env() {
     "$email" \
     "$password" \
     "$(date -u +%Y%m%dT%H%M%SZ)-${env_name}-studio" \
-    "1"
+    "1" \
+    "oidc"
+}
+
+run_local_login_env() {
+  local env_name="$1"
+  local lms_domain studio_domain mfe_domain email password
+
+  if [[ "$env_name" == "prod" ]]; then
+    lms_domain="$LMS_DOMAIN"
+    studio_domain="$STUDIO_DOMAIN"
+    mfe_domain="$MFE_DOMAIN"
+    email="${LOCAL_CANARY_EMAIL_PROD:-${LOCAL_CANARY_EMAIL:-${SSO_CANARY_EMAIL_PROD:-${SSO_CANARY_EMAIL:-}}}}"
+    password="${LOCAL_CANARY_PASSWORD_PROD:-${LOCAL_CANARY_PASSWORD:-${SSO_CANARY_PASSWORD_PROD:-${SSO_CANARY_PASSWORD:-}}}}"
+  else
+    lms_domain="$DEV_LMS_DOMAIN"
+    studio_domain="$DEV_STUDIO_DOMAIN"
+    mfe_domain="$DEV_MFE_DOMAIN"
+    email="${LOCAL_CANARY_EMAIL_DEV:-${LOCAL_CANARY_EMAIL:-${SSO_CANARY_EMAIL_DEV:-${SSO_CANARY_EMAIL:-}}}}"
+    password="${LOCAL_CANARY_PASSWORD_DEV:-${LOCAL_CANARY_PASSWORD:-${SSO_CANARY_PASSWORD_DEV:-${SSO_CANARY_PASSWORD:-}}}}"
+  fi
+
+  if [[ -z "${email:-}" || -z "${password:-}" ]]; then
+    if [[ "$REQUIRE_LOCAL_CANARY" == "1" ]]; then
+      echo "FAIL $env_name: missing local authn canary credentials (set LOCAL_CANARY_EMAIL[_${env_name^^}] and LOCAL_CANARY_PASSWORD[_${env_name^^}])" >&2
+      failures=$((failures + 1))
+      return
+    fi
+    echo "SKIP $env_name: missing local authn canary credentials (REQUIRE_LOCAL_CANARY=0)"
+    return
+  fi
+
+  run_playwright_canary \
+    "$env_name" \
+    "$lms_domain" \
+    "$studio_domain" \
+    "$mfe_domain" \
+    "$email" \
+    "$password" \
+    "$(date -u +%Y%m%dT%H%M%SZ)-${env_name}-local" \
+    "0" \
+    "local"
 }
 
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
   run_primary_env "prod"
   run_studio_env "prod"
+  if [[ "$RUN_LOCAL_LOGIN_CANARY" == "1" ]]; then
+    run_local_login_env "prod"
+  fi
 fi
 
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
   run_primary_env "dev"
   run_studio_env "dev"
+  if [[ "$RUN_LOCAL_LOGIN_CANARY" == "1" ]]; then
+    run_local_login_env "dev"
+  fi
 fi
 
 if [[ "$failures" -gt 0 ]]; then
