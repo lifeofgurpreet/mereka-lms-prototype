@@ -61,6 +61,8 @@ auth_log_dev="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-dev-${ts}
 auth_log_prod="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-prod-${ts}.log"
 cred_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-credentials-dev-${ts}.log"
 summary_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.summary.log"
+summary_json="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.summary.json"
+records_file="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.records.tsv"
 
 pass=0
 fail=0
@@ -75,13 +77,16 @@ run_check() {
   if "$@" 2>&1 | tee "$log_file"; then
     echo "PASS: $label" | tee -a "$summary_log"
     pass=$((pass + 1))
+    printf "%s\t%s\t%s\n" "$label" "pass" "$log_file" >>"$records_file"
   else
     echo "FAIL: $label" | tee -a "$summary_log"
     fail=$((fail + 1))
+    printf "%s\t%s\t%s\n" "$label" "fail" "$log_file" >>"$records_file"
   fi
 }
 
 : >"$summary_log"
+: >"$records_file"
 echo "Frontend runtime blocker sweep (${ENVIRONMENT}) @ ${ts}" | tee -a "$summary_log"
 
 if [[ "$ENVIRONMENT" == "prod" || "$ENVIRONMENT" == "both" ]]; then
@@ -92,6 +97,7 @@ if [[ "$ENVIRONMENT" == "prod" || "$ENVIRONMENT" == "both" ]]; then
     "prod"
 else
   skip=$((skip + 1))
+  printf "%s\t%s\t%s\n" "auth-surfaces:prod" "skip" "" >>"$records_file"
 fi
 
 if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "both" ]]; then
@@ -102,6 +108,7 @@ if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "both" ]]; then
     "dev"
 else
   skip=$((skip + 1))
+  printf "%s\t%s\t%s\n" "auth-surfaces:dev" "skip" "" >>"$records_file"
 fi
 
 if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "both" ]]; then
@@ -113,6 +120,7 @@ if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "both" ]]; then
 else
   echo "SKIP: credentials-readiness cluster sweep is dev-only" | tee -a "$summary_log"
   skip=$((skip + 1))
+  printf "%s\t%s\t%s\n" "credentials-readiness:dev:cluster" "skip" "" >>"$records_file"
 fi
 
 echo "" | tee -a "$summary_log"
@@ -125,5 +133,42 @@ if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "both" ]]; then
   echo "Credentials log: $cred_log" | tee -a "$summary_log"
 fi
 echo "Summary log: $summary_log" | tee -a "$summary_log"
+echo "Summary json: $summary_json" | tee -a "$summary_log"
+
+python3 - "$ENVIRONMENT" "$ts" "$pass" "$fail" "$skip" "$summary_log" "$summary_json" "$records_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+environment, ts, pass_count, fail_count, skip_count, summary_log, summary_json, records_file = sys.argv[1:9]
+checks = []
+for line in Path(records_file).read_text().splitlines():
+    if not line.strip():
+        continue
+    label, status, log_path = (line.split("\t") + ["", ""])[:3]
+    checks.append(
+        {
+            "label": label,
+            "status": status,
+            "log": log_path or None,
+        }
+    )
+
+payload = {
+    "environment": environment,
+    "timestamp": ts,
+    "summary": {
+        "pass": int(pass_count),
+        "fail": int(fail_count),
+        "skip": int(skip_count),
+    },
+    "artifacts": {
+        "summary_log": summary_log,
+        "checks": checks,
+    },
+}
+
+Path(summary_json).write_text(json.dumps(payload, indent=2) + "\n")
+PY
 
 [[ "$fail" -eq 0 ]]

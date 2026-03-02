@@ -44,7 +44,9 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` with default `auto` policy (`dev=1`, `prod=0`) so authenticated canary runs remain signal-focused in non-prod while production stays TLS-strict.
   - Canonical blocker sweep lane added for repeated tracking:
     - `make qa-frontend-runtime-blocker-sweep-both`
-    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T111511Z.summary.log`
+    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T112113Z.summary.log`
+    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T112113Z.summary.json`
+    - machine-readable summary artifact: `var/qa/frontend-runtime-blocker-sweep-*.summary.json` (plus per-check `*.records.tsv`)
     - latest result remains stable and isolated to the known dev credentials runtime blockers (`prod auth-surfaces` passes; `dev auth-surfaces` credentials 500 + credentials cluster timezone/tzdata fail).
   - Auth-surface checker is now non-prod TLS tolerant (`-k` for `dev`/`staging`) to prevent self-signed certificate noise from masking real auth/runtime failures.
   - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`). Direct pod inspection confirms `/usr/share/zoneinfo/UTC` is absent and `python -m pip show tzdata` returns not found.
