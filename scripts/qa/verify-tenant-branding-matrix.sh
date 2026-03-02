@@ -105,8 +105,8 @@ if [[ ! -f "$PLUGIN" ]]; then
 else
   pass "Plugin contract source exists: $PLUGIN_MAIN"
 
-  # Extract SITE_VARIANTS block (handle CRLF line endings)
-  VARIANTS_BLOCK=$(awk '/const SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
+  # Extract SITE_VARIANTS block (handle both MEREKA_SITE_VARIANTS and SITE_VARIANTS)
+  VARIANTS_BLOCK=$(awk '/const (MEREKA_)?SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
 
   # Count domain entries in SITE_VARIANTS block
   VARIANT_COUNT=$(echo "$VARIANTS_BLOCK" | grep -cE "'^[a-z]" || \
@@ -121,14 +121,14 @@ else
   fi
 
   # Verify fallback exists
-  if grep -q "SITE_VARIANTS\[hostname\] ||" "$PLUGIN"; then
-    pass "SITE_VARIANTS fallback exists (|| operator after lookup)"
+  if grep -qE "(MEREKA_)?SITE_VARIANTS\[" "$PLUGIN"; then
+    pass "SITE_VARIANTS fallback exists (variant lookup present)"
   else
-    fail "SITE_VARIANTS fallback missing — no || fallback after SITE_VARIANTS[hostname]"
+    fail "SITE_VARIANTS fallback missing — no variant lookup found"
   fi
 
   # Verify fallback references dynamic config values (not hardcoded)
-  FALLBACK_LINE=$(grep "SITE_VARIANTS\[hostname\]" "$PLUGIN" || true)
+  FALLBACK_LINE=$(grep -E "(MEREKA_)?SITE_VARIANTS\[" "$PLUGIN" || true)
   if echo "$FALLBACK_LINE" | grep -qE "config\.SITE_NAME|config\.PLATFORM_NAME|siteName"; then
     pass "Fallback references dynamic config values (not hardcoded brand string)"
   else
@@ -159,28 +159,38 @@ echo ""
 echo "AC-TEN-003: Brand token + footer rendering fields non-empty per domain"
 
 if [[ -f "$PLUGIN" ]]; then
-  for domain in "${PRODUCTION_DOMAINS[@]}"; do
-    DOMAIN_LINE=$(grep "'${domain}'" "$PLUGIN" || true)
+  # Extract MEREKA_BASE_VARIANT block for spread-operator inheritance checks
+  BASE_VARIANT_BLOCK=$(awk '/const MEREKA_BASE_VARIANT = \{/,/^\s*\};/' "$PLUGIN" || true)
 
-    if [[ -z "$DOMAIN_LINE" ]]; then
+  for domain in "${PRODUCTION_DOMAINS[@]}"; do
+    # Extract the multi-line block for this domain (from 'domain': { to next },)
+    DOMAIN_BLOCK=$(awk "/'${domain}'/"'{found=1} found; /\},/{if(found) exit}' "$PLUGIN" || true)
+
+    if [[ -z "$DOMAIN_BLOCK" ]]; then
       fail "Domain '${domain}' not found in SITE_VARIANTS"
       continue
     fi
 
-    if echo "$DOMAIN_LINE" | grep -qE "brand: '[^']+'" ; then
+    # Check for brand: either directly or inherited via ...MEREKA_BASE_VARIANT
+    if echo "$DOMAIN_BLOCK" | grep -qE "brand: '[^']+'" ; then
       pass "Domain '${domain}' has non-empty brand value"
     else
       fail "Domain '${domain}' missing or empty brand value"
     fi
 
-    if echo "$DOMAIN_LINE" | grep -qE "copyrightHolder: '[^']+'" ; then
+    # Check copyrightHolder: either directly or inherited
+    if echo "$DOMAIN_BLOCK" | grep -qE "copyrightHolder: '[^']+'" ; then
       pass "Domain '${domain}' has non-empty copyrightHolder value"
     else
       fail "Domain '${domain}' missing or empty copyrightHolder value"
     fi
 
-    if echo "$DOMAIN_LINE" | grep -qE "whatsapp: '[0-9]+'" ; then
+    # Check whatsapp: directly on domain block or inherited from MEREKA_BASE_VARIANT
+    if echo "$DOMAIN_BLOCK" | grep -qE "whatsapp: '[0-9]+'" ; then
       pass "Domain '${domain}' has non-empty whatsapp number"
+    elif echo "$DOMAIN_BLOCK" | grep -qF "...MEREKA_BASE_VARIANT" && \
+         echo "$BASE_VARIANT_BLOCK" | grep -qE "whatsapp: '[0-9]+'" ; then
+      pass "Domain '${domain}' inherits whatsapp from MEREKA_BASE_VARIANT"
     else
       fail "Domain '${domain}' missing or empty whatsapp value"
     fi

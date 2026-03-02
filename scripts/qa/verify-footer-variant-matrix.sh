@@ -93,9 +93,11 @@ if [[ -f "$PLUGIN" ]]; then
     fail "MEREKA_SITE_VARIANTS entries missing 'copyrightHolder:' field"
   fi
 
-  # Check whatsapp field present in variants block
+  # Check whatsapp field present in variants block or base variant (via spread)
   if echo "$VARIANTS_BLOCK" | grep -q "whatsapp:"; then
     pass "MEREKA_SITE_VARIANTS entries contain 'whatsapp:' field"
+  elif grep -q "MEREKA_BASE_VARIANT" "$PLUGIN" && grep -q "whatsapp:" "$PLUGIN"; then
+    pass "MEREKA_SITE_VARIANTS inherits 'whatsapp:' from MEREKA_BASE_VARIANT"
   else
     fail "MEREKA_SITE_VARIANTS entries missing 'whatsapp:' field"
   fi
@@ -131,14 +133,25 @@ if not entry_match:
 entry = entry_match.group(1)
 pattern = rf"{re.escape(field)}\s*:\s*'([^'\\]|\\.)*'"
 field_match = re.search(pattern, entry)
-if not field_match:
-    raise SystemExit(3)
-
-value = re.search(r"'([^'\\]|\\.)*'", field_match.group(0)).group(0)[1:-1]
-if value:
-    print("found")
+if field_match:
+    value = re.search(r"'([^'\\]|\\.)*'", field_match.group(0)).group(0)[1:-1]
+    if value:
+        print("found")
+    else:
+        raise SystemExit(4)
+elif "...MEREKA_BASE_VARIANT" in entry:
+    # Field may be inherited from base variant via spread operator
+    base_match = re.search(r"const MEREKA_BASE_VARIANT = \{(.*?)\n\s*\};", text, re.S)
+    if base_match:
+        base_field = re.search(pattern, base_match.group(1))
+        if base_field:
+            print("found (inherited)")
+        else:
+            raise SystemExit(3)
+    else:
+        raise SystemExit(3)
 else:
-    raise SystemExit(4)
+    raise SystemExit(3)
 PY
 }
 

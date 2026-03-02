@@ -3,6 +3,7 @@
   "source_path": "brands/mereka/tokens/tokens.css",
   "source_branch": "main",
   "source_commit": "667cfa6e40c6d67bd1cac6efa144a8ec69f5fa28",
-  "source_sha256": "335f20221ecdf3c824e9a51c12ea0043db5930fc2578e5d62b02bfba462dfb82",
-  "synced_at_utc": "2026-03-02T05:35:30Z"
+  "source_sha256": "4d300dc386f012952e61e954fe5fd223c7ea0ecd25f997fdf7442ec278dd6384",
+  "synced_at_utc": "2026-03-02T12:00:00Z",
+  "local_override": "gold #996b00 → #9e7000 for WCAG AA compliance (4.46:1 → 4.77:1)"
 }
