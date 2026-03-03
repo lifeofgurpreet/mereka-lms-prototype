@@ -128,7 +128,6 @@ jobs:
         with:
           gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
           skip_gke: 'true'
-          skip_gcloud: 'true'
 
       - name: Configure Docker for Artifact Registry
         run: |
@@ -371,7 +370,6 @@ jobs:
         with:
           gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
           skip_gke: 'true'
-          skip_gcloud: 'true'
 
       - name: Configure Docker for Artifact Registry
         run: |
@@ -569,7 +567,6 @@ jobs:
         with:
           gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
           skip_gke: 'true'
-          skip_gcloud: 'true'
 
       - name: Configure Docker for Artifact Registry
         run: |
