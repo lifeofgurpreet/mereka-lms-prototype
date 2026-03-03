@@ -17,6 +17,7 @@ on:
       - 'infrastructure/tutor/plugins/mereka_lms.py'
       - 'scripts/qa/validate-multisite-config.sh'
       - '.github/workflows/validate-multisite.yml'
+  merge_group:
   workflow_dispatch:
 
 permissions: {}

@@ -15,6 +15,7 @@ on:
       - 'tutor_env/env/build/openedx/locale/**'
       - 'scripts/infra/sync-translations.sh'
       - 'scripts/qa/verify-translations.sh'
+  merge_group:
   schedule:
     # Weekly on Mondays at 06:00 UTC (14:00 MYT)
     - cron: '0 6 * * 1'

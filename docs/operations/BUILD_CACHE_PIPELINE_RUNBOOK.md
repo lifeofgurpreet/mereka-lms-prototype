@@ -1,273 +1,371 @@
-# Build & Cache Pipeline Hardening Runbook
+# Build & Cache Pipeline Runbook
 
-> **Audience**: Platform Eng · **Owner**: Infra Team · **Last verified**: 2026-02-19
+> **Audience**: Platform Eng · **Owner**: Infra Team · **Last verified**: 2026-03-03
 >
-> Covers: cache hygiene, fast rebuild paths, image-tagging strategy, RKE2→GKE migration
-> notes, and artifact verification before production rollout.
+> Covers: CI architecture, ARC runner setup, registry (GHCR), tag strategy, cache
+> strategy, triggering builds, post-build GitOps, and a troubleshooting tree for
+> every failure mode we have hit.
 >
 > AC-OPS-211, AC-OPS-212, AC-OPS-213, AC-OPS-214
 
 ---
 
-## Quick Reference
+## Architecture Overview
 
-| Scenario | Command |
-|---|---|
-| Full rebuild (no cache) | `tutor images build openedx -a PIP_COMMAND=pip` |
-| Incremental rebuild (with cache) | `DOCKER_BUILDKIT=1 docker build --cache-from <prior-tag> ...` |
-| Tag both images | See [Step 2: Tag Strategy](#step-2-tag-strategy) |
-| Push to Artifact Registry | `docker push "${GAR}/openedx:${TAG}"` |
-| GitOps rollout | `./scripts/infra/release-openedx-gitops.sh ...` |
-| Verify image overrides contract | `./scripts/qa/verify-gitops-image-overrides.sh --check-infra` |
+### Registry: GHCR
 
----
+Images are published to the GitHub Container Registry. No GCP service account key
+is required — the workflow uses `GITHUB_TOKEN` for both push and pull.
 
-## Step 1: Canonical Rebuild Sequence (AC-OPS-211)
-
-### 1a. When to do a full rebuild
-
-Trigger a full rebuild when:
-- Open edX base image has changed (Tutor version bump, `requirements.txt` changes)
-- `infrastructure/tutor/apply-patches.sh` has new patches affecting Dockerfile layers
-- `tutor_env/` config has changed (e.g., new plugin, MFE branding changes)
-- Security advisory for a dependency in the image
-
-```bash
-export TUTOR_ROOT="$(pwd)/tutor_env"
-source infrastructure/tutor/tutor-env.sh
-
-# Full rebuild: LMS/CMS/workers (30–45 min, needs ≥12 GB Docker RAM)
-tutor images build openedx -a PIP_COMMAND=pip
-
-# Full rebuild: MFE (15–20 min)
-tutor images build mfe
-
-# Verify images are present
-docker images | grep -E "overhangio/openedx|overhangio/openedx-mfe"
+```
+Registry:  ghcr.io/biji-biji-initiative/mereka-lms
+Images:    ghcr.io/biji-biji-initiative/mereka-lms/openedx:<tag>
+           ghcr.io/biji-biji-initiative/mereka-lms/mfe:<tag>
 ```
 
-> **PIP_COMMAND=pip**: Tutor v21 defaults to `uv pip` which breaks `loremipsum==1.0.5`
-> (needs `pkg_resources`). Always pass `PIP_COMMAND=pip` for the openedx image build.
+Auth in workflow:
 
-### 1b. When to use cache (incremental build)
-
-Use `--cache-from` when only theme/static files have changed and you want to skip
-re-running the 20+ min pip install layer:
-
-```bash
-GAR="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
-PRIOR_TAG="mereka-brand-hotfix-full-v2"   # last known-good tag
-
-# Pull prior image to warm local Docker cache
-docker pull "${GAR}/openedx:${PRIOR_TAG}"
-
-# Build with cache
-DOCKER_BUILDKIT=1 docker build \
-  --cache-from "${GAR}/openedx:${PRIOR_TAG}" \
-  --tag docker.io/overhangio/openedx:latest \
-  "$(tutor config printroot)/env/build/openedx"
+```yaml
+- name: Log in to GHCR
+  uses: docker/login-action@v3
+  with:
+    registry: ghcr.io
+    username: ${{ github.actor }}
+    password: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-> **Cache busting**: If `requirements/edx/base.txt` or any Dockerfile `RUN pip install`
-> layer changed, Docker will miss the cache anyway. In that case fall back to full rebuild.
+No `gcloud auth configure-docker`, no `GCP_SA_KEY`. The `id-token: write` permission
+is only present on the `slsa-provenance` job (needed for Sigstore keyless signing).
 
-### 1c. Cache hygiene — when to bust
+### CI Runners: ARC on rke2-nonprod
 
-Force a fresh layer even with `--cache-from` by adding `--no-cache` or by touching
-the `Dockerfile` when:
+Heavy build jobs run on self-hosted ARC (Actions Runner Controller) runners deployed
+on the `rke2-nonprod` cluster:
 
-- A base OS/Python image (`FROM`) had a CVE patch
-- `loremipsum`, `mongoengine`, or any pinned dep version changed
-- You suspect a stale wheel from a prior broken build is being reused
-
-```bash
-# Bust all layers (safest option before a production release)
-tutor images build openedx -a PIP_COMMAND=pip --no-cache
-```
-
-### 1d. Post-build artifact check
-
-```bash
-# Confirm image exists and check size
-docker images docker.io/overhangio/openedx:latest --format "{{.Size}}"
-# Expected: ~3–4 GB for openedx, ~500 MB for mfe
-
-# Inspect entrypoint to catch silent build failures
-docker inspect docker.io/overhangio/openedx:latest \
-  --format '{{.Config.Entrypoint}}'
-# Expected: [/usr/local/bin/uwsgi ...]
-
-# Quick smoke: start container and check HTTP
-docker run --rm -d --name smoke-lms \
-  -p 18001:8000 \
-  docker.io/overhangio/openedx:latest lms
-sleep 5 && curl -sI http://localhost:18001/ | head -1
-docker stop smoke-lms
-```
-
----
-
-## Step 2: Tag Strategy (AC-OPS-212)
-
-### Standard tags (CI / routine releases)
-
-Use `{sha7}-{YYYYMMDDHHmmSS}` for all routine releases. This makes every tag
-traceable to a commit and build time.
-
-```bash
-TAG="$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M%S)"
-GAR="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
-
-# Tag both images with the same TAG
-docker tag docker.io/overhangio/openedx:latest "${GAR}/openedx:${TAG}"
-docker tag docker.io/overhangio/openedx-mfe:latest "${GAR}/openedx-mfe:${TAG}"
-
-# Push
-docker push "${GAR}/openedx:${TAG}"
-docker push "${GAR}/openedx-mfe:${TAG}"
-
-echo "TAG=${TAG}"  # record for release-openedx-gitops.sh
-```
-
-### Hotfix tags (manual branching fix)
-
-When fixing a branding or config issue without a full code change (e.g., after
-`apply-patches.sh` adds a new patch), use the `mereka-brand-hotfix-full-vN`
-naming convention. Increment `N` for each successive hotfix build.
-
-```bash
-# Find current hotfix number
-PREV_TAG=$(grep "mereka-brand-hotfix-full" \
-  deploy/k8s/overlays/production/kustomization.yaml | grep newTag | \
-  awk '{print $2}' | head -1)
-# e.g. mereka-brand-hotfix-full-v2
-
-N=$(echo "$PREV_TAG" | grep -o 'v[0-9]*$' | tr -d v)
-NEXT_N=$((N + 1))
-HOTFIX_TAG="mereka-brand-hotfix-full-v${NEXT_N}"
-
-docker tag docker.io/overhangio/openedx:latest "${GAR}/openedx:${HOTFIX_TAG}"
-docker push "${GAR}/openedx:${HOTFIX_TAG}"
-
-echo "HOTFIX_TAG=${HOTFIX_TAG}"
-```
-
-> **Use standard tags when possible.** Hotfix tags are for emergency fixes between
-> regular CI runs. They do not include the MFE image — only tag/push MFE separately
-> if MFE was actually rebuilt.
-
-### Fallback path: deploy without rebuilding
-
-If an image tag already exists in Artifact Registry (e.g., from a CI build), skip
-local build and push only the kustomization update:
-
-```bash
-# Verify tag exists in Artifact Registry before using it
-gcloud artifacts docker tags list \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx \
-  --filter="tag:${TAG}" --format="value(tag)"
-
-# If tag exists, go straight to GitOps rollout
-./scripts/infra/release-openedx-gitops.sh \
-  --openedx-tag "${TAG}" --mfe-tag "${MFE_TAG}" \
-  --target-env production --apply --commit --push
-```
-
-### Canonical release orchestration
-
-```bash
-./scripts/infra/release-openedx-gitops.sh \
-  --openedx-tag "${TAG}" \
-  --mfe-tag "${MFE_TAG}" \
-  --target-env production \
-  --apply --commit --push --verify-runtime
-```
-
-> **Known bug (fixed 2026-02-19):** Earlier versions of `release-openedx-gitops.sh`
-> missed the double-override entry in bbi-infrastructure (`asia-southeast1-docker.pkg.dev/.../openedx`
-> without `-mfe`). This is now fixed — the script updates all four image entries.
-> If you see the LMS deployment not rolling after a release, check that the
-> `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx` entry in
-> `bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml` was updated.
-
----
-
-## Step 3: RKE2 → GKE Migration Notes (AC-OPS-213)
-
-### Architecture compatibility
-
-Both RKE2 (VPS/Kind) and GKE use `linux/amd64`. Images built on either platform
-can be pushed to the same Artifact Registry and deployed to either cluster **without
-rebuilding**, as long as:
-
-- The base image is `linux/amd64` (Tutor's upstream images are amd64-only)
-- No ARM-specific binary was accidentally linked (rare, but verify with `docker inspect`)
-
-```bash
-# Verify image architecture before cross-env deploy
-docker inspect "${GAR}/openedx:${TAG}" \
-  --format '{{.Architecture}}/{{.Os}}'
-# Expected: amd64/linux
-```
-
-### What to rebuild vs copy
-
-| Scenario | Rebuild? | Copy from registry? |
+| Runner label | Resources | Node |
 |---|---|---|
-| Same code, new K8s cluster | No | Yes — pull tag, push to same GAR |
-| New Tutor version (Ulmo patch) | Yes | No |
-| Only kustomization/config change | No | Yes — reuse existing tag |
-| Theme/CSS change (apply-patches) | Yes (openedx only) | MFE can be reused |
-| MFE frontend code change | Yes (mfe only) | openedx can be reused |
-| Base OS security patch | Yes (both) | No |
+| `mereka-k8s-heavy-builders` | 4 CPU / 12 GB RAM + DinD sidecar | rke2-nonprod |
 
-### Registry separation
+Runners scale 0 → 3. When idle, no pods exist. A queued build triggers the scale-up.
 
-RKE2 (VPS) cluster points to the **same** Artifact Registry as GKE. No separate
-registry per cluster. Tag naming convention is shared. Key difference:
+**DinD sidecar** (`docker:24-dind`):
+- Provides a full Docker daemon for `tutor images build`
+- Communicates over TLS TCP socket (`tcp://localhost:2376`)
+- MTU is **1280** (required for Cilium VXLAN tunneling on RKE2)
+- `--data-root=/cache/docker/daemon` (persistent PVC)
+
+**PVC caches** (survive pod restarts, reduce build time from 30-45 min to ~5 min warm):
+
+| PVC | Size | Mount | Contents |
+|---|---|---|---|
+| `arc-docker-cache` | 50 Gi | `/cache/docker` (DinD) | Docker layer cache |
+| `arc-dep-cache` | 10 Gi | `/cache/deps` (runner) | pip / npm / Playwright |
+
+Manifests: `deploy/k8s/base/arc/`
+
+### Workflow: `.github/workflows/build-tutor-images.yml`
+
+Four jobs, executed in this order:
 
 ```
-GKE production:   bbi-infrastructure/overlays/prod  → mereka-brand-hotfix-full-v3
-RKE2 / Kind dev:  deploy/k8s/overlays/local         → uses base tag (latest)
+lint ──┬──► build-openedx ──► slsa-provenance
+       └──► build-mfe     ──┘
+                               update-gitops (if enabled)
 ```
 
-> Dev cluster (`local` overlay) typically relies on the Tutor `latest` tag rather than
-> a pinned release tag. Pin the dev tag explicitly when testing a specific build:
-> ```bash
-> # Override local overlay for specific build testing
-> kustomize edit set image \
->   docker.io/overhangio/openedx=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG}
-> ```
+`build-openedx` and `build-mfe` run in parallel on `mereka-k8s-heavy-builders`.
+`slsa-provenance` runs on `ubuntu-24.04` (GitHub-hosted) after both build jobs.
 
-### Cross-cluster smoke after image reuse
+**Triggers**:
+- `push` to `main` on paths: `infrastructure/tutor/**`, `assets/branding/**`, or the
+  workflow file itself
+- `workflow_dispatch` (manual) with inputs: `build_openedx`, `build_mfe`,
+  `update_gitops`, `target_environment`, `openedx_runner`, `image_tag`
 
-After reusing an image from one cluster on another, verify:
+---
+
+## Tag Strategy (AC-OPS-212)
+
+### Immutable tags (always produced)
+
+Every successful build produces two immutable tags per image:
+
+| Tag | Example | Description |
+|---|---|---|
+| Full SHA | `abc123def456...` (40 chars) | Exact commit, used for digest pinning |
+| Short SHA | `abc123de` (8 chars) | Used in kustomization overrides |
 
 ```bash
-# 1. Confirm pod is using expected image
+TAG="${{ inputs.image_tag || github.sha }}"      # full SHA or manual override
+SHORT_SHA="${GITHUB_SHA::8}"
+
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${TAG}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${SHORT_SHA}
+```
+
+### Mutable tag: `mereka-brand` (main push only)
+
+On `push` to `main`, an additional mutable `mereka-brand` tag is pushed. The
+rke2-nonprod dev overlay's ArgoCD application points at this tag for continuous
+deployment.
+
+```bash
+# Only on: github.event_name == 'push' && github.ref == 'refs/heads/main'
+docker pull ghcr.io/biji-biji-initiative/mereka-lms/openedx:${TAG}
+docker tag  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${TAG} \
+            ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand
+```
+
+Note: The pull before retag is required — the image is not in the local daemon
+after a push-only workflow step.
+
+### Cache tag: `buildcache`
+
+Registry-backed BuildKit cache uses a dedicated tag per image:
+
+```
+ghcr.io/biji-biji-initiative/mereka-lms/openedx:buildcache
+ghcr.io/biji-biji-initiative/mereka-lms/mfe:buildcache
+```
+
+Configured as `type=registry,ref=...:buildcache,mode=max`. This persists across
+runner pod restarts and is used automatically by `docker buildx build`.
+
+### No `mereka-brand-hotfix-full-vN` tags
+
+The old sequential hotfix tag convention (`mereka-brand-hotfix-full-v1`,
+`mereka-brand-hotfix-full-v2`, etc.) is **retired**. All images are now identified
+by SHA. For an emergency re-tag, just push the existing SHA-tagged image to a new
+tag:
+
+```bash
+docker pull ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OLD_SHA}
+docker tag  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OLD_SHA} \
+            ghcr.io/biji-biji-initiative/mereka-lms/openedx:${NEW_SHA_OR_LABEL}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${NEW_SHA_OR_LABEL}
+```
+
+---
+
+## Critical Rules (AC-OPS-211)
+
+These rules encode lessons learned from production failures. Violating any of them
+has caused broken builds or wasted hours of debugging.
+
+### 1. NEVER set `containerMode` in ARC Helm values when using a custom DinD template
+
+`containerMode.type: "dind"` is a convenience shortcut that auto-injects a DinD
+container. If you also have a manually declared `dind` container in the pod
+template, ARC injects a second one — both try to mount `dind-sock`, which fails
+with `Duplicate value: "dind-sock"`.
+
+The `runner-scale-set-heavy.yaml` manifest uses a hand-crafted DinD sidecar. Do
+not add `containerMode` to the ARC Helm values for this runner set.
+
+### 2. MTU must be 1280
+
+RKE2 uses Cilium with VXLAN encapsulation. The overlay adds a 50-byte overhead.
+If the DinD daemon uses the default MTU (1500), large TCP packets inside the DinD
+network get silently dropped, causing build failures that look like network timeouts
+or corrupted package downloads.
+
+Set via `--mtu=1280` in the DinD container's `args`:
+
+```yaml
+args:
+  - --storage-driver=overlay2
+  - --mtu=1280
+  - --data-root=/cache/docker/daemon
+```
+
+Or via a `daemon.json` ConfigMap mounted into the DinD container. Either works.
+Do not remove this setting.
+
+### 3. `load: true` and `push: true` are incompatible with `docker-container` buildx driver
+
+The `docker-container` buildx driver runs in a separate container; it cannot export
+directly to the local Docker daemon (`load: true`). Combining both flags causes:
+
+```
+ERROR: docker exporter does not currently support exporting manifest lists
+```
+
+The workflow uses `push: true` only. To inspect the image locally, pull it from
+GHCR after the push.
+
+### 4. NEVER hardcode Python version in Dockerfile paths
+
+The Open edX Dockerfile (managed by Tutor) installs Python packages into a path
+that includes the Python version (e.g., `/usr/local/lib/python3.11/site-packages`).
+
+The Docker image uses Python **3.11**. The CI runner uses Python **3.12**. Any
+patch that hardcodes `python3.12/site-packages` will create a valid path on the
+runner but a non-existent path inside the built image, causing silent failures
+at container startup.
+
+Use `sysconfig.get_path('purelib')` for dynamic resolution:
+
+```python
+import sysconfig
+site_packages = sysconfig.get_path('purelib')
+# Returns /usr/local/lib/python3.11/site-packages inside the image
+# Returns /usr/local/lib/python3.12/site-packages on the CI runner
+```
+
+This is how `build-optimizations.sh` writes the `mereka-plugins.pth` file.
+
+### 5. Tutor version is pinned in `requirements-tutor.txt` — do not duplicate it
+
+`requirements-tutor.txt` is the single source of truth for the Tutor version:
+
+```
+tutor==21.0.0
+```
+
+Do not specify the version anywhere else: not in workflow YAML, not in scripts,
+not in shell aliases. The setup-python-env composite action installs from this
+file. Hardcoding in multiple places causes drift.
+
+### 6. Do NOT add `RUN mv node_modules` in Dockerfile patches
+
+A previous `build-optimizations.sh` patch contained:
+
+```bash
+RUN mv /openedx/app/node_modules /openedx/node_modules && \
+    ln -s /openedx/node_modules /openedx/app/node_modules
+```
+
+This was a workaround for a path issue in Tutor 17 (Redwood). Tutor 21 (Ulmo)
+fixed the paths natively. If this patch is present, it **breaks** the Ulmo build
+because it tries to move a directory that no longer exists at that path, failing
+with `mv: cannot stat '/openedx/app/node_modules': No such file or directory`.
+
+If you see this patch in `infrastructure/tutor/patches/build-optimizations.sh`,
+remove it.
+
+### 7. ARC runners are non-root — install tools to `$HOME/.local/bin`
+
+The official ARC runner image (`ghcr.io/actions/actions-runner`) runs as a
+non-root user. Attempting to install binaries to `/usr/local/bin` fails with:
+
+```
+Permission denied: /usr/local/bin/trivy
+```
+
+Install CLI tools to `$HOME/.local/bin` and add that to `PATH`:
+
+```bash
+mkdir -p "$HOME/.local/bin"
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+  | sh -s -- -b "$HOME/.local/bin"
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+### 8. Concurrency group blocks parallel `workflow_dispatch` runs
+
+The workflow uses a per-`github.event_name`-and-`github.ref` concurrency group.
+For `workflow_dispatch`, `cancel-in-progress` is `false`, so a second manual
+trigger queues behind the first one. If the first run is stuck (e.g., ARC runner
+pod is deadlocked), the second run stays queued indefinitely.
+
+To unblock:
+
+```bash
+# Find the stuck runner pod
+kubectl --context rke2-nonprod get pods -n arc-runners
+
+# Delete it — ARC will replace it and the queued run will pick up
+kubectl --context rke2-nonprod delete pod <runner-pod-name> -n arc-runners
+```
+
+---
+
+## Triggering a Build (AC-OPS-211)
+
+### Manual trigger
+
+```bash
+# Build both images (default)
+gh workflow run build-tutor-images.yml --ref main
+
+# Build openedx only
+gh workflow run build-tutor-images.yml --ref main \
+  -f build_openedx=true -f build_mfe=false
+
+# Build MFE only
+gh workflow run build-tutor-images.yml --ref main \
+  -f build_openedx=false -f build_mfe=true
+
+# Build with a custom tag (overrides git SHA)
+gh workflow run build-tutor-images.yml --ref main \
+  -f image_tag=my-custom-tag
+
+# Build and update GitOps (triggers kustomization update in bbi-infrastructure)
+gh workflow run build-tutor-images.yml --ref main \
+  -f update_gitops=true -f target_environment=production
+```
+
+### Check run status
+
+```bash
+gh run list --workflow=build-tutor-images.yml --limit 5
+gh run view <run-id>
+gh run watch <run-id>     # live log streaming
+```
+
+### Automatic trigger (push to main)
+
+Any push to `main` that touches `infrastructure/tutor/**`, `assets/branding/**`,
+or the workflow file itself triggers a build automatically. This is the standard
+deployment path.
+
+---
+
+## After Build Succeeds (AC-OPS-212)
+
+### If `update_gitops` was NOT enabled
+
+You need to manually update the image tags in `bbi-infrastructure`:
+
+1. Edit `bbi-infrastructure/apps/mereka-lms/overlays/dev/kustomization.yaml`
+2. Edit `bbi-infrastructure/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml`
+3. Update both `newTag` fields to the new short SHA (8 chars from the build summary)
+
+```yaml
+images:
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/openedx
+    newTag: "abc123de"  # 8-char short SHA from build
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
+    newTag: "abc123de"
+```
+
+4. Commit and push bbi-infrastructure
+5. ArgoCD auto-syncs within 3 minutes
+
+### Verify rollout
+
+```bash
+# Watch deployment rolling update
+kubectl rollout status deployment/lms -n mereka-lms --timeout=300s
+kubectl rollout status deployment/cms -n mereka-lms --timeout=300s
+kubectl rollout status deployment/mfe -n mereka-lms --timeout=300s
+
+# Confirm ArgoCD is Synced+Healthy
+kubectl get application mereka-lms-dev -n argocd \
+  -o jsonpath='{.status.sync.status} {.status.health.status}'
+# Expected: Synced Healthy
+
+# Confirm pods are using the expected image
 kubectl get pod -n mereka-lms -l app.kubernetes.io/name=lms \
   -o jsonpath='{.items[0].spec.containers[0].image}'
-
-# 2. Quick endpoint smoke
-curl -sI https://academyv2.mereka.io/ | head -2
-curl -sI https://studio.academyv2.mereka.io/ | head -2
-
-# 3. Check for known RKE2→GKE migration gotchas in logs
-kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=50 \
-  | grep -iE "error|exception|failed|refused" | head -20
 ```
 
----
+### Pre-push: image override contract check
 
-## Step 4: CI Hooks and Verification (AC-OPS-211)
-
-### Pre-push: image override contract
-
-Before committing a new tag to any kustomization file, verify the cross-repo
-image override contract is consistent:
+Before committing a new tag to any kustomization file:
 
 ```bash
-# Checks all four image entries across app repo + bbi-infrastructure are aligned
 INFRA_PROD_OVERLAY=/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml \
 APP_BASE=deploy/k8s/base/kustomization.yaml \
 APP_PROD_OVERLAY=deploy/k8s/overlays/production/kustomization.yaml \
@@ -276,76 +374,231 @@ APP_PROD_OVERLAY=deploy/k8s/overlays/production/kustomization.yaml \
 
 Expected output: `✓ GitOps image override contract checks passed`
 
-### Post-deploy: ArgoCD health gate
+---
+
+## Monitoring ARC Runners (AC-OPS-213)
 
 ```bash
-# Wait for ArgoCD to sync and deployment to stabilize
-kubectl rollout status deployment/lms -n mereka-lms --timeout=300s
-kubectl rollout status deployment/cms -n mereka-lms --timeout=300s
+# Check runner pods (empty = no jobs running, scale=0)
+kubectl --context rke2-nonprod get pods -n arc-runners
 
-# Confirm ArgoCD Synced+Healthy
-kubectl get application mereka-lms-prod -n argocd \
-  -o jsonpath='{.status.sync.status} {.status.health.status}'
-# Expected: Synced Healthy   (or Synced Degraded if known pre-existing CronJob errors)
+# Check scale set status
+kubectl --context rke2-nonprod get autoscalingrunnersets -n arc-runners
+
+# Tail logs from an active runner
+kubectl --context rke2-nonprod logs <runner-pod> -n arc-runners -c runner --tail=50
+
+# Check DinD sidecar logs (useful for MTU/networking issues)
+kubectl --context rke2-nonprod logs <runner-pod> -n arc-runners -c dind --tail=50
+
+# Check PVC usage (if builds start OOMing, cache may need pruning)
+kubectl --context rke2-nonprod get pvc -n arc-runners
 ```
 
-### Post-deploy: endpoint smoke matrix
+### Manual cache pruning
+
+If the 50 Gi docker cache PVC fills up:
 
 ```bash
-./scripts/qa/verify-post-deploy-smoke.sh --env prod \
-  --evidence-dir "var/evidence/release-$(date +%Y%m%d)"
+# Exec into the DinD sidecar of a running job (or spawn a temp pod)
+kubectl --context rke2-nonprod exec -it <runner-pod> -n arc-runners -c dind -- sh
+
+# Inside the container
+docker system prune -af --volumes
+# or just prune build cache
+docker builder prune -af
 ```
 
 ---
 
-## Troubleshooting
+## Troubleshooting (AC-OPS-214)
 
-### LMS pods not rolling after release
+| Symptom | Cause | Fix |
+|---|---|---|
+| `Duplicate value: "dind-sock"` | `containerMode.type: "dind"` set in Helm values | Remove `containerMode` from ARC Helm values; the pod template already has a hand-crafted DinD container |
+| `node_modules not found` in COPY | Stale `RUN mv node_modules` patch from Redwood era | Remove the mv/ln block from `infrastructure/tutor/patches/build-optimizations.sh` |
+| `python3.12/site-packages: No such file or directory` | Hardcoded Python version in a patch (runner is 3.12, image is 3.11) | Replace hardcoded path with `sysconfig.get_path('purelib')` |
+| `SyntaxError` in apply-patches.sh | Triple-quote collision: shell `"` inside Python `"""` heredoc | Ensure `"""` appears on its own line, not adjacent to shell-quoted content |
+| `Permission denied: /usr/local/bin/trivy` | ARC runner is non-root | Install to `$HOME/.local/bin`, add to `PATH` |
+| Build queued forever, never starts | Concurrency group blocked by a stuck cancelled run | Delete the stuck ARC runner pod; the queued run will claim the next fresh pod |
+| Silent packet drops, npm/pip downloads hang or corrupt | MTU > 1280 on Cilium overlay | Set `--mtu=1280` on DinD `args` |
+| GitHub HTTP 500 during git clone | Transient GitHub infrastructure issue | Retry the run; not a local issue |
+| `docker exporter does not currently support exporting manifest lists` | `load: true` + `push: true` with `docker-container` buildx driver | Remove `load: true`; use `push: true` only |
+| LMS pods not rolling after GitOps update | bbi-infrastructure has stale tag on one of two override entries | Check all image entries in the prod kustomization: `grep newTag bbi-infrastructure/.../kustomization.yaml` |
+| `mereka-brand` tag stale after manual trigger | `mereka-brand` is only pushed on `push` to `main`, not on `workflow_dispatch` | Trigger via push, or manually retag and push after a `workflow_dispatch` build |
+| DinD container does not start in time | Timing race between runner start and DinD daemon readiness | Add a readiness poll at the start of steps that need Docker: `until docker info >/dev/null 2>&1; do sleep 1; done` |
+| `loremipsum==1.0.5` build failure | `uv pip` does not provide `pkg_resources`; Tutor 21 default is `uv pip` | Always pass `-a PIP_COMMAND=pip` to `tutor images build openedx` |
+| Swap provisioning skipped on ARC | ARC container runners lack `CAP_SYS_ADMIN`; swap step is non-fatal | Expected behavior; build continues. OOM risk is reduced by DinD having 8 Gi RAM limit and the 50 Gi cache |
 
-Most common cause: the bbi-infrastructure overlay has a double-override entry
-that the release script missed (fixed in 2026-02-19 release). Check manually:
+### Detailed: LMS pods not rolling after release
+
+Most common cause: two separate `newImage`/`newTag` entries in the bbi-infrastructure
+overlay for the same base image name. If the release script only updates one, the
+other stays pinned to the old tag and ArgoCD sees a diff-free state for the pods
+that reference the stale entry.
 
 ```bash
-grep "newTag" /home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
-# All four entries should show the same openedx tag and same mfe tag
+# Show all newTag lines in the prod overlay
+grep "newTag" /path/to/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+
+# All openedx entries must match; all mfe entries must match
 ```
 
-If one entry is stale, edit and push bbi-infrastructure, then re-annotate ArgoCD:
+If one entry is stale, edit and push bbi-infrastructure, then force ArgoCD refresh:
+
 ```bash
 kubectl annotate application mereka-lms-prod -n argocd \
-  argocd.argoproj.io/sync-force="$(date +%s)" --overwrite
+  argocd.argoproj.io/refresh=hard --overwrite
 ```
 
-### Docker build OOM during webpack
+### Detailed: `python3.12/site-packages: No such file or directory`
+
+The symptom is a container that starts and immediately exits with an ImportError or
+a pth file that silently does nothing. Cause: `build-optimizations.sh` (or another
+patch file) wrote:
 
 ```bash
-# Increase node memory via Tutor build arg
-tutor images build mfe -a NODE_OPTIONS="--max-old-space-size=6144"
+echo "mereka_plugins" > "${SITE_PACKAGES}/python3.12/site-packages/mereka-plugins.pth"
 ```
 
-### Cache miss on incremental build
+This path exists on the CI runner (Python 3.12) but not inside the image (Python 3.11).
+The fix is in `infrastructure/tutor/patches/build-optimizations.sh` — use Python to
+resolve the path dynamically at build time:
 
-If `--cache-from` shows all layers as MISS, the prior image may have been built
-on a different Docker daemon or the layer hashes diverged. Fall back to full build:
+```bash
+SITE_PACKAGES=$(python3 -c "import sysconfig; print(sysconfig.get_path('purelib'))")
+echo "mereka_plugins" > "${SITE_PACKAGES}/mereka-plugins.pth"
+```
+
+### Detailed: triple-quote collision in apply-patches.sh
+
+`apply-patches.sh` writes Python content into shell heredocs. When the Python
+content itself contains `"""`, and the shell heredoc is delimited by `EOF`, there
+is no issue. But if the script uses Python `"""` inside a shell string, the parser
+can misinterpret it.
+
+Safe pattern:
+
+```bash
+python3 - <<'EOF'
+content = """
+line one
+line two
+"""
+with open(target, 'w') as f:
+    f.write(content)
+EOF
+```
+
+Unsafe pattern (breaks on some shells):
+
+```bash
+python3 -c "content = \"\"\"line one\"\"\"; ..."
+```
+
+---
+
+## Local Development Builds
+
+For local iterative development, build images directly with Tutor. The CI pipeline
+is not required for local testing.
+
+### When to do a full local build
+
+- Tutor version bump or `requirements.txt` changes
+- `apply-patches.sh` has new patches affecting Dockerfile layers
+- `tutor_env/` config changed (new plugin, MFE branding changes)
+- Security advisory for a dependency
+
+```bash
+export TUTOR_ROOT="$(pwd)/tutor_env"
+source infrastructure/tutor/tutor-env.sh
+
+# Full rebuild: LMS/CMS/workers (30-45 min, needs >=12 GB Docker RAM)
+tutor images build openedx -a PIP_COMMAND=pip
+
+# Full rebuild: MFE (15-20 min)
+tutor images build mfe
+
+# Verify images are present
+docker images | grep -E "tutor_local/openedx|tutor_local/openedx-mfe"
+```
+
+`PIP_COMMAND=pip` is required because Tutor 21 defaults to `uv pip`, which does
+not provide `pkg_resources`. `loremipsum==1.0.5` (a transitive dep) requires it.
+
+### When to use cache (incremental build)
+
+When only theme or static files changed and you want to skip the 20+ min pip install
+layer:
+
+```bash
+# BuildKit reuses cached layers automatically when Dockerfile layers are unchanged
+DOCKER_BUILDKIT=1 tutor images build openedx -a PIP_COMMAND=pip
+```
+
+Force a complete rebuild with `--no-cache`:
+
 ```bash
 tutor images build openedx -a PIP_COMMAND=pip --no-cache
 ```
 
-### `loremipsum==1.0.5` build failure
+### Post-build local artifact check
 
-```
-ERROR: loremipsum==1.0.5 requires pkg_resources, not available under uv pip
+```bash
+# Confirm image size (expected: ~3-4 GB for openedx, ~500 MB for mfe)
+docker images tutor_local/openedx:latest --format "{{.Size}}"
+
+# Inspect entrypoint
+docker inspect tutor_local/openedx:latest --format '{{.Config.Entrypoint}}'
+# Expected: [/usr/local/bin/uwsgi ...]
+
+# Quick smoke (bring up LMS in isolation)
+docker run --rm -d --name smoke-lms \
+  -p 18001:8000 \
+  tutor_local/openedx:latest lms
+sleep 5 && curl -sI http://localhost:18001/ | head -1
+docker stop smoke-lms
 ```
 
-Fix: always pass `-a PIP_COMMAND=pip` to `tutor images build openedx`.
+### MFE memory during local build
+
+If the MFE webpack build OOMs locally:
+
+```bash
+tutor images build mfe -a NODE_OPTIONS="--max-old-space-size=6144"
+```
+
+This is also applied automatically in CI via the `NODE_OPTIONS` env var in the
+workflow.
+
+---
+
+## Key Files
+
+| File | Purpose |
+|---|---|
+| `.github/workflows/build-tutor-images.yml` | Main build + push + SLSA workflow |
+| `infrastructure/tutor/apply-patches.sh` | Central patch script — always run after `tutor config save` |
+| `infrastructure/tutor/patches/build-optimizations.sh` | Dockerfile patches (sysconfig path, PIP_COMMAND) |
+| `infrastructure/tutor/plugins/mereka_lms.py` | Tutor plugin — ENV_PATCHES for all environment customizations |
+| `deploy/k8s/base/arc/runner-scale-set-heavy.yaml` | ARC runner + DinD sidecar + PVC definitions |
+| `deploy/k8s/base/arc/` | Full ARC manifests directory (namespaces, Helm values, RunnerScaleSets) |
+| `requirements-tutor.txt` | Tutor version pin — single source of truth |
+| `bbi-infrastructure/apps/mereka-lms/overlays/dev/kustomization.yaml` | Dev image tag overrides (updated after build) |
+| `bbi-infrastructure/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml` | Profile-based dev overlay image tags |
+| `scripts/infra/release-openedx-gitops.sh` | Release orchestrator (updates kustomization + commits + pushes) |
+| `scripts/qa/verify-gitops-image-overrides.sh` | Pre-push image override contract verifier |
+| `scripts/qa/verify-post-deploy-smoke.sh` | Post-deploy endpoint smoke matrix |
 
 ---
 
 ## Reference
 
-- Branding release runbook (full deploy flow): `docs/operations/BRANDING_RELEASE_RUNBOOK.md`
-- Release orchestrator: `scripts/infra/release-openedx-gitops.sh`
-- Image override contract verifier: `scripts/qa/verify-gitops-image-overrides.sh`
-- Post-deploy smoke: `scripts/qa/verify-post-deploy-smoke.sh`
-- BRANDING.md (theme sync guide): `docs/BRANDING.md`
+- ARC runner setup guide: `docs/operations/CI_CD_RUNNERS.md`
+- CI optimization tracker: `docs/operations/CI_OPTIMIZATION_TRACKER.md`
+- CI cost analysis: `docs/operations/CI_PIPELINE_COST_OPTIMIZATION.md`
+- Branding release runbook: `docs/operations/BRANDING_RELEASE_RUNBOOK.md`
 - Tutor configuration runbook: `docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md`
+- ADR-021 (Tutor methodology): `docs/adr/021-openedx-tutor-methodology.md`
+- BRANDING.md (theme sync guide): `docs/BRANDING.md`

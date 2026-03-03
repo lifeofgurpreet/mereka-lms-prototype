@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   build:
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@main
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
     with:
       app_name: purchase-gateway
       dockerfile: services/purchase-gateway/Dockerfile
@@ -28,7 +28,7 @@ jobs:
   update-dev:
     needs: build
     if: github.ref == 'refs/heads/main'
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@main
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
     with:
       app_name: mereka-lms
       image_tag: ${{ needs.build.outputs.image_tag }}

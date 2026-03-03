@@ -17,6 +17,7 @@ on:
       - "deploy/k8s/base/monitoring/prometheusrule-tenant-isolation.yaml"
       - "scripts/qa/verify-tenant-isolation-gates.sh"
       - "scripts/tenants/**"
+  merge_group:
   workflow_dispatch: {}
 
 permissions:

@@ -81,6 +81,7 @@ on:
       - "scripts/qa/audit-observability.sh"
       - "scripts/qa/run-observability-first-class.sh"
       - "scripts/qa/verify-observability-evidence-identity.sh"
+  merge_group:
 
 permissions:
   contents: read
@@ -184,7 +185,7 @@ jobs:
 
       - name: Upload observability compliance artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: observability-compliance-local
           retention-days: ${{ fromJSON(env.EVIDENCE_RETENTION_DAYS) }}
@@ -388,7 +389,7 @@ jobs:
 
       - name: Upload runtime observability artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: observability-compliance-runtime
           retention-days: ${{ fromJSON(env.EVIDENCE_RETENTION_DAYS) }}
