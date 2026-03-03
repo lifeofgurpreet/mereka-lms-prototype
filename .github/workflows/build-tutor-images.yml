@@ -41,7 +41,7 @@ on:
         options:
           - github-hosted
           - heavy-builder
-        default: heavy-builder
+        default: github-hosted
       image_tag:
         description: 'Image tag (default: git SHA)'
         type: string
