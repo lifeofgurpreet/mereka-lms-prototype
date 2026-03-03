@@ -24,7 +24,7 @@ rg -n "^[A-Za-z0-9_.-]+:($|[^=])" Makefile | sed -E 's/:.*$//' | wc -l
 |---|---:|
 | Workflow files (`.github/workflows/*.yml`) | 56 |
 | Verify scripts (`scripts/qa/verify-*.sh`) | 465 |
-| Make targets (`Makefile` target declarations) | 77 |
+| Make targets (`Makefile` target declarations) | 75 |
 
 ## Deletion / Consolidation Matrix
 
@@ -33,16 +33,17 @@ rg -n "^[A-Za-z0-9_.-]+:($|[^=])" Makefile | sed -E 's/:.*$//' | wc -l
 | `.github/workflows/policy-checks.yml` | Workflow wrapper | Manual-only fanout of contract wrappers that duplicate checks already covered by `ci.yml` static lanes | `ci.yml` + `verify-ci-cd-pipeline.sh` | Completed |
 | `scripts/qa/verify-*-workflow.sh` family (18 files) | Meta wrapper scripts | Checks wrapper/workflow shape rather than runtime behavior; high ceremony, low signal | Direct source/runtime checks already in `ci-scripts-static.txt` | Completed |
 | `Makefile` frontend QA wrapper aliases (env-specific duplicates) | Make target duplication | Multiple targets differ only by env/flags | Parameterized canonical target (`qa-frontend-closure` + `QA_ENV`/flag matrix) | Completed |
+| `Makefile` blocker sweep env aliases (`*-both/dev/prod`) | Make target duplication | Alias wrappers only delegated to the same sweep target with a different `QA_ENV` | Parameterized canonical target (`qa-frontend-runtime-blocker-sweep QA_ENV=...`) | Completed |
 
 ## Post-Tranche Counts
 
-After removing `policy-checks` and the 18-script workflow-wrapper family, and parameterizing frontend closure Make lanes:
+After removing `policy-checks`, the 18-script workflow-wrapper family, and alias-only Make lanes:
 
 | Metric | Baseline | Current | Delta |
 |---|---:|---:|---:|
 | Workflow files | 60 | 56 | -4 |
 | Verify scripts | 495 | 465 | -30 |
-| Make targets | 76 | 77 | +1 |
+| Make targets | 76 | 75 | -1 |
 
 ## Follow-on Completion (Make Lane Canonicalization)
 
@@ -58,6 +59,11 @@ After removing `policy-checks` and the 18-script workflow-wrapper family, and pa
 - Canonical invocation examples:
   - `make qa-frontend-closure QA_ENV=prod QA_CROSS_BROWSER=1 QA_REQUIRE_RUNTIME_THEME=1`
   - `make qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1 QA_MFE_ONLY=1`
+  - `make qa-frontend-runtime-blocker-sweep QA_ENV=both`
+- Removed blocker-sweep alias wrappers (single canonical path retained):
+  - removed `qa-frontend-runtime-blocker-sweep-both`
+  - removed `qa-frontend-runtime-blocker-sweep-dev`
+  - removed `qa-frontend-runtime-blocker-sweep-prod`
 
 ## Wrapper Script Deletion Set (18)
 

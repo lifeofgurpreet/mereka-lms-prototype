@@ -45,7 +45,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - `verify-paragon-runtime.sh` and `verify-studio-authoring-branding.sh` now auto-enable insecure TLS only for dev checks (configurable overrides), removing self-signed cert false failures.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` with default `auto` policy (`dev=1`, `prod=0`) so authenticated canary runs remain signal-focused in non-prod while production stays TLS-strict.
   - Canonical blocker sweep lane added for repeated tracking:
-    - `make qa-frontend-runtime-blocker-sweep-both`
+    - `make qa-frontend-runtime-blocker-sweep QA_ENV=both`
     - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.log`
     - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.json`
     - machine-readable summary artifact: `var/qa/frontend-runtime-blocker-sweep-*.summary.json` (plus per-check `*.records.tsv` and diagnosis labels in `*.diagnostics.tsv`)

@@ -177,7 +177,7 @@ line("- Do not mutate app code in this step; apply runtime/GitOps rollout only."
 line("- After rollout, run these exact verifiers from this repo:")
 line("  1. `./scripts/qa/verify-auth-surfaces.sh dev`")
 line("  2. `./scripts/qa/verify-credentials-readiness.sh --cluster`")
-line("  3. `make qa-frontend-runtime-blocker-sweep-both`")
+line("  3. `make qa-frontend-runtime-blocker-sweep QA_ENV=both`")
 line("- Capture artifacts from the rerun and attach them in the issue handoff.")
 line("")
 if fmt == "markdown":
@@ -193,7 +193,7 @@ else:
     line("Acceptance criteria")
 line("- credentials dev /login and /login/edx-oauth2 return 302 in auth-surfaces dev check")
 line("- credentials readiness cluster check passes ZoneInfo('UTC') and tzdata checks")
-line("- rerun: make qa-frontend-runtime-blocker-sweep-both")
+line("- rerun: make qa-frontend-runtime-blocker-sweep QA_ENV=both")
 line("- expected summary: fail=0")
 
 rendered = buf.getvalue()

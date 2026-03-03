@@ -92,7 +92,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` (PASS; log `var/qa/paragon-runtime-dev-20260303T221801Z.log`)
     - `./scripts/qa/verify-studio-authoring-branding.sh dev` (PASS; log `var/qa/studio-authoring-branding-dev-20260303T221811Z.log`)
   - Canonical blocker tracking lane added:
-    - `make qa-frontend-runtime-blocker-sweep-both`
+    - `make qa-frontend-runtime-blocker-sweep QA_ENV=both`
     - Runs high-signal blocker checks in one pass:
       - `./scripts/qa/verify-auth-surfaces.sh prod`
       - `./scripts/qa/verify-auth-surfaces.sh dev`
@@ -130,7 +130,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - Capture wrapper strips daemon-warning noise from command stdout so `capture-summary.tsv` fields remain parseable and stable.
     - `verify-paragon-runtime.sh` and `verify-studio-authoring-branding.sh` now auto-allow insecure TLS only for dev runtime checks (configurable via `PARAGON_RUNTIME_CURL_INSECURE` and `STUDIO_CURL_INSECURE`) to prevent self-signed cert false failures.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` and defaults to TLS-ignore only in `dev` (prod stays strict), reducing false auth/session canary failures from non-prod cert trust.
-    - New canonical wrapper script `scripts/qa/run-frontend-runtime-blocker-sweep.sh` and Make target `qa-frontend-runtime-blocker-sweep-both` provide one-command blocker regression tracking for ongoing runtime convergence.
+    - New canonical wrapper script `scripts/qa/run-frontend-runtime-blocker-sweep.sh` and parameterized Make target `qa-frontend-runtime-blocker-sweep QA_ENV=both` provide one-command blocker regression tracking for ongoing runtime convergence.
   - CI runtime lane wiring:
     - `.github/workflows/frontend-runtime-qa.yml` now runs canonical `make qa-runtime-blocker-refresh` after the runtime tranche.
     - workflow now always emits blocker prompt/status artifacts even when blocker sweep fails, then exits non-zero at the end to preserve gate semantics.
