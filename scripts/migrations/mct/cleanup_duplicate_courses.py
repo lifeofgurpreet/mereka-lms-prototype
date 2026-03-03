@@ -76,7 +76,7 @@ def check_course_safety(course_id_str):
     try:
         course_key = CourseKey.from_string(course_id_str)
         store.get_course(course_key)
-    except:
+    except Exception:
         pass
 
     return True, f"Safe: {active_enrollments} active, {inactive_enrollments} inactive enrollments"
@@ -217,7 +217,7 @@ def verify_final_state():
             course_key = CourseKey.from_string(course_id_str)
             course = store.get_course(course_key)
             has_content = course is not None
-        except:
+        except Exception:
             has_content = False
 
         # Check enrollments

@@ -17,8 +17,8 @@ from pathlib import Path
 
 try:
     import yaml
-except ImportError:
-    raise SystemExit("PyYAML required: pip install pyyaml")
+except ImportError as exc:
+    raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TESTMAPS_DIR = REPO_ROOT / "specs" / "testmaps"

@@ -37,11 +37,7 @@ select = [
 ignore = [
     "E501",  # line too long (handled by formatter)
     "E402",  # module-import-not-at-top (common in scripts with sys.path manipulation)
-    "E722",  # bare-except (acceptable in resilient scripts)
-    "E741",  # ambiguous-variable-name (e.g., 'l' in loops)
-    "B008",  # do not perform function calls in argument defaults
-    "B904",  # raise-without-from-inside-except (style preference)
-    "UP031", # printf-string-formatting (% formatting still readable)
+    "B008",  # do not perform function calls in argument defaults (FastAPI Depends() pattern)
 ]
 
 [tool.ruff.format]

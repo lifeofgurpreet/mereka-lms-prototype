@@ -30,7 +30,7 @@ def main():
         for row in csv.DictReader(f):
             rows.append(row)
 
-    print("Loaded %d courses from manifest" % len(rows))
+    print(f"Loaded {len(rows)} courses from manifest")
 
     if args.dry_run:
         for row in rows:
@@ -93,7 +93,7 @@ def main():
                 store.update_item(course, None)
                 stats["uploaded"] += 1
                 if stats["uploaded"] % 10 == 0:
-                    print("  Uploaded %d..." % stats["uploaded"])
+                    print(f"  Uploaded {stats['uploaded']}...")
             else:
                 print(f"  FAIL {course_key_str}: course not found in modulestore")
                 stats["failed"] += 1
@@ -102,8 +102,7 @@ def main():
             print(f"  FAIL {course_key_str}: {e}")
             stats["failed"] += 1
 
-    print("Results: uploaded=%d skipped=%d failed=%d" % (
-        stats["uploaded"], stats["skipped"], stats["failed"]))
+    print(f"Results: uploaded={stats['uploaded']} skipped={stats['skipped']} failed={stats['failed']}")
 
 
 if __name__ == "__main__":

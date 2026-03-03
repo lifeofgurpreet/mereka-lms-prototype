@@ -81,7 +81,7 @@ echo "Import complete!"
         # Print relevant output
         # Show last section of output with course creation messages
         lines = output.split('\n')
-        relevant_lines = [l for l in lines if 'course-v1:' in l or 'created successfully' in l or 'Seeding' in l or 'Importing' in l]
+        relevant_lines = [line for line in lines if 'course-v1:' in line or 'created successfully' in line or 'Seeding' in line or 'Importing' in line]
         if relevant_lines:
             print(f"   ✓ {' '.join(relevant_lines[-3:])}")
         return True, ""

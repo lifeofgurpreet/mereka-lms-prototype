@@ -27,8 +27,8 @@ from pathlib import Path
 
 try:
     import yaml
-except ImportError:
-    raise SystemExit("PyYAML required: pip install pyyaml")
+except ImportError as exc:
+    raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 from lint_core import (
     LintResult,

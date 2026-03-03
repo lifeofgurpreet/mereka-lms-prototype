@@ -171,11 +171,11 @@ def mereka_lint_file(path: Path) -> LintResult:
 
     # MEREKA-NORM-001: Acceptance Criteria should use normative language
     # Check that at least some ACs contain MUST/SHOULD/MAY or Given-When-Then
-    ac_lines = [l for l in md.splitlines() if re.match(r"^\s*[-*]\s+\[ \]\s+AC-", l)]
+    ac_lines = [line for line in md.splitlines() if re.match(r"^\s*[-*]\s+\[ \]\s+AC-", line)]
     if ac_lines:
         normative_count = sum(
-            1 for l in ac_lines
-            if any(w in l for w in ["MUST", "SHOULD", "MAY", "Given", "given", "When", "when", "Then", "then"])
+            1 for line in ac_lines
+            if any(w in line for w in ["MUST", "SHOULD", "MAY", "Given", "given", "When", "when", "Then", "then"])
         )
         if normative_count == 0:
             result.violations.append(
