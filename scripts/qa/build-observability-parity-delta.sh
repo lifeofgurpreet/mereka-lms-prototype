@@ -127,6 +127,7 @@ record() {
 REQUIRED_FILES=(
   "observability-compliance-runtime.json"
   "observability-runtime-verify-runtime.md"
+  "observability-first-class-runtime-step-results.md"
   "observability-correlation-headers-runtime.txt"
   "observability-metrics-lms-runtime.md"
   "observability-metrics-cms-runtime.md"
@@ -146,6 +147,19 @@ for f in "${REQUIRED_FILES[@]}"; do
     record fail "PARITY-002" "Required artifact missing: $f"
   fi
 done
+
+STEP_RESULTS_FILE="$EVIDENCE_DIR/observability-first-class-runtime-step-results.md"
+if [[ -f "$STEP_RESULTS_FILE" ]]; then
+  if rg -q 'FAIL\(rc=' "$STEP_RESULTS_FILE" 2>/dev/null || grep -q 'FAIL(rc=' "$STEP_RESULTS_FILE"; then
+    record fail "PARITY-015" "First-class step results include failed steps in $(basename "$STEP_RESULTS_FILE")"
+  elif rg -q '\| verify-[^|]* \| PASS \||\| observability-[^|]* \| PASS \|' "$STEP_RESULTS_FILE" 2>/dev/null || grep -q "| PASS |" "$STEP_RESULTS_FILE"; then
+    record pass "PARITY-015" "First-class step results report PASS statuses only"
+  else
+    record fail "PARITY-015" "Unable to parse step-result status rows in $(basename "$STEP_RESULTS_FILE")"
+  fi
+else
+  record fail "PARITY-015" "First-class step results artifact missing: $(basename "$STEP_RESULTS_FILE")"
+fi
 
 TRACE_ARTIFACT="$EVIDENCE_DIR/observability-tracing-runtime.txt"
 if [[ -f "$TRACE_ARTIFACT" ]]; then
@@ -269,7 +283,7 @@ TOTAL=$((PASS + FAIL))
   echo ""
   echo "## Failed checks"
   echo ""
-  if awk -F $'\t' '$1=="fail"{exit 0} END{exit 1}' "$RESULTS_FILE"; then
+  if awk -F $'\t' '$1=="fail"{found=1} END{exit(found?0:1)}' "$RESULTS_FILE"; then
     awk -F $'\t' '$1=="fail"{printf("- %s: %s\n", $2, $3)}' "$RESULTS_FILE"
   else
     echo "- none"

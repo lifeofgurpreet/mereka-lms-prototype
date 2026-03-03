@@ -204,6 +204,26 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   record_step_result "verify-observability-runtime" "$RUNTIME_RC"
   set -e
 
+  if [[ ! -f "$RUNTIME_MD" ]]; then
+    {
+      echo "# Observability Runtime Verification Evidence"
+      echo ""
+      echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      echo "- app_namespace: $APP_NAMESPACE"
+      echo "- monitoring_namespace: $MONITORING_NAMESPACE"
+      echo "- gcp_project: $GCP_PROJECT_VALUE"
+      echo "- environment_label: $ENV_LABEL"
+      echo "- dispatch_profile: $DISPATCH_PROFILE"
+      echo "- k8s_context: ${K8S_CONTEXT:-default}"
+      echo "- note: runtime verifier exited rc=${RUNTIME_RC} before markdown artifact generation; fallback artifact emitted by runner"
+      echo "- evidence_identity: env=${ENV_LABEL};profile=${DISPATCH_PROFILE};context=${K8S_CONTEXT:-default};project=${GCP_PROJECT_VALUE}"
+      echo ""
+      echo "## Failed Checks"
+      echo ""
+      echo "- see \`$(basename "$RUNTIME_TXT")\` for captured runtime verifier output"
+    } > "$RUNTIME_MD"
+  fi
+
   echo "==> Running correlation header propagation check"
   CORRELATION_ARGS=()
   if [[ "$STRICT" == "1" ]]; then
