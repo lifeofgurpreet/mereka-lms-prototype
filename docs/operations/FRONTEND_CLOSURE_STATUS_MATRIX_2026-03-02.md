@@ -79,14 +79,14 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-studio-authoring-branding.sh dev`
   - Latest capture artifact set: `var/screenshots/dev/20260302T063522Z/` (`capture-summary.tsv` now includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format per route, with normalized unquoted probe values for deterministic parsing; confirms deterministic non-blank renders for authn/login + studio, plus unauthenticated redirects for account/learner-dashboard).
   - Latest Phase 7 + a11y sweep on dev:
-    - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260303T221944Z.log`)
+    - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260303T225049Z.log`)
     - `./scripts/qa/verify-mfe-selector-hardening.sh` (PASS, log: `var/qa/selector-hardening-20260303T222057Z.log`)
     - `./scripts/qa/verify-a11y-contrast-focus.sh` (PASS with expected non-blocking warnings, log: `var/qa/a11y-contrast-focus-20260303T222057Z.log`)
     - `./scripts/qa/verify-wcag-contrast-v2.sh` (PASS, log: `var/qa/wcag-contrast-v2-20260303T222138Z.log`; compatibility wrapper restored in repo so canonical Phase C command path resolves again)
   - Latest cross-browser smoke stability rerun (dev):
     - `./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser` (PASS `15 passed`, log: `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`)
   - Latest deterministic capture/runtime rerun (dev):
-    - `CAPTURE_STRICT_READY=1 CAPTURE_RETRIES=2 AGENT_BROWSER_TIMEOUT_SECONDS=45 ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` (PASS; screenshots `var/screenshots/dev/20260303T221705Z/`, log `var/qa/capture-branding-screenshots-dev-mfe-strict-20260303T221705Z.log`)
+    - `CAPTURE_STRICT_READY=1 CAPTURE_RETRIES=2 AGENT_BROWSER_TIMEOUT_SECONDS=45 ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` (PASS; screenshots `var/screenshots/dev/20260303T224930Z/`, log `var/qa/capture-branding-screenshots-dev-mfe-strict-20260303T224930Z.log`)
     - strict readiness mode is now available for release-grade non-blank enforcement: `CAPTURE_STRICT_READY=1 CAPTURE_RETRIES=3 ./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes` (fails instead of fallback when render readiness is not reached).
     - latest strict readiness evidence rerun: `CAPTURE_STRICT_READY=1 CAPTURE_RETRIES=2 AGENT_BROWSER_TIMEOUT_SECONDS=45 ./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes` (PASS; screenshots `var/screenshots/dev/20260303T221620Z/`, summary `var/screenshots/dev/20260303T221620Z/capture-summary.tsv` with one-attempt captures across closure routes; log `var/qa/capture-branding-screenshots-dev-core-strict-20260303T221620Z.log`).
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` (PASS; log `var/qa/paragon-runtime-dev-20260303T221801Z.log`)
@@ -97,24 +97,22 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `./scripts/qa/verify-auth-surfaces.sh prod`
       - `./scripts/qa/verify-auth-surfaces.sh dev`
       - `./scripts/qa/verify-credentials-readiness.sh --cluster` (dev-only)
-    - Latest run: `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.log` (`PASS=1 FAIL=2 SKIP=0`) with machine-readable summary `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.json` and per-check logs:
-      - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260303T222746Z.log` (PASS)
-      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260303T222746Z.log` (FAIL on dev host reachability; curl `000` to `academyv2.mereka.dev`)
-      - `var/qa/frontend-runtime-blocker-credentials-dev-20260303T222746Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
+    - Latest run: `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.log` (`PASS=1 FAIL=2 SKIP=0`) with machine-readable summary `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.json` and per-check logs:
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260303T224713Z.log` (PASS)
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260303T224713Z.log` (FAIL on credentials dev `/login` and `/login/edx-oauth2` returning 500)
+      - `var/qa/frontend-runtime-blocker-credentials-dev-20260303T224713Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
     - Latest diagnostics-labeled run:
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.json`
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.diagnostics.tsv`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.json`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.diagnostics.tsv`
       - diagnosis labels emitted:
-        - `auth-surfaces:dev` -> `auth_surfaces_dev_failure_other`
+        - `auth-surfaces:dev` -> `credentials_dev_login_500`
         - `credentials-readiness:dev:cluster` -> `credentials_timezone_tzdata_missing`
-      - repeated classification probe (3 samples) confirms dev reachability failure is currently persistent:
-        - `var/qa/auth-surfaces-dev-probe-20260303T223022Z.log`
-        - `var/qa/auth-surfaces-dev-probe-20260303T223033Z.log`
-        - `var/qa/auth-surfaces-dev-probe-20260303T223045Z.log`
+      - latest auth-surface recheck aligns with credentials-only failure signature:
+        - `var/qa/auth-surfaces-dev-recheck-20260303T224647Z.log`
       - routing metadata emitted per diagnosis:
         - `owner` (responsible lane)
         - `next_action` (recommended immediate remediation)
-      - platform-auth checklist for persistent `auth_surfaces_dev_failure_other` is documented in:
+      - platform-auth checklist for non-credentials host reachability incidents is documented in:
         - `docs/operations/HANDOFF_NEXT_AGENT_2026-03-01.md` (`Platform-Auth Reachability Checklist`)
   - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `23`, WARN `1`, FAIL `0`; warning is expected when `frontend-app-profile` source checkout is absent on runner).
   - Latest #104 consolidation contract reruns:
@@ -126,7 +124,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - env-specific closure targets now delegate to `qa-frontend-closure` with explicit `QA_*` flags
     - verifier updated: `scripts/qa/verify-frontend-qa-make-targets.sh` and rerun PASS
   - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) now passes notes-root banner and forum health contracts (forum non-prod fallback `/healthz=200`) and still fails on one non-authn runtime blocker (`credentials` `/login`, `/login/edx-oauth2`, `/admin/login` returning `500`), so local login/session runtime validation remains infra-convergence dependent. Equivalent prod credentials checks return `302`, confirming dev-runtime drift.
-  - Latest auth-surface evidence logs: dev `var/qa/auth-surfaces-dev-20260302T105604Z.log` (`FAILED` with 2 checks) vs prod `var/qa/auth-surfaces-prod-20260302T101515Z.log` (`OK`).
+  - Latest auth-surface evidence logs: dev `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260303T224713Z.log` (`FAILED` with 2 checks, credentials 500) vs prod `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260303T224713Z.log` (`OK`).
   - Capture/verification deterministic hardening in this tranche:
     - `capture-branding-screenshots.sh` now starts by closing stale agent-browser daemon sessions so launch flags are applied consistently.
     - Capture wrapper strips daemon-warning noise from command stdout so `capture-summary.tsv` fields remain parseable and stable.

@@ -1,5 +1,5 @@
 # Mereka.io Branding Rollout Tracker
-_Audience: Design + Platform Eng • Owner: Branding Guild • Last updated: 2026-03-02_
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last updated: 2026-03-03_
 
 Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
@@ -31,7 +31,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Latest focused closure screenshot set: `var/screenshots/dev/20260302T063522Z/` with probe summary `capture-summary.tsv` (includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format for each route, with normalized unquoted probe values).
   - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`exit=0`), latest log `var/qa/paragon-runtime-dev-20260303T221801Z.log`.
   - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`exit=0`) on latest rerun, log `var/qa/studio-authoring-branding-dev-20260303T221811Z.log`.
-  - Latest deterministic MFE capture rerun: `CAPTURE_STRICT_READY=1 CAPTURE_RETRIES=2 AGENT_BROWSER_TIMEOUT_SECONDS=45 ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed; screenshots `var/screenshots/dev/20260303T221705Z/`, log `var/qa/capture-branding-screenshots-dev-mfe-strict-20260303T221705Z.log`.
+  - Latest deterministic MFE capture rerun: `CAPTURE_STRICT_READY=1 CAPTURE_RETRIES=2 AGENT_BROWSER_TIMEOUT_SECONDS=45 ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed; screenshots `var/screenshots/dev/20260303T224930Z/`, log `var/qa/capture-branding-screenshots-dev-mfe-strict-20260303T224930Z.log`.
   - Full Playwright matrix rerun now passes after preflight hardening in `verify-cross-browser-branding-smoke.sh`: `./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser` -> `15 passed`; log `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`.
   - Auth runtime probe status: `./scripts/qa/verify-auth-surfaces.sh dev` now passes notes + forum health checks (forum accepts `/healthz` fallback in non-prod) and reports one remaining non-authn blocker (`credentials` login endpoints returning 500). Equivalent prod checks return expected `302` redirects, so the failure is dev-runtime specific.
   - Latest auth-surface evidence logs:
@@ -46,20 +46,16 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` with default `auto` policy (`dev=1`, `prod=0`) so authenticated canary runs remain signal-focused in non-prod while production stays TLS-strict.
   - Canonical blocker sweep lane added for repeated tracking:
     - `make qa-frontend-runtime-blocker-sweep-both`
-    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.log`
-    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.json`
+    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.log`
+    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.json`
     - machine-readable summary artifact: `var/qa/frontend-runtime-blocker-sweep-*.summary.json` (plus per-check `*.records.tsv` and diagnosis labels in `*.diagnostics.tsv`)
     - stable latest pointers are emitted per run for automation consumers:
       - `var/qa/frontend-runtime-blocker-sweep-latest-*.summary.log|summary.json|records.tsv|diagnostics.tsv`
       - `var/qa/frontend-runtime-blocker-auth-surfaces-*-latest.log`
       - `var/qa/frontend-runtime-blocker-credentials-dev-latest.log`
     - each summary JSON also carries the same stable pointers under `artifacts.latest` to simplify machine consumption.
-    - latest diagnosis labels: `auth-surfaces:dev=auth_surfaces_dev_failure_other`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.diagnostics.tsv`).
-    - repeated probe classification (2026-03-03): dev auth-surface reachability failure is currently persistent (3/3 probe failures, all `curl code 000` to `academyv2.mereka.dev`), not a one-off blip; credentials timezone/tzdata blocker remains unchanged.
-    - probe evidence logs:
-      - `var/qa/auth-surfaces-dev-probe-20260303T223022Z.log`
-      - `var/qa/auth-surfaces-dev-probe-20260303T223033Z.log`
-      - `var/qa/auth-surfaces-dev-probe-20260303T223045Z.log`
+    - latest diagnosis labels: `auth-surfaces:dev=credentials_dev_login_500`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.diagnostics.tsv`).
+    - auth-surface signal has stabilized back to credentials-only failures (dev credentials `/login` and `/login/edx-oauth2` return 500); prior transient host reachability signature (`curl 000`) is no longer the latest state.
     - diagnosis output now includes `owner` + `next_action` routing metadata for each check in both JSON and TSV artifacts.
     - infra-ready prompt can be generated from latest sweep JSON with `make qa-runtime-blocker-infra-prompt`.
     - canonical file output mode: `make qa-runtime-blocker-infra-prompt OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt` (markdown mode via `FORMAT=markdown`).
@@ -78,14 +74,14 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`). Direct pod inspection confirms `/usr/share/zoneinfo/UTC` is absent and `python -m pip show tzdata` returns not found.
   - Repo-side remediation is now in place: `infrastructure/tutor/plugins/mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1` alongside cryptography; readiness contract updated in `scripts/qa/verify-credentials-readiness.sh` and rerun offline PASS (`PASS=48 FAIL=0 SKIP=9`).
   - `verify-credentials-readiness.sh --cluster` now includes runtime checks for `ZoneInfo('UTC')` resolution and python `tzdata` package presence, so rollout validation can confirm the exact failure mode is removed.
-  - Latest live cluster audit: `./scripts/qa/verify-credentials-readiness.sh --cluster` -> `PASS=54 FAIL=1 SKIP=0` (`var/qa/credentials-readiness-cluster-20260302T103931Z.log`); DID endpoint failure is now classified as cascaded while timezone is broken, leaving one canonical runtime blocker: `ZoneInfo('UTC')` (`ModuleNotFoundError: No module named 'tzdata'`).
+  - Latest live cluster audit: `./scripts/qa/verify-credentials-readiness.sh --cluster` -> `PASS=54 FAIL=1 SKIP=0` (captured in blocker lane log `var/qa/frontend-runtime-blocker-credentials-dev-20260303T224713Z.log`); DID endpoint failure is now classified as cascaded while timezone is broken, leaving one canonical runtime blocker: `ZoneInfo('UTC')` (`ModuleNotFoundError: No module named 'tzdata'`).
   - Remaining action is runtime rollout only (rebuild/push/redeploy credentials-serving image path) to validate that dev credentials login endpoints return `302` instead of `500`.
   - Local-login replay canary support added in repo (`RUN_LOCAL_LOGIN_CANARY=1` mode in `verify-authenticated-sso-canary.sh`), but this runner currently has no canary secrets injected (`SSO_CANARY_*`/`LOCAL_CANARY_*` unset).
 - BEM + a11y (`#107`, `#108`):
   - `./scripts/qa/verify-mfe-selector-hardening.sh` passed (`exit=0`), latest log `var/qa/selector-hardening-20260303T222057Z.log`.
   - `./scripts/qa/verify-a11y-contrast-focus.sh` passed (`exit=0`) with documented non-blocking warnings, latest log `var/qa/a11y-contrast-focus-20260303T222057Z.log`.
   - `./scripts/qa/verify-wcag-contrast-v2.sh` passed (`exit=0`), latest log `var/qa/wcag-contrast-v2-20260303T222138Z.log`.
-  - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` passed (`exit=0`), latest log `var/qa/mfe-live-dom-audit-dev-20260303T221944Z.log`.
+  - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` passed (`exit=0`), latest log `var/qa/mfe-live-dom-audit-dev-20260303T225049Z.log`.
   - `verify-wcag-contrast-v2.sh` command compatibility was restored in this lane via a dedicated wrapper to keep Phase C command contracts stable.
 - Root-cause hardening applied in repo:
   - Updated `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` CSP to allow required CDN/Google font domains for MFE runtime script/style/font loads.
