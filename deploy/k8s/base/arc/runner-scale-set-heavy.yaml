@@ -113,15 +113,10 @@ spec:
           env:
             - name: DOCKER_TLS_CERTDIR
               value: /certs
-          args:
-            - --storage-driver=overlay2
-            # Point Docker data root at the persistent cache PVC
-            - --data-root=/cache/docker/daemon
-            # Match pod network MTU (eth0=1280 on rke2-nonprod).
-            # Without this, docker0 defaults to 1500 and large packets
-            # (TLS handshakes, apt downloads) get silently dropped,
-            # causing gnutls_handshake failures and connection timeouts.
-            - --mtu=1280
+          # NOTE: ARC controller overrides container args and volumeMounts
+          # for DinD sidecars. Custom daemon config (MTU, storage-driver)
+          # is applied at workflow level via "Fix DinD network MTU" step
+          # in build-tutor-images.yml using nsenter + daemon.json.
           resources:
             requests:
               cpu: "1"
@@ -129,13 +124,6 @@ spec:
             limits:
               cpu: "4"
               memory: 8Gi
-          volumeMounts:
-            - name: dind-certs-server
-              mountPath: /certs/server
-            - name: dind-certs-client
-              mountPath: /certs/client
-            - name: docker-cache
-              mountPath: /cache/docker
 
       volumes:
         # Ephemeral work dir — destroyed per job (clean checkout every time)
