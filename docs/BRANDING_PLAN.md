@@ -46,15 +46,16 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` with default `auto` policy (`dev=1`, `prod=0`) so authenticated canary runs remain signal-focused in non-prod while production stays TLS-strict.
   - Canonical blocker sweep lane added for repeated tracking:
     - `make qa-frontend-runtime-blocker-sweep-both`
-    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T121852Z.summary.log`
-    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T121852Z.summary.json`
+    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.log`
+    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.json`
     - machine-readable summary artifact: `var/qa/frontend-runtime-blocker-sweep-*.summary.json` (plus per-check `*.records.tsv` and diagnosis labels in `*.diagnostics.tsv`)
     - stable latest pointers are emitted per run for automation consumers:
       - `var/qa/frontend-runtime-blocker-sweep-latest-*.summary.log|summary.json|records.tsv|diagnostics.tsv`
       - `var/qa/frontend-runtime-blocker-auth-surfaces-*-latest.log`
       - `var/qa/frontend-runtime-blocker-credentials-dev-latest.log`
     - each summary JSON also carries the same stable pointers under `artifacts.latest` to simplify machine consumption.
-    - latest diagnosis labels: `auth-surfaces:dev=credentials_dev_login_500`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260302T121852Z.diagnostics.tsv`).
+    - latest diagnosis labels: `auth-surfaces:dev=auth_surfaces_dev_failure_other`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.diagnostics.tsv`).
+    - note: current auth-surfaces dev failure is a transient host reachability outage (`curl code 000` to `academyv2.mereka.dev`) rather than the previous credentials `500` signature; credentials timezone/tzdata blocker remains unchanged.
     - diagnosis output now includes `owner` + `next_action` routing metadata for each check in both JSON and TSV artifacts.
     - infra-ready prompt can be generated from latest sweep JSON with `make qa-runtime-blocker-infra-prompt`.
     - canonical file output mode: `make qa-runtime-blocker-infra-prompt OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt` (markdown mode via `FORMAT=markdown`).

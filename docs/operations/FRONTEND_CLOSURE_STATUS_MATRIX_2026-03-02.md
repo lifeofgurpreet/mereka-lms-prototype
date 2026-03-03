@@ -90,22 +90,22 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `./scripts/qa/verify-auth-surfaces.sh prod`
       - `./scripts/qa/verify-auth-surfaces.sh dev`
       - `./scripts/qa/verify-credentials-readiness.sh --cluster` (dev-only)
-    - Latest run: `var/qa/frontend-runtime-blocker-sweep-both-20260302T121852Z.summary.log` (`PASS=1 FAIL=2 SKIP=0`) with machine-readable summary `var/qa/frontend-runtime-blocker-sweep-both-20260302T121852Z.summary.json` and per-check logs:
-      - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260302T121852Z.log` (PASS)
-      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260302T121852Z.log` (FAIL on credentials login redirects `500`)
-      - `var/qa/frontend-runtime-blocker-credentials-dev-20260302T121852Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
+    - Latest run: `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.log` (`PASS=1 FAIL=2 SKIP=0`) with machine-readable summary `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.json` and per-check logs:
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260303T222746Z.log` (PASS)
+      - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260303T222746Z.log` (FAIL on dev host reachability; curl `000` to `academyv2.mereka.dev`)
+      - `var/qa/frontend-runtime-blocker-credentials-dev-20260303T222746Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
     - Latest diagnostics-labeled run:
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T121852Z.summary.json`
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T121852Z.diagnostics.tsv`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.json`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.diagnostics.tsv`
       - diagnosis labels emitted:
-        - `auth-surfaces:dev` -> `credentials_dev_login_500`
+        - `auth-surfaces:dev` -> `auth_surfaces_dev_failure_other`
         - `credentials-readiness:dev:cluster` -> `credentials_timezone_tzdata_missing`
       - routing metadata emitted per diagnosis:
         - `owner` (responsible lane)
         - `next_action` (recommended immediate remediation)
   - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `23`, WARN `1`, FAIL `0`; warning is expected when `frontend-app-profile` source checkout is absent on runner).
   - Latest #104 consolidation contract reruns:
-    - `./scripts/qa/verify-frontend-qa-make-targets.sh` (PASS)
+    - `make help` canonical target list check (PASS; legacy `qa-frontend-closure-*` aliases removed, canonical `qa-frontend-closure` retained)
     - `./scripts/qa/verify-ci-cd-pipeline.sh --section gitops` (PASS `27/0/0`)
     - `./scripts/qa/verify-release-automation.sh` (PASS; one expected worktree-mode WARN for dry-run contract checker)
   - #104 follow-on make-lane consolidation:
