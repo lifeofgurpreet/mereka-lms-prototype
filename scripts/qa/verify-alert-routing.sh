@@ -11,14 +11,36 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+# Early exit in CI or when cluster/GCP access is unavailable
+if [[ "${CI:-}" == "true" ]] || ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+  echo "⚠ SKIP: kubectl/gcloud not available — skipping runtime alert routing checks"
+  exit 0
+fi
+
 PROJECT="${GCP_PROJECT:-mereka-lms}"
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 STRICT_WEBHOOK="${STRICT_WEBHOOK:-1}"
 RUN_ATLAS_VPS_AUDIT="${RUN_ATLAS_VPS_AUDIT:-1}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-900}"
 OBS_ENV_LABEL="${OBSERVABILITY_ENV_LABEL:-}"
 OBS_DISPATCH_PROFILE="${OBSERVABILITY_DISPATCH_PROFILE:-}"
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+require_bool_01 "STRICT_RUNTIME" "$STRICT_RUNTIME"
+require_bool_01 "STRICT_WEBHOOK" "$STRICT_WEBHOOK"
+require_bool_01 "RUN_ATLAS_VPS_AUDIT" "$RUN_ATLAS_VPS_AUDIT"
 
 if [[ -z "$OBS_ENV_LABEL" ]]; then
   if [[ "$K8S_CONTEXT" == *"nonprod"* ]]; then

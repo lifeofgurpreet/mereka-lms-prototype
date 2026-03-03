@@ -400,19 +400,27 @@ for i in "${!PREREQ_SCRIPTS[@]}"; do
   fi
 done
 
-# Verify CI workflow references this script
+# Verify CI references this script — accept either ci.yml or ci-scripts-static.txt
+# (the CI uses a parallel xargs runner fed from ci-scripts-static.txt)
 CI_YML="$REPO_ROOT/.github/workflows/ci.yml"
+CI_SCRIPTS_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
 if [[ -f "$CI_YML" ]]; then
   do_pass "AC-A11Y-304: .github/workflows/ci.yml found"
 
   if grep -qF 'verify-a11y-tenant-branding.sh' "$CI_YML"; then
-    do_pass "AC-A11Y-304: verify-a11y-tenant-branding.sh referenced in CI workflow"
+    do_pass "AC-A11Y-304: verify-a11y-tenant-branding.sh referenced in CI workflow (ci.yml)"
+  elif [[ -f "$CI_SCRIPTS_LIST" ]] && grep -qF 'verify-a11y-tenant-branding.sh' "$CI_SCRIPTS_LIST"; then
+    do_pass "AC-A11Y-304: verify-a11y-tenant-branding.sh referenced in CI scripts list (ci-scripts-static.txt)"
   else
-    do_fail "AC-A11Y-304: verify-a11y-tenant-branding.sh not yet in CI workflow"
+    do_fail "AC-A11Y-304: verify-a11y-tenant-branding.sh not yet in CI workflow or ci-scripts-static.txt"
   fi
 
+  # CI uses a consolidated parallel runner (ci-scripts-static.txt) rather than named jobs.
+  # Accept the script being present in the scripts list as equivalent to a named job.
   if grep -qF 'a11y-tenant-branding' "$CI_YML"; then
     do_pass "AC-A11Y-304: a11y-tenant-branding CI job defined in workflow"
+  elif [[ -f "$CI_SCRIPTS_LIST" ]] && grep -qF 'verify-a11y-tenant-branding.sh' "$CI_SCRIPTS_LIST"; then
+    do_pass "AC-A11Y-304: a11y-tenant-branding covered via ci-scripts-static.txt parallel runner"
   else
     do_fail "AC-A11Y-304: a11y-tenant-branding CI job not found in workflow"
   fi

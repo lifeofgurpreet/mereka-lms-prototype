@@ -10,7 +10,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 # Courses that already exist - DO NOT REIMPORT
 EXISTING_COURSES = {1, 14, 15, 16, 22, 24, 27, 30, 31, 32, 33, 35, 44, 45, 46}
 
@@ -25,11 +24,11 @@ def get_pod(namespace: str, service: str) -> str:
 
 
 def import_course(namespace: str, pod: str, row: dict, package_path: Path) -> tuple[bool, str]:
-    course_id = row['category_id']
-    course_key = f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
+    row['category_id']
+    f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
     slug = Path(row['package_path']).parent.name
 
-    print(f"   📤 Copying tarball to pod...")
+    print("   📤 Copying tarball to pod...")
     sys.stdout.flush()
     copy_result = subprocess.run(
         ['kubectl', 'cp', str(package_path), f'{namespace}/{pod}:/tmp/course.tgz'],
@@ -38,7 +37,7 @@ def import_course(namespace: str, pod: str, row: dict, package_path: Path) -> tu
     if copy_result.returncode != 0:
         return False, f"Failed to copy: {copy_result.stderr}"
 
-    print(f"   🔧 Extracting and importing...")
+    print("   🔧 Extracting and importing...")
     sys.stdout.flush()
 
     # Extract and import - import expects parent dir and subdir name
@@ -82,7 +81,7 @@ echo "Import complete!"
         # Print relevant output
         # Show last section of output with course creation messages
         lines = output.split('\n')
-        relevant_lines = [l for l in lines if 'course-v1:' in l or 'created successfully' in l or 'Seeding' in l or 'Importing' in l]
+        relevant_lines = [line for line in lines if 'course-v1:' in line or 'created successfully' in line or 'Seeding' in line or 'Importing' in line]
         if relevant_lines:
             print(f"   ✓ {' '.join(relevant_lines[-3:])}")
         return True, ""

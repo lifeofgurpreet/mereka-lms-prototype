@@ -16,7 +16,6 @@ Usage:
 
 import json
 import logging
-from datetime import timedelta
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
@@ -27,95 +26,91 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = 'Process AWS SES bounce and complaint notifications from SNS'
+    help = "Process AWS SES bounce and complaint notifications from SNS"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--notification-json',
+            "--notification-json",
             type=str,
-            help='Raw SES notification JSON string',
+            help="Raw SES notification JSON string",
         )
         parser.add_argument(
-            '--sns-json',
+            "--sns-json",
             type=str,
-            help='SNS message JSON string (will extract Message field)',
+            help="SNS message JSON string (will extract Message field)",
         )
 
     def handle(self, *args, **options):
-        notification_json = options.get('notification_json')
-        sns_json = options.get('sns_json')
+        notification_json = options.get("notification_json")
+        sns_json = options.get("sns_json")
 
         if not notification_json and not sns_json:
-            raise CommandError('Either --notification-json or --sns-json is required')
+            raise CommandError("Either --notification-json or --sns-json is required")
 
         try:
             # Parse SNS message if provided
             if sns_json:
                 sns_message = json.loads(sns_json)
-                notification_json = sns_message.get('Message', '{}')
+                notification_json = sns_message.get("Message", "{}")
 
             # Parse SES notification
             notification = json.loads(notification_json)
-            notification_type = notification.get('notificationType')
+            notification_type = notification.get("notificationType")
 
-            if notification_type == 'Bounce':
+            if notification_type == "Bounce":
                 self._process_bounce(notification)
-            elif notification_type == 'Complaint':
+            elif notification_type == "Complaint":
                 self._process_complaint(notification)
             else:
                 self.stdout.write(
-                    self.style.WARNING(
-                        f'Ignoring notification type: {notification_type}'
-                    )
+                    self.style.WARNING(f"Ignoring notification type: {notification_type}")
                 )
 
         except json.JSONDecodeError as e:
-            raise CommandError(f'Invalid JSON: {e}')
+            raise CommandError(f"Invalid JSON: {e}") from e
         except Exception as e:
-            logger.exception('Error processing SES notification')
-            raise CommandError(f'Error processing notification: {e}')
+            logger.exception("Error processing SES notification")
+            raise CommandError(f"Error processing notification: {e}") from e
 
     def _process_bounce(self, notification):
         """Process bounce notification."""
-        bounce = notification.get('bounce', {})
-        bounce_type = bounce.get('bounceType', '')
-        bounced_recipients = bounce.get('bouncedRecipients', [])
+        bounce = notification.get("bounce", {})
+        bounce_type = bounce.get("bounceType", "")
+        bounced_recipients = bounce.get("bouncedRecipients", [])
 
         for recipient in bounced_recipients:
-            email_address = recipient.get('emailAddress', '').lower()
+            email_address = recipient.get("emailAddress", "").lower()
             if not email_address:
                 continue
 
             # Hard bounce: permanent failure
-            if bounce_type == 'Permanent':
+            if bounce_type == "Permanent":
                 suppression, created = EmailSuppression.objects.get_or_create(
                     email=email_address,
                     defaults={
-                        'reason': 'hard_bounce',
-                        'bounced_at': timezone.now(),
-                    }
+                        "reason": "hard_bounce",
+                        "bounced_at": timezone.now(),
+                    },
                 )
 
                 if not created:
-                    suppression.reason = 'hard_bounce'
+                    suppression.reason = "hard_bounce"
                     suppression.bounced_at = timezone.now()
                     suppression.save()
 
                 self.stdout.write(
-                    self.style.SUCCESS(
-                        f'Added hard bounce suppression for {email_address}'
-                    )
+                    self.style.SUCCESS(f"Added hard bounce suppression for {email_address}")
                 )
 
             # Soft bounce: temporary failure
-            elif bounce_type in ['Transient', 'Undetermined']:
+            elif bounce_type in ["Transient", "Undetermined"]:
                 suppression, created = EmailSuppression.objects.get_or_create(
                     email=email_address,
                     defaults={
-                        'reason': 'soft_bounce',
-                        'bounce_count': 1,
-                        'bounced_at': timezone.now(),
-                    }
+                        "reason": "soft_bounce",
+                        "bounce_count": 1,
+                        "bounced_at": timezone.now(),
+                    },
                 )
 
                 if not created:
@@ -132,39 +127,35 @@ class Command(BaseCommand):
                     suppression.bounced_at = timezone.now()
                     suppression.save()
 
-                status_msg = f'Soft bounce for {email_address} (count: {suppression.bounce_count})'
+                status_msg = f"Soft bounce for {email_address} (count: {suppression.bounce_count})"
                 if suppression.bounce_count >= 3:
-                    self.stdout.write(
-                        self.style.WARNING(f'{status_msg} - SUPPRESSED')
-                    )
+                    self.stdout.write(self.style.WARNING(f"{status_msg} - SUPPRESSED"))
                 else:
                     self.stdout.write(self.style.SUCCESS(status_msg))
 
     def _process_complaint(self, notification):
         """Process complaint notification."""
-        complaint = notification.get('complaint', {})
-        complained_recipients = complaint.get('complainedRecipients', [])
+        complaint = notification.get("complaint", {})
+        complained_recipients = complaint.get("complainedRecipients", [])
 
         for recipient in complained_recipients:
-            email_address = recipient.get('emailAddress', '').lower()
+            email_address = recipient.get("emailAddress", "").lower()
             if not email_address:
                 continue
 
             suppression, created = EmailSuppression.objects.get_or_create(
                 email=email_address,
                 defaults={
-                    'reason': 'complaint',
-                    'bounced_at': timezone.now(),
-                }
+                    "reason": "complaint",
+                    "bounced_at": timezone.now(),
+                },
             )
 
             if not created:
-                suppression.reason = 'complaint'
+                suppression.reason = "complaint"
                 suppression.bounced_at = timezone.now()
                 suppression.save()
 
             self.stdout.write(
-                self.style.SUCCESS(
-                    f'Added complaint suppression for {email_address}'
-                )
+                self.style.SUCCESS(f"Added complaint suppression for {email_address}")
             )

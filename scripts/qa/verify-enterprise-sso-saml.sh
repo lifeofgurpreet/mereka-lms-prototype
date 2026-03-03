@@ -25,6 +25,13 @@ django.setup()"
 echo "=== Enterprise SSO/SAML Verification (AC-026..AC-029) ==="
 echo
 
+# Early-exit when no cluster is available (CI without kubectl context).
+if ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+  echo "⚠ SKIP: kubectl not available or cluster unreachable — skipping runtime SSO/SAML checks"
+  echo "  (Run with a valid KUBECONFIG/cluster context to execute AC-026..AC-029)"
+  exit 0
+fi
+
 LMS_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=lms --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 
 # ---------------------------------------------------------------------------

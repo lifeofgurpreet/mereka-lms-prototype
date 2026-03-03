@@ -11,11 +11,12 @@ Usage:
     kubectl exec -n mereka-lms lms-pod -- python manage.py lms shell < validate_course_content.py
 """
 
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+
 from common.djangoapps.student.models import CourseEnrollment
 from opaque_keys.edx.keys import CourseKey
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from xmodule.modulestore.django import modulestore
-import json
+
 
 def validate_courses():
     """Validate all SKILLOURFUTURE courses"""
@@ -52,7 +53,7 @@ def validate_courses():
                 chapter_count = len(list(course.get_children())) if hasattr(course, 'get_children') else 0
             else:
                 chapter_count = 0
-        except Exception as e:
+        except Exception:
             has_content = False
             chapter_count = 0
 

@@ -14,12 +14,11 @@ from __future__ import annotations
 import argparse
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 try:
     import yaml
-except ImportError:
-    raise SystemExit("PyYAML required: pip install pyyaml")
+except ImportError as exc:
+    raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 COVERS_RE = re.compile(r"(?://|#)\s*@covers\s+((?:AC-[A-Z]*-?\d+(?:\s*,\s*)*)+)")
 SPEC_RE = re.compile(r"(?://|#)\s*@spec:\s*(\S+)")
@@ -27,7 +26,7 @@ AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
 SCAN_EXTENSIONS = {".sh", ".py", ".ts", ".js", ".tsx", ".jsx", ".yaml", ".yml"}
 
 
-def parse_spec_acs(spec_path: Path) -> List[Tuple[str, str]]:
+def parse_spec_acs(spec_path: Path) -> list[tuple[str, str]]:
     """Extract (ac_id, description) from spec checkbox lines."""
     content = spec_path.read_text(encoding="utf-8")
     acs = []
@@ -43,7 +42,7 @@ def parse_spec_acs(spec_path: Path) -> List[Tuple[str, str]]:
     return acs
 
 
-def scan_file(path: Path) -> Dict[str, str]:
+def scan_file(path: Path) -> dict[str, str]:
     """Returns {ac_id: spec_name} for @covers in file."""
     try:
         content = path.read_text(encoding="utf-8")
@@ -52,7 +51,7 @@ def scan_file(path: Path) -> Dict[str, str]:
     spec_name = None
     for m in SPEC_RE.finditer(content):
         spec_name = m.group(1)
-    covers: Dict[str, str] = {}
+    covers: dict[str, str] = {}
     for m in COVERS_RE.finditer(content):
         ids = [s.strip() for s in m.group(1).split(",") if s.strip()]
         for raw_id in ids:
@@ -63,13 +62,13 @@ def scan_file(path: Path) -> Dict[str, str]:
 
 
 def scan_dirs(
-    dirs: List[Path], spec_filter: Optional[str] = None
-) -> Dict[str, List[Path]]:
+    dirs: list[Path], spec_filter: str | None = None
+) -> dict[str, list[Path]]:
     """Scan dirs for @covers. Optionally filter by spec name.
 
     Returns {ac_id: [file_paths]}
     """
-    result: Dict[str, List[Path]] = {}
+    result: dict[str, list[Path]] = {}
     for d in dirs:
         if not d.exists():
             continue
@@ -85,14 +84,14 @@ def scan_dirs(
 
 
 def load_manual_verifications(
-    manual_file: Optional[Path], spec_name: str
-) -> Dict[str, dict]:
+    manual_file: Path | None, spec_name: str
+) -> dict[str, dict]:
     """Load manual/monitoring entries for a spec from centralized file."""
     if not manual_file or not manual_file.exists():
         return {}
     data = yaml.safe_load(manual_file.read_text(encoding="utf-8")) or {}
     entries = data.get("entries", [])
-    result: Dict[str, dict] = {}
+    result: dict[str, dict] = {}
     for entry in entries:
         if not isinstance(entry, dict):
             continue
@@ -124,8 +123,8 @@ def infer_command(file_path: Path, repo_root: Path) -> str:
 
 def generate_testmap(
     spec_path: Path,
-    scan_directories: List[Path],
-    manual_file: Optional[Path],
+    scan_directories: list[Path],
+    manual_file: Path | None,
     repo_root: Path,
 ) -> dict:
     """Generate complete testmap for a spec."""

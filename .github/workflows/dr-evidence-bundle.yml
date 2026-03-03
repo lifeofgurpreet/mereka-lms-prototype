@@ -18,7 +18,7 @@ permissions: {}
 jobs:
   dr-evidence:
     name: Build DR Evidence Bundle
-    runs-on: mereka-k8s-runners
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
     permissions:
       contents: read
     steps:

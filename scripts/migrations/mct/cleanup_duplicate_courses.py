@@ -17,12 +17,12 @@ Usage:
     kubectl exec -n mereka-lms lms-pod -- python manage.py lms shell < /tmp/cleanup_duplicate_courses.py
 """
 
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+
 from common.djangoapps.student.models import CourseEnrollment
-from opaque_keys.edx.keys import CourseKey
-from xmodule.modulestore.django import modulestore
 from django.db import transaction
-import sys
+from opaque_keys.edx.keys import CourseKey
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from xmodule.modulestore.django import modulestore
 
 # Courses to potentially delete
 OLD_FORMAT_COURSES = [
@@ -75,10 +75,9 @@ def check_course_safety(course_id_str):
     store = modulestore()
     try:
         course_key = CourseKey.from_string(course_id_str)
-        course = store.get_course(course_key)
-        has_content = course is not None
-    except:
-        has_content = False
+        store.get_course(course_key)
+    except Exception:
+        pass
 
     return True, f"Safe: {active_enrollments} active, {inactive_enrollments} inactive enrollments"
 
@@ -145,16 +144,16 @@ def cleanup_courses(dry_run=True, delete_old_format=True, delete_empty_mctcat=Tr
                     try:
                         course_key = CourseKey.from_string(course_id_str)
                         store.delete_course(course_key, user_id=-1)
-                        print(f"              ✅ Deleted from modulestore")
+                        print("              ✅ Deleted from modulestore")
                     except Exception as e:
                         print(f"              ⚠️  Modulestore deletion failed: {e}")
 
                     # Delete CourseOverview
                     course_overview.delete()
-                    print(f"              ✅ Deleted CourseOverview")
+                    print("              ✅ Deleted CourseOverview")
 
                 deleted_count += 1
-                print(f"              ✅ DELETED")
+                print("              ✅ DELETED")
 
             except Exception as e:
                 errors.append({
@@ -218,7 +217,7 @@ def verify_final_state():
             course_key = CourseKey.from_string(course_id_str)
             course = store.get_course(course_key)
             has_content = course is not None
-        except:
+        except Exception:
             has_content = False
 
         # Check enrollments

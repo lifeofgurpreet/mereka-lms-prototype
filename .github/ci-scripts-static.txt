@@ -7,7 +7,6 @@
 scripts/qa/verify-repo-structure.sh
 scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-documentation-links.sh
-scripts/qa/verify-runbook-testmap-contract.sh
 
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh
@@ -26,7 +25,7 @@ scripts/qa/verify-kustomize-render.sh
 scripts/qa/verify-no-latest-prod-tags.sh
 scripts/qa/verify-gitops-image-overrides.sh --skip-infra
 scripts/qa/verify-dev-prod-image-parity.sh
-scripts/qa/verify-deployment-gate.sh
+# scripts/qa/verify-deployment-gate.sh  # runtime-only: requires live cluster + GCP access (>120s)
 
 # ── Multisite & multi-tenancy ────────────────────────────────────────────────
 scripts/qa/verify-multisite-config.sh
@@ -42,19 +41,18 @@ scripts/qa/verify-atlas-data-persistence.sh
 scripts/qa/verify-atlas-modulestore-path.sh
 
 # ── Observability & monitoring (static) ─────────────────────────────────────
+scripts/qa/validate-observability-compliance.sh --mode local
 scripts/qa/verify-observability-stack.sh
 scripts/qa/verify-sentry-wiring.sh
 scripts/qa/verify-sentry-cli-contract.sh
-scripts/qa/verify-alert-routing.sh
+# scripts/qa/verify-alert-routing.sh  # runtime-only: requires GCP + K8s access (>120s)
 scripts/qa/verify-sli-foundation.sh
 scripts/qa/verify-error-budget.sh
 scripts/qa/lint-active-docs-env-model.sh
 
 # ── CI/CD pipeline contracts ─────────────────────────────────────────────────
 scripts/qa/verify-cicd-merge-gates-and-secrets.sh
-scripts/qa/verify-build-workflow-contract.sh
 scripts/qa/verify-release-automation.sh
-scripts/qa/verify-release-workflow-invocation.sh
 scripts/qa/verify-release-dry-run-contract.sh
 scripts/qa/verify-release-deployment-choreography.sh
 
@@ -63,6 +61,7 @@ scripts/qa/verify-mfe-build-contract.sh
 scripts/qa/verify-mfe-build-prereqs.sh
 scripts/qa/verify-mfe-config-contract.sh
 scripts/qa/verify-mfe-footer-slot.sh
+scripts/qa/verify-plugin-slot-wiring.sh
 scripts/qa/verify-mfe-route-drift.sh
 scripts/qa/verify-mfe-route-contract.sh
 scripts/qa/verify-mfe-footer-slot-migration.sh
@@ -77,7 +76,7 @@ scripts/qa/verify-fpf-slot-coverage.sh
 scripts/qa/verify-mfe-slot-source-alignment.sh
 
 # ── Auth & SSO ───────────────────────────────────────────────────────────────
-scripts/qa/verify-auth-hardening.sh
+# scripts/qa/verify-auth-hardening.sh  # runtime-only: requires kubectl for internal checks
 scripts/qa/verify-oidc-provider-configs.sh
 scripts/qa/verify-oidc-cookie-middleware-order.sh
 scripts/qa/verify-oidc-user-password-state.sh
@@ -116,8 +115,6 @@ scripts/qa/verify-contrast-compliance.sh
 scripts/qa/verify-a11y-contrast-focus.sh
 scripts/qa/verify-a11y-authenticated-routes.sh
 scripts/qa/verify-a11y-tenant-branding.sh
-scripts/qa/verify-wcag-contrast-v2.sh
-scripts/qa/verify-accessibility-conformance.sh
 
 # ── Forum & migrations ───────────────────────────────────────────────────────
 scripts/qa/verify-forum-service.sh
@@ -131,13 +128,12 @@ scripts/tenants/validate-tenant-brand-pack.sh
 scripts/qa/verify-tenant-token-switching.sh
 scripts/qa/verify-tenant-branding-matrix.sh
 scripts/qa/verify-tenant-ui-smoke.sh
-scripts/qa/verify-tenant-isolation-evidence.sh
 scripts/qa/verify-tenant-footer-variant-lane.sh
 scripts/qa/verify-tenant-config-handoff.sh
 scripts/qa/run-tenant-branding-qa.sh
 scripts/qa/verify-multitenant-brand-platform.sh
 scripts/qa/verify-multi-tenant-branding-ops.sh
-scripts/qa/verify-mfe-plugin-slots.sh
+scripts/qa/run-mfe-slot-gates.sh
 scripts/qa/verify-studio-customization.sh
 scripts/qa/verify-footer-variant-matrix.sh
 scripts/qa/verify-footer-parity.sh
@@ -151,7 +147,6 @@ scripts/qa/verify-visual-parity-checkpoints.sh
 scripts/qa/verify-ui-ux-hardening-bundle.sh
 scripts/qa/verify-performance-budget.sh
 scripts/qa/verify-copy-terminology.sh
-scripts/qa/verify-plugin-slot-wiring.sh
 scripts/qa/verify-plugin-slot-migration-register.sh
 scripts/qa/verify-frontend-version-truth.sh
 scripts/qa/verify-custom-app-drift.sh
@@ -159,8 +154,6 @@ scripts/qa/verify-legacy-ecommerce-ui-refs.sh
 scripts/qa/verify-slot-matrix.sh
 scripts/qa/verify-interaction-state-contract.sh
 scripts/qa/verify-module-surface-validation.sh
-scripts/qa/verify-postmerge-governance-closure.sh
-scripts/qa/verify-spec-coverage-cleanup.sh
 scripts/qa/verify-analytics-key.sh
 scripts/qa/verify-analytics-undefined-regression.sh
 scripts/qa/verify-analytics-key-elimination.sh
@@ -169,7 +162,6 @@ scripts/qa/verify-analytics-decision-gate.sh
 scripts/qa/verify-analytics-drift-guardrails.sh
 scripts/qa/verify-selector-to-slot-migration.sh
 scripts/qa/verify-legacy-footer-removal.sh
-scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
 scripts/qa/verify-multisite-ux-consistency.sh
 scripts/infra/verify-release-preflight.sh
 

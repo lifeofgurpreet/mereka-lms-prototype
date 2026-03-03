@@ -15,7 +15,7 @@
 #
 set -euo pipefail
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 VELERO_NS="${VELERO_NS:-velero}"
 SCHEDULE_NAME="${SCHEDULE_NAME:-velero-local-hourly-critical-databases}"
 JSON_OUT=0

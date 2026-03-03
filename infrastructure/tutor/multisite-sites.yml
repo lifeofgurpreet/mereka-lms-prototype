@@ -59,8 +59,8 @@ sites:
       site_name: Skill Our Future
       platform_name: Skill Our Future
       LMS_ROOT_URL: https://skillourfuture.academy.mereka.io
-      CMS_ROOT_URL: https://studio.academyv2.mereka.io
-      MFE_BASE_URL: https://apps.academyv2.mereka.io
+      CMS_ROOT_URL: https://studio.skillourfuture.academy.mereka.io
+      MFE_BASE_URL: https://apps.skillourfuture.academy.mereka.io
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:

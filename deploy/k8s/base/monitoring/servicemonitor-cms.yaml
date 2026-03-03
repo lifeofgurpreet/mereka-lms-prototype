@@ -32,7 +32,7 @@ spec:
       scrapeTimeout: 10s
       scheme: http
       # RelabelConfigs to add additional labels to metrics
-      podRelabelings:
+      relabelings:
         - action: replace
           sourceLabels: [__meta_kubernetes_pod_name]
           targetLabel: pod

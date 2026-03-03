@@ -28,10 +28,9 @@ import json
 import re
 import shutil
 import tarfile
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
-
 
 DEFAULT_START = "2025-01-01T00:00:00Z"
 
@@ -55,8 +54,8 @@ class CourseKey:
         return f"{self.slug}.tar.gz"
 
 
-def load_course_metadata(csv_path: Path) -> Dict[str, dict]:
-    metadata: Dict[str, dict] = {}
+def load_course_metadata(csv_path: Path) -> dict[str, dict]:
+    metadata: dict[str, dict] = {}
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
@@ -95,8 +94,8 @@ def build_policy_json(title: str, start: str = DEFAULT_START) -> str:
 def create_video_block(lesson: dict, video_url: str) -> str:
     """Create a video XBlock XML for Open edX."""
     title = html.escape(lesson.get("title", "Video Lesson"))
-    description = html.escape(lesson.get("description", "") or "")
-    
+    html.escape(lesson.get("description", "") or "")
+
     # Video XBlock XML structure
     video_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <video url_name="{html.escape(lesson.get('id', 'video'))}" display_name="{title}" download_video="false" show_captions="true">
@@ -110,37 +109,37 @@ def create_html_block_for_content(lesson: dict, content: dict) -> str:
     """Create HTML block content for PDFs, descriptions, etc."""
     title = html.escape(lesson.get("title", "Lesson"))
     description = html.escape(lesson.get("description", "") or "")
-    
+
     file_type = content.get("file_type", "").lower()
     download_url = content.get("download_url", "")
     aux_pdf_url = content.get("aux_pdf_url", "")
     aux_word_url = content.get("aux_word_url", "")
-    
+
     html_parts = []
-    
+
     if description:
         html_parts.append(f"<p>{description}</p>")
-    
+
     # Add video link if it's a video but we're using HTML block
     playback_url = content.get("playback_url", "")
     if playback_url:
         html_parts.append(f'<p><a href="{html.escape(playback_url)}" target="_blank">Watch Video</a></p>')
-    
+
     # Add PDF link
     if file_type == "pdf" and download_url:
         html_parts.append(f'<p><a href="{html.escape(download_url)}" target="_blank">Download PDF: {title}</a></p>')
     elif aux_pdf_url:
         html_parts.append(f'<p><a href="{html.escape(aux_pdf_url)}" target="_blank">Download PDF Resource</a></p>')
-    
+
     # Add Word doc link
     if aux_word_url:
         html_parts.append(f'<p><a href="{html.escape(aux_word_url)}" target="_blank">Download Word Document</a></p>')
-    
+
     if not html_parts:
         html_parts.append(f"<p>Lesson: {title}</p>")
-    
+
     html_body = "\n".join(html_parts)
-    
+
     html_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <html url_name="{html.escape(lesson.get('id', 'html'))}" display_name="{title}">
 {html_body}
@@ -161,7 +160,7 @@ def create_course_package(
     output_dir: Path,
     language: str,
     keep_build: bool,
-) -> Tuple[Path, int, int]:
+) -> tuple[Path, int, int]:
     course_dir = output_dir / key.slug
     build_root = course_dir / "build"
     ensure_clean_dir(build_root)
@@ -193,7 +192,7 @@ def create_course_package(
     write_text(overview_path, course_desc or "<p>No description provided.</p>")
     write_text(policy_path, build_policy_json(metadata.get("course_name", key.title) or key.title))
 
-    chapter_refs: List[str] = []
+    chapter_refs: list[str] = []
 
     modules = structure if structure else [
         {
@@ -216,7 +215,7 @@ def create_course_package(
     for module_index, module in enumerate(modules, start=1):
         chapter_url = f"module{module_index}"
         chapter_refs.append(f"  <chapter url_name=\"{chapter_url}\" />")
-        sequential_refs: List[str] = []
+        sequential_refs: list[str] = []
         lessons = module.get("lessons", [])
         if not lessons:
             lessons = [
@@ -241,9 +240,9 @@ def create_course_package(
             content = lesson.get("content", {})
             file_type = content.get("file_type", "").lower()
             video_url = content.get("playback_url") or content.get("download_url", "")
-            
-            vertical_blocks: List[str] = []
-            
+
+            vertical_blocks: list[str] = []
+
             # Use video XBlock for videos, HTML block for everything else
             if file_type == "video" and video_url:
                 video_block_id = f"{seq_url}_video"
@@ -360,7 +359,7 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest_rows: List[dict] = []
+    manifest_rows: list[dict] = []
 
     for course in structure_data:
         course_id = course["course_id"]

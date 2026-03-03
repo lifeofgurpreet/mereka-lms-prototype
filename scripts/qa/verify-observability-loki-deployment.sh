@@ -11,8 +11,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+DEFAULT_K8S_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-$DEFAULT_K8S_CONTEXT}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE:-${K8S_NAMESPACE_PROD:-mereka-lms}}}"
 STRICT="${STRICT:-0}"
 
 RED='\033[0;31m'
@@ -28,6 +29,11 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
+
+if [[ "$STRICT" != "0" && "$STRICT" != "1" ]]; then
+  echo "STRICT must be 0 or 1 (got: $STRICT)" >&2
+  exit 2
+fi
 
 failures=0
 skips=0
@@ -54,7 +60,17 @@ fi
 # Check if Promtail DaemonSet exists (might be in monitoring namespace)
 promtail_ns=""
 for ns in monitoring "$APP_NS" loki-stack; do
-  if kubectl --context "$K8S_CONTEXT" -n "$ns" get daemonset -l app.kubernetes.io/name=promtail -o name >/dev/null 2>&1; then
+  promtail_ds_names="$(
+    kubectl --context "$K8S_CONTEXT" -n "$ns" get daemonset \
+      -l app.kubernetes.io/name=promtail -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+  )"
+  if [[ -z "${promtail_ds_names//[[:space:]]/}" ]]; then
+    promtail_ds_names="$(
+      kubectl --context "$K8S_CONTEXT" -n "$ns" get daemonset \
+        -l app=promtail -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+    )"
+  fi
+  if [[ -n "${promtail_ds_names//[[:space:]]/}" ]]; then
     promtail_ns="$ns"
     break
   fi
@@ -69,7 +85,7 @@ fi
 
 # Check Promtail DaemonSet status
 echo -n "Check: Promtail DaemonSet exists in namespace $promtail_ns... "
-if kubectl --context "$K8S_CONTEXT" -n "$promtail_ns" get daemonset -l app.kubernetes.io/name=promtail >/dev/null 2>&1; then
+if [[ -n "${promtail_ds_names//[[:space:]]/}" ]]; then
   echo -e "${GREEN}PASS${NC}"
 else
   echo -e "${RED}FAIL${NC}"
@@ -78,7 +94,10 @@ fi
 
 # Check Promtail pods are running
 echo -n "Check: Promtail pods are running... "
-promtail_pods=$(kubectl --context "$K8S_CONTEXT" -n "$promtail_ns" get pods -l app.kubernetes.io/name=promtail -o json 2>/dev/null || echo '{"items":[]}')
+promtail_pods=$(kubectl --context "$K8S_CONTEXT" -n "$promtail_ns" get pods -l app.kubernetes.io/name=promtail -o json 2>/dev/null || true)
+if [[ -z "${promtail_pods//[[:space:]]/}" ]] || [[ "$(echo "$promtail_pods" | jq -r '.items | length' 2>/dev/null || echo 0)" -eq 0 ]]; then
+  promtail_pods=$(kubectl --context "$K8S_CONTEXT" -n "$promtail_ns" get pods -l app=promtail -o json 2>/dev/null || echo '{"items":[]}')
+fi
 running_count=$(echo "$promtail_pods" | jq -r '[.items[] | select(.status.phase == "Running")] | length')
 total_count=$(echo "$promtail_pods" | jq -r '.items | length')
 
@@ -91,7 +110,15 @@ fi
 
 # Check Promtail is configured to scrape from mereka-lms namespace
 echo -n "Check: Promtail configured to scrape $APP_NS namespace... "
-promtail_config=$(kubectl --context "$K8S_CONTEXT" -n "$promtail_ns" get configmap -l app.kubernetes.io/name=promtail -o jsonpath='{.items[0].data}' 2>/dev/null || echo '{}')
+promtail_cm=$(kubectl --context "$K8S_CONTEXT" -n "$promtail_ns" get configmap -l app.kubernetes.io/name=promtail -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+if [[ -z "${promtail_cm//[[:space:]]/}" ]]; then
+  promtail_cm=$(kubectl --context "$K8S_CONTEXT" -n "$promtail_ns" get configmap -l app=promtail -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+fi
+if [[ -n "${promtail_cm//[[:space:]]/}" ]]; then
+  promtail_config=$(kubectl --context "$K8S_CONTEXT" -n "$promtail_ns" get configmap "$promtail_cm" -o jsonpath='{.data}' 2>/dev/null || echo '{}')
+else
+  promtail_config="{}"
+fi
 if echo "$promtail_config" | grep -q "$APP_NS" || echo "$promtail_config" | grep -q "namespace_name"; then
   echo -e "${GREEN}PASS${NC}"
 else
@@ -102,7 +129,17 @@ fi
 echo -n "Check: Loki deployment exists... "
 loki_found=0
 for ns in monitoring "$APP_NS" loki-stack; do
-  if kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment -l app.kubernetes.io/name=loki -o name >/dev/null 2>&1; then
+  loki_workload_names="$(
+    kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment \
+      -l app.kubernetes.io/name=loki -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+  )"
+  if [[ -z "${loki_workload_names//[[:space:]]/}" ]]; then
+    loki_workload_names="$(
+      kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment \
+        -l app=loki -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+    )"
+  fi
+  if [[ -n "${loki_workload_names//[[:space:]]/}" ]]; then
     loki_found=1
     echo -e "${GREEN}PASS${NC} (found in namespace $ns)"
     break

@@ -7,6 +7,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
 
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_command rg || exit 0
+
 echo "Checking release dry-run contract..."
 
 if [[ ! -x "$RELEASE_SCRIPT" ]]; then

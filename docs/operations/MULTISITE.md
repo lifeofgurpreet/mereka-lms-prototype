@@ -14,6 +14,14 @@ This guide captures the steps required to attach additional branded experiences 
 | Biji-Biji Academy | `academy.biji-biji.com` | apex domain managed by the Biji-Biji team |
 | Skill Our Future | `skillourfuture.academy.mereka.io` | subdomain that lives inside the existing academyv2 zone (keep the Cloudflare record DNS-only; Universal SSL does not cover two-level wildcards) |
 
+Tenant host ownership contract (strict):
+- `academy.biji-biji.com` -> `studio.academy.biji-biji.com` + `apps.academy.biji-biji.com`
+- `skillourfuture.academy.mereka.io` -> `studio.skillourfuture.academy.mereka.io` + `apps.skillourfuture.academy.mereka.io`
+- Shared CMS/MFE hosts are allowed only for preview/dev lanes via explicit allowlist.
+  - Canonical file: `infrastructure/tutor/multisite-shared-host-allowlist.txt`
+  - Policy: entries MUST be preview/dev/staging scoped only; enterprise hosts are forbidden.
+- `site_values` schema is enforced by `scripts/qa/verify-tenant-override-schema.sh` (required keys + allowed keys + org filter consistency).
+
 > **Common mistake:** `skillsourfuture.academyv2.mereka.io` is **not** a canonical hostname and is not expected to resolve. The tenant domain is `skillourfuture.academy.mereka.io`.
 
 1. Create `A`/`CNAME` records that resolve to the same load balancer / host IP that currently serves `academyv2.mereka.io`. The `skillourfuture.academy` record is tracked in `infrastructure/cloudflare/records.json` and must stay gray-clouded unless you buy an Advanced Certificate pack.
@@ -108,7 +116,7 @@ For new tenants or brand updates, follow the **Fast-Path Brand Pack Flow**:
 
 ## 5. Content governance
 
-- **Organizations:** Authors must create courses under the correct org (`BIJIBIJI` or `SKILLOURFUTURE`). Organization-level roles keep Studio permissions separated even though everyone still signs into `studio.academyv2.mereka.io`.
+- **Organizations:** Authors must create courses under the correct org (`BIJIBIJI` or `SKILLOURFUTURE`). Organization-level roles and tenant-owned Studio hosts keep authoring boundaries explicit.
 - **Discovery / catalog:** The `course_org_filter` value surfaces the right subset of courses at runtime. Discovery also supports organization and catalog filters if you need to hide courses from anonymous visitors.
 - **Themes:** All microsites currently reuse the Mereka comprehensive theme. When brand assets are ready, add new theme directories under `infrastructure/tutor/themes/` (e.g., `infrastructure/tutor/themes/biji-biji`) and update each site configuration with `THEME_NAME`. Tutor already copies the entire `infrastructure/tutor/themes/` tree, so per-site themes only require CSS + static assets.
 
@@ -119,6 +127,7 @@ For new tenants or brand updates, follow the **Fast-Path Brand Pack Flow**:
 2. Visit each domain in a browser, confirm the navbar title, footer copy, and catalog results reflect the new brand.
 3. Log into Studio (`https://studio.academyv2.mereka.io`), create a course under each organization, then make sure only the matching microsite displays it.
 4. Spot-check CSRF/login by signing in/out through the new hostnames.
+- Governance wrapper: `./scripts/qa/run-multisite-governance-gates.sh --env dev` maps the tenant-branding runtime probe to `local` (the verifier accepts `prod|staging|local`).
 - If Cloudflare ever shows `525` for `skillourfuture…`, double-check the record is gray-clouded. Multi-level subdomains fall outside Universal SSL coverage, so Origin-only TLS is expected there.
 
 ## 7. Operational notes

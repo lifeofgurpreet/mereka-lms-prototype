@@ -4,20 +4,23 @@ Simple Programs creation script for Discovery.
 Run with CELERY_TASK_ALWAYS_EAGER=true in the Discovery pod.
 """
 import os
+
 os.environ.setdefault('CELERY_TASK_ALWAYS_EAGER', 'true')
 
 import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'course_discovery.settings.production')
 
 # Patch celery before Django setup
 from celery import current_app
+
 current_app.conf.task_always_eager = True
 
 django.setup()
 
-from django.contrib.sites.models import Site
 from course_discovery.apps.core.models import Partner
 from course_discovery.apps.course_metadata.models import Organization, Program, ProgramType
+from django.contrib.sites.models import Site
 
 print("=" * 60)
 print("MCT Programs Creation")

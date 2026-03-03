@@ -1,5 +1,5 @@
 # Auth Alert Runbook
-_Audience: On-call/SRE • Last updated: 2026-02-09_
+_Audience: On-call/SRE • Owner: Engineering Lead • Last updated: 2026-02-09_
 
 This is the remediation map for the auth-related alerts and checks in `infrastructure/monitoring/`.
 

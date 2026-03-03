@@ -11,8 +11,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+DEFAULT_K8S_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-$DEFAULT_K8S_CONTEXT}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE:-${K8S_NAMESPACE_PROD:-mereka-lms}}}"
 LOKI_URL="${LOKI_URL:-}"
 STRICT="${STRICT:-0}"
 
@@ -30,6 +31,11 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
+
+if [[ "$STRICT" != "0" && "$STRICT" != "1" ]]; then
+  echo "STRICT must be 0 or 1 (got: $STRICT)" >&2
+  exit 2
+fi
 
 failures=0
 skips=0
@@ -71,9 +77,18 @@ fi
 if [[ -z "$LOKI_URL" ]]; then
   # Try to find Loki service
   for ns in monitoring loki-stack "$APP_NS"; do
-    if kubectl --context "$K8S_CONTEXT" -n "$ns" get svc -l app.kubernetes.io/name=loki -o name >/dev/null 2>&1; then
-      LOKI_SVC=$(kubectl --context "$K8S_CONTEXT" -n "$ns" get svc -l app.kubernetes.io/name=loki -o jsonpath='{.items[0].metadata.name}')
-      LOKI_URL="http://${LOKI_SVC}.${ns}.svc.cluster.local:3100"
+    loki_svc_name="$(
+      kubectl --context "$K8S_CONTEXT" -n "$ns" get svc -l app.kubernetes.io/name=loki \
+        -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true
+    )"
+    if [[ -z "${loki_svc_name//[[:space:]]/}" ]]; then
+      loki_svc_name="$(
+        kubectl --context "$K8S_CONTEXT" -n "$ns" get svc -l app=loki \
+          -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true
+      )"
+    fi
+    if [[ -n "${loki_svc_name//[[:space:]]/}" ]]; then
+      LOKI_URL="http://${loki_svc_name}.${ns}.svc.cluster.local:3100"
       echo "Auto-detected Loki URL: $LOKI_URL"
       break
     fi

@@ -15,8 +15,8 @@ import argparse
 import csv
 import json
 from collections import defaultdict
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, List, Optional
 
 
 def read_ndjson(path: Path) -> Iterator[dict]:
@@ -28,7 +28,7 @@ def read_ndjson(path: Path) -> Iterator[dict]:
             yield json.loads(line)
 
 
-def write_csv(rows: Iterable[dict], fieldnames: List[str], path: Path) -> None:
+def write_csv(rows: Iterable[dict], fieldnames: list[str], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -46,17 +46,17 @@ def safe_get(data: dict, *keys, default=None):
     return cur if cur is not None else default
 
 
-def normalize_username(email: Optional[str], fallback: str) -> str:
+def normalize_username(email: str | None, fallback: str) -> str:
     if email:
         base = email.split("@")[0][:30]
         return base or fallback
     return fallback
 
 
-def build_user_rows(contacts: Path, customers: Path) -> List[dict]:
-    contact_records: Dict[str, dict] = {}
-    customer_records: Dict[str, dict] = {}
-    customer_to_contact: Dict[str, str] = {}
+def build_user_rows(contacts: Path, customers: Path) -> list[dict]:
+    contact_records: dict[str, dict] = {}
+    customer_records: dict[str, dict] = {}
+    customer_to_contact: dict[str, str] = {}
 
     for rec in read_ndjson(customers):
         customer_records[rec["id"]] = rec
@@ -64,7 +64,7 @@ def build_user_rows(contacts: Path, customers: Path) -> List[dict]:
         if contact_rel:
             customer_to_contact[rec["id"]] = contact_rel.get("id")
 
-    users: List[dict] = []
+    users: list[dict] = []
     seen_contacts: set = set()
 
     for rec in read_ndjson(contacts):
@@ -120,8 +120,8 @@ def build_user_rows(contacts: Path, customers: Path) -> List[dict]:
     return users
 
 
-def build_offer_product_map(offers_file: Path) -> Dict[str, List[str]]:
-    mapping: Dict[str, List[str]] = defaultdict(list)
+def build_offer_product_map(offers_file: Path) -> dict[str, list[str]]:
+    mapping: dict[str, list[str]] = defaultdict(list)
     for rec in read_ndjson(offers_file):
         offer_id = rec["id"]
         products = safe_get(rec, "relationships", "products", "data", default=[])
@@ -130,8 +130,8 @@ def build_offer_product_map(offers_file: Path) -> Dict[str, List[str]]:
     return mapping
 
 
-def build_customer_contact_map(customers_file: Path) -> Dict[str, str]:
-    mapping: Dict[str, str] = {}
+def build_customer_contact_map(customers_file: Path) -> dict[str, str]:
+    mapping: dict[str, str] = {}
     for rec in read_ndjson(customers_file):
         customer_id = rec["id"]
         contact_rel = safe_get(rec, "relationships", "contact", "data", default={})
@@ -140,11 +140,11 @@ def build_customer_contact_map(customers_file: Path) -> Dict[str, str]:
     return mapping
 
 
-def load_courses(courses_file: Path) -> Dict[str, dict]:
+def load_courses(courses_file: Path) -> dict[str, dict]:
     return {rec["id"]: rec for rec in read_ndjson(courses_file)}
 
 
-def load_products(products_file: Path) -> Dict[str, dict]:
+def load_products(products_file: Path) -> dict[str, dict]:
     return {rec["id"]: rec for rec in read_ndjson(products_file)}
 
 
@@ -154,14 +154,14 @@ def build_enrollment_rows(
     customers_file: Path,
     courses_file: Path,
     products_file: Path,
-) -> List[dict]:
+) -> list[dict]:
     offers_map = {rec["id"]: rec for rec in read_ndjson(offers_file)}
     offer_to_products = build_offer_product_map(offers_file)
     customer_to_contact = build_customer_contact_map(customers_file)
     courses = load_courses(courses_file)
-    products = load_products(products_file)
+    load_products(products_file)
 
-    rows: List[dict] = []
+    rows: list[dict] = []
 
     for rec in read_ndjson(purchases_file):
         attrs = rec.get("attributes", {})
@@ -206,13 +206,13 @@ def build_course_summary(
     lessons_file: Path,
     lesson_media_file: Path,
     lesson_details_file: Path | None = None,
-) -> (List[dict], List[dict]):
+) -> (list[dict], list[dict]):
     courses = load_courses(courses_file)
-    course_modules: Dict[str, List[dict]] = defaultdict(list)
-    module_lessons: Dict[str, List[dict]] = defaultdict(list)
-    lesson_media_rel: Dict[str, str] = {}
-    media_detail: Dict[str, dict] = {}
-    lesson_details: Dict[str, dict] = {}
+    course_modules: dict[str, list[dict]] = defaultdict(list)
+    module_lessons: dict[str, list[dict]] = defaultdict(list)
+    lesson_media_rel: dict[str, str] = {}
+    media_detail: dict[str, dict] = {}
+    lesson_details: dict[str, dict] = {}
 
     for rec in read_ndjson(modules_file):
         module = rec.get("module", {})
@@ -246,8 +246,8 @@ def build_course_summary(
                     "included": rec.get("included", []),
                 }
 
-    course_structures: List[dict] = []
-    summary_rows: List[dict] = []
+    course_structures: list[dict] = []
+    summary_rows: list[dict] = []
 
     for course_id, course_rec in courses.items():
         modules = []
@@ -276,7 +276,7 @@ def build_course_summary(
                         lesson, "attributes", "publishing_option", default=""
                     ),
                 }
-                
+
                 # Merge in lesson details if available
                 if lesson_id in lesson_details:
                     detail_attrs = lesson_details[lesson_id].get("attributes", {})
@@ -293,7 +293,7 @@ def build_course_summary(
                     included = lesson_details[lesson_id].get("included", [])
                     if included:
                         lesson_entry["included_resources"] = included
-                
+
                 media_id = lesson_media_rel.get(lesson_id)
                 if media_id:
                     lesson_entry["media_id"] = media_id

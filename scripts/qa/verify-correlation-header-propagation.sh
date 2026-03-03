@@ -47,6 +47,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+case "$STRICT" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT='$STRICT' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
+
 if [[ ! -f "$CADDYFILE" ]]; then
   echo -e "${RED}FAIL${NC}: Caddyfile not found: $CADDYFILE"
   exit 1

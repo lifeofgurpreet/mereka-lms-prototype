@@ -18,7 +18,7 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Request, Response, status
 
@@ -61,7 +61,7 @@ def _normalize_header(header_value: str | None) -> str:
     return header_value.strip()
 
 
-def _append_event(event: str, payload: Dict[str, Any]) -> None:
+def _append_event(event: str, payload: dict[str, Any]) -> None:
     ts = datetime.now(timezone.utc).isoformat()
     out_path = OUTBOX_DIR / f"{event}.ndjson"
     record = {

@@ -11,39 +11,37 @@ AC-043: GDPR compliance (bulk_campaign disabled by default)
 """
 
 from django.db import models
-from django.utils import timezone
-
 
 # 15 ACE message types as defined in the spec
 MESSAGE_TYPE_CHOICES = [
-    ('password_reset', 'Password Reset'),
-    ('account_activation', 'Account Activation'),
-    ('enrollment_confirmation', 'Enrollment Confirmation'),
-    ('course_announcement', 'Course Announcement'),
-    ('assignment_reminder', 'Assignment Reminder'),
-    ('grade_posted', 'Grade Posted'),
-    ('discussion_reply', 'Discussion Reply'),
-    ('discussion_mention', 'Discussion Mention'),
-    ('certificate_issued', 'Certificate Issued'),
-    ('course_start_reminder', 'Course Start Reminder'),
-    ('course_completion', 'Course Completion'),
-    ('license_expiry_warning', 'License Expiry Warning'),
-    ('enterprise_welcome', 'Enterprise Welcome'),
-    ('bulk_campaign', 'Bulk Campaign'),
-    ('forum_digest', 'Forum Digest'),
+    ("password_reset", "Password Reset"),
+    ("account_activation", "Account Activation"),
+    ("enrollment_confirmation", "Enrollment Confirmation"),
+    ("course_announcement", "Course Announcement"),
+    ("assignment_reminder", "Assignment Reminder"),
+    ("grade_posted", "Grade Posted"),
+    ("discussion_reply", "Discussion Reply"),
+    ("discussion_mention", "Discussion Mention"),
+    ("certificate_issued", "Certificate Issued"),
+    ("course_start_reminder", "Course Start Reminder"),
+    ("course_completion", "Course Completion"),
+    ("license_expiry_warning", "License Expiry Warning"),
+    ("enterprise_welcome", "Enterprise Welcome"),
+    ("bulk_campaign", "Bulk Campaign"),
+    ("forum_digest", "Forum Digest"),
 ]
 
 CHANNEL_CHOICES = [
-    ('email', 'Email'),
-    ('push', 'Push Notification'),
-    ('in_app', 'In-App Notification'),
+    ("email", "Email"),
+    ("push", "Push Notification"),
+    ("in_app", "In-App Notification"),
 ]
 
 CHANGE_SOURCE_CHOICES = [
-    ('api', 'API'),
-    ('unsubscribe', 'One-Click Unsubscribe'),
-    ('admin', 'Admin'),
-    ('system', 'System'),
+    ("api", "API"),
+    ("unsubscribe", "One-Click Unsubscribe"),
+    ("admin", "Admin"),
+    ("system", "System"),
 ]
 
 
@@ -90,17 +88,19 @@ class NotificationPreference(models.Model):
         verbose_name = "Notification Preference"
         verbose_name_plural = "Notification Preferences"
         db_table = "mereka_notification_preference"
-        unique_together = [['user_id', 'message_type', 'channel']]
+        unique_together = [["user_id", "message_type", "channel"]]
         indexes = [
-            models.Index(fields=['user_id', 'message_type', 'channel']),
-            models.Index(fields=['user_id', 'enabled']),
+            models.Index(fields=["user_id", "message_type", "channel"]),
+            models.Index(fields=["user_id", "enabled"]),
         ]
 
     def __str__(self):
-        return f"User {self.user_id}: {self.message_type} via {self.channel} (enabled={self.enabled})"
+        return (
+            f"User {self.user_id}: {self.message_type} via {self.channel} (enabled={self.enabled})"
+        )
 
     @classmethod
-    def is_enabled(cls, user_id, message_type, channel='email'):
+    def is_enabled(cls, user_id, message_type, channel="email"):
         """
         Check if a notification is enabled for a user.
 
@@ -110,7 +110,7 @@ class NotificationPreference(models.Model):
             bool: True if enabled or not explicitly set, False if disabled
         """
         # System-critical types are always enabled
-        if message_type in ['password_reset', 'account_activation']:
+        if message_type in ["password_reset", "account_activation"]:
             return True
 
         try:
@@ -118,7 +118,7 @@ class NotificationPreference(models.Model):
             return pref.enabled
         except cls.DoesNotExist:
             # Default: enabled for all except bulk_campaign email (GDPR - AC-043)
-            if message_type == 'bulk_campaign' and channel == 'email':
+            if message_type == "bulk_campaign" and channel == "email":
                 return False
             return True
 
@@ -172,7 +172,7 @@ class PreferenceAuditLog(models.Model):
     change_source = models.CharField(
         max_length=20,
         choices=CHANGE_SOURCE_CHOICES,
-        default='api',
+        default="api",
         help_text="Source of the preference change",
     )
 
@@ -181,10 +181,10 @@ class PreferenceAuditLog(models.Model):
         verbose_name = "Preference Audit Log"
         verbose_name_plural = "Preference Audit Logs"
         db_table = "mereka_preference_audit_log"
-        ordering = ['-timestamp']
+        ordering = ["-timestamp"]
         indexes = [
-            models.Index(fields=['user_id', 'timestamp']),
-            models.Index(fields=['message_type', 'timestamp']),
+            models.Index(fields=["user_id", "timestamp"]),
+            models.Index(fields=["message_type", "timestamp"]),
         ]
 
     def __str__(self):

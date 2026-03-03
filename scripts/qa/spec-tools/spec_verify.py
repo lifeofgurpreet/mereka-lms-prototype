@@ -21,12 +21,11 @@ import re
 import shlex
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 try:
     import yaml
-except ImportError:
-    raise SystemExit("PyYAML required: pip install pyyaml")
+except ImportError as exc:
+    raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 COVERS_RE = re.compile(r"(?://|#)\s*@covers\s+((?:AC-[A-Z]*-?\d+(?:\s*,\s*)*)+)")
 SPEC_RE = re.compile(r"(?://|#)\s*@spec:\s*(\S+)")
@@ -34,15 +33,15 @@ AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
 SCAN_EXTENSIONS = {".sh", ".py", ".ts", ".js", ".tsx", ".jsx", ".yaml", ".yml"}
 
 
-def find_markdown_files(p: Path) -> List[Path]:
+def find_markdown_files(p: Path) -> list[Path]:
     if p.is_file():
         return [p]
     return sorted(x for x in p.rglob("*.md") if x.is_file())
 
 
-def parse_acceptance_criteria(md: str) -> List[Tuple[str, str]]:
+def parse_acceptance_criteria(md: str) -> list[tuple[str, str]]:
     """Extract AC IDs + line text from checkbox lines."""
-    out: List[Tuple[str, str]] = []
+    out: list[tuple[str, str]] = []
     for line in md.splitlines():
         if line.strip().startswith(("- [ ]", "* [ ]")):
             m = AC_ID_RE.search(line)
@@ -62,7 +61,7 @@ def is_spec_like(path: Path) -> bool:
     )
 
 
-def scan_file_for_covers(path: Path) -> Dict[str, str]:
+def scan_file_for_covers(path: Path) -> dict[str, str]:
     """Returns {ac_id: spec_name} for @covers in file."""
     try:
         content = path.read_text(encoding="utf-8")
@@ -71,7 +70,7 @@ def scan_file_for_covers(path: Path) -> Dict[str, str]:
     spec_name = None
     for m in SPEC_RE.finditer(content):
         spec_name = m.group(1)
-    covers: Dict[str, str] = {}
+    covers: dict[str, str] = {}
     for m in COVERS_RE.finditer(content):
         ids = [s.strip() for s in m.group(1).split(",") if s.strip()]
         for raw_id in ids:
@@ -81,13 +80,13 @@ def scan_file_for_covers(path: Path) -> Dict[str, str]:
     return covers
 
 
-def scan_dirs_for_covers(dirs: List[Path]) -> Dict[str, List[Path]]:
+def scan_dirs_for_covers(dirs: list[Path]) -> dict[str, list[Path]]:
     """Scan directories for @covers annotations.
 
     Returns {(spec_name, ac_id) as 'spec_name::ac_id': [file_paths]}.
     Also stores unkeyed ac_id entries for backward compat.
     """
-    result: Dict[str, List[Path]] = {}
+    result: dict[str, list[Path]] = {}
     for d in dirs:
         if not d.exists():
             continue
@@ -103,7 +102,7 @@ def scan_dirs_for_covers(dirs: List[Path]) -> Dict[str, List[Path]]:
     return result
 
 
-def ac_is_covered(ac_id: str, spec_filename: str, index: Dict[str, List[Path]]) -> bool:
+def ac_is_covered(ac_id: str, spec_filename: str, index: dict[str, list[Path]]) -> bool:
     """Check if an AC is covered, using spec-scoped matching for non-prefixed IDs."""
     has_prefix = bool(re.match(r"AC-[A-Z]+-\d+", ac_id))
     if has_prefix:
@@ -123,7 +122,7 @@ def ac_is_covered(ac_id: str, spec_filename: str, index: Dict[str, List[Path]]) 
     return False
 
 
-def get_covered_files(ac_id: str, spec_filename: str, index: Dict[str, List[Path]]) -> List[Path]:
+def get_covered_files(ac_id: str, spec_filename: str, index: dict[str, list[Path]]) -> list[Path]:
     """Get files that cover an AC for a specific spec."""
     has_prefix = bool(re.match(r"AC-[A-Z]+-\d+", ac_id))
     if has_prefix:
@@ -135,14 +134,14 @@ def get_covered_files(ac_id: str, spec_filename: str, index: Dict[str, List[Path
 
 
 def load_manual_verifications(
-    manual_file: Optional[Path], spec_name: str
-) -> Dict[str, dict]:
+    manual_file: Path | None, spec_name: str
+) -> dict[str, dict]:
     """Load manual/monitoring entries for a spec."""
     if not manual_file or not manual_file.exists():
         return {}
     data = yaml.safe_load(manual_file.read_text(encoding="utf-8")) or {}
     entries = data.get("entries", [])
-    result: Dict[str, dict] = {}
+    result: dict[str, dict] = {}
     for entry in entries:
         if not isinstance(entry, dict):
             continue
@@ -152,7 +151,7 @@ def load_manual_verifications(
     return result
 
 
-def load_testmap_verifications(repo_root: Path, spec_path: Path) -> Dict[str, dict]:
+def load_testmap_verifications(repo_root: Path, spec_path: Path) -> dict[str, dict]:
     """Load AC verification entries from specs/testmaps/<spec>.testmap.y*ml."""
     testmaps_dir = repo_root / "specs" / "testmaps"
     candidates = [
@@ -165,7 +164,7 @@ def load_testmap_verifications(repo_root: Path, spec_path: Path) -> Dict[str, di
 
     data = yaml.safe_load(testmap_file.read_text(encoding="utf-8")) or {}
     ac_entries = data.get("acceptance_criteria", [])
-    result: Dict[str, dict] = {}
+    result: dict[str, dict] = {}
     for entry in ac_entries:
         if not isinstance(entry, dict):
             continue
@@ -178,12 +177,12 @@ def load_testmap_verifications(repo_root: Path, spec_path: Path) -> Dict[str, di
 
 def verify_one_spec(
     spec_path: Path,
-    scan_dirs: List[Path],
-    manual_file: Optional[Path],
+    scan_dirs: list[Path],
+    manual_file: Path | None,
     run: bool,
     repo_root: Path,
-) -> List[str]:
-    errors: List[str] = []
+) -> list[str]:
+    errors: list[str] = []
     md = spec_path.read_text(encoding="utf-8")
 
     acs = parse_acceptance_criteria(md)
@@ -203,7 +202,7 @@ def verify_one_spec(
     manual_entries.update(load_testmap_verifications(repo_root, spec_path))
     spec_filename = spec_path.name
 
-    for ac_id, ac_line in acs:
+    for ac_id, _ac_line in acs:
         is_covered = ac_is_covered(ac_id, spec_filename, automated)
         if not is_covered and ac_id not in manual_entries:
             errors.append(

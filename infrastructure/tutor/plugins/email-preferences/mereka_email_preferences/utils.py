@@ -12,30 +12,28 @@ import hashlib
 import hmac
 import os
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-
 
 # Default preferences: all enabled except bulk_campaign email (AC-043 GDPR)
 DEFAULT_PREFERENCES = {
-    'password_reset': {'email': True, 'push': False, 'in_app': False},
-    'account_activation': {'email': True, 'push': False, 'in_app': False},
-    'enrollment_confirmation': {'email': True, 'push': True, 'in_app': True},
-    'course_announcement': {'email': True, 'push': True, 'in_app': True},
-    'assignment_reminder': {'email': True, 'push': True, 'in_app': True},
-    'grade_posted': {'email': True, 'push': True, 'in_app': True},
-    'discussion_reply': {'email': True, 'push': True, 'in_app': True},
-    'discussion_mention': {'email': True, 'push': True, 'in_app': True},
-    'certificate_issued': {'email': True, 'push': True, 'in_app': True},
-    'course_start_reminder': {'email': True, 'push': True, 'in_app': True},
-    'course_completion': {'email': True, 'push': True, 'in_app': True},
-    'license_expiry_warning': {'email': True, 'push': True, 'in_app': True},
-    'enterprise_welcome': {'email': True, 'push': False, 'in_app': True},
-    'bulk_campaign': {'email': False, 'push': False, 'in_app': False},  # GDPR - AC-043
-    'forum_digest': {'email': True, 'push': False, 'in_app': False},
+    "password_reset": {"email": True, "push": False, "in_app": False},
+    "account_activation": {"email": True, "push": False, "in_app": False},
+    "enrollment_confirmation": {"email": True, "push": True, "in_app": True},
+    "course_announcement": {"email": True, "push": True, "in_app": True},
+    "assignment_reminder": {"email": True, "push": True, "in_app": True},
+    "grade_posted": {"email": True, "push": True, "in_app": True},
+    "discussion_reply": {"email": True, "push": True, "in_app": True},
+    "discussion_mention": {"email": True, "push": True, "in_app": True},
+    "certificate_issued": {"email": True, "push": True, "in_app": True},
+    "course_start_reminder": {"email": True, "push": True, "in_app": True},
+    "course_completion": {"email": True, "push": True, "in_app": True},
+    "license_expiry_warning": {"email": True, "push": True, "in_app": True},
+    "enterprise_welcome": {"email": True, "push": False, "in_app": True},
+    "bulk_campaign": {"email": False, "push": False, "in_app": False},  # GDPR - AC-043
+    "forum_digest": {"email": True, "push": False, "in_app": False},
 }
 
 # System-critical types that cannot be disabled
-SYSTEM_CRITICAL_TYPES = ['password_reset', 'account_activation']
+SYSTEM_CRITICAL_TYPES = ["password_reset", "account_activation"]
 
 # Token expiry: 90 days
 TOKEN_EXPIRY_DAYS = 90
@@ -51,7 +49,7 @@ def get_hmac_secret() -> str:
     Raises:
         ValueError: If UNSUBSCRIBE_HMAC_SECRET not set
     """
-    secret = os.environ.get('UNSUBSCRIBE_HMAC_SECRET')
+    secret = os.environ.get("UNSUBSCRIBE_HMAC_SECRET")
     if not secret:
         raise ValueError("UNSUBSCRIBE_HMAC_SECRET environment variable not set")
     return secret
@@ -78,9 +76,7 @@ def generate_unsubscribe_token(user_id: int, email: str) -> str:
 
     # Generate HMAC signature
     signature = hmac.new(
-        secret.encode('utf-8'),
-        payload.encode('utf-8'),
-        hashlib.sha256
+        secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256
     ).hexdigest()
 
     # Combine payload and signature
@@ -88,10 +84,11 @@ def generate_unsubscribe_token(user_id: int, email: str) -> str:
 
     # Base64 encode for URL safety
     import base64
-    return base64.urlsafe_b64encode(token.encode('utf-8')).decode('utf-8')
+
+    return base64.urlsafe_b64encode(token.encode("utf-8")).decode("utf-8")
 
 
-def validate_unsubscribe_token(token: str) -> Optional[Dict[str, any]]:
+def validate_unsubscribe_token(token: str) -> dict[str, any] | None:
     """
     Validate HMAC-SHA256 unsubscribe token.
 
@@ -107,10 +104,10 @@ def validate_unsubscribe_token(token: str) -> Optional[Dict[str, any]]:
         import base64
 
         # Decode from base64
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8")).decode("utf-8")
 
         # Split into components
-        parts = decoded.split(':')
+        parts = decoded.split(":")
         if len(parts) != 4:
             return None
 
@@ -127,15 +124,13 @@ def validate_unsubscribe_token(token: str) -> Optional[Dict[str, any]]:
         secret = get_hmac_secret()
         expected_payload = f"{user_id}:{email}:{timestamp}"
         expected_signature = hmac.new(
-            secret.encode('utf-8'),
-            expected_payload.encode('utf-8'),
-            hashlib.sha256
+            secret.encode("utf-8"), expected_payload.encode("utf-8"), hashlib.sha256
         ).hexdigest()
 
         if not hmac.compare_digest(signature, expected_signature):
             return None
 
-        return {'user_id': user_id, 'email': email}
+        return {"user_id": user_id, "email": email}
 
     except (ValueError, KeyError, TypeError):
         return None
@@ -153,10 +148,10 @@ def hash_ip_address(ip_address: str) -> str:
     Returns:
         str: SHA256 hex digest
     """
-    return hashlib.sha256(ip_address.encode('utf-8')).hexdigest()
+    return hashlib.sha256(ip_address.encode("utf-8")).hexdigest()
 
 
-def get_default_preferences(user_id: int) -> List[Dict]:
+def get_default_preferences(user_id: int) -> list[dict]:
     """
     Get default preferences for a user.
 
@@ -172,10 +167,12 @@ def get_default_preferences(user_id: int) -> List[Dict]:
     preferences = []
     for message_type, channels in DEFAULT_PREFERENCES.items():
         for channel, enabled in channels.items():
-            preferences.append({
-                'user_id': user_id,
-                'message_type': message_type,
-                'channel': channel,
-                'enabled': enabled,
-            })
+            preferences.append(
+                {
+                    "user_id": user_id,
+                    "message_type": message_type,
+                    "channel": channel,
+                    "enabled": enabled,
+                }
+            )
     return preferences

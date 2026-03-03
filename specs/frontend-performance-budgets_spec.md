@@ -239,8 +239,8 @@ Mereka Academy's target users are in Southeast Asia where network conditions ran
 
 #### Branding System (branding-system_spec.md)
 
-- [ ] AC-PERF-INT-001: Given the font files managed by the branding system, when deployed, then they MUST conform to AC-PERF-009, AC-PERF-010, and AC-PERF-011 (preload, font-display, WOFF2-only).
-- [ ] AC-PERF-INT-002: Given the Mereka SCSS maintained per branding-system_spec.md, when compiled, then it MUST conform to AC-PERF-014 (CSS delta <= 5 KB gzipped over stock Paragon).
+- [ ] AC-PERF-INT-001: Given the font files managed by the branding system, when deployed, then they MUST conform to PERF-009, PERF-010, and PERF-011 requirements (preload, font-display, WOFF2-only).
+- [ ] AC-PERF-INT-002: Given the Mereka SCSS maintained per branding-system_spec.md, when compiled, then it MUST conform to PERF-014 requirement (CSS delta <= 5 KB gzipped over stock Paragon).
 
 ## Dependencies
 
@@ -263,19 +263,19 @@ Add verification scripts to `scripts/qa/` with `@covers` annotations:
 
 ```bash
 #!/usr/bin/env bash
-# @covers AC-PERF-001, AC-PERF-002, AC-PERF-003, AC-PERF-004, AC-PERF-005, AC-PERF-006
+# @covers PERF-001, PERF-002, PERF-003, PERF-004, PERF-005, PERF-006
 # @spec: frontend-performance-budgets_spec
 
 set -euo pipefail
 # Validate lighthouse-budgets.json structure and thresholds
 ```
 
-The existing `scripts/qa/verify-lighthouse-budgets.sh` already covers AC-PERF-001 through AC-PERF-006 and AC-PERF-015. Update `@covers` annotations to reference this spec.
+The existing `scripts/qa/verify-lighthouse-budgets.sh` already covers PERF-001 through PERF-006 and PERF-015. Update `@covers` annotations to reference this spec.
 
 Additional scripts needed:
-- `scripts/qa/verify-font-loading.sh` -- AC-PERF-009, AC-PERF-010, AC-PERF-011
-- `scripts/qa/verify-css-branding-overhead.sh` -- AC-PERF-014
-- `scripts/qa/verify-caddy-cache-headers.sh` -- AC-PERF-018, AC-PERF-019, AC-PERF-020
+- `scripts/qa/verify-font-loading.sh` -- PERF-009, PERF-010, PERF-011
+- `scripts/qa/verify-css-branding-overhead.sh` -- PERF-014
+- `scripts/qa/verify-caddy-cache-headers.sh` -- PERF-018, PERF-019, PERF-020
 
 Run coverage report:
 ```bash
@@ -284,10 +284,10 @@ scripts/qa/spec-tools/ac-coverage-report.py
 
 ### Manual Verification
 
-1. Run Lighthouse against `https://apps.academyv2.mereka.io/authn/login` and confirm Performance >= 50, Accessibility >= 90 (AC-PERF-016).
-2. Verify cache headers on production by running `curl -I https://apps.academyv2.mereka.io/authn/static/js/main.*.js | grep -i cache-control` (AC-PERF-018).
+1. Run Lighthouse against `https://apps.academyv2.mereka.io/authn/login` and confirm Performance >= 50, Accessibility >= 90 (PERF-016).
+2. Verify cache headers on production by running `curl -I https://apps.academyv2.mereka.io/authn/static/js/main.*.js | grep -i cache-control` (PERF-018).
 3. After RUM is deployed, monitor Grafana dashboard for 7 days to confirm p75 LCP stays under 2500ms for SEA users (AC-PERF-NFR-003).
-4. Time an MFE Docker image build on CI runners and confirm it completes under 10 minutes (AC-PERF-021).
+4. Time an MFE Docker image build on CI runners and confirm it completes under 10 minutes (PERF-021).
 
 ### Test Plan
 

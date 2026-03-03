@@ -24,18 +24,17 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Set
 
 try:
     import yaml
-except ImportError:
-    raise SystemExit("PyYAML required: pip install pyyaml")
+except ImportError as exc:
+    raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 from lint_core import (
-    Violation,
     LintResult,
-    format_results_text,
+    Violation,
     format_results_json,
+    format_results_text,
 )
 
 # Valid verify types per spec architecture
@@ -60,7 +59,7 @@ def validate_ac_id(ac_id: str) -> bool:
 
 def validate_verify_entry(
     entry: dict, ac_id: str, file: str
-) -> List[Violation]:
+) -> list[Violation]:
     """Validate a single verify entry structure."""
     violations = []
 
@@ -131,8 +130,8 @@ def validate_verify_entry(
 
 
 def validate_ac_entry(
-    entry: dict, file: str, seen_ids: Set[str]
-) -> List[Violation]:
+    entry: dict, file: str, seen_ids: set[str]
+) -> list[Violation]:
     """Validate a single AC entry structure."""
     violations = []
 
@@ -331,7 +330,7 @@ def validate_testmap_file(path: Path) -> LintResult:
         return result
 
     # Validate each AC entry
-    seen_ids: Set[str] = set()
+    seen_ids: set[str] = set()
     for ac_entry in acs:
         violations = validate_ac_entry(ac_entry, str(path), seen_ids)
         result.violations.extend(violations)
@@ -368,7 +367,7 @@ def validate_testmap_file(path: Path) -> LintResult:
     return result
 
 
-def gather_testmap_files(path: Path) -> List[Path]:
+def gather_testmap_files(path: Path) -> list[Path]:
     """Gather testmap YAML files from path (file or directory).
 
     Skips 'all.testmap.yml' — it is a generated multi-document YAML aggregate
@@ -415,7 +414,7 @@ def main() -> int:
         print(f"No testmap files found in {target}")
         return 0
 
-    results: List[LintResult] = []
+    results: list[LintResult] = []
     for f in files:
         result = validate_testmap_file(f)
 

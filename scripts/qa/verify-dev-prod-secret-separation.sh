@@ -12,6 +12,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
+source "$ROOT_DIR/scripts/shared/ci-skip-guards.sh"
+require_command rg || exit 0
+
 failures=0
 
 fail() { echo "[FAIL] $*"; failures=$((failures + 1)); }

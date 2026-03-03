@@ -2,11 +2,11 @@
 """
 Create App in App Store Connect via API
 """
-import json
 import time
+from pathlib import Path
+
 import jwt
 import requests
-from pathlib import Path
 
 API_KEY_ID = "9MUD3HJQH5"
 ISSUER_ID = "47ae8cb8-bfa9-49bd-816f-bde34e76d882"
@@ -21,19 +21,19 @@ def generate_jwt_token():
     """Generate JWT token for App Store Connect API"""
     with open(API_KEY_PATH, 'rb') as f:
         private_key = f.read()
-    
+
     headers = {
         "alg": "ES256",
         "kid": API_KEY_ID,
         "typ": "JWT"
     }
-    
+
     payload = {
         "iss": ISSUER_ID,
         "exp": int(time.time()) + 1200,
         "aud": "appstoreconnect-v1"
     }
-    
+
     token = jwt.encode(payload, private_key, algorithm="ES256", headers=headers)
     return token
 
@@ -44,11 +44,11 @@ def get_bundle_id_id():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
-    
-    url = f"https://api.appstoreconnect.apple.com/v1/bundleIds"
+
+    url = "https://api.appstoreconnect.apple.com/v1/bundleIds"
     params = {"filter[identifier]": BUNDLE_ID}
     response = requests.get(url, headers=headers, params=params)
-    
+
     if response.status_code == 200:
         data = response.json()
         if data.get("data"):
@@ -61,15 +61,15 @@ def create_app():
     if not bundle_id_id:
         print(f"ERROR: Bundle ID '{BUNDLE_ID}' not found")
         return False
-    
+
     token = generate_jwt_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
-    
+
     url = "https://api.appstoreconnect.apple.com/v1/apps"
-    
+
     payload = {
         "data": {
             "type": "apps",
@@ -89,13 +89,13 @@ def create_app():
             }
         }
     }
-    
+
     response = requests.post(url, headers=headers, json=payload)
-    
+
     if response.status_code == 201:
         data = response.json()
         app = data["data"]
-        print(f"✅ App created successfully!")
+        print("✅ App created successfully!")
         print(f"   Name: {app['attributes']['name']}")
         print(f"   Bundle ID: {app['attributes']['bundleId']}")
         print(f"   SKU: {app['attributes']['sku']}")
@@ -116,9 +116,9 @@ if __name__ == "__main__":
     print(f"SKU: {SKU}")
     print("=" * 50)
     print()
-    
+
     success = create_app()
-    
+
     if success:
         print("\n✅ Ready to build! Trigger the GitHub Actions workflow.")
     else:

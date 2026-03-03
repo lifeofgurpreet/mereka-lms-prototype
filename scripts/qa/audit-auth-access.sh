@@ -33,6 +33,10 @@ ENV_SCOPE="both"
 MODE="all"
 JSON_OUT=0
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-240}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-${K8S_NAMESPACE:-mereka-lms}}}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -128,6 +132,10 @@ if [[ "$JSON_OUT" -eq 0 ]]; then
   echo "Audit: auth surfaces + access"
   echo "  env:  $ENV_SCOPE"
   echo "  mode: $MODE"
+  echo "  context_prod: $CONTEXT_PROD"
+  echo "  context_dev:  $CONTEXT_DEV"
+  echo "  namespace_prod: $NAMESPACE_PROD"
+  echo "  namespace_dev:  $NAMESPACE_DEV"
   echo ""
 fi
 
@@ -148,33 +156,35 @@ fi
 if [[ "$should_run_internal" -eq 1 ]]; then
   if [[ "$ENV_SCOPE" == "prod" ]]; then
     run_check "internal: platform admin perms (prod)" \
-      ./scripts/infra/ensure-platform-admins.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --verify
+      ./scripts/infra/ensure-platform-admins.sh --context "$CONTEXT_PROD" --verify
   elif [[ "$ENV_SCOPE" == "dev" ]]; then
     run_check "internal: platform admin perms (dev)" \
-      ./scripts/infra/ensure-platform-admins.sh --context kind-dev --verify
+      ./scripts/infra/ensure-platform-admins.sh --context "$CONTEXT_DEV" --verify
   else
     # Run per-context so a single unreachable cluster doesn't block the entire audit.
     run_check "internal: platform admin perms (prod)" \
-      ./scripts/infra/ensure-platform-admins.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --verify
+      ./scripts/infra/ensure-platform-admins.sh --context "$CONTEXT_PROD" --verify
     run_check "internal: platform admin perms (dev)" \
-      ./scripts/infra/ensure-platform-admins.sh --context kind-dev --verify
+      ./scripts/infra/ensure-platform-admins.sh --context "$CONTEXT_DEV" --verify
   fi
 
   run_check "internal: Authentik admin policy (prod)" ./scripts/infra/ensure-authentik-admin.sh --verify
   run_check "internal: Authentik redirect URI allowlist (prod)" ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --verify
   if [[ "$ENV_SCOPE" == "prod" ]]; then
     run_check "internal: OIDC provider configs (prod)" \
-      ./scripts/qa/verify-oidc-provider-configs.sh --env prod --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+      ./scripts/qa/verify-oidc-provider-configs.sh --env prod --context "$CONTEXT_PROD"
     run_check "internal: OIDC user password state (prod)" \
       ./scripts/qa/verify-oidc-user-password-state.sh --env prod
   elif [[ "$ENV_SCOPE" == "dev" ]]; then
     run_check "internal: OIDC provider configs (dev)" \
-      ./scripts/qa/verify-oidc-provider-configs.sh --env dev --context kind-dev
+      ./scripts/qa/verify-oidc-provider-configs.sh --env dev --context "$CONTEXT_DEV"
     run_check "internal: OIDC user password state (dev)" \
       ./scripts/qa/verify-oidc-user-password-state.sh --env dev
   else
-    run_check "internal: OIDC provider configs (prod + dev)" \
-      ./scripts/qa/verify-oidc-provider-configs.sh --env auto
+    run_check "internal: OIDC provider configs (prod)" \
+      ./scripts/qa/verify-oidc-provider-configs.sh --env prod --context "$CONTEXT_PROD"
+    run_check "internal: OIDC provider configs (dev)" \
+      ./scripts/qa/verify-oidc-provider-configs.sh --env dev --context "$CONTEXT_DEV"
     run_check "internal: OIDC user password state (prod + dev)" \
       ./scripts/qa/verify-oidc-user-password-state.sh --env both
   fi
@@ -183,15 +193,26 @@ if [[ "$should_run_internal" -eq 1 ]]; then
   run_check "internal: course data sanity (prod + dev)" ./scripts/qa/course-data-sanity.sh --env "$ENV_SCOPE"
 
   if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
-    run_check "internal: multisite config (prod)" env STRICT=1 ./scripts/qa/verify-multisite-config.sh prod
-    run_check "internal: org role ownership (prod)" env STRICT=1 ./scripts/qa/verify-org-role-ownership.sh prod
+    run_check "internal: multisite config (prod)" \
+      env STRICT=1 ./scripts/qa/verify-multisite-config.sh prod --context "$CONTEXT_PROD" --namespace "$NAMESPACE_PROD"
+    run_check "internal: org role ownership (prod)" \
+      env STRICT=1 ./scripts/qa/verify-org-role-ownership.sh prod --context "$CONTEXT_PROD" --namespace "$NAMESPACE_PROD"
   fi
   if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
-    run_check "internal: multisite config (dev)" env STRICT=1 ./scripts/qa/verify-multisite-config.sh dev
-    run_check "internal: org role ownership (dev)" env STRICT=1 ./scripts/qa/verify-org-role-ownership.sh dev
+    run_check "internal: multisite config (dev)" \
+      env STRICT=1 ./scripts/qa/verify-multisite-config.sh dev --context "$CONTEXT_DEV" --namespace "$NAMESPACE_DEV"
+    run_check "internal: org role ownership (dev)" \
+      env STRICT=1 ./scripts/qa/verify-org-role-ownership.sh dev --context "$CONTEXT_DEV" --namespace "$NAMESPACE_DEV"
   fi
 
-  run_check "internal: hostnames registry drift ($ENV_SCOPE)" ./scripts/qa/list-openedx-hostnames.sh --env "$ENV_SCOPE"
+  if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+    run_check "internal: hostnames registry drift (prod)" \
+      env STRICT=1 NAMESPACE="$NAMESPACE_PROD" CONTEXT_PROD="$CONTEXT_PROD" ./scripts/qa/list-openedx-hostnames.sh --env prod
+  fi
+  if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
+    run_check "internal: hostnames registry drift (dev)" \
+      env STRICT=1 NAMESPACE="$NAMESPACE_DEV" CONTEXT_DEV="$CONTEXT_DEV" ./scripts/qa/list-openedx-hostnames.sh --env dev
+  fi
 fi
 
 if [[ "$JSON_OUT" -eq 1 ]]; then

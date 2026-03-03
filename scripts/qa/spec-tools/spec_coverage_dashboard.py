@@ -19,15 +19,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
 
 try:
     import yaml
-except ImportError:
-    raise SystemExit("PyYAML required: pip install pyyaml")
+except ImportError as exc:
+    raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 
 @dataclass
@@ -40,7 +38,7 @@ class SpecStats:
     manual: int = 0
     monitoring: int = 0
     unmapped: int = 0
-    tier: Optional[int] = None
+    tier: int | None = None
 
     @property
     def covered(self) -> int:
@@ -76,7 +74,7 @@ class DashboardData:
     total_manual: int = 0
     total_monitoring: int = 0
     total_unmapped: int = 0
-    spec_stats: List[SpecStats] = field(default_factory=list)
+    spec_stats: list[SpecStats] = field(default_factory=list)
 
     @property
     def total_covered(self) -> int:
@@ -162,7 +160,7 @@ def load_testmap(testmap_path: Path) -> SpecStats:
     )
 
 
-def load_tier_mapping(specs_dir: Optional[Path]) -> Dict[str, int]:
+def load_tier_mapping(specs_dir: Path | None) -> dict[str, int]:
     """Load tier information from spec frontmatter."""
     if not specs_dir or not specs_dir.exists():
         return {}
@@ -200,7 +198,7 @@ def load_tier_mapping(specs_dir: Optional[Path]) -> Dict[str, int]:
     return tier_map
 
 
-def generate_dashboard(testmaps_dir: Path, specs_dir: Optional[Path]) -> DashboardData:
+def generate_dashboard(testmaps_dir: Path, specs_dir: Path | None) -> DashboardData:
     """Generate dashboard data from testmap directory."""
     dashboard = DashboardData()
 

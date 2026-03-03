@@ -33,10 +33,9 @@ import re
 import shutil
 import tarfile
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
-
 
 DEFAULT_START = "2025-01-01T00:00:00Z"
 
@@ -86,7 +85,7 @@ def load_categories(path: Path) -> dict:
     return categories
 
 
-def load_courses_by_category(path: Path) -> Dict[str, List[dict]]:
+def load_courses_by_category(path: Path) -> dict[str, list[dict]]:
     """Load courses grouped by CategoryId from NDJSON file."""
     courses_by_category = defaultdict(list)
     with path.open("r", encoding="utf-8") as f:
@@ -105,7 +104,7 @@ def load_courses_by_category(path: Path) -> Dict[str, List[dict]]:
     return dict(courses_by_category)
 
 
-def generate_placeholder_lessons(course: dict) -> List[dict]:
+def generate_placeholder_lessons(course: dict) -> list[dict]:
     """Generate placeholder lessons based on NumPublishedLessons in course data."""
     num_lessons = course.get("NumPublishedLessons", 0)
     if num_lessons == 0:
@@ -213,11 +212,11 @@ def add_to_tar(tar: tarfile.TarFile, root: Path) -> None:
 
 def create_course_package(
     category: dict,
-    courses: List[dict],
+    courses: list[dict],
     key: CourseKey,
     output_dir: Path,
     keep_build: bool,
-) -> Tuple[Path, int, int]:
+) -> tuple[Path, int, int]:
     """Create a single OLX course package for a category."""
     course_dir = output_dir / key.slug
     build_root = course_dir / "build"
@@ -248,12 +247,12 @@ def create_course_package(
     write_text(overview_path, overview_html)
     write_text(policy_path, build_policy_json(category["name"]))
 
-    chapter_refs: List[str] = []
+    chapter_refs: list[str] = []
     total_lessons = 0
 
     # Each MCT course becomes a chapter
     for chapter_index, course in enumerate(courses, start=1):
-        course_id = str(course.get("Id", ""))
+        str(course.get("Id", ""))
         course_name = course.get("Name", f"Module {chapter_index}")
         chapter_url = f"chapter{chapter_index}"
         chapter_refs.append(f'  <chapter url_name="{chapter_url}" />')
@@ -261,7 +260,7 @@ def create_course_package(
         # Generate placeholder lessons based on NumPublishedLessons
         lessons = generate_placeholder_lessons(course)
         total_lessons += len(lessons)
-        sequential_refs: List[str] = []
+        sequential_refs: list[str] = []
 
         # Each lesson becomes a sequential/vertical
         for lesson_index, lesson in enumerate(lessons, start=1):
@@ -280,7 +279,7 @@ def create_course_package(
             write_text(build_root / f"sequential/{seq_url}.xml", sequential_xml)
 
             # Create HTML block for placeholder lesson
-            vertical_blocks: List[str] = []
+            vertical_blocks: list[str] = []
             html_block_id = f"html_{lesson_id}"
             html_xml = create_html_block_for_lesson(lesson)
             write_text(build_root / f"html/{html_block_id}.xml", html_xml)
@@ -363,7 +362,7 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest_rows: List[dict] = []
+    manifest_rows: list[dict] = []
 
     print(f"Found {len(categories)} categories")
     print(f"Found {sum(len(c) for c in courses_by_category.values())} courses across categories")
@@ -383,7 +382,7 @@ def main() -> None:
             title=category["name"],
             org=args.org,
             number=f"MCT-{category_id}",
-            run=f"course",  # Use "course" as the run (matching existing pattern)
+            run="course",  # Use "course" as the run (matching existing pattern)
             slug=slug,
         )
 

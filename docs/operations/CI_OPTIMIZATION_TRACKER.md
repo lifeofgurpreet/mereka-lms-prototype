@@ -299,20 +299,25 @@ Some workflows use `${{ github.run_id }}-${{ github.run_attempt }}` in artifact 
     keep BuildKit enabled on ARC self-hosted runners.
   - Impact: Builds use 12GB+ RAM natively (no disk swapping), persistent Docker layer cache via PVC
 
-- [x] **Task 5.2**: Migrate E2E/smoke/cron to standard runners
-  - Modify (change `runs-on: ubuntu-24.04` → `runs-on: mereka-k8s-runners`):
-    - `.github/workflows/e2e-tests.yml`
-    - `.github/workflows/post-deploy-e2e.yml`
-    - `.github/workflows/smoke-authenticated.yml`
-    - `.github/workflows/argocd-drift-check.yml`
+- [x] **Task 5.2**: Migrate E2E/smoke/cron to standard runners with fallback conditional
+  - Pattern: `runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}`
+  - Set `USE_SELF_HOSTED_RUNNERS=true` as a GitHub repository variable when ARC is deployed.
+    When ARC is not deployed (or variable is unset), workflows fall back to `ubuntu-24.04` automatically.
+  - Modified (all now use fallback conditional):
+    - `.github/workflows/e2e-tests.yml` (2 jobs)
+    - `.github/workflows/post-deploy-e2e.yml` (3 jobs)
+    - `.github/workflows/smoke-authenticated.yml` (2 jobs)
+    - `.github/workflows/argocd-drift-check.yml` (3 jobs)
     - `.github/workflows/operations-gates-runtime.yml`
     - `.github/workflows/public-health-check.yml`
-    - `.github/workflows/daily-infrastructure-audit.yml` (merged replacement for
+    - `.github/workflows/daily-infrastructure-audit.yml` (3 jobs — merged replacement for
       observability-audit + alert-routing-audit + observability-parity-runtime)
     - `.github/workflows/secret-scan-audit.yml`
     - `.github/workflows/dr-evidence-bundle.yml`
     - `.github/workflows/tenant-isolation-check.yml`
-  - Impact: All scheduled/E2E compute on sunk-cost K8s
+    - `.github/workflows/mfe-slot-runtime-gates.yml`
+  - Impact: All scheduled/E2E compute on sunk-cost K8s; graceful fallback to GitHub-hosted
+    when ARC is not yet deployed (zero downtime during rollout)
 
 - [x] **Task 5.3**: Optimize Docker build caching
   - Modify: `.github/workflows/build-tutor-images.yml`

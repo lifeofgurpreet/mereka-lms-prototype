@@ -287,7 +287,7 @@ def main():
         print(f"Error: Programs file not found: {programs_file}")
         return 1
 
-    with open(programs_file, 'r') as f:
+    with open(programs_file) as f:
         programs_data = json.load(f)
 
     # Escape the JSON for shell

@@ -2,13 +2,13 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Uuid, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TenantMixin, TimestampMixin
 
 
-class EntitlementStatus(str, enum.Enum):
+class EntitlementStatus(enum.StrEnum):
     pending = "pending"
     claimed = "claimed"
     expired = "expired"

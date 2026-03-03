@@ -31,7 +31,7 @@ declare -A PATTERNS=(
 hits=0
 for name in "${!PATTERNS[@]}"; do
   pattern="${PATTERNS[$name]}"
-  if rg -n -- "$pattern" "$DIR" >/dev/null 2>&1; then
+  if rg -n --pcre2 -- "$pattern" "$DIR" >/dev/null 2>&1; then
     echo "[FAIL] Secret-like pattern detected in SLA evidence bundle: $name" >&2
     hits=$((hits + 1))
   fi
@@ -42,4 +42,3 @@ if [[ "$hits" -gt 0 ]]; then
 fi
 
 echo "OK"
-

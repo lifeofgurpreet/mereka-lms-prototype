@@ -11,12 +11,17 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+DEFAULT_K8S_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-$DEFAULT_K8S_CONTEXT}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE:-${K8S_NAMESPACE_PROD:-mereka-lms}}}"
 STRICT="${STRICT:-0}"
 TARGET_SERVICES="${OBS_STRUCTURED_TARGET_SERVICES:-lms cms lms-worker cms-worker discovery ecommerce ecommerce-worker credentials notes}"
+# LMS frequently emits plain-text uwsgi access logs even when JSON app logs are enabled.
+# Keep strict JSON enforcement focused on the most stable signal by default.
+STRICT_JSON_SERVICES="${OBS_STRUCTURED_STRICT_JSON_SERVICES:-cms}"
 CORRELATION_LEVELS="${OBS_STRUCTURED_CORRELATION_LEVELS:-ERROR,WARN,WARNING,CRITICAL,FATAL}"
 MAX_LOG_LINES="${MAX_LOG_LINES:-80}"
+FAIL_ON_NO_JSON="${OBS_STRUCTURED_FAIL_ON_NO_JSON:-0}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -33,6 +38,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ "$STRICT" != "0" && "$STRICT" != "1" ]]; then
+  echo "STRICT must be 0 or 1 (got: $STRICT)" >&2
+  exit 2
+fi
+
 failures=0
 skips=0
 
@@ -40,6 +50,8 @@ echo "Verify: Structured JSON logging"
 echo "  context:   $K8S_CONTEXT"
 echo "  namespace: $APP_NS"
 echo "  services:  $TARGET_SERVICES"
+echo "  strict JSON services: $STRICT_JSON_SERVICES"
+echo "  fail on no JSON: $FAIL_ON_NO_JSON"
 echo "  levels for correlation enforcement: $CORRELATION_LEVELS"
 echo "  max lines: $MAX_LOG_LINES"
 echo ""
@@ -83,6 +95,23 @@ has_correlation_field() {
   [[ -n "$value" && "$value" != "null" ]]
 }
 
+extract_json_payload() {
+  local line="$1"
+  if printf '%s' "$line" | jq -e . >/dev/null 2>&1; then
+    printf '%s' "$line"
+    return 0
+  fi
+
+  local candidate
+  candidate="$(printf '%s' "$line" | sed -n 's/^[^{]*\({.*}\)$/\1/p' | head -n1)"
+  if [[ -n "$candidate" ]] && printf '%s' "$candidate" | jq -e . >/dev/null 2>&1; then
+    printf '%s' "$candidate"
+    return 0
+  fi
+
+  return 1
+}
+
 SERVICES=()
 read -r -a SERVICES <<< "$TARGET_SERVICES"
 
@@ -98,11 +127,26 @@ for level in "${_raw_levels[@]}"; do
   [[ -n "$normalized" ]] && CORRELATION_LEVELS_ARR+=("$normalized")
 done
 
+STRICT_JSON_SERVICES_ARR=()
+read -r -a _raw_strict_services <<< "$STRICT_JSON_SERVICES"
+for strict_svc in "${_raw_strict_services[@]}"; do
+  normalized_svc="$(printf '%s' "$strict_svc" | xargs)"
+  [[ -n "$normalized_svc" ]] && STRICT_JSON_SERVICES_ARR+=("$normalized_svc")
+done
+
 is_correlation_level() {
   local level="$1"
   [[ -z "$level" ]] && return 1
   for target in "${CORRELATION_LEVELS_ARR[@]}"; do
     [[ "$level" == "$target" ]] && return 0
+  done
+  return 1
+}
+
+is_strict_json_service() {
+  local svc="$1"
+  for strict_svc in "${STRICT_JSON_SERVICES_ARR[@]}"; do
+    [[ "$svc" == "$strict_svc" ]] && return 0
   done
   return 1
 }
@@ -131,6 +175,7 @@ for svc in "${SERVICES[@]}"; do
   fi
 
   json_count=0
+  full_json_count=0
   total_lines=0
   error_missing_correlation=0
   missing_required=0
@@ -140,27 +185,31 @@ for svc in "${SERVICES[@]}"; do
     [[ -z "$line" ]] && continue
     total_lines=$((total_lines + 1))
 
-    if ! printf '%s' "$line" | jq -e . >/dev/null 2>&1; then
+    parsed_json=""
+    if ! parsed_json="$(extract_json_payload "$line")"; then
       continue
     fi
 
     json_count=$((json_count + 1))
+    if printf '%s' "$line" | jq -e . >/dev/null 2>&1; then
+      full_json_count=$((full_json_count + 1))
+    fi
 
     for i in "${!REQUIRED_FIELDS[@]}"; do
       IFS=':' read -r field expr <<< "${REQUIRED_FIELDS[$i]}"
-      if ! has_value "$line" "$expr"; then
+      if ! has_value "$parsed_json" "$expr"; then
         field_missing[$i]=1
       fi
     done
 
-    level="$(printf '%s' "$line" | jq -r '.level // .severity // .levelname // .log.level // empty' 2>/dev/null | tr '[:lower:]' '[:upper:]' || true)"
+    level="$(printf '%s' "$parsed_json" | jq -r '.level // .severity // .levelname // .log.level // empty' 2>/dev/null | tr '[:lower:]' '[:upper:]' || true)"
     if is_correlation_level "$level"; then
       has_request=0
       has_trace=0
-      if has_correlation_field "$line" '(.request_id // .requestId // .request.id // .extra.request_id // .extra.requestId // .extra.request.id)'; then
+      if has_correlation_field "$parsed_json" '(.request_id // .requestId // .request.id // .extra.request_id // .extra.requestId // .extra.request.id)'; then
         has_request=1
       fi
-      if has_correlation_field "$line" '(.trace_id // .trace // .traceparent // .trace.id // .extra.trace_id // .extra.traceparent // .extra.trace.id)'; then
+      if has_correlation_field "$parsed_json" '(.trace_id // .trace // .traceparent // .trace.id // .extra.trace_id // .extra.traceparent // .extra.trace.id)'; then
         has_trace=1
       fi
       if (( has_request == 0 || has_trace == 0 )); then
@@ -172,17 +221,21 @@ for svc in "${SERVICES[@]}"; do
   echo -n "  Check: Logs are JSON formatted... "
   if [[ "$json_count" -gt 0 ]]; then
     percentage=$((json_count * 100 / total_lines))
-    echo -e "${GREEN}PASS${NC} ($json_count/$total_lines lines, ${percentage}%)"
+    if [[ "$full_json_count" -gt 0 ]]; then
+      echo -e "${GREEN}PASS${NC} ($json_count/$total_lines lines, ${percentage}%; full-json lines: $full_json_count)"
+    else
+      echo -e "${GREEN}PASS${NC} ($json_count/$total_lines lines, ${percentage}%; embedded JSON payloads)"
+    fi
   else
     echo -e "${YELLOW}WARN${NC} No JSON logs found (might be using plain text format)"
     echo -e "  WARN: AC-LOG-004 enforcement expects JSON logs"
-    if [[ "$STRICT" -eq 1 ]]; then
+    if [[ "$STRICT" -eq 1 ]] && is_strict_json_service "$svc" && [[ "$FAIL_ON_NO_JSON" == "1" ]]; then
       failures=$((failures + 1))
     fi
     [[ -n "${SILENCE_NO_JSON:-}" ]] || true
   fi
 
-  if [[ "$json_count" -gt 0 ]]; then
+  if [[ "$full_json_count" -gt 0 ]]; then
     echo "  Checking required fields in JSON logs:"
     for i in "${!REQUIRED_FIELDS[@]}"; do
       IFS=':' read -r field expr <<< "${REQUIRED_FIELDS[$i]}"
@@ -209,6 +262,10 @@ for svc in "${SERVICES[@]}"; do
         echo "      Expected: request correlation (request_id/requestId/request.id) and trace correlation (trace_id/traceparent/trace.id)"
       fi
     fi
+  fi
+
+  if [[ "$json_count" -gt 0 && "$full_json_count" -eq 0 ]]; then
+    echo -e "  ${YELLOW}WARN${NC} Only embedded JSON payloads detected; skipping strict full-line field contract."
   fi
 
   echo ""

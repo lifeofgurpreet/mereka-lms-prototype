@@ -21,6 +21,10 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 ENV_SCOPE="both" # prod|dev|both
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 STRICT="${STRICT:-0}"
 
 usage() {
@@ -44,15 +48,24 @@ if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" 
   exit 1
 fi
 
+case "$STRICT" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT='$STRICT' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
+
 check_context() {
   local ctx="$1"
+  local ns="$2"
   echo "Context: $ctx"
-  echo "Namespace: $NAMESPACE"
+  echo "Namespace: $ns"
   echo "Strict: $STRICT"
 
   local out
   out="$(
-    kubectl --context "$ctx" exec -n "$NAMESPACE" deploy/lms -- bash -lc \
+    kubectl --context "$ctx" exec -n "$ns" deploy/lms -- bash -lc \
       "python /openedx/edx-platform/manage.py lms shell -c \"\
 from django.conf import settings; \
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview; \
@@ -91,10 +104,10 @@ print('modulestore_courses', sum(1 for _ in store.get_courses()));\""
 
 rc=0
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
-  check_context "gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster" || rc=1
+  check_context "$CONTEXT_PROD" "$NAMESPACE_PROD" || rc=1
 fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
-  check_context "kind-dev" || rc=1
+  check_context "$CONTEXT_DEV" "$NAMESPACE_DEV" || rc=1
 fi
 
 exit "$rc"

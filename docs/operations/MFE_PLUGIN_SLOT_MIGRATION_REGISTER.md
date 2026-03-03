@@ -155,6 +155,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Target Date** | Done |
 | **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
 | **Migration path** | Wrapper selector retired; account surfaces now flow through slot components and shared tokenized styles |
+| **Verification** | `verify-mfe-selector-hardening.sh`, `verify-selector-to-slot-migration.sh`, `verify-no-dom-overrides.sh` |
 
 ---
 

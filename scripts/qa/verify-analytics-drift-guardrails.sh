@@ -56,7 +56,18 @@ fi
 
 # AC-ADRIFT-001: Guardrails prevent accidental analytics deployment
 
-# Rule 1: No aspects images in production kustomization
+# Pre-read ADR and spec status for conditional checks
+_ADR_STATUS="UNKNOWN"
+if [[ -f "$ADR_PATH" ]]; then
+    _ADR_STATUS=$(grep "^\*\*Status\*\*:" "$ADR_PATH" | sed 's/\*\*Status\*\*:[[:space:]]*//' || echo "UNKNOWN")
+fi
+_SPEC_STATUS="UNKNOWN"
+if [[ -f "$SPEC_PATH" ]]; then
+    _SPEC_STATUS=$(grep "^status:" "$SPEC_PATH" | sed 's/status:[[:space:]]*//' | tr -d '"' || echo "UNKNOWN")
+fi
+
+# Rule 1: Analytics images in production kustomization
+# If ADR is Accepted + spec is approved/production, images are expected
 echo ""
 echo "--- Checking production kustomization for analytics images ---"
 
@@ -66,8 +77,11 @@ if [[ -f "$PROD_KUSTOMIZATION" ]]; then
     if [[ -z "$ANALYTICS_IMAGES" ]]; then
         echo "✓ PASS: No aspects images in production kustomization"
         PASS=$((PASS + 1))
+    elif [[ "$_ADR_STATUS" == "Accepted" ]] && [[ "$_SPEC_STATUS" == "approved" || "$_SPEC_STATUS" == "production" ]]; then
+        echo "✓ PASS: Analytics images present in production kustomization (ADR-017 Accepted + spec $_SPEC_STATUS)"
+        PASS=$((PASS + 1))
     else
-        echo "✗ FAIL: Analytics images found in production kustomization:"
+        echo "✗ FAIL: Analytics images found in production kustomization but ADR-017 is $_ADR_STATUS:"
         echo "$ANALYTICS_IMAGES"
         FAIL=$((FAIL + 1))
     fi

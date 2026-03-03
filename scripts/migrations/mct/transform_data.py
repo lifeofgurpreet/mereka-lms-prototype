@@ -16,8 +16,8 @@ import csv
 import json
 import re
 from collections import defaultdict
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, List, Optional
 
 
 def read_ndjson(path: Path) -> Iterator[dict]:
@@ -29,7 +29,7 @@ def read_ndjson(path: Path) -> Iterator[dict]:
             yield json.loads(line)
 
 
-def write_csv(rows: Iterable[dict], fieldnames: List[str], path: Path) -> None:
+def write_csv(rows: Iterable[dict], fieldnames: list[str], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -50,7 +50,7 @@ def safe_get(data: dict, *keys, default=None):
     return cur if cur is not None else default
 
 
-def normalize_username(email: Optional[str], fallback: str) -> str:
+def normalize_username(email: str | None, fallback: str) -> str:
     if email:
         base = email.split("@")[0][:30]
         # Remove special chars, keep alphanumeric and underscore
@@ -64,23 +64,23 @@ def slugify(value: str, fallback: str) -> str:
     return slug[:50] or fallback
 
 
-def build_user_rows(users_file: Path) -> List[dict]:
-    users: List[dict] = []
+def build_user_rows(users_file: Path) -> list[dict]:
+    users: list[dict] = []
     seen_emails: set = set()
-    
+
     for rec in read_ndjson(users_file):
         email = rec.get("Contact", "").strip().lower()
         if not email or email in seen_emails:
             continue
         seen_emails.add(email)
-        
+
         first_name = rec.get("First Name", "").strip()
         last_name = rec.get("Last Name", "").strip()
         full_name = f"{first_name} {last_name}".strip()
-        
+
         # Extract learning pathways from "My groups"
         groups = rec.get("My groups", "").strip()
-        
+
         row = {
             "username": normalize_username(email, f"user_{len(users)}"),
             "email": email,
@@ -94,29 +94,29 @@ def build_user_rows(users_file: Path) -> List[dict]:
             "mct_user_id": email,  # Use email as ID since no explicit user ID
         }
         users.append(row)
-    
+
     return users
 
 
-def extract_courses_from_categories(categories_file: Path) -> List[dict]:
+def extract_courses_from_categories(categories_file: Path) -> list[dict]:
     """Extract individual courses from category structure."""
-    courses: List[dict] = []
+    courses: list[dict] = []
     seen_course_ids: set = set()
-    
+
     for rec in read_ndjson(categories_file):
         category_id = rec.get("CategoryId")
         category_name = (rec.get("CategoryName") or "").strip()
-        category_desc = (rec.get("CategoryDescription") or "").strip()
-        
+        (rec.get("CategoryDescription") or "").strip()
+
         for course in rec.get("Courses", []):
             course_id = course.get("ParentCourseId") or course.get("CourseId")
             if not course_id or course_id in seen_course_ids:
                 continue
             seen_course_ids.add(course_id)
-            
+
             course_name = (course.get("CourseName") or "").strip()
             course_desc = (course.get("CourseDescription") or "").strip()
-            
+
             courses.append({
                 "course_id": str(course_id),
                 "course_name": course_name,
@@ -127,32 +127,32 @@ def extract_courses_from_categories(categories_file: Path) -> List[dict]:
                 "course_item_count": course.get("CourseItemCount", 0),
                 "completion_percentage": course.get("CompletionPercentage", 0),
             })
-    
+
     return courses
 
 
-def build_enrollment_rows(users_file: Path, courses: List[dict]) -> List[dict]:
+def build_enrollment_rows(users_file: Path, courses: list[dict]) -> list[dict]:
     """Build enrollments from user learning pathways/groups."""
-    enrollments: List[dict] = []
+    enrollments: list[dict] = []
     course_by_id = {c["course_id"]: c for c in courses}
-    
+
     # Map learning pathways to course IDs (this is approximate - may need refinement)
-    pathway_to_courses: Dict[str, List[str]] = defaultdict(list)
-    
+    defaultdict(list)
+
     # For now, create enrollments based on user groups
     # This is a simplified approach - may need course-specific enrollment data
     for rec in read_ndjson(users_file):
         email = rec.get("Contact", "").strip().lower()
         if not email:
             continue
-        
+
         groups = rec.get("My groups", "").strip()
         if not groups:
             continue
-        
+
         # Extract pathway names (e.g., "Developer | Id" -> "Developer")
         pathways = [g.split("|")[0].strip() for g in groups.split(";") if g.strip()]
-        
+
         # For each pathway, try to find matching courses
         # This is a heuristic - may need manual mapping
         for pathway in pathways:
@@ -160,7 +160,7 @@ def build_enrollment_rows(users_file: Path, courses: List[dict]) -> List[dict]:
             for course_id, course in course_by_id.items():
                 course_name_lower = course["course_name"].lower()
                 pathway_lower = pathway.lower()
-                
+
                 # Simple keyword matching (can be improved)
                 if pathway_lower in course_name_lower or any(
                     keyword in course_name_lower
@@ -173,7 +173,7 @@ def build_enrollment_rows(users_file: Path, courses: List[dict]) -> List[dict]:
                         "enrollment_source": "learning_pathway",
                         "pathway": pathway,
                     })
-    
+
     return enrollments
 
 
@@ -181,43 +181,43 @@ def build_course_structure(
     courses_file: Path,
     content_file: Path,
     metadata_file: Path,
-) -> List[dict]:
+) -> list[dict]:
     """Build nested course structure with modules and lessons."""
-    course_content: Dict[int, dict] = {}
-    course_metadata: Dict[int, dict] = {}
-    
+    course_content: dict[int, dict] = {}
+    course_metadata: dict[int, dict] = {}
+
     # Load course content
     for rec in read_ndjson(content_file):
         course_id = rec.get("courseId")
         if course_id:
             course_content[course_id] = rec
-    
+
     # Load course metadata
     for rec in read_ndjson(metadata_file):
         course_id = rec.get("courseId")
         if course_id:
             course_metadata[course_id] = rec
-    
+
     # Extract courses from categories
     courses = extract_courses_from_categories(courses_file)
-    
-    course_structures: List[dict] = []
-    
+
+    course_structures: list[dict] = []
+
     for course in courses:
         course_id = int(course["course_id"])
         content = course_content.get(course_id, {})
-        metadata = course_metadata.get(course_id, {})
-        
+        course_metadata.get(course_id, {})
+
         course_items = content.get("CourseItems", [])
-        
+
         # Group items by type (Module vs Lesson)
-        modules: List[dict] = []
-        current_module: Optional[dict] = None
-        
+        modules: list[dict] = []
+        current_module: dict | None = None
+
         for item in sorted(course_items, key=lambda x: x.get("DisplayOrder", 0)):
             item_type = item.get("ItemType", "")
             item_data = item.get("Data", {})
-            
+
             if item_type == "Module":
                 # Start a new module
                 if current_module:
@@ -247,11 +247,11 @@ def build_course_structure(
                     },
                 }
                 current_module["lessons"].append(lesson)
-        
+
         # Add final module
         if current_module:
             modules.append(current_module)
-        
+
         # If no modules, create a default one with all lessons
         if not modules and course_items:
             default_module = {
@@ -281,7 +281,7 @@ def build_course_structure(
                     })
             if default_module["lessons"]:
                 modules = [default_module]
-        
+
         course_structures.append({
             "course_id": course["course_id"],
             "course_name": course["course_name"],
@@ -289,7 +289,7 @@ def build_course_structure(
             "category_name": course["category_name"],
             "modules": modules,
         })
-    
+
     return course_structures
 
 
@@ -297,7 +297,7 @@ def build_category_courses_structure(
     courses_file: Path,
     content_file: Path,
     metadata_file: Path,
-) -> List[dict]:
+) -> list[dict]:
     """
     Build category-level courses where:
     - MCT Category -> Open edX Course
@@ -305,20 +305,20 @@ def build_category_courses_structure(
     - CourseItems -> Lessons within each module
     """
     # Load course content (keyed by product/courseId)
-    course_content: Dict[int, dict] = {}
+    course_content: dict[int, dict] = {}
     for rec in read_ndjson(content_file):
         course_id = rec.get("courseId")
         if course_id:
             course_content[course_id] = rec
 
-    category_courses: List[dict] = []
+    category_courses: list[dict] = []
 
     for rec in read_ndjson(courses_file):
         category_id = rec.get("CategoryId")
         category_name = (rec.get("CategoryName") or "").strip()
         category_desc = (rec.get("CategoryDescription") or "") or ""
 
-        modules: List[dict] = []
+        modules: list[dict] = []
         for idx, module in enumerate(rec.get("Courses", []) or [], start=1):
             module_course_id = module.get("ParentCourseId") or module.get("CourseId")
             if not module_course_id:
@@ -328,7 +328,7 @@ def build_category_courses_structure(
             content = course_content.get(int(module_course_id), {})
             items = content.get("CourseItems", []) or []
 
-            lessons: List[dict] = []
+            lessons: list[dict] = []
             for item in sorted(items, key=lambda x: x.get("DisplayOrder", 0)):
                 if item.get("ItemType") != "Lesson":
                     continue
@@ -374,13 +374,13 @@ def build_category_courses_structure(
     return category_courses
 
 
-def build_category_enrollments_heuristic(users_file: Path, courses_file: Path) -> List[dict]:
+def build_category_enrollments_heuristic(users_file: Path, courses_file: Path) -> list[dict]:
     """
     DEPRECATED: Build enrollments using heuristic keyword matching.
     Use build_real_enrollments() instead for accurate data from enrollments.ndjson.
     """
     # Collect categories
-    categories: List[dict] = []
+    categories: list[dict] = []
     for rec in read_ndjson(courses_file):
         categories.append(
             {
@@ -388,7 +388,7 @@ def build_category_enrollments_heuristic(users_file: Path, courses_file: Path) -
                 "category_name": (rec.get("CategoryName") or "").strip(),
             }
         )
-    enrollments: List[dict] = []
+    enrollments: list[dict] = []
     keywords = ["developer", "data", "analyst", "digital", "marketer", "project", "management", "ai", "basic", "microsoft", "employability"]
 
     for rec in read_ndjson(users_file):
@@ -422,7 +422,7 @@ def build_category_enrollments_heuristic(users_file: Path, courses_file: Path) -
     return enrollments
 
 
-def build_real_enrollments(enrollments_file: Path, courses_file: Path) -> List[dict]:
+def build_real_enrollments(enrollments_file: Path, courses_file: Path) -> list[dict]:
     """
     Build enrollments from REAL enrollment data exported from MCT Reports API.
 
@@ -444,7 +444,7 @@ def build_real_enrollments(enrollments_file: Path, courses_file: Path) -> List[d
         return []
 
     # Build course -> category mapping from courses.ndjson
-    course_to_category: Dict[int, Dict] = {}
+    course_to_category: dict[int, dict] = {}
     for rec in read_ndjson(courses_file):
         course_id = rec.get("Id") or rec.get("courseId")
         category_id = rec.get("CategoryId") or rec.get("ParentId")
@@ -458,7 +458,7 @@ def build_real_enrollments(enrollments_file: Path, courses_file: Path) -> List[d
     # Read enrollments and aggregate by category
     # Track unique (email, category_id) pairs to avoid duplicates
     seen_enrollments: set = set()
-    enrollments: List[dict] = []
+    enrollments: list[dict] = []
 
     enrollment_count = 0
     for rec in read_ndjson(enrollments_file):
@@ -500,7 +500,7 @@ def build_real_enrollments(enrollments_file: Path, courses_file: Path) -> List[d
     return enrollments
 
 
-def build_category_enrollments(users_file: Path, courses_file: Path, enrollments_file: Optional[Path] = None) -> List[dict]:
+def build_category_enrollments(users_file: Path, courses_file: Path, enrollments_file: Path | None = None) -> list[dict]:
     """
     Build category-level enrollments. Uses REAL enrollment data if enrollments.ndjson exists,
     otherwise falls back to heuristic matching (deprecated).
@@ -589,13 +589,13 @@ def main():
         structure_dir / "course_content.ndjson",
         structure_dir / "course_metadata.ndjson",
     )
-    
+
     # Write course structure as JSON
     with (output_dir / "course_structure.json").open("w", encoding="utf-8") as f:
         json.dump(course_structures, f, indent=2, ensure_ascii=False)
-    
+
     print(f"  → {len(course_structures)} courses with structure")
-    
+
     # Calculate summary stats
     total_modules = sum(len(c.get("modules", [])) for c in course_structures)
     total_lessons = sum(

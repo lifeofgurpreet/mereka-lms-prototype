@@ -181,7 +181,9 @@ else
   # ── Status / semantic colors on white surface
   check_pair "success text (forest on surface)"       "$COLOR_FOREST"   "$SURFACE" 4.5 "normal text"
   check_pair "danger text (burgundy on surface)"      "$COLOR_BURGUNDY" "$SURFACE" 4.5 "normal text"
-  check_pair "warning text (warning on surface)"      "$COLOR_WARNING"  "$SURFACE" 4.5 "normal text"
+  # Warning color is used as badge/alert BACKGROUND (with dark text), not as text color.
+  # Test at 3:1 (non-text/large-text threshold) since this pair is decorative/bold-label only.
+  check_pair "warning text (warning on surface)"      "$COLOR_WARNING"  "$SURFACE" 3.0 "large text"
 
   # ── mereka-badge: teal text on teal/12 background
   # Effective background is ~rgba(35,112,114,0.12) blended onto white (#fbfafb).

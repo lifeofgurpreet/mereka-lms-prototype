@@ -94,61 +94,79 @@ check_registry_path() {
 
   local files=("$PROD_KUSTOMIZATION" "$BASE_KUSTOMIZATION")
   local expected_registry="asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
-  # Accept: YYYYMMDD-*-HASH, HASH-YYYYMMDD*, mereka-brand*, nreum-clean-*
-  local tag_pattern='^([0-9]{8}-.*-[a-f0-9]+|[a-f0-9]+-[0-9]{14}|mereka-brand[a-z0-9-]*|nreum-clean-[0-9]+)$'
+  # Strict immutable release tags: YYYYMMDD-<descriptor>-<sha>
+  local tag_pattern='^[0-9]{8}-[a-z0-9-]+-[a-f0-9]{7,64}$'
 
   local all_valid=true
   local checked=0
 
-  for file in "${files[@]}"; do
-    if [[ ! -f "$file" ]]; then
-      warn "File not found: $file (skipping)"
-      continue
-    fi
+  local report
+  report="$(python3 - "$expected_registry" "$tag_pattern" "${files[@]}" <<'PY'
+import re
+import sys
+from pathlib import Path
 
-    local in_images=false
-    local current_image=""
-    local current_tag=""
+try:
+    import yaml  # type: ignore
+except Exception:
+    print("ERROR\tPyYAML unavailable")
+    sys.exit(2)
 
-    while IFS= read -r line; do
-      # Detect images section
-      if [[ "$line" =~ ^images: ]]; then
-        in_images=true
+expected_registry = sys.argv[1]
+tag_pattern = re.compile(sys.argv[2])
+semver_pattern = re.compile(r'^\d+\.\d+\.\d+(-[a-z0-9.]+)?$')
+files = sys.argv[3:]
+checked = 0
+
+for path in files:
+    p = Path(path)
+    if not p.exists():
+        print(f"WARN\tFile not found: {path} (skipping)")
         continue
-      fi
+    payload = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    images = payload.get("images") or []
+    for img in images:
+        if not isinstance(img, dict):
+            continue
+        new_name = str(img.get("newName") or "")
+        if not new_name.startswith(expected_registry):
+            continue
+        checked += 1
+        tag = str(img.get("newTag") or "")
+        digest = str(img.get("digest") or "")
+        if tag_pattern.match(tag) or semver_pattern.match(tag):
+            print(f"PASS\t{new_name}:{tag} (valid format)")
+        elif digest:
+            print(f"PASS\t{new_name}:{tag}@{digest} (legacy tag allowed: digest pinned)")
+        else:
+            print(f"FAIL\t{new_name}:{tag} (invalid format and no digest pin)")
 
-      # Exit images section
-      if [[ "$in_images" == true && "$line" =~ ^[a-zA-Z] ]]; then
-        in_images=false
-      fi
+print(f"META\tchecked={checked}")
+PY
+)"
 
-      # Extract newName (registry path)
-      if [[ "$in_images" == true && "$line" =~ newName:[[:space:]]*(.+) ]]; then
-        current_image="${BASH_REMATCH[1]}"
-      fi
-
-      # Extract newTag and validate
-      if [[ "$in_images" == true && "$line" =~ newTag:[[:space:]]*(.+) ]]; then
-        current_tag="${BASH_REMATCH[1]}"
-
-        # Only check OpenEdX images from our registry
-        if [[ "$current_image" == ${expected_registry}* ]]; then
-          checked=$((checked + 1))
-
-          # Check if it follows date-SHA pattern (YYYYMMDD-*-HASH)
-          if [[ "$current_tag" =~ $tag_pattern ]]; then
-            pass "$current_image:$current_tag (valid format)"
-          else
-            fail "$current_image:$current_tag (invalid format, expected: YYYYMMDD-*-HASH)"
-            all_valid=false
-          fi
-        fi
-
-        current_image=""
-        current_tag=""
-      fi
-    done < "$file"
-  done
+  while IFS=$'\t' read -r status message; do
+    [[ -z "${status:-}" ]] && continue
+    case "$status" in
+      PASS)
+        pass "$message"
+        ;;
+      FAIL)
+        fail "$message"
+        all_valid=false
+        ;;
+      WARN)
+        warn "$message"
+        ;;
+      ERROR)
+        fail "$message"
+        all_valid=false
+        ;;
+      META)
+        checked="${message#checked=}"
+        ;;
+    esac
+  done <<< "$report"
 
   if [[ $checked -eq 0 ]]; then
     warn "No OpenEdX images found in kustomization files"

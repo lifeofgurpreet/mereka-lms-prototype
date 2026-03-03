@@ -69,6 +69,13 @@ if [[ -n "$KUBE_CONTEXT" ]]; then
 fi
 echo
 
+# Early-exit when no cluster is available (CI without kubectl context).
+if ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+  echo "⚠ SKIP: kubectl not available or cluster unreachable — skipping runtime license checks"
+  echo "  (Run with a valid KUBECONFIG/cluster context to execute AC-014..AC-018)"
+  exit 0
+fi
+
 pod_http() {
   local pod="$1" url="$2"
   kubectl exec -n "$NAMESPACE" "$pod" -- python3 -c "

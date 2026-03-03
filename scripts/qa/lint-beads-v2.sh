@@ -52,22 +52,22 @@ count_sections() {
     # Check for required v2 sections (flexible format - headers or keywords)
     # Context: Where this lives, why now
     if grep -qiE '^(##? *)?(Context|Where|Scope):' <<< "$desc" || grep -qi 'why now|repo/path|service:' <<< "$desc"; then
-        ((count++))
+        count=$((count + 1))
     fi
 
     # Problem: What's broken/risky
     if grep -qiE '^(##? *)?(Problem|Issue|Current state|CRITICAL):' <<< "$desc" || grep -qi 'broken|risky|impact if|footgun' <<< "$desc"; then
-        ((count++))
+        count=$((count + 1))
     fi
 
     # Target state: Bullet list, measurable outcomes
     if grep -qiE '^(##? *)?(Target state|Goal|Success criteria|Acceptance criteria|DoD):' <<< "$desc" || grep -qi '^- \[' <<< "$desc"; then
-        ((count++))
+        count=$((count + 1))
     fi
 
     # Verification: Commands/scripts
     if grep -qiE '^(##? *)?(Verification|Evidence|Validation):' <<< "$desc" || grep -qi 'scripts/|\.sh|kubectl|verify' <<< "$desc"; then
-        ((count++))
+        count=$((count + 1))
     fi
 
     echo "$count"

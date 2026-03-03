@@ -11,9 +11,11 @@ from tutor import hooks
 __version__ = "1.0.0"
 
 # Plugin configuration
-hooks.Filters.CONFIG_DEFAULTS.add_items([
-    ("MFE_OAUTH_FIX_VERSION", __version__),
-])
+hooks.Filters.CONFIG_DEFAULTS.add_items(
+    [
+        ("MFE_OAUTH_FIX_VERSION", __version__),
+    ]
+)
 
 # Add the custom app to INSTALLED_APPS
 hooks.Filters.ENV_PATCHES.add_item(

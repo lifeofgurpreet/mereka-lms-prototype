@@ -1,6 +1,6 @@
 # mereka-lms Implementation Tracker
 
-**Last updated**: 2026-02-27
+**Last updated**: 2026-03-02
 **Branch**: main
 **Sources**: Internal audit · DR2 research review · DR1 frontend review · Top50 strategic priorities · CTO audit pass · Deployment parity review
 
@@ -8,16 +8,16 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 147   |
-| TODO   | 4     |
+| DONE   | 150   |
+| TODO   | 1     |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **154** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
-Sprints 6–10: 48 tasks (23 TODO→DONE this batch, 25 prior DONE)
-Sprint 11: 5 tasks (0 TODO, 5 DONE) — deployment parity & AC gap closure — DR1 frontend + Top50 strategic + CTO audit
-Sprint 12: 7 tasks (1 TODO, 6 DONE) — CI pipeline cost optimization (DevOps review)
+Sprints 6–10: 48 tasks (47 DONE, 1 TODO) — T118 CDN deferred by stakeholder
+Sprint 11: 5 tasks (5 DONE) — deployment parity & AC gap closure — DR1 frontend + Top50 strategic + CTO audit
+Sprint 12: 7 tasks (7 DONE) — CI pipeline cost optimization (DevOps review)
 
 Cross-references: DR2 items I-001→I-050 · DR1 findings P0-1→P2-2 · Top50 items #1→#50 · CTO audit #1→#31
 
@@ -747,7 +747,7 @@ T058
 | T151 | CI cost: Immediate cost drop (triggers, concurrency, artifacts) | P1 | DONE | DevOps-Review | S | — | ✓ iOS→manual trigger, concurrency blocks on 6 PR workflows, retention-days=3 on 31 artifact uploads, Playwright artifacts on failure only. See CI_OPTIMIZATION_TRACKER.md Phase 2. |
 | T152 | CI cost: Composite actions & caching | P1 | DONE | DevOps-Review | M | T151 | ✓ Created .github/actions/ composites (gcp-gke-auth, setup-python-env, setup-playwright). Refactored 9+10+3 consumer workflows. See CI_OPTIMIZATION_TRACKER.md Phase 3. |
 | T153 | CI cost: Workflow consolidation (merge & flatten) | P1 | DONE | DevOps-Review | M | T152 | ✓ Merged verify-specs→ci.yml, flattened to 5 jobs (static-validation, tutor-config-tests, security-scans, test-coverage, full-verification). Consolidated tenant/a11y gates. See CI_OPTIMIZATION_TRACKER.md Phase 4. |
-| T154 | CI cost: Heavy workload migration to ARC | P2 | TODO | DevOps-Review | M | T150, T153 | Migrate build-tutor-images + E2E + crons to K8s runners. Docker layer caching via PVC. See CI_OPTIMIZATION_TRACKER.md Phase 5. |
+| T154 | CI cost: Heavy workload migration to ARC | P2 | DONE | DevOps-Review | M | T150, T153 | ✓ Added USE_SELF_HOSTED_RUNNERS conditional to 11 workflows (build-tutor-images, E2E, smoke, cron audits). Falls back to ubuntu-24.04 when ARC not deployed. ARC infra deploy is infra team prereq. See CI_OPTIMIZATION_TRACKER.md Phase 5. |
 | T155 | CI cost: Cron schedule rationalization | P2 | DONE | DevOps-Review | S | T153 | ✓ 6-hourly→daily for argocd-drift-check + operations-gates-runtime. Merged 3 observability audits into daily-infrastructure-audit.yml. Event-driven triggers. TruffleHog full-scan monthly. See CI_OPTIMIZATION_TRACKER.md Phase 6. |
 | T156 | CI cost: Documentation & spec alignment | P2 | DONE | DevOps-Review | S | T153, T155 | ✓ Updated specs, docs, markdown for merged workflows (verify-specs ref, 3 observability audit refs, ARC runner docs). See CI_OPTIMIZATION_TRACKER.md Phase 7. |
 
@@ -757,16 +757,16 @@ T058
 
 | Status | Count |
 |--------|-------|
-| DONE   | 147   |
-| TODO   | 4     |
+| DONE   | 150   |
+| TODO   | 1     |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **154** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED)
-Sprints 6–10: 48 tasks (45 DONE, 3 TODO)
+Sprints 6–10: 48 tasks (47 DONE, 1 TODO — T118 CDN deferred)
 Sprint 11: 5 tasks (5 DONE) — deployment parity & AC gap closure
-Sprint 12: 7 tasks (6 DONE, 1 TODO) — CI pipeline cost optimization (DevOps review; Phase 5 ARC migration pending)
+Sprint 12: 7 tasks (7 DONE) — CI pipeline cost optimization complete (ARC infra deploy pending)
 
 Sources: Internal audit · DR2 (I-001→I-050) · DR1 frontend review · Top50 strategic priorities · CTO audit pass · DevOps review
 

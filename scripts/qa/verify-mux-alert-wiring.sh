@@ -467,7 +467,7 @@ check_live_alertmanager_route() {
 
   # Fetch Alertmanager config via API to check for video/component routing
   local am_config
-  am_config=$(kubectl exec -n monitoring "${am_pod}" 2>/dev/null -- \
+  am_config=$(kubectl exec -n monitoring "${am_pod}" -- \
     wget -qO- "http://localhost:9093/api/v2/status" 2>/dev/null || echo "")
 
   if [[ -z "${am_config}" ]]; then

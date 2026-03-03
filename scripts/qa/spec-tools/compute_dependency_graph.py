@@ -14,12 +14,11 @@ import argparse
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Set
 
 try:
     import yaml
-except ImportError:
-    raise SystemExit("PyYAML required: pip install pyyaml")
+except ImportError as exc:
+    raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
 
@@ -47,9 +46,9 @@ def count_acs(md: str) -> int:
     return count
 
 
-def load_specs(specs_dir: Path) -> Dict[str, dict]:
+def load_specs(specs_dir: Path) -> dict[str, dict]:
     """Load all specs with frontmatter. Returns {filename: info}."""
-    specs: Dict[str, dict] = {}
+    specs: dict[str, dict] = {}
     for f in sorted(specs_dir.glob("*_spec.md")):
         content = f.read_text(encoding="utf-8")
         fm = parse_frontmatter(content)
@@ -65,13 +64,13 @@ def load_specs(specs_dir: Path) -> Dict[str, dict]:
     return specs
 
 
-def compute_tiers(specs: Dict[str, dict]) -> List[List[str]]:
+def compute_tiers(specs: dict[str, dict]) -> list[list[str]]:
     """Topological sort into tiers using Kahn's algorithm."""
     all_specs = set(specs.keys())
-    deps: Dict[str, Set[str]] = {}
+    deps: dict[str, set[str]] = {}
 
     for name, info in specs.items():
-        dep_set: Set[str] = set()
+        dep_set: set[str] = set()
         for dep in info.get("depends_on", []):
             dep_name = Path(dep).name if "/" in dep else dep
             if dep_name in all_specs:
@@ -79,7 +78,7 @@ def compute_tiers(specs: Dict[str, dict]) -> List[List[str]]:
         deps[name] = dep_set
 
     in_degree = {name: len(deps[name]) for name in all_specs}
-    tiers: List[List[str]] = []
+    tiers: list[list[str]] = []
     remaining = set(all_specs)
 
     while remaining:
@@ -100,7 +99,7 @@ def compute_tiers(specs: Dict[str, dict]) -> List[List[str]]:
     return tiers
 
 
-def format_markdown(tiers: List[List[str]], specs: Dict[str, dict]) -> str:
+def format_markdown(tiers: list[list[str]], specs: dict[str, dict]) -> str:
     """Format as markdown implementation order."""
     lines = ["# Implementation Order", ""]
     lines.append("Generated from `depends_on` frontmatter in spec files.")
@@ -126,7 +125,7 @@ def format_markdown(tiers: List[List[str]], specs: Dict[str, dict]) -> str:
     return "\n".join(lines)
 
 
-def format_json_output(tiers: List[List[str]], specs: Dict[str, dict]) -> str:
+def format_json_output(tiers: list[list[str]], specs: dict[str, dict]) -> str:
     """Format as JSON."""
     output = {
         "tiers": [

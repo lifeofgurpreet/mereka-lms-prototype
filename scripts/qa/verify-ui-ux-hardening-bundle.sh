@@ -274,44 +274,67 @@ echo ""
 # ===========================================================================
 echo "--- AC-HB-004: CI Integration ---"
 
+CI_SCRIPTS_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
+
+# Helper: check if pattern exists in ci.yml OR ci-scripts-static.txt
+_ci_has() {
+  local pattern="$1"
+  local use_fixed="${2:-}"  # if "F", use -F (fixed string); else regex
+  if [[ -f "$CI_FILE" ]]; then
+    if [[ "$use_fixed" == "F" ]]; then
+      grep -qF "$pattern" "$CI_FILE" && return 0
+    else
+      grep -qE "$pattern" "$CI_FILE" && return 0
+    fi
+  fi
+  if [[ -f "$CI_SCRIPTS_LIST" ]]; then
+    if [[ "$use_fixed" == "F" ]]; then
+      grep -qF "$pattern" "$CI_SCRIPTS_LIST" && return 0
+    else
+      grep -qE "$pattern" "$CI_SCRIPTS_LIST" && return 0
+    fi
+  fi
+  return 1
+}
+
 if [[ ! -f "$CI_FILE" ]]; then
   do_fail "AC-HB-004: .github/workflows/ci.yml not found"
 else
   do_pass "AC-HB-004: .github/workflows/ci.yml exists"
 
-  # 4a. UI/UX hardening bundle job must be referenced.
-  if grep -q "ui-ux-hardening-bundle\|verify-ui-ux-hardening-bundle" "$CI_FILE"; then
-    do_pass "AC-HB-004: ui-ux-hardening-bundle job referenced in ci.yml"
+  # 4a. UI/UX hardening bundle job must be referenced (ci.yml or ci-scripts-static.txt).
+  if _ci_has "ui-ux-hardening-bundle|verify-ui-ux-hardening-bundle"; then
+    do_pass "AC-HB-004: ui-ux-hardening-bundle referenced in CI"
   else
-    do_fail "AC-HB-004: ui-ux-hardening-bundle job NOT referenced in ci.yml"
+    do_fail "AC-HB-004: ui-ux-hardening-bundle NOT referenced in CI (ci.yml or ci-scripts-static.txt)"
   fi
 
   # 4b. A11y gate scripts must be in CI.
-  if grep -qE "verify-a11y-contrast-focus\.sh|verify-a11y-authenticated-routes\.sh" "$CI_FILE"; then
-    do_pass "AC-HB-004: a11y gate scripts referenced in ci.yml"
+  if _ci_has "verify-a11y-contrast-focus\.sh|verify-a11y-authenticated-routes\.sh"; then
+    do_pass "AC-HB-004: a11y gate scripts referenced in CI"
   else
-    do_fail "AC-HB-004: a11y gate scripts not found in ci.yml"
+    do_fail "AC-HB-004: a11y gate scripts not found in CI"
   fi
 
   # 4c. Performance budget gate must be in CI.
-  if grep -q "verify-performance-budget\.sh" "$CI_FILE"; then
-    do_pass "AC-HB-004: verify-performance-budget.sh referenced in ci.yml"
+  if _ci_has "verify-performance-budget\.sh"; then
+    do_pass "AC-HB-004: verify-performance-budget.sh referenced in CI"
   else
-    do_fail "AC-HB-004: verify-performance-budget.sh not found in ci.yml"
+    do_fail "AC-HB-004: verify-performance-budget.sh not found in CI"
   fi
 
-  # 4d. Visual regression scripts in syntax check block.
-  if grep -q "verify-visual-parity-checkpoints\.sh\|verify-visual-smoke-baseline\.sh" "$CI_FILE"; then
-    do_pass "AC-HB-004: visual regression scripts referenced in ci.yml"
+  # 4d. Visual regression scripts in CI.
+  if _ci_has "verify-visual-parity-checkpoints\.sh|verify-visual-smoke-baseline\.sh"; then
+    do_pass "AC-HB-004: visual regression scripts referenced in CI"
   else
-    do_fail "AC-HB-004: visual regression scripts not found in ci.yml"
+    do_fail "AC-HB-004: visual regression scripts not found in CI"
   fi
 
-  # 4e. CI must reference the hardening bundle verify script in syntax checks.
-  if grep -q "verify-ui-ux-hardening-bundle\.sh" "$CI_FILE"; then
-    do_pass "AC-HB-004: verify-ui-ux-hardening-bundle.sh in ci.yml syntax check block"
+  # 4e. CI must reference the hardening bundle verify script.
+  if _ci_has "verify-ui-ux-hardening-bundle\.sh"; then
+    do_pass "AC-HB-004: verify-ui-ux-hardening-bundle.sh in CI"
   else
-    do_fail "AC-HB-004: verify-ui-ux-hardening-bundle.sh not in ci.yml syntax check block"
+    do_fail "AC-HB-004: verify-ui-ux-hardening-bundle.sh not in CI"
   fi
 fi
 

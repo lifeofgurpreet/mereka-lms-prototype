@@ -18,15 +18,18 @@ resources:
 - policies
 - operational
 
-# Custom Mereka-branded OpenEdX image
+# Custom Mereka-branded OpenEdX images.
+# Base uses mutable `mereka-brand` tags (updated by build-tutor-images.yml on
+# every push to main).  Environment overlays in bbi-infrastructure can override
+# with pinned tags+digests for production; dev inherits this mutable default so
+# ArgoCD auto-deploys new builds.
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: mereka-brand-hotfix-full-v3
+    newTag: mereka-brand
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 900d3d9d-20260301-142349
-    digest: sha256:6e940c493f8323a12159ee1d052992e909320ead68bf7456390724200fdb58fb
+    newTag: mereka-brand
 
 # namespace to deploy all Resources to
 namespace: mereka-lms
@@ -48,10 +51,10 @@ labels:
     includeSelectors: false
 
 
-patchesStrategicMerge:
+patches:
 # T087: Enforce non-root, read-only FS, capability drop, and RuntimeDefault
 # seccomp profile for all Deployments. Multi-doc file, matched by kind+name.
-- patches/container-hardening.yaml
+- path: patches/container-hardening.yaml
 
 configMapGenerator:
 - name: caddy-config

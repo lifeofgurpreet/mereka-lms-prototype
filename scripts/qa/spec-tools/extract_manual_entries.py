@@ -18,8 +18,8 @@ from pathlib import Path
 
 try:
     import yaml
-except ImportError:
-    raise SystemExit("PyYAML required: pip install pyyaml")
+except ImportError as exc:
+    raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TESTMAPS_DIR = REPO_ROOT / "specs" / "testmaps"
@@ -39,8 +39,7 @@ def iter_testmap_files(testmaps_dir: Path):
     files = set()
     for pattern in ("*.testmap.yml", "*.testmap.yaml", "*_testmap.yaml"):
         files.update(testmaps_dir.glob(pattern))
-    for tm_path in sorted(files):
-        yield tm_path
+    yield from sorted(files)
 
 
 def extract_entries(testmaps_dir: Path) -> list[dict]:
@@ -180,9 +179,9 @@ def main():
 
     print()
     print("=" * 60)
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Total entries: {len(entries)}")
-    print(f"  By type:")
+    print("  By type:")
     for t, count in sorted(by_type.items()):
         print(f"    {t}: {count}")
     print(f"  By spec ({len(by_spec)} specs with non-automated entries):")

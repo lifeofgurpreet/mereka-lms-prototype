@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-SLOT-021
+# @spec: mfe-plugin-slots_spec.md
 # Compare branding screenshots against a baseline using ImageMagick RMSE.
 #
 # This script is intentionally deterministic and CI-friendly:

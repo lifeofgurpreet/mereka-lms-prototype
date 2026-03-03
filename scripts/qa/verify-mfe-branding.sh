@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# @covers AC-UI-001, AC-UI-005, AC-UI-006, AC-UI-007, AC-UI-008
-# @spec: branding-system_spec.md, mfe-routing_spec.md
+# @covers AC-UI-001, AC-UI-005, AC-UI-006, AC-UI-007, AC-UI-008, AC-SLOT-023
+# @spec: branding-system_spec.md, mfe-routing_spec.md, mfe-plugin-slots_spec.md
 #
 # verify-mfe-branding.sh - Verify MFE branding, routing, and content
 #

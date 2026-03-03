@@ -3747,3 +3747,531 @@ entries:
     runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
     section: Integration Tests
     justification: Forum v2 runs in-process within LMS — no separate forum K8s service/endpoint; forum routes served via LMS caddy proxy on forum.academyv2.mereka.io
+- id: AC-PERF-001
+  spec: frontend-performance-budgets_spec.md
+  description: Lighthouse budgets include LCP <= 2500ms across required entries
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Budget Thresholds
+    justification: Verified by periodic operator review of budget JSON plus CI budget script output
+- id: AC-PERF-002
+  spec: frontend-performance-budgets_spec.md
+  description: Lighthouse budgets include INP <= 200ms and do not include FID
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Budget Thresholds
+    justification: Verified by periodic operator review of budget JSON plus CI budget script output
+- id: AC-PERF-003
+  spec: frontend-performance-budgets_spec.md
+  description: Lighthouse budgets include CLS <= 0.10 equivalent threshold
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Budget Thresholds
+    justification: Verified by periodic operator review of budget JSON plus CI budget script output
+- id: AC-PERF-004
+  spec: frontend-performance-budgets_spec.md
+  description: Lighthouse budgets cover required MFE paths
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Path Coverage
+    justification: Required path list is checked as part of release checklist review
+- id: AC-PERF-005
+  spec: frontend-performance-budgets_spec.md
+  description: JS resourceSize budget ceiling enforced
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Bundle Limits
+    justification: Current CI script validates absolute bundle ceilings; operator reviews warnings for per-MFE drift
+- id: AC-PERF-006
+  spec: frontend-performance-budgets_spec.md
+  description: CSS resourceSize budget ceiling enforced
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Bundle Limits
+    justification: Current CI script validates absolute bundle ceilings; operator reviews warnings for per-MFE drift
+- id: AC-PERF-007
+  spec: frontend-performance-budgets_spec.md
+  description: CI flags per-MFE JS growth and fails absolute cap breaches
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: CI Gate Behavior
+    justification: Growth-warning behavior is reviewed in CI logs during release checks
+- id: AC-PERF-008
+  spec: frontend-performance-budgets_spec.md
+  description: Initial CSS bundle size remains <= 100KB gzipped
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Bundle Limits
+    justification: Verified during release review from Lighthouse artifacts and bundle reports
+- id: AC-PERF-012
+  spec: frontend-performance-budgets_spec.md
+  description: SVG logo variants exist for required branding assets
+  verify:
+  - type: manual
+    runbook: docs/BRANDING.md
+    section: Asset Inventory
+    justification: Asset existence is validated during branding release checklist
+- id: AC-PERF-013
+  spec: frontend-performance-budgets_spec.md
+  description: Below-the-fold images are lazy-loaded
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Runtime Verification
+    justification: Requires browser inspection of rendered pages and network waterfall
+- id: AC-PERF-015
+  spec: frontend-performance-budgets_spec.md
+  description: verify-lighthouse-budgets script exits successfully only for valid thresholds
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: CI Gate Behavior
+    justification: Script behavior is validated in CI run logs on budget changes
+- id: AC-PERF-016
+  spec: frontend-performance-budgets_spec.md
+  description: Lighthouse score thresholds (Performance >= 50, Accessibility >= 90) hold
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Score Thresholds
+    justification: Requires live Lighthouse runs against production endpoints
+- id: AC-PERF-017
+  spec: frontend-performance-budgets_spec.md
+  description: Lighthouse workflow validates budget structure and ranges
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Workflow Validation
+    justification: Verified via GitHub Actions workflow execution history
+- id: AC-PERF-021
+  spec: frontend-performance-budgets_spec.md
+  description: MFE image build time remains under 10 minutes on standard CI runners
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Build timing is observed from CI job duration metrics
+- id: AC-PERF-022
+  spec: frontend-performance-budgets_spec.md
+  description: Open edX image build time remains under 45 minutes on standard CI runners
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Build timing is observed from CI job duration metrics
+- id: AC-PERF-023
+  spec: frontend-performance-budgets_spec.md
+  description: NODE_OPTIONS includes required memory cap for webpack builds
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: Build Preconditions
+    justification: Validated by source/config inspection and CI environment logging
+- id: AC-PERF-024
+  spec: frontend-performance-budgets_spec.md
+  description: Production bundles collect and report core web vitals metrics
+  verify:
+  - type: manual
+    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    section: RUM Verification
+    justification: Requires live browser and telemetry backend validation
+- id: AC-PERF-025
+  spec: frontend-performance-budgets_spec.md
+  description: Alerting triggers when p75 LCP exceeds threshold for SEA segments
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
+    section: Alert Verification
+    justification: Requires live telemetry windows and alert routing checks
+- id: AC-STUDIO-001
+  spec: studio-customization_spec.md
+  description: Studio theming baseline is applied and visible
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Theme Verification
+    justification: Requires Studio UI inspection in a live environment
+- id: AC-STUDIO-002
+  spec: studio-customization_spec.md
+  description: Studio custom CSS and token wiring are loaded correctly
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Theme Verification
+    justification: Requires browser-side style inspection
+- id: AC-STUDIO-003
+  spec: studio-customization_spec.md
+  description: Studio branding assets are present in rendered output
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Theme Verification
+    justification: Requires visual validation across Studio surfaces
+- id: AC-STUDIO-006
+  spec: studio-customization_spec.md
+  description: Studio course creation flow matches configured customization contract
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Studio Authoring Checks
+    justification: Requires interactive authoring workflow execution
+- id: AC-STUDIO-007
+  spec: studio-customization_spec.md
+  description: Studio library creation flow matches configured customization contract
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Studio Authoring Checks
+    justification: Requires interactive authoring workflow execution
+- id: AC-STUDIO-010
+  spec: studio-customization_spec.md
+  description: Studio course outline and component UI customization is applied
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Studio Authoring Checks
+    justification: Requires UI-level verification in Studio
+- id: AC-STUDIO-011
+  spec: studio-customization_spec.md
+  description: Studio add-component behavior matches customization contract
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Studio Authoring Checks
+    justification: Requires UI-level verification in Studio
+- id: AC-STUDIO-012
+  spec: studio-customization_spec.md
+  description: Studio customization remains active after rebuild/redeploy cycle
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Rollout Verification
+    justification: Requires post-deploy runtime verification in Studio
+- id: AC-STUDIO-013
+  spec: studio-customization_spec.md
+  description: Studio branding does not regress to default Open edX styles
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Regression Checks
+    justification: Visual regression check requires human review
+- id: AC-STUDIO-014
+  spec: studio-customization_spec.md
+  description: Studio customization survives Tutor patch regeneration
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Patch Verification
+    justification: Verified during regeneration/apply-patches runbook steps
+- id: AC-STUDIO-015
+  spec: studio-customization_spec.md
+  description: Studio customization survives Open edX image rebuild
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Rollout Verification
+    justification: Verified through post-build runtime checks
+- id: AC-STUDIO-016
+  spec: studio-customization_spec.md
+  description: Studio customization survives MFE rebuild where applicable
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Rollout Verification
+    justification: Verified through post-build runtime checks
+- id: AC-STUDIO-017
+  spec: studio-customization_spec.md
+  description: Studio customizations are documented for operators
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Operator Notes
+    justification: Documentation quality is manually reviewed
+- id: AC-STUDIO-018
+  spec: studio-customization_spec.md
+  description: Studio customization rollback path is documented and testable
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Rollback
+    justification: Rollback testing requires controlled runtime exercise
+- id: AC-STUDIO-019
+  spec: studio-customization_spec.md
+  description: Studio customization health checks exist and are actionable
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Health Checks
+    justification: Runtime health checks are reviewed by operators
+- id: AC-STUDIO-020
+  spec: studio-customization_spec.md
+  description: Studio customization governance constraints are enforced
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Governance
+    justification: Governance controls are assessed via runbook procedures
+- id: AC-STUDIO-021
+  spec: studio-customization_spec.md
+  description: Studio customization observability signals are available
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Observability
+    justification: Requires live telemetry and UI checks
+- id: AC-STUDIO-023
+  spec: studio-customization_spec.md
+  description: Studio customization remains compatible with multisite setup
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Multisite Checks
+    justification: Requires environment-aware runtime verification
+- id: AC-STUDIO-024
+  spec: studio-customization_spec.md
+  description: Studio customization remains compatible with authentication hardening
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Auth Surface Checks
+    justification: Requires runtime auth flow verification in Studio
+- id: AC-STUDIO-025
+  spec: studio-customization_spec.md
+  description: Studio customization operational handoff artifacts are maintained
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Handoff
+    justification: Handoff artifacts are operator-reviewed, not CI-verifiable
+- id: AC-SLOT-001
+  spec: mfe-plugin-slots_spec.md
+  description: Desktop header uses Mereka logo via plugin slots
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Requires UI validation across deployed MFE surfaces and hostnames
+- id: AC-SLOT-002
+  spec: mfe-plugin-slots_spec.md
+  description: Mobile header uses square Mereka logo via plugin slots
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Requires viewport-specific visual verification
+- id: AC-SLOT-003
+  spec: mfe-plugin-slots_spec.md
+  description: Header logo click routes to dashboard instead of default homepage
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Navigation behavior is validated through browser interaction
+- id: AC-SLOT-004
+  spec: mfe-plugin-slots_spec.md
+  description: Tenant hostname academy.biji-biji.com renders branded logo variant
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Requires live tenant-host verification
+- id: AC-SLOT-005
+  spec: mfe-plugin-slots_spec.md
+  description: Desktop main menu includes Mereka-specific navigation items
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Menu content must be verified in rendered UI state
+- id: AC-SLOT-006
+  spec: mfe-plugin-slots_spec.md
+  description: Mobile menu reflects desktop Mereka navigation set
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Requires cross-viewport parity validation
+- id: AC-SLOT-007
+  spec: mfe-plugin-slots_spec.md
+  description: Phase 1 slot registrations are present in rendered env config after build
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Build and runtime-rendered config evidence is environment-dependent
+- id: AC-SLOT-008
+  spec: mfe-plugin-slots_spec.md
+  description: Learning sidebar renders with Mereka branding via slot activation
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Learning Surface
+    justification: Requires visual validation in a live course context
+- id: AC-SLOT-009
+  spec: mfe-plugin-slots_spec.md
+  description: Learning sequence navigation uses branded styling
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Learning Surface
+    justification: Styling verification is visual and runtime-specific
+- id: AC-SLOT-010
+  spec: mfe-plugin-slots_spec.md
+  description: Default learning placeholder uses Mereka colors when course image absent
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Learning Surface
+    justification: Requires controlled course-state UI check
+- id: AC-SLOT-011
+  spec: mfe-plugin-slots_spec.md
+  description: Phase 2 Learning slot registrations are present after build
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Learning Surface
+    justification: Build/runtime verification is environment-coupled
+- id: AC-SLOT-012
+  spec: mfe-plugin-slots_spec.md
+  description: Account MFE renders enterprise profile fields via slot
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Account And Profile
+    justification: Requires authenticated UI verification
+- id: AC-SLOT-013
+  spec: mfe-plugin-slots_spec.md
+  description: Profile MFE renders branded profile header via slot
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Account And Profile
+    justification: Public profile surface branding requires visual validation
+- id: AC-SLOT-014
+  spec: mfe-plugin-slots_spec.md
+  description: Additional enterprise profile fields persist and are API-retrievable
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Account And Profile
+    justification: Requires stateful API/UI roundtrip checks
+- id: AC-SLOT-015
+  spec: mfe-plugin-slots_spec.md
+  description: Phase 3 Account/Profile slot registrations are present after build
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Account And Profile
+    justification: Build/runtime verification is environment-coupled
+- id: AC-SLOT-016
+  spec: mfe-plugin-slots_spec.md
+  description: Slot registration follows PLUGIN_SLOTS.add_items pattern
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Pattern compliance is verified via source + rendered behavior audit
+- id: AC-SLOT-017
+  spec: mfe-plugin-slots_spec.md
+  description: Custom slot components are defined inline in runtime env patches
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Requires source and generated runtime patch inspection
+- id: AC-SLOT-018
+  spec: mfe-plugin-slots_spec.md
+  description: Slot components use SITE_VARIANTS for hostname-aware tenant behavior
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Requires multi-host runtime checks
+- id: AC-SLOT-019
+  spec: mfe-plugin-slots_spec.md
+  description: all-target slot registrations apply across MFEs that define the slot
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Cross-MFE runtime verification required
+- id: AC-SLOT-020
+  spec: mfe-plugin-slots_spec.md
+  description: Unsupported slot IDs remain graceful no-op without breaking MFE render
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Requires negative-path runtime validation
+- id: AC-SLOT-021
+  spec: mfe-plugin-slots_spec.md
+  description: Visual regression captures and compares slot-bearing pages
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Test Execution
+    justification: Screenshot baseline review requires operator adjudication
+- id: AC-SLOT-023
+  spec: mfe-plugin-slots_spec.md
+  description: Smoke tests confirm no default Open edX header logo on key pages
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Test Execution
+    justification: Requires page-level visual checks across several routes
+- id: AC-SLOT-024
+  spec: mfe-plugin-slots_spec.md
+  description: Build failures identify failing slot ID/component for debugging
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Test Execution
+    justification: Requires intentional failure injection and build-log review
+- id: AC-SLOT-025
+  spec: mfe-plugin-slots_spec.md
+  description: Slot components render within 100ms of slot container mount
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Non-Functional Checks
+    justification: Timing measurements require runtime instrumentation and interpretation
+- id: AC-SLOT-026
+  spec: mfe-plugin-slots_spec.md
+  description: Total slot-component bundle delta stays within 15KB gzipped
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Non-Functional Checks
+    justification: Requires build artifact analysis in release pipeline context
+- id: AC-SLOT-027
+  spec: mfe-plugin-slots_spec.md
+  description: Slot components are responsive across 320px to 1920px without overflow
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Non-Functional Checks
+    justification: Requires viewport matrix UI checks
+- id: AC-SLOT-028
+  spec: mfe-plugin-slots_spec.md
+  description: Branded logo assets referenced by slots load without 404s
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Cross-Spec Checks
+    justification: Requires network and page render validation across surfaces
+- id: AC-SLOT-029
+  spec: mfe-plugin-slots_spec.md
+  description: Slot components do not introduce Google Fonts requests
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Cross-Spec Checks
+    justification: Requires runtime network inspection

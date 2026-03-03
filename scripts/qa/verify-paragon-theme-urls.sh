@@ -4,6 +4,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_command rg || exit 0
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 CADDY_FILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"

@@ -122,7 +122,7 @@ def export_simple(name, endpoint, token, dry_run):
         json.dump(data, f, indent=2)
     size = out.stat().st_size
     count = len(data) if isinstance(data, list) else "dict"
-    print("  Saved %s: %s records, %s bytes" % (out.name, count, f"{size:,}"))
+    print("  Saved {}: {} records, {} bytes".format(out.name, count, f"{size:,}"))
     return {"file": str(out), "size": size, "count": str(count)}
 
 
@@ -134,9 +134,9 @@ def export_admin_users(token, dry_run):
 
     while True:
         skip = page * take
-        url = "%s/api/v1/admin/users?skip=%d&take=%d" % (base_url, skip, take)
+        url = f"{base_url}/api/v1/admin/users?skip={skip}&take={take}"
         if dry_run:
-            print("  [dry-run] Would fetch page %d: %s" % (page + 1, url))
+            print(f"  [dry-run] Would fetch page {page + 1}: {url}")
             return {"status": "dry_run"}
 
         data, _ = fetch(url, token)
@@ -145,7 +145,7 @@ def export_admin_users(token, dry_run):
             break
         all_users.extend(users)
         if (page + 1) % 10 == 0:
-            print("  Page %d: %s users..." % (page + 1, f"{len(all_users):,}"))
+            print(f"  Page {page + 1}: {len(all_users):,} users...")
         if len(users) < take:
             break
         page += 1
@@ -157,7 +157,7 @@ def export_admin_users(token, dry_run):
     with open(out, "w") as f:
         json.dump(all_users, f)
     size = out.stat().st_size
-    print("  Total: %s users, %s bytes" % (f"{len(all_users):,}", f"{size:,}"))
+    print("  Total: {} users, {} bytes".format(f"{len(all_users):,}", f"{size:,}"))
     return {"file": str(out), "size": size, "count": len(all_users)}
 
 
@@ -174,14 +174,14 @@ def export_reports_users(token, dry_run):
         with open(out, "wb") as f:
             f.write(data)
         lines = data.decode("utf-8-sig", errors="replace").count("\n")
-        print("  Saved CSV: %s lines, %s bytes" % (f"{lines:,}", f"{len(data):,}"))
+        print("  Saved CSV: {} lines, {} bytes".format(f"{lines:,}", f"{len(data):,}"))
         return {"file": str(out), "size": len(data), "lines": lines}
     else:
         out = RAW_API_DIR / "reports_users.json"
         with open(out, "w") as f:
             json.dump(data, f)
         size = out.stat().st_size
-        print("  Saved JSON: %s bytes" % f"{size:,}")
+        print("  Saved JSON: {} bytes".format(f"{size:,}"))
         return {"file": str(out), "size": size}
 
 
@@ -196,7 +196,7 @@ def export_enrollments(token, dry_run):
     with open(v3_path) as f:
         v3 = json.load(f)
     course_ids = [item["Id"] for item in (v3.get("CourseItems") or []) if item.get("Id")]
-    print("  %d courses to export" % len(course_ids))
+    print(f"  {len(course_ids)} courses to export")
 
     if dry_run:
         return {"status": "dry_run", "courses": len(course_ids)}
@@ -208,26 +208,26 @@ def export_enrollments(token, dry_run):
 
     for i, cid in enumerate(course_ids):
         try:
-            data, fmt = fetch("%s/api/v1/Reports/Course/%s/Learners" % (base_url, cid), token)
+            data, fmt = fetch(f"{base_url}/api/v1/Reports/Course/{cid}/Learners", token)
             if fmt == "csv":
-                out = ENROLLMENTS_DIR / ("course_%s.csv" % cid)
+                out = ENROLLMENTS_DIR / (f"course_{cid}.csv")
                 with open(out, "wb") as f:
                     f.write(data)
                 lines = data.decode("utf-8-sig", errors="replace").count("\n") - 1
                 total_enrollments += max(0, lines)
                 new_files += 1
             else:
-                out = ENROLLMENTS_DIR / ("course_%s.json" % cid)
+                out = ENROLLMENTS_DIR / (f"course_{cid}.json")
                 with open(out, "w") as f:
                     json.dump(data, f)
                 new_files += 1
         except Exception as e:
             errors += 1
             if errors <= 5:
-                print("    ERROR course %s: %s" % (cid, e))
+                print(f"    ERROR course {cid}: {e}")
 
         if (i + 1) % 20 == 0:
-            print("    Progress: %d/%d, ~%s enrollments" % (i + 1, len(course_ids), f"{total_enrollments:,}"))
+            print(f"    Progress: {i + 1}/{len(course_ids)}, ~{total_enrollments:,} enrollments")
             time.sleep(0.5)
 
         if (i + 1) % 50 == 0:
@@ -235,7 +235,7 @@ def export_enrollments(token, dry_run):
 
         time.sleep(0.2)
 
-    print("  Done: %d files, ~%s enrollments, %d errors" % (new_files, f"{total_enrollments:,}", errors))
+    print(f"  Done: {new_files} files, ~{total_enrollments:,} enrollments, {errors} errors")
     return {"files": new_files, "enrollments": total_enrollments, "errors": errors}
 
 
@@ -267,8 +267,8 @@ def main():
         resources = [r.strip() for r in args.resources.split(",")]
         invalid = [r for r in resources if r not in RESOURCE_MAP]
         if invalid:
-            print("Unknown resources: %s" % invalid)
-            print("Available: %s" % list(RESOURCE_MAP.keys()))
+            print(f"Unknown resources: {invalid}")
+            print(f"Available: {list(RESOURCE_MAP.keys())}")
             sys.exit(1)
     elif args.delta:
         resources = DELTA_RESOURCES
@@ -280,9 +280,9 @@ def main():
 
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     mode = "delta" if args.delta else "full"
-    print("MCT Export -- %s" % now)
-    print("Mode: %s | Resources: %s" % (mode, resources))
-    print("Output: %s" % EXPORT_ROOT)
+    print(f"MCT Export -- {now}")
+    print(f"Mode: {mode} | Resources: {resources}")
+    print(f"Output: {EXPORT_ROOT}")
     if args.dry_run:
         print("DRY RUN -- no data will be written")
     print()
@@ -292,11 +292,11 @@ def main():
 
     results = {}
     for resource in resources:
-        print("=== %s ===" % resource)
+        print(f"=== {resource} ===")
         try:
             results[resource] = RESOURCE_MAP[resource](token, args.dry_run)
         except Exception as e:
-            print("  FAILED: %s" % e)
+            print(f"  FAILED: {e}")
             results[resource] = {"error": str(e)}
         print()
 
@@ -310,7 +310,7 @@ def main():
         manifest_path = EXPORT_ROOT / "last_export.json"
         with open(manifest_path, "w") as f:
             json.dump(manifest, f, indent=2)
-        print("Export manifest: %s" % manifest_path)
+        print(f"Export manifest: {manifest_path}")
 
     print("\n" + "=" * 60)
     print("EXPORT COMPLETE")

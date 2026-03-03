@@ -1,5 +1,8 @@
 name: Cross Browser Branding Smoke
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

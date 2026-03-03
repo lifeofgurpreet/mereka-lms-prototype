@@ -1,5 +1,6 @@
 name: Observability Compliance
 
+permissions: {}
 on:
   workflow_dispatch:
     inputs:

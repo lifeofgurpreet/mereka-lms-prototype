@@ -24,6 +24,9 @@ BASE_DIR="${REPO_ROOT}/deploy/k8s/base"
 OVERLAYS_DIR="${REPO_ROOT}/deploy/k8s/overlays"
 YQ="${HOME}/.local/bin/yq"
 
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_file "$YQ" "yq binary" || exit 0
+
 # Verify yq is available
 if [[ ! -x "$YQ" ]]; then
     echo -e "${RED}Error: yq not found at $YQ${NC}"

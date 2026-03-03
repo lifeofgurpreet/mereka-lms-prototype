@@ -55,20 +55,20 @@ def _mock_scalars_result(objects):
 
 
 def _make_subscription(**overrides) -> Subscription:
-    defaults = dict(
-        id=SUB_ID,
-        tenant_id=TENANT_ID,
-        offering_id=OFFERING_ID,
-        enterprise_customer_uuid=None,
-        stripe_subscription_id="sub_test123",
-        stripe_customer_id="cus_test456",
-        status=SubscriptionStatus.active,
-        current_period_start=datetime(2024, 1, 1, tzinfo=UTC),
-        current_period_end=datetime(2024, 2, 1, tzinfo=UTC),
-        grace_period_end=None,
-        canceled_at=None,
-        seat_count=5,
-    )
+    defaults = {
+        "id": SUB_ID,
+        "tenant_id": TENANT_ID,
+        "offering_id": OFFERING_ID,
+        "enterprise_customer_uuid": None,
+        "stripe_subscription_id": "sub_test123",
+        "stripe_customer_id": "cus_test456",
+        "status": SubscriptionStatus.active,
+        "current_period_start": datetime(2024, 1, 1, tzinfo=UTC),
+        "current_period_end": datetime(2024, 2, 1, tzinfo=UTC),
+        "grace_period_end": None,
+        "canceled_at": None,
+        "seat_count": 5,
+    }
     defaults.update(overrides)
     return Subscription(**defaults)
 

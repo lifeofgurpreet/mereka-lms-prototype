@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.database import get_db
 from app.models.offering import Offering
-from app.models.order import LineItem, Order, OrderStatus
+from app.models.order import Order, OrderStatus
 
 router = APIRouter()
 logger = structlog.get_logger()

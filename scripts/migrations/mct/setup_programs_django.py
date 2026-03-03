@@ -7,9 +7,14 @@ This script runs inside the Discovery pod.
 import json
 import sys
 
+
 def main():
     from course_discovery.apps.course_metadata.models import (
-        Program, ProgramType, Partner, Organization, Course
+        Course,
+        Organization,
+        Partner,
+        Program,
+        ProgramType,
     )
 
     # Load programs data from stdin or file
@@ -85,7 +90,7 @@ def main():
     updated_count = 0
     skipped_count = 0
 
-    for program_id, program_data in sorted_programs:
+    for _program_id, program_data in sorted_programs:
         # Skip programs with no courses or test programs
         if program_data.get('total_courses', 0) == 0:
             print(f"\nSkipping {program_data['program_name']} - no courses")

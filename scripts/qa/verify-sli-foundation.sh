@@ -21,6 +21,9 @@ fi
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
+source "$ROOT_DIR/scripts/shared/ci-skip-guards.sh"
+require_command rg || exit 0
+
 if [[ "$MODE" == "local" ]]; then
   ./scripts/qa/audit-observability.sh --mode local
   # Ensure reliability alert contract exists in-repo.

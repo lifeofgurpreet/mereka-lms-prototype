@@ -18,6 +18,10 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 ENV_SCOPE="both" # prod|dev|both
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 STRICT="${STRICT:-0}"
 
 usage() {
@@ -41,8 +45,17 @@ if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" 
   exit 1
 fi
 
+case "$STRICT" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT='$STRICT' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
+
 check_context() {
   local ctx="$1"
+  local ns="$2"
   local failures=0
 
   # Only check services that exist in the namespace.
@@ -55,25 +68,25 @@ check_context() {
   )
 
   echo "Context: $ctx"
-  echo "Namespace: $NAMESPACE"
+  echo "Namespace: $ns"
   echo "Strict: $STRICT"
 
   for svc in "${services[@]}"; do
-    if ! kubectl --context "$ctx" -n "$NAMESPACE" get svc "$svc" >/dev/null 2>&1; then
+    if ! kubectl --context "$ctx" -n "$ns" get svc "$svc" >/dev/null 2>&1; then
       echo "  - $svc: <service missing> (skipped)"
       continue
     fi
 
     # endpoints can be "not found" transiently; treat as failure if strict.
     local subsets
-    subsets="$(kubectl --context "$ctx" -n "$NAMESPACE" get endpoints "$svc" -o jsonpath='{.subsets}' 2>/dev/null || true)"
+    subsets="$(kubectl --context "$ctx" -n "$ns" get endpoints "$svc" -o jsonpath='{.subsets}' 2>/dev/null || true)"
     if [[ -z "$subsets" || "$subsets" == "[]" ]]; then
       echo "  - $svc: EMPTY" >&2
       failures=$((failures + 1))
     else
       # Print a small hint: port list.
       local ports
-      ports="$(kubectl --context "$ctx" -n "$NAMESPACE" get endpoints "$svc" -o jsonpath='{range .subsets[*].ports[*]}{.port}{" "}{end}' 2>/dev/null || true)"
+      ports="$(kubectl --context "$ctx" -n "$ns" get endpoints "$svc" -o jsonpath='{range .subsets[*].ports[*]}{.port}{" "}{end}' 2>/dev/null || true)"
       ports="$(echo "$ports" | awk '{$1=$1;print}')"
       echo "  - $svc: OK (ports=${ports:-?})"
     fi
@@ -94,11 +107,10 @@ check_context() {
 
 rc=0
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
-  check_context "gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster" || rc=1
+  check_context "$CONTEXT_PROD" "$NAMESPACE_PROD" || rc=1
 fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
-  check_context "kind-dev" || rc=1
+  check_context "$CONTEXT_DEV" "$NAMESPACE_DEV" || rc=1
 fi
 
 exit "$rc"
-

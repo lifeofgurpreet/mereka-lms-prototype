@@ -17,9 +17,7 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 from pathlib import Path
-from typing import Dict, List, Optional
 
 try:
     import yaml
@@ -27,15 +25,15 @@ except ImportError:
     yaml = None
 
 from lint_core import (
-    Violation,
-    LintResult,
-    parse_frontmatter,
-    has_section,
-    read_text,
-    gather_markdown_files,
-    format_results_text,
-    format_results_json,
     SKIP_FILES,
+    LintResult,
+    Violation,
+    format_results_json,
+    format_results_text,
+    gather_markdown_files,
+    has_section,
+    parse_frontmatter,
+    read_text,
 )
 from spec_lint import lint_file as base_lint_file
 
@@ -45,7 +43,7 @@ CROSS_CUTTING_SPEC = "specs/cross-cutting-requirements_spec.md"
 AC_ID_VALID_RE = re.compile(r"^AC-(?:[A-Z]+-)?(\d{3})$")
 
 # Type-specific required sections beyond the base set
-TYPE_REQUIRED_SECTIONS: Dict[str, List[tuple]] = {
+TYPE_REQUIRED_SECTIONS: dict[str, list[tuple]] = {
     "migration_spec": [
         ("Migration Strategy", "MEREKA-TYPE-001", "error"),
     ],
@@ -66,7 +64,7 @@ VALID_TYPES = {"feature_spec", "migration_spec", "infrastructure_spec", "service
                "data_pipeline_spec"}
 
 
-def _load_config(spec_path: Path) -> Optional[Dict]:
+def _load_config(spec_path: Path) -> dict | None:
     """Try to load specdocs.config.yml from repo root."""
     if yaml is None:
         return None
@@ -173,11 +171,11 @@ def mereka_lint_file(path: Path) -> LintResult:
 
     # MEREKA-NORM-001: Acceptance Criteria should use normative language
     # Check that at least some ACs contain MUST/SHOULD/MAY or Given-When-Then
-    ac_lines = [l for l in md.splitlines() if re.match(r"^\s*[-*]\s+\[ \]\s+AC-", l)]
+    ac_lines = [line for line in md.splitlines() if re.match(r"^\s*[-*]\s+\[ \]\s+AC-", line)]
     if ac_lines:
         normative_count = sum(
-            1 for l in ac_lines
-            if any(w in l for w in ["MUST", "SHOULD", "MAY", "Given", "given", "When", "when", "Then", "then"])
+            1 for line in ac_lines
+            if any(w in line for w in ["MUST", "SHOULD", "MAY", "Given", "given", "When", "when", "Then", "then"])
         )
         if normative_count == 0:
             result.violations.append(
@@ -258,7 +256,7 @@ def main() -> int:
     # Filter: only *_spec.md files, skip index/readme/template
     files = [f for f in files if f.name not in SKIP_FILES and f.name.endswith("_spec.md")]
 
-    results: List[LintResult] = []
+    results: list[LintResult] = []
     for f in files:
         result = mereka_lint_file(f)
 

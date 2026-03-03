@@ -13,6 +13,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
+source "$ROOT_DIR/scripts/shared/ci-skip-guards.sh"
+require_tutor_env || exit 0
+
 ./scripts/qa/verify-mfe-build-prereqs.sh
 
 dockerfile="tutor_env/env/plugins/mfe/build/mfe/Dockerfile"

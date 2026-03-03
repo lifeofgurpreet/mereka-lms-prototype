@@ -8,7 +8,7 @@
 #      (proxy: run --check mode of the generator, which does the real comparison)
 #   2. mereka-overrides.css (common/lms/cms) :root blocks contain no hex values
 #      that diverge from tokens.css for the 9 canonical color pairs
-#   3. mereka.scss (MFE) imports _tokens.scss (via @import "./scss/theme")
+#   3. mereka.scss (MFE) imports _tokens.scss (via @import "./scss/tokens" or "./scss/theme")
 #   4. No hardcoded hex color values inside the generated blocks of overrides files
 #      that should instead reference --mereka-* tokens
 #
@@ -189,10 +189,10 @@ echo "--- MFE SCSS imports _tokens.scss ---"
 if [[ ! -f "$MFE_SCSS" ]]; then
   fail "MFE SCSS not found: $MFE_SCSS"
 else
-  if grep -qE '@import\s+["\x27]\./scss/theme["\x27]' "$MFE_SCSS"; then
-    pass "mereka.scss imports ./scss/theme (which includes _tokens.scss)"
+  if grep -qE '@import\s+["\x27]\./scss/(theme|tokens)["\x27]' "$MFE_SCSS"; then
+    pass "mereka.scss imports token layer (which includes _tokens.scss)"
   else
-    fail "mereka.scss does not @import './scss/theme' — MFE tokens may not load"
+    fail "mereka.scss does not @import './scss/tokens' or './scss/theme' — MFE tokens may not load"
   fi
 fi
 

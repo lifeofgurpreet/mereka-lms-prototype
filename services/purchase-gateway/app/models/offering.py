@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base, TenantMixin, TimestampMixin
 
 
-class OfferingType(str, enum.Enum):
+class OfferingType(enum.StrEnum):
     course_seat = "course_seat"
     program = "program"
     seat_pack = "seat_pack"

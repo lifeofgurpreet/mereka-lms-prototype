@@ -12,6 +12,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
+source "$ROOT_DIR/scripts/shared/ci-skip-guards.sh"
+require_command rg || exit 0
+
 if [[ ! -d "deploy/k8s" ]]; then
   echo "Missing deploy/k8s" >&2
   exit 1

@@ -33,6 +33,18 @@ NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 STRICT="${STRICT:-1}"
 CTX_OVERRIDE=""
 
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
 ADMINS_CSV_DEFAULT="gurpreet@biji-biji.com,malasari@mereka.my"
 ADMINS_CSV="${ADMINS_CSV:-$ADMINS_CSV_DEFAULT}"
 ORGS_CSV="${ORGS_CSV:-MEREKA,BIJIBIJI,SKILLOURFUTURE}"
@@ -56,6 +68,7 @@ done
 
 DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
 DEFAULT_DEV_CTX="kind-dev"
+require_bool_01 "STRICT" "$STRICT"
 
 run_target() {
   local env_name="$1"
@@ -64,7 +77,7 @@ run_target() {
     if [[ "$env_name" == "prod" ]]; then
       ctx="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
     else
-      ctx="$DEFAULT_DEV_CTX"
+      ctx="${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-$DEFAULT_DEV_CTX}}"
     fi
   fi
 
@@ -137,4 +150,3 @@ fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
   run_target "dev"
 fi
-

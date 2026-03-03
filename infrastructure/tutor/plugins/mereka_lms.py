@@ -25,8 +25,8 @@ Usage:
 
 from __future__ import annotations
 
-from tutor import hooks
 from mereka_lms_mfe_slots import register_mfe_plugin_slots
+from tutor import hooks
 
 # Plugin metadata
 __version__ = "1.0.0"
@@ -35,26 +35,34 @@ __version__ = "1.0.0"
 # Configuration Defaults
 ###############################################################################
 
-hooks.Filters.CONFIG_DEFAULTS.add_items([
-    ("MEREKA_LMS_VERSION", __version__),
-    ("MEREKA_LMS_EXTRA_HOSTS", [
-        "admin.academyv2.mereka.io",
-        "academy.biji-biji.com",
-        "enterprise.academyv2.mereka.io",
-        "skillourfuture.academy.mereka.io",
-    ]),
-    ("MEREKA_LMS_EXTRA_CSRF_ORIGINS", [
-        "https://admin.academyv2.mereka.io",
-        "https://academy.biji-biji.com",
-        "https://enterprise.academyv2.mereka.io",
-        "https://skillourfuture.academy.mereka.io",
-        "https://apps.academy.biji-biji.com",
-    ]),
-    ("MEREKA_PARAGON_THEME_ENABLED", True),
-    ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
-    ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
-    ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
-])
+hooks.Filters.CONFIG_DEFAULTS.add_items(
+    [
+        ("MEREKA_LMS_VERSION", __version__),
+        (
+            "MEREKA_LMS_EXTRA_HOSTS",
+            [
+                "admin.academyv2.mereka.io",
+                "academy.biji-biji.com",
+                "enterprise.academyv2.mereka.io",
+                "skillourfuture.academy.mereka.io",
+            ],
+        ),
+        (
+            "MEREKA_LMS_EXTRA_CSRF_ORIGINS",
+            [
+                "https://admin.academyv2.mereka.io",
+                "https://academy.biji-biji.com",
+                "https://enterprise.academyv2.mereka.io",
+                "https://skillourfuture.academy.mereka.io",
+                "https://apps.academy.biji-biji.com",
+            ],
+        ),
+        ("MEREKA_PARAGON_THEME_ENABLED", True),
+        ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
+        ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
+        ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
+    ]
+)
 
 # Shared patch snippets to reduce duplication in ENV_PATCHES payloads.
 _REDWOOD_OPTIONAL_APPS_SNIPPET = """
@@ -111,7 +119,10 @@ if "django_prometheus" in INSTALLED_APPS:
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
 
-# NOTE: Prometheus URLs are registered via PluginURLs in openedx_prometheus/apps.py.
+# Ensure /metrics URL wiring even when PluginURLs auto-discovery is unavailable.
+ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
+    ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
 """.strip()
 
 ###############################################################################
@@ -248,7 +259,7 @@ FEATURES["ENABLE_DISCUSSION_HOME_PANEL"] = False  # Disable legacy in-LMS panel
 # Ensure all courses use MFE by default
 DISCUSSIONS_MFE_ENABLED = True
 if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
-    _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://apps.academyv2.mereka.io")
+    _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://{{ MFE_HOST }}")
     DISCUSSIONS_MICROFRONTEND_URL = f"{_mfe_base}/discussions"
 if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
     DISCUSSIONS_MFE_FEEDBACK_URL = None
@@ -298,7 +309,11 @@ if 'django_prometheus' in INSTALLED_APPS:
 # NOTE: URL patterns for custom modules are registered via Open edX's plugin
 # URL system (PluginURLs in each app's AppConfig.plugin_app). This uses
 # get_plugin_url_patterns(ProjectType.LMS) in lms/urls.py to auto-discover
-# URLs from INSTALLED_APPS. No manual URL wiring needed here.
+# URLs from INSTALLED_APPS.
+# Keep explicit URL override to preserve /metrics even on mixed plugin-app revisions.
+ROOT_URLCONF_OVERRIDES = globals().get('ROOT_URLCONF_OVERRIDES', [])
+if 'openedx_prometheus.urls' not in ROOT_URLCONF_OVERRIDES:
+    ROOT_URLCONF_OVERRIDES.insert(0, 'openedx_prometheus.urls')
 
 # In-App Notifications (Email Phase 3)
 _safe_add_app('openedx_notifications')
@@ -574,9 +589,7 @@ _copy_lines = "\n".join(
     f"COPY --chown=app:app ./infrastructure/tutor/custom-apps/{app} /openedx/{app}"
     for app in _CUSTOM_APPS
 )
-_install_lines = "\n".join(
-    f"RUN pip install -e /openedx/{app}" for app in _CUSTOM_APPS
-)
+_install_lines = "\n".join(f"RUN pip install -e /openedx/{app}" for app in _CUSTOM_APPS)
 
 hooks.Filters.ENV_PATCHES.add_item(
     (
@@ -867,43 +880,35 @@ const normalizeHostname = (hostname) => {
 };
 
 // Tenant branding + footer data contract.
-// Add tenant-specific overrides by hostname key.
+// Base config shared by all tenants; per-tenant overrides below.
+const MEREKA_BASE_VARIANT = {
+  logoUrl: '/theme/logo-horizontal.svg',
+  mobileLogoUrl: '/theme/logo.svg',
+  helpUrl: 'https://help.mereka.io/',
+  whatsapp: '601135271981',
+  privacyUrl: 'https://legal.mereka.io/privacy-policy/',
+  termsUrl: 'https://legal.mereka.io/',
+  cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
+};
+
 const MEREKA_SITE_VARIANTS = {
   'academyv2.mereka.io': {
+    ...MEREKA_BASE_VARIANT,
     brand: 'Mereka Academy',
-    logoUrl: '/theme/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/logo.svg',
-    helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'MEREKA',
-    whatsapp: '601135271981',
     supportEmail: 'support@mereka.io',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   },
   'academy.biji-biji.com': {
+    ...MEREKA_BASE_VARIANT,
     brand: 'Biji-Biji Academy',
-    logoUrl: '/theme/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/logo.svg',
-    helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'Biji-Biji Initiative',
-    whatsapp: '601135271981',
     supportEmail: 'techadmin@biji-biji.com',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   },
   'skillourfuture.academy.mereka.io': {
+    ...MEREKA_BASE_VARIANT,
     brand: 'Skill Our Future Academy',
-    logoUrl: '/theme/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/logo.svg',
-    helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'MEREKA',
-    whatsapp: '601135271981',
     supportEmail: 'support@mereka.io',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   },
 };
 
@@ -919,16 +924,10 @@ const getMerekaVariant = (hostname, config) => {
 
   // Unknown host fallback: keep shell rendering deterministic for dev/staging/new tenants.
   return {
+    ...MEREKA_BASE_VARIANT,
     brand: fallbackBrand,
-    logoUrl: '/theme/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/logo.svg',
-    helpUrl: 'https://help.mereka.io/',
     copyrightHolder: fallbackPlatform,
-    whatsapp: '601135271981',
     supportEmail: 'support@mereka.io',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   };
 };
 
@@ -2120,7 +2119,7 @@ hooks.Filters.ENV_PATCHES.add_item(
 {% endfor %}
 
 # MFE proxy: Forward selected MFE API paths to LMS for correct host context
-apps.academyv2.mereka.io{$default_site_port} {
+{{ MFE_HOST }}{$default_site_port} {
     import security_headers
 
     reverse_proxy /profile/api/* lms:8000 {
@@ -2205,7 +2204,7 @@ hooks.Filters.ENV_PATCHES.add_item(
         "openedx-cms-production-settings",
         f"""
 {_CMS_PROMETHEUS_METRICS_SNIPPET}
-# No manual ROOT_URLCONF_OVERRIDES needed.
+# Explicit ROOT_URLCONF_OVERRIDES keeps /metrics stable across plugin API variations.
 """,
     )
 )
@@ -2223,7 +2222,9 @@ hooks.Filters.ENV_PATCHES.add_item(
 # Plugin Initialization Hook
 ###############################################################################
 
+
 @hooks.Actions.PLUGIN_LOADED.add()
 def _print_loading_message(plugin_name: str):
     """Print a message when the plugin is loaded."""
-    print(f"Mereka LMS plugin v{__version__} loaded")
+    if plugin_name == "mereka_lms":
+        print(f"Mereka LMS plugin v{__version__} loaded")

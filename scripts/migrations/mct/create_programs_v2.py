@@ -3,8 +3,8 @@
 Programs creation script for Discovery - v2.
 Must be run from /openedx/discovery directory.
 """
-import sys
 import os
+import sys
 
 # Add discovery to path
 sys.path.insert(0, '/openedx/discovery')
@@ -15,15 +15,17 @@ os.environ['CELERY_TASK_ALWAYS_EAGER'] = 'true'
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'course_discovery.settings.production')
 
 import django
+
 django.setup()
 
 # Now patch celery
 from celery import current_app
+
 current_app.conf.task_always_eager = True
 
-from django.contrib.sites.models import Site
 from course_discovery.apps.core.models import Partner
 from course_discovery.apps.course_metadata.models import Organization, Program, ProgramType
+from django.contrib.sites.models import Site
 
 print("=" * 60)
 print("MCT Programs Creation - v2")

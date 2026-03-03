@@ -1,4 +1,5 @@
 # GitOps Workflow for Image Tag Management
+_Audience: Platform Eng + DevOps • Owner: Engineering Lead • Last updated: 2026-02-18_
 
 ## Overview
 

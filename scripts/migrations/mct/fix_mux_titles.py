@@ -11,9 +11,9 @@ Usage:
     python scripts/migrations/mct/fix_mux_titles.py
 """
 
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
 
@@ -50,7 +50,7 @@ def main():
         print(f"Error: Results file not found: {results_file}")
         sys.exit(1)
 
-    with open(results_file, 'r') as f:
+    with open(results_file) as f:
         data = json.load(f)
 
     videos = data['successful']
@@ -78,7 +78,7 @@ def main():
             update_request = mux_python.UpdateAssetRequest(meta=meta)
             assets_api.update_asset(asset_id, update_request)
             updated += 1
-            print(f"  ✓ Updated")
+            print("  ✓ Updated")
         except ApiException as e:
             print(f"  ✗ Error: {e}")
             failed += 1
@@ -91,7 +91,7 @@ def main():
             print(f"\nProgress: {updated} updated, {failed} failed\n")
 
     print(f"\n{'='*60}")
-    print(f"Complete!")
+    print("Complete!")
     print(f"  Updated: {updated}")
     print(f"  Failed: {failed}")
 

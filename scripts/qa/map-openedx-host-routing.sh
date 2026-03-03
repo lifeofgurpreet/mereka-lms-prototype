@@ -22,8 +22,10 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
-CONTEXT_PROD="${CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-CONTEXT_DEV="${CONTEXT_DEV:-kind-dev}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 ENV_SCOPE="both"   # prod|dev|both
 FORMAT="table"     # table|json
 
@@ -79,7 +81,8 @@ set_expected() {
 
 collect_context_hosts() {
   local ctx="$1"
-  kubectl --context "$ctx" get ingress -n "$NAMESPACE" -o json \
+  local ns="$2"
+  kubectl --context "$ctx" get ingress -n "$ns" -o json \
     | jq -r '
       .items[]
       | .metadata.name as $ing
@@ -129,7 +132,7 @@ if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
     host_union[$host]=1
     prod_present[$host]=1
     prod_ingresses[$host]="$(append_ingress "${prod_ingresses[$host]:-}" "$ingress")"
-  done < <(collect_context_hosts "$CONTEXT_PROD")
+  done < <(collect_context_hosts "$CONTEXT_PROD" "$NAMESPACE_PROD")
 fi
 
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
@@ -138,7 +141,7 @@ if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
     host_union[$host]=1
     dev_present[$host]=1
     dev_ingresses[$host]="$(append_ingress "${dev_ingresses[$host]:-}" "$ingress")"
-  done < <(collect_context_hosts "$CONTEXT_DEV")
+  done < <(collect_context_hosts "$CONTEXT_DEV" "$NAMESPACE_DEV")
 fi
 
 classification_for() {

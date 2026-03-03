@@ -21,8 +21,14 @@ need() {
   [[ -e "$p" ]] && pass "Present: $p" || fail "Missing: $p"
 }
 
-# Theme build context (Tutor-rendered)
-need "tutor_env/env/build/openedx/themes/mereka"
+# Theme build context (Tutor-rendered) — only present after 'tutor config save' +
+# 'apply-patches.sh' has run AND the Mereka theme is copied into the build context.
+# tutor_env/ is gitignored; CI and fresh clones skip this check.
+if [[ -d "tutor_env/env/build/openedx/themes/mereka" ]]; then
+  pass "Present: tutor_env/env/build/openedx/themes/mereka"
+else
+  echo "[SKIP] tutor_env/env/build/openedx/themes/mereka not present — run 'tutor config save' then 'apply-patches.sh'"
+fi
 
 # Runtime override CSS should exist (synced from assets/branding).
 need "infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"

@@ -3,6 +3,13 @@ _Audience: SRE + Platform + Contributors • Last updated: 2026-02-07_
 
 This document defines who owns each observability layer and how changes are synchronized.
 
+## Boundary Summary
+
+- `mereka-lms` repository owns observability contracts, templates, audits, and gates for LMS application-level monitoring posture.
+- `bbi-infrastructure` repository is the GitOps source of truth for deployed monitoring stack/runtime overlays in Kubernetes.
+- `vps/infrastructure` owns VPS-specific observability runtime assets.
+- `/home/gurpreet/projects/observability` is deprecated and must not be treated as active source of truth.
+
 ## Source of Truth
 
 | Layer | Source of truth | Owner |
@@ -18,7 +25,10 @@ This document defines who owns each observability layer and how changes are sync
 | Runtime consolidated operations gate | `.github/workflows/operations-gates-runtime.yml` | Mereka LMS platform team |
 | Atlas allowlist monitor audit (VPS drift routing) | `scripts/qa/audit-atlas-allowlist-monitor.sh` | Mereka LMS platform team |
 | Unified operator gate | `scripts/qa/run-operations-gates.sh` | Mereka LMS platform team |
-| VPS Grafana dashboard (`bbi-app-mereka-lms`) | observability repo (`/home/gurpreet/projects/observability`) | Observability platform team |
+| Platform monitoring stack (Prometheus/Grafana/Alertmanager/Loki/Tempo) | `bbi-infrastructure/platform/monitoring/` | Platform observability team |
+| Mereka LMS runtime overlays (ServiceMonitors/PrometheusRules/image pins) | `bbi-infrastructure/apps/mereka-lms/overlays/prod/` (+ nonprod overlays) | Platform observability + LMS platform team |
+| VPS-only observability runtime | `vps/infrastructure/observability/` | VPS infrastructure team |
+| Legacy observability workspace | `/home/gurpreet/projects/observability` (deprecated; historical reference only) | n/a |
 
 ## Change Process
 
@@ -44,7 +54,8 @@ This document defines who owns each observability layer and how changes are sync
      `DB_EXPORTER_AUDIT_MODE=runtime CHECK_TIMEOUT_SECONDS=1200 ./scripts/qa/run-operations-gates.sh --env prod`
 7. Build DR evidence artifact (monthly / major changes):
    - `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`
-8. If panel parity is needed in VPS Grafana, open/update PR in observability repo and link both PRs.
+8. If panel parity is needed in platform Grafana or runtime overlays, update `bbi-infrastructure` in the same change window and link both PRs.
+9. If a change is VPS-only (non-GKE), update `vps/infrastructure/observability/` and include a scope note in evidence.
 
 ## Drift Rules
 

@@ -6,6 +6,9 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_command rg || exit 0
+
 PASS=0
 FAIL=0
 WARN=0

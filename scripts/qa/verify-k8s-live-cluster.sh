@@ -5,6 +5,8 @@ set -euo pipefail
 
 # verify-k8s-live-cluster.sh
 # Verifies live GKE cluster state for mereka-lms namespace
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../shared/config.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -14,8 +16,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-CLUSTER_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
-NAMESPACE="mereka-lms"
+CLUSTER_CONTEXT="${CLUSTER_CONTEXT:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 
 # Counters
 PASS_COUNT=0
@@ -45,6 +47,38 @@ print_warn() {
 print_info() {
   echo -e "${BLUE}ℹ${NC} $1"
 }
+
+usage() {
+  cat <<EOF
+Usage: $0 [--context <kube-context>] [--namespace <namespace>]
+
+Env:
+  CLUSTER_CONTEXT / K8S_CONTEXT_PROD / K8S_CONTEXT
+  NAMESPACE / K8S_NAMESPACE_PROD / K8S_NAMESPACE
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --context)
+      CLUSTER_CONTEXT="${2:-}"
+      shift 2
+      ;;
+    --namespace)
+      NAMESPACE="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
 
 # Verify kubectl connectivity
 verify_connectivity() {

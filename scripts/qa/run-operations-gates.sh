@@ -11,6 +11,10 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 ENV_SCOPE="${ENV_SCOPE:-both}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT_DEV="${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}"
+K8S_NAMESPACE="${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}"
+K8S_NAMESPACE_DEV="${K8S_NAMESPACE_DEV:-${K8S_NAMESPACE:-mereka-lms}}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 FAIL_ON_LEGACY_MONGODB="${FAIL_ON_LEGACY_MONGODB:-1}"
 FAIL_ON_LEGACY_MONGODB_SERVICE="${FAIL_ON_LEGACY_MONGODB_SERVICE:-0}"
@@ -81,6 +85,33 @@ if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" 
   usage
   exit 1
 fi
+
+for bool_var in \
+  STRICT_RUNTIME \
+  FAIL_ON_LEGACY_MONGODB \
+  FAIL_ON_LEGACY_MONGODB_SERVICE \
+  RUN_ATLAS_ALLOWLIST_AUDIT \
+  RUN_ALERT_ROUTING_AUDIT \
+  RUN_ALERT_NOISE_AUDIT \
+  ALERT_NOISE_REQUIRE_RUNTIME_SOURCE \
+  ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT \
+  RUN_MULTISITE_GOVERNANCE_AUDIT \
+  RUN_DB_EXPORTER_TELEMETRY_AUDIT \
+  RUN_SENTRY_WIRING_AUDIT \
+  RUN_AUTHENTICATED_SSO_CANARY \
+  AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS \
+  RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT \
+  RUN_ENTERPRISE_RUNTIME_AUDIT \
+  RUN_ENTERPRISE_READINESS_INTEGRITY_AUDIT
+do
+  case "${!bool_var}" in
+    0|1) ;;
+    *)
+      echo "Invalid ${bool_var}='${!bool_var}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+done
 
 OBS_ENV_LABEL="$ENV_SCOPE"
 OBS_DISPATCH_PROFILE="custom"
@@ -240,24 +271,26 @@ fi
 if [[ "$RUN_MULTISITE_GOVERNANCE_AUDIT" == "1" ]]; then
   run_check "multisite governance gate" \
     env STRICT=1 CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" \
+    PROD_CONTEXT="$K8S_CONTEXT" DEV_CONTEXT="$K8S_CONTEXT_DEV" \
+    PROD_NAMESPACE="$K8S_NAMESPACE" DEV_NAMESPACE="$K8S_NAMESPACE_DEV" \
     ./scripts/qa/run-multisite-governance-gates.sh --env "$ENV_SCOPE"
 fi
 
 if [[ "$RUN_DB_EXPORTER_TELEMETRY_AUDIT" == "1" ]]; then
   run_check "db exporter telemetry audit (${DB_EXPORTER_AUDIT_MODE})" \
-    env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
+    env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="$K8S_CONTEXT" APP_NS="$K8S_NAMESPACE" \
     ./scripts/qa/audit-db-exporter-telemetry.sh --mode "$DB_EXPORTER_AUDIT_MODE"
 fi
 
 if [[ "$RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ) ]]; then
   run_check "authentik policy exception audit" \
-    env K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
+    env K8S_CONTEXT="$K8S_CONTEXT" \
     ./scripts/qa/audit-authentik-policy-exceptions.sh --since 6h
 fi
 
 if [[ "$RUN_SENTRY_WIRING_AUDIT" == "1" ]]; then
   run_check "sentry wiring audit (${SENTRY_AUDIT_MODE})" \
-    env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
+    env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="$K8S_CONTEXT" APP_NS="$K8S_NAMESPACE" \
     ./scripts/qa/verify-sentry-wiring.sh --mode "$SENTRY_AUDIT_MODE"
 fi
 
@@ -280,7 +313,7 @@ fi
 
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
   run_check "cert-manager readiness (prod)" \
-    env K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}" \
+    env K8S_CONTEXT="$K8S_CONTEXT" K8S_NAMESPACE="$K8S_NAMESPACE" \
     ./scripts/qa/verify-cert-manager-readiness.sh prod
 fi
 
@@ -294,7 +327,7 @@ run_check "observability runtime audit" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" \
   OBSERVABILITY_ENV_LABEL="$OBS_ENV_LABEL" \
   OBSERVABILITY_DISPATCH_PROFILE="$OBS_DISPATCH_PROFILE" \
-  OBSERVABILITY_K8S_CONTEXT="${K8S_CONTEXT:-}" \
+  OBSERVABILITY_K8S_CONTEXT="$K8S_CONTEXT" \
   OBSERVABILITY_GCP_PROJECT="${GCP_PROJECT:-mereka-lms}" \
   ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 

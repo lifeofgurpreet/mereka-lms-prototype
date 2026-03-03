@@ -323,22 +323,6 @@ qa-certificate-branding: ## Verify certificate surface branding coverage
 qa-email-template-branding: ## Verify multilingual email template branding coverage
 	./scripts/qa/verify-email-template-multilang.sh
 
-qa-make-help-contract: ## Verify Makefile help discoverability contract
-	./scripts/qa/verify-make-help-contract.sh
-
-qa-frontend-contracts: ## Run frontend closure contract suite (Makefile lanes + CI gate section)
-	./scripts/qa/verify-make-help-contract.sh
-	./scripts/qa/verify-frontend-qa-make-targets.sh
-	$(MAKE) qa-frontend-extended-surfaces
-	./scripts/qa/verify-release-automation.sh
-	./scripts/qa/verify-phase7-dom-audit-contract.sh
-	./scripts/qa/verify-phase7-selector-list-coverage.sh
-	./scripts/qa/verify-runtime-theme-drift-lane.sh
-	./scripts/qa/verify-phase2-smoke-evidence-contract.sh
-	./scripts/qa/verify-branding-evidence-a11y-contract.sh
-	./scripts/qa/verify-branding-evidence-screenshot-contract.sh
-	./scripts/qa/verify-ci-cd-pipeline.sh --section gitops
-
 mobile-secrets-check: ## Run mobile secrets verification (offline static checks)
 	./scripts/qa/verify-mobile-secrets-runtime.sh --offline
 

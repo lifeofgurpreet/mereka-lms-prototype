@@ -21,7 +21,7 @@ def main():
 
     # Load Mux upload results
     mux_results_file = exports_dir / 'mux_upload_complete.json'
-    with open(mux_results_file, 'r') as f:
+    with open(mux_results_file) as f:
         mux_data = json.load(f)
 
     # Create mapping from MCT lesson ID to Mux playback info
@@ -41,7 +41,7 @@ def main():
     # Load course content from structure
     content_file = exports_dir / 'structure' / 'course_content.ndjson'
     courses_data = []
-    with open(content_file, 'r') as f:
+    with open(content_file) as f:
         for line in f:
             if line.strip():
                 courses_data.append(json.loads(line))
@@ -139,7 +139,7 @@ def main():
     print(f"  Categories: {len(mapping['categories'])}")
 
     # Print sample
-    print(f"\nSample mapping for first category:")
+    print("\nSample mapping for first category:")
     for cat_id, cat_data in list(mapping['categories'].items())[:1]:
         print(f"  Category {cat_id}: {cat_data['name']}")
         print(f"  Open edX course: {cat_data['openedx_course_id']}")

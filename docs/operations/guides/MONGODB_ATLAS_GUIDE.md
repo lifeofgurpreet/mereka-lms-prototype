@@ -28,7 +28,7 @@ _Audience: Operations & Developers • Owner: Infra Team • Last updated: 2026-
 
 **Format**:
 ```
-mongodb+srv://username:password@cluster-mereka-lms.2pjex4s.mongodb.net/dbname?retryWrites=true&maxPoolSize=50
+mongodb+srv://<username>:<password>@cluster-mereka-lms.2pjex4s.mongodb.net/<dbname>?retryWrites=true&maxPoolSize=50
 ```
 
 **Required Python packages**:

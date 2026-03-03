@@ -20,17 +20,20 @@ if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
 fi
 
 BASE_DOMAIN="$LMS_DOMAIN"
-KCTX_ARGS=()
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+KCTX_ARGS=(--context "$CONTEXT_PROD")
 if [[ "$ENVIRONMENT" == "dev" ]]; then
   BASE_DOMAIN="$DEV_LMS_DOMAIN"
-  if [[ -n "${K8S_CONTEXT:-}" ]]; then
-    KCTX_ARGS+=(--context "${K8S_CONTEXT}")
-  else
-    KCTX_ARGS+=(--context kind-dev)
-  fi
+  KCTX_ARGS=(--context "$CONTEXT_DEV")
 fi
 
 NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  NAMESPACE="${K8S_NAMESPACE_PROD:-$NAMESPACE}"
+else
+  NAMESPACE="${K8S_NAMESPACE_DEV:-$NAMESPACE}"
+fi
 URL="https://ecommerce.${BASE_DOMAIN}/api/v2/webhooks/stripe/"
 
 # Pull the webhook secret from the running ecommerce container env.

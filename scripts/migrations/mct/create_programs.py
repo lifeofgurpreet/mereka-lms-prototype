@@ -138,7 +138,7 @@ def main():
         print(f"Error: Programs file not found: {PROGRAMS_FILE}")
         return 1
 
-    with open(PROGRAMS_FILE, 'r') as f:
+    with open(PROGRAMS_FILE) as f:
         programs_data = json.load(f)
 
     programs = programs_data.get('programs', {})
@@ -154,7 +154,7 @@ def main():
     success_count = 0
     failed_count = 0
 
-    for program_id, program_data in sorted_programs:
+    for _program_id, program_data in sorted_programs:
         # Skip test programs and empty programs
         if program_data.get('total_courses', 0) == 0:
             print(f"Skipping {program_data['program_name']} - no courses")
@@ -178,7 +178,7 @@ def main():
             print(f"✗ Failed to create: {program_data['program_name']}")
 
     print(f"\n{'='*80}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Successfully created: {success_count}")
     print(f"  Failed: {failed_count}")
     print(f"{'='*80}")

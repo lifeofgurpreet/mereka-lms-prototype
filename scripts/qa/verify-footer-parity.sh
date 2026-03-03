@@ -342,6 +342,8 @@ if [[ ! -f "$PLUGIN" ]]; then
 else
   DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
   VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
+  # Also extract MEREKA_BASE_VARIANT for fields inherited via spread
+  BASE_VARIANT_BLOCK=$(awk '/const MEREKA_BASE_VARIANT = \{/,/^\s*\};/' "$PLUGIN")
 
   for domain in "${DOMAINS[@]}"; do
     # Extract the domain object block (from the domain key line to the closing '},')
@@ -353,22 +355,22 @@ else
       continue
     fi
 
-    # brand field
+    # brand field — must be per-tenant (not in base)
     if grep -q "brand: '" <<<"$DOMAIN_BLOCK"; then
       pass "Domain '${domain}' has non-empty brand"
     else
       fail "Domain '${domain}' missing or empty brand"
     fi
 
-    # copyrightHolder field
+    # copyrightHolder field — must be per-tenant (not in base)
     if grep -q "copyrightHolder: '" <<<"$DOMAIN_BLOCK"; then
       pass "Domain '${domain}' has non-empty copyrightHolder"
     else
       fail "Domain '${domain}' missing or empty copyrightHolder"
     fi
 
-    # whatsapp field
-    if grep -q "whatsapp: '" <<<"$DOMAIN_BLOCK"; then
+    # whatsapp field — may be in MEREKA_BASE_VARIANT (inherited via spread ...MEREKA_BASE_VARIANT)
+    if grep -q "whatsapp: '" <<<"$DOMAIN_BLOCK" || grep -q "whatsapp: '" <<<"$BASE_VARIANT_BLOCK"; then
       pass "Domain '${domain}' has non-empty whatsapp"
     else
       fail "Domain '${domain}' missing or empty whatsapp"
@@ -586,6 +588,8 @@ if [[ -f "$PLUGIN" ]]; then
   DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
 
   VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
+  # MEREKA_BASE_VARIANT is spread into each tenant block — its fields are inherited
+  BASE_VARIANT_BLOCK=$(awk '/const MEREKA_BASE_VARIANT = \{/,/^\s*\};/' "$PLUGIN")
 
   for domain in "${DOMAINS[@]}"; do
     DOMAIN_BLOCK=$(awk "/'${domain}':/,/^[[:space:]]*},/" <<<"$VARIANTS_BLOCK")
@@ -594,7 +598,8 @@ if [[ -f "$PLUGIN" ]]; then
       continue
     fi
     for field in "${CONTRACT_FIELDS[@]}"; do
-      if grep -q "${field}:" <<<"$DOMAIN_BLOCK"; then
+      # Check per-tenant block first, then MEREKA_BASE_VARIANT (fields inherited via spread)
+      if grep -q "${field}:" <<<"$DOMAIN_BLOCK" || grep -q "${field}:" <<<"$BASE_VARIANT_BLOCK"; then
         pass "Domain '${domain}' has contract field '${field}'"
       else
         fail "Domain '${domain}' missing contract field '${field}'"
@@ -602,14 +607,15 @@ if [[ -f "$PLUGIN" ]]; then
     done
   done
 
-  # Fallback return object must also have all contract fields
+  # Fallback return object must also have all contract fields (directly or via spread)
   FALLBACK_BLOCK="$(
     awk '/const getMerekaVariant = /,/^};/' "$PLUGIN" \
       | awk '/return \{/,/^\s*\};/' \
       | head -20
   )"
   for field in "${CONTRACT_FIELDS[@]}"; do
-    if grep -q "${field}:" <<<"$FALLBACK_BLOCK"; then
+    # Fallback uses ...MEREKA_BASE_VARIANT spread — check both fallback and base block
+    if grep -q "${field}:" <<<"$FALLBACK_BLOCK" || grep -q "${field}:" <<<"$BASE_VARIANT_BLOCK"; then
       pass "Fallback variant has contract field '${field}'"
     else
       fail "Fallback variant missing contract field '${field}'"

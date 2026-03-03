@@ -4,17 +4,17 @@ Standalone script to export Open edX enrollments and certificates.
 Can be copied into LMS container and run directly.
 """
 import csv
-import sys
 import os
+import sys
 
 # Set Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.tutor.production')
 
 import django
+
 django.setup()
 
 from common.djangoapps.student.models import CourseEnrollment
-from django.contrib.auth.models import User
 
 try:
     from certificates.models import GeneratedCertificate
@@ -29,11 +29,11 @@ def export_enrollments(output_path):
     enrollments = CourseEnrollment.objects.select_related('user').all()
     count = enrollments.count()
     print(f"Exporting {count} enrollments...", file=sys.stderr)
-    
+
     with open(output_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['email', 'username', 'course_id', 'enrollment_date', 'is_active'])
-        
+
         total = 0
         for e in enrollments:
             writer.writerow([
@@ -46,7 +46,7 @@ def export_enrollments(output_path):
             total += 1
             if total % 10000 == 0:
                 print(f"  Exported {total}/{count}...", file=sys.stderr)
-    
+
     print(f"✓ Exported {total} enrollments to {output_path}", file=sys.stderr)
     return total
 
@@ -55,11 +55,11 @@ def export_certificates(output_path):
     certs = GeneratedCertificate.objects.select_related('user').all()
     count = certs.count()
     print(f"Exporting {count} certificates...", file=sys.stderr)
-    
+
     with open(output_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['email', 'username', 'course_id', 'status', 'created_date', 'modified_date', 'grade', 'mode'])
-        
+
         total = 0
         for cert in certs:
             writer.writerow([
@@ -75,17 +75,17 @@ def export_certificates(output_path):
             total += 1
             if total % 1000 == 0:
                 print(f"  Exported {total}/{count}...", file=sys.stderr)
-    
+
     print(f"✓ Exported {total} certificates to {output_path}", file=sys.stderr)
     return total
 
 if __name__ == '__main__':
     enrollments_path = sys.argv[1] if len(sys.argv) > 1 else '/tmp/openedx_enrollments.csv'
     certificates_path = sys.argv[2] if len(sys.argv) > 2 else '/tmp/openedx_certificates.csv'
-    
+
     export_enrollments(enrollments_path)
     export_certificates(certificates_path)
-    
-    print(f"\n✓ Export complete!", file=sys.stderr)
+
+    print("\n✓ Export complete!", file=sys.stderr)
     print(f"  Enrollments: {enrollments_path}", file=sys.stderr)
     print(f"  Certificates: {certificates_path}", file=sys.stderr)

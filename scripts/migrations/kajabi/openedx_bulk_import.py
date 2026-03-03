@@ -6,11 +6,9 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import os
-import sys
-from dataclasses import dataclass, field
 import logging
-from typing import List
+import os
+from dataclasses import dataclass, field
 
 
 def bootstrap(settings_module: str) -> None:
@@ -72,8 +70,8 @@ def load_csv_rows(csv_path: str, start: int, limit: int | None):
 
 def import_users(csv_path: str, settings_module: str, start: int, limit: int | None) -> ImportStats:
     bootstrap(settings_module)
-    from django.contrib.auth import get_user_model
     from common.djangoapps.student.models import UserProfile
+    from django.contrib.auth import get_user_model
     from django.db import IntegrityError
 
     stats = ImportStats(start_offset=start)
@@ -121,7 +119,7 @@ def import_users(csv_path: str, settings_module: str, start: int, limit: int | N
                             user.username = username
                             username_changed = True
 
-                    fields_to_update: List[str] = []
+                    fields_to_update: list[str] = []
                     if user.email != email:
                         user.email = email
                         fields_to_update.append("email")
@@ -180,9 +178,9 @@ def import_users(csv_path: str, settings_module: str, start: int, limit: int | N
 
 def import_enrollments(csv_path: str, settings_module: str, start: int, limit: int | None) -> ImportStats:
     bootstrap(settings_module)
+    from common.djangoapps.student.models import CourseEnrollment
     from django.contrib.auth import get_user_model
     from opaque_keys.edx.keys import CourseKey
-    from common.djangoapps.student.models import CourseEnrollment
     from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
     stats = ImportStats(start_offset=start)
@@ -267,7 +265,7 @@ def main() -> None:
     start_offset = args.offset if args.offset is not None else 0
     if args.offset is None and args.state_file and os.path.exists(args.state_file):
         try:
-            with open(args.state_file, "r", encoding="utf-8") as sf:
+            with open(args.state_file, encoding="utf-8") as sf:
                 start_offset = int(sf.read().strip() or start_offset)
         except Exception:
             pass

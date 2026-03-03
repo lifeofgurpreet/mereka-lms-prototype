@@ -112,10 +112,12 @@ PY
     warn "AC-UI-401: Removal comment block not found — expected '# REMOVED (bead 1rns' annotation"
   fi
 
-  # Verify the MerekaFooter component definition is still injected
-  # (component must remain available as a symbol even though slot wiring is canonical)
-  if grep -q 'const MerekaFooter' "$PATCHES_FILE"; then
-    pass "AC-UI-401: MerekaFooter component definition still present in apply-patches.sh"
+  # Verify the MerekaFooter component definition is still injected.
+  # The component lives in the Tutor plugin (mereka_lms.py), not in apply-patches.sh.
+  # Accept either location: plugin bundle (preferred) or apply-patches.sh (legacy).
+  if grep -q 'const MerekaFooter' "$PATCHES_FILE" || \
+     { [[ -f "$PLUGIN_FILE" ]] && grep -q 'const MerekaFooter' "$PLUGIN_FILE"; }; then
+    pass "AC-UI-401: MerekaFooter component definition present (plugin or apply-patches.sh)"
   else
     fail "AC-UI-401: MerekaFooter component definition missing — env.config.jsx symbol will be undefined"
   fi
@@ -142,11 +144,12 @@ if [[ ! -f "$PLUGIN_FILE" ]]; then
 else
   pass "AC-UI-402: mereka_lms.py exists"
 
-  # Check footer_slot PLUGIN_SLOTS.add_item registration
-  if grep -q '"footer_slot"' "$PLUGIN_FILE"; then
-    pass "AC-UI-402: footer_slot registered via PLUGIN_SLOTS.add_item"
+  # Check footer slot registration — the FPF slot ID is used, not a "footer_slot" literal.
+  # In Tutor v21, slot IDs follow the FPF convention: "org.openedx.frontend.layout.footer.v1"
+  if grep -qE '"footer_slot"|footer\.v1|layout\.footer' "$PLUGIN_FILE"; then
+    pass "AC-UI-402: footer slot registered via PLUGIN_SLOTS.add_item (FPF slot ID)"
   else
-    fail "AC-UI-402: footer_slot not found in mereka_lms.py"
+    fail "AC-UI-402: footer slot not found in plugin (expected FPF slot ID like org.openedx.frontend.layout.footer.v1)"
   fi
 
   # Check for keepDefault: False (slot must replace, not append)
@@ -156,8 +159,8 @@ else
     warn "AC-UI-402: keepDefault: False not found — footer may append instead of replace"
   fi
 
-  # Check for DIRECT_PLUGIN type
-  if grep -q '"DIRECT_PLUGIN"' "$PLUGIN_FILE"; then
+  # Check for DIRECT_PLUGIN type — used as a bare identifier (not quoted string)
+  if grep -q 'DIRECT_PLUGIN' "$PLUGIN_FILE"; then
     pass "AC-UI-402: DIRECT_PLUGIN type specified (not iFrame)"
   else
     fail "AC-UI-402: DIRECT_PLUGIN type not found in slot registration"

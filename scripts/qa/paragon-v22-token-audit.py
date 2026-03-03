@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import re
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-import re
 
 DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[2]
 

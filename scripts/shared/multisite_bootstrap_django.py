@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import os
 import sys
-import json
 import textwrap
 from dataclasses import dataclass
-from typing import Dict, List, Set
 from urllib.parse import urlparse
 
 
@@ -19,8 +17,8 @@ from urllib.parse import urlparse
 class SiteDefinition:
     domain: str
     name: str
-    orgs: List[str]
-    site_values: Dict[str, object]
+    orgs: list[str]
+    site_values: dict[str, object]
 
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -35,7 +33,7 @@ def _load_yaml(path: str) -> dict:
         import yaml  # type: ignore
     except Exception as exc:  # pragma: no cover
         raise RuntimeError("PyYAML is required to load multisite-sites.yml") from exc
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 
@@ -119,7 +117,7 @@ def _load_shared_host_allowlist() -> set[str]:
         or DEFAULT_SHARED_HOST_ALLOWLIST_PATH
     )
     if allowlist_file and os.path.exists(allowlist_file):
-        with open(allowlist_file, "r", encoding="utf-8") as f:
+        with open(allowlist_file, encoding="utf-8") as f:
             for line in f:
                 token = line.split("#", 1)[0].strip()
                 host = _extract_host(token)
@@ -128,8 +126,8 @@ def _load_shared_host_allowlist() -> set[str]:
     return allowed
 
 
-def _collect_host_owners(definitions: List[SiteDefinition], field: str) -> Dict[str, Set[str]]:
-    owners: Dict[str, Set[str]] = {}
+def _collect_host_owners(definitions: list[SiteDefinition], field: str) -> dict[str, set[str]]:
+    owners: dict[str, set[str]] = {}
     for definition in definitions:
         raw = definition.domain if field == "domain" else (definition.site_values.get(field) or "")
         host = _extract_host(raw)
@@ -151,8 +149,8 @@ def _is_non_enterprise_domain(domain: str) -> bool:
     )
 
 
-def validate_site_host_ownership(definitions: List[SiteDefinition], allow_shared_hosts: set[str]) -> List[str]:
-    errors: List[str] = []
+def validate_site_host_ownership(definitions: list[SiteDefinition], allow_shared_hosts: set[str]) -> list[str]:
+    errors: list[str] = []
 
     for field in ("domain", "LMS_ROOT_URL", "CMS_ROOT_URL", "MFE_BASE_URL"):
         owners = _collect_host_owners(definitions, field)
@@ -175,8 +173,8 @@ def validate_site_host_ownership(definitions: List[SiteDefinition], allow_shared
 
 
 def select_shared_mfe_host_owners(
-    definitions: List[SiteDefinition], allow_shared_hosts: set[str]
-) -> Dict[str, str]:
+    definitions: list[SiteDefinition], allow_shared_hosts: set[str]
+) -> dict[str, str]:
     """
     Pick one canonical tenant domain to manage each allowlisted shared MFE host.
 
@@ -185,7 +183,7 @@ def select_shared_mfe_host_owners(
       2. first sorted domain as deterministic fallback
     """
     host_owners = _collect_host_owners(definitions, "MFE_BASE_URL")
-    selected: Dict[str, str] = {}
+    selected: dict[str, str] = {}
     for host in sorted(allow_shared_hosts):
         domains = sorted(host_owners.get(host, set()))
         if not domains:
@@ -228,15 +226,15 @@ def upsert_organizations(dry_run: bool) -> None:
 
 
 def upsert_sites(
-    definitions: List[SiteDefinition],
+    definitions: list[SiteDefinition],
     dry_run: bool,
     unique_mfe_hosts: set[str],
-    shared_mfe_host_owners: Dict[str, str],
+    shared_mfe_host_owners: dict[str, str],
 ) -> None:
     """Create or update Site and SiteConfiguration records."""
+    from django.conf import settings
     from django.contrib.sites.models import Site
     from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-    from django.conf import settings
     try:
         from enterprise.models import EnterpriseCustomer
     except Exception:
@@ -260,7 +258,7 @@ def upsert_sites(
         rendered_values = dict(definition.site_values)
         rendered_values["course_org_filter"] = definition.orgs
         existing_site_config = SiteConfiguration.objects.filter(site=site).order_by("-id").first()
-        existing_values = dict((existing_site_config.site_values or {})) if existing_site_config else {}
+        existing_values = dict(existing_site_config.site_values or {}) if existing_site_config else {}
         enterprise_uuid = str(existing_values.get("ENTERPRISE_CUSTOMER_UUID") or "").strip()
         if EnterpriseCustomer is not None:
             ec_qs = EnterpriseCustomer.objects.filter(site=site)
@@ -425,16 +423,16 @@ def upsert_sites(
                 )
 
 
-def upsert_oidc_provider_configs(definitions: List[SiteDefinition], dry_run: bool) -> None:
+def upsert_oidc_provider_configs(definitions: list[SiteDefinition], dry_run: bool) -> None:
     """
     Ensure OIDC provider configs exist and are enabled for each site.
 
     Without this, hitting `/auth/login/oidc/` can 500 with:
       "Can't fetch setting of a disabled backend/provider."
     """
+    from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
     from django.conf import settings
     from django.contrib.sites.models import Site
-    from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
 
     key = getattr(settings, "SOCIAL_AUTH_OIDC_KEY", "mereka-lms")
     configured_secret = (

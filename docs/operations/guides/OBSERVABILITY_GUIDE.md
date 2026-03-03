@@ -304,7 +304,94 @@ kubectl edit statefulset prometheus-kube-prometheus-prometheus -n monitoring
 
 ---
 
+## Grafana OIDC Secret Recovery
+
+If Grafana pod is stuck in `CreateContainerConfigError` with message like `secret "grafana-oidc-client-secret" not found`, run:
+
+```bash
+./scripts/qa/verify-grafana-runtime-readiness.sh
+```
+
+To restore the missing secret from GCP Secret Manager:
+
+```bash
+PROJECT_ID=bbi-k8 \
+K8S_CONTEXT=gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+GCP_SECRET_NAME=mereka-lms-oidc-client-secret \
+./scripts/infra/sync-grafana-oidc-secret.sh
+```
+
+Then verify telemetry path:
+
+```bash
+./scripts/infra/validate-telemetry-connectivity.sh --json --strict
+```
+
 ## Troubleshooting
+
+### Velero `backup-verification` Stale / `PartiallyFailed` Backups
+
+**Symptom**: `audit-observability` fails on stale `backup-verification` and recent Velero backups are `PartiallyFailed`.
+
+**Debug**:
+```bash
+./scripts/qa/audit-observability.sh --mode runtime --strict-runtime
+
+kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n velero \
+  get backup.velero.io --sort-by=.metadata.creationTimestamp | tail -n 12
+
+kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n velero \
+  logs deploy/velero-local --since=3h \
+  | rg 'snapshots quota on Google Cloud Platform has been reached'
+```
+
+**Quota check**:
+```bash
+gcloud compute project-info describe --project bbi-k8 --format=json \
+  | jq '.quotas[] | select(.metric=="SNAPSHOTS") | {metric, limit, usage}'
+```
+
+For controlled cleanup of over-retention snapshots (dry-run first):
+
+```bash
+./scripts/infra/prune-gcp-snapshots.sh
+./scripts/infra/prune-gcp-snapshots.sh --apply --max-delete 300
+```
+
+If `usage >= limit`, backup snapshots will fail until quota headroom is restored.
+
+### Velero `signBlob` DownloadRequest Errors
+
+**Symptom**: Velero backups complete, but `DownloadRequest` reconciliation logs show:
+`Permission 'iam.serviceAccounts.signBlob' denied`.
+
+**Verify**:
+```bash
+kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n velero \
+  logs deploy/velero-local --since=15m \
+  | rg 'iam.serviceAccounts.signBlob|IAM_PERMISSION_DENIED'
+
+# Runtime gate also checks this automatically:
+./scripts/qa/audit-observability.sh --mode runtime --strict-runtime
+```
+
+**Fix IAM on Velero GSA** (`velero@bbi-k8.iam.gserviceaccount.com`):
+```bash
+gcloud iam service-accounts add-iam-policy-binding \
+  velero@bbi-k8.iam.gserviceaccount.com \
+  --project bbi-k8 \
+  --member='serviceAccount:bbi-k8.svc.id.goog[velero/velero]' \
+  --role='roles/iam.serviceAccountTokenCreator'
+```
+
+Optional self-binding (also safe):
+```bash
+gcloud iam service-accounts add-iam-policy-binding \
+  velero@bbi-k8.iam.gserviceaccount.com \
+  --project bbi-k8 \
+  --member='serviceAccount:velero@bbi-k8.iam.gserviceaccount.com' \
+  --role='roles/iam.serviceAccountTokenCreator'
+```
 
 ### Prometheus Not Scraping Pods
 

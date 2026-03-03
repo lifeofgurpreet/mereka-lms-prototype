@@ -223,7 +223,7 @@ fi
 
 # ── Runtime Mode Checks ──────────────────────────────────────────
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 NS="${APP_NS:-mereka-lms}"
 
 if ! command -v kubectl >/dev/null 2>&1; then

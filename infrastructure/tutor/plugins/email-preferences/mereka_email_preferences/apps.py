@@ -6,6 +6,6 @@ from django.apps import AppConfig
 
 
 class MerekaEmailPreferencesConfig(AppConfig):
-    name = 'mereka_email_preferences'
-    verbose_name = 'Mereka Email Preferences'
-    default_auto_field = 'django.db.models.BigAutoField'
+    name = "mereka_email_preferences"
+    verbose_name = "Mereka Email Preferences"
+    default_auto_field = "django.db.models.BigAutoField"

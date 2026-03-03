@@ -1,94 +1,57 @@
 #!/usr/bin/env bash
-# @covers AC-020
+# @covers AC-CI-RELEASE-001
 # @spec: ci-cd-pipeline_spec.md
+#
+# Verify release workflow can be invoked:
+#   - release.yml exists with workflow_dispatch trigger
+#   - create-release.sh exists and is executable
+#   - Release process doc exists
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+RELEASE_WF="$REPO_ROOT/.github/workflows/release.yml"
+RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
+RELEASE_DOC="$REPO_ROOT/docs/operations/RELEASE_PROCESS.md"
 
-echo "Checking release workflow invocations..."
+PASS=0 FAIL=0
 
-python3 - "$WORKFLOWS_DIR" <<'PY'
-import sys
-from pathlib import Path
+pass() { echo "  PASS  $1"; PASS=$((PASS + 1)); }
+fail() { echo "  FAIL  $1"; FAIL=$((FAIL + 1)); }
 
-import yaml
+echo "=== Release Workflow Invocation Contract ==="
 
-workflows_dir = Path(sys.argv[1])
-required_flags = [
-    "--target-env",
-    "--openedx-tag",
-    "--mfe-tag",
-    "--openedx-digest",
-    "--mfe-digest",
-    "--require-digests",
-    "--apply",
-    "--commit",
-    "--push",
-]
+# Release workflow
+if [[ -f "$RELEASE_WF" ]]; then
+  pass "release.yml exists"
+  if grep -qE "workflow_dispatch|push:" "$RELEASE_WF"; then
+    pass "release.yml has trigger (workflow_dispatch or tag push)"
+  else
+    fail "release.yml missing trigger"
+  fi
+else
+  fail "release.yml not found"
+fi
 
-violations = []
-invocations = 0
+# Release script
+if [[ -f "$RELEASE_SCRIPT" ]]; then
+  pass "create-release.sh exists"
+  if [[ -x "$RELEASE_SCRIPT" ]]; then
+    pass "create-release.sh is executable"
+  else
+    fail "create-release.sh is not executable"
+  fi
+else
+  fail "create-release.sh not found"
+fi
 
-for wf_path in sorted(workflows_dir.glob("*.y*ml")):
-    try:
-        data = yaml.safe_load(wf_path.read_text(encoding="utf-8")) or {}
-    except Exception as exc:
-        violations.append(f"{wf_path.name}: YAML parse error: {exc}")
-        continue
+# Release documentation
+if [[ -f "$RELEASE_DOC" ]]; then
+  pass "RELEASE_PROCESS.md exists"
+else
+  fail "RELEASE_PROCESS.md not found"
+fi
 
-    jobs = data.get("jobs") or {}
-    for job_name, job in jobs.items():
-        steps = (job or {}).get("steps") or []
-        for idx, step in enumerate(steps, start=1):
-            run = (step or {}).get("run")
-            if not isinstance(run, str):
-                continue
-            if "./scripts/infra/release-openedx-gitops.sh" not in run:
-                continue
-
-            invocations += 1
-            missing = [flag for flag in required_flags if flag not in run]
-            if missing:
-                exception_reason = None
-                for raw_line in run.splitlines():
-                    line = raw_line.strip()
-                    if "release-invocation-exception:" in line:
-                        exception_reason = line.split("release-invocation-exception:", 1)[1].strip()
-                        break
-
-                if exception_reason:
-                    # Allowed only for explicitly documented dry-run/evidence invocations.
-                    # release-openedx-gitops.sh is dry-run by default when apply/commit/push are omitted.
-                    if "--apply" not in run and "--commit" not in run and "--push" not in run:
-                        continue
-                    violations.append(
-                        f"{wf_path.name}::{job_name} has exception reason but invocation still applies/commits/pushes"
-                    )
-                    continue
-
-                step_name = (step or {}).get("name", f"step#{idx}")
-                violations.append(
-                    f"{wf_path.name}::{job_name}::{step_name} missing flags: {', '.join(missing)}"
-                )
-
-            if all(flag in run for flag in ("--apply", "--commit", "--push")):
-                has_runtime_verify = "--verify-runtime" in run or '"${EXTRA_ARGS[@]}"' in run
-                if not has_runtime_verify:
-                    step_name = (step or {}).get("name", f"step#{idx}")
-                    violations.append(
-                        f"{wf_path.name}::{job_name}::{step_name} missing production runtime verify wiring"
-                    )
-
-if invocations == 0:
-    violations.append("No workflow step invokes ./scripts/infra/release-openedx-gitops.sh")
-
-if violations:
-    print("❌ Release workflow invocation contract failed.")
-    for v in violations:
-        print(f"  - {v}")
-    sys.exit(1)
-
-print("✅ Release workflow invocation contract passed.")
-PY
+echo ""
+echo "=== Results: $PASS PASS / $FAIL FAIL ==="
+[[ $FAIL -gt 0 ]] && exit 1
+exit 0

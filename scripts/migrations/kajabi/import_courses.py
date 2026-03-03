@@ -7,9 +7,7 @@ import argparse
 import csv
 import os
 import subprocess
-import sys
 from pathlib import Path
-
 
 BASE_DIR = "/tmp/kajabi-import"
 
@@ -29,8 +27,7 @@ def ensure_tutor_available():
 def load_manifest(path: Path):
     with path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
-        for row in reader:
-            yield row
+        yield from reader
 
 
 def build_tutor_cmd(service: str, backend: str, bash_script: str) -> list[str]:
@@ -59,7 +56,6 @@ def import_course(
         return False
 
     slug = Path(package_rel).parent.name or Path(package_rel).stem
-    dest = f"{BASE_DIR}/{slug}"
 
     print(f"Importing Kajabi {kajabi_id} -> {course_key}")
     if dry_run:

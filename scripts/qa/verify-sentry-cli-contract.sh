@@ -8,6 +8,10 @@
 #   SENTRY_ORG=biji-biji-non-profits SENTRY_PROJECTS="mereka-lms-web" ./scripts/qa/verify-sentry-cli-contract.sh
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_command sentry-cli || exit 0
+
 SENTRY_ORG="${SENTRY_ORG:-biji-biji-non-profits}"
 SENTRY_PROJECTS="${SENTRY_PROJECTS:-mereka-lms-web}"
 JSON_OUT=0

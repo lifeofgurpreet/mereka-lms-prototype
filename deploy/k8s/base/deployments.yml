@@ -226,7 +226,7 @@ spec:
         - name: cms-worker
           image: docker.io/overhangio/openedx:21.0.0-indigo
           args:
-          
+
           - "celery"
           - "--app=cms.celery"
           - "worker"
@@ -462,7 +462,7 @@ spec:
       containers:
         - name: lms-worker
           image: docker.io/overhangio/openedx:21.0.0-indigo
-          args: 
+          args:
           - "celery"
           - "--app=lms.celery"
           - "worker"

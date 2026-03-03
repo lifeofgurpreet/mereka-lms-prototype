@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @covers AC-SLOT-022
+# @covers AC-SLOT-001, AC-SLOT-002, AC-SLOT-003, AC-SLOT-004, AC-SLOT-005, AC-SLOT-006, AC-SLOT-007, AC-SLOT-008, AC-SLOT-009, AC-SLOT-010, AC-SLOT-011, AC-SLOT-012, AC-SLOT-013, AC-SLOT-015, AC-SLOT-022, AC-SLOT-024
 # @spec: mfe-plugin-slots_spec.md
 # Verify expected plugin slot IDs exist in source plugin config and rendered env config.
 set -euo pipefail
@@ -202,6 +202,90 @@ elif [[ -f "$RENDERED_ENV" ]]; then
   fi
 else
   warn "Rendered env config missing (skipping runtime slot check): ${RENDERED_ENV#$REPO_ROOT/}"
+fi
+
+# Source-contract assertions for key slot behaviors (no runtime dependency).
+# These checks intentionally map to AC-SLOT source guarantees and do not assert browser rendering.
+if rg -qF "org.openedx.frontend.layout.header_logo.v1" "$PLUGIN_FILE" \
+  && rg -qF "mereka_header_logo" "$PLUGIN_FILE" \
+  && rg -qF "logoUrl: '/theme/logo-horizontal.svg'" "$PLUGIN_FILE"; then
+  pass "Source contract: desktop header logo slot binds to branded logo path"
+else
+  fail "Source contract: desktop header logo slot/logo path markers missing"
+fi
+
+if rg -qF "mobileLogoUrl:" "$PLUGIN_FILE" \
+  && rg -qF "selectedLogo = isMobileViewport && variant.mobileLogoUrl ? variant.mobileLogoUrl : variant.logoUrl;" "$PLUGIN_FILE"; then
+  pass "Source contract: mobile header logo selection uses mobileLogoUrl with viewport guard"
+else
+  fail "Source contract: mobile header logo selection markers missing"
+fi
+
+if rg -q "/dashboard" "$PLUGIN_FILE" \
+  && rg -q "baseUrl \\? .*\\/dashboard.*: '/dashboard'" "$PLUGIN_FILE"; then
+  pass "Source contract: dashboard href resolution includes baseUrl-aware /dashboard path"
+else
+  fail "Source contract: dashboard href resolution markers missing"
+fi
+
+if rg -qF "'academy.biji-biji.com': {" "$PLUGIN_FILE" \
+  && rg -qF "'skillourfuture.academy.mereka.io': {" "$PLUGIN_FILE" \
+  && rg -qF "const MEREKA_SITE_VARIANTS = {" "$PLUGIN_FILE"; then
+  pass "Source contract: tenant hostnames are present in SITE_VARIANTS map"
+else
+  fail "Source contract: expected tenant hostnames missing from SITE_VARIANTS map"
+fi
+
+if rg -qF "content: 'Discover Courses'" "$PLUGIN_FILE" \
+  && rg -qF "content: 'Support'" "$PLUGIN_FILE" \
+  && rg -qF "href: '/dashboard'" "$PLUGIN_FILE"; then
+  pass "Source contract: menu wiring contains Dashboard, Discover Courses, and Support markers"
+else
+  fail "Source contract: required menu content markers missing"
+fi
+
+if rg -qF "org.openedx.frontend.layout.header_desktop_main_menu.v1" "$PLUGIN_FILE" \
+  && rg -qF "org.openedx.frontend.layout.header_mobile_main_menu.v1" "$PLUGIN_FILE" \
+  && rg -qF "withMerekaMenuItems(" "$PLUGIN_FILE"; then
+  pass "Source contract: desktop/mobile main menu slots share withMerekaMenuItems helper"
+else
+  fail "Source contract: desktop/mobile menu parity helper markers missing"
+fi
+
+if rg -qF "org.openedx.frontend.learning.course_outline_sidebar.v1" "$PLUGIN_FILE" \
+  && rg -qF "mereka_course_outline_sidebar" "$PLUGIN_FILE"; then
+  pass "Source contract: learning course outline sidebar slot markers present"
+else
+  fail "Source contract: learning course outline sidebar slot markers missing"
+fi
+
+if rg -qF "org.openedx.frontend.learning.sequence_navigation.v1" "$PLUGIN_FILE" \
+  && rg -qF "mereka_learning_sequence_navigation_hint" "$PLUGIN_FILE"; then
+  pass "Source contract: learning sequence navigation slot markers present"
+else
+  fail "Source contract: learning sequence navigation slot markers missing"
+fi
+
+if rg -qF "org.openedx.frontend.account.additional_profile_fields.v1" "$PLUGIN_FILE" \
+  && rg -qF "mereka_additional_profile_fields" "$PLUGIN_FILE"; then
+  pass "Source contract: account additional profile fields slot markers present"
+else
+  fail "Source contract: account additional profile fields slot markers missing"
+fi
+
+if rg -qF "org.openedx.frontend.profile.additional_profile_fields.v1" "$PLUGIN_FILE" \
+  && rg -qF "mereka_profile_additional_fields" "$PLUGIN_FILE"; then
+  pass "Source contract: profile additional profile fields slot markers present"
+else
+  fail "Source contract: profile additional profile fields slot markers missing"
+fi
+
+# Build/verification diagnostics contract for rapid slot debugging.
+if rg -qF 'Expected slot binding marker missing for $slot: $marker' "$0" \
+  && rg -qF 'Expected slot missing in plugin: $slot' "$0"; then
+  pass "Diagnostics contract: failures include both slot ID and component marker context"
+else
+  fail "Diagnostics contract: slot/component failure message template missing"
 fi
 
 echo ""

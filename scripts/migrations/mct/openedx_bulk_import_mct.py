@@ -5,13 +5,11 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
-import os
-import sys
-from dataclasses import dataclass, field
-import logging
-from typing import List
 import hashlib
+import json
+import logging
+import os
+from dataclasses import dataclass, field
 
 
 def bootstrap(settings_module: str) -> None:
@@ -87,8 +85,8 @@ def import_users(csv_path: str, settings_module: str, start: int, limit: int | N
     username,email,full_name,first_name,last_name,country,gender,dob,learning_pathways,mct_user_id
     """
     bootstrap(settings_module)
-    from django.contrib.auth import get_user_model
     from common.djangoapps.student.models import UserProfile
+    from django.contrib.auth import get_user_model
     from django.db import IntegrityError
 
     stats = ImportStats(start_offset=start)
@@ -99,8 +97,8 @@ def import_users(csv_path: str, settings_module: str, start: int, limit: int | N
             email = (row.get("email") or "").strip().lower()
             username = (row.get("username") or "").strip()
             full_name = sanitize_text(row.get("full_name"))
-            first_name = sanitize_text(row.get("first_name"))
-            last_name = sanitize_text(row.get("last_name"))
+            sanitize_text(row.get("first_name"))
+            sanitize_text(row.get("last_name"))
             country = (row.get("country") or "").strip()[:2].upper() if row.get("country") else ""
             gender = (row.get("gender") or "").strip().lower()
             dob = (row.get("dob") or "").strip()
@@ -198,7 +196,6 @@ def import_users(csv_path: str, settings_module: str, start: int, limit: int | N
                 # Parse date of birth (format: DD/MM/YYYY)
                 if dob:
                     try:
-                        from datetime import datetime
                         # Parse DD/MM/YYYY format
                         parts = dob.split('/')
                         if len(parts) == 3:
@@ -257,9 +254,9 @@ def import_enrollments(csv_path: str, settings_module: str, start: int, limit: i
     email,course_id,mode,is_active
     """
     bootstrap(settings_module)
+    from common.djangoapps.student.models import CourseEnrollment
     from django.contrib.auth import get_user_model
     from opaque_keys.edx.keys import CourseKey
-    from common.djangoapps.student.models import CourseEnrollment
     from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
     stats = ImportStats(start_offset=start)
@@ -365,7 +362,7 @@ def main() -> None:
     start_offset = args.offset if args.offset is not None else 0
     if args.offset is None and args.state_file and os.path.exists(args.state_file):
         try:
-            with open(args.state_file, "r", encoding="utf-8") as sf:
+            with open(args.state_file, encoding="utf-8") as sf:
                 start_offset = int(sf.read().strip() or start_offset)
         except Exception:
             pass
@@ -382,7 +379,7 @@ def main() -> None:
     print(f"{'='*60}")
 
     if stats.errors:
-        print(f"\nFirst 20 errors:")
+        print("\nFirst 20 errors:")
         for err in stats.errors[:20]:
             print(f"  {err}")
         if len(stats.errors) > 20:

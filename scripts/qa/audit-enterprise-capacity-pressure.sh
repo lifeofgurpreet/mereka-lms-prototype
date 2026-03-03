@@ -2,9 +2,17 @@
 # Audit cluster capacity signals that commonly block enterprise API desired replicas.
 set -euo pipefail
 
-NAMESPACE="mereka-lms"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../shared/config.sh"
+
+NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 ENV_NAME=""
 KUBE_CONTEXT=""
+NAMESPACE_OVERRIDE=""
 
 usage() {
   cat <<'EOF'
@@ -26,6 +34,11 @@ while [[ $# -gt 0 ]]; do
       KUBE_CONTEXT="${2:-}"
       shift 2
       ;;
+    --namespace)
+      NAMESPACE="${2:-}"
+      NAMESPACE_OVERRIDE="$NAMESPACE"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -40,8 +53,14 @@ done
 
 if [[ -n "$ENV_NAME" ]]; then
   case "$ENV_NAME" in
-    prod) KUBE_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster" ;;
-    dev) KUBE_CONTEXT="kind-dev" ;;
+    prod)
+      KUBE_CONTEXT="$CONTEXT_PROD"
+      [[ -z "$NAMESPACE_OVERRIDE" ]] && NAMESPACE="$NAMESPACE_PROD"
+      ;;
+    dev)
+      KUBE_CONTEXT="$CONTEXT_DEV"
+      [[ -z "$NAMESPACE_OVERRIDE" ]] && NAMESPACE="$NAMESPACE_DEV"
+      ;;
     *)
       echo "Invalid --env: $ENV_NAME (expected prod|dev)" >&2
       exit 1

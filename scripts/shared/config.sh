@@ -56,6 +56,8 @@ export ENTERPRISE_PORTAL_DOMAIN="${ENTERPRISE_PORTAL_DOMAIN:-enterprise.${LMS_DO
 # Alternative domains (multisite)
 export BIJI_DOMAIN="${BIJI_DOMAIN:-academy.biji-biji.com}"
 export SKILLOURFUTURE_DOMAIN="${SKILLOURFUTURE_DOMAIN:-skillourfuture.academy.mereka.io}"
+export SKILLOURFUTURE_STUDIO_DOMAIN="${SKILLOURFUTURE_STUDIO_DOMAIN:-studio.${SKILLOURFUTURE_DOMAIN}}"
+export SKILLOURFUTURE_MFE_DOMAIN="${SKILLOURFUTURE_MFE_DOMAIN:-apps.${SKILLOURFUTURE_DOMAIN}}"
 
 # Biji-Biji dedicated subdomains (public DNS)
 export BIJI_STUDIO_DOMAIN="${BIJI_STUDIO_DOMAIN:-studio.academy.biji-biji.com}"

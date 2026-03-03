@@ -13,6 +13,7 @@ rules:
   indentation:
     spaces: 2
     indent-sequences: consistent
+    level: warning
 
 ignore: |
   tutor_env/

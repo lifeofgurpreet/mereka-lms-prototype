@@ -10,21 +10,19 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import List
 
 from lint_core import (
-    Violation,
-    LintResult,
-    parse_frontmatter,
-    has_section,
-    extract_section,
-    read_text,
-    gather_markdown_files,
-    format_results_text,
-    format_results_json,
     SKIP_FILES,
+    LintResult,
+    Violation,
+    extract_section,
+    format_results_json,
+    format_results_text,
+    gather_markdown_files,
+    has_section,
+    parse_frontmatter,
+    read_text,
 )
-
 
 NORMATIVE = ["MUST", "MUST NOT", "SHOULD", "SHOULD NOT", "MAY"]
 
@@ -54,7 +52,7 @@ SECTION_RULES = {
 
 
 def lint_file(path: Path) -> LintResult:
-    violations: List[Violation] = []
+    violations: list[Violation] = []
     md = read_text(path)
     fm, body = parse_frontmatter(md)
 
@@ -153,7 +151,7 @@ def main() -> int:
     files = [f for f in files if f.name not in SKIP_FILES]
 
     # Lint all files
-    results: List[LintResult] = []
+    results: list[LintResult] = []
     for f in files:
         result = lint_file(f)
 

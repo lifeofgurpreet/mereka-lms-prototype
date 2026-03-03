@@ -66,6 +66,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+case "$STRICT" in
+    0|1) ;;
+    *)
+        echo "Invalid STRICT='$STRICT' (expected 0 or 1)" >&2
+        exit 1
+        ;;
+esac
+
 log_info "Starting restore drill verification for namespace: $NAMESPACE"
 
 # Step 1: Verify namespace exists

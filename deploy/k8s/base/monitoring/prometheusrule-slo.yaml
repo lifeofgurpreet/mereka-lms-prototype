@@ -389,7 +389,7 @@ spec:
             severity: warning
             slo: latency_regression
           annotations:
-            summary: "{{ $labels.service | default(\"open-edx\") | toUpper }} latency regression spike"
+            summary: "{{ $labels.service | toUpper }} latency regression spike"
             description: >-
               p95 latency for {{ $labels.service }} is greater than 2x the prior 1-hour
               baseline and has persisted for 15 minutes.
@@ -416,7 +416,7 @@ spec:
             severity: warning
             slo: latency_regression
           annotations:
-            summary: "{{ $labels.service | default(\"open-edx\") | toUpper }} latency drift detected"
+            summary: "{{ $labels.service | toUpper }} latency drift detected"
             description: >-
               p95 latency for {{ $labels.service }} remains >3x its 24h baseline,
               suggesting sustained performance regression.
@@ -441,7 +441,7 @@ spec:
             severity: critical
             slo: availability
           annotations:
-            summary: "{{ $labels.service | default(\"open-edx\") | toUpper }} error rate spike"
+            summary: "{{ $labels.service | toUpper }} error rate spike"
             description: >-
               5m availability-based error rate for {{ $labels.service }} exceeds 1%
               for 10 minutes. Investigate dependency or release-related faults now.

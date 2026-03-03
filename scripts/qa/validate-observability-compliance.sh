@@ -210,6 +210,9 @@ normalize_host_value() {
   value="${value//$'\n'/}"
   value="${value//\"/}"
   value="${value// /}"
+  value="${value#http://}"
+  value="${value#https://}"
+  value="${value%%/*}"
   printf '%s' "$value"
 }
 
@@ -225,13 +228,14 @@ fetch_metrics_with_status() {
   local -a timeout_cmd=()
   local -a kubectl_cmd=()
   local host_header=""
+  local exec_rc=0
 
   if [[ -n "$metrics_host" ]]; then
     host_header="-H 'Host: ${metrics_host}' "
   fi
 
   probe_cmd="if command -v curl >/dev/null 2>&1; then \
-curl -s -m ${RUNTIME_CMD_TIMEOUT}s ${host_header}-w '\n${split_token}:%{http_code}\n' '${target}'; \
+curl -s -m ${RUNTIME_CMD_TIMEOUT} ${host_header}-w '\n${split_token}:%{http_code}\n' '${target}'; \
 elif command -v wget >/dev/null 2>&1; then \
 tmp_body=\$(mktemp); \
 tmp_hdr=\$(mktemp); \
@@ -254,15 +258,35 @@ fi"
     kubectl_cmd=(kubectl --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "$probe_cmd")
   fi
 
-  result="$("${timeout_cmd[@]}" "${kubectl_cmd[@]}" 2>/dev/null || true)"
+  if [[ "${VALIDATE_OBS_DEBUG_METRICS:-0}" == "1" ]]; then
+    set +e
+    result="$("${timeout_cmd[@]}" "${kubectl_cmd[@]}" 2>&1)"
+    exec_rc=$?
+    set -e
+  else
+    result="$("${timeout_cmd[@]}" "${kubectl_cmd[@]}" 2>/dev/null || true)"
+  fi
+  if [[ "${VALIDATE_OBS_DEBUG_METRICS:-0}" == "1" ]]; then
+    {
+      echo "[debug] fetch_metrics_with_status namespace=$namespace resource=$resource target=$target host=${metrics_host:-<none>}"
+      echo "[debug] exec_rc=$exec_rc"
+      echo "[debug] raw_result_start"
+      printf '%s\n' "$result"
+      echo "[debug] raw_result_end"
+    } >&2
+  fi
 
-  if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
+  if [[ -z "$result" ]] || ! printf '%s' "$result" | grep -q "^${split_token}:"; then
     printf '000%s' "$split_token"
     return 0
   fi
 
-  status="$(printf '%s' "$result" | tail -n1 | sed "s/^${split_token}://")"
-  body="$(printf '%s' "$result" | sed '$d')"
+  status="$(printf '%s' "$result" | awk -v marker="${split_token}:" 'index($0, marker)==1 {code=substr($0, length(marker)+1)} END{print code}')"
+  if [[ -z "${status//[[:space:]]/}" ]]; then
+    status="000"
+  fi
+
+  body="$(printf '%s' "$result" | sed "/^${split_token}:/d")"
   body="${body%$'\r'}"
 
   printf '%s%s%s' "$status" "$split_token" "$body"
@@ -290,7 +314,7 @@ read_metrics_host() {
   esac
 
   for key in "${fallback_keys[@]}"; do
-    resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
+    resolved_host="$(kubectl_cmd exec -n "$namespace" "$resource" -- \
       sh -lc "grep -E \"^${key}:\" '$config_file' 2>/dev/null | tail -n 1 | awk '{print \$2}'" 2>/dev/null || true)"
     resolved_host="$(normalize_host_value "$resolved_host")"
     if [[ -n "$resolved_host" ]]; then
@@ -299,7 +323,7 @@ read_metrics_host() {
     fi
   done
 
-  resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
+  resolved_host="$(kubectl_cmd exec -n "$namespace" "$resource" -- \
     sh -lc "printenv | awk -F= '/^(LMS_BASE|CMS_BASE|LMS_HOST|CMS_HOST|OPENEDX_HOSTNAME)=/ {print \$2; exit}'" 2>/dev/null || true)"
   resolved_host="$(normalize_host_value "$resolved_host")"
   echo "$resolved_host"
@@ -541,13 +565,13 @@ run_runtime_checks() {
   cms_metrics_code="${cms_metrics_result%%$metrics_split*}"
   cms_metrics_payload="${cms_metrics_result#*$metrics_split}"
 
-  if [[ "$lms_metrics_code" == "400" && -n "$lms_metrics_host" ]]; then
+  if [[ ( "$lms_metrics_code" == "400" || "$lms_metrics_code" == "000" ) && -n "$lms_metrics_host" ]]; then
     lms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/lms "http://localhost:8000/metrics" "")"
     lms_metrics_code="${lms_metrics_result%%$metrics_split*}"
     lms_metrics_payload="${lms_metrics_result#*$metrics_split}"
   fi
 
-  if [[ "$cms_metrics_code" == "400" && -n "$cms_metrics_host" ]]; then
+  if [[ ( "$cms_metrics_code" == "400" || "$cms_metrics_code" == "000" ) && -n "$cms_metrics_host" ]]; then
     cms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/cms "http://localhost:8000/metrics" "")"
     cms_metrics_code="${cms_metrics_result%%$metrics_split*}"
     cms_metrics_payload="${cms_metrics_result#*$metrics_split}"
@@ -733,7 +757,7 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
     echo ""
     echo "## Failed Checks"
     echo ""
-    if awk -F $'\t' '$1=="fail"{exit 0} END{exit 1}' "$RESULTS_FILE"; then
+    if awk -F $'\t' '$1=="fail"{found=1} END{exit(found?0:1)}' "$RESULTS_FILE"; then
       awk -F $'\t' '$1=="fail"{printf("- %s: %s\n", $2, $3)}' "$RESULTS_FILE"
     else
       echo "- none"

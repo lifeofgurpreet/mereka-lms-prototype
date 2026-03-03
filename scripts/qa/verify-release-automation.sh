@@ -20,7 +20,6 @@ CREATE_RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
 
 RELEASE_INVOKE_CHECKER="$REPO_ROOT/scripts/qa/verify-release-workflow-invocation.sh"
 RELEASE_DRY_RUN_CHECKER="$REPO_ROOT/scripts/qa/verify-release-dry-run-contract.sh"
-FRONTEND_QA_MAKE_TARGETS_CHECKER="$REPO_ROOT/scripts/qa/verify-frontend-qa-make-targets.sh"
 PHASE2_SMOKE_EVIDENCE_CONTRACT_CHECKER="$REPO_ROOT/scripts/qa/verify-phase2-smoke-evidence-contract.sh"
 BRANDING_EVIDENCE_A11Y_CONTRACT_CHECKER="$REPO_ROOT/scripts/qa/verify-branding-evidence-a11y-contract.sh"
 BRANDING_EVIDENCE_SCREENSHOT_CONTRACT_CHECKER="$REPO_ROOT/scripts/qa/verify-branding-evidence-screenshot-contract.sh"
@@ -260,7 +259,7 @@ if [[ -f "${BUILD_WORKFLOW}" ]]; then
 fi
 
 for checker_file in "${BUILD_WORKFLOW_CONTRACT}" "${RELEASE_INVOKE_CHECKER}" \
-                    "${RELEASE_DRY_RUN_CHECKER}" "${FRONTEND_QA_MAKE_TARGETS_CHECKER}" \
+                    "${RELEASE_DRY_RUN_CHECKER}" \
                     "${PHASE2_SMOKE_EVIDENCE_CONTRACT_CHECKER}" \
                     "${BRANDING_EVIDENCE_A11Y_CONTRACT_CHECKER}" \
                     "${BRANDING_EVIDENCE_SCREENSHOT_CONTRACT_CHECKER}"; do

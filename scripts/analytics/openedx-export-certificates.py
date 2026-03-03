@@ -6,7 +6,7 @@ Usage:
     python scripts/analytics/openedx-export-certificates.py \
         --django-settings lms.envs.tutor.production \
         --output exports/openedx/certificates.csv
-    
+
     OR with database:
     python scripts/analytics/openedx-export-certificates.py \
         --db-url "mysql://user:pass@host/db" \
@@ -27,8 +27,7 @@ def export_from_django(settings_module: str, output_path: Path) -> None:
         if not settings.configured:
             # Minimal Django setup
             django.setup()
-        
-        from django.contrib.auth.models import User
+
         try:
             from certificates.models import GeneratedCertificate
         except ImportError:
@@ -37,14 +36,14 @@ def export_from_django(settings_module: str, output_path: Path) -> None:
             except ImportError:
                 print("Certificate models not found. Trying alternative import...")
                 from common.djangoapps.certificates.models import GeneratedCertificate
-        
+
         with output_path.open('w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow([
-                'email', 'username', 'course_id', 'status', 
+                'email', 'username', 'course_id', 'status',
                 'created_date', 'modified_date', 'grade', 'mode'
             ])
-            
+
             for cert in GeneratedCertificate.objects.select_related('user').all():
                 writer.writerow([
                     cert.user.email if cert.user else '',
@@ -56,8 +55,8 @@ def export_from_django(settings_module: str, output_path: Path) -> None:
                     str(cert.grade) if cert.grade is not None else '',
                     cert.mode or '',
                 ])
-        
-        print(f"✓ Exported certificates via Django")
+
+        print("✓ Exported certificates via Django")
     except ImportError as e:
         print(f"Django/certificate models not available: {e}")
         print("Trying database export...")
@@ -70,9 +69,10 @@ def export_from_django(settings_module: str, output_path: Path) -> None:
 def export_from_db(db_url: str, output_path: Path) -> None:
     """Export using direct database connection."""
     try:
-        import pymysql
         from urllib.parse import urlparse
-        
+
+        import pymysql
+
         parsed = urlparse(db_url.replace('mysql://', 'mysql+pymysql://'))
         conn = pymysql.connect(
             host=parsed.hostname or 'localhost',
@@ -82,7 +82,7 @@ def export_from_db(db_url: str, output_path: Path) -> None:
             database=parsed.path.lstrip('/'),
             charset='utf8mb4'
         )
-        
+
         with conn.cursor() as cursor:
             # Try different table names
             table_name = None
@@ -91,7 +91,7 @@ def export_from_db(db_url: str, output_path: Path) -> None:
                 if cursor.fetchone():
                     table_name = table
                     break
-            
+
             if not table_name:
                 print("Certificate table not found. Available tables:")
                 cursor.execute("SHOW TABLES")
@@ -100,9 +100,9 @@ def export_from_db(db_url: str, output_path: Path) -> None:
                         print(f"  - {row[0]}")
                 conn.close()
                 sys.exit(1)
-            
+
             cursor.execute(f"""
-                SELECT 
+                SELECT
                     u.email,
                     u.username,
                     c.course_id,
@@ -115,14 +115,14 @@ def export_from_db(db_url: str, output_path: Path) -> None:
                 LEFT JOIN auth_user u ON c.user_id = u.id
                 ORDER BY c.created_date DESC
             """)
-            
+
             with output_path.open('w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow([
                     'email', 'username', 'course_id', 'status',
                     'created_date', 'modified_date', 'grade', 'mode'
                 ])
-                
+
                 for row in cursor.fetchall():
                     writer.writerow([
                         row[0] or '',
@@ -134,9 +134,9 @@ def export_from_db(db_url: str, output_path: Path) -> None:
                         str(row[6]) if row[6] is not None else '',
                         row[7] or '',
                     ])
-        
+
         conn.close()
-        print(f"✓ Exported certificates from database")
+        print("✓ Exported certificates from database")
     except ImportError:
         print("pymysql not available. Install with: pip install pymysql")
         sys.exit(1)
@@ -151,10 +151,10 @@ def main() -> None:
     parser.add_argument("--db-url", help="Database URL (mysql://user:pass@host/db)")
     parser.add_argument("--django-settings", help="Django settings module")
     args = parser.parse_args()
-    
+
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     if args.db_url:
         export_from_db(args.db_url, output_path)
     elif args.django_settings:
@@ -162,7 +162,7 @@ def main() -> None:
     else:
         print("Error: Must provide either --db-url or --django-settings")
         sys.exit(1)
-    
+
     count = sum(1 for _ in output_path.open()) - 1  # Subtract header
     print(f"✓ Exported {count} certificates to {output_path}")
 

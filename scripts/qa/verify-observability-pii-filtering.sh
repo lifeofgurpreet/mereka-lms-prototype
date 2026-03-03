@@ -10,9 +10,11 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+DEFAULT_K8S_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-$DEFAULT_K8S_CONTEXT}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE:-${K8S_NAMESPACE_PROD:-mereka-lms}}}"
 STRICT="${STRICT:-0}"
+PII_EMAIL_IGNORE_REGEX="${PII_EMAIL_IGNORE_REGEX:-^celery@edx\.(lms|cms)\.core\.default\.[a-z0-9-]+$}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -28,12 +30,18 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ "$STRICT" != "0" && "$STRICT" != "1" ]]; then
+  echo "STRICT must be 0 or 1 (got: $STRICT)" >&2
+  exit 2
+fi
+
 failures=0
 skips=0
 
 echo "Verify: PII filtering in logs"
 echo "  context:   $K8S_CONTEXT"
 echo "  namespace: $APP_NS"
+echo "  email ignore regex: $PII_EMAIL_IGNORE_REGEX"
 echo ""
 
 # Check if kubectl is available
@@ -83,27 +91,29 @@ for svc in "${SERVICES[@]}"; do
 
   # AC-LOG-005: Check for email addresses
   echo -n "  Check: No email addresses in logs... "
-  email_matches=$(echo "$logs" | grep -iE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' | wc -l)
+  raw_email_matches="$(echo "$logs" | grep -iEo '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' || true)"
+  filtered_email_matches="$(echo "$raw_email_matches" | grep -ivE "$PII_EMAIL_IGNORE_REGEX" || true)"
+  email_matches=$(echo "$filtered_email_matches" | sed '/^[[:space:]]*$/d' | wc -l || true)
 
   if [[ "$email_matches" -eq 0 ]]; then
     echo -e "${GREEN}PASS${NC}"
   else
     # Check if emails are redacted/anonymized
-    redacted_count=$(echo "$logs" | grep -iE '(redacted|anonymized|<email>|\*\*\*@|\[email\])' | wc -l)
+    redacted_count=$(echo "$logs" | grep -iE '(redacted|anonymized|<email>|\*\*\*@|\[email\])' | wc -l || true)
     if [[ "$redacted_count" -gt 0 ]]; then
       echo -e "${GREEN}PASS${NC} (emails appear redacted)"
     else
       echo -e "${RED}FAIL${NC} Found $email_matches potential email addresses"
       failures=$((failures + 1))
       # Show first few matches
-      echo "$logs" | grep -iE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' | head -3 | sed 's/^/    /'
+      echo "$filtered_email_matches" | sed '/^[[:space:]]*$/d' | head -3 | sed 's/^/    /'
     fi
   fi
 
   # AC-LOG-006: Check for passwords
   echo -n "  Check: No passwords in logs... "
   # Look for patterns like password=value (not password=***)
-  password_matches=$(echo "$logs" | grep -iE '(password|passwd|pwd)["\s]*[:=]["\s]*[^*\s]{3,}' | grep -v -iE '(password.*\*+|password.*redacted|password.*hidden)' | wc -l)
+  password_matches=$(echo "$logs" | grep -iE '(password|passwd|pwd)["\s]*[:=]["\s]*[^*\s]{3,}' | grep -v -iE '(password.*\*+|password.*redacted|password.*hidden)' | wc -l || true)
 
   if [[ "$password_matches" -eq 0 ]]; then
     echo -e "${GREEN}PASS${NC}"
@@ -117,7 +127,7 @@ for svc in "${SERVICES[@]}"; do
   # Additional PII checks
   echo -n "  Check: No API keys/tokens in logs... "
   # Look for common token patterns
-  token_matches=$(echo "$logs" | grep -iE '(api[_-]?key|token|secret|bearer)["\s]*[:=]["\s]*[a-zA-Z0-9+/=]{20,}' | grep -v -iE '(redacted|\*+|hidden)' | wc -l)
+  token_matches=$(echo "$logs" | grep -iE '(api[_-]?key|token|secret|bearer)["\s]*[:=]["\s]*[a-zA-Z0-9+/=]{20,}' | grep -v -iE '(redacted|\*+|hidden)' | wc -l || true)
 
   if [[ "$token_matches" -eq 0 ]]; then
     echo -e "${GREEN}PASS${NC}"

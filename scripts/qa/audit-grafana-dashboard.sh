@@ -103,6 +103,12 @@ query_freshness_window_met() {
   local minutes
 
   [[ "$max_minutes" -le 0 ]] && return 0
+  # SLO recording rules are pre-computed time-windowed gauges. The dashboard
+  # intentionally reads them as instant vectors without adding extra range
+  # selectors, and freshness is enforced by Prometheus rule evaluation cadence.
+  if [[ "$query" =~ ^[[:space:]]*mereka:slo:(error_budget_remaining_ratio|error_budget_remaining_minutes|journey_error_budget_remaining_ratio)(\{[^}]*\})?[[:space:]]*$ ]]; then
+    return 0
+  fi
   [[ "$query" == *"\$__rate_interval"* ]] && return 0
   [[ "$query" == *"\$__interval"* ]] && return 0
   [[ "$query" == *"\$__range"* ]] && return 0
@@ -117,7 +123,30 @@ query_freshness_window_met() {
     fi
   done < <(grep -oE '\[[0-9]+[smhdwy]\]' <<<"$query")
 
+  # Recording-rule conventions often encode windows in metric names
+  # (for example *_5m, *_1h, *_30d). Treat these as freshness hints.
+  local hint token
+  while IFS= read -r hint; do
+    [[ -z "$hint" ]] && continue
+    token="${hint#:}"
+    token="${token#_}"
+    minutes="$(to_minutes_from_range "[${token}]")"
+    [[ -z "$minutes" ]] && continue
+    if (( minutes <= max_minutes )); then
+      return 0
+    fi
+  done < <(grep -oE '[_:][0-9]+[smhdwy]\b' <<<"$query")
+
   return 1
+}
+
+panel_is_non_data() {
+  local title="$1"
+  jq -e --arg t "$title" '
+    [.. | objects | select(.title == $t and has("type")) | .type] as $types
+    | ($types | length) > 0
+      and ($types | all(. == "row" or . == "text" or . == "dashlist" or . == "news"))
+  ' "$DASHBOARD_FILE" >/dev/null
 }
 
 check_panel_ownership_and_freshness() {
@@ -144,6 +173,10 @@ check_panel_ownership_and_freshness() {
 
     if ! contains_exact_line "$title" "$titles_file"; then
       add_required_error "Missing required panel title: $title (contract metadata)"
+      continue
+    fi
+
+    if panel_is_non_data "$title"; then
       continue
     fi
 

@@ -1,4 +1,5 @@
 # Auth SSO Runbook (Authentik)
+_Audience: Platform Eng + SRE • Owner: Engineering Lead • Last updated: 2026-02-18_
 
 This runbook covers diagnosing and preventing regressions for **Authentik OIDC SSO** across:
 

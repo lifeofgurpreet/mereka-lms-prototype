@@ -1,6 +1,6 @@
 # XQueue Health Runbook
+_Audience: Platform Eng • Owner: Engineering Lead • Last verified: 2026-02-18_
 
-> **Last verified**: 2026-02-18 (GKE production cluster)
 > **Bead**: mereka-lms-1si5.2
 
 ## Quick Status Check

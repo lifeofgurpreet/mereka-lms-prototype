@@ -10,12 +10,10 @@ Adapts the generic spec_verify.py for our directory layout.
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 from spec_verify import (
     find_markdown_files,
-    is_spec_like,
     verify_one_spec,
 )
 

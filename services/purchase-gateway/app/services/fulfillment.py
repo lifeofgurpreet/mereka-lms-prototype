@@ -4,14 +4,14 @@
 
 import secrets
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.models.entitlement import Entitlement, EntitlementStatus
-from app.models.order import FulfillmentStatus, LineItem, Order, OrderStatus
+from app.models.order import FulfillmentStatus, Order, OrderStatus
 from app.services.lms_client import LMSClient
 
 logger = structlog.get_logger()
@@ -56,7 +56,7 @@ async def fulfill_order(order: Order, db: AsyncSession) -> None:
                 offering_type=item.offering_type,
                 status=EntitlementStatus.pending,
                 claim_token=claim_token,
-                expires_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC)
                 + timedelta(days=settings.ENTITLEMENT_CLAIM_EXPIRY_DAYS),
             )
             db.add(entitlement)
@@ -73,7 +73,7 @@ async def fulfill_order(order: Order, db: AsyncSession) -> None:
     statuses = {li.fulfillment_status for li in order.line_items}
     if statuses == {FulfillmentStatus.fulfilled}:
         order.status = OrderStatus.fulfilled
-        order.fulfilled_at = datetime.now(timezone.utc)
+        order.fulfilled_at = datetime.now(UTC)
     elif FulfillmentStatus.failed in statuses and FulfillmentStatus.fulfilled in statuses:
         order.status = OrderStatus.partially_fulfilled
     elif statuses == {FulfillmentStatus.failed}:

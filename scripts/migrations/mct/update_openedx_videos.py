@@ -17,10 +17,9 @@ Usage:
         --results-file /tmp/mux_upload_results.json
 """
 
-import os
-import sys
-import json
 import argparse
+import json
+import os
 
 # Django setup (when running in CMS container)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cms.envs.tutor.production')
@@ -55,8 +54,8 @@ def update_video_xblock(course_key, unit_location, mux_playback_id, title):
     Note: Open edX video XBlock supports external URLs.
     We can set the video_url field to the Mux HLS URL.
     """
+    from opaque_keys.edx.keys import UsageKey
     from xmodule.modulestore.django import modulestore
-    from opaque_keys.edx.keys import CourseKey, UsageKey
 
     store = modulestore()
 
@@ -92,7 +91,7 @@ def create_mapping_file(results_file, output_file):
     This creates a CSV that can be used to manually update courses or
     as input for bulk updates.
     """
-    with open(results_file, 'r') as f:
+    with open(results_file) as f:
         results = json.load(f)
 
     # Load the MCT to Open edX course mapping
@@ -137,7 +136,7 @@ def main():
     args = parser.parse_args()
 
     # Create the mapping file
-    mapping = create_mapping_file(args.results_file, args.output)
+    create_mapping_file(args.results_file, args.output)
 
     if args.dry_run:
         print("\nDry run - mapping file created but no updates applied")

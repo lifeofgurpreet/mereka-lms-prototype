@@ -1,0 +1,121 @@
+name: MFE Slot Runtime Gates
+
+on:
+  schedule:
+    - cron: '30 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Target environment for runtime slot checks"
+        required: false
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      run_visual_regression:
+        description: "Also run optional slot visual regression lane"
+        required: false
+        default: false
+        type: boolean
+      strict_runtime:
+        description: "Fail fast when runtime auth/cluster dependencies are unavailable"
+        required: false
+        default: true
+        type: boolean
+
+permissions: {}
+
+jobs:
+  mfe-slot-runtime-gates:
+    name: Run MFE Slot Runtime Gates
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
+    permissions:
+      contents: read
+    env:
+      TARGET_ENV: ${{ github.event.inputs.target_env || 'prod' }}
+      RUN_VISUAL_REGRESSION: ${{ github.event.inputs.run_visual_regression || 'false' }}
+      STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
+      SLOT_RUNTIME_LMS_BASE_URL_PROD: ${{ vars.SLOT_RUNTIME_LMS_BASE_URL_PROD || 'https://academyv2.mereka.io' }}
+      SLOT_RUNTIME_LMS_BASE_URL_DEV: ${{ vars.SLOT_RUNTIME_LMS_BASE_URL_DEV || 'https://academyv2.mereka.dev' }}
+      SLOT_RUNTIME_PROFILE_USERNAME_PROD: ${{ secrets.SLOT_RUNTIME_PROFILE_USERNAME_PROD }}
+      SLOT_RUNTIME_API_TOKEN_PROD: ${{ secrets.SLOT_RUNTIME_API_TOKEN_PROD }}
+      SLOT_RUNTIME_PROFILE_USERNAME_DEV: ${{ secrets.SLOT_RUNTIME_PROFILE_USERNAME_DEV }}
+      SLOT_RUNTIME_API_TOKEN_DEV: ${{ secrets.SLOT_RUNTIME_API_TOKEN_DEV }}
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Authenticate to GCP and get GKE credentials
+        if: ${{ vars.HAS_GCP_SA_KEY == 'true' }}
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          gcloud_project: mereka-lms
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          strict_runtime: ${{ github.event.inputs.strict_runtime || 'true' }}
+
+      - name: Resolve runtime slot credentials
+        run: |
+          case "$TARGET_ENV" in
+            prod)
+              echo "LMS_BASE_URL=$SLOT_RUNTIME_LMS_BASE_URL_PROD" >> "$GITHUB_ENV"
+              echo "PROFILE_USERNAME=$SLOT_RUNTIME_PROFILE_USERNAME_PROD" >> "$GITHUB_ENV"
+              echo "API_TOKEN=$SLOT_RUNTIME_API_TOKEN_PROD" >> "$GITHUB_ENV"
+              ;;
+            dev)
+              echo "LMS_BASE_URL=$SLOT_RUNTIME_LMS_BASE_URL_DEV" >> "$GITHUB_ENV"
+              echo "PROFILE_USERNAME=$SLOT_RUNTIME_PROFILE_USERNAME_DEV" >> "$GITHUB_ENV"
+              echo "API_TOKEN=$SLOT_RUNTIME_API_TOKEN_DEV" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unsupported TARGET_ENV: $TARGET_ENV" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Runtime preflight
+        run: |
+          missing=0
+          for v in LMS_BASE_URL PROFILE_USERNAME API_TOKEN; do
+            if [[ -z "${!v:-}" ]]; then
+              echo "Missing required runtime variable: $v" >&2
+              missing=1
+            fi
+          done
+          if [[ "$missing" -ne 0 ]]; then
+            if [[ "$STRICT_RUNTIME" == "true" ]]; then
+              exit 1
+            fi
+            echo "STRICT_RUNTIME=false: continuing despite missing runtime variables"
+          fi
+
+      - name: Run slot gate bundle (runtime mode)
+        if: ${{ env.STRICT_RUNTIME == 'false' || (env.LMS_BASE_URL != '' && env.PROFILE_USERNAME != '' && env.API_TOKEN != '') }}
+        run: |
+          export RUN_SLOT_RUNTIME=1
+          export RUN_SLOT_RUNTIME_ALLOW_MUTATION=1
+          export LMS_BASE_URL="$LMS_BASE_URL"
+          export PROFILE_USERNAME="$PROFILE_USERNAME"
+          export API_TOKEN="$API_TOKEN"
+
+          if [[ "$RUN_VISUAL_REGRESSION" == "true" ]]; then
+            export RUN_SLOT_VISUAL_REGRESSION=1
+            export SLOT_VISUAL_ENV="$TARGET_ENV"
+          fi
+
+          ./scripts/qa/run-mfe-slot-gates.sh
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## MFE Slot Runtime Gates"
+            echo ""
+            echo "- Target env: \`$TARGET_ENV\`"
+            echo "- Strict runtime: \`$STRICT_RUNTIME\`"
+            echo "- Visual regression: \`$RUN_VISUAL_REGRESSION\`"
+            echo "- Gate command: \`RUN_SLOT_RUNTIME=1 RUN_SLOT_RUNTIME_ALLOW_MUTATION=1 ./scripts/qa/run-mfe-slot-gates.sh\`"
+          } >> "$GITHUB_STEP_SUMMARY"

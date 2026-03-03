@@ -237,4 +237,10 @@
 	reverse_proxy /payment* payments-gateway:8080 {
 		header_up Host {http.request.host}
 	}
+
+	# Stripe webhook endpoint — must be externally reachable for Stripe event delivery.
+	# Stripe verifies webhook signatures server-side; no auth header needed here.
+	reverse_proxy /webhooks/stripe* payments-gateway:8080 {
+		header_up Host {http.request.host}
+	}
 }

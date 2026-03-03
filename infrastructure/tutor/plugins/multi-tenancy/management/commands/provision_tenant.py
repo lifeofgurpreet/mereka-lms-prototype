@@ -111,9 +111,7 @@ class Command(BaseCommand):
         self._get_or_create_oauth2_application(slug, name, domain)
         self._get_or_create_waffle_switches(slug)
 
-        self.stdout.write(self.style.SUCCESS(
-            f"\nTenant '{slug}' provisioned successfully."
-        ))
+        self.stdout.write(self.style.SUCCESS(f"\nTenant '{slug}' provisioned successfully."))
         self.stdout.write(f"  UUID: {enterprise_customer.uuid}")
         self.stdout.write(f"  Domain: {domain}")
         self.stdout.write(f"  Site ID: {site.id}")
@@ -136,9 +134,7 @@ class Command(BaseCommand):
             )
 
         if len(slug) > 63:
-            raise CommandError(
-                f"Slug '{slug}' too long: max 63 characters."
-            )
+            raise CommandError(f"Slug '{slug}' too long: max 63 characters.")
 
         # Check for duplicate domain belonging to a DIFFERENT tenant's site.
         existing_site = Site.objects.filter(domain__iexact=domain).first()
@@ -157,10 +153,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.WARNING("\n=== DRY RUN ==="))
         self.stdout.write(f"Would provision tenant '{slug}':")
         self.stdout.write(f"  1. Create/reuse Django Site: domain={domain}")
-        self.stdout.write(f"  2. Create/reuse SiteConfiguration with:")
+        self.stdout.write("  2. Create/reuse SiteConfiguration with:")
         self.stdout.write(f"       PLATFORM_NAME={name}")
         self.stdout.write(f"       SITE_NAME={name}")
-        self.stdout.write(f"       ENABLE_ENTERPRISE_INTEGRATION=True")
+        self.stdout.write("       ENABLE_ENTERPRISE_INTEGRATION=True")
         self.stdout.write(f"  3. Create/reuse EnterpriseCustomer: slug={slug}, name={name}")
         if contact_email:
             self.stdout.write(f"       contact_email={contact_email}")
@@ -168,7 +164,7 @@ class Command(BaseCommand):
             self.stdout.write(f"       country={country}")
         self.stdout.write(f"  4. Create/reuse TenantConfig: slug={slug}")
         self.stdout.write(f"  5. Create/reuse OAuth2 Application: client_id=tenant-{slug}")
-        self.stdout.write(f"  6. Create/reuse Waffle Switches:")
+        self.stdout.write("  6. Create/reuse Waffle Switches:")
         for switch_name, default in TENANT_WAFFLE_SWITCHES.items():
             self.stdout.write(f"       {switch_name}.{slug} = {default}")
         self.stdout.write(self.style.WARNING("\nNo changes made (dry run)."))
@@ -278,8 +274,8 @@ class Command(BaseCommand):
     def _get_or_create_oauth2_application(self, slug, name, domain):
         """Create an OAuth2 Application for this tenant's API access."""
         try:
-            from oauth2_provider.models import Application
             from django.contrib.auth import get_user_model
+            from oauth2_provider.models import Application
 
             User = get_user_model()
             client_id = f"tenant-{slug}"
@@ -313,9 +309,7 @@ class Command(BaseCommand):
             self.stdout.write(f"  Created OAuth2 Application: {client_id}")
             return app
         except ImportError:
-            self.stdout.write(
-                self.style.WARNING("  SKIP: django-oauth-toolkit not installed")
-            )
+            self.stdout.write(self.style.WARNING("  SKIP: django-oauth-toolkit not installed"))
             return None
 
     def _get_or_create_waffle_switches(self, slug):
@@ -335,6 +329,4 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write(f"  Waffle Switch already exists: {switch_name}")
         except ImportError:
-            self.stdout.write(
-                self.style.WARNING("  SKIP: django-waffle not installed")
-            )
+            self.stdout.write(self.style.WARNING("  SKIP: django-waffle not installed"))

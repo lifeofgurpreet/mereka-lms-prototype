@@ -5,15 +5,14 @@ from __future__ import annotations
 
 import argparse
 import csv
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable
 
 
 def read_csv(path: Path) -> Iterable[dict]:
     with path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
-        for row in reader:
-            yield row
+        yield from reader
 
 
 def write_csv(path: Path, fieldnames, rows: Iterable[dict]) -> None:
@@ -25,9 +24,9 @@ def write_csv(path: Path, fieldnames, rows: Iterable[dict]) -> None:
             writer.writerow(row)
 
 
-def build_user_maps(users_csv: Path) -> Dict[str, dict]:
-    by_contact: Dict[str, dict] = {}
-    by_customer: Dict[str, dict] = {}
+def build_user_maps(users_csv: Path) -> dict[str, dict]:
+    by_contact: dict[str, dict] = {}
+    by_customer: dict[str, dict] = {}
     for row in read_csv(users_csv):
         if row.get("kajabi_contact_id"):
             by_contact[row["kajabi_contact_id"]] = row
@@ -36,8 +35,8 @@ def build_user_maps(users_csv: Path) -> Dict[str, dict]:
     return {"contact": by_contact, "customer": by_customer}
 
 
-def build_course_key_map(manifest_csv: Path) -> Dict[str, str]:
-    mapping: Dict[str, str] = {}
+def build_course_key_map(manifest_csv: Path) -> dict[str, str]:
+    mapping: dict[str, str] = {}
     for row in read_csv(manifest_csv):
         kajabi_id = row["kajabi_course_id"]
         course_key = f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
@@ -85,8 +84,8 @@ def create_users_import(
 
 def create_enrollments_import(
     enrollments_csv: Path,
-    user_maps: Dict[str, Dict[str, dict]],
-    course_map: Dict[str, str],
+    user_maps: dict[str, dict[str, dict]],
+    course_map: dict[str, str],
     output_csv: Path,
 ) -> None:
     rows = []
