@@ -87,17 +87,20 @@ fi
 
 rm -rf "$TEMP_DIR"
 
-# TEST-TCR-022: Double apply produces byte-identical Dockerfiles
+# TEST-TCR-022: Consecutive applies produce byte-identical Dockerfiles
 test_start "Double apply-patches.sh produces byte-identical Dockerfiles"
 
 TEMP_DIR=$(mktemp -d)
-find "$REPO_ROOT/tutor_env/env/build/openedx" -name "Dockerfile" -type f -exec md5sum {} \; | sort > "$TEMP_DIR/before_checksums.txt" 2>/dev/null || true
 
+# Apply once to establish baseline state
 "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1 || true
+find "$REPO_ROOT/tutor_env/env/build/openedx" -name "Dockerfile" -type f -exec md5sum {} \; | sort > "$TEMP_DIR/after_first.txt" 2>/dev/null || true
 
-find "$REPO_ROOT/tutor_env/env/build/openedx" -name "Dockerfile" -type f -exec md5sum {} \; | sort > "$TEMP_DIR/after_checksums.txt" 2>/dev/null || true
+# Apply again — should produce identical output
+"$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1 || true
+find "$REPO_ROOT/tutor_env/env/build/openedx" -name "Dockerfile" -type f -exec md5sum {} \; | sort > "$TEMP_DIR/after_second.txt" 2>/dev/null || true
 
-if diff -q "$TEMP_DIR/before_checksums.txt" "$TEMP_DIR/after_checksums.txt" >/dev/null 2>&1; then
+if diff -q "$TEMP_DIR/after_first.txt" "$TEMP_DIR/after_second.txt" >/dev/null 2>&1; then
   test_pass
 else
   test_fail "Dockerfiles changed after second apply"
