@@ -109,7 +109,7 @@ jobs:
         run: python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/ --severity-filter error
 
       - name: Verify spec-testmap mapping (informational)
-        run: python3 scripts/qa/spec-tools/mereka_spec_verify.py specs/ --repo-root . --testmaps-dir specs/testmaps/ || true
+        run: python3 scripts/qa/spec-tools/mereka_spec_verify.py specs/ --repo-root . || true
 
       - name: Validate testmap format
         run: python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/
@@ -118,7 +118,7 @@ jobs:
         run: |
           mkdir -p var
           python3 scripts/qa/spec-tools/spec_coverage_report.py \
-            --specs-dir specs/ --testmaps-dir specs/testmaps/ --repo-root . \
+            --specs-dir specs/ --repo-root . \
             --format markdown --output var/spec-coverage.md --fail-under 80
 
       - name: Upload spec coverage artifact
