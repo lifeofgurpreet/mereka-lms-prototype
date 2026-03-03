@@ -125,14 +125,18 @@ if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
     ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
 """.strip()
 
+
+def _register_env_patch(patch_name: str, patch_body: str) -> None:
+    """Register a Tutor ENV patch with a consistent call shape."""
+    hooks.Filters.ENV_PATCHES.add_item((patch_name, patch_body))
+
 ###############################################################################
 # LMS Production Settings Patches
 ###############################################################################
 
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-lms-production-settings",
-        """
+_register_env_patch(
+    "openedx-lms-production-settings",
+    """
 # Safe app installer — prevents ImportError from missing optional modules
 def _safe_add_app(app_name):
     if app_name not in INSTALLED_APPS:
@@ -462,17 +466,15 @@ if "{{ MEREKA_PARAGON_THEME_ENABLED }}".lower() == "true":
     MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"]["urls"]["default"] = _theme_base + "/light.min.css"
     MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"]["urls"]["brandOverride"] = _theme_base + "/mereka-brand-light.min.css"
 """,
-    )
 )
 
 ###############################################################################
 # LMS Assets Settings Patches (for collectstatic)
 ###############################################################################
 
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-lms-assets-settings",
-        f"""
+_register_env_patch(
+    "openedx-lms-assets-settings",
+    f"""
 {_REDWOOD_OPTIONAL_APPS_SNIPPET}
 
 # Monkey-patch safe_join to be permissive during asset build.
@@ -480,23 +482,20 @@ hooks.Filters.ENV_PATCHES.add_item(
 # reference relative paths like ../../css/images/correct-icon.png
 {_SAFE_JOIN_MONKEYPATCH_SNIPPET}
 """,
-    )
 )
 
 ###############################################################################
 # CMS Assets Settings Patches
 ###############################################################################
 
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-cms-assets-settings",
-        f"""
+_register_env_patch(
+    "openedx-cms-assets-settings",
+    f"""
 {_REDWOOD_OPTIONAL_APPS_SNIPPET}
 
 # Same safe_join patch for CMS
 {_SAFE_JOIN_MONKEYPATCH_SNIPPET}
 """,
-    )
 )
 
 ###############################################################################
