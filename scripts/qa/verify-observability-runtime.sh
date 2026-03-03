@@ -912,12 +912,12 @@ check_prometheus_runtime_wiring() {
         echo ""
         echo "## Raw targets payload"
         echo '```json'
-        echo "$TARGETS_JSON" | jq '.data.activeTargets // []' 2>/dev/null | sed -n '1,120p'
+        jq '.data.activeTargets // [] | .[:120]' <<<"$TARGETS_JSON" 2>/dev/null
         echo '```'
         echo ""
         echo "## Raw rule payload"
         echo '```json'
-        echo "$RULES_JSON" | jq '.data.groups // []' 2>/dev/null | sed -n '1,160p'
+        jq '.data.groups // [] | .[:160]' <<<"$RULES_JSON" 2>/dev/null
         echo '```'
     } > "$evidence_file"
 
