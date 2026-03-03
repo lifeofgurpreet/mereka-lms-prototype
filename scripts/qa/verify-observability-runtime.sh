@@ -1210,7 +1210,9 @@ if [[ -f "scripts/qa/validate-observability-compliance.sh" ]]; then
         else
             pass "AC-OVR-025: Validation script emits schema-valid JSON"
             if [[ -n "$VERIFY_EVIDENCE_FILE" ]]; then
-                echo "${VALIDATE_JSON_PAYLOAD}" > "$VERIFY_EVIDENCE_DIR/observability-compliance-runtime.json"
+                # Keep AC-025 evidence separate so we do not clobber the canonical
+                # runtime compliance artifact emitted by run-observability-first-class.
+                echo "${VALIDATE_JSON_PAYLOAD}" > "$VERIFY_EVIDENCE_DIR/observability-compliance-ac025-local.json"
             fi
         fi
     fi
