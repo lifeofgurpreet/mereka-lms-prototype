@@ -519,10 +519,9 @@ RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target
 )
 
 # Override the base requirements install to use filtered requirements
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-dockerfile-python-requirements",
-        """
+_register_env_patch(
+    "openedx-dockerfile-python-requirements",
+    """
 # Install main requirements (with editable Git URLs filtered out)
 RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/assets.txt,target=/tmp/assets.txt \\
     --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
@@ -532,29 +531,24 @@ RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/assets.txt,targ
 RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
     [ -s /tmp/git-packages.txt ] && xargs -r -a /tmp/git-packages.txt $PIP_COMMAND install || true
 """,
-    )
 )
 
 # Node environment variables for webpack builds
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-dockerfile-pre-assets",
-        """
+_register_env_patch(
+    "openedx-dockerfile-pre-assets",
+    """
 # Increase Node memory limit for webpack builds
 ENV NODE_OPTIONS="--max-old-space-size=6144"
 ENV PYTHONPATH="/openedx/edx-platform"
 """,
-    )
 )
 
 # NPM install command override for lockfile drift tolerance
 # NOTE: Using 'npm install' instead of 'npm ci' to handle Open edX upstream
 # lockfile drift gracefully while still respecting the lockfile when possible.
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-dockerfile-npm-install-cmd",
-        """npm install --no-audit --registry=$NPM_REGISTRY""",
-    )
+_register_env_patch(
+    "openedx-dockerfile-npm-install-cmd",
+    """npm install --no-audit --registry=$NPM_REGISTRY""",
 )
 
 # Install custom apps and dependencies
@@ -590,10 +584,9 @@ _copy_lines = "\n".join(
 )
 _install_lines = "\n".join(f"RUN pip install -e /openedx/{app}" for app in _CUSTOM_APPS)
 
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-dockerfile-post-python-requirements",
-        f"""
+_register_env_patch(
+    "openedx-dockerfile-post-python-requirements",
+    f"""
 # Copy and install ALL custom apps (keep in sync with settings and custom-apps/)
 {_copy_lines}
 {_install_lines}
@@ -617,7 +610,6 @@ RUN pip install django-ratelimit==4.1.0
 # Install pymongo SRV extras for MongoDB Atlas
 RUN pip install "pymongo[srv]"
 """,
-    )
 )
 
 # Custom theme SASS compilation (strip Google Fonts imports)
