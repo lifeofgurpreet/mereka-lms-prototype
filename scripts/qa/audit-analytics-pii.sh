@@ -159,7 +159,6 @@ if [[ ${#sql_files[@]} -gt 0 ]]; then
     for pattern in "${PII_PATTERNS[@]}"; do
       if grep -qE "SELECT.*\b${pattern}\b" "$file" 2>/dev/null; then
         # Check if there's anonymization in the same query
-        local query_context
         query_context=$(grep -A5 "SELECT.*\b${pattern}\b" "$file" || true)
 
         if ! echo "$query_context" | grep -qE "(hash|md5|sha|anonymize|CONCAT|SUBSTR)"; then

@@ -116,7 +116,7 @@ fi
 # AC-BRAND-001: exact package structure
 if [[ -d "$BRAND_DIR" ]]; then
   actual_files="$(find "$BRAND_DIR" -type f | sed "s#^$BRAND_DIR/##" | LC_ALL=C sort)"
-  expected_files="$((cat <<'LIST'
+  expected_files="$( (cat <<'LIST'
 favicon.ico
 favicon.png
 fonts/Lato-Black.woff2

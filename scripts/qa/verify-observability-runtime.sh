@@ -1171,15 +1171,17 @@ if [[ -f "scripts/qa/validate-observability-compliance.sh" ]]; then
     VALIDATE_JSON_TMP="$VERIFY_EVIDENCE_DIR/observability-compliance-runtime-ac025.tmp.json"
     set +e
     if command -v timeout >/dev/null 2>&1; then
-      VALIDATE_OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
+        VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
         VALIDATE_OBS_JSON_ONLY=1 \
-        timeout "$VERIFY_RUNTIME_VALIDATION_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json --strict >"$VALIDATE_JSON_TMP" 2>&1)"
+        timeout "$VERIFY_RUNTIME_VALIDATION_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json --strict >"$VALIDATE_JSON_TMP" 2>&1
       VALIDATE_RC=$?
+      VALIDATE_OUTPUT="$(cat "$VALIDATE_JSON_TMP")"
     else
-      VALIDATE_OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
+      VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
         VALIDATE_OBS_JSON_ONLY=1 \
-        scripts/qa/validate-observability-compliance.sh --mode local --json --strict >"$VALIDATE_JSON_TMP" 2>&1)"
+        scripts/qa/validate-observability-compliance.sh --mode local --json --strict >"$VALIDATE_JSON_TMP" 2>&1
       VALIDATE_RC=$?
+      VALIDATE_OUTPUT="$(cat "$VALIDATE_JSON_TMP")"
     fi
 
     if [[ $VALIDATE_RC -ne 0 ]]; then

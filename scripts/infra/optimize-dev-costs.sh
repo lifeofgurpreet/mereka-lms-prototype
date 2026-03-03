@@ -33,7 +33,7 @@ echo ""
 
 # 2. Reduce Redis size and tier
 echo "📊 Current Redis: STANDARD_HA 2GB"
-echo "   → Reducing to BASIC 1GB for dev (saves ~$60/month)"
+echo "   → Reducing to BASIC 1GB for dev (saves ~\$60/month)"
 echo ""
 read -p "Continue with Redis optimization? (y/N): " -n 1 -r
 echo
@@ -67,7 +67,7 @@ echo ""
 
 # 3. Reduce Cloud SQL disk size
 echo "📊 Current Cloud SQL disk: 100GB"
-echo "   → Reducing to 20GB for dev (saves ~$13/month)"
+echo "   → Reducing to 20GB for dev (saves ~\$13/month)"
 echo ""
 read -p "Continue with disk size reduction? (y/N): " -n 1 -r
 echo
