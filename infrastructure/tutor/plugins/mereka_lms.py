@@ -506,16 +506,14 @@ _register_env_patch(
 # uv pip (Rust-based SOTA tool) doesn't support editable Git URLs (-e git+https://...)
 # We work around this by filtering them out and installing separately with PEP 508 format.
 # This lets us use uv pip for all packages while handling the edge case properly.
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-dockerfile-pre-python-requirements",
-        """
+_register_env_patch(
+    "openedx-dockerfile-pre-python-requirements",
+    """
 # Extract editable Git packages from requirements for separate installation
 RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/tmp/base.txt \\
     grep '^-e git+https://' /tmp/base.txt | sed 's|^-e git+https://github.com/\\([^/]\\+\\)/\\([^.]*\\)\\.git@\\([^#]\\+\\)#egg=\\(.*\\)$|\\4 @ git+https://github.com/\\1/\\2.git@\\3|' > /tmp/git-packages.txt || true && \\
     grep -v '^-e git+https://' /tmp/base.txt > /tmp/base-filtered.txt
 """,
-    )
 )
 
 # Override the base requirements install to use filtered requirements
@@ -841,10 +839,9 @@ import './mereka/mereka.scss';
 """,
 )
 
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-env-config-runtime-definitions",
-        """
+_register_env_patch(
+    "mfe-env-config-runtime-definitions",
+    """
 {% raw %}
 const normalizeHostname = (hostname) => {
   return (typeof hostname === 'string' ? hostname.toLowerCase() : '').replace(/^www\\./, '');
@@ -2023,23 +2020,20 @@ const MerekaFooter = () => {
 };
 {% endraw %}
 """,
-    )
 )
 
 ###############################################################################
 # MySQL Dockerfile Patches
 ###############################################################################
 
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mysql-docker-compose",
-        """
+_register_env_patch(
+    "mysql-docker-compose",
+    """
 # MySQL 8 authentication plugin fix
 environment:
   MYSQL_ROOT_HOST: "%"
 command: mysqld --default-authentication-plugin=mysql_native_password
 """,
-    )
 )
 
 ###############################################################################
@@ -2047,10 +2041,9 @@ command: mysqld --default-authentication-plugin=mysql_native_password
 ###############################################################################
 
 # Add extra LMS host blocks to Caddyfile
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "caddyfile",
-        """
+_register_env_patch(
+    "caddyfile",
+    """
 (security_headers) {
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -2103,17 +2096,15 @@ hooks.Filters.ENV_PATCHES.add_item(
     }
 }
 """,
-    )
 )
 
 ###############################################################################
 # Nginx Configuration Patches
 ###############################################################################
 
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "nginx-lms-config",
-        """
+_register_env_patch(
+    "nginx-lms-config",
+    """
 # Additional server names for multi-site support
 {% for host in MEREKA_LMS_EXTRA_HOSTS %}
 {{ host }}{% if not loop.last %} {% endif %}
@@ -2139,7 +2130,6 @@ location ^~ /profile/api/ {
     proxy_pass http://lms-backend;
 }
 """,
-    )
 )
 
 ###############################################################################
@@ -2147,10 +2137,9 @@ location ^~ /profile/api/ {
 ###############################################################################
 
 # Install credentials_vc_issuer custom app
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "credentials-dockerfile-post-python-requirements",
-        """
+_register_env_patch(
+    "credentials-dockerfile-post-python-requirements",
+    """
 # Copy and install credentials_vc_issuer custom app
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/credentials_vc_issuer /openedx/credentials_vc_issuer
 RUN pip install -e /openedx/credentials_vc_issuer
@@ -2161,7 +2150,6 @@ RUN pip install cryptography>=41.0.0
 # Ensure ZoneInfo("UTC") works even when OS tzdata files are absent
 RUN pip install tzdata>=2024.1
 """,
-    )
 )
 
 # NOTE: credentials-urlpatterns is NOT a standard Tutor patch. The VC issuer
@@ -2170,23 +2158,19 @@ RUN pip install tzdata>=2024.1
 # service is deployed.  See: credentials_vc_issuer/apps.py
 
 # CMS production settings patch (metrics + URL exposure in Studio)
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-cms-production-settings",
-        f"""
+_register_env_patch(
+    "openedx-cms-production-settings",
+    f"""
 {_CMS_PROMETHEUS_METRICS_SNIPPET}
 # Explicit ROOT_URLCONF_OVERRIDES keeps /metrics stable across plugin API variations.
 """,
-    )
 )
 
 # CMS development settings patch (metrics parity with production).
 # Keep this in sync with production CMS metrics wiring so nonprod/dev also has /metrics.
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-cms-development-settings",
-        _CMS_PROMETHEUS_METRICS_SNIPPET,
-    )
+_register_env_patch(
+    "openedx-cms-development-settings",
+    _CMS_PROMETHEUS_METRICS_SNIPPET,
 )
 
 ###############################################################################
