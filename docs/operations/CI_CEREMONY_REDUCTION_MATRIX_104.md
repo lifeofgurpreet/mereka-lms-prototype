@@ -23,8 +23,8 @@ rg -n "^[A-Za-z0-9_.-]+:($|[^=])" Makefile | sed -E 's/:.*$//' | wc -l
 | Metric | Current count |
 |---|---:|
 | Workflow files (`.github/workflows/*.yml`) | 56 |
-| Verify scripts (`scripts/qa/verify-*.sh`) | 466 |
-| Make targets (`Makefile` target declarations) | 83 |
+| Verify scripts (`scripts/qa/verify-*.sh`) | 465 |
+| Make targets (`Makefile` target declarations) | 77 |
 
 ## Deletion / Consolidation Matrix
 
@@ -41,22 +41,23 @@ After removing `policy-checks` and the 18-script workflow-wrapper family, and pa
 | Metric | Baseline | Current | Delta |
 |---|---:|---:|---:|
 | Workflow files | 60 | 56 | -4 |
-| Verify scripts | 495 | 466 | -29 |
-| Make targets | 76 | 83 | +7 |
+| Verify scripts | 495 | 465 | -30 |
+| Make targets | 76 | 77 | +1 |
 
-## Follow-on Completion (Make Lane Parameterization)
+## Follow-on Completion (Make Lane Canonicalization)
 
 - Added canonical parameterized target:
   - `qa-frontend-closure` (driven by `QA_ENV`, `QA_CROSS_BROWSER`, `QA_CAPTURE_SCREENSHOTS`, `QA_MFE_ONLY`, `QA_REQUIRE_RUNTIME_THEME`)
-- Retained existing entrypoint targets as thin delegators to preserve compatibility:
-  - `qa-frontend-closure-prod`
-  - `qa-frontend-closure-dev`
-  - `qa-frontend-closure-prod-screenshots`
-  - `qa-frontend-closure-prod-screenshots-mfe`
-  - `qa-frontend-closure-dev-screenshots`
-  - `qa-frontend-closure-dev-screenshots-mfe`
-- Contract verifier updated to enforce new canonical delegation pattern:
-  - `scripts/qa/verify-frontend-qa-make-targets.sh`
+- Removed redundant env-specific wrapper aliases to enforce one canonical execution path:
+  - removed `qa-frontend-closure-prod`
+  - removed `qa-frontend-closure-dev`
+  - removed `qa-frontend-closure-prod-screenshots`
+  - removed `qa-frontend-closure-prod-screenshots-mfe`
+  - removed `qa-frontend-closure-dev-screenshots`
+  - removed `qa-frontend-closure-dev-screenshots-mfe`
+- Canonical invocation examples:
+  - `make qa-frontend-closure QA_ENV=prod QA_CROSS_BROWSER=1 QA_REQUIRE_RUNTIME_THEME=1`
+  - `make qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1 QA_MFE_ONLY=1`
 
 ## Wrapper Script Deletion Set (18)
 
