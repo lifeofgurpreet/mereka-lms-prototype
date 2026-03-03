@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-03-03T04:11:32Z",
+  "mode": "runtime",
+  "strict": true,
+  "summary": {
+    "pass": 5,
+    "fail": 4,
+    "skip": 0,
+    "total": 9
+  },
+  "checks": [
+    {
+      "id": "AC-OVR-027",
+      "status": "pass",
+      "message": "kubectl and gcloud are available"
+    },
+    {
+      "id": "AC-OVR-027",
+      "status": "pass",
+      "message": "kubectl cluster access succeeds"
+    },
+    {
+      "id": "AC-OVR-027",
+      "status": "pass",
+      "message": "gcloud has an active authenticated account"
+    },
+    {
+      "id": "AC-OVR-016",
+      "status": "fail",
+      "message": "LMS /metrics returned 404 (expected 200)"
+    },
+    {
+      "id": "AC-OVR-016",
+      "status": "fail",
+      "message": "LMS /metrics payload unavailable or invalid for Prometheus exposition validation"
+    },
+    {
+      "id": "AC-OVR-016",
+      "status": "fail",
+      "message": "CMS /metrics returned 404 (expected 200)"
+    },
+    {
+      "id": "AC-OVR-016",
+      "status": "fail",
+      "message": "CMS /metrics payload unavailable or invalid for Prometheus exposition validation"
+    },
+    {
+      "id": "AC-OVR-026",
+      "status": "pass",
+      "message": "passed"
+    },
+    {
+      "id": "AC-OVR-026",
+      "status": "pass",
+      "message": "passed"
+    }
+  ]
+}

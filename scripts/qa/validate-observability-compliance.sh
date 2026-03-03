@@ -196,7 +196,10 @@ run_script() {
     else
       # Normalize noisy script output into a deterministic single-line excerpt.
       output_clean="$(printf '%s' "$output" | tr -d '\000' | sed 's/\x1B\[[0-9;]*[mK]//g')"
-      output_excerpt="$(printf '%s' "$output_clean" | awk 'NF{print; exit}')"
+      output_excerpt="$(printf '%s\n' "$output_clean" | awk '/\[FAIL\]|^FAIL |NOT listed in kustomization.yaml|returned [0-9]{3}|missing/{print; exit}')"
+      if [[ -z "$output_excerpt" ]]; then
+        output_excerpt="$(printf '%s\n' "$output_clean" | awk 'NF{print; exit}')"
+      fi
       if [[ -z "$output_excerpt" ]]; then
         output_excerpt="$output_clean"
       fi

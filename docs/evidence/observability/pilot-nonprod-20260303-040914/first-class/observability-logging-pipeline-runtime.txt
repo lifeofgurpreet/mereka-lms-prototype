@@ -1,0 +1,190 @@
+# Logging Pipeline Verification Evidence
+
+- generated_at: 2026-03-03T04:12:31Z
+- app_namespace: mereka-lms
+- k8s_context: rke2-nonprod
+- strict: 1
+- runner: run-observability-first-class
+- status: failed_strict
+- evidence_identity: env=nonprod;profile=nonprod;context=rke2-nonprod;project=mereka-lms
+
+## Logging pipeline checks
+
+Checking logging pipeline evidence
+  context:   rke2-nonprod
+  namespace: mereka-lms
+  strict:    1
+  runner:    run-observability-first-class
+
+=== AC-LOG-001: Promtail deployment ===
+Verify: Promtail DaemonSet deployment
+  context:   rke2-nonprod
+  namespace: mereka-lms
+
+Check: Promtail DaemonSet exists in namespace mereka-lms... PASS
+Check: Promtail pods are running... PASS (6/6 pods running)
+Check: Promtail configured to scrape mereka-lms namespace... PASS
+Check: Loki deployment exists... SKIP Loki deployment not found
+Check: Promtail is shipping logs... PASS
+
+OK (with 1 skipped checks)
+PASS Promtail deployment checks
+
+=== AC-LOG-002: Canonical log source coverage ===
+Verify: Loki canonical log sources
+  context:   rke2-nonprod
+  namespace: mereka-lms
+  loki URL:  auto-detect
+
+SKIP Loki service not found and LOKI_URL not provided
+FAIL Canonical log source coverage: failed (script exit 1)
+
+=== AC-LOG-003: Loki label schema ===
+Verify: Loki log label schema
+  context:   rke2-nonprod
+  namespace: mereka-lms
+
+Found Promtail in namespace: mereka-lms
+
+Checking Promtail configuration for label schema...
+Check: Promtail config includes label 'service'... PASS
+Check: Promtail config includes label 'env'... PASS
+Check: Promtail config includes label 'cluster'... PASS
+Check: Promtail config includes label 'namespace'... PASS
+Check: Promtail config includes label 'hostname'... PASS
+Check: Promtail config includes label 'severity'... PASS
+
+NOTE: This script checks Promtail configuration for label patterns.
+To verify actual log labels in Loki, query: {namespace="mereka-lms"} and inspect labels.
+
+OK
+PASS Loki label schema checks
+
+=== AC-LOG-004: Structured logs ===
+Verify: Structured JSON logging
+  context:   rke2-nonprod
+  namespace: mereka-lms
+  services:  lms cms lms-worker cms-worker discovery ecommerce ecommerce-worker credentials notes
+  strict JSON services: cms
+  fail on no JSON: 0
+  levels for correlation enforcement: ERROR,WARN,WARNING,CRITICAL,FATAL
+  max lines: 80
+
+Checking logs for service: lms
+  Found pod: lms-77744bcb8-hcj5v
+  Check: Logs are JSON formatted... PASS (1/80 lines, 1%; embedded JSON payloads)
+  WARN Only embedded JSON payloads detected; skipping strict full-line field contract.
+
+Checking logs for service: cms
+  Found pod: cms-76468b57d8-zgfb5
+  Check: Logs are JSON formatted... PASS (1/80 lines, 1%; embedded JSON payloads)
+  WARN Only embedded JSON payloads detected; skipping strict full-line field contract.
+
+Checking logs for service: lms-worker
+  Found pod: lms-worker-868667457d-hnd9z
+  Check: Logs are JSON formatted... WARN No JSON logs found (might be using plain text format)
+  WARN: AC-LOG-004 enforcement expects JSON logs
+
+Checking logs for service: cms-worker
+  Found pod: cms-worker-d58578959-cs9ff
+  Check: Logs are JSON formatted... WARN No JSON logs found (might be using plain text format)
+  WARN: AC-LOG-004 enforcement expects JSON logs
+
+Checking logs for service: discovery
+  Found pod: discovery-59598b5956-s6ln6
+  Check: Logs are JSON formatted... WARN No JSON logs found (might be using plain text format)
+  WARN: AC-LOG-004 enforcement expects JSON logs
+
+Checking logs for service: ecommerce
+  Found pod: ecommerce-86457487c8-pltdl
+  Check: Logs are JSON formatted... WARN No JSON logs found (might be using plain text format)
+  WARN: AC-LOG-004 enforcement expects JSON logs
+
+Checking logs for service: ecommerce-worker
+  Found pod: ecommerce-worker-68fc498b5-jr6hw
+  Check: Logs are JSON formatted... WARN No JSON logs found (might be using plain text format)
+  WARN: AC-LOG-004 enforcement expects JSON logs
+
+Checking logs for service: credentials
+  Found pod: credentials-8f64c9dd-clmbb
+  Check: Logs are JSON formatted... WARN No JSON logs found (might be using plain text format)
+  WARN: AC-LOG-004 enforcement expects JSON logs
+
+Checking logs for service: notes
+  Found pod: notes-58477697b5-2gx2z
+  Check: Logs are JSON formatted... WARN No JSON logs found (might be using plain text format)
+  WARN: AC-LOG-004 enforcement expects JSON logs
+
+NOTE: Open edX defaults may emit plain text in some code paths.
+Open this script in strict mode when structured logging is required for first-class gates.
+
+OK
+PASS Structured logging checks
+
+=== AC-LOG-005, AC-LOG-006: PII filtering ===
+Verify: PII filtering in logs
+  context:   rke2-nonprod
+  namespace: mereka-lms
+  email ignore regex: ^celery@edx\.(lms|cms)\.core\.default\.[a-z0-9-]+$
+
+Checking logs for service: lms
+  Found pod: lms-77744bcb8-hcj5v
+  Check: No email addresses in logs... PASS
+  Check: No passwords in logs... PASS
+  Check: No API keys/tokens in logs... PASS
+
+Checking logs for service: cms
+  Found pod: cms-76468b57d8-zgfb5
+  Check: No email addresses in logs... PASS
+  Check: No passwords in logs... PASS
+  Check: No API keys/tokens in logs... PASS
+
+Checking logs for service: lms-worker
+  Found pod: lms-worker-868667457d-hnd9z
+  Check: No email addresses in logs... PASS
+  Check: No passwords in logs... PASS
+  Check: No API keys/tokens in logs... PASS
+
+Checking logs for service: cms-worker
+  Found pod: cms-worker-d58578959-cs9ff
+  Check: No email addresses in logs... PASS
+  Check: No passwords in logs... PASS
+  Check: No API keys/tokens in logs... PASS
+
+NOTE: This check samples recent pod logs. For comprehensive PII filtering:
+  1. Query Loki: {namespace="mereka-lms"} |~ "@.*\\.com"
+  2. Review Django logging configuration for sensitive field filtering
+  3. Check Promtail pipeline stages for PII redaction
+
+OK
+PASS PII filtering checks
+
+=== AC-LOG-007, AC-LOG-008: Retention ===
+Verify: Observability retention policies
+  context:   rke2-nonprod
+  namespace: mereka-lms
+
+Checking Loki retention configuration...
+SKIP Loki deployment not found
+
+Checking Tempo retention configuration...
+SKIP Tempo deployment not found (traces retention N/A)
+
+Checking Prometheus retention configuration...
+SKIP Prometheus deployment not found
+
+NOTE: This script verifies retention configuration in ConfigMaps/StatefulSets.
+To verify actual data retention, query Loki/Tempo/Prometheus with old date ranges:
+  Loki:       {namespace="mereka-lms"} with range 31d-30d ago
+  Tempo:      traces older than 8 days should not be retrievable
+  Prometheus: rate(http_requests_total[30d]) should return data
+
+OK (with 3 skipped checks)
+PASS Retention checks
+
+=== Logging pipeline aggregate summary ===
+PASS:   5
+WARN:   0
+SKIP:   0
+FAIL:   1
+FAILED (strict mode)

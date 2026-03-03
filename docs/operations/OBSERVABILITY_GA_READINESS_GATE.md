@@ -1,6 +1,6 @@
 # Observability GA Readiness Gate
 
-Last updated: 2026-02-25
+Last updated: 2026-03-03
 
 ## Purpose
 
@@ -18,6 +18,40 @@ Decision options are based on objective evidence only:
 
 - `GO` — all criteria pass and evidence links are complete.
 - `NO-GO` — one or more mandatory criteria fail.
+
+## Current Decision Snapshot (2026-03-03)
+
+- Decision: `NO-GO`
+- Reviewer: Codex execution lane (automated + manual artifact review)
+- Evidence root:
+  - `var/ci/parity-dev`
+  - `var/ci/parity-nonprod`
+  - `var/ci/parity-prod`
+  - `docs/evidence/observability/pilot-nonprod-20260303-040914`
+
+### Lane results
+
+| Lane | Result | Primary blockers |
+|---|---|---|
+| `dev` (`rke2-staging`) | FAIL | `AC-OVR-016` (`LMS/CMS /metrics` return `404`), coverage/runtime/logging strict failures |
+| `nonprod` (`rke2-nonprod`) | FAIL | `AC-OVR-016` (`LMS/CMS /metrics` return `404`), coverage/runtime/logging strict failures |
+| `prod` (`gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`) | PASS | all six strict runtime first-class steps pass (`observability-compliance`, `coverage`, `runtime`, `correlation`, `logging`, `tracing`) |
+
+### Current blockers summary
+
+- Cross-lane parity gate remains blocked by nonprod/dev runtime conditions:
+  - `LMS/CMS /metrics` return `404` in both lanes.
+  - `openedx-settings-lms-patched` in both lanes lacks expected prometheus wiring markers at runtime.
+  - logging strict mode fails on `AC-LOG-002` because Loki service is absent in both lanes (`SKIP Loki service not found ...` followed by strict fail).
+- Production strict lane is green and no longer blocks GA on its own.
+
+### Tracing pilot status
+
+- Strict nonprod tracing pilot command timed out with exit `124`:
+  - `./scripts/qa/build-observability-tracing-pilot-bundle.sh --env nonprod --mode runtime --require-flow-capture --strict`
+- Bundle path exists but does not close pilot acceptance:
+  - `docs/evidence/observability/pilot-nonprod-20260303-040914`
+- `OBS-025` remains open until one end-to-end trace proof is captured with log/header correlation.
 
 ## Mandatory Criteria (all required)
 

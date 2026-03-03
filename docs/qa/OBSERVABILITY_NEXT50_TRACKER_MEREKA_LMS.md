@@ -1,9 +1,19 @@
 # Observability Next-50 Tracker (Mereka LMS)
 
-Date: 2026-02-25
+Date: 2026-03-03
 Owner: Mereka LMS platform team
 Scope: dev/nonprod/prod observability hardening for Open edX deployment
 Execution mode: Tracker-ready implementation backlog
+
+## Latest Runtime Snapshot (2026-03-03)
+
+- `prod` lane (`gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`) is strict-green:
+  - `./scripts/qa/run-observability-first-class.sh --mode runtime --strict` exits `0` with all six steps `PASS`.
+- `dev` (`rke2-staging`) and `nonprod` (`rke2-nonprod`) remain strict-red due to runtime platform gaps:
+  - `AC-OVR-016`: LMS/CMS `/metrics` return `404`.
+  - runtime marker probe: `openedx-settings-lms-patched` lacks expected prometheus wiring markers.
+  - logging strict failure (`AC-LOG-002`) when Loki service is absent in-lane.
+- Tracing pilot (`OBS-025`) remains open; strict nonprod pilot bundle still times out (`exit 124`).
 
 ## Status Legend
 
@@ -128,7 +138,7 @@ This is the next ordered 10-task handoff in terms of implementation scope, not m
 
 9. **OBS-EXT-069 — Stabilize strict runtime/compliance JSON and deterministic fail behavior (P1, in_progress)**
    - Definition of done: `AC-OVR-025` and `AC-OVR-029` pass consistently with strict mode and canonical runner outputs remain machine-parseable.
-   - Current implementation status: `validate-observability-compliance.sh` now supports deterministic JSON-only strict output (`VALIDATE_OBS_JSON_ONLY=1`) and `verify-observability-runtime.sh` now consumes it with stronger JSON payload extraction. `run-observability-first-class.sh` now publishes all per-component wiring evidence files in the runtime evidence index so downstream identity and CI integrity checks remain complete. Strict re-run evidence still needed.
+   - Current implementation status: `validate-observability-compliance.sh` supports deterministic JSON-only strict output (`VALIDATE_OBS_JSON_ONLY=1`), runtime verification no longer exits early on payload-shape checks under `set -e`, and compliance failure summaries are ANSI-stripped and deterministic. `prod` strict lane now passes end-to-end; remaining red lanes are runtime environment gaps, not parser instability.
 
 10. **OBS-EXT-070 — Publish implementation handoff epic (P0, planned)**
     - Definition of done: one parent issue set in tracker references `OBS-053..057`, `OBS-EXT-061..069`, and `OBS-058` with explicit evidence paths + closure criteria.
