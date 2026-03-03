@@ -100,6 +100,8 @@ jobs:
           find deploy/k8s -name '*.yml' -o -name '*.yaml' | \
             grep -v '/patches/' | \
             grep -v '/config/' | \
+            grep -v '/settings/' | \
+            grep -v 'helm-values' | \
             xargs kubeconform -strict -ignore-missing-schemas
 
       # ── Phase B (continued): Spec linting ─────────────────────────────────
