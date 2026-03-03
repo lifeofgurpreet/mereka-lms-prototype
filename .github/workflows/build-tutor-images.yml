@@ -899,6 +899,32 @@ jobs:
             --apply --commit --push \
             "${EXTRA_ARGS[@]}"
 
+      - name: Generate promotion record
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
+          GITOPS_COMMIT="$(git -C "$GITHUB_WORKSPACE/bbi-infrastructure" rev-parse HEAD)"
+          ./scripts/infra/generate-promotion-record.sh \
+            --output var/ci/promotion-record.json \
+            --repository "${{ github.repository }}" \
+            --commit-sha "${{ github.sha }}" \
+            --target-environment "${TARGET_ENV}" \
+            --openedx-digest "${OPENEDX_DIGEST}" \
+            --mfe-digest "${MFE_DIGEST}" \
+            --release-bundle-id "${RELEASE_BUNDLE_ID}" \
+            --gitops-repo "Biji-Biji-Initiative/bbi-infrastructure" \
+            --gitops-commit "${GITOPS_COMMIT}"
+
+      - name: Upload promotion record
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: promotion-record
+          path: var/ci/promotion-record.json
+          retention-days: 90
+
       - name: Summary
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
@@ -906,6 +932,7 @@ jobs:
           OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
           MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
           RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
+          GITOPS_COMMIT="$(git -C "$GITHUB_WORKSPACE/bbi-infrastructure" rev-parse HEAD)"
           echo "### Deployment Complete ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Mode:** GitOps update" >> $GITHUB_STEP_SUMMARY
@@ -914,3 +941,4 @@ jobs:
           echo "**OpenedX digest:** \`${OPENEDX_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
           echo "**MFE digest:** \`${MFE_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Release bundle:** \`${RELEASE_BUNDLE_ID}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**GitOps commit:** \`${GITOPS_COMMIT}\`" >> $GITHUB_STEP_SUMMARY

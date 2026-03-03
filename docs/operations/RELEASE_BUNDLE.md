@@ -1,6 +1,7 @@
 # Release Bundle Contract
 
 `build-tutor-images.yml` now emits a canonical `release-bundle` artifact (`var/ci/release-bundle.json`) for deterministic promotion records.
+The same workflow also emits `promotion-record` (`var/ci/promotion-record.json`) after GitOps update with the resulting infra commit SHA.
 
 ## Contract
 
@@ -14,6 +15,7 @@ The bundle captures:
 - source identity (`repository`, `commit_sha`, workflow run metadata)
 - artifact references (`sbom-*`, `slsa-provenance`, `trivy-*`)
 - promotion target environment
+- release-to-gitops linkage (`release_bundle_id` + resulting `bbi-infrastructure` commit)
 
 ## Local Verification
 
