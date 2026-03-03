@@ -300,6 +300,14 @@ jobs:
           docker push ${{ env.REGISTRY }}/openedx:${TAG}
           docker push ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
 
+          # Push mutable mereka-brand tag so the dev overlay (rke2-nonprod)
+          # auto-deploys via ArgoCD when a new image lands on main.
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker tag tutor_local/openedx:latest ${{ env.REGISTRY }}/openedx:mereka-brand
+            docker push ${{ env.REGISTRY }}/openedx:mereka-brand
+            echo "**Mutable tag:** \`mereka-brand\` (dev auto-deploy)" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "### OpenEdX Image Built ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`${{ env.REGISTRY }}/openedx:${TAG}\`" >> $GITHUB_STEP_SUMMARY
@@ -512,6 +520,14 @@ jobs:
 
           docker push ${{ env.REGISTRY }}/mfe:${TAG}
           docker push ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
+
+          # Push mutable mereka-brand tag so the dev overlay (rke2-nonprod)
+          # auto-deploys via ArgoCD when a new image lands on main.
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker tag tutor_local/openedx-mfe:latest ${{ env.REGISTRY }}/mfe:mereka-brand
+            docker push ${{ env.REGISTRY }}/mfe:mereka-brand
+            echo "**Mutable tag:** \`mereka-brand\` (dev auto-deploy)" >> $GITHUB_STEP_SUMMARY
+          fi
 
           echo "### MFE Image Built ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
