@@ -339,17 +339,17 @@ check_metrics_payload_shape() {
     return 1
   fi
 
-  if ! printf '%s' "$payload" | grep -qE '^# HELP '; then
+  if ! grep -qE '^# HELP ' <<<"$payload"; then
     record_result fail "AC-OVR-016" "${component} /metrics body missing # HELP exposition block"
     missing=$((missing + 1))
   fi
 
-  if ! printf '%s' "$payload" | grep -qE '^# TYPE '; then
+  if ! grep -qE '^# TYPE ' <<<"$payload"; then
     record_result fail "AC-OVR-016" "${component} /metrics body missing # TYPE exposition block"
     missing=$((missing + 1))
   fi
 
-  if ! printf '%s' "$payload" | grep -qE '^[a-zA-Z_:][a-zA-Z0-9_:]*(\{[^\n]*\})?[[:space:]]+[-+]?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?([[:space:]]+[0-9]+)?$'; then
+  if ! grep -qE '^[a-zA-Z_:][a-zA-Z0-9_:]*(\{[^\n]*\})?[[:space:]]+[-+]?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?([[:space:]]+[0-9]+)?$' <<<"$payload"; then
     record_result fail "AC-OVR-016" "${component} /metrics body missing a Prometheus sample with numeric value"
     missing=$((missing + 1))
   fi

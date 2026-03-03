@@ -232,7 +232,7 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
     APP_NS="$APP_NAMESPACE" \
     K8S_CONTEXT="$K8S_CONTEXT" \
     VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE="$COVERAGE_TXT" \
-    ./scripts/qa/verify-logging-pipeline.sh $STRICT_FLAG > "$COVERAGE_TXT"
+    ./scripts/qa/verify-logging-pipeline.sh $STRICT_FLAG
   LOGGING_RC=$?
   record_step_result "verify-logging-pipeline" "$LOGGING_RC"
   set -e
