@@ -13,7 +13,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 | `#106` PDF certificate branding closure | CLOSED | `verify-certificate-branding.sh` PASS; issue closure evidence on thread |
 | `#107` Phase 7 BEM live DOM audit + selector pruning | CLOSED | DOM audit rerun PASS after stability hardening (`issuecomment-3981799304`) |
 | `#108` Accessibility closure (contrast + focus) | CLOSED | `verify-a11y-contrast-focus.sh` + `verify-wcag-contrast-v2.sh` PASS |
-| `#109` `mereka_lms.py` maintainability split | CLOSED | Phase-14 extraction complete (`issuecomment-3981834322`): `mereka_lms.py` `3426 -> 2226`, new `mereka_lms_mfe_slots.py` (`1110`), QA path coupling `98 -> 0`; post-close no-behavior-change maintainability cleanup commits: `9f23cc0d`, `8b172c83`, `fb43eeb1` |
+| `#109` `mereka_lms.py` maintainability split | CLOSED | Phase-14 extraction complete (`issuecomment-3981834322`): `mereka_lms.py` `3426 -> 2226`, new `mereka_lms_mfe_slots.py` (`1110`), QA path coupling `98 -> 0`; post-close no-behavior-change maintainability cleanup commits: `9f23cc0d`, `8b172c83`, `fb43eeb1`, `72fc2f8e` |
 | `#111` Phase 6 slot decision (freeze vs continue) | CLOSED | Freeze decision recorded in `docs/BRANDING_PLAN.md` and issue thread |
 | `#110` staging promotion + rollback evidence | OPEN (BLOCKED BY SIGNAL) | Blocking notes posted (`issuecomment-3981835559`, `issuecomment-3981860415`, `issuecomment-3981904379`); offline preflight `verify-staging-activation.sh --offline` (`30 PASS / 0 FAIL / 3 SKIP`); repo-local rollback contract checks pass (`verify-cicd-release-rollback.sh`, `verify-release-dry-run-contract.sh`); staging-target release dry-run rehearsal passed (`var/qa/staging-release-dryrun-rehearsal-20260302T040104Z.log`); strict frontend stability sweep baseline is green (`var/qa/frontend-stability-sweep-20260302T040727Z.summary.log`, screenshots `var/screenshots/dev/20260302T040827Z/`); latest online read-only probe captured (`6 PASS / 3 FAIL / 1 SKIP`) with blockers in `var/qa/staging-activation-online-20260302T040504Z.log` (Argo `OutOfSync/Degraded`, `enterprise-secrets Ready=False SecretSyncedError`); staging auth-surface pre-signal baseline refreshed via `./scripts/qa/verify-auth-surfaces.sh staging` (`OK` with unresolved optional host warnings, log `var/qa/auth-surfaces-staging-20260302T101941Z.log`); execution playbook: `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` |
 
@@ -27,6 +27,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 - `8b172c83` — `#109` post-close maintainability: reuse env patch helper for dockerfile registrations (no behavior change)
 - `9f23cc0d` — `#109` post-close maintainability: add ENV patch registration helper and migrate initial patch cluster
 - `fb43eeb1` — `#109` post-close maintainability: migrate contiguous MFE/Open edX patch registration block to helper (no behavior change)
+- `72fc2f8e` — `#109` post-close maintainability: migrate remaining ENV patch registrations to helper (no behavior change)
 - `b92aefc9` — docs: classify dev auth reachability failure as persistent (3-probe evidence)
 - `3bce8fec` — docs: refresh blocker sweep to `20260303T222746Z` with diagnosis shift
 - `a64711a7` — `#104` canonical Make lane enforcement: remove legacy `qa-frontend-closure-*` aliases
