@@ -454,7 +454,9 @@ jobs:
         run: bash tests/tutor/test_edge_cases.sh
 
       - name: Validate config.example.yml structure
-        run: python3 scripts/qa/check-config-example-yaml.py
+        run: |
+          source .venv/bin/activate
+          python3 scripts/qa/check-config-example-yaml.py
 
       - name: Generate offline monitoring plan
         run: |
