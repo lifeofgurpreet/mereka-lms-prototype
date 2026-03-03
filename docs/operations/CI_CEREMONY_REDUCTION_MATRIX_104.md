@@ -1,6 +1,6 @@
 # CI Ceremony Reduction Matrix (#104 Follow-on)
 
-Date: 2026-03-02  
+Date: 2026-03-03  
 Scope: `mereka-lms` repo only (no GitOps repo changes)
 
 ## Canonical Execution Paths
@@ -22,9 +22,9 @@ rg -n "^[A-Za-z0-9_.-]+:($|[^=])" Makefile | sed -E 's/:.*$//' | wc -l
 
 | Metric | Current count |
 |---|---:|
-| Workflow files (`.github/workflows/*.yml`) | 60 |
-| Verify scripts (`scripts/qa/verify-*.sh`) | 495 |
-| Make targets (`Makefile` target declarations) | 76 |
+| Workflow files (`.github/workflows/*.yml`) | 56 |
+| Verify scripts (`scripts/qa/verify-*.sh`) | 466 |
+| Make targets (`Makefile` target declarations) | 83 |
 
 ## Deletion / Consolidation Matrix
 
@@ -40,9 +40,9 @@ After removing `policy-checks` and the 18-script workflow-wrapper family, and pa
 
 | Metric | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| Workflow files | 60 | 58 | -2 |
-| Verify scripts | 495 | 473 | -22 |
-| Make targets | 76 | 76 | 0 |
+| Workflow files | 60 | 56 | -4 |
+| Verify scripts | 495 | 466 | -29 |
+| Make targets | 76 | 83 | +7 |
 
 ## Follow-on Completion (Make Lane Parameterization)
 
