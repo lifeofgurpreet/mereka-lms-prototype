@@ -771,10 +771,48 @@ jobs:
           path: var/ci/provenance-*.json
           retention-days: 90
 
+  release-bundle:
+    name: Generate Release Bundle
+    runs-on: ubuntu-24.04
+    needs: [build-openedx, build-mfe, slsa-provenance]
+    if: ${{ needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' }}
+    outputs:
+      bundle_id: ${{ steps.bundle.outputs.bundle_id }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Generate release bundle
+        id: bundle
+        run: |
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          ./scripts/infra/generate-release-bundle.sh \
+            --output var/ci/release-bundle.json \
+            --repo "${{ github.repository }}" \
+            --commit-sha "${{ github.sha }}" \
+            --workflow ".github/workflows/build-tutor-images.yml" \
+            --run-id "${{ github.run_id }}" \
+            --run-attempt "${{ github.run_attempt }}" \
+            --target-environment "${TARGET_ENV}" \
+            --openedx-image "${{ env.REGISTRY }}/openedx" \
+            --openedx-digest "${{ needs.build-openedx.outputs.image_digest }}" \
+            --mfe-image "${{ env.REGISTRY }}/mfe" \
+            --mfe-digest "${{ needs.build-mfe.outputs.image_digest }}"
+          ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json
+          BUNDLE_ID="$(python3 -c 'import json;print(json.load(open("var/ci/release-bundle.json"))["bundle_id"])')"
+          echo "bundle_id=${BUNDLE_ID}" >> "$GITHUB_OUTPUT"
+          echo "**Release bundle:** \`${BUNDLE_ID}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload release bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: release-bundle
+          path: var/ci/release-bundle.json
+          retention-days: 90
+
   update-gitops:
     name: Update GitOps
     runs-on: ubuntu-24.04
-    needs: [build-openedx, build-mfe]
+    needs: [build-openedx, build-mfe, release-bundle]
     if: ${{ (github.event_name != 'workflow_dispatch' && (inputs.update_gitops || inputs.deploy_to_staging)) || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment') }}
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}
     permissions:
@@ -835,8 +873,13 @@ jobs:
           TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
           OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
           MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
           if [[ -z "${OPENEDX_DIGEST}" || -z "${MFE_DIGEST}" ]]; then
             echo "Missing image digests from build jobs (openedx='${OPENEDX_DIGEST}' mfe='${MFE_DIGEST}')." >&2
+            exit 1
+          fi
+          if [[ -z "${RELEASE_BUNDLE_ID}" ]]; then
+            echo "Missing release bundle id from release-bundle job." >&2
             exit 1
           fi
           EXTRA_ARGS=()
@@ -862,6 +905,7 @@ jobs:
           TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
           OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
           MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
           echo "### Deployment Complete ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Mode:** GitOps update" >> $GITHUB_STEP_SUMMARY
@@ -869,3 +913,4 @@ jobs:
           echo "**Tag:** \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
           echo "**OpenedX digest:** \`${OPENEDX_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
           echo "**MFE digest:** \`${MFE_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Release bundle:** \`${RELEASE_BUNDLE_ID}\`" >> $GITHUB_STEP_SUMMARY
