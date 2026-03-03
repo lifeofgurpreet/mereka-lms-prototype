@@ -719,9 +719,11 @@ check_metrics_payload_shape() {
     local payload="$2"
     local missing=0
 
+    payload="$(printf '%s' "$payload" | tr -d '\000' | tr -d '\r')"
+
     if [[ -z "$payload" ]]; then
         fail "AC-OVR-016: ${component} /metrics body is empty"
-        return 1
+        return 0
     fi
 
     if ! grep -qE '^# HELP ' <<<"$payload"; then
@@ -743,7 +745,8 @@ check_metrics_payload_shape() {
         pass "AC-OVR-016: ${component} /metrics has valid Prometheus exposition structure"
     fi
 
-    return "$missing"
+    # Failures are tracked via fail()/PASS counters; keep function non-fatal under set -e.
+    return 0
 }
 
 run_missing_resource_negative_check() {

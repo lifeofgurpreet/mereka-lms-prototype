@@ -169,6 +169,8 @@ run_script() {
   shift 2
   local -a script_args=("$@")
   local output
+  local output_clean
+  local output_excerpt
   local rc=0
 
   if [[ ! -x "$script_path" ]]; then
@@ -192,6 +194,13 @@ run_script() {
     if [[ $rc -eq 124 ]]; then
       output="command timed out (rc=${rc})"
     else
+      # Normalize noisy script output into a deterministic single-line excerpt.
+      output_clean="$(printf '%s' "$output" | tr -d '\000' | sed 's/\x1B\[[0-9;]*[mK]//g')"
+      output_excerpt="$(printf '%s' "$output_clean" | awk 'NF{print; exit}')"
+      if [[ -z "$output_excerpt" ]]; then
+        output_excerpt="$output_clean"
+      fi
+      output="$(printf '%s' "$output_excerpt" | tr '\n' ' ' | tr '\t' ' ' | sed 's/[[:space:]]\+/ /g')"
       output="${output:0:600}"
     fi
     if [[ -z "$output" ]]; then
@@ -334,9 +343,11 @@ check_metrics_payload_shape() {
   local payload="$2"
   local missing=0
 
+  payload="$(printf '%s' "$payload" | tr -d '\000' | tr -d '\r')"
+
   if [[ -z "$payload" ]]; then
     record_result fail "AC-OVR-016" "${component} /metrics body is empty"
-    return 1
+    return 0
   fi
 
   if ! grep -qE '^# HELP ' <<<"$payload"; then
@@ -359,7 +370,8 @@ check_metrics_payload_shape() {
     return 0
   fi
 
-  return 1
+  # Failures are tracked in record_result(); keep helper non-fatal under set -e.
+  return 0
 }
 
 run_negative_control_check() {
