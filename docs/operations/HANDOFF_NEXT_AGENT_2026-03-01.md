@@ -153,35 +153,30 @@ Both include the same frontend/runtime stabilization deltas (branch-local SHAs d
 
 ### Latest Heads
 
-- `start/next-implementor-2026-03-01`: `5c6d7dc5`
-- `main`: `3bce8fec`
+- `start/next-implementor-2026-03-01`: `43f7d147`
+- `main`: `547034b3`
 
 ### Latest Canonical Blocker Sweep
 
 - Command: `make qa-runtime-blocker-refresh`
-- Timestamp: `20260303T222746Z`
+- Timestamp: `20260303T224713Z`
 - Result: `PASS=1 FAIL=2 SKIP=0`
 - Summary artifacts:
-  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.log`
-  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.json`
-  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.diagnostics.tsv`
+  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.log`
+  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.json`
+  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.diagnostics.tsv`
 
 ### Diagnostic Shift (Important)
 
-- `auth-surfaces:dev` is currently labeled `auth_surfaces_dev_failure_other`
-  (dev host connectivity failure, `curl code 000` to `academyv2.mereka.dev`),
-  not the earlier `credentials_dev_login_500` signature.
+- `auth-surfaces:dev` is currently labeled `credentials_dev_login_500`
+  (dev credentials endpoints `/login` and `/login/edx-oauth2` returning `500`).
 - `credentials-readiness:dev:cluster` remains `credentials_timezone_tzdata_missing`.
 
-### Reachability Classification (Repeated Probe)
+### Reachability Classification (Current State)
 
-Repeated probes indicate the dev auth-surface reachability failure is currently **persistent**:
-
-- `var/qa/auth-surfaces-dev-probe-20260303T223022Z.log`
-- `var/qa/auth-surfaces-dev-probe-20260303T223033Z.log`
-- `var/qa/auth-surfaces-dev-probe-20260303T223045Z.log`
-
-All 3 failed with `curl: (7)` and `status=000` for `https://academyv2.mereka.dev/auth/login/oidc/`.
+- Latest recheck aligns with credentials-only failures (no host reachability collapse):
+  - `var/qa/auth-surfaces-dev-recheck-20260303T224647Z.log`
+- Earlier `curl code 000` host reachability probes from this date are historical/transient and no longer represent the latest blocker signature.
 
 ### Platform-Auth Reachability Checklist (dev, repo-side runbook)
 
@@ -200,6 +195,7 @@ Use this checklist before rerunning blocker sweep:
    - `./scripts/qa/verify-auth-surfaces.sh dev`
    - `make qa-frontend-runtime-blocker-sweep-both`
 
-Expected post-recovery signal:
-- `auth-surfaces:dev` should stop emitting `auth_surfaces_dev_failure_other`.
-- Remaining canonical blocker should be timezone/tzdata until runtime rollout completes.
+Expected post-rollout signal:
+- `auth-surfaces:dev` should stop emitting `credentials_dev_login_500`.
+- `credentials-readiness:dev:cluster` should stop emitting `credentials_timezone_tzdata_missing`.
+- Blocker sweep should report `PASS=3 FAIL=0 SKIP=0`.
