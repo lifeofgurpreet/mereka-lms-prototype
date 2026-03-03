@@ -114,6 +114,8 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - routing metadata emitted per diagnosis:
         - `owner` (responsible lane)
         - `next_action` (recommended immediate remediation)
+      - platform-auth checklist for persistent `auth_surfaces_dev_failure_other` is documented in:
+        - `docs/operations/HANDOFF_NEXT_AGENT_2026-03-01.md` (`Platform-Auth Reachability Checklist`)
   - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `23`, WARN `1`, FAIL `0`; warning is expected when `frontend-app-profile` source checkout is absent on runner).
   - Latest #104 consolidation contract reruns:
     - `make help` canonical target list check (PASS; legacy `qa-frontend-closure-*` aliases removed, canonical `qa-frontend-closure` retained)

@@ -182,3 +182,24 @@ Repeated probes indicate the dev auth-surface reachability failure is currently 
 - `var/qa/auth-surfaces-dev-probe-20260303T223045Z.log`
 
 All 3 failed with `curl: (7)` and `status=000` for `https://academyv2.mereka.dev/auth/login/oidc/`.
+
+### Platform-Auth Reachability Checklist (dev, repo-side runbook)
+
+Use this checklist before rerunning blocker sweep:
+
+1. Confirm DNS + TLS endpoint reachability from runner:
+   - `curl -vkI https://academyv2.mereka.dev/`
+   - `curl -vkI https://academyv2.mereka.dev/auth/login/oidc/`
+2. Confirm edge route/ingress has healthy backends:
+   - `kubectl get endpoints -n mereka-lms`
+   - `kubectl get ingress -n mereka-lms`
+3. Confirm core web pods are Ready in dev context:
+   - `kubectl get pods -n mereka-lms -l app=lms`
+   - `kubectl get pods -n mereka-lms -l app=caddy`
+4. If reachability recovers, rerun canonical auth checks:
+   - `./scripts/qa/verify-auth-surfaces.sh dev`
+   - `make qa-frontend-runtime-blocker-sweep-both`
+
+Expected post-recovery signal:
+- `auth-surfaces:dev` should stop emitting `auth_surfaces_dev_failure_other`.
+- Remaining canonical blocker should be timezone/tzdata until runtime rollout completes.
