@@ -26,7 +26,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 - Runtime evidence (`#105`):
   - Strict rerun completed with deterministic sweep summary: `var/qa/frontend-stability-sweep-20260302T040727Z.summary.log`.
-  - Consolidated frontend evidence rerun passed: `RUN_BASELINE_GATES=0 RUN_MFE_LIVE_DOM_AUDIT=1 RUN_SCREENSHOTS=1 SCREENSHOT_SCOPE=mfe-only ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only` -> `ALL GATES PASSED`; bundle: `var/evidence/branding/20260302-065539/`.
+  - Latest canonical closure lane rerun passed: `make qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=0` -> `ALL GATES PASSED`; bundle: `var/evidence/branding/20260303-231017/`.
   - Screenshot runner now supports focused closure capture mode: `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`.
   - Latest focused closure screenshot set: `var/screenshots/dev/20260302T063522Z/` with probe summary `capture-summary.tsv` (includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format for each route, with normalized unquoted probe values).
   - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`exit=0`), latest log `var/qa/paragon-runtime-dev-20260303T221801Z.log`.
@@ -35,8 +35,8 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Full Playwright matrix rerun now passes after preflight hardening in `verify-cross-browser-branding-smoke.sh`: `./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser` -> `15 passed`; log `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`.
   - Auth runtime probe status: `./scripts/qa/verify-auth-surfaces.sh dev` now passes notes + forum health checks (forum accepts `/healthz` fallback in non-prod) and reports one remaining non-authn blocker (`credentials` login endpoints returning 500). Equivalent prod checks return expected `302` redirects, so the failure is dev-runtime specific.
   - Latest auth-surface evidence logs:
-    - dev: `var/qa/auth-surfaces-dev-20260302T105604Z.log` (`FAILED` with 2 checks, both credentials login redirects returning 500)
-    - prod: `var/qa/auth-surfaces-prod-20260302T101515Z.log` (`OK`)
+    - dev: `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260303T230851Z.log` (`FAILED` with 2 checks, credentials login redirects returning 500)
+    - prod: `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260303T230851Z.log` (`OK`)
   - Deterministic verification hardening in this tranche:
     - `capture-branding-screenshots.sh` now closes stale agent-browser daemon sessions before capture to guarantee launch-flag application.
     - capture wrapper now strips daemon-warning stdout noise so `capture-summary.tsv` remains machine-parseable.
@@ -46,15 +46,15 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` with default `auto` policy (`dev=1`, `prod=0`) so authenticated canary runs remain signal-focused in non-prod while production stays TLS-strict.
   - Canonical blocker sweep lane added for repeated tracking:
     - `make qa-frontend-runtime-blocker-sweep QA_ENV=both`
-    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.log`
-    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.summary.json`
+    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T230851Z.summary.log`
+    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260303T230851Z.summary.json`
     - machine-readable summary artifact: `var/qa/frontend-runtime-blocker-sweep-*.summary.json` (plus per-check `*.records.tsv` and diagnosis labels in `*.diagnostics.tsv`)
     - stable latest pointers are emitted per run for automation consumers:
       - `var/qa/frontend-runtime-blocker-sweep-latest-*.summary.log|summary.json|records.tsv|diagnostics.tsv`
       - `var/qa/frontend-runtime-blocker-auth-surfaces-*-latest.log`
       - `var/qa/frontend-runtime-blocker-credentials-dev-latest.log`
     - each summary JSON also carries the same stable pointers under `artifacts.latest` to simplify machine consumption.
-    - latest diagnosis labels: `auth-surfaces:dev=credentials_dev_login_500`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260303T224713Z.diagnostics.tsv`).
+    - latest diagnosis labels: `auth-surfaces:dev=credentials_dev_login_500`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260303T230851Z.diagnostics.tsv`).
     - auth-surface signal has stabilized back to credentials-only failures (dev credentials `/login` and `/login/edx-oauth2` return 500); prior transient host reachability signature (`curl 000`) is no longer the latest state.
     - diagnosis output now includes `owner` + `next_action` routing metadata for each check in both JSON and TSV artifacts.
     - infra-ready prompt can be generated from latest sweep JSON with `make qa-runtime-blocker-infra-prompt`.
@@ -74,7 +74,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`). Direct pod inspection confirms `/usr/share/zoneinfo/UTC` is absent and `python -m pip show tzdata` returns not found.
   - Repo-side remediation is now in place: `infrastructure/tutor/plugins/mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1` alongside cryptography; readiness contract updated in `scripts/qa/verify-credentials-readiness.sh` and rerun offline PASS (`PASS=48 FAIL=0 SKIP=9`).
   - `verify-credentials-readiness.sh --cluster` now includes runtime checks for `ZoneInfo('UTC')` resolution and python `tzdata` package presence, so rollout validation can confirm the exact failure mode is removed.
-  - Latest live cluster audit: `./scripts/qa/verify-credentials-readiness.sh --cluster` -> `PASS=54 FAIL=1 SKIP=0` (captured in blocker lane log `var/qa/frontend-runtime-blocker-credentials-dev-20260303T224713Z.log`); DID endpoint failure is now classified as cascaded while timezone is broken, leaving one canonical runtime blocker: `ZoneInfo('UTC')` (`ModuleNotFoundError: No module named 'tzdata'`).
+  - Latest live cluster audit: `./scripts/qa/verify-credentials-readiness.sh --cluster` -> `PASS=54 FAIL=1 SKIP=0` (captured in blocker lane log `var/qa/frontend-runtime-blocker-credentials-dev-20260303T230851Z.log`); DID endpoint failure is now classified as cascaded while timezone is broken, leaving one canonical runtime blocker: `ZoneInfo('UTC')` (`ModuleNotFoundError: No module named 'tzdata'`).
   - Remaining action is runtime rollout only (rebuild/push/redeploy credentials-serving image path) to validate that dev credentials login endpoints return `302` instead of `500`.
   - Local-login replay canary support added in repo (`RUN_LOCAL_LOGIN_CANARY=1` mode in `verify-authenticated-sso-canary.sh`), but this runner currently has no canary secrets injected (`SSO_CANARY_*`/`LOCAL_CANARY_*` unset).
 - BEM + a11y (`#107`, `#108`):
@@ -89,7 +89,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Detailed stabilization log: `docs/operations/FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md`.
   - Issue closure matrix: `docs/operations/FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md`.
 - Certificate closure (`#106`):
-  - `./scripts/qa/verify-certificate-branding.sh` rerun passed (`PASS=23 WARN=1 FAIL=0`; warning is expected when `frontend-app-profile` source checkout is absent on the runner).
+  - `./scripts/qa/verify-certificate-branding.sh` rerun passed (`PASS=25 WARN=0 FAIL=0`).
 - Phase 6 decision (`#111`):
   - Slot-expansion lane remains intentionally frozen as a scope decision; runtime checks above are now green on latest rerun.
 - Staging/promotion lane (`#110`):
