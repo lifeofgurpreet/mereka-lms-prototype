@@ -457,6 +457,24 @@ for target in targets:
         updated,
     )
 
+    # ── Network resilience for ARC DinD runners ────────────────────────
+    # ARC container runners have flaky outbound networking (connection
+    # timeouts to Debian mirrors).  Inject apt retry config before the
+    # first `apt update` so transient failures don't kill the build.
+    if "apt update" in updated and "Acquire::Retries" not in updated:
+        updated = re.sub(
+            r"(RUN\s+)apt update",
+            r'\1echo \'Acquire::Retries "5";\' > /etc/apt/apt.conf.d/80-retries && \\\n    apt-get update -o Acquire::CompressionTypes::Order::=gz',
+            updated,
+            count=1,
+        )
+        # Also replace plain 'apt install' with 'apt-get install' for
+        # better scripting behaviour + add --fix-broken.
+        updated = updated.replace(
+            "&& apt install -y",
+            "&& apt-get install -y --fix-broken",
+        )
+
     updated = ensure_mfe_ulmo_source_refs(updated)
     updated = ensure_mfe_brand_ulmo_version(updated)
     updated = ensure_mfe_discussions_webpack_noninteractive(updated)

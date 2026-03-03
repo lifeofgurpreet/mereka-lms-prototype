@@ -303,6 +303,25 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         "# Patch edx-platform\n# Redwood already bundles the required security/email fixes; cherry-picks disabled locally.\n\n",
     )
 
+    # ── Network resilience for ARC DinD runners ───────────────────────
+    # ARC container runners have flaky outbound networking (gnutls_handshake
+    # failures, connection timeouts).  Wrap git-clone and apt-get in retry
+    # loops so transient failures don't kill 30-minute builds.
+
+    # pyenv git clone retry (OpenEdX Dockerfile)
+    if path.name == "Dockerfile":
+        plain_pyenv = "RUN git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v2.3.36 --depth 1"
+        retry_pyenv = (
+            "RUN for attempt in 1 2 3 4 5; do \\\n"
+            "      git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v2.3.36 --depth 1 && break; \\\n"
+            '      echo "pyenv clone attempt $attempt failed; retrying in 15s" >&2; \\\n'
+            "      rm -rf $PYENV_ROOT; \\\n"
+            "      sleep 15; \\\n"
+            "    done && test -d \"$PYENV_ROOT/bin\""
+        )
+        if plain_pyenv in updated and "pyenv clone attempt" not in updated:
+            updated = updated.replace(plain_pyenv, retry_pyenv)
+
     # Tutor v21 node_modules path fix
     if path.name == "Dockerfile" and "nodejs-requirements" in updated:
         npm_install_marker = "npm clean-install --no-audit --registry=$NPM_REGISTRY"
