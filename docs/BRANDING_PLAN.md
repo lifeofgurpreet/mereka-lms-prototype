@@ -77,10 +77,11 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Remaining action is runtime rollout only (rebuild/push/redeploy credentials-serving image path) to validate that dev credentials login endpoints return `302` instead of `500`.
   - Local-login replay canary support added in repo (`RUN_LOCAL_LOGIN_CANARY=1` mode in `verify-authenticated-sso-canary.sh`), but this runner currently has no canary secrets injected (`SSO_CANARY_*`/`LOCAL_CANARY_*` unset).
 - BEM + a11y (`#107`, `#108`):
-  - `./scripts/qa/verify-mfe-selector-hardening.sh` passed (`exit=0`).
-  - `./scripts/qa/verify-a11y-contrast-focus.sh` passed (`exit=0`) with documented non-blocking warnings.
-  - `./scripts/qa/verify-wcag-contrast-v2.sh` passed (`exit=0`).
-  - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` passed (`exit=0`).
+  - `./scripts/qa/verify-mfe-selector-hardening.sh` passed (`exit=0`), latest log `var/qa/selector-hardening-20260303T222057Z.log`.
+  - `./scripts/qa/verify-a11y-contrast-focus.sh` passed (`exit=0`) with documented non-blocking warnings, latest log `var/qa/a11y-contrast-focus-20260303T222057Z.log`.
+  - `./scripts/qa/verify-wcag-contrast-v2.sh` passed (`exit=0`), latest log `var/qa/wcag-contrast-v2-20260303T222138Z.log`.
+  - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` passed (`exit=0`), latest log `var/qa/mfe-live-dom-audit-dev-20260303T221944Z.log`.
+  - `verify-wcag-contrast-v2.sh` command compatibility was restored in this lane via a dedicated wrapper to keep Phase C command contracts stable.
 - Root-cause hardening applied in repo:
   - Updated `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` CSP to allow required CDN/Google font domains for MFE runtime script/style/font loads.
   - Added bounded recovery + low-signal hydration handling in `tests/e2e/tests/selector-dom-audit.spec.ts` to reduce headless false negatives.

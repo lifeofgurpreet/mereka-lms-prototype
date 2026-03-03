@@ -72,10 +72,10 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-studio-authoring-branding.sh dev`
   - Latest capture artifact set: `var/screenshots/dev/20260302T063522Z/` (`capture-summary.tsv` now includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format per route, with normalized unquoted probe values for deterministic parsing; confirms deterministic non-blank renders for authn/login + studio, plus unauthenticated redirects for account/learner-dashboard).
   - Latest Phase 7 + a11y sweep on dev:
-    - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260302T063401Z.log`)
-    - `./scripts/qa/verify-mfe-selector-hardening.sh` (PASS)
-    - `./scripts/qa/verify-a11y-contrast-focus.sh` (PASS, warning pair now enforced and passing at `4.52:1`)
-    - `./scripts/qa/verify-wcag-contrast-v2.sh` (PASS)
+    - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260303T221944Z.log`)
+    - `./scripts/qa/verify-mfe-selector-hardening.sh` (PASS, log: `var/qa/selector-hardening-20260303T222057Z.log`)
+    - `./scripts/qa/verify-a11y-contrast-focus.sh` (PASS with expected non-blocking warnings, log: `var/qa/a11y-contrast-focus-20260303T222057Z.log`)
+    - `./scripts/qa/verify-wcag-contrast-v2.sh` (PASS, log: `var/qa/wcag-contrast-v2-20260303T222138Z.log`; compatibility wrapper restored in repo so canonical Phase C command path resolves again)
   - Latest cross-browser smoke stability rerun (dev):
     - `./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser` (PASS `15 passed`, log: `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`)
   - Latest deterministic capture/runtime rerun (dev):
