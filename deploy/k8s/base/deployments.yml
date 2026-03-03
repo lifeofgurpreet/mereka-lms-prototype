@@ -102,6 +102,18 @@ spec:
             value: cms
           - name: DJANGO_SETTINGS_MODULE
             value: cms.envs.tutor.production
+          - name: OTEL_SERVICE_NAME
+            value: cms
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://tempo.monitoring.svc.cluster.local:4318
+          - name: OTEL_EXPORTER_OTLP_PROTOCOL
+            value: http/protobuf
+          - name: OTEL_PROPAGATORS
+            value: tracecontext,baggage
+          - name: OTEL_TRACES_SAMPLER
+            value: parentbased_traceidratio
+          - name: OTEL_TRACES_SAMPLER_ARG
+            value: "0.1"
           - name: MEREKA_PLATFORM_ADMIN_EMAILS
             value: "gurpreet@biji-biji.com,malasari@mereka.my"
           - name: UWSGI_WORKERS
@@ -243,6 +255,18 @@ spec:
             value: cms
           - name: DJANGO_SETTINGS_MODULE
             value: cms.envs.tutor.production
+          - name: OTEL_SERVICE_NAME
+            value: cms-worker
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://tempo.monitoring.svc.cluster.local:4318
+          - name: OTEL_EXPORTER_OTLP_PROTOCOL
+            value: http/protobuf
+          - name: OTEL_PROPAGATORS
+            value: tracecontext,baggage
+          - name: OTEL_TRACES_SAMPLER
+            value: parentbased_traceidratio
+          - name: OTEL_TRACES_SAMPLER_ARG
+            value: "0.1"
           - name: MONGODB_HOST
             valueFrom:
               secretKeyRef:
@@ -339,6 +363,18 @@ spec:
             value: lms
           - name: DJANGO_SETTINGS_MODULE
             value: lms.envs.tutor.production
+          - name: OTEL_SERVICE_NAME
+            value: lms
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://tempo.monitoring.svc.cluster.local:4318
+          - name: OTEL_EXPORTER_OTLP_PROTOCOL
+            value: http/protobuf
+          - name: OTEL_PROPAGATORS
+            value: tracecontext,baggage
+          - name: OTEL_TRACES_SAMPLER
+            value: parentbased_traceidratio
+          - name: OTEL_TRACES_SAMPLER_ARG
+            value: "0.1"
           - name: MEREKA_PLATFORM_ADMIN_EMAILS
             value: "gurpreet@biji-biji.com,malasari@mereka.my"
           - name: UWSGI_WORKERS
@@ -479,6 +515,18 @@ spec:
             value: lms
           - name: DJANGO_SETTINGS_MODULE
             value: lms.envs.tutor.production
+          - name: OTEL_SERVICE_NAME
+            value: lms-worker
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://tempo.monitoring.svc.cluster.local:4318
+          - name: OTEL_EXPORTER_OTLP_PROTOCOL
+            value: http/protobuf
+          - name: OTEL_PROPAGATORS
+            value: tracecontext,baggage
+          - name: OTEL_TRACES_SAMPLER
+            value: parentbased_traceidratio
+          - name: OTEL_TRACES_SAMPLER_ARG
+            value: "0.1"
           - name: MONGODB_HOST
             valueFrom:
               secretKeyRef:
