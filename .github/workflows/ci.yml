@@ -90,6 +90,9 @@ jobs:
       - name: Lint YAML files
         run: yamllint -c .yamllint.yml infrastructure/ deploy/
 
+      - name: Enforce repo conventions (includes immutable workflow refs)
+        run: ./scripts/qa/lint-repo-conventions.sh
+
       - name: Lint shell scripts (shellcheck)
         uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca  # master
         with:

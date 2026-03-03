@@ -243,6 +243,37 @@ check_grep_ability() {
   if [[ $shebang_violations -eq 0 ]]; then
     pass "Grep-ability: All shell scripts have proper shebang"
   fi
+
+  # Check workflow action refs are immutable SHAs (external uses: only)
+  local workflow_ref_violations=0
+  while IFS=: read -r file line ref; do
+    [[ -n "$file" ]] || continue
+    [[ "$ref" == ./* ]] && continue
+    [[ "$ref" == docker://* ]] && continue
+
+    if [[ "$ref" != *@* ]]; then
+      fail "Grep-ability: Workflow uses ref missing @version: ${file}:${line} (${ref})"
+      workflow_ref_violations=$((workflow_ref_violations + 1))
+      continue
+    fi
+
+    local version
+    version="${ref##*@}"
+    if [[ ! "$version" =~ ^[0-9a-f]{40}$ ]]; then
+      fail "Grep-ability: Workflow uses ref must be full 40-char SHA: ${file}:${line} (${ref})"
+      workflow_ref_violations=$((workflow_ref_violations + 1))
+    fi
+  done < <(
+    awk '
+      match($0, /^[[:space:]]*uses:[[:space:]]*([^[:space:]#]+)/, m) {
+        print FILENAME ":" NR ":" m[1]
+      }
+    ' .github/workflows/*.yml .github/workflows/*.yaml 2>/dev/null || true
+  )
+
+  if [[ $workflow_ref_violations -eq 0 ]]; then
+    pass "Grep-ability: All external workflow uses refs are pinned to immutable SHAs"
+  fi
 }
 
 ################################################################################
