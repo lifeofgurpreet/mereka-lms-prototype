@@ -53,8 +53,6 @@ concurrency:
   group: build-tutor-images-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'push' }}
 
-permissions: {}
-
 env:
   PROJECT_ID: mereka-lms
   REGION: asia-southeast1
