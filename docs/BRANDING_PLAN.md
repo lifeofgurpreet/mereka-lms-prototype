@@ -55,7 +55,11 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
       - `var/qa/frontend-runtime-blocker-credentials-dev-latest.log`
     - each summary JSON also carries the same stable pointers under `artifacts.latest` to simplify machine consumption.
     - latest diagnosis labels: `auth-surfaces:dev=auth_surfaces_dev_failure_other`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.diagnostics.tsv`).
-    - note: current auth-surfaces dev failure is a transient host reachability outage (`curl code 000` to `academyv2.mereka.dev`) rather than the previous credentials `500` signature; credentials timezone/tzdata blocker remains unchanged.
+    - repeated probe classification (2026-03-03): dev auth-surface reachability failure is currently persistent (3/3 probe failures, all `curl code 000` to `academyv2.mereka.dev`), not a one-off blip; credentials timezone/tzdata blocker remains unchanged.
+    - probe evidence logs:
+      - `var/qa/auth-surfaces-dev-probe-20260303T223022Z.log`
+      - `var/qa/auth-surfaces-dev-probe-20260303T223033Z.log`
+      - `var/qa/auth-surfaces-dev-probe-20260303T223045Z.log`
     - diagnosis output now includes `owner` + `next_action` routing metadata for each check in both JSON and TSV artifacts.
     - infra-ready prompt can be generated from latest sweep JSON with `make qa-runtime-blocker-infra-prompt`.
     - canonical file output mode: `make qa-runtime-blocker-infra-prompt OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt` (markdown mode via `FORMAT=markdown`).

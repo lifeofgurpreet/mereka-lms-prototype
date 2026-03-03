@@ -146,3 +146,39 @@ Both include the same frontend/runtime stabilization deltas (branch-local SHAs d
   - `ZoneInfoNotFoundError: No time zone found with key UTC`
   - `ModuleNotFoundError: No module named 'tzdata'`
 - Source-side remediation is already in repo (`mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1`); remaining work is runtime rollout convergence.
+
+---
+
+## Addendum (2026-03-03 Runtime Blocker Classification Update)
+
+### Latest Heads
+
+- `start/next-implementor-2026-03-01`: `5c6d7dc5`
+- `main`: `3bce8fec`
+
+### Latest Canonical Blocker Sweep
+
+- Command: `make qa-runtime-blocker-refresh`
+- Timestamp: `20260303T222746Z`
+- Result: `PASS=1 FAIL=2 SKIP=0`
+- Summary artifacts:
+  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.log`
+  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.summary.json`
+  - `var/qa/frontend-runtime-blocker-sweep-both-20260303T222746Z.diagnostics.tsv`
+
+### Diagnostic Shift (Important)
+
+- `auth-surfaces:dev` is currently labeled `auth_surfaces_dev_failure_other`
+  (dev host connectivity failure, `curl code 000` to `academyv2.mereka.dev`),
+  not the earlier `credentials_dev_login_500` signature.
+- `credentials-readiness:dev:cluster` remains `credentials_timezone_tzdata_missing`.
+
+### Reachability Classification (Repeated Probe)
+
+Repeated probes indicate the dev auth-surface reachability failure is currently **persistent**:
+
+- `var/qa/auth-surfaces-dev-probe-20260303T223022Z.log`
+- `var/qa/auth-surfaces-dev-probe-20260303T223033Z.log`
+- `var/qa/auth-surfaces-dev-probe-20260303T223045Z.log`
+
+All 3 failed with `curl: (7)` and `status=000` for `https://academyv2.mereka.dev/auth/login/oidc/`.

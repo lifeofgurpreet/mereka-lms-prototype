@@ -100,6 +100,10 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - diagnosis labels emitted:
         - `auth-surfaces:dev` -> `auth_surfaces_dev_failure_other`
         - `credentials-readiness:dev:cluster` -> `credentials_timezone_tzdata_missing`
+      - repeated classification probe (3 samples) confirms dev reachability failure is currently persistent:
+        - `var/qa/auth-surfaces-dev-probe-20260303T223022Z.log`
+        - `var/qa/auth-surfaces-dev-probe-20260303T223033Z.log`
+        - `var/qa/auth-surfaces-dev-probe-20260303T223045Z.log`
       - routing metadata emitted per diagnosis:
         - `owner` (responsible lane)
         - `next_action` (recommended immediate remediation)
