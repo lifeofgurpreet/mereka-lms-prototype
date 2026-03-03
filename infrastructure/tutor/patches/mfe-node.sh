@@ -440,11 +440,22 @@ for target in targets:
         updated,
         flags=re.MULTILINE,
     )
+    # Fix toolchain packages for Debian bullseye-slim:
+    #  - "python" doesn't exist on Debian 11+; replace with "python3"
+    #  - Ensure python3-distutils is present for node-gyp
+    # Match both old format ("gcc git libgl1 ...") and new ("gcc libgl1 ...").
     if "gcc git libgl1 libxi6 make" in updated:
         updated = updated.replace(
             "gcc git libgl1 libxi6 make",
             "gcc g++ git libgl1 libxi6 make python3 python3-distutils",
         )
+    # Tutor v21 (Ulmo) puts "python g++" on a separate line for arm deps.
+    # Replace "python" with "python3" and add python3-distutils.
+    updated = re.sub(
+        r"(\s+)python g\+\+",
+        r"\1python3 g++ python3-distutils",
+        updated,
+    )
 
     updated = ensure_mfe_ulmo_source_refs(updated)
     updated = ensure_mfe_brand_ulmo_version(updated)
