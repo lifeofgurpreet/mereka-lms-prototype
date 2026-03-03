@@ -112,6 +112,10 @@ emit_diagnostics() {
         diagnosis="credentials_dev_login_500"
         owner="infra-runtime"
         next_action="rollout_credentials_image_with_tzdata_then_rerun_sweep"
+      elif rg -q "curl: \\(7\\)|status=000|Failed to connect|Could not resolve host" "$log_file"; then
+        diagnosis="auth_surfaces_dev_unreachable"
+        owner="platform-auth"
+        next_action="run_platform_auth_reachability_checklist_then_rerun_sweep"
       else
         diagnosis="auth_surfaces_dev_failure_other"
         owner="platform-auth"
