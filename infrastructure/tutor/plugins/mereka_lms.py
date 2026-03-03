@@ -616,10 +616,9 @@ RUN pip install "pymongo[srv]"
 # NOTE: The Tutor template COPYs ./themes/ AFTER pre-assets hooks and BEFORE collectstatic.
 # But compile-sass needs the theme present. So we COPY the theme early here.
 # The later COPY ./themes/ will overwrite with the same files — safe and idempotent.
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "openedx-dockerfile-pre-assets",
-        """
+_register_env_patch(
+    "openedx-dockerfile-pre-assets",
+    """
 # Early-copy the mereka theme so it exists when compile-sass runs.
 # Tutor's standard COPY ./themes/ happens AFTER pre-assets hooks, but we need
 # the theme present for SASS compilation. The later COPY overwrites with same files.
@@ -699,14 +698,12 @@ for path in root.rglob('studio-main-v1*.css'):
 print(f'Stripped google font imports from {changed} compiled studio css files')
 PY
 """,
-    )
 )
 
 # Webpack optimization (disable parallel for stability, remove compat config)
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "webpack-prod-config",
-        """
+_register_env_patch(
+    "webpack-prod-config",
+    """
 // Mereka LMS: Disable parallel processing in Terser for build stability
 optimization: {
     minimizer: [
@@ -714,7 +711,6 @@ optimization: {
     ],
 }
 """,
-    )
 )
 
 ###############################################################################
@@ -722,75 +718,64 @@ optimization: {
 ###############################################################################
 
 # Node 24 build toolchain
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-dockerfile-pre-npm-install",
-        """
+_register_env_patch(
+    "mfe-dockerfile-pre-npm-install",
+    """
 # Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \\
     gcc g++ git libgl1 libxi6 make python3 python3-distutils \\
     && rm -rf /var/lib/apt/lists/*
 """,
-    )
 )
 
 # Install local OEP-48 brand package for MFEs.
 # We ship the package in tutor_env/plugins/mfe/build/mfe/indigo/brand-mereka and
 # alias it as @edx/brand for all frontend app builds.
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-dockerfile-pre-npm-install",
-        """
+_register_env_patch(
+    "mfe-dockerfile-pre-npm-install",
+    """
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
 """,
-    )
 )
 
 # Copy generated runtime theme assets into the MFE container.
 # PARAGON_THEME_URLS points to /theme/* on the MFE origin.
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-dockerfile-post-npm-install",
-        """
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
 COPY indigo/theme /openedx/dist/theme
 """,
-    )
 )
 
 # Cookie domain environment variables
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-dockerfile-post-npm-install",
-        """
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
 # Set cookie domains for MFE builds
 ARG SESSION_COOKIE_DOMAIN={{ MEREKA_SESSION_COOKIE_DOMAIN }}
 ARG CSRF_COOKIE_DOMAIN={{ MEREKA_CSRF_COOKIE_DOMAIN }}
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 """,
-    )
 )
 
 # Install frontend-plugin-framework with legacy peer deps
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-dockerfile-post-npm-install",
-        """
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 """,
-    )
 )
 
 # NPM install resilience (retry on failure)
 # NOTE: Using 'npm install' instead of 'npm ci' to handle lockfile drift gracefully
 # while still respecting the lockfile when possible. This is the SOTA approach for
 # environments where upstream package-lock.json may have minor version drift.
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-dockerfile-npm-install",
-        """
+_register_env_patch(
+    "mfe-dockerfile-npm-install",
+    """
 # Configure npm for resilience
 RUN npm config set fetch-retries 6 \\
  && npm config set fetch-retry-mintimeout 20000 \\
@@ -800,17 +785,15 @@ RUN npm config set fetch-retries 6 \\
 # Install with retries (using npm install for lockfile drift tolerance)
 RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 """,
-    )
 )
 
 # Enforce runtime Paragon theme URLs in built MFE shells.
 # We write ../theme/* (not /theme/*) because Ulmo joins fileName against the MFE
 # app base path (e.g. /authn/), and a leading slash can become /authn//theme/*.
 # The relative hop resolves consistently to /theme/* at runtime.
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-dockerfile-post-npm-build",
-        """
+_register_env_patch(
+    "mfe-dockerfile-post-npm-build",
+    """
 RUN python3 - <<'PY'
 from pathlib import Path
 import json
@@ -838,7 +821,6 @@ updated = content[:match.start(1)] + json.dumps(theme, separators=(", ", ": ")) 
 index_path.write_text(updated, encoding="utf-8")
 PY
 """,
-    )
 )
 
 ###############################################################################
@@ -851,14 +833,12 @@ register_mfe_plugin_slots()
 # MFE Theme Patches (Indigo)
 ###############################################################################
 
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-env-config-buildtime-imports",
-        """
+_register_env_patch(
+    "mfe-env-config-buildtime-imports",
+    """
 // Import Mereka theme SCSS
 import './mereka/mereka.scss';
 """,
-    )
 )
 
 hooks.Filters.ENV_PATCHES.add_item(
