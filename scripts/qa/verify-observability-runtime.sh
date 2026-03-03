@@ -104,7 +104,8 @@ write_metrics_payload_evidence() {
         echo ""
         echo '```text'
         if [[ -n "$payload" ]]; then
-            printf '%s\n' "$payload" | awk 'NF' | head -n 200
+            # Keep set -o pipefail safe: avoid producer-side SIGPIPE on long payloads.
+            awk 'NF{print; if (++count >= 200) exit}' <<<"$payload"
         else
             echo "<no-payload-generated>"
         fi

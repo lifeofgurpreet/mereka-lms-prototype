@@ -421,7 +421,7 @@ run_negative_control_check() {
 
   rm -rf "$temp_root"
 
-  if [[ $rc -ne 0 ]] && echo "$output" | grep -q "${missing_sm} NOT listed in kustomization.yaml"; then
+  if [[ $rc -ne 0 ]] && grep -q "${missing_sm} NOT listed in kustomization.yaml" <<<"$output"; then
     record_result pass "AC-OVR-026" "Negative-control validation fails when required ServiceMonitor entry is removed"
   elif [[ $rc -eq 0 ]]; then
     record_result fail "AC-OVR-026" "Negative-control validation succeeded even after removing required ServiceMonitor"
