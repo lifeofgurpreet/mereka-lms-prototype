@@ -18,6 +18,7 @@ EVIDENCE_CAPTURE=""
 # Add identity defaults for runtime evidence compatibility.
 EVIDENCE_ENV_LABEL="${VERIFY_LOGGING_PIPELINE_ENV_LABEL:-${ENV_LABEL:-unknown}}"
 EVIDENCE_DISPATCH_PROFILE="${VERIFY_LOGGING_PIPELINE_DISPATCH_PROFILE:-${DISPATCH_PROFILE:-custom}}"
+EVIDENCE_PROJECT="${VERIFY_LOGGING_PIPELINE_GCP_PROJECT:-${GCP_PROJECT:-mereka-lms}}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -162,11 +163,11 @@ write_evidence() {
     echo "- strict: $STRICT"
     echo "- runner: $RUNNER"
     echo "- status: $status_label"
-    echo "- evidence_identity: env=${EVIDENCE_ENV_LABEL};profile=${EVIDENCE_DISPATCH_PROFILE};context=${K8S_CONTEXT:-default}"
+    echo "- evidence_identity: env=${EVIDENCE_ENV_LABEL};profile=${EVIDENCE_DISPATCH_PROFILE};context=${K8S_CONTEXT:-default};project=${EVIDENCE_PROJECT}"
     echo ""
     echo "## Logging pipeline checks"
     echo ""
-    sed 's/\x1B\[[0-9;]*[mK]//g' "$EVIDENCE_CAPTURE"
+    tr -d '\000' < "$EVIDENCE_CAPTURE" | sed 's/\x1B\[[0-9;]*[mK]//g'
   } > "$EVIDENCE_FILE"
 }
 

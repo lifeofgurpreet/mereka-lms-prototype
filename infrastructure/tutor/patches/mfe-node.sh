@@ -462,9 +462,10 @@ for target in targets:
     # timeouts to Debian mirrors).  Inject apt retry config before the
     # first `apt update` so transient failures don't kill the build.
     if "apt update" in updated and "Acquire::Retries" not in updated:
+        # Use printf to avoid shell quoting issues with single quotes in Dockerfile RUN
         updated = re.sub(
             r"(RUN\s+)apt update",
-            r'\1echo \'Acquire::Retries "5";\' > /etc/apt/apt.conf.d/80-retries && \\\n    apt-get update -o Acquire::CompressionTypes::Order::=gz',
+            r"""\1printf 'Acquire::Retries "5";\\nAcquire::http::Timeout "120";\\n' > /etc/apt/apt.conf.d/80-retries && \\\n    apt-get update""",
             updated,
             count=1,
         )

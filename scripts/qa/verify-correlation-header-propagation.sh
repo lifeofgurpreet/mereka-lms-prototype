@@ -176,4 +176,6 @@ if [[ "$status" -ne 0 ]]; then
 fi
 
 echo -e "${GREEN}PASS${NC} correlation headers are present for proxy snippet and direct reverse_proxy blocks"
+echo "required_header: x-request-id"
+echo "required_header: traceparent"
 echo ""

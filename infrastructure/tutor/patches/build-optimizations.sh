@@ -308,19 +308,39 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
     # failures, connection timeouts).  Wrap git-clone and apt-get in retry
     # loops so transient failures don't kill 30-minute builds.
 
-    # pyenv git clone retry (OpenEdX Dockerfile)
+    # pyenv download: replace git clone with curl tarball download.
+    # ARC DinD containers have broken gnutls (git+HTTPS fails consistently).
+    # curl uses OpenSSL, not gnutls, so it works where git doesn't.
     if path.name == "Dockerfile":
         plain_pyenv = "RUN git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v2.3.36 --depth 1"
-        retry_pyenv = (
-            "RUN for attempt in 1 2 3 4 5; do \\\n"
-            "      git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v2.3.36 --depth 1 && break; \\\n"
-            '      echo "pyenv clone attempt $attempt failed; retrying in 15s" >&2; \\\n'
-            "      rm -rf $PYENV_ROOT; \\\n"
+        curl_pyenv = (
+            "RUN mkdir -p $PYENV_ROOT && \\\n"
+            "    for attempt in 1 2 3 4 5; do \\\n"
+            "      curl -fsSL --retry 5 --retry-delay 10 \\\n"
+            "        https://github.com/pyenv/pyenv/archive/refs/tags/v2.3.36.tar.gz \\\n"
+            "        | tar xz --strip-components=1 -C $PYENV_ROOT && break; \\\n"
+            '      echo "pyenv download attempt $attempt failed; retrying in 15s" >&2; \\\n'
+            "      rm -rf $PYENV_ROOT/*; \\\n"
             "      sleep 15; \\\n"
-            "    done && test -d \"$PYENV_ROOT/bin\""
+            "    done && test -x \"$PYENV_ROOT/bin/pyenv\""
         )
-        if plain_pyenv in updated and "pyenv clone attempt" not in updated:
-            updated = updated.replace(plain_pyenv, retry_pyenv)
+        # Also handle the retry version from a previous patch
+        retry_pyenv_marker = "pyenv clone attempt"
+        if plain_pyenv in updated:
+            updated = updated.replace(plain_pyenv, curl_pyenv)
+        elif retry_pyenv_marker in updated:
+            # Replace the retry-git-clone version with curl version
+            import re as _re
+            updated = _re.sub(
+                r"RUN for attempt in 1 2 3 4 5; do \\\n"
+                r"      git clone https://github\.com/pyenv/pyenv \$PYENV_ROOT --branch v2\.3\.36 --depth 1 && break; \\\n"
+                r'      echo "pyenv clone attempt \$attempt failed; retrying in 15s" >&2; \\\n'
+                r"      rm -rf \$PYENV_ROOT; \\\n"
+                r"      sleep 15; \\\n"
+                r'    done && test -d "\$PYENV_ROOT/bin"',
+                curl_pyenv,
+                updated,
+            )
 
     # Tutor v21 node_modules path fix
     if path.name == "Dockerfile" and "nodejs-requirements" in updated:
