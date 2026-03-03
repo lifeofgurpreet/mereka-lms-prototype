@@ -24,6 +24,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_kubectl || exit 0
 source "$REPO_ROOT/scripts/shared/config.sh"
 
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"

@@ -17,6 +17,9 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_file "docs/branding/MULTI_TENANT_BRANDING_OPS.md" "multi-tenant branding ops doc" || exit 0
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'

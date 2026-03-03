@@ -67,10 +67,10 @@ class Command(BaseCommand):
                 )
 
         except json.JSONDecodeError as e:
-            raise CommandError(f"Invalid JSON: {e}")
+            raise CommandError(f"Invalid JSON: {e}") from e
         except Exception as e:
             logger.exception("Error processing SES notification")
-            raise CommandError(f"Error processing notification: {e}")
+            raise CommandError(f"Error processing notification: {e}") from e
 
     def _process_bounce(self, notification):
         """Process bounce notification."""

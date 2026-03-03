@@ -7,6 +7,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_kubectl || exit 0
 NAMESPACE="mereka-lms"
 PASS=0; FAIL=0
 

@@ -5,6 +5,9 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_file "deploy/k8s/base/apps/openedx/settings/lms/production.py" "LMS production settings" || exit 0
+
 LMS_PROD="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 CMS_PROD="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
 LMS_MULTI="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py"

@@ -3,6 +3,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_command rg || exit 0
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 REGISTRY_DOC="$REPO_ROOT/docs/architecture/FPF_PLUGIN_SLOT_REGISTRY.md"
 

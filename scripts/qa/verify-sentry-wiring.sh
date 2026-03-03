@@ -12,6 +12,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_command rg || exit 0
+
 MODE="local" # local|runtime|all
 JSON_OUT=0
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"

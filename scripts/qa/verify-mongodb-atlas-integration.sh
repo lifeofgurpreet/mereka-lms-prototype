@@ -35,6 +35,9 @@ check_warn() {
 # Detect repository root
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_tutor_env || exit 0
+
 # Parse arguments
 MODE="all"
 while [[ $# -gt 0 ]]; do

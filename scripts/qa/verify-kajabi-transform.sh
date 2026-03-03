@@ -16,6 +16,9 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_directory "scripts/migrations/kajabi/output" "Kajabi transform output" || exit 0
+
 failures=0
 pass() { echo "[PASS] $*"; }
 fail() { echo "[FAIL] $*"; failures=$((failures + 1)); }

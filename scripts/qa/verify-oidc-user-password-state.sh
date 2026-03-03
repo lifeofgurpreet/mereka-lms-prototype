@@ -14,6 +14,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
+require_kubectl || exit 0
 source "$REPO_ROOT/scripts/shared/config.sh"
 
 ENV_SCOPE="prod" # prod|dev|both
