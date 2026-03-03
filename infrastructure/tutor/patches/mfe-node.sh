@@ -124,10 +124,26 @@ for target in targets:
                     end = idx
                     break
             authn_block = lines[start:end]
-            has_env_copy = any(line.strip() == env_copy for line in authn_block)
             has_theme_copy = any(line.strip() == app_theme_copy for line in authn_block)
 
-            if not (has_env_copy and has_theme_copy):
+            # NOTE: Do NOT copy env.config.jsx to authn. The Indigo env.config.jsx
+            # imports @edly-io/indigo-frontend-component-footer which is only installed
+            # for learning/discussions/learner-dashboard/profile/account MFEs.
+            # Copying it to authn causes "Module not found" at webpack build time.
+            # Also remove env.config.jsx if a previous patch run already added it.
+            has_env_copy = any(line.strip() == env_copy for line in authn_block)
+            if has_env_copy:
+                lines = [line for idx_l, line in enumerate(lines)
+                         if not (start <= idx_l < end and line.strip() == env_copy)]
+                # Recalculate end after removal
+                end = len(lines)
+                for idx in range(start + 1, len(lines)):
+                    stripped = lines[idx].strip()
+                    if stripped.startswith("######## ") or stripped.startswith("####################### "):
+                        end = idx
+                        break
+
+            if not has_theme_copy:
                 insert_at = None
                 for idx in range(start, end):
                     if lines[idx].strip() == "COPY --from=authn-src / /openedx/app":
@@ -139,12 +155,7 @@ for target in targets:
                             insert_at = idx
                             break
                 if insert_at is not None:
-                    inserts = []
-                    if not has_env_copy:
-                        inserts.append(env_copy)
-                    if not has_theme_copy:
-                        inserts.append(app_theme_copy)
-                    lines = lines[:insert_at] + inserts + lines[insert_at:]
+                    lines = lines[:insert_at] + [app_theme_copy] + lines[insert_at:]
 
         # Ensure runtime theme assets are present in the final caddy image.
         # Without this COPY, /theme/*.css resolves to 404 at runtime.
