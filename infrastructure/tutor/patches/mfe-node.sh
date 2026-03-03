@@ -476,6 +476,20 @@ for target in targets:
             "&& apt-get install -y --fix-broken",
         )
 
+    # Fix indigo-frontend-component-footer peer dep conflict.
+    # tutor-indigo 18.3.0 adds `RUN npm install @edly-io/indigo-frontend-component-footer@^2.0.0`
+    # WITHOUT --legacy-peer-deps. The footer package requires paragon <23 but
+    # learner-dashboard uses paragon 23.x. Add --legacy-peer-deps to avoid ERESOLVE.
+    updated = updated.replace(
+        "RUN npm install @edly-io/indigo-frontend-component-footer@",
+        "RUN npm install --legacy-peer-deps @edly-io/indigo-frontend-component-footer@",
+    )
+    # Also fix the header component install (same potential peer dep issue)
+    updated = updated.replace(
+        "RUN npm install '@edx/frontend-component-header@npm:@edly-io/indigo-frontend-component-header@",
+        "RUN npm install --legacy-peer-deps '@edx/frontend-component-header@npm:@edly-io/indigo-frontend-component-header@",
+    )
+
     updated = ensure_mfe_ulmo_source_refs(updated)
     updated = ensure_mfe_brand_ulmo_version(updated)
     updated = ensure_mfe_discussions_webpack_noninteractive(updated)

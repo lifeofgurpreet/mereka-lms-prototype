@@ -101,6 +101,20 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
+      - name: Free disk space for large image builds
+        run: |
+          # GitHub-hosted runners have ~14GB free. OpenEdX image build needs
+          # ~12GB+ (base layers + pip packages + webpack + image export).
+          # Remove pre-installed tools we don't need to reclaim ~6GB.
+          echo "=== Disk before cleanup ==="
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/share/powershell /usr/share/swift \
+            /usr/local/.ghcup 2>/dev/null || true
+          sudo docker image prune -af 2>/dev/null || true
+          echo "=== Disk after cleanup ==="
+          df -h /
+
       - name: Enable swap for heavy image builds
         run: |
           # GitHub hosted runners can OOM during large Open edX layer export.
