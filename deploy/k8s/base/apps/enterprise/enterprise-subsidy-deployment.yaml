@@ -57,11 +57,11 @@ spec:
                   'SOCIAL_AUTH_EDX_OAUTH2_KEY': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_KEY', 'enterprise-subsidy-key'),
                   'SOCIAL_AUTH_EDX_OAUTH2_SECRET': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_SECRET', ''),
                   'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': 'http://lms:8000',
-                  'SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT': 'https://academyv2.mereka.io',
+                  'SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT': os.environ.get('LMS_ROOT_URL', 'https://academyv2.mereka.io'),
                   'BACKEND_SERVICE_EDX_OAUTH2_KEY': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_KEY', 'enterprise-subsidy-key'),
                   'BACKEND_SERVICE_EDX_OAUTH2_SECRET': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET', ''),
                   'LMS_BASE_URL': 'http://lms:8000',
-                  'LMS_ROOT_URL': 'https://academyv2.mereka.io',
+                  'LMS_ROOT_URL': os.environ.get('LMS_ROOT_URL', 'https://academyv2.mereka.io'),
                   'ENTERPRISE_CATALOG_URL': 'http://enterprise-catalog:8000',
                   'ENTERPRISE_SUBSIDY_URL': 'http://enterprise-subsidy:8000',
               }
@@ -101,6 +101,8 @@ spec:
                 secretKeyRef:
                   name: enterprise-secrets
                   key: ENTERPRISE_SUBSIDY_OAUTH2_SECRET
+            - name: LMS_ROOT_URL
+              value: "https://academyv2.mereka.io"
           resources:
             requests:
               cpu: 10m

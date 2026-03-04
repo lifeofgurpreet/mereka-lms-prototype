@@ -6,7 +6,7 @@
 set -euo pipefail
 
 NAMESPACE=${1:-mereka-lms}
-SERVICES="lms cms caddy nginx discovery ecommerce notes xqueue"
+SERVICES="lms cms caddy nginx discovery notes xqueue"
 
 echo "🔍 Checking service selectors in namespace: $NAMESPACE"
 echo ""

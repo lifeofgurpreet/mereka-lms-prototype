@@ -30,7 +30,7 @@ KUSTOMIZATION="$ENTERPRISE_MFE_DIR/kustomization.yaml"
 BRAND_HTML="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/header/brand.html"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 
-MEREKA_REGISTRY="asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
+MEREKA_REGISTRY="ghcr.io/biji-biji-initiative/mereka-lms/"
 LMS_PROD_DOMAIN="academyv2.mereka.io"
 STUDIO_PROD_DOMAIN="studio.academyv2.mereka.io"
 

@@ -195,22 +195,22 @@ run_script() {
       output="command timed out (rc=${rc})"
     else
       # Normalize noisy script output into a deterministic single-line excerpt.
-      output_clean="$(printf '%s' "$output" | tr -d '\000' | tr -d '\r' | sed 's/\x1B\[[0-9;]*[mK]//g')"
-      output_excerpt="$(printf '%s\n' "$output_clean" | awk '/\[FAIL\]|^FAIL /{print; exit}')"
+      output_clean="$(tr -d '\000' <<< "$output" | tr -d '\r' | sed 's/\x1B\[[0-9;]*[mK]//g')"
+      output_excerpt="$(awk '/\[FAIL\]|^FAIL /{print; exit}' <<< "$output_clean")"
       if [[ -z "$output_excerpt" ]]; then
-        output_excerpt="$(printf '%s\n' "$output_clean" | awk '/NOT listed in kustomization.yaml|returned [0-9]{3}|missing/{print; exit}')"
+        output_excerpt="$(awk '/NOT listed in kustomization.yaml|returned [0-9]{3}|missing/{print; exit}' <<< "$output_clean")"
       fi
 
       if [[ -z "$output_excerpt" ]]; then
         local first_nonempty=""
-        first_nonempty="$(printf '%s\n' "$output_clean" | awk 'NF{print; exit}')"
+        first_nonempty="$(awk 'NF{print; exit}' <<< "$output_clean")"
         output_excerpt="script failed (rc=${rc})"
         if [[ -n "$first_nonempty" ]]; then
           output_excerpt="${output_excerpt}; first_line=${first_nonempty}"
         fi
       fi
 
-      output="$(printf '%s' "$output_excerpt" | tr '\n' ' ' | tr '\t' ' ' | sed 's/[[:space:]]\+/ /g')"
+      output="$(tr '\n' ' ' <<< "$output_excerpt" | tr '\t' ' ' | sed 's/[[:space:]]\+/ /g')"
       output="${output:0:320}"
     fi
     if [[ -z "$output" ]]; then
@@ -295,7 +295,7 @@ fi"
     } >&2
   fi
 
-  if [[ -z "$result" ]] || ! printf '%s' "$result" | grep -q "^${split_token}:"; then
+  if [[ -z "$result" ]] || ! grep -q "^${split_token}:" <<< "$result"; then
     printf '000%s' "$split_token"
     return 0
   fi

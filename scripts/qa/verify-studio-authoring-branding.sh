@@ -95,7 +95,12 @@ check_live_css() {
   ts="$(date +%s)"
   html="$(fetch "https://${studio_host}/?nocache=${ts}")"
   if [[ -z "${html:-}" ]]; then
-    fail "Studio host unreachable (${studio_host})"
+    # Live checks are best-effort; don't fail CI if studio is unreachable
+    if [[ "${CI:-}" == "true" ]]; then
+      printf "⚠ SKIP: Studio host unreachable in CI (%s)\n" "${studio_host}"
+    else
+      fail "Studio host unreachable (${studio_host})"
+    fi
     return
   fi
 

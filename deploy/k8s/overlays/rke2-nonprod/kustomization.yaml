@@ -28,6 +28,8 @@ resources:
   - ingress-openedx-studio.yaml
   - ingress-enterprise-admin.yaml
   - ingress-enterprise-learner.yaml
+  - ingress-credentials.yaml
+  - ingress-notes.yaml
   # NOTE: ARC resources (deploy/k8s/base/arc/) are NOT included here because this overlay
   # sets namespace: mereka-lms which would override arc-systems/arc-runners namespaces.
   # Apply ARC separately: kubectl apply -k deploy/k8s/base/arc/
@@ -87,6 +89,7 @@ patches:
   - path: patches/domain-env.yaml
   - path: patches/aspects-storage-class.yaml
   - path: patches/aspects-ingress-dev.yaml
+  - path: patches/aspects-container-hardening.yaml
   # enterprise-catalog-worker: Recreate strategy + probe hardening (from infra agent handoff)
   - path: patches/enterprise-catalog-worker-nonprod.yaml
   # payments-gateway: switch to infisical + DEV Stripe keys

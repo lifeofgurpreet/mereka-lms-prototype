@@ -83,7 +83,6 @@ if [[ "$MODE" == "local" ]]; then
     "mfe"
     "forum"
     "discovery"
-    "ecommerce"
     "mysql"
     "redis"
   )

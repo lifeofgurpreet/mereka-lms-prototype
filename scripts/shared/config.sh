@@ -90,6 +90,8 @@ export STAGING_MFE_DOMAIN="${STAGING_MFE_DOMAIN:-apps.staging.academyv2.mereka.i
 export STAGING_AUTHENTIK_DOMAIN="${STAGING_AUTHENTIK_DOMAIN:-staging.auth0.mereka.io}"
 export STAGING_PREVIEW_DOMAIN="${STAGING_PREVIEW_DOMAIN:-preview.staging.academyv2.mereka.io}"
 export STAGING_DISCOVERY_DOMAIN="${STAGING_DISCOVERY_DOMAIN:-discovery.staging.academyv2.mereka.io}"
+# Legacy Oscar ecommerce (deprecated — being replaced by purchase-gateway)
+# Kept during dual-stack transition period; will be removed after AC-027/AC-028 close
 export STAGING_ECOMMERCE_DOMAIN="${STAGING_ECOMMERCE_DOMAIN:-ecommerce.staging.academyv2.mereka.io}"
 export STAGING_NOTES_DOMAIN="${STAGING_NOTES_DOMAIN:-notes.staging.academyv2.mereka.io}"
 export STAGING_CREDENTIALS_DOMAIN="${STAGING_CREDENTIALS_DOMAIN:-credentials.staging.academyv2.mereka.io}"

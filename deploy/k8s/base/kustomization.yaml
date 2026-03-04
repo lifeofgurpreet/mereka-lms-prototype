@@ -55,6 +55,10 @@ patches:
 # T087: Enforce non-root, read-only FS, capability drop, and RuntimeDefault
 # seccomp profile for all Deployments. Multi-doc file, matched by kind+name.
 - path: patches/container-hardening.yaml
+# T087 (enterprise): Same hardening for enterprise services, portal MFEs, and
+# ancillary services. readOnlyRootFilesystem omitted — these services write
+# config to emptyDir at runtime and Caddy-based portals need writable paths.
+- path: patches/container-hardening-enterprise.yaml
 
 configMapGenerator:
 - name: caddy-config

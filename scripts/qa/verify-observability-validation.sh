@@ -68,7 +68,6 @@ REQUIRED_SMS=(
   "servicemonitor-mfe.yaml"
   "servicemonitor-forum.yaml"
   "servicemonitor-discovery.yaml"
-  "servicemonitor-ecommerce.yaml"
   "servicemonitor-credentials.yaml"
 )
 
@@ -199,7 +198,6 @@ if has_kubectl; then
     "mfe-metrics"
     "forum-metrics"
     "discovery-metrics"
-    "ecommerce-metrics"
     "credentials-metrics"
     "purchase-gateway-metrics"
   )
@@ -372,7 +370,6 @@ if [[ -f "$pr_services" ]]; then
   SERVICE_ALERTS=(
     "ForumPodDown"
     "DiscoveryPodDown"
-    "EcommercePodDown"
     "CredentialsPodDown"
     "MFEPodDown"
     "PurchaseGatewayPodDown"

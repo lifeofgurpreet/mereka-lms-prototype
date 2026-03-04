@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
-# DEPRECATED: This script validates the legacy Oscar-based ecommerce service configuration.
-# It is retained during the dual-stack transition period.
+# DEPRECATED: This script validated the legacy Oscar-based ecommerce service configuration.
+# Oscar ecommerce has been removed from deploy/k8s/base/deployments.yml.
+# The deploy/ecommerce Deployment no longer exists in the cluster, so the
+# run_ecommerce_checks() function will fail if executed against a live cluster.
+#
+# This file is RETAINED for reference during the transition period only.
+# DO NOT add this script to .github/ci-scripts-static.txt — it is a live-cluster
+# diagnostic tool, not a static CI check.
+#
 # For the replacement service, see: services/purchase-gateway/
+# For the deprecation audit, see: scripts/qa/verify-oscar-deprecation.sh
 # Spec: specs/ecommerce-purchase-gateway_spec.md
 #
 # @covers AC-031

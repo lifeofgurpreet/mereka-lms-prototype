@@ -1,7 +1,7 @@
 # Module Surface Validation Runbook
 
 **Bead**: 253a — module surface validation pack (non-UI modules)
-**Last updated**: 2026-02-18
+**Last updated**: 2026-03-04
 **Audience**: Platform Eng, On-call
 
 ---
@@ -13,8 +13,8 @@ collection for the non-UI Open edX module surfaces:
 
 | Service | Host | Port | Notes |
 |---------|------|------|-------|
-| Ecommerce | `ecommerce.academyv2.mereka.io` | 443 (HTTPS) | DEPRECATED — legacy Oscar; being replaced by purchase-gateway |
 | Credentials | `credentials.academyv2.mereka.io` | 443 (HTTPS) | Certificate/badge issuance service |
+| Purchase Gateway | `payments.academyv2.mereka.io` | 443 (HTTPS) | Stripe-based payment service (replaces legacy Oscar) |
 | Forum | `academyv2.mereka.io` | 443 (HTTPS) | Forum v2 integrated into LMS; no standalone host |
 | Notes | `notes.academyv2.mereka.io` | 443 (HTTPS) | Learner annotations API |
 | Preview | `preview.academyv2.mereka.io` | 443 (HTTPS) | LMS alias for staff course preview |
@@ -27,9 +27,6 @@ collection for the non-UI Open edX module surfaces:
 
 | Route | Expected HTTP | Notes |
 |-------|--------------|-------|
-| `GET ecommerce.academyv2.mereka.io/` | 200 | Caddy returns branded inline HTML page |
-| `GET ecommerce.academyv2.mereka.io/dashboard/` | 200 or 302→`/login` | Requires auth |
-| `GET ecommerce.academyv2.mereka.io/authn/login` | 200 | Proxied to MFE via Caddy |
 | `GET credentials.academyv2.mereka.io/` | 200 | Caddy returns branded inline HTML page |
 | `GET credentials.academyv2.mereka.io/health/` | 200 | JSON payload: `{"overall_status": "OK"}` |
 | `GET credentials.academyv2.mereka.io/admin/login/` | 200 | Django admin login page |
@@ -43,24 +40,6 @@ collection for the non-UI Open edX module surfaces:
 ---
 
 ## HTTP Smoke Commands
-
-### Ecommerce
-
-```bash
-# Root landing (expect 200 — branded Caddy response)
-curl -I -L https://ecommerce.academyv2.mereka.io/
-# Expected: HTTP/2 200, body contains "Mereka Ecommerce Service"
-
-# Dashboard (expect redirect to login when unauthenticated)
-curl -sL -o /dev/null -w "%{http_code} %{url_effective}\n" \
-  https://ecommerce.academyv2.mereka.io/dashboard/
-# Expected: 200 https://ecommerce.academyv2.mereka.io/login (or /authn/login)
-
-# Authn proxy route (expect 200 — served by MFE via Caddy)
-curl -sL -o /dev/null -w "%{http_code}\n" \
-  https://ecommerce.academyv2.mereka.io/authn/login
-# Expected: 200
-```
 
 ### Credentials
 
@@ -154,22 +133,18 @@ curl -sL -o /dev/null -w "%{http_code}\n" \
 
 ## Authn Proxy Route Verification
 
-Caddy routes `/authn/*` on service domains to the MFE container (`mfe:8002`).
-This ensures the branded authn shell is served on ecommerce and credentials domains.
+Caddy routes `/authn/*` on the credentials domain to the MFE container (`mfe:8002`).
+This ensures the branded authn shell is served on the credentials domain.
 
 **Verify Caddyfile config:**
 ```bash
 grep -A5 "handle /authn/" deploy/k8s/base/apps/caddy/Caddyfile
-# Expected: two blocks (ecommerce + credentials) each with:
+# Expected: credentials block with:
 #   reverse_proxy mfe:8002 { ... }
 ```
 
 **Verify live proxy (requires cluster):**
 ```bash
-# ecommerce authn proxy
-curl -s https://ecommerce.academyv2.mereka.io/authn/login | grep -o '<div id="root">'
-# Expected: <div id="root">
-
 # credentials authn proxy
 curl -s https://credentials.academyv2.mereka.io/authn/login | grep -o '<div id="root">'
 # Expected: <div id="root">
@@ -213,10 +188,6 @@ Run these to capture a timestamped evidence bundle:
 TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
 BUNDLE_DIR="var/module-surface-evidence/${TIMESTAMP}"
 mkdir -p "$BUNDLE_DIR"
-
-# Ecommerce
-curl -sL -o "$BUNDLE_DIR/ecommerce-root.html" -w "%{http_code}" \
-  https://ecommerce.academyv2.mereka.io/ > "$BUNDLE_DIR/ecommerce-root.txt"
 
 # Credentials
 curl -sL -o "$BUNDLE_DIR/credentials-health.json" -w "%{http_code}" \
@@ -276,10 +247,10 @@ Live mode : 0
 
 --- AC-MOD-001: Service Host Inventory & Smoke Coverage ---
 [PASS] AC-MOD-001: Service hostname registry doc: file exists (...)
-[PASS] AC-MOD-001: Hostname doc lists ecommerce host
+[PASS] AC-MOD-001: Hostname doc lists credentials host
 ...
 --- AC-MOD-002: Status Code Mapping & Authn Proxy Routes ---
-[PASS] AC-MOD-002: Caddyfile has authn proxy block for ecommerce
+[PASS] AC-MOD-002: Caddyfile has authn proxy block for credentials
 ...
 
 ==============================
@@ -295,12 +266,6 @@ RESULT: PASS
 ---
 
 ## Troubleshooting
-
-### Ecommerce root returns 502
-
-- Check pod status: `kubectl get pods -n mereka-lms -l app.kubernetes.io/name=ecommerce`
-- Check endpoints: `kubectl get endpoints ecommerce -n mereka-lms`
-- If `<none>`, service selector is mismatched — run `./scripts/infra/fix-service-selectors.sh`
 
 ### Credentials /health/ returns 503
 

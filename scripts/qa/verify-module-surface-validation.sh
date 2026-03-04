@@ -6,7 +6,7 @@
 #
 # Verifies:
 #   AC-MOD-001: Service host inventory documented; HTTP smoke coverage for
-#               ecommerce, credentials, forum, notes, preview, app/teacher paths.
+#               credentials, forum, notes, preview, app/teacher paths.
 #   AC-MOD-002: Expected status-code mapping per service; authn proxy routes
 #               present in Caddyfile.
 #   AC-MOD-003: 5xx monitoring/alerting config present; regression baseline docs.
@@ -50,7 +50,7 @@ CURL_TIMEOUT="${CURL_TIMEOUT:-15}"
 
 # Domain constants (match config.sh defaults)
 LMS_DOMAIN="${LMS_DOMAIN:-academyv2.mereka.io}"
-ECOMMERCE_HOST="ecommerce.${LMS_DOMAIN}"
+# Ecommerce removed (ADR-018, Oscar deprecated → Purchase Gateway)
 CREDENTIALS_HOST="credentials.${LMS_DOMAIN}"
 NOTES_HOST="notes.${LMS_DOMAIN}"
 FORUM_HOST="${LMS_DOMAIN}"          # Forum v2 is integrated into LMS
@@ -172,7 +172,6 @@ check_file_exists "$DOCS_OPS/OPENEDX_HOSTNAMES.md" \
 
 # 1b. Hostname doc must list each service host
 declare -A SERVICE_HOSTS=(
-  ["ecommerce"]="ecommerce\\.academyv2\\.mereka\\.io"
   ["credentials"]="credentials\\.academyv2\\.mereka\\.io"
   ["notes"]="notes\\.academyv2\\.mereka\\.io"
   ["forum"]="forum\\.academyv2\\.mereka\\.io"
@@ -188,7 +187,6 @@ done
 
 # 1c. Caddyfile must contain route blocks for each service
 declare -A CADDY_PATTERNS=(
-  ["ecommerce route"]="ecommerce\\.academyv2\\.mereka"
   ["credentials route"]="credentials\\.academyv2\\.mereka"
   ["notes route"]="notes\\.academyv2\\.mereka"
   ["preview route"]="preview\\.academyv2\\.mereka"
@@ -206,7 +204,6 @@ check_file_exists "$DOCS_OPS/MODULE_SURFACE_VALIDATION_RUNBOOK.md" \
   "AC-MOD-001: Module surface validation runbook present"
 
 # 1e. Live smoke — optional
-live_http_check "https://${ECOMMERCE_HOST}/" "AC-MOD-001 live: ecommerce root reachable" "2xx3xx"
 live_http_check "https://${CREDENTIALS_HOST}/health/" "AC-MOD-001 live: credentials /health/" "200"
 live_http_check "https://${NOTES_HOST}/heartbeat" "AC-MOD-001 live: notes /heartbeat" "200"
 live_http_check "https://${FORUM_HOST}/api/discussion/v1/" "AC-MOD-001 live: forum API" "2xx3xx"
@@ -220,17 +217,17 @@ echo ""
 # ---------------------------------------------------------------------------
 echo -e "${CYAN}--- AC-MOD-002: Status Code Mapping & Authn Proxy Routes ---${NC}"
 
-# 2a. Caddyfile must have authn proxy blocks for ecommerce and credentials
+# 2a. Caddyfile must have authn proxy blocks for credentials
 check_pattern_in_file "$CADDYFILE" \
   "handle /authn/\*" \
-  "AC-MOD-002: Caddyfile has authn proxy block for ecommerce"
+  "AC-MOD-002: Caddyfile has authn proxy block for credentials"
 
-# Count occurrences to verify both services have the proxy
+# Count occurrences to verify credentials has the proxy
 authn_count=$(grep -c "handle /authn/\*" "$CADDYFILE" 2>/dev/null || echo "0")
-if [[ "$authn_count" -ge 2 ]]; then
-  pass "AC-MOD-002: Caddyfile has authn proxy blocks for >= 2 services (count: $authn_count)"
+if [[ "$authn_count" -ge 1 ]]; then
+  pass "AC-MOD-002: Caddyfile has authn proxy blocks for >= 1 service (count: $authn_count)"
 else
-  fail "AC-MOD-002: Expected authn proxy in >= 2 Caddyfile blocks, found $authn_count"
+  fail "AC-MOD-002: Expected authn proxy in >= 1 Caddyfile block, found $authn_count"
 fi
 
 # 2b. Caddyfile must route authn/* to MFE service
@@ -238,10 +235,7 @@ check_pattern_in_file "$CADDYFILE" \
   "reverse_proxy mfe:8002" \
   "AC-MOD-002: Caddyfile routes authn/* to MFE (mfe:8002)"
 
-# 2c. Ecommerce root must have a known landing response (branded inline HTML or redirect)
-check_pattern_in_file "$CADDYFILE" \
-  "Mereka Ecommerce" \
-  "AC-MOD-002: Caddyfile has Mereka-branded ecommerce root response"
+# 2c. Ecommerce removed (ADR-018, Oscar deprecated → Purchase Gateway)
 
 # 2d. Credentials root must have a known landing response
 check_pattern_in_file "$CADDYFILE" \
@@ -259,14 +253,10 @@ check_pattern_in_file "$DOCS_OPS/MODULE_SURFACE_VALIDATION_RUNBOOK.md" \
   "AC-MOD-002: Runbook documents expected HTTP status codes"
 
 # 2g. Live status code checks
-live_http_check "https://${ECOMMERCE_HOST}/" \
-  "AC-MOD-002 live: ecommerce root (expect 200 or redirect)" "2xx3xx"
 live_http_check "https://${CREDENTIALS_HOST}/health/" \
   "AC-MOD-002 live: credentials /health/ → 200" "200"
 live_http_check "https://${CREDENTIALS_HOST}/admin/login/" \
   "AC-MOD-002 live: credentials /admin/login/ → 2xx/3xx" "2xx3xx"
-live_http_check "https://${ECOMMERCE_HOST}/authn/login" \
-  "AC-MOD-002 live: ecommerce /authn/login → 200 (via MFE proxy)" "200"
 live_http_check "https://${CREDENTIALS_HOST}/authn/login" \
   "AC-MOD-002 live: credentials /authn/login → 200 (via MFE proxy)" "200"
 
@@ -378,13 +368,11 @@ if [[ "$LIVE" == "1" ]]; then
   mkdir -p "$BUNDLE_DIR"
 
   declare -A LIVE_CHECKS=(
-    ["ecommerce-root"]="https://${ECOMMERCE_HOST}/"
     ["credentials-health"]="https://${CREDENTIALS_HOST}/health/"
     ["credentials-admin-login"]="https://${CREDENTIALS_HOST}/admin/login/"
     ["notes-heartbeat"]="https://${NOTES_HOST}/heartbeat"
     ["preview-root"]="https://${PREVIEW_HOST}/"
     ["mfe-authn-login"]="https://${MFE_HOST}/authn/login"
-    ["ecommerce-authn-proxy"]="https://${ECOMMERCE_HOST}/authn/login"
     ["credentials-authn-proxy"]="https://${CREDENTIALS_HOST}/authn/login"
   )
 

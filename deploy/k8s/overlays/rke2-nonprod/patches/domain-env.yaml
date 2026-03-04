@@ -22,6 +22,8 @@ spec:
               value: https://apps.academyv2.mereka.dev
             - name: MEREKA_AUTH_DOMAIN
               value: auth0.mereka.dev
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: credentials.academyv2.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -45,6 +47,8 @@ spec:
               value: https://apps.academyv2.mereka.dev
             - name: MEREKA_AUTH_DOMAIN
               value: auth0.mereka.dev
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: credentials.academyv2.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -68,6 +72,8 @@ spec:
               value: https://apps.academyv2.mereka.dev
             - name: MEREKA_AUTH_DOMAIN
               value: auth0.mereka.dev
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: credentials.academyv2.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -91,6 +97,27 @@ spec:
               value: https://apps.academyv2.mereka.dev
             - name: MEREKA_AUTH_DOMAIN
               value: auth0.mereka.dev
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: credentials.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credentials
+spec:
+  template:
+    spec:
+      containers:
+        - name: credentials
+          env:
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: credentials.academyv2.mereka.dev
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -127,3 +154,111 @@ spec:
               value: academyv2.mereka.dev
             - name: NOTES_DOMAIN
               value: notes.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-catalog
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+      containers:
+        - name: enterprise-catalog
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+      containers:
+        - name: enterprise-access
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-subsidy
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+      containers:
+        - name: enterprise-subsidy
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: license-manager
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+      containers:
+        - name: license-manager
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-catalog-worker
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+      containers:
+        - name: enterprise-catalog-worker
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access-worker
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev
+      containers:
+        - name: enterprise-access-worker
+          env:
+            - name: LMS_ROOT_URL
+              value: https://academyv2.mereka.dev

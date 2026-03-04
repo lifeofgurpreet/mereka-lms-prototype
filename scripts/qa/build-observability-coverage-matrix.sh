@@ -90,7 +90,6 @@ REQUIRED_SERVICE_MONITORS=(
   "servicemonitor-mfe.yaml"
   "servicemonitor-forum.yaml"
   "servicemonitor-discovery.yaml"
-  "servicemonitor-ecommerce.yaml"
   "servicemonitor-credentials.yaml"
   "servicemonitor-purchase-gateway.yaml"
 )
@@ -107,7 +106,6 @@ REQUIRED_SERVICE_MONITOR_RUNTIME=(
   "mfe-metrics"
   "forum-metrics"
   "discovery-metrics"
-  "ecommerce-metrics"
   "credentials-metrics"
   "purchase-gateway-metrics"
 )
