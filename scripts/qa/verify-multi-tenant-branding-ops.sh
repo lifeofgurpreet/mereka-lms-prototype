@@ -35,6 +35,11 @@ warn_check() { echo -e "  ${YELLOW}WARN${NC}: $1"; WARN=$((WARN + 1)); }
 
 OPS_DOC="$REPO_ROOT/docs/branding/MULTI_TENANT_BRANDING_OPS.md"
 
+# Helper: grep the document content without SIGPIPE from echo|grep -q under pipefail.
+# Uses herestring (<<<) instead of pipe so grep -q closing stdin early doesn't kill echo.
+doc_grep()    { grep -qiE  -- "$1" <<< "$content"; }
+doc_grep_f()  { grep -qF   -- "$1" <<< "$content"; }
+
 echo "========================================================"
 echo "Multi-Tenant Branding Operations Model Verifier (bead 2dcy.4)"
 echo "AC-FRONT-041..044"
@@ -55,35 +60,35 @@ else
   content="$(tr -d '\r' < "$OPS_DOC")"
 
   # Check for precedence section
-  if echo "$content" | grep -qiE "override precedence|precedence chain|Override Precedence"; then
+  if doc_grep "override precedence|precedence chain|Override Precedence"; then
     pass_check "Document contains 'override precedence' section"
   else
     fail_check "Document does not contain 'override precedence' section"
   fi
 
   # Check for SITE_VARIANTS reference
-  if echo "$content" | grep -q "SITE_VARIANTS"; then
+  if doc_grep_f "SITE_VARIANTS"; then
     pass_check "Document references SITE_VARIANTS"
   else
     fail_check "Document does not reference SITE_VARIANTS"
   fi
 
   # Check for design tokens or _tokens.scss reference
-  if echo "$content" | grep -qiE "_tokens\.scss|design.token"; then
+  if doc_grep "_tokens\.scss|design.token"; then
     pass_check "Document references design tokens (_tokens.scss)"
   else
     fail_check "Document does not reference design tokens / _tokens.scss"
   fi
 
   # Check for plugin slot reference
-  if echo "$content" | grep -qiE "plugin slot|mfe-env-config|footer.slot"; then
+  if doc_grep "plugin slot|mfe-env-config|footer.slot"; then
     pass_check "Document references plugin slot configuration"
   else
     warn_check "Document does not explicitly reference plugin slot — consider adding"
   fi
 
   # Check for tenant registry / ConfigMap reference
-  if echo "$content" | grep -qiE "configmap-tenants|tenant.registry|tenant-registry"; then
+  if doc_grep "configmap-tenants|tenant.registry|tenant-registry"; then
     pass_check "Document references tenant registry ConfigMap"
   else
     fail_check "Document does not reference tenant registry ConfigMap"
@@ -103,35 +108,35 @@ else
   content="$(tr -d '\r' < "$OPS_DOC")"
 
   # Check for onboarding or new tenant steps
-  if echo "$content" | grep -qiE "onboarding|new tenant|per.tenant"; then
+  if doc_grep "onboarding|new tenant|per.tenant"; then
     pass_check "Document contains onboarding / new tenant steps"
   else
     fail_check "Document does not contain onboarding steps"
   fi
 
   # Check for DNS steps
-  if echo "$content" | grep -qiE "dns|cloudflare|hostname"; then
+  if doc_grep "dns|cloudflare|hostname"; then
     pass_check "Document references DNS/hostname registration steps"
   else
     fail_check "Document does not reference DNS steps"
   fi
 
   # Check for provision-tenant.sh reference
-  if echo "$content" | grep -q "provision-tenant"; then
+  if doc_grep_f "provision-tenant"; then
     pass_check "Document references provision-tenant.sh"
   else
     fail_check "Document does not reference provision-tenant.sh"
   fi
 
   # Check for ConfigMap reference in onboarding context
-  if echo "$content" | grep -qiE "configmap|tenant-config|configmap-tenants"; then
+  if doc_grep "configmap|tenant-config|configmap-tenants"; then
     pass_check "Document references ConfigMap entries in onboarding"
   else
     fail_check "Document does not reference ConfigMap in onboarding section"
   fi
 
   # Check for smoke test / verification step in runbook
-  if echo "$content" | grep -qiE "smoke test|verify|Step.*[0-9].*[Ss]moke|Step.*[0-9].*[Vv]erif"; then
+  if doc_grep "smoke test|verify|Step.*[0-9].*[Ss]moke|Step.*[0-9].*[Vv]erif"; then
     pass_check "Document includes smoke test / verification step in runbook"
   else
     warn_check "Runbook does not mention smoke test verification step"
@@ -151,14 +156,14 @@ else
   content="$(tr -d '\r' < "$OPS_DOC")"
 
   # Check for CI validation mention
-  if echo "$content" | grep -qiE "ci|continuous integration|github.actions|ci.yml"; then
+  if doc_grep "ci|continuous integration|github.actions|ci.yml"; then
     pass_check "Document references CI validation"
   else
     fail_check "Document does not reference CI validation"
   fi
 
   # Check for runtime resolution mention
-  if echo "$content" | grep -qiE "runtime|domain resolution|TenantResolutionMiddleware|middleware"; then
+  if doc_grep "runtime|domain resolution|TenantResolutionMiddleware|middleware"; then
     pass_check "Document references runtime branding resolution"
   else
     fail_check "Document does not reference runtime domain resolution"
@@ -167,25 +172,25 @@ else
   # Count named verify scripts referenced in the document
   VERIFY_COUNT=0
 
-  if echo "$content" | grep -q "verify-tenant-branding-contract\.sh"; then
+  if doc_grep_f "verify-tenant-branding-contract.sh"; then
     VERIFY_COUNT=$((VERIFY_COUNT + 1))
   fi
-  if echo "$content" | grep -q "verify-branding-multi-domain\.sh"; then
+  if doc_grep_f "verify-branding-multi-domain.sh"; then
     VERIFY_COUNT=$((VERIFY_COUNT + 1))
   fi
-  if echo "$content" | grep -q "verify-multi-tenancy-foundation\.sh"; then
+  if doc_grep_f "verify-multi-tenancy-foundation.sh"; then
     VERIFY_COUNT=$((VERIFY_COUNT + 1))
   fi
-  if echo "$content" | grep -q "verify-tenant-configmap\.sh"; then
+  if doc_grep_f "verify-tenant-configmap.sh"; then
     VERIFY_COUNT=$((VERIFY_COUNT + 1))
   fi
-  if echo "$content" | grep -q "verify-tenant-branding\.sh"; then
+  if doc_grep_f "verify-tenant-branding.sh"; then
     VERIFY_COUNT=$((VERIFY_COUNT + 1))
   fi
-  if echo "$content" | grep -q "verify-tenant-branding-runtime\.sh"; then
+  if doc_grep_f "verify-tenant-branding-runtime.sh"; then
     VERIFY_COUNT=$((VERIFY_COUNT + 1))
   fi
-  if echo "$content" | grep -q "verify-plugin-slot-migration-register\.sh"; then
+  if doc_grep_f "verify-plugin-slot-migration-register.sh"; then
     VERIFY_COUNT=$((VERIFY_COUNT + 1))
   fi
 
@@ -196,7 +201,7 @@ else
   fi
 
   # Check for branding regression detection mention
-  if echo "$content" | grep -qiE "regression|regression detection|regression guard"; then
+  if doc_grep "regression|regression detection|regression guard"; then
     pass_check "Document references branding regression detection"
   else
     warn_check "Document does not mention branding regression detection"
@@ -216,21 +221,21 @@ else
   content="$(tr -d '\r' < "$OPS_DOC")"
 
   # Check for owner section
-  if echo "$content" | grep -qiE "owner|ownership|owns"; then
+  if doc_grep "owner|ownership|owns"; then
     pass_check "Document contains owner / ownership section"
   else
     fail_check "Document does not contain owner / ownership section"
   fi
 
   # Check for signoff mention
-  if echo "$content" | grep -qiE "signoff|sign.off|approval|pr approval"; then
+  if doc_grep "signoff|sign.off|approval|pr approval"; then
     pass_check "Document contains signoff / approval expectations"
   else
     fail_check "Document does not mention signoff requirements"
   fi
 
   # Check for escalation mention
-  if echo "$content" | grep -qiE "escalation|escalate|pagerduty|on.call|p1|p2"; then
+  if doc_grep "escalation|escalate|pagerduty|on.call|p1|p2"; then
     pass_check "Document contains escalation path"
   else
     fail_check "Document does not contain escalation path"
@@ -238,13 +243,13 @@ else
 
   # Check for Mereka Academy / Biji-Biji / SkilOurFuture tenant owners
   TENANT_OWNER_COUNT=0
-  if echo "$content" | grep -qiE "mereka academy"; then
+  if doc_grep "mereka academy"; then
     TENANT_OWNER_COUNT=$((TENANT_OWNER_COUNT + 1))
   fi
-  if echo "$content" | grep -qiE "biji-biji|biji biji"; then
+  if doc_grep "biji-biji|biji biji"; then
     TENANT_OWNER_COUNT=$((TENANT_OWNER_COUNT + 1))
   fi
-  if echo "$content" | grep -qiE "skil our future|skilourfuture|skillourfuture"; then
+  if doc_grep "skil our future|skilourfuture|skillourfuture"; then
     TENANT_OWNER_COUNT=$((TENANT_OWNER_COUNT + 1))
   fi
 
