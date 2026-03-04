@@ -4,7 +4,20 @@ description: 'Sets up GCP auth, gcloud CLI, and optionally fetches GKE cluster c
 inputs:
   gcp_sa_key:
     description: 'GCP Service Account JSON key'
-    required: true
+    required: false
+    default: ''
+  workload_identity_provider:
+    description: 'Workload Identity Provider resource name (projects/.../providers/...)'
+    required: false
+    default: ''
+  wif_service_account:
+    description: 'Service account email to impersonate when using WIF'
+    required: false
+    default: ''
+  auth_mode:
+    description: 'Auth mode: auto (prefer WIF), wif, or key'
+    required: false
+    default: 'auto'
   gcloud_project:
     description: 'Project ID to set as gcloud default (used for gcloud CLI; may differ from GKE cluster project)'
     required: false
@@ -48,7 +61,71 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Authenticate to GCP
+    - name: Resolve auth mode
+      id: auth-mode
+      shell: bash
+      env:
+        AUTH_MODE: ${{ inputs.auth_mode }}
+        WIF_PROVIDER: ${{ inputs.workload_identity_provider }}
+        WIF_SERVICE_ACCOUNT: ${{ inputs.wif_service_account }}
+        GCP_SA_KEY: ${{ inputs.gcp_sa_key }}
+      run: |
+        mode="${AUTH_MODE}"
+        if [[ "$mode" != "auto" && "$mode" != "wif" && "$mode" != "key" ]]; then
+          echo "ERROR: auth_mode must be one of auto|wif|key (got: ${mode})" >&2
+          exit 1
+        fi
+
+        has_wif=false
+        if [[ -n "$WIF_PROVIDER" && -n "$WIF_SERVICE_ACCOUNT" ]]; then
+          has_wif=true
+        fi
+
+        has_key=false
+        if [[ -n "$GCP_SA_KEY" ]]; then
+          has_key=true
+        fi
+
+        resolved=""
+        case "$mode" in
+          wif)
+            if [[ "$has_wif" != true ]]; then
+              echo "ERROR: auth_mode=wif requires workload_identity_provider and wif_service_account." >&2
+              exit 1
+            fi
+            resolved="wif"
+            ;;
+          key)
+            if [[ "$has_key" != true ]]; then
+              echo "ERROR: auth_mode=key requires gcp_sa_key." >&2
+              exit 1
+            fi
+            resolved="key"
+            ;;
+          auto)
+            if [[ "$has_wif" == true ]]; then
+              resolved="wif"
+            elif [[ "$has_key" == true ]]; then
+              resolved="key"
+            else
+              echo "ERROR: auth_mode=auto could not resolve credentials. Provide WIF inputs or gcp_sa_key." >&2
+              exit 1
+            fi
+            ;;
+        esac
+
+        echo "mode=${resolved}" >> "$GITHUB_OUTPUT"
+        echo "Resolved auth mode: ${resolved}"
+
+    - name: Authenticate to GCP (WIF)
+      if: ${{ steps.auth-mode.outputs.mode == 'wif' }}
+      uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+      with:
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.wif_service_account }}
+
+    - name: Authenticate to GCP (service account key)
+      if: ${{ steps.auth-mode.outputs.mode == 'key' }}
       uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
       with:
         credentials_json: ${{ inputs.gcp_sa_key }}

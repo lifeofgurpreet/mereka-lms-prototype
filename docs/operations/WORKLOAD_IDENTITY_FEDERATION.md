@@ -198,6 +198,24 @@ Key differences:
 2. Replace `credentials_json: ${{ secrets.GCP_SA_KEY }}` with `workload_identity_provider` + `service_account`
 3. `GCP_WIF_PROVIDER` and `GCP_WIF_SA` are variables (not secrets) — they contain no sensitive data
 
+### Composite Action Pattern (Current Repo Standard)
+
+This repo uses `./.github/actions/gcp-gke-auth` as the canonical auth entrypoint.
+It now supports WIF-first with key fallback:
+
+```yaml
+- name: Authenticate to GCP
+  uses: ./.github/actions/gcp-gke-auth
+  with:
+    workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+    wif_service_account: ${{ vars.GCP_WIF_SA }}
+    gcp_sa_key: ${{ secrets.GCP_SA_KEY }} # optional fallback during migration window
+    auth_mode: auto                        # prefer WIF when vars are present
+    skip_gke: 'true'
+```
+
+For long-running jobs, authenticate as late as possible (immediately before `docker push`, `gcloud` publish, or `kubectl` apply) to avoid short-lived token expiry during long build phases.
+
 ## Workflows Requiring Changes
 
 The following workflows currently use `credentials_json: ${{ secrets.GCP_SA_KEY }}`:
@@ -212,6 +230,7 @@ The following workflows currently use `credentials_json: ${{ secrets.GCP_SA_KEY 
 | `operations-gates-runtime.yml` | Runtime operations gates |
 
 Run `scripts/qa/verify-wif-readiness.sh` to get the current count.
+`build-tutor-images.yml` now uses late-auth before push steps (WIF-first in `auth_mode: auto`).
 
 ## Migration Plan
 
