@@ -163,6 +163,7 @@ else
   do_pass "setup-local.sh exists"
 
   if grep -q "pip install.*tutor\[full\]==" "$SETUP_SCRIPT"; then
+    # Inline version pin in setup-local.sh
     setup_tutor=$(grep "pip install.*tutor\[full\]==" "$SETUP_SCRIPT" | head -1 | sed -E 's/.*tutor\[full\]==([0-9.]+).*/\1/')
     if [ "$setup_tutor" = "$doc_tutor_version" ]; then
       do_pass "setup-local.sh Tutor version matches docs: $setup_tutor"
@@ -176,8 +177,34 @@ else
     else
       do_fail "setup-local.sh MFE plugin version ($setup_mfe_plugin) != docs ($doc_mfe_plugin_version)"
     fi
+  elif grep -qE 'pip install -r requirements-tutor\.txt|pip install.*-r.*requirements-tutor' "$SETUP_SCRIPT"; then
+    # setup-local.sh delegates version pins to requirements-tutor.txt — check that file
+    req_file="$REPO_ROOT/requirements-tutor.txt"
+    if [ ! -f "$req_file" ]; then
+      do_fail "setup-local.sh uses requirements-tutor.txt but file not found"
+    else
+      do_pass "setup-local.sh delegates Tutor version pin to requirements-tutor.txt"
+
+      setup_tutor=$(grep -E '^tutor\[full\]==[0-9.]+' "$req_file" | head -1 | sed -E 's/^tutor\[full\]==([0-9.]+).*/\1/')
+      if [ -n "$setup_tutor" ] && [ "$setup_tutor" = "$doc_tutor_version" ]; then
+        do_pass "requirements-tutor.txt Tutor version matches docs: $setup_tutor"
+      elif [ -n "$setup_tutor" ]; then
+        do_fail "requirements-tutor.txt Tutor version ($setup_tutor) != docs ($doc_tutor_version)"
+      else
+        do_fail "requirements-tutor.txt missing tutor[full] pin"
+      fi
+
+      setup_mfe_plugin=$(grep -E '^tutor-mfe==[0-9.]+' "$req_file" | head -1 | sed -E 's/^tutor-mfe==([0-9.]+).*/\1/')
+      if [ -n "$setup_mfe_plugin" ] && [ "$setup_mfe_plugin" = "$doc_mfe_plugin_version" ]; then
+        do_pass "requirements-tutor.txt MFE plugin version matches docs: $setup_mfe_plugin"
+      elif [ -n "$setup_mfe_plugin" ]; then
+        do_fail "requirements-tutor.txt MFE plugin version ($setup_mfe_plugin) != docs ($doc_mfe_plugin_version)"
+      else
+        do_fail "requirements-tutor.txt missing tutor-mfe pin"
+      fi
+    fi
   else
-    do_fail "No Tutor version pin found in setup-local.sh"
+    do_fail "No Tutor version pin found in setup-local.sh (inline or via requirements-tutor.txt)"
   fi
 fi
 

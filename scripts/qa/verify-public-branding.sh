@@ -18,15 +18,13 @@ for _arg in "$@"; do
   if [[ "$_arg" == "--source-only" ]]; then SOURCE_ONLY=1; fi
 done
 
-# In CI environments without live cluster access, default to source-only mode.
-# Pass --source-only explicitly or set CI=false to override.
+# In CI environments, default to source-only mode.
+# Live branding checks require a deployed cluster with branded images and are handled
+# separately by the live-branding workflow. Set CI=false or pass --source-only=false
+# to force live checks from a non-CI environment.
 if [[ "${SOURCE_ONLY}" == "0" && "${CI:-}" == "true" ]]; then
-  _prod_url="https://${LMS_DOMAIN:-academyv2.mereka.io}"
-  if ! curl -s --connect-timeout 3 --max-time 5 -o /dev/null "$_prod_url" 2>/dev/null; then
-    echo "⚠ SKIP: Production URL not reachable in CI environment — running source-only checks"
-    SOURCE_ONLY=1
-  fi
-  unset _prod_url
+  echo "⚠ SKIP: CI environment detected — running source-only checks (live branding checks skipped)"
+  SOURCE_ONLY=1
 fi
 
 ENVIRONMENT="${1:-prod}"

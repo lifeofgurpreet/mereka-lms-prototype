@@ -32,11 +32,11 @@ else
   fail "target_environment input missing"
 fi
 
-# Check Artifact Registry push target
-if grep -q "asia-southeast1-docker.pkg.dev" "$BUILD_WF"; then
-  pass "Artifact Registry push target present"
+# Check container registry push target (GHCR or Artifact Registry)
+if grep -q "ghcr.io" "$BUILD_WF" || grep -q "asia-southeast1-docker.pkg.dev" "$BUILD_WF"; then
+  pass "Container registry push target present"
 else
-  fail "Artifact Registry push target missing"
+  fail "Container registry push target missing (expected ghcr.io or asia-southeast1-docker.pkg.dev)"
 fi
 
 # Check permissions block
