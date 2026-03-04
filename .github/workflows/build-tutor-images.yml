@@ -917,6 +917,7 @@ jobs:
             --release-bundle-id "${RELEASE_BUNDLE_ID}" \
             --gitops-repo "Biji-Biji-Initiative/bbi-infrastructure" \
             --gitops-commit "${GITOPS_COMMIT}"
+          ./scripts/qa/verify-promotion-record.sh var/ci/promotion-record.json
 
       - name: Upload promotion record
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4

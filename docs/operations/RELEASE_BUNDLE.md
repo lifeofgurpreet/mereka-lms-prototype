@@ -8,6 +8,7 @@ The same workflow also emits `promotion-record` (`var/ci/promotion-record.json`)
 - Schema: `infrastructure/ci/release-bundle.schema.json`
 - Generator: `scripts/infra/generate-release-bundle.sh`
 - Validator: `scripts/qa/verify-release-bundle.sh`
+- Promotion record validator: `scripts/qa/verify-promotion-record.sh`
 
 The bundle captures:
 
