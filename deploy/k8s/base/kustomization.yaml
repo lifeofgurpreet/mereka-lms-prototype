@@ -17,6 +17,7 @@ resources:
 - ../../../services/purchase-gateway/k8s
 - policies
 - operational
+- jobs/discovery-sync-cronjob.yaml
 
 # Custom Mereka-branded OpenEdX images.
 # Base uses mutable `mereka-brand` tags (updated by build-tutor-images.yml on

@@ -55,25 +55,30 @@ spec:
             - |
               set -euo pipefail
 
-              echo "=== Discovery Course Sync - $(date) ==="
+              echo "=== Discovery Catalog Sync - $(date) ==="
 
               # Change to Discovery working directory
               cd /openedx/discovery
 
-              echo "[1/3] Refreshing course metadata..."
+              echo "[1/4] Refreshing course metadata..."
               python manage.py refresh_course_metadata 2>&1 | \
                 grep -v "UserWarning: The 'django-fsm'" || true
 
-              echo "[2/3] Updating search index..."
+              echo "[2/4] Refreshing program metadata..."
+              python manage.py refresh_program_metadata 2>&1 | \
+                grep -v "UserWarning: The 'django-fsm'" || true
+
+              echo "[3/4] Updating search index..."
               python manage.py update_index --disable-change-limit 2>&1 | \
                 grep -v "UserWarning: The 'django-fsm'" || true
 
-              echo "[3/3] Verifying course count..."
-              COURSE_COUNT=$(python manage.py shell -c \
-                "from course_discovery.apps.course_metadata.models import Course; print(Course.objects.count())" \
-                2>/dev/null | grep -E '^[0-9]+$' || echo "0")
+              echo "[4/4] Verifying catalog counts..."
+              python manage.py shell -c "
+              from course_discovery.apps.course_metadata.models import Course, Program
+              print(f'Courses: {Course.objects.count()}, Programs: {Program.objects.count()}')
+              " 2>/dev/null || echo "Could not verify counts"
 
-              echo "✓ Sync complete. Total courses in Discovery: $COURSE_COUNT"
+              echo "✓ Sync complete."
 
             # Environment variables
             env:
@@ -100,11 +105,13 @@ spec:
                   name: database-secrets
                   key: MYSQL_DISCOVERY_PASSWORD
 
-            # LMS connection for OAuth
+            # LMS connection for OAuth (overridden per-environment)
             - name: LMS_URL
               value: "https://academyv2.mereka.io"
             - name: DISCOVERY_URL
               value: "https://discovery.academyv2.mereka.io"
+            - name: MEREKA_SCHEME
+              value: "https"
 
             # Import secrets
             envFrom:

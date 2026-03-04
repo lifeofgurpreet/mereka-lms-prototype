@@ -307,8 +307,6 @@ for folder in [DATA_DIR, LOG_DIR, MEDIA_ROOT, STATIC_ROOT, ORA2_FILEUPLOAD_ROOT]
 
 FEATURES["ENABLE_COURSE_DISCOVERY"] = True
 EDX_API_KEY = os.environ.get("EDX_API_KEY", "")
-ECOMMERCE_API_SIGNING_KEY = os.environ.get("ECOMMERCE_API_SIGNING_KEY", "")
-ECOMMERCE_API_TIMEOUT = 5
 from babel.numbers import get_currency_symbol
 PAID_COURSE_REGISTRATION_CURRENCY = ["USD", get_currency_symbol("USD")]
 COURSE_MODE_DEFAULTS["currency"] = "USD"

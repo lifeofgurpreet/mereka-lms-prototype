@@ -69,6 +69,7 @@ REQUIRED_SMS=(
   "servicemonitor-forum.yaml"
   "servicemonitor-discovery.yaml"
   "servicemonitor-credentials.yaml"
+  "servicemonitor-notes.yaml"
 )
 
 if [[ -f "$KUST" ]]; then

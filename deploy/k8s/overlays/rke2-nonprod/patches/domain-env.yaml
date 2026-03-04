@@ -155,6 +155,25 @@ spec:
             - name: NOTES_DOMAIN
               value: notes.academyv2.mereka.dev
 ---
+# CronJob domain overrides
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: discovery-sync
+  namespace: mereka-lms
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sync
+              env:
+                - name: LMS_URL
+                  value: https://academyv2.mereka.dev
+                - name: DISCOVERY_URL
+                  value: https://discovery.academyv2.mereka.dev
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

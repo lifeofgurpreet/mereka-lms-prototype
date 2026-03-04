@@ -91,6 +91,7 @@ REQUIRED_SERVICE_MONITORS=(
   "servicemonitor-forum.yaml"
   "servicemonitor-discovery.yaml"
   "servicemonitor-credentials.yaml"
+  "servicemonitor-notes.yaml"
   "servicemonitor-purchase-gateway.yaml"
 )
 

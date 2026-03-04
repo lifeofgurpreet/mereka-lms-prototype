@@ -19,6 +19,7 @@ resources:
   - servicemonitor-mfe.yaml
   - servicemonitor-redis.yaml
   - servicemonitor-enterprise.yaml
+  - servicemonitor-notes.yaml
   - servicemonitor-xqueue.yaml
   - prometheusrule-caddy.yaml
   - prometheusrule-credentials.yaml
