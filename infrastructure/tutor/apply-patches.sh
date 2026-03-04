@@ -30,4 +30,18 @@ apply_webpack_memory_patch
 apply_footer_component_patch
 apply_build_optimizations_patch
 
+# Sync Mereka theme into Tutor build context.
+# tutor config save renders only the indigo theme from tutor-indigo plugin.
+# Our custom theme must be copied into the build context so that Dockerfile
+# COPY directives (from the mereka_lms.py plugin) can find it.
+TUTOR_THEME_DIR="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/build/openedx/themes/mereka"
+MEREKA_THEME_SRC="$REPO_ROOT/infrastructure/tutor/themes/mereka"
+if [[ -d "$MEREKA_THEME_SRC" ]]; then
+  mkdir -p "$TUTOR_THEME_DIR"
+  cp -R "$MEREKA_THEME_SRC/." "$TUTOR_THEME_DIR/"
+  echo "Synced Mereka theme to build context: $TUTOR_THEME_DIR"
+else
+  echo "WARNING: Mereka theme source not found at $MEREKA_THEME_SRC"
+fi
+
 echo "Applied local Tutor patches."

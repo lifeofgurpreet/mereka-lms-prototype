@@ -55,7 +55,7 @@ else
   content="$(tr -d '\r' < "$OPS_DOC")"
 
   # Check for precedence section
-  if echo "$content" | grep -qi "override precedence\|precedence chain\|Override Precedence"; then
+  if echo "$content" | grep -qiE "override precedence|precedence chain|Override Precedence"; then
     pass_check "Document contains 'override precedence' section"
   else
     fail_check "Document does not contain 'override precedence' section"
@@ -69,21 +69,21 @@ else
   fi
 
   # Check for design tokens or _tokens.scss reference
-  if echo "$content" | grep -qi "_tokens\.scss\|design.token"; then
+  if echo "$content" | grep -qiE "_tokens\.scss|design.token"; then
     pass_check "Document references design tokens (_tokens.scss)"
   else
     fail_check "Document does not reference design tokens / _tokens.scss"
   fi
 
   # Check for plugin slot reference
-  if echo "$content" | grep -qi "plugin slot\|mfe-env-config\|footer.slot"; then
+  if echo "$content" | grep -qiE "plugin slot|mfe-env-config|footer.slot"; then
     pass_check "Document references plugin slot configuration"
   else
     warn_check "Document does not explicitly reference plugin slot — consider adding"
   fi
 
   # Check for tenant registry / ConfigMap reference
-  if echo "$content" | grep -qi "configmap-tenants\|tenant.registry\|tenant-registry"; then
+  if echo "$content" | grep -qiE "configmap-tenants|tenant.registry|tenant-registry"; then
     pass_check "Document references tenant registry ConfigMap"
   else
     fail_check "Document does not reference tenant registry ConfigMap"
@@ -103,14 +103,14 @@ else
   content="$(tr -d '\r' < "$OPS_DOC")"
 
   # Check for onboarding or new tenant steps
-  if echo "$content" | grep -qi "onboarding\|new tenant\|per.tenant"; then
+  if echo "$content" | grep -qiE "onboarding|new tenant|per.tenant"; then
     pass_check "Document contains onboarding / new tenant steps"
   else
     fail_check "Document does not contain onboarding steps"
   fi
 
   # Check for DNS steps
-  if echo "$content" | grep -qi "dns\|cloudflare\|hostname"; then
+  if echo "$content" | grep -qiE "dns|cloudflare|hostname"; then
     pass_check "Document references DNS/hostname registration steps"
   else
     fail_check "Document does not reference DNS steps"
@@ -124,14 +124,14 @@ else
   fi
 
   # Check for ConfigMap reference in onboarding context
-  if echo "$content" | grep -qi "configmap\|tenant-config\|configmap-tenants"; then
+  if echo "$content" | grep -qiE "configmap|tenant-config|configmap-tenants"; then
     pass_check "Document references ConfigMap entries in onboarding"
   else
     fail_check "Document does not reference ConfigMap in onboarding section"
   fi
 
   # Check for smoke test / verification step in runbook
-  if echo "$content" | grep -qi "smoke test\|verify\|Step.*[0-9].*[Ss]moke\|Step.*[0-9].*[Vv]erif"; then
+  if echo "$content" | grep -qiE "smoke test|verify|Step.*[0-9].*[Ss]moke|Step.*[0-9].*[Vv]erif"; then
     pass_check "Document includes smoke test / verification step in runbook"
   else
     warn_check "Runbook does not mention smoke test verification step"
@@ -151,14 +151,14 @@ else
   content="$(tr -d '\r' < "$OPS_DOC")"
 
   # Check for CI validation mention
-  if echo "$content" | grep -qi "ci\|continuous integration\|github.actions\|ci.yml"; then
+  if echo "$content" | grep -qiE "ci|continuous integration|github.actions|ci.yml"; then
     pass_check "Document references CI validation"
   else
     fail_check "Document does not reference CI validation"
   fi
 
   # Check for runtime resolution mention
-  if echo "$content" | grep -qi "runtime\|domain resolution\|TenantResolutionMiddleware\|middleware"; then
+  if echo "$content" | grep -qiE "runtime|domain resolution|TenantResolutionMiddleware|middleware"; then
     pass_check "Document references runtime branding resolution"
   else
     fail_check "Document does not reference runtime domain resolution"
@@ -196,7 +196,7 @@ else
   fi
 
   # Check for branding regression detection mention
-  if echo "$content" | grep -qi "regression\|regression detection\|regression guard"; then
+  if echo "$content" | grep -qiE "regression|regression detection|regression guard"; then
     pass_check "Document references branding regression detection"
   else
     warn_check "Document does not mention branding regression detection"
@@ -216,21 +216,21 @@ else
   content="$(tr -d '\r' < "$OPS_DOC")"
 
   # Check for owner section
-  if echo "$content" | grep -qi "owner\|ownership\|owns"; then
+  if echo "$content" | grep -qiE "owner|ownership|owns"; then
     pass_check "Document contains owner / ownership section"
   else
     fail_check "Document does not contain owner / ownership section"
   fi
 
   # Check for signoff mention
-  if echo "$content" | grep -qi "signoff\|sign.off\|approval\|pr approval"; then
+  if echo "$content" | grep -qiE "signoff|sign.off|approval|pr approval"; then
     pass_check "Document contains signoff / approval expectations"
   else
     fail_check "Document does not mention signoff requirements"
   fi
 
   # Check for escalation mention
-  if echo "$content" | grep -qi "escalation\|escalate\|pagerduty\|on.call\|p1\|p2"; then
+  if echo "$content" | grep -qiE "escalation|escalate|pagerduty|on.call|p1|p2"; then
     pass_check "Document contains escalation path"
   else
     fail_check "Document does not contain escalation path"
@@ -238,13 +238,13 @@ else
 
   # Check for Mereka Academy / Biji-Biji / SkilOurFuture tenant owners
   TENANT_OWNER_COUNT=0
-  if echo "$content" | grep -qi "mereka academy"; then
+  if echo "$content" | grep -qiE "mereka academy"; then
     TENANT_OWNER_COUNT=$((TENANT_OWNER_COUNT + 1))
   fi
-  if echo "$content" | grep -qi "biji-biji\|biji biji"; then
+  if echo "$content" | grep -qiE "biji-biji|biji biji"; then
     TENANT_OWNER_COUNT=$((TENANT_OWNER_COUNT + 1))
   fi
-  if echo "$content" | grep -qi "skil our future\|skilourfuture\|skillourfuture"; then
+  if echo "$content" | grep -qiE "skil our future|skilourfuture|skillourfuture"; then
     TENANT_OWNER_COUNT=$((TENANT_OWNER_COUNT + 1))
   fi
 
