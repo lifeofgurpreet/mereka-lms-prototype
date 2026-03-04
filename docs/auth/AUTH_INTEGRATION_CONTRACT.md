@@ -23,8 +23,8 @@
 ## Required Runtime Configuration
 
 - Required env vars:
-  - `TODO_ENV_VAR_1`
-  - `TODO_ENV_VAR_2`
+  - `MEREKA_LMS_OIDC_CLIENT_ID`
+  - `MEREKA_LMS_OIDC_CLIENT_SECRET`
 - Secret source:
   - Infisical path: `/k8s/mereka-lms`
   - ESO target secret: `mereka-lms-secrets`
@@ -50,8 +50,8 @@ If pattern uses OIDC:
 ## Verification
 
 - Local:
-  - `TODO_LOCAL_CHECK_1`
-  - `TODO_LOCAL_CHECK_2`
+  - `rg -n 'OIDC_CLIENT_SECRET|OIDC_CLIENT_ID|SOCIAL_AUTH' . -g '!**/.git/**'`
+  - `rg -n 'auth0.mereka|application/o/' docs scripts infrastructure deploy || true`
 - Platform:
   - `auth-verify contract-check --format json`
   - `auth-verify drift-detect --format json`
@@ -62,4 +62,3 @@ If pattern uses OIDC:
   - Update in canonical infra repo
   - Update in auth registry/spec if needed
   - Evidence attached in PR
-
