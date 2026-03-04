@@ -197,6 +197,25 @@ jobs:
           retention-days: 30
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # Job 2: image-freshness — detect silently failing image builds
+  # If mereka-brand tag is older than 24h, builds are broken and nobody noticed.
+  # ─────────────────────────────────────────────────────────────────────────────
+  image-freshness:
+    name: Image Freshness Check
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Check GHCR image freshness
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MAX_AGE_HOURS=24 ./scripts/qa/verify-image-freshness.sh
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # Job 3: parity-check — 3-env parity matrix (needs GCP per lane)
   # Corresponds to: observability-parity-runtime.yml runtime-parity matrix job
   # GCP project handling differs per lane (computed from per-lane env vars).

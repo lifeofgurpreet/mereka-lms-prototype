@@ -200,3 +200,4 @@ scripts/qa/verify-mct-transform.sh
 scripts/qa/verify-mct-olx-packages.sh
 scripts/qa/verify-mct-video-urls.sh
 scripts/qa/verify-caddy-cache-policy.sh
+scripts/qa/verify-build-invariants.sh

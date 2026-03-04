@@ -102,6 +102,9 @@ spec:
               mountPath: /var/run
             - name: dind-externals
               mountPath: /home/runner/externals
+            # Persistent Docker data dir — layer cache survives between builds
+            - name: docker-cache
+              mountPath: /var/lib/docker
 
       containers:
         - name: runner
@@ -124,6 +127,9 @@ spec:
               mountPath: /home/runner/_work
             - name: dind-sock
               mountPath: /var/run
+            # Persistent dep cache for npm/pip/Playwright browsers
+            - name: dep-cache
+              mountPath: /home/runner/.cache
 
       volumes:
         - name: work
@@ -132,7 +138,33 @@ spec:
           emptyDir: {}
         - name: dind-externals
           emptyDir: {}
+        - name: docker-cache
+          persistentVolumeClaim:
+            claimName: arc-docker-cache
+        - name: dep-cache
+          persistentVolumeClaim:
+            claimName: arc-dep-cache
 
+---
+# PVC: Docker layer cache for DinD sidecar
+# Without this, every build starts from scratch (~50 min for OpenEdX).
+# With this, unchanged layers are reused between builds.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: arc-docker-cache
+  namespace: arc-runners
+  labels:
+    app.kubernetes.io/name: arc-docker-cache
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: mereka-ci
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 50Gi
 ---
 # PVC: npm / pip / Playwright browser cache
 apiVersion: v1

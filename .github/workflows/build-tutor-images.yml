@@ -35,13 +35,6 @@ on:
           - production
           - staging
         default: select-environment
-      openedx_runner:
-        description: 'Runner for image builds (workflow_dispatch only)'
-        type: choice
-        options:
-          - github-hosted
-          - heavy-builder
-        default: github-hosted
       image_tag:
         description: 'Image tag (default: git SHA)'
         type: string
