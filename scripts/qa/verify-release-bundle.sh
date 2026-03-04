@@ -6,6 +6,39 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 BUNDLE_PATH="${1:-${REPO_ROOT}/var/ci/release-bundle.json}"
 SCHEMA_PATH="${REPO_ROOT}/infrastructure/ci/release-bundle.schema.json"
+SIGNATURE_PATH=""
+CERTIFICATE_PATH=""
+CERT_IDENTITY=""
+CERT_OIDC_ISSUER="https://token.actions.githubusercontent.com"
+
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --signature)
+      SIGNATURE_PATH="${2:-}"
+      shift 2
+      ;;
+    --certificate)
+      CERTIFICATE_PATH="${2:-}"
+      shift 2
+      ;;
+    --certificate-identity)
+      CERT_IDENTITY="${2:-}"
+      shift 2
+      ;;
+    --certificate-oidc-issuer)
+      CERT_OIDC_ISSUER="${2:-}"
+      shift 2
+      ;;
+    *)
+      echo "FAIL: unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 if [[ ! -f "${BUNDLE_PATH}" ]]; then
   echo "FAIL: release bundle not found at ${BUNDLE_PATH}" >&2
@@ -71,3 +104,30 @@ print("PASS: release bundle structure and digest contract are valid")
 print(f"Bundle ID: {bundle.get('bundle_id')}")
 PY
 
+if [[ -n "${SIGNATURE_PATH}" || -n "${CERTIFICATE_PATH}" || -n "${CERT_IDENTITY}" ]]; then
+  if [[ -z "${SIGNATURE_PATH}" || -z "${CERTIFICATE_PATH}" || -z "${CERT_IDENTITY}" ]]; then
+    echo "FAIL: --signature, --certificate, and --certificate-identity must be provided together" >&2
+    exit 1
+  fi
+  if [[ ! -f "${SIGNATURE_PATH}" ]]; then
+    echo "FAIL: signature not found at ${SIGNATURE_PATH}" >&2
+    exit 1
+  fi
+  if [[ ! -f "${CERTIFICATE_PATH}" ]]; then
+    echo "FAIL: certificate not found at ${CERTIFICATE_PATH}" >&2
+    exit 1
+  fi
+  if ! command -v cosign >/dev/null 2>&1; then
+    echo "FAIL: cosign is required for signature verification" >&2
+    exit 1
+  fi
+
+  cosign verify-blob "${BUNDLE_PATH}" \
+    --signature "${SIGNATURE_PATH}" \
+    --certificate "${CERTIFICATE_PATH}" \
+    --certificate-identity "${CERT_IDENTITY}" \
+    --certificate-oidc-issuer "${CERT_OIDC_ISSUER}" \
+    >/dev/null
+
+  echo "PASS: release bundle signature verification succeeded"
+fi

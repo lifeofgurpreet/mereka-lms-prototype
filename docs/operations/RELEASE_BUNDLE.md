@@ -1,6 +1,10 @@
 # Release Bundle Contract
 
-`build-tutor-images.yml` now emits a canonical `release-bundle` artifact (`var/ci/release-bundle.json`) for deterministic promotion records.
+`build-tutor-images.yml` now emits a canonical signed `release-bundle` artifact:
+- `var/ci/release-bundle.json`
+- `var/ci/release-bundle.sig`
+- `var/ci/release-bundle.pem`
+for deterministic promotion records.
 The same workflow also emits `promotion-record` (`var/ci/promotion-record.json`) after GitOps update with the resulting infra commit SHA.
 `update-gitops` now hard-fails if downloaded `release-bundle` artifact does not match workflow commit SHA, target environment, bundle ID, and both image digests.
 
@@ -18,6 +22,7 @@ The bundle captures:
 - artifact references (`sbom-*`, `slsa-provenance`, `trivy-*`)
 - promotion target environment
 - release-to-gitops linkage (`release_bundle_id` + resulting `bbi-infrastructure` commit)
+- signature material for blob verification (`.sig` + `.pem`) issued by GitHub OIDC identity
 
 ## Local Verification
 
@@ -36,4 +41,11 @@ The bundle captures:
   --mfe-digest sha256:2222222222222222222222222222222222222222222222222222222222222222
 
 ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json
+
+# Optional: verify signature if cosign + signature artifacts are present
+./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json \
+  --signature var/ci/release-bundle.sig \
+  --certificate var/ci/release-bundle.pem \
+  --certificate-identity "https://github.com/Biji-Biji-Initiative/mereka-lms/.github/workflows/build-tutor-images.yml@refs/heads/main" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
 ```

@@ -776,10 +776,16 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [build-openedx, build-mfe, slsa-provenance]
     if: ${{ needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' }}
+    permissions:
+      contents: read
+      id-token: write
     outputs:
       bundle_id: ${{ steps.bundle.outputs.bundle_id }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
 
       - name: Generate release bundle
         id: bundle
@@ -797,16 +803,30 @@ jobs:
             --openedx-digest "${{ needs.build-openedx.outputs.image_digest }}" \
             --mfe-image "${{ env.REGISTRY }}/mfe" \
             --mfe-digest "${{ needs.build-mfe.outputs.image_digest }}"
-          ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json
+          cosign sign-blob --yes \
+            --output-signature var/ci/release-bundle.sig \
+            --output-certificate var/ci/release-bundle.pem \
+            var/ci/release-bundle.json
+          CERT_IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/build-tutor-images.yml@${{ github.ref }}"
+          ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json \
+            --signature var/ci/release-bundle.sig \
+            --certificate var/ci/release-bundle.pem \
+            --certificate-identity "${CERT_IDENTITY}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
           BUNDLE_ID="$(python3 -c 'import json;print(json.load(open("var/ci/release-bundle.json"))["bundle_id"])')"
           echo "bundle_id=${BUNDLE_ID}" >> "$GITHUB_OUTPUT"
           echo "**Release bundle:** \`${BUNDLE_ID}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Bundle signature:** \`var/ci/release-bundle.sig\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Bundle certificate:** \`var/ci/release-bundle.pem\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload release bundle
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: release-bundle
-          path: var/ci/release-bundle.json
+          path: |
+            var/ci/release-bundle.json
+            var/ci/release-bundle.sig
+            var/ci/release-bundle.pem
           retention-days: 90
 
   update-gitops:
@@ -867,6 +887,18 @@ jobs:
         with:
           name: release-bundle
           path: var/ci
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
+
+      - name: Verify release bundle signature
+        run: |
+          CERT_IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/build-tutor-images.yml@${{ github.ref }}"
+          ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json \
+            --signature var/ci/release-bundle.sig \
+            --certificate var/ci/release-bundle.pem \
+            --certificate-identity "${CERT_IDENTITY}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
 
       - name: Validate release bundle consistency gate
         run: |
