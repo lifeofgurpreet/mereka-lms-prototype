@@ -252,11 +252,16 @@ jobs:
             || { echo "FAIL: /openedx/staticfiles/${HASHED_CSS} missing" | tee -a var/ci/verify-openedx-image-branding.log; exit 1; }
 
       - name: Generate SBOM for OpenEdX image
-        uses: anchore/sbom-action@fbfd9c6c189226748411491745178e0c2017392d  # v0.20.10
-        with:
-          image: tutor_local/openedx:latest
-          format: cyclonedx-json
-          output-file: var/ci/sbom-openedx.cdx.json
+        continue-on-error: true  # Non-blocking: SBOM is informational, should not block image push
+        run: |
+          mkdir -p var/ci
+          # Install syft
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+            | sh -s -- -b "$HOME/.local/bin"
+          # Use docker: source explicitly so syft reads from the local Docker daemon
+          # (anchore/sbom-action fails on ARC DinD runners because it can't resolve local images)
+          "$HOME/.local/bin/syft" scan "docker:tutor_local/openedx:latest" \
+            -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
 
       - name: Upload OpenEdX SBOM
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
@@ -496,11 +501,15 @@ jobs:
             | tee var/ci/verify-mfe-image-branding.log
 
       - name: Generate SBOM for MFE image
-        uses: anchore/sbom-action@fbfd9c6c189226748411491745178e0c2017392d  # v0.20.10
-        with:
-          image: tutor_local/openedx-mfe:latest
-          format: cyclonedx-json
-          output-file: var/ci/sbom-mfe.cdx.json
+        continue-on-error: true  # Non-blocking: SBOM is informational, should not block image push
+        run: |
+          mkdir -p var/ci
+          # Install syft
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+            | sh -s -- -b "$HOME/.local/bin"
+          # Use docker: source explicitly so syft reads from the local Docker daemon
+          "$HOME/.local/bin/syft" scan "docker:tutor_local/openedx-mfe:latest" \
+            -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
 
       - name: Upload MFE SBOM
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0

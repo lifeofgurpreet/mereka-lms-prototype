@@ -97,7 +97,9 @@ DEFINED_TOKENS_FILE="$(mktemp)"
 trap 'rm -f "$DEFINED_TOKENS_FILE"' EXIT
 
 while IFS= read -r src_file; do
-  grep -oP '(?<=^\s{0,8})--mereka-[a-z0-9_-]+(?=\s*:)' "$src_file" 2>/dev/null >> "$DEFINED_TOKENS_FILE" || true
+  # Extract --mereka-* token definitions (e.g. "  --mereka-color-blue: #295cad;")
+  # Avoid variable-length lookbehind which fails on PCRE1 (some CI runners).
+  grep -oP '^\s{0,8}\K--mereka-[a-z0-9_-]+(?=\s*:)' "$src_file" 2>/dev/null >> "$DEFINED_TOKENS_FILE" || true
 done < <(find "$THEME_DIR" \( -name '*.scss' -o -name '*.css' \) -not -path '*/node_modules/*' 2>/dev/null)
 
 DEFINED_COUNT=$(sort -u "$DEFINED_TOKENS_FILE" | wc -l)
