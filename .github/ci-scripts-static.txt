@@ -32,7 +32,7 @@ scripts/qa/verify-multisite-config.sh
 scripts/qa/verify-tutor-multisite-domains.sh
 scripts/qa/verify-csrf-multisite.sh
 scripts/qa/verify-favicon-multisite.sh
-# scripts/qa/verify-site-id-hardening.sh  # deferred: multi-tenancy multisite files not implemented yet
+scripts/qa/verify-site-id-hardening.sh
 scripts/qa/verify-critical-testmap-scope.sh
 
 # ── MongoDB Atlas ────────────────────────────────────────────────────────────
@@ -41,7 +41,7 @@ scripts/qa/verify-atlas-data-persistence.sh
 scripts/qa/verify-atlas-modulestore-path.sh
 
 # ── Observability & monitoring (static) ─────────────────────────────────────
-# scripts/qa/validate-observability-compliance.sh --mode local  # deferred: observability stack not fully implemented
+scripts/qa/validate-observability-compliance.sh --mode local
 scripts/qa/verify-observability-stack.sh
 scripts/qa/verify-sentry-wiring.sh
 scripts/qa/verify-sentry-cli-contract.sh
@@ -52,7 +52,7 @@ scripts/qa/lint-active-docs-env-model.sh
 
 # ── CI/CD pipeline contracts ─────────────────────────────────────────────────
 scripts/qa/verify-cicd-merge-gates-and-secrets.sh
-# scripts/qa/verify-release-automation.sh  # deferred: RELEASE_PROCESS.md missing required sections
+scripts/qa/verify-release-automation.sh
 scripts/qa/verify-release-dry-run-contract.sh
 scripts/qa/verify-release-deployment-choreography.sh
 
@@ -88,7 +88,7 @@ scripts/qa/verify-design-tokens.sh
 scripts/qa/verify-design-tokens-migration.sh
 scripts/qa/verify-design-token-usage.sh
 scripts/qa/verify-token-definitions.sh
-# scripts/qa/verify-token-drift.sh  # deferred: design token system not implemented yet
+scripts/qa/verify-token-drift.sh
 scripts/qa/verify-token-reference-integrity.sh
 scripts/qa/verify-token-generation-pipeline.sh
 scripts/qa/verify-branding-token-integrity.sh
@@ -129,11 +129,11 @@ scripts/qa/verify-tenant-token-switching.sh
 scripts/qa/verify-tenant-branding-matrix.sh
 scripts/qa/verify-tenant-ui-smoke.sh
 scripts/qa/verify-tenant-footer-variant-lane.sh
-# scripts/qa/verify-tenant-config-handoff.sh  # deferred: tenant config handoff doc not written yet
-# scripts/qa/run-tenant-branding-qa.sh  # deferred: tenant branding features not implemented yet
+scripts/qa/verify-tenant-config-handoff.sh
+scripts/qa/run-tenant-branding-qa.sh
 scripts/qa/verify-multitenant-brand-platform.sh
-# scripts/qa/verify-multi-tenant-branding-ops.sh  # deferred: multi-tenant branding ops doc incomplete
-# scripts/qa/run-mfe-slot-gates.sh  # deferred: MFE plugin-slot features not implemented yet
+scripts/qa/verify-multi-tenant-branding-ops.sh
+scripts/qa/run-mfe-slot-gates.sh
 scripts/qa/verify-studio-customization.sh
 scripts/qa/verify-footer-variant-matrix.sh
 scripts/qa/verify-footer-parity.sh
@@ -148,7 +148,7 @@ scripts/qa/verify-ui-ux-hardening-bundle.sh
 scripts/qa/verify-performance-budget.sh
 scripts/qa/verify-copy-terminology.sh
 scripts/qa/verify-plugin-slot-migration-register.sh
-# scripts/qa/verify-frontend-version-truth.sh  # deferred: MFE_VERSIONS.md out of sync with CI pins
+scripts/qa/verify-frontend-version-truth.sh
 scripts/qa/verify-custom-app-drift.sh
 scripts/qa/verify-legacy-ecommerce-ui-refs.sh
 scripts/qa/verify-slot-matrix.sh
@@ -183,8 +183,8 @@ scripts/qa/verify-tutor-patches.sh
 scripts/qa/verify-idempotency.sh
 
 # ── Live branding (requires built artifacts) ────────────────────────────────
-# scripts/qa/verify-public-branding.sh  # deferred: requires built branding artifacts not available in CI
-# scripts/qa/verify-studio-authoring-branding.sh  # deferred: Studio branding CSS selectors not implemented
+scripts/qa/verify-public-branding.sh
+scripts/qa/verify-studio-authoring-branding.sh
 scripts/qa/verify-tutor-branding-render.sh
 scripts/qa/verify-mfe-image-branding.sh
 
