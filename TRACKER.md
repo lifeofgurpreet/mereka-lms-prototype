@@ -8,11 +8,11 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 150   |
+| DONE   | 157   |
 | TODO   | 1     |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
-| **Total** | **154** |
+| **Total** | **161** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
 Sprints 6–10: 48 tasks (47 DONE, 1 TODO) — T118 CDN deferred by stakeholder
@@ -757,11 +757,11 @@ T058
 
 | Status | Count |
 |--------|-------|
-| DONE   | 150   |
+| DONE   | 157   |
 | TODO   | 1     |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
-| **Total** | **154** |
+| **Total** | **161** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED)
 Sprints 6–10: 48 tasks (47 DONE, 1 TODO — T118 CDN deferred)
