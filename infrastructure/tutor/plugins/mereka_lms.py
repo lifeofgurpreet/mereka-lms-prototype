@@ -597,7 +597,7 @@ RUN pip install -e /openedx/plugins/mereka_tenancy
 # Add repository roots to Python path via .pth file for proper module imports.
 # Include /openedx because custom app packages are mounted there and should be importable
 # as top-level Django apps across CMS/LMS and worker processes.
-RUN echo '/openedx' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth && echo '/openedx/plugins' >> /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+RUN python3 -c "import sysconfig; open(sysconfig.get_path('purelib') + '/mereka-plugins.pth', 'w').write('/openedx\\n/openedx/plugins\\n')"
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1

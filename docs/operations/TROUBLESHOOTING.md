@@ -195,7 +195,7 @@ RUN ln -s /openedx/node_modules /openedx/edx-platform/node_modules
 
 **Fix (quick)**: Add a `.pth` file pointing to the parent directory:
 ```dockerfile
-RUN echo '/openedx' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+RUN echo '/openedx' > /openedx/venv/lib/python3.12/site-packages/mereka-plugins.pth
 ```
 
 **Fix (proper)**: Use non-editable install in production images:
@@ -242,7 +242,7 @@ tutor local run lms ./manage.py lms collectstatic --noinput --settings=tutor.ass
 **Add a single layer to existing image**:
 ```dockerfile
 FROM asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand
-RUN echo '/openedx' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+RUN echo '/openedx' > /openedx/venv/lib/python3.12/site-packages/mereka-plugins.pth
 ```
 ```bash
 docker build -f fix.Dockerfile -t <same-tag> .  # Takes seconds

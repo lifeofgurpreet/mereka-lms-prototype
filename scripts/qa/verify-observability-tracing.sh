@@ -38,6 +38,22 @@ Options:
 EOF
 }
 
+probe_tempo_readiness_via_pod() {
+  local context="$1"
+  local namespace="$2"
+  local service_name="$3"
+  local probe_image="${TRACE_PROBE_IMAGE:-curlimages/curl:8.10.1}"
+  local timeout="${TRACE_PROBE_TIMEOUT_SECONDS:-20}"
+
+  kubectl --context "$context" -n "$namespace" run tempo-readiness-probe \
+    --image="$probe_image" \
+    --restart=Never \
+    --rm -i \
+    --quiet \
+    --command -- \
+    sh -c "curl -fsS --max-time ${timeout} http://${service_name}.${namespace}.svc.cluster.local:3200/ready >/dev/null"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --context)
@@ -194,15 +210,11 @@ elif [[ -z "$TEMPO_URL" ]] && [[ -n "$tempo_ns" ]]; then
   # Attempt best-effort discovery of Tempo service URL.
   tempo_service_name=$(kubectl --context "$K8S_CONTEXT" -n "$tempo_ns" get svc -l app.kubernetes.io/name=tempo -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
   if [[ -n "$tempo_service_name" ]]; then
-    discover_url="http://${tempo_service_name}.${tempo_ns}.svc.cluster.local:3200"
-    if command -v curl >/dev/null 2>&1; then
-      if curl -fsS "${discover_url}/ready" >/dev/null 2>&1; then
-        report PASS "Tempo readiness endpoint reachable: $discover_url/ready"
-      else
-        report WARN "Tempo readiness endpoint not reachable at $discover_url/ready"
-      fi
+    discover_url="http://${tempo_service_name}.${tempo_ns}.svc.cluster.local:3200/ready"
+    if probe_tempo_readiness_via_pod "$K8S_CONTEXT" "$tempo_ns" "$tempo_service_name" >/dev/null 2>&1; then
+      report PASS "Tempo readiness endpoint reachable in-cluster: $discover_url"
     else
-      report SKIP "curl unavailable; cannot probe $discover_url"
+      report WARN "Tempo readiness endpoint not reachable in-cluster at $discover_url"
     fi
   else
     report SKIP "Tempo service name could not be discovered for readiness check"
@@ -215,10 +227,29 @@ echo ""
 echo "=== Trace context propagation coverage (manifest-level) ==="
 
 if kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy -o json | jq -e '.items | length > 0' >/dev/null 2>&1; then
-  if kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy -o json | jq -e '.items[] | (.spec.template.spec.containers[].env // [] )[] | select(.name | test(\"OTEL_EXPORTER_OTLP_ENDPOINT|OTEL_SERVICE_NAME|OTEL_EXPORTER_OTLP_PROTOCOL\"))' >/dev/null 2>&1; then
-    report PASS "OTEL env vars present in at least one deployment"
+  deployment_payload="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy -o json)"
+  deployment_count="$(jq -r '.items | length' <<<"$deployment_payload")"
+  otel_deployments_with_required_count="$(
+    jq -r '
+      [
+        .items[]
+        | {
+            name: .metadata.name,
+            env_names: (
+              [(.spec.template.spec.containers[]?.env[]?.name)] | unique
+            )
+          }
+        | select(
+            (.env_names | index("OTEL_EXPORTER_OTLP_ENDPOINT")) != null
+            and (.env_names | index("OTEL_SERVICE_NAME")) != null
+          )
+      ] | length
+    ' <<<"$deployment_payload"
+  )"
+  if [[ "$otel_deployments_with_required_count" -gt 0 ]]; then
+    report PASS "OTEL env vars present on ${otel_deployments_with_required_count}/${deployment_count} deployments (required: OTEL_EXPORTER_OTLP_ENDPOINT + OTEL_SERVICE_NAME)"
   else
-    report WARN "No OTEL env vars found in app deployments"
+    report WARN "No deployments contain required OTEL env vars (OTEL_EXPORTER_OTLP_ENDPOINT + OTEL_SERVICE_NAME)"
   fi
 else
   report SKIP "No deployments found in $APP_NS"

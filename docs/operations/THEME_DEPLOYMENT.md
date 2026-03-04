@@ -17,7 +17,7 @@ Important:
 - `gcloud` CLI authenticated (`gcloud auth login`)
 - `kubectl` configured for GKE cluster (`gcloud container clusters get-credentials bbi-k8-cluster --zone asia-southeast1-c`)
 - Python 3.10+ with venv activated
-- Tutor 18.2.2 installed
+- Tutor 21.0.0 installed (via `pip install -r requirements-tutor.txt`)
 
 ## One-Command Release (Canonical)
 
@@ -219,7 +219,7 @@ After intentional token updates, refresh and commit provenance metadata:
 
 **What the plugin does** (automatic via Tutor hooks):
 - MySQL 8 authentication fix
-- MFE Node 18 build toolchain
+- MFE Node build toolchain
 - MFE npm retry + timeout hardening for transient network failures
 - Webpack memory limits
 - CSRF/CORS configuration

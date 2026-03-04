@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Patch: Build optimizations and openedx Dockerfile/settings patches.
-# Covers: pip retries, node cache reuse, compile-sass, collectstatic fixes,
-#         i18n fixes, custom apps, django settings (discussions, theme, oauth fix,
+# Target: Tutor 21.x (Ulmo). Some replacements target Redwood-era template
+# patterns and are harmless no-ops on Ulmo (str.replace returns unchanged text).
+# Covers: pip retries, compile-sass, collectstatic fixes, i18n fixes,
+#         custom apps, django settings (discussions, theme, oauth fix,
 #         tenancy), assets.py (JS_COMPRESSOR, safe_join), MFE cache headers,
 #         nginx health/profile endpoints, Caddy profile proxy.
 
@@ -126,80 +128,10 @@ for target in targets:
         "RUN ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n\n",
     )
 
-    # node_modules COPY path fix
-    updated = updated.replace(
-        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/edx-platform/node_modules /openedx/node_modules",
-        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules",
-    )
-
-    # static bundles COPY (add then remove to normalize)
-    updated = updated.replace(
-        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
-        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\nCOPY --chown=app:app ./common/static/bundles /openedx/edx-platform/common/static/bundles\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
-    )
-    updated = updated.replace(
-        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\nCOPY --chown=app:app ./common/static/bundles /openedx/edx-platform/common/static/bundles\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
-        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
-    )
-
-    # Node cache reuse block
-    old_node_block = """###### Install nodejs with nodeenv in /openedx/nodeenv
-FROM python AS nodejs-requirements
-ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
-
-# Install nodeenv with the version provided by edx-platform
-# https://github.com/openedx/edx-platform/blob/master/requirements/edx/base.txt
-RUN pip install nodeenv==1.8.0
-RUN nodeenv /openedx/nodeenv --node=18.20.1 --prebuilt
-
-# Install nodejs requirements
-ARG NPM_REGISTRY=https://registry.npmjs.org/
-WORKDIR /openedx/edx-platform
-RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx-platform/package.json \\
-    --mount=type=bind,from=edx-platform,source=/package-lock.json,target=/openedx/edx-platform/package-lock.json \\
-    --mount=type=bind,from=edx-platform,source=/scripts/copy-node-modules.sh,target=/openedx/edx-platform/scripts/copy-node-modules.sh \\
-    --mount=type=cache,target=/root/.npm,sharing=shared \\
-    npm clean-install --no-audit --registry=$NPM_REGISTRY
-"""
-    new_node_block = """###### Reuse upstream Redwood node artifacts to avoid local npm installs
-FROM docker.io/overhangio/openedx:18.2.2 AS openedx_node_cache
-
-###### Install nodejs with nodeenv in /openedx/nodeenv
-FROM python AS nodejs-requirements
-ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
-
-# Copy prebuilt nodeenv/node_modules instead of re-running npm clean-install
-COPY --from=openedx_node_cache /openedx/nodeenv /openedx/nodeenv
-COPY --from=openedx_node_cache /openedx/node_modules /openedx/node_modules
-WORKDIR /openedx/edx-platform
-RUN ln -s /openedx/node_modules /openedx/edx-platform/node_modules
-"""
-    updated = updated.replace(old_node_block, new_node_block)
-    old_node_block_template = """###### Install nodejs with nodeenv in /openedx/nodeenv
-FROM python AS nodejs-requirements
-ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
-
-# Install nodeenv with the version provided by edx-platform
-# https://github.com/openedx/edx-platform/blob/master/requirements/edx/base.txt
-RUN pip install nodeenv==1.8.0
-RUN nodeenv /openedx/nodeenv --node=18.20.1 --prebuilt
-
-# Install nodejs requirements
-ARG NPM_REGISTRY={{ NPM_REGISTRY }}
-WORKDIR /openedx/edx-platform
-RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx-platform/package.json \\
-    --mount=type=bind,from=edx-platform,source=/package-lock.json,target=/openedx/edx-platform/package-lock.json \\
-    --mount=type=bind,from=edx-platform,source=/scripts/copy-node-modules.sh,target=/openedx/edx-platform/scripts/copy-node-modules.sh \\
-    --mount=type=cache,target=/root/.npm,sharing=shared \\
-    npm clean-install --no-audit --registry=$NPM_REGISTRY
-"""
-    updated = updated.replace(old_node_block_template, new_node_block)
-
-    # postinstall fix
-    updated = updated.replace(
-        'RUN if [ ! -d /openedx/node_modules ] || [ -z "$(ls -A /openedx/node_modules)" ]; then npm run postinstall; else echo "npm run postinstall skipped (prebuilt node_modules)"; fi',
-        "RUN npm run postinstall  # Postinstall artifacts are stuck in nodejs-requirements layer. Create them here too.",
-    )
+    # REMOVED: Redwood-era node_modules COPY path fixes + node cache reuse (FROM overhangio/openedx:18.2.2)
+    # This was a Tutor 18/Redwood optimization that copied node_modules from the upstream
+    # Redwood image. Incompatible with Ulmo (different node version, package structure).
+    # Tutor 21's standard node install with BuildKit cache is the correct approach.
 
     # brand compile block (sass + google fonts strip)
     brand_compile_block = (
@@ -342,12 +274,10 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
                 updated,
             )
 
-    # Tutor v21 node_modules path fix
-    if path.name == "Dockerfile" and "nodejs-requirements" in updated:
-        npm_install_marker = "npm clean-install --no-audit --registry=$NPM_REGISTRY"
-        node_mv = "npm clean-install --no-audit --registry=$NPM_REGISTRY\nRUN mv /openedx/edx-platform/node_modules /openedx/node_modules"
-        if npm_install_marker in updated and "mv /openedx/edx-platform/node_modules" not in updated:
-            updated = updated.replace(npm_install_marker, node_mv)
+    # REMOVED: Tutor v21 node_modules path fix (was lines 277-282)
+    # This `mv` moved node_modules to /openedx/node_modules but the production stage
+    # COPY still referenced /openedx/edx-platform/node_modules → build failure.
+    # Upstream Tutor 21 fixed the paths natively. Do not re-add.
 
     # mereka-overrides.css bake into staticfiles
     if path.name == "Dockerfile" and "rdfind -makesymlinks" in updated and "mereka-overrides.css" not in updated:
@@ -390,7 +320,8 @@ RUN pip install -e /openedx/plugins/mereka_tenancy
 
 # Add repository roots to Python path via .pth file for proper module imports.
 # Include /openedx because custom app packages are mounted there as top-level Django apps.
-RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
+RUN PTH_DIR=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))') && printf '/openedx\\n/openedx/plugins\\n' > "$PTH_DIR/mereka-plugins.pth"
+"""
         if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
             marker = copy_themes_marker if copy_themes_marker in updated else copy_themes_marker_alt
             custom_apps_copy = f"""{marker}
@@ -407,7 +338,8 @@ RUN pip install -e /openedx/plugins/mereka_tenancy
 
 # Add repository roots to Python path via .pth file for proper module imports.
 # Include /openedx because custom app packages are mounted there as top-level Django apps.
-RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
+RUN PTH_DIR=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))') && printf '/openedx\\n/openedx/plugins\\n' > "$PTH_DIR/mereka-plugins.pth"
+"""
             updated = updated.replace(mfe_oauth_marker, custom_apps_add)
         elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
             workdir_marker = "WORKDIR /openedx/edx-platform\n"
@@ -422,7 +354,7 @@ RUN pip install -e /openedx/plugins/mereka_tenancy
 
 # Add repository roots to Python path via .pth file for proper module imports.
 # Include /openedx because custom app packages are mounted there as top-level Django apps.
-RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+RUN python3 -c "import sysconfig; open(sysconfig.get_path('purelib') + '/mereka-plugins.pth', 'w').write('/openedx\\n/openedx/plugins\\n')"
 
 """ + workdir_marker
                 updated = updated.replace(workdir_marker, custom_app_insert, 1)
@@ -519,7 +451,7 @@ RUN pip install django-prometheus==2.3.1"""
     # ── assets.py patches ───────────────────────────────────────────────
 
     if path.name == "assets.py" and "derive_settings" in updated:
-        # Ensure optional Redwood apps exist when collecting assets
+        # Ensure optional apps exist when collecting assets (Redwood-era, harmless no-op on Ulmo)
         updated = updated.replace(
             "derive_settings(__name__)\n\nLOCALE_PATHS.append(\"/openedx/locale/contrib/locale\")\n",
             "derive_settings(__name__)\n\n# Ensure optional Redwood apps exist when collecting assets\nif \"openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig\"]\nif \"openedx.core.djangoapps.bookmarks.apps.BookmarksConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.bookmarks.apps.BookmarksConfig\"]\nif \"openedx.core.djangoapps.discussions.apps.DiscussionsConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.discussions.apps.DiscussionsConfig\"]\nif \"openedx.core.djangoapps.theming.apps.ThemingConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.theming.apps.ThemingConfig\"]\n\nLOCALE_PATHS.append(\"/openedx/locale/contrib/locale\")\n",

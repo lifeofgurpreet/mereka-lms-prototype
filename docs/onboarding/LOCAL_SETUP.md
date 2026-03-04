@@ -17,12 +17,12 @@ These instructions reproduce the nightly Open edX environment provisioned in thi
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+pip install -r requirements-tutor.txt
 
 ./infrastructure/tutor/apply-patches.sh
 ```
 
-Installing `tutor[full]` pulls the Tutor 18 core plus the first-party plugins (discovery, ecommerce, notes, xqueue, forum). The separate `tutor-mfe` wheel pins the MFE plugin version used by our Redwood stack.
+Installing from `requirements-tutor.txt` pulls the exact Tutor version (currently 21.0.0 Ulmo) plus first-party plugins (MFE, Indigo, discovery, ecommerce, notes, xqueue, forum).
 
 > ❗ The legacy `tutor-license` plugin does not compile against Python 3.12 (`longintrepr.h` removed). We will revisit licensing once an updated plugin is published.
 
@@ -34,11 +34,11 @@ Source the helper script whenever you enter a new shell:
 source infrastructure/tutor/tutor-env.sh
 ```
 
-This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. Re-run `./infrastructure/tutor/apply-patches.sh` after every `tutor config save` to keep the MFE build using Node 18 until Tutor ships an official fix.
+This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. Re-run `./infrastructure/tutor/apply-patches.sh` after every `tutor config save` to keep patches and MFE build configuration in sync.
 
 ### Docker resources
 
-Redwood’s asset pipeline easily bursts past 6 GB of RAM while `npm run webpack` is running inside the `openedx` build. Configure Docker Desktop (Settings → Resources) with **at least 12 GB RAM** and **2–4 GB of swap** so the build does not OOM. You can verify the limit at any time via `docker info | grep "Total Memory"`.
+The Ulmo asset pipeline easily bursts past 6 GB of RAM while `npm run webpack` is running inside the `openedx` build. Configure Docker Desktop (Settings → Resources) with **at least 12 GB RAM** and **2–4 GB of swap** so the build does not OOM. You can verify the limit at any time via `docker info | grep "Total Memory"`.
 
 ## Configuration
 
@@ -46,8 +46,8 @@ The current configuration pins:
 
 - `LMS_HOST=localhost`
 - `CMS_HOST=studio.localhost`
-- Open edX release branch: `open-release/redwood.master`
-- MFE branch: `master` (frontends track the latest master while Redwood branches are published)
+- Open edX release branch: `open-release/ulmo.master`
+- MFE branch: `master` (frontends track the latest master while Ulmo branches are published)
 - Enabled plugins: `mfe`, `discovery`, `notes`, `ecommerce`, `forum`, `xqueue`
 
 To regenerate the environment after editing configuration values:
@@ -63,9 +63,9 @@ tutor config save \
   --set XQUEUE_HOST=xqueue.localhost \
   --set DOCKER_IMAGE_MYSQL=docker.io/mysql:8.0 \
   --set MYSQL_ROOT_HOST=% \
-  --set OPENEDX_COMMON_VERSION=open-release/redwood.master \
-  --set OPENEDX_LMS_VERSION=open-release/redwood.master \
-  --set OPENEDX_CMS_VERSION=open-release/redwood.master \
+  --set OPENEDX_COMMON_VERSION=open-release/ulmo.master \
+  --set OPENEDX_LMS_VERSION=open-release/ulmo.master \
+  --set OPENEDX_CMS_VERSION=open-release/ulmo.master \
   --set MFE_COMMON_VERSION=master \
   --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
 ./infrastructure/tutor/apply-patches.sh
@@ -76,7 +76,6 @@ tutor plugins enable discovery ecommerce forum mfe notes xqueue
 Enabling/disabling plugins regenerates the rendered Tutor environment, so always rerun `./infrastructure/tutor/apply-patches.sh` afterwards to keep the Caddy/MySQL tweaks in sync.
 
 Secrets (`config.yml`) live in `tutor_env/` which is git-ignored. For reference, `infrastructure/tutor/config.example.yml` records the non-secret overrides.
-> ℹ️ `tutor-credentials` has no Tutor 12-compatible release (latest wheel targets Tutor >=16). Skip certificate automation until Tutor publishes a 12.x build.
 
 ### Apply the Mereka Theme
 
@@ -199,14 +198,13 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
 ## Maintenance
 
 - Capture backups before upgrades: `tutor local stop && tutor local do backup-db`. Store dumps outside this repo.
-- Update packages regularly: `pip install --upgrade "tutor[full]" tutor-mfe` (stay on Tutor 18.2.2 unless we intentionally rebase on the next LTS).
+- Update packages regularly: `pip install -r requirements-tutor.txt` (version pins live in `requirements-tutor.txt`).
 - After any upgrade, rerun `./infrastructure/tutor/apply-patches.sh` before rebuilding MFEs.
 - Apply Tutor upgrades: `source infrastructure/tutor/tutor-env.sh && tutor local do upgrade`.
 
 ## Troubleshooting
 
 - Docker image pulls are large; if `tutor local launch` fails mid-way, rerun `tutor local launch -I --skip-build` after ensuring adequate disk space (and rerun `tutor local do init` if the LMS still 500s).
-- If the forum container keeps restarting with `search:validate_indices` errors, create the expected Elasticsearch indexes with `tutor local run forum rake search:initialize`, then recheck `tutor local status`.
+- If the forum container keeps restarting, check logs with `tutor local logs forum` — forum v2 is Python-based and uses Meilisearch (no rake commands or Elasticsearch).
 - Ecommerce returning `OperationalError: Access denied for user 'ecommerce'` means the init job didn’t finish—rerun `tutor local do init --limit=ecommerce` to recreate the database, user, and OAuth clients.
 - For plugin template changes, run `tutor config save` to regenerate YAML manifests.
-- If you see `pkg_resources` deprecation warnings, they are safe with Tutor 12.x; the upstream plan is to replace the dependency before 2025.

@@ -110,7 +110,7 @@ tutor config printvalue OPENEDX_COMMON_VERSION
 
 Patches applied:
 - MySQL 8 authentication plugin (`mysql_native_password`)
-- MFE Node 18 build toolchain (g++, python3)
+- MFE Node build toolchain (g++, python3)
 - Extra domains (biji-biji.com, skillourfuture)
 - Webpack memory limit (`NODE_OPTIONS=--max-old-space-size=6144`)
 - CSRF trusted origins and allowed hosts

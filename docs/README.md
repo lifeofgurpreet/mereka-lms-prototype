@@ -49,7 +49,7 @@ See [INDEX_BY_AUDIENCE.md](INDEX_BY_AUDIENCE.md) for role-specific learning path
 | [`onboarding/QUICK_START_LOCAL.md`](onboarding/QUICK_START_LOCAL.md) | Fast 5-minute setup guide | 2025-11-12 |
 | [`onboarding/DEVELOPER_ONBOARDING.md`](onboarding/DEVELOPER_ONBOARDING.md) | Complete developer onboarding guide | 2025-11-12 |
 | [`onboarding/LOCAL_DEVELOPMENT_GUIDE.md`](onboarding/LOCAL_DEVELOPMENT_GUIDE.md) | Complete local development reference | 2025-11-12 |
-| [`onboarding/LOCAL_SETUP.md`](onboarding/LOCAL_SETUP.md) | Detailed Tutor 18.2.2 bootstrap guide | 2025-11-09 |
+| [`onboarding/LOCAL_SETUP.md`](onboarding/LOCAL_SETUP.md) | Detailed Tutor bootstrap guide (Ulmo) | 2025-11-09 |
 | [`onboarding/WORKFLOW_LOCAL.md`](onboarding/WORKFLOW_LOCAL.md) | Daily workflow commands and cheat sheet | 2025-11-09 |
 
 ## 🔧 Operations & Runbooks

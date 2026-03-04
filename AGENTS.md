@@ -62,8 +62,8 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 
 ## Build, Test, and Development Commands
 - **Setup**: `make bootstrap` sets up venv and pre-commit hooks, then `source infrastructure/tutor/tutor-env.sh` to activate Tutor environment.
-- Redwood’s asset build needs headroom: configure Docker Desktop with ≥12 GB RAM and 2–4 GB swap (Settings → Resources) before running `tutor images build openedx`.
-- `tutor images build mfe` rebuilds the micro-frontend image with the Node 18 patch applied.
+- Ulmo’s asset build needs headroom: configure Docker Desktop with ≥12 GB RAM and 2–4 GB swap (Settings → Resources) before running `tutor images build openedx`.
+- `tutor images build mfe` rebuilds the micro-frontend image.
 - `tutor local quickstart -I` performs an end-to-end configure + launch of the nightly stack.
 - `tutor local start -d` / `tutor local stop` manage day-to-day lifecycle; add `tutor local dc ps` to inspect container health and `tutor local logs --tail=100` to debug.
 - `make tutor-apply` (or `./infrastructure/tutor/apply-patches.sh`) keeps Tutor's rendered local/k8s templates using `--default-authentication-plugin=mysql_native_password` so MySQL 8 starts cleanly after `tutor config save` regenerations.
@@ -92,6 +92,7 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - CI guardrail: manual `build-tutor-images.yml` runs with `target_environment=staging` are blocked unless repo variable `ENABLE_STAGING_ENV=true`.
 - CI release guardrail: `update_gitops=true` requires both `build_openedx=true` and `build_mfe=true` so digest pinning inputs are captured deterministically.
 - Repo ownership boundary contract: `docs/operations/REPO_BOUNDARIES.md`
+- **Build Pipeline Runbook**: `docs/operations/BUILD_PIPELINE_RUNBOOK.md` — Critical build rules, DinD configuration, troubleshooting tree, GHCR auth
 
 ### Agent Runtime Notes (Codex/Claude)
 
@@ -244,7 +245,7 @@ kubectl -n mereka-lms get svc mongodb
 Shell scripts should begin with `#!/usr/bin/env bash`, enable `set -euo pipefail`, and prefer descriptive function names over inline command chains. Keep Bash indented with two spaces; YAML templates should mirror Tutor defaults and group environment variables in uppercase (e.g., `OPENEDX_RELEASE`). When extending scripts, mirror the existing comment style that summarizes intent rather than mechanics.
 
 ## Testing Guidelines
-Treat `tutor local quickstart -I` as the acceptance test for major changes—capture failures before opening a PR. Use `tutor local dc ps` to confirm every service reports `Up`, and spot-check critical logs with `tutor local logs --tail=50 service`. If you alter the MFE patches, confirm `node:18` appears in the generated Dockerfile under `tutor_env/env/plugins/mfe/build/mfe/`, and sanity-check `tutor_env/env/local/docker-compose.yml` still exposes `MYSQL_ROOT_HOST: "%"`.
+Treat `tutor local quickstart -I` as the acceptance test for major changes—capture failures before opening a PR. Use `tutor local dc ps` to confirm every service reports `Up`, and spot-check critical logs with `tutor local logs --tail=50 service`. If you alter the MFE patches, sanity-check `tutor_env/env/local/docker-compose.yml` still exposes `MYSQL_ROOT_HOST: "%"`.
 
 ## Commit & Pull Request Guidelines
 There is no upstream history yet, so follow Conventional Commits (`feat:`, `fix:`, `docs:`) to seed a consistent log; e.g., `fix: ensure tutor env script exits when .venv missing`. PRs should include a concise summary, the Tutor commands you ran, and links to any relevant docs you touched. Attach log excerpts or screenshots whenever behaviour changes, and request review before rolling out infrastructure-affecting adjustments.

@@ -10,10 +10,10 @@ This section is the **authoritative reference** for all frontend tooling version
 
 | Component | Version | Source | Notes |
 |-----------|---------|--------|-------|
-| **Tutor (pip)** | 18.2.2 | `tutor[full]==18.2.2` | Despite "Tutor 21" branding, pip installs v18.2.2 |
-| **Tutor MFE Plugin** | 18.1.0 | `tutor-mfe==18.1.0` | Official plugin for MFE builds |
-| **Open edX Release** | Ulmo | Named release | Corresponds to Tutor v21.0.0 in new versioning |
-| **Node.js** | 18.20.5 | Patched in `00-mfe-node18.patch` | Upgraded from default Node 16 |
+| **Tutor (pip)** | 21.0.0 | `requirements-tutor.txt` | Tutor 21.0.0 (Ulmo release) |
+| **Tutor MFE Plugin** | 21.0.0 | `requirements-tutor.txt` | Official plugin for MFE builds |
+| **Open edX Release** | Ulmo | Named release | Tutor v21.0.0 |
+| **Node.js** | 20+ | Patched via MFE Dockerfile | Current LTS |
 | **Python (CI/Dev)** | 3.12 | CI workflows, local dev | Minimum: 3.10 |
 | **Webpack Memory Limit** | 6144 MB | `NODE_OPTIONS=--max-old-space-size=6144` | Required for Ulmo asset pipeline |
 | **Mereka Plugin** | 1.0.0 | `infrastructure/tutor/plugins/mereka_lms.py` | Custom Tutor plugin for Mereka patches |
@@ -39,13 +39,13 @@ All MFEs are built from Tutor 21.0.0 (Ulmo release) with custom patches.
 
 | MFE | Version | Tutor Image Tag | Node Version | Notes |
 |-----|---------|-----------------|--------------|-------|
-| learner-dashboard | v21.0.0 | `openedx-mfe:21.0.0` | 18.20.5 | Learner progress, recommendations |
-| learning | v21.0.0 | `openedx-mfe:21.0.0` | 18.20.5 | Course player, unit navigation |
-| profile | v21.0.0 | `openedx-mfe:21.0.0` | 18.20.5 | User profiles |
-| account | v21.0.0 | `openedx-mfe:21.0.0` | 18.20.5 | Account settings |
-| gradebook | v21.0.0 | `openedx-mfe:21.0.0` | 18.20.5 | Instructor gradebook |
-| authn | v21.0.0 | `openedx-mfe:21.0.0` | 18.20.5 | Login, registration |
-| course-authoring | v21.0.0 | `openedx-mfe:21.0.0` | 18.20.5 | Studio content authoring |
+| learner-dashboard | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Learner progress, recommendations |
+| learning | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Course player, unit navigation |
+| profile | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | User profiles |
+| account | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Account settings |
+| gradebook | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Instructor gradebook |
+| authn | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Login, registration |
+| course-authoring | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Studio content authoring |
 
 ## Version Pinning Strategy
 
@@ -58,9 +58,9 @@ All MFEs are built from Tutor 21.0.0 (Ulmo release) with custom patches.
 
 All MFEs receive the following patches via `infrastructure/tutor/apply-patches.sh`:
 
-1. **Node 18 Build Toolchain** (`00-mfe-node18.patch`):
+1. **Node Build Toolchain** (`00-mfe-node18.patch`):
    - Adds build essentials: `g++`, `python3`, `make`
-   - Fixes webpack compilation errors on Node 18
+   - Fixes webpack compilation errors
    - Required for: all MFEs
 
 2. **Webpack Memory Limit** (`02-mfe-webpack-memory.patch`):
@@ -173,7 +173,7 @@ After upgrading Tutor/Open edX, verify these contracts:
 ## MFE Build Configuration
 
 ### Build Environment
-- **Base Image**: `node:18-bullseye` (patched from default Node 16)
+- **Base Image**: `node:20-bullseye` (current LTS)
 - **Build Tool**: Webpack 5
 - **Memory Limit**: 6GB (`NODE_OPTIONS=--max-old-space-size=6144`)
 - **Build Time**: ~15-20 minutes (all MFEs)

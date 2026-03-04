@@ -22,7 +22,7 @@ The Purchase Gateway is a custom Stripe-to-Open edX enrollment bridge that repla
 ┌─────────────────────────────────────────────────────────────────┐
 │              Purchase Gateway API (payments-gateway)            │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │ FastAPI Service (Python 3.11)                            │   │
+│  │ FastAPI Service (Python 3.12)                            │   │
 │  │ - POST /api/checkout/create-session                      │   │
 │  │ - POST /api/webhooks/stripe (signature verification)     │   │
 │  │ - GET /api/orders/{order-id}                             │   │

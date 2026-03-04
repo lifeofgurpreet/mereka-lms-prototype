@@ -807,6 +807,9 @@ check_prometheus_runtime_wiring() {
     local rule_resolve_rc=0
     local sm_resolve_rc=0
     local sm_namespace_candidate=""
+    local EXPECTED_RULE_NAMES_JSON="[]"
+    local EXPECTED_RULE_COUNT=0
+    local RULE_NAME_MATCH_COUNT=0
 
     if ! command -v kubectl >/dev/null 2>&1; then
         skip "runtime wiring for ${component}: kubectl unavailable"
@@ -815,6 +818,9 @@ check_prometheus_runtime_wiring() {
 
     if [[ -n "$target_name" ]]; then
         target_alt_name="${target_name%-metrics}"
+        if [[ -z "$target_alt_name" ]]; then
+            target_alt_name="$target_name"
+        fi
         set +e
         sm_namespace_candidate="$(resolve_service_monitor "$target_name")"
         sm_resolve_rc=$?
@@ -874,17 +880,60 @@ check_prometheus_runtime_wiring() {
     TARGET_DISCOVERY_COUNT="0"
     RULE_GROUP_COUNT="0"
     if [[ -n "$TARGETS_JSON" ]]; then
-        TARGET_COUNT="$(printf '%s' "$TARGETS_JSON" | jq -r --arg n "$target_name" --arg alt "$target_alt_name" '[ .data.activeTargets // [] | .[] | select( (.scrapePool // "" | contains($n) or contains($alt)) or (.labels.job // "" | tostring | contains($n) or contains($alt)) or (.discoveredLabels["__meta_kubernetes_service_name"] // "" | tostring | contains($n) or contains($alt)) ) ] | length' 2>/dev/null | tr -d '[:space:]')"
-        TARGET_DISCOVERY_COUNT="$(printf '%s' "$TARGETS_JSON" | jq -r --arg n "$target_name" --arg alt "$target_alt_name" '[ ((.data.activeTargets // []) + (.data.droppedTargets // []))[] | select( (.scrapePool // "" | contains($n) or contains($alt)) or (.labels.job // "" | tostring | contains($n) or contains($alt)) or (.discoveredLabels["__meta_kubernetes_service_name"] // "" | tostring | contains($n) or contains($alt)) ) ] | length' 2>/dev/null | tr -d '[:space:]')"
+        TARGET_COUNT="$(printf '%s' "$TARGETS_JSON" | jq -r --arg n "$target_name" --arg alt "$target_alt_name" '
+            [
+              .data.activeTargets // []
+              | .[]
+              | select(
+                  (.labels.job // "") == $n
+                  or (.labels.job // "") == $alt
+                  or (.discoveredLabels["__meta_kubernetes_service_name"] // "") == $n
+                  or (.discoveredLabels["__meta_kubernetes_service_name"] // "") == $alt
+                  or (.scrapePool // "" | test("/" + $n + "(?:$|/)"))
+                  or (.scrapePool // "" | test("/" + $alt + "(?:$|/)"))
+                )
+            ] | length
+        ' 2>/dev/null | tr -d '[:space:]')"
+        TARGET_DISCOVERY_COUNT="$(printf '%s' "$TARGETS_JSON" | jq -r --arg n "$target_name" --arg alt "$target_alt_name" '
+            [
+              ((.data.activeTargets // []) + (.data.droppedTargets // []))[]
+              | select(
+                  (.labels.job // "") == $n
+                  or (.labels.job // "") == $alt
+                  or (.discoveredLabels["__meta_kubernetes_service_name"] // "") == $n
+                  or (.discoveredLabels["__meta_kubernetes_service_name"] // "") == $alt
+                  or (.scrapePool // "" | test("/" + $n + "(?:$|/)"))
+                  or (.scrapePool // "" | test("/" + $alt + "(?:$|/)"))
+                )
+            ] | length
+        ' 2>/dev/null | tr -d '[:space:]')"
     fi
     if [[ "$check_rule" -eq 1 && -n "$RULES_JSON" ]]; then
         RULE_GROUP_COUNT="$(printf '%s' "$RULES_JSON" | jq -r --arg n "$rule_name" '[ .data.groups // [] | .[] | select((.name // "") == $n or (.name // "" | contains($n)) ) ] | length' 2>/dev/null | tr -d '[:space:]')"
         RULE_GROUP_COUNT="${RULE_GROUP_COUNT:-0}"
+
+        if [[ -n "$rule_namespace" ]]; then
+            EXPECTED_RULE_NAMES_JSON="$(
+                kubectl_cmd_with_timeout get prometheusrule "$rule_name" -n "$rule_namespace" -o json 2>/dev/null \
+                | jq -c '[ .spec.groups[]?.rules[]? | .alert // .record | select(. != null and . != "") ]' 2>/dev/null
+            )"
+            EXPECTED_RULE_NAMES_JSON="${EXPECTED_RULE_NAMES_JSON:-[]}"
+            EXPECTED_RULE_COUNT="$(jq -r 'length' <<<"$EXPECTED_RULE_NAMES_JSON" 2>/dev/null || echo 0)"
+            RULE_NAME_MATCH_COUNT="$(
+                printf '%s' "$RULES_JSON" | jq -r --argjson expected "$EXPECTED_RULE_NAMES_JSON" '
+                    ([ .data.groups // [] | .[] | .rules // [] | .[] | .name // empty ] | unique) as $loaded
+                    | [ $expected[] | select($loaded | index(.) != null) ] | length
+                ' 2>/dev/null | tr -d '[:space:]'
+            )"
+            RULE_NAME_MATCH_COUNT="${RULE_NAME_MATCH_COUNT:-0}"
+        fi
     fi
 
     TARGET_COUNT="${TARGET_COUNT:-0}"
     RULE_GROUP_COUNT="${RULE_GROUP_COUNT:-0}"
     TARGET_DISCOVERY_COUNT="${TARGET_DISCOVERY_COUNT:-0}"
+    EXPECTED_RULE_COUNT="${EXPECTED_RULE_COUNT:-0}"
+    RULE_NAME_MATCH_COUNT="${RULE_NAME_MATCH_COUNT:-0}"
 
     mkdir -p "$VERIFY_EVIDENCE_DIR"
     {
@@ -908,6 +957,8 @@ check_prometheus_runtime_wiring() {
         echo "- target_matches: ${TARGET_COUNT}"
         echo "- target_discovery_matches: ${TARGET_DISCOVERY_COUNT}"
         echo "- rule_group_matches: ${RULE_GROUP_COUNT}"
+        echo "- expected_rule_name_count: ${EXPECTED_RULE_COUNT}"
+        echo "- loaded_rule_name_matches: ${RULE_NAME_MATCH_COUNT}"
         echo "- prometheus_pod_namespace: ${prom_pod_namespace}"
         echo "- evidence_identity: env=${VERIFY_ENV_LABEL};profile=${VERIFY_DISPATCH_PROFILE};context=${VERIFY_K8S_CONTEXT:-default};project=${VERIFY_GCP_PROJECT}"
         echo ""
@@ -935,6 +986,10 @@ check_prometheus_runtime_wiring() {
     if [[ "$check_rule" -eq 1 ]]; then
         if [[ "$RULE_GROUP_COUNT" -gt 0 ]]; then
             pass "Runtime wiring: ${component} rule group present in Prometheus as '${rule_name}' (${RULE_GROUP_COUNT})"
+        elif [[ "$EXPECTED_RULE_COUNT" -gt 0 && "$RULE_NAME_MATCH_COUNT" -gt 0 ]]; then
+            pass "Runtime wiring: ${component} PrometheusRule '${rule_name}' loaded via rule-name match (${RULE_NAME_MATCH_COUNT}/${EXPECTED_RULE_COUNT})"
+        elif [[ "$EXPECTED_RULE_COUNT" -gt 0 ]]; then
+            fail "Runtime wiring: ${component} PrometheusRule '${rule_name}' rules not loaded in Prometheus (0/${EXPECTED_RULE_COUNT} matched)"
         else
             skip "Runtime wiring: ${component} PrometheusRule '${rule_name}' exists in-cluster but group name not directly matched in /api/v1/rules"
         fi
@@ -1112,6 +1167,7 @@ echo "==> AC-OVR-023: Grafana dashboard bbi-app-mereka-lms exists with required 
 GRAFANA_URL="${GRAFANA_URL:-https://grafana.mereka.io}"
 GRAFANA_TOKEN="${GRAFANA_API_TOKEN:-}"
 GRAFANA_DASHBOARD_CONTRACT_PATH="${GRAFANA_DASHBOARD_CONTRACT_PATH:-infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json}"
+DASHBOARD_JSON_CLEAN=""
 
 if [[ -n "$GRAFANA_TOKEN" ]]; then
     set +e
@@ -1124,7 +1180,11 @@ if [[ -n "$GRAFANA_TOKEN" ]]; then
     fi
     set -e
 
-    if echo "$DASHBOARD_JSON" | jq -e '.dashboard' >/dev/null 2>&1; then
+    # Some Grafana responses include NUL bytes in provisioned payload text fields.
+    # jq rejects those control chars unless we sanitize the payload first.
+    DASHBOARD_JSON_CLEAN="$(printf '%s' "$DASHBOARD_JSON" | tr -d '\000' | tr -d '\r')"
+
+    if jq -e '.dashboard' <<<"$DASHBOARD_JSON_CLEAN" >/dev/null 2>&1; then
         # Check required panels and query fragments from contract
         REQUIRED_PANELS=("LMS" "CMS (Studio)" "Caddy" "MySQL" "Redis")
         REQUIRED_QUERY_FRAGMENTS=("kube_pod_status_phase" "container_cpu_usage_seconds_total" "container_memory_usage_bytes")
@@ -1142,14 +1202,14 @@ if [[ -n "$GRAFANA_TOKEN" ]]; then
 
         MISSING=0
         for panel in "${REQUIRED_PANELS[@]}"; do
-            if ! echo "$DASHBOARD_JSON" | jq -e --arg panel "$panel" '.dashboard.panels[] | select(.title == $panel)' >/dev/null 2>&1; then
+            if ! jq -e --arg panel "$panel" '.dashboard.panels[] | select(.title == $panel)' <<<"$DASHBOARD_JSON_CLEAN" >/dev/null 2>&1; then
                 fail "AC-OVR-023: Required panel '$panel' not found in dashboard"
                 MISSING=$((MISSING + 1))
             fi
         done
 
         for fragment in "${REQUIRED_QUERY_FRAGMENTS[@]}"; do
-            if ! echo "$DASHBOARD_JSON" | jq -e --arg fragment "$fragment" '.dashboard.panels[].targets[]?.expr | select(strings | contains($fragment))' >/dev/null 2>&1; then
+            if ! jq -e --arg fragment "$fragment" '.dashboard.panels[].targets[]?.expr | select(strings | contains($fragment))' <<<"$DASHBOARD_JSON_CLEAN" >/dev/null 2>&1; then
                 fail "AC-OVR-023: Required query fragment '$fragment' not found in dashboard expressions"
                 MISSING=$((MISSING + 1))
             fi

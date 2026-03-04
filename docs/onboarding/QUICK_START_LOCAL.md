@@ -13,7 +13,7 @@ cd /path/to/mereka.academy
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+pip install -r requirements-tutor.txt
 
 # 3. Configure Docker Desktop (macOS)
 # Open Docker Desktop → Settings → Resources → Advanced

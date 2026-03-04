@@ -22,5 +22,6 @@ kind: Kustomization
 # Apply namespaces → install Helm chart → then apply RunnerScaleSets.
 resources:
   - namespace.yaml
+  - dind-daemon-config.yaml
   - runner-scale-set-standard.yaml
   - runner-scale-set-heavy.yaml

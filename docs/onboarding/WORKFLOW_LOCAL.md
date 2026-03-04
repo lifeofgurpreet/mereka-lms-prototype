@@ -11,7 +11,7 @@ _Last verified: 2025‑11‑09_
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+pip install -r requirements-tutor.txt
 ```
 
 Whenever you open a new shell:
@@ -29,7 +29,7 @@ tutor config save --env-only        # regenerates tutor_env/env
 ./infrastructure/tutor/apply-patches.sh        # keeps MySQL flags, forum env, Dockerfiles, etc.
 ```
 
-> **Why?** Tutor rewrites rendered templates each time you save. The patch script re-applies our Node 18 tweaks, theme pointers, and forum/env adjustments.
+> **Why?** Tutor rewrites rendered templates each time you save. The patch script re-applies our Node patches, theme pointers, and forum/env adjustments.
 
 ## 3. Start / Stop Cycle
 
@@ -112,7 +112,7 @@ Store screenshots under `screenshots/` with a descriptive filename (e.g., `scree
 ## 9. Troubleshooting Highlights
 
 - **LMS/Studio return 500** → rerun `tutor local do init` (recreates MySQL users & migrations).
-- **Forum stuck restarting** → `tutor local run forum rake search:initialize` (creates Elasticsearch indexes).
+- **Forum stuck restarting** → check forum v2 logs via `tutor local logs forum` (forum is Python-based, no rake commands).
 - **Ecommerce “Access denied”** → `tutor local do init --limit=ecommerce`.
 - **MySQL refuses connections** → stop stack, `rm -rf tutor_env/data/mysql`, rerun launch.
 

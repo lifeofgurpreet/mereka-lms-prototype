@@ -109,7 +109,7 @@ tutor_env/                # Generated Tutor state (gitignored)
 
 **Image Build Pipeline**:
 - `tutor images build openedx` → builds LMS/CMS/workers (30+ min)
-- `tutor images build mfe` → builds micro-frontends with Node 18 patch
+- `tutor images build mfe` → builds micro-frontends
 - Images pushed to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
 - Local builds tag as `latest`, cloud builds tag with git SHA
 
@@ -155,7 +155,7 @@ git submodule update --init --recursive
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -U pip uv
-pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+pip install -r requirements-tutor.txt
 
 # Set Tutor environment (REQUIRED before any tutor command)
 source infrastructure/tutor/tutor-env.sh
@@ -303,7 +303,7 @@ tutor local restart
 
 **Why**: `tutor config save` regenerates templates from scratch, losing patches. The `apply-patches.sh` script re-applies:
 - MySQL 8 authentication plugin fix (`mysql_native_password`)
-- MFE Node 18 build toolchain (g++, python3)
+- MFE build toolchain (g++, python3)
 - Extra domain names for multi-site support (biji-biji.com, skillourfuture)
 - Webpack memory limit increase (`NODE_OPTIONS=--max-old-space-size=6144`)
 - CSRF trusted origins and allowed hosts
@@ -346,6 +346,24 @@ tutor local restart
 4. **Always verify config uses local service names** (`mysql`, `mongodb`, `redis`), not cloud IPs (`10.97.x.x`)
 5. **Always check endpoints after K8s operations**: `kubectl get endpoints -n mereka-lms` (empty = site down)
 6. Test with `make qa-smoke` before committing infrastructure changes
+
+### Methodology (ADR-021)
+
+The full methodology is in `docs/adr/021-openedx-tutor-methodology.md`. Every agent must read it before starting Open edX customization work. The six binding decisions, summarized:
+
+| Decision | Rule |
+|---|---|
+| **Release line** | Tutor 21.x (Ulmo). No Tutor `main`/`master`. No mixed releases. |
+| **Customization** | Tutor plugin API only (`infrastructure/tutor/plugins/mereka_lms.py`). No new Dockerfile surgery. |
+| **Frontend** | Plugin slots + design tokens + `@edx/brand`. Do not edit `env.config.jsx` at Dockerfile level. |
+| **edx-platform fork** | Base on latest release tag (e.g., `open-release/ulmo.1`). Not `master`, not `release/ulmo` branch. |
+| **CI** | Local preflight first (<5 min), then CI validates. One hypothesis per PR. Never debug on `main`. |
+| **Heavy builds** | `tutor images build` in CI runs on `mereka-k8s-heavy-builders` ARC runners only, with `--cache-from`. |
+
+**Current debt** (do not add to; migrate away from):
+- `infrastructure/tutor/patches/mfe-node.sh` — Dockerfile surgery, migrating to plugin hooks
+- `infrastructure/tutor/patches/brand-package.sh` — sed/Python brand injection, migrating to `@edx/brand`
+- `infrastructure/tutor/patches/footer-component.sh` — footer injection, migrating to `PLUGIN_SLOTS`
 
 ## Code Style
 
@@ -525,7 +543,7 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
 
 ## Common Pitfalls
 
-1. **Forgetting to run `apply-patches.sh`** → MySQL auth fails, MFE Node 18 build breaks
+1. **Forgetting to run `apply-patches.sh`** → MySQL auth fails, MFE build breaks
    - **Fix**: Use `./scripts/infra/tutor-config-save.sh` (patches applied automatically)
    - **Verify**: Run `./scripts/infra/verify-tutor-config.sh`
 2. **Cloud IPs in local config** (`MYSQL_HOST: "10.97.0.2"`) → Services can't connect

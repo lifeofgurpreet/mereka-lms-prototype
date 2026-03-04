@@ -116,7 +116,7 @@
 | Footer slot actively wired | PASS | `org.openedx.frontend.layout.footer.v1` (AC-FOOTER-202) |
 | Slot inventory comprehensive | WARN | 41 slots documented (expected ≥80 from upstream) |
 | Migration opportunities tracked | PASS | 4 slot-wirable customizations documented |
-| Version Baseline table documented | PASS | Tutor 18.2.2, Node 18.20.5, Python 3.12 |
+| Version Baseline table documented | PASS | Tutor 21.0.0, Node 24.x, Python 3.12 |
 | Frontend version consistency (AC-UIVER-003) | PASS | docs ↔ CI ↔ scripts ↔ K8s verified |
 | Upgrade procedure documented (AC-UIVER-004) | PASS | 8-step procedure in MFE_VERSIONS.md |
 

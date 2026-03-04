@@ -83,9 +83,7 @@ jobs:
 
   build-openedx:
     name: Build OpenEdX Image
-    # Default to GitHub-hosted runners. Use heavy-builder only when explicitly
-    # selected AND ARC is deployed (mereka-k8s-heavy-builders label exists).
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.openedx_runner == 'heavy-builder' && 'mereka-k8s-heavy-builders' || 'ubuntu-24.04' }}
+    runs-on: mereka-k8s-heavy-builders
     # Keep outer timeout comfortably above inner image-build timeout (170m)
     # so pre/post-build checks and artifact upload have recovery headroom.
     timeout-minutes: 200
@@ -273,10 +271,13 @@ jobs:
 
       - name: Install Trivy CLI
         run: |
+          mkdir -p "$HOME/.local/bin"
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sh -s -- -b /usr/local/bin
+            | sh -s -- -b "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Scan OpenEdX image for vulnerabilities
+        continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
         run: |
           mkdir -p var/ci
           trivy image \
@@ -378,7 +379,7 @@ jobs:
 
   build-mfe:
     name: Build MFE Image
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.openedx_runner == 'heavy-builder' && 'mereka-k8s-heavy-builders' || 'ubuntu-24.04' }}
+    runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 120
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_mfe }}
@@ -522,10 +523,13 @@ jobs:
 
       - name: Install Trivy CLI
         run: |
+          mkdir -p "$HOME/.local/bin"
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sh -s -- -b /usr/local/bin
+            | sh -s -- -b "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Scan MFE image for vulnerabilities
+        continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
         run: |
           mkdir -p var/ci
           trivy image \

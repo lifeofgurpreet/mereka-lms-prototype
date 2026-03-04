@@ -39,8 +39,8 @@ Docker Desktop RAM setting: Settings > Resources > Advanced > Memory: 12 GB (16 
 The devcontainer sets up the following automatically:
 
 - Python 3.12 with a `.venv` virtual environment
-- Node 18 (required for Tutor MFE builds)
-- Tutor 18.2.2 + tutor-mfe 18.1.0
+- Node 20+ (required for Tutor MFE builds)
+- Tutor and plugins per requirements-tutor.txt
 - shellcheck, shfmt, ruff, pre-commit, uv, gh CLI
 - kubectl and helm (via devcontainer features)
 - Docker-in-Docker (so Tutor can run Docker Compose services)

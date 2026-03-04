@@ -17,7 +17,7 @@ This runbook covers manual verification procedures for Tutor configuration that 
 ## MFE Build Verification
 
 ### Procedure
-1. Verify MFE Dockerfile includes Node 18 build toolchain:
+1. Verify MFE Dockerfile includes Node 20+ build toolchain:
    ```bash
    grep -E "g\+\+|python3|build-essential" tutor_env/env/plugins/mfe/build/mfe/Dockerfile
    ```
@@ -31,7 +31,7 @@ This runbook covers manual verification procedures for Tutor configuration that 
    ```
 
 ### Acceptance
-- MFE Dockerfile contains Node 18 build dependencies
+- MFE Dockerfile contains Node 20+ build dependencies
 - Image build completes without OOM or dependency errors
 - MFE login page loads in browser
 

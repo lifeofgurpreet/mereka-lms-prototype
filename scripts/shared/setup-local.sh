@@ -50,7 +50,7 @@ else
     exit 1
 fi
 pip install --upgrade pip --quiet
-pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0 --quiet
+pip install -r requirements-tutor.txt --quiet
 echo -e "${GREEN}✅ Python environment ready${NC}"
 echo ""
 
