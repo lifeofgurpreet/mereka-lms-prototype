@@ -34,7 +34,7 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install -U pip
-          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+          pip install -r requirements-tutor.txt
 
       - name: Set Tutor environment
         run: |
@@ -149,7 +149,7 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install -U pip
-          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+          pip install -r requirements-tutor.txt
 
       - name: Set Tutor environment
         run: |
@@ -261,7 +261,7 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install -U pip
-          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+          pip install -r requirements-tutor.txt
           pip install pyyaml jinja2
 
       - name: Set Tutor environment
