@@ -75,6 +75,13 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
           rm kubeconform-linux-amd64.tar.gz
 
+      # ── Install ripgrep (needed by verification scripts) ──────────────────
+      - name: Install ripgrep
+        run: |
+          if ! command -v rg &>/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq ripgrep
+          fi
+
       # ── Phase A: Shell script syntax check (all scripts in parallel) ───────
       - name: Syntax check all shell scripts
         run: |
