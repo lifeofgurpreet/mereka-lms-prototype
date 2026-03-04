@@ -259,7 +259,7 @@ jobs:
           output-file: var/ci/sbom-openedx.cdx.json
 
       - name: Upload OpenEdX SBOM
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: sbom-openedx
@@ -306,7 +306,7 @@ jobs:
           fi
 
       - name: Upload Trivy OpenEdX scan results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: trivy-openedx-scan
@@ -359,7 +359,7 @@ jobs:
           echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload OpenEdX branding verification log
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: openedx-branding-contract-log
@@ -503,7 +503,7 @@ jobs:
           output-file: var/ci/sbom-mfe.cdx.json
 
       - name: Upload MFE SBOM
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: sbom-mfe
@@ -550,7 +550,7 @@ jobs:
           fi
 
       - name: Upload Trivy MFE scan results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: trivy-mfe-scan
@@ -602,7 +602,7 @@ jobs:
           echo "**MFE digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload MFE branding verification log
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: mfe-branding-contract-log
@@ -750,7 +750,7 @@ jobs:
           echo "**Image:** \`${IMAGE_REF}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload provenance artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: slsa-provenance
@@ -806,7 +806,7 @@ jobs:
           echo "**Bundle certificate:** \`var/ci/release-bundle.pem\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload release bundle
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: release-bundle
           path: |
@@ -1003,7 +1003,7 @@ jobs:
           ./scripts/qa/verify-promotion-record.sh var/ci/promotion-record.json
 
       - name: Upload promotion record
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: promotion-record
           path: var/ci/promotion-record.json

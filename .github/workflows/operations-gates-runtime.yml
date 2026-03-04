@@ -205,7 +205,7 @@ jobs:
 
       - name: Upload operations gate artifacts
         if: ${{ always() && env.CAN_RUN_RUNTIME == 'true' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: operations-gates-${{ github.run_id }}-${{ github.run_attempt }}
           path: var/operations-gates/

@@ -127,7 +127,7 @@ jobs:
 
       - name: Upload spec coverage artifact
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: spec-coverage
           path: var/spec-coverage.md
@@ -148,7 +148,7 @@ jobs:
 
       - name: Upload PR coverage artifact
         if: github.event_name == 'pull_request' && always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: spec-coverage-pr
           path: var/spec-coverage-pr.md
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload CI results artifact
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: ci-results
           path: var/ci-results/
@@ -217,7 +217,7 @@ jobs:
 
       - name: Upload verification summary artifact
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: verification-summary
           path: var/verification-summary.md
@@ -296,7 +296,7 @@ jobs:
           grep -q "gcloud monitoring" monitoring-plan.txt
 
       - name: Upload monitoring plan artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: monitoring-offline-plan-static
           path: monitoring-plan.txt
@@ -340,7 +340,7 @@ jobs:
 
       - name: Upload translation validation log
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: translation-validation-log
           path: var/ci/translation-validation.log
@@ -471,7 +471,7 @@ jobs:
           grep -q "gcloud monitoring" monitoring-plan.txt
 
       - name: Upload monitoring plan artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: monitoring-offline-plan
           path: monitoring-plan.txt
@@ -550,7 +550,7 @@ jobs:
         continue-on-error: true  # Non-blocking until coverage improves
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: coverage-report
