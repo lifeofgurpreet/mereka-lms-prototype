@@ -187,23 +187,17 @@ jobs:
       - name: Build OpenEdX image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
-          # Prefer lower peak-memory Docker build mode on GitHub-hosted runners
-          # to avoid abrupt OOM kills during layer export.
-          # Keep BuildKit enabled on self-hosted runners for better cache reuse.
-          if [[ "${RUNNER_ENVIRONMENT:-}" == "github-hosted" ]]; then
-            export DOCKER_BUILDKIT=0
-            export COMPOSE_DOCKER_CLI_BUILD=0
-            echo "GitHub-hosted runner detected: BuildKit disabled for stability."
-          else
-            echo "Self-hosted runner detected: BuildKit remains enabled."
-            if [[ -d /cache/docker ]]; then
-              mkdir -p /cache/docker/buildkit
-              export DOCKER_BUILD_OPTIONS="--cache-from=type=local,src=/cache/docker/buildkit --cache-to=type=local,dest=/cache/docker/buildkit,mode=max"
-              echo "BuildKit local cache enabled via /cache/docker/buildkit."
-            else
-              echo "No /cache/docker mount found; continuing without explicit BuildKit cache args."
-            fi
-          fi
+          export DOCKER_BUILDKIT=1
+          # Pull the last built image to use as Docker layer cache.
+          # BuildKit's inline cache embeds metadata so subsequent builds
+          # can skip unchanged layers (pip install, apt, collectstatic).
+          CACHE_IMAGE="${{ env.REGISTRY }}/openedx:mereka-brand"
+          echo "Pulling cache image: ${CACHE_IMAGE}"
+          docker pull "${CACHE_IMAGE}" 2>/dev/null && \
+            echo "Cache image pulled successfully." || \
+            echo "No cache image found — building from scratch."
+          export DOCKER_BUILD_OPTIONS="--cache-from=${CACHE_IMAGE} --build-arg BUILDKIT_INLINE_CACHE=1"
+          echo "BuildKit enabled with image cache: ${CACHE_IMAGE}"
           (
             while true; do
               echo "[build-openedx-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
@@ -463,22 +457,15 @@ jobs:
       - name: Build MFE image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
-          # Keep BuildKit enabled on self-hosted runners for cache efficiency.
-          # Disable only on GitHub-hosted runners when operators explicitly select that mode.
-          if [[ "${RUNNER_ENVIRONMENT:-}" == "github-hosted" ]]; then
-            export DOCKER_BUILDKIT=0
-            export COMPOSE_DOCKER_CLI_BUILD=0
-            echo "GitHub-hosted runner detected: BuildKit disabled for stability."
-          else
-            echo "Self-hosted runner detected: BuildKit remains enabled."
-            if [[ -d /cache/docker ]]; then
-              mkdir -p /cache/docker/buildkit
-              export DOCKER_BUILD_OPTIONS="--cache-from=type=local,src=/cache/docker/buildkit --cache-to=type=local,dest=/cache/docker/buildkit,mode=max"
-              echo "BuildKit local cache enabled via /cache/docker/buildkit."
-            else
-              echo "No /cache/docker mount found; continuing without explicit BuildKit cache args."
-            fi
-          fi
+          export DOCKER_BUILDKIT=1
+          # Pull the last built MFE image to use as Docker layer cache.
+          CACHE_IMAGE="${{ env.REGISTRY }}/mfe:mereka-brand"
+          echo "Pulling MFE cache image: ${CACHE_IMAGE}"
+          docker pull "${CACHE_IMAGE}" 2>/dev/null && \
+            echo "Cache image pulled successfully." || \
+            echo "No cache image found — building from scratch."
+          export DOCKER_BUILD_OPTIONS="--cache-from=${CACHE_IMAGE} --build-arg BUILDKIT_INLINE_CACHE=1"
+          echo "BuildKit enabled with image cache: ${CACHE_IMAGE}"
           export NODE_OPTIONS="--max-old-space-size=6144"
           (
             while true; do
