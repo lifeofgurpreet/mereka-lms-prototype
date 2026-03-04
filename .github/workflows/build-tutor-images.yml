@@ -224,6 +224,14 @@ jobs:
           kill "$HEARTBEAT_PID" 2>/dev/null || true
           trap - EXIT
 
+          # Tutor 21 with buildx names images docker.io/overhangio/openedx:*
+          # instead of tutor_local/openedx:latest. Retag for downstream steps.
+          TUTOR_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'overhangio/openedx:.*indigo' | head -1)"
+          if [[ -n "$TUTOR_IMAGE" && -z "$(docker images -q tutor_local/openedx:latest 2>/dev/null)" ]]; then
+            echo "Retagging $TUTOR_IMAGE → tutor_local/openedx:latest"
+            docker tag "$TUTOR_IMAGE" tutor_local/openedx:latest
+          fi
+
       - name: Verify OpenEdX image branding contract
         continue-on-error: true  # Non-blocking until FE-003 (LMS SCSS entry point) is resolved
         run: |
@@ -491,6 +499,14 @@ jobs:
           fi
           kill "$HEARTBEAT_PID" 2>/dev/null || true
           trap - EXIT
+
+          # Tutor 21 with buildx names MFE images docker.io/overhangio/openedx-mfe:*
+          # instead of tutor_local/openedx-mfe:latest. Retag for downstream steps.
+          TUTOR_MFE_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'overhangio/openedx-mfe:.*indigo' | head -1)"
+          if [[ -n "$TUTOR_MFE_IMAGE" && -z "$(docker images -q tutor_local/openedx-mfe:latest 2>/dev/null)" ]]; then
+            echo "Retagging $TUTOR_MFE_IMAGE → tutor_local/openedx-mfe:latest"
+            docker tag "$TUTOR_MFE_IMAGE" tutor_local/openedx-mfe:latest
+          fi
 
       - name: Verify MFE image branding contract
         continue-on-error: true  # Non-blocking until branding pipeline is fully verified

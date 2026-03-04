@@ -369,64 +369,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ecommerce
-spec:
-  template:
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
-      containers:
-        - name: ecommerce
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop: ["ALL"]
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp
-            - mountPath: /openedx/data
-              name: openedx-data
-      volumes:
-        - name: tmp
-          emptyDir: {}
-        - name: openedx-data
-          emptyDir: {}
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ecommerce-worker
-spec:
-  template:
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
-      containers:
-        - name: ecommerce-worker
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop: ["ALL"]
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp
-            - mountPath: /openedx/data
-              name: openedx-data
-      volumes:
-        - name: tmp
-          emptyDir: {}
-        - name: openedx-data
-          emptyDir: {}
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: credentials
 spec:
   template:

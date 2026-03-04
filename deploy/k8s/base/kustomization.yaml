@@ -123,17 +123,6 @@ configMapGenerator:
   - plugins/credentials/apps/credentials/settings/development.py
   - plugins/credentials/apps/credentials/settings/production.py
   - plugins/credentials/apps/credentials/settings/mereka_platform_admin.py
-- name: ecommerce-settings
-  files:
-  - plugins/ecommerce/apps/ecommerce/settings/__init__.py
-  - plugins/ecommerce/apps/ecommerce/settings/development.py
-  - plugins/ecommerce/apps/ecommerce/settings/paymentprocessors.json
-  - plugins/ecommerce/apps/ecommerce/settings/production.py
-  - plugins/ecommerce/apps/ecommerce/settings/mereka_platform_admin.py
-- name: ecommerce-worker-settings
-  files:
-  - plugins/ecommerce/apps/ecommerce-worker/settings/__init__.py
-  - plugins/ecommerce/apps/ecommerce-worker/settings/production.py
 - name: mfe-caddy-config
   files:
     - plugins/mfe/apps/mfe/Caddyfile

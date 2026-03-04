@@ -114,48 +114,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ecommerce
-  labels:
-    app.kubernetes.io/name: ecommerce
-spec:
-  template:
-    spec:
-      containers:
-        - name: ecommerce
-          env:
-            - name: MEREKA_LMS_DOMAIN
-              value: academyv2.mereka.dev
-            - name: MEREKA_SCHEME
-              value: https
-            - name: LMS_BASE_URL
-              value: https://academyv2.mereka.dev
-            - name: MFE_BASE_URL
-              value: https://apps.academyv2.mereka.dev
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ecommerce-worker
-  labels:
-    app.kubernetes.io/name: ecommerce-worker
-spec:
-  template:
-    spec:
-      containers:
-        - name: ecommerce-worker
-          env:
-            - name: MEREKA_LMS_DOMAIN
-              value: academyv2.mereka.dev
-            - name: MEREKA_SCHEME
-              value: https
-            - name: LMS_BASE_URL
-              value: https://academyv2.mereka.dev
-            - name: MFE_BASE_URL
-              value: https://apps.academyv2.mereka.dev
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: notes
   labels:
     app.kubernetes.io/name: notes

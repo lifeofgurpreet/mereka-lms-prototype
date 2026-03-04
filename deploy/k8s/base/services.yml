@@ -158,24 +158,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ecommerce
-  labels:
-    app.kubernetes.io/name: ecommerce
-    app.kubernetes.io/instance: mereka-lms
-    app.kubernetes.io/part-of: mereka-lms
-    app.kubernetes.io/managed-by: tutor
-spec:
-  type: NodePort
-  ports:
-    - port: 8000
-      name: http
-      protocol: TCP
-  selector:
-    app.kubernetes.io/name: ecommerce
----
-apiVersion: v1
-kind: Service
-metadata:
   name: credentials
   labels:
     app.kubernetes.io/name: credentials

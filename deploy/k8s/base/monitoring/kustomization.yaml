@@ -14,7 +14,6 @@ resources:
   - servicemonitor-lms.yaml
   - servicemonitor-cms.yaml
   - servicemonitor-discovery.yaml
-  - servicemonitor-ecommerce.yaml
   - servicemonitor-forum.yaml
   - servicemonitor-mysql.yaml
   - servicemonitor-mfe.yaml

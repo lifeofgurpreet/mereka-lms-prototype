@@ -163,49 +163,6 @@ http://discovery.academyv2.mereka.io, http://discovery.academyv2.mereka.dev {
 
     import proxy "discovery:8000"
 }
-# E-commerce Service
-ecommerce.localhost{$default_site_port} {
-    request_body {
-        max_size 10MB
-    }
-    import proxy "ecommerce:8000"
-}
-
-# E-commerce Service (TLS via NGINX Ingress)
-http://ecommerce.academyv2.mereka.io, http://ecommerce.academyv2.mereka.dev {
-    # Authn assets are served by MFE; keep service-domain auth pages branded/functional.
-    handle /authn/* {
-        reverse_proxy mfe:8002 {
-            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
-            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
-            header_up X-Request-ID {http.request.header.X-Request-ID}
-            header_up traceparent {http.request.header.traceparent}
-        }
-    }
-
-    # Keep service-domain dashboard route aligned to the shared authn shell (branding + login UX).
-    handle /dashboard {
-        redir /dashboard/ 308
-    }
-    handle /dashboard/* {
-        rewrite * /authn/login
-        reverse_proxy mfe:8002 {
-            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
-            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
-            header_up X-Request-ID {http.request.header.X-Request-ID}
-            header_up traceparent {http.request.header.traceparent}
-        }
-    }
-
-    @ecommerce_root path /
-    header @ecommerce_root Content-Type "text/html; charset=utf-8"
-    respond @ecommerce_root "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Mereka Ecommerce</title></head><body style='margin:0;padding:40px;background:#f5f7fb;color:#1a1623;font-family:Poppins,Lato,sans-serif'><main style='max-width:760px;margin:0 auto;background:#fff;padding:32px;border-radius:20px;border:1px solid rgba(26,22,35,.08);box-shadow:0 16px 50px rgba(26,22,35,.1)'><h1 style='margin:0 0 12px;color:#2d898b;font-size:2rem;line-height:1.2'>Mereka Ecommerce Service</h1><p style='margin:0 0 16px;font-size:1rem;line-height:1.6'>Checkout APIs are online. Use the dashboard for operator views, basket/checkout routes for learner purchase flow, and webhook endpoint for Stripe events.</p><p style='margin:0'><a href='/dashboard/' style='color:#295cad;font-weight:600;text-decoration:none'>Open dashboard</a><span style='opacity:.5'> · </span><a href='/basket/' style='color:#295cad;font-weight:600;text-decoration:none'>Open basket</a><span style='opacity:.5'> · </span><a href='/checkout/' style='color:#295cad;font-weight:600;text-decoration:none'>Open checkout</a></p></main></body></html>" 200
-
-    request_body {
-        max_size 10MB
-    }
-    import proxy "ecommerce:8000"
-}
 # MFE (Micro-Frontends) - localhost and production/dev
 # - apps.localhost: local development
 # - apps.academyv2.mereka.io: main GKE MFEs

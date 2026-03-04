@@ -43,16 +43,6 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: ecommerce.academyv2.mereka.dev
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: caddy
-                port:
-                  number: 80
     - host: notes.academyv2.mereka.dev
       http:
         paths:
@@ -88,7 +78,6 @@ spec:
         - academyv2.mereka.dev
         - preview.academyv2.mereka.dev
         - discovery.academyv2.mereka.dev
-        - ecommerce.academyv2.mereka.dev
         - notes.academyv2.mereka.dev
         - credentials.academyv2.mereka.dev
         - forum.academyv2.mereka.dev

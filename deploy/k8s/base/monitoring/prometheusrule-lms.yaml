@@ -256,7 +256,7 @@ spec:
             sum by (deployment) (
               kube_deployment_status_replicas_unavailable{
                 namespace="mereka-lms",
-                deployment=~"lms|cms|caddy|mfe|forum|discovery|ecommerce|credentials|notes|xqueue"
+                deployment=~"lms|cms|caddy|mfe|forum|discovery|credentials|notes|xqueue"
               }
             ) > 0
           for: 5m

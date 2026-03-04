@@ -62,16 +62,6 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: ecommerce.academyv2.mereka.io
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: caddy
-                port:
-                  number: 80
     - host: notes.academyv2.mereka.io
       http:
         paths:
@@ -110,7 +100,6 @@ spec:
         - skillourfuture.academy.mereka.io
         - academy.biji-biji.com
         - discovery.academyv2.mereka.io
-        - ecommerce.academyv2.mereka.io
         - notes.academyv2.mereka.io
         - credentials.academyv2.mereka.io
         - forum.academyv2.mereka.io
