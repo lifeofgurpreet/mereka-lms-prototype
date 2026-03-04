@@ -862,6 +862,71 @@ jobs:
           path: bbi-infrastructure
           token: ${{ secrets.GITOPS_PAT }}
 
+      - name: Download release bundle artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4
+        with:
+          name: release-bundle
+          path: var/ci
+
+      - name: Validate release bundle consistency gate
+        run: |
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
+          export TARGET_ENV OPENEDX_DIGEST MFE_DIGEST RELEASE_BUNDLE_ID
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+
+          path = "var/ci/release-bundle.json"
+          if not os.path.exists(path):
+              print(f"release bundle artifact missing: {path}", file=sys.stderr)
+              sys.exit(1)
+
+          bundle = json.load(open(path, encoding="utf-8"))
+          expected = {
+              "bundle_id": os.environ["RELEASE_BUNDLE_ID"],
+              "commit_sha": os.environ["GITHUB_SHA"],
+              "target_environment": os.environ["TARGET_ENV"],
+              "openedx_digest": os.environ["OPENEDX_DIGEST"],
+              "mfe_digest": os.environ["MFE_DIGEST"],
+          }
+          actual = {
+              "bundle_id": bundle.get("bundle_id"),
+              "commit_sha": bundle.get("commit_sha"),
+              "target_environment": bundle.get("target_environment"),
+              "openedx_digest": (((bundle.get("images") or {}).get("openedx") or {}).get("digest")),
+              "mfe_digest": (((bundle.get("images") or {}).get("mfe") or {}).get("digest")),
+          }
+
+          errors = []
+          for k, v in expected.items():
+              if not v:
+                  errors.append(f"expected {k} missing from workflow context")
+          for k in expected:
+              if expected[k] != actual[k]:
+                  errors.append(f"{k} mismatch: expected={expected[k]!r} actual={actual[k]!r}")
+
+          if not re.fullmatch(r"rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z", str(actual["bundle_id"] or "")):
+              errors.append(f"bundle_id format invalid: {actual['bundle_id']!r}")
+          if not re.fullmatch(r"[0-9a-f]{40}", str(actual["commit_sha"] or "")):
+              errors.append(f"commit_sha format invalid: {actual['commit_sha']!r}")
+          for key in ("openedx_digest", "mfe_digest"):
+              if not re.fullmatch(r"sha256:[0-9a-f]{64}", str(actual[key] or "")):
+                  errors.append(f"{key} format invalid: {actual[key]!r}")
+
+          if errors:
+              print("release-bundle consistency gate failed:", file=sys.stderr)
+              for err in errors:
+                  print(f" - {err}", file=sys.stderr)
+              sys.exit(1)
+
+          print("PASS: release-bundle artifact matches workflow commit/environment/digest context")
+          PY
+
       - name: Configure git identity
         run: |
           git config --global user.name "github-actions[bot]"

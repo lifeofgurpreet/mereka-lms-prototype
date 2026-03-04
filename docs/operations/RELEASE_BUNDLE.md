@@ -2,6 +2,7 @@
 
 `build-tutor-images.yml` now emits a canonical `release-bundle` artifact (`var/ci/release-bundle.json`) for deterministic promotion records.
 The same workflow also emits `promotion-record` (`var/ci/promotion-record.json`) after GitOps update with the resulting infra commit SHA.
+`update-gitops` now hard-fails if downloaded `release-bundle` artifact does not match workflow commit SHA, target environment, bundle ID, and both image digests.
 
 ## Contract
 
