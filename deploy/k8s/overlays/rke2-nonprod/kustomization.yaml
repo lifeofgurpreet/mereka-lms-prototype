@@ -79,6 +79,8 @@ configMapGenerator:
         app.kubernetes.io/component: enterprise
 
 patches:
+  # Remove stub mongodb Service — no in-cluster pods; Atlas is used
+  - path: patches/remove-legacy-mongodb-service.yaml
   # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store
   - path: patches/externalsecrets-infisical.yaml
   # Override domain env vars for rke2-nonprod dev hosts
@@ -124,6 +126,9 @@ replicas:
     count: 1
   - name: enterprise-subsidy
     count: 1
+  # xqueue: disabled — XQUEUE_INTERFACE.url is null in lms/cms env; no courses use it
+  - name: xqueue
+    count: 0
   # Payments gateway: set to 1 when PostgreSQL is confirmed available
   - name: payments-gateway
     count: 1

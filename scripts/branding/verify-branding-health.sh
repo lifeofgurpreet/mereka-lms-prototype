@@ -189,7 +189,7 @@ check_contains "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'accoun
 check_selector_absent_noncomment "MFE learner-dashboard wildcard selectors removed" "$MFE_SCSS" '[class*="learner-dashboard"]'
 check_selector_absent_noncomment "MFE learning wildcard selectors removed" "$MFE_SCSS" '[class*="learning"]'
 check_selector_absent_noncomment "MFE discussions wildcard selectors removed" "$MFE_SCSS" '[class*="discussions"]'
-check_contains "Caddy ecommerce root landing is branded" "$CADDYFILE" 'Mereka Ecommerce Service'
+# Ecommerce removed (ADR-018, Oscar deprecated → Purchase Gateway)
 # Forum v2 runs in-process (no separate Caddy block) - skip forum landing check
 
 echo ""

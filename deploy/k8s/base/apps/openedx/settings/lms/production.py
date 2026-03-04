@@ -576,6 +576,11 @@ FEATURES["ENABLE_LEARNER_CREDENTIAL_WALLET"] = os.environ.get(
     "ENABLE_LEARNER_CREDENTIAL_WALLET", "false"
 ).lower() in ("true", "1", "yes")
 
+# Programs & Program Certificates (requires Discovery + Credentials services)
+FEATURES["ENABLE_PROGRAM_CERTIFICATES"] = os.environ.get(
+    "ENABLE_PROGRAM_CERTIFICATES", "false"
+).lower() in ("true", "1", "yes")
+
 # CORS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
