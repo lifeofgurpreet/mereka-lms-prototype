@@ -561,7 +561,7 @@ If the HubSpot contact's `consent` field is missing or not `"true"` (user did no
    - Add unit tests (>80% coverage) and integration tests
 
 2. **Phase 1: Staging Deployment (Week 2)**
-   - Build Docker image and push to Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx/hubspot-registration-service:staging`)
+   - Build Docker image and push to Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms/hubspot-registration-service:staging`)
    - Deploy to staging K8s namespace with `HUBSPOT_REGISTRATION_ENABLED=false`
    - Configure ExternalSecrets for staging credentials (dev HubSpot app, staging SendGrid)
    - Test webhook signature verification with real HubSpot webhooks (use test form)

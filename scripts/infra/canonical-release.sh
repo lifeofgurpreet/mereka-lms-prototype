@@ -161,7 +161,7 @@ save_cached_digest() {
 }
 
 check_image_cache() {
-  local registry="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
+  local registry="ghcr.io/biji-biji-initiative/mereka-lms"
 
   ensure_cache_dir
   info "Checking image cache for rebuild skip..."

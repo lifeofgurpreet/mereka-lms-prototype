@@ -241,7 +241,7 @@ tutor local run lms ./manage.py lms collectstatic --noinput --settings=tutor.ass
 
 **Add a single layer to existing image**:
 ```dockerfile
-FROM asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand
+FROM ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand
 RUN echo '/openedx' > /openedx/venv/lib/python3.12/site-packages/mereka-plugins.pth
 ```
 ```bash

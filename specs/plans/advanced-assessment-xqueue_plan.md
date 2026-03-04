@@ -165,7 +165,7 @@ Before starting this spec, the following must be substantially complete:
 
 - [ ] **[S] P3-8.** Add XQueue grader secrets to ExternalSecrets: `XQUEUE_GRADER_USERNAME`, `XQUEUE_GRADER_PASSWORD` (if separate from LMS auth) (`deploy/k8s/base/secrets/external-secrets.yaml`) | AC: #16 | Depends: P0-2
 
-- [ ] **[M] P3-9.** Build and push grader worker container image to Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx/xqueue-grader`) (`services/xqueue-graders/Dockerfile`, `.github/workflows/build-grader.yml`) | AC: #16 | Depends: P3-7
+- [ ] **[M] P3-9.** Build and push grader worker container image to Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms/xqueue-grader`) (`services/xqueue-graders/Dockerfile`, `.github/workflows/build-grader.yml`) | AC: #16 | Depends: P3-7
 
 - [ ] **[M] P3-10.** Create XQueue-backed problem template in Studio for integration testing: Python code submission problem with expected output validation (`scripts/qa/setup-xqueue-test-problem.sh`) | AC: #16, #20 | Depends: P3-7
 

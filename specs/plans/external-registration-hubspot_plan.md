@@ -26,7 +26,7 @@ Before starting implementation:
 4. **Redis deployed in K8s** -- Accessible at `redis.mereka-lms.svc.cluster.local:6379`
 5. **ExternalSecrets infrastructure working** -- Per `specs/secrets-management_spec.md`
 6. **GKE cluster access** -- `kubectl` configured for `mereka-lms` namespace
-7. **Artifact Registry access** -- Push permissions to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
+7. **Artifact Registry access** -- Push permissions to `ghcr.io/biji-biji-initiative/mereka-lms`
 
 ## Task Breakdown
 
@@ -182,8 +182,8 @@ Before starting implementation:
 - [ ] **[M]** Create multi-stage Dockerfile: build stage (install deps) + production stage (minimal image, non-root user)
 - [ ] **[S]** Use Node.js 18 Alpine base image for smaller size
 - [ ] **[S]** Configure tmpfs mount for `/tmp` in Dockerfile
-- [ ] **[M]** Build image: `docker build -t asia-southeast1-docker.pkg.dev/mereka-lms/openedx/hubspot-registration-service:latest .`
-- [ ] **[M]** Push image to Artifact Registry: `docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/hubspot-registration-service:latest`
+- [ ] **[M]** Build image: `docker build -t ghcr.io/biji-biji-initiative/mereka-lms/hubspot-registration-service:latest .`
+- [ ] **[M]** Push image to Artifact Registry: `docker push ghcr.io/biji-biji-initiative/mereka-lms/hubspot-registration-service:latest`
 - **Files**: `services/hubspot-registration/Dockerfile`, `services/hubspot-registration/.dockerignore`
 - **AC**: Docker Image (Scope)
 - **Depends**: All build tasks
@@ -352,7 +352,7 @@ Before starting implementation:
 - **Done**: All secrets exist in Infisical and GCP SM; ExternalSecret syncs to K8s Secret
 
 #### R2. Deploy to production with feature flag disabled (dark launch)
-- [ ] **[M]** Build image with production tag: `docker build -t asia-southeast1-docker.pkg.dev/mereka-lms/openedx/hubspot-registration-service:$(git rev-parse --short HEAD) .`
+- [ ] **[M]** Build image with production tag: `docker build -t ghcr.io/biji-biji-initiative/mereka-lms/hubspot-registration-service:$(git rev-parse --short HEAD) .`
 - [ ] **[M]** Push image to Artifact Registry
 - [ ] **[M]** Update production Kustomization with image tag
 - [ ] **[M]** Apply manifests: `kubectl apply -k deploy/k8s/overlays/production/`

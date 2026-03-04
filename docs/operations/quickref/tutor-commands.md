@@ -162,8 +162,8 @@ tutor images push openedx
 tutor images push mfe
 
 # Tag and push manually
-docker tag openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
+docker tag openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
 ```
 
 ---

@@ -132,7 +132,7 @@ BuildKit allows building individual stages. To build only the `authn` production
 ```bash
 docker buildx build \
   --target authn-prod \
-  --tag asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:test \
+  --tag ghcr.io/biji-biji-initiative/mereka-lms/mfe:test \
   -f infrastructure/tutor/mfe-build/Dockerfile \
   infrastructure/tutor/mfe-build/
 ```

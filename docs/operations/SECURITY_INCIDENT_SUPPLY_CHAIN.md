@@ -53,14 +53,14 @@ Any of these should trigger an investigation. Don't wait for confirmation before
 # Step 1: Roll back the affected image to last-known-good SHA
 # Find the last clean image SHA before the dependency was introduced
 gcloud artifacts docker images list \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx \
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx \
   --include-tags --sort-by ~UPDATE_TIME | head -10
 
 # Roll back LMS/CMS deployment via GitOps (preferred)
 # ⚠️  Direct kubectl mutations are blocked by Kyverno policy protect-gitops-managed-resources.
 # Update the image tag in git and force ArgoCD sync:
 cd deploy/k8s/overlays/production
-kustomize edit set image openedx=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<LAST_GOOD_SHA>
+kustomize edit set image openedx=ghcr.io/biji-biji-initiative/mereka-lms/openedx:<LAST_GOOD_SHA>
 git add . && git commit -m "fix(security): roll back to <LAST_GOOD_SHA> — INC-NNN"
 git push
 argocd app sync mereka-lms --force
@@ -68,7 +68,7 @@ argocd app sync mereka-lms --force
 # Emergency bypass ONLY (if git push is impossible):
 kubectl --as=system:serviceaccount:argocd:argocd-application-controller \
   set image deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<LAST_GOOD_SHA> \
+  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:<LAST_GOOD_SHA> \
   -n mereka-lms
 # ⚠️  Follow up with a git commit within 5 minutes to prevent ArgoCD drift loop.
 
@@ -273,7 +273,7 @@ Run this after every P1 or P2. For P3/P4 it's optional but recommended if the sa
 
 ```bash
 # Scan running images for CVEs
-trivy image asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
+trivy image ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
 
 # Scan local filesystem dependencies
 trivy fs . --severity HIGH,CRITICAL
@@ -285,7 +285,7 @@ pip install pip-audit && pip-audit -r requirements/production.txt
 npm audit --audit-level=high
 
 # Generate SBOM (requires syft)
-syft asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest \
+syft ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest \
   -o cyclonedx-json > sbom.json
 
 # Diff SBOM against previous (requires cyclonedx-cli)

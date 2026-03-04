@@ -74,8 +74,8 @@
 
 Images are built in `mereka-lms` repo and pushed to Artifact Registry:
 ```
-asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<tag>
-asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:<tag>
+ghcr.io/biji-biji-initiative/mereka-lms/openedx:<tag>
+ghcr.io/biji-biji-initiative/mereka-lms/mfe:<tag>
 ```
 
 Current production tags (from bbi-infrastructure prod overlay):

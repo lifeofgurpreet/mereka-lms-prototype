@@ -124,9 +124,9 @@ if not mfe_tag:
 
 target_map = {
     "docker.io/overhangio/openedx": openedx_tag,
-    "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx": openedx_tag,
+    "ghcr.io/biji-biji-initiative/mereka-lms/openedx": openedx_tag,
     "docker.io/overhangio/openedx-mfe": mfe_tag,
-    "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe": mfe_tag,
+    "ghcr.io/biji-biji-initiative/mereka-lms/mfe": mfe_tag,
 }
 
 result = []

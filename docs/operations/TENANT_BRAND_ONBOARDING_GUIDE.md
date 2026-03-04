@@ -161,7 +161,7 @@ data:
 tutor images build openedx -a PIP_COMMAND=pip
 
 # Tag and push
-docker tag ... asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<tag>
+docker tag ... ghcr.io/biji-biji-initiative/mereka-lms/openedx:<tag>
 docker push ...
 
 # Update kustomization.yaml with new tag

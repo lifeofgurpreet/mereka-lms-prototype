@@ -170,8 +170,8 @@ proctoring_review_sla_hours = models.IntegerField(
 tutor images build openedx -a PIP_COMMAND=pip
 OPENEDX_TAG="$(date +%Y%m%d)-proctoring-$(git rev-parse --short HEAD)"
 docker tag docker.io/overhangio/openedx:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${OPENEDX_TAG}
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${OPENEDX_TAG}
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
 ./scripts/infra/canonical-release.sh \
   --openedx-tag ${OPENEDX_TAG} \
   --apply --commit --push --verify-runtime

@@ -105,8 +105,8 @@ Staging safety gate:
 - Current operating model is `local/dev -> prod`, so leave `ENABLE_STAGING_ENV` unset until staging is actually provisioned.
 
 Images pushed to:
-- `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<tag>`
-- `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:<tag>`
+- `ghcr.io/biji-biji-initiative/mereka-lms/openedx:<tag>`
+- `ghcr.io/biji-biji-initiative/mereka-lms/mfe:<tag>`
 
 Tag immutability:
 - Workflow publishes only immutable tags (`<image_tag>` and short SHA).

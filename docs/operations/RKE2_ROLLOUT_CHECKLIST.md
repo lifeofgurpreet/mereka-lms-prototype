@@ -87,7 +87,7 @@ for pod in data['items']:
   ```bash
   ./scripts/qa/verify-no-latest-prod-tags.sh
   ```
-- [ ] Images sourced from `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/` (not Docker Hub)
+- [ ] Images sourced from `ghcr.io/biji-biji-initiative/mereka-lms/` (not Docker Hub)
 - [ ] `dev-image-puller` imagePullSecret exists and is attached to default ServiceAccount
 
 **Gate 1 Sign-off**: `[ ]` Security hardening complete — reviewer: _____ date: _____

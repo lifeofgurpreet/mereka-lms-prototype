@@ -33,7 +33,7 @@ echo ""
 
 # Old OpenEdX images from GCP registry
 echo "3. Old OpenEdX images from GCP registry (not in use):"
-docker images "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/*" --format "  {{.Repository}}:{{.Tag}}\t{{.Size}}" 2>/dev/null || echo "  (none)"
+docker images "ghcr.io/biji-biji-initiative/mereka-lms/*" --format "  {{.Repository}}:{{.Tag}}\t{{.Size}}" 2>/dev/null || echo "  (none)"
 echo ""
 
 # Old MySQL version
@@ -107,7 +107,7 @@ if [[ "${1:-}" == "--execute" ]]; then
     
     # Remove old OpenEdX images from GCP registry
     echo "Removing old OpenEdX images from GCP registry..."
-    OLD_OPENEDX=$(docker images "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/*" --format "{{.ID}}" 2>/dev/null || true)
+    OLD_OPENEDX=$(docker images "ghcr.io/biji-biji-initiative/mereka-lms/*" --format "{{.ID}}" 2>/dev/null || true)
     if [[ -n "$OLD_OPENEDX" ]]; then
         echo "$OLD_OPENEDX" | xargs docker rmi 2>/dev/null || true
     fi

@@ -130,13 +130,13 @@ echo "--- Section 2: Base kustomization custom image override ---"
 if [[ ! -f "$KUSTOMIZATION_BASE" ]]; then
   fail "Base kustomization.yaml not found: $KUSTOMIZATION_BASE"
 else
-  if grep -q "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx" "$KUSTOMIZATION_BASE"; then
+  if grep -q "ghcr.io/biji-biji-initiative/mereka-lms/openedx" "$KUSTOMIZATION_BASE"; then
     pass "Base kustomization overrides openedx image to mereka-lms registry"
   else
     fail "Base kustomization does not redirect openedx to mereka-lms registry"
   fi
 
-  MEREKA_TAG=$(grep -A3 "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx" "$KUSTOMIZATION_BASE" \
+  MEREKA_TAG=$(grep -A3 "ghcr.io/biji-biji-initiative/mereka-lms/openedx" "$KUSTOMIZATION_BASE" \
     | grep "newTag:" | awk '{print $2}' | head -1 || true)
   if [[ -n "$MEREKA_TAG" && "$MEREKA_TAG" != "latest" && "$MEREKA_TAG" != "nightly" ]]; then
     pass "Base kustomization pins openedx to non-latest tag: $MEREKA_TAG"
@@ -239,9 +239,9 @@ else
   fi
 
   PROD_MFE_CANONICAL_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "docker.io/overhangio/openedx-mfe")
-  PROD_MFE_TRANSFORMED_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe")
+  PROD_MFE_TRANSFORMED_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "ghcr.io/biji-biji-initiative/mereka-lms/mfe")
   RKE2_MFE_CANONICAL_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "docker.io/overhangio/openedx-mfe")
-  RKE2_MFE_TRANSFORMED_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe")
+  RKE2_MFE_TRANSFORMED_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "ghcr.io/biji-biji-initiative/mereka-lms/mfe")
 
   if [[ -n "$RKE2_MFE_CANONICAL_TAG" && -n "$RKE2_MFE_TRANSFORMED_TAG" ]]; then
     pass "rke2-nonprod pins both canonical and transformed openedx-mfe image names"
@@ -261,10 +261,10 @@ else
     fail "rke2-nonprod transformed openedx-mfe tag drift (prod=$PROD_MFE_TRANSFORMED_TAG, rke2=$RKE2_MFE_TRANSFORMED_TAG)"
   fi
 
-  PROD_ENTERPRISE_ADMIN_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal")
-  PROD_ENTERPRISE_LEARNER_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal")
-  RKE2_ENTERPRISE_ADMIN_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal")
-  RKE2_ENTERPRISE_LEARNER_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal")
+  PROD_ENTERPRISE_ADMIN_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal")
+  PROD_ENTERPRISE_LEARNER_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal")
+  RKE2_ENTERPRISE_ADMIN_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal")
+  RKE2_ENTERPRISE_LEARNER_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal")
 
   if [[ -n "$RKE2_ENTERPRISE_ADMIN_TAG" && "$RKE2_ENTERPRISE_ADMIN_TAG" == "$PROD_ENTERPRISE_ADMIN_TAG" ]]; then
     pass "rke2-nonprod enterprise-admin-portal tag matches production: $RKE2_ENTERPRISE_ADMIN_TAG"

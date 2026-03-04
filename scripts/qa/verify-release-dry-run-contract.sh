@@ -50,7 +50,7 @@ import yaml
 path = Path(sys.argv[1])
 doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 images = doc.setdefault("images", [])
-required_name = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx"
+required_name = "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
 
 if not any((item or {}).get("name") == required_name for item in images):
     openedx_tag = next(

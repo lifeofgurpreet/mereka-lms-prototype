@@ -18,12 +18,12 @@ Environment:
 
 Examples:
   scripts/branding/repair-mfe-authn-branding.sh \
-    asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:src \
-    asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:fixed
+    ghcr.io/biji-biji-initiative/mereka-lms/mfe:src \
+    ghcr.io/biji-biji-initiative/mereka-lms/mfe:fixed
 
   PUSH_IMAGE=1 scripts/branding/repair-mfe-authn-branding.sh \
-    asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:src \
-    asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:fixed \
+    ghcr.io/biji-biji-initiative/mereka-lms/mfe:src \
+    ghcr.io/biji-biji-initiative/mereka-lms/mfe:fixed \
     2026-02-07-pass3
 EOF
 }

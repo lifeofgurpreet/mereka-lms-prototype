@@ -35,7 +35,7 @@ spec:
 
       containers:
       - name: grader
-        image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/xqueue-graders:latest
+        image: ghcr.io/biji-biji-initiative/mereka-lms/xqueue-graders:latest
         imagePullPolicy: Always
 
         # AC-ASS-021: No secrets in environment variables (use ExternalSecrets mounted as files)

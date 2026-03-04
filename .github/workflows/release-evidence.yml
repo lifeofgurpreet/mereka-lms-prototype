@@ -145,25 +145,13 @@ jobs:
       contents: read
       id-token: write
     env:
-      REGION: asia-southeast1
-      REGISTRY: asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+      REGISTRY: ghcr.io/biji-biji-initiative/mereka-lms
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Authenticate to GCP
-        uses: ./.github/actions/gcp-gke-auth
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          wif_service_account: ${{ vars.GCP_WIF_SA }}
-          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
-          auth_mode: auto
-          skip_gke: 'true'
-          skip_gcloud: 'true'
-
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Setup Node for frontend QA lanes
         if: ${{ inputs.run_npm_start_smoke == true || inputs.run_live_dom_audit == true || inputs.run_accessibility_scan == true }}

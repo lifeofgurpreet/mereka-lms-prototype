@@ -146,8 +146,8 @@ Application-level metrics that require Django instrumentation:
 4. Rebuild Open edX image:
    ```bash
    tutor images build openedx
-   docker tag ... asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
-   docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
+   docker tag ... ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
+   docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
    ```
 
 5. Restart LMS/CMS pods:

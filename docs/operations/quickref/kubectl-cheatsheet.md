@@ -323,7 +323,7 @@ kubectl delete namespace test-env
 ```bash
 # Update image tag (triggers rolling update)
 kubectl set image deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20240212-ulmo-abc1234
+  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:20240212-ulmo-abc1234
 
 # Update via kustomization (recommended)
 kubectl apply -k deploy/k8s/overlays/production

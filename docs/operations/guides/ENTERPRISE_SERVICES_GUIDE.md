@@ -345,7 +345,7 @@ done
 ```bash
 # Update to new tag
 kubectl set image deployment/enterprise-catalog \
-  enterprise-catalog=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-catalog:v1.2.3 \
+  enterprise-catalog=ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:v1.2.3 \
   -n mereka-lms
 
 # Watch rollout

@@ -152,7 +152,7 @@ if [[ -f "${PROD_KUSTOMIZATION}" ]]; then
   fi
 
   # Verify image names use canonical registry
-  ARTIFACT_REGISTRY="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
+  ARTIFACT_REGISTRY="ghcr.io/biji-biji-initiative/mereka-lms"
   CANONICAL_COUNT=$(grep -c "${ARTIFACT_REGISTRY}" "${PROD_KUSTOMIZATION}" 2>/dev/null || echo 0)
   if [[ "${CANONICAL_COUNT}" -gt 0 ]]; then
     pass "Production kustomization references Artifact Registry (${CANONICAL_COUNT} entries)"

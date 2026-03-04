@@ -5,14 +5,14 @@ kind: Kustomization
 #
 # Differences from production (GKE):
 #   - Secrets: uses infisical-secret-store (not gcp-secret-manager; no Workload Identity)
-#   - Images: pulled using artifact-registry-key imagePullSecret (no Workload Identity)
+#   - Images: pulled from GHCR using ghcr-registry imagePullSecret (no Workload Identity)
 #   - Domains: *.staging.mereka.dev (update to actual domain below)
 #   - ArgoCD: SSH-only to github.com (port 443 blocked by Cilium)
 #
 # IMPORTANT: Before deploying, ensure these manual prerequisites exist on rke2-nonprod:
 #   1. ClusterSecretStore infisical-secret-store (Valid/Ready)
-#   2. Secret artifact-registry-key in mereka-lms namespace (imagePullSecret for GCP AR)
-#   3. Default ServiceAccount patched: imagePullSecrets: [{name: artifact-registry-key}]
+#   2. Secret ghcr-registry in mereka-lms namespace (imagePullSecret for GHCR)
+#   3. Default ServiceAccount patched: imagePullSecrets: [{name: ghcr-registry}]
 #      OR each Deployment has spec.template.spec.imagePullSecrets set
 #
 # Domain: rke2-nonprod dev hostnames use *.academyv2.mereka.dev.
@@ -32,16 +32,16 @@ resources:
   # See: docs/operations/CI_CD_RUNNERS.md for the full deploy sequence.
 
 # Override image tag for nonprod (base transforms docker.io/overhangio/openedx
-# to asia-southeast1-docker.pkg.dev/... — overlay must match the transformed name)
+# to ghcr.io/biji-biji-initiative/mereka-lms/openedx — overlay must match the
+# transformed name)
 images:
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/openedx
     newTag: mereka-brand
   # Keep canonical + transformed openedx-mfe names aligned to avoid post-transform drift.
   - name: docker.io/overhangio/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: c1ef8f8f-20260301182820
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: c1ef8f8f-20260301182820
   # Enterprise MFEs must be pinned explicitly for nonprod parity.
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal

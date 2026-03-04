@@ -31,7 +31,7 @@ The rke2-nonprod cluster (academyv2.mereka.dev) has two categories of issues:
 
 ### Image diagnosis
 
-Image: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand-hotfix-full-v3`
+Image: `ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand-hotfix-full-v3`
 
 - Theme files EXIST at `/openedx/themes/mereka/` (80+ files, all present)
 - `lms-main-v1.css` (989KB) contains ZERO mereka tokens (no Poppins, Lato, #2d898b, #295cad)
@@ -186,7 +186,7 @@ $TUTOR config save  # MFE template error is pre-existing, doesn't block openedx 
 $TUTOR images build openedx -a PIP_COMMAND=pip
 
 # Push
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand
 ```
 
 ### Post-build verification

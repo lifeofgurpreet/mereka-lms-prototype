@@ -447,7 +447,7 @@ Before starting implementation:
   - Files: `infrastructure/terraform/main.tf` or manual GCS config
 
 - [ ] **[S]** Enable Artifact Registry multi-region replication (`infrastructure/terraform/main.tf`) | AC: (Req: containerimage replication) | Depends: Open Question #5 (budget)
-  - **Done**: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx` repository has multi-region replication configured
+  - **Done**: `ghcr.io/biji-biji-initiative/mereka-lms` repository has multi-region replication configured
   - Files: `infrastructure/terraform/main.tf`
 
 - [ ] **[M]** Verify Terraform/Kustomize can produce valid manifests for secondary region (`infrastructure/terraform/`, `deploy/k8s/overlays/production/`) | AC: #21 | Depends: None

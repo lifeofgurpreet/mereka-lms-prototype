@@ -20,7 +20,7 @@ source infrastructure/tutor/tutor-env.sh
 tutor images build openedx -a PIP_COMMAND=pip && tutor images build mfe
 
 TAG="$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M%S)"
-GAR="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
+GAR="ghcr.io/biji-biji-initiative/mereka-lms"
 docker tag docker.io/overhangio/openedx:latest "${GAR}/openedx:${TAG}"
 docker tag docker.io/overhangio/openedx-mfe:latest "${GAR}/openedx-mfe:${TAG}"
 docker push "${GAR}/openedx:${TAG}" && docker push "${GAR}/openedx-mfe:${TAG}"
@@ -73,7 +73,7 @@ docker images | grep -E "openedx|mfe"
 ```bash
 # Tag with git SHA + timestamp  (AC-DEP-001: exact image tag tied to commit SHA)
 TAG="$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M%S)"
-GAR="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
+GAR="ghcr.io/biji-biji-initiative/mereka-lms"
 
 # Tag images
 docker tag docker.io/overhangio/openedx:latest "${GAR}/openedx:${TAG}"
@@ -339,9 +339,9 @@ The smoke matrix covers:
 **Short SHA**: <short-sha>
 
 **Images**:
-- LMS/CMS: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<tag>`
+- LMS/CMS: `ghcr.io/biji-biji-initiative/mereka-lms/openedx:<tag>`
   - Digest: `sha256:<openedx-digest>`
-- MFE: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:<tag>`
+- MFE: `ghcr.io/biji-biji-initiative/mereka-lms/mfe:<tag>`
   - Digest: `sha256:<mfe-digest>`
 
 **Changes**:

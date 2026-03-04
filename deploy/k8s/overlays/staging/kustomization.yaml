@@ -23,13 +23,12 @@ labels:
 # Keep canonical + transformed openedx-mfe names aligned to avoid post-transform drift.
 images:
   - name: docker.io/overhangio/openedx
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
     newTag: 20260207-branding-pass7-5b26e45
   - name: docker.io/overhangio/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: c1ef8f8f-20260301182820
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: c1ef8f8f-20260301182820
 
 # Staging replica counts (lower for cost)

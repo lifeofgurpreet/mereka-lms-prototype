@@ -150,7 +150,7 @@ When analytics deployment is reconsidered:
 
 2. **Deploy to production**:
    ```bash
-   tutor images push all --repository asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+   tutor images push all --repository ghcr.io/biji-biji-initiative/mereka-lms
    tutor k8s init  # Initialize ClickHouse schema
    tutor k8s start
    ```

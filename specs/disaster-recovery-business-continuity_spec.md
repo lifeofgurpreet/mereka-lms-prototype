@@ -106,7 +106,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
   | Tier 3: Redis (cache, sessions, Celery) | N/A (ephemeral) | 15 minutes | Velero hourly VolumeSnapshots (warm data) | Cache rebuild acceptable; persistent queues restored from snapshot |
   | Tier 4: Elasticsearch (search index) | N/A (rebuildable) | 1 hour | Velero daily snapshots + full reindex | Index rebuilt from MySQL/MongoDB source data |
   | Tier 5: Configuration (K8s manifests, Tutor config) | 0 (no loss) | 15 minutes | Git + Infisical + GCP Secret Manager | Declarative; apply from source control |
-  | Tier 6: Container images | 0 (no loss) | 30 minutes | Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx`) | Immutable; tagged by git SHA |
+  | Tier 6: Container images | 0 (no loss) | 30 minutes | Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms`) | Immutable; tagged by git SHA |
 
 - The system MUST guarantee a composite RPO of 1 hour for full platform recovery (bounded by Tier 1)
 - The system MUST guarantee a composite RTO of 4 hours for full platform recovery from complete cluster loss

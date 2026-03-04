@@ -54,10 +54,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'push' }}
 
 env:
-  PROJECT_ID: mereka-lms
-  REGION: asia-southeast1
-  REPOSITORY: openedx
-  REGISTRY: asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+  REGISTRY: ghcr.io/biji-biji-initiative/mereka-lms
   DOCKER_BUILDKIT: 1
 
 jobs:
@@ -323,18 +320,8 @@ jobs:
           echo "tags=${{ env.REGISTRY }}/openedx:${TAG}" >> $GITHUB_OUTPUT
           echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
 
-      - name: Authenticate to GCP (late auth before push)
-        uses: ./.github/actions/gcp-gke-auth
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          wif_service_account: ${{ vars.GCP_WIF_SA }}
-          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
-          auth_mode: auto
-          skip_gke: 'true'
-
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Tag and push image
         run: |
@@ -574,18 +561,8 @@ jobs:
           TAG="${{ inputs.image_tag || github.sha }}"
           echo "tags=${{ env.REGISTRY }}/mfe:${TAG}" >> $GITHUB_OUTPUT
 
-      - name: Authenticate to GCP (late auth before push)
-        uses: ./.github/actions/gcp-gke-auth
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          wif_service_account: ${{ vars.GCP_WIF_SA }}
-          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
-          auth_mode: auto
-          skip_gke: 'true'
-
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Tag and push image
         run: |
@@ -643,18 +620,8 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
 
-      - name: Authenticate to GCP
-        uses: ./.github/actions/gcp-gke-auth
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          wif_service_account: ${{ vars.GCP_WIF_SA }}
-          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
-          auth_mode: auto
-          skip_gke: 'true'
-
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Generate provenance for OpenEdX image
         if: ${{ needs.build-openedx.result == 'success' }}

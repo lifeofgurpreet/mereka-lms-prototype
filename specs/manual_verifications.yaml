@@ -125,7 +125,7 @@ entries:
 - id: AC-009
   spec: ci-cd-pipeline_spec.md
   description: Given a push to main modifies infrastructure/tutor/**, when the build workflow triggers, then both openedx
-    and MFE images are built, tagged with the git SHA and short SHA, and pushed to asia-southeast1-docker.pkg.dev/mereka-lms/openedx/
+    and MFE images are built, tagged with the git SHA and short SHA, and pushed to ghcr.io/biji-biji-initiative/mereka-lms/
   verify:
   - type: manual
     runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md

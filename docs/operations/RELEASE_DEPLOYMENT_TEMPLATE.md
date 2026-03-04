@@ -103,9 +103,9 @@ tutor images push mfe
 Record pushed digests:
 ```bash
 docker inspect --format='{{index .RepoDigests 0}}' \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${OPENEDX_TAG}
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
 docker inspect --format='{{index .RepoDigests 0}}' \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${MFE_TAG}
+  ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
 ```
 
 | Image | Tag | Digest (sha256:…) |

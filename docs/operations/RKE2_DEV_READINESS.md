@@ -35,7 +35,7 @@ The `profiles/dev` overlay layers on top of `overlays/dev`, adding resource gove
 
 ### ImagePullBackOff (all pods)
 
-**Cause**: Images are hosted in GCP Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx/`). RKE2 nodes lack GCP Workload Identity, so they cannot pull without an explicit imagePullSecret.
+**Cause**: Images are hosted in GCP Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms/`). RKE2 nodes lack GCP Workload Identity, so they cannot pull without an explicit imagePullSecret.
 
 **Fix**: Create a `dev-image-puller` secret with a GCP service account key, and patch the default ServiceAccount (done by `profiles/dev/default-serviceaccount.yaml`).
 

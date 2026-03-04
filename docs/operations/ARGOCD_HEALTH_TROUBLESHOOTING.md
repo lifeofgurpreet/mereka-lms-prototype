@@ -175,7 +175,7 @@ kubectl get events -n mereka-lms --sort-by='.lastTimestamp' | tail -20
 3. If the image pull is slow, pre-pull the image on the node:
    ```bash
    kubectl debug node/<node-name> -it --image=busybox
-   # Inside: crictl pull asia-southeast1-docker.pkg.dev/mereka-lms/openedx/...
+   # Inside: crictl pull ghcr.io/biji-biji-initiative/mereka-lms/...
    ```
 
 4. As a temporary unblock (do not use routinely):

@@ -11,8 +11,8 @@ usage() {
 Usage: scripts/qa/verify-mfe-image-branding.sh <image_ref> [expected_mfe_branding_rev]
 
 Examples:
-  scripts/qa/verify-mfe-image-branding.sh asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:TAG
-  scripts/qa/verify-mfe-image-branding.sh asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:TAG 2026-02-07-pass3
+  scripts/qa/verify-mfe-image-branding.sh ghcr.io/biji-biji-initiative/mereka-lms/mfe:TAG
+  scripts/qa/verify-mfe-image-branding.sh ghcr.io/biji-biji-initiative/mereka-lms/mfe:TAG 2026-02-07-pass3
 EOF
 }
 

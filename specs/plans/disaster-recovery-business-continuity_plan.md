@@ -161,7 +161,7 @@ The codebase already provides substantial coverage:
 
 - [ ] **[M]** B-29: Configure GCS backup bucket for multi-region storage or cross-region replication (`infrastructure/terraform/gcs-velero-bucket.tf`) | AC: #022 | Depends: None
 
-- [ ] **[S]** B-30: Verify Artifact Registry multi-region replication is enabled for `asia-southeast1-docker.pkg.dev/mereka-lms/openedx` (`scripts/qa/verify-artifact-registry-replication.sh`) | AC: Cross-region readiness | Depends: None
+- [ ] **[S]** B-30: Verify Artifact Registry multi-region replication is enabled for `ghcr.io/biji-biji-initiative/mereka-lms` (`scripts/qa/verify-artifact-registry-replication.sh`) | AC: Cross-region readiness | Depends: None
 
 - [ ] **[M]** B-31: Document cross-region DNS failover procedure via Cloudflare (`docs/operations/CROSS_REGION_FAILOVER.md`) | AC: Cross-region readiness | Depends: None
 

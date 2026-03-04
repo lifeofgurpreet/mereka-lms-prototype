@@ -40,7 +40,7 @@ if [[ "${1:-}" == "--online" ]]; then
 fi
 
 BUILD_WORKFLOW=".github/workflows/build-tutor-images.yml"
-REGISTRY="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
+REGISTRY="ghcr.io/biji-biji-initiative/mereka-lms"
 
 # ---------------------------------------------------------------------------
 # Offline checks

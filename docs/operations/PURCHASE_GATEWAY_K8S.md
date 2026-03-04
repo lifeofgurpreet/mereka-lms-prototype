@@ -16,7 +16,7 @@ Related: `specs/ecommerce-purchase-gateway_spec.md` | `docs/operations/STRIPE_WE
 
 | Component | K8s Resource | Port | Image |
 |-----------|--------------|------|-------|
-| payments-gateway | Deployment | 8080 | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:0.1.1` |
+| payments-gateway | Deployment | 8080 | `ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:0.1.1` |
 | postgresql-payments | Deployment | 5432 | `docker.io/postgres:16-alpine` |
 | postgresql-payments | PVC | — | 5Gi, ReadWriteOnce |
 | payments-gateway | HPA | — | minReplicas=1, maxReplicas=3, CPU=70% |
@@ -84,15 +84,15 @@ The `migrate` init container runs `alembic upgrade head` on every pod start — 
 1. Build and push the new image:
 
 ```bash
-docker build -t asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:NEW_TAG \
+docker build -t ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:NEW_TAG \
   services/purchase-gateway/
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:NEW_TAG
+docker push ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:NEW_TAG
 ```
 
 2. Update the image tag in `services/purchase-gateway/k8s/deployment.yaml`:
 
 ```yaml
-image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:NEW_TAG
+image: ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:NEW_TAG
 ```
 
 3. Also update the init container image tag (same file, `migrate` container).

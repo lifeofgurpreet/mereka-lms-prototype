@@ -335,7 +335,7 @@ spec:
         spec:
           containers:
           - name: backfill
-            image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/credentials:21.1.0
+            image: ghcr.io/biji-biji-initiative/mereka-lms/credentials:21.1.0
             command:
             - python
             - manage.py

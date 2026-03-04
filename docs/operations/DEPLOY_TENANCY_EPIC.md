@@ -17,7 +17,7 @@ This runbook deploys the complete multi-tenancy system with:
 ## Prerequisites
 
 - [ ] Access to GKE cluster (`kubectl` configured for mereka-lms namespace)
-- [ ] Access to Artifact Registry (push permission for `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`)
+- [ ] Access to Artifact Registry (push permission for `ghcr.io/biji-biji-initiative/mereka-lms`)
 - [ ] Tutor environment configured (`TUTOR_ROOT` set)
 - [ ] Docker with ≥12 GB RAM allocated
 - [ ] Current LMS image tag noted for rollback
@@ -66,12 +66,12 @@ docker images | grep openedx
 GIT_SHA=$(git rev-parse --short HEAD)
 
 # Tag image
-docker tag openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${GIT_SHA}
-docker tag openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
+docker tag openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:${GIT_SHA}
+docker tag openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
 
 # Push to Artifact Registry
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${GIT_SHA}
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${GIT_SHA}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
 ```
 
 ## Step 4: Deploy to GKE Cluster
@@ -79,7 +79,7 @@ docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
 ```bash
 # Update deployment image
 kubectl set image -n mereka-lms deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${GIT_SHA}
+  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:${GIT_SHA}
 
 # Watch rollout
 kubectl rollout status -n mereka-lms deployment/lms --timeout=10m
@@ -243,7 +243,7 @@ If deployment fails or causes issues:
 # 1. Revert to previous image
 PREVIOUS_TAG="<previous-git-sha>"  # Note this before deployment
 kubectl set image -n mereka-lms deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${PREVIOUS_TAG}
+  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:${PREVIOUS_TAG}
 
 # 2. Watch rollback
 kubectl rollout status -n mereka-lms deployment/lms

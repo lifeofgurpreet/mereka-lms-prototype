@@ -35,7 +35,7 @@ status: "draft"
 | **Image Build** |
 | 9 | Push to main modifying infrastructure/tutor/** triggersbuild workflow | integration | `tests/workflows/test_build_trigger.sh` | Git push simulation |
 | 9 | Both openedx and MFE images built, tagged with SHA andshort SHA | integration | `tests/workflows/test_image_tagging.sh` | Mock Docker registry |
-| 9 | Images pushed to asia-southeast1-docker.pkg.dev/mereka-lms/openedx/ | integration | `tests/workflows/test_image_registry.sh` | Mock Artifact Registry |
+| 9 | Images pushed to ghcr.io/biji-biji-initiative/mereka-lms/ | integration | `tests/workflows/test_image_registry.sh` | Mock Artifact Registry |
 | 10 | OpenEdX image push returns resolved digest (sha256:...) in job output | integration | `tests/workflows/test_digest_resolution.sh` | Mock Docker registry |
 | 11 | MFE branding verification validates authn index.html revision marker | unit | `tests/workflows/test_mfe_branding_check.sh` | Mock MFE build output |
 | 11 | MFE branding check failure fails build before push | integration | `tests/workflows/test_mfe_branding_fail.sh` | MFE without branding marker |

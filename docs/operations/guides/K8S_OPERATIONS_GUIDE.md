@@ -124,7 +124,7 @@ kubectl apply -k deploy/k8s/base
 **Rolling Update (default)**: Zero-downtime deployments
 ```bash
 # Trigger rolling update
-kubectl set image deployment/lms lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:new-tag -n mereka-lms
+kubectl set image deployment/lms lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:new-tag -n mereka-lms
 
 # Watch rollout progress
 kubectl rollout status deployment/lms -n mereka-lms
@@ -837,7 +837,7 @@ kubectl delete pod memory-hog crash-test -n mereka-lms --ignore-not-found
 
 ### Artifact Registry
 
-**Registry**: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
+**Registry**: `ghcr.io/biji-biji-initiative/mereka-lms`
 
 **Images**:
 - `openedx:latest` - LMS/CMS/workers (dev builds)
@@ -850,11 +850,11 @@ kubectl delete pod memory-hog crash-test -n mereka-lms --ignore-not-found
 ```bash
 # List all tags for openedx image
 gcloud artifacts docker tags list \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx
 
 # Get digest for specific tag
 gcloud artifacts docker images describe \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:production
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:production
 ```
 
 ### Tagging Strategy
@@ -874,10 +874,10 @@ gcloud artifacts docker images describe \
 # deploy/k8s/overlays/production/kustomization.yaml
 images:
   - name: overhangio/openedx
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
     newTag: production  # Or specific git SHA for rollback
   - name: overhangio/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: production
 ```
 
@@ -918,7 +918,7 @@ kubectl rollout history deployment/lms -n mereka-lms
 kubectl rollout undo deployment/lms -n mereka-lms
 
 # Or explicit image rollback
-kubectl set image deployment/lms lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:previous-sha -n mereka-lms
+kubectl set image deployment/lms lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:previous-sha -n mereka-lms
 ```
 
 ### Image Pull Secrets (if needed)

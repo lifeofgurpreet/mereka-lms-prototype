@@ -78,7 +78,7 @@ export OPENEDX_RELEASE="nightly"
 
 # 2. Build and push images
 tutor images build openedx aspects aspects-superset
-tutor images push all --repository asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+tutor images push all --repository ghcr.io/biji-biji-initiative/mereka-lms
 
 # 3. Generate Kubernetes config
 tutor k8s quickstart

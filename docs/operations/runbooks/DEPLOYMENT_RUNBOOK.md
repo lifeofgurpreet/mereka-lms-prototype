@@ -53,15 +53,15 @@ Modules:
    - `LMS_HOST`: `academyv2.mereka.io`
    - `CMS_HOST`: `studio.academyv2.mereka.io`
    - `MFE_HOST`: `apps.academyv2.mereka.io`
-   - `MFE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:nightly` (post-build)
-   - `ECOMMERCE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-ecommerce:12.0.4`
-   - `ECOMMERCE_WORKER_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-ecommerce-worker:12.0.4`
-   - `XQUEUE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-xqueue:12.1.0`
+   - `MFE_DOCKER_IMAGE`: `ghcr.io/biji-biji-initiative/mereka-lms/mfe:nightly` (post-build)
+   - `ECOMMERCE_DOCKER_IMAGE`: `ghcr.io/biji-biji-initiative/mereka-lms/openedx-ecommerce:12.0.4`
+   - `ECOMMERCE_WORKER_DOCKER_IMAGE`: `ghcr.io/biji-biji-initiative/mereka-lms/openedx-ecommerce-worker:12.0.4`
+   - `XQUEUE_DOCKER_IMAGE`: `ghcr.io/biji-biji-initiative/mereka-lms/openedx-xqueue:12.1.0`
    - `MONGODB_URI`: Atlas connection string (for forum and the Atlas-only target state).
    - Configure external service endpoints (GCS buckets, etc). For DB/cache, prefer in-cluster service DNS.
    - For additional LMS domains (microsites), see `docs/MULTISITE.md` and re-run `./infrastructure/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
 2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
-3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=asia-southeast1-docker.pkg.dev/mereka-lms/openedx`.
+3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=ghcr.io/biji-biji-initiative/mereka-lms`.
 
 ## 4. Build & push images
 
@@ -74,7 +74,7 @@ Modules:
    source infrastructure/tutor/tutor-env.sh
    ./infrastructure/tutor/apply-patches.sh
    tutor images build all
-   tutor images push all --repository asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+   tutor images push all --repository ghcr.io/biji-biji-initiative/mereka-lms
    ```
    (Ensure `MFE_DOCKER_IMAGE` is updated before pushing.)
 

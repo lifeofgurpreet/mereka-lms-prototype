@@ -364,7 +364,7 @@ This plan converts the DR/BC spec into actionable implementation tasks grouped b
   - Done: GCS bucket is multi-region or cross-region replication is active
 
 - [ ] **[M]** Enable Artifact Registry multi-region replication (`infrastructure/terraform/artifact-registry.tf`) | AC: #2| Depends: None
-  - Enable multi-region replication for `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
+  - Enable multi-region replication for `ghcr.io/biji-biji-initiative/mereka-lms`
   - Document registry regions in DISASTER_RECOVERY.md
   - Verify images are replicated to secondary region
   - Done: Artifact Registry shows replicated repositories insecondary region

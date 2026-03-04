@@ -5,8 +5,8 @@
 #
 # Usage:
 #   ./scripts/infra/kind-load-openedx-image.sh
-#   IMAGE_REF=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG ./scripts/infra/kind-load-openedx-image.sh
-#   MFE_IMAGE_REF=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:TAG ./scripts/infra/kind-load-openedx-image.sh
+#   IMAGE_REF=ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG ./scripts/infra/kind-load-openedx-image.sh
+#   MFE_IMAGE_REF=ghcr.io/biji-biji-initiative/mereka-lms/mfe:TAG ./scripts/infra/kind-load-openedx-image.sh
 #   CLUSTER=dev RESTART=1 ./scripts/infra/kind-load-openedx-image.sh
 #
 set -euo pipefail
@@ -42,7 +42,7 @@ infer_image_ref() {
   echo "$image_ref"
 }
 
-OPENEDX_IMAGE_REF="${IMAGE_REF:-$(infer_image_ref "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx")}"
+OPENEDX_IMAGE_REF="${IMAGE_REF:-$(infer_image_ref "ghcr.io/biji-biji-initiative/mereka-lms/openedx")}"
 MFE_IMAGE_REF="${MFE_IMAGE_REF:-$(infer_image_ref "docker.io/overhangio/openedx-mfe")}"
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }

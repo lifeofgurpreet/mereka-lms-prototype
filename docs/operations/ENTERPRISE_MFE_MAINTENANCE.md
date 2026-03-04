@@ -245,7 +245,7 @@ If the new MFE image produces broken behavior:
 
 ```bash
 gcloud artifacts docker images list \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe \
+  ghcr.io/biji-biji-initiative/mereka-lms/mfe \
   --include-tags \
   --format="table(tags, createTime)" \
   --sort-by="~createTime" \
@@ -259,7 +259,7 @@ Edit `deploy/k8s/overlays/production/kustomization.yaml`:
 ```yaml
 images:
   - name: mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: <last-known-good-sha>
 ```
 

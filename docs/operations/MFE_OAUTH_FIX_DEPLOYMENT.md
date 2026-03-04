@@ -54,8 +54,8 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor images build openedx
 
 # If deploying to production, tag and push the image
-docker tag localhost/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:$(git rev-parse --short HEAD)
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:$(git rev-parse --short HEAD)
+docker tag localhost/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(git rev-parse --short HEAD)
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(git rev-parse --short HEAD)
 ```
 
 ### 2. Deploy to Kubernetes

@@ -93,15 +93,17 @@ check_registry_path() {
   echo "Checking OpenEdX image registry paths and tag format..."
 
   local files=("$PROD_KUSTOMIZATION" "$BASE_KUSTOMIZATION")
-  local expected_registry="asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
-  # Strict immutable release tags: YYYYMMDD-<descriptor>-<sha>
+  # Registries to validate: GHCR (primary) and GCP Artifact Registry (enterprise)
+  local ghcr_registry="ghcr.io/biji-biji-initiative/mereka-lms/"
+  local gcp_registry="asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
+  # Strict immutable release tags: YYYYMMDD-<descriptor>-<sha> or <sha>-YYYYMMDDHHMMSS
   local tag_pattern='^[0-9]{8}-[a-z0-9-]+-[a-f0-9]{7,64}$'
 
   local all_valid=true
   local checked=0
 
   local report
-  report="$(python3 - "$expected_registry" "$tag_pattern" "${files[@]}" <<'PY'
+  report="$(python3 - "$ghcr_registry" "$gcp_registry" "$tag_pattern" "${files[@]}" <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -112,10 +114,15 @@ except Exception:
     print("ERROR\tPyYAML unavailable")
     sys.exit(2)
 
-expected_registry = sys.argv[1]
-tag_pattern = re.compile(sys.argv[2])
+ghcr_registry = sys.argv[1]
+gcp_registry = sys.argv[2]
+tag_pattern = re.compile(sys.argv[3])
 semver_pattern = re.compile(r'^\d+\.\d+\.\d+(-[a-z0-9.]+)?$')
-files = sys.argv[3:]
+# GHCR tags: mereka-brand, mereka-brand-hotfix-*, <sha>-<timestamp>
+ghcr_tag_pattern = re.compile(r'^(mereka-brand(-[a-z0-9-]+)?|[a-f0-9]{7,8}-\d{14})$')
+# Enterprise tags: nreum-clean-*, semver
+enterprise_tag_pattern = re.compile(r'^(nreum-clean-\d{12}|\d+\.\d+\.\d+(-[a-z0-9.]+)?)$')
+files = sys.argv[4:]
 checked = 0
 
 for path in files:
@@ -128,18 +135,28 @@ for path in files:
     for img in images:
         if not isinstance(img, dict):
             continue
-        new_name = str(img.get("newName") or "")
-        if not new_name.startswith(expected_registry):
-            continue
-        checked += 1
+        new_name = str(img.get("newName") or img.get("name") or "")
         tag = str(img.get("newTag") or "")
         digest = str(img.get("digest") or "")
-        if tag_pattern.match(tag) or semver_pattern.match(tag):
-            print(f"PASS\t{new_name}:{tag} (valid format)")
-        elif digest:
-            print(f"PASS\t{new_name}:{tag}@{digest} (legacy tag allowed: digest pinned)")
-        else:
-            print(f"FAIL\t{new_name}:{tag} (invalid format and no digest pin)")
+
+        # Check GHCR images
+        if new_name.startswith(ghcr_registry) or (not img.get("newName") and new_name.startswith(ghcr_registry)):
+            checked += 1
+            if ghcr_tag_pattern.match(tag) or tag_pattern.match(tag):
+                print(f"PASS\t{new_name}:{tag} (valid GHCR tag)")
+            elif digest:
+                print(f"PASS\t{new_name}:{tag}@{digest} (digest pinned)")
+            else:
+                print(f"FAIL\t{new_name}:{tag} (invalid GHCR tag format)")
+        # Check GCP enterprise images
+        elif new_name.startswith(gcp_registry):
+            checked += 1
+            if enterprise_tag_pattern.match(tag) or tag_pattern.match(tag):
+                print(f"PASS\t{new_name}:{tag} (valid enterprise tag)")
+            elif digest:
+                print(f"PASS\t{new_name}:{tag}@{digest} (digest pinned)")
+            else:
+                print(f"FAIL\t{new_name}:{tag} (invalid enterprise tag format)")
 
 print(f"META\tchecked={checked}")
 PY

@@ -91,8 +91,8 @@ APP_MFE_CADDYFILE = Path(sys.argv[4])
 INFRA_PROD = Path(sys.argv[5])
 CHECK_INFRA = sys.argv[6]
 
-TARGET_OPENEDX = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx"
-TARGET_MFE = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe"
+TARGET_OPENEDX = "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+TARGET_MFE = "ghcr.io/biji-biji-initiative/mereka-lms/mfe"
 SOURCE_OPENEDX = "docker.io/overhangio/openedx"
 SOURCE_MFE = "docker.io/overhangio/openedx-mfe"
 

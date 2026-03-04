@@ -49,7 +49,7 @@ Canonical path for this stack: `/k8s/mereka-lms` (prod + dev).
 
 1. Build Tutor images locally on the VPS (`tutor images build openedx` / `mfe`).
 2. Push to Artifact Registry:
-   `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`.
+   `ghcr.io/biji-biji-initiative/mereka-lms`.
 3. Update K8s deployments (LMS/CMS/workers/MFE) to new tags.
 4. If production is pinned through GitOps (`BBI-K8`, legacy `bbi-infrastructure` naming), bump the pinned `?ref=<sha>` there so Argo can reconcile this repo’s latest manifests.
    - Recommended helper in this repo:

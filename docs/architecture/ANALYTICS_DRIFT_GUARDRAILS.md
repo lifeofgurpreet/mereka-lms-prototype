@@ -22,9 +22,9 @@ This contract prevents analytics infrastructure (Aspects/Superset/ClickHouse) fr
 - `docker.io/overhangio/openedx-aspects`
 - `docker.io/clickhouse/clickhouse-server`
 - `docker.io/apache/superset`
-- `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/*aspects*`
-- `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/*clickhouse*`
-- `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/*superset*`
+- `ghcr.io/biji-biji-initiative/mereka-lms/*aspects*`
+- `ghcr.io/biji-biji-initiative/mereka-lms/*clickhouse*`
+- `ghcr.io/biji-biji-initiative/mereka-lms/*superset*`
 
 **Scope**:
 - `deploy/k8s/overlays/production/kustomization.yaml`
@@ -211,7 +211,7 @@ When analytics deployment is approved, follow these steps to formally close the 
 6. **Push images to Artifact Registry**:
    ```bash
    tutor images push aspects aspects-superset \
-     --repository asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+     --repository ghcr.io/biji-biji-initiative/mereka-lms
    ```
 
 7. **Update production kustomization**:
@@ -219,10 +219,10 @@ When analytics deployment is approved, follow these steps to formally close the 
    # In deploy/k8s/overlays/production/kustomization.yaml
    images:
      - name: docker.io/clickhouse/clickhouse-server
-       newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/clickhouse
+       newName: ghcr.io/biji-biji-initiative/mereka-lms/clickhouse
        newTag: 23.8-alpine  # Pin specific version
      - name: docker.io/apache/superset
-       newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/superset
+       newName: ghcr.io/biji-biji-initiative/mereka-lms/superset
        newTag: 3.1.0  # Pin specific version
    ```
 

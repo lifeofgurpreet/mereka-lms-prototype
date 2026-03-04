@@ -47,7 +47,7 @@ We use **Tutor-based builds** with images pushed to **GCP Artifact Registry**.
 
 ## Implementation Notes
 
-- Registry: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
+- Registry: `ghcr.io/biji-biji-initiative/mereka-lms`
 - Image tags: `dev`, `production`, or git SHA (legacy `staging` tag is deprecated/unused)
 - Build script: `scripts/branding/deploy-branded-image.sh`
 - Memory requirement: Docker Desktop needs 12GB+ RAM for webpack builds

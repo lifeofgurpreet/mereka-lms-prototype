@@ -293,18 +293,18 @@ TAG="20260204-dnspython"
 ```bash
 # OpenEdX image
 docker tag tutor_local/openedx:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG}
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${TAG}
 
 # MFE image (if built)
 docker tag tutor_local/openedx-mfe:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${TAG}
+  ghcr.io/biji-biji-initiative/mereka-lms/mfe:${TAG}
 ```
 
 ### Step 7: Push to Artifact Registry
 
 ```bash
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG}
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${TAG}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${TAG}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:${TAG}
 ```
 
 ### Step 8: Update GitOps Sources (Production)
@@ -444,10 +444,10 @@ source .venv/bin/activate && export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor images build openedx
 tutor images build mfe
 ./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
-docker tag tutor_local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
-docker tag tutor_local/openedx-mfe:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:TAG
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:TAG
+docker tag tutor_local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
+docker tag tutor_local/openedx-mfe:latest ghcr.io/biji-biji-initiative/mereka-lms/mfe:TAG
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
+docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:TAG
 ./scripts/qa/verify-gitops-image-overrides.sh --check-infra
 
 # Check Argo + live image

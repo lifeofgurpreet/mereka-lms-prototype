@@ -110,7 +110,7 @@ tutor_env/                # Generated Tutor state (gitignored)
 **Image Build Pipeline**:
 - `tutor images build openedx` → builds LMS/CMS/workers (30+ min)
 - `tutor images build mfe` → builds micro-frontends
-- Images pushed to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
+- Images pushed to `ghcr.io/biji-biji-initiative/mereka-lms`
 - Local builds tag as `latest`, cloud builds tag with git SHA
 
 **CI/CD Pipeline Architecture**:

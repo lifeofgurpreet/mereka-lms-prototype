@@ -34,7 +34,7 @@ tutor config save
 tutor images build openedx
 
 # Tag and push
-IMAGE=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+IMAGE=ghcr.io/biji-biji-initiative/mereka-lms/openedx
 TAG="main-$(git rev-parse --short HEAD)-$(date +%Y%m%d)"
 docker tag openedx:latest "$IMAGE:$TAG"
 docker push "$IMAGE:$TAG"
@@ -66,7 +66,7 @@ bash scripts/qa/verify-public-branding.sh
 tutor images build mfe
 
 # Tag and push
-MFE_IMAGE=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+MFE_IMAGE=ghcr.io/biji-biji-initiative/mereka-lms/mfe
 MFE_TAG="main-$(git rev-parse --short HEAD)-$(date +%Y%m%d)"
 docker tag mfe:latest "$MFE_IMAGE:$MFE_TAG"
 docker push "$MFE_IMAGE:$MFE_TAG"
@@ -128,7 +128,7 @@ bash scripts/infra/build-credentials-image.sh
 The script will:
 1. Build a wrapper image that adds `tzdata>=2024.1` and `cryptography>=41.0.0`
 2. Verify `ZoneInfo("UTC")` resolves correctly inside the container
-3. Push to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-credentials:21.0.0-tzdata`
+3. Push to `ghcr.io/biji-biji-initiative/mereka-lms/openedx-credentials:21.0.0-tzdata`
 4. Print the deployment manifest update instructions
 
 **Then update** `deploy/k8s/base/deployments.yml` (credentials section):
@@ -136,7 +136,7 @@ The script will:
 # Change:
 image: docker.io/overhangio/openedx-credentials:21.0.0
 # To:
-image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-credentials:21.0.0-tzdata
+image: ghcr.io/biji-biji-initiative/mereka-lms/openedx-credentials:21.0.0-tzdata
 ```
 
 ---

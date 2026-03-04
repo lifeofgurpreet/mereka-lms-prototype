@@ -500,7 +500,7 @@ acceptance_criteria:
     command: scripts/qa/verify-rke2-tenant-routes.sh
 - id: AC-026
   description: Given the production overlay, when openedx image references are inspected,
-    then they point to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/` with date-prefixed
+    then they point to `ghcr.io/biji-biji-initiative/mereka-lms/` with date-prefixed
     SHA tags.
   verify:
   - type: automated

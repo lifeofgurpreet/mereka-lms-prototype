@@ -111,7 +111,7 @@ Most ACs can be verified offline by rendering Kustomize overlays and parsing the
 |----|-----------|------|----------------|------------------|
 | AC-025 | No production image uses `latest` tag | shell_verification | `scripts/qa/verify-k8s-images.sh --check no-latest` | Parses production rendered output |
 | AC-025 | (Negative) Image with `latest` tag is flagged | shell_verification | Synthetic: inject latest tag | Mutation test |
-| AC-026 | OpenEdX images point to asia-southeast1-docker.pkg.dev/mereka-lms/openedx/ with date-SHA tags | shell_verification | `scripts/qa/verify-k8s-images.sh --check registry-path`| Regex for YYYYMMDD-description-SHA format |
+| AC-026 | OpenEdX images point to ghcr.io/biji-biji-initiative/mereka-lms/ with date-SHA tags | shell_verification | `scripts/qa/verify-k8s-images.sh --check registry-path`| Regex for YYYYMMDD-description-SHA format |
 
 ### Monitoring (AC-027, AC-028)
 

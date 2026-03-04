@@ -25,10 +25,10 @@ resources:
 # ArgoCD auto-deploys new builds.
 images:
   - name: docker.io/overhangio/openedx
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
     newTag: mereka-brand
   - name: docker.io/overhangio/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: mereka-brand
 
 # namespace to deploy all Resources to

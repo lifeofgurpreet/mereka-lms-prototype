@@ -95,7 +95,7 @@
 ### Registry
 
 ```
-asia-southeast1-docker.pkg.dev/mereka-lms/openedx/
+ghcr.io/biji-biji-initiative/mereka-lms/
 ├── openedx:<tag>           # LMS/CMS/workers
 ├── openedx-mfe:<tag>       # Micro-frontends
 ├── openedx-xqueue:<tag>    # XQueue service
@@ -120,7 +120,7 @@ Build (mereka-lms repo) → Push to AR → Update tag in bbi-infrastructure over
 ```bash
 # Get image digest from AR
 gcloud artifacts docker images describe \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand \
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand \
   --format='value(image_summary.digest)'
 
 # Verify running image matches

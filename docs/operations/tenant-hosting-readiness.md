@@ -168,8 +168,8 @@ source infrastructure/tutor/tutor-env.sh
 tutor images build openedx -a PIP_COMMAND=pip
 OPENEDX_TAG="$(date +%Y%m%d)-openedx-$(git rev-parse --short HEAD)"
 docker tag docker.io/overhangio/openedx:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${OPENEDX_TAG}
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${OPENEDX_TAG}
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
 
 # 2. Dry-run GitOps update
 ./scripts/infra/canonical-release.sh --dry-run \

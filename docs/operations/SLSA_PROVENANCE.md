@@ -5,8 +5,8 @@
 The `build-tutor-images.yml` workflow generates SLSA-style build provenance for every OCI image pushed to Artifact Registry. Provenance is attached as a cosign attestation (keyless, via Sigstore OIDC) and uploaded as a workflow artifact.
 
 **Images covered:**
-- `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx`
-- `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe`
+- `ghcr.io/biji-biji-initiative/mereka-lms/openedx`
+- `ghcr.io/biji-biji-initiative/mereka-lms/mfe`
 
 ## How It Works
 
@@ -41,7 +41,7 @@ cosign verify-attestation \
   --type slsaprovenance \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   --certificate-identity-regexp 'https://github.com/Biji-Biji-Initiative/mereka-lms/' \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx@sha256:<DIGEST>
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx@sha256:<DIGEST>
 ```
 
 ### Online checks (requires registry access + cosign)

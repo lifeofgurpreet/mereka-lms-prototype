@@ -17,8 +17,8 @@ from pathlib import Path
 local_path = Path(sys.argv[1])
 prod_path = Path(sys.argv[2])
 
-TARGET_OPENEDX = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx"
-TARGET_MFE = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe"
+TARGET_OPENEDX = "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+TARGET_MFE = "ghcr.io/biji-biji-initiative/mereka-lms/mfe"
 SOURCE_OPENEDX = "docker.io/overhangio/openedx"
 SOURCE_MFE = "docker.io/overhangio/openedx-mfe"
 

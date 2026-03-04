@@ -169,7 +169,7 @@ PY
 latest_tag_for_image() {
   local full_image="$1"
   # Strip the registry host to get the repository path for gcloud
-  # e.g. asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+  # e.g. ghcr.io/biji-biji-initiative/mereka-lms/openedx
   #   -> projects/mereka-lms/locations/asia-southeast1/repositories/openedx/packages/openedx
   # gcloud artifacts docker tags list accepts the full image reference directly.
 

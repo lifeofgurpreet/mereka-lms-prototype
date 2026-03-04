@@ -280,7 +280,7 @@ Namespace: mereka-lms
 ─────────────────────────────────────────────────────────────────
 
 Deployment: payments-gateway
-  Image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:0.1.1
+  Image: ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:0.1.1
   Replicas: 1 (HPA min=1, max=3, CPU target=70%)
   Security: runAsUser=1000, allowPrivilegeEscalation=false
   Port: 8080

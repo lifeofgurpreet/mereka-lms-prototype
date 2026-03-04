@@ -92,7 +92,7 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 - ExternalSecrets Operator is installed with a configured `gcp-secret-manager` ClusterSecretStore
 - Prometheus Operator (kube-prometheus-stack) is installed for ServiceMonitor and PrometheusRule support
 - Loki is reachable from within the cluster for log ingestion by Promtail
-- Container images are pre-built and pushed to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/`
+- Container images are pre-built and pushed to `ghcr.io/biji-biji-initiative/mereka-lms/`
 - MongoDB Atlas is externally accessible and connection strings are stored in GCP Secret Manager
 
 ## Requirements
@@ -257,7 +257,7 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 
 #### Image Management
 
-- Production images MUST be stored in `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/`.
+- Production images MUST be stored in `ghcr.io/biji-biji-initiative/mereka-lms/`.
 - Production image tags MUST follow the format `YYYYMMDD-<description>-<7-char-git-sha>`.
 - Production images MUST NOT use the `latest` tag.
 - Local overlay images SHOULD align with production tags and be pre-loaded into Kind nodes.
@@ -391,7 +391,7 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 
 ### Images
 - [ ] AC-025: Given the production overlay, when image tags are inspected, then no image uses the `latest` tag.
-- [ ] AC-026: Given the production overlay, when openedx image references are inspected, then they point to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/` with date-prefixed SHA tags.
+- [ ] AC-026: Given the production overlay, when openedx image references are inspected, then they point to `ghcr.io/biji-biji-initiative/mereka-lms/` with date-prefixed SHA tags.
 
 ### Monitoring
 - [ ] AC-027: Given the base monitoring resources, when they are applied, then ServiceMonitors for lms, cms, mysql, and redis exist with 30-second scrape intervals.

@@ -362,7 +362,7 @@ make branding-sync
 tutor images build openedx
 
 # Push and deploy
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
 kubectl rollout restart deployment/lms -n mereka-lms
 kubectl rollout restart deployment/cms -n mereka-lms
 ```
@@ -386,7 +386,7 @@ kubectl exec -n mereka-lms deployment/mfe -- \
 tutor images build mfe
 
 # Push and deploy
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:latest
+docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:latest
 kubectl rollout restart deployment/mfe -n mereka-lms
 ```
 

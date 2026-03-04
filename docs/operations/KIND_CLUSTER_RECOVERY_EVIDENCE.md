@@ -37,7 +37,7 @@
 
 ### RC-1: Enterprise services — 403 from GCR (7 pods)
 
-**Cause**: All enterprise service images reference `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-*:latest`. The Kind cluster lacks:
+**Cause**: All enterprise service images reference `ghcr.io/biji-biji-initiative/mereka-lms/enterprise-*:latest`. The Kind cluster lacks:
 1. An `imagePullSecret` with GCR credentials
 2. Pre-loaded images via `kind load docker-image`
 

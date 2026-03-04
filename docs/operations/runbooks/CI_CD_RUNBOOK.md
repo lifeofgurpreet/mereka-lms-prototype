@@ -37,7 +37,7 @@ This runbook covers manual verification procedures for CI/CD pipeline components
 3. Verify images are pushed to Artifact Registry:
    ```bash
    gcloud artifacts docker images list \
-     asia-southeast1-docker.pkg.dev/mereka-lms/openedx \
+     ghcr.io/biji-biji-initiative/mereka-lms \
      --include-tags --limit=5
    ```
 4. Verify image tags match the commit SHA

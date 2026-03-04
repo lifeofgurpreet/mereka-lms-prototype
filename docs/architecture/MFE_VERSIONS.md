@@ -22,8 +22,8 @@ This section is the **authoritative reference** for all frontend tooling version
 
 | Image | Registry | Current Tag | Base Image |
 |-------|----------|-------------|------------|
-| **OpenEdX** | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx` | `20260210-v21-mfe-only-b988d63` | `docker.io/overhangio/openedx:21.0.0-indigo` |
-| **MFE** | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe` | `20260208-mfe-discussions-pass4-c17df16` | `docker.io/overhangio/openedx-mfe:21.0.0-indigo` |
+| **OpenEdX** | `ghcr.io/biji-biji-initiative/mereka-lms/openedx` | `20260210-v21-mfe-only-b988d63` | `docker.io/overhangio/openedx:21.0.0-indigo` |
+| **MFE** | `ghcr.io/biji-biji-initiative/mereka-lms/mfe` | `20260208-mfe-discussions-pass4-c17df16` | `docker.io/overhangio/openedx-mfe:21.0.0-indigo` |
 
 **Verification**: Image tags are pinned in `deploy/k8s/base/kustomization.yaml` and validated by CI (`verify-mfe-version-pinning.sh`, `verify-frontend-version-truth.sh`).
 
@@ -185,7 +185,7 @@ tutor images build mfe
 ```
 
 ### Build Output
-- **Registry**: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
+- **Registry**: `ghcr.io/biji-biji-initiative/mereka-lms`
 - **Tag Format**: `openedx-mfe:21.0.0` (local), `openedx-mfe:<git-sha>` (cloud)
 
 ## MFE URL Path Mapping (AC-UI-001)

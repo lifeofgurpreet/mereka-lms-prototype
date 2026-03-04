@@ -9,7 +9,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 TAG="${1:-mereka-brand}"
-IMAGE_BASE="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
+IMAGE_BASE="ghcr.io/biji-biji-initiative/mereka-lms"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
 KUBECTL_CONTEXT="${KUBECTL_CONTEXT:-}"
 

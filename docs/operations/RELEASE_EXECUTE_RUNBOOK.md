@@ -37,12 +37,12 @@ OPENEDX_TAG="$(date +%Y%m%d)-openedx-$(git rev-parse --short HEAD)"
 MFE_TAG="$(date +%Y%m%d)-mfe-$(git rev-parse --short HEAD)"
 
 docker tag docker.io/overhangio/openedx:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${OPENEDX_TAG}
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
 docker tag docker.io/overhangio/openedx-mfe:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${MFE_TAG}
+  ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
 
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${OPENEDX_TAG}
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${MFE_TAG}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
+docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
 ```
 
 **Rollback checkpoint**: Images are immutable once pushed. Old tags remain valid. No rollback needed.

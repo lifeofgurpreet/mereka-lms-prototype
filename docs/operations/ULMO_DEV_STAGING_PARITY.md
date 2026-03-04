@@ -30,8 +30,8 @@ Ulmo testing. Dev is validated first, then production GKE is scaled back up.
 | Item | Status |
 |------|--------|
 | Platform | Tutor v21 / Open edX Ulmo / Indigo theme |
-| LMS | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand-hotfix-full-v3` |
-| MFE | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:1c66529-20260220023917` |
+| LMS | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand-hotfix-full-v3` |
+| MFE | `ghcr.io/biji-biji-initiative/mereka-lms/mfe:1c66529-20260220023917` |
 | Enterprise Admin MFE | `…/enterprise-admin-portal:nreum-clean-202602200416` |
 | Enterprise Learner MFE | `…/enterprise-learner-portal:nreum-clean-202602200416` |
 | Secret store | `gcp-secret-manager` ClusterSecretStore (Workload Identity, GCP project `bbi-k8`) |
@@ -66,8 +66,8 @@ the MFE tag.
 
 | Service | Base image in `deployments.yml` | Override in `base/kustomization.yaml` |
 |---------|---------------------------------|---------------------------------------|
-| `lms` / `cms` / workers | `docker.io/overhangio/openedx:21.0.0-indigo` | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand-hotfix-full-v3` |
-| `mfe` | `docker.io/overhangio/openedx-mfe:21.0.0-indigo` | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:b732a7d-20260210161437` |
+| `lms` / `cms` / workers | `docker.io/overhangio/openedx:21.0.0-indigo` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand-hotfix-full-v3` |
+| `mfe` | `docker.io/overhangio/openedx-mfe:21.0.0-indigo` | `ghcr.io/biji-biji-initiative/mereka-lms/mfe:b732a7d-20260210161437` |
 | `discovery` | `docker.io/overhangio/openedx-discovery:21.0.1` | (none) |
 | `ecommerce` | `docker.io/overhangio/openedx-ecommerce:19.0.0` | (none) |
 | `credentials` | `docker.io/overhangio/openedx-credentials:21.0.0` | (none) |

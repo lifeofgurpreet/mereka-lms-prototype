@@ -65,7 +65,7 @@ This ensures the login experience stays in sync with upstream Open edX changes
 
 ## Container Images
 
-Tutor now pulls most runtime images from our Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx`):
+Tutor now pulls most runtime images from our Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms`):
 
 | Service | Image | Notes |
 |---------|-------|-------|

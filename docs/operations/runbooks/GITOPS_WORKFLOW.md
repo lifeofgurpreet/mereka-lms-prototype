@@ -136,7 +136,7 @@ yq eval -i "(.images[] | select(.name == \"docker.io/overhangio/openedx\") | .ne
 yq eval -i "(.images[] | select(.name == \"docker.io/overhangio/openedx-mfe\") | .newTag) = \"$APP_MFE_TAG\"" \
   apps/mereka-lms/overlays/prod/kustomization.yaml
 
-yq eval -i "(.images[] | select(.name == \"asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe\") | .newTag) = \"$APP_MFE_TAG\"" \
+yq eval -i "(.images[] | select(.name == \"ghcr.io/biji-biji-initiative/mereka-lms/mfe\") | .newTag) = \"$APP_MFE_TAG\"" \
   apps/mereka-lms/overlays/prod/kustomization.yaml
 
 # 3. Verify changes
@@ -183,7 +183,7 @@ yq eval -i "(.images[] | select(.name == \"docker.io/overhangio/openedx\") | .ne
 yq eval -i "(.images[] | select(.name == \"docker.io/overhangio/openedx-mfe\") | .newTag) = \"$INFRA_MFE_TAG\"" \
   deploy/k8s/overlays/production/kustomization.yaml
 
-yq eval -i "(.images[] | select(.name == \"asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe\") | .newTag) = \"$INFRA_MFE_TAG\"" \
+yq eval -i "(.images[] | select(.name == \"ghcr.io/biji-biji-initiative/mereka-lms/mfe\") | .newTag) = \"$INFRA_MFE_TAG\"" \
   deploy/k8s/overlays/production/kustomization.yaml
 
 # 3. Verify changes
@@ -274,7 +274,7 @@ yq eval -i "(.images[] | select(.name == \"docker.io/overhangio/openedx\") | .ne
   apps/mereka-lms/overlays/prod/kustomization.yaml
 yq eval -i "(.images[] | select(.name == \"docker.io/overhangio/openedx-mfe\") | .newTag) = \"$APP_MFE\"" \
   apps/mereka-lms/overlays/prod/kustomization.yaml
-yq eval -i "(.images[] | select(.name == \"asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe\") | .newTag) = \"$APP_MFE\"" \
+yq eval -i "(.images[] | select(.name == \"ghcr.io/biji-biji-initiative/mereka-lms/mfe\") | .newTag) = \"$APP_MFE\"" \
   apps/mereka-lms/overlays/prod/kustomization.yaml
 
 git diff apps/mereka-lms/overlays/prod/kustomization.yaml
@@ -429,7 +429,7 @@ kubectl patch deployment lms -n mereka-lms -p \
 ```bash
 # List available tags
 gcloud artifacts docker tags list \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx \
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx \
   --limit 20 --sort-by=~UPDATE_TIME
 
 # Verify tag exists before updating kustomization.yaml

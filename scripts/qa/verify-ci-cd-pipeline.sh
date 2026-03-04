@@ -195,7 +195,7 @@ check_registry() {
   fi
 
   # AC-009: Image push targets correct registry
-  if grep -q 'asia-southeast1-docker.pkg.dev/mereka-lms/openedx' "$BUILD_WF"; then
+  if grep -q 'ghcr.io/biji-biji-initiative/mereka-lms' "$BUILD_WF"; then
     pass "[AC-009] Images push to correct Artifact Registry (asia-southeast1)"
   else
     fail "[AC-009] Images do not target correct Artifact Registry"

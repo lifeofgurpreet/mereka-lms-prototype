@@ -52,8 +52,8 @@ source infrastructure/tutor/tutor-env.sh
 tutor images build openedx
 
 # For production
-docker tag local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
+docker tag local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
 
 # Restart pods
 kubectl rollout restart deployment/lms deployment/cms -n mereka-lms

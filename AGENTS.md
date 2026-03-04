@@ -82,7 +82,7 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - **Theme files** live in `infrastructure/tutor/themes/mereka/` (SCSS, templates)
 - **Brand assets** live in `assets/branding/` (logos, fonts, favicons)
 - **Images are built locally** on VPS, then pushed to Artifact Registry
-- **GKE pulls images** from `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
+- **GKE pulls images** from `ghcr.io/biji-biji-initiative/mereka-lms`
 - **K8s deployments** must be updated to use new image tags
 
 ### Environment Reality (Current)
@@ -119,9 +119,9 @@ These flags do not live in this repo; they are provided by the agent runner at e
 5. **Authenticate to Artifact Registry**: `gcloud auth configure-docker asia-southeast1-docker.pkg.dev`
 6. **Tag images**:
    ```bash
-   docker tag tutor_local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
+   docker tag tutor_local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
    ```
-7. **Push images**: `docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG`
+7. **Push images**: `docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG`
 8. **Update GitOps manifests (production is ArgoCD-managed)**:
    - This repo (`mereka-lms`) provides the base manifests under `deploy/k8s/base`.
    - Active GitOps checkout is usually `/home/gurpreet/projects/k8s/infrastructure` (currently tracking `Biji-Biji-Initiative/BBI-K8`; older docs may refer to `bbi-infrastructure`).
@@ -628,7 +628,7 @@ Regenerate hostname registry (after domain changes):
   `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image> [expected_rev]`
   (use only as controlled fallback; still rerun strict parity gate after GitOps rollout).
 - GitOps overlay image overrides should include both canonical names when needed
-  (`docker.io/overhangio/openedx-mfe` and `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe`) to avoid post-transform tag drift.
+  (`docker.io/overhangio/openedx-mfe` and `ghcr.io/biji-biji-initiative/mereka-lms/mfe`) to avoid post-transform tag drift.
 - Enforce this contract before rollout with:
   `./scripts/qa/verify-gitops-image-overrides.sh --check-infra`
   (now also fails on prod tag drift between this repo overlay and active GitOps overlay checkout).

@@ -132,7 +132,7 @@ Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployme
 
 - `kubectl` access to `mereka-lms` namespace in production GKE cluster
 - Git access to `Biji-Biji-Initiative/mereka-lms` repository
-- Access to Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx`)
+- Access to Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms`)
 
 ### Procedure: Rollback to Previous Image Tag
 
@@ -145,7 +145,7 @@ Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployme
 
    Example output:
    ```
-   asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260210-v21-mfe-only-b988d63
+   ghcr.io/biji-biji-initiative/mereka-lms/openedx:20260210-v21-mfe-only-b988d63
    ```
 
 2. **Find the previous stable image**:
@@ -156,7 +156,7 @@ Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployme
 
    # Or check Artifact Registry for recent tags
    gcloud artifacts docker images list \
-     asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx \
+     ghcr.io/biji-biji-initiative/mereka-lms/openedx \
      --include-tags --limit=10 --sort-by=~UPDATE_TIME
    ```
 
@@ -186,7 +186,7 @@ Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployme
    ```yaml
    images:
      - name: docker.io/overhangio/openedx
-       newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+       newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
        newTag: 20260208-mfe-discussions-pass4-c17df16  # <- Previous stable tag
    ```
 
@@ -265,7 +265,7 @@ vim kustomization.yaml
 # Change:
 images:
   - name: docker.io/overhangio/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: <previous-mfe-tag>
 
 # Apply
@@ -650,8 +650,8 @@ Mereka Academy Engineering Team
 4. **Tag the failed image** (prevent accidental re-deploy):
    ```bash
    gcloud artifacts docker tags add \
-     asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<failed-sha> \
-     asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<failed-sha>-ROLLBACK-REQUIRED
+     ghcr.io/biji-biji-initiative/mereka-lms/openedx:<failed-sha> \
+     ghcr.io/biji-biji-initiative/mereka-lms/openedx:<failed-sha>-ROLLBACK-REQUIRED
    ```
 
 ---

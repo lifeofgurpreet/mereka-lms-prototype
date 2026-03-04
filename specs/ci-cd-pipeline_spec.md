@@ -103,7 +103,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 ## Assumptions
 
 - GitHub Actions is the sole CI/CD platform. No Jenkins, CircleCI, or other systems.
-- GCP Artifact Registry at `asia-southeast1-docker.pkg.dev/mereka-lms/openedx` is the container image registry.
+- GCP Artifact Registry at `ghcr.io/biji-biji-initiative/mereka-lms` is the container image registry.
 - The GitOps target repository is `Biji-Biji-Initiative/bbi-infrastructure`, accessed via `GITOPS_PAT` secret.
 - Production runs on GKE Autopilot in `asia-southeast1-c` (project `bbi-k8`).
 - Dev/local runs on Kind cluster on the VPS (`194.233.84.55`).
@@ -384,7 +384,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 ### Image Build
 
-- [ ] AC-009: Given a push to `main` modifies `infrastructure/tutor/**`, when the build workflow triggers, then both openedx and MFE images are built, tagged with the git SHA and short SHA, and pushed to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/`.
+- [ ] AC-009: Given a push to `main` modifies `infrastructure/tutor/**`, when the build workflow triggers, then both openedx and MFE images are built, tagged with the git SHA and short SHA, and pushed to `ghcr.io/biji-biji-initiative/mereka-lms/`.
 - [ ] AC-010: Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the resolved image digest (sha256:...).
 - [ ] AC-011: Given the MFE image is built, when the branding verification runs, then it validates that the authn index.html contains the expected branding revision marker.
 - [ ] AC-012: Given a manual dispatch with `build_openedx=true` and `image_tag=v1.2.3`, when the build completes, then the image is tagged as `openedx:v1.2.3` and `openedx:<short-sha>`.

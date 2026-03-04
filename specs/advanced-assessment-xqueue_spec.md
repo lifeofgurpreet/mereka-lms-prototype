@@ -763,6 +763,6 @@ Proctoring features referenced in this spec are defined in `specs/proctoring-int
 
 11. **Timed exam accommodation workflow**: How should time accommodations be requested and approved? Options: (a) instructor manually sets per student in the instructor dashboard, (b) student self-service request with instructor approval, (c) enterprise admin bulk upload of accommodation lists. This affects both UX design and access control.
 
-12. **XQueue grader container image registry**: Should XQueue grader worker container images be stored in the same Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx`) as the Open edX images, or in a separate repository? Course-author-provided grading scripts need a secure build and deployment pipeline.
+12. **XQueue grader container image registry**: Should XQueue grader worker container images be stored in the same Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms`) as the Open edX images, or in a separate repository? Course-author-provided grading scripts need a secure build and deployment pipeline.
 
 13. **Integration with Badges & Credentials**: Should assessment completion events (particularly ORA2 staff-graded assignments and timed exam passes) trigger badge issuance (per `specs/badges-credentials-enterprise_spec.md`)? If so, what assessment events should be badge-eligible, and how is the mapping configured?

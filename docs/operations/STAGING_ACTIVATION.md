@@ -106,7 +106,7 @@ CI builds images on merge to main and tags them with the git SHA:
 
 ```bash
 # Example tag format (CI output)
-asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260224-feature-abc-1a2b3c4
+ghcr.io/biji-biji-initiative/mereka-lms/openedx:20260224-feature-abc-1a2b3c4
 ```
 
 ### Step 2: Validate on nonprod (rke2-nonprod)
@@ -134,7 +134,7 @@ Update the image tag in the **bbi-infrastructure** staging overlay:
 
 images:
   - name: docker.io/overhangio/openedx
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
     newTag: 20260224-feature-abc-1a2b3c4   # ← update this
 ```
 
@@ -165,7 +165,7 @@ Update the image tag in the **bbi-infrastructure** production overlay:
 
 images:
   - name: docker.io/overhangio/openedx
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
     newTag: 20260224-feature-abc-1a2b3c4   # ← same tag as staging
 ```
 
@@ -193,7 +193,7 @@ Revert the image tag in `bbi-infrastructure/apps/mereka-lms/overlays/profiles/de
 ```bash
 # Last resort — document and raise PR immediately after
 kubectl --context rke2-nonprod set image deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<previous-tag> \
+  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:<previous-tag> \
   -n mereka-lms
 # Then raise PR within 5 minutes to bring git in sync with cluster state
 ```

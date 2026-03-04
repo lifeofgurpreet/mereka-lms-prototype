@@ -22,15 +22,14 @@ patches:
 # Image tags for production (use specific SHA or version)
 images:
   - name: docker.io/overhangio/openedx
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
     newTag: mereka-brand-hotfix-full-v3
     digest: sha256:907951ebabff35f1843685c97c2fb0a0e5fa0c286adba54d34156ffee594dad4
   - name: docker.io/overhangio/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: 900d3d9d-20260301-142349
     digest: sha256:6e940c493f8323a12159ee1d052992e909320ead68bf7456390724200fdb58fb
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: 900d3d9d-20260301-142349
     digest: sha256:6e940c493f8323a12159ee1d052992e909320ead68bf7456390724200fdb58fb
   # Enterprise MFE: NREUM-clean + env placeholder patching (strip-nreum.sh + patch-missing-env.sh)

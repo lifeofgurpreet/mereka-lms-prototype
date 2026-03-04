@@ -95,10 +95,10 @@ tutor images build openedx
 
 # 2. Tag with date-SHA
 docker tag openedx:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
 
 # 3. Push to registry
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
 
 # 4. Update kustomization
 # Edit deploy/k8s/overlays/production/kustomization.yaml

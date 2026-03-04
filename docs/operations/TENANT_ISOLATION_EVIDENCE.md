@@ -225,7 +225,7 @@ kubectl exec -n mereka-lms deploy/mfe -- \
 ```bash
 # List recent MFE image tags in the registry
 gcloud artifacts docker tags list \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe \
+  ghcr.io/biji-biji-initiative/mereka-lms/mfe \
   --sort-by=~UPDATE_TIME --limit=10
 ```
 
@@ -242,7 +242,7 @@ the regression (check ArgoCD history or `git log deploy/k8s/overlays/production/
 #       newTag: <previous-good-tag>
 
 # Then commit and let ArgoCD sync, OR force a manual rollout:
-kubectl set image deployment/mfe mfe=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:<previous-tag> \
+kubectl set image deployment/mfe mfe=ghcr.io/biji-biji-initiative/mereka-lms/mfe:<previous-tag> \
   -n mereka-lms
 ```
 

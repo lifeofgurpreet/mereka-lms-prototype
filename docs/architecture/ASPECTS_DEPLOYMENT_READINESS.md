@@ -159,15 +159,15 @@ Execute these steps in order when prerequisites are satisfied:
    ```bash
    GIT_SHA=$(git rev-parse --short HEAD)
    docker tag overhangio/openedx-aspects:latest \
-     asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-aspects:$GIT_SHA
+     ghcr.io/biji-biji-initiative/mereka-lms/openedx-aspects:$GIT_SHA
    docker tag overhangio/openedx-aspects-superset:latest \
-     asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-aspects-superset:$GIT_SHA
+     ghcr.io/biji-biji-initiative/mereka-lms/openedx-aspects-superset:$GIT_SHA
    ```
 
 3. **Push images to Artifact Registry**:
    ```bash
-   docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-aspects:$GIT_SHA
-   docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-aspects-superset:$GIT_SHA
+   docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx-aspects:$GIT_SHA
+   docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx-aspects-superset:$GIT_SHA
    ```
 
 4. **Update production kustomization**:
@@ -175,10 +175,10 @@ Execute these steps in order when prerequisites are satisfied:
    # deploy/k8s/overlays/production/kustomization.yaml
    images:
      - name: overhangio/openedx-aspects
-       newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-aspects
+       newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx-aspects
        newTag: <GIT_SHA>
      - name: overhangio/openedx-aspects-superset
-       newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-aspects-superset
+       newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx-aspects-superset
        newTag: <GIT_SHA>
    ```
 

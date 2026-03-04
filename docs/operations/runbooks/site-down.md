@@ -303,9 +303,9 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor images build openedx
 
 # 3) Push + update deployments (GKE)
-docker tag tutor_local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
-kubectl set image deployment/cms cms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG -n mereka-lms
+docker tag tutor_local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
+docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
+kubectl set image deployment/cms cms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG -n mereka-lms
 kubectl rollout status deployment/cms -n mereka-lms
 ```
 
