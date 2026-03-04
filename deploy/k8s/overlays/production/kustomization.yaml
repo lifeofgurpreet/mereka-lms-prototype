@@ -30,6 +30,7 @@ images:
     newTag: 900d3d9d-20260301-142349
     digest: sha256:6e940c493f8323a12159ee1d052992e909320ead68bf7456390724200fdb58fb
   - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: 900d3d9d-20260301-142349
     digest: sha256:6e940c493f8323a12159ee1d052992e909320ead68bf7456390724200fdb58fb
   # Enterprise MFE: NREUM-clean + env placeholder patching (strip-nreum.sh + patch-missing-env.sh)

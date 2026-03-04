@@ -41,7 +41,8 @@ patches:
 images:
   # Local overlay should not depend on `:latest` tags (which trigger AlwaysPull).
   # Keep images aligned with production tags; load them into kind nodes before apply.
-  - name: ghcr.io/biji-biji-initiative/mereka-lms/openedx
+  - name: docker.io/overhangio/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
     newTag: 20260207-branding-pass7-5b26e45
   - name: docker.io/overhangio/openedx-mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
