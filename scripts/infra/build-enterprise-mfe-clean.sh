@@ -8,7 +8,7 @@
 #   bash scripts/infra/build-enterprise-mfe-clean.sh [SOURCE_TAG]
 #   SOURCE_TAG defaults to "latest"
 #
-# Output images pushed to GCR:
+# Output images pushed to GHCR:
 #   enterprise-admin-portal:nreum-clean-YYYYMMDDHHMI
 #   enterprise-learner-portal:nreum-clean-YYYYMMDDHHMI
 #
@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-REGISTRY="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
+REGISTRY="ghcr.io/biji-biji-initiative/mereka-lms"
 SOURCE_TAG="${1:-latest}"
 CLEAN_TAG="nreum-clean-$(date +%Y%m%d%H%M)"
 DOCKERFILE_DIR="infrastructure/docker/enterprise-mfe-clean"
@@ -103,9 +103,9 @@ if ! docker info >/dev/null 2>&1; then
 fi
 pass_check "Docker daemon running"
 
-# Configure Docker for GCR
-gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet 2>/dev/null
-pass_check "GCR auth configured"
+# Configure Docker for GHCR
+echo "${GHCR_TOKEN:-}" | docker login ghcr.io -u "${GHCR_USER:-biji-biji-initiative}" --password-stdin 2>/dev/null || true
+pass_check "GHCR auth configured"
 
 # ---- Build admin portal ----
 echo ""
@@ -125,7 +125,7 @@ fi
 # Push admin portal
 echo "  Pushing enterprise-admin-portal:${CLEAN_TAG} ..."
 docker push "${REGISTRY}/enterprise-admin-portal:${CLEAN_TAG}"
-pass_check "enterprise-admin-portal:${CLEAN_TAG} pushed to GCR"
+pass_check "enterprise-admin-portal:${CLEAN_TAG} pushed to GHCR"
 
 # ---- Build learner portal ----
 echo ""
@@ -145,7 +145,7 @@ fi
 # Push learner portal
 echo "  Pushing enterprise-learner-portal:${CLEAN_TAG} ..."
 docker push "${REGISTRY}/enterprise-learner-portal:${CLEAN_TAG}"
-pass_check "enterprise-learner-portal:${CLEAN_TAG} pushed to GCR"
+pass_check "enterprise-learner-portal:${CLEAN_TAG} pushed to GHCR"
 
 # ---- Summary + GitOps instructions ----
 echo ""

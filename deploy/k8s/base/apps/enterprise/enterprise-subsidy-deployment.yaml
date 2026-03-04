@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: config-gen
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:latest
           command: ["python3", "-c"]
           args:
             - |
@@ -114,7 +114,7 @@ spec:
             - name: config
               mountPath: /config
         - name: migrate
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:latest
           command: ["python", "manage.py", "migrate", "--noinput"]
           env:
             - name: DJANGO_SETTINGS_MODULE
@@ -135,7 +135,7 @@ spec:
               mountPath: /config
       containers:
         - name: enterprise-subsidy
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:latest
           ports:
             - containerPort: 18280
           env:

@@ -43,26 +43,19 @@ images:
     newTag: c1ef8f8f-20260301182820
   - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: c1ef8f8f-20260301182820
-  # Enterprise MFEs must be pinned explicitly for nonprod parity.
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
+  # Enterprise MFEs — GHCR (migrated from GAR)
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal
     newTag: nreum-clean-202602200416
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal
     newTag: nreum-clean-202602200416
-  # Enterprise backend services — pin to 21.0.0 (matches production overlay)
-  # Update newTag after next image rebuild with build-specific tag
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-catalog
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-catalog
+  # Enterprise backend services — frozen at 21.0.0 (archived upstream, Nov 2024)
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog
     newTag: "21.0.0"
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-subsidy
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy
     newTag: "21.0.0"
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access
     newTag: "21.0.0"
-  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager
-    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/license-manager
     newTag: "21.0.0"
 
 generatorOptions:

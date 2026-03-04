@@ -31,7 +31,7 @@ spec:
       # NREUM was stripped at build time; runtime HTML sanitization is not required.
       containers:
         - name: enterprise-learner-portal
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal:latest
           command:
             - /bin/sh
             - -c

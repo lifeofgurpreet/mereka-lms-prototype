@@ -1,0 +1,33 @@
+name: Build Enterprise MFEs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/docker/enterprise-mfe-clean/**"
+      - ".github/workflows/build-enterprise-mfe.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  admin-portal:
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
+    with:
+      app_name: mereka-lms/enterprise-admin-portal
+      dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal
+      context: infrastructure/docker/enterprise-mfe-clean
+
+  learner-portal:
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
+    with:
+      app_name: mereka-lms/enterprise-learner-portal
+      dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal
+      context: infrastructure/docker/enterprise-mfe-clean

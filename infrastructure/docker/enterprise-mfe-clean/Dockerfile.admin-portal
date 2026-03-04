@@ -13,7 +13,7 @@
 #     --build-arg SOURCE_TAG=latest \
 #     -t $REGISTRY/enterprise-admin-portal:nreum-clean-YYYYMMDD .
 
-ARG REGISTRY=asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+ARG REGISTRY=ghcr.io/biji-biji-initiative/mereka-lms
 ARG SOURCE_TAG=latest
 FROM ${REGISTRY}/enterprise-admin-portal:${SOURCE_TAG}
 

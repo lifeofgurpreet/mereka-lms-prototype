@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: config-gen
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/license-manager:latest
           command: ["python3", "-c"]
           args:
             - |
@@ -123,7 +123,7 @@ spec:
             - name: config
               mountPath: /config
         - name: migrate
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/license-manager:latest
           command: ["python", "manage.py", "migrate", "--noinput"]
           env:
             - name: DJANGO_SETTINGS_MODULE
@@ -144,7 +144,7 @@ spec:
               mountPath: /config
       containers:
         - name: license-manager
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-license-manager:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/license-manager:latest
           ports:
             - containerPort: 18170
           env:

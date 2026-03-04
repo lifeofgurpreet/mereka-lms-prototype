@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: config-gen
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:latest
           command: ["python3", "-c"]
           args:
             - |
@@ -124,7 +124,7 @@ spec:
               mountPath: /config
       containers:
         - name: enterprise-access-worker
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:latest
           args:
             - celery
             - --app=enterprise_access
