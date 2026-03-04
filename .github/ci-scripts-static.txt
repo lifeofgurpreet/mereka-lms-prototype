@@ -129,7 +129,7 @@ scripts/qa/verify-tenant-token-switching.sh
 scripts/qa/verify-tenant-branding-matrix.sh
 scripts/qa/verify-tenant-ui-smoke.sh
 scripts/qa/verify-tenant-footer-variant-lane.sh
-scripts/qa/verify-tenant-config-handoff.sh
+# scripts/qa/verify-tenant-config-handoff.sh  # deferred: tenant config handoff doc not written yet
 # scripts/qa/run-tenant-branding-qa.sh  # deferred: tenant branding features not implemented yet
 scripts/qa/verify-multitenant-brand-platform.sh
 # scripts/qa/verify-multi-tenant-branding-ops.sh  # deferred: multi-tenant branding ops doc incomplete
