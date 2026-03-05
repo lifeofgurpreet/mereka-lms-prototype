@@ -104,6 +104,9 @@ check_plugin_pattern "CSP_CONNECT_SRC" \
 check_plugin_pattern "CSP_OBJECT_SRC" \
   "CSP_OBJECT_SRC defined in plugin (should be 'none')"
 
+check_plugin_pattern "CSP_FORM_ACTION" \
+  "CSP_FORM_ACTION defined in plugin (should be 'self')"
+
 # Confirm the permissive directives are still present (Phase 0 — expected)
 check_plugin_pattern "'unsafe-inline'" \
   "unsafe-inline present (Phase 0 — intentional, see ADR-025)"

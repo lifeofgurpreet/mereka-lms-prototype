@@ -1799,9 +1799,10 @@ CSP_FRAME_SRC = (
     "https://www.youtube.com",
     "https://player.vimeo.com",
 )
-CSP_MEDIA_SRC = ("'self'", "blob:", "https:")
+CSP_MEDIA_SRC = ("'self'", "blob:")
 CSP_OBJECT_SRC = ("'none'",)
 CSP_BASE_URI = ("'self'",)
+CSP_FORM_ACTION = ("'self'",)
 CSP_FRAME_ANCESTORS = ("'self'",)
 
 # Nonce preparation — nonces coexist with 'unsafe-inline'; templates that adopt

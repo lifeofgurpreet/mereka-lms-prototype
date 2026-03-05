@@ -171,6 +171,19 @@ if [[ -f "$PROD_PY" ]]; then
     fi
   fi
 
+  # MEDIA_SRC must not use wildcard https: (tightened to 'self' + blob:)
+  if grep -q 'CSP_MEDIA_SRC' "$PROD_PY"; then
+    _media_src_block=$(sed -n '/^CSP_MEDIA_SRC/,/^)/p' "$PROD_PY")
+    if echo "$_media_src_block" | grep -qF '"https:"'; then
+      do_fail "CSP_MEDIA_SRC contains wildcard 'https:' — should use explicit sources"
+    else
+      do_pass "CSP_MEDIA_SRC uses explicit sources (no wildcard https:)"
+    fi
+  fi
+
+  # FORM_ACTION must be restricted
+  check_pattern "$PROD_PY" "CSP_FORM_ACTION" "CSP_FORM_ACTION configured in production.py"
+
   # Auth domain in CONNECT_SRC and FRAME_SRC for OIDC
   check_pattern "$PROD_PY" "_auth_url" "Auth domain variable defined for CSP directives"
 fi
