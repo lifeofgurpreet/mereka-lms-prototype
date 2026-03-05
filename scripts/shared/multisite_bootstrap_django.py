@@ -149,25 +149,97 @@ def _is_non_enterprise_domain(domain: str) -> bool:
     )
 
 
-def validate_site_host_ownership(definitions: list[SiteDefinition], allow_shared_hosts: set[str]) -> list[str]:
-    errors: list[str] = []
+@dataclass(frozen=True)
+class HostCollision:
+    """Structured record of a cross-tenant host collision detected before any DB write."""
+
+    field: str
+    host: str
+    owners: tuple[str, ...]
+    file_source: str
+    allowlisted: bool
+    enterprise_violation: bool
+
+
+def build_collision_report(
+    definitions: list[SiteDefinition],
+    allow_shared_hosts: set[str],
+    file_source: str = "",
+) -> list[HostCollision]:
+    """
+    Return structured collision records for all fields.
+
+    Each record captures the field name, the shared host, all tenant domain owners,
+    the YAML file it was loaded from, and whether the collision is allowlist-approved
+    or an enterprise violation.
+
+    This is the source of truth consumed by both validate_site_host_ownership (for
+    error strings) and the dry-run collision report printed before any DB writes.
+    """
+    collisions: list[HostCollision] = []
+    source = file_source or os.environ.get("MULTISITE_DEFINITIONS_PATH") or DEFAULT_DEFINITIONS_PATH
 
     for field in ("domain", "LMS_ROOT_URL", "CMS_ROOT_URL", "MFE_BASE_URL"):
-        owners = _collect_host_owners(definitions, field)
-        for host, tenant_domains in sorted(owners.items()):
-            domains = sorted(tenant_domains)
+        owners_map = _collect_host_owners(definitions, field)
+        for host, tenant_domains in sorted(owners_map.items()):
+            domains = tuple(sorted(tenant_domains))
             if len(domains) <= 1:
                 continue
-            if field in ("CMS_ROOT_URL", "MFE_BASE_URL") and host in allow_shared_hosts:
-                if any(not _is_non_enterprise_domain(d) for d in domains):
-                    errors.append(
-                        f"{field} host '{host}' allowlisted but used by enterprise domains {domains} "
-                        "(allowlist is preview/dev/staging only)"
-                    )
-                    continue
-                continue
+
+            allowlisted = field in ("CMS_ROOT_URL", "MFE_BASE_URL") and host in allow_shared_hosts
+            enterprise_violation = allowlisted and any(
+                not _is_non_enterprise_domain(d) for d in domains
+            )
+
+            collisions.append(
+                HostCollision(
+                    field=field,
+                    host=host,
+                    owners=domains,
+                    file_source=source,
+                    allowlisted=allowlisted,
+                    enterprise_violation=enterprise_violation,
+                )
+            )
+    return collisions
+
+
+def print_collision_report(collisions: list[HostCollision]) -> None:
+    """Print a deterministic, human-readable collision report to stdout."""
+    if not collisions:
+        print("Host ownership check: OK (no shared hosts detected)")
+        return
+
+    print("Host ownership collision report:")
+    print(f"  {'FIELD':<20} {'HOST':<45} {'OWNERS'}")
+    print(f"  {'-'*20} {'-'*45} {'-'*40}")
+    for c in collisions:
+        status = "ALLOWLISTED" if c.allowlisted and not c.enterprise_violation else "COLLISION"
+        if c.enterprise_violation:
+            status = "ENTERPRISE-VIOLATION"
+        owners_str = ", ".join(c.owners)
+        print(f"  {c.field:<20} {c.host:<45} {owners_str}")
+        print(f"  {'':20} {'status':>10}: {status}  source: {c.file_source}")
+
+
+def validate_site_host_ownership(definitions: list[SiteDefinition], allow_shared_hosts: set[str]) -> list[str]:
+    """Return error strings for collisions that must block DB writes.
+
+    Delegates collision detection to build_collision_report so both the error path
+    and the dry-run report use identical logic.
+    """
+    errors: list[str] = []
+    for c in build_collision_report(definitions, allow_shared_hosts):
+        if c.allowlisted and not c.enterprise_violation:
+            continue
+        if c.enterprise_violation:
             errors.append(
-                f"{field} host '{host}' is shared by tenants {domains} (must be unique or allowlisted)"
+                f"{c.field} host '{c.host}' allowlisted but used by enterprise domains {list(c.owners)} "
+                "(allowlist is preview/dev/staging only)"
+            )
+        else:
+            errors.append(
+                f"{c.field} host '{c.host}' is shared by tenants {list(c.owners)} (must be unique or allowlisted)"
             )
     return errors
 
@@ -536,6 +608,15 @@ def main() -> None:
         help="Apply changes to database",
     )
     parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Check host ownership collisions and print deterministic collision report. "
+            "Exits non-zero if any blocking collision is detected. "
+            "Does NOT initialize Django or touch the database."
+        ),
+    )
+    parser.add_argument(
         "--scope",
         choices=("full", "sites"),
         default="full",
@@ -548,12 +629,35 @@ def main() -> None:
     strict_host_ownership = os.environ.get("STRICT_TENANT_HOST_OWNERSHIP", "1") != "0"
     allow_shared_hosts = _load_shared_host_allowlist()
 
+    collisions = build_collision_report(SITE_DEFINITIONS, allow_shared_hosts)
     ownership_errors = validate_site_host_ownership(SITE_DEFINITIONS, allow_shared_hosts)
     unique_mfe_hosts = {
         host for host, owners in _collect_host_owners(SITE_DEFINITIONS, "MFE_BASE_URL").items()
         if len(owners) == 1
     }
     shared_mfe_host_owners = select_shared_mfe_host_owners(SITE_DEFINITIONS, allow_shared_hosts)
+
+    # --check: pure collision report, no Django, exits non-zero on blocking collisions
+    if args.check:
+        print("=" * 60)
+        print("HOST OWNERSHIP CHECK (no DB writes)")
+        print("=" * 60)
+        if allow_shared_hosts:
+            print(f"Shared host allowlist active: {sorted(allow_shared_hosts)}")
+        else:
+            print("Shared host allowlist active: []")
+        print()
+        print_collision_report(collisions)
+        if ownership_errors:
+            print("\nBlocking collisions detected:")
+            for err in ownership_errors:
+                print(f"  - {err}")
+            print("\nFix: ensure each enterprise host is owned by exactly one tenant,")
+            print("     or add preview/dev/staging hosts to the allowlist file:")
+            print(f"     {DEFAULT_SHARED_HOST_ALLOWLIST_PATH}")
+            sys.exit(1)
+        print("\nNo blocking collisions. Host ownership OK.")
+        sys.exit(0)
 
     if dry_run:
         print("=" * 60)
@@ -566,6 +670,12 @@ def main() -> None:
             print(f"Shared MFE host canonical owners: {shared_mfe_host_owners}")
     else:
         print("Shared host allowlist active: []")
+
+    # Always print the collision report in dry-run mode so operators can see the
+    # ownership state before any DB writes happen.
+    if dry_run:
+        print()
+        print_collision_report(collisions)
 
     if ownership_errors:
         print("\nHost ownership validation errors:")
