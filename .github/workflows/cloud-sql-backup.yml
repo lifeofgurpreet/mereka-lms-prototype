@@ -24,6 +24,7 @@ jobs:
           echo "This workflow is legacy and runs only when ENABLE_CLOUD_SQL_BACKUPS=true."
           echo "If production uses in-cluster MySQL (PVC + Velero), keep it disabled."
       - name: Authenticate to GCP
+        if: ${{ (vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '') || vars.HAS_GCP_SA_KEY == 'true' }}
         uses: ./.github/actions/gcp-gke-auth
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}

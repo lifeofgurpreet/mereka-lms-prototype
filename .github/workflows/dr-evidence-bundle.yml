@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Authenticate to GCP and get GKE credentials
+        if: ${{ (vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '') || vars.HAS_GCP_SA_KEY == 'true' }}
         uses: ./.github/actions/gcp-gke-auth
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}

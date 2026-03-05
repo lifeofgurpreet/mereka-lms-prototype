@@ -72,6 +72,7 @@ jobs:
 
       - name: Authenticate to GCP and get GKE credentials
         id: gke-auth
+        if: ${{ (vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '') || vars.HAS_GCP_SA_KEY == 'true' }}
         uses: ./.github/actions/gcp-gke-auth
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}

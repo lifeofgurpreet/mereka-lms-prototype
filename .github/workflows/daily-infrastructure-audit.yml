@@ -88,6 +88,7 @@ jobs:
       # job when the cluster is temporarily unreachable. Each audit step applies its own
       # strict_runtime semantics to govern whether it should hard-fail on unavailability.
       - name: Authenticate to GCP and get GKE credentials
+        if: ${{ (vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '') || vars.HAS_GCP_SA_KEY == 'true' }}
         uses: ./.github/actions/gcp-gke-auth
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
@@ -298,6 +299,7 @@ jobs:
       # GCP project is per-lane (computed above from OBS_GCP_PROJECT env var).
       # strict_runtime=true: parity lanes always require live cluster access.
       - name: Authenticate to GCP and get GKE credentials
+        if: ${{ (vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '') || vars.HAS_GCP_SA_KEY == 'true' }}
         uses: ./.github/actions/gcp-gke-auth
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}

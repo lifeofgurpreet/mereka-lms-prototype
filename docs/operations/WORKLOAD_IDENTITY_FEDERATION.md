@@ -216,21 +216,36 @@ It now supports WIF-first with key fallback:
 
 For long-running jobs, authenticate as late as possible (immediately before `docker push`, `gcloud` publish, or `kubectl` apply) to avoid short-lived token expiry during long build phases.
 
-## Workflows Requiring Changes
+## Migration Status
 
-The following workflows currently use `credentials_json: ${{ secrets.GCP_SA_KEY }}`:
+Workflows using the `./.github/actions/gcp-gke-auth` composite action with `auth_mode: auto` and the skip-on-missing-creds condition:
 
-| Workflow | Description |
-|----------|-------------|
-| `build-tutor-images.yml` | Builds and pushes images to Artifact Registry |
-| `cloud-sql-backup.yml` | Cloud SQL backup operations |
-| `release-evidence.yml` | Release evidence bundle generation |
-| `daily-infrastructure-audit.yml` | Observability audit + alert routing + env parity (consolidated from `observability-audit.yml`, `alert-routing-audit.yml`, `observability-parity-runtime.yml` in Phase 6.4) |
-| `dr-evidence-bundle.yml` | DR evidence collection |
-| `operations-gates-runtime.yml` | Runtime operations gates |
+```yaml
+if: ${{ (vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '') || vars.HAS_GCP_SA_KEY == 'true' }}
+```
+
+| Workflow | GCP Auth Job(s) | `id-token: write` | Skip Condition | Status |
+|----------|-----------------|-------------------|----------------|--------|
+| `operations-gates-runtime.yml` | `runtime-gates` | yes | yes | migrated |
+| `mfe-slot-runtime-gates.yml` | `mfe-slot-gates` | yes | yes | migrated |
+| `argocd-drift-check.yml` | `online-drift-check` | yes | yes | migrated (#154) |
+| `cloud-sql-backup.yml` | `backup` | yes | yes | migrated (#154) |
+| `daily-infrastructure-audit.yml` | `observability-audits`, `parity-check` | yes | yes | migrated (#154) |
+| `dr-evidence-bundle.yml` | `dr-evidence` | yes | yes | migrated (#154) |
+| `build-tutor-images.yml` | `build-and-push` | yes | — (uses late-auth) | migrated |
+| `release-evidence.yml` | `release-evidence` | yes | — | migrated |
 
 Run `scripts/qa/verify-wif-readiness.sh` to get the current count.
-`build-tutor-images.yml` now uses late-auth before push steps (WIF-first in `auth_mode: auto`).
+
+### Required GitHub Repository Variables
+
+Set these in **Settings → Secrets and Variables → Variables** (not Secrets):
+
+| Variable | Example Value | Notes |
+|----------|---------------|-------|
+| `GCP_WIF_PROVIDER` | `projects/123456789/locations/global/workloadIdentityPools/mereka-lms-github-pool/providers/github-oidc-provider` | Full resource name from GCP |
+| `GCP_WIF_SA` | `ci-deployer@bbi-k8.iam.gserviceaccount.com` | SA to impersonate |
+| `HAS_GCP_SA_KEY` | `true` | Set to `'true'` while `GCP_SA_KEY` secret is present; delete after Phase 3 |
 
 ## Migration Plan
 
