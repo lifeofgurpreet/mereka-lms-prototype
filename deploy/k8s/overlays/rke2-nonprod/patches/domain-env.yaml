@@ -1,4 +1,11 @@
 # Domain overrides for rke2-nonprod dev environment.
+#
+# AUTH DOMAIN NOTE (issue #174):
+# MEREKA_AUTH_DOMAIN is HYBRID ownership: the *value* (auth0.mereka.dev) is env-specific
+# and must stay here. However, MEREKA_AUTH_DOMAIN must NOT be used to set
+# SOCIAL_AUTH_OIDC_OIDC_ENDPOINT or SOCIAL_AUTH_OIDC_KEY — those are owned by
+# bbi-infrastructure (overlays/dev/patches/production-staging.py). This variable
+# is only for URL construction in application code that needs the auth domain hostname.
 
 apiVersion: apps/v1
 kind: Deployment
