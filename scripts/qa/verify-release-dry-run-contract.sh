@@ -36,8 +36,22 @@ YAML
 
 cp "$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml" \
   "$TMP_INFRA/apps/mereka-lms/overlays/prod/kustomization.yaml"
-cp "$REPO_ROOT/deploy/k8s/overlays/staging/kustomization.yaml" \
-  "$TMP_INFRA/apps/mereka-lms/overlays/staging/kustomization.yaml"
+# Staging overlay was removed from the app repo. Create a minimal fixture
+# so that the release script's staging code path can still be exercised.
+cat > "$TMP_INFRA/apps/mereka-lms/overlays/staging/kustomization.yaml" <<'YAML'
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: mereka-lms
+resources:
+  - ../../base
+images:
+  - name: docker.io/overhangio/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
+    newTag: fixture-tag
+  - name: docker.io/overhangio/openedx-mfe
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
+    newTag: fixture-tag
+YAML
 
 # Fixture guard: release-openedx-gitops.sh expects infra overlay to include the
 # already-transformed openedx image name entry as well.

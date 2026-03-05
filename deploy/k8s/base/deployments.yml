@@ -64,6 +64,8 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
             timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
       volumes:
         - name: config
           configMap:
@@ -180,11 +182,18 @@ spec:
             limits:
               cpu: "2"
               memory: 3Gi
+          startupProbe:
+            httpGet:
+              path: /heartbeat
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /heartbeat
               port: 8000
-            initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
@@ -192,7 +201,6 @@ spec:
             httpGet:
               path: /heartbeat
               port: 8000
-            initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
@@ -471,11 +479,18 @@ spec:
             limits:
               cpu: "2"
               memory: 3Gi
+          startupProbe:
+            httpGet:
+              path: /heartbeat
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /heartbeat
               port: 8000
-            initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
@@ -483,7 +498,6 @@ spec:
             httpGet:
               path: /heartbeat
               port: 8000
-            initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
@@ -708,17 +722,22 @@ spec:
             limits:
               cpu: "1"
               memory: 1536Mi
+          startupProbe:
+            tcpSocket:
+              port: 9200
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 5
           livenessProbe:
             tcpSocket:
               port: 9200
-            initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
           readinessProbe:
             tcpSocket:
               port: 9200
-            initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
@@ -787,6 +806,17 @@ spec:
             limits:
               cpu: "2"
               memory: 4Gi
+          startupProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 5
           livenessProbe:
             exec:
               command:
@@ -794,7 +824,6 @@ spec:
                 - ping
                 - -h
                 - localhost
-            initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
@@ -805,7 +834,6 @@ spec:
                 - ping
                 - -h
                 - localhost
-            initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
@@ -912,6 +940,8 @@ spec:
             periodSeconds: 30
             failureThreshold: 3
             timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
 
 
 ---
@@ -1299,6 +1329,8 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
             timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
           volumeMounts:
             - mountPath: /etc/caddy/
               name: config
@@ -1441,6 +1473,8 @@ spec:
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
           volumeMounts:
             - mountPath: /openedx/xqueue/xqueue/tutor.py
               name: settings
@@ -1464,6 +1498,8 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
           volumeMounts:
             - mountPath: /openedx/xqueue/xqueue/tutor.py
               name: settings

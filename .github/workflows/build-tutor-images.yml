@@ -76,7 +76,7 @@ jobs:
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_openedx }}
     permissions:
-      contents: write
+      contents: read
       packages: write
       id-token: write
     outputs:
@@ -366,7 +366,7 @@ jobs:
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_mfe }}
     permissions:
-      contents: write
+      contents: read
       packages: write
       id-token: write
     outputs:

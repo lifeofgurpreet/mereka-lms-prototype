@@ -79,3 +79,65 @@ spec:
     matchLabels:
       app.kubernetes.io/name: mysql
       app.kubernetes.io/instance: mereka-lms
+
+---
+# Enterprise service PDBs — protect against voluntary disruptions
+# during node drains and cluster upgrades.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: enterprise-catalog
+  labels:
+    app.kubernetes.io/name: enterprise-catalog
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: enterprise-catalog
+      app.kubernetes.io/instance: mereka-lms
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: enterprise-access
+  labels:
+    app.kubernetes.io/name: enterprise-access
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: enterprise-access
+      app.kubernetes.io/instance: mereka-lms
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: enterprise-subsidy
+  labels:
+    app.kubernetes.io/name: enterprise-subsidy
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: enterprise-subsidy
+      app.kubernetes.io/instance: mereka-lms
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: license-manager
+  labels:
+    app.kubernetes.io/name: license-manager
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: license-manager
+      app.kubernetes.io/instance: mereka-lms

@@ -1,6 +1,7 @@
 # DEPRECATED: 2026-02-10
 # This staging overlay is no longer actively maintained.
-# It is kept for historical reference only.
+# It exists as a fixture for release-openedx-gitops.sh staging code path
+# and verification scripts. Do not deploy from this overlay.
 # Production deployments use the 'production' overlay.
 # Local development uses the 'local' overlay.
 

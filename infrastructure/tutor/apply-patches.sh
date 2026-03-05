@@ -24,11 +24,22 @@ source "$PATCHES_DIR/footer-component.sh"
 source "$PATCHES_DIR/build-optimizations.sh"
 
 # Apply patches in dependency order
-apply_mfe_node_patch
-apply_brand_package_patch
-apply_webpack_memory_patch
-apply_footer_component_patch
-apply_build_optimizations_patch
+apply_patch() {
+  local fn="$1"
+  echo "  Applying: $fn ..."
+  if "$fn"; then
+    echo "  OK: $fn"
+  else
+    echo "  FAILED: $fn (exit $?)" >&2
+    exit 1
+  fi
+}
+
+apply_patch apply_mfe_node_patch
+apply_patch apply_brand_package_patch
+apply_patch apply_webpack_memory_patch
+apply_patch apply_footer_component_patch
+apply_patch apply_build_optimizations_patch
 
 # Sync Mereka theme into Tutor build context.
 # tutor config save renders only the indigo theme from tutor-indigo plugin.
