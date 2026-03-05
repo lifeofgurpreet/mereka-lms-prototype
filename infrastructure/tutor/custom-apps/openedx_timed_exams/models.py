@@ -28,7 +28,7 @@ class ExamTimeExtension(models.Model):
     )
     additional_minutes = models.IntegerField(
         default=0,
-        validators=[MinValueValidator(0), MaxValueValidator=9999],
+        validators=[MinValueValidator(0), MaxValueValidator(9999)],
         help_text="Additional minutes to add (after applying multiplier)"
     )
 

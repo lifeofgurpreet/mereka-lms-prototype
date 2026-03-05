@@ -9,6 +9,11 @@ metadata:
     app.kubernetes.io/name: caddy
     app.kubernetes.io/part-of: mereka-lms
 spec:
+  # Recreate strategy: Caddy uses a RWO PVC. RollingUpdate would schedule the
+  # new pod before the old one terminates, causing a volume mount deadlock on
+  # multi-node clusters. Recreate terminates first, then creates.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/instance: mereka-lms
@@ -23,20 +28,6 @@ spec:
         app.kubernetes.io/name: caddy
         app.kubernetes.io/part-of: mereka-lms
     spec:
-      # This Deployment uses a persistent volume claim. This requires
-      # that in order to enable rolling updates (i.e. use a deployment
-      # strategy other than Replace), we schedule the new Pod to the
-      # same node as the original Pod.
-      affinity:
-        podAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values:
-                    - caddy
-              topologyKey: "kubernetes.io/hostname"
       containers:
         - name: caddy
           image: docker.io/caddy:2.7.4
@@ -59,6 +50,20 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
       volumes:
         - name: config
           configMap:
@@ -175,6 +180,22 @@ spec:
             limits:
               cpu: "2"
               memory: 3Gi
+          livenessProbe:
+            httpGet:
+              path: /heartbeat
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /heartbeat
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           lifecycle:
             postStart:
               exec:
@@ -315,6 +336,20 @@ spec:
             limits:
               cpu: "1"
               memory: 1536Mi
+          livenessProbe:
+            exec:
+              command:
+                - celery
+                - -A
+                - cms
+                - inspect
+                - ping
+                - -t
+                - "10"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 15
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -436,6 +471,22 @@ spec:
             limits:
               cpu: "2"
               memory: 3Gi
+          livenessProbe:
+            httpGet:
+              path: /heartbeat
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /heartbeat
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           lifecycle:
             postStart:
               exec:
@@ -575,6 +626,20 @@ spec:
             limits:
               cpu: "1"
               memory: 1536Mi
+          livenessProbe:
+            exec:
+              command:
+                - celery
+                - -A
+                - lms
+                - inspect
+                - ping
+                - -t
+                - "10"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 15
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -643,6 +708,20 @@ spec:
             limits:
               cpu: "1"
               memory: 1536Mi
+          livenessProbe:
+            tcpSocket:
+              port: 9200
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 9200
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
           volumeMounts:
@@ -708,6 +787,28 @@ spec:
             limits:
               cpu: "2"
               memory: 4Gi
+          livenessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           volumeMounts:
             - mountPath: /var/lib/mysql
               name: data
@@ -797,6 +898,20 @@ spec:
             limits:
               cpu: 50m
               memory: 64Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8025
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 8025
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 5
 
 
 ---
@@ -845,6 +960,24 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
           volumeMounts:
             - mountPath: /openedx/redis/config/
               name: config
@@ -932,6 +1065,22 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -991,6 +1140,22 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -1052,6 +1217,22 @@ spec:
             limits:
               cpu: "1"
               memory: 1536Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 7700
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 7700
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
           volumeMounts:
@@ -1104,6 +1285,20 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 8002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
           volumeMounts:
             - mountPath: /etc/caddy/
               name: config
@@ -1163,6 +1358,22 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /heartbeat
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /heartbeat
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -1214,6 +1425,22 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /status/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /status/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
           volumeMounts:
             - mountPath: /openedx/xqueue/xqueue/tutor.py
               name: settings
