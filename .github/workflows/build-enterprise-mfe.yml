@@ -12,13 +12,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  packages: write
-  id-token: write
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 jobs:
   admin-portal:
+    # contents: read — checkout in reusable workflow
+    # packages: write — push image to GHCR
+    # id-token: write — OIDC for Workload Identity Federation (GCP auth)
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
     with:
       app_name: mereka-lms/enterprise-admin-portal
@@ -26,6 +30,13 @@ jobs:
       context: infrastructure/docker/enterprise-mfe-clean
 
   learner-portal:
+    # contents: read — checkout in reusable workflow
+    # packages: write — push image to GHCR
+    # id-token: write — OIDC for Workload Identity Federation (GCP auth)
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
     with:
       app_name: mereka-lms/enterprise-learner-portal

@@ -1,6 +1,5 @@
 name: Accessibility Audit (axe-core)
 
-permissions: {}
 on:
   push:
     branches: [main]
@@ -30,8 +29,7 @@ on:
         default: "/authn/login,/authn/register,/dashboard,/account,/learning"
         type: string
 
-permissions:
-  contents: read
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 jobs:
   axe-audit:

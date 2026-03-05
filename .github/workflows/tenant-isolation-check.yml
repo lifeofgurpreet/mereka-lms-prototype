@@ -20,8 +20,7 @@ on:
   merge_group:
   workflow_dispatch: {}
 
-permissions:
-  contents: read
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 jobs:
   tenant-isolation-offline:

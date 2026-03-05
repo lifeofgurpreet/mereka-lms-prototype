@@ -2,8 +2,7 @@
 # DELETE after confirming runners work
 name: Test ARC Runners
 
-permissions:
-  contents: read
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 on:
   workflow_dispatch:
@@ -11,6 +10,7 @@ on:
 jobs:
   test-standard:
     runs-on: mereka-k8s-runners
+    permissions: {}  # No code checkout or GitHub API calls — no permissions needed
     steps:
       - name: Runner info
         run: |
@@ -23,6 +23,7 @@ jobs:
 
   test-heavy:
     runs-on: mereka-k8s-heavy-builders
+    permissions: {}  # No code checkout or GitHub API calls — no permissions needed
     steps:
       - name: Runner info
         run: |

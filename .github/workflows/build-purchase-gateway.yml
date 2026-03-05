@@ -12,13 +12,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  packages: write
-  id-token: write
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 jobs:
   build:
+    # contents: read — checkout in reusable workflow
+    # packages: write — push image to GHCR
+    # id-token: write — OIDC for Workload Identity Federation (GCP auth)
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
     with:
       app_name: purchase-gateway
@@ -28,6 +32,11 @@ jobs:
   update-dev:
     needs: build
     if: github.ref == 'refs/heads/main'
+    # contents: read — checkout in reusable workflow
+    # id-token: write — OIDC for Workload Identity Federation used by reusable workflow
+    permissions:
+      contents: read
+      id-token: write
     uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
     with:
       app_name: mereka-lms

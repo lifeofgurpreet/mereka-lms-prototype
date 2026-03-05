@@ -1,7 +1,6 @@
 name: NPM Start MFE Smoke
 
-permissions:
-  contents: read
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 on:
   workflow_dispatch:
@@ -48,6 +47,8 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: read  # checkout
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2

@@ -1,6 +1,5 @@
 name: Observability Compliance
 
-permissions: {}
 on:
   workflow_dispatch:
     inputs:
@@ -83,8 +82,7 @@ on:
       - "scripts/qa/verify-observability-evidence-identity.sh"
   merge_group:
 
-permissions:
-  contents: read
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 env:
   EVIDENCE_RETENTION_DAYS: "30"
@@ -94,6 +92,8 @@ jobs:
     name: Validate observability monitoring manifests
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read  # checkout
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
@@ -201,6 +201,8 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_runtime == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: read  # checkout
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
