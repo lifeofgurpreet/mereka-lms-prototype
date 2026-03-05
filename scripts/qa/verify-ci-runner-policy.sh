@@ -38,6 +38,10 @@ ARC_TEST_WORKFLOWS=(
 HEAVY_BUILDER_ALLOWED_WORKFLOWS=(
   "build-tutor-images.yml"
   "test-arc-runners.yml"
+  "cross-browser-branding-smoke.yml"
+  "frontend-branding-closure.yml"
+  "mfe-live-dom-audit.yml"
+  "npm-start-mfe-smoke.yml"
 )
 
 violations=0

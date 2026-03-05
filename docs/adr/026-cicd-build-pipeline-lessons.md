@@ -265,6 +265,14 @@ explicit daemon config.
 
 ---
 
+## Decision
+
+The eight lessons documented above are adopted as binding operational rules for all CI/CD work
+on this repository. Each lesson maps to one or more prevention rules enforced by the
+`verify-cicd-lessons-compliance.sh` verification script running on every PR.
+
+The rules below are the machine-enforceable subset derived from the lessons.
+
 ## Binding Decisions
 
 These rules derive from the eight lessons above and apply to all future CI/CD work:

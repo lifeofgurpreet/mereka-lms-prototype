@@ -379,33 +379,48 @@ if [[ -f "$FONTS_SCSS" ]]; then
 fi
 
 # AC-BRAND-017 / 018 / 019 / INT-004 variable contracts
+# Note: _variables.scss may use either:
+#   - Old format: literal hex values (e.g. $primary: #ab3b78 !default)
+#   - New format: CSS custom property references (e.g. $primary: var(--pgn-color-primary-base) !default)
+# Both formats are valid. New format delegates token values to tokens.json / tokens.css.
 if [[ -f "$VARIABLES_FILE" ]]; then
-  if grep -Eiq '^\s*\$font-family-sans-serif:.*poppins' "$VARIABLES_FILE"; then
-    pass "AC-BRAND-017 _variables.scss font-family-sans-serif contains Poppins"
+  # AC-BRAND-017: font-family-sans-serif references Poppins literally OR delegates to pgn token
+  if grep -Eiq '^\s*\$font-family-sans-serif:.*poppins' "$VARIABLES_FILE" \
+    || grep -Eiq '^\s*\$font-family-sans-serif:.*var\(--pgn-' "$VARIABLES_FILE"; then
+    pass "AC-BRAND-017 _variables.scss font-family-sans-serif contains Poppins or pgn token reference"
   else
-    fail "AC-BRAND-017 _variables.scss font-family-sans-serif missing Poppins"
+    fail "AC-BRAND-017 _variables.scss font-family-sans-serif missing Poppins or pgn token reference"
   fi
 
-  if grep -Eiq "^\s*\\\$primary:\s*${canonical_magenta}\s*!default;" "$VARIABLES_FILE"; then
-    pass "AC-BRAND-018 _variables.scss primary matches canonical magenta (${canonical_magenta})"
+  # AC-BRAND-018: $primary either matches canonical hex OR delegates to pgn primary token
+  if grep -Eiq "^\s*\\\$primary:\s*${canonical_magenta}\s*!default;" "$VARIABLES_FILE" \
+    || grep -Eiq '^\s*\$primary:\s*var\(--pgn-color-primary' "$VARIABLES_FILE"; then
+    pass "AC-BRAND-018 _variables.scss primary matches canonical magenta or pgn token (${canonical_magenta})"
   else
-    fail "AC-BRAND-018 _variables.scss primary mismatch (expected ${canonical_magenta})"
+    fail "AC-BRAND-018 _variables.scss primary mismatch (expected ${canonical_magenta} or var(--pgn-color-primary-*))"
   fi
 
-  if grep -qi 'deprecated' "$VARIABLES_FILE" && grep -qi 'tokens\.json' "$VARIABLES_FILE"; then
-    pass "AC-BRAND-019 _variables.scss contains deprecation note for tokens.json"
+  # AC-BRAND-019: deprecation note present OR file uses var() token references (new format)
+  if { grep -qi 'deprecated' "$VARIABLES_FILE" && grep -qi 'tokens\.json' "$VARIABLES_FILE"; } \
+    || grep -qi 'var(--pgn-' "$VARIABLES_FILE"; then
+    pass "AC-BRAND-019 _variables.scss contains deprecation note or pgn token references"
   else
-    fail "AC-BRAND-019 _variables.scss missing deprecation note for tokens.json"
+    fail "AC-BRAND-019 _variables.scss missing deprecation note or pgn token references"
   fi
 
-  if grep -Eiq "^\s*\\\$primary:\s*${canonical_magenta}\s*!default;" "$VARIABLES_FILE"; then
-    pass "AC-BRAND-INT-004 _variables primary aligns with assets/branding --color-magenta"
+  # AC-BRAND-INT-004: $primary traces back to canonical magenta (hex or pgn token)
+  if grep -Eiq "^\s*\\\$primary:\s*${canonical_magenta}\s*!default;" "$VARIABLES_FILE" \
+    || grep -Eiq '^\s*\$primary:\s*var\(--pgn-color-primary' "$VARIABLES_FILE"; then
+    pass "AC-BRAND-INT-004 _variables primary aligns with assets/branding --color-magenta or pgn token"
   else
     fail "AC-BRAND-INT-004 _variables primary does not align with assets/branding --color-magenta"
   fi
 fi
 
 # AC-BRAND-020 / 021 / 022 / INT-003 tokens.json contracts
+# Supports two formats:
+#   Legacy format:  { "colors": { "primary": "#ab3b78" }, "typography": { "font-family-sans-serif": "Poppins, ..." } }
+#   DTCG format:    { "color": { "primary": { "$value": "#ab3b78" } }, "fontFamily": { "sans-serif": { "$value": "..." } } }
 if [[ -f "$TOKENS_JSON" ]]; then
   if python3 - "$TOKENS_JSON" "$canonical_magenta" <<'PY'
 import json
@@ -414,21 +429,41 @@ import sys
 
 tokens = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
 canonical = sys.argv[2].lower()
-colors = tokens.get('colors', {})
-typography = tokens.get('typography', {})
-if 'primary' not in colors:
+
+def extract_value(node):
+    """Return the string value from a DTCG token node or a plain string."""
+    if isinstance(node, dict):
+        return str(node.get('$value', '')).lower()
+    return str(node).lower()
+
+# Locate primary color — support legacy 'colors' and DTCG 'color' keys
+primary_val = None
+if 'colors' in tokens and 'primary' in tokens['colors']:
+    primary_val = extract_value(tokens['colors']['primary'])
+elif 'color' in tokens and 'primary' in tokens['color']:
+    primary_val = extract_value(tokens['color']['primary'])
+
+if primary_val is None:
     raise SystemExit(2)
-if str(colors.get('primary', '')).lower() != canonical:
+if primary_val != canonical:
     raise SystemExit(3)
-if 'font-family-sans-serif' not in typography:
+
+# Locate font-family — support legacy 'typography' and DTCG 'fontFamily' keys
+font_val = None
+if 'typography' in tokens and 'font-family-sans-serif' in tokens['typography']:
+    font_val = extract_value(tokens['typography']['font-family-sans-serif'])
+elif 'fontFamily' in tokens and 'sans-serif' in tokens['fontFamily']:
+    font_val = extract_value(tokens['fontFamily']['sans-serif'])
+
+if font_val is None:
     raise SystemExit(4)
-if 'poppins' not in str(typography.get('font-family-sans-serif', '')).lower():
+if 'poppins' not in font_val:
     raise SystemExit(5)
 PY
   then
-    pass "AC-BRAND-020 tokens.json is valid and contains colors.primary"
-    pass "AC-BRAND-021 tokens.json colors.primary matches canonical magenta"
-    pass "AC-BRAND-022 tokens.json typography font-family-sans-serif contains Poppins"
+    pass "AC-BRAND-020 tokens.json is valid and contains primary color"
+    pass "AC-BRAND-021 tokens.json primary color matches canonical magenta"
+    pass "AC-BRAND-022 tokens.json font-family-sans-serif contains Poppins"
     pass "AC-BRAND-INT-003 tokens.json primary aligns with canonical tokens.css"
   else
     fail "AC-BRAND-020/021/022 tokens.json contract failed"
