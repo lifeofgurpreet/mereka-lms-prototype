@@ -1,6 +1,6 @@
 # CI/CD Optimization & Cost Reduction — Implementation Tracker
 
-<!-- Last updated: 2026-02-26 (Phase 6 complete) -->
+<!-- Last updated: 2026-03-05 (Phase 6 complete; ADR-026 lessons documented) -->
 
 **Objective**: Migrate heavy CI/CD workloads to self-hosted Kubernetes runners (ARC), eliminate compute waste, consolidate micro-jobs, and optimize caching — driving GitHub Actions costs from ~$56/month to near-zero without compromising any quality gates.
 
@@ -381,6 +381,30 @@ Some workflows use `${{ github.run_id }}-${{ github.run_attempt }}` in artifact 
   - Modified: `.github/workflows/secret-scan-audit.yml`
   - Changed: `0 3 * * 1` (weekly Monday) → `0 3 1 * *` (1st of each month)
   - Note: Per-PR TruffleHog in `ci.yml` covers new commits continuously
+
+---
+
+## Lessons Learned (ADR-026)
+
+*Documented: 2026-03-05 | See: [docs/adr/026-cicd-build-pipeline-lessons.md](../adr/026-cicd-build-pipeline-lessons.md)*
+
+Eight failure modes discovered during the ARC migration and GHCR switch (March 2026) are
+captured as binding decisions in ADR-026. A compliance verification script runs on every PR:
+
+```bash
+scripts/qa/verify-cicd-lessons-compliance.sh
+```
+
+| Lesson | Binding Decision | Automated? |
+|--------|-----------------|------------|
+| 1 — Registry mismatch (GAR on rke2-nonprod) | Always use GHCR for new images | YES (B1 check) |
+| 2 — `--load` with docker-container driver fails in DinD | Use `--push` directly to registry | Manual |
+| 3 — ARC minRunners:0 cold start delay | Tolerate 2-3 min; revisit at threshold | Manual |
+| 4 — `gh run watch` breaks on GitHub 502s | Use `gh run view --exit-status` in loops | Manual |
+| 5 — No live log access during builds | Implement progress artifacts for >10 min builds | Manual |
+| 6 — Stale version refs across 27+ files | requirements-tutor.txt is single source of truth | YES (B6 check) |
+| 7 — python3.11 hard-coded, Ulmo uses 3.12 | Use unversioned `python3` in containers | YES (B7 check) |
+| 8 — DinD MTU mismatch on WireGuard CNI | Set daemon MTU to pod network MTU | YES (B8 check) |
 
 ---
 
