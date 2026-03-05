@@ -9,7 +9,7 @@ Quick guide to automated verification and testing in Mereka LMS.
 ```
 scripts/
 ├── qa/                          # Quality assurance & verification
-│   ├── verify-*.sh              # Verification scripts (164 scripts)
+│   ├── verify-*.sh              # Verification scripts (see generated catalog for exact count)
 │   ├── spec-tools/              # Spec coverage tools
 │   │   ├── spec_coverage_dashboard.py  # Compact coverage dashboard
 │   │   ├── spec_coverage_report.py     # Generate coverage report
@@ -50,13 +50,18 @@ scripts/
 ### Full Suite
 
 ```bash
-# Run all QA smoke tests
-make qa-smoke
+# Release-blocking static suite
+./scripts/qa/run-release-verification-gates.sh
 
-# Count verification scripts
-ls scripts/qa/verify-*.sh | wc -l
-# Output: 164 scripts
+# Catalog and ownership metadata
+python3 scripts/qa/generate-verification-catalog.py
+./scripts/qa/verify-verification-catalog.sh
 ```
+
+Catalog outputs:
+- `docs/operations/verification/verification_catalog.json`
+- `docs/operations/verification/VERIFICATION_CATALOG.md`
+- `docs/operations/verification/VERIFICATION_GOVERNANCE.md`
 
 ---
 
