@@ -19,8 +19,9 @@
 #   New Relic env           → template already has ARG ENABLE_NEW_RELIC
 #   Theme/brand copy       → mfe-dockerfile-pre-npm-install + mfe-dockerfile-post-npm-install
 #   Admin console Redux    → mfe-dockerfile-post-npm-install-admin-console
-#   Course authoring fix   → mfe-dockerfile-post-npm-install-course-authoring
-#   Ulmo source refs       → should be set via MFE_COMMON_VERSION in tutor config
+#   Course authoring fix   → dead code (Tutor app name is 'authoring', not 'course-authoring';
+#                            symlink paths never existed; original function was also a no-op)
+#   Ulmo source refs       → no-op (Tutor v21 template already uses Ulmo refs natively)
 #   Brand version bump     → dead (we use @edx/brand@file:./brand-mereka now)
 #   Discussions webpack    → dead code (no-op function)
 #
