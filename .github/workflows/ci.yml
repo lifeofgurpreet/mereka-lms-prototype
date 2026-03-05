@@ -14,7 +14,7 @@ permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   # ============================================================================
@@ -70,10 +70,14 @@ jobs:
       - name: Install kubeconform
         if: steps.cache-kubeconform.outputs.cache-hit != 'true'
         run: |
-          wget -q https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz
-          tar xzf kubeconform-linux-amd64.tar.gz
+          # kubeconform v0.6.4 — checksum computed 2026-03-05
+          EXPECTED_SHA="2b4ebeaa4d5ac4843cf8f7b7e66a8874252b6b71bc7cbfc4ef1cbf85acec7c07"
+          TARBALL="kubeconform-linux-amd64.tar.gz"
+          wget -q https://github.com/yannh/kubeconform/releases/download/v0.6.4/${TARBALL}
+          echo "${EXPECTED_SHA}  ${TARBALL}" | sha256sum -c -
+          tar xzf "${TARBALL}"
           sudo mv kubeconform /usr/local/bin/
-          rm kubeconform-linux-amd64.tar.gz
+          rm "${TARBALL}"
 
       # ── Install ripgrep (needed by verification scripts) ──────────────────
       - name: Install ripgrep
@@ -367,6 +371,11 @@ jobs:
             } catch (error) {
               coverageContent = '_Coverage report not available_';
             }
+            // Sanitize: truncate and escape HTML to prevent injection
+            if (coverageContent.length > 5000) {
+              coverageContent = coverageContent.substring(0, 5000) + '\n\n..._[Truncated to 5000 chars]_';
+            }
+            coverageContent = coverageContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const jobResult = '${{ job.status }}';
             const statusEmoji = jobResult === 'success' ? '✅' : '❌';
             const body = `## ${statusEmoji} CI Static Validation

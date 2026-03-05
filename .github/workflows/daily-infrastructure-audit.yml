@@ -193,7 +193,7 @@ jobs:
           # Preserve original artifact name from alert-routing-audit.yml (includes run_id for dedup)
           name: alert-routing-audit-${{ github.run_id }}-${{ github.run_attempt }}
           path: alert-routing-audit.txt
-          retention-days: 30
+          retention-days: 7
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2: image-freshness — detect silently failing image builds

@@ -37,10 +37,11 @@ on:
         required: false
 
 concurrency:
-  # Keep push runs preemptive, but do not let manual workflow_dispatch runs
-  # cancel each other (or get canceled by a push run) on long image builds.
+  # Never cancel in-progress builds on main (prevents orphaned GHCR layers /
+  # corrupted GitOps commits). PRs and workflow_dispatch on other refs can still
+  # be superseded.
   group: build-tutor-images-${{ github.event_name }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'push' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
   REGISTRY: ghcr.io/biji-biji-initiative/mereka-lms
@@ -239,9 +240,14 @@ jobs:
         continue-on-error: true  # Non-blocking: SBOM is informational, should not block image push
         run: |
           mkdir -p var/ci
-          # Install syft
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
-            | sh -s -- -b "$HOME/.local/bin"
+          # Install syft v1.42.1 — checksum computed 2026-03-05
+          SYFT_VERSION="v1.42.1"
+          SYFT_INSTALL_SHA="01d0d15aff461f1bc54d1716feb4824341918c4f37e1b6a5a0c0caee2251be67"
+          curl -sSfL "https://raw.githubusercontent.com/anchore/syft/${SYFT_VERSION}/install.sh" \
+            -o /tmp/syft-install.sh
+          echo "${SYFT_INSTALL_SHA}  /tmp/syft-install.sh" | sha256sum -c -
+          sh /tmp/syft-install.sh -b "$HOME/.local/bin"
+          rm /tmp/syft-install.sh
           # Use docker: source explicitly so syft reads from the local Docker daemon
           # (anchore/sbom-action fails on ARC DinD runners because it can't resolve local images)
           "$HOME/.local/bin/syft" scan "docker:tutor_local/openedx:latest" \
@@ -257,9 +263,15 @@ jobs:
 
       - name: Install Trivy CLI
         run: |
+          # trivy v0.69.3 — checksum computed 2026-03-05
+          TRIVY_VERSION="v0.69.3"
+          TRIVY_INSTALL_SHA="e00df553be558995b994758bc8995956554a16937f456dc6615b0cc411bfec7a"
           mkdir -p "$HOME/.local/bin"
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sh -s -- -b "$HOME/.local/bin"
+          curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_VERSION}/contrib/install.sh" \
+            -o /tmp/trivy-install.sh
+          echo "${TRIVY_INSTALL_SHA}  /tmp/trivy-install.sh" | sha256sum -c -
+          sh /tmp/trivy-install.sh -b "$HOME/.local/bin"
+          rm /tmp/trivy-install.sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Scan OpenEdX image for vulnerabilities
@@ -481,9 +493,14 @@ jobs:
         continue-on-error: true  # Non-blocking: SBOM is informational, should not block image push
         run: |
           mkdir -p var/ci
-          # Install syft
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
-            | sh -s -- -b "$HOME/.local/bin"
+          # Install syft v1.42.1 — checksum computed 2026-03-05
+          SYFT_VERSION="v1.42.1"
+          SYFT_INSTALL_SHA="01d0d15aff461f1bc54d1716feb4824341918c4f37e1b6a5a0c0caee2251be67"
+          curl -sSfL "https://raw.githubusercontent.com/anchore/syft/${SYFT_VERSION}/install.sh" \
+            -o /tmp/syft-install.sh
+          echo "${SYFT_INSTALL_SHA}  /tmp/syft-install.sh" | sha256sum -c -
+          sh /tmp/syft-install.sh -b "$HOME/.local/bin"
+          rm /tmp/syft-install.sh
           # Use docker: source explicitly so syft reads from the local Docker daemon
           "$HOME/.local/bin/syft" scan "docker:tutor_local/openedx-mfe:latest" \
             -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
@@ -498,9 +515,15 @@ jobs:
 
       - name: Install Trivy CLI
         run: |
+          # trivy v0.69.3 — checksum computed 2026-03-05
+          TRIVY_VERSION="v0.69.3"
+          TRIVY_INSTALL_SHA="e00df553be558995b994758bc8995956554a16937f456dc6615b0cc411bfec7a"
           mkdir -p "$HOME/.local/bin"
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sh -s -- -b "$HOME/.local/bin"
+          curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_VERSION}/contrib/install.sh" \
+            -o /tmp/trivy-install.sh
+          echo "${TRIVY_INSTALL_SHA}  /tmp/trivy-install.sh" | sha256sum -c -
+          sh /tmp/trivy-install.sh -b "$HOME/.local/bin"
+          rm /tmp/trivy-install.sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Scan MFE image for vulnerabilities
