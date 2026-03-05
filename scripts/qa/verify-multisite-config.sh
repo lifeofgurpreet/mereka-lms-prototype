@@ -142,9 +142,29 @@ PY
 )
 
 # Early-exit when no cluster is available (CI without kubectl context).
-if ! command -v kubectl >/dev/null 2>&1 || ! kubectl "${CONTEXT_ARGS[@]}" cluster-info >/dev/null 2>&1; then
-  echo "⚠ SKIP: kubectl not available or cluster unreachable — skipping multisite config runtime checks"
+# Use a short timeout so a stale/unreachable context doesn't cause a multi-minute hang.
+_CLUSTER_CHECK_TIMEOUT="${CLUSTER_CHECK_TIMEOUT:-20}"
+if ! command -v kubectl >/dev/null 2>&1; then
+  echo "⚠ SKIP: kubectl not found — skipping multisite config runtime checks"
   echo "  (Run with a valid KUBECONFIG/cluster context to execute AC-001, AC-005)"
+  exit 0
+fi
+
+_cluster_reachable=0
+if command -v timeout >/dev/null 2>&1; then
+  if timeout "${_CLUSTER_CHECK_TIMEOUT}s" kubectl "${CONTEXT_ARGS[@]}" cluster-info >/dev/null 2>&1; then
+    _cluster_reachable=1
+  fi
+else
+  # No timeout binary; try once with a short connect timeout via kubectl --request-timeout.
+  if kubectl "${CONTEXT_ARGS[@]}" --request-timeout="${_CLUSTER_CHECK_TIMEOUT}s" cluster-info >/dev/null 2>&1; then
+    _cluster_reachable=1
+  fi
+fi
+
+if [[ "$_cluster_reachable" -eq 0 ]]; then
+  echo "⚠ SKIP: kubectl cluster unreachable (context=${K8S_CONTEXT_EFFECTIVE:-default}, timeout=${_CLUSTER_CHECK_TIMEOUT}s) — skipping multisite config runtime checks"
+  echo "  (Run with a reachable cluster context to execute AC-001, AC-005)"
   exit 0
 fi
 

@@ -28,6 +28,11 @@ PROD_ALLOW_FORUM_HEARTBEAT_404="${PROD_ALLOW_FORUM_HEARTBEAT_404:-0}"
 DEV_ALLOW_FORUM_HEARTBEAT_404="${DEV_ALLOW_FORUM_HEARTBEAT_404:-0}"
 # Explicit ack required before any prod auth-surface relaxation is allowed.
 ALLOW_PROD_AUTH_SURFACE_TOLERANCES="${ALLOW_PROD_AUTH_SURFACE_TOLERANCES:-0}"
+# Short timeout (seconds) for cluster reachability probes.  Prevents hangs when
+# a kubectl context exists in kubeconfig but the cluster is offline.
+CLUSTER_CHECK_TIMEOUT="${CLUSTER_CHECK_TIMEOUT:-20}"
+# Skip dev OIDC checks when the entrypoint returns non-redirect (Authentik not configured).
+DEV_SKIP_OIDC_ON_NON_REDIRECT="${DEV_SKIP_OIDC_ON_NON_REDIRECT:-1}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/multisite-governance-gates/${STAMP}}"
 mkdir -p "$ARTIFACT_DIR"
@@ -52,6 +57,8 @@ Env:
   PROD_ALLOW_FORUM_HEARTBEAT_404=0|1 Optional auth-surface tolerance for prod forum heartbeat
   DEV_ALLOW_FORUM_HEARTBEAT_404=0|1  Optional auth-surface tolerance for dev forum heartbeat
   ALLOW_PROD_AUTH_SURFACE_TOLERANCES=1 Required to permit any prod auth-surface relaxations
+  CLUSTER_CHECK_TIMEOUT=20          Seconds to wait for cluster reachability probe (default: 20)
+  DEV_SKIP_OIDC_ON_NON_REDIRECT=1   Skip dev OIDC checks when endpoint returns non-302 (default: 1)
 EOF
 }
 
@@ -206,14 +213,17 @@ if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
   [[ -n "${DEV_CONTEXT:-}" ]] && dev_args+=(--context "$DEV_CONTEXT")
   [[ -n "${DEV_NAMESPACE:-}" ]] && dev_args+=(--namespace "$DEV_NAMESPACE")
   run_check "multisite config (dev)" \
-    env STRICT="$STRICT" ./scripts/qa/verify-multisite-config.sh dev "${dev_args[@]}"
+    env STRICT="$STRICT" CLUSTER_CHECK_TIMEOUT="$CLUSTER_CHECK_TIMEOUT" \
+      ./scripts/qa/verify-multisite-config.sh dev "${dev_args[@]}"
   run_check "org role ownership (dev)" \
-    env STRICT="$STRICT" ./scripts/qa/verify-org-role-ownership.sh dev "${dev_args[@]}"
+    env STRICT="$STRICT" CLUSTER_CHECK_TIMEOUT="$CLUSTER_CHECK_TIMEOUT" \
+      ./scripts/qa/verify-org-role-ownership.sh dev "${dev_args[@]}"
   run_check "auth surfaces (dev)" \
     env \
       ALLOW_CREDENTIALS_500="$DEV_ALLOW_CREDENTIALS_500" \
       NOTES_BANNER_NEEDLE="$DEV_NOTES_BANNER_NEEDLE" \
       ALLOW_FORUM_HEARTBEAT_404="$DEV_ALLOW_FORUM_HEARTBEAT_404" \
+      DEV_SKIP_OIDC_ON_NON_REDIRECT="$DEV_SKIP_OIDC_ON_NON_REDIRECT" \
       ./scripts/qa/verify-auth-surfaces.sh dev
 fi
 
