@@ -23,16 +23,29 @@ data:
   # YAML-formatted tenant registry.  One entry per tenant.
   # Infrastructure scripts can parse this with yq/jq.
   tenants.yaml: |
-    # Mereka Academy — default "self" tenant (platform owner).
+    # Mereka Academy — primary tenant (platform owner).
     - slug: mereka-academy
       name: Mereka Academy
       domain: academyv2.mereka.io
       enterprise_customer_uuid: "PLACEHOLDER-MEREKA-UUID"
       active: true
-      # Additional alias domains (all resolve to the same Site).
-      alias_domains:
-        - academy.biji-biji.com
-        - skillourfuture.academy.mereka.io
+      alias_domains: []
+
+    # Biji-Biji Academy tenant.
+    - slug: biji-biji
+      name: Biji-Biji Academy
+      domain: academy.biji-biji.com
+      enterprise_customer_uuid: "PLACEHOLDER-BIJIBIJI-UUID"
+      active: true
+      alias_domains: []
+
+    # Skill Our Future tenant.
+    - slug: skillourfuture
+      name: Skill Our Future
+      domain: skillourfuture.academy.mereka.io
+      enterprise_customer_uuid: "PLACEHOLDER-SKILLOURFUTURE-UUID"
+      active: true
+      alias_domains: []
 
     # Template for adding new tenants:
     # - slug: acme-corp

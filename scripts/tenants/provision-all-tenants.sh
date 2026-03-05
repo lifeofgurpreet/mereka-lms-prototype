@@ -16,6 +16,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PROVISION_SCRIPT="${REPO_ROOT}/scripts/tenants/provision-tenant.sh"
+TENANT_CONTRACT="${REPO_ROOT}/infrastructure/tenants/tenant-contracts.yml"
 
 # Colors
 GREEN='\033[0;32m'
@@ -41,12 +42,48 @@ if [[ ! -x "$PROVISION_SCRIPT" ]]; then
   exit 1
 fi
 
-echo -e "${BLUE}=== Provisioning All Tenants for Mereka LMS ===${NC}"
+if [[ ! -f "$TENANT_CONTRACT" ]]; then
+  echo -e "${RED}✗${NC} tenant contract not found: $TENANT_CONTRACT"
+  exit 1
+fi
+
+mapfile -t TENANT_ROWS < <(python3 - "$TENANT_CONTRACT" <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+
+contract = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8"))
+tenants = contract.get("tenants", [])
+if not tenants:
+    raise SystemExit("No tenants found in tenant contract")
+
+for tenant in tenants:
+    if not tenant.get("active", True):
+        continue
+    slug = tenant["slug"]
+    name = tenant["name"]
+    lms = tenant["domains"]["lms"]
+    email = tenant.get("contact_email", "")
+    country = tenant.get("country", "")
+    print(f"{slug}|{name}|{lms}|{email}|{country}")
+PY
+)
+
+if [[ "${#TENANT_ROWS[@]}" -eq 0 ]]; then
+  echo -e "${RED}✗${NC} no active tenants found in $TENANT_CONTRACT"
+  exit 1
+fi
+
+echo -e "${BLUE}=== Provisioning Tenants from Canonical Contract ===${NC}"
 echo ""
-echo "This will provision 3 tenants:"
-echo "  1. MEREKA (academyv2.mereka.io)"
-echo "  2. BIJIBIJI (academy.biji-biji.com)"
-echo "  3. SKILLOURFUTURE (skillourfuture.academy.mereka.io)"
+echo "Tenant contract: ${TENANT_CONTRACT#$REPO_ROOT/}"
+echo "Active tenants: ${#TENANT_ROWS[@]}"
+echo ""
+for idx in "${!TENANT_ROWS[@]}"; do
+  IFS='|' read -r slug name domain _ _ <<< "${TENANT_ROWS[$idx]}"
+  printf "  %s. %s (%s)\n" "$((idx + 1))" "$slug" "$domain"
+done
 echo ""
 
 if [[ $DRY_RUN -eq 1 ]]; then
@@ -59,15 +96,9 @@ PROVISIONED=0
 SKIPPED=0
 FAILED=0
 
-# Tenant definitions
-declare -A TENANTS
-TENANTS[mereka]="Mereka Academy|academyv2.mereka.io|team@mereka.io|MY"
-TENANTS[bijibiji]="Biji-Biji Initiative|academy.biji-biji.com|admin@biji-biji.com|MY"
-TENANTS[skillourfuture]="Skill Our Future|skillourfuture.academy.mereka.io|admin@mereka.io|MY"
-
 # Provision each tenant
-for slug in mereka bijibiji skillourfuture; do
-  IFS='|' read -r name domain email country <<< "${TENANTS[$slug]}"
+for tenant_row in "${TENANT_ROWS[@]}"; do
+  IFS='|' read -r slug name domain email country <<< "$tenant_row"
 
   echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo -e "${BLUE}Tenant: ${slug} (${name})${NC}"

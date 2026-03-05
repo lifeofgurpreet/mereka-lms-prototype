@@ -79,7 +79,9 @@ This ConfigMap (`tenant-registry`) is the infrastructure-discoverable source of 
 
 | Slug | Domain | Alias Domains |
 |------|--------|---------------|
-| `mereka-academy` | `academyv2.mereka.io` | `academy.biji-biji.com`, `skillourfuture.academy.mereka.io` |
+| `mereka-academy` | `academyv2.mereka.io` | _none_ |
+| `biji-biji` | `academy.biji-biji.com` | _none_ |
+| `skillourfuture` | `skillourfuture.academy.mereka.io` | _none_ |
 
 ### 1.5 Design Tokens
 

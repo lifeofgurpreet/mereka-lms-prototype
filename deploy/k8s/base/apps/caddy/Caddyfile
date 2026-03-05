@@ -131,7 +131,8 @@ studio.localhost{$default_site_port} {
 # - studio.academyv2.mereka.io: GKE Studio
 # - studio.academyv2.mereka.dev: VPS kind Studio
 # - studio.academy.biji-biji.com: Biji-Biji Studio
-http://studio.academyv2.mereka.io, http://studio.academyv2.mereka.dev, http://studio.academy.biji-biji.com {
+# - studio.skillourfuture.academy.mereka.io: Skill Our Future Studio
+http://studio.academyv2.mereka.io, http://studio.academyv2.mereka.dev, http://studio.academy.biji-biji.com, http://studio.skillourfuture.academy.mereka.io {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -168,6 +169,7 @@ http://discovery.academyv2.mereka.io, http://discovery.academyv2.mereka.dev {
 # - apps.academyv2.mereka.io: main GKE MFEs
 # - apps.academyv2.mereka.dev: VPS kind MFEs
 # - apps.academy.biji-biji.com: Biji-Biji Academy MFEs
+# - apps.skillourfuture.academy.mereka.io: Skill Our Future MFEs
 apps.localhost{$default_site_port} {
     request_body {
         max_size 2MB
@@ -176,7 +178,7 @@ apps.localhost{$default_site_port} {
 }
 
 # MFE (TLS via NGINX Ingress)
-http://apps.academyv2.mereka.io, http://apps.academyv2.mereka.dev, http://apps.academy.biji-biji.com {
+http://apps.academyv2.mereka.io, http://apps.academyv2.mereka.dev, http://apps.academy.biji-biji.com, http://apps.skillourfuture.academy.mereka.io {
     redir / https://academyv2.mereka.io
     request_body {
         max_size 2MB

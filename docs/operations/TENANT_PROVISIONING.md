@@ -66,6 +66,18 @@ Tenants share the same codebase, database, and infrastructure but appear as sepa
 
 ## Provisioning Process
 
+Canonical tenant metadata now lives in:
+
+- `infrastructure/tenants/tenant-contracts.yml`
+
+This contract is the declarative source for domain roots, org codes, registry slugs, and enterprise MFE env config mapping.
+
+Before provisioning, verify contract drift across Caddy + multisite + tenant-registry + enterprise MFE env files:
+
+```bash
+./scripts/qa/verify-tenant-contract-alignment.sh
+```
+
 Provisioning is performed via the Django management command:
 
 ```bash
@@ -95,6 +107,13 @@ The wrapper script:
 - Validates slug format
 - Provides post-provisioning reminders
 - Supports `--dry-run` for preview
+
+For batch provisioning from the canonical contract:
+
+```bash
+./scripts/tenants/provision-all-tenants.sh --dry-run
+./scripts/tenants/provision-all-tenants.sh
+```
 
 ---
 

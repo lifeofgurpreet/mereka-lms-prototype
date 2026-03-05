@@ -1,0 +1,47 @@
+version: 1
+
+tenants:
+  - slug: mereka
+    registry_slug: mereka-academy
+    name: Mereka Academy
+    org_code: MEREKA
+    active: true
+    contact_email: team@mereka.io
+    country: MY
+    domains:
+      lms: academyv2.mereka.io
+      studio: studio.academyv2.mereka.io
+      apps: apps.academyv2.mereka.io
+      admin: admin.academyv2.mereka.io
+    aliases: []
+    mfe_env_file: deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js
+
+  - slug: bijibiji
+    registry_slug: biji-biji
+    name: Biji-Biji Academy
+    org_code: BIJIBIJI
+    active: true
+    contact_email: admin@biji-biji.com
+    country: MY
+    domains:
+      lms: academy.biji-biji.com
+      studio: studio.academy.biji-biji.com
+      apps: apps.academy.biji-biji.com
+      admin: admin.academy.biji-biji.com
+    aliases: []
+    mfe_env_file: deploy/k8s/base/apps/enterprise/mfe/biji-biji-mfe-env.js
+
+  - slug: skillourfuture
+    registry_slug: skillourfuture
+    name: Skill Our Future
+    org_code: SKILLOURFUTURE
+    active: true
+    contact_email: admin@mereka.io
+    country: MY
+    domains:
+      lms: skillourfuture.academy.mereka.io
+      studio: studio.skillourfuture.academy.mereka.io
+      apps: apps.skillourfuture.academy.mereka.io
+      admin: admin.skillourfuture.academy.mereka.io
+    aliases: []
+    mfe_env_file: deploy/k8s/base/apps/enterprise/mfe/skillourfuture-mfe-env.js
