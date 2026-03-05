@@ -100,9 +100,9 @@ Overlay is ready in this repo but staging is not yet deployed via ArgoCD. Requir
 
 > **ADR-024**: All subsites are TRUE TENANTS. See `docs/adr/024-multi-tenancy-true-tenants.md`.
 
-1. **No `EnterpriseCustomer` records** — Neither Biji-Biji nor SkillOurFuture has an EnterpriseCustomer record. They need one for proper tenant scoping.
-2. **No Discovery `Partner` records** — Neither subsite has a Partner record in Discovery. Needed for proper course catalog scoping per tenant.
-3. **No `course_org_filter`** — Neither subsite's SiteConfiguration restricts visible courses to their org. All tenants see all courses.
+1. ~~No `EnterpriseCustomer` records~~ — **DONE** (verified 2026-03-05: bijibiji uuid=378aa476, skillourfuture uuid=36d0e89b)
+2. **Discovery `Partner` records** — **UNVERIFIED** — needs checking via Discovery admin API
+3. ~~No `course_org_filter`~~ — **DONE** (verified 2026-03-05: BIJIBIJI, SKILLOURFUTURE filters set)
 4. **No dev/staging domains** — `academy.biji-biji.com` has no dev equivalent. Testing happens on the shared dev platform (`academyv2.mereka.dev`).
 5. **No own design system** — Both subsites share the Mereka comprehensive theme. Tenant-level branding (logo, colours) is via Open edX Site Configuration, not a separate theme.
 
@@ -146,5 +146,6 @@ These services are shared by design — Open edX's architecture does not support
 | 2 | Add enterprise Caddy routes to dev Caddy config (fixes admin/learner 503 on dev) | bbi-infrastructure | High |
 | 3 | Deploy staging overlay via ArgoCD | bbi-infrastructure | Medium |
 | 4 | Add dev/staging DNS records for staging.academyv2.mereka.io subdomains | bbi-infrastructure | Medium |
-| 5 | Create EnterpriseCustomer + Discovery Partner records for Biji-Biji and SkillOurFuture | mereka-lms | **High** |
-| 6 | Add `course_org_filter` to SiteConfiguration for both subsites | mereka-lms | **High** |
+| 5 | ~~Create EnterpriseCustomer records~~ | ~~mereka-lms~~ | **DONE** (verified 2026-03-05) |
+| 6 | ~~Add `course_org_filter` to SiteConfiguration~~ | ~~mereka-lms~~ | **DONE** (verified 2026-03-05) |
+| 7 | Verify Discovery `Partner` records exist for subsites | mereka-lms | Medium |

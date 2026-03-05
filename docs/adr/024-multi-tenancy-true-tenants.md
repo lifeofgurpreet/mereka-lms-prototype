@@ -125,14 +125,20 @@ framework, EnterpriseCustomer scoping), not at the infrastructure layer.
   complexity
 - Custom domains require DNS + TLS management per tenant
 
-### Current Gaps (Must Fix)
+### Current State (Verified 2026-03-05 via live cluster)
+
+| Record | Biji-Biji | SkillOurFuture | Mereka |
+|--------|-----------|----------------|--------|
+| `EnterpriseCustomer` | uuid=378aa476, slug=bijibiji, site=4 | uuid=36d0e89b, slug=skillourfuture, site=7 | uuid=6435193a, slug=mereka, site=6 |
+| `SiteConfiguration` | enabled=True, org_filter=BIJIBIJI | enabled=True, org_filter=SKILLOURFUTURE | enabled=True, org_filter=MEREKA |
+| Django `Site` (LMS) | academy.biji-biji.com (id=4) | skillourfuture.academy.mereka.io (id=7) | academyv2.mereka.io (id=6) |
+| Django `Site` (MFE) | apps.academy.biji-biji.com (id=9) | apps.skillourfuture.academy.mereka.io (id=10) | apps.academyv2.mereka.io (id=8) |
+
+### Remaining Gaps
 
 | Gap | Status | Action |
 |-----|--------|--------|
-| Biji-Biji has no `EnterpriseCustomer` record | **OPEN** | Create via provisioning script |
-| SkillOurFuture has no `EnterpriseCustomer` record | **OPEN** | Create via provisioning script |
-| Neither subsite has Discovery `Partner` records | **OPEN** | Create via Discovery admin |
-| Neither subsite has `course_org_filter` in SiteConfig | **OPEN** | Add to SiteConfiguration |
+| Discovery `Partner` records for subsites | **UNVERIFIED** | Check Discovery admin API |
 | Enterprise learner portal naming inconsistency | **OPEN** | See issue #206 |
 | Enterprise MFEs 503 on dev | **OPEN** | See issue #206 (bbi-infrastructure fix) |
 | No dev/staging domains for subsites | **BY DESIGN** | Subsites test on shared dev platform; prod-only custom domains are correct |
