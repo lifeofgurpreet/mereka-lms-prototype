@@ -129,6 +129,18 @@ else
   do_pass "INV-7: (skipped — ARC runner manifest not in this repo)"
 fi
 
+# --- Invariant 8: ExternalSecrets MUST use v1 apiVersion ---
+# v1beta1 causes apiVersion mismatch with bbi-infrastructure vendored copy,
+# making kustomize overlay patches silently fail (March 2026 ExternalSecret incident).
+ES_FILE="$REPO_ROOT/deploy/k8s/base/secrets/external-secrets.yaml"
+if [[ -f "$ES_FILE" ]]; then
+  if grep -q 'external-secrets.io/v1beta1' "$ES_FILE"; then
+    do_fail "INV-8: ExternalSecrets use deprecated v1beta1 apiVersion (must use v1)"
+  else
+    do_pass "INV-8: ExternalSecrets use v1 apiVersion"
+  fi
+fi
+
 echo
 echo "=== Summary ==="
 echo -e "${GREEN}PASS:${NC} $PASSED | ${RED}FAIL:${NC} $FAILED"

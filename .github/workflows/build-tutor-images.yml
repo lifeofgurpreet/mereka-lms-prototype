@@ -19,10 +19,6 @@ on:
         description: 'Build MFE image'
         type: boolean
         default: true
-      deploy_to_staging:
-        description: 'DEPRECATED: use update_gitops. Kept for backward compatibility'
-        type: boolean
-        default: false
       update_gitops:
         description: 'Update GitOps after build'
         type: boolean
@@ -348,6 +344,10 @@ jobs:
           TAG="${{ inputs.image_tag || github.sha }}"
           REF="${{ env.REGISTRY }}/openedx:${TAG}"
           DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${REF}")"
+          if [[ -z "${DIGEST}" || ! "${DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::Failed to resolve openedx digest for ${REF} (got: '${DIGEST}')"
+            exit 1
+          fi
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
@@ -584,6 +584,10 @@ jobs:
           TAG="${{ inputs.image_tag || github.sha }}"
           REF="${{ env.REGISTRY }}/mfe:${TAG}"
           DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${REF}")"
+          if [[ -z "${DIGEST}" || ! "${DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::Failed to resolve mfe digest for ${REF} (got: '${DIGEST}')"
+            exit 1
+          fi
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           echo "**MFE digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
@@ -805,7 +809,10 @@ jobs:
     name: Update GitOps
     runs-on: ubuntu-24.04
     needs: [build-openedx, build-mfe, release-bundle]
-    if: ${{ (github.event_name != 'workflow_dispatch' && (inputs.update_gitops || inputs.deploy_to_staging)) || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment') }}
+    # Push to main → auto-deploy to production.
+    # workflow_dispatch → deploy only when update_gitops=true and environment selected.
+    # NOTE: inputs.* are undefined on push events, so we can't reference them in that branch.
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment') }}
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}
     permissions:
       contents: write
@@ -817,10 +824,6 @@ jobs:
       - name: Validate manual dispatch inputs
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          if [[ "${{ inputs.deploy_to_staging }}" == "true" ]]; then
-            echo "deploy_to_staging is deprecated; use update_gitops=true." >&2
-            exit 1
-          fi
           if [[ "${{ inputs.update_gitops }}" != "true" ]]; then
             echo "update_gitops must be true for manual GitOps update." >&2
             exit 1

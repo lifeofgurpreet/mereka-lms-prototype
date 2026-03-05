@@ -96,7 +96,7 @@ patches:
   - path: patches/payments-gateway-secrets-infisical.yaml
     target:
       group: external-secrets.io
-      version: v1beta1
+      version: v1
       kind: ExternalSecret
       name: payments-gateway-secrets
 
