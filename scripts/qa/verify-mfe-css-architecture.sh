@@ -202,12 +202,17 @@ else:
     if any(key.startswith("./paragon/") for key in keys):
         errors.append("paragon/* exports present (asset-only contract violated)")
 
+# Build scripts for Paragon v23 DTCG token compilation are allowed.
+# Only flag scripts that imply runtime behaviour (start, serve, dev).
 if "scripts" in pkg:
-    errors.append("package.json contains scripts (build contract should be asset-only)")
+    runtime_scripts = {"start", "serve", "dev", "preinstall", "postinstall"}
+    found_runtime = set(pkg["scripts"].keys()) & runtime_scripts
+    if found_runtime:
+        errors.append(f"package.json contains runtime scripts {sorted(found_runtime)} (asset-only contract)")
 if "peerDependencies" in pkg:
     errors.append("package.json contains peerDependencies (asset-only contract)")
 if pkg.get("dependencies") not in ({}, None):
-    errors.append("dependencies must be empty/absent")
+    errors.append("dependencies must be empty/absent (use devDependencies for build tools)")
 
 if errors:
     print("\n".join(errors))
