@@ -63,7 +63,7 @@ Enterprise API-only services (catalog, access, subsidy) are excluded — no cust
 
 ### What is Missing (Pre-Launch)
 
-1. **No enterprise domain in SITE_VARIANTS** — When enterprise portals go live on a dedicated subdomain (e.g., `enterprise.academyv2.mereka.io`), a SITE_VARIANTS entry should be added in `mereka_lms.py` to serve enterprise-specific branding.
+1. **No enterprise domain in SITE_VARIANTS** — When enterprise portals go live on a dedicated subdomain (e.g., `learner.academyv2.mereka.io`), a SITE_VARIANTS entry should be added in `mereka_lms.py` to serve enterprise-specific branding.
 
 2. **No enterprise SCSS overrides** — `mereka.scss` has zero enterprise-specific selectors. The portals inherit Paragon defaults. If brand alignment is required before launch, add enterprise-scoped overrides under `.enterprise-learner-portal` or `.enterprise-admin-portal` class selectors.
 

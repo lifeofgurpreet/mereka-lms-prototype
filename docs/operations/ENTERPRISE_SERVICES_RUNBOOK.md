@@ -31,7 +31,7 @@ Comprehensive operations guide for the Open edX enterprise services stack deploy
 | Service | Port | Health Endpoint | Image | Public URL |
 |---------|------|-----------------|-------|------------|
 | enterprise-admin-portal | 8002 | `/` | enterprise-admin-portal:latest | https://admin.academyv2.mereka.io |
-| enterprise-learner-portal | 8002 | `/` | enterprise-learner-portal:latest | https://enterprise.academyv2.mereka.io |
+| enterprise-learner-portal | 8002 | `/` | enterprise-learner-portal:latest | https://learner.academyv2.mereka.io |
 
 **Note**: Both MFEs run on port 8002 (Caddy server), served via different K8s services and Ingress routes.
 
@@ -87,7 +87,7 @@ kubectl exec -n mereka-lms deploy/license-manager -- \
 curl -I https://admin.academyv2.mereka.io
 
 # Learner portal
-curl -I https://enterprise.academyv2.mereka.io
+curl -I https://learner.academyv2.mereka.io
 ```
 
 **Expected**: `HTTP 200` or `302` redirect.
@@ -213,11 +213,11 @@ All enterprise services authenticate with LMS via OAuth2. Each service has 2 OAu
 | Client ID | MFE | Public URL |
 |-----------|-----|------------|
 | enterprise-admin-portal-sso | enterprise-admin-portal | https://admin.academyv2.mereka.io |
-| enterprise-learner-portal-sso | enterprise-learner-portal | https://enterprise.academyv2.mereka.io |
+| enterprise-learner-portal-sso | enterprise-learner-portal | https://learner.academyv2.mereka.io |
 
 **Redirect URIs**:
 - Admin portal: `https://admin.academyv2.mereka.io/auth/callback`
-- Learner portal: `https://enterprise.academyv2.mereka.io/auth/callback`
+- Learner portal: `https://learner.academyv2.mereka.io/auth/callback`
 
 ---
 
@@ -583,7 +583,7 @@ kubectl get ingress -n mereka-lms -o yaml | grep -A 5 "admin.academyv2.mereka.io
 | Hostname | Type | Target | TTL | Proxy |
 |----------|------|--------|-----|-------|
 | admin.academyv2.mereka.io | A | <GKE LoadBalancer IP> | 300 | DNS-only (gray cloud) |
-| enterprise.academyv2.mereka.io | A | <GKE LoadBalancer IP> | 300 | DNS-only (gray cloud) |
+| learner.academyv2.mereka.io | A | <GKE LoadBalancer IP> | 300 | DNS-only (gray cloud) |
 
 **Why DNS-only**: Cloudflare Free SSL doesn't cover multi-level subdomains (`*.*.mereka.io`). Use Let's Encrypt via cert-manager instead.
 
@@ -598,7 +598,7 @@ dnsNames:
   - studio.academyv2.mereka.io
   - apps.academyv2.mereka.io
   - admin.academyv2.mereka.io          # Enterprise admin portal
-  - enterprise.academyv2.mereka.io     # Enterprise learner portal
+  - learner.academyv2.mereka.io     # Enterprise learner portal
   - discovery.academyv2.mereka.io
   - ecommerce.academyv2.mereka.io
   # ... (other domains)
@@ -632,7 +632,7 @@ admin.academyv2.mereka.io {
   tls /etc/caddy/tls.crt /etc/caddy/tls.key
 }
 
-enterprise.academyv2.mereka.io {
+learner.academyv2.mereka.io {
   reverse_proxy enterprise-learner-portal:8002
   tls /etc/caddy/tls.crt /etc/caddy/tls.key
 }

@@ -18,7 +18,7 @@
 | **Forum** | `forum.academyv2.mereka.io` | `forum.academyv2.mereka.dev` | `forum.staging.academyv2.mereka.io` |
 | **Ecommerce** (legacy) | `ecommerce.academyv2.mereka.io` | `ecommerce.academyv2.mereka.dev` | `ecommerce.staging.academyv2.mereka.io` |
 | **Enterprise Admin** | `admin.academyv2.mereka.io` | `admin.academyv2.mereka.dev` | `admin.staging.academyv2.mereka.io` |
-| **Enterprise Learner** | `enterprise.academyv2.mereka.io` | `learner.academyv2.mereka.dev` | `learner.staging.academyv2.mereka.io` |
+| **Enterprise Learner** | `learner.academyv2.mereka.io` | `learner.academyv2.mereka.dev` | `learner.staging.academyv2.mereka.io` |
 | **Payments Gateway** | `payments.academyv2.mereka.io` | `payments.academyv2.mereka.dev` | `payments.staging.academyv2.mereka.io` |
 
 **Total: 13 services x 3 environments = 39 domains**
@@ -36,9 +36,7 @@
 
 | Item | Issue | Status |
 |---|---|---|
-| Enterprise Learner portal | Prod uses `enterprise.*`, dev/staging use `learner.*` | **OPEN** — needs alignment |
-
-`config.sh` defines `ENTERPRISE_PORTAL_DOMAIN=enterprise.academyv2.mereka.io` for prod, but dev/staging use `learner.*`. The ingresses, Caddy routes, and DNS all need to agree. Recommend standardising on `learner.*` everywhere (more descriptive), which requires updating the prod ingress and Caddy config.
+| Enterprise Learner portal | Prod used `enterprise.*`, dev/staging used `learner.*` | **RESOLVED** (#206) — standardised on `learner.*` everywhere |
 
 ## Operational Status (2026-03-05)
 
@@ -142,7 +140,7 @@ These services are shared by design — Open edX's architecture does not support
 
 | # | Item | Owner | Priority |
 |---|---|---|---|
-| 1 | Fix enterprise learner portal naming: standardise `enterprise.*` or `learner.*` across all envs | mereka-lms + bbi-infrastructure | Medium |
+| 1 | ~~Fix enterprise learner portal naming: standardise on `learner.*` across all envs~~ | ~~mereka-lms + bbi-infrastructure~~ | **DONE** (#206) |
 | 2 | Add enterprise Caddy routes to dev Caddy config (fixes admin/learner 503 on dev) | bbi-infrastructure | High |
 | 3 | Deploy staging overlay via ArgoCD | bbi-infrastructure | Medium |
 | 4 | Add dev/staging DNS records for staging.academyv2.mereka.io subdomains | bbi-infrastructure | Medium |

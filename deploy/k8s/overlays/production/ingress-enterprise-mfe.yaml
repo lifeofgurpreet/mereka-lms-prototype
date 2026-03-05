@@ -22,7 +22,7 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: enterprise.academyv2.mereka.io
+    - host: learner.academyv2.mereka.io
       http:
         paths:
           - path: /
@@ -35,5 +35,5 @@ spec:
   tls:
     - hosts:
         - admin.academyv2.mereka.io
-        - enterprise.academyv2.mereka.io
+        - learner.academyv2.mereka.io
       secretName: enterprise-mfe-tls

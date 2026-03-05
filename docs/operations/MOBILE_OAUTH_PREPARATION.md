@@ -18,7 +18,7 @@
 | Discovery SSO | authorization-code | `https://discovery.academyv2.mereka.io/complete/edx-oauth2/` |
 | Credentials SSO | authorization-code | `https://credentials.academyv2.mereka.io/complete/edx-oauth2/` |
 | Enterprise Admin Portal SSO | authorization-code | `https://admin.academyv2.mereka.io/login/callback` |
-| Enterprise Learner Portal SSO | authorization-code | `https://enterprise.academyv2.mereka.io/login/callback` |
+| Enterprise Learner Portal SSO | authorization-code | `https://learner.academyv2.mereka.io/login/callback` |
 
 ### Mobile OAuth2 App Status: **NOT YET CREATED**
 

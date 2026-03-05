@@ -35,7 +35,7 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 ### Enterprise URLs (important)
 - LMS admin (enterprise records): `https://academyv2.mereka.io/admin/enterprise/`
 - Enterprise admin portal: `https://admin.academyv2.mereka.io`
-- Enterprise learner portal: `https://enterprise.academyv2.mereka.io`
+- Enterprise learner portal: `https://learner.academyv2.mereka.io`
 
 ## 4) Branding, Theme, and Tenant Identity
 

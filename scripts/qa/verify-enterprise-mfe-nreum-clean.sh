@@ -19,7 +19,7 @@ FAIL=0
 SKIP=0
 
 ADMIN_URL="https://admin.academyv2.mereka.io/"
-ENTERPRISE_URL="https://enterprise.academyv2.mereka.io/"
+ENTERPRISE_URL="https://learner.academyv2.mereka.io/"
 TIMEOUT=10
 
 pass_check() { echo "  [PASS] $1"; PASS=$((PASS + 1)); }

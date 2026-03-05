@@ -160,7 +160,7 @@ else
   done
 
   # mfe_config proxy: enterprise portals must forward Host header to LMS
-  ENTERPRISE_PORTALS=("admin.academyv2.mereka.io" "enterprise.academyv2.mereka.io")
+  ENTERPRISE_PORTALS=("admin.academyv2.mereka.io" "learner.academyv2.mereka.io")
   for portal in "${ENTERPRISE_PORTALS[@]}"; do
     if grep -A5 "$portal" "$CADDYFILE" | grep -qF "header_up Host"; then
       pass "Enterprise portal $portal proxies mfe_config with Host header"
@@ -189,7 +189,7 @@ if [[ ! -f "$PLUGIN" ]]; then
 else
   pass "mereka_lms.py plugin exists"
 
-  PLUGIN_EXPECTED_HOSTS=("academy.biji-biji.com" "skillourfuture.academy.mereka.io" "enterprise.academyv2.mereka.io")
+  PLUGIN_EXPECTED_HOSTS=("academy.biji-biji.com" "skillourfuture.academy.mereka.io" "learner.academyv2.mereka.io")
   for host in "${PLUGIN_EXPECTED_HOSTS[@]}"; do
     if grep -qF "$host" "$PLUGIN"; then
       pass "Extra host in mereka_lms.py: $host"

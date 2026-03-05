@@ -15,7 +15,7 @@ hooks.Filters.CONFIG_DEFAULTS.add_items(
             [
                 "admin.academyv2.mereka.io",
                 "academy.biji-biji.com",
-                "enterprise.academyv2.mereka.io",
+                "learner.academyv2.mereka.io",
                 "skillourfuture.academy.mereka.io",
             ],
         ),
@@ -24,7 +24,7 @@ hooks.Filters.CONFIG_DEFAULTS.add_items(
             [
                 "https://admin.academyv2.mereka.io",
                 "https://academy.biji-biji.com",
-                "https://enterprise.academyv2.mereka.io",
+                "https://learner.academyv2.mereka.io",
                 "https://skillourfuture.academy.mereka.io",
                 "https://apps.academy.biji-biji.com",
             ],

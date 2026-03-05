@@ -106,7 +106,7 @@ container on port 8002. Key routing decisions:
 
 The main Caddyfile at `deploy/k8s/base/apps/caddy/Caddyfile` routes the `apps.*`
 vhosts to `mfe:8002` and also proxies `/api/mfe_config/v1*` from the enterprise
-portal vhosts (`admin.academyv2.mereka.io`, `enterprise.academyv2.mereka.io`).
+portal vhosts (`admin.academyv2.mereka.io`, `learner.academyv2.mereka.io`).
 
 ### LMS Production Settings (mereka_lms plugin)
 

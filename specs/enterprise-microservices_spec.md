@@ -298,7 +298,7 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 
 #### Enterprise Learner Portal MFE
 
-- The system MUST deploy `frontend-app-learner-portal-enterprise` as a Caddy-served MFE at `https://enterprise.academyv2.mereka.io`
+- The system MUST deploy `frontend-app-learner-portal-enterprise` as a Caddy-served MFE at `https://learner.academyv2.mereka.io`
 - The learner portal MUST allow enterprise learners to:
   - Browse their enterprise catalog
   - Self-enroll in catalog courses (if access policy permits)
@@ -393,7 +393,7 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 - [ ] AC-005: Given the enterprise-access service is running, when `curl http://enterprise-access:18270/health/` is called from within the cluster, then the response is HTTP 200
 - [ ] AC-006: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:18280/health/` is called from within the cluster, then the response is HTTP 200
 - [ ] AC-007: Given enterprise MFEs are deployed, when `curl https://admin.academyv2.mereka.io/` is called, then the admin portal HTML is returned with HTTP 200
-- [ ] AC-008: Given enterprise MFEs are deployed, when `curl https://enterprise.academyv2.mereka.io/` is called, then the learner portal HTML is returned with HTTP 200
+- [ ] AC-008: Given enterprise MFEs are deployed, when `curl https://learner.academyv2.mereka.io/` is called, then the learner portal HTML is returned with HTTP 200
 - [ ] AC-009: Given the service is deployed, its domain MUST use DNS-only Cloudflare mode with Let's Encrypt SSL (not Cloudflare proxy)
 
 ### Tenant Isolation
@@ -582,7 +582,7 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 2. Configure Caddy routing for `admin.academyv2.mereka.io`
 3. Verify admin portal login and dashboard
 4. Build and deploy `frontend-app-learner-portal-enterprise`
-5. Configure Caddy routing for `enterprise.academyv2.mereka.io`
+5. Configure Caddy routing for `learner.academyv2.mereka.io`
 6. Verify learner portal catalog browsing and enrollment
 
 #### Phase 4: SSO/SAML and Integrated Channels (Week 9-10)

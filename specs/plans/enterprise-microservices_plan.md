@@ -235,13 +235,13 @@ Before starting any task in this plan:
 
 - [ ] **[M] Task 3.4**: Configure Caddy routing for enterprise MFE domains (`deploy/k8s/base/apps/caddy/Caddyfile`) | AC: AC-007, AC-008 | Depends: Task 3.3
   - Add `http://admin.academyv2.mereka.io` routing to admin-portal MFE
-  - Add `http://enterprise.academyv2.mereka.io` routing to learner-portal MFE
+  - Add `http://learner.academyv2.mereka.io` routing to learner-portal MFE
   - Follow existing Caddyfile patterns (proxy snippet, http-only behind NGINX Ingress)
   - **Done**: `curl http://admin.academyv2.mereka.io/` returns HTML with HTTP 200
 
 - [ ] **[M] Task 3.5**: Configure DNS and SSL for enterprise MFE domains (`infrastructure/cloudflare/enterprise-dns.md`) | AC: AC-007, AC-008 | Depends: None
   - `admin.academyv2.mereka.io` -- multi-level subdomain, needs DNS-only + Let's Encrypt
-  - `enterprise.academyv2.mereka.io` -- multi-level subdomain, needs DNS-only + Let's Encrypt
+  - `learner.academyv2.mereka.io` -- multi-level subdomain, needs DNS-only + Let's Encrypt
   - Update cert-manager Certificate or Ingress annotations
   - **Done**: Both domains resolve and have valid TLS certificates
 

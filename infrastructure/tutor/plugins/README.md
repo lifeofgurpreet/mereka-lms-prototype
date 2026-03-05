@@ -81,8 +81,8 @@ The plugin exposes the following configuration variables (can be overridden in `
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MEREKA_LMS_EXTRA_HOSTS` | `["admin.academyv2.mereka.io", "academy.biji-biji.com", "enterprise.academyv2.mereka.io", "skillourfuture.academy.mereka.io"]` | Additional LMS domains |
-| `MEREKA_LMS_EXTRA_CSRF_ORIGINS` | `["https://admin.academyv2.mereka.io", "https://academy.biji-biji.com", "https://enterprise.academyv2.mereka.io", "https://skillourfuture.academy.mereka.io"]` | CSRF trusted origins |
+| `MEREKA_LMS_EXTRA_HOSTS` | `["admin.academyv2.mereka.io", "academy.biji-biji.com", "learner.academyv2.mereka.io", "skillourfuture.academy.mereka.io"]` | Additional LMS domains |
+| `MEREKA_LMS_EXTRA_CSRF_ORIGINS` | `["https://admin.academyv2.mereka.io", "https://academy.biji-biji.com", "https://learner.academyv2.mereka.io", "https://skillourfuture.academy.mereka.io"]` | CSRF trusted origins |
 | `SESSION_COOKIE_DOMAIN` | `.academyv2.mereka.io` | Session cookie domain |
 | `CSRF_COOKIE_DOMAIN` | `.academyv2.mereka.io` | CSRF cookie domain |
 

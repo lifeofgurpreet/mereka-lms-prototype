@@ -292,7 +292,7 @@ http://admin.academyv2.mereka.io {
 }
 
 # Enterprise Learner Portal MFE (TLS via NGINX Ingress)
-http://enterprise.academyv2.mereka.io {
+http://learner.academyv2.mereka.io {
     request_body {
         max_size 2MB
     }

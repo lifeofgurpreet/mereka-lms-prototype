@@ -429,11 +429,11 @@ else
 fi
 
 if command -v curl &>/dev/null; then
-  EXT_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://enterprise.academyv2.mereka.io/" 2>/dev/null || echo "000")
+  EXT_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://learner.academyv2.mereka.io/" 2>/dev/null || echo "000")
   if [[ "$EXT_HTTP" == "200" ]]; then
-    pass "AC-008: enterprise.academyv2.mereka.io returns 200 externally"
+    pass "AC-008: learner.academyv2.mereka.io returns 200 externally"
   else
-    info "AC-008: enterprise.academyv2.mereka.io returns $EXT_HTTP externally (may need ingress)"
+    info "AC-008: learner.academyv2.mereka.io returns $EXT_HTTP externally (may need ingress)"
   fi
 fi
 

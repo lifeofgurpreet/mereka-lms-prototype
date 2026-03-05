@@ -79,7 +79,7 @@ replace_key "LICENSE_MANAGER_BASE_URL" "https://admin.academyv2.mereka.io/api/li
 replace_key "ENTERPRISE_CATALOG_BASE_URL" "https://admin.academyv2.mereka.io/api/enterprise-catalog"
 replace_key "ENTERPRISE_ACCESS_BASE_URL" "https://admin.academyv2.mereka.io/api/enterprise-access"
 replace_key "ENTERPRISE_SUBSIDY_BASE_URL" "https://admin.academyv2.mereka.io/api/enterprise-subsidy"
-replace_key "ENTERPRISE_LEARNER_PORTAL_URL" "https://enterprise.academyv2.mereka.io"
+replace_key "ENTERPRISE_LEARNER_PORTAL_URL" "https://learner.academyv2.mereka.io"
 replace_key "ACCESS_TOKEN_COOKIE_NAME" "edx-jwt-cookie-header-payload"
 replace_key "USER_INFO_COOKIE_NAME" "edx-user-info"
 replace_key "PLATFORM_NAME" "Mereka Academy"

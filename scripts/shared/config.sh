@@ -51,7 +51,7 @@ export FORUM_DOMAIN="${FORUM_DOMAIN:-forum.${LMS_DOMAIN}}"
 
 # Enterprise MFE domains
 export ENTERPRISE_ADMIN_DOMAIN="${ENTERPRISE_ADMIN_DOMAIN:-admin.${LMS_DOMAIN}}"
-export ENTERPRISE_PORTAL_DOMAIN="${ENTERPRISE_PORTAL_DOMAIN:-enterprise.${LMS_DOMAIN}}"
+export ENTERPRISE_PORTAL_DOMAIN="${ENTERPRISE_PORTAL_DOMAIN:-learner.${LMS_DOMAIN}}"
 
 # Alternative domains (multisite)
 export BIJI_DOMAIN="${BIJI_DOMAIN:-academy.biji-biji.com}"

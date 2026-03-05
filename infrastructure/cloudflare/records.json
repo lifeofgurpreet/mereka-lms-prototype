@@ -91,7 +91,7 @@
   {
     "description": "Enterprise Learner Portal MFE (DNS-only for Let's Encrypt)",
     "type": "CNAME",
-    "name": "enterprise.academyv2.mereka.io",
+    "name": "learner.academyv2.mereka.io",
     "content": "academyv2.mereka.io",
     "ttl": 1,
     "proxied": false

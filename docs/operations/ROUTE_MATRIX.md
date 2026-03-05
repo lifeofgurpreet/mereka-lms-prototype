@@ -21,7 +21,7 @@ for diagnosing 404s, 502s, auth loops, and branding issues.
 | **MFE apps** | `apps.academyv2.mereka.io` | `mfe:8002` | LMS session (cookie) | React MFEs: authn, learning, account, etc. |
 | **MFE apps (Biji-Biji)** | `apps.academy.biji-biji.com` | `mfe:8002` | Same MFE pod | |
 | **Admin portal** | `admin.academyv2.mereka.io` | `enterprise-admin-portal:8002` | LMS session + enterprise service APIs | Enterprise B2B admin UI |
-| **Learner portal** | `enterprise.academyv2.mereka.io` | `enterprise-learner-portal:8002` | LMS session | Enterprise learner UI |
+| **Learner portal** | `learner.academyv2.mereka.io` | `enterprise-learner-portal:8002` | LMS session | Enterprise learner UI |
 | **Discovery** | `discovery.academyv2.mereka.io` | `discovery:8000` | LMS session | Course catalog API |
 | **Ecommerce** | `ecommerce.academyv2.mereka.io` | `ecommerce:8000` | LMS session | Legacy Oscar ecommerce |
 | **Credentials** | `credentials.academyv2.mereka.io` | `credentials:8000` | LMS session | Certificate/badge issuance |

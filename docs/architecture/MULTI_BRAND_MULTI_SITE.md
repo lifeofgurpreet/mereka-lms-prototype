@@ -165,7 +165,7 @@ config keys:
 MEREKA_LMS_EXTRA_HOSTS = [
     "admin.academyv2.mereka.io",
     "academy.biji-biji.com",
-    "enterprise.academyv2.mereka.io",
+    "learner.academyv2.mereka.io",
     "skillourfuture.academy.mereka.io",
 ]
 MEREKA_LMS_EXTRA_CSRF_ORIGINS = [...]   # HTTPS versions of the above

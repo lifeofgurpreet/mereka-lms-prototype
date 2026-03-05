@@ -116,7 +116,7 @@ acceptance_criteria:
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
 - id: AC-008
-  description: Given enterprise MFEs are deployed, when `curl https://enterprise.academyv2.mereka.io/`
+  description: Given enterprise MFEs are deployed, when `curl https://learner.academyv2.mereka.io/`
     is called, then the learner portal HTML is returned with HTTP 200
   verify:
   - type: automated

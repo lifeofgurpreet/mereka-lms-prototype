@@ -78,7 +78,7 @@ This test plan covers the deployment and operation of five enterprise microservi
 - All 5 enterprise ClusterIP services have non-empty endpoints
 - Health check endpoints (enterprise-catalog, enterprise-access, enterprise-subsidy) return HTTP 200
 - MFE admin portal loads at admin.academyv2.mereka.io (HTTP 200)
-- MFE learner portal loads at enterprise.academyv2.mereka.io (HTTP 200)
+- MFE learner portal loads at learner.academyv2.mereka.io (HTTP 200)
 - enterprise-catalog to LMS internal API call (http://lms:8000)
 - enterprise-catalog to Cloud SQL connection (enterprise_catalog database)
 - enterprise-access to Redis connection (cache)

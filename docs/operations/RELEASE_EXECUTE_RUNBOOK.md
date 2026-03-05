@@ -101,7 +101,7 @@ curl -sI https://academyv2.mereka.io | head -1
 curl -sI https://studio.academyv2.mereka.io | head -1
 curl -sI https://apps.academyv2.mereka.io | head -1
 curl -sI https://admin.academyv2.mereka.io | head -1
-curl -sI https://enterprise.academyv2.mereka.io | head -1
+curl -sI https://learner.academyv2.mereka.io | head -1
 ```
 
 ## Rollback Summary (AC-OPS-204)
@@ -204,7 +204,7 @@ All routes respond 200 (pre-rollout, ArgoCD sync pending):
 | `https://studio.academyv2.mereka.io/` | 200 | PASS |
 | `https://apps.academyv2.mereka.io/authn/login` | 200 | PASS |
 | `https://admin.academyv2.mereka.io/` | 200 | PASS |
-| `https://enterprise.academyv2.mereka.io/` | 200 | PASS |
+| `https://learner.academyv2.mereka.io/` | 200 | PASS |
 
 > **Note**: NREUM clean check will PASS post-ArgoCD-sync when clean images roll out.
 > Operator action: `argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal`
@@ -242,7 +242,7 @@ All service hosts confirmed HTTP 200/302 (auth redirect where expected), zero `u
 | `studio.academyv2.mereka.io` | 200 | 0 | PASS |
 | `apps.academyv2.mereka.io/authn/login` | 200 | 0 | PASS |
 | `admin.academyv2.mereka.io` | 200 | 0 | PASS |
-| `enterprise.academyv2.mereka.io` | 200 | 0 | PASS |
+| `learner.academyv2.mereka.io` | 200 | 0 | PASS |
 | `ecommerce.academyv2.mereka.io` | 200 | 0 | PASS |
 | `credentials.academyv2.mereka.io/health/` | 200 | 0 | PASS |
 | `discovery.academyv2.mereka.io` | 200 | 0 | PASS |
@@ -264,7 +264,7 @@ for URL in \
   "https://studio.academyv2.mereka.io/" \
   "https://apps.academyv2.mereka.io/authn/login" \
   "https://admin.academyv2.mereka.io/" \
-  "https://enterprise.academyv2.mereka.io/" \
+  "https://learner.academyv2.mereka.io/" \
   "https://ecommerce.academyv2.mereka.io/" \
   "https://credentials.academyv2.mereka.io/health/"; do
   echo "$(curl -o /dev/null -s -w '%{http_code}' --max-time 10 "$URL") $URL"
