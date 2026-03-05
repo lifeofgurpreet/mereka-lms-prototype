@@ -1,12 +1,20 @@
-# DEPRECATED: 2026-02-10
-# This staging overlay is no longer actively maintained.
-# It exists as a fixture for release-openedx-gitops.sh staging code path
-# and verification scripts. Do not deploy from this overlay.
-# Production deployments use the 'production' overlay.
-# Local development uses the 'local' overlay.
-
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
+# Staging overlay — rke2-nonprod cluster, staging domains
+#
+# Environment: staging.academyv2.mereka.io (on rke2-nonprod)
+# Shares cluster with dev (rke2-nonprod) but uses staging.* domains.
+#
+# Differences from dev (rke2-nonprod overlay):
+#   - Domains: staging.academyv2.mereka.io (not academyv2.mereka.dev)
+#   - Replicas: same minimal counts
+#   - Purpose: pre-production validation before GKE rollout
+#
+# Prerequisites (same as rke2-nonprod — shared cluster):
+#   1. ClusterSecretStore infisical-secret-store (Valid/Ready)
+#   2. Secret ghcr-registry in mereka-lms namespace (imagePullSecret for GHCR)
+#   3. Default ServiceAccount patched: imagePullSecrets: [{name: ghcr-registry}]
 
 namespace: mereka-lms
 
@@ -20,19 +28,32 @@ labels:
     pairs:
       environment: staging
 
-# Image tags for staging
+# Image tags for staging — match nonprod (same GHCR images)
 # Keep canonical + transformed openedx-mfe names aligned to avoid post-transform drift.
 images:
-  - name: docker.io/overhangio/openedx
-    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: 20260207-branding-pass7-5b26e45
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/openedx
+    newTag: mereka-brand
   - name: docker.io/overhangio/openedx-mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: c1ef8f8f-20260301182820
   - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newTag: c1ef8f8f-20260301182820
+  # Enterprise MFEs — GHCR
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal
+    newTag: nreum-clean-202602200416
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal
+    newTag: nreum-clean-202602200416
+  # Enterprise backend services — frozen at 21.0.0 (archived upstream, Nov 2024)
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog
+    newTag: "21.0.0"
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy
+    newTag: "21.0.0"
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access
+    newTag: "21.0.0"
+  - name: ghcr.io/biji-biji-initiative/mereka-lms/license-manager
+    newTag: "21.0.0"
 
-# Staging replica counts (lower for cost)
+# Staging replica counts (minimal)
 replicas:
   - name: lms
     count: 1
