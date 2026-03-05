@@ -177,7 +177,7 @@ on:
 
 jobs:
   frontend-closure:
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 90
     permissions:
       contents: read  # checkout

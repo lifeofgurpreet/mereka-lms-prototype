@@ -131,7 +131,7 @@ Legend:
 
 | Workflow file | Job name | Current `runs-on` | Policy class | Status |
 |---------------|----------|-------------------|--------------|--------|
-| `a11y-tenant-branding.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
+| `a11y-tenant-branding.yml` | _(unnamed)_ | `ubuntu-24.04` | C | CONFORM |
 | `accessibility-audit.yml` | axe-core WCAG 2.2 AA Audit | `ubuntu-24.04` | C | CONFORM |
 | `argocd-drift-check.yml` | Offline Drift Check | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
 | `argocd-drift-check.yml` | Online Drift Check | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
@@ -149,14 +149,14 @@ Legend:
 | `build-tutor-images.yml` | SLSA Provenance & Attestation | `ubuntu-24.04` | C | CONFORM |
 | `build-tutor-images.yml` | Generate Release Bundle | `ubuntu-24.04` | C | CONFORM |
 | `build-tutor-images.yml` | Update GitOps | `ubuntu-24.04` | C | CONFORM |
-| `certificate-branding.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
+| `certificate-branding.yml` | _(unnamed)_ | `ubuntu-24.04` | C | CONFORM |
 | `ci.yml` | Static Validation | `ubuntu-24.04` | C | CONFORM |
 | `ci.yml` | Tutor Configuration Tests | `ubuntu-24.04` | C | CONFORM |
 | `ci.yml` | Security Scans | `ubuntu-24.04` | C | CONFORM |
 | `ci.yml` | Python test coverage | `ubuntu-24.04` | C | CONFORM |
 | `cloud-sql-backup.yml` | _(unnamed)_ | `ubuntu-24.04` | C | CONFORM |
 | `codeql.yml` | Analyze | `ubuntu-24.04` | C | CONFORM |
-| `cross-browser-branding-smoke.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
+| `cross-browser-branding-smoke.yml` | _(unnamed)_ | `mereka-k8s-heavy-builders` | B | CONFORM |
 | `daily-infrastructure-audit.yml` | Observability Audits | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
 | `daily-infrastructure-audit.yml` | Image Freshness Check | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
 | `daily-infrastructure-audit.yml` | Runtime parity | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
@@ -165,25 +165,25 @@ Legend:
 | `dr-evidence-bundle.yml` | Build DR Evidence Bundle | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
 | `e2e-tests.yml` | Verify E2E Framework (offline) | fallback expr (`mereka-k8s-runners`) | A | FLAG (offline check; class C may be sufficient) |
 | `e2e-tests.yml` | E2E Critical Path | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
-| `email-template-branding.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
+| `email-template-branding.yml` | _(unnamed)_ | `ubuntu-24.04` | C | CONFORM |
 | `frontend-before-after-visuals.yml` | Build Before/After Visual Evidence | `ubuntu-24.04` | C | CONFORM |
-| `frontend-branding-closure.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
-| `frontend-performance-spotcheck.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
+| `frontend-branding-closure.yml` | _(unnamed)_ | `mereka-k8s-heavy-builders` | B | CONFORM |
+| `frontend-performance-spotcheck.yml` | _(unnamed)_ | `ubuntu-24.04` | C | CONFORM |
 | `frontend-runtime-qa.yml` | Run Runtime Frontend QA Tranche | `ubuntu-24.04` | C | CONFORM |
 | `iac-scan.yml` | Trivy — K8s Manifests | `ubuntu-24.04` | C | CONFORM |
 | `iac-scan.yml` | Trivy — Terraform | `ubuntu-24.04` | C | CONFORM |
 | `ios-testflight.yml` | Build and Deploy to TestFlight | `macos-14` | D | CONFORM |
 | `lighthouse-ci.yml` | Verify Lighthouse Budgets | `ubuntu-24.04` | C | CONFORM |
-| `mfe-live-dom-audit.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
-| `mfe-selector-hardening.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
+| `mfe-live-dom-audit.yml` | _(unnamed)_ | `mereka-k8s-heavy-builders` | B | CONFORM |
+| `mfe-selector-hardening.yml` | _(unnamed)_ | `ubuntu-24.04` | C | CONFORM |
 | `mfe-slot-runtime-gates.yml` | Run MFE Slot Runtime Gates | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
 | `mobile-secrets-check.yml` | Mobile Secrets Offline Check | `ubuntu-24.04` | C | CONFORM |
-| `npm-start-mfe-smoke.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
+| `npm-start-mfe-smoke.yml` | _(unnamed)_ | `mereka-k8s-heavy-builders` | B | CONFORM |
 | `observability-compliance.yml` | Validate observability monitoring manifests | `ubuntu-24.04` | C | CONFORM |
 | `observability-compliance.yml` | Runtime observability verification | `ubuntu-24.04` | C | FLAG (runtime check; could benefit from class A) |
 | `operations-gates-runtime.yml` | Run Operations Gates (Runtime) | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
-| `paragon-runtime-contract.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
-| `paragon-theme-budget.yml` | _(unnamed)_ | `ubuntu-latest` | C | LEGACY |
+| `paragon-runtime-contract.yml` | _(unnamed)_ | `ubuntu-24.04` | C | CONFORM |
+| `paragon-theme-budget.yml` | _(unnamed)_ | `ubuntu-24.04` | C | CONFORM |
 | `phase2-smoke-evidence.yml` | Run Phase 2 Smoke Evidence Gates | `ubuntu-24.04` | C | CONFORM |
 | `post-deploy-e2e.yml` | Pre-flight Gate Check | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
 | `post-deploy-e2e.yml` | E2E Critical Path Tests | fallback expr (`mereka-k8s-runners`) | A | CONFORM |
@@ -250,7 +250,7 @@ Legacy `ubuntu-latest` jobs (LEGACY status in the table above) are low-priority.
 2. Trigger the workflow manually to verify compatibility
 3. Update the status column in the audit table from `LEGACY` to `CONFORM`
 
-There are currently **12 jobs** using `ubuntu-latest` that should be migrated.
+There is currently **1 job** using `ubuntu-latest` that should be migrated: `build-ios-app.yml` uses `macos-latest` (Class D, tracked separately under the macOS runner class).
 
 ---
 

@@ -45,7 +45,7 @@ on:
 
 jobs:
   smoke:
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 60
     permissions:
       contents: read  # checkout

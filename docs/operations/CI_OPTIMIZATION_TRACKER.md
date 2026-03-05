@@ -337,6 +337,23 @@ Some workflows use `${{ github.run_id }}-${{ github.run_attempt }}` in artifact 
     - HIGH findings exported as artifact summary
   - Impact: Halves security scan time per image build
 
+- [x] **Task 5.5**: Migrate remaining LEGACY workflows (issue #124 follow-up)
+  - Playwright-based browser-test workflows migrated to `mereka-k8s-heavy-builders`:
+    - `.github/workflows/cross-browser-branding-smoke.yml`
+    - `.github/workflows/mfe-live-dom-audit.yml`
+    - `.github/workflows/npm-start-mfe-smoke.yml`
+    - `.github/workflows/frontend-branding-closure.yml`
+  - Lightweight static workflows pinned from `ubuntu-latest` → `ubuntu-24.04` (Class C, CONFORM):
+    - `.github/workflows/email-template-branding.yml`
+    - `.github/workflows/certificate-branding.yml`
+    - `.github/workflows/a11y-tenant-branding.yml`
+    - `.github/workflows/mfe-selector-hardening.yml`
+    - `.github/workflows/paragon-runtime-contract.yml`
+    - `.github/workflows/paragon-theme-budget.yml`
+    - `.github/workflows/frontend-performance-spotcheck.yml`
+  - `docs/operations/CI_RUNNER_POLICY.md` audit table updated to CONFORM for all 11 jobs
+  - Remaining LEGACY entry: `build-ios-app.yml` uses `macos-latest` (Class D, tracked separately)
+
 ---
 
 ## Phase 6: Cron Schedule Rationalization
