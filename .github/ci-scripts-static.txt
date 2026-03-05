@@ -14,6 +14,7 @@ scripts/qa/verify-secrets-naming-convention.sh
 scripts/qa/verify-dev-prod-secret-separation.sh
 scripts/qa/verify-secrets-management.sh
 scripts/qa/verify-secrets-inventory.sh
+scripts/qa/verify-secrets-isolation.sh
 scripts/qa/verify-security-hardening.sh
 scripts/qa/verify-csp-headers.sh
 scripts/qa/verify-domain-url-invariants.sh

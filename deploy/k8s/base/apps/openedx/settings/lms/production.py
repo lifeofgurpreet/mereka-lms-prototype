@@ -1809,8 +1809,17 @@ CSP_FRAME_ANCESTORS = ("'self'",)
 # {% csp_nonce %} will work before we remove 'unsafe-inline'.
 CSP_INCLUDE_NONCE_IN = ["script-src"]
 
-# CSP violation report endpoint (optional; set to a Sentry CSP endpoint if available).
+# CSP report endpoint (Phase 1 — ADR-025):
+# Auto-derive from SENTRY_DSN if CSP_REPORT_URI not explicitly set.
+# Sentry's security endpoint: https://sentry.io/api/<project_id>/security/?sentry_key=<key>
+import re as _re
 _csp_report_uri = os.environ.get("CSP_REPORT_URI", "")
+if not _csp_report_uri:
+    _sentry_dsn = os.environ.get("SENTRY_DSN", "")
+    _dsn_match = _re.match(r'https://(\w+)@[^/]+/(\d+)', _sentry_dsn)
+    if _dsn_match:
+        _csp_report_uri = "https://sentry.io/api/{}/security/?sentry_key={}".format(
+            _dsn_match.group(2), _dsn_match.group(1))
 if _csp_report_uri:
     CSP_REPORT_URI = _csp_report_uri
 

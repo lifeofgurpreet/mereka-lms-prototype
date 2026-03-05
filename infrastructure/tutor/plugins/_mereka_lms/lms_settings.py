@@ -136,11 +136,17 @@ CSP_FRAME_ANCESTORS = ("'self'",)
 # This is a zero-risk change: adding a nonce does not enforce anything new.
 CSP_INCLUDE_NONCE_IN = ["script-src"]
 
-# CSP report endpoint (Phase 0 — ADR-025):
-# Set CSP_REPORT_URI env var to enable violation reporting.
-# Defaults to empty (disabled).  Sentry's /_/csp-report/ is a drop-in option.
-# Example: CSP_REPORT_URI=https://sentry.io/api/<id>/security/?sentry_key=<key>
+# CSP report endpoint (Phase 1 — ADR-025):
+# Auto-derive from SENTRY_DSN if CSP_REPORT_URI not explicitly set.
+# Sentry's security endpoint: https://sentry.io/api/<project_id>/security/?sentry_key=<key>
+import re as _re
 _csp_report_uri = os.environ.get("CSP_REPORT_URI", "")
+if not _csp_report_uri:
+    _sentry_dsn = os.environ.get("SENTRY_DSN", "")
+    _dsn_match = _re.match(r'https://(\w+)@[^/]+/(\d+)', _sentry_dsn)
+    if _dsn_match:
+        _csp_report_uri = "https://sentry.io/api/{}/security/?sentry_key={}".format(
+            _dsn_match.group(2), _dsn_match.group(1))
 if _csp_report_uri:
     CSP_REPORT_URI = _csp_report_uri
 
