@@ -84,7 +84,7 @@ spec:
                   name: payments-gateway-secrets
                   key: SECRET_KEY
             - name: ENABLE_GATEWAY_FULFILLMENT
-              value: "false"
+              value: "true"
             - name: TENANT_ISOLATION_ENABLED
               value: "true"
           readinessProbe:
