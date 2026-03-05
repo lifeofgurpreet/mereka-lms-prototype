@@ -83,6 +83,26 @@ jobs:
           CI: 'true'
         run: npx playwright test
 
+      - name: Sanitize test artifacts
+        if: always()
+        env:
+          E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for ARTIFACT_DIR in var/e2e-report var/e2e-artifacts; do
+            [[ -d "$ARTIFACT_DIR" ]] || continue
+            # Remove Playwright traces (contain full network payloads with credentials)
+            find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
+            # Redact known passwords from text logs using perl (safe with special chars)
+            for secret_var in E2E_PASSWORD; do
+              secret_val="${!secret_var:-}"
+              if [[ -n "$secret_val" ]]; then
+                find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
+                  -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+              fi
+            done
+          done
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0

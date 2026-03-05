@@ -203,6 +203,29 @@ jobs:
 
           ./scripts/qa/run-operations-gates.sh --env "$INPUT_ENV_SCOPE"
 
+      - name: Sanitize operations gate artifacts
+        if: ${{ always() && env.CAN_RUN_RUNTIME == 'true' }}
+        env:
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ARTIFACT_DIR="var/operations-gates"
+          [[ -d "$ARTIFACT_DIR" ]] || exit 0
+          # Remove Playwright traces (contain full network payloads with credentials)
+          find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
+          # Redact known passwords from text logs using perl (safe with special chars)
+          for secret_var in SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_PASSWORD_DEV SSO_CANARY_PASSWORD; do
+            secret_val="${!secret_var:-}"
+            if [[ -n "$secret_val" ]]; then
+              find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
+                -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+            fi
+          done
+
       - name: Upload operations gate artifacts
         if: ${{ always() && env.CAN_RUN_RUNTIME == 'true' }}
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0

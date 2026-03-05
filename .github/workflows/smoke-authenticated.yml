@@ -49,6 +49,34 @@ jobs:
           SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
         run: ./scripts/qa/visual-regression-test.sh --env production --authenticated || true
 
+      - name: Sanitize smoke test artifacts
+        if: always()
+        env:
+          SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for ARTIFACT_DIR in var/screenshots; do
+            [[ -d "$ARTIFACT_DIR" ]] || continue
+            # Remove Playwright traces (contain full network payloads with credentials)
+            find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
+            # Redact known passwords from text logs using perl (safe with special chars)
+            for secret_var in SSO_PASSWORD; do
+              secret_val="${!secret_var:-}"
+              if [[ -n "$secret_val" ]]; then
+                find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
+                  -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+              fi
+            done
+          done
+          # Redact from loose log files in workspace root
+          for secret_var in SSO_PASSWORD; do
+            secret_val="${!secret_var:-}"
+            if [[ -n "$secret_val" ]]; then
+              find . -maxdepth 1 -type f -name "*.log" \
+                -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+            fi
+          done
+
       - name: Upload screenshots and logs
         if: failure()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
@@ -101,6 +129,29 @@ jobs:
           REQUIRE_STUDIO_CANARY: '0'
           SSO_CANARY_TIMEOUT_SECONDS: '180'
         run: ./scripts/qa/verify-authenticated-sso-canary.sh --env "$INPUT_ENV_SCOPE"
+
+      - name: Sanitize canary artifacts
+        if: always()
+        env:
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ARTIFACT_DIR="var/auth-sso-canary"
+          [[ -d "$ARTIFACT_DIR" ]] || exit 0
+          # Remove Playwright traces (contain full network payloads with credentials)
+          find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
+          # Redact known passwords from text logs using perl (safe with special chars)
+          for secret_var in SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_PASSWORD_DEV SSO_CANARY_PASSWORD; do
+            secret_val="${!secret_var:-}"
+            if [[ -n "$secret_val" ]]; then
+              find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
+                -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+            fi
+          done
 
       - name: Upload canary artifacts
         if: always()
