@@ -55,23 +55,26 @@ check_link() {
         return 0
     fi
 
-    # Skip anchors
+    # Skip anchors-only links
     if [[ "$link" =~ ^# ]]; then
         return 0
     fi
 
+    # Strip anchor from link before resolving path
+    local file_part="${link%%#*}"
+
     # Resolve relative path
     local target_path
-    if [[ "$link" =~ ^/ ]]; then
+    if [[ "$file_part" =~ ^/ ]]; then
         # Absolute path from repo root
-        target_path="${REPO_ROOT}${link}"
+        target_path="${REPO_ROOT}${file_part}"
     else
         # Relative path from source file directory
-        target_path="${source_dir}/${link}"
+        target_path="${source_dir}/${file_part}"
     fi
 
     # Normalize path (resolve ..)
-    target_path="$(cd "$source_dir" && realpath --relative-to="$REPO_ROOT" "$link" 2>/dev/null)" || {
+    target_path="$(cd "$source_dir" && realpath --relative-to="$REPO_ROOT" "$file_part" 2>/dev/null)" || {
         warn "Invalid link in $source_file: $link"
         return 1
     }

@@ -292,7 +292,7 @@ kubectl get events -n mereka-lms --watch
 
 ### Quick Reference
 
-For detailed troubleshooting procedures, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md).
+For detailed troubleshooting procedures, see [TROUBLESHOOTING.md](../TROUBLESHOOTING.md).
 
 ### Most Common Issues
 
@@ -1116,10 +1116,10 @@ kubectl exec -it -n mereka-lms deployment/lms -- curl -I http://localhost:8000/h
 
 - **Specs**: `specs/k8s-deployment_spec.md` - Complete K8s deployment specification (32 ACs)
 - **Operations**:
-  - [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - Detailed troubleshooting procedures
-  - [DEPLOYMENT_RUNBOOK.md](./DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
+  - [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) - Detailed troubleshooting procedures
+  - [DEPLOYMENT_RUNBOOK.md](../runbooks/DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
   - [SECRETS_MANAGEMENT_GUIDE.md](./SECRETS_MANAGEMENT_GUIDE.md) - Secrets pipeline and rotation
-  - [ACCESS_URLS.md](./ACCESS_URLS.md) - Service URLs and access info
+  - [ACCESS_URLS.md](../ACCESS_URLS.md) - Service URLs and access info
 - **Scripts**:
   - `scripts/infra/release-openedx-gitops.sh` - GitOps image promotion
   - `scripts/infra/fix-service-selectors.sh` - Fix service selector mismatches

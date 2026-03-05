@@ -54,7 +54,7 @@ curl -sS -o /dev/null -w '%{redirect_url}' \
 
 ## MFE White Screen / Login Issues
 
-See [`MFE_LOGIN_FIX.md`](MFE_LOGIN_FIX.md) for MFE-specific login issues (white screen, missing authn MFE).
+See [`MFE_LOGIN_FIX.md`](../archive/MFE_LOGIN_FIX.md) for MFE-specific login issues (white screen, missing authn MFE).
 
 ## Ecommerce OAuth 500
 

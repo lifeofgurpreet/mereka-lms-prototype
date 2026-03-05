@@ -12,7 +12,7 @@ This directory contains architectural overviews and design documentation for the
 
 ## Open edX Service Overviews
 
-- **[badges-credentials-overview.md](badges-credentials-overview.md)** - Digital badges and credentials system
+- **[badges-credentials-overview.md](../../specs/archive/badges-credentials-overview.md)** - Digital badges and credentials system
 - **[content-libraries-overview.md](content-libraries-overview.md)** - Content libraries architecture
 - **[enterprise-services-overview.md](enterprise-services-overview.md)** - Enterprise features and integrations
 - **[multi-tenancy-overview.md](multi-tenancy-overview.md)** - Multi-tenancy implementation

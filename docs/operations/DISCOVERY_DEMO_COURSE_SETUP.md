@@ -261,7 +261,7 @@ kubectl apply -f deploy/k8s/base/jobs/discovery-sync-cronjob.yaml
 ## Related Documentation
 
 - [MongoDB Permissions Issue](./MONGODB_PERMISSIONS_ISSUE.md)
-- [Discovery Service Configuration](../architecture/DISCOVERY_SERVICE.md)
+- Discovery Service Configuration (see `deploy/k8s/base/plugins/discovery/`)
 - [Troubleshooting Guide](./TROUBLESHOOTING.md)
 
 ## Next Steps

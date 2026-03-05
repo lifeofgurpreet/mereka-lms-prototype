@@ -21,11 +21,11 @@ Runbooks, troubleshooting guides, and operational procedures for managing the Me
 
 ### Troubleshooting
 - [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) - Common issues and fixes
-- [`MFE_LOGIN_FIX.md`](MFE_LOGIN_FIX.md) - MFE authentication issues
-- [`MFE_REBUILD_SUCCESS.md`](MFE_REBUILD_SUCCESS.md) - MFE rebuild guide
+- [`MFE_LOGIN_FIX.md`](../archive/MFE_LOGIN_FIX.md) - MFE authentication issues
+- [`MFE_REBUILD_SUCCESS.md`](../archive/MFE_REBUILD_SUCCESS.md) - MFE rebuild guide
 
 ### Deployment & Infrastructure
-- [`DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Deployment procedures
+- [`DEPLOYMENT_RUNBOOK.md`](runbooks/DEPLOYMENT_RUNBOOK.md) - Deployment procedures
 - [`THEME_DEPLOYMENT.md`](THEME_DEPLOYMENT.md) - Branding/theme deployment flow
 - [`../branding/BRANDING_OPERATING_MODEL.md`](../branding/BRANDING_OPERATING_MODEL.md) - Canonical branding execution contract
 - [`GCP_ROADMAP.md`](GCP_ROADMAP.md) - Cloud architecture plan

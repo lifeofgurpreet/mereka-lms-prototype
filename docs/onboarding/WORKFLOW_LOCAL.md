@@ -69,7 +69,7 @@ tutor local run --volume="$(pwd)/scripts/migrations/kajabi/scripts/openedx_bulk_
   lms python /tmp/openedx_bulk_import.py users --csv /tmp/kajabi-users.csv --settings=lms.envs.tutor.production
 ```
 
-Enrollments: same command with the `enrollments` sub-command and CSV. See [`KAJABI_MIGRATION.md`](KAJABI_MIGRATION.md) for the full pipeline.
+Enrollments: same command with the `enrollments` sub-command and CSV. See [`KAJABI_MIGRATION.md`](../migrations/kajabi/KAJABI_MIGRATION.md) for the full pipeline.
 
 ## 6. Micro-Frontend Development
 

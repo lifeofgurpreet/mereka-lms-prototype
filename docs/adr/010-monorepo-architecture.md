@@ -3,7 +3,7 @@
 **Status**: Accepted
 **Date**: 2026-02-10
 **Deciders**: Platform Team
-**Related**: [specs/repository-structure.md](../../specs/repository-structure.md)
+**Related**: [specs/repository-structure.md](../../specs/repository-structure_spec.md)
 
 <!-- Last verified: 2026-02-13 -->
 
@@ -178,5 +178,5 @@ Estimated effort: 2-3 weeks for 5-10 services
 
 - [Google's Monorepo Philosophy](https://cacm.acm.org/magazines/2016/7/204032-why-google-stores-billions-of-lines-of-code-in-a-single-repository/fulltext)
 - [Monorepo vs Polyrepo Trade-offs](https://github.com/joelparkerhenderson/monorepo-vs-polyrepo)
-- [Repository Structure Spec](../../specs/repository-structure.md)
+- [Repository Structure Spec](../../specs/repository-structure_spec.md)
 - [Open edX Repository List](https://github.com/openedx)

@@ -41,7 +41,7 @@ flowchart TD
 **Related Runbooks**:
 - [Performance Degradation](performance-degradation.md) - Slow responses, high latency
 - [Database Issues](database-issues.md) - MySQL/MongoDB connection failures
-- [Certificate Issues](certificate-issues.md) - TLS/SSL problems
+- Certificate Issues (no dedicated runbook; see [INCIDENT_RESPONSE.md](../INCIDENT_RESPONSE.md) TLS section) - TLS/SSL problems
 
 ---
 
@@ -84,7 +84,7 @@ kubectl run curl-test --rm -i --image=curlimages/curl --restart=Never -n mereka-
 | Issue | Frequency | MTTR | Impact | Related Runbook |
 |-------|-----------|------|--------|-----------------|
 | Service selector mismatch | 70% | 2 min | Total outage | This guide |
-| HTTPS port missing on Caddy | 10% | 15 min (LB propagation) | HTTPS-only outage | [Certificate Issues](certificate-issues.md) |
+| HTTPS port missing on Caddy | 10% | 15 min (LB propagation) | HTTPS-only outage | [Issue 4](#issue-4-https-port-missing-on-caddy--15-min-lb-propagation) |
 | Database connection failures | 10% | 5-30 min | Total outage | [Database Issues](database-issues.md) |
 | Redis host drift | 5% | 5 min | Slow/hanging requests | [Performance Degradation](performance-degradation.md) |
 | Other (DNS, CDN, app bugs) | 5% | Variable | Variable | Various |
@@ -219,7 +219,7 @@ sleep 3 && kubectl get endpoints caddy -n mereka-lms
 - Caddy Service was created without port 443. The GCP LoadBalancer never opens TLS, so all HTTPS requests fail.
 
 **Related Issues**:
-- [Certificate Issues Runbook](certificate-issues.md) - For fake certificate or TLS handshake errors
+- See [Issue 4b: Fake Ingress Certificate](#issue-4b-fake-ingress-certificate-10-30-min) - For fake certificate or TLS handshake errors
 
 **Quick Fix:**
 ```bash
@@ -278,7 +278,7 @@ echo | openssl s_client -servername academyv2.mereka.io -connect academyv2.merek
 - When enabling new services (credentials/forum), add/update DNS records in `infrastructure/cloudflare/records*.json` and re-run `./scripts/infra/cloudflare-sync.sh`.
 - Re-run `./scripts/infra/repair-routing.sh` after any selector drift.
 
-**See Also**: [Certificate Issues Runbook](certificate-issues.md) - Comprehensive TLS troubleshooting
+**See Also**: [Issue 4b: Fake Ingress Certificate](#issue-4b-fake-ingress-certificate-10-30-min) - Comprehensive TLS troubleshooting
 
 ---
 
@@ -1583,8 +1583,8 @@ Verify Redis Streams consumers implement idempotent handling with deduplication 
 ## 📚 Related Documentation
 
 - [`docs/operations/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
-- [`docs/operations/ACCESS_URLS.md`](ACCESS_URLS.md) - Service URLs and access info
-- [`docs/DATABASE_ARCHITECTURE.md`](../DATABASE_ARCHITECTURE.md) - Database connectivity guide
+- [`docs/operations/ACCESS_URLS.md`](../ACCESS_URLS.md) - Service URLs and access info
+- [`docs/architecture/DATABASE_ARCHITECTURE.md`](../../architecture/DATABASE_ARCHITECTURE.md) - Database connectivity guide
 
 ---
 
@@ -1603,7 +1603,7 @@ Verify Redis Streams consumers implement idempotent handling with deduplication 
 **By Symptom**:
 - **Site completely down** → [Issue 1: Service selector mismatch](#issue-1-service-has-no-endpoints-none) (70% of cases)
 - **HTTPS doesn't work, HTTP does** → [Issue 4: HTTPS port missing](#issue-4-https-port-missing-on-caddy-15-min-lb-propagation)
-- **Certificate warnings** → [Issue 4b: Fake certificate](#issue-4b-fake-ingress-certificate-10-30-min) or [Certificate Issues Runbook](certificate-issues.md)
+- **Certificate warnings** → [Issue 4b: Fake certificate](#issue-4b-fake-ingress-certificate-10-30-min)
 - **Site slow/hanging** → [Issue 5: Redis host drift](#issue-5-redis-host-drift-requests-hang-5-min) or [Performance Degradation Runbook](performance-degradation.md)
 - **Login broken** → [Issue 7 series](#issue-7-login-fails-csrf-403-or-500-on-login_session-10-min)
 - **Database errors** → [Database Issues Runbook](database-issues.md)
@@ -1618,8 +1618,8 @@ Verify Redis Streams consumers implement idempotent handling with deduplication 
 **By Related Runbook**:
 - [Performance Degradation](performance-degradation.md) - Slow responses, high latency, resource exhaustion
 - [Database Issues](database-issues.md) - MySQL, MongoDB, Redis connection/auth failures
-- [Certificate Issues](certificate-issues.md) - TLS/SSL certificate problems, fake certs, SAN mismatches
-- [Authentication Issues](authentication-issues.md) - SSO, OIDC, session problems (if created)
+- Certificate Issues - TLS/SSL certificate problems, fake certs, SAN mismatches (see [Issue 4b](#issue-4b-fake-ingress-certificate-10-30-min))
+- Authentication Issues - SSO, OIDC, session problems (see [AUTH_SSO_RUNBOOK.md](AUTH_SSO_RUNBOOK.md))
 
 ---
 
