@@ -10,7 +10,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKFLOW_FILE="$REPO_ROOT/.github/workflows/operations-gates-runtime.yml"
-CANARY_WORKFLOW_FILE="$REPO_ROOT/.github/workflows/authenticated-sso-canary.yml"
+# The SSO canary job lives in smoke-authenticated.yml (merged from authenticated-sso-canary.yml)
+CANARY_WORKFLOW_FILE="$REPO_ROOT/.github/workflows/smoke-authenticated.yml"
 REPO_SLUG="${REPO_SLUG:-Biji-Biji-Initiative/mereka-lms}"
 STRICT="${STRICT:-0}"
 
@@ -72,7 +73,8 @@ check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_EMAIL_PROD" "prod canary ema
 check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_PASSWORD_PROD" "prod canary password secret wiring"
 
 if [[ ! -f "$CANARY_WORKFLOW_FILE" ]]; then
-  echo "FAIL workflow file not found: $CANARY_WORKFLOW_FILE" >&2
+  echo "FAIL canary workflow file not found: $CANARY_WORKFLOW_FILE" >&2
+  echo "  (SSO canary is in the sso-canary job inside smoke-authenticated.yml)" >&2
   exit 1
 fi
 
@@ -80,12 +82,17 @@ check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_EMAIL_PROD" "canary w
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_PASSWORD_PROD" "canary workflow prod canary password wiring"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_EMAIL_PROD" "canary workflow prod studio canary email wiring"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_PASSWORD_PROD" "canary workflow prod studio canary password wiring"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_EMAIL_DEV" "canary workflow dev studio canary email wiring"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_PASSWORD_DEV" "canary workflow dev studio canary password wiring"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY" "canary workflow REQUIRE_STUDIO_CANARY flag present"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "sso-canary" "canary workflow sso-canary job defined"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "verify-authenticated-sso-canary.sh" "canary workflow invokes canary script"
 
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   secret_names="$(gh secret list --repo "$REPO_SLUG" | awk '{print $1}')"
   variable_rows="$(gh variable list --repo "$REPO_SLUG" || true)"
 
-  for key in SSO_CANARY_EMAIL_PROD SSO_CANARY_PASSWORD_PROD SSO_CANARY_STUDIO_EMAIL_PROD SSO_CANARY_STUDIO_PASSWORD_PROD; do
+  for key in SSO_CANARY_EMAIL_PROD SSO_CANARY_PASSWORD_PROD SSO_CANARY_STUDIO_EMAIL_PROD SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_EMAIL_DEV SSO_CANARY_STUDIO_PASSWORD_DEV; do
     if grep -qx "$key" <<<"$secret_names"; then
       echo "OK github secret present: $key"
     else
