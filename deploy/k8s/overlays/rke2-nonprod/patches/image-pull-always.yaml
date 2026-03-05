@@ -1,0 +1,52 @@
+# Force imagePullPolicy: Always for mutable tags (mereka-brand).
+#
+# Without this, Kubernetes defaults to IfNotPresent — if the tag name
+# hasn't changed but the digest has (mutable tag), K8s won't re-pull.
+# This ensures pods always get the latest image when restarted.
+#
+# Only needed for nonprod where mutable tags are used. Production uses
+# SHA-pinned tags where IfNotPresent is correct.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms-worker
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms-worker
+          imagePullPolicy: Always

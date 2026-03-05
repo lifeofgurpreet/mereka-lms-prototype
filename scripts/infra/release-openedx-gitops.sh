@@ -599,8 +599,9 @@ push_with_rebase_if_needed() {
 }
 
 verify_runtime_convergence() {
-  local mfe_tag="$1"
-  local wait_seconds="$2"
+  local openedx_tag="$1"
+  local mfe_tag="$2"
+  local wait_seconds="$3"
   local interval=10
   local attempts=$(( wait_seconds / interval ))
   if [[ "$attempts" -lt 1 ]]; then
@@ -612,23 +613,35 @@ verify_runtime_convergence() {
   fi
 
   echo "Polling runtime convergence (context=$K8S_CONTEXT app=$ARGO_APP namespace=$APP_NAMESPACE)..."
+  echo "  Waiting for: lms=$openedx_tag cms=$openedx_tag mfe=$mfe_tag"
   for ((i=1; i<=attempts; i++)); do
     local app_line
     app_line="$(kubectl --context "$K8S_CONTEXT" -n "$ARGOCD_NAMESPACE" \
       get applications.argoproj.io "$ARGO_APP" \
       -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision}' 2>/dev/null || true)"
-    local deploy_image
-    deploy_image="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NAMESPACE" \
+
+    local lms_image mfe_image cms_image
+    lms_image="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NAMESPACE" \
+      get deploy lms -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
+    cms_image="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NAMESPACE" \
+      get deploy cms -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
+    mfe_image="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NAMESPACE" \
       get deploy mfe -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
 
-    echo "  [$i/$attempts] app=[$app_line] mfe=[$deploy_image]"
-    if [[ "$deploy_image" == *":$mfe_tag" ]]; then
-      echo "✓ Runtime convergence verified."
+    echo "  [$i/$attempts] app=[$app_line] lms=[$lms_image] cms=[$cms_image] mfe=[$mfe_image]"
+
+    local lms_ok=0 cms_ok=0 mfe_ok=0
+    [[ "$lms_image" == *":$openedx_tag" ]] && lms_ok=1
+    [[ "$cms_image" == *":$openedx_tag" ]] && cms_ok=1
+    [[ "$mfe_image" == *":$mfe_tag" ]] && mfe_ok=1
+
+    if [[ "$lms_ok" -eq 1 && "$cms_ok" -eq 1 && "$mfe_ok" -eq 1 ]]; then
+      echo "✓ Runtime convergence verified (lms + cms + mfe)."
       return 0
     fi
     sleep "$interval"
   done
-  echo "Runtime verification timed out waiting for mfe:$mfe_tag" >&2
+  echo "Runtime verification timed out. Expected: lms/cms=$openedx_tag mfe=$mfe_tag" >&2
   return 1
 }
 
@@ -696,11 +709,19 @@ if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_FOOTER_RUNTIME_GU
 fi
 
 if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 ]]; then
+  # Block known mutable tags for production. Immutable tags should be SHA-based
+  # (e.g., abc1234f-20260305120000) or release tags (e.g., 21.0.0).
+  MUTABLE_TAG_PATTERN="^(latest|mereka-brand|main|master|dev|staging|nightly)$"
   openedx_tag_lc="$(echo "$OPENEDX_TAG" | tr '[:upper:]' '[:lower:]')"
   mfe_tag_lc="$(echo "$MFE_TAG" | tr '[:upper:]' '[:lower:]')"
-  if [[ "$openedx_tag_lc" == "latest" || "$mfe_tag_lc" == "latest" ]]; then
-    echo "Error: production apply forbids mutable 'latest' tags." >&2
-    echo "Use immutable release tags for --openedx-tag and --mfe-tag." >&2
+  if [[ "$openedx_tag_lc" =~ $MUTABLE_TAG_PATTERN ]]; then
+    echo "Error: production apply forbids mutable tag '$OPENEDX_TAG' for openedx." >&2
+    echo "Use immutable release tags (e.g., abc1234f-20260305120000)." >&2
+    exit 1
+  fi
+  if [[ "$mfe_tag_lc" =~ $MUTABLE_TAG_PATTERN ]]; then
+    echo "Error: production apply forbids mutable tag '$MFE_TAG' for mfe." >&2
+    echo "Use immutable release tags (e.g., abc1234f-20260305120000)." >&2
     exit 1
   fi
 fi
@@ -975,7 +996,7 @@ if [[ "$PUSH" -eq 1 ]]; then
 fi
 
 if [[ "$VERIFY_RUNTIME" -eq 1 ]]; then
-  verify_runtime_convergence "$MFE_TAG" "$WAIT_SECONDS"
+  verify_runtime_convergence "$OPENEDX_TAG" "$MFE_TAG" "$WAIT_SECONDS"
 fi
 
 run_branding_release_postflights

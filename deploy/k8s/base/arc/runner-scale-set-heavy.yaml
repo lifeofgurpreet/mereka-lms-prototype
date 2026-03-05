@@ -38,8 +38,12 @@ spec:
   githubConfigSecret: arc-github-app-secret
 
   minRunners: 0
-  maxRunners: 3
+  # RWO PVCs for Docker/dep caches can only mount to one pod at a time.
+  # Keep maxRunners=1. See bbi-infrastructure arc-runners-heavy.yaml for rationale.
+  maxRunners: 1
   runnerGroup: heavy-builders
+  # Prevent runaway builds from holding slots indefinitely (45 min ceiling).
+  maxRunnerLifetime: 2700
 
   listenerTemplate:
     spec:
@@ -59,6 +63,8 @@ spec:
 
   template:
     spec:
+      # Extended grace period: DinD needs time to flush layer caches before force-kill.
+      terminationGracePeriodSeconds: 120
       serviceAccountName: arc-runner-sa
       restartPolicy: Never
 

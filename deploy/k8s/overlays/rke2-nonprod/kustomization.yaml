@@ -92,6 +92,8 @@ patches:
   - path: patches/aspects-container-hardening.yaml
   # enterprise-catalog-worker: Recreate strategy + probe hardening (from infra agent handoff)
   - path: patches/enterprise-catalog-worker-nonprod.yaml
+  # Force Always pull for mutable tags (mereka-brand) — IfNotPresent skips re-pull
+  - path: patches/image-pull-always.yaml
   # payments-gateway: switch to infisical + DEV Stripe keys
   - path: patches/payments-gateway-secrets-infisical.yaml
     target:

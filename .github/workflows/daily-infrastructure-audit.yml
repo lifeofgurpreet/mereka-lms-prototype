@@ -52,8 +52,6 @@ on:
           - prod
           - all
 
-permissions: {}
-
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 1: observability-audits — local + runtime observability + alert routing
@@ -206,6 +204,7 @@ jobs:
     permissions:
       contents: read
       packages: read
+      actions: read    # Required for gh run list (build health check)
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
