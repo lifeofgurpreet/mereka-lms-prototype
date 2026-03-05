@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# verify-ci-runner-policy.sh — enforce CI runner label policy
+# verify-ci-runner-policy.sh — enforce ARC-only CI runner policy
 #
 # Policy source: docs/operations/CI_RUNNER_POLICY.md
 #
 # Rules checked:
-#   1. No job may use 'ubuntu-latest' (use 'ubuntu-24.04' or 'macos-14' for pinned versions)
-#   2. 'mereka-k8s-heavy-builders' is reserved for Docker image builds and Playwright E2E
-#   3. 'mereka-k8s-runners' (without fallback) is only used in test-arc-runners.yml
-#   4. The fallback expression pattern is the approved form for ARC lightweight jobs
+#   1. No 'ubuntu-latest' or 'ubuntu-24.04' except in permitted exceptions
+#   2. No fallback expressions — all jobs must hard-code ARC runner labels
+#   3. 'mereka-k8s-heavy-builders' only in allowed workflows
+#   4. All other jobs must use 'mereka-k8s-runners'
 #
 # Exit codes:
-#   0 — policy satisfied (or only warnings)
+#   0 — policy satisfied
 #   1 — policy violation found
 
 set -euo pipefail
@@ -18,24 +18,17 @@ set -euo pipefail
 WORKFLOWS_DIR=".github/workflows"
 POLICY_DOC="docs/operations/CI_RUNNER_POLICY.md"
 
-# Approved runner labels and patterns
-APPROVED_PINNED_LABELS=(
-  "ubuntu-24.04"
-  "macos-14"
-  "mereka-k8s-runners"
-  "mereka-k8s-heavy-builders"
+# Workflows permitted to use GitHub-hosted runners (Class C/D exceptions)
+GITHUB_HOSTED_EXCEPTIONS=(
+  "codeql.yml"
+  "scorecard.yml"
+  "dependency-review.yml"
+  "build-ios-app.yml"
+  "ios-testflight.yml"
 )
 
-# The approved fallback expression for ARC lightweight jobs
-APPROVED_FALLBACK_PATTERN="vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04'"
-
-# Workflows allowed to use a hard 'mereka-k8s-runners' label without fallback expression
-ARC_TEST_WORKFLOWS=(
-  "test-arc-runners.yml"
-)
-
-# Workflows that use 'mereka-k8s-heavy-builders' (Docker builds, Playwright E2E)
-HEAVY_BUILDER_ALLOWED_WORKFLOWS=(
+# Workflows permitted to use mereka-k8s-heavy-builders (Class B)
+HEAVY_BUILDER_ALLOWED=(
   "build-tutor-images.yml"
   "test-arc-runners.yml"
   "cross-browser-branding-smoke.yml"
@@ -46,6 +39,7 @@ HEAVY_BUILDER_ALLOWED_WORKFLOWS=(
 
 violations=0
 warnings=0
+checks=0
 
 error() {
   echo "  FAIL: $*" >&2
@@ -57,18 +51,28 @@ warn() {
   warnings=$((warnings + 1))
 }
 
+pass() {
+  checks=$((checks + 1))
+}
+
+is_in_list() {
+  local needle="$1"; shift
+  for item in "$@"; do
+    [[ "$needle" == "$item" ]] && return 0
+  done
+  return 1
+}
+
 if [[ ! -d "$WORKFLOWS_DIR" ]]; then
   echo "ERROR: workflows directory not found at $WORKFLOWS_DIR" >&2
   echo "Run this script from the repository root." >&2
   exit 1
 fi
 
-echo "=== CI Runner Policy Verification ==="
+echo "=== CI Runner Policy Verification (ARC-only) ==="
 echo "Policy: $POLICY_DOC"
-echo "Workflows: $WORKFLOWS_DIR"
 echo ""
 
-# Collect all workflow files
 mapfile -t workflow_files < <(find "$WORKFLOWS_DIR" -maxdepth 1 -name "*.yml" | sort)
 
 if [[ ${#workflow_files[@]} -eq 0 ]]; then
@@ -82,84 +86,64 @@ echo ""
 for wf_path in "${workflow_files[@]}"; do
   wf_name="$(basename "$wf_path")"
 
-  # Read runs-on lines with line numbers
   while IFS=: read -r lineno line; do
-    # Strip leading/trailing whitespace from the value
     runs_on_value="${line#*runs-on:}"
-    runs_on_value="${runs_on_value#"${runs_on_value%%[![:space:]]*}"}"  # ltrim
-    runs_on_value="${runs_on_value%"${runs_on_value##*[![:space:]]}"}"  # rtrim
+    runs_on_value="${runs_on_value#"${runs_on_value%%[![:space:]]*}"}"
+    runs_on_value="${runs_on_value%"${runs_on_value##*[![:space:]]}"}"
 
-    # Skip empty
     [[ -z "$runs_on_value" ]] && continue
 
-    # ── Rule 1: No ubuntu-latest ────────────────────────────────────────────
-    # Reported as a warning (not a hard failure) because these are pre-existing.
-    # Migration tracked in CI_RUNNER_POLICY.md under "LEGACY" status.
-    if echo "$runs_on_value" | grep -qF "ubuntu-latest"; then
-      warn "$wf_name:$lineno  uses 'ubuntu-latest' — pin to 'ubuntu-24.04' instead (tracked in CI_RUNNER_POLICY.md)"
-      continue
-    fi
-
-    # ── Rule 2: macos-latest not allowed (use macos-14) ─────────────────────
-    if echo "$runs_on_value" | grep -qF "macos-latest"; then
-      warn "$wf_name:$lineno  uses 'macos-latest' — prefer pinned 'macos-14'"
-      continue
-    fi
-
-    # ── Rule 3: mereka-k8s-heavy-builders only in allowed workflows ──────────
-    if echo "$runs_on_value" | grep -qF "mereka-k8s-heavy-builders"; then
-      allowed=0
-      for allowed_wf in "${HEAVY_BUILDER_ALLOWED_WORKFLOWS[@]}"; do
-        if [[ "$wf_name" == "$allowed_wf" ]]; then
-          allowed=1
-          break
-        fi
-      done
-      if [[ "$allowed" -eq 0 ]]; then
-        error "$wf_name:$lineno  uses 'mereka-k8s-heavy-builders' — this label is reserved for Docker image builds and Playwright E2E. Add workflow to HEAVY_BUILDER_ALLOWED_WORKFLOWS in this script if intentional."
+    # ── GitHub-hosted labels ──────────────────────────────────────────────
+    if echo "$runs_on_value" | grep -qE 'ubuntu-|macos-'; then
+      if is_in_list "$wf_name" "${GITHUB_HOSTED_EXCEPTIONS[@]}"; then
+        pass
+      else
+        error "$wf_name:$lineno  uses GitHub-hosted runner '$runs_on_value' — must use ARC runner (mereka-k8s-runners or mereka-k8s-heavy-builders)"
       fi
       continue
     fi
 
-    # ── Rule 4: Hard mereka-k8s-runners only in test workflow ────────────────
-    # (other workflows must use the approved fallback expression)
+    # ── Fallback expressions (DEPRECATED) ─────────────────────────────────
+    if echo "$runs_on_value" | grep -qF "USE_SELF_HOSTED_RUNNERS"; then
+      error "$wf_name:$lineno  uses deprecated fallback expression — replace with hard 'mereka-k8s-runners' label"
+      continue
+    fi
+
+    # ── Heavy builders — only in allowed workflows ────────────────────────
+    if echo "$runs_on_value" | grep -qF "mereka-k8s-heavy-builders"; then
+      if is_in_list "$wf_name" "${HEAVY_BUILDER_ALLOWED[@]}"; then
+        pass
+      else
+        error "$wf_name:$lineno  uses 'mereka-k8s-heavy-builders' — add to HEAVY_BUILDER_ALLOWED in this script if intentional"
+      fi
+      continue
+    fi
+
+    # ── ARC lightweight — correct ─────────────────────────────────────────
     if echo "$runs_on_value" | grep -qF "mereka-k8s-runners"; then
-      # If it contains the fallback expression, that's fine
-      if echo "$runs_on_value" | grep -qF "$APPROVED_FALLBACK_PATTERN"; then
+      pass
+      continue
+    fi
+
+    # ── Expression patterns (matrix, needs, inputs) — skip ────────────────
+    if echo "$runs_on_value" | grep -qE '^\$\{\{'; then
+      if echo "$runs_on_value" | grep -qE "matrix\.|needs\.|github\.|inputs\."; then
+        pass
         continue
       fi
-      # Otherwise only test-arc-runners.yml is exempt
-      in_test_wf=0
-      for test_wf in "${ARC_TEST_WORKFLOWS[@]}"; do
-        if [[ "$wf_name" == "$test_wf" ]]; then
-          in_test_wf=1
-          break
-        fi
-      done
-      if [[ "$in_test_wf" -eq 0 ]]; then
-        error "$wf_name:$lineno  uses hard 'mereka-k8s-runners' label without the approved fallback expression. Use: runs-on: \${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}"
-      fi
+      warn "$wf_name:$lineno  uses non-standard expression: $runs_on_value"
       continue
     fi
 
-    # ── Rule 5: Expression patterns must use approved form ───────────────────
-    if echo "$runs_on_value" | grep -q '^\${{'; then
-      if ! echo "$runs_on_value" | grep -qF "$APPROVED_FALLBACK_PATTERN"; then
-        # Allow reusable workflow expressions or matrix strategies (skip those)
-        if echo "$runs_on_value" | grep -qE "matrix\.|needs\.|github\.|inputs\."; then
-          continue
-        fi
-        warn "$wf_name:$lineno  uses a non-standard expression: $runs_on_value"
-      fi
-      continue
-    fi
+    # ── Unknown label ─────────────────────────────────────────────────────
+    warn "$wf_name:$lineno  unrecognized runner label: $runs_on_value"
 
   done < <(grep -n "runs-on:" "$wf_path")
-
 done
 
 echo ""
 echo "=== Summary ==="
+echo "Checks     : $checks"
 echo "Violations : $violations"
 echo "Warnings   : $warnings"
 echo ""
@@ -173,5 +157,5 @@ fi
 if [[ "$warnings" -gt 0 ]]; then
   echo "PASS — no violations. $warnings warning(s) noted (non-blocking)."
 else
-  echo "PASS — all runner labels conform to policy."
+  echo "PASS — all runner labels conform to ARC-only policy."
 fi
