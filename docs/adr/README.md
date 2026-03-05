@@ -20,6 +20,10 @@ This directory contains Architecture Decision Records (ADRs) documenting signifi
 | [ADR-012](012-no-runtime-css-overlay.md) | Eliminate Runtime CSS ConfigMap Overlay | Accepted | 2026-02-10 |
 | [ADR-013](013-studio-sso-bypass-middleware.md) | Studio SSO Bypass Middleware | Accepted | 2026-02-12 |
 | [ADR-020](020-tracing-scope-and-pilot-decision.md) | Tracing Scope and Pilot Decision | Accepted | 2026-02-25 |
+| [ADR-023](023-enterprise-images-ghcr-migration.md) | Enterprise Images GHCR Migration | Accepted | 2026-03-04 |
+| [ADR-024](024-multi-tenancy-true-tenants.md) | True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture) | Accepted | 2026-03-05 |
+| [ADR-025](025-csp-nonce-migration.md) | CSP Nonce-Based Migration (Phase 0) | Accepted | 2026-03-05 |
+| [ADR-026](026-cicd-build-pipeline-lessons.md) | CI/CD Build Pipeline Lessons Learned (March 2026) | Accepted | 2026-03-05 |
 
 ## ADR Template
 
