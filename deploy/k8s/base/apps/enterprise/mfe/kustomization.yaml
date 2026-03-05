@@ -36,4 +36,7 @@ configMapGenerator:
   # Per-tenant env.config.js files exist as reference (biji-biji-mfe-env.js,
   # skillourfuture-mfe-env.js) but are NOT deployed as ConfigMaps because
   # a single MFE deployment serves all tenants via slug routing (ADR-024).
-  # These will be used when/if mfe_config_api is adopted (Phase 3, #207).
+  # Phase D1 (#207): mfe_config_api wired — per-tenant overrides are now
+  # delivered via SiteConfiguration.site_values["MFE_CONFIG"] at runtime.
+  # Provision with: scripts/tenants/provision-mfe-config.sh --tenant <name>
+  # Verify with:    scripts/qa/verify-mfe-config-api.sh

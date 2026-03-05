@@ -66,6 +66,7 @@ scripts/qa/verify-release-deployment-choreography.sh
 # ── MFE contracts ────────────────────────────────────────────────────────────
 scripts/qa/verify-mfe-build-contract.sh
 scripts/qa/verify-mfe-build-prereqs.sh
+scripts/qa/verify-mfe-config-api.sh
 scripts/qa/verify-mfe-config-contract.sh
 scripts/qa/verify-mfe-footer-slot.sh
 scripts/qa/verify-plugin-slot-wiring.sh
