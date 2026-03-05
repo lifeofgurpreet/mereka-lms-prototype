@@ -266,7 +266,7 @@ if [[ "$FAILED" -eq 0 ]]; then
   echo -e "${GREEN}All CI/CD merge gate and secret masking checks passed.${NC}"
   echo ""
   echo "Verified:"
-  echo "  AC-007/008: ci.yml defines ${#required_jobs[@]} required consolidated jobs (static-validation,"
+  echo "  AC-007/008: ci.yml defines 4 required consolidated jobs (static-validation,"
   echo "              tutor-config-tests, security-scans, test-coverage) as PR status checks."
   echo "              All action refs are SHA-pinned (immutable). GitHub branch protection"
   echo "              enforces all checks before merge."
