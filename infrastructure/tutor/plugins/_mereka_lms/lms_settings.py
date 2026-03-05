@@ -35,9 +35,15 @@ CSRF_COOKIE_HTTPONLY = False
 
 CSP_REPORT_ONLY = os.environ.get("CSP_REPORT_ONLY", "true").lower() not in ("false", "0", "no")
 
+# Activate CSPMiddleware — django-csp ships with Open edX but the middleware
+# is not enabled by default.  Adding it emits CSP headers (report-only by default).
+if 'csp.middleware.CSPMiddleware' not in MIDDLEWARE:
+    MIDDLEWARE.append('csp.middleware.CSPMiddleware')
+
 _lms_url = globals().get("MEREKA_LMS_BASE_URL", "https://{{ LMS_HOST }}")
 _mfe_url = globals().get("MEREKA_MFE_BASE_URL", "https://{{ MFE_HOST }}")
 _studio_url = globals().get("MEREKA_STUDIO_BASE_URL", "https://{{ CMS_HOST }}")
+_auth_url = globals().get("MEREKA_AUTH_BASE_URL", "https://auth0.mereka.io")
 _mfe_static_base = _mfe_url.rstrip("/")
 
 # Use MFE-hosted static branding assets as global defaults.
@@ -78,13 +84,17 @@ CSP_IMG_SRC = (
     "blob:",
     _lms_url,
     _mfe_url,
-    "https:",
+    "https://fonts.gstatic.com",
+    "https://cdn.jsdelivr.net",
+    "https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
 )
 CSP_CONNECT_SRC = (
     "'self'",
     _lms_url,
     _mfe_url,
     _studio_url,
+    _auth_url,
     "https://www.google-analytics.com",
     "https://sentry.io",
 )
@@ -93,6 +103,7 @@ CSP_FRAME_SRC = (
     _lms_url,
     _mfe_url,
     _studio_url,
+    _auth_url,
     "https://www.youtube.com",
     "https://player.vimeo.com",
 )
@@ -100,6 +111,10 @@ CSP_MEDIA_SRC = ("'self'", "blob:", "https:")
 CSP_OBJECT_SRC = ("'none'",)
 CSP_BASE_URI = ("'self'",)
 CSP_FRAME_ANCESTORS = ("'self'",)
+
+# Nonce preparation — nonces coexist with 'unsafe-inline'; templates that adopt
+# {% csp_nonce %} will work before we remove 'unsafe-inline'.
+CSP_INCLUDE_NONCE_IN = ["script-src"]
 
 _csp_report_uri = os.environ.get("CSP_REPORT_URI", "")
 if _csp_report_uri:

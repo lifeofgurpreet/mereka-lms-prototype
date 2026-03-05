@@ -1734,9 +1734,14 @@ CSRF_COOKIE_HTTPONLY = False  # MFEs read the CSRF token from JS — must stay F
 # To enforce, set CSP_REPORT_ONLY=false after validating the report feed.
 CSP_REPORT_ONLY = os.environ.get("CSP_REPORT_ONLY", "true").lower() not in ("false", "0", "no")
 
+# Activate CSPMiddleware — emits CSP headers (report-only by default).
+if 'csp.middleware.CSPMiddleware' not in MIDDLEWARE:
+    MIDDLEWARE.append('csp.middleware.CSPMiddleware')
+
 _lms_url = MEREKA_LMS_BASE_URL
 _mfe_url = MEREKA_MFE_BASE_URL
 _studio_url = MEREKA_STUDIO_BASE_URL
+_auth_url = MEREKA_AUTH_BASE_URL
 
 # Allowlist sources used by Open edX + Mereka MFEs.
 # 'unsafe-inline' is required for legacy Open edX inline scripts/styles;
@@ -1771,13 +1776,17 @@ CSP_IMG_SRC = (
     "blob:",
     _lms_url,
     _mfe_url,
-    "https:",  # Courses embed images from many CDNs; restrict further over time
+    "https://fonts.gstatic.com",
+    "https://cdn.jsdelivr.net",
+    "https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
 )
 CSP_CONNECT_SRC = (
     "'self'",
     _lms_url,
     _mfe_url,
     _studio_url,
+    _auth_url,
     "https://www.google-analytics.com",
     "https://sentry.io",
 )
@@ -1786,6 +1795,7 @@ CSP_FRAME_SRC = (
     _lms_url,
     _mfe_url,
     _studio_url,
+    _auth_url,
     "https://www.youtube.com",
     "https://player.vimeo.com",
 )
@@ -1793,6 +1803,10 @@ CSP_MEDIA_SRC = ("'self'", "blob:", "https:")
 CSP_OBJECT_SRC = ("'none'",)
 CSP_BASE_URI = ("'self'",)
 CSP_FRAME_ANCESTORS = ("'self'",)
+
+# Nonce preparation — nonces coexist with 'unsafe-inline'; templates that adopt
+# {% csp_nonce %} will work before we remove 'unsafe-inline'.
+CSP_INCLUDE_NONCE_IN = ["script-src"]
 
 # CSP violation report endpoint (optional; set to a Sentry CSP endpoint if available).
 _csp_report_uri = os.environ.get("CSP_REPORT_URI", "")

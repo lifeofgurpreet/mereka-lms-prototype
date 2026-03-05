@@ -118,6 +118,8 @@ check_plugin_pattern "SESSION_COOKIE_SECURE = True" "Session hardening flags add
 check_plugin_pattern "CSRF_COOKIE_SECURE = True" "CSRF hardening flags added in plugin"
 check_plugin_pattern "CSRF_COOKIE_HTTPONLY = False" "CSRF_HTTPONLY false remains required for MFE"
 check_plugin_pattern "REST_FRAMEWORK.setdefault(\"DEFAULT_THROTTLE_RATES\"" "REST_FRAMEWORK throttle defaults are initialized in plugin"
+check_plugin_pattern "csp.middleware.CSPMiddleware" "CSPMiddleware activated in plugin"
+check_plugin_pattern "CSP_INCLUDE_NONCE_IN" "CSP nonce infrastructure prepared in plugin"
 
 # ── 2. Caddy security headers (static k8s Caddyfile) ─────────────────────
 check_file_exists "$MFE_CADDYFILE" "MFE static k8s Caddyfile"
@@ -152,6 +154,25 @@ if [[ -f "$PROD_PY" ]]; then
   else
     do_warn "CSP_OBJECT_SRC not explicitly restricted to 'none'"
   fi
+
+  # CSPMiddleware must be activated (not just configured)
+  check_pattern "$PROD_PY" "csp.middleware.CSPMiddleware" "CSPMiddleware activated in production.py"
+
+  # Nonce infrastructure prepared for future unsafe-inline removal
+  check_pattern "$PROD_PY" "CSP_INCLUDE_NONCE_IN" "CSP_INCLUDE_NONCE_IN configured in production.py"
+
+  # IMG_SRC must not use wildcard https: (tightened to explicit domains)
+  if grep -q 'CSP_IMG_SRC' "$PROD_PY"; then
+    _img_src_block=$(sed -n '/^CSP_IMG_SRC/,/^)/p' "$PROD_PY")
+    if echo "$_img_src_block" | grep -qF '"https:"'; then
+      do_fail "CSP_IMG_SRC contains wildcard 'https:' — should use explicit domains"
+    else
+      do_pass "CSP_IMG_SRC uses explicit domains (no wildcard https:)"
+    fi
+  fi
+
+  # Auth domain in CONNECT_SRC and FRAME_SRC for OIDC
+  check_pattern "$PROD_PY" "_auth_url" "Auth domain variable defined for CSP directives"
 fi
 
 # ── 4. Rate limiting + session flags in generated production.py ───────────
