@@ -1,0 +1,13 @@
+# Keep Docker build context small for enterprise MFE builds.
+# Only include files referenced by Dockerfiles.
+*
+
+# Enterprise MFE build scripts
+!infrastructure/docker/enterprise-mfe-clean/strip-nreum.sh
+!infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh
+
+# Brand package (logos, favicon)
+!infrastructure/tutor/brand-mereka/
+
+# MFE theme CSS
+!infrastructure/tutor/themes/mereka/mfe/theme/

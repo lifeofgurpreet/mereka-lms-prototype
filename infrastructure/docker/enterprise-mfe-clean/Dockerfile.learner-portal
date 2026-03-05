@@ -1,23 +1,48 @@
 # Dockerfile.learner-portal
-# Build-time NREUM strip for enterprise-learner-portal.
+# Build-time NREUM strip + Mereka branding for enterprise-learner-portal.
 #
 # Same approach as Dockerfile.admin-portal — strips the inline New Relic browser
-# agent (NREUM) from the dist/index.html at Docker build time.
+# agent (NREUM) from the dist/index.html at Docker build time, then overlays
+# Mereka theme CSS and brand assets.
 #
-# Build (see scripts/infra/build-enterprise-mfe-clean.sh for wrapper):
-#   docker build -f Dockerfile.learner-portal \
+# Build context: repo root (so Dockerfile can COPY brand assets from their canonical location).
+#
+# Build (CI uses reusable workflow; local wrapper: scripts/infra/build-enterprise-mfe-clean.sh):
+#   docker build -f infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal \
 #     --build-arg SOURCE_TAG=latest \
-#     -t $REGISTRY/enterprise-learner-portal:nreum-clean-YYYYMMDD .
+#     -t $REGISTRY/enterprise-learner-portal:mereka-branded-YYYYMMDD .
 
 ARG REGISTRY=ghcr.io/biji-biji-initiative/mereka-lms
 ARG SOURCE_TAG=latest
 FROM ${REGISTRY}/enterprise-learner-portal:${SOURCE_TAG}
 
 # Copy and run cleanup/patch scripts at build time
-COPY strip-nreum.sh /tmp/strip-nreum.sh
-COPY patch-missing-env.sh /tmp/patch-missing-env.sh
+COPY infrastructure/docker/enterprise-mfe-clean/strip-nreum.sh /tmp/strip-nreum.sh
+COPY infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh /tmp/patch-missing-env.sh
 RUN chmod +x /tmp/strip-nreum.sh \
     && chmod +x /tmp/patch-missing-env.sh \
     && /tmp/strip-nreum.sh /openedx/dist/index.html \
     && /tmp/patch-missing-env.sh /openedx/dist \
     && rm /tmp/strip-nreum.sh /tmp/patch-missing-env.sh
+
+# --- Mereka branding overlay ---
+# Copy Paragon theme CSS (served at /theme/* by the MFE Caddy/nginx).
+COPY infrastructure/tutor/themes/mereka/mfe/theme /openedx/dist/theme
+
+# Replace upstream brand assets (logos, favicon) with Mereka equivalents.
+COPY infrastructure/tutor/brand-mereka/logo.svg /openedx/dist/logo.svg
+COPY infrastructure/tutor/brand-mereka/logo.png /openedx/dist/logo.png
+COPY infrastructure/tutor/brand-mereka/logo-white.svg /openedx/dist/logo-white.svg
+COPY infrastructure/tutor/brand-mereka/logo-white.png /openedx/dist/logo-white.png
+COPY infrastructure/tutor/brand-mereka/logo_white.svg /openedx/dist/logo_white.svg
+COPY infrastructure/tutor/brand-mereka/logo_white.png /openedx/dist/logo_white.png
+COPY infrastructure/tutor/brand-mereka/logo-trademark.svg /openedx/dist/logo-trademark.svg
+COPY infrastructure/tutor/brand-mereka/logo-trademark.png /openedx/dist/logo-trademark.png
+COPY infrastructure/tutor/brand-mereka/favicon.ico /openedx/dist/favicon.ico
+COPY infrastructure/tutor/brand-mereka/favicon.png /openedx/dist/favicon.png
+
+# Inject env.config.js <script> tag into index.html so runtime config is loaded
+# before the app bundle. The env.config.js file itself is mounted via K8s ConfigMap
+# (see deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js).
+# This sets window.PARAGON_THEME and window.ENV_CONFIG at load time.
+RUN sed -i 's|<head>|<head><script src="/env.config.js"></script>|' /openedx/dist/index.html

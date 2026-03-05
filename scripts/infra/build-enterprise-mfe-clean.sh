@@ -25,10 +25,13 @@
 
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 REGISTRY="ghcr.io/biji-biji-initiative/mereka-lms"
 SOURCE_TAG="${1:-latest}"
-CLEAN_TAG="nreum-clean-$(date +%Y%m%d%H%M)"
-DOCKERFILE_DIR="infrastructure/docker/enterprise-mfe-clean"
+CLEAN_TAG="mereka-branded-$(date +%Y%m%d%H%M)"
+DOCKERFILE_DIR="${REPO_ROOT}/infrastructure/docker/enterprise-mfe-clean"
+BRAND_SRC="${REPO_ROOT}/infrastructure/tutor/brand-mereka"
+THEME_SRC="${REPO_ROOT}/infrastructure/tutor/themes/mereka/mfe/theme"
 
 PASS=0
 FAIL=0
@@ -85,7 +88,18 @@ check_image_bundle() {
     return 1
   fi
 
-  pass_check "${label} — index clean, env.config.js wired, placeholders fully resolved"
+  # Verify Mereka branding assets
+  if ! docker run --rm "$image" sh -c 'test -f /openedx/dist/theme/mereka-brand.min.css' >/dev/null 2>&1; then
+    fail_check "${label} — mereka-brand.min.css missing from /openedx/dist/theme/"
+    return 1
+  fi
+
+  if ! docker run --rm "$image" sh -c 'test -f /openedx/dist/favicon.ico' >/dev/null 2>&1; then
+    fail_check "${label} — Mereka favicon.ico missing from /openedx/dist/"
+    return 1
+  fi
+
+  pass_check "${label} — index clean, branded, env.config.js wired, placeholders resolved"
   return 0
 }
 
@@ -107,6 +121,16 @@ pass_check "Docker daemon running"
 echo "${GHCR_TOKEN:-}" | docker login ghcr.io -u "${GHCR_USER:-biji-biji-initiative}" --password-stdin 2>/dev/null || true
 pass_check "GHCR auth configured"
 
+# ---- Verify brand assets exist ----
+echo ""
+echo "--- Verifying brand assets ---"
+if [ -f "${THEME_SRC}/mereka-brand.min.css" ] && [ -f "${BRAND_SRC}/favicon.ico" ]; then
+  pass_check "Brand assets found (theme CSS + brand package)"
+else
+  fail_check "Brand assets missing — check ${THEME_SRC} and ${BRAND_SRC}"
+  exit 1
+fi
+
 # ---- Build admin portal ----
 echo ""
 echo "--- Building enterprise-admin-portal:${CLEAN_TAG} ---"
@@ -115,7 +139,7 @@ docker build \
   --build-arg SOURCE_TAG="${SOURCE_TAG}" \
   -f "${DOCKERFILE_DIR}/Dockerfile.admin-portal" \
   -t "${REGISTRY}/enterprise-admin-portal:${CLEAN_TAG}" \
-  "${DOCKERFILE_DIR}"
+  "${REPO_ROOT}"
 
 # Verify clean locally before push
 if ! check_image_bundle "${REGISTRY}/enterprise-admin-portal:${CLEAN_TAG}" "enterprise-admin-portal:${CLEAN_TAG}"; then
@@ -135,7 +159,7 @@ docker build \
   --build-arg SOURCE_TAG="${SOURCE_TAG}" \
   -f "${DOCKERFILE_DIR}/Dockerfile.learner-portal" \
   -t "${REGISTRY}/enterprise-learner-portal:${CLEAN_TAG}" \
-  "${DOCKERFILE_DIR}"
+  "${REPO_ROOT}"
 
 # Verify clean locally before push
 if ! check_image_bundle "${REGISTRY}/enterprise-learner-portal:${CLEAN_TAG}" "enterprise-learner-portal:${CLEAN_TAG}"; then

@@ -1,5 +1,9 @@
 // Runtime configuration for Enterprise MFEs
 // Injected via ConfigMap at /openedx/dist/env.config.js
+//
+// Branding: LOGO_URL, FAVICON_URL, SITE_NAME configure @edx/frontend-platform.
+// PARAGON_THEME: points MFE shell to Mereka theme CSS served from /theme/ in the
+// same container (COPY'd into /openedx/dist/theme/ at Docker build time).
 window.ENV_CONFIG = {
   LMS_BASE_URL: 'https://academyv2.mereka.io',
   STUDIO_BASE_URL: 'https://studio.academyv2.mereka.io',
@@ -14,4 +18,35 @@ window.ENV_CONFIG = {
   ENTERPRISE_SUBSIDY_BASE_URL: 'https://admin.academyv2.mereka.io/api/enterprise-subsidy',
   FEATURE_ENROLL_WITH_CODES: true,
   FEATURE_BROWSE_AND_REQUEST: true,
+
+  // Mereka branding — served from /theme/ and / in the MFE container
+  LOGO_URL: '/logo.svg',
+  LOGO_WHITE_URL: '/logo-white.svg',
+  LOGO_TRADEMARK_URL: '/logo-trademark.svg',
+  FAVICON_URL: '/favicon.ico',
+  SITE_NAME: 'Mereka Academy',
+};
+
+// Runtime Paragon theme — tells the MFE shell which CSS files to load.
+// These are served by Caddy from /openedx/dist/theme/ (same container).
+window.PARAGON_THEME = {
+  paragon: {
+    version: '22.20.3',
+    themeUrls: {
+      core: { fileName: './theme/core.min.css' },
+      variants: {
+        light: { fileName: './theme/light.min.css' },
+      },
+    },
+  },
+  brand: {
+    version: '1.0.0',
+    themeUrls: {
+      core: { fileName: './theme/mereka-brand.min.css' },
+      defaults: { light: 'light' },
+      variants: {
+        light: { fileName: './theme/mereka-brand-light.min.css' },
+      },
+    },
+  },
 };
