@@ -1,24 +1,22 @@
-// Mereka Academy brand overrides for Paragon/Bootstrap
-// Source of truth: assets/branding/tokens.css
+// Mereka Academy brand overrides for Paragon v23+
+// These SCSS variables reference CSS custom properties for runtime theming.
+// Token values defined in tokens/src/ and compiled via `npm run build-tokens`.
 //
-// Compatibility-only for legacy import paths.
-// Ulmo-era MFEs (Paragon v23+) do not import @edx/brand SCSS variables at runtime.
-// Active theming is driven by CSS custom properties from themes/mereka/scss/_tokens.scss.
-// DEPRECATED: These SCSS variables are deprecated in Paragon v23+.
-// Use paragon/tokens.json for new implementations.
+// Compatibility: Paragon v23+ (uses var() references)
+// Legacy: Paragon v22 consumers should pin brand-mereka@1.x
 
-$font-family-sans-serif: 'Poppins', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !default;
-$headings-font-family: 'Lato', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !default;
+$font-family-sans-serif: var(--pgn-typography-font-family-sans-serif) !default;
+$headings-font-family: var(--pgn-typography-headings-font-family) !default;
 
-$primary: #ab3b78 !default;
-$secondary: #237072 !default;
-$success: #2c6e49 !default;
-$info: #295cad !default;
-$warning: #9e7000 !default;
-$danger: #8c002f !default;
+$primary: var(--pgn-color-primary-base) !default;
+$secondary: var(--pgn-color-secondary-base) !default;
+$success: var(--pgn-color-success-base) !default;
+$info: var(--pgn-color-info-base) !default;
+$warning: var(--pgn-color-warning-base) !default;
+$danger: var(--pgn-color-danger-base) !default;
 
-$link-color: #295cad !default;
-$link-hover-color: #237072 !default;
+$link-color: var(--pgn-color-info-base) !default;
+$link-hover-color: var(--pgn-color-secondary-base) !default;
 
 $btn-border-radius: 9999px !default;
 $btn-border-radius-sm: 9999px !default;

@@ -5,6 +5,9 @@ kind: Kustomization
 namespace: mereka-lms
 
 resources:
+  # Single deployment per MFE serves all tenants via slug routing (ADR-024).
+  # Enterprise MFEs resolve tenant from URL path /:enterpriseSlug/,
+  # NOT from separate deployments per tenant.
   - admin-portal-deployment.yaml
   - admin-portal-service.yaml
   - learner-portal-deployment.yaml
@@ -23,9 +26,14 @@ configMapGenerator:
     options:
       labels:
         app.kubernetes.io/name: enterprise-learner-portal
+  # Mereka (default tenant) env config
   - name: enterprise-mfe-env
     files:
       - env.config.js=enterprise-mfe-env.js
     options:
       labels:
         app.kubernetes.io/component: enterprise
+  # Per-tenant env.config.js files exist as reference (biji-biji-mfe-env.js,
+  # skillourfuture-mfe-env.js) but are NOT deployed as ConfigMaps because
+  # a single MFE deployment serves all tenants via slug routing (ADR-024).
+  # These will be used when/if mfe_config_api is adopted (Phase 3, #207).

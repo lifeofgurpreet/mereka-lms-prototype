@@ -1,0 +1,13 @@
+{
+  "color": {
+    "primary": { "$value": "#ab3b78", "$type": "color", "$description": "Mereka magenta — primary CTA" },
+    "secondary": { "$value": "#237072", "$type": "color", "$description": "Mereka teal — secondary actions" },
+    "success": { "$value": "#2c6e49", "$type": "color", "$description": "Success states" },
+    "info": { "$value": "#295cad", "$type": "color", "$description": "Informational — links" },
+    "warning": { "$value": "#9e7000", "$type": "color", "$description": "Warning states" },
+    "danger": { "$value": "#8c002f", "$type": "color", "$description": "Error/danger — burgundy" },
+    "brand": { "$value": "#ab3b78", "$type": "color", "$description": "Brand accent (same as primary)" },
+    "accent-a": { "$value": "#94d1e4", "$type": "color", "$description": "Accent sky blue" },
+    "accent-b": { "$value": "#295cad", "$type": "color", "$description": "Accent blue" }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "fontFamily": {
+    "sans-serif": { "$value": "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", "$type": "fontFamily" },
+    "heading": { "$value": "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", "$type": "fontFamily" }
+  }
+}

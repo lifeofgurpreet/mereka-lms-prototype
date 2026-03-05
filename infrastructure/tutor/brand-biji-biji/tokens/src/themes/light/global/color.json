@@ -1,0 +1,25 @@
+{
+  "color": {
+    "primary": {
+      "base": { "$value": "#000000", "$type": "color" },
+      "100": { "$value": "#374151", "$type": "color" },
+      "200": { "$value": "#1f2937", "$type": "color" },
+      "500": { "$value": "#000000", "$type": "color" },
+      "700": { "$value": "#000000", "$type": "color" }
+    },
+    "secondary": {
+      "base": { "$value": "#4b5563", "$type": "color" }
+    },
+    "brand": {
+      "base": { "$value": "#000000", "$type": "color" }
+    },
+    "success": { "base": { "$value": "#2c6e49", "$type": "color" } },
+    "info": {
+      "base": { "$value": "#374151", "$type": "color" },
+      "200": { "$value": "#9ca3af", "$type": "color" },
+      "500": { "$value": "#374151", "$type": "color" }
+    },
+    "warning": { "base": { "$value": "#9e7000", "$type": "color" } },
+    "danger": { "base": { "$value": "#8c002f", "$type": "color" } }
+  }
+}

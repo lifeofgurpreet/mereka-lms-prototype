@@ -17,6 +17,14 @@
     "./favicon.ico": "./favicon.ico",
     "./favicon.png": "./favicon.png"
   },
+  "scripts": {
+    "build-tokens": "paragon build-tokens --source ./tokens/src --output ./dist",
+    "build-scss": "paragon build-scss --corePath ./paragon/core.scss --themesPath ./paragon --outDir ./dist",
+    "build": "npm run build-tokens && npm run build-scss"
+  },
+  "devDependencies": {
+    "@openedx/paragon": "^23.19.1"
+  },
   "sideEffects": false,
   "license": "AGPL-3.0"
 }

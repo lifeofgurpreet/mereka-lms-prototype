@@ -31,7 +31,7 @@ window.ENV_CONFIG = {
 // These are served by Caddy from /openedx/dist/theme/ (same container).
 window.PARAGON_THEME = {
   paragon: {
-    version: '22.20.3',
+    version: '23.19.1',
     themeUrls: {
       core: { fileName: './theme/core.min.css' },
       variants: {

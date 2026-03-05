@@ -1,0 +1,11 @@
+{
+  "color": {
+    "primary": { "$value": "#000000", "$type": "color", "$description": "Biji-Biji black — primary" },
+    "secondary": { "$value": "#4b5563", "$type": "color", "$description": "Gray 600 — secondary" },
+    "brand": { "$value": "#000000", "$type": "color", "$description": "Brand color" },
+    "success": { "$value": "#2c6e49", "$type": "color", "$description": "Success states" },
+    "info": { "$value": "#374151", "$type": "color", "$description": "Gray 700 — info" },
+    "warning": { "$value": "#9e7000", "$type": "color", "$description": "Warning states" },
+    "danger": { "$value": "#8c002f", "$type": "color", "$description": "Error/danger" }
+  }
+}

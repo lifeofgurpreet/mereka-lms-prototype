@@ -1,0 +1,11 @@
+{
+  "color": {
+    "primary": { "$value": "#1a3c6e", "$type": "color", "$description": "SOF navy — primary" },
+    "secondary": { "$value": "#f5a623", "$type": "color", "$description": "SOF gold — secondary" },
+    "brand": { "$value": "#1a3c6e", "$type": "color", "$description": "Brand color" },
+    "success": { "$value": "#2c6e49", "$type": "color", "$description": "Success states" },
+    "info": { "$value": "#295cad", "$type": "color", "$description": "Informational — links" },
+    "warning": { "$value": "#f5a623", "$type": "color", "$description": "Gold warning" },
+    "danger": { "$value": "#e8460e", "$type": "color", "$description": "SOF orange-red — danger" }
+  }
+}
