@@ -197,12 +197,15 @@ This controls `get_platform_name()` in LMS Mako templates (footer copyright + pa
 ### Step 3: Update logos
 
 ```bash
-# Place logos at:
-infrastructure/tutor/themes/mereka/tenants/<slug>/logos/logo.png
-infrastructure/tutor/themes/mereka/tenants/<slug>/favicons/favicon.ico
+# Update canonical brand assets first:
+# - default brand: assets/branding/
+# - tenant package brands: assets/branding/tenants/<slug>/
 
-# Sync assets
+# Sync themes + all brand-* packages
 ./scripts/branding/sync-brand-assets.sh
+
+# Verify no drift across all consumers
+./scripts/qa/verify-brand-asset-drift.sh
 ```
 
 Logo changes require LMS image rebuild.

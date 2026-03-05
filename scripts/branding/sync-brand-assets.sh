@@ -20,7 +20,13 @@ TOKENS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mer
 OVERRIDES_SRC="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 OVERRIDES_LMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
 OVERRIDES_CMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
-BRAND_REPO_TOKENS="/home/gurpreet/projects/bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css"
+BRAND_REPO_TOKENS="${BRAND_REPO_TOKENS:-}"
+if [[ -z "$BRAND_REPO_TOKENS" ]]; then
+  AUTO_BRAND_REPO_TOKENS="$REPO_ROOT/../bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css"
+  if [[ -f "$AUTO_BRAND_REPO_TOKENS" ]]; then
+    BRAND_REPO_TOKENS="$AUTO_BRAND_REPO_TOKENS"
+  fi
+fi
 BRAND_PACKAGE_SYNC="$REPO_ROOT/scripts/branding/sync-brand-package.sh"
 
 if [[ ! -d "$SRC_FONTS" ]]; then
@@ -30,9 +36,9 @@ fi
 
 # Optional: if the canonical brand-assets repo exists locally, refresh tokens.css
 # in this repo so we don't drift from the design system export.
-if [[ -f "$BRAND_REPO_TOKENS" ]]; then
+if [[ -n "$BRAND_REPO_TOKENS" && -f "$BRAND_REPO_TOKENS" ]]; then
   cp "$BRAND_REPO_TOKENS" "$TOKENS_SRC"
-  echo "  ✓ Refreshed tokens.css from bbbi-mereka-brand-assets"
+  echo "  ✓ Refreshed tokens.css from ${BRAND_REPO_TOKENS#"$REPO_ROOT/"}"
 fi
 
 mkdir -p "$THEME_FONT_DIR" "$MFE_FONT_DIR" "$IMG_DEST_DIR" "$MFE_IMG_DEST_DIR" "$LMS_IMG_DEST_DIR" "$CMS_IMG_DEST_DIR"
@@ -73,7 +79,7 @@ done
 
 # Keep OEP-48 local brand package asset bundle in sync as well.
 if [[ -x "$BRAND_PACKAGE_SYNC" ]]; then
-  "$BRAND_PACKAGE_SYNC"
+  "$BRAND_PACKAGE_SYNC" --all
 fi
 
 echo "Brand assets synced to theme directories."

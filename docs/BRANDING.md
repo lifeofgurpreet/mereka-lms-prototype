@@ -64,6 +64,9 @@ npm start
   them into the theme images directory.
 - Design tokens (Figma export) are vendored as `assets/branding/tokens.css` and synced to
   `infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css` for operator inspection on live hosts.
+- Non-default OEP-48 package sources live under `assets/branding/tenants/`:
+  - `assets/branding/tenants/biji-biji/` -> `infrastructure/tutor/brand-biji-biji/`
+  - `assets/branding/tenants/skillourfuture/` -> `infrastructure/tutor/brand-skillourfuture/`
 
 When new assets arrive, drop them into `assets/branding/`, re-sync the theme copy if needed, and update the tables above so the next engineer understands which files feed the build.
 
@@ -298,6 +301,9 @@ cp new-font.woff2 assets/branding/fonts/
 # Sync assets after changes
 ./scripts/branding/sync-brand-assets.sh
 
+# Verify all brand package + theme asset drift
+./scripts/qa/verify-brand-asset-drift.sh
+
 # Verify branding health (CI gate)
 ./scripts/branding/verify-branding-health.sh
 
@@ -433,6 +439,8 @@ find infrastructure/tutor/themes/mereka -name "*.scss"
 
 **Scripts**:
 - `scripts/branding/sync-brand-assets.sh` - Sync assets to theme
+- `scripts/branding/sync-brand-package.sh` - Sync all `brand-*` OEP-48 packages from canonical asset sources
+- `scripts/qa/verify-brand-asset-drift.sh` - Verify theme + brand package asset drift
 - `scripts/branding/verify-branding-health.sh` - CI gate
 - `scripts/branding/verify-logo-setup.sh` - Logo verification
 - `scripts/branding/verify-branding-css.sh` - CSS loading check
@@ -443,6 +451,7 @@ find infrastructure/tutor/themes/mereka -name "*.scss"
 
 **Assets**:
 - `assets/branding/` - Source assets (logos, fonts, tokens)
+- `assets/branding/tenants/` - Source assets for non-default tenant brand packages
 - `infrastructure/tutor/themes/mereka/` - Theme directory
 - `infrastructure/tutor/themes/mereka/scss/theme.scss` - Shared SCSS
 - `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css` - Runtime CSS

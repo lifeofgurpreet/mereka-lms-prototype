@@ -661,24 +661,24 @@ body:not(.courseware) button.btn.btn-primary:focus {
   box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
 }
 
+/* Course catalog / discovery cards — use aspect-ratio for flexible sizing
+   instead of hardcoded pixel heights that squash content (ADR-024 branding). */
 .course .course-image,
 .dashboard .course .course-image {
-  min-height: 180px;
   background: linear-gradient(135deg, rgba(45, 137, 139, 0.22), rgba(41, 92, 173, 0.25));
 }
 
 .course .course-image .cover-image,
 .dashboard .course .course-image .cover-image {
-  height: 180px;
-  min-height: 180px;
+  aspect-ratio: 16 / 9;
   background: inherit;
 }
 
 .course .course-image img,
 .dashboard .course .course-image img {
   display: block;
-  height: 180px;
   width: 100%;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
   object-position: center;
 }
