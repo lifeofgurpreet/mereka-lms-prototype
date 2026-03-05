@@ -1,0 +1,29 @@
+# Production compat: normalize trailing-slash MFE config endpoint used by some authn clients.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openedx-mfe-mfeconfig-compat
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: openedx-mfe-mfeconfig-compat
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /api/mfe_config/v1
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: apps.academyv2.mereka.io
+      http:
+        paths:
+          - path: /api/mfe_config/v1/
+            pathType: Exact
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+  tls:
+    - hosts:
+        - apps.academyv2.mereka.io
+      secretName: openedx-mfe-mfeconfig-compat-tls

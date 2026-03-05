@@ -3,6 +3,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ PRODUCTION OVERLAY — FROZEN                                             │
+# │                                                                         │
+# │ GKE prod is scaled to zero replicas.  All active development targets    │
+# │ rke2-nonprod (dev/staging).  Do NOT deploy to prod until:               │
+# │   1. dev + staging are green on rke2-nonprod                            │
+# │   2. Image builds complete and tags are pinned here                     │
+# │   3. Explicit sign-off from project lead                                │
+# │                                                                         │
+# │ To maintain parity: any structural change to rke2-nonprod overlay       │
+# │ (new patches, ingresses, configMaps) MUST be mirrored here.             │
+# │ Image tags may differ (prod pins independently after staging bake).     │
+# └──────────────────────────────────────────────────────────────────────────┘
+
 namespace: mereka-lms
 
 resources:
@@ -10,16 +24,18 @@ resources:
   - ../../base/plugins/aspects
   - ingress-openedx-lms.yaml
   - ingress-openedx-mfe.yaml
+  - ingress-openedx-mfeconfig-compat.yaml
   - ingress-openedx-studio.yaml
-  - ingress-enterprise-mfe.yaml
+  - ingress-enterprise-admin.yaml
+  - ingress-enterprise-learner.yaml
+  - ingress-credentials.yaml
+  - ingress-notes.yaml
 
 patches:
   - path: patches/remove-legacy-mongodb-service.yaml
   - path: patches/resource-limits.yaml
 
-# Production-specific configurations
-
-# Image tags for production (use specific SHA or version)
+# Image tags for production (FROZEN — do not update until staging bake)
 images:
   - name: docker.io/overhangio/openedx
     newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
@@ -65,6 +81,31 @@ replicas:
   - name: lms-worker
     count: 2
   - name: cms-worker
+    count: 1
+  - name: discovery
+    count: 1
+  - name: notes
+    count: 1
+  # Enterprise services
+  - name: enterprise-access
+    count: 1
+  - name: enterprise-access-worker
+    count: 1
+  - name: enterprise-admin-portal
+    count: 1
+  - name: enterprise-catalog
+    count: 1
+  - name: enterprise-catalog-worker
+    count: 1
+  - name: enterprise-learner-portal
+    count: 1
+  - name: enterprise-subsidy
+    count: 1
+  # xqueue: disabled — no courses use it
+  - name: xqueue
+    count: 0
+  # Payments gateway: dark launch
+  - name: payments-gateway
     count: 1
   - name: clickhouse
     count: 1

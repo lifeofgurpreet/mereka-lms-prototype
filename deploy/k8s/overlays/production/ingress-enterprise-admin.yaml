@@ -1,0 +1,97 @@
+# Enterprise Admin Portal — production
+# Routes /api/* paths to backend services, / to admin-portal MFE
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: enterprise-admin-portal
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: enterprise-admin-portal
+    app.kubernetes.io/component: enterprise
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: admin.academyv2.mereka.io
+      http:
+        paths:
+          # Backend API proxies — route to respective enterprise services
+          - path: /api/enterprise-catalog
+            pathType: Prefix
+            backend:
+              service:
+                name: enterprise-catalog
+                port:
+                  number: 8160
+          - path: /api/enterprise-access
+            pathType: Prefix
+            backend:
+              service:
+                name: enterprise-access
+                port:
+                  number: 18270
+          - path: /api/enterprise-subsidy
+            pathType: Prefix
+            backend:
+              service:
+                name: enterprise-subsidy
+                port:
+                  number: 18280
+          - path: /api/license-manager
+            pathType: Prefix
+            backend:
+              service:
+                name: license-manager
+                port:
+                  number: 18170
+          # LMS auth endpoints (login, csrf, oauth2, jwt refresh)
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /csrf
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /login_refresh
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /login
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          # Default — serve the admin portal MFE
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: enterprise-admin-portal
+                port:
+                  number: 8002
+  tls:
+    - hosts:
+        - admin.academyv2.mereka.io
+      secretName: enterprise-admin-portal-tls
