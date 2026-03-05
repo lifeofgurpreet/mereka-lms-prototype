@@ -117,6 +117,8 @@ fi
 if [[ -d "$BRAND_DIR" ]]; then
   actual_files="$(find "$BRAND_DIR" -type f | sed "s#^$BRAND_DIR/##" | LC_ALL=C sort)"
   expected_files="$( (cat <<'LIST'
+dist/css/.gitkeep
+dist/tokens/.gitkeep
 favicon.ico
 favicon.png
 fonts/Lato-Black.woff2
@@ -138,12 +140,15 @@ logo.svg
 logo_white.png
 logo_white.svg
 package.json
+paragon/_fonts.scss
 paragon/_overrides.scss
 paragon/_variables.scss
 paragon/core.scss
-paragon/_fonts.scss
 paragon/images/card-imagecap-fallback.png
 paragon/tokens.json
+tokens/src/core/global/color.json
+tokens/src/core/global/typography.json
+tokens/src/themes/light/global/color.json
 LIST
 ) | LC_ALL=C sort)"
   if [[ "$actual_files" == "$expected_files" ]]; then
