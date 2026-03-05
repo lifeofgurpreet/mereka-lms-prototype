@@ -10,13 +10,13 @@ Runbooks, troubleshooting guides, and operational procedures for managing the Me
 - [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) - **🚨 SITE DOWN?** Start here for quick diagnostics
 - [`ACCESS_URLS.md`](ACCESS_URLS.md) - Quick reference for all URLs and access
 - [`ENTERPRISE_MULTI_TENANCY_NAVIGATION.md`](ENTERPRISE_MULTI_TENANCY_NAVIGATION.md) - One-page map for enterprise, tenant, licensing, branding, and enterprise runbooks
-- [`DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - How we deploy Tutor environments
+- [`DEPLOYMENT_RUNBOOK.md`](runbooks/DEPLOYMENT_RUNBOOK.md) - How we deploy Tutor environments
 
 ## Categories
 
 ### Access & URLs
 - [`ACCESS_URLS.md`](ACCESS_URLS.md) - All URLs (LMS, Studio, Forum, Admin)
-- [`ADMIN_LOGIN_GUIDE.md`](ADMIN_LOGIN_GUIDE.md) - Admin access instructions
+- [`ADMIN_LOGIN_GUIDE.md`](guides/ADMIN_LOGIN_GUIDE.md) - Admin access instructions
 - [`LOCAL_ACCESS_INFO.md`](LOCAL_ACCESS_INFO.md) - Local development URLs
 
 ### Troubleshooting

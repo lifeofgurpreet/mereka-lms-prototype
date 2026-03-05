@@ -729,7 +729,7 @@ grep -E -i "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}" /tmp/license-manager.log /tm
 - **Database Issues**: [database-issues.md](runbooks/database-issues.md) - MySQL connection failures
 - **Auth & Permissions**: [AUTH_AND_PERMISSIONS.md](AUTH_AND_PERMISSIONS.md) - OAuth2 app setup
 - **Domain Management**: [DOMAIN_MANAGEMENT.md](DOMAIN_MANAGEMENT.md) - DNS + TLS setup
-- **Secrets Management Spec**: [../../specs/secrets-management.md](../../specs/secrets-management.md) - Infisical → GCP SM → K8s flow
+- **Secrets Management Spec**: [../../specs/secrets-management_spec.md](../../specs/secrets-management_spec.md) - Infisical → GCP SM → K8s flow
 
 ---
 

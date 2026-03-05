@@ -214,8 +214,8 @@ Fast lookup references for common tasks:
 | [`BRANDING.md`](BRANDING.md) | **Mereka branding system** - Color palette, typography, assets, verification, MFE integration, troubleshooting | 2026-02-11 |
 | [`BRANDING_PLAN.md`](BRANDING_PLAN.md) | Status tracker for the cross-surface branding rollout (Phases 1-5) | 2026-02-27 |
 | [`FRONTEND_TRACKER.md`](FRONTEND_TRACKER.md) | **Frontend strategy tracker** - 27 tasks across 5 phases, health scorecard, dependency graph | 2026-02-27 |
-| [`FRONTEND_ORCHESTRATOR_WORKLOG.md`](FRONTEND_ORCHESTRATOR_WORKLOG.md) | Frontend doc/spec quality worklog (orchestrator tasks) | 2026-02-27 |
-| [`FRONTEND_IMPLEMENTER_PROMPT.md`](FRONTEND_IMPLEMENTER_PROMPT.md) | Ready-to-use prompt for frontend Phase A implementation | 2026-02-27 |
+| `FRONTEND_ORCHESTRATOR_WORKLOG.md` | Frontend doc/spec quality worklog (orchestrator tasks) — archived | 2026-02-27 |
+| `FRONTEND_IMPLEMENTER_PROMPT.md` | Ready-to-use prompt for frontend Phase A implementation — archived | 2026-02-27 |
 | [`MFE_COMPLETE_LIST.md`](MFE_COMPLETE_LIST.md) | Complete list of 12 configured + enterprise MFEs | 2026-02-27 |
 | [`STYLE_GUIDE.md`](STYLE_GUIDE.md) | Documentation conventions (metadata, folder layout, cross-links) | 2025-11-09 |
 

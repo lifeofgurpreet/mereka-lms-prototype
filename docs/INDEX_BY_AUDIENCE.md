@@ -187,8 +187,8 @@ _Local setup, feature development, testing, contribution_
 
 **Troubleshooting**:
 - [TROUBLESHOOTING.md](operations/runbooks/site-down.md) - Common issues
-- [MFE_LOGIN_FIX.md](operations/MFE_LOGIN_FIX.md) - MFE auth issues
-- [MFE_REBUILD_SUCCESS.md](operations/MFE_REBUILD_SUCCESS.md) - MFE rebuild guide
+- `MFE_LOGIN_FIX.md` (archived at `archive/MFE_LOGIN_FIX.md`) - MFE auth issues
+- `MFE_REBUILD_SUCCESS.md` (archived at `archive/MFE_REBUILD_SUCCESS.md`) - MFE rebuild guide
 
 ### Relevant Runbooks
 
@@ -308,7 +308,7 @@ _Tenant management, SSO configuration, user provisioning_
 **Enterprise Services**:
 - [enterprise-services-overview.md](architecture/enterprise-services-overview.md) - Service architecture
 - [purchase-gateway-overview.md](architecture/purchase-gateway-overview.md) - Payment flow
-- [badges-credentials-overview.md](architecture/badges-credentials-overview.md) - Credentials system
+- [badges-credentials-runbook.md](runbooks/badges-credentials-runbook.md) - Credentials system
 
 ### Contact/Escalation
 - **Tenant Requests**: Submit via tenant provisioning form

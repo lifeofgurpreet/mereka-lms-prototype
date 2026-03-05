@@ -22,7 +22,7 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 - [`docs/operations/runbooks/MULTI_TENANCY_RUNBOOK.md`](runbooks/MULTI_TENANCY_RUNBOOK.md) - Runbook for verification and isolation checks.
 - [`docs/operations/TENANT_PROVISIONING.md`](TENANT_PROVISIONING.md) - Provisioning command and brand-pack path.
 - [`docs/runbooks/tenant-provisioning-runbook.md`](../runbooks/tenant-provisioning-runbook.md) - Full provision + offboarding workflow.
-- [`scripts/qa/verify-multisite-config.sh`](../scripts/qa/verify-multisite-config.sh) / [`scripts/qa/verify-org-role-ownership.sh`](../scripts/qa/verify-org-role-ownership.sh) - Readiness checks.
+- [`scripts/qa/verify-multisite-config.sh`](../../scripts/qa/verify-multisite-config.sh) / [`scripts/qa/verify-org-role-ownership.sh`](../../scripts/qa/verify-org-role-ownership.sh) - Readiness checks.
 
 ## 3) Enterprise Features, Licensing, and Admin Surfaces
 
@@ -45,18 +45,18 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 - [`docs/operations/TENANT_BRANDING_READINESS_RAG.md`](TENANT_BRANDING_READINESS_RAG.md) - Branding readiness state and gaps.
 - [`docs/branding/BRANDING_GUARDRAILS.md`](../branding/BRANDING_GUARDRAILS.md) - Guardrails and regression checks.
 - [`docs/branding/FOOTER_V2_TO_LMS_MAPPING.md`](../branding/FOOTER_V2_TO_LMS_MAPPING.md) - Footer mapping for LMS/MFE alignment.
-- [`docs/branding/TENANT_BRANDING_TROUBLESHOOTING.md`](../branding/TENANT_BRANDING_TROUBLESHOOTING.md) - Branding breakages and fixes.
+- [`docs/operations/TENANT_BRANDING_TROUBLESHOOTING.md`](TENANT_BRANDING_TROUBLESHOOTING.md) - Branding breakages and fixes.
 - [`docs/operations/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md`](runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md) - Plugin strategy for Tutor/MFE customization.
 
 ## 5) Deployment, Verification, and Gates to Run
 
-- [`scripts/branding/run-branding-gates.sh`](../scripts/branding/run-branding-gates.sh) - Canonical branding verification flow.
-- [`scripts/branding/sync-brand-assets.sh`](../scripts/branding/sync-brand-assets.sh) - Brand asset sync process.
-- [`scripts/qa/public-health-check.sh`](../scripts/qa/public-health-check.sh) - Full platform health check.
-- [`scripts/qa/run-multisite-governance-gates.sh`](../scripts/qa/run-multisite-governance-gates.sh) - Multi-tenancy governance gates.
-- [`scripts/qa/verify-mfe-build-prereqs.sh`](../scripts/qa/verify-mfe-build-prereqs.sh) - Required checks before MFE builds.
-- [`scripts/qa/verify-mfe-image-branding.sh`](../scripts/qa/verify-mfe-image-branding.sh) - Image-level branding contract.
-- [`scripts/qa/verify-gitops-image-overrides.sh`](../scripts/qa/verify-gitops-image-overrides.sh) - GitOps image/tag/override guardrails.
+- [`scripts/branding/run-branding-gates.sh`](../../scripts/branding/run-branding-gates.sh) - Canonical branding verification flow.
+- [`scripts/branding/sync-brand-assets.sh`](../../scripts/branding/sync-brand-assets.sh) - Brand asset sync process.
+- [`scripts/qa/public-health-check.sh`](../../scripts/qa/public-health-check.sh) - Full platform health check.
+- [`scripts/qa/run-multisite-governance-gates.sh`](../../scripts/qa/run-multisite-governance-gates.sh) - Multi-tenancy governance gates.
+- [`scripts/qa/verify-mfe-build-prereqs.sh`](../../scripts/qa/verify-mfe-build-prereqs.sh) - Required checks before MFE builds.
+- [`scripts/qa/verify-mfe-image-branding.sh`](../../scripts/qa/verify-mfe-image-branding.sh) - Image-level branding contract.
+- [`scripts/qa/verify-gitops-image-overrides.sh`](../../scripts/qa/verify-gitops-image-overrides.sh) - GitOps image/tag/override guardrails.
 
 ## 6) Suggested Work Sequence
 

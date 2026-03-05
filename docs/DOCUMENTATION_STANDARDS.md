@@ -492,7 +492,7 @@ entries:
 
 2. **Add deprecation notice** at the top:
    ```markdown
-   > **DEPRECATED**: This document is no longer maintained. See [new-doc.md](new-doc.md) instead.
+   > **DEPRECATED**: This document is no longer maintained. See `new-doc.md` instead.
    ```
 
 3. **Move to archive** (if not referenced elsewhere):
@@ -779,7 +779,7 @@ Given a valid user, when they log in, then they receive a session token.
 
 ### Non-Functional Requirements
 
-See [Cross-Cutting Requirements](cross-cutting-requirements_spec.md) for shared NFRs.
+See [Cross-Cutting Requirements](../../specs/cross-cutting-requirements_spec.md) for shared NFRs.
 
 - Performance: Login completes in <2s (p95)
 - Security: Passwords hashed with bcrypt (cost factor 12)

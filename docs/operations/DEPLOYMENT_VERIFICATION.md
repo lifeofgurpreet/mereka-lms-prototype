@@ -143,6 +143,6 @@ cd /data/projects/mereka-lms  # or /home/gurpreet/projects/k8s/mereka-lms
 
 ## Related Documentation
 
-- [K8s Operations Skill](~/.claude/skills/k8s-operations/SKILL.md)
-- [Reka Slackbot Deployment Skill](~/.claude/skills/reka-slackbot-deployment/SKILL.md)
+- K8s Operations Skill: `~/.claude/skills/k8s-operations/SKILL.md`
+- Reka Slackbot Deployment Skill: `~/.claude/skills/reka-slackbot-deployment/SKILL.md`
 - [Troubleshooting Guide](TROUBLESHOOTING.md)
