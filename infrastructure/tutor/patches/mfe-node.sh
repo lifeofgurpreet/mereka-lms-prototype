@@ -1,5 +1,30 @@
 #!/usr/bin/env bash
-# Patch: MFE Node 24.11.0 base image, toolchain, cookie env, theme copy,
+# DEPRECATED: This file is a legacy safety net.
+#
+# All operations here are now handled by Tutor plugin hooks in:
+#   infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py
+#
+# This script runs after `tutor config save` as defense-in-depth — if the
+# rendered Dockerfile already has the correct content (from plugin hooks),
+# every str.replace/regex below is a no-op. It will be removed once CI
+# confirms the plugin hooks are sufficient for 2+ release cycles.
+#
+# Operations and their plugin hook equivalents:
+#   Node 24 base image     → template already uses node:24.11.0-bullseye-slim
+#   Build toolchain        → mfe-dockerfile-pre-npm-install
+#   APT retry config       → template already has Acquire::Retries
+#   Cookie domain env      → mfe-dockerfile-post-npm-install
+#   NPM install resilience → mfe-dockerfile-npm-install
+#   Plugin framework       → mfe-dockerfile-post-npm-install
+#   New Relic env           → template already has ARG ENABLE_NEW_RELIC
+#   Theme/brand copy       → mfe-dockerfile-pre-npm-install + mfe-dockerfile-post-npm-install
+#   Admin console Redux    → mfe-dockerfile-post-npm-install-admin-console
+#   Course authoring fix   → mfe-dockerfile-post-npm-install-course-authoring
+#   Ulmo source refs       → should be set via MFE_COMMON_VERSION in tutor config
+#   Brand version bump     → dead (we use @edx/brand@file:./brand-mereka now)
+#   Discussions webpack    → dead code (no-op function)
+#
+# Original purpose: MFE Node 24.11.0 base image, toolchain, cookie env, theme copy,
 #        npm resilience, plugin framework, admin-console redux, course-authoring fix,
 #        new relic env, ulmo source refs, brand version, discussions webpack fix.
 

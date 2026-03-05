@@ -76,6 +76,23 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 """,
 )
 
+# Admin console requires react-redux and redux (not bundled by default)
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install-admin-console",
+    """
+RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
+""",
+)
+
+# Course authoring: webpack expects 'course-authoring' directory name,
+# but the repo clones as 'frontend-app-course-authoring'
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install-course-authoring",
+    """
+RUN ln -sf /openedx/app/frontend-app-course-authoring /openedx/app/course-authoring || true
+""",
+)
+
 # Enforce runtime Paragon theme URLs in built MFE shells.
 # We write ../theme/* (not /theme/*) because Ulmo joins fileName against the MFE
 # app base path (e.g. /authn/), and a leading slash can become /authn//theme/*.
