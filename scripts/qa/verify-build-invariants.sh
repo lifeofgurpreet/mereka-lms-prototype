@@ -52,20 +52,29 @@ else
   fi
 fi
 
-# --- Invariant 2: --cache-from MUST be used ---
-# Without cache-from, every build starts from scratch (50+ min).
-if grep -q '\-\-cache-from' "$BUILD_WF"; then
-  do_pass "INV-2: --cache-from is used for Docker layer caching"
+# --- Invariant 2: Registry cache MUST be used ---
+# Tutor v21 has built-in registry cache (--cache-to-registry).
+# Without it, every build starts from scratch (50+ min).
+if grep -q '\-\-cache-to-registry' "$BUILD_WF"; then
+  do_pass "INV-2: tutor's --cache-to-registry is used for layer caching"
 else
-  do_fail "INV-2: --cache-from missing. Every build will start from scratch (~50 min)."
+  # Fall back to checking for manual --cache-from
+  if grep -q '\-\-cache-from' "$BUILD_WF"; then
+    do_pass "INV-2: --cache-from is used for Docker layer caching"
+  else
+    do_fail "INV-2: No registry cache (need --cache-to-registry or --cache-from). Every build starts from scratch (~50 min)."
+  fi
 fi
 
-# --- Invariant 3: BUILDKIT_INLINE_CACHE MUST be set ---
-# Without this, the pushed image won't contain cache metadata for future builds.
-if grep -q 'BUILDKIT_INLINE_CACHE=1' "$BUILD_WF"; then
-  do_pass "INV-3: BUILDKIT_INLINE_CACHE=1 is set (cache metadata embedded in images)"
+# --- Invariant 3: Buildx driver MUST support registry cache ---
+# docker-container driver is required for type=registry cache backend.
+# The 'docker' driver silently ignores registry cache args.
+if grep -q 'driver: docker-container' "$BUILD_WF"; then
+  do_pass "INV-3: Buildx uses docker-container driver (supports registry cache)"
+elif grep -q 'driver: docker$' "$BUILD_WF"; then
+  do_fail "INV-3: Buildx uses 'docker' driver — registry cache silently fails. Use 'docker-container'."
 else
-  do_fail "INV-3: BUILDKIT_INLINE_CACHE=1 missing. Future builds can't use this image as cache."
+  do_pass "INV-3: Buildx driver not explicitly set (docker-container is the default)"
 fi
 
 # --- Invariant 4: mereka-brand tag MUST be pushed on main ---

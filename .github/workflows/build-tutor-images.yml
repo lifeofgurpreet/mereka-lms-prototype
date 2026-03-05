@@ -151,9 +151,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3
         with:
-          driver: docker
-          # Use 'docker' driver so Tutor's 'docker build' benefits from BuildKit.
-          # The 'docker-container' driver would require 'docker buildx build'.
+          # docker-container driver enables BuildKit registry cache backend.
+          # Tutor v21 already uses `docker buildx build` so this is compatible.
+          # With this driver, tutor's built-in --cache-from=type=registry
+          # works automatically — no manual docker pull needed.
+          driver: docker-container
 
       - name: Fix DinD network MTU
         run: |
@@ -177,20 +179,19 @@ jobs:
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
 
+      - name: Login to GHCR (needed for registry cache)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Build OpenEdX image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
           export DOCKER_BUILDKIT=1
-          # Pull the last built image to use as Docker layer cache.
-          # BuildKit's inline cache embeds metadata so subsequent builds
-          # can skip unchanged layers (pip install, apt, collectstatic).
-          CACHE_IMAGE="${{ env.REGISTRY }}/openedx:mereka-brand"
-          echo "Pulling cache image: ${CACHE_IMAGE}"
-          docker pull "${CACHE_IMAGE}" 2>/dev/null && \
-            echo "Cache image pulled successfully." || \
-            echo "No cache image found — building from scratch."
-          export DOCKER_BUILD_OPTIONS="--cache-from=${CACHE_IMAGE} --build-arg BUILDKIT_INLINE_CACHE=1"
-          echo "BuildKit enabled with image cache: ${CACHE_IMAGE}"
+          # Tutor v21 has built-in registry cache support:
+          #   --cache-from=type=registry,ref={tag}-cache  (default, pulls cache)
+          #   --cache-to-registry pushes cache layers to GHCR for next build
+          # Requires docker-container buildx driver (set above).
           (
             while true; do
               echo "[build-openedx-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
@@ -199,12 +200,9 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          build_cmd=(tutor images build openedx)
-          if [[ -n "${DOCKER_BUILD_OPTIONS:-}" ]]; then
-            read -r -a build_opts <<< "$DOCKER_BUILD_OPTIONS"
-            build_cmd+=("${build_opts[@]}")
-          fi
-          if ! timeout 170m "${build_cmd[@]}"; then
+          # --output=type=docker loads the image into the local daemon so
+          # downstream steps (branding verify, SBOM, push) can access it.
+          if ! timeout 170m tutor images build openedx --cache-to-registry --output=type=docker; then
             echo "OpenedX image build timed out or failed after timeout guard" >&2
             exit 1
           fi
@@ -447,19 +445,17 @@ jobs:
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
 
+      - name: Login to GHCR (needed for registry cache)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Build MFE image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
           export DOCKER_BUILDKIT=1
-          # Pull the last built MFE image to use as Docker layer cache.
-          CACHE_IMAGE="${{ env.REGISTRY }}/mfe:mereka-brand"
-          echo "Pulling MFE cache image: ${CACHE_IMAGE}"
-          docker pull "${CACHE_IMAGE}" 2>/dev/null && \
-            echo "Cache image pulled successfully." || \
-            echo "No cache image found — building from scratch."
-          export DOCKER_BUILD_OPTIONS="--cache-from=${CACHE_IMAGE} --build-arg BUILDKIT_INLINE_CACHE=1"
-          echo "BuildKit enabled with image cache: ${CACHE_IMAGE}"
           export NODE_OPTIONS="--max-old-space-size=6144"
+          # Tutor v21 built-in registry cache (same as OpenEdX build above).
           (
             while true; do
               echo "[build-mfe-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
@@ -468,12 +464,7 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          build_cmd=(tutor images build mfe)
-          if [[ -n "${DOCKER_BUILD_OPTIONS:-}" ]]; then
-            read -r -a build_opts <<< "$DOCKER_BUILD_OPTIONS"
-            build_cmd+=("${build_opts[@]}")
-          fi
-          if ! timeout 110m "${build_cmd[@]}"; then
+          if ! timeout 110m tutor images build mfe --cache-to-registry --output=type=docker; then
             echo "MFE image build timed out or failed after timeout guard" >&2
             exit 1
           fi
