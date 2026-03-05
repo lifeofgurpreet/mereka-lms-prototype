@@ -6,6 +6,7 @@ kind: NetworkPolicy
 metadata:
   name: allow-dns
   labels:
+    app.kubernetes.io/name: network-policy
     app.kubernetes.io/component: network-policy
 spec:
   podSelector: {}

@@ -13,6 +13,7 @@ kind: NetworkPolicy
 metadata:
   name: allow-namespace-internal
   labels:
+    app.kubernetes.io/name: network-policy
     app.kubernetes.io/component: network-policy
 spec:
   podSelector: {}
