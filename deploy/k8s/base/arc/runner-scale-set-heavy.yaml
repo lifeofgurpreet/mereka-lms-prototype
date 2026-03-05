@@ -13,9 +13,11 @@
 # DinD init containers, which duplicates the manual ones below →
 # pod creation fails with "Duplicate value: dind-sock".
 #
+# WARNING: This file is a LOCAL REFERENCE ONLY — NOT deployed to the cluster.
 # The actual ARC config is managed by ArgoCD from bbi-infrastructure:
 #   clusters/dev/rke2/apps/arc-runners-heavy.yaml
-# This file is a local reference that should stay in sync.
+# To change runner behavior, update the Helm values in bbi-infrastructure.
+# Changes here have NO EFFECT on the live cluster.
 #
 # Usage in workflows:
 #   jobs:

@@ -52,29 +52,27 @@ else
   fi
 fi
 
-# --- Invariant 2: Registry cache MUST be used ---
-# Tutor v21 has built-in registry cache (--cache-to-registry).
-# Without it, every build starts from scratch (50+ min).
-if grep -q '\-\-cache-to-registry' "$BUILD_WF"; then
-  do_pass "INV-2: tutor's --cache-to-registry is used for layer caching"
+# --- Invariant 2: Buildx driver MUST be 'docker' ---
+# Tutor defaults --output=type=docker to load images into the local daemon
+# for downstream steps (branding verify, SBOM, push). The 'docker-container'
+# driver can't load images back into the host daemon → cascade failure.
+# Registry cache (type=registry) requires docker-container driver, but that's
+# incompatible — layer caching must come from ARC runner persistent volumes.
+if grep -q "driver: docker-container" "$BUILD_WF"; then
+  do_fail "INV-2: Buildx uses docker-container driver — incompatible with tutor's --output=type=docker. Use 'docker' driver."
+elif grep -q "driver: docker" "$BUILD_WF"; then
+  do_pass "INV-2: Buildx uses 'docker' driver (compatible with tutor's image loading)"
 else
-  # Fall back to checking for manual --cache-from
-  if grep -q '\-\-cache-from' "$BUILD_WF"; then
-    do_pass "INV-2: --cache-from is used for Docker layer caching"
-  else
-    do_fail "INV-2: No registry cache (need --cache-to-registry or --cache-from). Every build starts from scratch (~50 min)."
-  fi
+  do_pass "INV-2: Buildx driver defaults to docker"
 fi
 
-# --- Invariant 3: Buildx driver MUST support registry cache ---
-# docker-container driver is required for type=registry cache backend.
-# The 'docker' driver silently ignores registry cache args.
-if grep -q 'driver: docker-container' "$BUILD_WF"; then
-  do_pass "INV-3: Buildx uses docker-container driver (supports registry cache)"
-elif grep -q 'driver: docker$' "$BUILD_WF"; then
-  do_fail "INV-3: Buildx uses 'docker' driver — registry cache silently fails. Use 'docker-container'."
+# --- Invariant 3: Must NOT use --cache-to-registry with docker driver ---
+# --cache-to-registry requires docker-container driver. With docker driver
+# it silently fails or errors. Don't mix incompatible features.
+if grep -q '\-\-cache-to-registry' "$BUILD_WF"; then
+  do_fail "INV-3: --cache-to-registry used but requires docker-container driver (we use docker). Remove it."
 else
-  do_pass "INV-3: Buildx driver not explicitly set (docker-container is the default)"
+  do_pass "INV-3: No incompatible --cache-to-registry flag"
 fi
 
 # --- Invariant 4: mereka-brand tag MUST be pushed on main ---
