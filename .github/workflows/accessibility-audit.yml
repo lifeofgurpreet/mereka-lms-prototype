@@ -34,7 +34,7 @@ permissions: {}  # Deny-all at workflow level; each job grants only what it need
 jobs:
   axe-audit:
     name: axe-core WCAG 2.2 AA Audit
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 20
     continue-on-error: true
     permissions:

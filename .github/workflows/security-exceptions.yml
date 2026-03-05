@@ -15,7 +15,7 @@ permissions: {}
 jobs:
   check-expiry:
     name: Verify security exception expiry dates
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:

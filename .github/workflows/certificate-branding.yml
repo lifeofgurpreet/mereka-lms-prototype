@@ -7,7 +7,7 @@ permissions: {}
 
 jobs:
   certificate-branding:
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 20
     permissions:
       contents: read  # checkout

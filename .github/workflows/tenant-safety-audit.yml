@@ -24,7 +24,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   tenant-config-audit:
     name: Tenant Config Safety Audit (prod + dev)
-    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:
@@ -126,7 +126,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   tenant-branding-audit:
     name: Tenant Branding Fallback Audit
-    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:

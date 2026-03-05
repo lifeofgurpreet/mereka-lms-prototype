@@ -25,7 +25,7 @@ permissions: {}
 jobs:
   offline-drift-check:
     name: Offline Drift Check (git manifests)
-    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:
@@ -63,7 +63,7 @@ jobs:
 
   online-drift-check:
     name: Online Drift Check (live cluster)
-    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
       id-token: write
@@ -103,7 +103,7 @@ jobs:
     name: Alert on Drift
     needs: [offline-drift-check, online-drift-check]
     if: failure()
-    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
+    runs-on: mereka-k8s-runners
     permissions:
       issues: write
     steps:

@@ -24,7 +24,7 @@ permissions: {}
 jobs:
   visual-regression-auth:
     name: Authenticated route checks (${{ github.event.inputs.environment || 'production' }})
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 10
     permissions:
       contents: read

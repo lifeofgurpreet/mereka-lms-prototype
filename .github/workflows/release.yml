@@ -10,7 +10,7 @@ permissions: {}
 jobs:
   create-github-release:
     name: Create GitHub Release
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: write
     steps:

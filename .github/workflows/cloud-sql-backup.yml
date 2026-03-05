@@ -13,7 +13,7 @@ jobs:
   backup:
     # Enable by setting GitHub repo variable: ENABLE_CLOUD_SQL_BACKUPS=true
     if: ${{ vars.ENABLE_CLOUD_SQL_BACKUPS == 'true' }}
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
       id-token: write

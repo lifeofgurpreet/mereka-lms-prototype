@@ -11,7 +11,7 @@ permissions: {}
 jobs:
   atlas-health:
     name: Atlas SRV Connectivity Verification
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 10
     continue-on-error: true
     permissions:

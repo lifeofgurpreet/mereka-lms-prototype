@@ -10,7 +10,7 @@ permissions: {}
 jobs:
   branding-and-public-checks:
     name: Branding + Public Endpoint Checks
-    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:

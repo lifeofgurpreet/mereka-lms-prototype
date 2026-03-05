@@ -7,7 +7,7 @@ permissions: {}
 
 jobs:
   email-template-branding:
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 30
     permissions:
       contents: read  # checkout

@@ -25,7 +25,7 @@ permissions: {}
 jobs:
   validate-multisite:
     name: Validate SITE_VARIANTS and multisite config
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:

@@ -15,7 +15,7 @@ permissions: {}
 jobs:
   test-mfe-oauth-plugin:
     name: Test MFE OAuth Fix Plugin
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     env:
@@ -130,7 +130,7 @@ jobs:
 
   test-plugin-lifecycle:
     name: Test Plugin Enable/Disable Lifecycle
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     env:
@@ -198,7 +198,7 @@ jobs:
 
   verify-custom-app-structure:
     name: Verify Custom App Structure
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:
@@ -220,7 +220,7 @@ jobs:
 
   lint-plugins:
     name: Lint Plugin Code
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:
@@ -242,7 +242,7 @@ jobs:
 
   integration-test:
     name: Integration Test - Plugin with Patches
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     env:
@@ -304,7 +304,7 @@ jobs:
 
   post-failure-comment:
     name: Post PR Comment on Plugin Test Failure
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     needs: [test-mfe-oauth-plugin, test-plugin-lifecycle, lint-plugins, integration-test]
     if: failure() && github.event_name == 'pull_request'
     permissions:

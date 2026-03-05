@@ -22,7 +22,7 @@ permissions: {}
 jobs:
   phase2-smoke-evidence:
     name: Run Phase 2 Smoke Evidence Gates
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 45
     permissions:
       contents: read

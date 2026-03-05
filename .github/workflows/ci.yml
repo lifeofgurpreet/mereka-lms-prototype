@@ -46,7 +46,7 @@ jobs:
   # ============================================================================
   static-validation:
     name: Static Validation
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
       pull-requests: write
@@ -422,7 +422,7 @@ jobs:
   # ============================================================================
   tutor-config-tests:
     name: Tutor Configuration Tests
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
 
@@ -491,7 +491,7 @@ jobs:
   # ============================================================================
   security-scans:
     name: Security Scans
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
 
@@ -535,7 +535,7 @@ jobs:
   # ============================================================================
   test-coverage:
     name: Python test coverage
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
 

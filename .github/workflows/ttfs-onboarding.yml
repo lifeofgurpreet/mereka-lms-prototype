@@ -8,7 +8,7 @@ permissions: {}
 jobs:
   ttfs-onboarding:
     name: Verify TTFS Onboarding Funnel Config
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 10
     permissions:
       contents: read

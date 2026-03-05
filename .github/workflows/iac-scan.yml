@@ -23,7 +23,7 @@ concurrency:
 jobs:
   trivy-k8s-manifests:
     name: Trivy — K8s Manifests
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:
@@ -50,7 +50,7 @@ jobs:
 
   trivy-terraform:
     name: Trivy — Terraform
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:

@@ -140,7 +140,7 @@ permissions: {}
 jobs:
   release-evidence:
     name: Build Release Evidence Bundle
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
       id-token: write

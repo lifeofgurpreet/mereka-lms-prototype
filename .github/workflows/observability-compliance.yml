@@ -90,7 +90,7 @@ env:
 jobs:
   observability-compliance-local:
     name: Validate observability monitoring manifests
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 15
     permissions:
       contents: read  # checkout
@@ -199,7 +199,7 @@ jobs:
   observability-compliance-runtime:
     name: Runtime observability verification (manual)
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_runtime == 'true' }}
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 20
     permissions:
       contents: read  # checkout

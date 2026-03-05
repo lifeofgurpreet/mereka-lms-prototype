@@ -51,7 +51,7 @@ permissions: {}
 jobs:
   frontend-before-after-visuals:
     name: Build Before/After Visual Evidence
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 60
     permissions:
       contents: read

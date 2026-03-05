@@ -22,7 +22,7 @@ permissions: {}
 jobs:
   frontend-runtime-qa:
     name: Run Runtime Frontend QA Tranche
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 90
     permissions:
       contents: read

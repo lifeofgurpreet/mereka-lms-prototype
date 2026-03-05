@@ -10,7 +10,7 @@ permissions: {}
 jobs:
   verify-commit-signing:
     name: Commit Signing Check (soft gate)
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     timeout-minutes: 5
     continue-on-error: true
     permissions:
