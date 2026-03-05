@@ -57,6 +57,8 @@ scripts/qa/lint-active-docs-env-model.sh
 
 # ── CI/CD pipeline contracts ─────────────────────────────────────────────────
 scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+scripts/qa/verify-cicd-lessons-compliance.sh
+scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/verify-release-automation.sh
 scripts/qa/verify-release-dry-run-contract.sh
 scripts/qa/verify-release-deployment-choreography.sh

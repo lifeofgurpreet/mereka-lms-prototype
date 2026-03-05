@@ -1,6 +1,7 @@
 # CI/CD Self-Hosted Runners — Actions Runner Controller (ARC)
 
 **Parent docs**: [CI_PIPELINE_COST_OPTIMIZATION.md](CI_PIPELINE_COST_OPTIMIZATION.md) | [CI_OPTIMIZATION_TRACKER.md](CI_OPTIMIZATION_TRACKER.md)
+**Runner policy**: [CI_RUNNER_POLICY.md](CI_RUNNER_POLICY.md) — which job type uses which runner class
 **Tracker tasks**: Phase 1, T150 (Tasks 1.1–1.5)
 **Cluster**: rke2-nonprod (Contabo VPS, `154.26.132.35`)
 
@@ -321,6 +322,7 @@ kubectl get pods -n arc-runners   # Should show runner pods during active CI run
 
 ## Related Documentation
 
+- [CI_RUNNER_POLICY.md](CI_RUNNER_POLICY.md) — runner class definitions, job-type routing rules, full workflow audit table, migration checklist
 - [CI_PIPELINE_COST_OPTIMIZATION.md](CI_PIPELINE_COST_OPTIMIZATION.md) — cost analysis and rationale
 - [CI_OPTIMIZATION_TRACKER.md](CI_OPTIMIZATION_TRACKER.md) — phase-by-phase implementation tracker
 - [CI_CD_SETUP.md](CI_CD_SETUP.md) — overall CI/CD setup guide
