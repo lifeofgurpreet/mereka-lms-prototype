@@ -54,11 +54,28 @@ MFE_CONFIG["LOGO_URL"] = f"{_mfe_static_base}/theme/logo-horizontal.png"
 MFE_CONFIG["LOGO_WHITE_URL"] = f"{_mfe_static_base}/theme/logo-horizontal-white.png"
 MFE_CONFIG["LOGO_TRADEMARK_URL"] = f"{_mfe_static_base}/theme/logo.png"
 
+# ── Content Security Policy ────────────────────────────────────────────────
+# Migration plan: docs/adr/025-csp-nonce-migration.md
+#
+# Phase 0 (current): 'unsafe-inline' and 'unsafe-eval' intentionally present.
+#   Open edX (RequireJS bootstrap, XBlock runtime, Waffle flags) generates
+#   inline scripts that cannot be trivially externalised.  MathJax / Studio
+#   drag-drop require eval().  Removing these now would break the platform.
+#
+# Phase 1 (future): add CSP-Report-Only header with strict nonce policy.
+#   Collect violation data via CSP_REPORT_URI; fix first-party violations.
+#
+# Phase 2 (future): remove 'unsafe-inline' once violation report shows zero
+#   first-party hits.  Keep 'strict-dynamic' + nonce.
+#
+# Phase 3 (future): remove 'unsafe-eval' after MathJax 3 migration.
+#
+# DO NOT remove 'unsafe-inline' or 'unsafe-eval' without completing Phase 1.
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = (
     "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'",
+    "'unsafe-inline'",   # Phase 0: required by Open edX inline scripts — see ADR-025
+    "'unsafe-eval'",     # Phase 0: required by MathJax / Studio DnD — see ADR-025
     _mfe_url,
     "https://cdn.jsdelivr.net",
     "https://cdnjs.cloudflare.com",
@@ -112,10 +129,16 @@ CSP_OBJECT_SRC = ("'none'",)
 CSP_BASE_URI = ("'self'",)
 CSP_FRAME_ANCESTORS = ("'self'",)
 
-# Nonce preparation — nonces coexist with 'unsafe-inline'; templates that adopt
-# {% csp_nonce %} will work before we remove 'unsafe-inline'.
+# Nonce injection scaffold (Phase 0 — ADR-025):
+# Nonces coexist safely with 'unsafe-inline'.  Templates that adopt
+# {% csp_nonce %} will be nonce-trusted even before we remove 'unsafe-inline'.
+# This is a zero-risk change: adding a nonce does not enforce anything new.
 CSP_INCLUDE_NONCE_IN = ["script-src"]
 
+# CSP report endpoint (Phase 0 — ADR-025):
+# Set CSP_REPORT_URI env var to enable violation reporting.
+# Defaults to empty (disabled).  Sentry's /_/csp-report/ is a drop-in option.
+# Example: CSP_REPORT_URI=https://sentry.io/api/<id>/security/?sentry_key=<key>
 _csp_report_uri = os.environ.get("CSP_REPORT_URI", "")
 if _csp_report_uri:
     CSP_REPORT_URI = _csp_report_uri
