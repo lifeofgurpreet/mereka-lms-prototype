@@ -96,20 +96,35 @@ Overlay is ready in this repo but staging is not yet deployed via ArgoCD. Requir
 | Own discovery/notes/etc | **No** — shared | **No** — shared |
 | Dev/staging domains | **No** — prod only | **No** — prod only |
 
-### What subsites DON'T have
+### What subsites DON'T have (gaps to fix)
 
-1. **No dev/staging domains** — `academy.biji-biji.com` has no dev equivalent. Testing happens on the prod LMS with the alternate domain.
-2. **No own design system** — Both subsites share the Mereka comprehensive theme. Tenant-level branding (logo, colours) is via Open edX Site Configuration, not a separate theme.
-3. **No own enterprise services** — Enterprise admin/learner/catalog/subsidy are per-platform, not per-tenant. EnterpriseCustomer records in the LMS DB scope enterprise features to the correct tenant.
-4. **No own auxiliary services** — Discovery, notes, credentials, forum, ecommerce, payments are all shared platform services. Tenant isolation is at the application layer (Sites framework + TenantConfig), not at the infrastructure layer.
+> **ADR-024**: All subsites are TRUE TENANTS. See `docs/adr/024-multi-tenancy-true-tenants.md`.
 
-### Is this a problem?
+1. **No `EnterpriseCustomer` records** — Neither Biji-Biji nor SkillOurFuture has an EnterpriseCustomer record. They need one for proper tenant scoping.
+2. **No Discovery `Partner` records** — Neither subsite has a Partner record in Discovery. Needed for proper course catalog scoping per tenant.
+3. **No `course_org_filter`** — Neither subsite's SiteConfiguration restricts visible courses to their org. All tenants see all courses.
+4. **No dev/staging domains** — `academy.biji-biji.com` has no dev equivalent. Testing happens on the shared dev platform (`academyv2.mereka.dev`).
+5. **No own design system** — Both subsites share the Mereka comprehensive theme. Tenant-level branding (logo, colours) is via Open edX Site Configuration, not a separate theme.
 
-**For current subsites (alias domains)**: No. Biji-Biji and SkillOurFuture are alias domains for the same Mereka Academy Site. They don't need separate infra.
+### What's correctly shared (NOT a gap)
 
-**For future enterprise subsites (dedicated tenants)**: Depends on the isolation model:
-- **Shared platform, separate branding** (current approach): New tenant gets a domain (`acme.academyv2.mereka.io`), a Site record, a TenantConfig, and brand assets. No new infra needed. This is what the multi-tenancy foundation supports.
-- **Dedicated infrastructure per tenant**: Each tenant would need their own service stack, databases, secrets. This is NOT the current architecture and would be a major change.
+These services are shared by design — Open edX's architecture does not support (or need) per-tenant instances:
+
+| Service | Why shared is correct |
+|---|---|
+| **Notes** | No `site_id` in data model. Isolation by `course_id` (contains org prefix) |
+| **Forum** | Runs in-process with LMS. Isolation by `course_id` + enrollment |
+| **Enterprise Portals** | Slug-based routing (`/:slug/`), designed multi-tenant from the start |
+| **Studio** | Shared platform-wide — course authoring is not per-tenant |
+| **Enterprise backends** | Scoped by `enterprise_customer_uuid` on every query |
+
+### What needs per-tenant DB records (no separate domains needed)
+
+| Service | Record Needed | Why |
+|---|---|---|
+| **Credentials** | Site + SiteConfiguration | Certificate issuance scoped by `(site, course_id)` |
+| **Discovery** | Site + Partner | Catalog scoping — `course_org_filter` drives visibility |
+| **Ecommerce / Purchase Gateway** | Partner + Site + SiteConfig | Separate payment flow per tenant |
 
 ## Infrastructure Ownership
 
@@ -131,4 +146,5 @@ Overlay is ready in this repo but staging is not yet deployed via ArgoCD. Requir
 | 2 | Add enterprise Caddy routes to dev Caddy config (fixes admin/learner 503 on dev) | bbi-infrastructure | High |
 | 3 | Deploy staging overlay via ArgoCD | bbi-infrastructure | Medium |
 | 4 | Add dev/staging DNS records for staging.academyv2.mereka.io subdomains | bbi-infrastructure | Medium |
-| 5 | Decide: do subsites (biji-biji, skillourfuture) need dev/staging domains? | Product decision | Low |
+| 5 | Create EnterpriseCustomer + Discovery Partner records for Biji-Biji and SkillOurFuture | mereka-lms | **High** |
+| 6 | Add `course_org_filter` to SiteConfiguration for both subsites | mereka-lms | **High** |

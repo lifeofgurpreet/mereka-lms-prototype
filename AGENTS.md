@@ -484,13 +484,31 @@ curl -I http://apps.localhost/authn/login
 - **Development (VPS kind):** `academyv2.mereka.dev`, `studio.academyv2.mereka.dev`, `apps.academyv2.mereka.dev`,
   `discovery.academyv2.mereka.dev`, `ecommerce.academyv2.mereka.dev`, `credentials.academyv2.mereka.dev`,
   `forum.academyv2.mereka.dev`, `notes.academyv2.mereka.dev`, `preview.academyv2.mereka.dev`
-- **Subsites (separate clients):** `skillourfuture.academy.mereka.io`, `academy.biji-biji.com`
+- **Subsites (TRUE TENANTS — see ADR-024):** `skillourfuture.academy.mereka.io`, `academy.biji-biji.com`
 - Authentik base URL: `https://auth0.mereka.io`
 - Authn MFE shows two login methods: local LMS credentials + “Sign in with Mereka” (OIDC)
 - Shared admin test creds in Infisical `/shared/oauth`: `GOOGLE_IMPERSONATE_EMAIL`, `GOOGLE_IMPERSONATE_PASSWORD`
 
 Canonical hostname list:
 - `docs/operations/OPENEDX_HOSTNAMES.md`
+
+**CRITICAL — Multi-Tenancy Rule (ADR-024):**
+Every subsite is a **true tenant**, no exceptions. This means each tenant MUST have:
+- Django `Site` + `SiteConfiguration` records
+- `EnterpriseCustomer` record with UUID, slug, and feature flags
+- Discovery `Partner` record for catalog scoping
+- `course_org_filter` in SiteConfiguration
+- Own LMS + MFE domains with ingress, TLS, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS
+- Branding assets in `tenants/{slug}/`
+
+Services that do NOT need per-tenant domains (shared by design):
+- Notes (no `site_id` in data model — `course_id` isolation)
+- Forum (in-process with LMS — `course_id` isolation)
+- Enterprise portals (slug-based routing `/:slug/`)
+- Studio (shared platform-wide)
+
+Full details: `docs/adr/024-multi-tenancy-true-tenants.md`
+Domain matrix: `docs/operations/DOMAIN_MATRIX.md`
 
 Branding guardrails (read before changing theme assets/CSS):
 - `docs/branding/BRANDING_GUARDRAILS.md`
