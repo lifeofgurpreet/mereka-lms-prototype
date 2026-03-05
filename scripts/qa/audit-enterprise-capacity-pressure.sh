@@ -73,6 +73,11 @@ if [[ -n "$KUBE_CONTEXT" ]]; then
   KCTX=(--context "$KUBE_CONTEXT")
 fi
 
+if ! command -v kubectl >/dev/null 2>&1; then
+  echo "[SKIP] kubectl not available — skipping cluster checks"
+  exit 0
+fi
+
 echo "=== Enterprise Capacity Pressure Audit ==="
 echo "Namespace: $NAMESPACE"
 if [[ -n "$KUBE_CONTEXT" ]]; then

@@ -63,6 +63,11 @@ if [[ -z "$SINCE" ]]; then
   exit 1
 fi
 
+if ! command -v kubectl >/dev/null 2>&1; then
+  echo "[SKIP] kubectl not available — skipping cluster checks"
+  exit 0
+fi
+
 log_json="$(kubectl --context "$CONTEXT" -n "$NAMESPACE" logs deploy/"$DEPLOYMENT" --since="$SINCE" 2>/dev/null || true)"
 if [[ -z "$log_json" ]]; then
   echo "FAIL: no logs returned (ctx=$CONTEXT ns=$NAMESPACE deploy=$DEPLOYMENT since=$SINCE)" >&2

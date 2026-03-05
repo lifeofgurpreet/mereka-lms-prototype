@@ -40,6 +40,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if ! command -v kubectl >/dev/null 2>&1; then
+  echo "[SKIP] kubectl not available — skipping cluster checks"
+  exit 0
+fi
+
 kubectl_json() {
   kubectl --context "$K8S_CONTEXT" -n "$1" get "$2" -o json 2>/dev/null || echo '{"items":[]}'
 }
