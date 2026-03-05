@@ -79,6 +79,10 @@ export DEV_NOTES_DOMAIN="${DEV_NOTES_DOMAIN:-notes.${DEV_LMS_DOMAIN}}"
 export DEV_CREDENTIALS_DOMAIN="${DEV_CREDENTIALS_DOMAIN:-credentials.${DEV_LMS_DOMAIN}}"
 export DEV_FORUM_DOMAIN="${DEV_FORUM_DOMAIN:-forum.${DEV_LMS_DOMAIN}}"
 
+# Enterprise MFE domains (dev)
+export DEV_ENTERPRISE_ADMIN_DOMAIN="${DEV_ENTERPRISE_ADMIN_DOMAIN:-admin.${DEV_LMS_DOMAIN}}"
+export DEV_ENTERPRISE_PORTAL_DOMAIN="${DEV_ENTERPRISE_PORTAL_DOMAIN:-learner.${DEV_LMS_DOMAIN}}"
+
 # Purchase Gateway (canonical ecommerce replacement)
 export PURCHASE_GATEWAY_DOMAIN="${PURCHASE_GATEWAY_DOMAIN:-payments.${LMS_DOMAIN}}"
 export DEV_PURCHASE_GATEWAY_DOMAIN="${DEV_PURCHASE_GATEWAY_DOMAIN:-payments.${DEV_LMS_DOMAIN}}"
@@ -96,6 +100,13 @@ export STAGING_ECOMMERCE_DOMAIN="${STAGING_ECOMMERCE_DOMAIN:-ecommerce.staging.a
 export STAGING_NOTES_DOMAIN="${STAGING_NOTES_DOMAIN:-notes.staging.academyv2.mereka.io}"
 export STAGING_CREDENTIALS_DOMAIN="${STAGING_CREDENTIALS_DOMAIN:-credentials.staging.academyv2.mereka.io}"
 export STAGING_FORUM_DOMAIN="${STAGING_FORUM_DOMAIN:-forum.staging.academyv2.mereka.io}"
+
+# Enterprise MFE domains (staging)
+export STAGING_ENTERPRISE_ADMIN_DOMAIN="${STAGING_ENTERPRISE_ADMIN_DOMAIN:-admin.staging.academyv2.mereka.io}"
+export STAGING_ENTERPRISE_PORTAL_DOMAIN="${STAGING_ENTERPRISE_PORTAL_DOMAIN:-learner.staging.academyv2.mereka.io}"
+
+# Purchase Gateway (staging)
+export STAGING_PURCHASE_GATEWAY_DOMAIN="${STAGING_PURCHASE_GATEWAY_DOMAIN:-payments.staging.academyv2.mereka.io}"
 
 # =============================================================================
 # Container Registry

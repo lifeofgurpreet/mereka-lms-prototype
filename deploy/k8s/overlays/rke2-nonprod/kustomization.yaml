@@ -73,12 +73,16 @@ images:
   # Enterprise backend services — frozen at 21.0.0 (archived upstream, Nov 2024)
   - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog
     newTag: "21.0.0"
+    digest: sha256:5ef5ee4bea398af0027c5e85d107860145a0dced7c0ad022edd99cd7fa5c1cbc
   - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy
     newTag: "21.0.0"
+    digest: sha256:2d701f8f9c6482176eade8d028d0bff653fbc03e4b1b619d21238dd2b9f8a461
   - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access
     newTag: "21.0.0"
+    digest: sha256:5315667f47d93beed464c59e9fb6c393428a4f0156e57a39f03c439f257caa22
   - name: ghcr.io/biji-biji-initiative/mereka-lms/license-manager
     newTag: "21.0.0"
+    digest: sha256:11cad063c297761353b38df9255fdebfa244038f5ab90f660935bd9ecc39d138
 
 generatorOptions:
   disableNameSuffixHash: true
