@@ -79,6 +79,7 @@ find var/evidence/ -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +
 
 ## Related
 
+- `docs/operations/EVIDENCE_REDACTION_POLICY.md` — Required redaction policy for committed evidence
 - `docs/operations/BRANDING_RELEASE_RUNBOOK.md` — Evidence retention policy
 - `docs/operations/TENANT_ONBOARDING_PLAYBOOK.md` — Onboarding evidence template
 - `scripts/qa/ops-confidence.sh` — Unified confidence bundle

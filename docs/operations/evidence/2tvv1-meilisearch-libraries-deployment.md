@@ -16,8 +16,8 @@
 | Meilisearch service (ClusterIP) | ✅ `34.118.236.116:7700` |
 | Meilisearch health endpoint | ✅ `{"status":"available"}` |
 | `MEILISEARCH_API_KEY` in `openedx-secrets` | ✅ Present (synced from GCP SM) |
-| `MEILISEARCH_MASTER_KEY` in CMS env | ✅ `628b1d17660ca71027f87890993082f4` |
-| `MEILISEARCH_API_KEY` in CMS env | ✅ `9bff9b95fbdb1a4ba97dc83486ce9b57` |
+| `MEILISEARCH_MASTER_KEY` in CMS env | ✅ `<REDACTED>` |
+| `MEILISEARCH_API_KEY` in CMS env | ✅ `<REDACTED>` |
 | CMS → Meilisearch connectivity | ✅ `MEILISEARCH_SERVICE_HOST=34.118.236.116` |
 | Content libraries migrations applied | ✅ 0001–0004 all `[X]` |
 

@@ -4,6 +4,16 @@
 > **Date**: 2026-02-18
 > **Cluster**: gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
 
+## Redaction Requirement
+
+Evidence committed to `docs/**/evidence/**` MUST redact sensitive headers/tokens.
+Use:
+
+- `set-cookie: <REDACTED>`
+- `authorization: <REDACTED>`
+
+See `docs/operations/EVIDENCE_REDACTION_POLICY.md`.
+
 ## 1. GKE/Dev Parity Proof Commands (AC-OPS-301)
 
 ### Route Parity

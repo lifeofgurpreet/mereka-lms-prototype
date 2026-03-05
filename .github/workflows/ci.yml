@@ -261,6 +261,12 @@ jobs:
       - name: Verify token drift
         run: ./scripts/qa/verify-token-drift.sh
 
+      - name: Syntax check evidence redaction verifier
+        run: bash -n scripts/qa/verify-evidence-redaction.sh
+
+      - name: Verify evidence redaction policy
+        run: STRICT=1 ./scripts/qa/verify-evidence-redaction.sh
+
       - name: Validate config.example.yml
         run: python3 scripts/qa/check-config-example-yaml.py
 

@@ -172,7 +172,7 @@ Indexes (current):
 CMS Meilisearch env:
   MEILISEARCH_SERVICE_HOST=34.118.236.116
   MEILISEARCH_PORT_7700_TCP_PORT=7700
-  MEILISEARCH_API_KEY=9bff9b95fbdb1a4ba97dc83486ce9b57
+  MEILISEARCH_API_KEY=<REDACTED>
 
 Content libraries migrations:
   [X] 0001_initial
