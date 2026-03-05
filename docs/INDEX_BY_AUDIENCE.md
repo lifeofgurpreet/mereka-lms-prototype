@@ -409,6 +409,7 @@ _Security configs, compliance, audit logs, secrets management_
 ### Migrations & Data
 - **Kajabi Migration**: [migrations/kajabi/](migrations/kajabi/) - Kajabi → Open edX migration
 - **MCT Migration**: [migrations/mct/](migrations/mct/) - MCT → Open edX migration
+- **Drive + Airtable Video Inventory**: [migrations/drive-airtable/README.md](migrations/drive-airtable/README.md) - Course-first pipeline for nested Drive video mapping, subtitle review, and lesson linking.
 - **BBI K8s Migration**: [BBI-K8-MIGRATION.md](migrations/BBI-K8-MIGRATION.md) - Infrastructure migration
 
 ### Analytics & Reporting

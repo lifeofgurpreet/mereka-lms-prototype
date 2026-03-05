@@ -7,5 +7,6 @@ Every large-scale content or user migration lives under this folder. Pick the do
 | --- | --- | --- | --- |
 | Kajabi | [`kajabi/README.md`](kajabi/README.md) | Canonical export -> transform -> import playbook plus QA/rollback notes. | 2025-11-09 |
 | MCT | [`mct/README.md`](mct/README.md) | Legacy Microsoft Community Training migration docs and API research. | 2025-08-31 |
+| Drive + Airtable Video Inventory | [`drive-airtable/README.md`](drive-airtable/README.md) | Course-first folder targeting and reusable mapping pipeline from nested Drive assets into Airtable lesson links. | 2026-03-05 |
 
 **Adding another system?** Create `docs/migrations/<system>/README.md`, mirror the metadata block, and cross-link it from here and the global docs index.
