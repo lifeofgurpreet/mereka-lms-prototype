@@ -1,0 +1,84 @@
+# Staging hosts (DNS + cert-manager TLS).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openedx-lms
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: openedx-lms
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: staging.academyv2.mereka.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: preview.staging.academyv2.mereka.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: discovery.staging.academyv2.mereka.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: notes.staging.academyv2.mereka.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: credentials.staging.academyv2.mereka.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: forum.staging.academyv2.mereka.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - staging.academyv2.mereka.io
+        - preview.staging.academyv2.mereka.io
+        - discovery.staging.academyv2.mereka.io
+        - notes.staging.academyv2.mereka.io
+        - credentials.staging.academyv2.mereka.io
+        - forum.staging.academyv2.mereka.io
+      secretName: staging-openedx-lms-tls

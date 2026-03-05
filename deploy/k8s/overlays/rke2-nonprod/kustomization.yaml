@@ -47,18 +47,24 @@ resources:
   # Apply ARC separately: kubectl apply -k deploy/k8s/base/arc/
   # See: docs/operations/CI_CD_RUNNERS.md for the full deploy sequence.
 
-# Override image tag for nonprod (base transforms docker.io/overhangio/openedx
-# to ghcr.io/biji-biji-initiative/mereka-lms/openedx — overlay must match the
-# transformed name)
+# Immutable SHA-pinned image tags (no mutable mereka-brand tag).
+# Image Updater will manage these tags once enrolled.
 images:
+  # Keep canonical (docker.io) + transformed (GHCR) names aligned to avoid post-transform drift.
+  - name: docker.io/overhangio/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
+    newTag: c2719c3a
+    digest: sha256:b6d75c8da854f160cc30cd169ba909cbc96de5cc3b8f9375353e9651cf5fd924
   - name: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: mereka-brand
-  # Keep canonical + transformed openedx-mfe names aligned to avoid post-transform drift.
+    newTag: c2719c3a
+    digest: sha256:b6d75c8da854f160cc30cd169ba909cbc96de5cc3b8f9375353e9651cf5fd924
   - name: docker.io/overhangio/openedx-mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: c1ef8f8f-20260301182820
+    newTag: c2719c3a
+    digest: sha256:007d6bce86e3bec3f7a4e9357237ebe0b6809be26401c8679faaf60402bec792
   - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: c1ef8f8f-20260301182820
+    newTag: c2719c3a
+    digest: sha256:007d6bce86e3bec3f7a4e9357237ebe0b6809be26401c8679faaf60402bec792
   # Enterprise MFEs — GHCR (migrated from GAR)
   - name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal
     newTag: nreum-clean-202602200416
@@ -104,8 +110,7 @@ patches:
   - path: patches/aspects-container-hardening.yaml
   # enterprise-catalog-worker: Recreate strategy + probe hardening (from infra agent handoff)
   - path: patches/enterprise-catalog-worker-nonprod.yaml
-  # Force Always pull for mutable tags (mereka-brand) — IfNotPresent skips re-pull
-  - path: patches/image-pull-always.yaml
+  # imagePullPolicy: Always patch removed — immutable SHA tags don't need it
   # payments-gateway: switch to infisical + DEV Stripe keys
   - path: patches/payments-gateway-secrets-infisical.yaml
     target:

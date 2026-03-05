@@ -1,0 +1,22 @@
+# Patch Superset ingress hostname for staging
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: superset
+  namespace: mereka-lms
+spec:
+  rules:
+    - host: analytics.staging.academyv2.mereka.io
+      http:
+        paths:
+          - backend:
+              service:
+                name: superset
+                port:
+                  number: 8088
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - analytics.staging.academyv2.mereka.io
+      secretName: staging-superset-tls

@@ -375,7 +375,7 @@ fi
 # ── 10. Kustomize overlays render cleanly ────────────────────────────────
 printf "\n${BLUE}── 10. Kustomize overlay rendering ──${NC}\n"
 
-for overlay in local production rke2-nonprod; do
+for overlay in local production rke2-nonprod staging; do
   overlay_dir="$REPO_ROOT/deploy/k8s/overlays/$overlay"
   if [[ -d "$overlay_dir" ]]; then
     if kubectl kustomize "$overlay_dir" > /dev/null 2>&1; then

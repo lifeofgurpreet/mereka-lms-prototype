@@ -1,0 +1,64 @@
+# Staging MFE host.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openedx-mfe
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: openedx-mfe
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: apps.staging.academyv2.mereka.io
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /csrf
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /login_refresh
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /login
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - apps.staging.academyv2.mereka.io
+      secretName: staging-openedx-mfe-tls
