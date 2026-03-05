@@ -16,6 +16,18 @@ kind: Kustomization
 #      OR each Deployment has spec.template.spec.imagePullSecrets set
 #
 # Domain: rke2-nonprod dev hostnames use *.academyv2.mereka.dev.
+#
+# AUTH KEY OWNERSHIP (issue #174):
+#   This repo owns:
+#     - OAUTH_OIDC_ISSUER (the LMS's own JWT issuer, domain-specific per env)
+#     - THIRD_PARTY_AUTH_BACKENDS (the list of available auth backends)
+#   bbi-infrastructure owns (canonical, set in overlays/dev/patches/production-staging.py):
+#     - SOCIAL_AUTH_OIDC_OIDC_ENDPOINT (Authentik provider endpoint URL)
+#     - SOCIAL_AUTH_OIDC_KEY (Authentik client ID / OIDC key)
+#     - SOCIAL_AUTH_OIDC_SECRET (via K8s secret openedx-secrets → OIDC_CLIENT_SECRET)
+#     - SOCIAL_AUTH_REDIRECT_IS_HTTPS / SOCIAL_AUTH_OIDC_REDIRECT_IS_HTTPS
+#   Do NOT add these to config/lms.env.yml or config/cms.env.yml — bbi-infrastructure
+#   is the single source of truth for Authentik/OIDC ownership.
 
 namespace: mereka-lms
 
