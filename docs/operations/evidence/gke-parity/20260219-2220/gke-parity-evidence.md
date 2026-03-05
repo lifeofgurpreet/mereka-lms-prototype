@@ -53,6 +53,7 @@ with a minimal Mereka-branded footer:
 - No external CDN references
 
 **Footer parity before/after**:
+
 - Before: 25 PASS / 0 FAIL / 3 WARN (CMS footer absent WARN present)
 - After: 28 PASS / 0 FAIL / 2 WARN (CMS footer WARN resolved)
 
@@ -102,7 +103,7 @@ Policy compliance: footer slot-only: **15 PASS / 0 FAIL / 1 WARN**
 | PASS | 200 | preview | https://preview.academyv2.mereka.io/ |
 | PASS | 200 | forum | https://forum.academyv2.mereka.io/heartbeat |
 
-**10 PASS / 0 WARN / 0 FAIL**
+10 PASS / 0 WARN / 0 FAIL
 
 ---
 

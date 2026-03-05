@@ -206,12 +206,15 @@ aws sts get-caller-identity
 ## Troubleshooting
 
 ### Error: "Unable to locate credentials"
+
 **Solution**: Re-run configuration script to populate `~/.aws/credentials`
 
 ### Error: "Access Denied"
+
 **Solution**: Verify IAM user has `AmazonSESFullAccess` policy attached
 
 ### Error: "Invalid credentials"
+
 **Solution**: Check if access key is still active in AWS IAM Console
 
 ### SMTP relay not working

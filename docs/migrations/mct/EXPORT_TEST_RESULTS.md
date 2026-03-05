@@ -39,6 +39,7 @@ Page Size: 100
 ```
 
 ### ❌ Step 2: Authentication Test - FAILED (Credentials Expired)
+
 **Command:**
 ```bash
 MCT_BASE_URL=learn.skillourfuture.org \

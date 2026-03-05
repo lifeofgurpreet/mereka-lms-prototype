@@ -16,6 +16,7 @@ ArgoCD `mereka-lms-local` is now **Synced** (SSH fix applied by bbi-infrastructu
 ## Blocker 1: ExternalSecrets — `gcp-secret-manager` ClusterSecretStore Invalid
 
 ### Error
+
 ```
 ClusterSecretStore gcp-secret-manager: InvalidProviderConfig
   failed to create GCP secretmanager client: ServiceAccount "external-secrets-gcp" not found
@@ -49,6 +50,7 @@ payments-gateway-secrets   SecretSyncedError
 ## Blocker 2: ImagePullBackOff — No GCP Artifact Registry Credentials
 
 ### Error
+
 ```
 failed to authorize: failed to fetch anonymous token:
 unexpected status from GET request to

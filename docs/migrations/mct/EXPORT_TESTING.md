@@ -132,11 +132,13 @@ node scripts/migrations/mct/mct-export.mjs \
 ## Troubleshooting
 
 ### Authentication Errors
+
 - **401 Unauthorized**: Check credentials are correct
 - **Token request failed**: Verify MCT_API_URI format (should be `api://...`)
 - **Missing scope**: Ensure service principal has MCT API permissions
 
 ### API Errors
+
 - **404 Not Found**: Endpoint may not exist for this API version
 - **429 Too Many Requests**: Rate limiting - script will retry automatically
 - **500 Server Error**: MCT API issue - check MCT portal status

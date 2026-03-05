@@ -94,6 +94,7 @@ bash scripts/qa/capture-branding-screenshots.sh
 - `docs/operations/evidence/footer-slot-evidence-rollback-report.md` — footer slot migration evidence
 
 **Current session verify outputs**:
+
 | Script | PASS | FAIL | WARN |
 |--------|------|------|------|
 | `verify-branding-health.sh` | 3 | 0 | 0 |

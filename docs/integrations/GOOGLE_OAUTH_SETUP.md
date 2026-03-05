@@ -132,12 +132,14 @@ tutor k8s restart lms
 - Restart LMS service after configuration changes
 
 ### "Redirect URI Mismatch" Error
+
 - Verify redirect URIs in Google Cloud Console match exactly:
   - Must include `/auth/complete/google-oauth2/` path
   - Protocol (http/https) must match
   - Domain must match exactly (no trailing slashes in origins)
 
 ### "Invalid Client" Error
+
 - Verify Client ID and Secret are correct
 - Check that OAuth consent screen is configured
 - Ensure the project has the Google+ API enabled (if required)

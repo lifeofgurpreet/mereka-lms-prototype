@@ -57,6 +57,7 @@ Each MCT user profile includes:
 ## Known Issues
 
 ### allow_certificate Field Errors
+
 - **Count:** 881 users failed
 - **Error:** `Field 'allow_certificate' doesn't have a default value`
 - **Cause:** Database schema issue when creating UserProfile for users with duplicate usernames
@@ -136,6 +137,7 @@ Test login for sample MCT users:
 ## Sample Error Analysis
 
 ### allow_certificate Errors
+
 These errors occurred when trying to create UserProfile for users whose email already existed but with a different username. The script updated the auth_user record but failed to create the profile due to missing default value for `allow_certificate` field.
 
 **Example:**

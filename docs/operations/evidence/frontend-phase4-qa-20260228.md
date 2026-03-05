@@ -34,6 +34,7 @@ Runtime verification for the remaining QA closure lanes in `docs/BRANDING_PLAN.m
 - Artifact: script output only (no explicit artifact path emitted by the command)
 
 ### 4) Strict runtime-theme npm-start smoke
+
 - Status: FAIL (expected deployment blocker signal)
 - Failure: `runtime theme mode required, but detected 'embedded-theme-files'`
 - Failing preflight target: `https://apps.academyv2.mereka.io/authn/login`

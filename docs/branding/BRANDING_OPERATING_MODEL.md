@@ -168,6 +168,7 @@ Preferred deployment command:
      3) verify local image digest changed before tagging/pushing.
 
 13. **Argo `ComparisonError` with `not our ref` during GitOps rollout**
+
    - Cause: incorrect pinned SHA in active GitOps repo (`BBI-K8`/`bbi-infrastructure`) (`?ref=<sha>` typo or stale SHA).
    - Fix:
      1) get exact SHA from source repo: `git -C /home/gurpreet/projects/k8s/mereka-lms rev-parse HEAD`

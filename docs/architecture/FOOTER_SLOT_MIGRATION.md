@@ -94,6 +94,7 @@ The MerekaFooter component (v2, 5-zone dark footer) is currently delivered via t
 **When**: tutor-mfe upstream exposes `tutormfe.hooks.PLUGIN_SLOTS` filter
 
 **Actions**:
+
 1. Remove ImportError guard from `mereka_lms.py` lines 568-593
 2. Set `_PLUGIN_SLOTS_AVAILABLE = True` as unconditional
 3. Test: `tutor images build mfe && tutor k8s restart mfe`

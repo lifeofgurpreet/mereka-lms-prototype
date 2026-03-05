@@ -93,6 +93,7 @@ if user:
 ## Known Issues
 
 ### Profile Creation Failures (854 users)
+
 - Error: `Field 'allow_certificate' doesn't have a default value`
 - Impact: User accounts created but profiles incomplete
 - Resolution: Post-import cleanup script (optional, low priority)

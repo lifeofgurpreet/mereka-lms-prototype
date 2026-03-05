@@ -22,7 +22,7 @@
 | PASS | 200 | preview | https://preview.academyv2.mereka.io/ |
 | PASS | 200 | forum | https://forum.academyv2.mereka.io/heartbeat |
 
-**10 PASS / 0 WARN / 0 FAIL**
+10 PASS / 0 WARN / 0 FAIL
 
 ---
 

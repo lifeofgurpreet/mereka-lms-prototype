@@ -138,6 +138,7 @@ cd /data/projects/mereka-lms  # or /home/gurpreet/projects/k8s/mereka-lms
 ```
 
 ### False positives
+
 - CronJob pods in `Error` or `Failed` state are expected (they run periodically)
 - Use `--field-selector=status.phase!=Running,status.phase!=Succeeded` to filter
 

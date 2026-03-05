@@ -201,6 +201,7 @@ The existing `.github/workflows/public-health-check.yml` now runs:
     runtime workflow contract is present, prod canary secrets exist, and `RUN_AUTHENTICATED_SSO_CANARY=true` is set.
 
 Convenience:
+
 - `CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env both --mode all`
   runs the full suite (public + internal) with bounded per-check timeouts.
 - `./scripts/gen/update-openedx-hostnames-doc.sh` regenerates `docs/operations/OPENEDX_HOSTNAMES.md`.
