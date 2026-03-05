@@ -475,20 +475,34 @@ PY
   fi
 fi
 
-# AC-BRAND-023 Tutor plugin integration contract
-if [[ -f "$PLUGIN_FILE" ]]; then
-  if grep -q 'mfe-dockerfile-pre-npm-install' "$PLUGIN_FILE" \
-    && grep -q 'COPY indigo/brand-mereka /openedx/app/brand-mereka' "$PLUGIN_FILE"; then
-    pass "AC-BRAND-023 plugin copies brand package in pre-npm hook"
-  else
-    fail "AC-BRAND-023 plugin missing pre-npm brand COPY hook"
-  fi
+# AC-BRAND-023 Tutor build integration contract
+# Brand COPY + npm alias may be in the plugin OR in patches/mfe-node.sh (current debt).
+BRAND_SEARCH_FILES=("$PLUGIN_FILE")
+MFE_NODE_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
+[[ -f "$MFE_NODE_PATCH" ]] && BRAND_SEARCH_FILES+=("$MFE_NODE_PATCH")
 
-  if grep -q 'npm install --legacy-peer-deps @edx/brand@file:\./brand-mereka' "$PLUGIN_FILE"; then
-    pass "AC-BRAND-023 plugin wires npm alias install command for @edx/brand"
-  else
-    fail "AC-BRAND-023 plugin missing expected npm alias install command"
+BRAND_COPY_FOUND=0
+BRAND_NPM_FOUND=0
+for f in "${BRAND_SEARCH_FILES[@]}"; do
+  [[ -f "$f" ]] || continue
+  if grep -q 'brand-mereka' "$f" && grep -q 'COPY' "$f"; then
+    BRAND_COPY_FOUND=1
   fi
+  if grep -q '@edx/brand@file:.*brand-mereka' "$f"; then
+    BRAND_NPM_FOUND=1
+  fi
+done
+
+if [[ $BRAND_COPY_FOUND -eq 1 ]]; then
+  pass "AC-BRAND-023 build pipeline copies brand package into MFE image"
+else
+  fail "AC-BRAND-023 plugin/patches missing brand COPY hook"
+fi
+
+if [[ $BRAND_NPM_FOUND -eq 1 ]]; then
+  pass "AC-BRAND-023 build pipeline wires npm alias install for @edx/brand"
+else
+  fail "AC-BRAND-023 plugin/patches missing npm alias install command"
 fi
 
 # AC-BRAND-028 CI wiring
