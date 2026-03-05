@@ -221,10 +221,10 @@ if [[ -f "${RELEASE_SCRIPT}" ]]; then
     fail "release-openedx-gitops.sh missing CI production digest safety gate"
   fi
 
-  if grep -q "production apply forbids mutable 'latest' tags" "${RELEASE_SCRIPT}" 2>/dev/null; then
-    pass "release-openedx-gitops.sh forbids mutable latest tags for production apply"
+  if grep -q "production apply forbids mutable tag" "${RELEASE_SCRIPT}" 2>/dev/null; then
+    pass "release-openedx-gitops.sh forbids mutable tags for production apply"
   else
-    fail "release-openedx-gitops.sh missing production latest-tag guard"
+    fail "release-openedx-gitops.sh missing production mutable-tag guard"
   fi
 
   for flag in \
