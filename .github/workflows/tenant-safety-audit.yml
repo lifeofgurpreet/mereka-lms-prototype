@@ -81,7 +81,9 @@ jobs:
             file="tenant-safety-audit-${config_set}.json"
             if [[ -f "$file" ]]; then
               echo "### Config set: ${config_set}" >> "$GITHUB_STEP_SUMMARY"
-              python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(f'- Pass checks: **{d.get(\"pass_checks\",0)}**\n- Warnings: **{d.get(\"warnings_count\",0)}**\n- Failures: **{d.get(\"failures_count\",0)}**'); cats=d.get('failure_categories',[]); print('- Failure categories: ' + ', '.join(cats)) if cats else None" "$file" >> "$GITHUB_STEP_SUMMARY"
+              jq -r '"- Pass checks: **\(.pass_checks // 0)**\n- Warnings: **\(.warnings_count // 0)**\n- Failures: **\(.failures_count // 0)**"' "$file" >> "$GITHUB_STEP_SUMMARY"
+              cats=$(jq -r '(.failure_categories // []) | select(length > 0) | "- Failure categories: " + join(", ")' "$file")
+              [[ -n "$cats" ]] && echo "$cats" >> "$GITHUB_STEP_SUMMARY"
               echo "" >> "$GITHUB_STEP_SUMMARY"
             fi
           done
@@ -89,7 +91,7 @@ jobs:
       # ── Gate on failure counts (separate from audit steps so artifacts are always written) ──
       - name: Gate on prod audit result
         run: |
-          FAILURES=$(python3 -c "import json,sys; d=json.load(open('tenant-safety-audit-prod.json')); print(d['failures_count'])")
+          FAILURES=$(jq '.failures_count // 0' tenant-safety-audit-prod.json)
           if [[ "$FAILURES" -gt 0 ]]; then
             echo "ERROR: prod tenant config audit found $FAILURES blocking failure(s)." >&2
             echo "See tenant-safety-audit-prod.json artifact for details." >&2
@@ -99,7 +101,7 @@ jobs:
 
       - name: Gate on dev audit result
         run: |
-          FAILURES=$(python3 -c "import json,sys; d=json.load(open('tenant-safety-audit-dev.json')); print(d['failures_count'])")
+          FAILURES=$(jq '.failures_count // 0' tenant-safety-audit-dev.json)
           if [[ "$FAILURES" -gt 0 ]]; then
             echo "ERROR: dev tenant config audit found $FAILURES blocking failure(s)." >&2
             echo "See tenant-safety-audit-dev.json artifact for details." >&2

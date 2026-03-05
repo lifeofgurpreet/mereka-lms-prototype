@@ -347,54 +347,69 @@ jobs:
             | tee var/release-evidence/live-dom-selector-audit.log
 
       - name: Write release metadata
+        env:
+          OPENEDX_TAG: ${{ inputs.openedx_tag }}
+          MFE_TAG: ${{ inputs.mfe_tag }}
+          OPENEDX_DIGEST: ${{ steps.digests.outputs.openedx_digest }}
+          MFE_DIGEST: ${{ steps.digests.outputs.mfe_digest }}
+          TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+          REQUIRE_RUNTIME_THEME: ${{ inputs.require_runtime_theme || 'false' }}
+          REQUIRE_BRANDING_MARKERS: ${{ inputs.require_branding_markers || 'true' }}
+          RUNTIME_THEME_URL: ${{ inputs.runtime_theme_url || '' }}
+          RUN_NPM_START_SMOKE: ${{ inputs.run_npm_start_smoke || 'false' }}
+          RUN_ACCESSIBILITY_SCAN: ${{ inputs.run_accessibility_scan || 'true' }}
+          A11Y_MODE: ${{ inputs.a11y_mode || 'offline' }}
+          A11Y_TARGET_URL: ${{ inputs.a11y_target_url || '' }}
+          A11Y_ROUTES: ${{ inputs.a11y_routes || '' }}
+          A11Y_ALLOW_MISSING_REPORTS: ${{ inputs.a11y_allow_missing_reports || 'false' }}
+          RUN_CERTIFICATE_BRANDING: ${{ inputs.run_certificate_branding || 'true' }}
+          RUN_LIVE_DOM_AUDIT: ${{ inputs.run_live_dom_audit || 'false' }}
+          LEARNING_PATH: ${{ inputs.learning_path || '/learning' }}
+          NPM_START_PROJECT: ${{ inputs.npm_start_project || 'chromium' }}
+          LIVE_DOM_AUDIT_PROJECT: ${{ inputs.live_dom_audit_project || 'chromium' }}
+          LIVE_DOM_AUDIT_MIN_HITS: ${{ inputs.live_dom_audit_min_hits || '3' }}
+          LIVE_DOM_AUDIT_PROFILE: ${{ inputs.live_dom_audit_profile || 'standard' }}
+          LIVE_DOM_AUDIT_ROUTES: ${{ inputs.live_dom_audit_routes || '' }}
+          LIVE_DOM_AUDIT_SELECTORS: ${{ inputs.live_dom_audit_selectors || '' }}
+          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS: ${{ inputs.live_dom_audit_min_custom_hits || '0' }}
+          SELECTOR_AUDIT_PATH: ${{ inputs.selector_audit_path || '/authn/login' }}
         run: |
-          python3 - <<'PY'
-          import json
-          import os
-          from datetime import datetime, timezone
-          from pathlib import Path
-
-          out = Path("var/release-evidence/release-metadata.json")
-          out.parent.mkdir(parents=True, exist_ok=True)
-
-          payload = {
-              "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-              "repo": os.environ.get("GITHUB_REPOSITORY"),
-              "run_id": os.environ.get("GITHUB_RUN_ID"),
-              "run_number": os.environ.get("GITHUB_RUN_NUMBER"),
-              "sha": os.environ.get("GITHUB_SHA"),
-              "actor": os.environ.get("GITHUB_ACTOR"),
-              "ref": os.environ.get("GITHUB_REF"),
-              "openedx_tag": "${{ inputs.openedx_tag }}",
-              "mfe_tag": "${{ inputs.mfe_tag }}",
-              "openedx_digest": "${{ steps.digests.outputs.openedx_digest }}",
-              "mfe_digest": "${{ steps.digests.outputs.mfe_digest }}",
-              "target_environment": "${{ inputs.target_environment }}",
-              "require_runtime_theme": "${{ inputs.require_runtime_theme || 'false' }}",
-              "require_branding_markers": "${{ inputs.require_branding_markers || 'true' }}",
-              "runtime_theme_url": "${{ inputs.runtime_theme_url || '' }}",
-              "run_npm_start_smoke": "${{ inputs.run_npm_start_smoke || 'false' }}",
-              "run_accessibility_scan": "${{ inputs.run_accessibility_scan || 'true' }}",
-              "a11y_mode": "${{ inputs.a11y_mode || 'offline' }}",
-              "a11y_target_url": "${{ inputs.a11y_target_url || '' }}",
-              "a11y_routes": "${{ inputs.a11y_routes || '' }}",
-              "a11y_allow_missing_reports": "${{ inputs.a11y_allow_missing_reports || 'false' }}",
-              "run_certificate_branding": "${{ inputs.run_certificate_branding || 'true' }}",
-              "run_live_dom_audit": "${{ inputs.run_live_dom_audit || 'false' }}",
-              "learning_path": "${{ inputs.learning_path || '/learning' }}",
-              "npm_start_project": "${{ inputs.npm_start_project || 'chromium' }}",
-              "live_dom_audit_project": "${{ inputs.live_dom_audit_project || 'chromium' }}",
-              "live_dom_audit_min_hits": "${{ inputs.live_dom_audit_min_hits || '3' }}",
-              "live_dom_audit_profile": "${{ inputs.live_dom_audit_profile || 'standard' }}",
-              "live_dom_audit_routes": "${{ inputs.live_dom_audit_routes || '' }}",
-              "live_dom_audit_selectors": "${{ inputs.live_dom_audit_selectors || '' }}",
-              "live_dom_audit_min_custom_hits": "${{ inputs.live_dom_audit_min_custom_hits || '0' }}",
-              "selector_audit_path": "${{ inputs.selector_audit_path || '/authn/login' }}",
-          }
-
-          out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-          print(out)
-          PY
+          set -euo pipefail
+          jq -n '{
+            generated_at_utc: (now | todate),
+            repo: $ENV.GITHUB_REPOSITORY,
+            run_id: $ENV.GITHUB_RUN_ID,
+            run_number: $ENV.GITHUB_RUN_NUMBER,
+            sha: $ENV.GITHUB_SHA,
+            actor: $ENV.GITHUB_ACTOR,
+            ref: $ENV.GITHUB_REF,
+            openedx_tag: $ENV.OPENEDX_TAG,
+            mfe_tag: $ENV.MFE_TAG,
+            openedx_digest: $ENV.OPENEDX_DIGEST,
+            mfe_digest: $ENV.MFE_DIGEST,
+            target_environment: $ENV.TARGET_ENVIRONMENT,
+            require_runtime_theme: $ENV.REQUIRE_RUNTIME_THEME,
+            require_branding_markers: $ENV.REQUIRE_BRANDING_MARKERS,
+            runtime_theme_url: $ENV.RUNTIME_THEME_URL,
+            run_npm_start_smoke: $ENV.RUN_NPM_START_SMOKE,
+            run_accessibility_scan: $ENV.RUN_ACCESSIBILITY_SCAN,
+            a11y_mode: $ENV.A11Y_MODE,
+            a11y_target_url: $ENV.A11Y_TARGET_URL,
+            a11y_routes: $ENV.A11Y_ROUTES,
+            a11y_allow_missing_reports: $ENV.A11Y_ALLOW_MISSING_REPORTS,
+            run_certificate_branding: $ENV.RUN_CERTIFICATE_BRANDING,
+            run_live_dom_audit: $ENV.RUN_LIVE_DOM_AUDIT,
+            learning_path: $ENV.LEARNING_PATH,
+            npm_start_project: $ENV.NPM_START_PROJECT,
+            live_dom_audit_project: $ENV.LIVE_DOM_AUDIT_PROJECT,
+            live_dom_audit_min_hits: $ENV.LIVE_DOM_AUDIT_MIN_HITS,
+            live_dom_audit_profile: $ENV.LIVE_DOM_AUDIT_PROFILE,
+            live_dom_audit_routes: $ENV.LIVE_DOM_AUDIT_ROUTES,
+            live_dom_audit_selectors: $ENV.LIVE_DOM_AUDIT_SELECTORS,
+            live_dom_audit_min_custom_hits: $ENV.LIVE_DOM_AUDIT_MIN_CUSTOM_HITS,
+            selector_audit_path: $ENV.SELECTOR_AUDIT_PATH
+          }' > var/release-evidence/release-metadata.json
+          echo "var/release-evidence/release-metadata.json"
 
       - name: Summarize release evidence
         if: always()
