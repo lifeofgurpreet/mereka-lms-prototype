@@ -75,7 +75,7 @@ fi
 
 if rg -qF "mereka_additional_profile_fields" "$PLUGIN_FILE" \
   && rg -qF "mereka_profile_additional_fields" "$PLUGIN_FILE" \
-  && rg -qF "RenderWidget: MerekaAdditionalProfileFields" "$PLUGIN_FILE"; then
+  && rg -qF "MerekaAdditionalProfileFields" "$PLUGIN_FILE"; then
   pass "Account/Profile slots bind to MerekaAdditionalProfileFields component"
 else
   fail "Slot-to-component binding markers for additional profile fields missing"

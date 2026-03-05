@@ -49,14 +49,10 @@ echo ""
 echo "AC-AN-001: Analytics key guard"
 
 # Check 1: Plugin configures SEGMENT_KEY from env var (not hardcoded)
-if [[ -f "$PLUGIN" ]]; then
-  if grep -q 'SEGMENT_KEY.*os\.environ\.get.*MEREKA_SEGMENT_KEY' "$PLUGIN"; then
-    pass_check "Plugin reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
-  else
-    fail_check "Plugin reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
-  fi
+if mereka_plugin_has_regex "$REPO_ROOT" 'SEGMENT_KEY.*os\.environ\.get.*MEREKA_SEGMENT_KEY'; then
+  pass_check "Plugin reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
 else
-  warn "mereka_lms.py not found at $PLUGIN"
+  fail_check "Plugin reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
 fi
 
 # Check 2: Plugin defaults SEGMENT_KEY to empty string (safe default)
@@ -233,12 +229,10 @@ elif [[ -f "$PLUGIN" ]]; then
 fi
 
 # Check 13: env.config patch uses supported mfe-env-config hook variant(s)
-if [[ -f "$PLUGIN" ]]; then
-  if grep -qE '"mfe-env-config"|"mfe-env-config-buildtime-imports"|"mfe-env-config-runtime-definitions"' "$PLUGIN"; then
-    pass_check "MFE theme patch uses supported env-config hook variant(s)"
-  else
-    fail_check "MFE theme patch uses supported env-config hook variant(s)"
-  fi
+if mereka_plugin_has_regex "$REPO_ROOT" '"mfe-env-config"|"mfe-env-config-buildtime-imports"|"mfe-env-config-runtime-definitions"'; then
+  pass_check "MFE theme patch uses supported env-config hook variant(s)"
+else
+  fail_check "MFE theme patch uses supported env-config hook variant(s)"
 fi
 
 # Check 14: No banned patterns (direct body injection) in apply-patches.sh

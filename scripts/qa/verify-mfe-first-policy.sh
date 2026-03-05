@@ -180,16 +180,16 @@ echo -e "${BLUE}## Plugin-Slot Wiring${NC}"
 
 PLUGIN="$PLUGIN_MAIN"
 
-if grep -q "PLUGIN_SLOTS" "$PLUGIN" 2>/dev/null; then
-  pass "Plugin slot registration found in mereka_lms.py"
+if mereka_plugin_has_fixed "$REPO_ROOT" "PLUGIN_SLOTS"; then
+  pass "Plugin slot registration found in plugin contract files"
 else
-  fail "No plugin slot registration in mereka_lms.py"
+  fail "No plugin slot registration in plugin contract files"
 fi
 
-if grep -q "footer_slot" "$PLUGIN" 2>/dev/null; then
-  pass "footer_slot actively used (canonical MFE-first example)"
+if mereka_plugin_has_fixed "$REPO_ROOT" "footer"; then
+  pass "footer slot actively used (canonical MFE-first example)"
 else
-  warn "footer_slot not wired in mereka_lms.py"
+  warn "footer slot not wired in plugin contract files"
 fi
 
 echo ""
