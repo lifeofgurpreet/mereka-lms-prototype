@@ -11,10 +11,30 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 CONTRACT="$REPO_ROOT/docs/architecture/COPY_TERMINOLOGY_CONTRACT.md"
 THEMES_DIR="$REPO_ROOT/infrastructure/tutor/themes"
 CUSTOM_APPS_DIR="$REPO_ROOT/infrastructure/tutor/custom-apps"
 PLUGINS_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
+
+PLUGIN_BUNDLE=""
+PLUGIN_BUNDLE_FILE="$(mereka_plugin_main_file "$REPO_ROOT")"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN_BUNDLE_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 PASS=0
 FAIL=0
@@ -224,7 +244,7 @@ echo ""
 echo "--- Canonical Brand Configuration ---"
 
 # Check for PLATFORM_NAME in plugin configuration
-mereka_plugin="$PLUGINS_DIR/mereka_lms.py"
+mereka_plugin="$PLUGIN_BUNDLE_FILE"
 if [ -f "$mereka_plugin" ]; then
   do_pass "mereka_lms.py plugin exists"
 

@@ -8,7 +8,14 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
-PLUGIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+# Search all plugin contract files (main + submodules)
+PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-drift.XXXXXX)"
+trap 'rm -f "$PLUGIN_BUNDLE"' EXIT
+while IFS= read -r _pf; do
+  cat "$_pf" >>"$PLUGIN_BUNDLE"
+  printf '\n' >>"$PLUGIN_BUNDLE"
+done < <(mereka_plugin_contract_files "$REPO_ROOT")
+PLUGIN="$PLUGIN_BUNDLE"
 CUSTOM_APPS_DIR="$REPO_ROOT/infrastructure/tutor/custom-apps"
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 CMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
