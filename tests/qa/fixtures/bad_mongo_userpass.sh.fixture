@@ -1,0 +1,3 @@
+# Test fixture: MongoDB URI with non-placeholder password (user:passw0rd).
+# This file uses a .fixture extension and is excluded from secret scanner globs.
+DATABASE_URL="mongodb+srv://user:passw0rd@host.example.com/db"

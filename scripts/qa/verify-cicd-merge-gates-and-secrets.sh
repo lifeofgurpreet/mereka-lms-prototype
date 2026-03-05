@@ -99,13 +99,14 @@ check_merge_gates() {
     fail "Missing CI jobs:${missing_jobs} (${job_count}/${#required_jobs[@]} found)"
   fi
 
-  # Verify each job uses actions/checkout@v4 (tag alias or SHA-pinned with # v4 comment)
+  # Verify each job uses actions/checkout SHA-pinned (immutable workflow ref policy).
+  # ci.yml enforces SHA-pinned action refs (not mutable tag aliases like @v4).
   local checkout_count
-  checkout_count=$(grep -cE 'actions/checkout@(v4|[0-9a-f]{40})(\s*#\s*v4)?' "$CI_YML" || echo "0")
+  checkout_count=$(grep -cE 'actions/checkout@[0-9a-f]{40}' "$CI_YML" || echo "0")
   if [[ "$checkout_count" -ge "${#required_jobs[@]}" ]]; then
-    pass "All jobs use actions/checkout@v4 (${checkout_count} checkouts found)"
+    pass "All required jobs use SHA-pinned actions/checkout (${checkout_count} checkouts found)"
   else
-    fail "Insufficient actions/checkout@v4 usage (${checkout_count} found, need ${#required_jobs[@]}+)"
+    fail "Insufficient SHA-pinned actions/checkout usage (${checkout_count} found, need ${#required_jobs[@]}+; mutable @vN tags are not acceptable)"
   fi
 
   # GitHub branch protection: verify the spec documents the requirement
@@ -265,11 +266,13 @@ if [[ "$FAILED" -eq 0 ]]; then
   echo -e "${GREEN}All CI/CD merge gate and secret masking checks passed.${NC}"
   echo ""
   echo "Verified:"
-  echo "  AC-007/008: ci.yml defines 4 required consolidated jobs as PR status checks"
-  echo "              GitHub branch protection enforces all checks before merge"
-  echo "  AC-028:     All workflows use \${{ secrets.* }} (auto-masked by GitHub)"
-  echo "              No raw echo, no set -x near secrets, no inline references"
-  echo "              TruffleHog + pre-commit hook provide defense in depth"
+  echo "  AC-007/008: ci.yml defines ${#required_jobs[@]-4} required consolidated jobs (static-validation,"
+  echo "              tutor-config-tests, security-scans, test-coverage) as PR status checks."
+  echo "              All action refs are SHA-pinned (immutable). GitHub branch protection"
+  echo "              enforces all checks before merge."
+  echo "  AC-028:     All workflows use \${{ secrets.* }} (auto-masked by GitHub)."
+  echo "              No raw echo, no set -x near secrets, no inline run: references."
+  echo "              TruffleHog (--only-verified) + pre-commit hook provide defense in depth."
   exit 0
 else
   echo ""

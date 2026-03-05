@@ -1,0 +1,3 @@
+# Test fixture: safe env-var reference (should NOT be flagged).
+# The password position contains a shell variable reference, not a literal value.
+MONGO_URI="mongodb+srv://admin:${MONGODB_PASSWORD}@cluster.mongodb.net/db"

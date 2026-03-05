@@ -5,14 +5,33 @@ set -euo pipefail
 
 # verify-k8s-images.sh - Verifies production image tags in K8s manifests
 #
+# Default (strict) mode: production images MUST use deterministic immutable tags
+# (SHA-based or digest-pinned). Mutable tags like :mereka-brand or :latest are
+# rejected in the production overlay unless RELAXED_MODE=1 is set.
+#
+# RELAXED_MODE=1: Allows mutable convenience tags in the production overlay.
+#   Use only for temporary local testing. NEVER set in CI.
+#   Document the reason when using: RELAXED_MODE=1 # reason: <explanation>
+#
 # Usage:
-#   scripts/qa/verify-k8s-images.sh                      # Run all checks
+#   scripts/qa/verify-k8s-images.sh                      # Run all checks (strict)
 #   scripts/qa/verify-k8s-images.sh --check no-latest    # Check for :latest tags
 #   scripts/qa/verify-k8s-images.sh --check registry-path # Check registry paths
+#   RELAXED_MODE=1 scripts/qa/verify-k8s-images.sh       # Relaxed (temporary only)
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PROD_KUSTOMIZATION="${REPO_ROOT}/deploy/k8s/overlays/production/kustomization.yaml"
-BASE_KUSTOMIZATION="${REPO_ROOT}/deploy/k8s/base/kustomization.yaml"
+# Allow env var overrides for testing; fall back to canonical paths
+PROD_KUSTOMIZATION="${PROD_KUSTOMIZATION:-${REPO_ROOT}/deploy/k8s/overlays/production/kustomization.yaml}"
+BASE_KUSTOMIZATION="${BASE_KUSTOMIZATION:-${REPO_ROOT}/deploy/k8s/base/kustomization.yaml}"
+
+# RELAXED_MODE=1 disables strict immutable-tag enforcement for the production overlay.
+# This is a temporary escape hatch — never set in CI.
+RELAXED_MODE="${RELAXED_MODE:-0}"
+if [[ "$RELAXED_MODE" == "1" ]]; then
+  echo "WARNING: RELAXED_MODE=1 is set — mutable tags will not be rejected."
+  echo "         This mode is TEMPORARY and must NOT be used in CI."
+  echo ""
+fi
 
 # Colors
 RED='\033[0;31m'
@@ -92,7 +111,11 @@ check_no_latest() {
 check_registry_path() {
   echo "Checking OpenEdX image registry paths and tag format..."
 
-  local files=("$PROD_KUSTOMIZATION" "$BASE_KUSTOMIZATION")
+  # Production overlay images must be immutable (digest-pinned or deterministic SHA tag).
+  # Base kustomization may use mutable convenience tags (e.g. mereka-brand) — those are
+  # expected and only checked for registry path correctness, not tag immutability.
+  local prod_files=("$PROD_KUSTOMIZATION")
+  local base_files=("$BASE_KUSTOMIZATION")
   # Registries to validate: GHCR (primary) and GCP Artifact Registry (enterprise)
   local ghcr_registry="ghcr.io/biji-biji-initiative/mereka-lms/"
   local gcp_registry="asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
@@ -103,7 +126,7 @@ check_registry_path() {
   local checked=0
 
   local report
-  report="$(python3 - "$ghcr_registry" "$gcp_registry" "$tag_pattern" "${files[@]}" <<'PY'
+  report="$(python3 - "$ghcr_registry" "$gcp_registry" "$tag_pattern" "$RELAXED_MODE" "${prod_files[@]}" "---BASE---" "${base_files[@]}" <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -117,19 +140,36 @@ except Exception:
 ghcr_registry = sys.argv[1]
 gcp_registry = sys.argv[2]
 tag_pattern = re.compile(sys.argv[3])
+relaxed_mode = sys.argv[4] == "1"
+args = sys.argv[5:]
+
+# Split args into prod_files and base_files on the sentinel "---BASE---"
+sentinel = "---BASE---"
+try:
+    sep_idx = args.index(sentinel)
+    prod_files = args[:sep_idx]
+    base_files = args[sep_idx + 1:]
+except ValueError:
+    prod_files = args
+    base_files = []
+
 semver_pattern = re.compile(r'^\d+\.\d+\.\d+(-[a-z0-9.]+)?$')
-# GHCR tags: mereka-brand, mereka-brand-hotfix-*, <sha>-<timestamp>
-ghcr_tag_pattern = re.compile(r'^(mereka-brand(-[a-z0-9-]+)?|[a-f0-9]{7,8}-\d{14})$')
+# Deterministic GHCR tags: hotfix/build descriptors with SHA suffix, or <sha>-<timestamp>.
+# Bare mutable tags like "mereka-brand" are NOT deterministic and are rejected in strict mode.
+ghcr_immutable_pattern = re.compile(r'^mereka-brand-[a-z0-9-]+-[a-f0-9]{6,}|[a-f0-9]{7,8}-\d{14}$')
+# Mutable convenience tags only allowed in base or under RELAXED_MODE
+ghcr_mutable_pattern = re.compile(r'^mereka-brand$')
 # Enterprise tags: nreum-clean-*, semver
 enterprise_tag_pattern = re.compile(r'^(nreum-clean-\d{12}|\d+\.\d+\.\d+(-[a-z0-9.]+)?)$')
-files = sys.argv[4:]
+
 checked = 0
 
-for path in files:
+def check_file(path, strict_immutable):
+    global checked
     p = Path(path)
     if not p.exists():
         print(f"WARN\tFile not found: {path} (skipping)")
-        continue
+        return
     payload = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
     images = payload.get("images") or []
     for img in images:
@@ -140,23 +180,35 @@ for path in files:
         digest = str(img.get("digest") or "")
 
         # Check GHCR images
-        if new_name.startswith(ghcr_registry) or (not img.get("newName") and new_name.startswith(ghcr_registry)):
+        if new_name.startswith(ghcr_registry):
             checked += 1
-            if ghcr_tag_pattern.match(tag) or tag_pattern.match(tag):
-                print(f"PASS\t{new_name}:{tag} (valid GHCR tag)")
-            elif digest:
-                print(f"PASS\t{new_name}:{tag}@{digest} (digest pinned)")
+            if digest:
+                # Digest-pinned is always acceptable (strongest guarantee)
+                print(f"PASS\t{new_name}:{tag}@{digest[:16]}... (digest pinned)")
+            elif ghcr_immutable_pattern.match(tag) or tag_pattern.match(tag):
+                print(f"PASS\t{new_name}:{tag} (deterministic immutable tag)")
+            elif ghcr_mutable_pattern.match(tag):
+                if strict_immutable and not relaxed_mode:
+                    print(f"FAIL\t{new_name}:{tag} (mutable tag in production — use digest-pinned or SHA tag; set RELAXED_MODE=1 to bypass temporarily)")
+                else:
+                    print(f"PASS\t{new_name}:{tag} (mutable tag — acceptable in base/relaxed context)")
             else:
-                print(f"FAIL\t{new_name}:{tag} (invalid GHCR tag format)")
+                print(f"FAIL\t{new_name}:{tag} (unrecognised tag format for GHCR image)")
         # Check GCP enterprise images
         elif new_name.startswith(gcp_registry):
             checked += 1
-            if enterprise_tag_pattern.match(tag) or tag_pattern.match(tag):
+            if digest:
+                print(f"PASS\t{new_name}:{tag}@{digest[:16]}... (digest pinned)")
+            elif enterprise_tag_pattern.match(tag) or tag_pattern.match(tag):
                 print(f"PASS\t{new_name}:{tag} (valid enterprise tag)")
-            elif digest:
-                print(f"PASS\t{new_name}:{tag}@{digest} (digest pinned)")
             else:
                 print(f"FAIL\t{new_name}:{tag} (invalid enterprise tag format)")
+
+for path in prod_files:
+    check_file(path, strict_immutable=True)
+
+for path in base_files:
+    check_file(path, strict_immutable=False)
 
 print(f"META\tchecked={checked}")
 PY

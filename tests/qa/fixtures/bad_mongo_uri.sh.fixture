@@ -1,0 +1,3 @@
+# Test fixture: seeded bad MongoDB URI with embedded password.
+# This file uses a .fixture extension and is excluded from secret scanner globs.
+MONGO_URI="mongodb+srv://admin:s3cr3tPa55word@cluster.mongodb.net/openedx"

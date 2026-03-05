@@ -1,0 +1,2 @@
+# Test fixture: seeded Slack bot token.
+SLACK_TOKEN = "xoxb-123456789012-123456789012-abc123def456ghi789jk"
