@@ -1,0 +1,27 @@
+# Allow all pods within the mereka-lms namespace to communicate with each other.
+# This is a pragmatic first pass — granular pod-to-pod rules can be added later
+# by creating additional policies that restrict specific selectors.
+#
+# Current value: blocks all cross-namespace and external access by default.
+# Future hardening: replace this with per-service ingress/egress rules.
+# Note: xqueue-graders has its own restrictive NetworkPolicy, but this
+# namespace-wide allow overrides it for intra-namespace ingress. A future
+# iteration should exclude grader pods via matchExpressions.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-namespace-internal
+  labels:
+    app.kubernetes.io/component: network-policy
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+  egress:
+    - to:
+        - podSelector: {}

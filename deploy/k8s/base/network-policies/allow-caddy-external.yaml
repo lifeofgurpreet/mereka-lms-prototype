@@ -1,0 +1,24 @@
+# Allow Caddy (reverse proxy) to receive traffic from outside the namespace.
+# Caddy is the sole entry point — all HTTP/HTTPS traffic routes through it.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-caddy-external-ingress
+  labels:
+    app.kubernetes.io/component: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: caddy
+  policyTypes:
+    - Ingress
+  ingress:
+    # From any source: LoadBalancer (GKE), ingress-nginx (RKE2), or
+    # NodePort traffic. No `from` clause = allow all sources, which is
+    # correct since Caddy is the designated cluster entry point.
+    - ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
