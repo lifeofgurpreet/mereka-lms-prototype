@@ -4,6 +4,7 @@
 # - Catch cross-tenant host collisions before bootstrap writes.
 # - Enforce strict host ownership for LMS/CMS/MFE roots.
 # - Confirm base-default + tenant-override posture is explicit.
+# - Enforce allowlist expiry dates (expired entries = governance FAIL).
 #
 # Usage:
 #   ./scripts/qa/audit-tenant-config-safety.sh
@@ -12,6 +13,7 @@
 #   OUTPUT_FORMAT=json ./scripts/qa/audit-tenant-config-safety.sh
 #   ./scripts/qa/audit-tenant-config-safety.sh --allow-shared-host apps.preview.example.com
 #   ALLOW_SHARED_HOSTS_FILE=infrastructure/tutor/multisite-shared-host-allowlist.txt ./scripts/qa/audit-tenant-config-safety.sh
+#   TODAY=2026-06-01 ./scripts/qa/audit-tenant-config-safety.sh   # override date for testing
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -21,6 +23,7 @@ STRICT="${STRICT:-1}"
 OUTPUT_FORMAT="${OUTPUT_FORMAT:-text}"
 ALLOW_SHARED_HOSTS="${ALLOW_SHARED_HOSTS:-}"
 ALLOW_SHARED_HOSTS_FILE="${ALLOW_SHARED_HOSTS_FILE:-infrastructure/tutor/multisite-shared-host-allowlist.txt}"
+TODAY="${TODAY:-$(date +%Y-%m-%d)}"
 
 require_bool_01() {
   local var_name="$1"
@@ -55,7 +58,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
-      sed -n '1,18p' "$0"
+      sed -n '1,21p' "$0"
       exit 0
       ;;
     *)
@@ -73,12 +76,13 @@ if [[ "${#FILES[@]}" -eq 0 ]]; then
   )
 fi
 
-python3 - "$STRICT" "$OUTPUT_FORMAT" "$ALLOW_SHARED_HOSTS" "$ALLOW_SHARED_HOSTS_FILE" "${FILES[@]}" <<'PY'
+python3 - "$STRICT" "$OUTPUT_FORMAT" "$ALLOW_SHARED_HOSTS" "$ALLOW_SHARED_HOSTS_FILE" "$TODAY" "${FILES[@]}" <<'PY'
 import os
 import re
 import json
 import sys
 from collections import defaultdict
+from datetime import date
 from urllib.parse import urlparse
 
 try:
@@ -91,27 +95,73 @@ strict = (sys.argv[1] == "1")
 output_format = (sys.argv[2] or "text").strip().lower()
 allow_shared_hosts_csv = (sys.argv[3] or "").strip()
 allow_shared_hosts_file = (sys.argv[4] or "").strip()
-files = sys.argv[5:]
+today_str = (sys.argv[5] or "").strip()
+files = sys.argv[6:]
 repo_root = os.getcwd()
 
 if output_format not in ("text", "json"):
     print(f"FAIL: unsupported output format '{output_format}'", file=sys.stderr)
     sys.exit(2)
 
-allow_shared_hosts = {h.strip().lower() for h in allow_shared_hosts_csv.split(",") if h.strip()}
+try:
+    today = date.fromisoformat(today_str) if today_str else date.today()
+except ValueError:
+    print(f"FAIL: invalid TODAY date '{today_str}' (expected YYYY-MM-DD)", file=sys.stderr)
+    sys.exit(2)
+
+# allow_shared_hosts: host -> {owner, expires}
+# CLI-provided hosts have no expiry (legacy path; use the file for structured entries).
+allow_shared_hosts: dict[str, dict] = {}
+
+for h in allow_shared_hosts_csv.split(","):
+    h = h.strip().lower()
+    if h:
+        allow_shared_hosts[h] = {"owner": None, "expires": None, "source": "cli"}
+
+_entry_re = re.compile(
+    r"^(?P<host>[^\s]+)"
+    r"(?:\s+owner=(?P<owner>[^\s]+))?"
+    r"(?:\s+expires=(?P<expires>\d{4}-\d{2}-\d{2}))?$"
+)
+
 if allow_shared_hosts_file and os.path.exists(allow_shared_hosts_file):
     with open(allow_shared_hosts_file, "r", encoding="utf-8") as f:
-        for line in f:
-            token = line.split("#", 1)[0].strip().lower()
-            if token:
-                allow_shared_hosts.add(token)
+        for lineno, line in enumerate(f, 1):
+            raw = line.split("#", 1)[0].strip()
+            if not raw:
+                continue
+            m = _entry_re.match(raw)
+            if not m:
+                # Fallback: treat whole token as host (no expiry metadata)
+                token = raw.lower()
+                if token:
+                    allow_shared_hosts[token] = {
+                        "owner": None,
+                        "expires": None,
+                        "source": f"{allow_shared_hosts_file}:{lineno}",
+                    }
+                continue
+            host = m.group("host").lower()
+            owner = m.group("owner")
+            expires_str = m.group("expires")
+            expires = None
+            if expires_str:
+                try:
+                    expires = date.fromisoformat(expires_str)
+                except ValueError:
+                    pass
+            allow_shared_hosts[host] = {
+                "owner": owner,
+                "expires": expires,
+                "source": f"{allow_shared_hosts_file}:{lineno}",
+            }
 
 failures = []
 warnings = []
 passes = []
-used_allowlist_hosts = set()
-shared_cms_hosts = set()
-shared_mfe_hosts = set()
+used_allowlist_hosts: set[str] = set()
+shared_cms_hosts: set[str] = set()
+shared_mfe_hosts: set[str] = set()
 
 
 def norm_host(value: str) -> str:
@@ -127,13 +177,14 @@ def norm_host(value: str) -> str:
 
 def short(path: str) -> str:
     if path.startswith(repo_root + "/"):
-        return path[len(repo_root) + 1 :]
+        return path[len(repo_root) + 1:]
     return path
 
 
 domain_rx = re.compile(
     r"^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
 )
+
 
 def add_failure(category: str, message: str) -> None:
     failures.append({"category": category, "message": message})
@@ -163,6 +214,35 @@ def is_non_enterprise_host(host: str) -> bool:
     )
 
 
+# --- Validate allowlist entries before processing YAML files ---
+for host, meta in sorted(allow_shared_hosts.items()):
+    if not is_non_enterprise_host(host):
+        add_failure(
+            "allowlist_policy",
+            f"allowlist host '{host}' is not preview/dev/staging scoped "
+            f"(source: {meta['source']})",
+        )
+    if meta.get("expires") is None:
+        add_failure(
+            "allowlist_policy",
+            f"allowlist host '{host}' has no expiry date — every allowlist entry "
+            f"MUST have 'expires=YYYY-MM-DD' (source: {meta['source']})",
+        )
+    elif meta["expires"] < today:
+        add_failure(
+            "allowlist_policy",
+            f"allowlist host '{host}' expired on {meta['expires']} "
+            f"(today: {today}) — remove the entry or extend its expiry "
+            f"(source: {meta['source']})",
+        )
+    if meta.get("owner") is None:
+        add_failure(
+            "allowlist_policy",
+            f"allowlist host '{host}' has no owner — every allowlist entry "
+            f"MUST have 'owner=<team-or-person>' (source: {meta['source']})",
+        )
+
+
 if output_format == "text":
     print("== Tenant Config Safety Audit (read-only) ==")
 
@@ -188,10 +268,10 @@ for rel_path in files:
 
     passes.append(f"{label}: parsed {len(sites)} site definitions")
 
-    domain_map = defaultdict(list)
-    lms_host_map = defaultdict(list)
-    cms_host_map = defaultdict(list)
-    mfe_host_map = defaultdict(list)
+    domain_map: dict[str, list[str]] = defaultdict(list)
+    lms_host_map: dict[str, list[str]] = defaultdict(list)
+    cms_host_map: dict[str, list[str]] = defaultdict(list)
+    mfe_host_map: dict[str, list[str]] = defaultdict(list)
 
     for idx, site in enumerate(sites):
         site = site or {}
@@ -262,7 +342,8 @@ for rel_path in files:
         owners = sorted(set(domains))
         if len(owners) > 1:
             shared_cms_hosts.add(host)
-            if host in allow_shared_hosts:
+            meta = allow_shared_hosts.get(host)
+            if meta is not None:
                 used_allowlist_hosts.add(host)
                 if any(not is_non_enterprise_domain(d) for d in owners):
                     add_failure(
@@ -281,7 +362,8 @@ for rel_path in files:
         owners = sorted(set(domains))
         if len(owners) > 1:
             shared_mfe_hosts.add(host)
-            if host in allow_shared_hosts:
+            meta = allow_shared_hosts.get(host)
+            if meta is not None:
                 used_allowlist_hosts.add(host)
                 if any(not is_non_enterprise_domain(d) for d in owners):
                     add_failure(
@@ -296,12 +378,8 @@ for rel_path in files:
                 f"{label}: MFE host '{host}' shared across tenants {owners} (must be unique)"
             )
 
+# Warn about allowlist entries that are unused (stale entries)
 for host in sorted(allow_shared_hosts):
-    if not is_non_enterprise_host(host):
-        add_failure(
-            "allowlist_policy",
-            f"allowlist host '{host}' is not preview/dev/staging scoped",
-        )
     if len(files) > 1:
         if host not in shared_cms_hosts and host not in shared_mfe_hosts:
             warnings.append(
@@ -318,7 +396,15 @@ if output_format == "json":
         "warnings_count": len(warnings),
         "failures_count": len(failures),
         "strict": strict,
-        "allow_shared_hosts": sorted(allow_shared_hosts),
+        "today": str(today),
+        "allow_shared_hosts": {
+            h: {
+                "owner": m.get("owner"),
+                "expires": str(m["expires"]) if m.get("expires") else None,
+                "source": m.get("source"),
+            }
+            for h, m in sorted(allow_shared_hosts.items())
+        },
         "passes": passes,
         "warnings": warnings,
         "failures": failures,
@@ -346,7 +432,11 @@ else:
     print(f"  Warnings:    {len(warnings)}")
     print(f"  Failures:    {len(failures)}")
     print(f"  Strict mode: {strict}")
-    print(f"  Allowlist:   {sorted(allow_shared_hosts)}")
+    allowlist_summary = [
+        f"{h} (owner={m.get('owner') or 'MISSING'}, expires={m.get('expires') or 'MISSING'})"
+        for h, m in sorted(allow_shared_hosts.items())
+    ]
+    print(f"  Allowlist:   {allowlist_summary}")
 
 if failures and strict:
     sys.exit(1)

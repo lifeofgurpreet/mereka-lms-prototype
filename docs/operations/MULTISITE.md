@@ -1,11 +1,55 @@
 # Multi-site LMS Playbook
-_Audience: Platform Eng + Design • Owner: Infra Team • Last verified: 2025-09-10_
+_Audience: Platform Eng + Design • Owner: Infra Team • Last updated: 2026-03-05_
 
-> **STALE WARNING (2026-02-27)**: This doc predates the comprehensive multi-site guide. See `operations/guides/MULTI_SITE_GUIDE.md` for the current authoritative reference. This file may contain outdated DNS or config details.
-
-This guide captures the steps required to attach additional branded experiences to the canonical `academyv2.mereka.io` Tutor deployment. It covers DNS, Tutor templating changes, database bootstrap, and validation.
+This guide covers DNS setup, Tutor templating, database bootstrap, host ownership policy, and governance gates for the Mereka Academy multi-tenant deployment. It supersedes the stale 2025-09-10 version.
 
 > **Microsite boundary:** `academy.biji-biji.com` and `skillourfuture.academy.mereka.io` are distinct client tenants with their own organizations and catalogs. Treat them as separate brands, not aliases.
+
+## 0. Host Ownership Matrix
+
+Every tenant owns exactly the LMS, Studio (CMS), and MFE host that belongs to its domain prefix.
+No two tenants may share a host in production. Dev/staging exceptions require an explicit allowlist entry with an owner and expiry date.
+
+### Production (GKE)
+
+| Tenant | LMS Host | CMS Host | MFE Host |
+|---|---|---|---|
+| **mereka** | `academyv2.mereka.io` | `studio.academyv2.mereka.io` | `apps.academyv2.mereka.io` |
+| **biji-biji** | `academy.biji-biji.com` | `studio.academy.biji-biji.com` | `apps.academy.biji-biji.com` |
+| **skillourfuture** | `skillourfuture.academy.mereka.io` | `studio.skillourfuture.academy.mereka.io` | `apps.skillourfuture.academy.mereka.io` |
+
+All three rows are disjoint — no sharing is permitted in production.
+
+### Dev (rke2-nonprod)
+
+| Tenant | LMS Host | CMS Host | MFE Host | Notes |
+|---|---|---|---|---|
+| **mereka** | `academyv2.mereka.dev` | `studio.academyv2.mereka.dev` | `apps.academyv2.mereka.dev` | |
+| **mereka-preview** | `preview.academyv2.mereka.dev` | `studio.academyv2.mereka.dev` | `apps.academyv2.mereka.dev` | Shared Studio/MFE — allowlisted (read-only preview node) |
+
+biji-biji and skillourfuture do not yet have dev domains. Testing for those tenants uses the main `academyv2.mereka.dev` cluster.
+
+### Staging
+
+| Tenant | LMS Host | CMS Host | MFE Host | Notes |
+|---|---|---|---|---|
+| **mereka** | `staging.academyv2.mereka.io` | `studio.staging.academyv2.mereka.io` | `apps.staging.academyv2.mereka.io` | |
+| **mereka-preview** | `preview.staging.academyv2.mereka.io` | `studio.staging.academyv2.mereka.io` | `apps.staging.academyv2.mereka.io` | Shared Studio/MFE — allowlisted |
+
+### Shared-host Allowlist (dev/staging only)
+
+Shared Studio/MFE hosts for preview lanes are explicitly allowlisted in
+`infrastructure/tutor/multisite-shared-host-allowlist.txt`. Each entry requires:
+
+| Field | Required | Description |
+|---|---|---|
+| `host` | Yes | The shared hostname |
+| `owner=<team>` | Yes | Team or person responsible for the exception |
+| `expires=YYYY-MM-DD` | Yes | Date after which the allowlist entry becomes a governance FAIL |
+
+Enterprise (production `.mereka.io`, `.biji-biji.com`) hosts are **never** allowed in the allowlist.
+The governance gate (`scripts/qa/audit-tenant-config-safety.sh`) enforces all three fields and
+fails the CI pipeline on expired or malformed entries.
 
 ## 1. Domains, DNS, and TLS
 
@@ -138,3 +182,109 @@ For new tenants or brand updates, follow the **Fast-Path Brand Pack Flow**:
 - Forum is deployed at `forum.academyv2.mereka.io` (and `.dev`) but is **API-first**; the learner discussion UI is embedded inside LMS course pages, and moderation happens via Studio.
 - Any `tutor config save` run must be followed by `./infrastructure/tutor/apply-patches.sh` so the additional host headers stay injected.
 - Back up the database (`tutor local do backup-db` / `scripts/infra/backup-db.sh`) before rolling out further domain changes.
+
+## 8. Host Ownership Migration and Rollback
+
+### When to use this section
+
+Use this procedure when:
+- Assigning a new dedicated Studio or MFE host to a tenant that currently shares one
+- Renaming a tenant domain
+- Removing an expired allowlist entry that is still in active use
+
+### Pre-migration checklist
+
+```bash
+# 1. Confirm current state of the audit gate (must be green before starting)
+STRICT=1 ./scripts/qa/audit-tenant-config-safety.sh
+
+# 2. Snapshot the Site/SiteConfiguration state in MySQL
+kubectl exec -n mereka-lms deploy/lms -- \
+  python manage.py lms shell -c "
+from django.contrib.sites.models import Site
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+for s in Site.objects.all():
+  try:
+    sc = s.configuration
+    print(s.domain, sc.values.get('CMS_ROOT_URL'), sc.values.get('MFE_BASE_URL'))
+  except SiteConfiguration.DoesNotExist:
+    print(s.domain, 'no-SiteConfiguration')
+"
+
+# 3. Take a database backup
+./scripts/infra/backup-db.sh
+```
+
+### Migration steps
+
+1. **Update the YAML source of truth** — edit `infrastructure/tutor/multisite-sites.yml`
+   (prod), `multisite-sites.dev.yml` (dev), or `multisite-sites.staging.yml` (staging)
+   with the new host values.
+
+2. **Update the allowlist if required** — add or remove entries in
+   `infrastructure/tutor/multisite-shared-host-allowlist.txt` with correct `owner=` and
+   `expires=` fields.
+
+3. **Run the governance gate** to confirm no violations:
+
+   ```bash
+   STRICT=1 ./scripts/qa/audit-tenant-config-safety.sh
+   ```
+
+4. **Commit and push** — CI will re-run the gate on the PR.
+
+5. **Apply to the live cluster** (after merge):
+
+   ```bash
+   # Re-bootstrap SiteConfiguration from the updated YAML
+   python scripts/shared/multisite_bootstrap.py --apply
+
+   # Restart LMS to pick up the new SiteConfiguration cache
+   kubectl rollout restart -n mereka-lms deployment/lms
+   kubectl rollout status -n mereka-lms deployment/lms
+   ```
+
+6. **Verify** each affected domain:
+
+   ```bash
+   # Check LMS responds on the new host
+   curl -I https://<new-lms-host>/health
+
+   # Check CMS (Studio) responds on the new host
+   curl -I https://<new-cms-host>/health
+
+   # Check MFE renders (expect 200 on the login page)
+   curl -I https://<new-mfe-host>/authn/login
+   ```
+
+### Rollback procedure
+
+If the migration causes issues, rollback in reverse order:
+
+```bash
+# 1. Revert the YAML file(s) to the previous commit
+git revert HEAD --no-edit   # or git checkout <previous-sha> -- infrastructure/tutor/multisite-sites.yml
+
+# 2. Re-run bootstrap to restore the previous SiteConfiguration
+python scripts/shared/multisite_bootstrap.py --apply
+
+# 3. Restart LMS
+kubectl rollout restart -n mereka-lms deployment/lms
+kubectl rollout status -n mereka-lms deployment/lms
+
+# 4. Confirm the governance gate is green again
+STRICT=1 ./scripts/qa/audit-tenant-config-safety.sh
+
+# 5. If DNS records were changed, revert them via bbi-infrastructure (Cloudflare IaC).
+#    DNS TTL is typically 60–300 s; wait for propagation before declaring rollback complete.
+```
+
+### Verification commands reference
+
+| Command | What it checks |
+|---|---|
+| `STRICT=1 ./scripts/qa/audit-tenant-config-safety.sh` | Host uniqueness, allowlist policy, expiry |
+| `OUTPUT_FORMAT=json ./scripts/qa/audit-tenant-config-safety.sh` | Same checks, machine-readable |
+| `STRICT=1 ./scripts/qa/verify-multisite-config.sh prod` | Live DB — SiteConfiguration correctness |
+| `./scripts/qa/public-health-check.sh prod` | HTTP health of all public endpoints |
+| `./scripts/qa/run-multisite-governance-gates.sh --env both` | Full governance sweep (all environments) |
