@@ -5,6 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 APP_BASE_REL="deploy/k8s/base/kustomization.yaml"
 APP_PROD_REL="deploy/k8s/overlays/production/kustomization.yaml"
@@ -392,8 +393,8 @@ detect_infra_repo() {
     return
   fi
   for candidate in \
-    /home/gurpreet/projects/k8s/infrastructure \
-    /home/gurpreet/projects/k8s/bbi-infrastructure; do
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${WORKSPACE_ROOT}/bbi-infrastructure"; do
     if [[ -f "$candidate/$INFRA_BASE_REL" && -f "$candidate/$INFRA_PROD_REL" ]]; then
       INFRA_REPO="$candidate"
       return
