@@ -5,6 +5,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 SOURCE_OVERLAY="$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml"
 INFRA_REPO=""
 DEST_OVERLAY=""
@@ -60,8 +61,8 @@ done
 
 if [[ -z "$INFRA_REPO" ]]; then
   for candidate in \
-    /home/gurpreet/projects/k8s/infrastructure \
-    /home/gurpreet/projects/k8s/bbi-infrastructure; do
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${WORKSPACE_ROOT}/bbi-infrastructure"; do
     if [[ -d "$candidate/.git" ]]; then
       INFRA_REPO="$candidate"
       break
