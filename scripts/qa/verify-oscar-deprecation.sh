@@ -150,8 +150,10 @@ header "2. Oscar K8s Resources (KEEP during transition)"
 # ══════════════════════════════════════════════════════════════════════════
 
 # Deployments
-ECOM_DEPLOY_COUNT=$(grep -c "name: ecommerce$" deploy/k8s/base/deployments.yml 2>/dev/null || echo 0)
-ECOM_WORKER_COUNT=$(grep -c "name: ecommerce-worker$" deploy/k8s/base/deployments.yml 2>/dev/null || echo 0)
+ECOM_DEPLOY_COUNT="$(grep -c "name: ecommerce$" deploy/k8s/base/deployments.yml 2>/dev/null || true)"
+ECOM_WORKER_COUNT="$(grep -c "name: ecommerce-worker$" deploy/k8s/base/deployments.yml 2>/dev/null || true)"
+[[ -n "$ECOM_DEPLOY_COUNT" ]] || ECOM_DEPLOY_COUNT="0"
+[[ -n "$ECOM_WORKER_COUNT" ]] || ECOM_WORKER_COUNT="0"
 
 if [[ "$ECOM_DEPLOY_COUNT" -gt 0 ]]; then
   keep "deploy/k8s/base/deployments.yml: ecommerce Deployment (active, needed until AC-027 closes)"
