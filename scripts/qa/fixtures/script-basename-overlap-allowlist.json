@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "overlaps": [
+    {
+      "basename": "build_course_packages.py",
+      "contract_type": "peer_set",
+      "paths": [
+        "scripts/migrations/kajabi/build_course_packages.py",
+        "scripts/migrations/mct/build_course_packages.py"
+      ],
+      "owner": "migration-platform",
+      "rationale": "Kajabi and MCT maintain independent migration pipelines."
+    },
+    {
+      "basename": "check-error-budget-gate.sh",
+      "contract_type": "wrapper",
+      "canonical": "scripts/infra/check-error-budget-gate.sh",
+      "wrappers": [
+        "scripts/qa/check-error-budget-gate.sh"
+      ],
+      "paths": [
+        "scripts/infra/check-error-budget-gate.sh",
+        "scripts/qa/check-error-budget-gate.sh"
+      ],
+      "owner": "sre-security",
+      "rationale": "QA surface keeps a stable wrapper while infra script remains canonical implementation."
+    },
+    {
+      "basename": "export.sh",
+      "contract_type": "peer_set",
+      "paths": [
+        "scripts/migrations/kajabi/export.sh",
+        "scripts/migrations/mct/export.sh"
+      ],
+      "owner": "migration-platform",
+      "rationale": "Kajabi and MCT export contracts are domain-specific checks."
+    },
+    {
+      "basename": "generate-sla-report.sh",
+      "contract_type": "peer_set",
+      "paths": [
+        "scripts/ops/generate-sla-report.sh",
+        "scripts/qa/generate-sla-report.sh"
+      ],
+      "owner": "sre-security",
+      "rationale": "Operational monthly report and QA evidence bundle are different artifacts."
+    },
+    {
+      "basename": "post-deploy-verify.sh",
+      "contract_type": "peer_set",
+      "paths": [
+        "scripts/qa/post-deploy-verify.sh",
+        "scripts/qa/validation-pack/post-deploy-verify.sh"
+      ],
+      "owner": "platform-infra",
+      "rationale": "Validation pack keeps a portable runtime checker alongside the main gate."
+    },
+    {
+      "basename": "prepare_openedx_imports.py",
+      "contract_type": "peer_set",
+      "paths": [
+        "scripts/migrations/kajabi/prepare_openedx_imports.py",
+        "scripts/migrations/mct/prepare_openedx_imports.py"
+      ],
+      "owner": "migration-platform",
+      "rationale": "Migration import shaping differs across source systems."
+    },
+    {
+      "basename": "transform_data.py",
+      "contract_type": "peer_set",
+      "paths": [
+        "scripts/migrations/kajabi/transform_data.py",
+        "scripts/migrations/mct/transform_data.py"
+      ],
+      "owner": "migration-platform",
+      "rationale": "Kajabi and MCT raw export schemas differ."
+    },
+    {
+      "basename": "verify-branding-health.sh",
+      "contract_type": "wrapper",
+      "canonical": "scripts/branding/verify-branding-health.sh",
+      "wrappers": [
+        "scripts/qa/verify-branding-health.sh"
+      ],
+      "paths": [
+        "scripts/branding/verify-branding-health.sh",
+        "scripts/qa/verify-branding-health.sh"
+      ],
+      "owner": "frontend-platform",
+      "rationale": "Branding implementation stays canonical; QA wrapper enforces AC-level contract."
+    },
+    {
+      "basename": "verify-token-drift.sh",
+      "contract_type": "peer_set",
+      "paths": [
+        "scripts/branding/verify-token-drift.sh",
+        "scripts/qa/verify-token-drift.sh"
+      ],
+      "owner": "frontend-platform",
+      "rationale": "Branding canonical parity and QA drift regression checks serve different scopes."
+    },
+    {
+      "basename": "verify-tutor-patches.sh",
+      "contract_type": "peer_set",
+      "paths": [
+        "scripts/infra/verify-tutor-patches.sh",
+        "scripts/qa/verify-tutor-patches.sh"
+      ],
+      "owner": "platform-infra",
+      "rationale": "Infra manifest validation and QA render-marker checks are complementary."
+    }
+  ]
+}
