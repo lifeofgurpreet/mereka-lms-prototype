@@ -250,7 +250,10 @@ async def test_checkout_status_unknown_session_returns_404(client):
 
     _override_db(mock_db)
     try:
-        resp = await client.get("/api/v1/checkout/unknown_session_id/status/")
+        resp = await client.get(
+            "/api/v1/checkout/unknown_session_id/status/",
+            params={"customer_email": "test@example.com"},
+        )
     finally:
         _clear_overrides()
 
@@ -267,7 +270,10 @@ async def test_checkout_status_returns_order_status(client):
 
     _override_db(mock_db)
     try:
-        resp = await client.get("/api/v1/checkout/cs_known_session/status/")
+        resp = await client.get(
+            "/api/v1/checkout/cs_known_session/status/",
+            params={"customer_email": "buyer@example.com"},
+        )
     finally:
         _clear_overrides()
 
@@ -287,7 +293,10 @@ async def test_checkout_status_pending_order(client):
 
     _override_db(mock_db)
     try:
-        resp = await client.get("/api/v1/checkout/cs_pending_session/status/")
+        resp = await client.get(
+            "/api/v1/checkout/cs_pending_session/status/",
+            params={"customer_email": "buyer@example.com"},
+        )
     finally:
         _clear_overrides()
 

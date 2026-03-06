@@ -272,7 +272,7 @@ async def test_checkout_status_order_not_found(mock_db):
     mock_db.execute.return_value = _mock_select_result(None)
 
     with pytest.raises(HTTPException) as exc_info:
-        await checkout_status("cs_unknown", mock_db)
+        await checkout_status("cs_unknown", customer_email="test@example.com", db=mock_db)
 
     assert exc_info.value.status_code == 404
 
@@ -293,7 +293,7 @@ async def test_checkout_status_returns_order_state(mock_db):
     )
     mock_db.execute.return_value = _mock_select_result(order)
 
-    result = await checkout_status("cs_known123", mock_db)
+    result = await checkout_status("cs_known123", customer_email="buyer@example.com", db=mock_db)
 
     assert result["status"] == "fulfilled"
     assert result["order_id"] == str(order.id)

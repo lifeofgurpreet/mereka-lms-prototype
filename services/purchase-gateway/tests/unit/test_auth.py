@@ -68,13 +68,13 @@ async def test_wrong_api_key_returns_403(mock_settings):
 @pytest.mark.asyncio
 @patch("app.auth.settings")
 async def test_correct_api_key_passes_through(mock_settings):
-    """Correct X-API-Key header passes auth and returns the key value."""
+    """Correct X-API-Key header passes auth and returns opaque identifier."""
     _set_auth_defaults(mock_settings)
     mock_settings.ADMIN_API_KEY = "valid-key-12345"
 
     result = await require_admin_api_key(api_key="valid-key-12345")
 
-    assert result == "valid-key-12345"
+    assert result == "api-key-admin"
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +111,7 @@ async def test_timing_safe_comparison_accepts_correct_key(mock_settings):
 
     result = await require_admin_api_key(api_key=key)
 
-    assert result == key
+    assert result == "api-key-admin"
 
 
 @pytest.mark.asyncio
