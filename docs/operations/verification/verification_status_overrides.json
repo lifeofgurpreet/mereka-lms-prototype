@@ -35,6 +35,27 @@
       "cadence": "scheduled_or_post_deploy",
       "severity": "medium",
       "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-libraries-core.sh",
+      "tier": "exploratory_manual",
+      "cadence": "on_demand",
+      "severity": "low",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-mobile-backend-api.sh",
+      "tier": "exploratory_manual",
+      "cadence": "on_demand",
+      "severity": "low",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-spec-dedupe-normalize.sh",
+      "tier": "exploratory_manual",
+      "cadence": "on_demand",
+      "severity": "low",
+      "status": "active"
     }
   ]
 }

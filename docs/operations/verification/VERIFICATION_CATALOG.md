@@ -12,7 +12,7 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - Archived deprecated scripts: **21**
 - CI static-bound scripts: **334**
 - Workflow-direct bound scripts: **49**
-- Status overrides applied: **5**
+- Status overrides applied: **8**
 
 ### Tier Distribution
 - `exploratory_manual`: 130
@@ -20,16 +20,12 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `release_blocking`: 354
 
 ### Status Distribution
-- `active`: 366
-- `deprecated_candidate`: 3
+- `active`: 369
 - `manual_only`: 127
 
 ## Deprecated Candidates
 
-Scripts currently not CI-bound and with near-zero references:
-- `scripts/qa/verify-libraries-core.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-spec-dedupe-normalize.sh` (owner: `platform-core`, refs: 1)
+- None
 
 ## Archived Deprecated Scripts
 

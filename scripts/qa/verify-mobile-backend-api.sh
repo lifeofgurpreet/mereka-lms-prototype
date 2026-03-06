@@ -52,19 +52,19 @@ log_skip() {
 
 check_pass() {
     log_success "$1"
-    ((PASSED_CHECKS++))
-    ((TOTAL_CHECKS++))
+    PASSED_CHECKS=$((PASSED_CHECKS + 1))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
 check_fail() {
     log_fail "$1"
-    ((FAILED_CHECKS++))
-    ((TOTAL_CHECKS++))
+    FAILED_CHECKS=$((FAILED_CHECKS + 1))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
 check_skip() {
     log_skip "$1"
-    ((SKIPPED_CHECKS++))
+    SKIPPED_CHECKS=$((SKIPPED_CHECKS + 1))
 }
 
 check_file_exists() {

@@ -2586,9 +2586,9 @@
       "ci_binding": [],
       "owner": "platform-core",
       "path": "scripts/qa/verify-libraries-core.sh",
-      "reference_count": 1,
+      "reference_count": 2,
       "severity": "low",
-      "status": "deprecated_candidate",
+      "status": "active",
       "tier": "exploratory_manual"
     },
     {
@@ -3148,9 +3148,9 @@
       "ci_binding": [],
       "owner": "platform-core",
       "path": "scripts/qa/verify-mobile-backend-api.sh",
-      "reference_count": 1,
+      "reference_count": 2,
       "severity": "low",
-      "status": "deprecated_candidate",
+      "status": "active",
       "tier": "exploratory_manual"
     },
     {
@@ -4877,9 +4877,9 @@
       "ci_binding": [],
       "owner": "platform-core",
       "path": "scripts/qa/verify-spec-dedupe-normalize.sh",
-      "reference_count": 1,
+      "reference_count": 2,
       "severity": "low",
-      "status": "deprecated_candidate",
+      "status": "active",
       "tier": "exploratory_manual"
     },
     {
@@ -5847,10 +5847,9 @@
   "summary": {
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 334,
-    "status_overrides_applied": 5,
+    "status_overrides_applied": 8,
     "statuses": {
-      "active": 366,
-      "deprecated_candidate": 3,
+      "active": 369,
       "manual_only": 127
     },
     "tiers": {

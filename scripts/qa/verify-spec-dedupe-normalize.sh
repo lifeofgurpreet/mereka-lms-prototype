@@ -40,7 +40,7 @@ done < <(find "$SPECS_DIR" -maxdepth 1 -name '*_spec.md' -print0 | sort -z)
 dup_found=0
 for spec in "${spec_files[@]}"; do
   content="$(tr -d '\r' < "$spec")"
-  dups="$(echo "$content" | grep -P '^\- \[ \] AC-' | grep -oP 'AC-[A-Z0-9]+-[0-9]+' | sort | uniq -d || true)"
+  dups="$(echo "$content" | grep -oP '^\- \[ \] \KAC-[A-Z0-9]+-[0-9]+' | sort | uniq -d || true)"
   if [[ -n "$dups" ]]; then
     fail_check "AC-SPEC-204: Duplicate checkbox AC IDs in $(basename "$spec"): $dups"
     dup_found=1
