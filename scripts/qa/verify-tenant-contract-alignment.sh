@@ -5,6 +5,17 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+REGISTRY_SYNC_SCRIPT="${REPO_ROOT}/scripts/tenants/sync-tenant-registry-configmap.sh"
+if [[ ! -x "$REGISTRY_SYNC_SCRIPT" ]]; then
+  echo "FAIL tenant registry sync script missing or not executable: ${REGISTRY_SYNC_SCRIPT}"
+  exit 1
+fi
+
+if ! "$REGISTRY_SYNC_SCRIPT" --check; then
+  echo "FAIL tenant registry sync contract check failed"
+  exit 1
+fi
+
 python3 - "$REPO_ROOT" <<'PY'
 from __future__ import annotations
 
