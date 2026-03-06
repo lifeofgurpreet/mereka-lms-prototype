@@ -8,7 +8,7 @@ import stripe
 import structlog
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,6 +30,22 @@ from app.services.subscription import (
 
 router = APIRouter()
 logger = structlog.get_logger()
+
+
+async def _persist_failed_event_status(db: AsyncSession, *, event_id: str) -> None:
+    """Persist failed webhook event status in a fresh transaction after rollback."""
+    try:
+        result = await db.execute(
+            update(StripeEvent)
+            .where(StripeEvent.stripe_event_id == event_id)
+            .values(processing_status=ProcessingStatus.failed)
+        )
+        await db.commit()
+        if not getattr(result, "rowcount", 0):
+            logger.warning("webhook.failed_event_not_found", stripe_event_id=event_id)
+    except Exception:
+        await db.rollback()
+        logger.error("webhook.failed_status_update_error", stripe_event_id=event_id)
 
 
 async def _log_audit(
@@ -292,11 +308,7 @@ async def stripe_webhook(
             error=str(e),
         )
         await db.rollback()
-        stripe_event_record.processing_status = ProcessingStatus.failed
-        try:
-            await db.commit()
-        except Exception:
-            logger.error("webhook.failed_status_update_error", stripe_event_id=event_id)
+        await _persist_failed_event_status(db, event_id=event_id)
         observe_webhook_processing(
             event_type=event_type,
             status="failed",

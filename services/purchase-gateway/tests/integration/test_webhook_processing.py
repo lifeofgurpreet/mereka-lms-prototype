@@ -299,6 +299,11 @@ async def test_processing_error_returns_500_not_500_exception(mock_stripe, clien
     assert resp.status_code == 500
     data = resp.json()
     assert data["status"] == "error"
+    assert mock_db.rollback.await_count >= 1
+    assert mock_db.commit.await_count >= 3
+    assert any(
+        "UPDATE stripe_events" in str(call.args[0]) for call in mock_db.execute.call_args_list
+    )
 
 
 # ---------------------------------------------------------------------------
