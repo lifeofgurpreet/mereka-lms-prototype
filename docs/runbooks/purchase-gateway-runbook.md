@@ -96,40 +96,44 @@ This runbook covers operational procedures for the Purchase Gateway (Stripe inte
 
 ## Manual Order Fulfillment
 
-### Procedure (use only when webhook fails)
-1. Identify unfulfilled order:
+### Procedure (use when order is stuck in `paid`/`fulfillment_failed`/`partially_fulfilled`)
+1. Identify candidate orders:
    ```bash
    kubectl exec -n mereka-lms -l app.kubernetes.io/name=payments-gateway -- \
-     psql $DATABASE_URL -c "
-     SELECT id, payment_intent_id, status, user_email, offering_id
+     psql "$DATABASE_URL" -c "
+     SELECT id, stripe_payment_intent_id, buyer_email, status, fulfilled_at
      FROM orders
-     WHERE status = 'payment_succeeded' AND fulfilled_at IS NULL;
+     WHERE status IN ('paid', 'fulfillment_failed', 'partially_fulfilled')
+     ORDER BY created_at DESC
+     LIMIT 20;
      "
    ```
-2. Manually trigger fulfillment via gateway API:
+2. Requeue fulfillment via admin endpoint (this resets retry attempts safely):
    ```bash
    kubectl exec -n mereka-lms -l app.kubernetes.io/name=payments-gateway -- \
-     curl -X POST http://localhost:8000/api/orders/<order-id>/fulfill \
-       -H "Authorization: Bearer $ADMIN_TOKEN"
+     curl -X POST "http://localhost:8080/api/v1/admin/orders/<order-id>/retry-fulfillment/" \
+       -H "X-API-Key: $ADMIN_API_KEY"
    ```
-3. Verify enrollment created in LMS:
-   ```bash
-   kubectl exec -n mereka-lms -l app.kubernetes.io/name=lms -- \
-     python manage.py lms get_enrollment --username <username> --course-id <course-id>
-   ```
-4. Update order status to fulfilled:
+3. Confirm a pending job exists:
    ```bash
    kubectl exec -n mereka-lms -l app.kubernetes.io/name=payments-gateway -- \
-     psql $DATABASE_URL -c "
-     UPDATE orders SET status = 'fulfilled', fulfilled_at = NOW() WHERE id = <order-id>;
+     psql "$DATABASE_URL" -c "
+     SELECT order_id, status, attempts, max_attempts, next_attempt_at, last_error
+     FROM fulfillment_jobs
+     WHERE order_id = '<order-id>';
      "
+   ```
+4. Verify fulfillment result:
+   ```bash
+   kubectl logs -n mereka-lms -l app.kubernetes.io/name=payments-gateway --tail=200 | \
+     grep "fulfillment.job_succeeded\|fulfillment.job_execution_error"
    ```
 
 ### Acceptance
-- Order status changes to `fulfilled`
-- Enrollment appears in LMS with `is_active: true`
-- User receives enrollment confirmation email
-- Manual fulfillment is logged for audit
+- `fulfillment_jobs` row transitions to `pending` and worker picks it up
+- Order transitions to `fulfilled` (or remains non-terminal with updated `last_error`)
+- Enrollment appears in LMS with `is_active: true` when fulfillment succeeds
+- Manual retry is logged as `triggered_by=admin.retry_fulfillment`
 
 ---
 

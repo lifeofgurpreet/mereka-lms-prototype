@@ -20,6 +20,7 @@ from app.routers.admin import (
     bulk_assign_entitlements,
     create_offering,
     list_orders,
+    retry_order_fulfillment,
     update_offering,
 )
 
@@ -464,3 +465,76 @@ async def test_list_orders_with_tenant_filter(mock_db):
 
     assert mock_db.execute.await_count == 1
     assert result == [order]
+
+
+# ---------------------------------------------------------------------------
+# retry_order_fulfillment
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_retry_order_fulfillment_queues_for_retryable_status(mock_db):
+    """retry_order_fulfillment force-requeues jobs for retryable order states."""
+    order = _make_order(status=OrderStatus.fulfillment_failed)
+    mock_db.execute.return_value = _mock_select_result(order)
+    mock_db.refresh = AsyncMock()
+
+    job = MagicMock()
+    job.id = uuid.uuid4()
+    job.status = MagicMock()
+    job.status.value = "pending"
+    job.attempts = 0
+    job.max_attempts = 10
+    job.next_attempt_at = datetime.now(UTC)
+
+    request = MagicMock()
+    request.state = MagicMock(spec=[])
+
+    with patch("app.routers.admin.enqueue_fulfillment_job", new_callable=AsyncMock) as mock_enqueue:
+        mock_enqueue.return_value = job
+        result = await retry_order_fulfillment(order.id, request, mock_db)
+
+    mock_enqueue.assert_awaited_once_with(
+        mock_db,
+        order=order,
+        triggered_by="admin.retry_fulfillment",
+        force=True,
+    )
+    mock_db.commit.assert_awaited_once()
+    mock_db.refresh.assert_awaited_once_with(job)
+    assert result.order_id == order.id
+    assert result.job_id == job.id
+    assert result.job_status == "pending"
+
+
+@pytest.mark.asyncio
+async def test_retry_order_fulfillment_not_found_returns_404(mock_db):
+    """retry_order_fulfillment returns 404 when order does not exist."""
+    mock_db.execute.return_value = _mock_select_result(None)
+
+    request = MagicMock()
+    request.state = MagicMock(spec=[])
+
+    with pytest.raises(HTTPException) as exc_info:
+        await retry_order_fulfillment(uuid.uuid4(), request, mock_db)
+
+    assert exc_info.value.status_code == 404
+    assert "not found" in exc_info.value.detail.lower()
+
+
+@pytest.mark.asyncio
+async def test_retry_order_fulfillment_rejects_non_retryable_state(mock_db):
+    """retry_order_fulfillment returns 409 for terminal/non-retryable statuses."""
+    order = _make_order(status=OrderStatus.refunded)
+    mock_db.execute.return_value = _mock_select_result(order)
+
+    request = MagicMock()
+    request.state = MagicMock(spec=[])
+
+    with patch("app.routers.admin.enqueue_fulfillment_job", new_callable=AsyncMock) as mock_enqueue:
+        with pytest.raises(HTTPException) as exc_info:
+            await retry_order_fulfillment(order.id, request, mock_db)
+
+    assert exc_info.value.status_code == 409
+    assert "cannot be retried" in exc_info.value.detail
+    mock_enqueue.assert_not_awaited()

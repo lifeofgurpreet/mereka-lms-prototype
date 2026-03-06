@@ -17,12 +17,19 @@ from app.config import settings
 from app.database import get_db
 from app.models.entitlement import Entitlement, EntitlementStatus
 from app.models.offering import Offering, OfferingType
-from app.models.order import Order
+from app.models.order import Order, OrderStatus
+from app.services.fulfillment_outbox import enqueue_fulfillment_job
 
 router = APIRouter(tags=["admin"], dependencies=[Depends(require_admin_api_key)])
 logger = structlog.get_logger()
 
 MAX_BULK_ASSIGN = 500
+RETRYABLE_ORDER_STATUSES = {
+    OrderStatus.paid,
+    OrderStatus.fulfilling,
+    OrderStatus.partially_fulfilled,
+    OrderStatus.fulfillment_failed,
+}
 
 
 # --- Request / Response schemas ---
@@ -94,6 +101,15 @@ class OrderSummaryResponse(BaseModel):
     refunded_at: datetime | None
 
     model_config = {"from_attributes": True}
+
+
+class RetryFulfillmentResponse(BaseModel):
+    order_id: uuid.UUID
+    job_id: uuid.UUID
+    job_status: str
+    attempts: int
+    max_attempts: int
+    next_attempt_at: datetime
 
 
 # --- Offerings ---
@@ -269,3 +285,55 @@ async def list_orders(
 
     result = await db.execute(query)
     return result.scalars().all()
+
+
+@router.post(
+    "/admin/orders/{order_id}/retry-fulfillment/",
+    response_model=RetryFulfillmentResponse,
+)
+async def retry_order_fulfillment(
+    order_id: uuid.UUID,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Force requeue fulfillment for a retryable order state."""
+    query = select(Order).where(Order.id == order_id)
+    mw_tenant_id = getattr(request.state, "tenant_id", None)
+    if mw_tenant_id:
+        query = query.where(Order.tenant_id == mw_tenant_id)
+
+    result = await db.execute(query)
+    order = result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    if order.status not in RETRYABLE_ORDER_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Order status '{order.status.value}' cannot be retried",
+        )
+
+    job = await enqueue_fulfillment_job(
+        db,
+        order=order,
+        triggered_by="admin.retry_fulfillment",
+        force=True,
+    )
+    await db.commit()
+    await db.refresh(job)
+
+    logger.info(
+        "fulfillment.manual_retry_queued",
+        order_uuid=str(order.id),
+        job_uuid=str(job.id),
+        order_status=order.status.value,
+        job_status=job.status.value,
+    )
+    return RetryFulfillmentResponse(
+        order_id=order.id,
+        job_id=job.id,
+        job_status=job.status.value,
+        attempts=job.attempts,
+        max_attempts=job.max_attempts,
+        next_attempt_at=job.next_attempt_at,
+    )

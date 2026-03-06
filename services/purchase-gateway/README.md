@@ -50,6 +50,7 @@ All configuration via environment variables (see `app/config.py`):
 | POST | `/api/v1/checkout/` | Public | Create Stripe Checkout Session |
 | POST | `/webhooks/stripe/` | Stripe Signature | Receive Stripe webhook events |
 | GET | `/api/v1/admin/orders/{order_id}/` | `X-API-Key` | Get detailed order view with line items, audit timeline, and fulfillment job |
+| POST | `/api/v1/admin/orders/{order_id}/retry-fulfillment/` | `X-API-Key` | Force requeue fulfillment job for retryable orders |
 | GET | `/health/` | None | Liveness probe |
 | GET | `/ready/` | None | Readiness probe |
 | GET | `/metrics/` | None | Prometheus metrics |

@@ -300,3 +300,74 @@ async def test_list_orders_without_auth_returns_401(mock_settings, client):
     resp = await client.get("/api/v1/admin/orders/")
 
     assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_retry_fulfillment_with_valid_auth_returns_200(mock_settings, client):
+    """POST /admin/orders/{id}/retry-fulfillment/ with valid key requeues fulfillment."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    order = _make_order(status=OrderStatus.fulfillment_failed)
+    mock_db = _make_mock_db(order=order)
+    mock_db.commit = AsyncMock()
+    mock_db.refresh = AsyncMock()
+
+    job = MagicMock()
+    job.id = uuid.uuid4()
+    status_obj = MagicMock()
+    status_obj.value = "pending"
+    job.status = status_obj
+    job.attempts = 0
+    job.max_attempts = 10
+    job.next_attempt_at = datetime(2024, 1, 1, tzinfo=UTC)
+
+    _override_db(mock_db)
+    try:
+        with patch("app.routers.admin.enqueue_fulfillment_job", new_callable=AsyncMock) as mock_enqueue:
+            mock_enqueue.return_value = job
+            resp = await client.post(
+                f"/api/v1/admin/orders/{order.id}/retry-fulfillment/",
+                headers=HEADERS,
+            )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload["order_id"] == str(order.id)
+    assert payload["job_id"] == str(job.id)
+    assert payload["job_status"] == "pending"
+    mock_db.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_retry_fulfillment_without_auth_returns_401(mock_settings, client):
+    """POST /admin/orders/{id}/retry-fulfillment/ without API key is rejected."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    resp = await client.post(f"/api/v1/admin/orders/{ORDER_ID}/retry-fulfillment/")
+
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_retry_fulfillment_non_retryable_status_returns_409(mock_settings, client):
+    """POST /admin/orders/{id}/retry-fulfillment/ rejects non-retryable order states."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    order = _make_order(status=OrderStatus.refunded)
+    mock_db = _make_mock_db(order=order)
+    _override_db(mock_db)
+    try:
+        resp = await client.post(
+            f"/api/v1/admin/orders/{order.id}/retry-fulfillment/",
+            headers=HEADERS,
+        )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 409
+    assert "cannot be retried" in resp.json()["detail"]
