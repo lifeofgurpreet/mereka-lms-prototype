@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Lightweight self-test for build-validator-drift-evidence-bundle.sh.
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+BUILD_SCRIPT="$ROOT_DIR/scripts/qa/build-validator-drift-evidence-bundle.sh"
+TMP_DIR="$(mktemp -d)"
+
+cleanup() {
+  rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+OUT_DIR="$TMP_DIR/bundle"
+"$BUILD_SCRIPT" --out-dir "$OUT_DIR" >/dev/null
+
+required_files=(
+  "$OUT_DIR/index.md"
+  "$OUT_DIR/01_scope.md"
+  "$OUT_DIR/02_claims.json"
+  "$OUT_DIR/03_catalog.csv"
+  "$OUT_DIR/04_duplicate_clusters.txt"
+  "$OUT_DIR/05_ci_reachability.json"
+  "$OUT_DIR/06_mutability_scan.txt"
+  "$OUT_DIR/07_env_taxonomy.txt"
+  "$OUT_DIR/08_generated_artifact_leakage.txt"
+  "$OUT_DIR/09_seeded_defect_results.txt"
+  "$OUT_DIR/10_docs_truth_scan.txt"
+  "$OUT_DIR/11_open_risks.md"
+  "$OUT_DIR/12_limits.md"
+  "$OUT_DIR/command-status.tsv"
+)
+
+for f in "${required_files[@]}"; do
+  [[ -f "$f" ]] || { echo "FAIL missing: $f" >&2; exit 1; }
+done
+
+grep -q "## 1. Scope" "$OUT_DIR/index.md"
+grep -q "## 12. Limits" "$OUT_DIR/index.md"
+grep -q '"canonical_hypothesis"' "$OUT_DIR/02_claims.json"
+head -n1 "$OUT_DIR/command-status.tsv" | grep -q "name"
+head -n1 "$OUT_DIR/command-status.tsv" | grep -q "exit_code"
+head -n1 "$OUT_DIR/command-status.tsv" | grep -q "output_path"
+
+echo "PASS test-build-validator-drift-evidence-bundle"
