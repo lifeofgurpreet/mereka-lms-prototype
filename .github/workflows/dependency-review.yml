@@ -2,6 +2,10 @@ name: Dependency Review
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'LICENSE'
   merge_group:
 
 permissions: {}  # Deny-all at workflow level; each job grants only what it needs

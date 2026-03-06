@@ -4,6 +4,14 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'CLAUDE.md'
+      - 'AGENTS.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'LICENSE'
   merge_group:
   schedule:
     - cron: '0 8 * * 3'  # Weekly Wednesday 8am UTC
