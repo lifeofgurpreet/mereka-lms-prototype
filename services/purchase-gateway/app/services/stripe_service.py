@@ -113,3 +113,16 @@ class StripeService:
         """
         secret = webhook_secret or settings.STRIPE_WEBHOOK_SECRET
         return stripe.Webhook.construct_event(payload, signature, secret)
+
+    @staticmethod
+    def verify_webhook_signature(
+        payload: bytes,
+        signature: str,
+        webhook_secret: str | None = None,
+    ) -> stripe.Event:
+        """Backward-compatible alias for webhook signature verification."""
+        return StripeService.construct_webhook_event(
+            payload=payload,
+            signature=signature,
+            webhook_secret=webhook_secret,
+        )
