@@ -54,6 +54,15 @@ Target load balancer IP: **34.177.83.168** (GKE ingress for `academyv2.mereka.io
 
 If you need additional records (TXT for verification, CNAMEs for future MFEs), add them to the JSON file and rerun `./scripts/infra/cloudflare-sync.sh` so the script handles creation/update instead of doing it manually.
 
+Run tenant inventory drift check after tenant/domain edits:
+
+```bash
+./scripts/qa/verify-tenant-dns-inventory.sh
+```
+
+This checks active tenant LMS domains as hard requirements and reports studio/apps/admin
+inventory gaps as onboarding drift warnings.
+
 ## Zone security baseline
 
 Run `./scripts/infra/cloudflare-harden-zone.sh` after DNS changes or when cloning the environment. It ensures:

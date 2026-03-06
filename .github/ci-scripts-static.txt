@@ -45,6 +45,7 @@ scripts/qa/verify-dev-prod-image-parity.sh
 scripts/qa/verify-multisite-config.sh
 scripts/qa/verify-tutor-multisite-domains.sh
 scripts/qa/verify-tenant-contract-alignment.sh
+scripts/qa/verify-tenant-dns-inventory.sh
 scripts/qa/verify-csrf-multisite.sh
 scripts/qa/verify-favicon-multisite.sh
 scripts/qa/verify-site-id-hardening.sh
