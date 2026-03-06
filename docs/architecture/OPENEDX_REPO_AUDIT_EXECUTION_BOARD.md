@@ -79,6 +79,15 @@ Parent issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/214
 | High-signal governance/evidence verifier promotion | Merged | [#335](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/335) |
 | Verification catalog runtime status overrides | Merged | [#336](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/336) |
 | Final verification candidate classification + strictness fixes | Merged | [#337](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/337) |
+| Release invocation guardrail token wiring | Open | [#362](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/362) |
+| CI sourced-guard lint annotation contract | Open | [#363](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/363) |
+| QA naming convention sync-prefix allowance | Open | [#364](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/364) |
+| Archive report artifact ignore policy | Open | [#365](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/365) |
+| Canonical token CSS header regeneration | Closed | [#366](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/366) |
+| Branding token sync/drift contract alignment | Open | [#367](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/367) |
+| Repo hygiene cache-check deduplication | Open | [#368](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/368) |
+| Evidence tracking policy archive-report coverage | Open | [#369](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/369) |
+| Evidence sprawl zero-budget archive-report enforcement | Open | [#370](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/370) |
 | Audit board consolidation for PR stream #362-#370 | Open | [#371](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/371) |
 | Audit PR status sync performance hardening | Open | [#372](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/372) |
 | Repo-conventions warning-budget signal hardening | Open | [#373](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/373) |
