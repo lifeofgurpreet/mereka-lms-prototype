@@ -33,6 +33,32 @@ if [[ -z "$BBI_PROD" ]]; then
   done
 fi
 
+resolve_prod_settings() {
+  local candidates=()
+  if [[ -n "${PLATFORM_MW_PROD_SETTINGS:-}" ]]; then
+    candidates+=("${PLATFORM_MW_PROD_SETTINGS}")
+  fi
+  candidates+=(
+    "$REPO_ROOT/../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "$REPO_ROOT/../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "$LMS_SETTINGS"
+  )
+
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if [[ -n "$candidate" && -f "$candidate" ]]; then
+      printf "%s" "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+BBI_PROD="$(resolve_prod_settings || true)"
+
 # Counters
 PASS=0
 FAIL=0
@@ -46,6 +72,7 @@ echo "=== Platform Middleware Verification ==="
 echo "Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "Domain: $DOMAIN"
 echo "Repo: $REPO_ROOT"
+echo "Prod settings source: ${BBI_PROD:-not found}"
 echo
 
 # ─── Helper: check if live endpoint is reachable ────────────────────────
