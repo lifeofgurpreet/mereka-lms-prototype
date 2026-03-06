@@ -59,7 +59,7 @@ check_file() {
     *.md|*.txt|*.rst|*.html|*.css|*.svg|*.png|*.jpg|*.jpeg|*.gif|*.ico|*.woff|*.woff2|*.ttf|*.eot)
       return 0
       ;;
-    *test*|*spec*|*mock*|*fixture*|*__tests__*|*__mocks__*)
+    *test*|*spec*|*mock*|*fixture*)
       # Skip test files but warn about them
       return 0
       ;;
