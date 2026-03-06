@@ -106,11 +106,72 @@ cat > "$ROOT_DIR/trend-fail.json" <<'EOF_JSON'
 }
 EOF_JSON
 
+cat > "$ROOT_DIR/scorecard-recency-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "latest_report": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
+  "latest_date": "20260307",
+  "age_days": 0,
+  "max_age_days": 7
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-recency-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "latest_report": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260301.md",
+  "latest_date": "20260301",
+  "age_days": 6,
+  "max_age_days": 1
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-consistency-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "reports_checked": 1,
+  "invalid_reports": 0,
+  "mismatches": []
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-consistency-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "reports_checked": 1,
+  "invalid_reports": 1,
+  "mismatches": [
+    "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260308.md: filename_date=20260308 title_date=20260307"
+  ]
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-head-freshness-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "latest_report": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
+  "latest_date": "20260307",
+  "reference_date": "20260307"
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-head-freshness-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "latest_report": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
+  "latest_date": "20260307",
+  "reference_date": "20260308"
+}
+EOF_JSON
+
 python3 docs/qa/build-docs-compliance-summary.py \
   --catalog-summary "$ROOT_DIR/catalog-pass.json" \
   --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
   --scorecard "$ROOT_DIR/scorecard-pass.json" \
   --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
   --out "$PASS_OUT"
 
 python3 - "$PASS_OUT" <<'PY'
@@ -127,6 +188,9 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --cmdref-summary "$ROOT_DIR/cmdref-fail.json" \
   --scorecard "$ROOT_DIR/scorecard-pass.json" \
   --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
   --out "$FAIL_OUT" || true
 
 python3 - "$FAIL_OUT" <<'PY'
@@ -143,6 +207,9 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
   --scorecard "$ROOT_DIR/scorecard-warn.json" \
   --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
   --out "$WARN_OUT"
 
 python3 - "$WARN_OUT" <<'PY'
@@ -159,6 +226,9 @@ if python3 docs/qa/build-docs-compliance-summary.py \
   --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
   --scorecard "$ROOT_DIR/scorecard-fail.json" \
   --comparison "$ROOT_DIR/trend-fail.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-fail.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-fail.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-fail.json" \
   --out /tmp/does-not-exist.json >/tmp/compliance-summary-fail.out 2>&1; then
   echo "expected command to fail for terminal fail status"
   cat /tmp/compliance-summary-fail.out

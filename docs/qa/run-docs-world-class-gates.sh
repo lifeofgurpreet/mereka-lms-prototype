@@ -11,6 +11,9 @@ CATALOG_HEALTH_SUMMARY="$WORK_DIR/docs-catalog-health-summary.json"
 DOCS_SCORECARD_PATH="$WORK_DIR/docs-scorecard.json"
 DOCS_SCORECARD_COMPARISON_PATH="$WORK_DIR/docs-scorecard-comparison.json"
 DOCS_COMMAND_REFS_SUMMARY="$WORK_DIR/docs-command-refs-summary.json"
+DOCS_SCORECARD_RECENCY_SUMMARY="$WORK_DIR/docs-scorecard-recency-summary.json"
+DOCS_SCORECARD_CONSISTENCY_SUMMARY="$WORK_DIR/docs-scorecard-consistency-summary.json"
+DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY="$WORK_DIR/docs-scorecard-head-freshness-summary.json"
 DOCS_COMPLIANCE_SUMMARY_PATH="$WORK_DIR/docs-compliance-summary.json"
 
 MAX_AGE_SECONDS=1200
@@ -121,9 +124,9 @@ fi
 run_step "verify-docs-policy" ./docs/qa/verify-docs-policy.sh
 run_step "verify-repo-structure" ./scripts/qa/verify-repo-structure.sh
 run_step "verify-doc-command-refs" ./docs/qa/verify-doc-command-refs.sh --summary-json "$DOCS_COMMAND_REFS_SUMMARY"
-run_step "verify-docs-scorecard-recency" ./docs/qa/verify-docs-scorecard-recency.sh --max-age-days 7
-run_step "verify-docs-scorecard-report-consistency" ./docs/qa/verify-docs-scorecard-report-consistency.sh
-run_step "verify-docs-scorecard-head-freshness" ./docs/qa/verify-docs-scorecard-head-freshness.sh
+run_step "verify-docs-scorecard-recency" ./docs/qa/verify-docs-scorecard-recency.sh --max-age-days 7 --summary-json "$DOCS_SCORECARD_RECENCY_SUMMARY"
+run_step "verify-docs-scorecard-report-consistency" ./docs/qa/verify-docs-scorecard-report-consistency.sh --summary-json "$DOCS_SCORECARD_CONSISTENCY_SUMMARY"
+run_step "verify-docs-scorecard-head-freshness" ./docs/qa/verify-docs-scorecard-head-freshness.sh --summary-json "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY"
 run_step "verify-doc-link-integrity" ./docs/qa/verify-doc-link-integrity.sh
 run_step "verify-doc-catalog-health" python3 docs/qa/verify-doc-catalog-health.py \
   --max-stale-days 45 \
@@ -142,6 +145,9 @@ run_step "build-docs-compliance-summary" python3 docs/qa/build-docs-compliance-s
   --cmdref-summary "$DOCS_COMMAND_REFS_SUMMARY" \
   --scorecard "$DOCS_SCORECARD_PATH" \
   --comparison "$DOCS_SCORECARD_COMPARISON_PATH" \
+  --scorecard-recency-summary "$DOCS_SCORECARD_RECENCY_SUMMARY" \
+  --scorecard-consistency-summary "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" \
+  --scorecard-head-freshness-summary "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" \
   --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
 run_step "verify-doc-catalog-health-test" ./docs/qa/verify-doc-catalog-health-test.sh
 run_step "verify-doc-link-integrity-test" ./docs/qa/verify-doc-link-integrity-test.sh

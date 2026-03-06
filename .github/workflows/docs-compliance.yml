@@ -171,6 +171,9 @@ PY
           CATALOG_HEALTH_SUMMARY="${RUNNER_TEMP}/docs-catalog-health-summary.json"
           DOCS_SCORECARD_PATH="${RUNNER_TEMP}/docs-scorecard.json"
           DOCS_SCORECARD_COMPARISON_PATH="${RUNNER_TEMP}/docs-scorecard-comparison.json"
+          DOCS_SCORECARD_RECENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-recency-summary.json"
+          DOCS_SCORECARD_CONSISTENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-consistency-summary.json"
+          DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY="${RUNNER_TEMP}/docs-scorecard-head-freshness-summary.json"
           DOCS_COMPLIANCE_SUMMARY_PATH="${RUNNER_TEMP}/docs-compliance-summary.json"
           BASE_REF="origin/${{ github.base_ref }}"
           if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
@@ -230,6 +233,9 @@ PY
             --cmdref-summary "$DOCS_CMDREF_SUMMARY" \
             --scorecard "$DOCS_SCORECARD_PATH" \
             --comparison "$DOCS_SCORECARD_COMPARISON_PATH" \
+            --scorecard-recency-summary "$DOCS_SCORECARD_RECENCY_SUMMARY" \
+            --scorecard-consistency-summary "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" \
+            --scorecard-head-freshness-summary "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" \
             --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
 
           python3 - "$DOCS_SCORECARD_COMPARISON_PATH" "$GITHUB_STEP_SUMMARY" <<'PY'
@@ -263,6 +269,9 @@ with open(sys.argv[2], "a", encoding="utf-8") as fp:
     fp.write(f"- command_refs_status={payload.get('statuses', {}).get('command_references', 'n/a')}\n")
     fp.write(f"- docs_scorecard_status={payload.get('statuses', {}).get('docs_scorecard', 'n/a')}\n")
     fp.write(f"- scorecard_trend_status={payload.get('statuses', {}).get('scorecard_trend', 'n/a')}\n")
+    fp.write(f"- scorecard_recency_status={payload.get('statuses', {}).get('scorecard_recency', 'n/a')}\n")
+    fp.write(f"- scorecard_consistency_status={payload.get('statuses', {}).get('scorecard_consistency', 'n/a')}\n")
+    fp.write(f"- scorecard_head_freshness_status={payload.get('statuses', {}).get('scorecard_head_freshness', 'n/a')}\n")
 PY
 
       - name: Upload docs catalog health scorecard
