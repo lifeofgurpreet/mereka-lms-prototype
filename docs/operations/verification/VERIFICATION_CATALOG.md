@@ -8,19 +8,19 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **508**
-- Archived deprecated scripts: **9**
+- Total `verify-*.sh` scripts: **505**
+- Archived deprecated scripts: **12**
 - CI static-bound scripts: **325**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 156
+- `exploratory_manual`: 153
 - `periodic_runtime`: 7
 - `release_blocking`: 345
 
 ### Status Distribution
 - `active`: 352
-- `deprecated_candidate`: 29
+- `deprecated_candidate`: 26
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -44,9 +44,6 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-email-preferences.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-push-code.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-evidence-sprawl-budget.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-gh-actions-budget-config.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-gh-actions-cost-dashboard.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-gh-actions-cost-tracking.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-libraries-core.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-notifications-inapp.sh` (owner: `platform-core`, refs: 1)
@@ -67,6 +64,9 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/deprecated/verify-ux-audit-coverage.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with zero references and stale section contracts that no longer match the active UI/UX audit report.)
 - `scripts/qa/deprecated/verify-k8s-validation-job.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale kubeconform bootstrap assumptions and broken pass/fail counters under strict-mode shell semantics.)
 - `scripts/qa/deprecated/verify-lint-job.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with broken pass/fail counters under strict-mode shell semantics and no CI/workflow binding.)
+- `scripts/qa/deprecated/verify-gh-actions-budget-config.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check for non-existent GitHub Actions budget config with strict-mode counter semantics that terminate on first warning.)
+- `scripts/qa/deprecated/verify-gh-actions-cost-dashboard.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check for non-existent GitHub Actions cost dashboard with strict-mode counter semantics that terminate on first warning.)
+- `scripts/qa/deprecated/verify-gh-actions-cost-tracking.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check for non-existent GitHub Actions cost tracking script with strict-mode counter semantics that terminate on first warning.)
 
 ## Lifecycle Policy
 - `release_blocking`: MUST stay bound to CI static or direct workflow execution.

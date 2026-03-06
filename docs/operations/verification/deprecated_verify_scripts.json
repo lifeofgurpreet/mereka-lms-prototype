@@ -54,6 +54,24 @@
       "archived_at": "2026-03-06",
       "reason": "Unbound exploratory check with broken pass/fail counters under strict-mode shell semantics and no CI/workflow binding.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-gh-actions-budget-config.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions budget config with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-gh-actions-cost-dashboard.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions cost dashboard with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-gh-actions-cost-tracking.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions cost tracking script with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ]
 }

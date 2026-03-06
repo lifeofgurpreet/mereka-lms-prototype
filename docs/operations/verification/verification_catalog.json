@@ -53,6 +53,24 @@
       "path": "scripts/qa/deprecated/verify-lint-job.sh",
       "reason": "Unbound exploratory check with broken pass/fail counters under strict-mode shell semantics and no CI/workflow binding.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-03-06",
+      "path": "scripts/qa/deprecated/verify-gh-actions-budget-config.sh",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions budget config with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-03-06",
+      "path": "scripts/qa/deprecated/verify-gh-actions-cost-dashboard.sh",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions cost dashboard with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-03-06",
+      "path": "scripts/qa/deprecated/verify-gh-actions-cost-tracking.sh",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions cost tracking script with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ],
   "entrypoints": [
@@ -111,7 +129,7 @@
       ],
       "owner": "frontend-platform",
       "path": "scripts/branding/verify-logo-setup.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -2168,36 +2186,6 @@
       "reference_count": 3,
       "severity": "low",
       "status": "manual_only",
-      "tier": "exploratory_manual"
-    },
-    {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "platform-core",
-      "path": "scripts/qa/verify-gh-actions-budget-config.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
-    },
-    {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "platform-core",
-      "path": "scripts/qa/verify-gh-actions-cost-dashboard.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
-    },
-    {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "platform-core",
-      "path": "scripts/qa/verify-gh-actions-cost-tracking.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
       "tier": "exploratory_manual"
     },
     {
@@ -5875,19 +5863,19 @@
     }
   ],
   "summary": {
-    "archived_deprecated_scripts": 9,
+    "archived_deprecated_scripts": 12,
     "ci_static_bound": 325,
     "statuses": {
       "active": 352,
-      "deprecated_candidate": 29,
+      "deprecated_candidate": 26,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 156,
+      "exploratory_manual": 153,
       "periodic_runtime": 7,
       "release_blocking": 345
     },
-    "total_verify_scripts": 508,
+    "total_verify_scripts": 505,
     "workflow_direct_bound": 49
   },
   "version": "1"

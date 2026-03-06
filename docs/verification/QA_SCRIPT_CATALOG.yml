@@ -1176,30 +1176,6 @@ scripts:
     covers_acs: []
     makefile_target: null
 
-  - path: "scripts/qa/verify-gh-actions-cost-tracking.sh"
-    method: monitoring
-    tier: P2
-    description: "Verify GitHub Actions cost tracking"
-    covers_specs: ["github-actions-cost-monitoring_spec.md"]
-    covers_acs: []
-    makefile_target: null
-
-  - path: "scripts/qa/verify-gh-actions-budget-config.sh"
-    method: static
-    tier: P0
-    description: "Verify GitHub Actions budget configuration"
-    covers_specs: ["github-actions-cost-monitoring_spec.md"]
-    covers_acs: []
-    makefile_target: null
-
-  - path: "scripts/qa/verify-gh-actions-cost-dashboard.sh"
-    method: monitoring
-    tier: P2
-    description: "Verify GitHub Actions cost dashboard"
-    covers_specs: ["github-actions-cost-monitoring_spec.md"]
-    covers_acs: []
-    makefile_target: null
-
   - path: "scripts/qa/verify-k8s-images.sh"
     method: static
     tier: P0
