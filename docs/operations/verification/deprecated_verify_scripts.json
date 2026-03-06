@@ -84,6 +84,18 @@
       "archived_at": "2026-03-06",
       "reason": "Unbound exploratory check with stale scheduled-ops workflow assumptions no longer matching active runtime gate workflows.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-patch-modularity.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with stale assumptions about direct patch-function invocation in apply-patches.sh after plugin-driven patch orchestration changes.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-tutor-patches-inventory.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with stale inventory/parser assumptions (including non-Python plugin companion files) that no longer match current Tutor plugin contract layout.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ]
 }

@@ -8,19 +8,19 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **503**
-- Archived deprecated scripts: **14**
+- Total `verify-*.sh` scripts: **501**
+- Archived deprecated scripts: **16**
 - CI static-bound scripts: **328**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 148
+- `exploratory_manual`: 146
 - `periodic_runtime`: 7
 - `release_blocking`: 348
 
 ### Status Distribution
 - `active`: 355
-- `deprecated_candidate`: 21
+- `deprecated_candidate`: 19
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -42,10 +42,8 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-libraries-core.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-notifications-inapp.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-patch-modularity.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-restore-drill.sh` (owner: `sre-security`, refs: 1)
 - `scripts/qa/verify-spec-dedupe-normalize.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-tutor-patches-inventory.sh` (owner: `platform-infra`, refs: 1)
 - `scripts/qa/verify-video-protection.sh` (owner: `migration-platform`, refs: 1)
 
 ## Archived Deprecated Scripts
@@ -64,6 +62,8 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/deprecated/verify-gh-actions-cost-tracking.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check for non-existent GitHub Actions cost tracking script with strict-mode counter semantics that terminate on first warning.)
 - `scripts/qa/deprecated/verify-cicd-image-build.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale CI contract assumptions (deprecated build inputs) no longer matching the active build workflow.)
 - `scripts/qa/deprecated/verify-cicd-scheduled-ops.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale scheduled-ops workflow assumptions no longer matching active runtime gate workflows.)
+- `scripts/qa/deprecated/verify-patch-modularity.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale assumptions about direct patch-function invocation in apply-patches.sh after plugin-driven patch orchestration changes.)
+- `scripts/qa/deprecated/verify-tutor-patches-inventory.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale inventory/parser assumptions (including non-Python plugin companion files) that no longer match current Tutor plugin contract layout.)
 
 ## Lifecycle Policy
 - `release_blocking`: MUST stay bound to CI static or direct workflow execution.
