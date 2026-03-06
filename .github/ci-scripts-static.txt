@@ -34,6 +34,7 @@ scripts/qa/verify-domain-url-invariants.sh
 scripts/qa/verify-evidence-redaction.sh
 
 # ── Kubernetes & GitOps ──────────────────────────────────────────────────────
+scripts/qa/validate-deploy-contract.sh
 scripts/qa/verify-k8s-deployment-spec.sh
 scripts/qa/verify-migration-init-contract.sh
 scripts/qa/verify-dev-db-rebuild-contract.sh
