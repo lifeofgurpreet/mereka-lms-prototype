@@ -289,11 +289,12 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-a11y-regression-lane.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -312,14 +313,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-accessibility.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -332,24 +335,28 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-admin-console.sh",
-      "reference_count": 5,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 6,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-advanced-xblocks.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -436,24 +443,28 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-analytics-pipeline.sh",
-      "reference_count": 5,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 6,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-analytics-retention.sh",
-      "reference_count": 4,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 5,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -502,23 +513,26 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-aspects-analytics.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-aspects-compat.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -625,14 +639,16 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "identity-access",
       "path": "scripts/qa/verify-auth-sso-enterprise.sh",
-      "reference_count": 5,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 6,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -649,11 +665,12 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-authenticated-smoke-a11y.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -671,14 +688,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "scheduled_or_post_deploy",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-authenticated-ui-smoke.sh",
-      "reference_count": 3,
-      "severity": "medium",
+      "reference_count": 4,
+      "severity": "high",
       "status": "active",
-      "tier": "periodic_runtime"
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -715,24 +734,28 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-binary-pinning-pcp.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-body-limits.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -793,14 +816,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-brand-parity.sh",
-      "reference_count": 6,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 7,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -839,14 +864,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-branding-health.sh",
-      "reference_count": 5,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 6,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -897,11 +924,12 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-workflow-contract.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -967,24 +995,27 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-certificate-branding.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-certificate-issuance.sh",
-      "reference_count": 4,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 5,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -1057,14 +1088,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-cicd-release-rollback.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1103,11 +1136,12 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-commit-signing.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -1123,44 +1157,52 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-content-libraries-advanced.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-content-libraries-v2-baseline.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-content-libraries-v2-enterprise.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-content-libraries-v2.sh",
-      "reference_count": 4,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 5,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1187,14 +1229,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-correlation-header-propagation.sh",
-      "reference_count": 6,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 7,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -1217,14 +1261,16 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-credentials-issuance.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "scheduled_or_post_deploy",
@@ -1247,14 +1293,16 @@
       "tier": "periodic_runtime"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-credentials-ops.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -1267,24 +1315,28 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-credentials-types.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-credentials-verification.sh",
-      "reference_count": 4,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 5,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1333,14 +1385,16 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-cross-system-identity.sh",
-      "reference_count": 5,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 6,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1391,14 +1445,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-css-scoping.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1449,14 +1505,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-data-privacy-gdpr.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1471,14 +1529,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-infra",
       "path": "scripts/qa/verify-deployment-critical-coverage.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -1665,23 +1725,26 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "sre-security",
       "path": "scripts/qa/verify-dr-drill-schedule.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-e2e-framework.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -1741,24 +1804,28 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-email-notifications-pipeline.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-email-notifications.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "scheduled_or_post_deploy",
@@ -1783,24 +1850,27 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-email-template-multilang.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-email-templates.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -2005,14 +2075,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "identity-access",
       "path": "scripts/qa/verify-enterprise-sso.sh",
-      "reference_count": 12,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 13,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -2781,14 +2853,16 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-logging-pipeline.sh",
-      "reference_count": 6,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 7,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -2815,14 +2889,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-manifest-integrity.sh",
-      "reference_count": 4,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 5,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -3021,7 +3097,7 @@
       ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-footer-slot-migration.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -3077,14 +3153,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-plugin-slots.sh",
-      "reference_count": 5,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 6,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -3196,14 +3274,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-slot-profile-persistence.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -3289,10 +3369,12 @@
     },
     {
       "cadence": "on_demand",
-      "ci_binding": [],
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-mobile-backend-api.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "severity": "low",
       "status": "active",
       "tier": "exploratory_manual"
@@ -4479,14 +4561,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-purchase-gateway-scaffold.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -4903,7 +4987,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-selector-hardening.sh",
-      "reference_count": 5,
+      "reference_count": 4,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4915,7 +4999,7 @@
       ],
       "owner": "sre-security",
       "path": "scripts/qa/verify-selector-to-slot-migration.sh",
-      "reference_count": 8,
+      "reference_count": 7,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -5142,10 +5226,12 @@
     },
     {
       "cadence": "on_demand",
-      "ci_binding": [],
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-spec-dedupe-normalize.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "severity": "low",
       "status": "active",
       "tier": "exploratory_manual"
@@ -5814,14 +5900,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-version-pin.sh",
-      "reference_count": 2,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -6150,19 +6238,18 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 361,
+    "ci_static_bound": 409,
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 396,
-      "deprecated_candidate": 1,
-      "manual_only": 125
+      "active": 433,
+      "manual_only": 88
     },
     "tiers": {
-      "exploratory_manual": 129,
-      "periodic_runtime": 12,
-      "release_blocking": 381
+      "exploratory_manual": 91,
+      "periodic_runtime": 11,
+      "release_blocking": 419
     },
-    "total_verify_scripts": 522,
+    "total_verify_scripts": 521,
     "workflow_direct_bound": 49
   },
   "version": "1"

@@ -470,3 +470,77 @@ scripts/qa/verify-translations.sh
 scripts/qa/verify-ttfs-onboarding.sh
 scripts/qa/verify-tutor-config-safety.sh
 scripts/qa/verify-tutor-services.sh
+
+# ── Tutor version & config (additional) ──────────────────────────────
+scripts/qa/verify-tutor-version-pin.sh
+
+# ── CI/CD contracts (additional) ─────────────────────────────────────
+scripts/qa/verify-build-workflow-contract.sh
+scripts/qa/verify-cicd-release-rollback.sh
+scripts/qa/verify-deployment-critical-coverage.sh
+scripts/qa/verify-spec-dedupe-normalize.sh
+scripts/qa/verify-manifest-integrity.sh
+scripts/qa/verify-commit-signing.sh
+scripts/qa/verify-body-limits.sh
+scripts/qa/verify-binary-pinning-pcp.sh
+
+# ── Analytics & aspects (additional) ─────────────────────────────────
+scripts/qa/verify-analytics-pipeline.sh
+scripts/qa/verify-analytics-retention.sh
+scripts/qa/verify-aspects-analytics.sh
+scripts/qa/verify-aspects-compat.sh
+
+# ── Email & notifications (additional) ───────────────────────────────
+scripts/qa/verify-email-notifications.sh
+scripts/qa/verify-email-notifications-pipeline.sh
+scripts/qa/verify-email-templates.sh
+scripts/qa/verify-email-template-multilang.sh
+
+# ── Content libraries (additional) ───────────────────────────────────
+scripts/qa/verify-content-libraries-v2-baseline.sh
+scripts/qa/verify-content-libraries-v2.sh
+scripts/qa/verify-content-libraries-v2-enterprise.sh
+scripts/qa/verify-content-libraries-advanced.sh
+
+# ── Enterprise & SSO contracts (additional) ──────────────────────────
+scripts/qa/verify-enterprise-sso.sh
+scripts/qa/verify-auth-sso-enterprise.sh
+scripts/qa/verify-cross-system-identity.sh
+
+# ── Observability (additional static) ────────────────────────────────
+scripts/qa/verify-logging-pipeline.sh
+scripts/qa/verify-correlation-header-propagation.sh
+
+# ── Branding (additional) ─────────────────────────────────────────────
+scripts/qa/verify-branding-health.sh
+scripts/qa/verify-brand-parity.sh
+scripts/qa/verify-certificate-branding.sh
+scripts/qa/verify-css-scoping.sh
+scripts/qa/verify-mfe-plugin-slots.sh
+scripts/qa/verify-mfe-slot-profile-persistence.sh
+
+# ── Accessibility & UI smoke (additional) ─────────────────────────────
+scripts/qa/verify-a11y-regression-lane.sh
+scripts/qa/verify-accessibility.sh
+scripts/qa/verify-e2e-framework.sh
+scripts/qa/verify-authenticated-ui-smoke.sh
+scripts/qa/verify-authenticated-smoke-a11y.sh
+scripts/qa/verify-admin-console.sh
+
+# ── Credentials & certificates (additional) ───────────────────────────
+scripts/qa/verify-certificate-issuance.sh
+scripts/qa/verify-credentials-issuance.sh
+scripts/qa/verify-credentials-types.sh
+scripts/qa/verify-credentials-verification.sh
+scripts/qa/verify-credentials-ops.sh
+
+# ── Privacy & compliance (additional) ────────────────────────────────
+scripts/qa/verify-data-privacy-gdpr.sh
+
+# ── Platform extensions (additional) ─────────────────────────────────
+scripts/qa/verify-advanced-xblocks.sh
+scripts/qa/verify-purchase-gateway-scaffold.sh
+scripts/qa/verify-mobile-backend-api.sh
+
+# ── DR & schedules (additional) ──────────────────────────────────────
+scripts/qa/verify-dr-drill-schedule.sh
