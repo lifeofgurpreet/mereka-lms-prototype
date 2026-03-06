@@ -12,11 +12,30 @@
 #
 # Usage:
 #   ./scripts/qa/verify-email-ses-infrastructure.sh
+#   ./scripts/qa/verify-email-ses-infrastructure.sh --skip-cluster
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
+
+SKIP_CLUSTER=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --skip-cluster)
+      SKIP_CLUSTER=true
+      shift
+      ;;
+    -h|--help)
+      echo "Usage: $0 [--skip-cluster]"
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 # Colors
 RED='\033[0;31m'
@@ -35,6 +54,34 @@ fail() { echo -e "${RED}FAIL${NC} $1"; FAIL=$((FAIL + 1)); }
 skip() { echo -e "${YELLOW}SKIP${NC} $1"; SKIP=$((SKIP + 1)); }
 
 echo "=== Email SES Infrastructure Verification ==="
+echo "Skip cluster checks: $SKIP_CLUSTER"
+echo ""
+
+resolve_prod_settings() {
+  local candidates=()
+  if [[ -n "${EMAIL_SES_PROD_SETTINGS:-}" ]]; then
+    candidates+=("${EMAIL_SES_PROD_SETTINGS}")
+  fi
+  candidates+=(
+    "../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "deploy/k8s/base/apps/openedx/settings/lms/production.py"
+  )
+
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if [[ -n "$candidate" && -f "$candidate" ]]; then
+      printf "%s" "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+PROD_SETTINGS="$(resolve_prod_settings || true)"
+echo "Prod settings source: ${PROD_SETTINGS:-not found}"
 echo ""
 
 # Check 1: DNS documentation exists
@@ -88,6 +135,8 @@ echo "Checking AC-003: SES SMTP relay configuration..."
 
 # Check if smtp deployment exists in K8s manifests
 SMTP_DEPLOYMENT_FILES=(
+  "deploy/k8s/patches/smtp-ses-relay.yaml"
+  "../infrastructure/apps/mereka-lms/base/smtp.yaml"
   "../bbi-infrastructure/apps/mereka-lms/base/smtp.yaml"
   "deploy/k8s/base/apps/smtp.yaml"
 )
@@ -119,7 +168,6 @@ echo ""
 # Check 4: MAIL FROM configuration in production settings
 echo "Checking AC-004: Custom MAIL FROM domain configuration..."
 
-PROD_SETTINGS="../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
 if [[ -f "$PROD_SETTINGS" ]]; then
   if grep -q "MAIL_FROM\|DEFAULT_FROM_EMAIL\|SERVER_EMAIL" "$PROD_SETTINGS"; then
     pass "AC-004: MAIL FROM configuration found in production settings"
@@ -134,7 +182,7 @@ if [[ -f "$PROD_SETTINGS" ]]; then
     skip "AC-004: MAIL FROM configuration not found in production settings"
   fi
 else
-  skip "AC-004: Production settings file not found at $PROD_SETTINGS"
+  skip "AC-004: Production settings file not found"
 fi
 
 echo ""
@@ -187,7 +235,9 @@ echo ""
 # Check 7: Exim relay running (cluster check)
 echo "Checking AC-003: Exim relay pod status..."
 
-if command -v kubectl &> /dev/null; then
+if $SKIP_CLUSTER; then
+  skip "AC-003: Exim relay pod status check skipped (--skip-cluster)"
+elif command -v kubectl &> /dev/null; then
   KUBECTL_CONTEXT=$(kubectl config current-context 2>/dev/null || echo "none")
 
   if [[ "$KUBECTL_CONTEXT" != "none" ]]; then
