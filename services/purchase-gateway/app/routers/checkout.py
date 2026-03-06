@@ -9,7 +9,7 @@ import stripe
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, EmailStr, HttpUrl, model_validator
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -155,12 +155,13 @@ async def checkout_status(
 ):
     """Check order status after checkout. Requires buyer email to prevent enumeration."""
     result = await db.execute(
-        select(Order).where(Order.stripe_checkout_session_id == session_id)
+        select(Order).where(
+            Order.stripe_checkout_session_id == session_id,
+            func.lower(Order.buyer_email) == customer_email.lower(),
+        )
     )
     order = result.scalar_one_or_none()
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    if order.buyer_email.lower() != customer_email.lower():
         raise HTTPException(status_code=404, detail="Order not found")
     return {
         "order_id": str(order.id),
