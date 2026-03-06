@@ -82,6 +82,7 @@ Guardrail:
 ## Enforcement Checks
 
 - In `mereka-lms`:
+  - `./scripts/qa/verify-k8s-repo-boundaries.sh`
   - `./scripts/qa/verify-auth-surfaces.sh prod`
   - `./scripts/qa/verify-oidc-provider-configs.sh --env prod`
   - `./scripts/qa/verify-gitops-image-overrides.sh --check-infra`

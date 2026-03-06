@@ -31,6 +31,7 @@ scripts/qa/verify-k8s-deployment-spec.sh
 scripts/qa/verify-k8s-externalsecrets.sh
 scripts/qa/verify-k8s-images.sh
 scripts/qa/verify-k8s-secrets-hygiene.sh
+scripts/qa/verify-k8s-repo-boundaries.sh
 scripts/qa/verify-kustomize-no-deprecated-keys.sh
 scripts/qa/verify-kustomize-render.sh
 scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
