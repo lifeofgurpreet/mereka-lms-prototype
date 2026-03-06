@@ -1,5 +1,7 @@
 # Postmortems
 
+_Audience: Platform Team • Owner: Operations Team • Last verified: 2026-03-06 • Status: canonical_
+
 This directory contains postmortem reports for production incidents affecting Mereka Academy.
 
 ## Purpose

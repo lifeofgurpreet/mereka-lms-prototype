@@ -87,7 +87,7 @@ manual_verifications:
     justification: "Visual verification required for theme rendering"
   - ac_id: AC-MON-001
     verification_type: monitoring
-    runbook: docs/operations/MONITORING.md
+    runbook: docs/ops/monitoring/MONITORING.md
     section: "Prometheus Alerts"
     justification: "Runtime monitoring, not testable in CI"
 ```

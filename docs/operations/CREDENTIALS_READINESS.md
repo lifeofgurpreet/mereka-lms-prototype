@@ -181,7 +181,7 @@ print(base64.b64encode(full).decode())
 ```
 
 Store the output in Infisical as `MEREKA_LMS_VC_SIGNING_PRIVATE_KEY`, then sync to GCP SM.
-See `docs/operations/credential-key-rotation-runbook.md` for the full procedure.
+See `docs/ops/runbooks/credential-key-rotation-runbook.md` for the full procedure.
 
 ### Gap 3: OAuth2 Client Applications Not Verified in LMS
 
@@ -320,7 +320,7 @@ For live cluster checks (requires `kubectl` access):
 | `infrastructure/tutor/plugins/mereka_lms.py` | Tutor plugin hooks (install, URL wiring) |
 | `infrastructure/tutor/mfe-build/Dockerfile` | MFE build — learner-record at line 733 |
 | `deploy/k8s/base/monitoring/prometheusrule-credentials.yaml` | Alerting rules |
-| `docs/operations/credential-key-rotation-runbook.md` | Key rotation procedure |
-| `docs/operations/credential-issuance-failure-runbook.md` | Issuance failure runbook |
+| `docs/ops/runbooks/credential-key-rotation-runbook.md` | Key rotation procedure |
+| `docs/ops/runbooks/credential-issuance-failure-runbook.md` | Issuance failure runbook |
 | `specs/verifiable-credentials-issuer_spec.md` | Spec: VC issuer (CRED-020) |
 | `specs/verifiable-credentials-issuance_spec.md` | Spec: issuance flows (CRED-030) |

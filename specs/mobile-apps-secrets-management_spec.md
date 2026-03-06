@@ -17,7 +17,7 @@ links:
     - "docs/ios-cicd-spec.md"
     - "docs/IOS_APP_CI_SETUP.md"
     - "docs/IOS_DEPLOYMENT_LEARNINGS.md"
-    - "docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md"
+    - "docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md"
   related_specs:
     - "specs/secrets-management_spec.md"
     - "specs/mobile-apps-enterprise_spec.md"
@@ -329,7 +329,7 @@ Mobile secrets are uniquely fragile. An expired Apple Distribution certificate b
 
 ### Apple Certificate Expiry During Active Release
 
-- The Apple Distribution certificate expires on 2027-01-22. If an App Store submission is in review when the certificate expires, the already-submitted build remains valid. However, no new builds can be signed until the certificate is renewed. Mitigation: the validation script warns at 60 days and fails at 30 days. The rotation runbook (`docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md`) includes certificate renewal steps. Calendar reminders MUST be set for 90, 60, and 30 days before expiry.
+- The Apple Distribution certificate expires on 2027-01-22. If an App Store submission is in review when the certificate expires, the already-submitted build remains valid. However, no new builds can be signed until the certificate is renewed. Mitigation: the validation script warns at 60 days and fails at 30 days. The rotation runbook (`docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md`) includes certificate renewal steps. Calendar reminders MUST be set for 90, 60, and 30 days before expiry.
 
 ### Fastlane Match Certificate Mismatch
 
@@ -507,7 +507,7 @@ kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data}' | jq 'key
    - **Clarification**: Firebase is ONLY used for push notifications (FCM), NOT for hosting
    - Open edX backend runs on GCP, but mobile apps use FCM to send push notifications to learners' devices
    - **Rationale**: Zero infrastructure management, works out-of-box with Open edX ACE, free tier covers our needs
-   - **Future path**: May migrate to self-hosted (Gotify/UnifiedPush) on Mereka VPS later - see [ADR-015](../../docs/adr/015-mobile-push-notification-provider.md)
+- **Future path**: May migrate to self-hosted (Gotify/UnifiedPush) on Mereka VPS later - see [ADR-015](../docs/adr/015-mobile-push-notification-provider.md)
    - **Decision deferred**: Firebase project sharing (dev vs prod) - will decide when mobile app deployment is ready
 
 3. **✅ APNs Authentication Key (.p8)**: Use APNs Authentication Key (no expiry, works for all apps) instead of per-app certificates.

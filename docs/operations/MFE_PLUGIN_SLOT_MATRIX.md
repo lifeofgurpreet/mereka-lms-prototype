@@ -2,7 +2,7 @@
 
 **Purpose**: Operational compatibility matrix view of plugin-slot wiring, mapping Mereka Academy's MFE customization strategy to FPF (Frontend Plugin Framework) extension points.
 
-**Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md) — This document is a derived view focused on operational planning and migration tracking.
+**Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md) — This document is a derived view focused on operational planning and migration tracking.
 
 **Last updated**: 2026-02-28
 **Covers**: Bead 1aj1 AC-UISLOT-001 through AC-UISLOT-005
@@ -59,7 +59,7 @@ This section maps current hardcoded customizations in `env.config.jsx` to their 
 
 When migrating a hardcoded customization to plugin-slot wiring:
 
-1. Identify the target slot from [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
+1. Identify the target slot from [MFE_PLUGIN_SLOT_INVENTORY.md](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
 2. Choose operation type: `Insert` (add before/after), `Replace` (full override), or `Hide` (remove default)
 3. Implement React component in `infrastructure/tutor/plugins/mereka_lms.py` mfe-env-config patch
 4. Wire slot via `config['pluginSlots'][SLOT_ID] = { op: PLUGIN_OPERATIONS.X, widget: ComponentName }`
@@ -160,7 +160,7 @@ Run the plugin-slot wiring verification script:
 This cross-references:
 - Plugin definitions in `mereka_lms.py`
 - Patch script changes in `apply-patches.sh`
-- Canonical inventory in `docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md`
+- Canonical inventory in `docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md`
 
 ---
 
@@ -219,7 +219,7 @@ For the complete override-to-slot migration plan, see [MFE_PLUGIN_SLOT_MIGRATION
 
 ## References
 
-- **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
+- **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
 - **Migration Register**: [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md)
 - **Selector Hardening Audit**: [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
 - **ADR-014**: [MFE Branding Strategy](../adr/014-mfe-branding-strategy.md)

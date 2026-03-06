@@ -16,7 +16,7 @@ THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 MFE_SCSS="$THEME_DIR/mfe/mereka.scss"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 MIGRATION_REGISTER="$REPO_ROOT/docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
-OPERATING_MODEL="$REPO_ROOT/docs/branding/BRANDING_OPERATING_MODEL.md"
+OPERATING_MODEL="$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
 CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
 
 echo "========================================"

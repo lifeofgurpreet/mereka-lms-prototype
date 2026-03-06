@@ -145,6 +145,6 @@ Monthly restore-drill evidence checklist:
 
 ## Related Docs
 
-- DR overview: `docs/operations/DISASTER_RECOVERY.md`
+- DR overview: `docs/ops/runbooks/DISASTER_RECOVERY.md`
 - Coverage matrix: `docs/operations/BACKUP_COVERAGE_MATRIX.md`
 - Platform auth audit: `scripts/qa/audit-auth-access.sh`

@@ -333,8 +333,8 @@ Run the readiness script to track migration progress at any time:
 
 ## Related Documentation
 
-- `docs/operations/CI_CD_SETUP.md` — CI/CD pipeline overview
-- `docs/operations/SECRETS_SNAPSHOT.md` — current secrets inventory
+- `docs/ops/ci-cd/CI_CD_SETUP.md` — CI/CD pipeline overview
+- `docs/ops/security/SECRETS_SNAPSHOT.md` — current secrets inventory
 - `scripts/qa/verify-wif-readiness.sh` — readiness verification script
 - [google-github-actions/auth documentation](https://github.com/google-github-actions/auth)
 - [GCP WIF official docs](https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines)

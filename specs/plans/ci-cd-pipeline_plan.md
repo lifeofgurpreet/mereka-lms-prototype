@@ -380,7 +380,7 @@ status: "draft"
   - Rollback: procedure with time estimates
   - Link to CI/CD runbook for detailed troubleshooting
 
-- [ ] **[S]** Document branch protection rules (`docs/operations/BRANCH_PROTECTION.md`) | AC: #7, #8 | Depends: Branch protection setup
+- [ ] **[S]** Document branch protection rules (`docs/ops/ci-cd/BRANCH_PROTECTION.md`) | AC: #7, #8 | Depends: Branch protection setup
   - Current protection rules for main branch
   - Rationale for each rule
   - Emergency hotfix bypass procedure

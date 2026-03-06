@@ -153,5 +153,5 @@ The `rke2-nonprod` overlay kustomization (`deploy/k8s/overlays/rke2-nonprod/kust
 - [ADR-010: Monorepo Architecture](010-monorepo-architecture.md)
 - [GHCR documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
 - [crane copy documentation](https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_copy.md)
-- [docs/operations/CI_CD_RUNNERS.md](../operations/CI_CD_RUNNERS.md)
+- [docs/ops/ci-cd/CI_CD_RUNNERS.md](../ops/ci-cd/CI_CD_RUNNERS.md)
 - [.github/workflows/build-enterprise-mfe.yml](../../.github/workflows/build-enterprise-mfe.yml)

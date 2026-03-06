@@ -5,7 +5,7 @@
 #  1) prevent new binary/log/json evidence artifacts from entering git under
 #     curated evidence directories
 #       (docs/operations/evidence, docs/evidence/observability,
-#        docs/archive/reports), and
+#        docs/archive/evidence/observability), and
 #  2) prevent newly introduced unredacted sensitive markers in changed
 #     markdown evidence files.
 # Existing historical files remain untouched.
@@ -119,7 +119,7 @@ while IFS= read -r path; do
   [[ -z "$path" ]] && continue
 
   case "$path" in
-    docs/operations/evidence/*|docs/evidence/observability/*|docs/archive/reports/*)
+    docs/operations/evidence/*|docs/evidence/observability/*|docs/archive/evidence/observability/*)
       if [[ "$path" == *.md ]]; then
         if [[ -f "$path" ]]; then
           check_new_markdown_size "$path"
@@ -141,10 +141,10 @@ while IFS= read -r path; do
   [[ -z "$path" ]] && continue
   [[ -f "$path" ]] || continue
 
-  if [[ "$path" =~ ^docs/operations/evidence/.+\.md$ || "$path" =~ ^docs/evidence/observability/.+\.md$ || "$path" =~ ^docs/archive/reports/.+\.md$ ]]; then
+  if [[ "$path" =~ ^docs/operations/evidence/.+\.md$ || "$path" =~ ^docs/evidence/observability/.+\.md$ || "$path" =~ ^docs/archive/evidence/observability/.+\.md$ ]]; then
     scan_sensitive_markers "$path"
   fi
-done < <(git diff --name-only --diff-filter=AM "$MERGE_BASE"...HEAD -- docs/operations/evidence docs/evidence/observability docs/archive/reports)
+done < <(git diff --name-only --diff-filter=AM "$MERGE_BASE"...HEAD -- docs/operations/evidence docs/evidence/observability docs/archive/evidence/observability)
 
 echo "=== Summary ==="
 echo "Checks     : $checks"
@@ -155,7 +155,7 @@ if [[ "$violations" -gt 0 ]]; then
   cat >&2 <<'EOM'
 FAIL — evidence tracking policy violations found.
 Use CI artifacts/object storage for raw evidence payloads, and keep only
-human-readable markdown summaries plus links in curated evidence paths.
+human-readable markdown summaries plus links in docs/archive/evidence.
 Redact cookie/session/bearer markers before committing markdown evidence.
 EOM
   exit 1

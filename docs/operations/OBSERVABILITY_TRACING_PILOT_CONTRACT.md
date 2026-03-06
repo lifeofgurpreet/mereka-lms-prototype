@@ -45,7 +45,7 @@ If the endpoint changes, update this document and the following env/command inpu
    - ingress layer
    - LMS/CMS app boundary
 3. Log proof in matching namespace with equivalent request/trace metadata.
-4. Evidence directory and manifest hash present in `docs/evidence/observability/`.
+4. Evidence directory and manifest hash present in `docs/archive/evidence/observability/`.
 
 ## Operational Inputs (Script-facing)
 

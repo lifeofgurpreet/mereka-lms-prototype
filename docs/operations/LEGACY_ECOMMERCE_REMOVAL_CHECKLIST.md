@@ -57,7 +57,7 @@
   - `docs/operations/ECOMMERCE_THEMING.md`
   - `docs/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md`
   - `docs/operations/STRIPE_WEBHOOKS_SETUP.md` (if Oscar-specific sections)
-- [ ] Remove ecommerce references from `docs/operations/ACCESS_URLS.md`
+- [ ] Remove ecommerce references from `docs/ops/quickref/access-urls.md`
 - [ ] Remove ecommerce references from `docs/operations/USER_FACING_URLS.md`
 - [ ] Update `docs/operations/CAPABILITY_MATRIX.md` to remove legacy ecommerce row
 - [ ] Remove ecommerce from `docs/operations/MULTISITE.md` shared services list

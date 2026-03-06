@@ -181,6 +181,6 @@ registration page delays the learner's first interaction.
 
 - `docs/operations/LIGHTHOUSE_BUDGETS.md` — Core Web Vitals budgets per MFE route
 - `docs/operations/TROUBLESHOOTING.md` — Site-down diagnostic runbook
-- `docs/operations/AUTH_AND_PERMISSIONS.md` — Auth flow details
+- `docs/ops/security/AUTH_AND_PERMISSIONS.md` — Auth flow details
 - `scripts/qa/verify-ttfs-onboarding.sh` — Offline config verification
 - `.github/workflows/ttfs-onboarding.yml` — CI workflow

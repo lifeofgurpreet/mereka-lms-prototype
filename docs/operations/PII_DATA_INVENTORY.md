@@ -164,6 +164,6 @@ Backup flow:
 ## References
 
 - Open edX OEP-30: https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0030-arch-pii-markup-and-auditing.html
-- Erasure runbook: `docs/operations/DATA_ERASURE_RUNBOOK.md`
+- Erasure runbook: `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md`
 - GDPR operational runbook: `docs/operations/GDPR_COMPLIANCE.md`
 - Spec: `specs/data-privacy-gdpr-compliance_spec.md`

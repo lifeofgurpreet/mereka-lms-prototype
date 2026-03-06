@@ -350,5 +350,5 @@ kubectl exec -it -n mereka-lms deploy/ecommerce -- ls -la /openedx/ecommerce/tem
 ## Related Documentation
 
 - `docs/operations/THEME_DEPLOYMENT.md` - Full deployment guide
-- `docs/BRANDING.md` - Branding system overview
+- `docs/guides/branding/BRANDING.md` - Branding system overview
 - `infrastructure/tutor/branding/` - Design tokens and assets

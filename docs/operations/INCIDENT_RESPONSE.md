@@ -5,7 +5,7 @@ _Audience: All Engineers · Owner: Engineering Lead · Last updated: 2026-02-24_
 
 Use this runbook during an active incident. Keep it open alongside the terminal.
 
-**Related docs**: [ONCALL_ROTATION.md](ONCALL_ROTATION.md) · [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md) · [runbooks/site-down.md](runbooks/site-down.md) · [runbooks/emergency-rollback.md](runbooks/emergency-rollback.md)
+**Related docs**: [ONCALL_ROTATION.md](ONCALL_ROTATION.md) · [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md) · [../ops/runbooks/site-down.md](../ops/runbooks/site-down.md) · [../ops/runbooks/emergency-rollback.md](../ops/runbooks/emergency-rollback.md)
 
 ---
 
@@ -94,7 +94,7 @@ kubectl exec -n mereka-lms deploy/lms -- python -c \
 - ExternalSecret not synced — `kubectl get externalsecret -n mereka-lms`
 - Wrong password in Infisical — rotate via `gcloud secrets versions add`
 
-**Runbook**: [runbooks/MONGODB_ATLAS_RUNBOOK.md](runbooks/MONGODB_ATLAS_RUNBOOK.md)
+**Runbook**: [../ops/runbooks/MONGODB_ATLAS_RUNBOOK.md](../ops/runbooks/MONGODB_ATLAS_RUNBOOK.md)
 
 ---
 

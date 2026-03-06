@@ -1,5 +1,7 @@
 # Architecture Decision Records
 
+_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: canonical_
+
 This directory contains Architecture Decision Records (ADRs) documenting significant architectural decisions made for the Mereka LMS project.
 
 ## Index

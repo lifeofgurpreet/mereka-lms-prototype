@@ -468,7 +468,7 @@ tutor k8s restart
 ## Related Documents
 
 ### Source Documents (Audit Inputs)
-- `docs/architecture/MULTISITE_UX_CONSISTENCY.md` — Hardcoded domain audit findings
+- `docs/concepts/architecture/MULTISITE_UX_CONSISTENCY.md` — Hardcoded domain audit findings
 - `docs/operations/TENANT_BRANDING_READINESS_RAG.md` — 5-dimension readiness assessment
 - `docs/operations/TENANT_BRANDING_TROUBLESHOOTING.md` — Known edge cases
 
@@ -491,8 +491,8 @@ tutor k8s restart
 
 ### Runbooks & Guides
 - `docs/operations/TENANT_PROVISIONING.md` — Tenant provisioning workflow
-- `docs/branding/TENANT_BRANDING_CONTRACT.md` — Tenant branding contract
-- `docs/architecture/multi-tenancy-overview.md` — Multi-tenancy architecture overview
+- `docs/guides/branding/TENANT_BRANDING_CONTRACT.md` — Tenant branding contract
+- `docs/concepts/architecture/multi-tenancy-overview.md` — Multi-tenancy architecture overview
 
 ---
 

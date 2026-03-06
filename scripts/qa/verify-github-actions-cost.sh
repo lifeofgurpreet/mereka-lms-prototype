@@ -88,14 +88,14 @@ if [ "$EXIT_CODE" -eq 2 ]; then
     echo "Action required:"
     echo "  1. Disable non-critical scheduled workflows"
     echo "  2. Defer image builds until next billing cycle"
-    echo "  3. Review workflow optimization recommendations in docs/operations/GITHUB_ACTIONS_COST_MONITORING.md"
+    echo "  3. Review workflow optimization recommendations in docs/ops/ci-cd/GITHUB_ACTIONS_COST_MONITORING.md"
 elif [ "$EXIT_CODE" -eq 1 ]; then
     echo -e "${YELLOW}⚠ Warning: Usage >= ${WARN_THRESHOLD}%${NC}"
     echo "Recommendations:"
     echo "  - Review workflow usage and identify optimization opportunities"
     echo "  - Consider enabling caching for dependencies"
     echo "  - Reduce scheduled workflow frequency"
-    echo "  - See docs/operations/GITHUB_ACTIONS_COST_MONITORING.md for details"
+    echo "  - See docs/ops/ci-cd/GITHUB_ACTIONS_COST_MONITORING.md for details"
 else
     echo -e "${GREEN}✓ Usage within budget${NC}"
 fi

@@ -128,5 +128,5 @@ kubectl get pods -n mereka-lms | grep -v Running
 - Incident procedures: [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md)
 - Communication templates: [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md)
 - Observability quick-start: [ONCALL_OBSERVABILITY_PLAYBOOK.md](ONCALL_OBSERVABILITY_PLAYBOOK.md)
-- Site-down runbook: [runbooks/site-down.md](runbooks/site-down.md)
-- Emergency rollback: [runbooks/emergency-rollback.md](runbooks/emergency-rollback.md)
+- Site-down runbook: [../ops/runbooks/site-down.md](../ops/runbooks/site-down.md)
+- Emergency rollback: [../ops/runbooks/emergency-rollback.md](../ops/runbooks/emergency-rollback.md)

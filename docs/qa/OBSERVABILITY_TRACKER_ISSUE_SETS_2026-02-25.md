@@ -1,6 +1,6 @@
 # Observability Tracker Issue Sets (Mereka LMS)
 
-> Status: Superseded for current execution flow.
+> Status: Archive-candidate for current execution flow.
 > This file is retained for historical tracker context only.
 > Active execution source of truth is `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md`
 > and `.github/workflows/observability-compliance.yml`.
@@ -98,11 +98,11 @@ br create "OBS-F: Parity policy codification and operator handoff" -t docs -p 2 
 ## 5) Evidence file convention
 
 Use:
-- `docs/evidence/observability/<issue-id>-<UTC_TIMESTAMP>.md`
+- `docs/archive/evidence/observability/<issue-id>-<UTC_TIMESTAMP>.md`
 
 Recommended command:
 ```bash
 ts="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
-mkdir -p docs/evidence/observability
-touch "docs/evidence/observability/OBS-COMPLIANCE-01-${ts}.md"
+mkdir -p docs/archive/evidence/observability
+touch "docs/archive/evidence/observability/OBS-COMPLIANCE-01-${ts}.md"
 ```

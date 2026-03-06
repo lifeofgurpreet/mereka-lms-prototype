@@ -347,19 +347,19 @@ else
 fi
 
 # Observability docs exist
-OBS_DOC="$REPO_ROOT/docs/operations/MONITORING.md"
+OBS_DOC="$REPO_ROOT/docs/ops/monitoring/MONITORING.md"
 if [[ -f "$OBS_DOC" ]]; then
-  pass_check "Monitoring documentation exists (docs/operations/MONITORING.md)"
+  pass_check "Monitoring documentation exists (docs/ops/monitoring/MONITORING.md)"
 else
   fail_check "Monitoring documentation missing"
 fi
 
 # Logging pipeline runbook
-LOGGING_RUNBOOK="$REPO_ROOT/docs/operations/LOGGING_AND_SENTRY.md"
+LOGGING_RUNBOOK="$REPO_ROOT/docs/ops/monitoring/LOGGING_AND_SENTRY.md"
 if [[ -f "$LOGGING_RUNBOOK" ]]; then
-  pass_check "Logging runbook exists (docs/operations/LOGGING_AND_SENTRY.md)"
+  pass_check "Logging runbook exists (docs/ops/monitoring/LOGGING_AND_SENTRY.md)"
 else
-  fail_check "Logging runbook missing (docs/operations/LOGGING_AND_SENTRY.md)"
+  fail_check "Logging runbook missing (docs/ops/monitoring/LOGGING_AND_SENTRY.md)"
 fi
 
 # Verify logging pipeline script
@@ -571,7 +571,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  S2 (security):  Add securityContext to deployments or rely on Kyverno policies"
   echo "  S3 (monitoring): Add missing ServiceMonitors/PrometheusRules to deploy/k8s/base/monitoring/"
   echo "  S4 (backup):    Configure Velero schedule; run: scripts/qa/audit-velero.sh"
-  echo "  S5 (logs):      Verify Loki/Promtail pipeline; see docs/operations/LOGGING_AND_SENTRY.md"
+  echo "  S5 (logs):      Verify Loki/Promtail pipeline; see docs/ops/monitoring/LOGGING_AND_SENTRY.md"
   echo "  S6 (live):      Run with --online after fixing offline checks"
   echo "  S7 (runbooks):  Create missing docs in docs/operations/"
   echo ""

@@ -5,7 +5,7 @@ _Audience: Platform Engineering + Operations • Last updated: 2026-02-17_
 **Purpose**: Machine-checkable readiness assessment for multi-tenant branding activation.
 
 **Spec Reference**: `specs/multi-tenancy-architecture_spec.md`
-**Contract Reference**: `docs/branding/TENANT_BRANDING_CONTRACT.md`
+**Contract Reference**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 
 ---
 
@@ -234,11 +234,11 @@ Already GREEN. Add any new verifiers for tenant-specific branding contracts as n
 
 ## Related Documents
 
-- **Contract**: `docs/branding/TENANT_BRANDING_CONTRACT.md`
+- **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - **Provisioning**: `docs/operations/TENANT_PROVISIONING.md`
-- **Architecture**: `docs/architecture/multi-tenancy-overview.md`
+- **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
-- **Branding Model**: `docs/branding/BRANDING_OPERATING_MODEL.md`
+- **Branding Model**: `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - **Verifier**: `scripts/qa/verify-tenant-branding-contract.sh`
 
 ---

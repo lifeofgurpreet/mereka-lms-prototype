@@ -44,7 +44,7 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 - **Aspects** - Official Open edX analytics using Apache Superset for visualization (Tutor plugin)
 - **Superset** - Data visualization tool (used by Aspects)
 - **Current Choice**: Aspects + Superset infrastructure in place
-- **Current Status**: Analytics not deployed, see `docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`
+- **Current Status**: Analytics not deployed, see `docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md`
 - **Note**: Panorama is a separate analytics platform (alternative to Aspects), but we're using Aspects
 
 ---
@@ -285,7 +285,7 @@ When adding a new tenant, ensure these URLs are configured:
 - [ ] Branding assets (logo, colors, footer)
 - [ ] Smoke tests passing
 
-**Guide**: `docs/operations/runbooks/MULTI_TENANCY_RUNBOOK.md`
+**Guide**: `docs/ops/runbooks/MULTI_TENANCY_RUNBOOK.md`
 
 ---
 
@@ -312,7 +312,7 @@ When adding a new tenant, ensure these URLs are configured:
   - Uses Apache Superset as reporting tool
   - **Sources**: [Aspects Docs](https://docs.openedx.org/projects/openedx-aspects/), [Superset Decision](https://docs.openedx.org/projects/openedx-aspects/en/latest/technical_documentation/decisions/0003_superset.html)
 - **Our Choice**: Aspects + Superset
-- **Current Status**: Not yet deployed, see `docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`
+- **Current Status**: Not yet deployed, see `docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md`
 - **Note**: Panorama is an alternative analytics platform by Aulasneo, but we're using Aspects
 
 **Preview Domain**:
@@ -336,9 +336,9 @@ When adding a new tenant, ensure these URLs are configured:
 
 ## 📚 Related Documentation
 
-- **Access URLs**: `docs/operations/ACCESS_URLS.md` (detailed version with credentials)
+- **Access URLs**: `docs/ops/quickref/access-urls.md` (detailed version with credentials)
 - **Hostname Registry**: `docs/operations/OPENEDX_HOSTNAMES.md` (canonical list)
-- **Multi-Tenancy**: `docs/operations/runbooks/MULTI_TENANCY_RUNBOOK.md`
+- **Multi-Tenancy**: `docs/ops/runbooks/MULTI_TENANCY_RUNBOOK.md`
 - **Studio Isolation**: Security verified by `scripts/qa/verify-studio-isolation.sh`
 - **Health Checks**: `scripts/qa/public-health-check.sh`
 

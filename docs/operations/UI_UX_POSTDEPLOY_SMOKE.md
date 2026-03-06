@@ -13,7 +13,7 @@ This runbook defines the authenticated UI smoke + visual checkpoint contract for
 3 tenant domains across 5 critical MFE routes (15 checkpoints total).  It is
 the top layer of the Mereka Academy verification stack, sitting above unauthenticated
 visual regression (`VISUAL_SMOKE_BASELINE.md`) and route-level a11y conformance
-(`ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`).
+(../ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md).
 
 The verification script is `scripts/qa/verify-tenant-ui-smoke.sh`.
 
@@ -129,7 +129,7 @@ Every checkpoint in the Route × Domain matrix **must** also pass the
 authenticated a11y landmark + focus-indicator checks defined in:
 
 - **Script**: `scripts/qa/verify-a11y-authenticated-routes.sh`
-- **Runbook**: `docs/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
+- **Runbook**: `../ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
 
 ### Required Landmarks (per authenticated route)
 
@@ -288,9 +288,9 @@ wait
 ## Related Documentation
 
 - [`VISUAL_SMOKE_BASELINE.md`](VISUAL_SMOKE_BASELINE.md) — RMSE threshold policy + baseline generation
-- [`ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`](ACCESSIBILITY_CONFORMANCE_RUNBOOK.md) — Landmark + focus requirements
+- [`ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`](../ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md) — Landmark + focus requirements
 - [`TENANT_BRANDING_MATRIX.md`](TENANT_BRANDING_MATRIX.md) — Per-domain brand configuration
-- [`VISUAL_REGRESSION_RUNBOOK.md`](VISUAL_REGRESSION_RUNBOOK.md) — Unauthenticated visual regression infrastructure
+- [`../ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`](../ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md) — Unauthenticated visual regression infrastructure
 - [`scripts/qa/verify-tenant-ui-smoke.sh`](../../scripts/qa/verify-tenant-ui-smoke.sh) — This gate's verification script
 - [`scripts/qa/verify-a11y-authenticated-routes.sh`](../../scripts/qa/verify-a11y-authenticated-routes.sh) — A11y authenticated route gate
 - [`scripts/qa/verify-visual-smoke-baseline.sh`](../../scripts/qa/verify-visual-smoke-baseline.sh) — Visual smoke baseline verification

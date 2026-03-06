@@ -332,4 +332,4 @@ $font-family-base: $mereka-font-primary;
 
 - `docs/operations/THEME_DEPLOYMENT.md` - Full deployment guide
 - `docs/operations/FORUM_AUTH_E2E.md` - Forum authentication flow
-- `docs/BRANDING.md` - Branding system overview
+- `docs/guides/branding/BRANDING.md` - Branding system overview

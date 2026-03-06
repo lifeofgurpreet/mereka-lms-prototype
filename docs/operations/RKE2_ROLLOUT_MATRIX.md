@@ -148,7 +148,7 @@ docs/operations/
 ├── RKE2_ROLLOUT_MATRIX.md        # This file (2j6g.1 + 2j6g.2)
 ├── KIND_CLUSTER_RECOVERY_EVIDENCE.md  # Kind fixes (3cdw)
 ├── GKE_WORKLOAD_TRIAGE_EVIDENCE.md    # GKE triage (3k2i)
-└── runbooks/
+└── ops/runbooks/
     └── DEPLOYMENT_RUNBOOK.md      # Full deployment procedure
 ```
 
@@ -160,7 +160,7 @@ docs/operations/
 | `RKE2_ROLLOUT_MATRIX.md` | `bb298bd2ccbad685` | 2j6g.1, 2j6g.2 |
 | `CANONICAL_DEPLOY_CONTRACT.md` | `7cda29fb92fa8222` | 36va.5, 36va.2, 36va.1 |
 | `POSTDEPLOY_SMOKE_AND_INCIDENT.md` | `2527b09953ae34af` | 36va.4, 36va.3, 36va.3.1 |
-| `RELEASE_EXECUTE_RUNBOOK.md` | `52b3b0b0871fac62` | kbpu |
+| `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md` | `52b3b0b0871fac62` | kbpu |
 | `canonical-release.sh` | `d31c2b53eb2c2966` | 36va.6 |
 
 ### Owner/Contact Matrix

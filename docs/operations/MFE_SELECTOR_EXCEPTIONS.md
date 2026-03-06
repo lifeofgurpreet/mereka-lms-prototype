@@ -96,5 +96,5 @@ See `infrastructure/tutor/plugins/mereka_lms.py` for canonical registrations.
 
 - `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`
 - `docs/operations/MFE_SELECTOR_HARDENING_AUDIT.md`
-- `docs/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md`
-- `docs/operations/evidence/selector-to-slot-migration-diff.md`
+- `docs/concepts/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md`
+- `docs/archive/evidence/operations/selector-to-slot-migration-diff.md`

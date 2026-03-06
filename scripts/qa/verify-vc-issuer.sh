@@ -124,7 +124,7 @@ echo
 echo "[AC-CRED-013] Verifying key rotation infrastructure..."
 
 # Check for key rotation documentation
-ROT_RUNBOOK="$REPO_ROOT/docs/operations/credential-key-rotation-runbook.md"
+ROT_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/credential-key-rotation-runbook.md"
 if [[ -f "$ROT_RUNBOOK" ]]; then
   pass "AC-CRED-013: Key rotation runbook exists at $ROT_RUNBOOK"
 else

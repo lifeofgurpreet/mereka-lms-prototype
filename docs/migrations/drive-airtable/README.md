@@ -1,5 +1,5 @@
 # Drive <-> Airtable Video Inventory Runbook
-_Audience: Platform Eng + Data + AI Agents • Owner: Migration Squad • Last verified: 2026-03-05 (UTC)_
+_Audience: Platform Eng + Data + AI Agents • Owner: Migration Squad • Last verified: 2026-03-06 • Status: canonical_
 
 ## Why This Exists
 

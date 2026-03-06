@@ -7,7 +7,7 @@ Date: 2026-02-25
 - Purpose: map observability validation scripts and parity tooling to spec-level acceptance criteria (ACs).
 - Source contracts:
   - `specs/observability-validation-requirements_spec.md`
-  - `docs/operations/OBSERVABILITY_PARITY_MATRIX.md`
+  - `docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md`
   - `docs/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md`
 
 ## Script Coverage
@@ -25,7 +25,7 @@ Date: 2026-02-25
 | `scripts/qa/build-observability-parity-rollup.sh` | AC-OVR-024, AC-OVR-025, AC-OVR-026 | Aggregates all environment parity deltas into release-ready rollup with optional no-skip enforcement |
 | `scripts/qa/run-observability-first-class.sh` | AC-005, AC-007, AC-LOG-001, AC-LOG-002, AC-LOG-003, AC-LOG-004, AC-LOG-005, AC-LOG-006, AC-LOG-007, AC-LOG-008, AC-OVR-024, AC-OVR-027, AC-OVR-028, AC-OVR-029 | Produces canonical parity evidence in runtime mode and supports strict enforcement workflows |
 | `scripts/qa/verify-observability-tracing.sh` | AC-005, AC-007 | Pilot tracing scope checks, Tempo manifest/runtime presence, readiness probing, and env-level trace context propagation contract checks |
-| `scripts/qa/build-observability-tracing-pilot-bundle.sh` | AC-005, AC-007, AC-LOG-001, AC-LOG-002, AC-LOG-004, AC-LOG-005, AC-LOG-007, AC-LOG-008 | Builds trace-pilot evidence bundles in `docs/evidence/observability` with copied run outputs, route capture, and optional tempo query proof |
+| `scripts/qa/build-observability-tracing-pilot-bundle.sh` | AC-005, AC-007, AC-LOG-001, AC-LOG-002, AC-LOG-004, AC-LOG-005, AC-LOG-007, AC-LOG-008 | Builds trace-pilot evidence bundles in `docs/archive/evidence/observability` with copied run outputs, route capture, and optional tempo query proof |
 | `scripts/qa/verify-logging-pipeline.sh` | AC-LOG-001, AC-LOG-002, AC-LOG-003, AC-LOG-004, AC-LOG-005, AC-LOG-006, AC-LOG-007, AC-LOG-008 | Aggregate runbook for logging checks that gates tracing and contract runbook evidence |
 | `scripts/qa/verify-observability-evidence-identity.sh` | AC-OVR-005, AC-OVR-006, AC-OVR-026 | Ensures identity fields and evidence hashes remain stable across generated artifacts |
 | `scripts/qa/verify-observability-structured-logging.sh` | AC-LOG-004 | LMS/CMS and worker logs must include structured fields (`timestamp`, `level`, `service`, `message`) and include correlation fields on configured severity levels |
@@ -42,6 +42,6 @@ Date: 2026-02-25
 
 ## Evidence Artifacts
 
-- `docs/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`
+- `docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`
 - `scripts/qa/test-observability-parity-contracts.sh`
 - `docs/qa/OBSERVABILITY_CANONICAL_INDEX.md`

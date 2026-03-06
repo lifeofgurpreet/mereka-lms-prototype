@@ -18,12 +18,12 @@ Close the non-production tracing pilot gap for `AC-005`/`AC-007` by producing re
 ## Acceptance Criteria
 
 - [ ] `docs/adr/020-tracing-scope-and-pilot-decision.md` is the accepted tracing scope contract.
-- [ ] `build-observability-tracing-pilot-bundle.sh` writes a nonprod tracing bundle under `docs/evidence/observability/` each run.
+- [ ] `build-observability-tracing-pilot-bundle.sh` writes a nonprod tracing bundle under `docs/archive/evidence/observability/` each run.
 - [ ] Nonprod pilot run verifies:
   - Tempo manifests/runtime presence check passes.
   - At least one end-to-end Tier-1 flow emits a valid trace ID.
   - `X-Request-ID`/`traceparent` propagation exists at ingress-to-app boundaries for that flow.
-- [ ] `docs/evidence/observability/` contains one pilot evidence bundle with:
+- [ ] `docs/archive/evidence/observability/` contains one pilot evidence bundle with:
   - correlation header proof (`request-id`, `trace-id`, timestamp)
   - a trace path showing ingress → LMS/CMS → downstream service
   - Loki proof using the corresponding request-id/trace-id
@@ -34,7 +34,7 @@ Close the non-production tracing pilot gap for `AC-005`/`AC-007` by producing re
 1. Finalize `nonprod` pilot route and OTLP sink details in the runbook.
 2. Execute:
    - `./scripts/qa/build-observability-tracing-pilot-bundle.sh --env nonprod --mode runtime --require-flow-capture --strict`
-3. Store artifacts under `docs/evidence/observability/` and link to tracker row.
+3. Store artifacts under `docs/archive/evidence/observability/` and link to tracker row.
 4. If pilot fails:
    - open follow-up implementation ticket for missing runtime labels, missing OTEL env vars, or Tempo ingress path.
 5. If pilot succeeds twice within 7 days with stable traces:

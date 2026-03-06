@@ -18,7 +18,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
-require_file "docs/branding/MULTI_TENANT_BRANDING_OPS.md" "multi-tenant branding ops doc" || exit 0
+require_file "docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md" "multi-tenant branding ops doc" || exit 0
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -33,7 +33,7 @@ pass_check() { echo -e "  ${GREEN}PASS${NC}: $1"; PASS=$((PASS + 1)); }
 fail_check() { echo -e "  ${RED}FAIL${NC}: $1"; FAIL=$((FAIL + 1)); }
 warn_check() { echo -e "  ${YELLOW}WARN${NC}: $1"; WARN=$((WARN + 1)); }
 
-OPS_DOC="$REPO_ROOT/docs/branding/MULTI_TENANT_BRANDING_OPS.md"
+OPS_DOC="$REPO_ROOT/docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md"
 
 # Helper: grep the document content without SIGPIPE from echo|grep -q under pipefail.
 # Uses herestring (<<<) instead of pipe so grep -q closing stdin early doesn't kill echo.

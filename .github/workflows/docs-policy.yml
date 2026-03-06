@@ -1,0 +1,25 @@
+name: Docs Policy Gates
+
+on:
+  push:
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs-policy.yml"
+      - "docs/qa/verify-docs-policy.sh"
+
+jobs:
+  docs-policy:
+    name: Enforce docs anti-regression gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify docs policy
+        env:
+          DOCS_POLICY_RANGE: ${{ github.event.before }}...${{ github.sha }}
+        run: |
+          chmod +x docs/qa/verify-docs-policy.sh
+          ./docs/qa/verify-docs-policy.sh

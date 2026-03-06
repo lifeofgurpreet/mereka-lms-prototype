@@ -191,9 +191,9 @@ If storage is full, check for old static files or increase PVC size.
 
 ## Related Documentation
 
-- [BRANDING.md](/docs/BRANDING.md) - Complete branding guide
-- [TROUBLESHOOTING.md](/docs/operations/TROUBLESHOOTING.md) - General troubleshooting
-- [DEVELOPER_ONBOARDING.md](/docs/onboarding/DEVELOPER_ONBOARDING.md) - Setup instructions
+- [BRANDING.md](../guides/branding/BRANDING.md) - Complete branding guide
+- [TROUBLESHOOTING.md](../operations/TROUBLESHOOTING.md) - General troubleshooting
+- [DEVELOPER_ONBOARDING.md](../guides/onboarding/DEVELOPER_ONBOARDING.md) - Setup instructions
 
 ## Timeline
 

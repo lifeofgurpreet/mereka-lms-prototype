@@ -2,7 +2,7 @@
 # verify-branch-protection.sh
 #
 # Verifies that the main branch protection settings meet the requirements
-# documented in docs/operations/BRANCH_PROTECTION.md.
+# documented in docs/ops/ci-cd/BRANCH_PROTECTION.md.
 #
 # Exit 0  — all required settings are compliant
 # Exit 1  — one or more settings are missing or misconfigured
@@ -15,7 +15,7 @@
 #   - gh CLI authenticated with a token that has Administration: read on the repo
 #   - jq installed
 #
-# See docs/operations/BRANCH_PROTECTION.md for the full policy.
+# See docs/ops/ci-cd/BRANCH_PROTECTION.md for the full policy.
 
 set -euo pipefail
 
@@ -73,7 +73,7 @@ echo
 echo -e "${BOLD}=== verify-branch-protection ===${RESET}"
 echo -e "      Repo  : ${OWNER}/${REPO}"
 echo -e "      Branch: ${BRANCH}"
-echo -e "      Policy: docs/operations/BRANCH_PROTECTION.md"
+echo -e "      Policy: docs/ops/ci-cd/BRANCH_PROTECTION.md"
 echo
 
 if ! command -v gh &>/dev/null; then
@@ -110,7 +110,7 @@ PROTECTION_JSON="$(gh api \
   HTTP_STATUS="$?"
   if echo "${PROTECTION_JSON}" | grep -q "Branch not protected"; then
     echo -e "${RED}FAIL${RESET}: Branch '${BRANCH}' has NO protection rules configured."
-    echo -e "       See docs/operations/BRANCH_PROTECTION.md to set up protection."
+    echo -e "       See docs/ops/ci-cd/BRANCH_PROTECTION.md to set up protection."
     exit 1
   fi
   if echo "${PROTECTION_JSON}" | grep -q "Not Found"; then
@@ -265,11 +265,11 @@ echo -e "${BOLD}--- Summary ---${RESET}"
 
 if [[ ${FAILURES} -eq 0 ]]; then
   echo -e "${GREEN}${BOLD}RESULT: PASS — branch protection is compliant (${BRANCH})${RESET}"
-  echo -e "  See docs/operations/BRANCH_PROTECTION.md for the full policy."
+  echo -e "  See docs/ops/ci-cd/BRANCH_PROTECTION.md for the full policy."
   exit 0
 else
   echo -e "${RED}${BOLD}RESULT: FAIL — ${FAILURES} setting(s) are non-compliant${RESET}"
   echo -e "  Fix the settings listed above, then re-run this script."
-  echo -e "  See docs/operations/BRANCH_PROTECTION.md for remediation steps."
+  echo -e "  See docs/ops/ci-cd/BRANCH_PROTECTION.md for remediation steps."
   exit 1
 fi

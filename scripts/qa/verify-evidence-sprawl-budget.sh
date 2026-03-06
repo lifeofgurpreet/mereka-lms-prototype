@@ -36,6 +36,7 @@ tracked = subprocess.check_output(
         "ls-files",
         "docs/operations/evidence",
         "docs/evidence/observability",
+        "docs/archive/evidence/observability",
     ],
     cwd=repo_root,
     text=True,

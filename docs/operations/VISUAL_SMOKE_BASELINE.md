@@ -10,7 +10,7 @@
 This document defines the authenticated visual smoke + screenshot baseline
 contract for the 5 critical MFE flows in Mereka Academy. It extends the
 existing unauthenticated visual regression infrastructure (described in
-`VISUAL_REGRESSION_RUNBOOK.md`) to cover post-login pages that require a
+`docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`) to cover post-login pages that require a
 valid session cookie.
 
 ## 5 Critical MFE Routes (AC-VIS-002)
@@ -156,7 +156,7 @@ explicitly set (live cluster + credentials required).
   ImageMagick diff engine; supports `--authenticated` flag.
 - `scripts/qa/smoke-authenticated.sh` — headless browser authenticated smoke
   harness.
-- `docs/branding/BRANDING_OPERATING_MODEL.md` — broader branding QA operating
+- `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — broader branding QA operating
   model; visual regression is section 4.
 
 ## Verification

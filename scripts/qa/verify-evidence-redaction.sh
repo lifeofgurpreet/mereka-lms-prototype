@@ -57,7 +57,7 @@ reset=$'\033[0m'
 collect_files() {
   if [[ "$STAGED_ONLY" -eq 1 ]]; then
     git diff --cached --name-only --diff-filter=ACM \
-      | grep -E '^(docs/operations/evidence/|docs/evidence/observability/)' || true
+      | grep -E '^(docs/operations/evidence/|docs/evidence/observability/|docs/archive/evidence/observability/)' || true
     return
   fi
 
@@ -66,6 +66,9 @@ collect_files() {
   fi
   if [[ -d docs/evidence/observability ]]; then
     find docs/evidence/observability -type f -print
+  fi
+  if [[ -d docs/archive/evidence/observability ]]; then
+    find docs/archive/evidence/observability -type f -print
   fi
 }
 

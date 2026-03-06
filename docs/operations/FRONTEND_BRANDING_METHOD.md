@@ -251,7 +251,7 @@ grep "pgn-color-primary-base" infrastructure/tutor/themes/mereka/scss/_tokens.sc
 ## Related Documentation
 
 - **Theme README**: `infrastructure/tutor/themes/mereka/README.md`
-- **Branding Guide**: `docs/BRANDING.md`
+- **Branding Guide**: `docs/guides/branding/BRANDING.md`
 - **Asset Sync**: `scripts/branding/sync-brand-assets.sh`
 - **Design System**: https://www.figma.com/design/jBO2FrTslM4wocrRzwQaPo/mereka.io-Design-System
 

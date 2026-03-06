@@ -369,7 +369,7 @@ production rollout.
 
 - `docs/operations/RELEASE_CHECKLIST.md` — Condensed release checklist
 - `docs/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md` — Merge-first rules
-- `docs/operations/BRANDING_RELEASE_RUNBOOK.md` — Branding-specific rollout
+- `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` — Branding-specific rollout
 - `scripts/infra/verify-release-preflight.sh` — Pre-deploy gating script
 - `scripts/infra/release-openedx-gitops.sh` — Canonical release orchestrator
 - `scripts/qa/verify-release-readiness.sh` — Evidence package generator

@@ -165,4 +165,4 @@ Example of conflating tracks (wrong): "We're staying on Tutor 18.x (release line
 - [Tutor Plugin API documentation](https://docs.tutor.edly.io/tutorials/plugin.html)
 - [OEP-48: Brand Customization](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0048-brand-customization.html)
 - [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)
-- [docs/operations/CI_CD_RUNNERS.md](../operations/CI_CD_RUNNERS.md)
+- [docs/ops/ci-cd/CI_CD_RUNNERS.md](../ops/ci-cd/CI_CD_RUNNERS.md)

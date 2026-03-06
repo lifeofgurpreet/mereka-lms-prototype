@@ -163,7 +163,7 @@ Rotate every **90 days**. Add a calendar reminder:
 | Day 80 | — | Reminder: rotate within 10 days |
 | Day 90 | — | Old token expires; new one must be in place |
 
-Record each rotation in `docs/operations/SECRET_ROTATION_CHECKLIST.md`.
+Record each rotation in `docs/ops/security/SECRET_ROTATION_CHECKLIST.md`.
 
 ---
 
@@ -229,9 +229,9 @@ references remain. During migration it exits `0` with WARNs (via
 
 ## Related Documents
 
-- `docs/operations/BRANCH_PROTECTION.md` — Branch protection policy
-- `docs/operations/ALLOWED_ACTIONS_POLICY.md` — SHA-pinning policy for Actions
-- `docs/operations/SECRET_ROTATION_CHECKLIST.md` — Secret rotation log
+- `docs/ops/ci-cd/BRANCH_PROTECTION.md` — Branch protection policy
+- `docs/ops/security/ALLOWED_ACTIONS_POLICY.md` — SHA-pinning policy for Actions
+- `docs/ops/security/SECRET_ROTATION_CHECKLIST.md` — Secret rotation log
 - `scripts/qa/verify-github-app-token.sh` — Verification script
 - `.github/workflows/verify-github-app-token.yml` — CI enforcement
 - `.github/workflows/build-tutor-images.yml` — Primary migration target

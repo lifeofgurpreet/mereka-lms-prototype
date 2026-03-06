@@ -19,7 +19,7 @@ This gate extends the existing a11y regression lane to cover:
 
 For the upstream contrast and focus-visible gate see
 [A11Y_CONTRAST_FOCUS_GATE.md](A11Y_CONTRAST_FOCUS_GATE.md). For authenticated route landmark
-details see [ACCESSIBILITY_CONFORMANCE_RUNBOOK.md](ACCESSIBILITY_CONFORMANCE_RUNBOOK.md).
+details see [ACCESSIBILITY_CONFORMANCE_RUNBOOK.md](../ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md).
 
 ---
 
@@ -252,7 +252,7 @@ See `.github/workflows/ci.yml` job `a11y-tenant-branding`.
 ## Related Documents
 
 - `docs/operations/A11Y_CONTRAST_FOCUS_GATE.md` — Token contrast + focus-visible gate (public routes)
-- `docs/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` — Landmark requirements for authenticated routes
+- `../ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` — Landmark requirements for authenticated routes
 - `docs/operations/A11Y_EXCEPTIONS.md` — Active exception log (create when first needed)
 - `scripts/qa/verify-a11y-contrast-focus.sh` — Contrast + focus-visible verification
 - `scripts/qa/verify-a11y-authenticated-routes.sh` — Authenticated route landmark/focus gate

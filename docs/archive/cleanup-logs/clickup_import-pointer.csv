@@ -1,0 +1,4 @@
+# clickup_import.csv (superseded)
+status,replacement
+superseded,docs/archive/reports/clickup_import.csv
+reason,"Legacy import artifact moved during docs structural consolidation; archived copy is maintained at docs/archive/reports/clickup_import.csv."

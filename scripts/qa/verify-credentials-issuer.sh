@@ -280,7 +280,7 @@ if [[ "$VM_COUNT" -gt 1 ]]; then
 else
   skip "AC-CRED-013: Key rotation verification (only ${VM_COUNT} key present, rotation not yet performed)"
   echo "To test key rotation:"
-  echo "1. Follow docs/operations/credential-key-rotation-runbook.md"
+  echo "1. Follow docs/ops/runbooks/credential-key-rotation-runbook.md"
   echo "2. Re-run this script to verify both old and new keys are present"
 fi
 
@@ -367,6 +367,6 @@ else
   echo ""
   echo "Review failures above and consult:"
   echo "- specs/verifiable-credentials-issuer_spec.md"
-  echo "- docs/operations/credential-key-rotation-runbook.md"
+  echo "- docs/ops/runbooks/credential-key-rotation-runbook.md"
   exit 1
 fi

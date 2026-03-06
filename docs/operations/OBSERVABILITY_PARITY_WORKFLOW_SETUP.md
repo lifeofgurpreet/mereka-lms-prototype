@@ -105,7 +105,7 @@ For each nonprod parity run, the nonprod lane must also ensure:
 
 1. `observability-logging-pipeline-runtime.txt` exists and includes all AC-LOG checks.
 2. `observability-tracing-runtime.txt` exists and documents the selected pilot tracing contract status.
-3. Pilot flow traceability evidence is captured in the weekly handoff (`docs/evidence/observability/`), including one trace path with matching request-id/log correlation.
+3. Pilot flow traceability evidence is captured in the weekly handoff (`docs/archive/evidence/observability/`), including one trace path with matching request-id/log correlation.
 
 Automation note:
 - `scripts/qa/build-observability-parity-review.sh` now auto-generates

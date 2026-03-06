@@ -13,11 +13,11 @@ fi
 docs=(
   "$REPO_ROOT/AGENTS.md"
   "$REPO_ROOT/scripts/infra/README.md"
-  "$REPO_ROOT/docs/operations/CI_CD_SETUP.md"
+  "$REPO_ROOT/docs/ops/ci-cd/CI_CD_SETUP.md"
   "$REPO_ROOT/docs/operations/RELEASE_CHECKLIST.md"
   "$REPO_ROOT/docs/operations/THEME_DEPLOYMENT.md"
   "$DOMAIN_CHANGE_RUNBOOK"
-  "$REPO_ROOT/docs/branding/BRANDING_OPERATING_MODEL.md"
+  "$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
   "$REPO_ROOT/docs/status/NEXT10_TASKS.md"
 )
 

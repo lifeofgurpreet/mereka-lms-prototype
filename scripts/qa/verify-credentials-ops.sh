@@ -52,10 +52,10 @@ skip_() { SKIP=$((SKIP + 1)); printf "SKIP: %s\n" "$1"; }
 
 # Key file paths
 PROMETHEUS_RULE="$REPO_ROOT/deploy/k8s/base/monitoring/prometheusrule-credentials.yaml"
-RUNBOOK_KEY_ROTATION="$REPO_ROOT/docs/operations/credential-key-rotation-runbook.md"
-RUNBOOK_ISSUANCE_FAILURE="$REPO_ROOT/docs/operations/credential-issuance-failure-runbook.md"
-RUNBOOK_BACKFILL="$REPO_ROOT/docs/operations/credential-backfill-runbook.md"
-RUNBOOK_VERIFICATION_FAILURE="$REPO_ROOT/docs/operations/credential-verification-failure-runbook.md"
+RUNBOOK_KEY_ROTATION="$REPO_ROOT/docs/ops/runbooks/credential-key-rotation-runbook.md"
+RUNBOOK_ISSUANCE_FAILURE="$REPO_ROOT/docs/ops/runbooks/credential-issuance-failure-runbook.md"
+RUNBOOK_BACKFILL="$REPO_ROOT/docs/ops/runbooks/credential-backfill-runbook.md"
+RUNBOOK_VERIFICATION_FAILURE="$REPO_ROOT/docs/ops/runbooks/credential-verification-failure-runbook.md"
 
 echo "========================================================"
 echo "  Verifiable Credentials Ops & Reliability Verification"

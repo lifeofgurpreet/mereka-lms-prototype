@@ -121,7 +121,7 @@ Both include the same frontend/runtime stabilization deltas (branch-local SHAs d
     - new env: `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1`
     - default `auto`: dev ignores TLS errors, prod stays strict
 - Status docs refreshed:
-  - `docs/BRANDING_PLAN.md`
+  - `docs/guides/branding/BRANDING_PLAN.md`
   - `docs/operations/FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md`
 
 ### Latest Verification Evidence

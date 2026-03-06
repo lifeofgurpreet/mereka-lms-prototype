@@ -6,7 +6,7 @@ _Owner: Mereka Frontend_
 
 This document tracks the migration of MFE structural customizations from brittle
 CSS selector blocks to the Frontend Plugin Framework (FPF) slot system. It
-complements `docs/branding/BRANDING_OPERATING_MODEL.md § Plugin Slot Migration`.
+complements `docs/guides/branding/BRANDING_OPERATING_MODEL.md § Plugin Slot Migration`.
 
 ---
 
@@ -207,7 +207,7 @@ tutor images build mfe
 - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` — SCSS with `/* RISK: */` tags
 - `infrastructure/tutor/plugins/mereka_lms.py` — Slot registrations
 - `infrastructure/tutor/apply-patches.sh` — Fallback RenderWidget patch (MIGRATED-TO-SLOT comment)
-- `docs/branding/BRANDING_OPERATING_MODEL.md` — § Plugin Slot Migration
+- `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — § Plugin Slot Migration
 - `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — Exception register
 - `scripts/qa/verify-mfe-footer-slot-migration.sh` — Verification script (bead 2dcy.6)
 - `scripts/qa/verify-mfe-footer-slot.sh` — Footer slot wiring check

@@ -1,5 +1,5 @@
 # MCT API - Complete Reference Summary
-_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2025-11-07_
+_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2026-03-06 • Status: canonical_
 
 **Date:** 2025-11-07  
 **Source:** Swagger UI exploration

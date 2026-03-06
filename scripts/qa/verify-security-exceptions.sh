@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verify that no Active security exception in docs/operations/SECURITY_EXCEPTIONS.md
+# Verify that no Active security exception in docs/ops/security/SECURITY_EXCEPTIONS.md
 # is past its expiry date.
 #
 # Exit codes:
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-REGISTER="${ROOT_DIR}/docs/operations/SECURITY_EXCEPTIONS.md"
+REGISTER="${ROOT_DIR}/docs/ops/security/SECURITY_EXCEPTIONS.md"
 
 if [[ ! -f "${REGISTER}" ]]; then
   echo "ERROR: Register not found: ${REGISTER}" >&2
@@ -86,7 +86,7 @@ if (( expired_count > 0 )); then
   printf "\nFAIL: %d Active exception(s) are past their expiry date.\n" \
     "${expired_count}"
   printf "Renew or revoke them in %s before re-running.\n" \
-    "docs/operations/SECURITY_EXCEPTIONS.md"
+    "docs/ops/security/SECURITY_EXCEPTIONS.md"
   exit 1
 fi
 

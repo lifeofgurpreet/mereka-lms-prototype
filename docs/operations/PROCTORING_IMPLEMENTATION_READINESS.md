@@ -211,7 +211,7 @@ print('Config:', b.get_configuration())
 | `deploy/k8s/base/apps/openedx/settings/lms/production.py` | Update PROCTORING_BACKENDS + ENABLE_PROCTORED_EXAMS + Celery beat | AC-001..008, AC-014..022 |
 | `infrastructure/tutor/plugins/multi-tenancy/mereka_tenancy/models.py` | Add proctoring_provider + review_sla_hours fields | AC-008, AC-033, AC-034 |
 | `infrastructure/tutor/plugins/multi-tenancy/mereka_tenancy/migrations/` | New migration for tenant model fields | AC-008 |
-| `docs/operations/runbooks/PROCTORING_RUNBOOK.md` | Update "Current State" table with live provider + test evidence | All |
+| `docs/ops/runbooks/PROCTORING_RUNBOOK.md` | Update "Current State" table with live provider + test evidence | All |
 | `docs/operations/PROCTORING_VENDOR_READINESS.md` | Update blocker tracker (mark resolved) | All |
 
 **No new services or containers required.** edx-proctoring is already installed in the LMS image.
@@ -249,7 +249,7 @@ print('Config:', b.get_configuration())
 ## Related
 
 - `docs/operations/PROCTORING_VENDOR_READINESS.md` — Vendor matrix + blocker tracker (33ff)
-- `docs/operations/runbooks/PROCTORING_RUNBOOK.md` — Operational runbook (i8lo.1)
+- `docs/ops/runbooks/PROCTORING_RUNBOOK.md` — Operational runbook (i8lo.1)
 - `specs/proctoring-integration_spec.md` — Full 38-AC specification
 - `scripts/qa/verify-proctoring.sh` — AC-001/002/006..008/020..022/036..038
 - `scripts/qa/verify-proctoring-advanced.sh` — AC-004/005/009..013/016/024..035

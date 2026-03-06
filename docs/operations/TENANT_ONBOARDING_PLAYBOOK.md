@@ -242,7 +242,7 @@ gh pr create --title "feat(tenancy): onboard newclient" --body "..."
 gh pr merge --merge --delete-branch
 
 # 5. If image rebuild needed (theme/MFE changes):
-#    Follow BRANDING_RELEASE_RUNBOOK.md steps 1-3
+#    Follow `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` steps 1-3
 ```
 
 ## Step 8: Verify
@@ -394,7 +394,7 @@ print([o for o in settings.CSRF_TRUSTED_ORIGINS if 'newclient' in o])
 
 # Repair: re-run apply-patches.sh and rebuild
 ./infrastructure/tutor/apply-patches.sh
-# Then follow BRANDING_RELEASE_RUNBOOK.md for image rebuild + deploy
+# Then follow `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` for image rebuild + deploy
 ```
 
 **Owner**: Infrastructure team. **Evidence**: grep output from production.py settings.
@@ -709,7 +709,7 @@ The provisioning script sets:
 
 ### Step 6: Document in migration survey
 
-After onboarding, update `docs/branding/PLUGIN_MIGRATION_SURVEY.md` if any
+After onboarding, update `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` if any
 new exceptions were needed. All exceptions must have an expiry date per the
 Non-Plugin Customization Exception Policy in `BRANDING_OPERATING_MODEL.md`.
 
@@ -720,9 +720,9 @@ Non-Plugin Customization Exception Policy in `BRANDING_OPERATING_MODEL.md`.
 - `infrastructure/tutor/multisite-sites.yml` — Canonical site registry
 - `docs/operations/TENANT_BRANDING_SURFACE_MATRIX.md` — Per-domain verification matrix
 - `docs/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md` — Deployment protocol
-- `docs/operations/BRANDING_RELEASE_RUNBOOK.md` — Image build + deploy steps
+- `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` — Image build + deploy steps
 - `scripts/tenants/provision-tenant.sh` — Provisioning script
 - `specs/multi-site-domains_spec.md` — Domain configuration spec
 - `specs/multi-tenancy-architecture_spec.md` — Multi-tenancy architecture spec
-- `docs/branding/PLUGIN_MIGRATION_SURVEY.md` — Override inventory + migration status
-- `docs/branding/BRANDING_OPERATING_MODEL.md` — Exception policy for non-plugin overrides
+- `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` — Override inventory + migration status
+- `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — Exception policy for non-plugin overrides

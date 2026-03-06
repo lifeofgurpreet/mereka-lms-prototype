@@ -92,7 +92,7 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - CI guardrail: manual `build-tutor-images.yml` runs with `target_environment=staging` are blocked unless repo variable `ENABLE_STAGING_ENV=true`.
 - CI release guardrail: `update_gitops=true` requires both `build_openedx=true` and `build_mfe=true` so digest pinning inputs are captured deterministically.
 - Repo ownership boundary contract: `docs/operations/REPO_BOUNDARIES.md`
-- **Build Pipeline Runbook**: `docs/operations/BUILD_PIPELINE_RUNBOOK.md` — Critical build rules, DinD configuration, troubleshooting tree, GHCR auth
+- **Build Pipeline Runbook**: `docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md` — Critical build rules, DinD configuration, troubleshooting tree, GHCR auth
 
 ### Agent Runtime Notes (Codex/Claude)
 
@@ -511,8 +511,8 @@ Full details: `docs/adr/024-multi-tenancy-true-tenants.md`
 Domain matrix: `docs/operations/DOMAIN_MATRIX.md`
 
 Branding guardrails (read before changing theme assets/CSS):
-- `docs/branding/BRANDING_GUARDRAILS.md`
-- `docs/branding/BRANDING_OPERATING_MODEL.md`
+- `docs/guides/branding/BRANDING_GUARDRAILS.md`
+- `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 
 Canonical branding execution command (source + live verification):
 ```bash
@@ -677,7 +677,7 @@ Regenerate hostname registry (after domain changes):
   - `.github/workflows/public-health-check.yml` runs strict parity with strict audit (`STRICT_MFE_BRANDING_REV=1 AUDIT_STRICT=1`) and uploads `var/ci/*.log` artifacts.
 - If strict prod branding gate fails with MFE revision mismatch, treat it as release-blocking deploy drift:
   rebuild/push `openedx-mfe`, bump this repo image tag, update `BBI-K8` pinned ref, then rerun strict gate.
-- Branding incident write-up template (required after production regressions): `docs/branding/BRANDING_INCIDENT_TEMPLATE.md`.
+- Branding incident write-up template (required after production regressions): `docs/guides/branding/BRANDING_INCIDENT_TEMPLATE.md`.
 - In-cluster synthetic checks (recommended for drift detection): `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` (template files; deploy via GitOps).
 - Blank account settings/profile pages usually indicate stale cookies or MFE config mismatch; test in a fresh browser and verify `https://apps.academyv2.mereka.io/api/mfe_config/v1`.
 - Production LMS/CMS `SITE_ID` must stay env-driven (`DJANGO_SITE_ID`) with multisite fallback enabled in `mereka_multisite.py`; never reintroduce hardcoded numeric `SITE_ID` in production settings.
@@ -728,7 +728,7 @@ Regenerate hostname registry (after domain changes):
   - Test (no Stripe CLI login needed): `scripts/qa/test-stripe-webhook-delivery.sh prod` and `K8S_CONTEXT=kind-dev scripts/qa/test-stripe-webhook-delivery.sh dev`
 - Secret hygiene/rotation:
   - Fast scan: `STRICT=1 ./scripts/qa/scan-secrets-fast.sh`
-  - Rotation flow: `docs/operations/SECRET_ROTATION_CHECKLIST.md` (Infisical-first, then sync + runtime verification)
+  - Rotation flow: `docs/ops/security/SECRET_ROTATION_CHECKLIST.md` (Infisical-first, then sync + runtime verification)
 
 ---
 

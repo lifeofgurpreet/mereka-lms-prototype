@@ -15,11 +15,13 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
 ## Structure
 
 - `docs/` – Documentation organized by category:
-  - `onboarding/` – Setup guides and getting started (start with [`docs/onboarding/QUICK_START_LOCAL.md`](docs/onboarding/QUICK_START_LOCAL.md))
-  - `operations/` – Runbooks, troubleshooting, and operational procedures
+  - `guides/onboarding/` – Setup guides and getting started (start with [`docs/guides/onboarding/QUICK_START_LOCAL.md`](docs/guides/onboarding/QUICK_START_LOCAL.md))
+  - `ops/` – Canonical operations runbooks and quick references
+  - `operations/` – Compatibility transitional docs (canonical mirrors in `docs/ops/`)
   - `migrations/` – Migration playbooks for Kajabi and MCT
-  - `architecture/` – System architecture and design decisions
-  - `status/` – Status trackers and backlog (see [`docs/status/NEXT10_TASKS.md`](docs/status/NEXT10_TASKS.md))
+  - `concepts/architecture/` – System architecture and design decisions
+  - `architecture/` – Compatibility transitional folder (archived to `concepts/architecture/` where canonical)
+  - `archive/reports/status/` – Status trackers and backlog (see [`docs/archive/reports/status/NEXT10_TASKS.md`](docs/archive/reports/status/NEXT10_TASKS.md))
 - `infrastructure/` – Infrastructure-as-code:
   - `tutor/` – Tutor configuration templates and patches (`apply-patches.sh`, `tutor-env.sh`)
   - `terraform/` – Terraform modules and configs
@@ -49,9 +51,9 @@ make tutor-start
 
 This automatically sets up everything you need for local development. See `README_SETUP.md` for details.
 
-**For complete onboarding:** See [`docs/onboarding/DEVELOPER_ONBOARDING.md`](docs/onboarding/DEVELOPER_ONBOARDING.md)
+**For complete onboarding:** See [`docs/guides/onboarding/DEVELOPER_ONBOARDING.md`](docs/guides/onboarding/DEVELOPER_ONBOARDING.md)
 
-See [`docs/onboarding/LOCAL_SETUP.md`](docs/onboarding/LOCAL_SETUP.md) for detailed setup instructions and [`docs/operations/GCP_ROADMAP.md`](docs/operations/GCP_ROADMAP.md) for the cloud deployment plan.
+See [`docs/guides/onboarding/LOCAL_SETUP.md`](docs/guides/onboarding/LOCAL_SETUP.md) for detailed setup instructions and [`docs/archive/reports/GCP_ROADMAP.md`](docs/archive/reports/GCP_ROADMAP.md) for the cloud deployment plan.
 
 ## Submodules
 

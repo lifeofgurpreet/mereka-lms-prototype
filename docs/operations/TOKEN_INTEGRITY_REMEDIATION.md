@@ -115,6 +115,6 @@ Pull requests will fail if:
 
 ## Related Documentation
 
-- Architecture: `docs/architecture/TOKEN_REFERENCE_INTEGRITY.md`
-- Branding: `docs/BRANDING.md`
+- Architecture: `docs/concepts/architecture/TOKEN_REFERENCE_INTEGRITY.md`
+- Branding: `docs/guides/branding/BRANDING.md`
 - Design tokens spec: `specs/ui-ux-design-tokens_spec.md`

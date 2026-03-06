@@ -27,7 +27,7 @@ Decision options are based on objective evidence only:
   - `var/ci/parity-dev`
   - `var/ci/parity-nonprod`
   - `var/ci/parity-prod`
-  - `docs/evidence/observability/pilot-nonprod-20260303-040914`
+  - `docs/archive/evidence/observability/pilot-nonprod-20260303-040914`
 
 ### Lane results
 
@@ -50,7 +50,7 @@ Decision options are based on objective evidence only:
 - Strict nonprod tracing pilot command timed out with exit `124`:
   - `./scripts/qa/build-observability-tracing-pilot-bundle.sh --env nonprod --mode runtime --require-flow-capture --strict`
 - Bundle path exists but does not close pilot acceptance:
-  - `docs/evidence/observability/pilot-nonprod-20260303-040914`
+  - `docs/archive/evidence/observability/pilot-nonprod-20260303-040914`
 - `OBS-025` remains open until one end-to-end trace proof is captured with log/header correlation.
 
 ## Mandatory Criteria (all required)
@@ -77,12 +77,12 @@ Decision options are based on objective evidence only:
 ### 4) Coverage and retention governance
 
 - `build-observability-coverage-matrix.sh --mode runtime` is complete and stored in release evidence.
-- Retention artifacts are compliant with `docs/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`.
+- Retention artifacts are compliant with `docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`.
 
 ### 5) Human process readiness
 
 - `docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md` drill runbook remains current.
-- Monthly operator drill completed (within last 30 days) with attendance artifact in `docs/operations/evidence/observability-drills/`.
+- Monthly operator drill completed (within last 30 days) with attendance artifact in `docs/archive/evidence/operations/observability-drills/`.
 - No high-severity alerting change since last review without service-owner ack recorded in PR/evidence.
 
 ## Evidence bundle

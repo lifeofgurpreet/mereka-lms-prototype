@@ -7,9 +7,9 @@ _Audience: Platform Eng + Enterprise Ops • Owner: Migration Squad_
 - `specs/multi-site-domains_spec.md`
 - `specs/auth-sso-enterprise_spec.md`
 - `specs/data-migrations-kajabi-mct_spec.md`
-- `docs/runbooks/tenant-provisioning-runbook.md`
-- `docs/runbooks/enterprise-services-runbook.md`
-- `docs/runbooks/auth-sso-enterprise-runbook.md`
+- `docs/archive/superseded/runbooks/tenant-provisioning-runbook.md`
+- `docs/archive/superseded/runbooks/enterprise-services-runbook.md`
+- `docs/archive/superseded/runbooks/auth-sso-enterprise-runbook.md`
 
 ## Current evidence snapshot
 

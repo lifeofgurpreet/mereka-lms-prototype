@@ -90,10 +90,12 @@ specs/                    # Specifications (machine-checkable intent)
 
 docs/                     # Documentation by category
   ├── adr/                # Architecture Decision Records
-  ├── onboarding/         # Setup guides (start here)
-  ├── operations/         # Runbooks, troubleshooting, CI/CD docs
+  ├── concepts/           # Architecture and system references
+  ├── guides/             # How-to guides (onboarding, admin, branding, etc.)
+  ├── ops/                # Operational and runbook docs (authoritative)
+  ├── operations/         # Legacy transitional docs (compatibility path)
   ├── migrations/         # Migration playbooks
-  ├── architecture/       # System design docs
+  ├── architecture/       # Legacy transitional path to concepts/architecture
   └── archive/            # Historical session reports
 
 services/                 # Microservices (HubSpot webhooks)
@@ -520,12 +522,12 @@ Running verification checks...
 
 ## Key Documentation Files
 
-- **Quick Start**: `docs/onboarding/QUICK_START_LOCAL.md` (5-min setup)
-- **Full Setup**: `docs/onboarding/DEVELOPER_ONBOARDING.md`
+- **Quick Start**: `docs/guides/onboarding/QUICK_START_LOCAL.md` (5-min setup)
+- **Full Setup**: `docs/guides/onboarding/DEVELOPER_ONBOARDING.md`
 - **Troubleshooting**: `docs/operations/TROUBLESHOOTING.md`
 - **Branding**: `docs/BRANDING.md`
 - **Migrations**: `docs/migrations/` (Kajabi, MCT playbooks)
-- **Architecture**: `docs/architecture/`
+- **Architecture**: `docs/concepts/architecture/`
 - **ADRs**: `docs/adr/` (Architecture Decision Records)
 - **CI/CD Runners**: `docs/operations/CI_CD_RUNNERS.md` (ARC setup, runner labels, PVC caching)
 - **CI/CD Optimization**: `docs/operations/CI_OPTIMIZATION_TRACKER.md` (phase tracker)
@@ -536,7 +538,7 @@ Running verification checks...
 
 Machine-checkable specifications for key systems:
 - **Secrets**: `specs/secrets-management.md` - Secret naming, required keys, verification
-- **Repo Structure**: `specs/repository-structure.md` - Directory layout, deprecated paths
+- **Repo Structure**: `specs/repository-structure_spec.md` - Directory layout, deprecated paths
 - **K8s Deployment**: `specs/k8s-deployment.md` - Namespace, overlays, ExternalSecrets
 
 ## Central Configuration

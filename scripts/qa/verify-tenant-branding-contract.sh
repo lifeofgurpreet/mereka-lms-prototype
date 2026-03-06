@@ -69,10 +69,10 @@ else
 fi
 
 # AC-TBR-002: Contract doc exists
-if [[ -f "docs/branding/TENANT_BRANDING_CONTRACT.md" ]]; then
-  pass "Contract doc exists (docs/branding/TENANT_BRANDING_CONTRACT.md)"
+if [[ -f "docs/guides/branding/TENANT_BRANDING_CONTRACT.md" ]]; then
+  pass "Contract doc exists (docs/guides/branding/TENANT_BRANDING_CONTRACT.md)"
 else
-  fail "Contract doc missing (docs/branding/TENANT_BRANDING_CONTRACT.md)"
+  fail "Contract doc missing (docs/guides/branding/TENANT_BRANDING_CONTRACT.md)"
 fi
 
 # Tenant provisioning guide exists
@@ -270,28 +270,28 @@ echo ""
 echo -e "${BLUE}## Contract Compliance Checks${NC}"
 
 # Contract doc defines required inputs
-if grep -q "## Required Inputs Per Tenant" docs/branding/TENANT_BRANDING_CONTRACT.md 2>/dev/null; then
+if grep -q "## Required Inputs Per Tenant" docs/guides/branding/TENANT_BRANDING_CONTRACT.md 2>/dev/null; then
   pass "Contract defines required inputs per tenant"
 else
   fail "Contract missing required inputs section"
 fi
 
 # Contract defines fallback rules
-if grep -q "## Fallback Rules" docs/branding/TENANT_BRANDING_CONTRACT.md 2>/dev/null; then
+if grep -q "## Fallback Rules" docs/guides/branding/TENANT_BRANDING_CONTRACT.md 2>/dev/null; then
   pass "Contract defines fallback rules"
 else
   fail "Contract missing fallback rules section"
 fi
 
 # Contract defines ownership boundaries
-if grep -q "## Ownership Boundaries" docs/branding/TENANT_BRANDING_CONTRACT.md 2>/dev/null; then
+if grep -q "## Ownership Boundaries" docs/guides/branding/TENANT_BRANDING_CONTRACT.md 2>/dev/null; then
   pass "Contract defines ownership boundaries"
 else
   fail "Contract missing ownership boundaries section"
 fi
 
 # Contract defines zero-downtime workflow (AC-TBR-005)
-if grep -q "## Zero-Downtime Brand Pack Workflow" docs/branding/TENANT_BRANDING_CONTRACT.md 2>/dev/null; then
+if grep -q "## Zero-Downtime Brand Pack Workflow" docs/guides/branding/TENANT_BRANDING_CONTRACT.md 2>/dev/null; then
   pass "Contract defines zero-downtime brand pack workflow"
 else
   fail "Contract missing zero-downtime workflow (AC-TBR-005)"

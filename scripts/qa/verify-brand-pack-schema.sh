@@ -4,7 +4,7 @@
 #
 # Validates that tenant config.json files conform to the brand pack schema
 # defined in specs/brand-pack-schema.json and the contract in
-# docs/branding/TENANT_BRANDING_CONTRACT.md.
+# docs/guides/branding/TENANT_BRANDING_CONTRACT.md.
 #
 # Usage:
 #   ./scripts/qa/verify-brand-pack-schema.sh

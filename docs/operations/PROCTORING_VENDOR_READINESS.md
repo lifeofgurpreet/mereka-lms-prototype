@@ -207,7 +207,7 @@ print('Exam/proctoring feature flags:', flags)
 | `deploy/k8s/base/secrets/external-secrets.yaml` | Add 2 proctoring secret mappings |
 | `deploy/k8s/base/apps/openedx/settings/lms/production.py` | Update `PROCTORING_BACKENDS` dict |
 | `infrastructure/tutor/apply-patches.sh` | Add proctoring backend config if using Tutor path |
-| `docs/operations/runbooks/PROCTORING_RUNBOOK.md` | Update "Current State" table with live provider |
+| `docs/ops/runbooks/PROCTORING_RUNBOOK.md` | Update "Current State" table with live provider |
 | `docs/operations/PROCTORING_VENDOR_READINESS.md` | This file — update blocker tracker |
 
 ---
@@ -242,7 +242,7 @@ When vendor contract is signed, parent bead `i8lo` (38 ACs) can proceed. Require
 
 ## Related
 
-- `docs/operations/runbooks/PROCTORING_RUNBOOK.md` — operational runbook (i8lo.1)
+- `docs/ops/runbooks/PROCTORING_RUNBOOK.md` — operational runbook (i8lo.1)
 - `specs/proctoring_spec.md` — full 38-AC specification
 - `deploy/k8s/base/apps/openedx/settings/lms/production.py` — current `PROCTORING_BACKENDS = null`
 - `deploy/k8s/base/secrets/external-secrets.yaml` — ExternalSecret mapping to update

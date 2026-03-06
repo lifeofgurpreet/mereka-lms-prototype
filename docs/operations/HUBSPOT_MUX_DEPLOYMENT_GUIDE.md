@@ -669,11 +669,11 @@ kubectl apply -f deploy/k8s/base/secrets/external-secrets.yaml
   - `specs/external-registration-hubspot_spec.md` (HubSpot)
   - `specs/video-pipeline-delivery_spec.md` (Mux)
 - **Runbooks**:
-  - `docs/operations/runbooks/emergency-rollback.md` (Rollback procedures)
-  - `docs/operations/runbooks/database-issues.md` (If user creation fails)
+  - `docs/ops/runbooks/emergency-rollback.md` (Rollback procedures)
+  - `docs/ops/runbooks/database-issues.md` (If user creation fails)
 - **Guides**:
-  - `docs/operations/guides/SECRETS_MANAGEMENT_GUIDE.md` (Secret management)
-  - `docs/operations/guides/OBSERVABILITY_GUIDE.md` (Monitoring setup)
+  - `docs/guides/admin/SECRETS_MANAGEMENT_GUIDE.md` (Secret management)
+  - `docs/guides/admin/OBSERVABILITY_GUIDE.md` (Monitoring setup)
 
 ---
 

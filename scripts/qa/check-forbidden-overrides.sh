@@ -138,7 +138,7 @@ fi
 
 echo ""
 echo "--- Migration Survey Cross-Check ---"
-SURVEY="$REPO_ROOT/docs/branding/PLUGIN_MIGRATION_SURVEY.md"
+SURVEY="$REPO_ROOT/docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md"
 if [[ -f "$SURVEY" ]]; then
   pass "PLUGIN_MIGRATION_SURVEY.md exists"
 else
@@ -147,7 +147,7 @@ fi
 
 # ── Check 6: Exception policy exists ─────────────────────────────────────
 
-OPERATING_MODEL="$REPO_ROOT/docs/branding/BRANDING_OPERATING_MODEL.md"
+OPERATING_MODEL="$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
 if [[ -f "$OPERATING_MODEL" ]]; then
   if grep -q "Non-Plugin Customization Exception Policy" "$OPERATING_MODEL"; then
     pass "Exception policy documented in BRANDING_OPERATING_MODEL.md"

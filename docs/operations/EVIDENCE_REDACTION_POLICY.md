@@ -1,12 +1,15 @@
 # Evidence Redaction Policy
-
-**Status**: Active  
-**Last Updated**: 2026-03-05
+_Audience: Contributors + Reviewers • Owner: Platform Team • Last verified: 2026-03-06 • Status: supporting_
 
 ## Scope
 
 Applies to committed evidence under:
 
+Canonical:
+- `docs/archive/evidence/operations/**`
+- `docs/archive/evidence/observability/**`
+
+Transitional compatibility:
 - `docs/operations/evidence/**`
 - `docs/evidence/observability/**`
 
@@ -44,6 +47,7 @@ authorization: bearer eyJ...
 - Local: `.githooks/pre-commit` calls `scripts/qa/verify-evidence-redaction.sh --staged-only`
 - CI: `.github/workflows/ci.yml` runs `STRICT=1 ./scripts/qa/verify-evidence-redaction.sh`
 - CI growth budget: `./scripts/qa/verify-evidence-sprawl-budget.sh` enforces tracked evidence file/size budgets from `docs/operations/verification/evidence_sprawl_budget.json`
+- Tracking policy: `./scripts/qa/verify-evidence-tracking-policy.sh` enforces markdown-only evidence + redaction markers across canonical and transitional evidence paths.
 
 ## Related
 

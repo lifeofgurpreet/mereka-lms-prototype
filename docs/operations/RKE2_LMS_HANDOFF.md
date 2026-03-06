@@ -192,7 +192,7 @@ All LMS-specific RKE2 evidence is written to:
 | Cross-repo touchpoint note | `docs/operations/RKE2_LMS_HANDOFF.md` (this file) | 2026-02-18T13:50Z |
 | Dependency gate map | This file, Section 3 | 2026-02-18T13:50Z |
 | Repo boundaries reference | `docs/operations/REPO_BOUNDARIES.md` | 2026-02-13 (last verified) |
-| GitOps workflow reference | `docs/operations/runbooks/GITOPS_WORKFLOW.md` | Existing |
+| GitOps workflow reference | `docs/ops/runbooks/GITOPS_WORKFLOW.md` | Existing |
 | Kind cluster recovery (context) | `docs/operations/KIND_CLUSTER_RECOVERY_EVIDENCE.md` | 2026-02-18T13:13Z |
 | GKE workload triage (context) | `docs/operations/GKE_WORKLOAD_TRIAGE_EVIDENCE.md` | 2026-02-18T13:21Z |
 | RKE2 staging overlay (infra repo) | `bbi-infrastructure:apps/mereka-lms/overlays/staging/kustomization.yaml` | Existing (17 patches) |
@@ -220,7 +220,7 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster get application -n
 ## Related Documents
 
 - `docs/operations/REPO_BOUNDARIES.md` — Canonical ownership matrix
-- `docs/operations/runbooks/GITOPS_WORKFLOW.md` — Two-repo GitOps architecture
+- `docs/ops/runbooks/GITOPS_WORKFLOW.md` — Two-repo GitOps architecture
 - `docs/operations/KIND_CLUSTER_RECOVERY_EVIDENCE.md` — Kind cluster fixes (Kyverno, CMS OOM)
 - `docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md` — Current infra model
 - `bbi-infrastructure:ENVIRONMENTS.md` — All environments and URLs

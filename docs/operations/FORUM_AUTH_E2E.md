@@ -205,6 +205,6 @@ Use the verification script to test the complete flow:
 
 ## Related Documentation
 
-- `docs/operations/AUTH_AND_PERMISSIONS.md` - Authentication architecture
+- `docs/ops/security/AUTH_AND_PERMISSIONS.md` - Authentication architecture
 - `scripts/qa/verify-forum-service.sh` - Forum service verification
 - `scripts/qa/verify-forum-moderation.sh` - Moderation flow verification

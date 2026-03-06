@@ -197,7 +197,7 @@ OIDC client already configured for the LMS (`LMS_OIDC_KEY`).
 ### Admin Console and Authentik Groups
 
 If you use Authentik group-based role sync (via `SOCIAL_AUTH_EDX_OAUTH2_*` claims),
-ensure the `is_staff` claim is forwarded. See `docs/operations/AUTH_AND_PERMISSIONS.md`
+ensure the `is_staff` claim is forwarded. See `docs/ops/security/AUTH_AND_PERMISSIONS.md`
 for the Authentik property mapping setup.
 
 ## Verification

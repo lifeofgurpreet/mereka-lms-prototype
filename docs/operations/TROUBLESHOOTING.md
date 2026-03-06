@@ -310,7 +310,7 @@ kubectl get endpoints -n mereka-lms
 **Known edge cases:**
 
 - **skillourfuture.academy.mereka.io requires multi-level subdomain SSL setup**
-  - See `docs/operations/MULTI_LEVEL_SUBDOMAIN_SSL.md` (if exists) or `docs/architecture/DOMAIN_SSL_MANAGEMENT.md`
+  - See `docs/operations/CLOUDFLARE_DNS.md` for DNS record and TLS certificate prerequisites, including wildcard and multi-level hostname constraints
   - Cloudflare Free SSL only covers `*.mereka.io`, NOT `*.*.mereka.io`
   - Use DNS-only (gray cloud) + Let's Encrypt via cert-manager
 

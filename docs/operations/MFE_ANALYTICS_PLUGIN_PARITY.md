@@ -310,7 +310,7 @@ Diagnosis:
 - `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — full migration inventory
 - `docs/operations/MFE_PLUGIN_SLOT_MATRIX.md` — slot availability by MFE
 - `docs/adr/014-mfe-plugin-slot-first.md` — plugin-slot-first architecture decision
-- `docs/branding/BRANDING_OPERATING_MODEL.md` — No DOM Override Policy
+- `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — No DOM Override Policy
 - `scripts/qa/verify-analytics-key.sh` — analytics key injection safety check
 - `scripts/qa/verify-no-dom-overrides.sh` — DOM override policy enforcement
 - `scripts/qa/smoke-test-analytics.sh` — live analytics smoke test

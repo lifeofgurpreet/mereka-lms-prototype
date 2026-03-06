@@ -151,7 +151,7 @@ Title: `OBS-PARITY-06: Define and enforce canonical non-prod parity policy`
 
 Scope: formalize local vs `rke2-nonprod` vs production parity expectations and explicit intentional differences for staging-like work.
 
-Acceptance basis: release readiness semantics captured in tracker and documented in `docs/operations/OBSERVABILITY_OWNERSHIP.md`.
+Acceptance basis: release readiness semantics captured in tracker and documented in `docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md`.
 
 Done when parity policy is explicit, reviewed, and referenced in handoff checks.
 
@@ -294,7 +294,7 @@ if [ "${lane}" = prod ] && [ -n "${OBS_PARITY_PROD_GCP_PROJECT:-}" ]; then
   OBSERVABILITY_GCP_PROJECT="$OBS_PARITY_PROD_GCP_PROJECT"
 fi
 
-OBSERVABILITY_EVIDENCE_DIR="docs/evidence/observability/${lane}-$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+OBSERVABILITY_EVIDENCE_DIR="docs/archive/evidence/observability/${lane}-$(date -u +%Y-%m-%dT%H-%M-%SZ)"
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
@@ -336,7 +336,7 @@ Manual CI runtime path is now available in `.github/workflows/observability-comp
 
 ## 12) Parity execution status (2026-02-25)
 
-- Added canonical parity matrix: `docs/operations/OBSERVABILITY_PARITY_MATRIX.md`.
+- Added canonical parity matrix: `docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md`.
 - CI now enforces active operations/docs/runtime observability commands to use the canonical runner (`run-observability-first-class.sh`) and fails on non-canonical runtime command usage.
 - Runtime preflight now enforces parity mapping from `environment_label` to `dispatch_profile`:
   - `dev|nonprod -> nonprod`
@@ -344,7 +344,7 @@ Manual CI runtime path is now available in `.github/workflows/observability-comp
   - `custom -> custom`
 - Canonical runtime identity and parity model are now wired through:
   - `docs/qa/OBSERVABILITY_CANONICAL_INDEX.md`
-  - `docs/operations/MONITORING.md`
+  - `docs/ops/monitoring/MONITORING.md`
   - `.github/workflows/observability-compliance.yml`
 
 ## 13) Parity gap register (2026-02-25)

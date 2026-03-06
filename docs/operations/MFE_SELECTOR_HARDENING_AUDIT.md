@@ -1,12 +1,12 @@
 # MFE Selector Hardening Audit
 
-> **SUPERSEDED**: The data-testid selectors documented below were removed in T102 (2026-02-25). See [MFE_SELECTOR_AUDIT.md](../architecture/MFE_SELECTOR_AUDIT.md) for the current authoritative state.
+> **SUPERSEDED**: The data-testid selectors documented below were removed in T102 (2026-02-25). See [MFE_SELECTOR_AUDIT.md](../concepts/architecture/MFE_SELECTOR_AUDIT.md) for the current authoritative state.
 
 **Purpose**: Inventory and risk analysis of brittle CSS selectors in the MFE override layer.
 
 **Last updated**: 2026-02-27 (added superseded notice)
 **Covers**: Bead 8jao.3, AC-SEL-001 through AC-SEL-005
-**Related**: [MFE_SELECTOR_AUDIT.md](../architecture/MFE_SELECTOR_AUDIT.md), [MFE_PLUGIN_SLOT_MATRIX.md](MFE_PLUGIN_SLOT_MATRIX.md)
+**Related**: [MFE_SELECTOR_AUDIT.md](../concepts/architecture/MFE_SELECTOR_AUDIT.md), [MFE_PLUGIN_SLOT_MATRIX.md](MFE_PLUGIN_SLOT_MATRIX.md)
 
 ---
 
@@ -24,7 +24,7 @@ The MFE override layer at `infrastructure/tutor/themes/mereka/mfe/mereka.scss` (
 
 **Achievement**: 83% reduction in unmarked brittle selectors (72 → 0), 307% increase in stable data-testid selectors (27 → 110)
 
-> **Note (2026-02-25)**: T102 subsequently removed all 110 `[data-testid*=]` selectors per SELECTOR_HARDENING_POLICY.md guidance that data-testid should be used for testing, not production styling. The 72 `[class*=]` selectors now serve as the canonical single-path selectors. See [MFE_SELECTOR_AUDIT.md](../architecture/MFE_SELECTOR_AUDIT.md) for current counts.
+> **Note (2026-02-25)**: T102 subsequently removed all 110 `[data-testid*=]` selectors per SELECTOR_HARDENING_POLICY.md guidance that data-testid should be used for testing, not production styling. The 72 `[class*=]` selectors now serve as the canonical single-path selectors. See [MFE_SELECTOR_AUDIT.md](../concepts/architecture/MFE_SELECTOR_AUDIT.md) for current counts.
 
 ---
 
@@ -190,7 +190,7 @@ See [MFE_PLUGIN_SLOT_MATRIX.md](MFE_PLUGIN_SLOT_MATRIX.md) for full slot invento
 
 ## References
 
-- **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
+- **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
 - **ADR-014**: [MFE Branding Strategy](../adr/014-mfe-branding-strategy.md)
 - **Upstream**: [Open edX MFE Class Naming Conventions](https://docs.openedx.org/en/latest/developers/references/frontend_style_guide.html)
 - **Verification**: [verify-mfe-selector-hardening.sh](../../scripts/qa/verify-mfe-selector-hardening.sh)

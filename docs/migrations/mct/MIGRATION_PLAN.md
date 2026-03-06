@@ -394,5 +394,5 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 - **📖 Complete Export Guide:** `docs/migrations/mct/EXPORT_GUIDE.md` - Comprehensive documentation for MCT export process
 - Kajabi migration pattern: `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
 - Kajabi transformation scripts: `scripts/migrations/kajabi/scripts/`
-- Open edX bulk import commands: `docs/onboarding/LOCAL_SETUP.md`
+- Open edX bulk import commands: `docs/guides/onboarding/LOCAL_SETUP.md`
 - MCT API exploration results: `docs/migrations/mct/API_EXPLORATION.md`

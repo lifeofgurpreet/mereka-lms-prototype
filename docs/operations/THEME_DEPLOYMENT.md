@@ -5,7 +5,7 @@
 This guide covers deploying branding/theme changes from the Mereka brand system to the production (GKE) and dev (kind) Open edX environments.
 
 Canonical branding workflow:
-- `docs/branding/BRANDING_OPERATING_MODEL.md`
+- `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - `./scripts/branding/run-branding-gates.sh prod`
 
 Important:
@@ -483,7 +483,7 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n mereka-lms get 
 
 ## Related Documentation
 
-- [BRANDING.md](../BRANDING.md) - Brand guidelines and token reference
+- [BRANDING.md](../guides/branding/BRANDING.md) - Brand guidelines and token reference
 - [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - General troubleshooting
 - [CLAUDE.md](../../CLAUDE.md) - Repository overview and workflows
 - [Brand Assets Repository](https://github.com/biji-biji-initiative/bbbi-mereka-brand-assets)

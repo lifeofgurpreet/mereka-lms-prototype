@@ -4,7 +4,7 @@
 # verify-enterprise-all-acs.sh
 # Comprehensive runner for enterprise microservices automated acceptance criteria.
 # Runs AC-001..AC-036 automated checks and aggregates results.
-# AC-037 is manual and documented in docs/operations/ENTERPRISE_SERVICES_RUNBOOK.md
+# AC-037 is manual and documented in docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
 # Exit 0 = all suites pass, exit 1 = any failure
 set -euo pipefail
 

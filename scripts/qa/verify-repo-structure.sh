@@ -83,6 +83,29 @@ check_deprecated_dir() {
   fi
 }
 
+check_doc_dir_transition() {
+  local canonical="$1"
+  local legacy="$2"
+
+  if [[ -d "$canonical" ]]; then
+    pass "Docs directory exists: $canonical/"
+    return 0
+  fi
+
+  if [[ ! -d "$legacy" ]]; then
+    fail "Docs directory missing: $canonical/ (or legacy $legacy/)"
+    return 0
+  fi
+
+  local count
+  count="$(find "$legacy" -maxdepth 1 -type f | wc -l | tr -d ' ')"
+  if [[ "$count" -eq 1 && -f "$legacy/README.md" ]]; then
+    pass "Legacy docs directory maintained as transition tombstone: $legacy/README.md"
+  else
+    fail "Legacy docs directory must be absent or contain only README.md: $legacy/"
+  fi
+}
+
 check_gitignore_has() {
   local pattern_re="$1"
   if [[ ! -f ".gitignore" ]]; then
@@ -208,10 +231,13 @@ fi
 check_deprecated_dir "tools"
 check_deprecated_dir "ops"
 
-# AC-008: docs required subdirectories.
-for d in adr onboarding operations migrations architecture archive; do
-  check_dir "docs/$d"
-done
+# AC-008: docs canonical + transition directories.
+check_dir "docs/adr"
+check_doc_dir_transition "docs/guides/onboarding" "docs/onboarding"
+check_doc_dir_transition "docs/ops" "docs/operations"
+check_dir "docs/migrations"
+check_doc_dir_transition "docs/concepts/architecture" "docs/architecture"
+check_dir "docs/archive"
 
 # AC-009: infrastructure required subdirectories.
 for d in tutor cloudflare terraform monitoring; do

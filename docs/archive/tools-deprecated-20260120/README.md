@@ -1,5 +1,7 @@
 # Tools Directory (Legacy - Migration Complete)
 
+_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: archive-candidate_
+
 ⚠️ **This directory has been migrated to `scripts/`.**
 
 All scripts have been reorganized into domain-specific directories under `scripts/`:

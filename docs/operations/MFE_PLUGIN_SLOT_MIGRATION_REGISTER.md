@@ -299,7 +299,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 - [x] Navbar token migration (DONE)
 
 ### Next Sprint
-- [x] Learning layout upstream slot expansion proposal drafted (course-grid/surface-level slots) — see [LEARNING_SLOT_EXPANSION_PROPOSAL.md](../architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md)
+- [x] Learning layout upstream slot expansion proposal drafted (course-grid/surface-level slots) — see [LEARNING_SLOT_EXPANSION_PROPOSAL.md](../concepts/architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md)
 
 ### Backlog
 - [ ] Optional: replace remaining structural navbar CSS with slot-owned React shell if upstream adds header layout slots
@@ -338,7 +338,7 @@ Rollback windows per exception tier:
 CI job `migration-lock` runs `scripts/qa/verify-migration-lock.sh` on every PR touching:
 - `infrastructure/tutor/themes/mereka/mfe/mereka.scss`
 - `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`
-- `docs/branding/BRANDING_OPERATING_MODEL.md`
+- `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 
 ## Verification
 
@@ -351,6 +351,6 @@ Run `./scripts/qa/verify-plugin-slot-migration-register.sh` to check:
 ## References
 - [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
 - [MFE_PLUGIN_SLOT_MATRIX.md](MFE_PLUGIN_SLOT_MATRIX.md)
-- [LEARNING_SLOT_EXPANSION_PROPOSAL.md](../architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md)
+- [LEARNING_SLOT_EXPANSION_PROPOSAL.md](../concepts/architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md)
 - [footer-slot-exceptions.md](footer-slot-exceptions.md) — Footer fallback exception register with visual evidence pack
 - [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)

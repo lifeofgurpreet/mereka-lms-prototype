@@ -2,7 +2,7 @@
 
 _Audience: Platform Eng + SRE | Owner: Engineering Lead | Last updated: 2026-02-24_
 
-> **Related**: `docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md` | `specs/forum-service-migration_spec.md`
+> **Related**: `docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md` | `specs/forum-service-migration_spec.md`
 
 ---
 

@@ -69,7 +69,7 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-041 | P0 | Governance | Add CI lint for non-canonical observability command drift in `docs/` (global) | OBS-005 | lint script/workflow | CI blocks non-canonical runtime command references | done |
 | OBS-042 | P1 | Governance | Add AC coverage map for observability scripts -> specs | OBS-041 | coverage map doc/json | each AC has at least one enforcing check mapped | done |
 | OBS-043 | P1 | Governance | Add script contract tests for parity-delta/review/rollup tools | OBS-042 | scripts/qa/test-observability-parity-contracts.sh | tools fail fast on malformed inputs and pass valid fixtures | done |
-| OBS-044 | P1 | Governance | Add artifact retention policy matrix (CI + long-term archive) | OBS-032 | docs/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md | retention windows defined and enforceable per artifact class | done |
+| OBS-044 | P1 | Governance | Add artifact retention policy matrix (CI + long-term archive) | OBS-032 | docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md | retention windows defined and enforceable per artifact class | done |
 | OBS-045 | P1 | Governance | Add "observability release checklist" gate to deployment playbook | OBS-041 | docs/operations/RELEASE_CHECKLIST.md | release process requires observability sign-off step | done |
 | OBS-046 | P1 | Ops | Add weekly parity review issue template in repo | OBS-005 | template markdown | weekly review can be opened in <2 minutes with standard fields | done |
 | OBS-047 | P1 | Ops | Add incident postmortem section for observability misses | OBS-046 | postmortem template update | postmortems classify monitoring detection gap explicitly | done |
@@ -88,7 +88,7 @@ Execution mode: Tracker-ready implementation backlog
 6. Complete `scripts/qa/verify-logging-pipeline.sh` by wiring existing AC-LOG checks (log source presence, label schema, structured JSON, retention) and strict-mode behavior.
 7. Update `docs/qa/OBSERVABILITY_SCRIPT_AC_COVERAGE_MAP.md` and `specs/testmaps/observability-stack_spec.testmap.yml` for OBS-024/025 and AC-LOG/AC-005 evidence paths. **Done** (`docs/qa/OBSERVABILITY_SCRIPT_AC_COVERAGE_MAP.md` updated; testmap already maps `verify-observability-contracts.sh` and `verify-observability-tracing.sh` to AC-005/AC-007)
 8. Add nonprod tracing evidence runbook step to `docs/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md` and `OBSERVABILITY_PARITY_MATRIX.md`. **Done** (nonprod step and tracing artifact requirements documented).
-9. Produce the first pilot evidence artifact bundle (`docs/evidence/observability/`), including one canonical flow trace ID + log correlation proof.
+9. Produce the first pilot evidence artifact bundle (`docs/archive/evidence/observability/`), including one canonical flow trace ID + log correlation proof.
 10. Prepare handoff ticket set `OBS-PILOT-TRACING-01` in docs/qa tracker for implementation agents with explicit acceptance gates and ownership. **Done** (`docs/qa/OBS-PILOT-TRACING-01.md`)
 
 
@@ -232,7 +232,7 @@ Required artifacts to close each wave:
    - dev-only `xqueue-metrics` + `mux-delivery-monitor`
 3. Re-run parity matrix and close tasks as each missing object set clears.
 4. Keep OBS-052 scope lock active so `video-cost`/`video-operations` stay in the appropriate local monitoring artifact path and are not treated as GCP parity failures.
-5. `OBS-051` recovery artifact generated from offline plan: `docs/evidence/observability/observability-monitoring-dashboard-plan-2026-02-26.md`.
+5. `OBS-051` recovery artifact generated from offline plan: `docs/archive/evidence/observability/observability-monitoring-dashboard-plan-2026-02-26.md`.
 
 ### Runtime-object evidence checks (per lane)
 

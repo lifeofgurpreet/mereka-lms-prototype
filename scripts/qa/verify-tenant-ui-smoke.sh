@@ -63,7 +63,7 @@ declare -a REQUIRED_ROUTES=(
 
 SMOKE_DOC="$REPO_ROOT/docs/operations/UI_UX_POSTDEPLOY_SMOKE.md"
 A11Y_SCRIPT="$REPO_ROOT/scripts/qa/verify-a11y-authenticated-routes.sh"
-A11Y_RUNBOOK="$REPO_ROOT/docs/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
+A11Y_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
 VISUAL_BASELINE_DOC="$REPO_ROOT/docs/operations/VISUAL_SMOKE_BASELINE.md"
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 

@@ -92,7 +92,7 @@ Files that consume this pin:
 - `.github/workflows/build-tutor-images.yml` — CI image builds
 - `.github/workflows/ci.yml` — CI config validation
 - `scripts/shared/setup-local.sh` — local dev setup
-- `docs/onboarding/*.md` — onboarding guides
+- `docs/guides/onboarding/*.md` — onboarding guides
 
 ### Checking for patch releases
 

@@ -20,10 +20,10 @@ This document is the single authoritative reference for the UI/UX hardening lane
 
 Related documents:
 - `docs/operations/VISUAL_SMOKE_BASELINE.md` — visual smoke baseline per environment
-- `docs/operations/VISUAL_REGRESSION_RUNBOOK.md` — visual regression runbook
-- `docs/branding/VISUAL_PARITY_CHECKPOINTS.md` — checkpoint matrix (5 routes × 3 domains)
+- `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md` — visual regression runbook
+- `docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md` — checkpoint matrix (5 routes × 3 domains)
 - `docs/operations/A11Y_CONTRAST_FOCUS_GATE.md` — contrast and focus-visible gate details
-- `docs/architecture/PERFORMANCE_BUDGETS.md` — full Web Vitals + cache-control policy
+- `docs/concepts/architecture/PERFORMANCE_BUDGETS.md` — full Web Vitals + cache-control policy
 
 ---
 
@@ -396,9 +396,9 @@ UI_HARDENING_LIVE=1 UI_HARDENING_DOMAIN=academyv2.mereka.io \
 | Document | Purpose |
 |----------|---------|
 | `docs/operations/VISUAL_SMOKE_BASELINE.md` | Per-environment visual smoke baseline |
-| `docs/operations/VISUAL_REGRESSION_RUNBOOK.md` | Visual regression investigation runbook |
-| `docs/branding/VISUAL_PARITY_CHECKPOINTS.md` | 5-route × 3-domain checkpoint matrix |
+| `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md` | Visual regression investigation runbook |
+| `docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md` | 5-route × 3-domain checkpoint matrix |
 | `docs/operations/A11Y_CONTRAST_FOCUS_GATE.md` | Contrast gate WCAG AA thresholds |
 | `docs/operations/A11Y_TENANT_BRANDING_GATE.md` | Tenant a11y gate |
-| `docs/architecture/PERFORMANCE_BUDGETS.md` | Web Vitals thresholds, cache-control policy |
-| `docs/operations/BRANDING_RELEASE_RUNBOOK.md` | Branding release checklist |
+| `docs/concepts/architecture/PERFORMANCE_BUDGETS.md` | Web Vitals thresholds, cache-control policy |
+| `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` | Branding release checklist |

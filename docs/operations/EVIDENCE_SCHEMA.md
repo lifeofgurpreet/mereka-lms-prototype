@@ -59,7 +59,7 @@ Within each evidence directory, artifact names correspond to the script that pro
 2. **Directories are date-stamped**: Evidence is immutable within a dated directory
 3. **Summaries are Markdown**: Human-readable with PASS/FAIL counts
 4. **JSON outputs are machine-readable**: MFE config snapshots saved as `.json`
-5. **Retention**: 30 days minimum (see `BRANDING_RELEASE_RUNBOOK.md`)
+5. **Retention**: 30 days minimum (see `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md`)
 
 ## Referencing in Release Notes
 
@@ -80,6 +80,6 @@ find var/evidence/ -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +
 ## Related
 
 - `docs/operations/EVIDENCE_REDACTION_POLICY.md` — Required redaction policy for committed evidence
-- `docs/operations/BRANDING_RELEASE_RUNBOOK.md` — Evidence retention policy
+- `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` — Evidence retention policy
 - `docs/operations/TENANT_ONBOARDING_PLAYBOOK.md` — Onboarding evidence template
 - `scripts/qa/ops-confidence.sh` — Unified confidence bundle

@@ -202,9 +202,9 @@ The script checks:
 ## References
 
 - [`infrastructure/tutor/plugins/mereka_lms.py`](../../infrastructure/tutor/plugins/mereka_lms.py) — `SITE_VARIANTS` map, `MerekaFooter` component
-- [`docs/architecture/COPY_TERMINOLOGY_CONTRACT.md`](../architecture/COPY_TERMINOLOGY_CONTRACT.md) — domain → brand copy table
-- [`docs/architecture/MULTISITE_UX_CONSISTENCY.md`](../architecture/MULTISITE_UX_CONSISTENCY.md) — SITE_VARIANTS UX consistency requirements
-- [`docs/architecture/FOOTER_SLOT_MIGRATION.md`](../architecture/FOOTER_SLOT_MIGRATION.md) — footer slot wiring contract
+- [`docs/concepts/architecture/COPY_TERMINOLOGY_CONTRACT.md`](../concepts/architecture/COPY_TERMINOLOGY_CONTRACT.md) — domain → brand copy table
+- [`docs/concepts/architecture/MULTISITE_UX_CONSISTENCY.md`](../concepts/architecture/MULTISITE_UX_CONSISTENCY.md) — SITE_VARIANTS UX consistency requirements
+- [`docs/concepts/architecture/FOOTER_SLOT_MIGRATION.md`](../concepts/architecture/FOOTER_SLOT_MIGRATION.md) — footer slot wiring contract
 - [`infrastructure/tutor/plugins/multi-tenancy/`](../../infrastructure/tutor/plugins/multi-tenancy/) — TenantConfig model
 - [`scripts/tenants/provision-tenant.sh`](../../scripts/tenants/provision-tenant.sh) — tenant provisioning
 - [`scripts/qa/verify-footer-variant-matrix.sh`](../../scripts/qa/verify-footer-variant-matrix.sh) — verification script

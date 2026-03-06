@@ -1,5 +1,5 @@
 # MCT Migration Docs
-_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2025-12-18_
+_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2026-03-06 • Status: canonical_
 
 Use this folder when working on Microsoft Community Training (MCT) migrations—API discovery, export tooling, verification, and import plans. Start with the index below.
 

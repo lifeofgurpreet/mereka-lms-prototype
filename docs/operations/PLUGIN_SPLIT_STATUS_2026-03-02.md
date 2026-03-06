@@ -248,7 +248,7 @@ Validation after phase 10:
 
 Validation after phase 11:
 - `./scripts/qa/verify-mfe-css-architecture.sh` PASS (`PASS=7 / FAIL=0 / WARN=0`)
-- `./scripts/qa/verify-oep65-readiness.sh` FAIL (`PASS=16 / FAIL=5 / SKIP=3`) — existing OEP-65 readiness gaps tracked in `docs/architecture/OEP65_MODULE_READINESS.md`
+- `./scripts/qa/verify-oep65-readiness.sh` FAIL (`PASS=16 / FAIL=5 / SKIP=3`) — existing OEP-65 readiness gaps tracked in `docs/concepts/architecture/OEP65_MODULE_READINESS.md`
 - `./scripts/qa/verify-tenant-first-consolidation.sh --env dev` FAIL (`PASS=15 / FAIL=2 / WARN=0 / SKIP=0`) — existing runtime checks failing in tenant visual/smoke sub-gates
 - `./scripts/qa/verify-multi-brand-site.sh` PASS (`PASS=76 / FAIL=0 / SKIP=1`)
 - `./scripts/qa/verify-mfe-first-policy.sh` PASS (`PASS=22 / WARN=0 / FAIL=0`)

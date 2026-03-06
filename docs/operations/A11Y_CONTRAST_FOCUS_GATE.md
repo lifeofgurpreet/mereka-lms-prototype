@@ -170,7 +170,7 @@ machine-readable counters for downstream consumption.
 
 ## Related Documents
 
-- `docs/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md` — Platform-wide a11y policy
+- `docs/concepts/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md` — Platform-wide a11y policy
 - `docs/operations/A11Y_EXCEPTIONS.md` — Active exception log (create when first needed)
 - `scripts/qa/verify-accessibility-conformance.sh` — Broader WCAG conformance gate
 - `scripts/qa/verify-contrast-compliance.sh` — Original token contrast gate

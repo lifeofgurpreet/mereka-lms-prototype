@@ -202,4 +202,4 @@ export OBSERVABILITY_K8S_TIMEOUT=30
 2. Evidence identity in all strict artifacts is exactly:
    `env=<lane>;profile=nonprod|prod;context=<k8s_context>;project=<gcp_project>`.
 3. At least one strict run in the active lane completed with full file set above present.
-4. Any task that passes must include a dated evidence note in `docs/evidence` or `var/ci` for handoff.
+4. Any task that passes must include a dated evidence note in `docs/archive/evidence` or `var/ci` for handoff.

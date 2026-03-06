@@ -9,8 +9,8 @@ version: "1.0.0"
 depends_on: []
 links:
   related_docs:
-    - "docs/onboarding/DEVELOPER_ONBOARDING.md"
-    - "docs/onboarding/QUICK_START_LOCAL.md"
+    - "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
+    - "docs/guides/onboarding/QUICK_START_LOCAL.md"
     - "CLAUDE.md"
     - "AGENTS.md"
   related_specs:
@@ -143,17 +143,19 @@ Without a canonical structure contract, agents and engineers create files in ad-
 
 - `docs/` MUST contain these subdirectories:
   - `adr/` -- Architecture Decision Records
-  - `onboarding/` -- Setup guides and getting-started docs
-  - `operations/` -- Runbooks and operational procedures
+  - `guides/onboarding/` -- Setup guides and getting-started docs
+  - `ops/` -- Runbooks and operational procedures
+  - `operations/` -- Legacy operational docs kept as transition compatibility path
   - `migrations/` -- Migration playbooks (Kajabi, MCT)
-  - `architecture/` -- System design documentation
+  - `concepts/architecture/` -- System design documentation
+  - `architecture/` -- Legacy architectural path kept as transition compatibility path
   - `archive/` -- Historical/superseded documentation
 - Documentation files MUST NOT exist at repository root unless they are in the root markdown allowlist.
 - Every ADR in `docs/adr/` SHOULD follow the numbered naming convention: `NNN-<slug>.md`.
 
 #### Deprecated Directories
 
-- The directories `tools/` and `ops/` MUST NOT exist in the repository.
+- The directories `tools/` and top-level root `ops/` MUST NOT exist in the repository.
 - If tombstone directories are maintained for redirect purposes, they MUST contain only a `README.md` file that points to the new locations (`scripts/` and `infrastructure/` respectively).
 - No scripts, configs, or data files MUST exist in deprecated directory paths.
 
@@ -179,7 +181,7 @@ Without a canonical structure contract, agents and engineers create files in ad-
 - [ ] AC-005: Given `deploy/k8s/overlays/`, when listing subdirectories, then `local/` and `production/` both exist.
 - [ ] AC-006: Given the `deploy/k8s/base/secrets/` directory, when scanning YAML files, then no file contains a `kind: Secret` resource with `data:` or `stringData:` fields containing non-reference values.
 - [ ] AC-007: Given the repository, when checking for `tools/` and `ops/` directories, then neither directory exists OR each contains only a `README.md` redirect file.
-- [ ] AC-008: Given `docs/`, when listing subdirectories, then `adr/`, `onboarding/`, `operations/`, `migrations/`, `architecture/`, and `archive/` all exist.
+- [ ] AC-008: Given `docs/`, when listing subdirectories, then `adr/`, `migrations/`, and `archive/` exist and either canonical paths (`guides/onboarding/`, `ops/`, `concepts/architecture/`) exist or legacy transition directories (`onboarding/`, `operations/`, `architecture/`) are preserved as `README.md` tombstones.
 - [ ] AC-009: Given `infrastructure/`, when listing subdirectories, then `tutor/`, `cloudflare/`, `terraform/`, and `monitoring/` all exist.
 - [ ] AC-010: Given `var/` and `tutor_env/`, when checking `.gitignore`, then both directories are listed as gitignored patterns.
 - [ ] AC-011: Given any `specs/*.md` file, when checking the filename, then it matches the pattern `*_spec.md`.
@@ -285,9 +287,27 @@ for dir in tools ops; do
 done
 
 # AC-008: Required docs subdirectories
-for dir in adr onboarding operations migrations architecture archive; do
-  check "docs/$dir/ exists" test -d "docs/$dir"
-done
+check "docs/adr/ exists" test -d docs/adr
+if test -d docs/guides/onboarding || test -d docs/onboarding; then
+  check "docs onboarding path exists (canonical or transition)" true
+else
+  echo "[FAIL] Onboarding docs path missing (expected docs/guides/onboarding or docs/onboarding)"
+  FAIL=$((FAIL + 1))
+fi
+if test -d docs/ops || test -d docs/operations; then
+  check "docs operations path exists (canonical or transition)" true
+else
+  echo "[FAIL] Operations docs path missing (expected docs/ops or docs/operations)"
+  FAIL=$((FAIL + 1))
+fi
+check "docs/migrations/ exists" test -d docs/migrations
+if test -d docs/concepts/architecture || test -d docs/architecture; then
+  check "docs architecture path exists (canonical or transition)" true
+else
+  echo "[FAIL] Architecture docs path missing (expected docs/concepts/architecture or docs/architecture)"
+  FAIL=$((FAIL + 1))
+fi
+check "docs/archive/ exists" test -d docs/archive
 
 # AC-009: Required infrastructure subdirectories
 for dir in tutor cloudflare terraform monitoring; do

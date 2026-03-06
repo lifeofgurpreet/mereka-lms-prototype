@@ -90,7 +90,7 @@ We are **proceeding** with Aspects deployment. Initial deployment targets dev (r
 
 ### Immediate Actions
 1. **Document deferral status**:
-   - [x] Update `docs/analytics/README.md` with deferral notice (already includes deployment status warning)
+   - [x] Update `docs/concepts/analytics/README.md` with deferral notice (already includes deployment status warning)
    - [ ] Update `docs/operations/CAPABILITY_MATRIX.md`: Change Aspects from "IN-PROGRESS" to "DEFERRED"
    - [ ] Update `specs/analytics-pipeline_spec.md`: Add deferral notice at top
 
@@ -101,7 +101,7 @@ We are **proceeding** with Aspects deployment. Initial deployment targets dev (r
    - No cleanup required - just don't deploy
 
 3. **Document interim analytics approach**:
-   - [ ] Create `docs/analytics/INTERIM_ANALYTICS.md` documenting built-in LMS analytics usage
+   - [ ] Create `docs/concepts/analytics/INTERIM_ANALYTICS.md` documenting built-in LMS analytics usage
 
 ## Alternatives Considered
 
@@ -115,7 +115,7 @@ We are **proceeding** with Aspects deployment. Initial deployment targets dev (r
 - **Rejected because**: Commercial solution, significant cost
 - **Rejected because**: Same operational complexity concerns as Aspects
 - **Rejected because**: No demand validation
-- See `docs/analytics/ASPECTS_VS_PANORAMA.md` for detailed comparison
+- See `docs/concepts/analytics/ASPECTS_VS_PANORAMA.md` for detailed comparison
 
 ### Build custom analytics
 - **Rejected because**: Reinventing wheel - Aspects provides this
@@ -167,8 +167,8 @@ When analytics deployment is reconsidered:
    - Implement via ClickHouse TTL: `ALTER TABLE xapi_events_all MODIFY TTL event_date + INTERVAL 90 DAY`
 
 ### Resources to Review Before Deployment
-- `docs/analytics/ASPECTS_INSTALLATION.md` (step-by-step deployment)
-- `docs/analytics/ASPECTS_QUICKSTART.md` (post-install validation)
+- `docs/concepts/analytics/ASPECTS_INSTALLATION.md` (step-by-step deployment)
+- `docs/concepts/analytics/ASPECTS_QUICKSTART.md` (post-install validation)
 - `specs/analytics-pipeline_spec.md` (requirements and acceptance criteria)
 - Open edX Aspects documentation: https://docs.openedx.org/projects/openedx-aspects/
 
@@ -182,7 +182,7 @@ If Aspects is deployed in the future, ensure:
 ## Related
 - ADR-016: Android app support decision (similar deferral pattern)
 - `specs/analytics-pipeline_spec.md` (analytics requirements)
-- `docs/analytics/ASPECTS_INSTALLATION.md` (deployment guide)
-- `docs/analytics/ASPECTS_VS_PANORAMA.md` (comparison with commercial alternative)
+- `docs/concepts/analytics/ASPECTS_INSTALLATION.md` (deployment guide)
+- `docs/concepts/analytics/ASPECTS_VS_PANORAMA.md` (comparison with commercial alternative)
 - `docs/operations/CAPABILITY_MATRIX.md` (capability tracking)
 - `docs/operations/ASPECTS_WIRING_CHECKLIST.md` (deployment checklist)

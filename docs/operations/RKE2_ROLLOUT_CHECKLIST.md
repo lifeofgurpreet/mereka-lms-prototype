@@ -67,7 +67,7 @@ for pod in data['items']:
   kubectl --context rke2-nonprod get networkpolicy -n mereka-lms
   ```
   > Note: RKE2-nonprod uses Canal CNI. NetworkPolicies are supported.
-  > If no NetworkPolicies exist, document in `docs/operations/SECURITY_EXCEPTIONS.md`.
+  > If no NetworkPolicies exist, document in `docs/ops/security/SECURITY_EXCEPTIONS.md`.
 
 ### 1.4 Secrets Hygiene
 

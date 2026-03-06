@@ -77,5 +77,5 @@ Canonical gate:
 
 ## 7. Change Control
 
-- [ ] Use `docs/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md` for any domain or secret changes.
+- [ ] Use `docs/ops/security/RELEASE_CHECKLIST_DOMAIN_SECRETS.md` for any domain or secret changes.
 - [ ] Log changes in `docs/operations/CONFIG_REVIEW_YYYY-MM-DD.md`.

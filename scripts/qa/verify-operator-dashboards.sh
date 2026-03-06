@@ -83,10 +83,10 @@ grep_in_file() {
 
 section "1. Operator documentation files"
 
-file_exists "docs/operations/OPERATOR_DASHBOARD_GUIDE.md"
+file_exists "docs/ops/monitoring/OPERATOR_DASHBOARD_GUIDE.md"
 file_exists "docs/operations/TROUBLESHOOTING.md"
-file_exists "docs/operations/MONITORING.md"
-file_exists "docs/operations/OBSERVABILITY_QUICKSTART.md"
+file_exists "docs/ops/monitoring/MONITORING.md"
+file_exists "docs/ops/monitoring/OBSERVABILITY_QUICKSTART.md"
 file_exists "docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
 file_exists "docs/operations/ONCALL_ROTATION.md"
 file_exists "docs/operations/INCIDENT_RESPONSE.md"
@@ -96,7 +96,7 @@ file_exists "docs/operations/ALERT_TUNING_SOP.md"
 file_exists "docs/operations/SLO_POLICY.md"
 file_exists "docs/operations/SLO_DASHBOARDS_SETUP.md"
 file_exists "docs/operations/ADMIN_CONSOLE_SETUP.md"
-file_exists "docs/operations/ACCESS_URLS.md"
+file_exists "docs/ops/quickref/access-urls.md"
 file_exists "docs/operations/CAPACITY_PLANNING.md"
 file_exists "docs/operations/runbooks/site-down.md"
 file_exists "docs/operations/runbooks/emergency-rollback.md"
@@ -108,7 +108,7 @@ file_exists "docs/operations/quickref/common-troubleshooting.md"
 
 section "2. OPERATOR_DASHBOARD_GUIDE.md content"
 
-GUIDE="${REPO_ROOT}/docs/operations/OPERATOR_DASHBOARD_GUIDE.md"
+GUIDE="${REPO_ROOT}/docs/ops/monitoring/OPERATOR_DASHBOARD_GUIDE.md"
 
 if [[ -f "$GUIDE" ]]; then
   content=$(<"$GUIDE")

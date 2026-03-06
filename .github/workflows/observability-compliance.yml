@@ -102,11 +102,11 @@ jobs:
           for f in \
             docs/qa/OBSERVABILITY_CANONICAL_INDEX.md \
             docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md \
-            docs/operations/OBSERVABILITY_PARITY_MATRIX.md; do
+            docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md; do
             test -f "$f"
             grep -q "last_updated:" "$f"
             grep -q "owner:" "$f"
-            if [ "$f" != "docs/operations/OBSERVABILITY_PARITY_MATRIX.md" ]; then
+            if [ "$f" != "docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md" ]; then
               grep -q "canonical_workflow:" "$f"
             fi
           done
@@ -123,9 +123,9 @@ jobs:
       - name: Validate parity matrix command/profile contract
         run: |
           # Matrix must document canonical environment/profile pairs.
-          rg -q "OBSERVABILITY_ENV_LABEL=dev OBSERVABILITY_DISPATCH_PROFILE=nonprod" docs/operations/OBSERVABILITY_PARITY_MATRIX.md
-          rg -q "OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod" docs/operations/OBSERVABILITY_PARITY_MATRIX.md
-          rg -q "OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod" docs/operations/OBSERVABILITY_PARITY_MATRIX.md
+          rg -q "OBSERVABILITY_ENV_LABEL=dev OBSERVABILITY_DISPATCH_PROFILE=nonprod" docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md
+          rg -q "OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod" docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md
+          rg -q "OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod" docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md
 
           # Workflow preflight must enforce the same profile mapping rules.
           rg -q "dev\\|nonprod" .github/workflows/observability-compliance.yml

@@ -31,7 +31,7 @@ For scripts marked `deprecated_candidate` in the catalog:
 
 1. Confirm no active workflow or runbook dependency.
 2. Replace with one of the canonical entry points where possible.
-3. Move decommissioned logic into docs/evidence or a consolidated gate.
+3. Move decommissioned logic into docs/archive/evidence or a consolidated gate.
 4. Remove script from active references and regenerate the catalog.
 5. Move retired scripts to `scripts/qa/deprecated/` and register them in `deprecated_verify_scripts.json`.
 

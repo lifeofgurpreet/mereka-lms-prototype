@@ -1,5 +1,5 @@
 # Migration Runbooks
-_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2026-03-05_
+_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2026-03-06 • Status: canonical_
 
 Every large-scale content or user migration lives under this folder. Pick the domain below to jump into the relevant export/import guides, verification plans, and rollback checklists.
 

@@ -144,14 +144,14 @@ curl -sI https://apps.academyv2.mereka.io | head -1
 
 | Failure Mode | Runbook | Rollback Action |
 |-------------|---------|-----------------|
-| Site down (502/503) | `runbooks/site-down.md` | Revert git + check endpoints |
+| Site down (502/503) | `ops/runbooks/site-down.md` | Revert git + check endpoints |
 | CMS OOM | `KIND_CLUSTER_RECOVERY_EVIDENCE.md` | Increase memory limit |
-| Auth loop | `runbooks/AUTH_SSO_RUNBOOK.md` | Check SESSION_COOKIE_* settings |
-| DB connection refused | `runbooks/database-issues.md` | Check MySQL pod + secrets |
+| Auth loop | `ops/runbooks/AUTH_SSO_RUNBOOK.md` | Check SESSION_COOKIE_* settings |
+| DB connection refused | `ops/runbooks/database-issues.md` | Check MySQL pod + secrets |
 | MFE blank page | `FRONTEND_REGRESSION_CHECKLIST.md` | Check MFE image tag + config API |
-| Enterprise 403 | `ENTERPRISE_SERVICES_RUNBOOK.md` | Check image pull + service account |
-| XQueue backlog | `runbooks/XQUEUE_HEALTH_RUNBOOK.md` | Check consumer logs |
-| SSL cert expired | `runbooks/DOMAIN_CHANGE_RUNBOOK.md` | Check cert-manager + Cloudflare |
+| Enterprise 403 | `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md` | Check image pull + service account |
+| XQueue backlog | `ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md` | Check consumer logs |
+| SSL cert expired | `ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md` | Check cert-manager + Cloudflare |
 | Meilisearch denied | `KIND_CLUSTER_RECOVERY_EVIDENCE.md` | Add `runAsNonRoot: true` |
 
 ## 5. Owner Signoff Template (AC-OPS-073)
@@ -188,7 +188,7 @@ curl -sI https://apps.academyv2.mereka.io | head -1
 ## Related
 
 - `docs/operations/CANONICAL_DEPLOY_CONTRACT.md` — Build/tag/push flow
-- `docs/operations/RELEASE_EXECUTE_RUNBOOK.md` — Step-by-step release
+- `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md` — Step-by-step release
 - `docs/operations/DEPLOY_EVIDENCE_GATES.md` — Parity proof commands
 - `docs/operations/ECOMMERCE_DEPRECATION_INVENTORY.md` — Legacy ecommerce removal
-- `docs/operations/ENTERPRISE_SERVICES_RUNBOOK.md` — Enterprise service operations
+- `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md` — Enterprise service operations

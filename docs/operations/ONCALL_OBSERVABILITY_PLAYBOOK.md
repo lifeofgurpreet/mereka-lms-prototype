@@ -175,7 +175,7 @@ Preparation (within 3 business days before drill):
 - Select one active P1/P2 historical scenario from `parity-drill-scaffold.md` or last month incident write-up.
 - Open one issue using the `Observability Parity Weekly Review` template and label it `observability-drill`.
 - Prepare a shared evidence directory:
-  - `docs/operations/evidence/observability-drills/<YYYY-MM-DD>/`
+  - `docs/archive/evidence/operations/observability-drills/<YYYY-MM-DD>/`
 
 Execution sequence:
 1. Receive synthetic alert (Slack/on-call channel) and log alert metadata (`alertname`, `fingerprint`, firing timestamp).
@@ -188,7 +188,7 @@ Execution sequence:
 5. Capture attendance (operator names + duration) and finalize drill outcome in the issue.
 
 Completion criteria:
-- Drill log links are stored in `docs/operations/evidence/observability-drills/`.
+- Drill log links are stored in `docs/archive/evidence/operations/observability-drills/`.
 - At least one failure-injection path and one recovery path are demonstrated.
 - Action items are assigned with due dates where the drill exposed risk.
 

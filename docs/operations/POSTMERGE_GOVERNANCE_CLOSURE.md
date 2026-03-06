@@ -245,7 +245,7 @@ These rules prevent the two agents from clobbering each other's work when runnin
 
 `infrastructure/tutor/apply-patches.sh` is owned by BoldBadger. WhiteCliff must not modify it without an explicit coordination step. If WhiteCliff needs a new patch, it must:
 
-1. File the patch requirement in `docs/operations/BRANDING_RELEASE_RUNBOOK.md`
+1. File the patch requirement in `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md`
 2. BoldBadger picks it up in the next deploy cycle and adds the patch
 
 #### Rule 3: SCSS is WhiteCliff-Owned

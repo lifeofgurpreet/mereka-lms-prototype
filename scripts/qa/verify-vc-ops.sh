@@ -278,13 +278,13 @@ echo
 
 # ---------------------------------------------------------------------------
 # AC-CRED-048: Key rotation runbook
-# Given key rotation runbook docs/operations/credential-key-rotation-runbook.md,
+# Given key rotation runbook docs/ops/runbooks/credential-key-rotation-runbook.md,
 # when followed step by step, then old credentials verify successfully and new credentials use the new key
 # ---------------------------------------------------------------------------
 echo "[AC-CRED-048] Verifying key rotation runbook..."
 
 # Check for key rotation runbook
-RUNBOOK="$REPO_ROOT/docs/operations/credential-key-rotation-runbook.md"
+RUNBOOK="$REPO_ROOT/docs/ops/runbooks/credential-key-rotation-runbook.md"
 if [[ -f "$RUNBOOK" ]]; then
   pass "AC-CRED-048: Key rotation runbook exists at $RUNBOOK"
 
@@ -311,21 +311,21 @@ else
 fi
 
 # Check for other operational runbooks
-ISSUANCE_RUNBOOK="$REPO_ROOT/docs/operations/credential-issuance-failure-runbook.md"
+ISSUANCE_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/credential-issuance-failure-runbook.md"
 if [[ -f "$ISSUANCE_RUNBOOK" ]]; then
   pass "AC-CRED-048: Issuance failure runbook exists"
 else
   skip "AC-CRED-048: Issuance failure runbook not found"
 fi
 
-BACKFILL_RUNBOOK="$REPO_ROOT/docs/operations/credential-backfill-runbook.md"
+BACKFILL_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/credential-backfill-runbook.md"
 if [[ -f "$BACKFILL_RUNBOOK" ]]; then
   pass "AC-CRED-048: Backfill runbook exists"
 else
   skip "AC-CRED-048: Backfill runbook not found"
 fi
 
-VERIFY_RUNBOOK="$REPO_ROOT/docs/operations/credential-verification-failure-runbook.md"
+VERIFY_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/credential-verification-failure-runbook.md"
 if [[ -f "$VERIFY_RUNBOOK" ]]; then
   pass "AC-CRED-048: Verification failure runbook exists"
 else

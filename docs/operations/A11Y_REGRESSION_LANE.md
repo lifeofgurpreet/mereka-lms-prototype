@@ -115,7 +115,7 @@ RESULT: PASS
 
 ```bash
 # Re-create from scratch using the structure in:
-# docs/operations/evidence/a11y-regression-lane-report.md
+# docs/archive/evidence/operations/a11y-regression-lane-report.md
 ```
 
 The evidence report must:

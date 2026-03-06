@@ -31,7 +31,7 @@ references staging has been archived at:
 - **Redis**: in-cluster (PVC-backed) in production and dev.
 - **MongoDB**:
   - Target state: Atlas-only (see `docs/adr/001-mongodb-atlas.md`).
-  - Current production reality: modulestore + forum are Atlas-backed; legacy deployment is retired and production overlay removes `Service/mongodb` to prevent drift (see `docs/ARCHITECTURE_MONGODB.md`).
+  - Current production reality: modulestore + forum are Atlas-backed; legacy deployment is retired and production overlay removes `Service/mongodb` to prevent drift (see `docs/concepts/architecture/ARCHITECTURE_MONGODB.md`).
 
 ## Secrets
 
@@ -56,7 +56,7 @@ Canonical path for this stack: `/k8s/mereka-lms` (prod + dev).
      `./scripts/infra/prepare-bbi-infra-ref-bump.sh --apply`
 5. Verify rollouts (`kubectl rollout status ...`).
 
-See `docs/operations/DEPLOYMENT_RUNBOOK.md` for the full, step-by-step flow.
+See `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md` for the full, step-by-step flow.
 
 ## Monitoring & health checks
 
@@ -76,12 +76,12 @@ See `docs/operations/DEPLOYMENT_RUNBOOK.md` for the full, step-by-step flow.
 
 References:
 - `docs/operations/VELERO_BACKUP_AUDIT.md`
-- `docs/operations/DISASTER_RECOVERY.md`
+- `docs/ops/runbooks/DISASTER_RECOVERY.md`
 - `docs/operations/BACKUP_COVERAGE_MATRIX.md`
 
 ## References
 
-- `docs/operations/DOMAIN_CHANGE_RUNBOOK.md`
-- `docs/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
-- `docs/operations/K8S_OPERATIONS_GUIDE.md`
-- `docs/operations/DISASTER_RECOVERY.md`
+- `docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md`
+- `docs/ops/security/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
+- `docs/guides/admin/K8S_OPERATIONS_GUIDE.md`
+- `docs/ops/runbooks/DISASTER_RECOVERY.md`

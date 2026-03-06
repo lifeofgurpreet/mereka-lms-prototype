@@ -29,7 +29,7 @@ local (developer machine)
 
 Images travel forward-only. An image tag is promoted by updating the relevant overlay in
 `bbi-infrastructure` and merging the PR to main. ArgoCD reconciles within ~3 minutes.
-Never patch clusters directly — see `docs/operations/runbooks/GITOPS_WORKFLOW.md`.
+Never patch clusters directly — see `docs/ops/runbooks/GITOPS_WORKFLOW.md`.
 
 ---
 
@@ -172,7 +172,7 @@ marked in its `kustomization.yaml` header.
 
 - `docs/operations/STAGING_ACTIVATION.md` — prerequisites and steps to activate a future
   GKE staging lane (not currently active)
-- `docs/operations/runbooks/DEPLOYMENT_RUNBOOK.md` — step-by-step deploy procedure
-- `docs/operations/runbooks/GITOPS_WORKFLOW.md` — GitOps rules (never patch directly)
+- `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md` — step-by-step deploy procedure
+- `docs/ops/runbooks/GITOPS_WORKFLOW.md` — GitOps rules (never patch directly)
 - `docs/operations/RKE2_ROLLOUT_CHECKLIST.md` — rke2-nonprod first-deploy checklist
 - `scripts/qa/verify-deployment-lanes.sh` — automated verification of this document

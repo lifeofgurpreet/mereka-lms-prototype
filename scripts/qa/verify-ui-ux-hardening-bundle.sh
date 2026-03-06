@@ -53,8 +53,8 @@ CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 PERF_BUDGET_DOC="$REPO_ROOT/docs/architecture/PERFORMANCE_BUDGETS.md"
 A11Y_GATE_DOC="$REPO_ROOT/docs/operations/A11Y_CONTRAST_FOCUS_GATE.md"
 VISUAL_BASELINE_DOC="$REPO_ROOT/docs/operations/VISUAL_SMOKE_BASELINE.md"
-VISUAL_RUNBOOK="$REPO_ROOT/docs/operations/VISUAL_REGRESSION_RUNBOOK.md"
-VISUAL_PARITY_DOC="$REPO_ROOT/docs/branding/VISUAL_PARITY_CHECKPOINTS.md"
+VISUAL_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
+VISUAL_PARITY_DOC="$REPO_ROOT/docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
 
 # ===========================================================================
 # AC-HB-001: Visual regression baseline — 10+ critical routes + refresh playbook

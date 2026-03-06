@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/operations/SECURITY_EXCEPTIONS.md'
+      - 'docs/ops/security/SECURITY_EXCEPTIONS.md'
   schedule:
     # Every Monday at 08:00 UTC
     - cron: '0 8 * * 1'

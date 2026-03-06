@@ -206,7 +206,7 @@ else
 fi
 
 # Check existing visual regression runbook as a fallback reference.
-VIS_RUNBOOK="$REPO_ROOT/docs/operations/VISUAL_REGRESSION_RUNBOOK.md"
+VIS_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
 if [[ -f "$VIS_RUNBOOK" ]]; then
   do_pass "AC-VIS-003: VISUAL_REGRESSION_RUNBOOK.md exists (baseline threshold reference)"
   if grep -qiE "5%|threshold|RMSE" "$VIS_RUNBOOK"; then

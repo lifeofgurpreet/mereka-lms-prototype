@@ -9,17 +9,17 @@ Date: 2026-02-25
 - canonical_workflow: `.github/workflows/observability-compliance.yml`
 - canonical_readiness_report: `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md`
 - observability_ga_gate: `docs/operations/OBSERVABILITY_GA_READINESS_GATE.md`
-- canonical_roadmap: `docs/operations/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
+- canonical_roadmap: `docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
 
 ## Canonical Sources (active)
 
 - Runtime/readiness source of truth:
   - `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md`
 - Strategy/phase planning source of truth:
-  - `docs/operations/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
-  - `docs/operations/OBSERVABILITY_PARITY_MATRIX.md`
+  - `docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
+  - `docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md`
   - `docs/qa/OBSERVABILITY_SCRIPT_AC_COVERAGE_MAP.md`
-  - `docs/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`
+  - `docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`
   - `docs/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md`
   - `docs/qa/OBSERVABILITY_NEXT50_TRACKER_MEREKA_LMS.md`
   - `docs/operations/OBSERVABILITY_GA_READINESS_GATE.md`

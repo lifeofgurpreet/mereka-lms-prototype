@@ -47,10 +47,10 @@ echo ""
 # ---------------------------------------------------------------------------
 # Paths used across multiple ACs
 # ---------------------------------------------------------------------------
-CHECKPOINT_DOC="$REPO_ROOT/docs/branding/VISUAL_PARITY_CHECKPOINTS.md"
+CHECKPOINT_DOC="$REPO_ROOT/docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
 BASELINE_DOC="$REPO_ROOT/docs/operations/VISUAL_SMOKE_BASELINE.md"
-VISUAL_RUNBOOK="$REPO_ROOT/docs/operations/VISUAL_REGRESSION_RUNBOOK.md"
-BRANDING_OPS="$REPO_ROOT/docs/branding/BRANDING_OPERATING_MODEL.md"
+VISUAL_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
+BRANDING_OPS="$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 COMMON_CSS_DIR="$THEME_DIR/common/static/css"
 MFE_SCSS="$THEME_DIR/mfe/mereka.scss"
@@ -520,11 +520,11 @@ echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Action required: Fix FAIL items above."
-  echo "  - Create docs/branding/VISUAL_PARITY_CHECKPOINTS.md if missing"
+  echo "  - Create docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md if missing"
   echo "  - Ensure 5-route x 3-domain matrix (15 entries) is documented"
   echo "  - Verify MerekaFooter wiring in apply-patches.sh"
   echo "  - Add verify-visual-parity-checkpoints.sh to .github/workflows/ci.yml"
-  echo "  - See docs/branding/VISUAL_PARITY_CHECKPOINTS.md for full runbook"
+  echo "  - See docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md for full runbook"
   exit 1
 fi
 

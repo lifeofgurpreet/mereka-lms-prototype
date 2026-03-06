@@ -181,7 +181,7 @@ Run this before cutover to capture a verifiable snapshot of cluster state.
 
 ```bash
 TIMESTAMP=$(date +%Y%m%dT%H%M)
-EVIDENCE_DIR="docs/operations/evidence/rke2/${TIMESTAMP}-lms-validation"
+EVIDENCE_DIR="docs/archive/evidence/operations/rke2/${TIMESTAMP}-lms-validation"
 mkdir -p "$EVIDENCE_DIR"
 
 # 1. Validation script output

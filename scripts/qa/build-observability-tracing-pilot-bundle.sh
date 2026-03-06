@@ -12,7 +12,7 @@ DISPATCH_PROFILE="${OBSERVABILITY_PILOT_DISPATCH_PROFILE:-nonprod}"
 K8S_CONTEXT="${OBSERVABILITY_PILOT_K8S_CONTEXT:-${OBSERVABILITY_K8S_CONTEXT:-${K8S_CONTEXT:-rke2-nonprod}}}"
 APP_NAMESPACE="${OBSERVABILITY_PILOT_APP_NAMESPACE:-mereka-lms}"
 MONITORING_NAMESPACE="${OBSERVABILITY_PILOT_MONITORING_NAMESPACE:-monitoring}"
-OUT_DIR="${OBSERVABILITY_PILOT_OUT_DIR:-docs/evidence/observability}"
+OUT_DIR="${OBSERVABILITY_PILOT_OUT_DIR:-docs/archive/evidence/observability}"
 PILOT_HOST="${OBSERVABILITY_PILOT_HOST:-apps.academyv2.mereka.dev}"
 PILOT_PATH="${OBSERVABILITY_PILOT_PATH:-/health/}"
 TEMPO_URL="${OBSERVABILITY_PILOT_TEMPO_URL:-${TEMPO_URL:-}}"
@@ -31,7 +31,7 @@ Options:
   --context <k8s-context>      kubectl context override
   --host <hostname>            pilot route host (default: apps.academyv2.mereka.dev)
   --path <path>                pilot route path (default: /health/)
-  --out-dir <dir>              evidence output base (default: docs/evidence/observability)
+  --out-dir <dir>              evidence output base (default: docs/archive/evidence/observability)
   --strict                     fail on downstream strict check failures
   --require-flow-capture       require successful route capture proof
   --help                       show this help text

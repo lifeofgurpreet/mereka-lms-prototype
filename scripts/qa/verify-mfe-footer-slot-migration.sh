@@ -33,7 +33,7 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN_FILE="$PLUGIN_MAIN"
 PATCHES_FILE="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-BRANDING_DOC="$REPO_ROOT/docs/branding/BRANDING_OPERATING_MODEL.md"
+BRANDING_DOC="$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
 OPS_DOC="$REPO_ROOT/docs/operations/MFE_FOOTER_SLOT_MIGRATION.md"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
@@ -383,7 +383,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "2. Register canonical slots in plugin contract sources"
   echo "   (org.openedx.frontend.layout.footer.v1 and org.openedx.frontend.layout.header_logo.v1)"
   echo "3. Keep apply-patches.sh free of structural footer/layout string rewrites"
-  echo "4. Add 'Plugin Slot Migration' section to docs/branding/BRANDING_OPERATING_MODEL.md"
+  echo "4. Add 'Plugin Slot Migration' section to docs/guides/branding/BRANDING_OPERATING_MODEL.md"
   echo "   documenting canonical slot IDs, fallback/exception paths, and rollback procedure"
   echo "5. Keep dead authn/dashboard wildcard selectors removed; enforce slot coverage in plugin contract sources"
   exit 1

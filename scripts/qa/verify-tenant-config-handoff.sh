@@ -21,7 +21,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-HANDOFF_DOC="$REPO_ROOT/docs/branding/TENANT_CONFIG_HANDOFF.md"
+HANDOFF_DOC="$REPO_ROOT/docs/guides/branding/TENANT_CONFIG_HANDOFF.md"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

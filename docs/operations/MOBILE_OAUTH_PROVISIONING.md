@@ -273,5 +273,5 @@ tutor local exec lms ./manage.py lms create_dot_application \
 ## Related Documentation
 
 - `docs/MOBILE_IOS_APP_SETUP.md` - iOS app setup guide
-- `docs/operations/AUTH_AND_PERMISSIONS.md` - Authentication architecture
+- `docs/ops/security/AUTH_AND_PERMISSIONS.md` - Authentication architecture
 - [Django OAuth Toolkit Documentation](https://django-oauth-toolkit.readthedocs.io/)

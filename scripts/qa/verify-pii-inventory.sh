@@ -16,7 +16,7 @@ skip() { echo "SKIP: $1"; SKIP=$((SKIP + 1)); }
 # ── File existence ────────────────────────────────────────────────────────────
 
 PII_DOC="$REPO_ROOT/docs/operations/PII_DATA_INVENTORY.md"
-ERASURE_DOC="$REPO_ROOT/docs/operations/DATA_ERASURE_RUNBOOK.md"
+ERASURE_DOC="$REPO_ROOT/docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md"
 
 if [[ -f "$PII_DOC" ]]; then
   pass "PII_DATA_INVENTORY.md exists"
