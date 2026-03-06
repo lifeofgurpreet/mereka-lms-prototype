@@ -24,7 +24,17 @@ TEXT_SUFFIXES = {
     ".txt",
 }
 SCRIPT_REF_PATTERN = re.compile(r"scripts/[A-Za-z0-9_./-]*verify-[A-Za-z0-9_./-]*\.sh")
-STATUS_OVERRIDE_KEYS = {"owner", "tier", "cadence", "severity", "status"}
+SPEC_ID_PATTERN = re.compile(r"AC-[A-Z0-9-]+")
+STATUS_OVERRIDE_KEYS = {
+    "owner",
+    "tier",
+    "cadence",
+    "severity",
+    "status",
+    "kind",
+    "mutability",
+}
+ENV_SCOPE_TOKENS = ("dev", "staging", "prod", "nonprod", "preview")
 
 ENTRYPOINTS = [
     {
@@ -49,9 +59,17 @@ ENTRYPOINTS = [
 class ScriptMeta:
     path: str
     owner: str
+    kind: str
     tier: str
     cadence: str
     severity: str
+    mutability: str
+    env_scope: list[str]
+    spec_ids: list[str]
+    runtime_dependencies: list[str]
+    ci_entrypoints: list[str]
+    canonical: bool
+    replaced_by: str
     ci_binding: list[str]
     reference_count: int
     status: str
@@ -116,6 +134,85 @@ def classify_owner(script_path: str) -> str:
     if any(k in joined for k in ["migration", "kajabi", "mct", "video"]):
         return "migration-platform"
     return "platform-core"
+
+
+def classify_kind(script_path: str) -> str:
+    name = Path(script_path).name
+    prefixes = (
+        "verify-",
+        "audit-",
+        "check-",
+        "run-",
+        "build-",
+        "generate-",
+        "test-",
+        "fix-",
+        "sync-",
+        "load-",
+    )
+    for prefix in prefixes:
+        if name.startswith(prefix):
+            return prefix.rstrip("-")
+    return "script"
+
+
+def classify_mutability(script_path: str, content: str) -> str:
+    name = Path(script_path).name
+    if name.startswith(("fix-", "repair-", "cleanup-", "load-", "sync-", "apply-", "create-", "provision-", "rollback-")):
+        return "mutating"
+    if re.search(r"\b(kubectl\s+(apply|delete|patch|replace)|terraform\s+apply|helm\s+upgrade|argocd\s+app\s+sync)\b", content):
+        return "destructive"
+    if "rm -rf" in content:
+        return "mutating"
+    return "read-only"
+
+
+def classify_env_scope(content: str) -> list[str]:
+    found = sorted({token for token in ENV_SCOPE_TOKENS if re.search(rf"\b{token}\b", content)})
+    return found if found else ["global"]
+
+
+def classify_runtime_dependencies(content: str) -> list[str]:
+    deps: list[str] = []
+    if re.search(r"\bkubectl\b", content):
+        deps.append("cluster")
+    if re.search(r"\b(gcloud|aws|az)\b", content):
+        deps.append("cloud")
+    if re.search(r"\b(infisical|stripe|sentry|argocd)\b", content):
+        deps.append("vendor")
+    if not deps:
+        deps.append("none")
+    return deps
+
+
+def load_deprecated_replacement_map(deprecated_manifest: list[dict]) -> dict[str, str]:
+    replacements: dict[str, str] = {}
+    for item in deprecated_manifest:
+        if not isinstance(item, dict):
+            continue
+        path = item.get("path")
+        replacement = item.get("replacement_entrypoint")
+        if isinstance(path, str) and path:
+            replacements[path] = replacement if isinstance(replacement, str) else ""
+    return replacements
+
+
+def load_basename_contracts(repo_root: Path) -> dict[str, dict]:
+    allowlist_path = repo_root / "scripts/qa/fixtures/script-basename-overlap-allowlist.json"
+    if not allowlist_path.exists():
+        return {}
+    payload = json.loads(allowlist_path.read_text(encoding="utf-8"))
+    overlaps = payload.get("overlaps", [])
+    if not isinstance(overlaps, list):
+        return {}
+    by_basename: dict[str, dict] = {}
+    for item in overlaps:
+        if not isinstance(item, dict):
+            continue
+        basename = item.get("basename")
+        if isinstance(basename, str) and basename:
+            by_basename[basename] = item
+    return by_basename
 
 
 def classify_tier(path: str, ci_binding: list[str], reference_count: int) -> tuple[str, str, str, str]:
@@ -196,6 +293,8 @@ def build_catalog(repo_root: Path) -> dict:
         deprecated_manifest = json.loads(
             deprecated_manifest_path.read_text(encoding="utf-8")
         ).get("scripts", [])
+    deprecated_replacements = load_deprecated_replacement_map(deprecated_manifest)
+    basename_contracts = load_basename_contracts(repo_root)
 
     ci_static_list = repo_root / ".github/ci-scripts-static.txt"
     ci_static = set(normalize_lines(ci_static_list)) if ci_static_list.exists() else set()
@@ -204,6 +303,27 @@ def build_catalog(repo_root: Path) -> dict:
     for workflow in (repo_root / ".github/workflows").glob("*.y*ml"):
         text = workflow.read_text(encoding="utf-8", errors="ignore")
         workflow_refs.update(SCRIPT_REF_PATTERN.findall(text))
+
+    release_gate_refs: set[str] = set()
+    release_gate_path = repo_root / "scripts/qa/run-release-verification-gates.sh"
+    if release_gate_path.exists():
+        release_gate_refs.update(
+            SCRIPT_REF_PATTERN.findall(release_gate_path.read_text(encoding="utf-8", errors="ignore"))
+        )
+
+    operations_gate_refs: set[str] = set()
+    operations_gate_path = repo_root / "scripts/qa/run-operations-gates.sh"
+    if operations_gate_path.exists():
+        operations_gate_refs.update(
+            SCRIPT_REF_PATTERN.findall(operations_gate_path.read_text(encoding="utf-8", errors="ignore"))
+        )
+
+    multisite_gate_refs: set[str] = set()
+    multisite_gate_path = repo_root / "scripts/qa/run-multisite-governance-gates.sh"
+    if multisite_gate_path.exists():
+        multisite_gate_refs.update(
+            SCRIPT_REF_PATTERN.findall(multisite_gate_path.read_text(encoding="utf-8", errors="ignore"))
+        )
 
     status_overrides = load_status_overrides(repo_root)
     reference_counts = compute_reference_counts(repo_root, script_paths)
@@ -216,6 +336,14 @@ def build_catalog(repo_root: Path) -> dict:
             ci_binding.append("ci_static")
         if script_path in workflow_refs:
             ci_binding.append("workflow_direct")
+        ci_entrypoints = list(ci_binding)
+        if script_path in release_gate_refs:
+            ci_entrypoints.append("release_gate")
+        if script_path in operations_gate_refs:
+            ci_entrypoints.append("operations_gate")
+        if script_path in multisite_gate_refs:
+            ci_entrypoints.append("multisite_gate")
+        ci_entrypoints = sorted(set(ci_entrypoints))
 
         tier, cadence, severity, status = classify_tier(
             script_path,
@@ -227,12 +355,28 @@ def build_catalog(repo_root: Path) -> dict:
         if override:
             overrides_applied += 1
 
+        content = (repo_root / script_path).read_text(encoding="utf-8", errors="ignore")
+        basename_contract = basename_contracts.get(Path(script_path).name, {})
+        canonical = True
+        if basename_contract.get("contract_type") == "wrapper":
+            canonical = basename_contract.get("canonical") == script_path
+        elif basename_contract.get("contract_type") == "peer_set":
+            canonical = False
+
         entry = ScriptMeta(
             path=script_path,
             owner=override.get("owner", classify_owner(script_path)),
+            kind=override.get("kind", classify_kind(script_path)),
             tier=override.get("tier", tier),
             cadence=override.get("cadence", cadence),
             severity=override.get("severity", severity),
+            mutability=override.get("mutability", classify_mutability(script_path, content)),
+            env_scope=classify_env_scope(content),
+            spec_ids=sorted(set(SPEC_ID_PATTERN.findall(content))),
+            runtime_dependencies=classify_runtime_dependencies(content),
+            ci_entrypoints=ci_entrypoints,
+            canonical=canonical,
+            replaced_by=deprecated_replacements.get(script_path, ""),
             ci_binding=ci_binding,
             reference_count=reference_counts.get(script_path, 0),
             status=override.get("status", status),
@@ -241,9 +385,17 @@ def build_catalog(repo_root: Path) -> dict:
             {
                 "path": entry.path,
                 "owner": entry.owner,
+                "kind": entry.kind,
                 "tier": entry.tier,
                 "cadence": entry.cadence,
                 "severity": entry.severity,
+                "mutability": entry.mutability,
+                "env_scope": entry.env_scope,
+                "spec_ids": entry.spec_ids,
+                "runtime_dependencies": entry.runtime_dependencies,
+                "ci_entrypoints": entry.ci_entrypoints,
+                "canonical": entry.canonical,
+                "replaced_by": entry.replaced_by,
                 "ci_binding": entry.ci_binding,
                 "reference_count": entry.reference_count,
                 "status": entry.status,
@@ -252,9 +404,13 @@ def build_catalog(repo_root: Path) -> dict:
 
     by_tier: dict[str, int] = {}
     by_status: dict[str, int] = {}
+    by_kind: dict[str, int] = {}
+    by_mutability: dict[str, int] = {}
     for item in catalog_entries:
         by_tier[item["tier"]] = by_tier.get(item["tier"], 0) + 1
         by_status[item["status"]] = by_status.get(item["status"], 0) + 1
+        by_kind[item["kind"]] = by_kind.get(item["kind"], 0) + 1
+        by_mutability[item["mutability"]] = by_mutability.get(item["mutability"], 0) + 1
 
     return {
         "version": "1",
@@ -265,6 +421,8 @@ def build_catalog(repo_root: Path) -> dict:
             "archived_deprecated_scripts": len(deprecated_manifest),
             "tiers": by_tier,
             "statuses": by_status,
+            "kinds": by_kind,
+            "mutability": by_mutability,
             "ci_static_bound": sum(1 for x in catalog_entries if "ci_static" in x["ci_binding"]),
             "workflow_direct_bound": sum(
                 1 for x in catalog_entries if "workflow_direct" in x["ci_binding"]
@@ -311,6 +469,14 @@ def render_markdown(catalog: dict) -> str:
     lines.extend(["", "### Status Distribution"])
     for status, count in sorted(summary["statuses"].items()):
         lines.append(f"- `{status}`: {count}")
+
+    lines.extend(["", "### Kind Distribution"])
+    for kind, count in sorted(summary.get("kinds", {}).items()):
+        lines.append(f"- `{kind}`: {count}")
+
+    lines.extend(["", "### Mutability Distribution"])
+    for mutability, count in sorted(summary.get("mutability", {}).items()):
+        lines.append(f"- `{mutability}`: {count}")
 
     lines.extend(["", "## Deprecated Candidates", ""])
     if not deprecated:
@@ -394,4 +560,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-    status_overrides = load_status_overrides(repo_root)
