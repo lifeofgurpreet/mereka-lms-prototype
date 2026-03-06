@@ -160,6 +160,48 @@ def fetch_pr_status(number: int) -> str:
     return "Closed"
 
 
+def fetch_pr_status_bulk(required_prs: set[int]) -> tuple[dict[int, str], int]:
+    if not required_prs:
+        return {}, 0
+
+    out = subprocess.check_output(
+        [
+            "gh",
+            "pr",
+            "list",
+            "--repo",
+            repo_slug,
+            "--state",
+            "all",
+            "--limit",
+            "1000",
+            "--json",
+            "number,state,mergedAt",
+        ],
+        text=True,
+    )
+    payload = json.loads(out)
+    status_by_pr: dict[int, str] = {}
+    for item in payload:
+        number = item.get("number")
+        if not isinstance(number, int):
+            continue
+        if item.get("mergedAt"):
+            status_by_pr[number] = "Merged"
+        elif item.get("state") == "OPEN":
+            status_by_pr[number] = "Open"
+        else:
+            status_by_pr[number] = "Closed"
+
+    fallback_calls = 0
+    missing = sorted(required_prs - set(status_by_pr))
+    for number in missing:
+        status_by_pr[number] = fetch_pr_status(number)
+        fallback_calls += 1
+
+    return status_by_pr, fallback_calls
+
+
 def collect_pr_numbers(path: Path, heading: str) -> set[int]:
     lines = path.read_text(encoding="utf-8").splitlines()
     table_start, table_end = find_table(lines, heading)
@@ -240,7 +282,7 @@ for section in TARGET_SECTIONS:
 if not all_prs:
     raise SystemExit("FAIL: no PR references found in target sections")
 
-status_by_pr = {pr: fetch_pr_status(pr) for pr in sorted(all_prs)}
+status_by_pr, fallback_calls = fetch_pr_status_bulk(all_prs)
 
 total_updates = 0
 all_diffs: list[str] = []
@@ -256,6 +298,7 @@ for section in TARGET_SECTIONS:
 
 print(f"Repo: {repo_slug}")
 print(f"Tracked PRs: {len(all_prs)}")
+print(f"Fallback PR API calls: {fallback_calls}")
 if all_diffs:
     print("Detected status drift:")
     for diff in all_diffs:
