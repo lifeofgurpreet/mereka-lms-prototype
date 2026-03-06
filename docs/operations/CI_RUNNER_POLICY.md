@@ -26,7 +26,7 @@ The policy is enforced by `scripts/qa/verify-ci-runner-policy.sh`, which is regi
 | Docker | Not available (no DinD sidecar) |
 | Cluster access | Yes (in-cluster, kubectl pre-configured) |
 | Cost | Sunk-cost (VPS always on) |
-| Fallback expression | `${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}` |
+| Fallback expression | Not allowed (hard-coded ARC labels only) |
 
 Use for jobs that need live cluster access, runtime checks, or scheduled audits. These jobs
 benefit from in-cluster network proximity (no external auth round-trip) and eliminate GitHub-hosted
@@ -213,10 +213,11 @@ When adding a new workflow:
 
 `scripts/qa/verify-ci-runner-policy.sh` enforces this policy in CI. It:
 
-1. Parses every `.github/workflows/*.yml` file
-2. Checks that `runs-on: mereka-k8s-heavy-builders` is used only for Docker build and Playwright jobs
-3. Checks that no GitHub-hosted Linux labels (`ubuntu-*`) are used
-4. Reports violations with workflow file and line number
+1. Parses every `.github/workflows/*.yml` file structurally via `yq` (job-level `runs-on`)
+2. Fails if a non-reusable job omits `runs-on`
+3. Fails on expression-based `runs-on` values (including deprecated `USE_SELF_HOSTED_RUNNERS` fallbacks)
+4. Enforces allowed labels only: `mereka-k8s-runners`, allowlisted `mereka-k8s-heavy-builders`, and macOS exceptions
+5. Fails on GitHub-hosted Linux labels (`ubuntu-*`) and any unknown runner labels
 
 The script runs as part of the `static-validation` job in `ci.yml` via `.github/ci-scripts-static.txt`.
 It exits non-zero on violations so CI blocks merges.

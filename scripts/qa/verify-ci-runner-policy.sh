@@ -1,19 +1,7 @@
 #!/usr/bin/env bash
+# @covers AC-CI-014
+# @spec: ci-cd-pipeline_spec.md
 # verify-ci-runner-policy.sh — enforce ARC-first CI runner policy
-#
-# Policy source: docs/operations/CI_RUNNER_POLICY.md
-#
-# Rules checked:
-#   1. No GitHub-hosted Linux runners ('ubuntu-*')
-#   2. No fallback expressions — all jobs must hard-code ARC runner labels
-#   3. 'mereka-k8s-heavy-builders' only in allowed workflows
-#   4. All other jobs must use 'mereka-k8s-runners'
-#   5. macOS runner exceptions are explicitly allowlisted (Apple-only flows)
-#
-# Exit codes:
-#   0 — policy satisfied
-#   1 — policy violation found
-
 set -euo pipefail
 
 WORKFLOWS_DIR=".github/workflows"
@@ -36,7 +24,6 @@ HEAVY_BUILDER_ALLOWED=(
 )
 
 violations=0
-warnings=0
 checks=0
 
 error() {
@@ -44,22 +31,89 @@ error() {
   violations=$((violations + 1))
 }
 
-warn() {
-  echo "  WARN: $*"
-  warnings=$((warnings + 1))
-}
-
 pass() {
   checks=$((checks + 1))
 }
 
 is_in_list() {
-  local needle="$1"; shift
+  local needle="$1"
+  shift
+  local item
   for item in "$@"; do
     [[ "$needle" == "$item" ]] && return 0
   done
   return 1
 }
+
+trim() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
+validate_runner_label() {
+  local wf_name="$1"
+  local job_name="$2"
+  local raw_label="$3"
+  local label
+  label="$(trim "${raw_label//$'\r'/}")"
+
+  if [[ -z "$label" || "$label" == "null" ]]; then
+    error "$wf_name:$job_name has empty runs-on label"
+    return
+  fi
+
+  if [[ "$label" == *"USE_SELF_HOSTED_RUNNERS"* ]]; then
+    error "$wf_name:$job_name uses deprecated fallback expression '$label'"
+    return
+  fi
+
+  if [[ "$label" == *'${{'* ]]; then
+    error "$wf_name:$job_name uses expression-based runs-on '$label' (hard-coded ARC label required)"
+    return
+  fi
+
+  if [[ "$label" == *"ubuntu-"* ]]; then
+    error "$wf_name:$job_name uses GitHub-hosted Linux runner '$label'"
+    return
+  fi
+
+  if [[ "$label" == *"macos-"* ]]; then
+    if is_in_list "$wf_name" "${MACOS_HOSTED_EXCEPTIONS[@]}"; then
+      pass
+    else
+      error "$wf_name:$job_name uses GitHub-hosted macOS runner '$label' outside allowlist"
+    fi
+    return
+  fi
+
+  if [[ "$label" == "mereka-k8s-heavy-builders" ]]; then
+    if is_in_list "$wf_name" "${HEAVY_BUILDER_ALLOWED[@]}"; then
+      pass
+    else
+      error "$wf_name:$job_name uses 'mereka-k8s-heavy-builders' outside allowlist"
+    fi
+    return
+  fi
+
+  if [[ "$label" == "mereka-k8s-runners" ]]; then
+    pass
+    return
+  fi
+
+  error "$wf_name:$job_name uses unapproved runner label '$label'"
+}
+
+if ! command -v yq >/dev/null 2>&1; then
+  echo "ERROR: yq is required for workflow parsing." >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "ERROR: jq is required for workflow parsing." >&2
+  exit 1
+fi
 
 if [[ ! -d "$WORKFLOWS_DIR" ]]; then
   echo "ERROR: workflows directory not found at $WORKFLOWS_DIR" >&2
@@ -84,72 +138,46 @@ echo ""
 for wf_path in "${workflow_files[@]}"; do
   wf_name="$(basename "$wf_path")"
 
-  while IFS=: read -r lineno line; do
-    runs_on_value="${line#*runs-on:}"
-    runs_on_value="${runs_on_value#"${runs_on_value%%[![:space:]]*}"}"
-    runs_on_value="${runs_on_value%"${runs_on_value##*[![:space:]]}"}"
+  while IFS= read -r job_row; do
+    [[ -z "$job_row" ]] && continue
 
-    [[ -z "$runs_on_value" ]] && continue
+    job_name="$(jq -r '.job' <<<"$job_row")"
+    uses_value="$(jq -r '.uses // ""' <<<"$job_row")"
+    runs_on_type="$(jq -r '.runs_on | type' <<<"$job_row")"
 
-    # ── GitHub-hosted Linux labels are forbidden ──────────────────────────
-    if echo "$runs_on_value" | grep -qE 'ubuntu-'; then
-      error "$wf_name:$lineno  uses GitHub-hosted Linux runner '$runs_on_value' — must use ARC runner (mereka-k8s-runners or mereka-k8s-heavy-builders)"
-      continue
-    fi
+    [[ -z "$job_name" ]] && continue
 
-    # ── GitHub-hosted macOS labels are tightly scoped exceptions ──────────
-    if echo "$runs_on_value" | grep -qE 'macos-'; then
-      if is_in_list "$wf_name" "${MACOS_HOSTED_EXCEPTIONS[@]}"; then
+    if [[ "$runs_on_type" == "null" ]]; then
+      if [[ -n "$uses_value" ]]; then
+        # Reusable-workflow proxy job (runs-on belongs to called workflow).
         pass
       else
-        error "$wf_name:$lineno  uses GitHub-hosted macOS runner '$runs_on_value' outside approved Apple workflows"
+        error "$wf_name:$job_name missing runs-on"
       fi
       continue
     fi
 
-    # ── Fallback expressions (DEPRECATED) ─────────────────────────────────
-    if echo "$runs_on_value" | grep -qF "USE_SELF_HOSTED_RUNNERS"; then
-      error "$wf_name:$lineno  uses deprecated fallback expression — replace with hard 'mereka-k8s-runners' label"
+    mapfile -t labels < <(jq -r 'if .runs_on | type == "array" then .runs_on[] else .runs_on end' <<<"$job_row")
+    if [[ "${#labels[@]}" -eq 0 ]]; then
+      error "$wf_name:$job_name has empty runs-on declaration"
       continue
     fi
 
-    # ── Heavy builders — only in allowed workflows ────────────────────────
-    if echo "$runs_on_value" | grep -qF "mereka-k8s-heavy-builders"; then
-      if is_in_list "$wf_name" "${HEAVY_BUILDER_ALLOWED[@]}"; then
-        pass
-      else
-        error "$wf_name:$lineno  uses 'mereka-k8s-heavy-builders' — add to HEAVY_BUILDER_ALLOWED in this script if intentional"
-      fi
-      continue
-    fi
-
-    # ── ARC lightweight — correct ─────────────────────────────────────────
-    if echo "$runs_on_value" | grep -qF "mereka-k8s-runners"; then
-      pass
-      continue
-    fi
-
-    # ── Expression patterns (matrix, needs, inputs) — skip ────────────────
-    if echo "$runs_on_value" | grep -qE '^\$\{\{'; then
-      if echo "$runs_on_value" | grep -qE "matrix\.|needs\.|github\.|inputs\."; then
-        pass
-        continue
-      fi
-      warn "$wf_name:$lineno  uses non-standard expression: $runs_on_value"
-      continue
-    fi
-
-    # ── Unknown label ─────────────────────────────────────────────────────
-    warn "$wf_name:$lineno  unrecognized runner label: $runs_on_value"
-
-  done < <(grep -n "runs-on:" "$wf_path")
+    label_index=0
+    for label in "${labels[@]}"; do
+      label_index=$((label_index + 1))
+      validate_runner_label "$wf_name" "$job_name[$label_index]" "$label"
+    done
+  done < <(
+    yq -o=json '.jobs // {}' "$wf_path" \
+      | jq -c 'to_entries[] | {job: .key, uses: (.value.uses // ""), runs_on: (.value["runs-on"] // null)}'
+  )
 done
 
 echo ""
 echo "=== Summary ==="
 echo "Checks     : $checks"
 echo "Violations : $violations"
-echo "Warnings   : $warnings"
 echo ""
 
 if [[ "$violations" -gt 0 ]]; then
@@ -158,8 +186,4 @@ if [[ "$violations" -gt 0 ]]; then
   exit 1
 fi
 
-if [[ "$warnings" -gt 0 ]]; then
-  echo "PASS — no violations. $warnings warning(s) noted (non-blocking)."
-else
-  echo "PASS — all runner labels conform to ARC-first policy."
-fi
+echo "PASS — all workflow jobs conform to ARC-first runner policy."
