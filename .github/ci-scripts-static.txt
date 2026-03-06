@@ -109,6 +109,7 @@ scripts/qa/verify-new-ci-static-entries.sh
 scripts/qa/verify-verification-catalog.sh
 scripts/qa/test-verify-verification-catalog.sh
 scripts/qa/verify-verification-sprawl-budget.sh
+scripts/qa/verify-verify-script-reachability.sh
 scripts/qa/verify-deprecated-verification-hygiene.sh
 scripts/qa/verify-post-deploy-health-gate-wiring.sh
 scripts/qa/verify-release-automation.sh
