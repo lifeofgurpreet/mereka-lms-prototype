@@ -8,18 +8,18 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **498**
+- Total `verify-*.sh` scripts: **499**
 - Archived deprecated scripts: **5**
-- CI static-bound scripts: **312**
+- CI static-bound scripts: **313**
 - Workflow-direct bound scripts: **51**
 
 ### Tier Distribution
 - `exploratory_manual`: 159
 - `periodic_runtime`: 7
-- `release_blocking`: 334
+- `release_blocking`: 335
 
 ### Status Distribution
-- `active`: 341
+- `active`: 342
 - `deprecated_candidate`: 32
 - `manual_only`: 127
 

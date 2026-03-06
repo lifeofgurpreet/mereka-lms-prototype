@@ -13,9 +13,11 @@ These are the only approved top-level gate entry points.
 - Machine-readable: `docs/operations/verification/verification_catalog.json`
 - Human summary: `docs/operations/verification/VERIFICATION_CATALOG.md`
 - Deprecated archive: `docs/operations/verification/deprecated_verify_scripts.json`
+- Sprawl budget: `docs/operations/verification/verification_sprawl_budget.json`
 - Generator: `python3 scripts/qa/generate-verification-catalog.py`
 - CI gate: `./scripts/qa/verify-verification-catalog.sh`
 - CI hygiene gate: `./scripts/qa/verify-deprecated-verification-hygiene.sh`
+- CI growth gate: `./scripts/qa/verify-verification-sprawl-budget.sh`
 
 ## Tier Policy
 
@@ -32,6 +34,16 @@ For scripts marked `deprecated_candidate` in the catalog:
 3. Move decommissioned logic into docs/evidence or a consolidated gate.
 4. Remove script from active references and regenerate the catalog.
 5. Move retired scripts to `scripts/qa/deprecated/` and register them in `deprecated_verify_scripts.json`.
+
+## Sprawl Budget Policy
+
+- Verification suite growth MUST remain within `verification_sprawl_budget.json`.
+- Increasing any budget threshold is allowed only via explicit reviewed PR rationale.
+- Preferred strategy is consolidation:
+  - raise `ci_static_bound`,
+  - reduce `manual_only`,
+  - reduce `deprecated_candidate`,
+  before adding new standalone `verify-*.sh` scripts.
 
 ## Environment Dependency Boundary
 
