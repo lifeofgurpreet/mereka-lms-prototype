@@ -43,6 +43,7 @@ authorization: bearer eyJ...
 
 - Local: `.githooks/pre-commit` calls `scripts/qa/verify-evidence-redaction.sh --staged-only`
 - CI: `.github/workflows/ci.yml` runs `STRICT=1 ./scripts/qa/verify-evidence-redaction.sh`
+- CI growth budget: `./scripts/qa/verify-evidence-sprawl-budget.sh` enforces tracked evidence file/size budgets from `docs/operations/verification/evidence_sprawl_budget.json`
 
 ## Related
 
