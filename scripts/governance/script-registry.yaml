@@ -358,6 +358,25 @@ scripts:
     proof_command: "bash scripts/infra/bootstrap-kind-secrets.sh --help 2>&1 || true"
     criticality: release-supporting
 
+  # ── Release Gate ─────────────────────────────────────────────────────────────
+
+  - path: scripts/release/release-gate.sh
+    owner: platform-team
+    purpose: >
+      Canonical release verification entrypoint. Runs 6 gates: Kustomize render,
+      deployment contract validation, migration registry, image pin check,
+      secret key completeness, and cluster connectivity.
+    inputs:
+      - --overlay PATH (default: deploy/k8s/base)
+      - --skip-cluster (skip live cluster checks)
+    outputs:
+      - stdout (PASS/SKIP/FAIL per gate)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/release-gate.sh --skip-cluster 2>&1 | tail -10"
+    criticality: release-blocking
+
   # ── Quality Gates & Verification ─────────────────────────────────────────────
 
   - path: scripts/qa/verify-deployment-contract.sh

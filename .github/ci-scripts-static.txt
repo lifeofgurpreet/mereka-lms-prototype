@@ -569,3 +569,6 @@ scripts/qa/no_runtime_release_side_effects.sh
 scripts/qa/verify-deployment-contract.sh
 scripts/release/release-gate.sh --skip-cluster
 scripts/governance/validate-registry.sh
+scripts/qa/scan-secrets-fast.sh
+scripts/qa/verify-release-readiness.sh --dry-run
+scripts/qa/verify-script-registry-completeness.sh
