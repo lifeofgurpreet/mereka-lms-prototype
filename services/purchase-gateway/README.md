@@ -53,6 +53,7 @@ All configuration via environment variables (see `app/config.py`):
 | GET | `/api/v1/admin/orders/{order_id}/` | `X-API-Key` | Get detailed order view with line items, audit timeline, and fulfillment job |
 | POST | `/api/v1/admin/orders/{order_id}/retry-fulfillment/` | `X-API-Key` | Force requeue fulfillment job for retryable orders |
 | POST | `/api/v1/admin/orders/{order_id}/refund/` | `X-API-Key` | Initiate Stripe refund (order state updates asynchronously via webhook) |
+| GET | `/api/v1/admin/entitlements/` | `X-API-Key` | List/filter entitlements by tenant, status, and recipient email |
 | GET | `/health/` | None | Liveness probe |
 | GET | `/ready/` | None | Readiness probe |
 | GET | `/metrics/` | None | Prometheus metrics |
