@@ -98,6 +98,17 @@ http://academyv2.mereka.io, http://academyv2.mereka.dev, http://preview.academyv
         }
     }
 
+    # Purchase Gateway — Stripe webhooks + checkout API
+    handle /payments/* {
+        uri strip_prefix /payments
+        reverse_proxy payments-gateway:8080 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+
     import proxy "lms:8000"
 
 
