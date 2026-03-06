@@ -68,7 +68,7 @@ app.add_middleware(
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "Authorization", "X-API-Key", "X-Tenant-ID"],
 )
 
 app.add_middleware(TenantMiddleware)

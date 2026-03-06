@@ -139,4 +139,4 @@ async def require_admin_api_key(
     if not hmac.compare_digest(api_key_value, admin_api_key):
         logger.warning("admin.invalid_api_key")
         raise HTTPException(status_code=403, detail="Invalid API key")
-    return api_key_value
+    return "api-key-admin"
