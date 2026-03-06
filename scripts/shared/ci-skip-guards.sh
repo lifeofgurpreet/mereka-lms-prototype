@@ -3,6 +3,7 @@
 # @spec: ci-cd-pipeline_spec.md
 # Shared CI skip guards — source this in verification scripts to gracefully
 # skip checks whose prerequisites are absent (tutor_env, exports, kubectl, etc.).
+# lint: allow-no-euo (sourced helper; must not mutate caller shell options)
 #
 # Usage:
 #   source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/shared/ci-skip-guards.sh"
