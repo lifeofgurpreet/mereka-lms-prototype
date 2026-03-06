@@ -71,6 +71,18 @@
       "path": "scripts/qa/deprecated/verify-gh-actions-cost-tracking.sh",
       "reason": "Unbound exploratory check for non-existent GitHub Actions cost tracking script with strict-mode counter semantics that terminate on first warning.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-03-06",
+      "path": "scripts/qa/deprecated/verify-cicd-image-build.sh",
+      "reason": "Unbound exploratory check with stale CI contract assumptions (deprecated build inputs) no longer matching the active build workflow.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-03-06",
+      "path": "scripts/qa/deprecated/verify-cicd-scheduled-ops.sh",
+      "reason": "Unbound exploratory check with stale scheduled-ops workflow assumptions no longer matching active runtime gate workflows.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ],
   "entrypoints": [
@@ -916,16 +928,6 @@
       "cadence": "on_demand",
       "ci_binding": [],
       "owner": "frontend-platform",
-      "path": "scripts/qa/verify-cicd-image-build.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
-    },
-    {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "frontend-platform",
       "path": "scripts/qa/verify-cicd-ios-build.sh",
       "reference_count": 1,
       "severity": "low",
@@ -964,16 +966,6 @@
       "reference_count": 2,
       "severity": "low",
       "status": "manual_only",
-      "tier": "exploratory_manual"
-    },
-    {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "platform-core",
-      "path": "scripts/qa/verify-cicd-scheduled-ops.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
       "tier": "exploratory_manual"
     },
     {
@@ -5863,19 +5855,19 @@
     }
   ],
   "summary": {
-    "archived_deprecated_scripts": 12,
+    "archived_deprecated_scripts": 14,
     "ci_static_bound": 325,
     "statuses": {
       "active": 352,
-      "deprecated_candidate": 26,
+      "deprecated_candidate": 24,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 153,
+      "exploratory_manual": 151,
       "periodic_runtime": 7,
       "release_blocking": 345
     },
-    "total_verify_scripts": 505,
+    "total_verify_scripts": 503,
     "workflow_direct_bound": 49
   },
   "version": "1"

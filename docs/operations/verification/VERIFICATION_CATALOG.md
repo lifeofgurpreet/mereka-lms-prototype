@@ -8,19 +8,19 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **505**
-- Archived deprecated scripts: **12**
+- Total `verify-*.sh` scripts: **503**
+- Archived deprecated scripts: **14**
 - CI static-bound scripts: **325**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 153
+- `exploratory_manual`: 151
 - `periodic_runtime`: 7
 - `release_blocking`: 345
 
 ### Status Distribution
 - `active`: 352
-- `deprecated_candidate`: 26
+- `deprecated_candidate`: 24
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -29,9 +29,7 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-audit-logging.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-branding-evidence-a11y-contract.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-branding-evidence-screenshot-contract.sh` (owner: `frontend-platform`, refs: 1)
-- `scripts/qa/verify-cicd-image-build.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-cicd-ios-build.sh` (owner: `frontend-platform`, refs: 1)
-- `scripts/qa/verify-cicd-scheduled-ops.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-cicd-tutor-plugin-test.sh` (owner: `platform-infra`, refs: 1)
 - `scripts/qa/verify-credentials-issuer.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-deprecation-discipline.sh` (owner: `platform-core`, refs: 1)
@@ -67,6 +65,8 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/deprecated/verify-gh-actions-budget-config.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check for non-existent GitHub Actions budget config with strict-mode counter semantics that terminate on first warning.)
 - `scripts/qa/deprecated/verify-gh-actions-cost-dashboard.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check for non-existent GitHub Actions cost dashboard with strict-mode counter semantics that terminate on first warning.)
 - `scripts/qa/deprecated/verify-gh-actions-cost-tracking.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check for non-existent GitHub Actions cost tracking script with strict-mode counter semantics that terminate on first warning.)
+- `scripts/qa/deprecated/verify-cicd-image-build.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale CI contract assumptions (deprecated build inputs) no longer matching the active build workflow.)
+- `scripts/qa/deprecated/verify-cicd-scheduled-ops.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale scheduled-ops workflow assumptions no longer matching active runtime gate workflows.)
 
 ## Lifecycle Policy
 - `release_blocking`: MUST stay bound to CI static or direct workflow execution.
