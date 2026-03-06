@@ -7,6 +7,7 @@
 scripts/qa/verify-repo-structure.sh
 scripts/qa/verify-repo-hygiene-artifacts.sh
 scripts/qa/verify-custom-apps-hygiene.sh
+scripts/qa/verify-authn-submodule-path-contract.sh
 scripts/qa/verify-evidence-tracking-policy.sh
 scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-documentation-links.sh
@@ -32,6 +33,7 @@ scripts/qa/verify-k8s-images.sh
 scripts/qa/verify-k8s-secrets-hygiene.sh
 scripts/qa/verify-kustomize-no-deprecated-keys.sh
 scripts/qa/verify-kustomize-render.sh
+scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
 scripts/qa/verify-network-policies.sh
 scripts/qa/verify-no-latest-prod-tags.sh
 scripts/qa/verify-gitops-image-overrides.sh --skip-infra
