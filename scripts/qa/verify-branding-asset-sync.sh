@@ -42,24 +42,22 @@ echo
 
 # Check 1: Verify tutor_env build directory exists
 BUILD_DIR="${REPO_ROOT}/tutor_env/env/build/openedx"
+BUILD_AVAILABLE=1
 
 if [[ ! -d "$BUILD_DIR" ]]; then
+  BUILD_AVAILABLE=0
   skip "tutor_env/env/build/openedx not found (image build not completed)"
-  echo
-  echo "=== Summary ==="
-  echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC} $SKIP"
-  echo
-  echo "Note: This verification requires 'tutor images build openedx' to have completed."
-  echo "  Run: tutor images build openedx"
-  exit 0
+else
+  pass "Build directory exists: tutor_env/env/build/openedx"
 fi
 
-pass "Build directory exists: tutor_env/env/build/openedx"
-
-RUNTIME_THEME_AVAILABLE=1
-if [[ ! -d "${BUILD_DIR}/themes/mereka" ]]; then
-  RUNTIME_THEME_AVAILABLE=0
-  skip "Rendered themes/mereka build tree not found (runtime asset checks 2/3/4/7 will be skipped)"
+RUNTIME_THEME_AVAILABLE=0
+if [[ "$BUILD_AVAILABLE" -eq 1 ]]; then
+  RUNTIME_THEME_AVAILABLE=1
+  if [[ ! -d "${BUILD_DIR}/themes/mereka" ]]; then
+    RUNTIME_THEME_AVAILABLE=0
+    skip "Rendered themes/mereka build tree not found (runtime asset checks 2/3/4/7 will be skipped)"
+  fi
 fi
 
 # Check 2: Verify Mereka logo variants exist in compiled static files (AC-INT-003)
@@ -287,6 +285,12 @@ if [[ $FAIL -gt 0 ]]; then
   echo "  2. Build: tutor images build openedx"
   echo "  3. Verify: grep -r 'fonts.googleapis.com' tutor_env/env/build/openedx/"
   exit 1
+fi
+
+if [[ "$BUILD_AVAILABLE" -eq 0 ]]; then
+  echo
+  echo "Note: Runtime asset checks were skipped because Tutor build artifacts are unavailable."
+  echo "  Run: tutor images build openedx"
 fi
 
 exit 0
