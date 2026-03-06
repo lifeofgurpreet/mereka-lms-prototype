@@ -23,6 +23,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 cd "$REPO_ROOT"
 
 GREEN='\033[0;32m'
@@ -60,11 +61,21 @@ skip() { echo -e "${YELLOW}SKIP${NC} $1"; SKIPPED=$((SKIPPED + 1)); }
 
 # Key file paths
 LMS_PROD="deploy/k8s/base/apps/openedx/settings/lms/production.py"
-BBI_PROD="/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
 DEPLOYMENTS="deploy/k8s/base/deployments.yml"
 SERVICES="deploy/k8s/base/services.yml"
 EXT_SECRETS="deploy/k8s/base/secrets/external-secrets.yaml"
 APPLY_PATCHES="infrastructure/tutor/apply-patches.sh"
+BBI_PROD="${BBI_PROD:-}"
+if [[ -z "$BBI_PROD" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py" \
+    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"; do
+    if [[ -f "$candidate" ]]; then
+      BBI_PROD="$candidate"
+      break
+    fi
+  done
+fi
 
 echo "=================================================================="
 echo "  Forum Moderation, Spam Controls & Performance"
