@@ -121,6 +121,9 @@ fi
 run_step "verify-docs-policy" ./docs/qa/verify-docs-policy.sh
 run_step "verify-repo-structure" ./scripts/qa/verify-repo-structure.sh
 run_step "verify-doc-command-refs" ./docs/qa/verify-doc-command-refs.sh --summary-json "$DOCS_COMMAND_REFS_SUMMARY"
+run_step "verify-docs-scorecard-recency" ./docs/qa/verify-docs-scorecard-recency.sh --max-age-days 7
+run_step "verify-docs-scorecard-report-consistency" ./docs/qa/verify-docs-scorecard-report-consistency.sh
+run_step "verify-docs-scorecard-head-freshness" ./docs/qa/verify-docs-scorecard-head-freshness.sh
 run_step "verify-doc-link-integrity" ./docs/qa/verify-doc-link-integrity.sh
 run_step "verify-doc-catalog-health" python3 docs/qa/verify-doc-catalog-health.py \
   --max-stale-days 45 \
@@ -143,6 +146,9 @@ run_step "build-docs-compliance-summary" python3 docs/qa/build-docs-compliance-s
 run_step "verify-doc-catalog-health-test" ./docs/qa/verify-doc-catalog-health-test.sh
 run_step "verify-doc-link-integrity-test" ./docs/qa/verify-doc-link-integrity-test.sh
 run_step "verify-doc-command-refs-test" ./docs/qa/verify-doc-command-refs-test.sh
+run_step "verify-docs-scorecard-recency-test" ./docs/qa/verify-docs-scorecard-recency-test.sh
+run_step "verify-docs-scorecard-report-consistency-test" ./docs/qa/verify-docs-scorecard-report-consistency-test.sh
+run_step "verify-docs-scorecard-head-freshness-test" ./docs/qa/verify-docs-scorecard-head-freshness-test.sh
 run_step "build-docs-scorecard-test" ./docs/qa/build-docs-scorecard-test.sh
 run_step "compare-docs-scorecard-to-base-test" ./docs/qa/compare-docs-scorecard-to-base-test.sh
 run_step "build-docs-compliance-summary-test" ./docs/qa/build-docs-compliance-summary-test.sh

@@ -41,11 +41,11 @@ This PR advances the docs remediation and compliance program from cleanup into a
 - `GOV-01`, `GOV-02`, `CLS-02` governance/closure sign-offs in tracker are required before merge.
 - PR branch must remain on top of latest `origin/main` (`git fetch origin && git rebase origin/main`) before final merge.
 
-### Current state (2026-03-07)
-- Latest docs branch head: `3e2ddb88`
-- `run-docs-world-class-gates.sh --sync` latest outcome: **PASS** (catalog, scorecard, trend, compliance summary)
-- Sync delta: `origin/main...HEAD` -> `0 58`
-- Compliance trend: `base=100 current=100 drop=0 threshold=10`
+### Current state refresh commands
+- Latest docs branch head: `git rev-parse --short HEAD`
+- Gate outcome: `./docs/qa/run-docs-world-class-gates.sh --sync --require-sync`
+- Sync delta: `git rev-list --left-right --count origin/main...HEAD`
+- Latest scorecard report: `docs/guides/admin/DOCS_PROGRAM_SCORECARD_<YYYYMMDD>.md`
 - PR title/URL: [#443](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/443)
 - Merge gate state: `run-docs-world-class-gates.sh --sync` includes both real checks and self-tests in same sequence.
 

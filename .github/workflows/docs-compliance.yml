@@ -14,6 +14,13 @@ on:
       - "docs/qa/build-docs-scorecard-test.sh"
       - "docs/qa/build-docs-compliance-summary.py"
       - "docs/qa/build-docs-compliance-summary-test.sh"
+      - "docs/qa/generate-docs-scorecard-report.sh"
+      - "docs/qa/verify-docs-scorecard-recency.sh"
+      - "docs/qa/verify-docs-scorecard-recency-test.sh"
+      - "docs/qa/verify-docs-scorecard-report-consistency.sh"
+      - "docs/qa/verify-docs-scorecard-report-consistency-test.sh"
+      - "docs/qa/verify-docs-scorecard-head-freshness.sh"
+      - "docs/qa/verify-docs-scorecard-head-freshness-test.sh"
       - "docs/qa/verify-doc-command-refs-test.sh"
       - "docs/qa/compare-docs-scorecard-to-base.sh"
       - "docs/qa/compare-docs-scorecard-to-base-test.sh"
@@ -69,14 +76,15 @@ with open(sys.argv[1], "r", encoding="utf-8") as fp:
 
 missing = payload.get("missing", [])
 
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-            fp.write("### Docs Command Reference Summary\n")
-            fp.write(f"- files_checked={payload.get('files_checked', 0)}\n")
-            fp.write(f"- total_candidates={payload.get('total_candidates', 0)}\n")
-            fp.write(f"- missing_references={payload.get('missing_references', 0)}\n")
-            fp.write(f"- status={payload.get('status')}\n")
-            for item in missing[:15]:
-                fp.write(f"- {item}\n")
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Command Reference Summary\n")
+    fp.write(f"- files_checked={payload.get('files_checked', 0)}\n")
+    fp.write(f"- total_candidates={payload.get('total_candidates', 0)}\n")
+    fp.write(f"- missing_references={payload.get('missing_references', 0)}\n")
+    fp.write(f"- status={payload.get('status')}\n")
+    for item in missing[:15]:
+        fp.write(f"- {item}\n")
+PY
 
       - name: Verify docs link integrity
         run: |
@@ -88,6 +96,73 @@ missing = payload.get("missing", [])
           else
             docs/qa/verify-doc-link-integrity.sh
           fi
+
+      - name: Verify docs scorecard recency
+        run: |
+          set -euo pipefail
+          chmod +x docs/qa/verify-docs-scorecard-recency.sh
+          DOCS_SCORECARD_RECENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-recency-summary.json"
+          docs/qa/verify-docs-scorecard-recency.sh \
+            --max-age-days 7 \
+            --summary-json "$DOCS_SCORECARD_RECENCY_SUMMARY"
+          python3 - "$DOCS_SCORECARD_RECENCY_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Recency\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- latest_report={payload.get('latest_report', 'n/a')}\n")
+    fp.write(f"- latest_date={payload.get('latest_date', 'n/a')}\n")
+    fp.write(f"- age_days={payload.get('age_days', 'n/a')}\n")
+    fp.write(f"- max_age_days={payload.get('max_age_days', 'n/a')}\n")
+PY
+
+      - name: Verify docs scorecard report consistency
+        run: |
+          set -euo pipefail
+          chmod +x docs/qa/verify-docs-scorecard-report-consistency.sh
+          DOCS_SCORECARD_CONSISTENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-consistency-summary.json"
+          docs/qa/verify-docs-scorecard-report-consistency.sh \
+            --summary-json "$DOCS_SCORECARD_CONSISTENCY_SUMMARY"
+          python3 - "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Report Consistency\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- reports_checked={payload.get('reports_checked', 'n/a')}\n")
+    fp.write(f"- invalid_reports={payload.get('invalid_reports', 'n/a')}\n")
+PY
+
+      - name: Verify docs scorecard head freshness
+        run: |
+          set -euo pipefail
+          chmod +x docs/qa/verify-docs-scorecard-head-freshness.sh
+          DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY="${RUNNER_TEMP}/docs-scorecard-head-freshness-summary.json"
+          docs/qa/verify-docs-scorecard-head-freshness.sh \
+            --summary-json "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY"
+          python3 - "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Head Freshness\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- latest_report={payload.get('latest_report', 'n/a')}\n")
+    fp.write(f"- latest_date={payload.get('latest_date', 'n/a')}\n")
+    fp.write(f"- reference_date={payload.get('reference_date', 'n/a')}\n")
+PY
 
       - name: Verify docs catalog health
         run: |
@@ -144,20 +219,27 @@ PY
             --out "$DOCS_SCORECARD_PATH" \
             --min-score 80
 
-          python3 docs/qa/compare-docs-scorecard-to-base.sh \
+          bash docs/qa/compare-docs-scorecard-to-base.sh \
             --current-summary "$CATALOG_HEALTH_SUMMARY" \
             --base-ref "$BASE_REF" \
             --regression-threshold 10 \
             --out "$DOCS_SCORECARD_COMPARISON_PATH"
 
-          python3 - "$DOCS_SCORECARD_COMPARISON_PATH" <<'PY'
-import json
-import os
+          python3 docs/qa/build-docs-compliance-summary.py \
+            --catalog-summary "$CATALOG_HEALTH_SUMMARY" \
+            --cmdref-summary "$DOCS_CMDREF_SUMMARY" \
+            --scorecard "$DOCS_SCORECARD_PATH" \
+            --comparison "$DOCS_SCORECARD_COMPARISON_PATH" \
+            --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
 
-with open(os.environ["DOCS_SCORECARD_COMPARISON_PATH"], "r", encoding="utf-8") as fp:
+          python3 - "$DOCS_SCORECARD_COMPARISON_PATH" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
     trend = json.load(fp)
 
-with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as fp:
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
     fp.write("### Docs Scorecard Trend\n")
     fp.write(f"- base_ref={trend['base_ref']}\n")
     fp.write(f"- base_score={trend['base_score']}\n")
@@ -167,21 +249,14 @@ with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as fp:
     fp.write(f"- status={trend['status']}\n")
 PY
 
-          python3 docs/qa/build-docs-compliance-summary.py \
-            --catalog-summary "$CATALOG_HEALTH_SUMMARY" \
-            --cmdref-summary "$DOCS_CMDREF_SUMMARY" \
-            --scorecard "$DOCS_SCORECARD_PATH" \
-            --comparison "$DOCS_SCORECARD_COMPARISON_PATH" \
-            --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
-
           python3 - "$DOCS_COMPLIANCE_SUMMARY_PATH" "$GITHUB_STEP_SUMMARY" <<'PY'
 import json
-import os
+import sys
 
-with open(os.environ["DOCS_COMPLIANCE_SUMMARY_PATH"], "r", encoding="utf-8") as fp:
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
     payload = json.load(fp)
 
-with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as fp:
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
     fp.write("### Docs Compliance Summary\n")
     fp.write(f"- overall_status={payload.get('overall_status')}\n")
     fp.write(f"- catalog_health_status={payload.get('statuses', {}).get('catalog_health', 'n/a')}\n")
@@ -199,7 +274,29 @@ PY
             ${{ runner.temp }}/docs-scorecard.json
             ${{ runner.temp }}/docs-scorecard-comparison.json
             ${{ runner.temp }}/docs-command-refs-summary.json
+            ${{ runner.temp }}/docs-scorecard-recency-summary.json
+            ${{ runner.temp }}/docs-scorecard-consistency-summary.json
+            ${{ runner.temp }}/docs-scorecard-head-freshness-summary.json
             ${{ runner.temp }}/docs-compliance-summary.json
+
+      - name: Generate docs scorecard report markdown
+        run: |
+          set -euo pipefail
+          REPORT_PATH="${RUNNER_TEMP}/DOCS_PROGRAM_SCORECARD_${{ github.run_id }}.md"
+          chmod +x docs/qa/generate-docs-scorecard-report.sh
+          ./docs/qa/generate-docs-scorecard-report.sh \
+            --base-ref "origin/${{ github.base_ref }}" \
+            --output "$REPORT_PATH"
+          {
+            echo "### Docs Program Scorecard Report"
+            echo "- report_path=${REPORT_PATH}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload docs scorecard markdown report
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-program-scorecard-report
+          path: ${{ runner.temp }}/DOCS_PROGRAM_SCORECARD_${{ github.run_id }}.md
 
       - name: Verify docs catalog health self-test
         run: |
@@ -207,12 +304,21 @@ PY
             docs/qa/verify-doc-catalog-health-test.sh \
             docs/qa/verify-doc-command-refs-test.sh \
             docs/qa/verify-doc-link-integrity-test.sh \
+            docs/qa/verify-docs-scorecard-recency.sh \
+            docs/qa/verify-docs-scorecard-recency-test.sh \
+            docs/qa/verify-docs-scorecard-report-consistency.sh \
+            docs/qa/verify-docs-scorecard-report-consistency-test.sh \
+            docs/qa/verify-docs-scorecard-head-freshness.sh \
+            docs/qa/verify-docs-scorecard-head-freshness-test.sh \
             docs/qa/build-docs-scorecard-test.sh \
             docs/qa/compare-docs-scorecard-to-base-test.sh \
             docs/qa/build-docs-compliance-summary-test.sh
           docs/qa/verify-doc-catalog-health-test.sh
           docs/qa/verify-doc-command-refs-test.sh
           docs/qa/verify-doc-link-integrity-test.sh
+          docs/qa/verify-docs-scorecard-recency-test.sh
+          docs/qa/verify-docs-scorecard-report-consistency-test.sh
+          docs/qa/verify-docs-scorecard-head-freshness-test.sh
           docs/qa/build-docs-scorecard-test.sh
           docs/qa/compare-docs-scorecard-to-base-test.sh
           docs/qa/build-docs-compliance-summary-test.sh

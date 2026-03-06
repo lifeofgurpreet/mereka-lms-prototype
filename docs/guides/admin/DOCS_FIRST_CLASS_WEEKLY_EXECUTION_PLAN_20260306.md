@@ -20,6 +20,8 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 
 - `docs/qa/verify-docs-policy.sh` passes.
 - `./scripts/qa/verify-repo-structure.sh` passes.
+- `docs/qa/verify-docs-scorecard-recency.sh --max-age-days 7` passes.
+- `docs/qa/verify-docs-scorecard-head-freshness.sh` passes.
 - Changed canonical docs include metadata (`Status`, `Owner`, `Last verified`) in subtitle or frontmatter.
 - Every moved/renamed file has updated inbound+outbound links in the same PR.
 - No `docs/` root files outside allowlist unless explicitly approved.
@@ -88,7 +90,9 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 ## 6) Day 4 — Scorecard + drift gates
 
 ### AC-DOCS-401: Weekly KPI scorecard (single source output)
-- [ ] Create/update `docs/archive/reports/docs-program-scorecard-20260313.md` for this week.
+- [ ] Create/update `docs/guides/admin/DOCS_PROGRAM_SCORECARD_<YYYYMMDD>.md` for this week.
+- [ ] Generate from canonical tooling (do not hand-edit metrics):
+  - `./docs/qa/generate-docs-scorecard-report.sh --date <YYYYMMDD>`
 - [ ] Include at minimum:
   - canonical coverage %
   - duplicate canonical conflicts

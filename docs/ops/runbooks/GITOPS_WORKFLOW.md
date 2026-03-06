@@ -12,9 +12,9 @@ _Audience: Platform Eng + DevOps • Owner: Engineering Lead • Last updated: 2
 Mereka LMS uses a **two-repository GitOps architecture**:
 
 1. **Application Repository** (`mereka-lms`): Source code, base K8s manifests, CI/CD pipeline
-2. **Infrastructure Repository** (`BBI-K8`, previously `infrastructure`): Production overlay, ArgoCD configuration
+2. **Infrastructure Repository** (`BBI-K8`, previously `infrastructure`, legacy `bbi-infrastructure`): Production overlay, ArgoCD configuration
 
-**CRITICAL**: ArgoCD syncs from `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`), NOT from `mereka-lms`. Any `kubectl patch` commands targeting production will be reverted on the next ArgoCD sync cycle.
+**CRITICAL**: ArgoCD syncs from `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`; legacy name `bbi-infrastructure`), NOT from `mereka-lms`. Any `kubectl patch` commands targeting production will be reverted on the next ArgoCD sync cycle.
 
 ```bash
 # Optional defaults used by the examples below
@@ -460,6 +460,7 @@ gcloud artifacts docker tags list \
 1. **Automated Tag Sync in CI/CD**
    - GitHub Action to auto-sync tags from app repo to infra repo after CI build
    - Requires PAT with write access to `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`)
+   - Requires PAT with write access to `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`, legacy `bbi-infrastructure`)
 
 2. **Slack Notifications on Drift**
    - Daily cron job runs `verify-gitops-image-overrides.sh`
