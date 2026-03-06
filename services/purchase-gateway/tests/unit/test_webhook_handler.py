@@ -60,8 +60,8 @@ def mock_db():
 
 
 @pytest.mark.asyncio
-@patch("app.routers.webhooks.fulfill_order", new_callable=AsyncMock)
-async def test_checkout_completed_marks_order_paid(mock_fulfill, mock_db):
+@patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock)
+async def test_checkout_completed_marks_order_paid(mock_enqueue, mock_db):
     """checkout.session.completed transitions order status to paid."""
     order = _make_order()
     mock_db.execute.return_value = _mock_select_result(order)
@@ -77,12 +77,12 @@ async def test_checkout_completed_marks_order_paid(mock_fulfill, mock_db):
     assert order.status == OrderStatus.paid
     assert order.stripe_payment_intent_id == "pi_abc123"
     mock_db.commit.assert_awaited()
-    mock_fulfill.assert_awaited_once_with(order, mock_db)
+    mock_enqueue.assert_awaited_once()
 
 
 @pytest.mark.asyncio
-@patch("app.routers.webhooks.fulfill_order", new_callable=AsyncMock)
-async def test_checkout_completed_creates_audit_log(mock_fulfill, mock_db):
+@patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock)
+async def test_checkout_completed_creates_audit_log(mock_enqueue, mock_db):
     """checkout.session.completed creates an OrderAuditLog entry."""
     order = _make_order()
     mock_db.execute.return_value = _mock_select_result(order)
@@ -97,8 +97,8 @@ async def test_checkout_completed_creates_audit_log(mock_fulfill, mock_db):
 
 
 @pytest.mark.asyncio
-@patch("app.routers.webhooks.fulfill_order", new_callable=AsyncMock)
-async def test_checkout_completed_order_not_found_is_noop(mock_fulfill, mock_db):
+@patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock)
+async def test_checkout_completed_order_not_found_is_noop(mock_enqueue, mock_db):
     """checkout.session.completed is silent when order cannot be found."""
     mock_db.execute.return_value = _mock_select_result(None)
 
@@ -106,12 +106,12 @@ async def test_checkout_completed_order_not_found_is_noop(mock_fulfill, mock_db)
     await _handle_checkout_completed(event_data, mock_db)
 
     mock_db.commit.assert_not_awaited()
-    mock_fulfill.assert_not_awaited()
+    mock_enqueue.assert_not_awaited()
 
 
 @pytest.mark.asyncio
-@patch("app.routers.webhooks.fulfill_order", new_callable=AsyncMock)
-async def test_checkout_completed_no_payment_intent(mock_fulfill, mock_db):
+@patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock)
+async def test_checkout_completed_no_payment_intent(mock_enqueue, mock_db):
     """checkout.session.completed handles missing payment_intent gracefully."""
     order = _make_order()
     mock_db.execute.return_value = _mock_select_result(order)
@@ -122,6 +122,22 @@ async def test_checkout_completed_no_payment_intent(mock_fulfill, mock_db):
     assert order.status == OrderStatus.paid
     assert order.stripe_payment_intent_id is None
     mock_db.commit.assert_awaited()
+    mock_enqueue.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+@patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock)
+async def test_checkout_completed_does_not_regress_fulfilled_order(mock_enqueue, mock_db):
+    """checkout.session.completed does not downgrade already-fulfilled orders."""
+    order = _make_order(status=OrderStatus.fulfilled)
+    mock_db.execute.return_value = _mock_select_result(order)
+
+    event_data = {"object": {"id": "cs_test123", "payment_intent": "pi_abc123"}}
+    await _handle_checkout_completed(event_data, mock_db)
+
+    assert order.status == OrderStatus.fulfilled
+    assert order.stripe_payment_intent_id == "pi_abc123"
+    mock_enqueue.assert_awaited_once()
 
 
 # ---------------------------------------------------------------------------

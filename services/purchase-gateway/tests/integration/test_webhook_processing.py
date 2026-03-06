@@ -82,7 +82,7 @@ async def test_valid_signature_is_accepted(mock_stripe, client):
 
     _override_db(mock_db)
     try:
-        with patch("app.routers.webhooks.fulfill_order", new_callable=AsyncMock):
+        with patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock):
             resp = await client.post(
                 "/webhooks/stripe/",
                 content=payload,
@@ -337,7 +337,7 @@ async def test_checkout_completed_marks_order_paid(mock_stripe, client):
 
     _override_db(mock_db)
     try:
-        with patch("app.routers.webhooks.fulfill_order", new_callable=AsyncMock):
+        with patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock):
             resp = await client.post(
                 "/webhooks/stripe/",
                 content=payload,

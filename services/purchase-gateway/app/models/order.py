@@ -1,12 +1,16 @@
 import enum
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Uuid, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TenantMixin, TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.fulfillment_job import FulfillmentJob
 
 
 class OrderStatus(enum.StrEnum):
@@ -62,6 +66,11 @@ class Order(Base, TenantMixin, TimestampMixin):
     metadata_json: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     line_items: Mapped[list["LineItem"]] = relationship(back_populates="order", lazy="selectin")
+    fulfillment_job: Mapped["FulfillmentJob | None"] = relationship(
+        back_populates="order",
+        lazy="selectin",
+        uselist=False,
+    )
 
 
 class LineItem(Base, TimestampMixin):

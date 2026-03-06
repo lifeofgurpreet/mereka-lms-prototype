@@ -1,6 +1,7 @@
 import uuid
 from datetime import UTC, datetime
 
+from app.models.fulfillment_job import FulfillmentJobStatus
 from app.models.order import FulfillmentStatus, LineItem, Order, OrderAuditLog, OrderStatus
 
 
@@ -19,6 +20,12 @@ def test_fulfillment_status_values():
     """Verify all expected fulfillment statuses exist."""
     expected = {"pending", "fulfilled", "failed", "revoked"}
     assert {s.value for s in FulfillmentStatus} == expected
+
+
+def test_fulfillment_job_status_values():
+    """Verify outbox job status enum covers retry + terminal states."""
+    expected = {"pending", "processing", "succeeded", "failed", "dead_letter"}
+    assert {s.value for s in FulfillmentJobStatus} == expected
 
 
 # ---------------------------------------------------------------------------

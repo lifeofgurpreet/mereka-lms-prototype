@@ -5,10 +5,11 @@ Stripe-to-Open edX enrollment bridge. Replaces the deprecated Oscar/ecommerce se
 ## Architecture
 
 ```
-Browser → Stripe Checkout → Webhook → Purchase Gateway → Open edX Enrollment API
-                                            │
-                                            ├── PostgreSQL (orders, entitlements, events)
-                                            └── Redis (fulfillment job queue)
+Browser → Stripe Checkout → Webhook ACK
+                                 │
+                                 └── PostgreSQL durable outbox (fulfillment_jobs)
+                                               │
+                                               └── Background worker → Open edX Enrollment API
 ```
 
 ## Quick Start (Local)
@@ -36,6 +37,11 @@ All configuration via environment variables (see `app/config.py`):
 | `SECRET_KEY` | Yes | Application secret key |
 | `ENABLE_GATEWAY_FULFILLMENT` | No | Enable fulfillment processing (default: false) |
 | `TENANT_ISOLATION_ENABLED` | No | Enable multi-tenant isolation (default: true) |
+| `FULFILLMENT_WORKER_ENABLED` | No | Run background outbox worker (default: true) |
+| `FULFILLMENT_WORKER_POLL_SECONDS` | No | Poll cadence for pending jobs (default: 5s) |
+| `FULFILLMENT_MAX_RETRIES` | No | Maximum durable retries per order (default: 10) |
+| `FULFILLMENT_BASE_DELAY_SECONDS` | No | Exponential backoff base delay (default: 5s) |
+| `ENABLE_RECONCILIATION_JOB` | No | Auto-detect paid-but-unfulfilled drift (default: false) |
 
 ## API Endpoints
 
@@ -68,3 +74,9 @@ Manifests in `k8s/`:
 ## Spec
 
 Full specification: `specs/ecommerce-purchase-gateway_spec.md`
+
+## Fulfillment Recovery Runbook
+
+Operational replay and reconciliation procedures are documented in:
+
+- `docs/operations/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md`

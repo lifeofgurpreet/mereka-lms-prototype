@@ -16,7 +16,7 @@ from app.database import get_db
 from app.models.order import Order, OrderAuditLog, OrderStatus
 from app.models.stripe_event import ProcessingStatus, StripeEvent
 from app.services.dispute import handle_dispute_closed, handle_dispute_created
-from app.services.fulfillment import fulfill_order
+from app.services.fulfillment_outbox import enqueue_fulfillment_job
 from app.services.refund import process_refund
 from app.services.subscription import (
     handle_invoice_paid,
@@ -74,16 +74,22 @@ async def _handle_checkout_completed(
         return
 
     old_status = order.status
-    order.status = OrderStatus.paid
+    if old_status in {OrderStatus.pending, OrderStatus.expired, OrderStatus.canceled}:
+        order.status = OrderStatus.paid
     order.stripe_payment_intent_id = payment_intent_id
 
-    await _log_audit(
-        db, order, old_status, OrderStatus.paid, "stripe.checkout.session.completed"
+    if old_status != order.status:
+        await _log_audit(
+            db, order, old_status, OrderStatus.paid, "stripe.checkout.session.completed"
+        )
+
+    await enqueue_fulfillment_job(
+        db,
+        order=order,
+        triggered_by="stripe.checkout.session.completed",
+        force=False,
     )
     await db.commit()
-
-    # Dispatch fulfillment
-    await fulfill_order(order, db)
 
 
 async def _handle_checkout_expired(

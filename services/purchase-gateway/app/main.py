@@ -1,6 +1,7 @@
 # @covers AC-029, AC-032
 # @spec: ecommerce-purchase-gateway_spec.md
 
+import asyncio
 from contextlib import asynccontextmanager
 
 import stripe
@@ -13,6 +14,7 @@ from app.config import settings
 from app.database import engine
 from app.middleware.tenant import TenantMiddleware
 from app.routers import admin, checkout, health, subscriptions, webhooks
+from app.services.fulfillment_outbox import run_fulfillment_worker
 
 logger = structlog.get_logger()
 
@@ -21,8 +23,19 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI):
     # Set Stripe API key once at startup (not per-request)
     stripe.api_key = settings.STRIPE_SECRET_KEY
+    stop_event = asyncio.Event()
+    app.state.fulfillment_worker_stop = stop_event
+    worker_task = None
+    if settings.FULFILLMENT_WORKER_ENABLED and settings.ENABLE_GATEWAY_FULFILLMENT:
+        worker_task = asyncio.create_task(run_fulfillment_worker(stop_event))
+        app.state.fulfillment_worker_task = worker_task
+        logger.info("purchase_gateway.fulfillment_worker_enabled")
+
     logger.info("purchase_gateway.starting")
     yield
+    stop_event.set()
+    if worker_task:
+        await worker_task
     await engine.dispose()
     logger.info("purchase_gateway.shutdown")
 
