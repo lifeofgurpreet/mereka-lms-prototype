@@ -13,6 +13,13 @@
 - [ ] No secrets hardcoded
 - [ ] CI passes
 
+## Handoff Guardrails (Required)
+
+- [ ] I ran `./scripts/infra/check-pr-handoff-discipline.sh` and it passed
+- [ ] `git status --porcelain` is empty in my source worktree before task switch
+- [ ] `git stash list` has no feature work parked
+- [ ] If scope was deferred, I linked a follow-up issue/PR in this description
+
 ## For infrastructure changes
 
 - [ ] Rollout plan documented
