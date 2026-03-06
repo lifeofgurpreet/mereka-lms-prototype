@@ -10,6 +10,9 @@
 #   ./scripts/infra/canonical-release.sh --openedx-tag TAG --mfe-tag TAG [options]
 #   ./scripts/infra/canonical-release.sh --check-only   # Just validate environment
 #   ./scripts/infra/canonical-release.sh --dry-run       # Full dry-run with cache check
+#   CONFIRM_CANONICAL_RELEASE=CANONICAL_RELEASE \
+#   CONFIRM_PUSH_CANONICAL_RELEASE=PUSH_CANONICAL_RELEASE \
+#   ALLOW_PROD_APPLY=1 \
 #   ./scripts/infra/canonical-release.sh --openedx-tag TAG --mfe-tag TAG \
 #     --apply --commit --push --verify-runtime --purge-frontend-cache
 
@@ -37,6 +40,11 @@ info()      { echo -e "INFO: $1"; }
 CHECK_ONLY=0
 DRY_RUN=0
 PASSTHROUGH_ARGS=()
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CONFIRM_CANONICAL_RELEASE="${CONFIRM_CANONICAL_RELEASE:-}"
+CONFIRM_PUSH_CANONICAL_RELEASE="${CONFIRM_PUSH_CANONICAL_RELEASE:-}"
+CONFIRM_APPLY_TOKEN="CANONICAL_RELEASE"
+CONFIRM_PUSH_TOKEN="PUSH_CANONICAL_RELEASE"
 
 usage() {
   cat <<'EOF'
@@ -57,6 +65,13 @@ Release options:
     --frontend-cache-env auto|prod|dev
     --purge-frontend-cache-everything
     --openedx-digest sha256:... --mfe-digest sha256:... --require-digests
+
+Safety controls for write operations:
+  CONFIRM_CANONICAL_RELEASE=CANONICAL_RELEASE
+                       Required when delegated args include --apply.
+  CONFIRM_PUSH_CANONICAL_RELEASE=PUSH_CANONICAL_RELEASE
+                       Required when delegated args include --push.
+  ALLOW_PROD_APPLY=1   Required when delegated target env resolves to production + --apply.
 EOF
 }
 
@@ -70,6 +85,39 @@ while [[ $# -gt 0 ]]; do
     *)            ARGS+=("$1"); shift ;;
   esac
 done
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      fail_hard "Invalid ${var_name}='${value}' (expected 0 or 1)"
+      ;;
+  esac
+}
+
+args_contains() {
+  local needle="$1"
+  local arg
+  for arg in "${ARGS[@]}"; do
+    if [[ "$arg" == "$needle" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_target_env_from_args() {
+  local i
+  for ((i=0; i<${#ARGS[@]}; i++)); do
+    if [[ "${ARGS[$i]}" == "--target-env" ]]; then
+      echo "${ARGS[$((i+1))]:-production}"
+      return 0
+    fi
+  done
+  echo "production"
+}
 
 check_canonical_environment() {
   local errors=0
@@ -276,6 +324,33 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
 fi
 
 # Full release: check cache, then delegate
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+DELEGATE_APPLY=0
+DELEGATE_PUSH=0
+if args_contains "--apply"; then
+  DELEGATE_APPLY=1
+fi
+if args_contains "--push"; then
+  DELEGATE_PUSH=1
+fi
+
+DELEGATE_TARGET_ENV="$(echo "$(resolve_target_env_from_args)" | tr '[:upper:]' '[:lower:]')"
+if [[ "$DELEGATE_TARGET_ENV" == "prod" ]]; then
+  DELEGATE_TARGET_ENV="production"
+fi
+
+if [[ "$DELEGATE_APPLY" -eq 1 && "$CONFIRM_CANONICAL_RELEASE" != "$CONFIRM_APPLY_TOKEN" ]]; then
+  fail_hard "Refusing delegated --apply without confirmation token. Set CONFIRM_CANONICAL_RELEASE=${CONFIRM_APPLY_TOKEN}"
+fi
+
+if [[ "$DELEGATE_PUSH" -eq 1 && "$CONFIRM_PUSH_CANONICAL_RELEASE" != "$CONFIRM_PUSH_TOKEN" ]]; then
+  fail_hard "Refusing delegated --push without confirmation token. Set CONFIRM_PUSH_CANONICAL_RELEASE=${CONFIRM_PUSH_TOKEN}"
+fi
+
+if [[ "$DELEGATE_APPLY" -eq 1 && "$DELEGATE_TARGET_ENV" == "production" && "$ALLOW_PROD_APPLY" != "1" ]]; then
+  fail_hard "Refusing delegated production --apply without ALLOW_PROD_APPLY=1"
+fi
+
 echo ""
 info "Checking image cache..."
 if check_image_cache; then
@@ -284,4 +359,11 @@ fi
 
 echo ""
 info "Delegating to release-openedx-gitops.sh..."
-exec "$REPO_ROOT/scripts/infra/release-openedx-gitops.sh" "${ARGS[@]}"
+if [[ "$DELEGATE_APPLY" -eq 1 || "$DELEGATE_PUSH" -eq 1 ]]; then
+  CONFIRM_RELEASE_OPENEDX_GITOPS="RELEASE_OPENEDX_GITOPS" \
+  CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS="PUSH_RELEASE_OPENEDX_GITOPS" \
+  ALLOW_PROD_APPLY="$ALLOW_PROD_APPLY" \
+  exec "$REPO_ROOT/scripts/infra/release-openedx-gitops.sh" "${ARGS[@]}"
+else
+  exec "$REPO_ROOT/scripts/infra/release-openedx-gitops.sh" "${ARGS[@]}"
+fi

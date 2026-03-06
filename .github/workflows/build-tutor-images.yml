@@ -966,6 +966,10 @@ jobs:
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
           TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          ALLOW_PROD_APPLY=0
+          if [[ "${TARGET_ENV}" == "production" ]]; then
+            ALLOW_PROD_APPLY=1
+          fi
           OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
           MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
           RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
@@ -982,6 +986,9 @@ jobs:
             # Production rollouts require runtime convergence verification.
             EXTRA_ARGS+=(--verify-runtime --wait-seconds 900)
           fi
+          CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS \
+          CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS \
+          ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY}" \
           ./scripts/infra/release-openedx-gitops.sh \
             --target-env "${TARGET_ENV}" \
             --openedx-tag "${TAG}" \

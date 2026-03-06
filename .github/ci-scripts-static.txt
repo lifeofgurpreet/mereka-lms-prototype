@@ -107,6 +107,7 @@ scripts/qa/verify-release-automation.sh
 scripts/qa/verify-release-gitops-guardrails.sh
 scripts/qa/verify-release-dry-run-contract.sh
 scripts/qa/verify-release-deployment-choreography.sh
+scripts/qa/verify-release-invocation-guardrail-wiring.sh
 
 # ── MFE contracts ────────────────────────────────────────────────────────────
 scripts/qa/verify-mfe-build-contract.sh
