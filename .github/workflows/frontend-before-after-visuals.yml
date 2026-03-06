@@ -46,8 +46,6 @@ on:
         default: true
         type: boolean
 
-permissions: {}
-
 jobs:
   frontend-before-after-visuals:
     name: Build Before/After Visual Evidence
