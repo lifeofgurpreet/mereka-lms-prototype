@@ -3,6 +3,7 @@
 Check Apple Developer account setup via App Store Connect API
 Checks if Bundle ID and App already exist
 """
+import os
 import time
 from pathlib import Path
 
@@ -13,12 +14,18 @@ API_KEY_ID = "9MUD3HJQH5"
 ISSUER_ID = "47ae8cb8-bfa9-49bd-816f-bde34e76d882"
 TEAM_ID = "44F7G2D7U6"
 BUNDLE_ID = "com.mereka.academy.mobile"
+REPO_ROOT = Path(os.environ.get("MEREKA_LMS_REPO_ROOT", Path(__file__).resolve().parents[2]))
 
 # Get API key from GitHub secrets or local file
-API_KEY_PATH = Path("/tmp/api_key.p8")
+API_KEY_PATH = Path(os.environ.get("APP_STORE_CONNECT_API_KEY_PATH", "/tmp/api_key.p8"))
 if not API_KEY_PATH.exists():
-    print("ERROR: API key not found at /tmp/api_key.p8")
-    print("Run: cd /home/gurpreet/bbi-meta/mereka-lms && cat /tmp/api_key_base64.txt | base64 -d > /tmp/api_key.p8")
+    print(f"ERROR: API key not found at {API_KEY_PATH}")
+    print(
+        f"Run: cd {REPO_ROOT} && cat /tmp/api_key_base64.txt | base64 -d > {API_KEY_PATH}"
+    )
+    print(
+        "Or set APP_STORE_CONNECT_API_KEY_PATH to an existing App Store Connect private key (.p8)."
+    )
     exit(1)
 
 def generate_jwt_token():
