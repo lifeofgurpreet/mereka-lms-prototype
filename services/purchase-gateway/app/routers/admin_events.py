@@ -5,7 +5,7 @@
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import require_admin_api_key
 from app.database import get_db
 from app.models.stripe_event import ProcessingStatus, StripeEvent
+from app.tenancy import request_tenant_scope
 
 router = APIRouter(tags=["admin"], dependencies=[Depends(require_admin_api_key)])
 
@@ -29,6 +30,7 @@ class StripeEventSummaryResponse(BaseModel):
 
 @router.get("/admin/stripe-events/", response_model=list[StripeEventSummaryResponse])
 async def list_stripe_events(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     event_type: str | None = Query(default=None),
     processing_status: ProcessingStatus | None = Query(default=None),
@@ -37,7 +39,18 @@ async def list_stripe_events(
     offset: int = Query(default=0, ge=0),
     include_payload: bool = Query(default=False),
 ):
-    """List Stripe events with optional filtering for debugging."""
+    """List Stripe events with optional filtering for debugging.
+
+    Restricted to platform-level admins — tenant-scoped admins cannot access
+    cross-tenant payment event data.
+    """
+    mw_tenant_id = request_tenant_scope(request)
+    if mw_tenant_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Stripe events not available for tenant-scoped admins",
+        )
+
     query = select(StripeEvent)
 
     if event_type:

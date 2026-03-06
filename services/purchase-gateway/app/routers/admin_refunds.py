@@ -86,11 +86,11 @@ async def create_order_refund(
     try:
         stripe_refund = stripe.Refund.create(**refund_args)
     except stripe.error.InvalidRequestError as exc:
-        raise HTTPException(status_code=400, detail=f"Stripe refund rejected: {exc.user_message or str(exc)}") from exc
+        raise HTTPException(status_code=400, detail=f"Stripe refund rejected: {exc.user_message or 'unexpected error'}") from exc
     except stripe.error.StripeError as exc:  # pragma: no cover - defensive branch
         raise HTTPException(
             status_code=502,
-            detail=f"Stripe refund creation failed: {exc.user_message or str(exc)}",
+            detail=f"Stripe refund creation failed: {exc.user_message or 'unexpected error'}",
         ) from exc
 
     refund_id = stripe_refund.get("id") or ""

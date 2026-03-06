@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.stripe_event import ProcessingStatus, StripeEvent
@@ -35,6 +36,17 @@ def _make_event(**overrides) -> StripeEvent:
     return StripeEvent(**defaults)
 
 
+def _make_request(tenant_id=None):
+    """Create a mock Request with optional tenant scope."""
+    request = MagicMock()
+    if tenant_id is not None:
+        request.state = MagicMock()
+        request.state.tenant_id = tenant_id
+    else:
+        request.state = MagicMock(spec=[])
+    return request
+
+
 @pytest.fixture
 def mock_db():
     db = AsyncMock(spec=AsyncSession)
@@ -48,6 +60,7 @@ async def test_list_stripe_events_omits_payload_by_default(mock_db):
     mock_db.execute.return_value = _mock_scalars_result([event])
 
     result = await list_stripe_events(
+        request=_make_request(),
         db=mock_db,
         include_payload=False,
         event_type=None,
@@ -76,6 +89,7 @@ async def test_list_stripe_events_includes_payload_when_requested(mock_db):
     mock_db.execute.return_value = _mock_scalars_result([event])
 
     result = await list_stripe_events(
+        request=_make_request(),
         db=mock_db,
         include_payload=True,
         event_type=None,
@@ -89,3 +103,21 @@ async def test_list_stripe_events_includes_payload_when_requested(mock_db):
     assert result[0].stripe_event_id == "evt_test_2"
     assert result[0].processing_status == "failed"
     assert result[0].payload_json == payload
+
+
+@pytest.mark.asyncio
+async def test_list_stripe_events_rejects_tenant_scoped_admin(mock_db):
+    """Tenant-scoped admins cannot access cross-tenant Stripe events."""
+    with pytest.raises(HTTPException) as exc_info:
+        await list_stripe_events(
+            request=_make_request(tenant_id=uuid.uuid4()),
+            db=mock_db,
+            include_payload=False,
+            event_type=None,
+            processing_status=None,
+            stripe_event_id=None,
+            limit=50,
+            offset=0,
+        )
+
+    assert exc_info.value.status_code == 403
