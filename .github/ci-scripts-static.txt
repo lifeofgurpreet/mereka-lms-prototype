@@ -11,6 +11,7 @@ scripts/qa/verify-authn-submodule-path-contract.sh
 scripts/qa/verify-evidence-tracking-policy.sh
 scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-documentation-links.sh
+scripts/qa/verify-openedx-audit-tracker-sync.sh
 
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh
