@@ -1780,6 +1780,10 @@ CSP_IMG_SRC = (
     "https://cdn.jsdelivr.net",
     "https://www.google-analytics.com",
     "https://www.googletagmanager.com",
+    "https://storage.googleapis.com",  # GCS-hosted course assets
+    "https://i.ytimg.com",             # YouTube video thumbnails
+    "https://img.youtube.com",         # YouTube video thumbnails
+    "https://www.gravatar.com",        # User avatar images
 )
 CSP_CONNECT_SRC = (
     "'self'",
