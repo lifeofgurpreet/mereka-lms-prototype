@@ -48,6 +48,12 @@
       "archived_at": "2026-03-06",
       "reason": "Unbound exploratory check with stale kubeconform bootstrap assumptions and broken pass/fail counters under strict-mode shell semantics.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-lint-job.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with broken pass/fail counters under strict-mode shell semantics and no CI/workflow binding.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ]
 }

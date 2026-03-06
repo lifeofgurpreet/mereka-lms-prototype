@@ -1352,14 +1352,6 @@ scripts:
     covers_acs: []
     makefile_target: null
 
-  - path: "scripts/qa/verify-lint-job.sh"
-    method: contract
-    tier: P0
-    description: "Verify lint job execution"
-    covers_specs: ["ci-cd-pipeline_spec.md"]
-    covers_acs: []
-    makefile_target: null
-
   - path: "scripts/qa/verify-spec-lint-job.sh"
     method: contract
     tier: P0
