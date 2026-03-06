@@ -5468,14 +5468,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-config-path-contract.sh",
-      "reference_count": 0,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5882,16 +5884,16 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 7,
-    "ci_static_bound": 324,
+    "ci_static_bound": 325,
     "statuses": {
-      "active": 351,
-      "deprecated_candidate": 32,
+      "active": 352,
+      "deprecated_candidate": 31,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 159,
+      "exploratory_manual": 158,
       "periodic_runtime": 7,
-      "release_blocking": 344
+      "release_blocking": 345
     },
     "total_verify_scripts": 510,
     "workflow_direct_bound": 49

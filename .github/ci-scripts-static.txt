@@ -13,6 +13,7 @@ scripts/qa/verify-evidence-tracking-policy.sh
 scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-documentation-links.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
+scripts/qa/verify-tutor-config-path-contract.sh
 
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh
