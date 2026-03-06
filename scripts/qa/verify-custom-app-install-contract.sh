@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import ast
 import re
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -174,6 +175,58 @@ for app in custom_dirs:
     else:
         # Fail hard: packaged app present but never copied/installed into openedx image.
         fail(f"{app}: directory exists but missing from _CUSTOM_APPS install map")
+
+print("")
+print("--- Tracked runtime-artifact hygiene under custom-apps ---")
+
+try:
+    tracked_files = subprocess.check_output(
+        ["git", "ls-files", str(custom_apps_dir)],
+        text=True,
+        stderr=subprocess.DEVNULL,
+    ).splitlines()
+except Exception as exc:
+    fail(f"Unable to enumerate tracked files under custom-apps ({exc})")
+    tracked_files = []
+
+runtime_artifact_violations: list[str] = []
+for rel_path in tracked_files:
+    rel = rel_path.strip()
+    if not rel:
+        continue
+    normalized = rel.replace("\\", "/")
+    if "/__pycache__/" in normalized or normalized.endswith("/__pycache__"):
+        runtime_artifact_violations.append(f"{rel}: tracked __pycache__ content")
+        continue
+    if any(
+        segment in normalized
+        for segment in ("/.ruff_cache/", "/.pytest_cache/", "/.mypy_cache/", "/.hypothesis/")
+    ):
+        runtime_artifact_violations.append(f"{rel}: tracked tool cache content")
+        continue
+    if normalized.endswith((".pyc", ".pyo")):
+        runtime_artifact_violations.append(f"{rel}: tracked compiled Python bytecode")
+        continue
+    if normalized.endswith((".sqlite", ".sqlite3", ".db")):
+        runtime_artifact_violations.append(f"{rel}: tracked local database file")
+        continue
+    if normalized.endswith(
+        (".sqlite-wal", ".sqlite-shm", ".sqlite-journal", ".sqlite3-wal", ".sqlite3-shm", ".sqlite3-journal", ".db-wal", ".db-shm", ".db-journal")
+    ):
+        runtime_artifact_violations.append(f"{rel}: tracked database sidecar file")
+        continue
+    if normalized.endswith((".log", ".pid", ".sock")):
+        runtime_artifact_violations.append(f"{rel}: tracked runtime state file")
+        continue
+    if "/dist/" in normalized and not normalized.endswith("/.gitkeep"):
+        runtime_artifact_violations.append(f"{rel}: tracked dist build artifact")
+        continue
+
+if runtime_artifact_violations:
+    for violation in runtime_artifact_violations:
+        fail(violation)
+else:
+    ok("No tracked runtime artifacts/caches detected in custom-apps")
 
 print("")
 print(f"Summary: PASS={passes} FAIL={fails}")
