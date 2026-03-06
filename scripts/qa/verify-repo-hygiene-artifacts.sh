@@ -69,6 +69,21 @@ while IFS= read -r -d '' path; do
     *.pyc|*.pyo)
       fail "$path is tracked compiled Python bytecode"
       ;;
+    *.sqlite|*.sqlite3|*.db)
+      fail "$path is tracked local database state file"
+      ;;
+    *.sqlite-wal|*.sqlite-shm|*.sqlite-journal|*.sqlite3-wal|*.sqlite3-shm|*.sqlite3-journal|*.db-wal|*.db-shm|*.db-journal)
+      fail "$path is tracked database sidecar/transaction file"
+      ;;
+    *.pid|*.sock)
+      fail "$path is tracked runtime process/socket state"
+      ;;
+    .coverage|.coverage.*)
+      fail "$path is tracked Python coverage artifact"
+      ;;
+    .hypothesis/*|*/.hypothesis/*|.hypothesis)
+      fail "$path is tracked hypothesis cache content"
+      ;;
     .ruff_cache/*|*/.ruff_cache/*|.ruff_cache)
       fail "$path is tracked Ruff cache content (.ruff_cache)"
       ;;
