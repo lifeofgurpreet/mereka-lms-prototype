@@ -330,10 +330,16 @@ jobs:
           INFISICAL_DOMAIN: https://secrets.mereka.io/api
           INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
           INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
+          ENABLE_STAGING_ENV: ${{ vars.ENABLE_STAGING_ENV }}
         run: |
           npm i -g @infisical/cli
           STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
           STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
+          if [[ "${ENABLE_STAGING_ENV:-false}" == "true" ]]; then
+            STRICT=1 INFISICAL_ENV=staging ./scripts/infra/infisical-validate-mereka-lms.sh
+          else
+            echo "Staging Infisical validation skipped (ENABLE_STAGING_ENV != true)"
+          fi
 
       # ── Phase G: Translation validation ───────────────────────────────────
       - name: Verify atlas.yml and translation infrastructure

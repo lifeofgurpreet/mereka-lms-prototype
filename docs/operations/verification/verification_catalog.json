@@ -2337,6 +2337,18 @@
         "ci_static"
       ],
       "owner": "platform-core",
+      "path": "scripts/qa/verify-infisical-env-validation-coverage.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-core",
       "path": "scripts/qa/verify-interaction-state-contract.sh",
       "reference_count": 4,
       "severity": "high",
@@ -2901,7 +2913,7 @@
       ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-footer-slot-migration.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4635,7 +4647,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-selector-hardening.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4647,7 +4659,7 @@
       ],
       "owner": "sre-security",
       "path": "scripts/qa/verify-selector-to-slot-migration.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -5846,18 +5858,18 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 334,
+    "ci_static_bound": 335,
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 369,
+      "active": 370,
       "manual_only": 127
     },
     "tiers": {
       "exploratory_manual": 130,
       "periodic_runtime": 12,
-      "release_blocking": 354
+      "release_blocking": 355
     },
-    "total_verify_scripts": 496,
+    "total_verify_scripts": 497,
     "workflow_direct_bound": 49
   },
   "version": "1"

@@ -24,6 +24,7 @@ scripts/qa/verify-dev-prod-secret-separation.sh
 scripts/qa/verify-secrets-management.sh
 scripts/qa/verify-secret-inventory.sh
 scripts/qa/verify-secrets-inventory.sh
+scripts/qa/verify-infisical-env-validation-coverage.sh
 scripts/qa/verify-secrets-isolation.sh
 scripts/qa/verify-security-hardening.sh
 scripts/qa/verify-csp-headers.sh
@@ -253,7 +254,6 @@ scripts/qa/verify-pod-security-policies.sh
 scripts/qa/verify-precommit-secret-scan.sh
 scripts/qa/verify-purchase-gateway-resilience.sh
 scripts/qa/verify-purchase-gateway-security.sh
-scripts/qa/verify-purchase-gateway-resilience.sh
 scripts/qa/verify-secrets-live-cluster.sh
 scripts/qa/verify-security-exceptions.sh
 scripts/qa/verify-sla-report-security.sh
