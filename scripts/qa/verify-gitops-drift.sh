@@ -15,6 +15,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 STRICT=0
 
 while [[ $# -gt 0 ]]; do
@@ -29,15 +30,17 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Auto-detect bbi-infrastructure repo (matches pattern used in verify-gitops-image-overrides.sh)
-BBI_INFRA=""
-for candidate in \
-  /home/gurpreet/projects/k8s/bbi-infrastructure \
-  /home/gurpreet/projects/k8s/infrastructure; do
-  if [[ -d "$candidate" ]]; then
-    BBI_INFRA="$candidate"
-    break
-  fi
-done
+BBI_INFRA="${BBI_INFRA:-}"
+if [[ -z "$BBI_INFRA" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure"; do
+    if [[ -d "$candidate" ]]; then
+      BBI_INFRA="$candidate"
+      break
+    fi
+  done
+fi
 
 PASS=0
 FAIL=0
