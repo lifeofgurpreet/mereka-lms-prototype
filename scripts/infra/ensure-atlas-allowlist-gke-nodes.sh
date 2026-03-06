@@ -15,12 +15,6 @@
 # Dependencies:
 #   - atlas CLI authenticated with mereka-lms profile
 #   - kubectl access to GKE cluster (gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster)
-#
-# Cron (add to crontab for automated drift prevention):
-#   0 * * * * cd /home/gurpreet/projects/k8s/mereka-lms && \
-#     ./scripts/infra/ensure-atlas-allowlist-gke-nodes.sh >> \
-#     var/atlas-gke-allowlist.log 2>&1
-#
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,9 +25,38 @@ ATLAS_PROFILE="${ATLAS_PROFILE:-mereka-lms}"
 GKE_CONTEXT="${GKE_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 DRY_RUN="${DRY_RUN:-0}"
 
-[[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
-
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
+usage() {
+  cat <<EOF
+Usage:
+  scripts/infra/ensure-atlas-allowlist-gke-nodes.sh [--dry-run]
+
+Options:
+  --dry-run    Print Atlas allowlist changes without applying them
+  -h, --help   Show this help
+
+Cron example (hourly):
+  0 * * * * cd "$REPO_ROOT" && ./scripts/infra/ensure-atlas-allowlist-gke-nodes.sh >> var/atlas-gke-allowlist.log 2>&1
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      log "Unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
 
 atlas_cmd() { atlas "$@" -P "$ATLAS_PROFILE" 2>/dev/null; }
 
