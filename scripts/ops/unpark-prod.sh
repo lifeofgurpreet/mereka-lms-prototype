@@ -16,7 +16,20 @@
 
 set -euo pipefail
 
-BBI_INFRA="${BBI_INFRA:-/home/gurpreet/projects/k8s/bbi-infrastructure}"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+BBI_INFRA="${BBI_INFRA:-}"
+if [[ -z "$BBI_INFRA" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure"; do
+    if [[ -d "$candidate/.git" ]]; then
+      BBI_INFRA="$candidate"
+      break
+    fi
+  done
+fi
+BBI_INFRA="${BBI_INFRA:-${WORKSPACE_ROOT}/bbi-infrastructure}"
 ARGOCD_APP="mereka-lms-prod"
 PARK_PATCH="apps/mereka-lms/overlays/prod/patches/warm-park-mode.yaml"
 KUSTOMIZE_FILE="apps/mereka-lms/overlays/prod/kustomization.yaml"
