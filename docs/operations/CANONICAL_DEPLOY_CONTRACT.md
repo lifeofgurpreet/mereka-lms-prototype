@@ -157,6 +157,8 @@ The `tutor_env/` directory is gitignored. Docker images are cached locally:
 
 ## Related
 
+- Architecture: `docs/architecture/DEPLOYMENT_BOUNDARY.md` — authoritative boundary: what stays vs moves to infra repo
+- Architecture: `docs/architecture/DEPLOYMENT_CONTRACT.md` — interface contract between app repo and GitOps repo
 - Script: `scripts/infra/canonical-release.sh`
 - Script: `scripts/infra/release-openedx-gitops.sh`
 - Runbook: `docs/operations/RELEASE_EXECUTE_RUNBOOK.md`

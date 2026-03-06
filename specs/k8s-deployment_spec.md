@@ -27,11 +27,17 @@ links:
     - "specs/cross-cutting-requirements_spec.md"
 ---
 
+> **Deployment boundary (ADR-025)**: For the authoritative classification of which files in
+> `deploy/k8s/` stay in this repo vs migrate to `bbi-infrastructure`, see
+> `docs/architecture/DEPLOYMENT_BOUNDARY.md` and `docs/architecture/DEPLOYMENT_CONTRACT.md`.
+> The active development environment is now `rke2-nonprod` (not GKE). The production GKE overlay
+> is frozen at zero replicas pending the infrastructure repo migration.
+
 # Human Summary
 
 ## What we're building
 
-A production-grade Kubernetes deployment of the Open edX learning platform (Tutor 21.0.0, Ulmo) on Google Kubernetes Engine. The deployment consists of 17+ workloads spanning the LMS, Studio (CMS), micro-frontends, supporting services (Forum, Discovery, Ecommerce, Credentials, Notes, XQueue), infrastructure databases (MySQL, Redis, Elasticsearch), an SMTP relay, a Caddy reverse proxy, and an analytics stack (ClickHouse, Superset). All resources live in the `mereka-lms` namespace, managed through Kustomize overlays with two environments: local (Kind) and production (GKE).
+A production-grade Kubernetes deployment of the Open edX learning platform (Tutor 21.0.0, Ulmo). The deployment consists of 17+ workloads spanning the LMS, Studio (CMS), micro-frontends, supporting services (Forum, Discovery, Credentials, Notes, XQueue, Purchase Gateway), infrastructure databases (MySQL, Redis, Meilisearch), an SMTP relay, a Caddy reverse proxy, and an analytics stack (ClickHouse, Superset). All resources live in the `mereka-lms` namespace, managed through Kustomize overlays. Active environments: local (Kind) and rke2-nonprod (dev); production (GKE) is frozen.
 
 ## Why it matters
 

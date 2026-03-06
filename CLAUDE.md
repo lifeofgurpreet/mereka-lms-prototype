@@ -37,17 +37,28 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
   - Meilisearch (forum search)
 
 ### Repository Structure
+
+> **Deployment boundary (ADR-025)**: Not everything in `deploy/k8s/` is meant to stay here.
+> `base/arc/`, `base/logging/`, `base/policies/`, `overlays/production/`, `overlays/rke2-nonprod/`,
+> and `overlays/staging/` are classified for migration to `bbi-infrastructure`. Only `base/` app
+> resources and `overlays/local/` permanently belong in this repo. See
+> `docs/architecture/DEPLOYMENT_BOUNDARY.md` for the authoritative classification.
+
 ```
 deploy/k8s/               # Kubernetes manifests
   ├── base/               # Base Kustomize resources
-  │   ├── secrets/        # ExternalSecrets (synced from Infisical)
-  │   ├── apps/           # App-specific configs
-  │   ├── arc/            # Actions Runner Controller (self-hosted CI runners)
-  │   └── plugins/        # Plugin configs (discovery, ecommerce, etc.)
+  │   ├── secrets/        # ExternalSecrets (synced from Infisical/GCP SM)
+  │   ├── apps/           # App-specific configs (lms, cms, enterprise, multi-tenancy, etc.)
+  │   ├── arc/            # ARC runners — PLATFORM_SHARED, will move to bbi-infrastructure
+  │   ├── logging/        # Promtail DaemonSet — PLATFORM_SHARED, will move to bbi-infrastructure
+  │   ├── monitoring/     # ServiceMonitors + PrometheusRules (app-owned)
+  │   ├── policies/       # Kyverno ClusterPolicies — PLATFORM_SHARED, will move to bbi-infrastructure
+  │   └── plugins/        # Plugin configs (discovery, mfe, credentials, aspects, etc.)
   └── overlays/           # Environment-specific overlays
-      ├── local/          # Local Kind/Minikube
-      ├── staging/        # Legacy (reference only)
-      └── production/     # Production GKE
+      ├── local/          # Local Kind/Minikube (stays in app repo)
+      ├── rke2-nonprod/   # Dev RKE2 cluster (active dev target — will move to bbi-infrastructure)
+      ├── staging/        # Staging overlay — shares rke2-nonprod cluster, consolidation pending
+      └── production/     # Production GKE — frozen at 0 replicas, will move to bbi-infrastructure
 
 .github/
   ├── actions/            # Composite actions (DRY building blocks)

@@ -56,33 +56,43 @@ mereka-lms/
 
 **Purpose**: Kubernetes deployment manifests and Kustomize overlays.
 
+> **Boundary reference**: For the authoritative classification of what belongs here vs in
+> `bbi-infrastructure`, see [DEPLOYMENT_BOUNDARY.md](../architecture/DEPLOYMENT_BOUNDARY.md)
+> and [DEPLOYMENT_CONTRACT.md](../architecture/DEPLOYMENT_CONTRACT.md).
+
 **Structure**:
 ```
 deploy/k8s/
-├── base/                      # Base Kustomize resources
-│   ├── secrets/               # ExternalSecret manifests
+├── base/                      # Base Kustomize resources (APP_RUNTIME — stays here)
+│   ├── secrets/               # ExternalSecret manifests + ClusterSecretStore
 │   │   └── external-secrets.yaml  # Maps Infisical/GCP SM → K8s secrets
-│   ├── apps/                  # App-specific configs
-│   │   ├── lms/               # LMS deployment, services
-│   │   ├── cms/               # Studio deployment, services
-│   │   └── workers/           # Celery worker configs
-│   └── plugins/               # Plugin configs (discovery, ecommerce, forum)
+│   ├── apps/                  # App-specific configs (lms, cms, enterprise, multi-tenancy, etc.)
+│   ├── arc/                   # ARC runner manifests (PLATFORM_SHARED — will move to bbi-infra)
+│   ├── logging/               # Promtail DaemonSet (PLATFORM_SHARED — will move to bbi-infra)
+│   ├── monitoring/            # ServiceMonitors, PrometheusRules (APP_RUNTIME)
+│   ├── network-policies/      # Namespace network policies (APP_RUNTIME)
+│   ├── operational/           # PDB, HPA baselines (APP_RUNTIME)
+│   ├── policies/              # Kyverno ClusterPolicies (PLATFORM_SHARED — will move to bbi-infra)
+│   └── plugins/               # Plugin configs (discovery, mfe, credentials, notes, aspects)
 └── overlays/                  # Environment-specific overrides
-    ├── local/                 # Local Kind/Minikube development
-    └── production/            # Production GKE
+    ├── local/                 # Local Kind development (APP_LOCAL_ONLY — stays here)
+    ├── production/            # Production GKE (ENVIRONMENT_SPECIFIC — will move to bbi-infra)
+    ├── rke2-nonprod/          # Dev RKE2 cluster (ENVIRONMENT_SPECIFIC — will move to bbi-infra)
+    └── staging/               # Staging overlay (ENVIRONMENT_SPECIFIC — consolidation pending)
 ```
 
 **Key files**:
-- `deploy/k8s/base/kustomization.yaml` — Base resources list
-- `deploy/k8s/overlays/production/kustomization.yaml` — Production image tags
+- `deploy/k8s/base/kustomization.yaml` — Base resources list (stable export path)
 - `deploy/k8s/base/secrets/external-secrets.yaml` — Secret sync configuration
+- `deploy/k8s/overlays/local/` — The only overlay that permanently stays in this repo
 
 **Where to add**:
-- New K8s resource → `deploy/k8s/base/apps/<service>/`
+- New app K8s resource → `deploy/k8s/base/apps/<service>/`
 - New secret → Add to `external-secrets.yaml` (never hardcode secrets)
-- Environment-specific config → `deploy/k8s/overlays/<env>/`
+- Local dev override → `deploy/k8s/overlays/local/`
+- Environment-specific config → `bbi-infrastructure` repo (not here)
 
-**Related docs**: `specs/k8s-deployment_spec.md`, `docs/operations/DEPLOYMENT_RUNBOOK.md`
+**Related docs**: `docs/architecture/DEPLOYMENT_BOUNDARY.md`, `docs/architecture/DEPLOYMENT_CONTRACT.md`, `docs/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `docs/operations/DEPLOYMENT_RUNBOOK.md`
 
 ---
 

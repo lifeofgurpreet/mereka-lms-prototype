@@ -1,5 +1,16 @@
 # Mereka LMS Kubernetes Manifests
 
+> **PARTIALLY SUPERSEDED**: The directory structure described below is outdated. The canonical
+> reference for what belongs in this directory vs `bbi-infrastructure` is:
+> - [docs/architecture/DEPLOYMENT_BOUNDARY.md](../../docs/architecture/DEPLOYMENT_BOUNDARY.md) — authoritative boundary (ADR-025)
+> - [docs/architecture/DEPLOYMENT_CONTRACT.md](../../docs/architecture/DEPLOYMENT_CONTRACT.md) — interface contract
+> - [docs/architecture/RESOURCE_OWNERSHIP_MATRIX.md](../../docs/architecture/RESOURCE_OWNERSHIP_MATRIX.md) — per-file classification
+>
+> Key differences from the description below: `overlays/local/`, `overlays/rke2-nonprod/`, and
+> `overlays/staging/` exist (production was not "to be created" — it exists and is frozen at 0
+> replicas). `base/arc/`, `base/logging/`, and `base/policies/` exist and are classified for
+> migration to `bbi-infrastructure`. Ecommerce has been deprecated; Purchase Gateway replaces it.
+
 This directory contains the Kubernetes manifests for deploying Mereka LMS (OpenEdX via Tutor) in the BBI-K8 GitOps environment.
 
 ## Directory Structure

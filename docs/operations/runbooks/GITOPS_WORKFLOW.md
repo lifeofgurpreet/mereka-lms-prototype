@@ -1,6 +1,12 @@
 # GitOps Workflow for Image Tag Management
 _Audience: Platform Eng + DevOps • Owner: Engineering Lead • Last updated: 2026-02-18_
 
+> **Deployment boundary**: For the authoritative classification of what belongs in this repo
+> vs `bbi-infrastructure`, see [DEPLOYMENT_BOUNDARY.md](../../architecture/DEPLOYMENT_BOUNDARY.md)
+> and [DEPLOYMENT_CONTRACT.md](../../architecture/DEPLOYMENT_CONTRACT.md).
+> Note: `deploy/k8s/overlays/production/` and `overlays/rke2-nonprod/` are classified
+> ENVIRONMENT_SPECIFIC and will migrate to `bbi-infrastructure` in a future phase (ADR-025).
+
 ## Overview
 
 Mereka LMS uses a **two-repository GitOps architecture**:

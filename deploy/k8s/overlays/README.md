@@ -2,6 +2,12 @@
 
 This directory contains Kustomize overlays for different deployment environments.
 
+> **Boundary note (ADR-025)**: Only `overlays/local/` permanently belongs in this app repo.
+> `overlays/production/`, `overlays/rke2-nonprod/`, and `overlays/staging/` are classified
+> ENVIRONMENT_SPECIFIC and will migrate to `bbi-infrastructure` in a future phase. All three
+> currently remain here for operational continuity during the transition period.
+> See [docs/architecture/DEPLOYMENT_BOUNDARY.md](../../docs/architecture/DEPLOYMENT_BOUNDARY.md).
+
 See **`docs/operations/DEPLOYMENT_LANES.md`** for the canonical reference on active lanes,
 promotion path, and differences between environments.
 

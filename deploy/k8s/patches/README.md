@@ -1,5 +1,15 @@
 # Kubernetes Patches
 
+> **Status per ADR-025**: The patches in this directory have the following classifications:
+> - `argocd-configmap-ignore.yaml` — PLATFORM_SHARED: belongs with ArgoCD Application manifest
+>   in `bbi-infrastructure`. Will move there in Phase 3 of the ADR-025 migration.
+> - `caddy-staging-fix.yaml` — DEAD_REFERENCE: legacy emergency patch with hardcoded prod
+>   domains, not referenced by any kustomization. Pending deletion.
+> - `smtp-ses-relay.yaml` — DEAD_REFERENCE: manual-apply patch not integrated into any overlay.
+>   Needs assessment before deletion.
+>
+> See [docs/architecture/DEPLOYMENT_BOUNDARY.md](../../../docs/architecture/DEPLOYMENT_BOUNDARY.md) for details.
+
 This directory contains Kubernetes patches for fixing deployment issues that can't be resolved through Tutor configuration alone.
 
 ## Available Patches

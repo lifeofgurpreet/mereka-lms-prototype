@@ -39,8 +39,8 @@ runner pods in `arc-runners` namespace. Deployed via Helm.
 **Runner pods** (`arc-runners` namespace): One pod per job. Pod terminates after job completes.
 The work directory (`/runner/_work`) uses an `emptyDir` volume — always clean per job.
 
-**Manifests**: `deploy/k8s/base/arc/`
-**Overlay**: `deploy/k8s/overlays/rke2-nonprod/` (includes `../../base/arc`)
+**Manifests**: `deploy/k8s/base/arc/` (currently in app repo; classified PLATFORM_SHARED — will migrate to `bbi-infrastructure` per ADR-025. See [DEPLOYMENT_BOUNDARY.md](../architecture/DEPLOYMENT_BOUNDARY.md).)
+**Overlay**: Applied separately via `kubectl apply -k deploy/k8s/base/arc/` — NOT included in the main overlay, because the namespace transformer would override `arc-systems`/`arc-runners`.
 
 ---
 
