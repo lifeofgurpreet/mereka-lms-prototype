@@ -34,33 +34,30 @@ Usage: sync-brand-package.sh [--all] [--brand <slug>]
 Sync OEP-48 brand packages from canonical asset sources.
 
 Options:
-  --all            Sync all supported brand packages (default)
-  --brand <slug>   Sync a single brand slug (mereka|biji-biji|skillourfuture)
+  --all            Sync all discovered brand packages (default)
+  --brand <slug>   Sync a single brand slug (brand-<slug> must exist)
   -h, --help       Show this help
 EOF
 }
 
 brand_source_dir() {
   local brand="$1"
-  case "$brand" in
-    mereka)
-      echo "$REPO_ROOT/assets/branding"
-      ;;
-    biji-biji)
-      echo "$REPO_ROOT/assets/branding/tenants/biji-biji"
-      ;;
-    skillourfuture)
-      echo "$REPO_ROOT/assets/branding/tenants/skillourfuture"
-      ;;
-    *)
-      return 1
-      ;;
-  esac
+  if [[ "$brand" == "mereka" ]]; then
+    echo "$REPO_ROOT/assets/branding"
+  else
+    echo "$REPO_ROOT/assets/branding/tenants/$brand"
+  fi
 }
 
 brand_package_dir() {
   local brand="$1"
   echo "$REPO_ROOT/infrastructure/tutor/brand-${brand}"
+}
+
+discover_supported_brands() {
+  find "$REPO_ROOT/infrastructure/tutor" -mindepth 1 -maxdepth 1 -type d -name 'brand-*' -printf '%f\n' \
+    | sed 's/^brand-//' \
+    | sort
 }
 
 validate_shared_fonts() {
@@ -155,13 +152,20 @@ EOF
 
 main() {
   local brands=()
+  local discovered_brands=()
+  mapfile -t discovered_brands < <(discover_supported_brands)
+  if [[ ${#discovered_brands[@]} -eq 0 ]]; then
+    echo "No brand-* package directories found under infrastructure/tutor" >&2
+    exit 1
+  fi
+
   if [[ "$#" -eq 0 ]]; then
-    brands=(mereka biji-biji skillourfuture)
+    brands=("${discovered_brands[@]}")
   else
     while [[ "$#" -gt 0 ]]; do
       case "$1" in
         --all)
-          brands=(mereka biji-biji skillourfuture)
+          brands=("${discovered_brands[@]}")
           shift
           ;;
         --brand)
