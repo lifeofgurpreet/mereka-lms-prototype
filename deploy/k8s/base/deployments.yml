@@ -34,6 +34,27 @@ spec:
           env:
           - name: default_site_port
             value: ":80"
+          # Domain env vars consumed by Caddyfile {$VAR} placeholders.
+          # Base defaults use localhost/placeholder values; overlays MUST override
+          # these with environment-specific hostnames.
+          - name: LMS_HOST
+            value: "localhost"
+          - name: LMS_HOST_PREVIEW
+            value: "preview.localhost"
+          - name: STUDIO_HOST
+            value: "studio.localhost"
+          - name: DISCOVERY_HOST
+            value: "discovery.localhost"
+          - name: MFE_HOST
+            value: "apps.localhost"
+          - name: NOTES_HOST
+            value: "notes.localhost"
+          - name: CREDENTIALS_HOST
+            value: "credentials.localhost"
+          - name: ENTERPRISE_ADMIN_HOST
+            value: "admin.localhost"
+          - name: ENTERPRISE_LEARNER_HOST
+            value: "learner.localhost"
           volumeMounts:
             - mountPath: /etc/caddy/
               name: config

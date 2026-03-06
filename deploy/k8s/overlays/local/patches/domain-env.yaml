@@ -152,3 +152,34 @@ spec:
               value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
               value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy
+  labels:
+    app.kubernetes.io/name: caddy
+spec:
+  template:
+    spec:
+      containers:
+        - name: caddy
+          env:
+            - name: LMS_HOST
+              value: academyv2.mereka.dev
+            - name: LMS_HOST_PREVIEW
+              value: preview.academyv2.mereka.dev
+            - name: STUDIO_HOST
+              value: studio.academyv2.mereka.dev
+            - name: DISCOVERY_HOST
+              value: discovery.academyv2.mereka.dev
+            - name: MFE_HOST
+              value: apps.academyv2.mereka.dev
+            - name: NOTES_HOST
+              value: notes.academyv2.mereka.dev
+            - name: CREDENTIALS_HOST
+              value: credentials.academyv2.mereka.dev
+            - name: ENTERPRISE_ADMIN_HOST
+              value: admin.academyv2.mereka.dev
+            - name: ENTERPRISE_LEARNER_HOST
+              value: learner.academyv2.mereka.dev

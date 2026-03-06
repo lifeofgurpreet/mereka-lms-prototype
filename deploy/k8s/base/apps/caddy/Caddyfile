@@ -80,12 +80,12 @@ localhost{$default_site_port}, preview.localhost{$default_site_port} {
     }
 }
 
-# LMS - production/dev + microsites (TLS via NGINX Ingress)
-# - academyv2.mereka.io: main GKE environment (PRODUCTION DOMAIN)
-# - academyv2.mereka.dev: VPS kind cluster
-# - skillourfuture.academy.mereka.io: Skill Our Future microsite
-# - academy.biji-biji.com: Biji-Biji Academy microsite
-http://academyv2.mereka.io, http://academyv2.mereka.dev, http://preview.academyv2.mereka.io, http://preview.academyv2.mereka.dev, http://skillourfuture.academy.mereka.io, http://academy.biji-biji.com {
+# LMS - environment-specific domains (TLS via NGINX Ingress)
+# Domains are injected via environment variables; overlays must set:
+#   LMS_HOST        — primary LMS hostname (e.g. academyv2.mereka.io)
+#   LMS_HOST_PREVIEW — preview hostname    (e.g. preview.academyv2.mereka.io)
+# Additional microsite domains are added by overlay-supplied Caddyfile overrides.
+http://{$LMS_HOST}, http://{$LMS_HOST_PREVIEW} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -138,12 +138,9 @@ studio.localhost{$default_site_port} {
     }
 }
 
-# Studio/CMS - production/dev (TLS via NGINX Ingress)
-# - studio.academyv2.mereka.io: GKE Studio
-# - studio.academyv2.mereka.dev: VPS kind Studio
-# - studio.academy.biji-biji.com: Biji-Biji Studio
-# - studio.skillourfuture.academy.mereka.io: Skill Our Future Studio
-http://studio.academyv2.mereka.io, http://studio.academyv2.mereka.dev, http://studio.academy.biji-biji.com, http://studio.skillourfuture.academy.mereka.io {
+# Studio/CMS - environment-specific domain (TLS via NGINX Ingress)
+# STUDIO_HOST is injected by the overlay (e.g. studio.academyv2.mereka.io).
+http://{$STUDIO_HOST} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -168,7 +165,8 @@ discovery.localhost{$default_site_port} {
 }
 
 # Discovery Service (TLS via NGINX Ingress)
-http://discovery.academyv2.mereka.io, http://discovery.academyv2.mereka.dev {
+# DISCOVERY_HOST is injected by the overlay (e.g. discovery.academyv2.mereka.io).
+http://{$DISCOVERY_HOST} {
     request_body {
         max_size 10MB
     }
@@ -177,10 +175,7 @@ http://discovery.academyv2.mereka.io, http://discovery.academyv2.mereka.dev {
 }
 # MFE (Micro-Frontends) - localhost and production/dev
 # - apps.localhost: local development
-# - apps.academyv2.mereka.io: main GKE MFEs
-# - apps.academyv2.mereka.dev: VPS kind MFEs
-# - apps.academy.biji-biji.com: Biji-Biji Academy MFEs
-# - apps.skillourfuture.academy.mereka.io: Skill Our Future MFEs
+# MFE_HOST is injected by the overlay (e.g. apps.academyv2.mereka.io).
 apps.localhost{$default_site_port} {
     request_body {
         max_size 2MB
@@ -189,8 +184,8 @@ apps.localhost{$default_site_port} {
 }
 
 # MFE (TLS via NGINX Ingress)
-http://apps.academyv2.mereka.io, http://apps.academyv2.mereka.dev, http://apps.academy.biji-biji.com, http://apps.skillourfuture.academy.mereka.io {
-    redir / https://academyv2.mereka.io
+http://{$MFE_HOST} {
+    redir / https://{$LMS_HOST}
     request_body {
         max_size 2MB
     }
@@ -202,12 +197,14 @@ notes.localhost{$default_site_port} {
 }
 
 # Notes API (TLS via NGINX Ingress)
-http://notes.academyv2.mereka.io, http://notes.academyv2.mereka.dev {
+# NOTES_HOST is injected by the overlay (e.g. notes.academyv2.mereka.io).
+http://{$NOTES_HOST} {
     import proxy "notes:8000"
 }
 
 # Credentials Service
-http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev {
+# CREDENTIALS_HOST is injected by the overlay (e.g. credentials.academyv2.mereka.io).
+http://{$CREDENTIALS_HOST} {
     # Authn assets are served by MFE; keep service-domain admin/login pages branded/functional.
     handle /authn/* {
         reverse_proxy mfe:8002 {
@@ -240,7 +237,7 @@ http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev 
 
     @credentials_root path /
     header @credentials_root Content-Type "text/html; charset=utf-8"
-    respond @credentials_root "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Mereka Credentials</title></head><body style='margin:0;padding:40px;background:#f5f7fb;color:#1a1623;font-family:Poppins,Lato,sans-serif'><main style='max-width:760px;margin:0 auto;background:#fff;padding:32px;border-radius:20px;border:1px solid rgba(26,22,35,.08);box-shadow:0 16px 50px rgba(26,22,35,.1)'><h1 style='margin:0 0 12px;color:#2d898b;font-size:2rem;line-height:1.2'>Mereka Credentials Service</h1><p style='margin:0 0 16px;font-size:1rem;line-height:1.6'>Credential issuance APIs are online. Use the admin route for operator actions and the health route for service checks.</p><p style='margin:0'><a href='/admin/login/' style='color:#295cad;font-weight:600;text-decoration:none'>Open admin login</a><span style='opacity:.5'> · </span><a href='/health/' style='color:#295cad;font-weight:600;text-decoration:none'>Health endpoint</a></p></main></body></html>" 200
+    respond @credentials_root "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Credentials</title></head><body style='margin:0;padding:40px;background:#f5f7fb;color:#1a1623;font-family:Poppins,Lato,sans-serif'><main style='max-width:760px;margin:0 auto;background:#fff;padding:32px;border-radius:20px;border:1px solid rgba(26,22,35,.08);box-shadow:0 16px 50px rgba(26,22,35,.1)'><h1 style='margin:0 0 12px;color:#2d898b;font-size:2rem;line-height:1.2'>Credentials Service</h1><p style='margin:0 0 16px;font-size:1rem;line-height:1.6'>Credential issuance APIs are online. Use the admin route for operator actions and the health route for service checks.</p><p style='margin:0'><a href='/admin/login/' style='color:#295cad;font-weight:600;text-decoration:none'>Open admin login</a><span style='opacity:.5'> · </span><a href='/health/' style='color:#295cad;font-weight:600;text-decoration:none'>Health endpoint</a></p></main></body></html>" 200
     import proxy "credentials:8000"
 }
 
@@ -249,7 +246,8 @@ http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev 
 # The Discussions MFE handles the learner-facing UI.
 
 # Enterprise Admin Portal MFE (TLS via NGINX Ingress)
-http://admin.academyv2.mereka.io {
+# ENTERPRISE_ADMIN_HOST is injected by the overlay (e.g. admin.academyv2.mereka.io).
+http://{$ENTERPRISE_ADMIN_HOST} {
     request_body {
         max_size 2MB
     }
@@ -305,7 +303,8 @@ http://admin.academyv2.mereka.io {
 }
 
 # Enterprise Learner Portal MFE (TLS via NGINX Ingress)
-http://learner.academyv2.mereka.io {
+# ENTERPRISE_LEARNER_HOST is injected by the overlay (e.g. learner.academyv2.mereka.io).
+http://{$ENTERPRISE_LEARNER_HOST} {
     request_body {
         max_size 2MB
     }

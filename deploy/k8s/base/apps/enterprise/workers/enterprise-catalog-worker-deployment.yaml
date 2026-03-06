@@ -110,8 +110,9 @@ spec:
                 secretKeyRef:
                   name: enterprise-secrets
                   key: ENTERPRISE_CATALOG_OAUTH2_SECRET
+            # Overlays override LMS_ROOT_URL with the environment-specific public URL.
             - name: LMS_ROOT_URL
-              value: "https://academyv2.mereka.io"
+              value: "http://localhost"
           resources:
             requests:
               cpu: 10m

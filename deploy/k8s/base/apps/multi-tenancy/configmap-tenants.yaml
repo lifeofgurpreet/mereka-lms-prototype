@@ -4,9 +4,15 @@
 # This is a reference/bootstrap file — the canonical source of truth is
 # the EnterpriseCustomer + TenantConfig records in the LMS database.
 #
-# Update this file when provisioning or offboarding tenants so that
-# infrastructure scripts can discover tenant configuration without
-# querying the database.
+# BASE DEFAULTS: This file uses placeholder domains so the base package
+# is environment-neutral. Overlays MUST replace this ConfigMap with the
+# correct environment-specific tenant records via configMapGenerator
+# behavior: replace, or via a kustomize patch on the tenant-registry
+# ConfigMap data key.
+#
+# Update the overlay-specific version when provisioning or offboarding
+# tenants so that infrastructure scripts can discover tenant configuration
+# without querying the database.
 #
 # See: specs/multi-tenancy-architecture_spec.md
 ---
@@ -23,34 +29,18 @@ data:
   # YAML-formatted tenant registry.  One entry per tenant.
   # Infrastructure scripts can parse this with yq/jq.
   tenants.yaml: |
-    # Mereka Academy — primary tenant (platform owner).
-    - slug: mereka-academy
-      name: Mereka Academy
-      domain: academyv2.mereka.io
-      enterprise_customer_uuid: "PLACEHOLDER-MEREKA-UUID"
-      active: true
-      alias_domains: []
-
-    # Biji-Biji Academy tenant.
-    - slug: biji-biji
-      name: Biji-Biji Academy
-      domain: academy.biji-biji.com
-      enterprise_customer_uuid: "PLACEHOLDER-BIJIBIJI-UUID"
-      active: true
-      alias_domains: []
-
-    # Skill Our Future tenant.
-    - slug: skillourfuture
-      name: Skill Our Future
-      domain: skillourfuture.academy.mereka.io
-      enterprise_customer_uuid: "PLACEHOLDER-SKILLOURFUTURE-UUID"
+    # Primary tenant (platform owner) — domain set by overlay.
+    - slug: primary
+      name: Primary Tenant
+      domain: localhost
+      enterprise_customer_uuid: "PLACEHOLDER-PRIMARY-UUID"
       active: true
       alias_domains: []
 
     # Template for adding new tenants:
     # - slug: acme-corp
     #   name: Acme Corp
-    #   domain: acme.academyv2.mereka.io
+    #   domain: acme.localhost
     #   enterprise_customer_uuid: "uuid-here"
     #   active: true
     #   alias_domains: []

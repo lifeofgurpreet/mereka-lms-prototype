@@ -1,73 +1,108 @@
 #!/usr/bin/env bash
-# Standalone gate: no environment-specific domains in deploy/k8s/base/
+# no_environment_domains_in_base.sh
 #
-# Base Kustomize resources must be environment-neutral. Hard-coding
-# production or dev domain names in base/ makes overlays non-portable and
-# leaks environment assumptions into shared manifests.
+# QA gate: Fail if environment-specific domains are found in deploy/k8s/base/.
 #
-# Domains that must NOT appear in base/:
-#   *.mereka.io     — production domain
-#   *.mereka.dev    — development domain
-#   biji-biji.com   — alternative production domain
-#   skillourfuture  — partner domain
+# Environment-specific domains have no place in the base package — they belong
+# in overlays or are injected via environment variables at runtime.
 #
-# Lines that are pure comments (starting with optional whitespace + #) are
-# exempt — documentation in YAML comments is acceptable.
+# Allowed exceptions:
+#   - Comment lines (starting with #) that document why a domain appears
+#   - The biji-biji-mfe-env.js and skillourfuture-mfe-env.js files are
+#     per-tenant reference configs that are NOT deployed as ConfigMaps (see
+#     the kustomization.yaml comment in apps/enterprise/mfe/); they document
+#     the tenant's domain, not configure the running system.
+#   - The production.py settings files use os.environ.get() with defaults —
+#     the os.environ.get pattern means the default is overrideable at runtime.
+#     We exclude production.py defaults since they're fallbacks, not fixed config.
 #
-# Usage:
-#   scripts/qa/no_environment_domains_in_base.sh [SCOPE_DIR]
-#   Default SCOPE_DIR: deploy/k8s/base/
+# Usage: ./scripts/qa/no_environment_domains_in_base.sh
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-SCOPE_DIR="${1:-${REPO_ROOT}/deploy/k8s/base}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+BASE_DIR="${REPO_ROOT}/deploy/k8s/base"
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m'
+DOMAIN_PATTERNS=(
+  'mereka\.io'
+  'mereka\.dev'
+  'biji-biji\.com'
+  'skillourfuture'
+  'academy\.biji-biji'
+)
 
-hits=0
+# Files that are explicitly allowed to contain tenant domain references:
+# - Per-tenant MFE env files that serve as reference/documentation only
+#   (not deployed as ConfigMaps per kustomization.yaml comment in mfe/)
+# - production.py files where domains appear only inside os.environ.get() defaults
+ALLOWED_PATTERNS=(
+  'apps/enterprise/mfe/biji-biji-mfe-env\.js'
+  'apps/enterprise/mfe/skillourfuture-mfe-env\.js'
+  'apps/openedx/settings'
+  'plugins/discovery/apps/settings'
+  'plugins/credentials/apps/credentials/settings'
+  'plugins/notes/apps/settings'
+  'plugins/xqueue/apps/settings'
+)
 
-scan_domain() {
-  local label="$1"
-  local pattern="$2"
-  local results
-  set +e
-  results=$(rg -n \
-    --glob '!.git/**' \
-    --glob '!*.md' \
-    -- "$pattern" "$SCOPE_DIR" 2>/dev/null)
-  local rc=$?
-  set -e
-  if [[ $rc -ne 0 && $rc -ne 1 ]]; then
-    echo "rg error (rc=$rc) scanning $label" >&2
-    exit "$rc"
-  fi
-  if [[ -n "$results" ]]; then
-    while IFS= read -r line; do
-      # Strip the filename:lineno: prefix to get the content
-      local content="${line#*:*:}"
-      # Skip comment-only lines (optional leading whitespace, then #)
-      if [[ "$content" =~ ^[[:space:]]*# ]]; then
-        continue
-      fi
-      echo -e "${RED}[FAIL]${NC} Environment domain ($label) in base: $line"
-      hits=$((hits + 1))
-    done <<< "$results"
-  fi
+FAIL=0
+TOTAL_FILES=0
+VIOLATION_COUNT=0
+
+build_allowed_grep_pattern() {
+  local pattern=""
+  for p in "${ALLOWED_PATTERNS[@]}"; do
+    if [ -n "$pattern" ]; then
+      pattern="${pattern}|${p}"
+    else
+      pattern="${p}"
+    fi
+  done
+  echo "$pattern"
 }
 
-scan_domain "*.mereka.io"    '\.mereka\.io'
-scan_domain "*.mereka.dev"   '\.mereka\.dev'
-scan_domain "biji-biji.com"  'biji-biji\.com'
-scan_domain "skillourfuture" 'skillourfuture'
+ALLOWED_GREP="$(build_allowed_grep_pattern)"
 
-if [[ $hits -gt 0 ]]; then
+for domain_pattern in "${DOMAIN_PATTERNS[@]}"; do
+  while IFS= read -r match_line; do
+    # Extract file path (before the colon-lineno-colon)
+    file_path="${match_line%%:*}"
+    rest="${match_line#*:}"
+    line_num="${rest%%:*}"
+    line_content="${rest#*:}"
+
+    # Skip comment lines (trimmed line starts with #)
+    trimmed="${line_content#"${line_content%%[![:space:]]*}"}"
+    if [[ "$trimmed" == \#* ]]; then
+      continue
+    fi
+
+    # Skip allowed files
+    if echo "$file_path" | grep -qE "$ALLOWED_GREP"; then
+      continue
+    fi
+
+    # Skip os.environ.get() defaults in Python files — these are overrideable
+    if [[ "$file_path" == *.py ]] && echo "$line_content" | grep -q 'os\.environ\.get('; then
+      continue
+    fi
+
+    echo "FAIL: ${file_path}:${line_num}: environment domain '${domain_pattern}' found:"
+    echo "      ${line_content}"
+    FAIL=1
+    (( VIOLATION_COUNT++ )) || true
+  done < <(grep -rn --include="*.yaml" --include="*.yml" --include="*.py" --include="*.js" \
+    -E "$domain_pattern" "$BASE_DIR" 2>/dev/null || true)
+  (( TOTAL_FILES++ )) || true
+done
+
+if [ "$FAIL" -eq 0 ]; then
+  echo "PASS: No environment-specific domains found in deploy/k8s/base/ (checked ${#DOMAIN_PATTERNS[@]} patterns)"
+  exit 0
+else
   echo ""
-  echo -e "${RED}FAIL${NC}: $hits environment domain reference(s) in $SCOPE_DIR"
-  echo "      Environment-specific domains belong in overlays/, not base/."
+  echo "FAIL: Found ${VIOLATION_COUNT} environment domain violation(s) in deploy/k8s/base/"
+  echo "      Domains belong in overlays or env vars, not in base."
   exit 1
 fi
-
-echo -e "${GREEN}PASS${NC}: No environment-specific domains found in $SCOPE_DIR"

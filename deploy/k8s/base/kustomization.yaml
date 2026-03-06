@@ -14,7 +14,7 @@ resources:
 - apps/lms
 - apps/cms
 - apps/preview-redirect
-- ../../../services/purchase-gateway/k8s
+- apps/purchase-gateway
 - policies
 - network-policies
 - operational
