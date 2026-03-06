@@ -15,13 +15,23 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 MONITORING_NS="${MONITORING_NS:-monitoring}"
 APP_NS="${APP_NS:-mereka-lms}"
 VPS_PROM_URL="${VPS_PROM_URL:-https://prometheus.mereka.dev}"
 GKE_PROM_SVC="${GKE_PROM_SVC:-monitoring-kube-prometheus-prometheus}"
 GRAFANA_LABEL="${GRAFANA_LABEL:-app.kubernetes.io/name=grafana}"
-OBSERVABILITY_REPO="${OBSERVABILITY_REPO:-/home/gurpreet/projects/observability}"
+OBSERVABILITY_REPO="${OBSERVABILITY_REPO:-}"
+if [[ -z "$OBSERVABILITY_REPO" ]]; then
+  if [[ -d "${WORKSPACE_ROOT}/observability" ]]; then
+    OBSERVABILITY_REPO="${WORKSPACE_ROOT}/observability"
+  elif [[ -d "${HOME}/projects/observability" ]]; then
+    OBSERVABILITY_REPO="${HOME}/projects/observability"
+  else
+    OBSERVABILITY_REPO="${WORKSPACE_ROOT}/observability"
+  fi
+fi
 GRAFANA_CONTRACT_FILE="${GRAFANA_CONTRACT_FILE:-${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json}"
 GRAFANA_DASHBOARD_FILE="${GRAFANA_DASHBOARD_FILE:-${REPO_ROOT}/infrastructure/monitoring/grafana/dashboards/slo-overview.json}"
 LEGACY_GRAFANA_DASHBOARD_FILE="${LEGACY_GRAFANA_DASHBOARD_FILE:-${OBSERVABILITY_REPO}/dashboards/03-applications/bbi-mereka-lms.json}"
