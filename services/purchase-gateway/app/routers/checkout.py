@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
+from app.metrics import record_checkout_created
 from app.models.offering import Offering
 from app.models.order import Order, OrderStatus
 
@@ -115,6 +116,7 @@ async def create_checkout(
 
     db.add(order)
     await db.commit()
+    record_checkout_created()
 
     logger.info(
         "checkout.created",

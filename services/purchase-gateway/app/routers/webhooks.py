@@ -2,6 +2,7 @@
 # @spec: ecommerce-purchase-gateway_spec.md
 
 from datetime import UTC, datetime
+from time import monotonic
 
 import stripe
 import structlog
@@ -13,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
+from app.metrics import observe_webhook_processing
 from app.models.order import Order, OrderAuditLog, OrderStatus
 from app.models.stripe_event import ProcessingStatus, StripeEvent
 from app.services.dispute import handle_dispute_closed, handle_dispute_created
@@ -169,15 +171,26 @@ async def stripe_webhook(
     db: AsyncSession = Depends(get_db),
 ):
     """Handle incoming Stripe webhook events with idempotent processing."""
+    started_at = monotonic()
     payload = await request.body()
     try:
         event = stripe.Webhook.construct_event(
             payload, stripe_signature, settings.STRIPE_WEBHOOK_SECRET
         )
     except stripe.SignatureVerificationError as exc:
+        observe_webhook_processing(
+            event_type="unknown",
+            status="invalid_signature",
+            duration_seconds=monotonic() - started_at,
+        )
         logger.warning("webhook.signature_invalid")
         raise HTTPException(status_code=400, detail="Invalid signature") from exc
     except ValueError as exc:
+        observe_webhook_processing(
+            event_type="unknown",
+            status="invalid_payload",
+            duration_seconds=monotonic() - started_at,
+        )
         logger.warning("webhook.invalid_payload")
         raise HTTPException(status_code=400, detail="Invalid payload") from exc
 
@@ -198,12 +211,22 @@ async def stripe_webhook(
     if existing_event:
         # Allow retry of failed events; skip already-processed ones
         if existing_event.processing_status == ProcessingStatus.processed:
+            observe_webhook_processing(
+                event_type=event_type,
+                status="duplicate",
+                duration_seconds=monotonic() - started_at,
+            )
             logger.info("webhook.duplicate", stripe_event_id=event_id)
             return {"status": "duplicate"}
         if existing_event.processing_status == ProcessingStatus.failed:
             logger.info("webhook.retrying_failed", stripe_event_id=event_id)
             stripe_event_record = existing_event
         else:
+            observe_webhook_processing(
+                event_type=event_type,
+                status="duplicate",
+                duration_seconds=monotonic() - started_at,
+            )
             logger.info("webhook.already_processing", stripe_event_id=event_id)
             return {"status": "duplicate"}
     else:
@@ -219,6 +242,11 @@ async def stripe_webhook(
             await db.commit()
         except IntegrityError:
             await db.rollback()
+            observe_webhook_processing(
+                event_type=event_type,
+                status="duplicate",
+                duration_seconds=monotonic() - started_at,
+            )
             logger.info("webhook.duplicate_race", stripe_event_id=event_id)
             return {"status": "duplicate"}
 
@@ -269,9 +297,19 @@ async def stripe_webhook(
             await db.commit()
         except Exception:
             logger.error("webhook.failed_status_update_error", stripe_event_id=event_id)
+        observe_webhook_processing(
+            event_type=event_type,
+            status="failed",
+            duration_seconds=monotonic() - started_at,
+        )
         return JSONResponse(
             status_code=500,
             content={"status": "error", "detail": "Webhook processing failed"},
         )
 
+    observe_webhook_processing(
+        event_type=event_type,
+        status="processed",
+        duration_seconds=monotonic() - started_at,
+    )
     return {"status": "received"}

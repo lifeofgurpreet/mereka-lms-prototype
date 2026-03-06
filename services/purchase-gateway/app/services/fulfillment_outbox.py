@@ -2,6 +2,7 @@
 
 import asyncio
 from datetime import UTC, datetime, timedelta
+from time import monotonic
 
 import structlog
 from sqlalchemy import Select, select
@@ -10,6 +11,11 @@ from sqlalchemy.orm import selectinload
 
 from app.config import settings
 from app.database import async_session
+from app.metrics import (
+    observe_fulfillment_duration,
+    record_dead_letter,
+    record_reconciliation_queued,
+)
 from app.models.fulfillment_job import FulfillmentJob, FulfillmentJobStatus
 from app.models.order import Order, OrderAuditLog, OrderStatus
 from app.services.fulfillment import fulfill_order
@@ -91,6 +97,7 @@ async def _mark_dead_letter(db: AsyncSession, job: FulfillmentJob, reason: str) 
             )
         )
     await db.commit()
+    record_dead_letter()
 
 
 async def _mark_retry(
@@ -155,8 +162,13 @@ async def process_fulfillment_job(job_id) -> None:
             )
             return
 
+        started_at = monotonic()
         if not job.order:
             await _mark_dead_letter(db, job, "Associated order was not found")
+            observe_fulfillment_duration(
+                status=FulfillmentJobStatus.dead_letter.value,
+                duration_seconds=monotonic() - started_at,
+            )
             return
 
         try:
@@ -171,8 +183,16 @@ async def process_fulfillment_job(job_id) -> None:
             )
             if job.attempts >= job.max_attempts:
                 await _mark_dead_letter(db, job, f"Unhandled error: {exc}")
+                observe_fulfillment_duration(
+                    status=FulfillmentJobStatus.dead_letter.value,
+                    duration_seconds=monotonic() - started_at,
+                )
             else:
                 await _mark_retry(db, job, f"Unhandled error: {exc}")
+                observe_fulfillment_duration(
+                    status=FulfillmentJobStatus.failed.value,
+                    duration_seconds=monotonic() - started_at,
+                )
             return
 
         if job.order.status == OrderStatus.fulfilled:
@@ -180,6 +200,10 @@ async def process_fulfillment_job(job_id) -> None:
             job.completed_at = datetime.now(UTC)
             job.last_error = None
             await db.commit()
+            observe_fulfillment_duration(
+                status=FulfillmentJobStatus.succeeded.value,
+                duration_seconds=monotonic() - started_at,
+            )
             logger.info(
                 "fulfillment.job_succeeded",
                 job_id=str(job.id),
@@ -190,8 +214,16 @@ async def process_fulfillment_job(job_id) -> None:
         reason = f"Order status after fulfillment is {job.order.status.value}"
         if job.attempts >= job.max_attempts:
             await _mark_dead_letter(db, job, reason)
+            observe_fulfillment_duration(
+                status=FulfillmentJobStatus.dead_letter.value,
+                duration_seconds=monotonic() - started_at,
+            )
         else:
             await _mark_retry(db, job, reason)
+            observe_fulfillment_duration(
+                status=FulfillmentJobStatus.failed.value,
+                duration_seconds=monotonic() - started_at,
+            )
 
 
 async def reconcile_paid_orders(db: AsyncSession, *, limit: int) -> int:
@@ -217,6 +249,7 @@ async def reconcile_paid_orders(db: AsyncSession, *, limit: int) -> int:
 
     if reconciled:
         await db.commit()
+        record_reconciliation_queued(reconciled)
         logger.info(
             "fulfillment.reconcile_queued",
             reconciled=reconciled,

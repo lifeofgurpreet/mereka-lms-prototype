@@ -371,6 +371,7 @@ scripts/qa/verify-video-pipeline.sh
 
 # ── Purchase gateway (additional) ────────────────────────────────────
 scripts/qa/verify-purchase-gateway-models.sh
+scripts/qa/verify-purchase-gateway-metrics-contract.sh
 
 # ── Proctoring & timed exams ─────────────────────────────────────────
 scripts/qa/verify-proctoring-environment.sh

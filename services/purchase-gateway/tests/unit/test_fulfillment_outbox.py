@@ -125,7 +125,11 @@ async def test_claim_next_fulfillment_job_marks_processing(mock_db):
 
 
 @pytest.mark.asyncio
-async def test_reconcile_paid_orders_enqueues_jobs_and_commits(mock_db):
+@patch("app.services.fulfillment_outbox.record_reconciliation_queued")
+async def test_reconcile_paid_orders_enqueues_jobs_and_commits(
+    mock_record_reconciliation_queued,
+    mock_db,
+):
     orders = [
         _make_order(OrderStatus.paid),
         _make_order(OrderStatus.fulfillment_failed),
@@ -153,3 +157,4 @@ async def test_reconcile_paid_orders_enqueues_jobs_and_commits(mock_db):
     assert reconciled == 2
     assert mock_enqueue.await_count == 2
     mock_db.commit.assert_awaited_once()
+    mock_record_reconciliation_queued.assert_called_once_with(2)

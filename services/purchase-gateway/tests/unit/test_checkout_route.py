@@ -162,9 +162,15 @@ async def test_create_checkout_tenant_mismatch(mock_stripe, mock_settings, mock_
 
 
 @pytest.mark.asyncio
+@patch("app.routers.checkout.record_checkout_created")
 @patch("app.routers.checkout.settings")
 @patch("app.routers.checkout.stripe")
-async def test_create_checkout_stripe_error_returns_503(mock_stripe, mock_settings, mock_db):
+async def test_create_checkout_stripe_error_returns_503(
+    mock_stripe,
+    mock_settings,
+    mock_record_checkout_created,
+    mock_db,
+):
     """create_checkout returns 503 when Stripe raises an error."""
     import stripe as stripe_lib
     from fastapi import HTTPException
@@ -192,6 +198,7 @@ async def test_create_checkout_stripe_error_returns_503(mock_stripe, mock_settin
         await create_checkout(request, mock_db)
 
     assert exc_info.value.status_code == 503
+    mock_record_checkout_created.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -200,9 +207,15 @@ async def test_create_checkout_stripe_error_returns_503(mock_stripe, mock_settin
 
 
 @pytest.mark.asyncio
+@patch("app.routers.checkout.record_checkout_created")
 @patch("app.routers.checkout.settings")
 @patch("app.routers.checkout.stripe")
-async def test_create_checkout_happy_path(mock_stripe, mock_settings, mock_db):
+async def test_create_checkout_happy_path(
+    mock_stripe,
+    mock_settings,
+    mock_record_checkout_created,
+    mock_db,
+):
     """create_checkout creates an order and returns checkout URL on success."""
     from app.routers.checkout import CheckoutResponse, create_checkout
 
@@ -233,6 +246,7 @@ async def test_create_checkout_happy_path(mock_stripe, mock_settings, mock_db):
     assert response.session_id == "cs_new123"
     mock_db.add.assert_called_once()
     mock_db.commit.assert_awaited()
+    mock_record_checkout_created.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

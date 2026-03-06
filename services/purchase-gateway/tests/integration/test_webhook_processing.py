@@ -60,8 +60,9 @@ def _clear_overrides():
 
 
 @pytest.mark.asyncio
+@patch("app.routers.webhooks.observe_webhook_processing")
 @patch("app.routers.webhooks.stripe")
-async def test_valid_signature_is_accepted(mock_stripe, client):
+async def test_valid_signature_is_accepted(mock_stripe, mock_observe_webhook_processing, client):
     """Webhook with a valid Stripe signature returns 200."""
     import stripe as stripe_lib
 
@@ -93,11 +94,20 @@ async def test_valid_signature_is_accepted(mock_stripe, client):
 
     # construct_event was called and returned our event without raising
     assert resp.status_code == 200
+    mock_observe_webhook_processing.assert_called()
+    _, kwargs = mock_observe_webhook_processing.call_args
+    assert kwargs["event_type"] == "checkout.session.completed"
+    assert kwargs["status"] == "processed"
 
 
 @pytest.mark.asyncio
+@patch("app.routers.webhooks.observe_webhook_processing")
 @patch("app.routers.webhooks.stripe")
-async def test_invalid_signature_returns_400(mock_stripe, client):
+async def test_invalid_signature_returns_400(
+    mock_stripe,
+    mock_observe_webhook_processing,
+    client,
+):
     """Webhook with an invalid Stripe signature → 400."""
     import stripe as stripe_lib
 
@@ -114,6 +124,10 @@ async def test_invalid_signature_returns_400(mock_stripe, client):
 
     assert resp.status_code == 400
     assert "Invalid signature" in resp.json()["detail"]
+    mock_observe_webhook_processing.assert_called_once()
+    _, kwargs = mock_observe_webhook_processing.call_args
+    assert kwargs["event_type"] == "unknown"
+    assert kwargs["status"] == "invalid_signature"
 
 
 @pytest.mark.asyncio
@@ -129,8 +143,13 @@ async def test_missing_stripe_signature_header_returns_422(client):
 
 
 @pytest.mark.asyncio
+@patch("app.routers.webhooks.observe_webhook_processing")
 @patch("app.routers.webhooks.stripe")
-async def test_duplicate_already_processed_event_returns_duplicate(mock_stripe, client):
+async def test_duplicate_already_processed_event_returns_duplicate(
+    mock_stripe,
+    mock_observe_webhook_processing,
+    client,
+):
     """Webhook returns {status: 'duplicate'} for an already-processed event."""
     import stripe as stripe_lib
 
@@ -165,6 +184,9 @@ async def test_duplicate_already_processed_event_returns_duplicate(mock_stripe, 
 
     assert resp.status_code == 200
     assert resp.json() == {"status": "duplicate"}
+    _, kwargs = mock_observe_webhook_processing.call_args
+    assert kwargs["event_type"] == "checkout.session.completed"
+    assert kwargs["status"] == "duplicate"
 
 
 @pytest.mark.asyncio
