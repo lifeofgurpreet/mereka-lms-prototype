@@ -11,6 +11,7 @@ scripts/qa/verify-custom-app-install-contract.sh
 scripts/qa/verify-authn-submodule-path-contract.sh
 scripts/qa/verify-evidence-tracking-policy.sh
 scripts/qa/verify-evidence-sprawl-budget.sh
+scripts/qa/test-verify-evidence-sprawl-budget.sh
 scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-documentation-links.sh
 scripts/qa/verify-deprecation-discipline.sh
