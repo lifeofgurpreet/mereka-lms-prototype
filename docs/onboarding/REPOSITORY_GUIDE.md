@@ -324,13 +324,13 @@ assets/
 
 ---
 
-### apps/
+### tmp/
 
-**Purpose**: Application submodules (micro-frontends, external apps).
+**Purpose**: Temporary/vendor source checkouts (including upstream submodules).
 
 **Structure**:
 ```
-apps/
+tmp/
 └── frontend-app-authn/        # Git submodule: Open edX authn MFE
     ├── src/
     └── package.json
@@ -342,14 +342,14 @@ apps/
 git submodule update --init --recursive
 
 # Update submodule
-cd apps/frontend-app-authn
+cd tmp/frontend-app-authn
 git pull origin main
 cd ../..
-git add apps/frontend-app-authn
+git add tmp/frontend-app-authn
 git commit -m "chore: update authn MFE"
 ```
 
-**Where to add**: New MFE or external app → `apps/<app-name>/`
+**Where to add**: Temporary vendor checkouts → `tmp/<name>/`
 
 **Related docs**: `docs/MFE_COMPLETE_LIST.md`
 

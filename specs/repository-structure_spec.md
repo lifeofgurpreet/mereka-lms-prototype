@@ -57,7 +57,7 @@ Without a canonical structure contract, agents and engineers create files in ad-
   - File-level naming conventions within directories (e.g., kebab-case vs snake_case)
   - Content requirements for individual files (covered by other specs)
   - Git branching strategy or CI pipeline definitions
-  - Third-party submodule layout (e.g., `apps/frontend-app-authn/`)
+  - Third-party submodule layout (e.g., `tmp/frontend-app-authn/`)
   - Internal Tutor-generated file structure within `tutor_env/`
 
 ## Non-goals
@@ -104,7 +104,7 @@ Without a canonical structure contract, agents and engineers create files in ad-
   | `specs/` | Machine-checkable specifications | No |
   | `services/` | Microservices source code (e.g., HubSpot webhooks) | No |
   | `assets/` | Static assets (logos, images, brand files) | No |
-  | `apps/` | Application submodules (e.g., frontend-app-authn) | No |
+  | `tmp/` | Temporary/vendor checkouts (e.g., frontend-app-authn submodule) | No |
   | `var/` | Runtime artifacts (logs, temp files) | Yes |
   | `tutor_env/` | Tutor-generated environment state | Yes |
 
@@ -191,7 +191,7 @@ Without a canonical structure contract, agents and engineers create files in ad-
 - **New subdirectory creation**: When a new domain emerges (e.g., `scripts/mobile/`), it MAY be added without spec amendment. Only the required subdirectories listed in this spec are mandatory; additional subdirectories are allowed.
 - **Deprecated directory recreation**: If a tool or script accidentally recreates `tools/` or `ops/`, the verification script MUST detect this and flag it as a violation.
 - **Gitignored directories missing on fresh clone**: `var/` and `tutor_env/` will not exist on a fresh clone because they are gitignored. Verification MUST NOT fail if these directories are absent; it MUST only verify they are in `.gitignore`.
-- **Submodule directories**: `apps/` may contain git submodules (e.g., `frontend-app-authn`). Structure verification MUST NOT recurse into submodule directories.
+- **Submodule directories**: `tmp/` may contain git submodules (e.g., `frontend-app-authn`). Structure verification MUST NOT recurse into submodule directories.
 - **Empty required directories**: A required directory (e.g., `docs/adr/`) MAY be empty (contain no files) and still pass verification. The requirement is that the directory exists.
 - **Concurrent reorganization**: If two branches both reorganize files, merge conflicts on directory structure are resolved by this spec as the source of truth. The resulting merge MUST comply with all MUST requirements.
 

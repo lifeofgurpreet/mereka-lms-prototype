@@ -267,6 +267,12 @@ jobs:
       - name: Verify no legacy Tutor k8s control-plane paths
         run: ./scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
 
+      - name: Syntax check authn submodule path contract verifier
+        run: bash -n scripts/qa/verify-authn-submodule-path-contract.sh
+
+      - name: Verify authn submodule path contract
+        run: ./scripts/qa/verify-authn-submodule-path-contract.sh
+
       - name: Validate config.example.yml
         run: python3 scripts/qa/check-config-example-yaml.py
 
