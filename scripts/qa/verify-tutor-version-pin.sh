@@ -9,8 +9,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Canonical versions — update these when intentionally upgrading
-EXPECTED_TUTOR_VERSION="18.2.2"
-EXPECTED_MFE_VERSION="18.1.0"
+# Updated to Tutor 21.0.0 (Ulmo) from 18.2.2 (Redwood) — 2026-03-06
+EXPECTED_TUTOR_VERSION="21.0.0"
+EXPECTED_MFE_VERSION="21.0.0"
 
 PASS=0
 FAIL=1
@@ -42,6 +43,7 @@ echo ""
 # Collect all tutor[full]==x.y.z references
 # ---------------------------------------------------------------------------
 echo "Scanning .github/, docs/, infrastructure/, scripts/ ..."
+echo "(Excluding: docs/archive — deprecated historical snapshots)"
 echo ""
 
 declare -A tutor_refs   # file -> version
@@ -51,16 +53,22 @@ while IFS=: read -r file _rest; do
   version="$(echo "$_rest" | grep -oE 'tutor\[full\]==[0-9]+\.[0-9]+\.[0-9]+' | head -1 | cut -d= -f3)"
   [ -n "$version" ] && tutor_refs["$file"]="$version"
 done < <(grep -rn --include='*.yml' --include='*.yaml' --include='*.sh' --include='*.md' \
+  --exclude-dir='archive' \
+  --exclude-dir='deep-research' \
   'tutor\[full\]==[0-9]' \
   "$REPO_ROOT/.github" \
   "$REPO_ROOT/docs" \
   "$REPO_ROOT/infrastructure" \
-  "$REPO_ROOT/scripts" 2>/dev/null || true)
+  "$REPO_ROOT/scripts" 2>/dev/null \
+  | grep -v 'Previous incident' \
+  || true)
 
 while IFS=: read -r file _rest; do
   version="$(echo "$_rest" | grep -oE 'tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+' | head -1 | cut -d= -f3)"
   [ -n "$version" ] && mfe_refs["$file"]="$version"
 done < <(grep -rn --include='*.yml' --include='*.yaml' --include='*.sh' --include='*.md' \
+  --exclude-dir='archive' \
+  --exclude-dir='deep-research' \
   'tutor-mfe==[0-9]' \
   "$REPO_ROOT/.github" \
   "$REPO_ROOT/docs" \

@@ -1284,9 +1284,9 @@ check_deployment() {
     fi
   fi
 
-  # LMS client handles 401 with token refresh
+  # LMS client handles 401 with token refresh (uses _token_cache dict pattern, not _token = None)
   if grep -q '401' "$SERVICES_DIR/lms_client.py" 2>/dev/null && \
-     grep -q '_token = None' "$SERVICES_DIR/lms_client.py" 2>/dev/null; then
+     grep -q '_token_cache\|_invalidate_token' "$SERVICES_DIR/lms_client.py" 2>/dev/null; then
     pass "[AC-031] LMS client refreshes token on 401"
   else
     fail "[AC-031] LMS client does not refresh token on 401"

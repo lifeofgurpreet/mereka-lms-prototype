@@ -154,9 +154,10 @@ check_build_pipeline() {
   fi
 
   # AC-009: Tutor version pinned in build dependency file (loaded by setup-python-env action)
+  # Updated to Tutor 21.0.0 (Ulmo) from 18.2.2 (Redwood) — 2026-03-06
   if [[ -f "requirements-tutor.txt" ]] \
-    && grep -q 'tutor\[full\]==18.2.2' requirements-tutor.txt \
-    && grep -q 'tutor-mfe==18.1.0' requirements-tutor.txt \
+    && grep -q 'tutor\[full\]==21.0.0' requirements-tutor.txt \
+    && grep -q 'tutor-mfe==21.0.0' requirements-tutor.txt \
     && grep -q "requirements-file: 'requirements-tutor.txt'" "$BUILD_WF"; then
     pass "[AC-009] Tutor version pinned via requirements-tutor.txt and wired into build workflow"
   else
@@ -194,11 +195,11 @@ check_registry() {
     return
   fi
 
-  # AC-009: Image push targets correct registry
+  # AC-009: Image push targets correct registry (GHCR — migrated from GCP Artifact Registry)
   if grep -q 'ghcr.io/biji-biji-initiative/mereka-lms' "$BUILD_WF"; then
-    pass "[AC-009] Images push to correct Artifact Registry (asia-southeast1)"
+    pass "[AC-009] Images push to correct registry (ghcr.io/biji-biji-initiative/mereka-lms)"
   else
-    fail "[AC-009] Images do not target correct Artifact Registry"
+    fail "[AC-009] Images do not target correct registry (expected ghcr.io/biji-biji-initiative/mereka-lms)"
   fi
 
   # AC-009: Both openedx and mfe images are pushed
@@ -248,12 +249,17 @@ check_registry() {
     fail "[AC-010] Image digest not exposed as job output"
   fi
 
-  # AC-009: GCP auth configured (direct action or local composite auth wrapper)
+  # AC-009: Registry authentication configured
+  # After GHCR migration: uses GITHUB_TOKEN (docker login ghcr.io) instead of GCP auth.
+  # GCP auth (gcp-gke-auth) is only needed for GKE deployments, not image pushes to GHCR.
   if grep -qE 'google-github-actions/auth@(v2|[0-9a-f]{40})(\s*#\s*v2)?' "$BUILD_WF" \
     || grep -q '\./\.github/actions/gcp-gke-auth' "$BUILD_WF"; then
     pass "[AC-009] GCP authentication configured (direct action or gcp-gke-auth composite)"
+  elif grep -q 'docker login ghcr.io' "$BUILD_WF" \
+    && grep -q 'GITHUB_TOKEN' "$BUILD_WF"; then
+    pass "[AC-009] GHCR authentication configured via GITHUB_TOKEN (post-GHCR migration)"
   else
-    fail "[AC-009] GCP authentication missing from build workflow"
+    fail "[AC-009] Registry authentication missing from build workflow"
   fi
 }
 

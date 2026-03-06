@@ -2,9 +2,10 @@
 # Aspects Version Compatibility Check
 #
 # Validates that the installed tutor-contrib-aspects version is compatible
-# with the Redwood release track (Tutor 18.x).
+# with the Ulmo release track (Tutor 21.x).
 #
-# Known compatible range for Redwood: >= 0.70.0 and < 1.0.0
+# Known compatible range for Ulmo: >= 1.0.0 and < 2.0.0
+# (Redwood/Tutor 18.x used >= 0.70.0, < 1.0.0 — now superseded by Ulmo)
 #
 # Usage:
 #   ./scripts/qa/verify-aspects-compat.sh
@@ -14,10 +15,11 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 # --- Constants ---
-TUTOR_VERSION_MAJOR=18
-ASPECTS_MIN_MAJOR=0
-ASPECTS_MIN_MINOR=70
-ASPECTS_MAX_MAJOR=1   # exclusive upper bound (must be < 1.0)
+# Updated from 18 (Redwood) to 21 (Ulmo) — 2026-03-06
+TUTOR_VERSION_MAJOR=21
+ASPECTS_MIN_MAJOR=1
+ASPECTS_MIN_MINOR=0
+ASPECTS_MAX_MAJOR=2   # exclusive upper bound (must be < 2.0)
 
 # --- Colors ---
 GREEN='\033[0;32m'
@@ -36,7 +38,7 @@ do_warn() { echo -e "  ${YELLOW}WARN${NC}  $1"; WARNED=$((WARNED + 1)); }
 do_info() { echo -e "  ${CYAN}INFO${NC}  $1"; }
 
 echo "══════════════════════════════════════════════════════════════"
-echo "  Aspects Version Compatibility Check (Redwood / Tutor 18.x)"
+echo "  Aspects Version Compatibility Check (Ulmo / Tutor 21.x)"
 echo "══════════════════════════════════════════════════════════════"
 echo ""
 
@@ -109,12 +111,12 @@ fi
 # Step 3: Version compatibility validation
 # ============================================================================
 echo "──────────────────────────────────────────────────────────────"
-echo "  Version compatibility (Redwood = Tutor ${TUTOR_VERSION_MAJOR}.x)"
+echo "  Version compatibility (Ulmo = Tutor ${TUTOR_VERSION_MAJOR}.x)"
 echo "──────────────────────────────────────────────────────────────"
 
 if [[ "$ASPECTS_VERSION" == "unpinned" ]]; then
   do_warn "Aspects is referenced in config but no explicit version is pinned"
-  do_warn "Pin tutor-contrib-aspects>=0.70,<1.0 in requirements for Redwood compatibility"
+  do_warn "Pin tutor-contrib-aspects>=1.0,<2.0 in requirements for Ulmo compatibility"
   echo ""
 else
   # Parse semver components
@@ -123,10 +125,10 @@ else
   ASPECTS_PATCH=$(echo "$ASPECTS_VERSION" | cut -d. -f3)
 
   do_info "Detected version: tutor-contrib-aspects==${ASPECTS_VERSION}"
-  do_info "Compatible range for Redwood (Tutor 18.x): >=0.70.0,<1.0.0"
+  do_info "Compatible range for Ulmo (Tutor 21.x): >=1.0.0,<2.0.0"
   echo ""
 
-  # Check lower bound: >= 0.70.0
+  # Check lower bound: >= 1.0.0
   ABOVE_MIN=false
   if [[ "$ASPECTS_MAJOR" -gt "$ASPECTS_MIN_MAJOR" ]]; then
     ABOVE_MIN=true
@@ -134,24 +136,24 @@ else
     ABOVE_MIN=true
   fi
 
-  # Check upper bound: < 1.0.0
+  # Check upper bound: < 2.0.0
   BELOW_MAX=false
   if [[ "$ASPECTS_MAJOR" -lt "$ASPECTS_MAX_MAJOR" ]]; then
     BELOW_MAX=true
   fi
 
   if $ABOVE_MIN; then
-    do_pass "tutor-contrib-aspects ${ASPECTS_VERSION} >= 0.70.0 (minimum Redwood-compatible)"
+    do_pass "tutor-contrib-aspects ${ASPECTS_VERSION} >= 1.0.0 (minimum Ulmo-compatible)"
   else
-    do_fail "tutor-contrib-aspects ${ASPECTS_VERSION} is below 0.70.0 — not compatible with Redwood"
-    do_fail "Upgrade to tutor-contrib-aspects>=0.70,<1.0 for Tutor 18.x / Redwood"
+    do_fail "tutor-contrib-aspects ${ASPECTS_VERSION} is below 1.0.0 — not compatible with Ulmo"
+    do_fail "Upgrade to tutor-contrib-aspects>=1.0,<2.0 for Tutor 21.x / Ulmo"
   fi
 
   if $BELOW_MAX; then
-    do_pass "tutor-contrib-aspects ${ASPECTS_VERSION} < 1.0.0 (within Redwood release track)"
+    do_pass "tutor-contrib-aspects ${ASPECTS_VERSION} < 2.0.0 (within Ulmo release track)"
   else
-    do_fail "tutor-contrib-aspects ${ASPECTS_VERSION} >= 1.0.0 — may target Sumac (Tutor 19.x), not Redwood"
-    do_fail "Downgrade to tutor-contrib-aspects<1.0 for Redwood / Tutor 18.x compatibility"
+    do_fail "tutor-contrib-aspects ${ASPECTS_VERSION} >= 2.0.0 — may target a future release beyond Ulmo"
+    do_fail "Pin tutor-contrib-aspects<2.0 for Ulmo / Tutor 21.x compatibility"
   fi
 
   echo ""
@@ -213,14 +215,14 @@ echo -e "  ${YELLOW}WARN${NC}: ${WARNED}"
 echo ""
 
 if [[ $FAILED -eq 0 && $WARNED -eq 0 ]]; then
-  echo "✓ Aspects version is compatible with Redwood (Tutor 18.x)"
+  echo "✓ Aspects version is compatible with Ulmo (Tutor 21.x)"
   exit 0
 elif [[ $FAILED -eq 0 ]]; then
   echo "✓ Aspects compatibility check passed with warnings — review above"
   exit 0
 else
   echo "✗ Aspects version compatibility check failed"
-  echo "  Compatible range for Redwood: tutor-contrib-aspects>=0.70,<1.0"
+  echo "  Compatible range for Ulmo: tutor-contrib-aspects>=1.0,<2.0"
   echo "  See: https://github.com/openedx/tutor-contrib-aspects"
   exit 1
 fi
