@@ -293,6 +293,8 @@ async def list_orders(
     # Tenant isolation from middleware
     mw_tenant_id = getattr(request.state, "tenant_id", None)
     if mw_tenant_id:
+        if tenant_id and tenant_id != mw_tenant_id:
+            raise HTTPException(status_code=403, detail="Tenant scope mismatch")
         query = query.where(Order.tenant_id == mw_tenant_id)
     elif tenant_id:
         query = query.where(Order.tenant_id == tenant_id)

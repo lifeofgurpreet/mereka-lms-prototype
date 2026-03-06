@@ -19,6 +19,7 @@ from app.models.order import Order, OrderStatus
 
 
 TENANT_ID = str(uuid.UUID("00000000-0000-0000-0000-000000000001"))
+OTHER_TENANT_ID = str(uuid.UUID("00000000-0000-0000-0000-000000000009"))
 ORDER_ID = uuid.UUID("00000000-0000-0000-0000-000000000002")
 LINE_ITEM_ID = uuid.UUID("00000000-0000-0000-0000-000000000003")
 
@@ -394,6 +395,31 @@ async def test_list_orders_invalid_date_range_returns_400(mock_settings, client)
 
     assert resp.status_code == 400
     assert "created_from" in resp.json()["detail"]
+    mock_db.execute.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_list_orders_tenant_scope_mismatch_returns_403(mock_settings, client):
+    """GET /admin/orders/ rejects conflicting tenant_id query and header scope."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    mock_db = AsyncMock()
+    _override_db(mock_db)
+    try:
+        resp = await client.get(
+            "/api/v1/admin/orders/",
+            headers={
+                "X-API-Key": VALID_API_KEY,
+                "X-Tenant-ID": TENANT_ID,
+            },
+            params={"tenant_id": OTHER_TENANT_ID},
+        )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 403
+    assert "Tenant scope mismatch" in resp.json()["detail"]
     mock_db.execute.assert_not_awaited()
 
 

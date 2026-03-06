@@ -5,7 +5,7 @@
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -50,6 +50,8 @@ async def list_offerings(
 
     mw_tenant_id = getattr(request.state, "tenant_id", None)
     if mw_tenant_id:
+        if tenant_id and tenant_id != mw_tenant_id:
+            raise HTTPException(status_code=403, detail="Tenant scope mismatch")
         query = query.where(Offering.tenant_id == mw_tenant_id)
     elif tenant_id:
         query = query.where(Offering.tenant_id == tenant_id)

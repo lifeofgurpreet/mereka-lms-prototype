@@ -498,6 +498,31 @@ async def test_list_orders_with_tenant_filter(mock_db):
 
 
 @pytest.mark.asyncio
+async def test_list_orders_tenant_scope_mismatch_returns_403(mock_db):
+    """list_orders rejects tenant filter that conflicts with middleware tenant."""
+    request = MagicMock()
+    request.state = MagicMock()
+    request.state.tenant_id = TENANT_ID
+
+    with pytest.raises(HTTPException) as exc_info:
+        await list_orders(
+            request=request,
+            db=mock_db,
+            tenant_id=uuid.UUID("00000000-0000-0000-0000-000000000009"),
+            status=None,
+            buyer_email=None,
+            created_from=None,
+            created_to=None,
+            limit=50,
+            offset=0,
+        )
+
+    assert exc_info.value.status_code == 403
+    assert "Tenant scope mismatch" in exc_info.value.detail
+    mock_db.execute.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_list_orders_filters_by_date_range(mock_db):
     """list_orders applies created_from/created_to filters when provided."""
     order = _make_order(created_at=datetime.now(UTC))

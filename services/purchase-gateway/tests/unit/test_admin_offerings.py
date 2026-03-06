@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.offering import Offering, OfferingType
@@ -54,6 +55,13 @@ def _request_no_tenant():
     return request
 
 
+def _request_with_tenant(tenant_id: uuid.UUID):
+    request = MagicMock()
+    request.state = MagicMock()
+    request.state.tenant_id = tenant_id
+    return request
+
+
 @pytest.mark.asyncio
 async def test_list_offerings_returns_filtered_records(mock_db):
     """Returns offerings with expected type and active filter serialization."""
@@ -91,3 +99,22 @@ async def test_list_offerings_returns_empty_list(mock_db):
     )
 
     assert result == []
+
+
+@pytest.mark.asyncio
+async def test_list_offerings_tenant_scope_mismatch_returns_403(mock_db):
+    """Reject query tenant_id that does not match middleware tenant scope."""
+    with pytest.raises(HTTPException) as exc_info:
+        await list_offerings(
+            request=_request_with_tenant(TENANT_ID),
+            db=mock_db,
+            tenant_id=uuid.UUID("00000000-0000-0000-0000-000000000009"),
+            offering_type=None,
+            active=None,
+            limit=50,
+            offset=0,
+        )
+
+    assert exc_info.value.status_code == 403
+    assert "Tenant scope mismatch" in exc_info.value.detail
+    mock_db.execute.assert_not_awaited()
