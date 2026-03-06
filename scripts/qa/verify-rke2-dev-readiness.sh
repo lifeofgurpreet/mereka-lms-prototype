@@ -24,8 +24,9 @@ SKIP_COUNT=0
 
 # Paths
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-DEFAULT_INFRA_DIR="/home/gurpreet/projects/k8s/infrastructure"
-LEGACY_INFRA_DIR="/home/gurpreet/projects/k8s/bbi-infrastructure"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+DEFAULT_INFRA_DIR="${DEFAULT_INFRA_DIR:-${WORKSPACE_ROOT}/infrastructure}"
+LEGACY_INFRA_DIR="${LEGACY_INFRA_DIR:-${WORKSPACE_ROOT}/bbi-infrastructure}"
 if [[ -n "${BBI_INFRA_DIR:-}" ]]; then
   BBI_INFRA_DIR="$BBI_INFRA_DIR"
 elif [[ -d "$DEFAULT_INFRA_DIR" ]]; then
