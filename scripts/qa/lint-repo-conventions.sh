@@ -314,6 +314,7 @@ check_architectural_boundaries() {
   # Check for cloud IPs (10.x.x.x) in local config files
   local cloud_ip_violations=0
   local local_configs=(
+    "infrastructure/tutor/config.example.yml"
     "infrastructure/tutor/config.yml.example"
     "docker-compose.yml"
     "docker-compose.override.yml"

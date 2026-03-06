@@ -403,7 +403,8 @@ Quick reference for frequently accessed files:
 ### Configuration
 - Central script config: `scripts/shared/config.sh`
 - Tutor patch runner: `infrastructure/tutor/apply-patches.sh`
-- Tutor config example: `tutor_env/config.example.yml`
+- Tutor config example template: `infrastructure/tutor/config.example.yml`
+- Local Tutor runtime config (gitignored): `tutor_env/config.yml`
 - Makefile targets: `Makefile`
 
 ### Deployment
