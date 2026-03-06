@@ -26,6 +26,7 @@ This directory contains Architecture Decision Records (ADRs) documenting signifi
 | [ADR-024](024-multi-tenancy-true-tenants.md) | True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture) | Accepted | 2026-03-05 |
 | [ADR-025](025-csp-nonce-migration.md) | CSP Nonce-Based Migration (Phase 0) | Accepted | 2026-03-05 |
 | [ADR-026](026-cicd-build-pipeline-lessons.md) | CI/CD Build Pipeline Lessons Learned (March 2026) | Accepted | 2026-03-05 |
+| [ADR-027](027-deployment-contract-ownership-lanes.md) | Deployment Contract — Ownership Lanes | Proposed | 2026-03-06 |
 
 ## ADR Template
 

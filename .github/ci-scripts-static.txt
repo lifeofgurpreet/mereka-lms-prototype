@@ -550,3 +550,4 @@ scripts/qa/verify-dr-drill-schedule.sh
 
 # ── Release engineering gates ─────────────────────────────────────────
 scripts/qa/no_runtime_release_side_effects.sh
+scripts/qa/verify-deployment-contract.sh

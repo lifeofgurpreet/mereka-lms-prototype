@@ -1,0 +1,334 @@
+{
+  "version": "1.0.0",
+  "contract_schema_version": "1",
+  "base_path": "deploy/k8s/base",
+  "local_overlay": "deploy/k8s/overlays/local",
+  "namespace": "mereka-lms",
+  "min_kustomize_version": "5.0.0",
+
+  "workloads": [
+    {
+      "name": "caddy",
+      "kind": "Deployment",
+      "ports": [80, 443, 2019],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "cms",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": true,
+      "health": { "path": "/heartbeat", "port": 8000 }
+    },
+    {
+      "name": "cms-worker",
+      "kind": "Deployment",
+      "ports": [],
+      "has_hpa": true,
+      "health": null
+    },
+    {
+      "name": "credentials",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/health/", "port": 8000 }
+    },
+    {
+      "name": "discovery",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/health/", "port": 8000 }
+    },
+    {
+      "name": "elasticsearch",
+      "kind": "Deployment",
+      "ports": [9200],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "enterprise-access",
+      "kind": "Deployment",
+      "ports": [18270],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 18270 }
+    },
+    {
+      "name": "enterprise-access-worker",
+      "kind": "Deployment",
+      "ports": [],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "enterprise-admin-portal",
+      "kind": "Deployment",
+      "ports": [8002],
+      "has_hpa": false,
+      "health": { "path": "/", "port": 8002 }
+    },
+    {
+      "name": "enterprise-catalog",
+      "kind": "Deployment",
+      "ports": [8160],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 8160 }
+    },
+    {
+      "name": "enterprise-catalog-worker",
+      "kind": "Deployment",
+      "ports": [],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "enterprise-learner-portal",
+      "kind": "Deployment",
+      "ports": [8002],
+      "has_hpa": false,
+      "health": { "path": "/", "port": 8002 }
+    },
+    {
+      "name": "enterprise-subsidy",
+      "kind": "Deployment",
+      "ports": [18280],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 18280 }
+    },
+    {
+      "name": "license-manager",
+      "kind": "Deployment",
+      "ports": [18170],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 18170 }
+    },
+    {
+      "name": "lms",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": true,
+      "health": { "path": "/heartbeat", "port": 8000 }
+    },
+    {
+      "name": "lms-worker",
+      "kind": "Deployment",
+      "ports": [],
+      "has_hpa": true,
+      "health": null
+    },
+    {
+      "name": "meilisearch",
+      "kind": "Deployment",
+      "ports": [7700],
+      "has_hpa": false,
+      "health": { "path": "/health", "port": 7700 }
+    },
+    {
+      "name": "mfe",
+      "kind": "Deployment",
+      "ports": [8002],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "mux-delivery-monitor",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/healthz", "port": 8000 }
+    },
+    {
+      "name": "mysql",
+      "kind": "Deployment",
+      "ports": [3306],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "notes",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/heartbeat", "port": 8000 }
+    },
+    {
+      "name": "payments-gateway",
+      "kind": "Deployment",
+      "ports": [8080],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 8080 }
+    },
+    {
+      "name": "postgresql-payments",
+      "kind": "Deployment",
+      "ports": [5432],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "preview-redirect",
+      "kind": "Deployment",
+      "ports": [80],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "redis",
+      "kind": "Deployment",
+      "ports": [6379],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "smtp",
+      "kind": "Deployment",
+      "ports": [8025],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "xqueue",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/status/", "port": 8000 },
+      "_note": "Disabled by default (replicas: 0). No courses use it."
+    }
+  ],
+
+  "required_secrets": [
+    {
+      "name": "openedx-secrets",
+      "source": "ExternalSecret",
+      "key_count": 43,
+      "keys": [
+        "OPENEDX_SECRET_KEY", "SECRET_KEY", "CMS_SECRET_KEY",
+        "MONGODB_USERNAME", "MONGODB_PASSWORD",
+        "FORUM_MONGODB_HOST", "FORUM_MONGODB_PASSWORD",
+        "MEILISEARCH_MASTER_KEY", "MEILISEARCH_API_KEY",
+        "JWT_SECRET_KEY_LMS", "JWT_SECRET_KEY_CMS",
+        "JWT_SECRET_KEY_DISCOVERY", "JWT_SECRET_KEY_NOTES",
+        "JWT_SECRET_KEY_XQUEUE", "JWT_PRIVATE_SIGNING_JWK",
+        "EDX_API_KEY",
+        "DISCOVERY_SECRET_KEY", "DISCOVERY_SOCIAL_AUTH_EDX_OAUTH2_SECRET",
+        "DISCOVERY_BACKEND_OAUTH2_SECRET",
+        "NOTES_SECRET_KEY", "NOTES_CLIENT_SECRET",
+        "XQUEUE_SECRET_KEY", "XQUEUE_LMS_PASSWORD",
+        "CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "OIDC_CLIENT_SECRET",
+        "CREDENTIALS_SECRET_KEY", "CREDENTIALS_BACKEND_OAUTH2_SECRET",
+        "CREDENTIALS_SSO_OAUTH2_SECRET", "JWT_SECRET_KEY_CREDENTIALS",
+        "STRIPE_SECRET_KEY", "STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET",
+        "SENTRY_DSN", "SENTRY_ENVIRONMENT",
+        "SENTRY_TRACES_SAMPLE_RATE", "SENTRY_PROFILES_SAMPLE_RATE",
+        "MUX_TOKEN_ID", "MUX_TOKEN_SECRET",
+        "EMAIL_HOST_USER", "EMAIL_HOST_PASSWORD",
+        "SES_SNS_WEBHOOK_SECRET", "UNSUBSCRIBE_HMAC_SECRET",
+        "VC_SIGNING_PRIVATE_KEY"
+      ]
+    },
+    {
+      "name": "database-secrets",
+      "source": "ExternalSecret",
+      "key_count": 6,
+      "keys": [
+        "MYSQL_ROOT_PASSWORD", "OPENEDX_MYSQL_PASSWORD",
+        "MYSQL_DISCOVERY_PASSWORD", "MYSQL_NOTES_PASSWORD",
+        "MYSQL_XQUEUE_PASSWORD", "MYSQL_CREDENTIALS_PASSWORD"
+      ]
+    },
+    {
+      "name": "enterprise-secrets",
+      "source": "ExternalSecret",
+      "key_count": 12,
+      "keys": [
+        "ENTERPRISE_CATALOG_SECRET_KEY", "ENTERPRISE_CATALOG_OAUTH2_SECRET",
+        "MYSQL_ENTERPRISE_CATALOG_PASSWORD",
+        "ENTERPRISE_SUBSIDY_SECRET_KEY", "ENTERPRISE_SUBSIDY_OAUTH2_SECRET",
+        "MYSQL_ENTERPRISE_SUBSIDY_PASSWORD",
+        "ENTERPRISE_ACCESS_SECRET_KEY", "ENTERPRISE_ACCESS_OAUTH2_SECRET",
+        "MYSQL_ENTERPRISE_ACCESS_PASSWORD",
+        "LICENSE_MANAGER_SECRET_KEY", "LICENSE_MANAGER_OAUTH2_SECRET",
+        "MYSQL_LICENSE_MANAGER_PASSWORD"
+      ]
+    },
+    {
+      "name": "enterprise-sso-secrets",
+      "source": "ExternalSecret",
+      "key_count": 4,
+      "keys": [
+        "SAML_SP_PUBLIC_CERT", "SAML_SP_PRIVATE_KEY",
+        "OIDC_ENTERPRISE_CLIENT_SECRET", "SCIM_BEARER_TOKEN"
+      ]
+    },
+    {
+      "name": "aspects-secrets",
+      "source": "ExternalSecret",
+      "key_count": 4,
+      "keys": [
+        "clickhouse-password", "superset-secret-key",
+        "superset-db-password", "oauth-client-secret"
+      ]
+    },
+    {
+      "name": "payments-gateway-secrets",
+      "source": "ExternalSecret",
+      "key_count": 6,
+      "keys": [
+        "SECRET_KEY", "DATABASE_URL", "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET", "LMS_OAUTH_CLIENT_SECRET",
+        "POSTGRESQL_PASSWORD"
+      ]
+    },
+    {
+      "name": "ses-smtp-credentials",
+      "source": "ExternalSecret",
+      "key_count": 2,
+      "keys": ["RELAY_USERNAME", "RELAY_PASSWORD"]
+    }
+  ],
+
+  "required_configmaps": [
+    "caddy-config",
+    "openedx-settings-lms",
+    "openedx-settings-cms",
+    "openedx-config",
+    "openedx-uwsgi-config",
+    "openedx-theme-head-extra",
+    "redis-config",
+    "discovery-settings",
+    "credentials-settings",
+    "mfe-caddy-config",
+    "notes-settings",
+    "xqueue-settings",
+    "enterprise-access-settings"
+  ],
+
+  "cluster_secret_store": {
+    "default": "gcp-secret-manager",
+    "_note": "Overlays may patch to infisical-secret-store or other backends"
+  },
+
+  "images": {
+    "openedx": {
+      "default_registry": "ghcr.io/biji-biji-initiative/mereka-lms/openedx",
+      "default_tag": "mereka-brand",
+      "_note": "Overlays MUST pin to immutable tag+digest for non-local environments"
+    },
+    "mfe": {
+      "default_registry": "ghcr.io/biji-biji-initiative/mereka-lms/mfe",
+      "default_tag": "mereka-brand",
+      "_note": "Overlays MUST pin to immutable tag+digest for non-local environments"
+    }
+  },
+
+  "jobs": [
+    "jobs/discovery-sync-cronjob.yaml",
+    "jobs/enterprise-catalog-migrate.yaml",
+    "jobs/enterprise-access-migrate.yaml",
+    "jobs/enterprise-subsidy-migrate.yaml",
+    "jobs/license-manager-migrate.yaml"
+  ]
+}
