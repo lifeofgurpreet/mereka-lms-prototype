@@ -28,7 +28,7 @@ Usage: verify-docs-scorecard-head-freshness.sh [options]
 
 Options:
   --report-glob <glob>      scorecard glob (default: docs/guides/admin/DOCS_PROGRAM_SCORECARD_*.md)
-  --reference-date YYYYMMDD compare latest scorecard date to this date (default: HEAD commit date UTC)
+  --reference-date YYYYMMDD compare latest scorecard date to this date (default: HEAD commit date converted to UTC)
   --summary-json <path>     optional JSON summary output
   --help                    show this message
 EOF
@@ -42,7 +42,8 @@ EOF
 done
 
 if [ -z "$REFERENCE_DATE" ]; then
-  REFERENCE_DATE=$(git show -s --format=%cd --date=format:%Y%m%d HEAD)
+  HEAD_EPOCH=$(git show -s --format=%ct HEAD)
+  REFERENCE_DATE=$(date -u -d "@${HEAD_EPOCH}" +%Y%m%d)
 fi
 
 if [[ ! "$REFERENCE_DATE" =~ ^[0-9]{8}$ ]]; then

@@ -5,7 +5,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "${SCRIPT_DIR}/../.." && pwd)
 cd "$REPO_ROOT"
 
-DATE="$(date +%Y%m%d)"
+DATE="$(date -u +%Y%m%d)"
 BASE_REF="origin/main"
 MAX_STALE_DAYS=45
 REGRESSION_THRESHOLD=10
@@ -38,7 +38,7 @@ while [[ $# -gt 0 ]]; do
 Usage: generate-docs-scorecard-report.sh [options]
 
 Options:
-  --date YYYYMMDD            report date (default: today)
+  --date YYYYMMDD            report date (default: today, UTC)
   --base-ref <ref>           base ref for trend comparison (default: origin/main)
   --max-stale-days <n>       stale threshold (default: 45)
   --regression-threshold <n> max allowed score drop (default: 10)
@@ -177,5 +177,9 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 ## Recommendation
 - Publish this report at the same cadence as governance cycles and link from the closure readiness artifact.
 EOF_REPORT
+
+# Enforce report metadata contracts on generated output.
+bash docs/qa/verify-docs-scorecard-report-consistency.sh --report-glob "$REPORT_FILE"
+bash docs/qa/verify-docs-scorecard-report-timestamp.sh --report-glob "$REPORT_FILE"
 
 echo "Generated $(basename "$REPORT_FILE")"

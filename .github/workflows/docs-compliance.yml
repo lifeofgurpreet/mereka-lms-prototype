@@ -16,12 +16,15 @@ on:
       - "docs/qa/build-docs-compliance-summary.py"
       - "docs/qa/build-docs-compliance-summary-test.sh"
       - "docs/qa/generate-docs-scorecard-report.sh"
+      - "docs/qa/generate-docs-scorecard-report-test.sh"
       - "docs/qa/verify-docs-scorecard-recency.sh"
       - "docs/qa/verify-docs-scorecard-recency-test.sh"
       - "docs/qa/verify-docs-scorecard-report-consistency.sh"
       - "docs/qa/verify-docs-scorecard-report-consistency-test.sh"
       - "docs/qa/verify-docs-scorecard-head-freshness.sh"
       - "docs/qa/verify-docs-scorecard-head-freshness-test.sh"
+      - "docs/qa/verify-docs-scorecard-report-timestamp.sh"
+      - "docs/qa/verify-docs-scorecard-report-timestamp-test.sh"
       - "docs/qa/verify-doc-command-refs-test.sh"
       - "docs/qa/compare-docs-scorecard-to-base.sh"
       - "docs/qa/compare-docs-scorecard-to-base-test.sh"
@@ -165,6 +168,27 @@ with open(sys.argv[2], "a", encoding="utf-8") as fp:
     fp.write(f"- reference_date={payload.get('reference_date', 'n/a')}\n")
 PY
 
+      - name: Verify docs scorecard timestamp format
+        run: |
+          set -euo pipefail
+          chmod +x docs/qa/verify-docs-scorecard-report-timestamp.sh
+          DOCS_SCORECARD_TIMESTAMP_SUMMARY="${RUNNER_TEMP}/docs-scorecard-timestamp-summary.json"
+          docs/qa/verify-docs-scorecard-report-timestamp.sh \
+            --summary-json "$DOCS_SCORECARD_TIMESTAMP_SUMMARY"
+          python3 - "$DOCS_SCORECARD_TIMESTAMP_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Timestamp Format\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- reports_checked={payload.get('reports_checked', 'n/a')}\n")
+    fp.write(f"- invalid_reports={payload.get('invalid_reports', 'n/a')}\n")
+PY
+
       - name: Verify docs catalog health
         run: |
           set -euo pipefail
@@ -175,6 +199,7 @@ PY
           DOCS_SCORECARD_RECENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-recency-summary.json"
           DOCS_SCORECARD_CONSISTENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-consistency-summary.json"
           DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY="${RUNNER_TEMP}/docs-scorecard-head-freshness-summary.json"
+          DOCS_SCORECARD_TIMESTAMP_SUMMARY="${RUNNER_TEMP}/docs-scorecard-timestamp-summary.json"
           DOCS_COMPLIANCE_SUMMARY_PATH="${RUNNER_TEMP}/docs-compliance-summary.json"
           BASE_REF="origin/${{ github.base_ref }}"
           if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
@@ -237,6 +262,7 @@ PY
             --scorecard-recency-summary "$DOCS_SCORECARD_RECENCY_SUMMARY" \
             --scorecard-consistency-summary "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" \
             --scorecard-head-freshness-summary "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" \
+            --scorecard-timestamp-summary "$DOCS_SCORECARD_TIMESTAMP_SUMMARY" \
             --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
 
           python3 - "$DOCS_SCORECARD_COMPARISON_PATH" "$GITHUB_STEP_SUMMARY" <<'PY'
@@ -273,6 +299,7 @@ with open(sys.argv[2], "a", encoding="utf-8") as fp:
     fp.write(f"- scorecard_recency_status={payload.get('statuses', {}).get('scorecard_recency', 'n/a')}\n")
     fp.write(f"- scorecard_consistency_status={payload.get('statuses', {}).get('scorecard_consistency', 'n/a')}\n")
     fp.write(f"- scorecard_head_freshness_status={payload.get('statuses', {}).get('scorecard_head_freshness', 'n/a')}\n")
+    fp.write(f"- scorecard_timestamp_format_status={payload.get('statuses', {}).get('scorecard_timestamp_format', 'n/a')}\n")
 PY
 
       - name: Upload docs catalog health scorecard
@@ -287,6 +314,7 @@ PY
             ${{ runner.temp }}/docs-scorecard-recency-summary.json
             ${{ runner.temp }}/docs-scorecard-consistency-summary.json
             ${{ runner.temp }}/docs-scorecard-head-freshness-summary.json
+            ${{ runner.temp }}/docs-scorecard-timestamp-summary.json
             ${{ runner.temp }}/docs-compliance-summary.json
 
       - name: Generate docs scorecard report markdown
@@ -303,7 +331,7 @@ PY
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload docs scorecard markdown report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: docs-program-scorecard-report
           path: ${{ runner.temp }}/DOCS_PROGRAM_SCORECARD_${{ github.run_id }}.md
@@ -320,6 +348,10 @@ PY
             docs/qa/verify-docs-scorecard-report-consistency-test.sh \
             docs/qa/verify-docs-scorecard-head-freshness.sh \
             docs/qa/verify-docs-scorecard-head-freshness-test.sh \
+            docs/qa/verify-docs-scorecard-report-timestamp.sh \
+            docs/qa/verify-docs-scorecard-report-timestamp-test.sh \
+            docs/qa/generate-docs-scorecard-report.sh \
+            docs/qa/generate-docs-scorecard-report-test.sh \
             docs/qa/build-docs-scorecard-test.sh \
             docs/qa/compare-docs-scorecard-to-base-test.sh \
             docs/qa/build-docs-compliance-summary-test.sh
@@ -329,6 +361,8 @@ PY
           docs/qa/verify-docs-scorecard-recency-test.sh
           docs/qa/verify-docs-scorecard-report-consistency-test.sh
           docs/qa/verify-docs-scorecard-head-freshness-test.sh
+          docs/qa/verify-docs-scorecard-report-timestamp-test.sh
+          docs/qa/generate-docs-scorecard-report-test.sh
           docs/qa/build-docs-scorecard-test.sh
           docs/qa/compare-docs-scorecard-to-base-test.sh
           docs/qa/build-docs-compliance-summary-test.sh

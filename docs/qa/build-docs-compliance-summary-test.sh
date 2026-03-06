@@ -164,6 +164,26 @@ cat > "$ROOT_DIR/scorecard-head-freshness-fail.json" <<'EOF_JSON'
 }
 EOF_JSON
 
+cat > "$ROOT_DIR/scorecard-timestamp-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "reports_checked": 1,
+  "invalid_reports": 0,
+  "mismatches": []
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-timestamp-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "reports_checked": 1,
+  "invalid_reports": 1,
+  "mismatches": [
+    "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md: missing/invalid Last verified (UTC) timestamp"
+  ]
+}
+EOF_JSON
+
 python3 docs/qa/build-docs-compliance-summary.py \
   --catalog-summary "$ROOT_DIR/catalog-pass.json" \
   --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
@@ -172,6 +192,7 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
   --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
   --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
   --out "$PASS_OUT"
 
 python3 - "$PASS_OUT" <<'PY'
@@ -191,6 +212,7 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
   --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
   --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
   --out "$FAIL_OUT" || true
 
 python3 - "$FAIL_OUT" <<'PY'
@@ -210,6 +232,7 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
   --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
   --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
   --out "$WARN_OUT"
 
 python3 - "$WARN_OUT" <<'PY'
@@ -229,6 +252,7 @@ if python3 docs/qa/build-docs-compliance-summary.py \
   --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-fail.json" \
   --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-fail.json" \
   --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-fail.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-fail.json" \
   --out /tmp/does-not-exist.json >/tmp/compliance-summary-fail.out 2>&1; then
   echo "expected command to fail for terminal fail status"
   cat /tmp/compliance-summary-fail.out

@@ -28,6 +28,12 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="docs-scorecard-head-freshness-summary.json",
     )
+    p.add_argument(
+        "--scorecard-timestamp-summary",
+        required=False,
+        default="",
+        help="docs-scorecard-timestamp-summary.json",
+    )
     p.add_argument("--out", required=False, default="docs-compliance-summary.json", help="output path")
     return p.parse_args()
 
@@ -85,6 +91,7 @@ def main() -> int:
     scorecard_recency = _safe_load(args.scorecard_recency_summary, {})
     scorecard_consistency = _safe_load(args.scorecard_consistency_summary, {})
     scorecard_head_freshness = _safe_load(args.scorecard_head_freshness_summary, {})
+    scorecard_timestamp = _safe_load(args.scorecard_timestamp_summary, {})
 
     catalog_status = _status_from_catalog(catalog)
     cmdref_status = _normalized_status(_status_from_cmdref(cmdref))
@@ -93,6 +100,7 @@ def main() -> int:
     recency_status = _normalized_status(_status_from_scorecard(scorecard_recency))
     consistency_status = _normalized_status(_status_from_scorecard(scorecard_consistency))
     head_freshness_status = _normalized_status(_status_from_scorecard(scorecard_head_freshness))
+    timestamp_status = _normalized_status(_status_from_scorecard(scorecard_timestamp))
     catalog_status = _normalized_status(catalog_status)
 
     statuses = {
@@ -103,6 +111,7 @@ def main() -> int:
         "scorecard_recency": recency_status,
         "scorecard_consistency": consistency_status,
         "scorecard_head_freshness": head_freshness_status,
+        "scorecard_timestamp_format": timestamp_status,
     }
 
     terminal_status = "pass"
@@ -165,6 +174,12 @@ def main() -> int:
             "latest_date": scorecard_head_freshness.get("latest_date", ""),
             "reference_date": scorecard_head_freshness.get("reference_date", ""),
         },
+        "docs_scorecard_timestamp_format": {
+            "status": timestamp_status,
+            "reports_checked": scorecard_timestamp.get("reports_checked", 0),
+            "invalid_reports": scorecard_timestamp.get("invalid_reports", 0),
+            "mismatches": scorecard_timestamp.get("mismatches", []),
+        },
     }
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
@@ -175,7 +190,8 @@ def main() -> int:
         f"overall_status={terminal_status} "
         f"catalog={catalog_status} cmdref={cmdref_status} "
         f"scorecard={scorecard_status} trend={comparison_status} "
-        f"recency={recency_status} consistency={consistency_status} head_freshness={head_freshness_status}"
+        f"recency={recency_status} consistency={consistency_status} "
+        f"head_freshness={head_freshness_status} timestamp={timestamp_status}"
     )
 
     if terminal_status == "fail":
