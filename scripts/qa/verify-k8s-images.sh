@@ -159,6 +159,8 @@ semver_pattern = re.compile(r'^\d+\.\d+\.\d+(-[a-z0-9.]+)?$')
 ghcr_immutable_pattern = re.compile(r'^mereka-brand-[a-z0-9-]+-[a-f0-9]{6,}|[a-f0-9]{7,8}-\d{14}$')
 # Mutable convenience tags only allowed in base or under RELAXED_MODE
 ghcr_mutable_pattern = re.compile(r'^mereka-brand$')
+# Sentinel tag that forces overlays to pin — valid only in base
+sentinel_tag_pattern = re.compile(r'^pin-required$')
 # Enterprise tags: nreum-clean-*, semver
 enterprise_tag_pattern = re.compile(r'^(nreum-clean-\d{12}|\d+\.\d+\.\d+(-[a-z0-9.]+)?)$')
 
@@ -187,6 +189,11 @@ def check_file(path, strict_immutable):
                 print(f"PASS\t{new_name}:{tag}@{digest[:16]}... (digest pinned)")
             elif ghcr_immutable_pattern.match(tag) or tag_pattern.match(tag):
                 print(f"PASS\t{new_name}:{tag} (deterministic immutable tag)")
+            elif sentinel_tag_pattern.match(tag):
+                if strict_immutable:
+                    print(f"FAIL\t{new_name}:{tag} (sentinel tag in production overlay — overlay must pin to real image)")
+                else:
+                    print(f"PASS\t{new_name}:{tag} (sentinel tag — forces overlays to pin)")
             elif ghcr_mutable_pattern.match(tag):
                 if strict_immutable and not relaxed_mode:
                     print(f"FAIL\t{new_name}:{tag} (mutable tag in production — use digest-pinned or SHA tag; set RELAXED_MODE=1 to bypass temporarily)")
