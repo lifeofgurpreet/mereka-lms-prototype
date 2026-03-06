@@ -4756,6 +4756,18 @@
       "ci_binding": [
         "ci_static"
       ],
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-release-invocation-guardrail-wiring.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-repo-hygiene-artifacts.sh",
       "reference_count": 1,
