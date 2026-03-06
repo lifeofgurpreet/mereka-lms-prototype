@@ -59,25 +59,38 @@ BRAND_ASSETS=(
   favicon.ico
 )
 
-declare -A BRAND_SOURCE_DIRS=(
-  [mereka]="$REPO_ROOT/assets/branding"
-  [biji-biji]="$REPO_ROOT/assets/branding/tenants/biji-biji"
-  [skillourfuture]="$REPO_ROOT/assets/branding/tenants/skillourfuture"
-)
+brand_source_dir() {
+  local brand="$1"
+  if [[ "$brand" == "mereka" ]]; then
+    echo "$REPO_ROOT/assets/branding"
+  else
+    echo "$REPO_ROOT/assets/branding/tenants/$brand"
+  fi
+}
 
-declare -A BRAND_PACKAGE_DIRS=(
-  [mereka]="$REPO_ROOT/infrastructure/tutor/brand-mereka"
-  [biji-biji]="$REPO_ROOT/infrastructure/tutor/brand-biji-biji"
-  [skillourfuture]="$REPO_ROOT/infrastructure/tutor/brand-skillourfuture"
-)
+brand_package_dir() {
+  local brand="$1"
+  echo "$REPO_ROOT/infrastructure/tutor/brand-$brand"
+}
+
+discover_brand_slugs() {
+  find "$REPO_ROOT/infrastructure/tutor" -mindepth 1 -maxdepth 1 -type d -name 'brand-*' -printf '%f\n' \
+    | sed 's/^brand-//' \
+    | sort
+}
 
 echo "=== Brand Asset Drift Verification ==="
 
 echo
 echo "[1/2] Verifying brand package drift"
-for brand in mereka biji-biji skillourfuture; do
-  source_dir="${BRAND_SOURCE_DIRS[$brand]}"
-  package_dir="${BRAND_PACKAGE_DIRS[$brand]}"
+mapfile -t BRAND_SLUGS < <(discover_brand_slugs)
+if [[ ${#BRAND_SLUGS[@]} -eq 0 ]]; then
+  fail "No brand-* package directories found under infrastructure/tutor"
+fi
+
+for brand in "${BRAND_SLUGS[@]}"; do
+  source_dir="$(brand_source_dir "$brand")"
+  package_dir="$(brand_package_dir "$brand")"
 
   if [[ ! -d "$source_dir" ]]; then
     fail "brand-$brand source directory missing ($source_dir)"
