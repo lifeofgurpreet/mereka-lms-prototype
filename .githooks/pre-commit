@@ -294,7 +294,7 @@ if [[ -n "$TUTOR_FILES" ]]; then
   echo ""
 
   # Run verification script
-  REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
   VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-patches.sh"
 
   if [[ -x "$VERIFY_SCRIPT" ]]; then
