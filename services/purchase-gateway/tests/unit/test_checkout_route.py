@@ -94,7 +94,7 @@ def test_checkout_request_rejects_disallowed_origin():
 @pytest.mark.asyncio
 @patch("app.routers.checkout.settings")
 @patch("app.routers.checkout.stripe")
-async def test_create_checkout_offering_not_found(mock_stripe, mock_settings, mock_db):
+async def test_create_checkout_offering_not_found(mock_stripe, mock_settings, mock_db, fake_request):
     """create_checkout returns 404 when offering does not exist or is inactive."""
     from fastapi import HTTPException
 
@@ -108,16 +108,16 @@ async def test_create_checkout_offering_not_found(mock_stripe, mock_settings, mo
         "https://apps.academyv2.mereka.io",
     ]
 
-    request = MagicMock()
-    request.offering_uuid = uuid.UUID(int=1)
-    request.buyer_email = "buyer@example.com"
-    request.tenant_id = None
-    request.success_url = "https://academyv2.mereka.io/success"
-    request.cancel_url = "https://academyv2.mereka.io/cancel"
-    request.metadata = None
+    body = MagicMock()
+    body.offering_uuid = uuid.UUID(int=1)
+    body.buyer_email = "buyer@example.com"
+    body.tenant_id = None
+    body.success_url = "https://academyv2.mereka.io/success"
+    body.cancel_url = "https://academyv2.mereka.io/cancel"
+    body.metadata = None
 
     with pytest.raises(HTTPException) as exc_info:
-        await create_checkout(request, mock_db)
+        await create_checkout(fake_request, body, mock_db)
 
     assert exc_info.value.status_code == 404
 
@@ -130,7 +130,7 @@ async def test_create_checkout_offering_not_found(mock_stripe, mock_settings, mo
 @pytest.mark.asyncio
 @patch("app.routers.checkout.settings")
 @patch("app.routers.checkout.stripe")
-async def test_create_checkout_tenant_mismatch(mock_stripe, mock_settings, mock_db):
+async def test_create_checkout_tenant_mismatch(mock_stripe, mock_settings, mock_db, fake_request):
     """create_checkout returns 403 when offering belongs to a different tenant."""
     from fastapi import HTTPException
 
@@ -142,16 +142,17 @@ async def test_create_checkout_tenant_mismatch(mock_stripe, mock_settings, mock_
     mock_settings.STRIPE_SECRET_KEY = "sk_test_xxx"
     mock_settings.TENANT_ISOLATION_ENABLED = True
 
-    request = MagicMock()
-    request.offering_uuid = offering.id
-    request.buyer_email = "buyer@example.com"
-    request.tenant_id = uuid.UUID(int=1)  # Different from offering's tenant
-    request.success_url = "https://academyv2.mereka.io/success"
-    request.cancel_url = "https://academyv2.mereka.io/cancel"
-    request.metadata = None
+    http_request = MagicMock()
+    body = MagicMock()
+    body.offering_uuid = offering.id
+    body.buyer_email = "buyer@example.com"
+    body.tenant_id = uuid.UUID(int=1)  # Different from offering's tenant
+    body.success_url = "https://academyv2.mereka.io/success"
+    body.cancel_url = "https://academyv2.mereka.io/cancel"
+    body.metadata = None
 
     with pytest.raises(HTTPException) as exc_info:
-        await create_checkout(request, mock_db)
+        await create_checkout(fake_request, body, mock_db)
 
     assert exc_info.value.status_code == 403
 
@@ -170,6 +171,7 @@ async def test_create_checkout_stripe_error_returns_503(
     mock_settings,
     mock_record_checkout_created,
     mock_db,
+    fake_request,
 ):
     """create_checkout returns 503 when Stripe raises an error."""
     import stripe as stripe_lib
@@ -186,18 +188,18 @@ async def test_create_checkout_stripe_error_returns_503(
     mock_stripe.StripeError = stripe_lib.StripeError
     mock_stripe.checkout.Session.create.side_effect = stripe_lib.StripeError("Network error")
 
-    request = MagicMock()
-    request.offering_uuid = offering.id
-    request.buyer_email = "buyer@example.com"
-    request.tenant_id = uuid.UUID(int=0)
-    request.success_url = "https://academyv2.mereka.io/success"
-    request.cancel_url = "https://academyv2.mereka.io/cancel"
-    request.metadata = None
+    body = MagicMock()
+    body.offering_uuid = offering.id
+    body.buyer_email = "buyer@example.com"
+    body.tenant_id = uuid.UUID(int=0)
+    body.success_url = "https://academyv2.mereka.io/success"
+    body.cancel_url = "https://academyv2.mereka.io/cancel"
+    body.metadata = None
     added_entities = []
     mock_db.add = MagicMock(side_effect=lambda obj: added_entities.append(obj))
 
     with pytest.raises(HTTPException) as exc_info:
-        await create_checkout(request, mock_db)
+        await create_checkout(fake_request, body, mock_db)
 
     assert exc_info.value.status_code == 503
     mock_record_checkout_created.assert_not_called()
@@ -221,6 +223,7 @@ async def test_create_checkout_happy_path(
     mock_settings,
     mock_record_checkout_created,
     mock_db,
+    fake_request,
 ):
     """create_checkout creates an order and returns checkout URL on success."""
     from app.routers.checkout import CheckoutResponse, create_checkout
@@ -237,15 +240,15 @@ async def test_create_checkout_happy_path(
     mock_stripe.checkout.Session.create.return_value = mock_session
     mock_stripe.StripeError = Exception  # won't be raised
 
-    request = MagicMock()
-    request.offering_uuid = offering.id
-    request.buyer_email = "buyer@example.com"
-    request.tenant_id = uuid.UUID(int=0)
-    request.success_url = "https://academyv2.mereka.io/success"
-    request.cancel_url = "https://academyv2.mereka.io/cancel"
-    request.metadata = None
+    body = MagicMock()
+    body.offering_uuid = offering.id
+    body.buyer_email = "buyer@example.com"
+    body.tenant_id = uuid.UUID(int=0)
+    body.success_url = "https://academyv2.mereka.io/success"
+    body.cancel_url = "https://academyv2.mereka.io/cancel"
+    body.metadata = None
 
-    response = await create_checkout(request, mock_db)
+    response = await create_checkout(fake_request, body, mock_db)
 
     assert isinstance(response, CheckoutResponse)
     assert response.checkout_url == "https://checkout.stripe.com/pay/cs_new123"
@@ -263,7 +266,7 @@ async def test_create_checkout_happy_path(
 
 
 @pytest.mark.asyncio
-async def test_checkout_status_order_not_found(mock_db):
+async def test_checkout_status_order_not_found(mock_db, fake_request):
     """checkout_status returns 404 when session_id is unknown."""
     from fastapi import HTTPException
 
@@ -272,13 +275,13 @@ async def test_checkout_status_order_not_found(mock_db):
     mock_db.execute.return_value = _mock_select_result(None)
 
     with pytest.raises(HTTPException) as exc_info:
-        await checkout_status("cs_unknown", customer_email="test@example.com", db=mock_db)
+        await checkout_status(fake_request, "cs_unknown", customer_email="test@example.com", db=mock_db)
 
     assert exc_info.value.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_checkout_status_returns_order_state(mock_db):
+async def test_checkout_status_returns_order_state(mock_db, fake_request):
     """checkout_status returns order_id and current status."""
     from app.routers.checkout import checkout_status
 
@@ -293,7 +296,7 @@ async def test_checkout_status_returns_order_state(mock_db):
     )
     mock_db.execute.return_value = _mock_select_result(order)
 
-    result = await checkout_status("cs_known123", customer_email="buyer@example.com", db=mock_db)
+    result = await checkout_status(fake_request, "cs_known123", customer_email="buyer@example.com", db=mock_db)
 
     assert result["status"] == "fulfilled"
     assert result["order_id"] == str(order.id)
