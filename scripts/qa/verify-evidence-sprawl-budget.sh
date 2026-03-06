@@ -27,6 +27,8 @@ budget = json.loads(budget_path.read_text(encoding="utf-8"))
 
 max_files = int(budget.get("tracked_evidence_max_files", 0))
 max_bytes = int(budget.get("tracked_evidence_max_bytes", 0))
+archive_max_files = int(budget.get("tracked_archive_reports_max_files", 0))
+archive_max_bytes = int(budget.get("tracked_archive_reports_max_bytes", 0))
 
 tracked = subprocess.check_output(
     [
@@ -39,12 +41,29 @@ tracked = subprocess.check_output(
     text=True,
 ).splitlines()
 
+archive_tracked = subprocess.check_output(
+    [
+        "git",
+        "ls-files",
+        "docs/archive/reports",
+    ],
+    cwd=repo_root,
+    text=True,
+).splitlines()
+
 tracked_files = len(tracked)
 tracked_bytes = 0
 for rel in tracked:
     p = repo_root / rel
     if p.is_file():
         tracked_bytes += p.stat().st_size
+
+archive_tracked_files = len(archive_tracked)
+archive_tracked_bytes = 0
+for rel in archive_tracked:
+    p = repo_root / rel
+    if p.is_file():
+        archive_tracked_bytes += p.stat().st_size
 
 failed = 0
 passed = 0
@@ -68,6 +87,28 @@ if tracked_bytes <= max_bytes:
     ok(f"tracked evidence bytes {tracked_bytes} <= budget {max_bytes}")
 else:
     fail(f"tracked evidence bytes {tracked_bytes} exceeds budget {max_bytes}")
+
+if archive_tracked_files <= archive_max_files:
+    ok(
+        "tracked archive report files "
+        f"{archive_tracked_files} <= budget {archive_max_files}"
+    )
+else:
+    fail(
+        "tracked archive report files "
+        f"{archive_tracked_files} exceeds budget {archive_max_files}"
+    )
+
+if archive_tracked_bytes <= archive_max_bytes:
+    ok(
+        "tracked archive report bytes "
+        f"{archive_tracked_bytes} <= budget {archive_max_bytes}"
+    )
+else:
+    fail(
+        "tracked archive report bytes "
+        f"{archive_tracked_bytes} exceeds budget {archive_max_bytes}"
+    )
 
 print(f"Summary: PASS={passed} FAIL={failed}")
 if failed:
