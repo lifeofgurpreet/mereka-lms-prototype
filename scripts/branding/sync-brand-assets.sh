@@ -16,7 +16,7 @@ MFE_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/images"
 LMS_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images"
 CMS_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images"
 TOKENS_SRC="$REPO_ROOT/assets/branding/tokens.css"
-TOKENS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css"
+TOKEN_GENERATOR="$REPO_ROOT/scripts/branding/generate-tokens-from-canonical.sh"
 OVERRIDES_SRC="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 OVERRIDES_LMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
 OVERRIDES_CMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
@@ -53,13 +53,14 @@ cp "$SRC_FONTS"/*.woff2 "$LMS_FONT_DIR"/
 cp "$SRC_FONTS"/*.woff2 "$CMS_FONT_DIR"/
 cp "$SRC_FONTS"/*.woff2 "$MFE_FONT_DIR"/
 
-# Optional: keep a copy of the canonical design-token CSS in the theme tree
-# so operators can inspect it on live hosts.
-if [[ -f "$TOKENS_SRC" ]]; then
-  mkdir -p "$(dirname "$TOKENS_DEST")"
-  cp "$TOKENS_SRC" "$TOKENS_DEST"
-  echo "  ✓ Copied tokens.css -> $(basename "$TOKENS_DEST")"
+# Regenerate all token layers from canonical source. This keeps generated
+# markers intact while synchronizing SCSS + CSS consumers.
+if [[ ! -x "$TOKEN_GENERATOR" ]]; then
+  echo "Missing token generator script: $TOKEN_GENERATOR" >&2
+  exit 1
 fi
+"$TOKEN_GENERATOR"
+echo "  ✓ Regenerated token layers from canonical source"
 
 # Keep runtime override CSS in sync across common + LMS so deploy checks are deterministic.
 if [[ -f "$OVERRIDES_SRC" ]]; then
