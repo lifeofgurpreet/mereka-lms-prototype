@@ -37,9 +37,9 @@ async def revoke_enrollment(username: str, course_id: str) -> bool:
     lms = LMSClient()
     success = await lms.deactivate_enrollment(username, course_id)
     if success:
-        logger.info("enrollment.revoked", username=username, course_id=course_id)
+        logger.info("enrollment.revoked", course_id=course_id)
     else:
-        logger.error("enrollment.revoke_failed", username=username, course_id=course_id)
+        logger.error("enrollment.revoke_failed", course_id=course_id)
     return success
 
 
