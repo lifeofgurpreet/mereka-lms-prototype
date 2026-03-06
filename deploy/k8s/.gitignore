@@ -1,0 +1,4 @@
+# Generated Python bytecode — never commit these
+__pycache__/
+*.pyc
+*.pyo
