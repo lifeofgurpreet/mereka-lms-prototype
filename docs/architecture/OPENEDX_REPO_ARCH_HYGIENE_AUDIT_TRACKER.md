@@ -88,6 +88,10 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 - Purchase-gateway admin order-detail API → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/275
 - Purchase-gateway admin refund initiation API → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/276
 - Purchase-gateway admin entitlements list API → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/282
+- PR handoff discipline guardrails → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/312
+- Verification catalog reference-scan performance optimization → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/314
+- Purchase-gateway checkout durability + webhook recovery hardening → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/317
+- Purchase-gateway resilience gate promotion into static CI → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/318
 
 ### Post-Audit Implementation Status (2026-03-06)
 
@@ -129,6 +133,10 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 | Purchase-gateway admin order-detail API | #275 | Open | Adds `GET /api/v1/admin/orders/{order_id}/` returning line items + order audit timeline + fulfillment job state so operators can inspect end-to-end fulfillment state transitions from a single endpoint |
 | Purchase-gateway admin refund initiation API | #276 | Open | Adds `POST /api/v1/admin/orders/{order_id}/refund/` to trigger Stripe refunds (full by default, optional partial amount/reason) with explicit safety guards, while preserving webhook-driven local order-state transitions for idempotency |
 | Purchase-gateway admin entitlements list API | #282 | Open | Adds `GET /api/v1/admin/entitlements/` with tenant/status/recipient filters and pagination, providing direct operational visibility into pending/claimed/revoked entitlement state |
+| PR handoff discipline guardrails | #312 | Open | Adds required PR-template handoff checklist plus executable local (`check-pr-handoff-discipline.sh`) and CI (`verify-pr-handoff-guardrails.sh`) enforcement to prevent local-only implementation drift |
+| Verification catalog performance hardening | #314 | Open | Refactors verification-catalog reference counting to single-pass regex extraction with cache-dir exclusion, reducing generation runtime and keeping governance gates responsive as script inventory grows |
+| Purchase-gateway checkout durability + webhook recovery hardening | #317 | Open | Persists checkout order+line-item before Stripe call, marks failed checkout attempts as canceled, and recovers `checkout.session.completed` by `metadata.order_uuid` when session-id lookup misses so fulfillment can proceed without lost paid orders |
+| Purchase-gateway resilience gate promotion into static CI | #318 | Open | Promotes `verify-purchase-gateway-resilience.sh` into release-blocking static validation so outbox/webhook/worker durability contracts are continuously enforced in CI rather than manually |
 
 ---
 
