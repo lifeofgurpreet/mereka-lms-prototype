@@ -1,5 +1,11 @@
 # Alert rules for tenant isolation regression
 # @covers: AC-TEN-017 — Critical alert within 5 minutes
+#
+# QUARANTINE NOTE: These alerts depend on the metric `tenant_isolation_failures`
+# which is pushed by cronjob-tenant-isolation.yaml via Pushgateway.
+# Pushgateway is not currently deployed. Until it is, these alerts will never
+# fire (absent() will fire TenantIsolationTestMissing perpetually).
+# To activate: deploy Pushgateway and restore push calls in the CronJob.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

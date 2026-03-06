@@ -14,10 +14,11 @@ metadata:
     app.kubernetes.io/component: monitoring
 spec:
   # Select the CMS service
+  # Note: cms Service in services.yml does not carry the instance label —
+  # selecting only on name to guarantee this ServiceMonitor matches.
   selector:
     matchLabels:
       app.kubernetes.io/name: cms
-      app.kubernetes.io/instance: mereka-lms
 
   # Target the mereka-lms namespace
   namespaceSelector:

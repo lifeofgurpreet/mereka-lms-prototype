@@ -167,14 +167,17 @@ spec:
 
                   if [[ $FAILURES -gt 0 ]]; then
                     echo "CRITICAL: $FAILURES isolation test(s) FAILED"
-                    # Push Prometheus metric for alerting
-                    curl -s -X POST "http://pushgateway:9091/metrics/job/tenant_isolation_test" \
-                      --data-binary "tenant_isolation_failures $FAILURES" 2>/dev/null || true
+                    # QUARANTINE: Pushgateway is not deployed. Push calls are no-ops.
+                    # To enable metric-based alerting, deploy a Pushgateway and
+                    # uncomment the curl lines below:
+                    # curl -s -X POST "http://pushgateway:9091/metrics/job/tenant_isolation_test" \
+                    #   --data-binary "tenant_isolation_failures $FAILURES" 2>/dev/null || true
                     exit 1
                   else
                     echo "ALL TESTS PASSED"
-                    curl -s -X POST "http://pushgateway:9091/metrics/job/tenant_isolation_test" \
-                      --data-binary "tenant_isolation_failures 0" 2>/dev/null || true
+                    # QUARANTINE: Pushgateway is not deployed. See comment above.
+                    # curl -s -X POST "http://pushgateway:9091/metrics/job/tenant_isolation_test" \
+                    #   --data-binary "tenant_isolation_failures 0" 2>/dev/null || true
                     exit 0
                   fi
               env:

@@ -22,7 +22,9 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: library-export
-              image: "$(OPENEDX_IMAGE)"
+              # Image is overridden by the kustomization images[] transformer.
+              # Base uses docker.io/overhangio/openedx (remapped to ghcr.io image).
+              image: docker.io/overhangio/openedx
               command:
                 - python
                 - manage.py

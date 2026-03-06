@@ -8,29 +8,31 @@ configMapGenerator:
     files:
       - mux_delivery_monitor.py=./mux_delivery_monitor.py
 resources:
+  # ── Active ServiceMonitors (target service exists, selectors verified) ──
   - servicemonitor-caddy.yaml
   - servicemonitor-credentials.yaml
   - servicemonitor-purchase-gateway.yaml
   - servicemonitor-lms.yaml
   - servicemonitor-cms.yaml
   - servicemonitor-discovery.yaml
-  - servicemonitor-forum.yaml
   - servicemonitor-mysql.yaml
-  - servicemonitor-mfe.yaml
   - servicemonitor-redis.yaml
   - servicemonitor-enterprise.yaml
   - servicemonitor-notes.yaml
   - servicemonitor-xqueue.yaml
+  # ── QUARANTINED ServiceMonitors (not rendered) ───────────────────────────
+  # servicemonitor-forum.yaml   — Forum v2 is in-process with LMS; no separate
+  #                               Service. Use job="lms-metrics" for forum data.
+  # servicemonitor-mfe.yaml     — MFE Caddy proxy has no /metrics endpoint.
+  #                               MFE infra covered by servicemonitor-caddy.yaml.
+  # ── Active PrometheusRules ───────────────────────────────────────────────
   - prometheusrule-caddy.yaml
   - prometheusrule-credentials.yaml
-  - prometheusrule-email.yaml
   - prometheusrule-libraries.yaml
   - prometheusrule-lms.yaml
-  - prometheusrule-ora2.yaml
   - prometheusrule-enterprise.yaml
   - prometheusrule-services.yaml
   - prometheusrule-xqueue.yaml
-  - prometheusrule-tenant-isolation.yaml
   - prometheusrule-velero.yaml
   - prometheusrule-slo.yaml
   - prometheusrule-auth.yaml
@@ -40,3 +42,15 @@ resources:
   - prometheusrule-video.yaml
   - prometheusrule-externalsecrets.yaml
   - hpa-enterprise.yaml
+  # ── QUARANTINED PrometheusRules (not rendered) ───────────────────────────
+  # prometheusrule-email.yaml          — References SES exporter metrics
+  #                                      (ses_bounce_total etc.) — exporter not
+  #                                      deployed. Re-enable with SES exporter.
+  # prometheusrule-ora2.yaml           — References custom ORA2 metrics not
+  #                                      emitted by standard Open edX. Re-enable
+  #                                      when ORA2 custom instrumentation is added.
+  # prometheusrule-tenant-isolation.yaml — Depends on tenant_isolation_failures
+  #                                        pushed via Pushgateway (not deployed).
+  # ── CronJobs ─────────────────────────────────────────────────────────────
+  - cronjob-library-export.yaml
+  - cronjob-tenant-isolation.yaml

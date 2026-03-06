@@ -1,3 +1,10 @@
+# QUARANTINE NOTE: Alerts in this file reference ORA2-specific Prometheus metrics
+# (ora2_file_storage_used_bytes, ora2_staff_grading_queue_size,
+# ora2_grade_propagation_total, ora2_fallback_to_staff_total,
+# ora2_file_uploads_total). These are not emitted by the standard Open edX
+# django-prometheus integration and require a custom ORA2 metrics instrumentation
+# that is not currently deployed. These alerts will never fire.
+# To activate: implement ORA2 metrics emission in the edx-platform fork.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

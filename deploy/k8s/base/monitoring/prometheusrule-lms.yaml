@@ -228,27 +228,22 @@ spec:
             summary: "Redis key evictions detected"
             description: "Redis evicted keys in the last 15 minutes. Check memory pressure and maxmemory policy."
 
-        # MongoDB alerts
-        - alert: MongoDBPodDown
-          expr: up{namespace="mereka-lms", pod=~"mongodb-.*"} == 0
-          for: 5m
-          labels:
-            severity: critical
-            component: mongodb
-          annotations:
-            summary: "MongoDB is down"
-            description: "MongoDB pod {{ $labels.pod }} has been down for more than 5 minutes. Course content and forums unavailable."
+        # MongoDB: Atlas-managed — no in-cluster pod to monitor.
+        # MongoDB Atlas connectivity is monitored via application-level metrics
+        # (django_http_responses, Celery task failures). No pod-based alert needed.
 
-        # Elasticsearch alerts
-        - alert: ElasticsearchPodDown
-          expr: up{namespace="mereka-lms", pod=~"elasticsearch-.*"} == 0
-          for: 5m
-          labels:
-            severity: warning
-            component: elasticsearch
-          annotations:
-            summary: "Elasticsearch is down"
-            description: "Elasticsearch pod {{ $labels.pod }} has been down for more than 5 minutes. Search functionality unavailable."
+        # QUARANTINE: Elasticsearch is not deployed in the standard stack.
+        # Meilisearch replaced Elasticsearch for forum search in Tutor v19+.
+        # Re-enable if Elasticsearch is explicitly deployed for a future use case.
+        # - alert: ElasticsearchPodDown
+        #   expr: up{namespace="mereka-lms", pod=~"elasticsearch-.*"} == 0
+        #   for: 5m
+        #   labels:
+        #     severity: warning
+        #     component: elasticsearch
+        #   annotations:
+        #     summary: "Elasticsearch is down"
+        #     description: "Elasticsearch pod {{ $labels.pod }} has been down for more than 5 minutes. Search functionality unavailable."
 
         # Workload stability alerts
         - alert: OpenEdxCriticalDeploymentUnavailable

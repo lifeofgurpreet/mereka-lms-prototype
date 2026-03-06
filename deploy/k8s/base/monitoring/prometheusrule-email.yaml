@@ -1,5 +1,11 @@
 # @covers AC-036
 # @spec: email-notifications-pipeline_spec.md
+#
+# QUARANTINE NOTE: Alerts in this file reference metrics from a dedicated SES
+# Prometheus exporter (ses_bounce_total, ses_send_total, ses_quota_remaining,
+# ses_delivery_duration_seconds_bucket, exim_queue_size, email_suppression_total).
+# No such exporter is currently deployed. These alerts will never fire.
+# To activate: deploy an SES metrics exporter that exposes these metrics.
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
