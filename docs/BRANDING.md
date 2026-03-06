@@ -436,11 +436,13 @@ find infrastructure/tutor/themes/mereka -name "*.scss"
 - `docs/branding/BRANDING_ROADMAP.md` - Future branding plans
 - `docs/BRANDING_VERIFICATION_CHECKLIST.md` - Pre-deploy checklist
 - `docs/BRANDING_PLAN.md` - Rollout plan
+- `docs/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md` - Source vs generated theming contract
 
 **Scripts**:
 - `scripts/branding/sync-brand-assets.sh` - Sync assets to theme
 - `scripts/branding/sync-brand-package.sh` - Sync all `brand-*` OEP-48 packages from canonical asset sources
 - `scripts/qa/verify-brand-asset-drift.sh` - Verify theme + brand package asset drift
+- `scripts/branding/build-tokens.sh` - Generate/check runtime `/theme/*.min.css` artifacts
 - `scripts/branding/verify-branding-health.sh` - CI gate
 - `scripts/branding/verify-logo-setup.sh` - Logo verification
 - `scripts/branding/verify-branding-css.sh` - CSS loading check
@@ -448,6 +450,7 @@ find infrastructure/tutor/themes/mereka -name "*.scss"
 - `scripts/branding/deploy-branded-image.sh` - Production deployment
 - `scripts/branding/setup-mfe-branding.sh` - MFE dev setup
 - `scripts/branding/run-branding-gates.sh` - Full gate suite
+- `scripts/qa/verify-theming-generated-artifacts.sh` - Generated-theming governance gate
 
 **Assets**:
 - `assets/branding/` - Source assets (logos, fonts, tokens)

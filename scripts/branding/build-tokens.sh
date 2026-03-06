@@ -7,10 +7,37 @@ set -euo pipefail
 # - light.min.css (light-variant delta)
 # - mereka-brand.min.css (brand delta against core)
 # - mereka-brand-light.min.css (brand delta for light variant)
+#
+# Usage:
+#   ./scripts/branding/build-tokens.sh
+#   ./scripts/branding/build-tokens.sh --check
+#     - Verifies tracked runtime theme artifacts match deterministic regeneration.
+#     - Uses tracked core.min.css as the deterministic baseline for delta generation.
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TOKENS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 OUTPUT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
+CHECK_ONLY=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --check)
+      CHECK_ONLY=1
+      ;;
+    -h|--help)
+      cat <<'EOF'
+Usage: build-tokens.sh [--check]
+
+Generate or validate PARAGON_THEME_URLS runtime theme artifacts.
+EOF
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $arg" >&2
+      exit 1
+      ;;
+  esac
+done
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -229,6 +256,56 @@ path_brand.write_text(payload, encoding="utf-8")
 path_brand.with_name("mereka-brand-light.min.css").write_text(payload, encoding="utf-8")
 PY
 }
+
+check_mode() {
+  local tracked_core="$OUTPUT_DIR/core.min.css"
+  local tracked_light="$OUTPUT_DIR/light.min.css"
+  local tracked_brand="$OUTPUT_DIR/mereka-brand.min.css"
+  local tracked_brand_light="$OUTPUT_DIR/mereka-brand-light.min.css"
+
+  for required in "$tracked_core" "$tracked_light" "$tracked_brand" "$tracked_brand_light"; do
+    if [[ ! -f "$required" ]]; then
+      echo "ERROR: missing tracked runtime theme artifact: $required" >&2
+      echo "Run ./scripts/branding/build-tokens.sh to generate all runtime theme artifacts." >&2
+      exit 1
+    fi
+  done
+
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+  trap "rm -rf '$tmp_dir'" EXIT
+
+  cp "$tracked_core" "$tmp_dir/core.min.css"
+  write_light_delta_theme "$tmp_dir/light.min.css"
+  write_brand_delta_theme "$TOKENS_SCSS" "$tmp_dir/mereka-brand.min.css" "$tmp_dir/core.min.css"
+
+  local drift=0
+  if ! cmp -s "$tracked_light" "$tmp_dir/light.min.css"; then
+    echo "DRIFT: light.min.css does not match generator output." >&2
+    drift=1
+  fi
+  if ! cmp -s "$tracked_brand" "$tmp_dir/mereka-brand.min.css"; then
+    echo "DRIFT: mereka-brand.min.css does not match generator output." >&2
+    drift=1
+  fi
+  if ! cmp -s "$tracked_brand_light" "$tmp_dir/mereka-brand-light.min.css"; then
+    echo "DRIFT: mereka-brand-light.min.css does not match generator output." >&2
+    drift=1
+  fi
+
+  if [[ "$drift" -ne 0 ]]; then
+    echo "FAIL: runtime theme artifact drift detected." >&2
+    echo "Run ./scripts/branding/build-tokens.sh and commit regenerated files." >&2
+    exit 1
+  fi
+
+  echo "Runtime theme artifacts are in sync."
+}
+
+if [[ "$CHECK_ONLY" -eq 1 ]]; then
+  check_mode
+  exit 0
+fi
 
 write_core_theme "$OUTPUT_DIR/core.min.css"
 write_light_delta_theme "$OUTPUT_DIR/light.min.css"
