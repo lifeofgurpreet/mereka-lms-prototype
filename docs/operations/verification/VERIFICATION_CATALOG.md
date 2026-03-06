@@ -8,19 +8,19 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **501**
-- Archived deprecated scripts: **16**
+- Total `verify-*.sh` scripts: **496**
+- Archived deprecated scripts: **21**
 - CI static-bound scripts: **328**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 146
+- `exploratory_manual`: 141
 - `periodic_runtime`: 7
 - `release_blocking`: 348
 
 ### Status Distribution
 - `active`: 355
-- `deprecated_candidate`: 19
+- `deprecated_candidate`: 14
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -31,14 +31,9 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-branding-evidence-screenshot-contract.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-credentials-issuer.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-deprecation-discipline.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-email-ace-channels.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-email-bulk-campaigns.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-email-digests-code.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-digests.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-gdpr-code.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-email-inapp-code.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-preferences.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-email-push-code.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-libraries-core.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-notifications-inapp.sh` (owner: `platform-core`, refs: 1)
@@ -64,6 +59,11 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/deprecated/verify-cicd-scheduled-ops.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale scheduled-ops workflow assumptions no longer matching active runtime gate workflows.)
 - `scripts/qa/deprecated/verify-patch-modularity.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale assumptions about direct patch-function invocation in apply-patches.sh after plugin-driven patch orchestration changes.)
 - `scripts/qa/deprecated/verify-tutor-patches-inventory.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with stale inventory/parser assumptions (including non-Python plugin companion files) that no longer match current Tutor plugin contract layout.)
+- `scripts/qa/deprecated/verify-email-ace-channels.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check that reports warning-only posture when email plugin/config surfaces are absent, providing low signal for current architecture.)
+- `scripts/qa/deprecated/verify-email-bulk-campaigns.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check against optional bulk-email plugin paths that are absent in the active stack and currently emit warning-only results.)
+- `scripts/qa/deprecated/verify-email-digests-code.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check against optional email-digests plugin paths that are absent in the active stack and currently emit warning-only results.)
+- `scripts/qa/deprecated/verify-email-inapp-code.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check against optional in-app notifications plugin paths that are absent in the active stack and currently emit warning-only results.)
+- `scripts/qa/deprecated/verify-email-push-code.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check against optional push-notifications plugin paths that are absent in the active stack and currently emit warning-only results.)
 
 ## Lifecycle Policy
 - `release_blocking`: MUST stay bound to CI static or direct workflow execution.
