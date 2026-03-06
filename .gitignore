@@ -64,8 +64,10 @@ infrastructure/tutor/custom-apps/**/*.log
 infrastructure/tutor/custom-apps/**/__pycache__/
 
 # Migration outputs (may contain PII or logs)
-scripts/migrations/kajabi/output/
-scripts/migrations/output/
+scripts/migrations/*/output/
+scripts/migrations/*/logs/
+migrations/*/output/
+migrations/*/logs/
 
 # Exports (moved to var/)
 exports/

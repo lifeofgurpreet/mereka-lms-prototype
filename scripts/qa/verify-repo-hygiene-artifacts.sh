@@ -13,6 +13,7 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$REPO_ROOT}"
 cd "$REPO_ROOT"
 
 violations=0
@@ -47,6 +48,18 @@ while IFS= read -r -d '' path; do
       ;;
     tutor_env/dev/frontend-app-*)
       fail "$path is tracked under tutor_env/dev/frontend-app-* (local MFE clones must not be committed)"
+      ;;
+    scripts/migrations/*/output/*)
+      fail "$path is tracked under scripts/migrations/*/output (generated migration artifacts must stay untracked)"
+      ;;
+    scripts/migrations/*/logs/*)
+      fail "$path is tracked under scripts/migrations/*/logs (migration logs must stay untracked)"
+      ;;
+    migrations/*/output/*)
+      fail "$path is tracked under migrations/*/output (generated migration artifacts must stay untracked)"
+      ;;
+    migrations/*/logs/*)
+      fail "$path is tracked under migrations/*/logs (migration logs must stay untracked)"
       ;;
     tmp/frontend-app-*)
       if [[ "$path" == "tmp/frontend-app-authn" ]]; then
