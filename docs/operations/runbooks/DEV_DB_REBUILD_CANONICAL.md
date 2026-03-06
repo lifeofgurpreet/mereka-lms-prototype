@@ -1,5 +1,7 @@
 # Dev Open edX DB Rebuild (Canonical, Guarded)
 
+_Audience: Platform Operators / SRE • Owner: Infra Team • Last updated: 2026-03-06_
+
 Audience: platform operators, SRE
 
 ## Purpose
