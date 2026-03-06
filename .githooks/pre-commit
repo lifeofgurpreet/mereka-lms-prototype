@@ -10,6 +10,7 @@ set -euo pipefail
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Track if any secrets were found
@@ -58,7 +59,7 @@ check_file() {
     *.md|*.txt|*.rst|*.html|*.css|*.svg|*.png|*.jpg|*.jpeg|*.gif|*.ico|*.woff|*.woff2|*.ttf|*.eot)
       return 0
       ;;
-    *test*|*spec*|*mock*|*fixture*|*__tests__*|*__mocks__*)
+    *test*|*spec*|*mock*|*fixture*)
       # Skip test files but warn about them
       return 0
       ;;
@@ -293,7 +294,7 @@ if [[ -n "$TUTOR_FILES" ]]; then
   echo ""
 
   # Run verification script
-  REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
   VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-patches.sh"
 
   if [[ -x "$VERIFY_SCRIPT" ]]; then
