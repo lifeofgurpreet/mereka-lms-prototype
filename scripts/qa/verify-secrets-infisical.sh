@@ -17,6 +17,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+PROJECTS_ROOT="${PROJECTS_ROOT:-$(cd "$REPO_ROOT/../.." && pwd)}"
 cd "$REPO_ROOT"
 
 # Colors
@@ -159,7 +160,8 @@ required_atlas_keys=("ATLAS_PUBLIC_KEY" "ATLAS_PRIVATE_KEY" "ATLAS_ORG_ID" "ATLA
 # Try to resolve Infisical directory
 INFISICAL_DIR=""
 candidates=(
-  "/home/gurpreet/projects/secrets-management"
+  "${PROJECTS_ROOT}/secrets-management"
+  "${HOME}/projects/secrets-management"
   "$REPO_ROOT"
 )
 for candidate in "${candidates[@]}"; do
