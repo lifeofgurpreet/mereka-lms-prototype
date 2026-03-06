@@ -17,6 +17,11 @@ CHECKS_TOTAL=0
 CHECKS_PASSED=0
 CHECKS_FAILED=0
 
+REPO_ROOT="${MEREKA_LMS_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+LMS_SETTINGS="${REPO_ROOT}/deploy/k8s/base/apps/openedx/settings/lms/production.py"
+CMS_SETTINGS="${REPO_ROOT}/deploy/k8s/base/apps/openedx/settings/cms/production.py"
+TUTOR_CONFIG="${TUTOR_CONFIG:-${REPO_ROOT}/tutor_env/config.yml}"
+
 # Logging functions
 log_info() {
   echo -e "${GREEN}[INFO]${NC} $*"
@@ -65,8 +70,7 @@ main() {
 
   # Check 1: Verify content_libraries Django app is enabled in LMS settings
   log_info "Check 1: Verify content_libraries Django app in LMS settings"
-  if grep -q "openedx.core.djangoapps.content_libraries" \
-    /home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/apps/openedx/settings/lms/production.py 2>/dev/null; then
+  if grep -q "openedx.core.djangoapps.content_libraries" "$LMS_SETTINGS" 2>/dev/null; then
     check_pass "content_libraries app found in LMS production.py"
   else
     check_fail "content_libraries app NOT found in LMS production.py"
@@ -75,8 +79,7 @@ main() {
 
   # Check 2: Verify content_libraries Django app is enabled in CMS settings
   log_info "Check 2: Verify content_libraries Django app in CMS settings"
-  if grep -q "openedx.core.djangoapps.content_libraries" \
-    /home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/apps/openedx/settings/cms/production.py 2>/dev/null; then
+  if grep -q "openedx.core.djangoapps.content_libraries" "$CMS_SETTINGS" 2>/dev/null; then
     check_pass "content_libraries app found in CMS production.py"
   else
     check_fail "content_libraries app NOT found in CMS production.py"
@@ -85,10 +88,8 @@ main() {
 
   # Check 3: Verify FEATURES flag for Content Libraries v2
   log_info "Check 3: Verify CONTENT_LIBRARIES_V2_ENABLED feature flag"
-  if grep -q "CONTENT_LIBRARIES_V2_ENABLED" \
-    /home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/apps/openedx/settings/lms/production.py 2>/dev/null || \
-     grep -q "CONTENT_LIBRARIES_V2_ENABLED" \
-    /home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/apps/openedx/settings/cms/production.py 2>/dev/null; then
+  if grep -q "CONTENT_LIBRARIES_V2_ENABLED" "$LMS_SETTINGS" 2>/dev/null || \
+     grep -q "CONTENT_LIBRARIES_V2_ENABLED" "$CMS_SETTINGS" 2>/dev/null; then
     check_pass "CONTENT_LIBRARIES_V2_ENABLED feature flag found"
   else
     log_warn "CONTENT_LIBRARIES_V2_ENABLED not explicitly set (may use Tutor/Redwood default)"
@@ -99,10 +100,8 @@ main() {
 
   # Check 4: Verify Blockstore backend configuration
   log_info "Check 4: Verify CONTENTSTORE_BACKEND settings"
-  if grep -q "CONTENTSTORE_BACKEND" \
-    /home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/apps/openedx/settings/lms/production.py 2>/dev/null || \
-     grep -q "CONTENTSTORE_BACKEND" \
-    /home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/apps/openedx/settings/cms/production.py 2>/dev/null; then
+  if grep -q "CONTENTSTORE_BACKEND" "$LMS_SETTINGS" 2>/dev/null || \
+     grep -q "CONTENTSTORE_BACKEND" "$CMS_SETTINGS" 2>/dev/null; then
     check_pass "CONTENTSTORE_BACKEND setting found"
   else
     log_warn "CONTENTSTORE_BACKEND not explicitly configured (using Tutor default)"
@@ -140,7 +139,6 @@ main() {
 
   # Check 6: Verify Tutor config includes library settings
   log_info "Check 6: Verify Tutor config.yml for library-related settings"
-  TUTOR_CONFIG="/home/gurpreet/projects/k8s/mereka-lms/tutor_env/config.yml"
   if [[ -f "$TUTOR_CONFIG" ]]; then
     # Look for any library or blockstore related configs
     if grep -qi "library\|blockstore" "$TUTOR_CONFIG" 2>/dev/null; then
