@@ -14,7 +14,7 @@ kind: Kustomization
 #   - Purpose: pre-production validation before GKE rollout
 #
 # Prerequisites (same as rke2-nonprod — shared cluster):
-#   1. ClusterSecretStore infisical-secret-store (Valid/Ready)
+#   1. ClusterSecretStore infisical-secret-store-staging (Valid/Ready)
 #   2. Secret ghcr-registry in mereka-lms namespace (imagePullSecret for GHCR)
 #   3. Default ServiceAccount patched: imagePullSecrets: [{name: ghcr-registry}]
 
@@ -95,7 +95,7 @@ configMapGenerator:
 patches:
   # Remove stub mongodb Service — no in-cluster pods; Atlas is used
   - path: patches/remove-legacy-mongodb-service.yaml
-  # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store
+  # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store-staging
   - path: patches/externalsecrets-infisical.yaml
   # Override domain env vars for staging hosts
   - path: patches/domain-env.yaml

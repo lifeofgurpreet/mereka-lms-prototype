@@ -4,13 +4,13 @@ kind: Kustomization
 # rke2-nonprod overlay — bbi-infrastructure dev/staging cluster
 #
 # Differences from production (GKE):
-#   - Secrets: uses infisical-secret-store (not gcp-secret-manager; no Workload Identity)
+#   - Secrets: uses infisical-secret-store-dev (not gcp-secret-manager; no Workload Identity)
 #   - Images: pulled from GHCR using ghcr-registry imagePullSecret (no Workload Identity)
 #   - Domains: *.staging.mereka.dev (update to actual domain below)
 #   - ArgoCD: SSH-only to github.com (port 443 blocked by Cilium)
 #
 # IMPORTANT: Before deploying, ensure these manual prerequisites exist on rke2-nonprod:
-#   1. ClusterSecretStore infisical-secret-store (Valid/Ready)
+#   1. ClusterSecretStore infisical-secret-store-dev (Valid/Ready)
 #   2. Secret ghcr-registry in mereka-lms namespace (imagePullSecret for GHCR)
 #   3. Default ServiceAccount patched: imagePullSecrets: [{name: ghcr-registry}]
 #      OR each Deployment has spec.template.spec.imagePullSecrets set
@@ -105,7 +105,7 @@ configMapGenerator:
 patches:
   # Remove stub mongodb Service — no in-cluster pods; Atlas is used
   - path: patches/remove-legacy-mongodb-service.yaml
-  # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store
+  # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store-dev
   - path: patches/externalsecrets-infisical.yaml
   # Override domain env vars for rke2-nonprod dev hosts
   - path: patches/domain-env.yaml
