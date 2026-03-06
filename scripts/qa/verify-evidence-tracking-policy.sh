@@ -117,7 +117,7 @@ while IFS= read -r path; do
   [[ -z "$path" ]] && continue
 
   case "$path" in
-    docs/operations/evidence/*|docs/evidence/observability/*)
+    docs/operations/evidence/*|docs/evidence/observability/*|docs/archive/reports/*)
       if [[ "$path" == *.md ]]; then
         if [[ -f "$path" ]]; then
           check_new_markdown_size "$path"
@@ -139,10 +139,10 @@ while IFS= read -r path; do
   [[ -z "$path" ]] && continue
   [[ -f "$path" ]] || continue
 
-  if [[ "$path" =~ ^docs/operations/evidence/.+\.md$ || "$path" =~ ^docs/evidence/observability/.+\.md$ ]]; then
+  if [[ "$path" =~ ^docs/operations/evidence/.+\.md$ || "$path" =~ ^docs/evidence/observability/.+\.md$ || "$path" =~ ^docs/archive/reports/.+\.md$ ]]; then
     scan_sensitive_markers "$path"
   fi
-done < <(git diff --name-only --diff-filter=AM "$MERGE_BASE"...HEAD -- docs/operations/evidence docs/evidence/observability)
+done < <(git diff --name-only --diff-filter=AM "$MERGE_BASE"...HEAD -- docs/operations/evidence docs/evidence/observability docs/archive/reports)
 
 echo "=== Summary ==="
 echo "Checks     : $checks"
