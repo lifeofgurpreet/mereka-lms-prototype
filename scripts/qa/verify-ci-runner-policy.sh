@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# verify-ci-runner-policy.sh — enforce ARC-only CI runner policy
+# verify-ci-runner-policy.sh — enforce ARC-first CI runner policy
 #
 # Policy source: docs/operations/CI_RUNNER_POLICY.md
 #
 # Rules checked:
-#   1. No 'ubuntu-latest' or 'ubuntu-24.04' except in permitted exceptions
+#   1. No GitHub-hosted Linux runners ('ubuntu-*')
 #   2. No fallback expressions — all jobs must hard-code ARC runner labels
 #   3. 'mereka-k8s-heavy-builders' only in allowed workflows
 #   4. All other jobs must use 'mereka-k8s-runners'
+#   5. macOS runner exceptions are explicitly allowlisted (Apple-only flows)
 #
 # Exit codes:
 #   0 — policy satisfied
@@ -18,11 +19,8 @@ set -euo pipefail
 WORKFLOWS_DIR=".github/workflows"
 POLICY_DOC="docs/operations/CI_RUNNER_POLICY.md"
 
-# Workflows permitted to use GitHub-hosted runners (Class C/D exceptions)
-GITHUB_HOSTED_EXCEPTIONS=(
-  "codeql.yml"
-  "scorecard.yml"
-  "dependency-review.yml"
+# Workflows permitted to use GitHub-hosted macOS runners (Class D exceptions)
+MACOS_HOSTED_EXCEPTIONS=(
   "build-ios-app.yml"
   "ios-testflight.yml"
 )
@@ -69,7 +67,7 @@ if [[ ! -d "$WORKFLOWS_DIR" ]]; then
   exit 1
 fi
 
-echo "=== CI Runner Policy Verification (ARC-only) ==="
+echo "=== CI Runner Policy Verification (ARC-first, strict) ==="
 echo "Policy: $POLICY_DOC"
 echo ""
 
@@ -93,12 +91,18 @@ for wf_path in "${workflow_files[@]}"; do
 
     [[ -z "$runs_on_value" ]] && continue
 
-    # ── GitHub-hosted labels ──────────────────────────────────────────────
-    if echo "$runs_on_value" | grep -qE 'ubuntu-|macos-'; then
-      if is_in_list "$wf_name" "${GITHUB_HOSTED_EXCEPTIONS[@]}"; then
+    # ── GitHub-hosted Linux labels are forbidden ──────────────────────────
+    if echo "$runs_on_value" | grep -qE 'ubuntu-'; then
+      error "$wf_name:$lineno  uses GitHub-hosted Linux runner '$runs_on_value' — must use ARC runner (mereka-k8s-runners or mereka-k8s-heavy-builders)"
+      continue
+    fi
+
+    # ── GitHub-hosted macOS labels are tightly scoped exceptions ──────────
+    if echo "$runs_on_value" | grep -qE 'macos-'; then
+      if is_in_list "$wf_name" "${MACOS_HOSTED_EXCEPTIONS[@]}"; then
         pass
       else
-        error "$wf_name:$lineno  uses GitHub-hosted runner '$runs_on_value' — must use ARC runner (mereka-k8s-runners or mereka-k8s-heavy-builders)"
+        error "$wf_name:$lineno  uses GitHub-hosted macOS runner '$runs_on_value' outside approved Apple workflows"
       fi
       continue
     fi
@@ -157,5 +161,5 @@ fi
 if [[ "$warnings" -gt 0 ]]; then
   echo "PASS — no violations. $warnings warning(s) noted (non-blocking)."
 else
-  echo "PASS — all runner labels conform to ARC-only policy."
+  echo "PASS — all runner labels conform to ARC-first policy."
 fi

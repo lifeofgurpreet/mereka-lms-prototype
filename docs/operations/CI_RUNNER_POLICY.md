@@ -46,25 +46,18 @@ Use for Docker image builds and Playwright E2E tests that require browser downlo
 benefit from the persistent BuildKit layer cache and npm/Playwright browser cache across runs,
 dropping image build times from 30+ min to ~5 min on warm cache.
 
-### Class C — GitHub-Hosted (`ubuntu-24.04`) — RESTRICTED
+### Class C — GitHub-Hosted Linux (`ubuntu-*`) — FORBIDDEN
 
 | Property | Value |
 |----------|-------|
-| Label | `ubuntu-24.04` |
+| Label | `ubuntu-*` |
 | Resources | Standard GitHub-hosted runner (2 CPU, 7 GB RAM) |
 | Docker | Available (but no persistent cache) |
 | Cluster access | No (cannot reach rke2-nonprod) |
 | Cost | Per-minute billing |
 
-**RESTRICTED**: GitHub-hosted runners are ONLY permitted for workflows that require
-GitHub-native tooling APIs (CodeQL, OSSF Scorecard, Dependency Review). All other jobs
-MUST use ARC runners (Class A or B). If ARC is unavailable, jobs fail — this is intentional
-to ensure infra issues are surfaced and fixed, not silently worked around.
-
-Permitted exceptions:
-- `codeql.yml` — requires GitHub CodeQL Actions integration
-- `scorecard.yml` — requires GitHub OSSF Scorecard API
-- `dependency-review.yml` — requires GitHub dependency graph API
+**FORBIDDEN**: GitHub-hosted Linux runners are not allowed in this repository. All Linux
+jobs MUST run on ARC runners (Class A or B). If ARC is unavailable, jobs fail by design.
 
 ### Class D — GitHub-Hosted macOS (`macos-14`)
 
@@ -95,7 +88,7 @@ is determined by the called workflow. This applies to `build-enterprise-mfe.yml`
 | YAML / Markdown / shell syntax checks | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | Unit and integration tests (Python) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | Tutor config tests (offline rendering) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
-| CodeQL / Scorecard / Dependency Review | C — GitHub-hosted | GitHub-managed security tooling (ONLY exceptions) |
+| CodeQL / Scorecard / Dependency Review | A — ARC lightweight | Security tooling is executed on ARC with least-privilege `GITHUB_TOKEN` |
 | Release evidence assembly (offline) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | iOS / macOS builds | D — macOS | Apple platform requirement |
 | Reusable workflow call | E — no runs-on | Delegated to callee |
@@ -121,13 +114,13 @@ runs-on: mereka-k8s-heavy-builders  # Class B — Docker builds, Playwright
 
 ---
 
-## Current Audit — All Workflows (updated 2026-03-05)
+## Current Audit — All Workflows (updated 2026-03-06)
 
-All workflows migrated to ARC self-hosted runners. No GitHub-hosted fallback expressions remain.
+All Linux workflows are migrated to ARC self-hosted runners. No GitHub-hosted Linux fallback expressions remain.
 
 Legend:
 - `CONFORM` — uses correct ARC runner label
-- `EXCEPTION` — GitHub-hosted, permitted per Class C/D policy
+- `EXCEPTION` — GitHub-hosted macOS, permitted only for Apple platform workflows
 - `REUSABLE` — job delegates to reusable workflow (no `runs-on` set here)
 
 | Workflow file | Job(s) | `runs-on` | Policy class | Status |
@@ -145,10 +138,10 @@ Legend:
 | `certificate-branding.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `ci.yml` | all (4 jobs) | `mereka-k8s-runners` | A | CONFORM |
 | `cloud-sql-backup.yml` | all | `mereka-k8s-runners` | A | CONFORM |
-| `codeql.yml` | Analyze | `ubuntu-24.04` | C | EXCEPTION |
+| `codeql.yml` | Analyze | `mereka-k8s-runners` | A | CONFORM |
 | `cross-browser-branding-smoke.yml` | all | `mereka-k8s-heavy-builders` | B | CONFORM |
 | `daily-infrastructure-audit.yml` | all (4 jobs) | `mereka-k8s-runners` | A | CONFORM |
-| `dependency-review.yml` | all | `ubuntu-24.04` | C | EXCEPTION |
+| `dependency-review.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `dr-evidence-bundle.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `e2e-tests.yml` | all (2 jobs) | `mereka-k8s-runners` | A | CONFORM |
 | `email-template-branding.yml` | all | `mereka-k8s-runners` | A | CONFORM |
@@ -175,7 +168,7 @@ Legend:
 | `release-evidence.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `release.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `runtime-theme-drift-diagnose.yml` | all | `mereka-k8s-runners` | A | CONFORM |
-| `scorecard.yml` | all | `ubuntu-24.04` | C | EXCEPTION |
+| `scorecard.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `secret-scan-audit.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `security-exceptions.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `smoke-authenticated.yml` | all (2 jobs) | `mereka-k8s-runners` | A | CONFORM |
@@ -198,9 +191,6 @@ Legend:
 
 | Workflow | Exception | Rationale |
 |----------|-----------|-----------|
-| `codeql.yml` | GitHub-hosted (`ubuntu-24.04`) | Requires GitHub CodeQL Actions integration (uploads SARIF to GitHub Security tab) |
-| `scorecard.yml` | GitHub-hosted (`ubuntu-24.04`) | Requires GitHub OSSF Scorecard API (publishes to OpenSSF dashboard) |
-| `dependency-review.yml` | GitHub-hosted (`ubuntu-24.04`) | Requires GitHub dependency graph API (only available on GitHub-hosted) |
 | `build-ios-app.yml` | GitHub-hosted (`macos-latest`) | Apple platform — no ARC macOS runners available |
 | `ios-testflight.yml` | GitHub-hosted (`macos-14`) | Apple platform — no ARC macOS runners available |
 
@@ -212,19 +202,10 @@ When adding a new workflow:
 
 1. Set `runs-on: mereka-k8s-runners` (Class A) by default
 2. Use `runs-on: mereka-k8s-heavy-builders` (Class B) only for Docker builds or Playwright E2E
-3. **NEVER** use `ubuntu-24.04` or `ubuntu-latest` — the only exceptions are CodeQL/Scorecard/dependency-review
-4. Run `scripts/qa/verify-ci-runner-policy.sh` to confirm compliance
-5. Update the audit table in this document
-
-### Legacy: Migrating `ubuntu-latest` to `ubuntu-24.04`
-
-Legacy `ubuntu-latest` jobs (LEGACY status in the table above) are low-priority. To migrate:
-
-1. Change `ubuntu-latest` → `ubuntu-24.04` in the workflow file
-2. Trigger the workflow manually to verify compatibility
-3. Update the status column in the audit table from `LEGACY` to `CONFORM`
-
-There is currently **1 job** using `ubuntu-latest` that should be migrated: `build-ios-app.yml` uses `macos-latest` (Class D, tracked separately under the macOS runner class).
+3. **NEVER** use `ubuntu-*` or `windows-*` runners
+4. Use `macos-*` only for Apple platform workflows (`build-ios-app.yml`, `ios-testflight.yml`)
+5. Run `scripts/qa/verify-ci-runner-policy.sh` to confirm compliance
+6. Update the audit table in this document
 
 ---
 
@@ -234,7 +215,7 @@ There is currently **1 job** using `ubuntu-latest` that should be migrated: `bui
 
 1. Parses every `.github/workflows/*.yml` file
 2. Checks that `runs-on: mereka-k8s-heavy-builders` is used only for Docker build and Playwright jobs
-3. Checks that `runs-on: ubuntu-latest` is not used (pinned version required)
+3. Checks that no GitHub-hosted Linux labels (`ubuntu-*`) are used
 4. Reports violations with workflow file and line number
 
 The script runs as part of the `static-validation` job in `ci.yml` via `.github/ci-scripts-static.txt`.

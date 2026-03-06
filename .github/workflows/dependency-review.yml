@@ -13,7 +13,7 @@ concurrency:
 jobs:
   dependency-review:
     name: Review dependencies
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read         # checkout
       pull-requests: write   # post dependency review comment on PR

@@ -11,7 +11,7 @@ permissions: {}
 jobs:
   analysis:
     name: Scorecard analysis
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       security-events: write
       id-token: write
