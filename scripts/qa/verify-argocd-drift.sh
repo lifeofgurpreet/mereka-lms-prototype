@@ -15,13 +15,25 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 # shellcheck source=../shared/config.sh
 source "${REPO_ROOT}/scripts/shared/config.sh"
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-BBI_INFRA="${BBI_INFRA:-/home/gurpreet/projects/k8s/bbi-infrastructure}"
+BBI_INFRA="${BBI_INFRA:-}"
+if [[ -z "$BBI_INFRA" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure"; do
+    if [[ -d "$candidate" ]]; then
+      BBI_INFRA="$candidate"
+      break
+    fi
+  done
+fi
+BBI_INFRA="${BBI_INFRA:-${WORKSPACE_ROOT}/bbi-infrastructure}"
 ARGOCD_NAMESPACE="argocd"
 
 # Known-good source paths per app (git is the source of truth)
