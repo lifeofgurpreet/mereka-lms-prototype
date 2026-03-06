@@ -13,6 +13,7 @@ set -euo pipefail
 
 DOMAIN="${1:-academyv2.mereka.io}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 # Settings file locations (base repo)
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
@@ -20,6 +21,17 @@ MW_PLATFORM_ADMIN="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_p
 MW_MULTISITE="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py"
 MW_FORWARDED="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py"
 MW_JWT_SESSION="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_jwt_session.py"
+BBI_PROD="${BBI_PROD:-}"
+if [[ -z "$BBI_PROD" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py" \
+    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"; do
+    if [[ -f "$candidate" ]]; then
+      BBI_PROD="$candidate"
+      break
+    fi
+  done
+fi
 
 # Counters
 PASS=0
@@ -680,7 +692,6 @@ echo
 echo "--- Studio SSO Bypass ---"
 
 # Check: StudioSSOBypassMiddleware exists in bbi-infrastructure overlay
-BBI_PROD="/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
 if [ -f "$BBI_PROD" ] && grep -q 'class StudioSSOBypassMiddleware' "$BBI_PROD"; then
   pass_ "SSO Bypass: StudioSSOBypassMiddleware class defined in production overlay"
 else
