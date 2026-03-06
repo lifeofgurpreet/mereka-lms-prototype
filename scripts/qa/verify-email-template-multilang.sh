@@ -7,6 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -26,8 +27,10 @@ resolve_ace_settings_source() {
     candidates+=(
         "../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
         "../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-        "/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-        "/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+        "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+        "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+        "${HOME}/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+        "${HOME}/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
         "infrastructure/tutor/config.yml"
         "tutor_env/config.yml"
     )
