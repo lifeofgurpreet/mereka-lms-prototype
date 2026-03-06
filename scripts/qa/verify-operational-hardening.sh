@@ -167,18 +167,19 @@ check_hpa_baselines_reasonable() {
 check_deployments_have_resource_requests() {
   echo "Checking Deployments have resource requests"
 
-  local deployments_file="${BASE_DIR}/deployments.yml"
-  if [[ ! -f "$deployments_file" ]]; then
-    fail "Deployments file not found: $deployments_file"
+  # Use rendered kustomize output (deployments.yml was split into per-app dirs)
+  local rendered
+  rendered=$(kubectl kustomize "$BASE_DIR" 2>/dev/null) || {
+    fail "Cannot render kustomize base for resource request check"
     return
-  fi
+  }
 
   # LMS and CMS are the primary web workloads; they must have memory requests at minimum.
   local -a web_workloads=("lms" "cms")
 
   for workload in "${web_workloads[@]}"; do
     local has_requests
-    has_requests=$("$YQ" eval "select(.kind == \"Deployment\" and .metadata.name == \"$workload\") | .spec.template.spec.containers[0].resources.requests" "$deployments_file" 2>/dev/null | head -1 || echo "")
+    has_requests=$(echo "$rendered" | "$YQ" eval "select(.kind == \"Deployment\" and .metadata.name == \"$workload\") | .spec.template.spec.containers[0].resources.requests" - 2>/dev/null | head -1 || echo "")
     if [[ -n "$has_requests" && "$has_requests" != "null" ]]; then
       pass "Deployment $workload has resource requests"
     else
@@ -190,11 +191,12 @@ check_deployments_have_resource_requests() {
 check_progress_deadline() {
   echo "Checking progressDeadlineSeconds on critical Deployments"
 
-  local deployments_file="${BASE_DIR}/deployments.yml"
-  if [[ ! -f "$deployments_file" ]]; then
-    fail "Deployments file not found: $deployments_file"
+  # Use rendered kustomize output (deployments.yml was split into per-app dirs)
+  local rendered
+  rendered=$(kubectl kustomize "$BASE_DIR" 2>/dev/null) || {
+    fail "Cannot render kustomize base for progress deadline check"
     return
-  fi
+  }
 
   # progressDeadlineSeconds defaults to 600s in Kubernetes if unset.
   # We accept the default as sufficient — just verify the field is not
@@ -203,7 +205,7 @@ check_progress_deadline() {
 
   for workload in "${critical[@]}"; do
     local deadline
-    deadline=$("$YQ" eval "select(.kind == \"Deployment\" and .metadata.name == \"$workload\") | .spec.progressDeadlineSeconds" "$deployments_file" 2>/dev/null | head -1 || echo "")
+    deadline=$(echo "$rendered" | "$YQ" eval "select(.kind == \"Deployment\" and .metadata.name == \"$workload\") | .spec.progressDeadlineSeconds" - 2>/dev/null | head -1 || echo "")
     if [[ -z "$deadline" || "$deadline" == "null" ]]; then
       # Kubernetes default of 600s applies — acceptable
       pass "Deployment $workload: progressDeadlineSeconds uses K8s default (600s)"
