@@ -39,6 +39,9 @@ while IFS= read -r -d '' path; do
     var/*)
       fail "$path is tracked under var/ (runtime evidence/artifacts must not be committed)"
       ;;
+    docs/archive/reports/*)
+      fail "$path is tracked under docs/archive/reports/ (generated archival reports must stay untracked)"
+      ;;
     tutor_env/dev/frontend-app-*)
       fail "$path is tracked under tutor_env/dev/frontend-app-* (local MFE clones must not be committed)"
       ;;

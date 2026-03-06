@@ -54,6 +54,9 @@ scripts/migrations/output/
 # Exports (moved to var/)
 exports/
 
+# Generated archival report drops (keep out of git history)
+docs/archive/reports/
+
 # IDE configs
 .vscode/
 .idea/
