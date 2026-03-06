@@ -11,11 +11,12 @@ APP_STAGING_OVERLAY="${APP_STAGING_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/stagi
 APP_MFE_CADDYFILE="${APP_MFE_CADDYFILE:-$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile}"
 INFRA_PROD_OVERLAY="${INFRA_PROD_OVERLAY:-}"
 CHECK_INFRA="${CHECK_INFRA:-auto}" # auto|1|0
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
   for candidate in \
-    /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml \
-    /home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml; do
+    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml" \
+    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"; do
     if [[ -f "$candidate" ]]; then
       INFRA_PROD_OVERLAY="$candidate"
       break
@@ -24,7 +25,7 @@ if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
 fi
 
 if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
-  INFRA_PROD_OVERLAY="/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"
+  INFRA_PROD_OVERLAY="${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"
 fi
 
 usage() {
