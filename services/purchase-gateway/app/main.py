@@ -13,7 +13,7 @@ from prometheus_client import make_asgi_app
 from app.config import settings
 from app.database import engine
 from app.middleware.tenant import TenantMiddleware
-from app.routers import admin, admin_events, admin_orders, checkout, health, subscriptions, webhooks
+from app.routers import admin, admin_events, admin_orders, admin_refunds, checkout, health, subscriptions, webhooks
 from app.services.fulfillment_outbox import run_fulfillment_worker
 
 logger = structlog.get_logger()
@@ -64,6 +64,7 @@ app.include_router(health.router)
 app.include_router(checkout.router, prefix="/api/v1")
 app.include_router(subscriptions.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")
+app.include_router(admin_refunds.router, prefix="/api/v1")
 app.include_router(admin_events.router, prefix="/api/v1")
 app.include_router(admin_orders.router, prefix="/api/v1")
 app.include_router(webhooks.router)
