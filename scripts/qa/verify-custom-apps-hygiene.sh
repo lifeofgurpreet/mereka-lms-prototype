@@ -7,7 +7,9 @@
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$REPO_ROOT}"
 CUSTOM_APPS_DIR="$REPO_ROOT/infrastructure/tutor/custom-apps"
+cd "$REPO_ROOT"
 
 if [[ ! -d "$CUSTOM_APPS_DIR" ]]; then
   echo "ERROR: custom apps directory not found: $CUSTOM_APPS_DIR" >&2
