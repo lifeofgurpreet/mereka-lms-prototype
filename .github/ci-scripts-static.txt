@@ -114,6 +114,7 @@ scripts/qa/verify-mfe-build-prereqs.sh
 scripts/qa/verify-mfe-config-api.sh
 scripts/qa/verify-mfe-config-contract.sh
 scripts/qa/verify-mfe-footer-slot.sh
+scripts/qa/verify-mfe-header-branding.sh
 scripts/qa/verify-plugin-slot-wiring.sh
 scripts/qa/verify-mfe-route-drift.sh
 scripts/qa/verify-mfe-route-contract.sh
@@ -245,6 +246,9 @@ scripts/qa/verify-public-branding.sh
 scripts/qa/verify-studio-authoring-branding.sh
 scripts/qa/verify-tutor-branding-render.sh
 scripts/qa/verify-mfe-image-branding.sh
+
+# ── Drive-Airtable migration readiness ──────────────────────────────────────
+scripts/qa/verify-airtable-readiness.sh
 
 # ── Kajabi migration data (data-dependent) ──────────────────────────────────
 scripts/qa/verify-kajabi-export.sh
@@ -390,6 +394,7 @@ scripts/qa/verify-mobile-release.sh
 scripts/qa/verify-post-deploy-gate.sh
 scripts/qa/verify-promotion-record.sh
 scripts/qa/verify-release-bundle.sh
+scripts/qa/verify-release-promotion-wiring.sh
 scripts/qa/verify-release-workflow-invocation.sh
 scripts/qa/verify-rke2-rollout-readiness.sh
 scripts/qa/verify-rollback-dry-run.sh
@@ -411,8 +416,11 @@ scripts/qa/verify-video-phase3.sh
 scripts/qa/verify-video-pipeline.sh
 
 # ── Purchase gateway (additional) ────────────────────────────────────
+scripts/qa/verify-caddy-payments-route.sh
+scripts/qa/verify-purchase-gateway.sh
 scripts/qa/verify-purchase-gateway-models.sh
 scripts/qa/verify-purchase-gateway-metrics-contract.sh
+scripts/qa/verify-purchase-gateway-stripe.sh
 
 # ── Proctoring & timed exams ─────────────────────────────────────────
 scripts/qa/verify-proctoring-environment.sh
