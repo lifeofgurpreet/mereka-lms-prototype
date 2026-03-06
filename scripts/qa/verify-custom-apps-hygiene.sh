@@ -42,10 +42,22 @@ done < <(find "$CUSTOM_APPS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
 # 2) No tracked stateful/runtime artifacts in custom-apps.
 while IFS= read -r path; do
-  if [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.(sqlite3|sqlite)$ ]]; then
+  if [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.(sqlite3|sqlite|db)$ ]]; then
     fail "$path is a tracked SQLite runtime database file"
+  elif [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.(sqlite3|sqlite|db)-(wal|shm|journal)$ ]]; then
+    fail "$path is a tracked SQLite sidecar/transaction file"
   elif [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.log$ ]]; then
     fail "$path is a tracked runtime log file"
+  elif [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.coverage(\..+)?$ ]]; then
+    fail "$path is a tracked Python coverage artifact"
+  elif [[ "$path" == infrastructure/tutor/custom-apps/*"/.pytest_cache/"* ]]; then
+    fail "$path is tracked pytest cache content"
+  elif [[ "$path" == infrastructure/tutor/custom-apps/*"/.ruff_cache/"* ]]; then
+    fail "$path is tracked ruff cache content"
+  elif [[ "$path" == infrastructure/tutor/custom-apps/*"/.mypy_cache/"* ]]; then
+    fail "$path is tracked mypy cache content"
+  elif [[ "$path" == infrastructure/tutor/custom-apps/*"/.hypothesis/"* ]]; then
+    fail "$path is tracked hypothesis cache content"
   elif [[ "$path" == infrastructure/tutor/custom-apps/*"/__pycache__/"* ]]; then
     fail "$path is tracked Python bytecode cache content"
   elif [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.(pyc|pyo)$ ]]; then
