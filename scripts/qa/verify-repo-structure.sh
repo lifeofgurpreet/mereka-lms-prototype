@@ -218,9 +218,20 @@ for d in tutor cloudflare terraform monitoring; do
   check_dir "infrastructure/$d"
 done
 
-# AC-010: .gitignore has var/ and tutor_env/.
-check_gitignore_has "var/"
-check_gitignore_has "tutor_env/"
+# AC-010: .gitignore baseline runtime + statefile patterns.
+for pattern in \
+  "var/" \
+  "tutor_env/" \
+  ".coverage.*" \
+  ".hypothesis/" \
+  "*.pid" \
+  "*.sock" \
+  "*.sqlite3" \
+  "*.db" \
+  "*.sqlite3-wal" \
+  "*.db-wal"; do
+  check_gitignore_has "$pattern"
+done
 
 # AC-011: specs root markdown files match *_spec.md (allow explicit exceptions).
 spec_exceptions=(
@@ -255,4 +266,3 @@ if [[ "$failures" -eq 0 ]]; then
 fi
 echo "FAIL ($failures violation(s))" >&2
 exit 1
-

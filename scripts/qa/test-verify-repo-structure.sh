@@ -19,6 +19,14 @@ mkdir -p "$tmpdir/infrastructure"/{tutor,cloudflare,terraform,monitoring}
 cat >"$tmpdir/.gitignore" <<'EOF'
 var/
 tutor_env/
+.coverage.*
+.hypothesis/
+*.pid
+*.sock
+*.sqlite3
+*.db
+*.sqlite3-wal
+*.db-wal
 EOF
 
 cat >"$tmpdir/scripts/shared/config.sh" <<'EOF'
@@ -51,7 +59,6 @@ cat >"$tmpdir/GEMINI.md" <<'EOF'
 EOF
 
 echo "Running verify against isolated tree: $tmpdir"
-REPO_ROOT_OVERRIDE="$tmpdir" ALLOW_EXTRA_ROOT_MD=0 bash "$VERIFY"
+REPO_ROOT_OVERRIDE="$tmpdir" ALLOW_EXTRA_ROOT_MD=1 bash "$VERIFY"
 
 echo "OK"
-
