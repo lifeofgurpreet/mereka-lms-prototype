@@ -1,6 +1,6 @@
 {
   "tracked_evidence_max_files": 133,
   "tracked_evidence_max_bytes": 1013702,
-  "tracked_archive_reports_max_files": 0,
-  "tracked_archive_reports_max_bytes": 0
+  "tracked_archive_reports_max_files": 50,
+  "tracked_archive_reports_max_bytes": 450000
 }

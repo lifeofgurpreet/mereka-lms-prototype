@@ -25,7 +25,7 @@ fi
 # 2) Contract docs/specs must not reference legacy path.
 CONTRACT_FILES=(
   "README.md"
-  "docs/onboarding/REPOSITORY_GUIDE.md"
+  "docs/guides/onboarding/REPOSITORY_GUIDE.md"
   "specs/repository-structure_spec.md"
 )
 

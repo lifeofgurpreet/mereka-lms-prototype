@@ -213,10 +213,13 @@ check_standards_exist() {
     echo ""
     echo "=== Checking Standards Document ==="
 
-    if [[ -f "docs/DOCUMENTATION_STANDARDS.md" ]]; then
-        pass "docs/DOCUMENTATION_STANDARDS.md exists"
+    # Check both canonical and legacy paths (docs were reorganized)
+    if [[ -f "docs/guides/standards/DOCUMENTATION_STANDARDS.md" ]]; then
+        pass "DOCUMENTATION_STANDARDS.md exists (docs/guides/standards/)"
+    elif [[ -f "docs/DOCUMENTATION_STANDARDS.md" ]]; then
+        pass "DOCUMENTATION_STANDARDS.md exists (legacy path)"
     else
-        fail "docs/DOCUMENTATION_STANDARDS.md not found"
+        fail "DOCUMENTATION_STANDARDS.md not found in docs/guides/standards/ or docs/"
     fi
 }
 

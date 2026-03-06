@@ -32,6 +32,10 @@ require_contains() {
   local path="$1"
   local pattern="$2"
   local label="$3"
+  if [[ -z "$path" || ! -f "$path" ]]; then
+    fail "$label (file not found)"
+    return
+  fi
   if rg -q "$pattern" "$path"; then
     pass "$label"
   else
@@ -41,8 +45,19 @@ require_contains() {
 
 echo "=== Theming Generated Artifact Contract ==="
 
-CONTRACT_DOC="$REPO_ROOT/docs/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md"
-require_file "$CONTRACT_DOC" "generated-artifact contract doc"
+CONTRACT_DOC_NEW="$REPO_ROOT/docs/concepts/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md"
+CONTRACT_DOC_LEGACY="$REPO_ROOT/docs/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md"
+
+if [[ -f "$CONTRACT_DOC_NEW" ]]; then
+  CONTRACT_DOC="$CONTRACT_DOC_NEW"
+  pass "generated-artifact contract doc exists (canonical path)"
+elif [[ -f "$CONTRACT_DOC_LEGACY" ]]; then
+  CONTRACT_DOC="$CONTRACT_DOC_LEGACY"
+  pass "generated-artifact contract doc exists (legacy path)"
+else
+  fail "generated-artifact contract doc missing (checked $CONTRACT_DOC_NEW and $CONTRACT_DOC_LEGACY)"
+  CONTRACT_DOC=""
+fi
 
 echo
 echo "[1/4] Canonical token generator drift check"

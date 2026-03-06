@@ -74,7 +74,7 @@ offline_checks() {
     "allow-dns.yaml"
     "allow-namespace-internal.yaml"
     "allow-caddy-external.yaml"
-    "allow-external-egress.yaml"
+    "allow-prometheus-scrape.yaml"
     "kustomization.yaml"
   )
   for f in "${required_files[@]}"; do
@@ -82,6 +82,24 @@ offline_checks() {
       pass "policy file exists: $f"
     else
       fail "policy file missing: $f"
+    fi
+  done
+
+  # 3b. Per-service external egress policies (split from monolithic allow-external-egress.yaml)
+  local required_egress=(
+    "allow-lms-external-egress.yaml"
+    "allow-cms-external-egress.yaml"
+    "allow-lms-worker-external-egress.yaml"
+    "allow-cms-worker-external-egress.yaml"
+    "allow-payments-external-egress.yaml"
+    "allow-smtp-external-egress.yaml"
+    "allow-discovery-external-egress.yaml"
+  )
+  for f in "${required_egress[@]}"; do
+    if [[ -f "$NP_DIR/$f" ]]; then
+      pass "egress policy exists: $f"
+    else
+      fail "egress policy missing: $f"
     fi
   done
 
@@ -138,23 +156,30 @@ offline_checks() {
     fi
   fi
 
-  # 7. External egress exists for key services
-  if [[ -f "$NP_DIR/allow-external-egress.yaml" ]]; then
-    local egress_content
-    egress_content="$(cat "$NP_DIR/allow-external-egress.yaml")"
-    local required_services=("lms" "cms" "lms-worker" "cms-worker" "payments-gateway" "smtp" "discovery")
-    for svc in "${required_services[@]}"; do
-      if echo "$egress_content" | grep -q "app.kubernetes.io/name: $svc"; then
-        pass "external egress policy exists for $svc"
+  # 7. Per-service egress policies select the correct pods
+  local -A egress_svc_map=(
+    ["allow-lms-external-egress.yaml"]="lms"
+    ["allow-cms-external-egress.yaml"]="cms"
+    ["allow-lms-worker-external-egress.yaml"]="lms-worker"
+    ["allow-cms-worker-external-egress.yaml"]="cms-worker"
+    ["allow-payments-external-egress.yaml"]="payments-gateway"
+    ["allow-smtp-external-egress.yaml"]="smtp"
+    ["allow-discovery-external-egress.yaml"]="discovery"
+  )
+  for f in "${!egress_svc_map[@]}"; do
+    local svc="${egress_svc_map[$f]}"
+    if [[ -f "$NP_DIR/$f" ]]; then
+      if grep -q "app.kubernetes.io/name: $svc" "$NP_DIR/$f"; then
+        pass "egress policy $f selects $svc pods"
       else
-        fail "missing external egress policy for $svc"
+        fail "egress policy $f does not select $svc pods"
       fi
-    done
-  fi
+    fi
+  done
 
   # 8. Prometheus scrape policy restricts source namespace
-  if [[ -f "$NP_DIR/allow-external-egress.yaml" ]]; then
-    if grep -q "kubernetes.io/metadata.name: monitoring" "$NP_DIR/allow-external-egress.yaml"; then
+  if [[ -f "$NP_DIR/allow-prometheus-scrape.yaml" ]]; then
+    if grep -q "kubernetes.io/metadata.name: monitoring" "$NP_DIR/allow-prometheus-scrape.yaml"; then
       pass "prometheus scrape restricted to monitoring namespace"
     else
       fail "prometheus scrape should restrict source to monitoring namespace"

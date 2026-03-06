@@ -68,10 +68,12 @@ for deployment_file in "${ENTERPRISE_DEPLOYMENTS[@]}"; do
   fi
   pass "enterprise deployment exists: $rel_path"
 
-  if grep -Fq "name: migrate" "$deployment_file" && grep -Fq "manage.py\", \"migrate\"" "$deployment_file"; then
-    pass "enterprise deployment includes migrate init contract: $rel_path"
+  # Enterprise services use config-gen init containers (generate YAML from env vars).
+  # Schema migrations are handled by standalone Jobs in base/jobs/, not init containers.
+  if grep -Fq "initContainers:" "$deployment_file" && grep -Fq "name: config-gen" "$deployment_file"; then
+    pass "enterprise deployment includes config-gen init contract: $rel_path"
   else
-    fail "enterprise deployment missing migrate init contract: $rel_path"
+    fail "enterprise deployment missing config-gen init contract: $rel_path"
   fi
 done
 

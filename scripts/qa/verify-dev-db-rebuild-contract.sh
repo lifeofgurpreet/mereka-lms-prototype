@@ -5,7 +5,14 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCRIPT_PATH="$REPO_ROOT/scripts/infra/rebuild-dev-openedx-db.sh"
-RUNBOOK_PATH="$REPO_ROOT/docs/operations/runbooks/DEV_DB_REBUILD_CANONICAL.md"
+# Check both canonical and legacy paths (docs were reorganized)
+if [[ -f "$REPO_ROOT/docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md" ]]; then
+  RUNBOOK_PATH="$REPO_ROOT/docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md"
+elif [[ -f "$REPO_ROOT/docs/operations/runbooks/DEV_DB_REBUILD_CANONICAL.md" ]]; then
+  RUNBOOK_PATH="$REPO_ROOT/docs/operations/runbooks/DEV_DB_REBUILD_CANONICAL.md"
+else
+  RUNBOOK_PATH="$REPO_ROOT/docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md"
+fi
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

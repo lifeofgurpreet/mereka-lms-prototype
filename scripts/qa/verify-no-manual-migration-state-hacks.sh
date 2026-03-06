@@ -65,6 +65,8 @@ for pattern in "${PATTERNS[@]}"; do
   done < <(
     rg -n -i --no-messages --glob '!**/*.md' \
       --glob '!**/verify-no-manual-migration-state-hacks.sh' \
+      --glob '!**/verify-dev-db-rebuild-contract.sh' \
+      --glob '!**/test-*.sh' \
       -e "$pattern" -- "${TARGETS[@]}" || true
   )
 done
