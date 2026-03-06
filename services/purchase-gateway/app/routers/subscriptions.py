@@ -91,6 +91,7 @@ async def get_subscription(
     subscription_id: uuid.UUID,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    _admin: str = Depends(require_admin_api_key),
 ):
     """Get subscription details."""
     result = await db.execute(select(Subscription).where(Subscription.id == subscription_id))
@@ -167,6 +168,7 @@ async def update_subscription(
 async def list_subscriptions(
     request: Request,
     db: AsyncSession = Depends(get_db),
+    _admin: str = Depends(require_admin_api_key),
     tenant_id: uuid.UUID | None = Query(default=None),
     status: str | None = Query(default=None),
     limit: int = Query(default=50, le=200),
