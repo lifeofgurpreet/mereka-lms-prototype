@@ -16,6 +16,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 EXPECTED_SHA=""
 GITOPS_REPO_ROOT="${GITOPS_REPO_ROOT:-}"
@@ -48,8 +49,8 @@ fi
 
 if [[ -z "${GITOPS_REPO_ROOT}" ]]; then
   for candidate in \
-    /home/gurpreet/projects/k8s/bbi-infrastructure \
-    /home/gurpreet/projects/k8s/infrastructure; do
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure"; do
     if [[ -d "$candidate/.git" ]]; then
       GITOPS_REPO_ROOT="$candidate"
       break
@@ -102,4 +103,3 @@ echo "  file:     ${PIN_FILE}" >&2
 echo "" >&2
 echo "Fix (in GitOps repo): bump apps/mereka-lms/base/kustomization.yaml ref= to ${EXPECTED_SHA}" >&2
 exit 1
-
