@@ -118,7 +118,6 @@ class LMSClient:
 
         logger.error(
             "lms.enrollment_failed",
-            username=username,
             course_id=course_id,
             status_code=resp.status_code,
         )

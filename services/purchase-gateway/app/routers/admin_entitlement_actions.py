@@ -58,7 +58,6 @@ async def revoke_entitlement(
         "entitlement.revoked",
         entitlement_uuid=str(entitlement.id),
         tenant_id=str(entitlement.tenant_id),
-        recipient_email=entitlement.recipient_email,
     )
     return EntitlementActionResponse(
         id=entitlement.id,
