@@ -17,7 +17,7 @@ links:
     - "docs/ios-cicd-spec.md"
     - "docs/IOS_APP_CI_SETUP.md"
     - "docs/IOS_DEPLOYMENT_LEARNINGS.md"
-    - "docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md"
+    - "docs/operations/MOBILE_DEPLOYMENT.md"
   related_specs:
     - "specs/secrets-management_spec.md"
     - "specs/mobile-apps-enterprise_spec.md"
@@ -329,7 +329,7 @@ Mobile secrets are uniquely fragile. An expired Apple Distribution certificate b
 
 ### Apple Certificate Expiry During Active Release
 
-- The Apple Distribution certificate expires on 2027-01-22. If an App Store submission is in review when the certificate expires, the already-submitted build remains valid. However, no new builds can be signed until the certificate is renewed. Mitigation: the validation script warns at 60 days and fails at 30 days. The rotation runbook (`docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md`) includes certificate renewal steps. Calendar reminders MUST be set for 90, 60, and 30 days before expiry.
+- The Apple Distribution certificate expires on 2027-01-22. If an App Store submission is in review when the certificate expires, the already-submitted build remains valid. However, no new builds can be signed until the certificate is renewed. Mitigation: the validation script warns at 60 days and fails at 30 days. The rotation runbook (`docs/operations/MOBILE_DEPLOYMENT.md`) includes certificate renewal steps. Calendar reminders MUST be set for 90, 60, and 30 days before expiry.
 
 ### Fastlane Match Certificate Mismatch
 

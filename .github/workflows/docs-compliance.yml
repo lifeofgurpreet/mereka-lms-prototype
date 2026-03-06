@@ -7,6 +7,7 @@ on:
       - ".github/workflows/docs-compliance.yml"
       - "docs/qa/verify-doc-command-refs.sh"
       - "docs/qa/verify-doc-link-integrity.sh"
+      - "docs/qa/verify-doc-link-integrity.py"
       - "docs/qa/verify-doc-catalog-health-test.sh"
       - "docs/qa/verify-docs-policy.sh"
       - "docs/qa/verify-doc-catalog-health.py"
@@ -33,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           fetch-depth: 0
 
@@ -275,7 +276,7 @@ with open(sys.argv[2], "a", encoding="utf-8") as fp:
 PY
 
       - name: Upload docs catalog health scorecard
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: docs-catalog-health-scorecard
           path: |
