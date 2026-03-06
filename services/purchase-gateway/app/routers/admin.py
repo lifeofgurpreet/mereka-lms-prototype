@@ -119,9 +119,14 @@ class RetryFulfillmentResponse(BaseModel):
 @router.post("/admin/offerings/", response_model=OfferingResponse, status_code=201)
 async def create_offering(
     request_body: CreateOfferingRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new offering (course seat, program, or seat pack)."""
+    mw_tenant_id = request_tenant_scope(request)
+    if mw_tenant_id and request_body.tenant_id != mw_tenant_id:
+        raise HTTPException(status_code=403, detail="Tenant scope mismatch")
+
     offering = Offering(
         id=uuid.uuid4(),
         tenant_id=request_body.tenant_id,
@@ -152,12 +157,17 @@ async def create_offering(
 async def update_offering(
     offering_id: uuid.UUID,
     request_body: UpdateOfferingRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Update an existing offering."""
     result = await db.execute(select(Offering).where(Offering.id == offering_id))
     offering = result.scalar_one_or_none()
     if not offering:
+        raise HTTPException(status_code=404, detail="Offering not found")
+
+    mw_tenant_id = request_tenant_scope(request)
+    if mw_tenant_id and offering.tenant_id != mw_tenant_id:
         raise HTTPException(status_code=404, detail="Offering not found")
 
     if request_body.title is not None:
@@ -181,12 +191,17 @@ async def update_offering(
 @router.delete("/admin/offerings/{offering_id}", response_model=OfferingResponse)
 async def soft_delete_offering(
     offering_id: uuid.UUID,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Soft-delete an existing offering by setting active=false."""
     result = await db.execute(select(Offering).where(Offering.id == offering_id))
     offering = result.scalar_one_or_none()
     if not offering:
+        raise HTTPException(status_code=404, detail="Offering not found")
+
+    mw_tenant_id = request_tenant_scope(request)
+    if mw_tenant_id and offering.tenant_id != mw_tenant_id:
         raise HTTPException(status_code=404, detail="Offering not found")
 
     offering.active = False
@@ -204,9 +219,14 @@ async def soft_delete_offering(
 @router.post("/admin/entitlements/assign", response_model=BulkAssignResponse)
 async def bulk_assign_entitlements(
     request_body: BulkAssignRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Bulk assign entitlements to a list of emails (up to 500)."""
+    mw_tenant_id = request_tenant_scope(request)
+    if mw_tenant_id and request_body.tenant_id != mw_tenant_id:
+        raise HTTPException(status_code=403, detail="Tenant scope mismatch")
+
     if len(request_body.emails) > MAX_BULK_ASSIGN:
         raise HTTPException(
             status_code=400,

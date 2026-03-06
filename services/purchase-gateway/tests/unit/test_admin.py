@@ -35,6 +35,17 @@ ORDER_ID = uuid.UUID("00000000-0000-0000-0000-000000000002")
 LINE_ITEM_ID = uuid.UUID("00000000-0000-0000-0000-000000000003")
 
 
+def _make_request(tenant_id=None):
+    """Create a mock Request with optional tenant scope."""
+    request = MagicMock()
+    if tenant_id is not None:
+        request.state = MagicMock()
+        request.state.tenant_id = tenant_id
+    else:
+        request.state = MagicMock(spec=[])  # no tenant_id attribute
+    return request
+
+
 @pytest.fixture
 def mock_db():
     db = AsyncMock(spec=AsyncSession)
@@ -131,7 +142,7 @@ async def test_create_offering_persists_and_returns_offering(mock_db):
 
     mock_db.refresh.side_effect = _fake_refresh
 
-    result = await create_offering(request_body, mock_db)
+    result = await create_offering(request_body, _make_request(), mock_db)
 
     mock_db.add.assert_called_once()
     mock_db.commit.assert_awaited_once()
@@ -179,7 +190,7 @@ async def test_update_offering_modifies_fields(mock_db):
 
     mock_db.refresh.side_effect = _fake_refresh
 
-    result = await update_offering(existing.id, request_body, mock_db)
+    result = await update_offering(existing.id, request_body, _make_request(), mock_db)
 
     assert result.title == "Updated Title"
     assert result.description == "New description"
@@ -197,7 +208,7 @@ async def test_update_offering_not_found_raises_404(mock_db):
     request_body = UpdateOfferingRequest(title="New Title")
 
     with pytest.raises(HTTPException) as exc_info:
-        await update_offering(uuid.uuid4(), request_body, mock_db)
+        await update_offering(uuid.uuid4(), request_body, _make_request(), mock_db)
 
     assert exc_info.value.status_code == 404
 
@@ -222,7 +233,7 @@ async def test_update_offering_partial_update_only_changes_provided_fields(mock_
 
     mock_db.refresh.side_effect = _fake_refresh
 
-    result = await update_offering(existing.id, request_body, mock_db)
+    result = await update_offering(existing.id, request_body, _make_request(), mock_db)
 
     assert result.title == "New Title Only"
     assert result.price_cents == 9900  # unchanged
@@ -240,7 +251,7 @@ async def test_soft_delete_offering_sets_active_false(mock_db):
 
     mock_db.refresh.side_effect = _fake_refresh
 
-    result = await soft_delete_offering(existing.id, mock_db)
+    result = await soft_delete_offering(existing.id, _make_request(), mock_db)
 
     assert result.active is False
     mock_db.commit.assert_awaited_once()
@@ -253,7 +264,7 @@ async def test_soft_delete_offering_not_found_raises_404(mock_db):
     mock_db.execute.return_value = _mock_select_result(None)
 
     with pytest.raises(HTTPException) as exc_info:
-        await soft_delete_offering(uuid.uuid4(), mock_db)
+        await soft_delete_offering(uuid.uuid4(), _make_request(), mock_db)
 
     assert exc_info.value.status_code == 404
 
@@ -288,7 +299,7 @@ async def test_bulk_assign_creates_entitlements_for_new_emails(mock_db):
 
     with patch("app.routers.admin.settings") as mock_settings:
         mock_settings.ENTITLEMENT_CLAIM_EXPIRY_DAYS = 30
-        result = await bulk_assign_entitlements(request_body, mock_db)
+        result = await bulk_assign_entitlements(request_body, _make_request(), mock_db)
 
     assert result.created == 2
     assert result.skipped == 0
@@ -321,7 +332,7 @@ async def test_bulk_assign_skips_already_assigned_emails(mock_db):
 
     with patch("app.routers.admin.settings") as mock_settings:
         mock_settings.ENTITLEMENT_CLAIM_EXPIRY_DAYS = 30
-        result = await bulk_assign_entitlements(request_body, mock_db)
+        result = await bulk_assign_entitlements(request_body, _make_request(), mock_db)
 
     assert result.created == 1
     assert result.skipped == 1
@@ -345,7 +356,7 @@ async def test_bulk_assign_more_than_500_emails_returns_400(mock_db):
     )
 
     with pytest.raises(HTTPException) as exc_info:
-        await bulk_assign_entitlements(request_body, mock_db)
+        await bulk_assign_entitlements(request_body, _make_request(), mock_db)
 
     assert exc_info.value.status_code == 400
     assert "500" in exc_info.value.detail
@@ -366,7 +377,7 @@ async def test_bulk_assign_order_not_found_returns_404(mock_db):
     )
 
     with pytest.raises(HTTPException) as exc_info:
-        await bulk_assign_entitlements(request_body, mock_db)
+        await bulk_assign_entitlements(request_body, _make_request(), mock_db)
 
     assert exc_info.value.status_code == 404
 
@@ -395,7 +406,7 @@ async def test_bulk_assign_each_entitlement_has_unique_claim_token(mock_db):
 
     with patch("app.routers.admin.settings") as mock_settings:
         mock_settings.ENTITLEMENT_CLAIM_EXPIRY_DAYS = 30
-        await bulk_assign_entitlements(request_body, mock_db)
+        await bulk_assign_entitlements(request_body, _make_request(), mock_db)
 
     added_entitlements = [call[0][0] for call in mock_db.add.call_args_list]
     tokens = [e.claim_token for e in added_entitlements]
