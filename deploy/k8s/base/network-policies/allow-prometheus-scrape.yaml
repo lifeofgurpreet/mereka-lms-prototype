@@ -6,7 +6,10 @@ kind: NetworkPolicy
 metadata:
   name: allow-prometheus-scrape
   labels:
+    app.kubernetes.io/name: allow-prometheus-scrape
     app.kubernetes.io/component: network-policy
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   podSelector: {}
   policyTypes:
