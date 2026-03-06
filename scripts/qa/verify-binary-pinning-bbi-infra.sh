@@ -26,6 +26,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -48,9 +49,8 @@ BBI_INFRA="${BBI_INFRA:-}"
 
 if [[ -z "$BBI_INFRA" ]]; then
   for candidate in \
-    /home/gurpreet/projects/k8s/bbi-infrastructure \
-    /home/gurpreet/projects/k8s/infrastructure \
-    "${REPO_ROOT}/../bbi-infrastructure"; do
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure"; do
     if [[ -d "$candidate/.github/workflows" ]]; then
       BBI_INFRA="$candidate"
       break
