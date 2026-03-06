@@ -5,7 +5,9 @@ set -euo pipefail
 # Usage: ./scripts/tools/beads-post-sync-hook.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-HUB_INDEX="/home/projects/mcp_agent_mail/beads-hub/index.html"
+REPO_ROOT="${MEREKA_LMS_REPO_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+BEADS_DB="${BEADS_DB:-${REPO_ROOT}/.beads/beads.db}"
+HUB_INDEX="${HUB_INDEX:-/home/projects/mcp_agent_mail/beads-hub/index.html}"
 
 echo "🔄 Running beads post-sync hook..."
 
@@ -30,7 +32,6 @@ fi
 
 # Fallback: query database directly
 if [[ "$TOTAL" == "0" ]]; then
-  BEADS_DB="/home/gurpreet/projects/k8s/mereka-lms/.beads/beads.db"
   if [[ -f "$BEADS_DB" ]]; then
     TOTAL=$(sqlite3 "$BEADS_DB" "SELECT COUNT(*) FROM issues;" 2>/dev/null || echo "0")
     OPEN=$(sqlite3 "$BEADS_DB" "SELECT COUNT(*) FROM issues WHERE status IN ('Open', 'InProgress', 'Blocked');" 2>/dev/null || echo "0")

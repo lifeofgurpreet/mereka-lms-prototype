@@ -4,8 +4,10 @@ set -euo pipefail
 # Copies .beads/beads.db → beads-hub viewer, updates config.json
 # Usage: ./scripts/tools/sync-beads-viewer.sh [--force]
 
-BEADS_DB="/home/gurpreet/projects/k8s/mereka-lms/.beads/beads.db"
-VIEWER_DIR="/home/projects/mcp_agent_mail/beads-hub/lms"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${MEREKA_LMS_REPO_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+BEADS_DB="${BEADS_DB:-${REPO_ROOT}/.beads/beads.db}"
+VIEWER_DIR="${VIEWER_DIR:-/home/projects/mcp_agent_mail/beads-hub/lms}"
 VIEWER_DB="${VIEWER_DIR}/beads.sqlite3"
 VIEWER_CONFIG="${VIEWER_DIR}/beads.sqlite3.config.json"
 
@@ -45,7 +47,8 @@ sudo cp "$BEADS_DB" "$VIEWER_DB"
 sudo chown gurpreet:gurpreet "$VIEWER_DB"
 
 # Generate config.json
-cat > /tmp/beads.config.json <<EOF
+TMP_CONFIG="$(mktemp -t beads-config.XXXXXX.json)"
+cat > "$TMP_CONFIG" <<EOF
 {
   "chunked": false,
   "chunk_count": 0,
@@ -55,9 +58,9 @@ cat > /tmp/beads.config.json <<EOF
 }
 EOF
 
-sudo cp /tmp/beads.config.json "$VIEWER_CONFIG"
+sudo cp "$TMP_CONFIG" "$VIEWER_CONFIG"
 sudo chown gurpreet:gurpreet "$VIEWER_CONFIG"
-rm /tmp/beads.config.json
+rm -f "$TMP_CONFIG"
 
 # Get bead statistics
 TOTAL=0
@@ -90,5 +93,5 @@ echo "  Size: $(numfmt --to=iec-i --suffix=B ${SOURCE_SIZE} 2>/dev/null || echo 
 cat <<'EOF'
 
 💡 To auto-sync every 15 minutes, add to crontab:
-   */15 * * * * /home/gurpreet/projects/k8s/mereka-lms/scripts/tools/sync-beads-viewer.sh >> /tmp/beads-sync.log 2>&1
+   */15 * * * * <repo-root>/scripts/tools/sync-beads-viewer.sh >> /tmp/beads-sync.log 2>&1
 EOF
