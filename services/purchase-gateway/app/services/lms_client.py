@@ -49,67 +49,91 @@ class LMSClient:
         _token_cache["token"] = ""
         _token_cache["expires_at"] = 0.0
 
+    async def _request_with_auth(
+        self,
+        *,
+        method: str,
+        path: str,
+        params: dict | None = None,
+        json: dict | None = None,
+        timeout: int = 15,
+    ) -> httpx.Response:
+        """Send an authenticated LMS request with one token-refresh retry on 401."""
+        url = f"{self.base_url}{path}"
+        async with httpx.AsyncClient() as client:
+            for attempt in (1, 2):
+                token = await self._get_token()
+                resp = await client.request(
+                    method=method,
+                    url=url,
+                    params=params,
+                    json=json,
+                    headers={"Authorization": f"Bearer {token}"},
+                    timeout=timeout,
+                )
+                if resp.status_code != 401:
+                    return resp
+
+                # Token may have expired or been revoked; force refresh and retry once.
+                self._invalidate_token()
+                if attempt == 1:
+                    logger.warning("lms.auth_401_retry", method=method, path=path)
+                    continue
+                return resp
+
+        raise RuntimeError("Unreachable LMS request state")
+
     async def get_user_by_email(self, email: str) -> dict | None:
         """Look up an LMS user by email. Returns user dict or None."""
-        token = await self._get_token()
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(
-                f"{self.base_url}/api/user/v1/accounts",
-                params={"email": email},
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=15,
-            )
-            if resp.status_code == 200:
-                users = resp.json()
-                return users[0] if users else None
-            if resp.status_code == 401:
-                self._invalidate_token()
-            return None
+        resp = await self._request_with_auth(
+            method="GET",
+            path="/api/user/v1/accounts",
+            params={"email": email},
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            users = resp.json()
+            return users[0] if users else None
+        return None
 
     async def enroll_user(self, username: str, course_id: str) -> bool:
         """Enroll a user in a course. Returns True on success or if already enrolled."""
-        token = await self._get_token()
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"{self.base_url}/api/enrollment/v1/enrollment",
-                json={
-                    "user": username,
-                    "course_details": {"course_id": course_id},
-                    "mode": "verified",
-                    "is_active": True,
-                },
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=15,
-            )
+        resp = await self._request_with_auth(
+            method="POST",
+            path="/api/enrollment/v1/enrollment",
+            json={
+                "user": username,
+                "course_details": {"course_id": course_id},
+                "mode": "verified",
+                "is_active": True,
+            },
+            timeout=15,
+        )
 
-            if resp.status_code in (200, 201):
-                return True
-            if resp.status_code == 409:
-                # Already enrolled — idempotent success
-                return True
-            if resp.status_code == 401:
-                self._invalidate_token()
+        if resp.status_code in (200, 201):
+            return True
+        if resp.status_code == 409:
+            # Already enrolled — idempotent success
+            return True
 
-            logger.error(
-                "lms.enrollment_failed",
-                username=username,
-                course_id=course_id,
-                status_code=resp.status_code,
-            )
-            return False
+        logger.error(
+            "lms.enrollment_failed",
+            username=username,
+            course_id=course_id,
+            status_code=resp.status_code,
+        )
+        return False
 
     async def deactivate_enrollment(self, username: str, course_id: str) -> bool:
         """Deactivate an enrollment (used for refund revocation)."""
-        token = await self._get_token()
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"{self.base_url}/api/enrollment/v1/enrollment",
-                json={
-                    "user": username,
-                    "course_details": {"course_id": course_id},
-                    "is_active": False,
-                },
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=15,
-            )
-            return resp.status_code in (200, 201)
+        resp = await self._request_with_auth(
+            method="POST",
+            path="/api/enrollment/v1/enrollment",
+            json={
+                "user": username,
+                "course_details": {"course_id": course_id},
+                "is_active": False,
+            },
+            timeout=15,
+        )
+        return resp.status_code in (200, 201)
