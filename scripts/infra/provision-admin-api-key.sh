@@ -14,7 +14,41 @@
 
 set -euo pipefail
 
-INFISICAL="/home/gurpreet/projects/vps/infrastructure/scripts/infisical"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+
+INFISICAL="${INFISICAL:-}"
+if [[ -z "$INFISICAL" ]]; then
+  if [[ -x "${WORKSPACE_ROOT}/../vps/infrastructure/scripts/infisical" ]]; then
+    INFISICAL="${WORKSPACE_ROOT}/../vps/infrastructure/scripts/infisical"
+  elif [[ -x "${HOME}/projects/vps/infrastructure/scripts/infisical" ]]; then
+    INFISICAL="${HOME}/projects/vps/infrastructure/scripts/infisical"
+  elif command -v infisical >/dev/null 2>&1; then
+    INFISICAL="infisical"
+  fi
+fi
+
+INFISICAL_DIR="${INFISICAL_DIR:-}"
+if [[ -z "$INFISICAL_DIR" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/reka-slackbot" \
+    "${HOME}/projects/k8s/reka-slackbot"; do
+    if [[ -f "${candidate}/.infisical.json" ]]; then
+      INFISICAL_DIR="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ -z "$INFISICAL" ]]; then
+  echo "ERROR: Infisical CLI/wrapper not found. Set INFISICAL or install infisical." >&2
+  exit 1
+fi
+if [[ -z "$INFISICAL_DIR" || ! -f "${INFISICAL_DIR}/.infisical.json" ]]; then
+  echo "ERROR: Infisical working repo not found. Set INFISICAL_DIR to a repo with .infisical.json." >&2
+  exit 1
+fi
+
 GCP_PROJECT="bbi-k8"
 SECRET_NAME="MEREKA_LMS_ADMIN_API_KEY"
 
@@ -32,7 +66,7 @@ echo
 
 # Step 1: Infisical
 echo "--- Step 1: Store in Infisical ---"
-cd /home/gurpreet/projects/k8s/reka-slackbot  # has .infisical.json
+cd "$INFISICAL_DIR"
 ${INFISICAL} secrets set "${SECRET_NAME}=${ADMIN_API_KEY}" \
   --domain https://secrets.mereka.io/api \
   --env prod --path / 2>/dev/null
