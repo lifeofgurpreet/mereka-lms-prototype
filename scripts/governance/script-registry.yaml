@@ -1,0 +1,586 @@
+# Script Governance Registry — Mereka LMS
+# Release-critical scripts must be registered here.
+# CI blocks new critical scripts that are not in this registry.
+#
+# Fields:
+#   path          - Repo-relative path (from repo root)
+#   owner         - Team responsible for this script
+#   purpose       - One-line description
+#   inputs        - Named env vars or args the script consumes
+#   outputs       - What the script produces (files, stdout, exit code only)
+#   side_effects  - Mutations outside the repo (cluster, registry, secrets, git)
+#   dry_run       - Whether a safe dry-run mode is available (flag or env var)
+#   lanes         - Which environments the script applies to
+#   proof_command - Command to verify the script is functional (read-only)
+#   criticality   - release-blocking | release-supporting | informational
+
+version: "1.0.0"
+
+canonical_entrypoints:
+  # Top-level release automation
+  release_canonical: scripts/infra/canonical-release.sh
+  release_gitops: scripts/infra/release-openedx-gitops.sh
+  # Static release gate (read-only preflight)
+  release_readiness: scripts/qa/verify-release-readiness.sh
+  # Image tag promotion into gitops overlays
+  image_tag_promotion: scripts/infra/bump-image-tags.sh
+  # Secrets sync source-of-truth → GCP SM
+  secrets_sync: scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
+  # Deployment contract verification
+  deploy_contract: scripts/qa/verify-deployment-contract.sh
+
+scripts:
+
+  # ── Release Orchestration ────────────────────────────────────────────────────
+
+  - path: scripts/infra/canonical-release.sh
+    owner: platform-team
+    purpose: >
+      Top-level release wrapper — enforces canonical path/branch/worktree,
+      checks image hash cache, and delegates to release-openedx-gitops.sh.
+      Double-confirmation tokens required for --apply and --push.
+    inputs:
+      - CONFIRM_CANONICAL_RELEASE=CANONICAL_RELEASE
+      - CONFIRM_PUSH_CANONICAL_RELEASE=PUSH_CANONICAL_RELEASE
+      - ALLOW_PROD_APPLY=1
+      - --openedx-tag TAG
+      - --mfe-tag TAG
+    outputs:
+      - stdout (release summary)
+    side_effects:
+      - Delegates git commit + push to release-openedx-gitops.sh
+      - Updates production kustomization.yaml image tags (via delegate)
+    dry_run: true  # --check-only and --dry-run flags available
+    lanes: [prod]
+    proof_command: "bash scripts/infra/canonical-release.sh --check-only"
+    criticality: release-blocking
+
+  - path: scripts/infra/release-openedx-gitops.sh
+    owner: platform-team
+    purpose: >
+      Core gitops release orchestrator — writes image tags into the production
+      overlay, commits, pushes, triggers ArgoCD sync, runs runtime verification
+      guards, and optionally purges the frontend cache.
+    inputs:
+      - CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS
+      - CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS
+      - ALLOW_PROD_APPLY=1
+      - --openedx-tag TAG
+      - --mfe-tag TAG
+      - --openedx-digest sha256:...
+      - --mfe-digest sha256:...
+    outputs:
+      - deploy/k8s/overlays/production/kustomization.yaml (modified)
+      - stdout (ArgoCD sync status)
+    side_effects:
+      - Writes and git-commits production overlay image tags
+      - Pushes to origin main (with --push)
+      - Triggers ArgoCD sync (live cluster mutation)
+      - Purges Cloudflare frontend cache (with --purge-frontend-cache)
+    dry_run: true  # --dry-run flag supported
+    lanes: [prod, staging]
+    proof_command: "bash scripts/infra/release-openedx-gitops.sh --dry-run --openedx-tag latest --mfe-tag latest 2>&1 | head -5"
+    criticality: release-blocking
+
+  - path: scripts/infra/create-release.sh
+    owner: platform-team
+    purpose: >
+      Creates a semver annotated git tag, generates a changelog from conventional
+      commits, and pushes the tag to origin (triggering the release.yml workflow).
+    inputs:
+      - "positional: VERSION (e.g. v1.2.0)"
+    outputs:
+      - stdout (tag + changelog summary)
+    side_effects:
+      - Creates annotated git tag
+      - Pushes tag to origin (triggers GitHub Actions release.yml)
+    dry_run: false
+    lanes: [prod]
+    proof_command: "bash scripts/infra/create-release.sh --help 2>&1 | head -3 || true"
+    criticality: release-blocking
+
+  # ── Image Tag Management ─────────────────────────────────────────────────────
+
+  - path: scripts/infra/bump-image-tags.sh
+    owner: platform-team
+    purpose: >
+      Queries GCR Artifact Registry for the latest available tag for each image
+      in the production Kustomize overlay and shows current vs latest. Writes
+      changes only when --apply is passed.
+    inputs:
+      - --apply (flag; default dry-run)
+      - --overlay PATH (optional)
+    outputs:
+      - stdout (diff of current vs latest tags)
+      - deploy/k8s/overlays/production/kustomization.yaml (when --apply)
+    side_effects:
+      - Modifies production overlay kustomization.yaml (only with --apply)
+    dry_run: true  # default mode is dry-run
+    lanes: [prod]
+    proof_command: "bash scripts/infra/bump-image-tags.sh 2>&1 | head -5"
+    criticality: release-blocking
+
+  - path: scripts/infra/resolve-image-digest.sh
+    owner: platform-team
+    purpose: >
+      Resolves an image tag to its sha256 digest via crane/skopeo. Used in CI
+      to pin mutable tags to immutable digests before writing to overlays.
+    inputs:
+      - --image-ref IMAGE[:TAG|@DIGEST]
+      - --output-key KEY (optional; writes to $GITHUB_OUTPUT)
+    outputs:
+      - stdout (sha256 digest)
+      - GITHUB_OUTPUT (when --output-key provided)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/resolve-image-digest.sh --help"
+    criticality: release-blocking
+
+  - path: scripts/infra/sync-gitops-prod-image-tags.sh
+    owner: platform-team
+    purpose: >
+      Syncs production image tags from the app-repo overlay to the infra-repo
+      overlay. Dry-run by default; exits non-zero when drift exists.
+    inputs:
+      - --infra-repo PATH (optional; auto-detect)
+      - --source-overlay PATH
+      - --dest-overlay PATH
+      - --apply (flag; default dry-run)
+    outputs:
+      - stdout (drift report)
+      - infra overlay kustomization.yaml (when --apply)
+    side_effects:
+      - Modifies infra-repo overlay kustomization.yaml (only with --apply)
+    dry_run: true  # default mode is dry-run
+    lanes: [prod]
+    proof_command: "bash scripts/infra/sync-gitops-prod-image-tags.sh --help"
+    criticality: release-blocking
+
+  # ── Release Evidence & Promotion ─────────────────────────────────────────────
+
+  - path: scripts/infra/generate-release-bundle.sh
+    owner: platform-team
+    purpose: >
+      Generates a structured JSON release bundle recording commit SHA, image
+      digests, workflow run ID, and target environment. Consumed by promotion
+      record and evidence pack.
+    inputs:
+      - --output PATH
+      - --repo owner/repo
+      - --commit-sha 40-hex
+      - --workflow PATH
+      - --run-id ID
+      - --run-attempt N
+      - --target-environment dev|nonprod|staging|production
+      - --openedx-image IMAGE
+      - --openedx-digest sha256:...
+      - --mfe-image IMAGE
+      - --mfe-digest sha256:...
+    outputs:
+      - JSON file at --output path
+    side_effects: none
+    dry_run: true  # generates a file only; no cluster/registry mutation
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/generate-release-bundle.sh --help"
+    criticality: release-supporting
+
+  - path: scripts/infra/generate-promotion-record.sh
+    owner: platform-team
+    purpose: >
+      Generates a structured JSON promotion record linking a release bundle to
+      a gitops commit. Used to create an auditable promotion chain.
+    inputs:
+      - --output PATH
+      - --repository owner/repo
+      - --commit-sha 40-hex
+      - --target-environment dev|nonprod|staging|production
+      - --openedx-digest sha256:...
+      - --mfe-digest sha256:...
+      - --release-bundle-id ID
+      - --gitops-repo owner/repo
+      - --gitops-commit 40-hex
+    outputs:
+      - JSON file at --output path
+    side_effects: none
+    dry_run: true  # generates a file only
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/generate-promotion-record.sh --help"
+    criticality: release-supporting
+
+  - path: scripts/infra/assemble-release-evidence.sh
+    owner: platform-team
+    purpose: >
+      Assembles a release evidence bundle for a given git SHA or tag into
+      var/release-evidence/<sha>/. Captures image tags, ArgoCD status, and
+      branding gate outputs.
+    inputs:
+      - "positional: SHA or tag (default: HEAD)"
+    outputs:
+      - var/release-evidence/<sha>/ directory
+    side_effects: none
+    dry_run: true  # read-only; writes to var/ (gitignored)
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/assemble-release-evidence.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  # ── Deployment & Kustomize ───────────────────────────────────────────────────
+
+  - path: scripts/infra/apply-kind-overlay.sh
+    owner: platform-team
+    purpose: >
+      Loads the Open edX image into kind nodes and applies the local Kustomize
+      overlay to the dev cluster (kind-dev context).
+    inputs:
+      - KUBE_CONTEXT (default: kind-dev)
+      - CLUSTER (default: dev)
+      - NAMESPACE (default: mereka-lms)
+    outputs:
+      - stdout (kubectl apply output)
+    side_effects:
+      - Mutates kind cluster (kubectl apply)
+    dry_run: false
+    lanes: [dev]
+    proof_command: "bash scripts/infra/apply-kind-overlay.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  - path: scripts/infra/post-k8s-apply-hook.sh
+    owner: platform-team
+    purpose: >
+      Post-apply hook that runs verify-deployment.sh after kubectl apply.
+      Called automatically by release orchestration.
+    inputs:
+      - NAMESPACE (default: mereka-lms)
+    outputs:
+      - stdout (deployment verification result)
+    side_effects: none  # read-only verification
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/post-k8s-apply-hook.sh 2>&1 || true"
+    criticality: release-supporting
+
+  # ── Secrets Management ───────────────────────────────────────────────────────
+
+  - path: scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
+    owner: platform-team
+    purpose: >
+      Syncs Infisical secrets to GCP Secret Manager so ExternalSecrets can
+      pull them. Create-if-missing by default; overwrites only Stripe keys
+      unless OVERWRITE_ALLOWED_REGEX is extended. Never prints secret values.
+    inputs:
+      - GCP_PROJECT_ID (default: bbi-k8)
+      - INFISICAL_DOMAIN
+      - INFISICAL_PATH
+      - ALLOW_OVERWRITE_MONGODB_KEYS=1 (opt-in)
+      - OVERWRITE_ALLOWED_REGEX (extend allowlist)
+    outputs:
+      - stdout (created/updated secret names)
+    side_effects:
+      - Creates or updates GCP Secret Manager secret versions
+      - Must NOT be run without confirmed Infisical → GCP SM drift
+    dry_run: false
+    lanes: [prod]
+    proof_command: "bash scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh --help 2>&1 || true"
+    criticality: release-blocking
+
+  - path: scripts/infra/infisical-sync-mereka-lms.sh
+    owner: platform-team
+    purpose: >
+      Syncs Infisical secrets from source path to destination path within
+      the same Infisical project. Used to establish per-app secret namespacing.
+    inputs:
+      - "positional: ENVIRONMENT (default: prod)"
+      - SRC_PATH (default: /)
+      - DEST_PATH (default: /k8s/mereka-lms)
+      - INFISICAL_DOMAIN
+      - INFISICAL_PROJECT_ID
+    outputs:
+      - stdout (sync result)
+    side_effects:
+      - Writes secrets to Infisical (source of truth)
+    dry_run: false
+    lanes: [prod, staging]
+    proof_command: "bash scripts/infra/infisical-sync-mereka-lms.sh --help 2>&1 || true"
+    criticality: release-blocking
+
+  - path: scripts/infra/infisical-validate-mereka-lms.sh
+    owner: platform-team
+    purpose: >
+      Validates that all secrets listed in external-secrets.yaml exist in
+      Infisical with non-empty values. Read-only; exits non-zero on any gap.
+    inputs:
+      - INFISICAL_DOMAIN
+      - INFISICAL_ENV (default: prod)
+      - INFISICAL_PATH (default: /k8s/mereka-lms)
+      - STRICT=1 (promote warnings to errors)
+    outputs:
+      - stdout (pass/fail per secret key)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/infisical-validate-mereka-lms.sh --help 2>&1 || true"
+    criticality: release-blocking
+
+  - path: scripts/infra/infisical-audit-mereka-lms.sh
+    owner: platform-team
+    purpose: >
+      Audits Infisical secrets for stale, orphaned, or misconfigured entries
+      relative to what external-secrets.yaml expects. Informational only.
+    inputs:
+      - INFISICAL_DOMAIN
+      - INFISICAL_ENV
+    outputs:
+      - stdout (audit findings)
+    side_effects: none
+    dry_run: true  # read-only
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/infisical-audit-mereka-lms.sh --help 2>&1 || true"
+    criticality: informational
+
+  - path: scripts/infra/bootstrap-kind-secrets.sh
+    owner: platform-team
+    purpose: >
+      Creates the GCP service account key K8s secret in the kind dev cluster
+      so ExternalSecrets can authenticate to GCP Secret Manager.
+    inputs:
+      - KUBE_CONTEXT (default: kind-dev)
+      - SECRET_NAMESPACE (default: external-secrets)
+      - PROJECT_ID (default: bbi-k8)
+      - SA_EMAIL
+      - GCP_SA_KEY_FILE (optional; auto-generated if absent)
+    outputs:
+      - stdout (secret creation result)
+    side_effects:
+      - Creates K8s secret in kind cluster
+      - Optionally generates a GCP service account key (IAM mutation)
+    dry_run: false
+    lanes: [dev]
+    proof_command: "bash scripts/infra/bootstrap-kind-secrets.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  # ── Quality Gates & Verification ─────────────────────────────────────────────
+
+  - path: scripts/qa/verify-deployment-contract.sh
+    owner: platform-team
+    purpose: >
+      Validates contract.json against the actual base kustomization output.
+      Ensures the deployment contract bundle (contract.json, VERSION, CONTRACTS.md)
+      is present and consistent with the rendered manifests.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL per check)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-deployment-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-k8s-images.sh
+    owner: platform-team
+    purpose: >
+      Verifies that production Kustomize overlays use deterministic immutable
+      image tags (SHA-based or digest-pinned). Rejects :latest and other mutable
+      tags in the production overlay. RELAXED_MODE=1 disables strict mode.
+    inputs:
+      - RELAXED_MODE=1 (temporary escape hatch; never set in CI)
+      - PROD_KUSTOMIZATION (override path)
+      - BASE_KUSTOMIZATION (override path)
+      - --check no-latest|registry-path (run specific check only)
+    outputs:
+      - stdout (PASS/FAIL per image)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-k8s-images.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-kustomize-render.sh
+    owner: platform-team
+    purpose: >
+      Renders all Kustomize overlays and verifies that resources are in the
+      mereka-lms namespace and expected resource types are present.
+    inputs:
+      - --overlay local|production (optional; default: both)
+    outputs:
+      - stdout (PASS/FAIL per overlay)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-kustomize-render.sh 2>&1 | head -20"
+    criticality: release-blocking
+
+  - path: scripts/qa/scan-secrets-fast.sh
+    owner: platform-team
+    purpose: >
+      Fast local secret hygiene scan. Catches obvious committed secrets quickly.
+      Complement to CI's TruffleHog scan. STRICT=1 promotes warnings to errors.
+    inputs:
+      - STRICT=1 (optional; promote warnings to errors)
+    outputs:
+      - stdout (file:line context for any findings)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/scan-secrets-fast.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-release-readiness.sh
+    owner: platform-team
+    purpose: >
+      Pre-release gating script. Blocks deploy when config or patch drift is
+      detected. Produces an evidence package with image tags, commit SHAs,
+      ArgoCD status, and branding gate outputs.
+    inputs:
+      - --env prod|dev (default: prod)
+      - --evidence-dir DIR (default: var/evidence/release-YYYYMMDD)
+      - --dry-run (skip live cluster checks)
+    outputs:
+      - var/evidence/release-<date>/ evidence directory
+      - stdout (gate pass/fail summary)
+    side_effects: none
+    dry_run: true  # --dry-run flag supported
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-release-readiness.sh --dry-run 2>&1 | head -10"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    owner: platform-team
+    purpose: >
+      Verifies that CI/CD merge gates (branch protection, required status checks)
+      and secret masking are configured correctly. Checks ci.yml structure and
+      absence of unsafe secret echoing.
+    inputs:
+      - --ac 007|008|028 (optional; run specific AC check only)
+    outputs:
+      - stdout (PASS/FAIL per AC)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-cicd-merge-gates-and-secrets.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-no-latest-prod-tags.sh
+    owner: platform-team
+    purpose: >
+      Checks that no production Kustomize overlay uses mutable :latest tags.
+      Fast, explicit check complementing verify-k8s-images.sh.
+    inputs: []
+    outputs:
+      - stdout (violations or pass)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [prod]
+    proof_command: "bash scripts/qa/verify-no-latest-prod-tags.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-no-hardcoded-secrets.sh
+    owner: platform-team
+    purpose: >
+      Scans the repository for hardcoded secrets using pattern matching.
+      Exits non-zero on any finding.
+    inputs: []
+    outputs:
+      - stdout (findings or pass)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-no-hardcoded-secrets.sh 2>&1 | tail -5"
+    criticality: release-blocking
+
+  # ── CI Preflight & Build ─────────────────────────────────────────────────────
+
+  - path: scripts/ci/preflight-check.sh
+    owner: platform-team
+    purpose: >
+      Validates generated MFE/OpenEdX Dockerfiles against known invariants BEFORE
+      a 30-60 minute build cycle. Renders Dockerfiles via tutor config save +
+      apply-patches.sh and checks for required markers. Runtime ~30 seconds.
+    inputs:
+      - TUTOR_VENV (path to venv; auto-created if absent)
+    outputs:
+      - stdout (PASS/FAIL/SKIP per invariant)
+    side_effects:
+      - Creates a temporary Tutor root (cleaned up after run)
+    dry_run: true  # safe to run locally
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/ci/preflight-check.sh 2>&1 | head -20"
+    criticality: release-blocking
+
+  # ── Tutor Configuration ──────────────────────────────────────────────────────
+
+  - path: scripts/infra/tutor-config-save.sh
+    owner: platform-team
+    purpose: >
+      Safe wrapper for 'tutor config save'. Automatically applies patches and
+      verifies configuration. Use this instead of bare 'tutor config save'.
+    inputs:
+      - TUTOR_ROOT (required env var)
+      - tutor config save args (passed through)
+    outputs:
+      - tutor_env/ directory (regenerated)
+      - stdout (patch application summary)
+    side_effects:
+      - Regenerates tutor_env/ from scratch (overwrites rendered files)
+      - Applies all infrastructure patches
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/tutor-config-save.sh --help 2>&1 | head -5"
+    criticality: release-supporting
+
+  # ── Database & Migrations ────────────────────────────────────────────────────
+
+  - path: scripts/infra/provision-mysql-app-dbs.sh
+    owner: platform-team
+    purpose: >
+      Provisions MySQL databases and users for all Open edX satellite services
+      (discovery, ecommerce, credentials, notes, xqueue). Run once per
+      environment; idempotent.
+    inputs:
+      - MYSQL_HOST
+      - MYSQL_ROOT_PASSWORD
+      - target env flags
+    outputs:
+      - stdout (created databases + users)
+    side_effects:
+      - Mutates MySQL (creates databases and users)
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/provision-mysql-app-dbs.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  - path: scripts/migrations/run-verification-pipeline.sh
+    owner: platform-team
+    purpose: >
+      Orchestrates all migration verification scripts in workflow order and
+      produces a summary report. Continues even if individual scripts fail.
+    inputs: []
+    outputs:
+      - scripts/migrations/output/verification/summary.txt
+      - stdout (summary)
+    side_effects: none
+    dry_run: true  # read-only verification
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/migrations/run-verification-pipeline.sh 2>&1 | tail -10"
+    criticality: release-supporting
+
+  # ── Branding ─────────────────────────────────────────────────────────────────
+
+  - path: scripts/branding/deploy-branded-image.sh
+    owner: platform-team
+    purpose: >
+      Deploys a branded OpenEdX image to GKE by setting the image tag on the
+      LMS deployment via kubectl. Defaults to tag 'mereka-brand'.
+    inputs:
+      - "positional: TAG (default: mereka-brand)"
+      - NAMESPACE (default: mereka-lms)
+      - KUBECTL_CONTEXT (optional)
+      - SOURCE_IMAGE (optional; overrides pull source)
+    outputs:
+      - stdout (kubectl rollout status)
+    side_effects:
+      - Mutates live cluster (kubectl set image on LMS deployment)
+      - Optionally pushes image to ghcr.io registry
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/branding/deploy-branded-image.sh --help 2>&1 || true"
+    criticality: release-supporting

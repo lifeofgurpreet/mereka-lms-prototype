@@ -314,13 +314,13 @@
   "images": {
     "openedx": {
       "default_registry": "ghcr.io/biji-biji-initiative/mereka-lms/openedx",
-      "default_tag": "mereka-brand",
-      "_note": "Overlays MUST pin to immutable tag+digest for non-local environments"
+      "default_tag": "pin-required",
+      "_note": "Sentinel tag — does not exist. Every overlay MUST override with a real pinned tag."
     },
     "mfe": {
       "default_registry": "ghcr.io/biji-biji-initiative/mereka-lms/mfe",
-      "default_tag": "mereka-brand",
-      "_note": "Overlays MUST pin to immutable tag+digest for non-local environments"
+      "default_tag": "pin-required",
+      "_note": "Sentinel tag — does not exist. Every overlay MUST override with a real pinned tag."
     }
   },
 
@@ -330,5 +330,100 @@
     "jobs/enterprise-access-migrate.yaml",
     "jobs/enterprise-subsidy-migrate.yaml",
     "jobs/license-manager-migrate.yaml"
-  ]
+  ],
+
+  "migrations": {
+    "registry": "migrations/registry.yaml",
+    "services": [
+      {
+        "name": "lms",
+        "database": "mysql",
+        "migration_command": "python manage.py lms migrate --noinput",
+        "health_endpoint": "/heartbeat",
+        "health_port": 8000,
+        "release_critical": true
+      },
+      {
+        "name": "cms",
+        "database": "mysql",
+        "migration_command": "python manage.py cms migrate --noinput",
+        "health_endpoint": "/heartbeat",
+        "health_port": 8000,
+        "release_critical": true
+      },
+      {
+        "name": "discovery",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 8000,
+        "release_critical": true
+      },
+      {
+        "name": "credentials",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 8000,
+        "release_critical": false
+      },
+      {
+        "name": "notes",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/heartbeat",
+        "health_port": 8000,
+        "release_critical": false
+      },
+      {
+        "name": "xqueue",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/status/",
+        "health_port": 8000,
+        "release_critical": false,
+        "disabled": true
+      },
+      {
+        "name": "enterprise-catalog",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 8160,
+        "release_critical": false
+      },
+      {
+        "name": "enterprise-access",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 18270,
+        "release_critical": false
+      },
+      {
+        "name": "enterprise-subsidy",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 18280,
+        "release_critical": false
+      },
+      {
+        "name": "license-manager",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 18170,
+        "release_critical": false
+      },
+      {
+        "name": "payments-gateway",
+        "database": "postgresql",
+        "migration_command": "python -m alembic upgrade head",
+        "health_endpoint": "/health/",
+        "health_port": 8080,
+        "release_critical": true
+      }
+    ]
+  }
 }

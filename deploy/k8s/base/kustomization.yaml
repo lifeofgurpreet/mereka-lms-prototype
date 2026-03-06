@@ -35,18 +35,17 @@ resources:
 - jobs/enterprise-subsidy-migrate.yaml
 - jobs/license-manager-migrate.yaml
 
-# Custom Mereka-branded OpenEdX images.
-# Base uses mutable `mereka-brand` tags (updated by build-tutor-images.yml on
-# every push to main).  Environment overlays in bbi-infrastructure can override
-# with pinned tags+digests for production; dev inherits this mutable default so
-# ArgoCD auto-deploys new builds.
+# Mereka-branded OpenEdX images.
+# Base uses sentinel tag `pin-required` — this tag does NOT exist in the registry.
+# Every environment overlay MUST override with a real pinned tag (or tag+digest).
+# This prevents accidental deployment of an unpinned base.
 images:
   - name: docker.io/overhangio/openedx
     newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: mereka-brand
+    newTag: pin-required
   - name: docker.io/overhangio/openedx-mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: mereka-brand
+    newTag: pin-required
 
 # namespace to deploy all Resources to
 namespace: mereka-lms
