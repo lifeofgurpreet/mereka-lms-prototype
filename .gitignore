@@ -41,6 +41,11 @@ build_*.log
 ops/migrations/**/output/
 ops/migrations/**/logs/
 
+# Custom Tutor app runtime/state files
+infrastructure/tutor/custom-apps/**/db.sqlite3
+infrastructure/tutor/custom-apps/**/*.log
+infrastructure/tutor/custom-apps/**/__pycache__/
+
 # Migration outputs (may contain PII or logs)
 scripts/migrations/kajabi/output/
 scripts/migrations/output/
