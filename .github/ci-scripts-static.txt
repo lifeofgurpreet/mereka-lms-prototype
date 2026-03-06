@@ -64,6 +64,7 @@ scripts/qa/lint-active-docs-env-model.sh
 scripts/qa/verify-cicd-merge-gates-and-secrets.sh
 scripts/qa/verify-cicd-lessons-compliance.sh
 scripts/qa/verify-ci-runner-policy.sh
+scripts/qa/verify-new-ci-static-entries.sh
 scripts/qa/verify-verification-catalog.sh
 scripts/qa/verify-deprecated-verification-hygiene.sh
 scripts/qa/verify-release-automation.sh
