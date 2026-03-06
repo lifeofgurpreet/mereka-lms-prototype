@@ -354,6 +354,18 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-airtable-readiness.sh",
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
         "workflow_direct"
       ],
       "owner": "sre-security",
@@ -674,6 +686,18 @@
         "ci_static"
       ],
       "owner": "identity-access",
+      "path": "scripts/qa/verify-authentik-apply-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "identity-access",
       "path": "scripts/qa/verify-authn-submodule-path-contract.sh",
       "reference_count": 4,
       "severity": "high",
@@ -902,6 +926,18 @@
       "owner": "platform-core",
       "path": "scripts/qa/verify-caddy-cache-policy.sh",
       "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-caddy-payments-route.sh",
+      "reference_count": 2,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -1256,6 +1292,18 @@
         "ci_static"
       ],
       "owner": "platform-core",
+      "path": "scripts/qa/verify-credentials-zoneinfo-contract.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-core",
       "path": "scripts/qa/verify-critical-testmap-scope.sh",
       "reference_count": 1,
       "severity": "high",
@@ -1411,6 +1459,18 @@
       "tier": "exploratory_manual"
     },
     {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-data-retention-jobs-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
       "cadence": "on_demand",
       "ci_binding": [],
       "owner": "platform-infra",
@@ -1506,6 +1566,18 @@
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-design-tokens.sh",
       "reference_count": 5,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-destructive-ops-guardrails.sh",
+      "reference_count": 1,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -1871,6 +1943,18 @@
       "severity": "medium",
       "status": "active",
       "tier": "periodic_runtime"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "multisite-governance",
+      "path": "scripts/qa/verify-enterprise-schema-repair-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -2957,6 +3041,18 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "frontend-platform",
+      "path": "scripts/qa/verify-mfe-header-branding.sh",
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
         "ci_static",
         "workflow_direct"
       ],
@@ -3345,6 +3441,18 @@
         "ci_static"
       ],
       "owner": "multisite-governance",
+      "path": "scripts/qa/verify-multisite-apply-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "multisite-governance",
       "path": "scripts/qa/verify-multisite-config.sh",
       "reference_count": 25,
       "severity": "high",
@@ -3430,6 +3538,18 @@
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mux-video-upload.sh",
       "reference_count": 6,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-mysql-user-repair-guardrails.sh",
+      "reference_count": 1,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -3527,6 +3647,18 @@
       "owner": "platform-infra",
       "path": "scripts/qa/verify-no-legacy-tutor-k8s-paths.sh",
       "reference_count": 4,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "migration-platform",
+      "path": "scripts/qa/verify-no-manual-migration-state-hacks.sh",
+      "reference_count": 1,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4267,6 +4399,30 @@
       "ci_binding": [
         "ci_static"
       ],
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-provision-mysql-app-dbs-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-prune-gcp-snapshots-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-public-branding.sh",
       "reference_count": 23,
@@ -4293,7 +4449,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-purchase-gateway-metrics-contract.sh",
-      "reference_count": 1,
+      "reference_count": 2,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4305,7 +4461,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-purchase-gateway-models.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4317,7 +4473,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-purchase-gateway-resilience.sh",
-      "reference_count": 1,
+      "reference_count": 2,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4339,30 +4495,46 @@
       ],
       "owner": "sre-security",
       "path": "scripts/qa/verify-purchase-gateway-security.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-purchase-gateway-stripe.sh",
-      "reference_count": 3,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 5,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-purchase-gateway.sh",
-      "reference_count": 8,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "reference_count": 10,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-purge-frontend-cache-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -4444,6 +4616,18 @@
       "owner": "platform-infra",
       "path": "scripts/qa/verify-release-gitops-guardrails.sh",
       "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-release-promotion-wiring.sh",
+      "reference_count": 2,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -5028,6 +5212,18 @@
         "ci_static"
       ],
       "owner": "identity-access",
+      "path": "scripts/qa/verify-studio-sso-canary-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "identity-access",
       "path": "scripts/qa/verify-studio-sso-flow.sh",
       "reference_count": 6,
       "severity": "high",
@@ -5168,6 +5364,18 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "multisite-governance",
+      "path": "scripts/qa/verify-tenant-enterprise-mutation-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
       "cadence": "on_demand",
       "ci_binding": [],
       "owner": "multisite-governance",
@@ -5259,6 +5467,18 @@
       "severity": "low",
       "status": "manual_only",
       "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "multisite-governance",
+      "path": "scripts/qa/verify-tenant-lifecycle-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -5930,18 +6150,19 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 340,
+    "ci_static_bound": 361,
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 375,
-      "manual_only": 127
+      "active": 396,
+      "deprecated_candidate": 1,
+      "manual_only": 125
     },
     "tiers": {
-      "exploratory_manual": 130,
+      "exploratory_manual": 129,
       "periodic_runtime": 12,
-      "release_blocking": 360
+      "release_blocking": 381
     },
-    "total_verify_scripts": 502,
+    "total_verify_scripts": 522,
     "workflow_direct_bound": 49
   },
   "version": "1"
