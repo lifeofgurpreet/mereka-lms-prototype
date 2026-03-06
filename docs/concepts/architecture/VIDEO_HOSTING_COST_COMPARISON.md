@@ -608,7 +608,7 @@ All three solutions support this, but **Mux** has the simplest implementation.
 
 Example batch upload to Mux:
 ```python
-# scripts/migrations/mct/scripts/upload_videos_to_mux.py
+# scripts/migrations/mct/upload_videos_to_mux.py
 import mux_python
 import os
 from pathlib import Path

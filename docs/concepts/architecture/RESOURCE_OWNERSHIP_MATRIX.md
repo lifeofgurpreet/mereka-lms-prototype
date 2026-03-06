@@ -2,7 +2,7 @@
 
 **Generated:** 2026-03-06
 **Maintainer:** Platform Engineering
-**Related:** `docs/architecture/DEPLOYMENT_BOUNDARY.md`
+**Related:** `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md`
 
 This table classifies every file under `deploy/k8s/`. "Rendered By" lists which kustomization.yaml
 entry points include this file (directly or via a sub-kustomization). Files marked NOT RENDERED are
@@ -25,7 +25,7 @@ not included by any kustomization and require action.
 |---|---|
 | KEEP | Stays in app repo; no changes needed |
 | KEEP_DOCUMENT | Stays but needs status comment or README update |
-| MOVE_INFRA | Move to bbi-infrastructure (cluster management repo) |
+| MOVE_INFRA | Move to infrastructure (cluster management repo) |
 | QUARANTINE | Move to `_quarantine/` pending decision or migration |
 | DELETE | Remove after confirming no live dependency |
 | ASSESS | Requires decision before acting |
@@ -386,7 +386,7 @@ not included by any kustomization and require action.
 
 | File | Classification | Rendered By | Action | Notes |
 |---|---|---|---|---|
-| `overlays/production/kustomization.yaml` | ENVIRONMENT_SPECIFIC | self (entry point) | MOVE_INFRA | GKE production overlay; frozen (scaled to 0). Currently duplicated between app repo and bbi-infrastructure |
+| `overlays/production/kustomization.yaml` | ENVIRONMENT_SPECIFIC | self (entry point) | MOVE_INFRA | GKE production overlay; frozen (scaled to 0). Currently duplicated between app repo and infrastructure |
 | `overlays/production/ingress-openedx-lms.yaml` | ENVIRONMENT_SPECIFIC | overlays/production | MOVE_INFRA | Production LMS Ingress (academyv2.mereka.io, academy.biji-biji.com) |
 | `overlays/production/ingress-openedx-mfe.yaml` | ENVIRONMENT_SPECIFIC | overlays/production | MOVE_INFRA | Production MFE Ingress (apps.academyv2.mereka.io) |
 | `overlays/production/ingress-openedx-mfeconfig-compat.yaml` | ENVIRONMENT_SPECIFIC | overlays/production | MOVE_INFRA | Production MFE config compatibility Ingress |
@@ -453,7 +453,7 @@ not included by any kustomization and require action.
 | File | Classification | Rendered By | Action | Notes |
 |---|---|---|---|---|
 | `patches/README.md` | — | NOT RENDERED | KEEP | Patches documentation |
-| `patches/argocd-configmap-ignore.yaml` | PLATFORM_SHARED | NOT RENDERED (manual apply only) | MOVE_INFRA | ArgoCD Application ignoreDifferences patch; belongs in ArgoCD Application manifest in bbi-infrastructure |
+| `patches/argocd-configmap-ignore.yaml` | PLATFORM_SHARED | NOT RENDERED (manual apply only) | MOVE_INFRA | ArgoCD Application ignoreDifferences patch; belongs in ArgoCD Application manifest in infrastructure |
 | `patches/caddy-staging-fix.yaml` | DEAD_REFERENCE | NOT RENDERED (manual apply only) | DELETE | Legacy emergency ConfigMap patch with hardcoded prod domains; superseded by proper Tutor/overlay config |
 | `patches/smtp-ses-relay.yaml` | DEAD_REFERENCE | NOT RENDERED (manual apply only) | ASSESS | SES relay Deployment patch; should be integrated into base or overlay rather than applied manually |
 
@@ -467,7 +467,7 @@ not included by any kustomization and require action.
 | APP_RELEASE | 5 | Keep in app repo |
 | APP_LOCAL_ONLY | 13 | Keep in app repo |
 | PLATFORM_SHARED | 15 | Move to infrastructure repo |
-| ENVIRONMENT_SPECIFIC | 47 | Move to bbi-infrastructure |
+| ENVIRONMENT_SPECIFIC | 47 | Move to infrastructure |
 | DEAD_REFERENCE | 14 | Quarantine or delete |
 
 **Total files classified:** 204 (excluding docs-only files)

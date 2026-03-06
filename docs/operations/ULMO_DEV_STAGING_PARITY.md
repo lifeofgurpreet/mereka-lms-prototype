@@ -17,7 +17,7 @@ The goal of this document is to enumerate every gap that must be closed before
 rke2-nonprod can serve as a reliable dev environment for production-equivalent
 Ulmo testing. Dev is validated first, then production GKE is scaled back up.
 
-**GitOps source of truth**: `bbi-infrastructure` repo
+**GitOps source of truth**: `infrastructure` repo
 (`apps/mereka-lms/overlays/profiles/dev`). This document tracks what
 `mereka-lms` must contribute: images, Tutor config, secrets, and theme assets.
 
@@ -43,7 +43,7 @@ Ulmo testing. Dev is validated first, then production GKE is scaled back up.
 
 | Item | Status |
 |------|--------|
-| Platform | Deploys base images from `deploy/k8s/base/deployments.yml` (Ulmo versions `21.0.0-indigo`) |
+| Platform | Deploys base images from `deploy/k8s/base/kustomization.yaml` (Ulmo versions `21.0.0-indigo`) |
 | LMS | `overhangio/openedx:21.0.0-indigo` (base, no custom Mereka build) |
 | MFE | `overhangio/openedx-mfe:21.0.0-indigo` (base, no custom Mereka build) |
 | Enterprise MFEs | No image override; inherits base image tags |
@@ -58,7 +58,7 @@ Ulmo testing. Dev is validated first, then production GKE is scaled back up.
 
 ## Image Tag Inventory
 
-### Base (`deploy/k8s/base/deployments.yml` + `base/kustomization.yaml`)
+### Base (`deploy/k8s/base/kustomization.yaml`)
 
 The base layer sets upstream image tags and overrides the main OpenedX image to the
 Mereka-branded build at `mereka-brand-hotfix-full-v3`. Downstream overlays re-pin
@@ -262,7 +262,7 @@ diverges.
 
 Items to complete before rke2-nonprod is production-equivalent for Ulmo testing.
 
-### Infrastructure (bbi-infrastructure repo)
+### Infrastructure (infrastructure repo)
 
 - [ ] Confirm `infisical-secret-store` ClusterSecretStore is `Valid/Ready` on rke2-nonprod
 - [ ] Confirm `artifact-registry-key` Secret exists in `mereka-lms` namespace
@@ -297,15 +297,15 @@ Items to complete before rke2-nonprod is production-equivalent for Ulmo testing.
 
 ---
 
-## Notes on bbi-infrastructure repo
+## Notes on infrastructure repo
 
-The actual ArgoCD Application and workload profile live in `bbi-infrastructure`. The
+The actual ArgoCD Application and workload profile live in `infrastructure`. The
 profile for rke2-nonprod dev at
 `apps/mereka-lms/overlays/profiles/dev/workload-profile.yaml` sets many services to 0
 replicas for cost control. When running Ulmo parity tests, the relevant services
 (LMS, CMS, MFE, lms-worker, cms-worker, discovery) must be scaled to at least 1.
 
-The `bbi-infrastructure` repo must also apply any domain-specific ConfigMap patches
+The `infrastructure` repo must also apply any domain-specific ConfigMap patches
 for `lms.env.yml` / `cms.env.yml` if those are managed there rather than in this
 repo's overlay. Coordinate with the platform team before making changes to either
 side of this boundary.

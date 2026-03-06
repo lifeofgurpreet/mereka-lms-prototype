@@ -123,7 +123,7 @@ These cannot be tested from a pure repository-tree shell script.
 
 **Root cause**: All five require a live cluster (`kubectl exec`, ExternalSecret sync, pod environment
 inspection). These are covered by the cluster-level verification scripts
-(`scripts/qa/verify-k8s-deployment.sh`, `scripts/qa/verify-kustomize-render.sh`) when a cluster
+(`scripts/qa/verify-k8s-deployment-spec.sh`, `scripts/qa/verify-kustomize-render.sh`) when a cluster
 is present; they are excluded from the testmap because they cannot run in the repository-only CI
 environment without cluster credentials.
 
@@ -151,7 +151,7 @@ cross-team escalation.
 | AC IDs | Gap | Priority | Recommended Action |
 |--------|-----|----------|--------------------|
 | ci-cd-pipeline AC-INT-001..004, AC-003, AC-004 | Require live GHA runner or GKE cluster | P2 | Add to CI integration test suite that runs in nightly environment with cluster access; mark as `type: manual` in testmap with runbook reference |
-| k8s-deployment AC-INT-001..005 | Require live cluster for pod/secret inspection | P2 | Covered by `verify-k8s-deployment.sh` when `KUBECONFIG` is present; add `type: manual` entries pointing to `docs/operations/TROUBLESHOOTING.md` |
+| k8s-deployment AC-INT-001..005 | Require live cluster for pod/secret inspection | P2 | Covered by `scripts/qa/verify-k8s-live-cluster.sh` (and `scripts/qa/verify-k8s-deployment-spec.sh`) when `KUBECONFIG` is present; add `type: manual` entries pointing to `docs/operations/TROUBLESHOOTING.md` |
 
 **Priority definitions:**
 - **P1** — Blocking deployment; must resolve before next production release

@@ -4,7 +4,7 @@ _Audience: SRE + Platform Ops · Owner: Engineering Lead · Last updated: 2026-0
 
 This document governs the recurring monthly disaster recovery drills for Mereka Academy. Drills verify that backup procedures, restore mechanics, and data integrity checks function correctly before they are needed in a real incident.
 
-**Cross-repo note**: The K8s CronJob manifests that automate drills live in `bbi-infrastructure`. This repo contains the verification scripts, documentation, and evidence pipeline.
+**Cross-repo note**: The K8s CronJob manifests that automate drills live in `infrastructure`. This repo contains the verification scripts, documentation, and evidence pipeline.
 
 ---
 
@@ -344,7 +344,7 @@ If a drill is blocked due to environment access, an Engineering Lead can approve
 **Escalation contacts**:
 - On-call SRE: check `docs/operations/ONCALL_ROTATION.md`
 - Engineering Lead: see `AGENTS.md` team contact list
-- Backup infrastructure issue: raise in `bbi-infrastructure` repo
+- Backup infrastructure issue: raise in `infrastructure` repo
 
 ### Common Failure Modes
 

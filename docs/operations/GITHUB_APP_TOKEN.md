@@ -73,7 +73,7 @@ individual account is involved.
 2. Click **Install** on your organization.
 3. Choose **Only select repositories** and add:
    - `Biji-Biji-Initiative/mereka-lms`
-   - `Biji-Biji-Initiative/bbi-infrastructure` (the GitOps target repo)
+   - `Biji-Biji-Initiative/infrastructure` (the GitOps target repo)
 4. Click **Install**.
 5. Note the **App ID** from the App settings page (a numeric value, e.g. `123456`).
 
@@ -101,14 +101,14 @@ Replace every occurrence of `secrets.GITOPS_PAT` with a two-step pattern:
   with:
     app-id: ${{ secrets.GH_APP_ID }}
     private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-    repositories: bbi-infrastructure
+    repositories: infrastructure
 
 # Step 2 — use the token wherever GITOPS_PAT was used
-- name: Checkout bbi-infrastructure
+- name: Checkout infrastructure
   uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
   with:
-    repository: Biji-Biji-Initiative/bbi-infrastructure
-    path: bbi-infrastructure
+    repository: Biji-Biji-Initiative/infrastructure
+    path: infrastructure
     token: ${{ steps.app-token.outputs.token }}
 ```
 
@@ -119,8 +119,8 @@ For inline git operations that previously used `GITOPS_PAT` as an env var:
   env:
     APP_TOKEN: ${{ steps.app-token.outputs.token }}
   run: |
-    git -C bbi-infrastructure remote set-url origin \
-      "https://x-access-token:${APP_TOKEN}@github.com/Biji-Biji-Initiative/bbi-infrastructure.git"
+    git -C infrastructure remote set-url origin \
+      "https://x-access-token:${APP_TOKEN}@github.com/Biji-Biji-Initiative/infrastructure.git"
 ```
 
 Pin the action SHA before merging to main (find the current SHA at
@@ -147,7 +147,7 @@ lower-risk interim measure.
    - **Token name**: `mereka-lms-gitops-<YYYY-MM>`
    - **Expiration**: 90 days (maximum for fine-grained PATs)
    - **Resource owner**: `Biji-Biji-Initiative`
-   - **Repository access**: Only `bbi-infrastructure`
+   - **Repository access**: Only `infrastructure`
    - **Permissions → Repository**:
      - `Contents`: Read and write
      - All others: No access
@@ -194,7 +194,7 @@ For each workflow:
 2. Replace `secrets.GITOPS_PAT` references with `steps.app-token.outputs.token`.
 3. Remove the `Validate GitOps token` step that checks `GITOPS_PAT`.
 4. Open a PR, run the workflow in `workflow_dispatch` mode, verify the GitOps
-   commit lands in `bbi-infrastructure`.
+   commit lands in `infrastructure`.
 5. Merge.
 
 ### Step 3: Verify Migration
@@ -233,5 +233,5 @@ references remain. During migration it exits `0` with WARNs (via
 - `docs/ops/security/ALLOWED_ACTIONS_POLICY.md` — SHA-pinning policy for Actions
 - `docs/ops/security/SECRET_ROTATION_CHECKLIST.md` — Secret rotation log
 - `scripts/qa/verify-github-app-token.sh` — Verification script
-- `.github/workflows/verify-github-app-token.yml` — CI enforcement
+- `.github/workflows/ci.yml` — GitHub App token checks in CI
 - `.github/workflows/build-tutor-images.yml` — Primary migration target

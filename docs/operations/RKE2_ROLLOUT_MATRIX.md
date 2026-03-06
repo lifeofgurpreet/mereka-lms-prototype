@@ -10,8 +10,8 @@
 
 | Step | Command | Repo | Owner |
 |------|---------|------|-------|
-| Verify guardrails active | `kubectl --context rke2-nonprod get clusterpolicy` | bbi-infrastructure | Platform |
-| Verify PVC protection | `kubectl --context rke2-nonprod get pdb -A` | bbi-infrastructure | Platform |
+| Verify guardrails active | `kubectl --context rke2-nonprod get clusterpolicy` | infrastructure | Platform |
+| Verify PVC protection | `kubectl --context rke2-nonprod get pdb -A` | infrastructure | Platform |
 
 **Status**: DONE | **Abort if**: Kyverno policies missing
 
@@ -19,8 +19,8 @@
 
 | Step | Command | Repo | Owner |
 |------|---------|------|-------|
-| Verify ArgoCD | `kubectl --context rke2-nonprod get pods -n argocd` | bbi-infrastructure | Platform |
-| Verify app access | `kubectl --context rke2-nonprod get application -n argocd` | bbi-infrastructure | Platform |
+| Verify ArgoCD | `kubectl --context rke2-nonprod get pods -n argocd` | infrastructure | Platform |
+| Verify app access | `kubectl --context rke2-nonprod get application -n argocd` | infrastructure | Platform |
 
 **Status**: DONE | **Abort if**: ArgoCD pods not Running
 
@@ -28,11 +28,11 @@
 
 | Step | Command | Repo | Owner |
 |------|---------|------|-------|
-| cert-manager | `kubectl --context rke2-nonprod get pods -n cert-manager` | bbi-infrastructure | Platform |
-| ingress-nginx | `kubectl --context rke2-nonprod get pods -n ingress-nginx` | bbi-infrastructure | Platform |
-| external-secrets | `kubectl --context rke2-nonprod get pods -n external-secrets` | bbi-infrastructure | Platform |
-| monitoring | `kubectl --context rke2-nonprod get pods -n monitoring` | bbi-infrastructure | Platform |
-| kyverno | `kubectl --context rke2-nonprod get pods -n kyverno` | bbi-infrastructure | Platform |
+| cert-manager | `kubectl --context rke2-nonprod get pods -n cert-manager` | infrastructure | Platform |
+| ingress-nginx | `kubectl --context rke2-nonprod get pods -n ingress-nginx` | infrastructure | Platform |
+| external-secrets | `kubectl --context rke2-nonprod get pods -n external-secrets` | infrastructure | Platform |
+| monitoring | `kubectl --context rke2-nonprod get pods -n monitoring` | infrastructure | Platform |
+| kyverno | `kubectl --context rke2-nonprod get pods -n kyverno` | infrastructure | Platform |
 
 **Status**: DONE | **Abort if**: Any platform pod not Running
 
@@ -40,7 +40,7 @@
 
 | Step | Command | Repo | Owner |
 |------|---------|------|-------|
-| Create namespace | `kubectl --context rke2-nonprod create ns mereka-lms` | bbi-infrastructure | Platform |
+| Create namespace | `kubectl --context rke2-nonprod create ns mereka-lms` | infrastructure | Platform |
 | Deploy ExternalSecrets | `kubectl --context rke2-nonprod apply -f deploy/k8s/base/secrets/` | mereka-lms | LMS team |
 | Verify sync | `kubectl --context rke2-nonprod get externalsecret -n mereka-lms` | — | LMS team |
 | Check no PLACEHOLDER | `kubectl --context rke2-nonprod get secret openedx-secrets -n mereka-lms -o json \| jq '.data \| keys'` | — | Security |
@@ -53,8 +53,8 @@
 
 | Step | Command | Repo | Owner |
 |------|---------|------|-------|
-| Enable staging kustomization | Copy `kustomization.enabled.yaml` → `kustomization.yaml` in `clusters/staging/rke2/` | bbi-infrastructure | Platform |
-| Create ArgoCD Application | `kubectl --context rke2-nonprod apply -f` (ApplicationSet or manual Application) | bbi-infrastructure | Platform |
+| Enable staging kustomization | Copy `kustomization.enabled.yaml` → `kustomization.yaml` in `clusters/staging/rke2/` | infrastructure | Platform |
+| Create ArgoCD Application | `kubectl --context rke2-nonprod apply -f` (ApplicationSet or manual Application) | infrastructure | Platform |
 | Verify image pull | `kubectl --context rke2-nonprod get pods -n mereka-lms` | — | LMS team |
 | Check core pods | All of: lms, cms, caddy, mfe, mysql, redis, meilisearch Running | — | LMS team |
 | Run health check | `kubectl --context rke2-nonprod exec -n mereka-lms deploy/lms -- curl -s http://localhost:8000/heartbeat` | — | LMS team |
@@ -80,7 +80,7 @@
 
 | Step | Command | Repo | Owner |
 |------|---------|------|-------|
-| DNS records | Create Cloudflare records for `*.staging.mereka.dev` → RKE2 IP | bbi-infrastructure | Platform |
+| DNS records | Create Cloudflare records for `*.staging.mereka.dev` → RKE2 IP | infrastructure | Platform |
 | SSL certs | Verify cert-manager issues certs: `kubectl --context rke2-nonprod get certificate -n mereka-lms` | — | Platform |
 | Smoke test | `curl -sI https://lms.staging.mereka.dev \| head -1` | — | LMS team |
 | Auth flow | Verify OIDC redirect works end-to-end | — | LMS team |
@@ -112,7 +112,7 @@ ghcr.io/biji-biji-initiative/mereka-lms/
 ### Promotion Flow
 
 ```
-Build (mereka-lms repo) → Push to AR → Update tag in bbi-infrastructure overlay → ArgoCD syncs
+Build (mereka-lms repo) → Push to AR → Update tag in infrastructure overlay → ArgoCD syncs
 ```
 
 ### Checksum Validation
@@ -167,7 +167,7 @@ docs/operations/
 
 | Gate | Primary Owner | Contact | Backup |
 |------|--------------|---------|--------|
-| 0-2 (Platform) | Platform team | bbi-infrastructure repo | Gurpreet |
+| 0-2 (Platform) | Platform team | infrastructure repo | Gurpreet |
 | 3 (Secrets) | Security + Platform | GCP SM console | Gurpreet |
 | 4 (App deploy) | LMS team | mereka-lms repo | WhiteCliff |
 | 5 (Data) | DBA + LMS team | Atlas console + kubectl | Gurpreet |
@@ -190,8 +190,8 @@ kubectl --context rke2-nonprod apply -f deploy/k8s/base/secrets/
 kubectl --context rke2-nonprod get externalsecret -n mereka-lms
 kubectl --context rke2-nonprod get secret -n mereka-lms
 
-# 4. Enable staging overlay in bbi-infrastructure (gate 4)
-# (Done by platform team in bbi-infrastructure repo)
+# 4. Enable staging overlay in infrastructure (gate 4)
+# (Done by platform team in infrastructure repo)
 # Verify: kubectl --context rke2-nonprod get application -n argocd | grep mereka-lms
 
 # 5. Wait for pods

@@ -311,7 +311,7 @@
 | Check | Status | Evidence |
 |-------|--------|----------|
 | Accessibility conformance policy documented | PASS | `docs/concepts/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md` |
-| Conformance verifier exists | PASS | `scripts/qa/verify-accessibility-conformance.sh` (20 PASS / 7 WARN) |
+| Conformance verifier exists | PASS | `scripts/qa/verify-accessibility.sh` (20 PASS / 7 WARN) |
 | WCAG AA contrast gate (27 PASS) | PASS | AC-UIA11Y-001 |
 | Axe-core WCAG 2.1 AA gate (4 journeys) | PASS | AC-UIA11Y-002 (login, dashboard, courseware, discussions) |
 | Focus ring patterns in MFE SCSS | PASS | `:focus` rules in _tokens.scss, theme.scss |
@@ -322,7 +322,7 @@
 | :focus-visible migration | WARN | Planned enhancement (Q2 2026) — AC-UIA11Y-004 |
 | CI gate for conformance | PASS | `monitoring-guardrails` CI job |
 
-**Script**: `scripts/qa/verify-accessibility-conformance.sh` (20 PASS / 0 FAIL / 7 WARN)
+**Script**: `scripts/qa/verify-accessibility.sh` (20 PASS / 0 FAIL / 7 WARN)
 
 **Known gaps** (documented in policy, not blocking):
 - **Skip navigation link** (Level A): Required for WCAG 2.1 SC 2.4.1, planned Q2 2026
@@ -342,13 +342,13 @@
 | Footer variant contract per domain (AC-TBR-103) | PENDING | Requires live endpoints |
 | Integration into governance gates (AC-TBR-104) | PASS | `run-multisite-governance-gates.sh` (line 117-122) |
 | Troubleshooting runbook documented (AC-TBR-105) | PASS | `docs/operations/TENANT_BRANDING_TROUBLESHOOTING.md` |
-| Troubleshooting doc verification (AC-TBR-105) | PASS | `scripts/qa/verify-tenant-branding-troubleshoot-docs.sh` |
+| Troubleshooting doc verification (AC-TBR-105) | PASS | `scripts/qa/run-tenant-branding-qa.sh` |
 | CI syntax check | PASS | `.github/workflows/ci.yml` monitoring-guardrails job |
 
 **Scripts**:
 - `scripts/qa/verify-tenant-branding-runtime.sh` — Runtime verification (AC-TBR-101..103)
 - `scripts/qa/run-multisite-governance-gates.sh` — Governance gate integration (AC-TBR-104)
-- `scripts/qa/verify-tenant-branding-troubleshoot-docs.sh` — Troubleshooting doc verification (AC-TBR-105)
+- `scripts/qa/run-tenant-branding-qa.sh` — Troubleshooting doc verification (AC-TBR-105)
 
 **Current state**: Runtime checks SKIP until ENABLE_MULTI_TENANT_BRANDING=True. This is expected behavior.
 
@@ -361,7 +361,7 @@
 ./scripts/qa/verify-tenant-branding-runtime.sh --env local
 
 # Verify troubleshooting documentation
-./scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
+./scripts/qa/run-tenant-branding-qa.sh
 
 # Run full multisite governance gates (includes runtime check)
 ./scripts/qa/run-multisite-governance-gates.sh --env prod

@@ -36,7 +36,7 @@ Located in: `infrastructure/monitoring/`
 
 ### 2. Centralized Grafana Dashboard (GitOps Platform Stack)
 
-Primary source of truth: `bbi-infrastructure/platform/monitoring/`
+Primary source of truth: `infrastructure/monitoring/`
 
 Dashboard contract in this repo:
 - `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
@@ -78,7 +78,7 @@ Based on STANDARDS.md Tier 2 classification:
 ### Platform Grafana Stack (GitOps)
 
 ```bash
-cd /home/gurpreet/projects/k8s/bbi-infrastructure
+cd /home/gurpreet/projects/k8s/infrastructure
 ./scripts/kube dev apply -f platform/monitoring/application.yaml
 ```
 
@@ -503,7 +503,7 @@ Caddy LoadBalancer and run `./scripts/infra/check-cert-sans.sh`. Caddy manages T
 
 - `infrastructure/monitoring/` in this repo (GCP monitoring templates and alert JSON)
 - `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json` (dashboard contract)
-- `bbi-infrastructure/platform/monitoring/overlays/{dev,prod}/dashboards/` (platform Grafana dashboards)
+- `infrastructure/platform/monitoring/overlays/{dev,prod}/dashboards/` (platform Grafana dashboards)
 - `vps/infrastructure/observability/` (VPS-only runtime observability assets)
 
 Legacy historical artifacts (deprecated workspace, do not use as active SoT):

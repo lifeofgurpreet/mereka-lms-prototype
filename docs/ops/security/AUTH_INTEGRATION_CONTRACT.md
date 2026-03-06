@@ -2,8 +2,8 @@
 
 ## Ownership
 
-1. Environment and deployment source of truth lives in: `k8s/bbi-infrastructure`
-2. Canonical ownership matrix reference: `docs/AUTH_OWNERSHIP_MATRIX.md` (in `k8s/bbi-infrastructure`)
+1. Environment and deployment source of truth lives in: `infrastructure` (Git checkout from `Biji-Biji-Initiative/BBI-K8`; legacy name: `infrastructure`)
+2. Canonical ownership matrix reference: `docs/concepts/architecture/RESOURCE_OWNERSHIP_MATRIX.md` (shared with the infra repo boundary)
 3. This repo owns service/chart capability only.
 4. This repo does not own production environment auth values unless explicitly documented.
 

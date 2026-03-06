@@ -275,7 +275,7 @@ kubectl rollout status -n mereka-lms deployment/lms
 # 4. Confirm the governance gate is green again
 STRICT=1 ./scripts/qa/audit-tenant-config-safety.sh
 
-# 5. If DNS records were changed, revert them via bbi-infrastructure (Cloudflare IaC).
+# 5. If DNS records were changed, revert them via infrastructure (Cloudflare IaC).
 #    DNS TTL is typically 60–300 s; wait for propagation before declaring rollback complete.
 ```
 

@@ -100,7 +100,7 @@ a {
 
 **Rule**: All `outline: none` declarations MUST be paired with a box-shadow replacement.
 
-**Enforcement**: `verify-accessibility-conformance.sh` checks for bare `outline: none` without `box-shadow` in the same rule block.
+**Enforcement**: `verify-a11y-contrast-focus.sh` checks for bare `outline: none` without `box-shadow` in the same rule block.
 
 **Current compliance**:
 - 2 instances of `outline: none` in `mereka-overrides.css`
@@ -226,7 +226,7 @@ a {
 
 ### Verification Plan
 
-**Script**: `scripts/qa/verify-keyboard-navigation.sh` (planned)
+**Script**: `scripts/qa/verify-a11y-regression-lane.sh`
 
 **Checks**:
 - All interactive elements focusable via Tab
@@ -316,7 +316,7 @@ a {
 - **Non-blocking** (enhancements/partial coverage): `:focus-visible`, Paragon token bridge, axe-core expansion
 
 **Gate behavior**:
-- `verify-accessibility-conformance.sh` will **WARN** (not FAIL) for documented gaps
+- `verify-a11y-contrast-focus.sh` will **WARN** (not FAIL) for documented gaps
 - This ensures gates don't regress while we address known issues
 - Once implemented, WARNs convert to PASS
 
@@ -346,7 +346,7 @@ a {
 
 ```bash
 # Full accessibility conformance gate (all AC-UIA11Y-* criteria)
-./scripts/qa/verify-accessibility-conformance.sh
+./scripts/qa/verify-accessibility.sh
 
 # WCAG AA contrast gate (AC-UIA11Y-001)
 ./scripts/qa/verify-contrast-compliance.sh

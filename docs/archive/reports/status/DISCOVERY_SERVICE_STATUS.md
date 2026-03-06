@@ -48,7 +48,7 @@ Fix MongoDB Atlas permissions by either:
 1. **Grant `readWrite` role to `cs_comments_user` on `openedx` database** (Recommended)
 2. **Create dedicated Open edX user with full permissions**
 
-See: [MONGODB_PERMISSIONS_ISSUE.md](../operations/MONGODB_PERMISSIONS_ISSUE.md)
+See: [MONGODB_PERMISSIONS_ISSUE.md](../../../operations/MONGODB_PERMISSIONS_ISSUE.md)
 
 ## Workaround: Manual Course Creation
 
@@ -71,7 +71,7 @@ Until MongoDB permissions are fixed, create courses via Studio UI:
 
 ### Detailed Instructions
 
-See: [DISCOVERY_DEMO_COURSE_SETUP.md](../operations/DISCOVERY_DEMO_COURSE_SETUP.md)
+See: [DISCOVERY_DEMO_COURSE_SETUP.md](../../../operations/DISCOVERY_DEMO_COURSE_SETUP.md)
 
 ## Tools Created
 
@@ -147,9 +147,9 @@ kubectl apply -f deploy/k8s/base/jobs/discovery-sync-cronjob.yaml
 
 | Document | Purpose |
 |----------|---------|
-| [MONGODB_PERMISSIONS_ISSUE.md](../operations/MONGODB_PERMISSIONS_ISSUE.md) | MongoDB permissions problem and fix |
-| [DISCOVERY_DEMO_COURSE_SETUP.md](../operations/DISCOVERY_DEMO_COURSE_SETUP.md) | Full setup guide for Discovery and courses |
-| [DISCOVERY_QUICKSTART.md](../operations/DISCOVERY_QUICKSTART.md) | Quick reference for common tasks |
+| [MONGODB_PERMISSIONS_ISSUE.md](../../../operations/MONGODB_PERMISSIONS_ISSUE.md) | MongoDB permissions problem and fix |
+| [DISCOVERY_DEMO_COURSE_SETUP.md](../../../operations/DISCOVERY_DEMO_COURSE_SETUP.md) | Full setup guide for Discovery and courses |
+| [DISCOVERY_QUICKSTART.md](../../../operations/DISCOVERY_QUICKSTART.md) | Quick reference for common tasks |
 | [DISCOVERY_SERVICE_STATUS.md](DISCOVERY_SERVICE_STATUS.md) | This file - overall status |
 
 ## Next Steps
@@ -269,6 +269,6 @@ kubectl exec -it -n mereka-lms $DISCOVERY_POD -- python manage.py shell
 ## Support
 
 For issues or questions, refer to:
-- MongoDB permissions: [MONGODB_PERMISSIONS_ISSUE.md](../operations/MONGODB_PERMISSIONS_ISSUE.md)
-- Discovery setup: [DISCOVERY_DEMO_COURSE_SETUP.md](../operations/DISCOVERY_DEMO_COURSE_SETUP.md)
-- General troubleshooting: [TROUBLESHOOTING.md](../operations/TROUBLESHOOTING.md)
+- MongoDB permissions: [MONGODB_PERMISSIONS_ISSUE.md](../../../operations/MONGODB_PERMISSIONS_ISSUE.md)
+- Discovery setup: [DISCOVERY_DEMO_COURSE_SETUP.md](../../../operations/DISCOVERY_DEMO_COURSE_SETUP.md)
+- General troubleshooting: [TROUBLESHOOTING.md](../../../operations/TROUBLESHOOTING.md)

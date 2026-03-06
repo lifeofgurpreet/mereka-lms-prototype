@@ -169,7 +169,7 @@ If enrollments are missing in Open edX:
 
 ```bash
 # Re-import enrollments from Kajabi
-python scripts/migrations/kajabi/scripts/prepare_openedx_imports.py \
+python scripts/migrations/kajabi/prepare_openedx_imports.py \
   --output-root scripts/migrations/kajabi/output \
   --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 

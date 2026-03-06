@@ -248,7 +248,7 @@ kubectl run dns-test --rm -i --image=busybox --restart=Never -n mereka-lms \
 **To enable HPA:**
 
 ```yaml
-# File: deploy/k8s/base/apps/lms-hpa.yaml
+# File: deploy/k8s/base/apps/lms/hpa.yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

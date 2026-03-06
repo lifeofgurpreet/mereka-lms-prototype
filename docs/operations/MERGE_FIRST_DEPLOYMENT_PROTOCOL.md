@@ -9,7 +9,7 @@ All changes MUST be merged to `main` via Pull Request before deployment to produ
 
 ### Why
 
-1. **ArgoCD reverts manual patches**: The GitOps controller syncs from the `bbi-infrastructure` repo. Any `kubectl patch` or direct edit gets overwritten on next sync cycle.
+1. **ArgoCD reverts manual patches**: The GitOps controller syncs from the `infrastructure` repo. Any `kubectl patch` or direct edit gets overwritten on next sync cycle.
 2. **Worktree divergence**: Multiple agents working on separate worktrees/branches can produce conflicting changes. Merging to main first ensures a single source of truth.
 3. **Audit trail**: PRs provide code review, CI checks, and a permanent record of what changed and why.
 
@@ -27,7 +27,7 @@ The canonical sequence for enterprise UI/branding changes:
 │  6. Update deploy/k8s/overlays/production/kustomization.yaml│
 │     (image tag → new SHA)                                   │
 │  7. git add → commit → push → PR → merge to main           │
-│  8. ArgoCD auto-syncs (bbi-infrastructure watches main)     │
+│  8. ArgoCD auto-syncs (infrastructure watches main)     │
 │  9. ./scripts/qa/verify-post-deploy-smoke.sh --env prod     │
 │ 10. ./scripts/qa/ops-confidence.sh --env prod               │
 └─────────────────────────────────────────────────────────────┘
@@ -102,7 +102,7 @@ This checks:
 
 | Anti-Pattern | Why It Fails | Correct Approach |
 |-------------|-------------|------------------|
-| `kubectl patch` on live cluster | ArgoCD reverts within sync interval | Commit to `bbi-infrastructure`, let ArgoCD apply |
+| `kubectl patch` on live cluster | ArgoCD reverts within sync interval | Commit to `infrastructure`, let ArgoCD apply |
 | Deploy from feature branch | Other agents may overwrite | Merge to main first, deploy from main |
 | Cherry-pick to main without PR | No CI, no review trail | Create PR even for single-commit changes |
 | Direct `tutor config save` on cluster | Loses apply-patches.sh customizations | Use `tutor-config-save.sh` wrapper locally, commit result |

@@ -176,6 +176,6 @@ tutor k8s start  # Uses last known good images
 ## Contact
 
 **Issues during deployment?**
-- Check: [LOGO_404_FIX.md](docs/operations/LOGO_404_FIX.md)
+- Check: [LOGO_404_FIX.md](../operations/LOGO_404_FIX.md)
 - Logs: `kubectl logs -n mereka-lms <pod-name>`
 - Support: techadmin@biji-biji.com

@@ -3,8 +3,8 @@
 <!-- Last verified: 2026-02-13 -->
 
 > **Superseded in part by ADR-025**: For the authoritative per-file classification of every
-> resource in `deploy/k8s/`, see [DEPLOYMENT_BOUNDARY.md](../architecture/DEPLOYMENT_BOUNDARY.md)
-> and [DEPLOYMENT_CONTRACT.md](../architecture/DEPLOYMENT_CONTRACT.md). The high-level ownership
+> resource in `deploy/k8s/`, see [DEPLOYMENT_BOUNDARY.md](../concepts/architecture/DEPLOYMENT_BOUNDARY.md)
+> and [DEPLOYMENT_CONTRACT.md](../concepts/architecture/DEPLOYMENT_CONTRACT.md). The high-level ownership
 > rules below remain accurate; the detailed matrix there takes precedence for specific files.
 
 This document defines ownership boundaries to prevent drift, duplication, and regression.
@@ -17,7 +17,7 @@ This document defines ownership boundaries to prevent drift, duplication, and re
 
 ### Staging Environment Status
 
-The `staging` overlay (`deploy/k8s/overlays/staging/`) in bbi-infrastructure is archived/unused. The mereka-lms project operates with two environments only:
+The `staging` overlay (`deploy/k8s/overlays/staging/`) in infrastructure is archived/unused. The mereka-lms project operates with two environments only:
 
 | Environment | Infrastructure | Purpose |
 |-------------|---------------|---------|

@@ -336,7 +336,7 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:${TAG}
 ### Step 8: Update GitOps Sources (Production)
 
 Production is **GitOps-managed** by Argo app `mereka-lms-local` from:
-- repo: `Biji-Biji-Initiative/BBI-K8` (older docs may still mention `bbi-infrastructure`)
+- repo: `Biji-Biji-Initiative/BBI-K8` (older docs may still mention `infrastructure`)
 - path: `apps/mereka-lms/overlays/prod`
 
 Do not use `kubectl set image` for normal releases.

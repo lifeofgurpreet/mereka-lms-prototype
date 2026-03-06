@@ -194,7 +194,7 @@ node scripts/migrations/mct/mct-export.mjs --resources users --start-page 1 --en
 ### Phase 2: Data Transformation
 
 **2.1 Transformation Script**
-Create `scripts/migrations/mct/scripts/transform_data.py` (mirroring Kajabi pattern):
+Create `scripts/migrations/mct/transform_data.py` (mirroring Kajabi pattern):
 
 **Mappings:**
 
@@ -231,7 +231,7 @@ scripts/migrations/mct/output/
 ### Phase 3: Course Package Building
 
 **3.1 Course Package Script**
-Create `scripts/migrations/mct/scripts/build_course_packages.py`:
+Create `scripts/migrations/mct/build_course_packages.py`:
 
 - Convert MCT course structure to Open edX OLX format
 - Generate course tarballs (`course-v1:SKILLOURFUTURE+{slug}+{run}.tar.gz`)
@@ -261,7 +261,7 @@ tutor local run lms ./manage.py lms importusers \
 # Upload tarballs from scripts/migrations/mct/output/course_packages/
 
 # OR automated:
-python scripts/migrations/mct/scripts/import_courses.py \
+python scripts/migrations/mct/import_courses_k8s.py \
   --manifest scripts/migrations/mct/output/course_packages/course_packages_manifest.csv \
   --packages-root scripts/migrations/mct/output/course_packages \
   --org SKILLOURFUTURE
@@ -372,7 +372,7 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 2. **Short-term:**
    - [ ] Run full data export to `exports/mct/`
    - [ ] Analyze exported data structure
-   - [ ] Build transformation scripts (`scripts/migrations/mct/scripts/transform_data.py`)
+   - [ ] Build transformation scripts (`scripts/migrations/mct/transform_data.py`)
    - [ ] Map MCT user profile fields to Open edX user profile
 
 3. **Medium-term:**
@@ -393,6 +393,6 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 - **Working MCT Integration:** `hubspot-webhook-mct/functions/index.js` - Production code showing authentication and API usage patterns
 - **📖 Complete Export Guide:** `docs/migrations/mct/EXPORT_GUIDE.md` - Comprehensive documentation for MCT export process
 - Kajabi migration pattern: `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
-- Kajabi transformation scripts: `scripts/migrations/kajabi/scripts/`
+- Kajabi transformation scripts: `scripts/migrations/kajabi/`
 - Open edX bulk import commands: `docs/guides/onboarding/LOCAL_SETUP.md`
 - MCT API exploration results: `docs/migrations/mct/API_EXPLORATION.md`

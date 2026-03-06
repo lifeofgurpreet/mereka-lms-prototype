@@ -165,8 +165,8 @@ make tutor-apply  # or ./infrastructure/tutor/apply-patches.sh
 
 ## Questions?
 
-- See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development workflow
-- See [`docs/README.md`](docs/README.md) for documentation index
-- See [`infrastructure/README.md`](infrastructure/README.md) for infrastructure docs
-- See [`scripts/README.md`](scripts/README.md) for scripts documentation
+- See [`CONTRIBUTING.md`](../../CONTRIBUTING.md) for development workflow
+- See [`docs/README.md`](../../README.md) for documentation index
+- See [`infrastructure/README.md`](../../../infrastructure/README.md) for infrastructure docs
+- See [`scripts/README.md`](../../../scripts/README.md) for scripts documentation
 

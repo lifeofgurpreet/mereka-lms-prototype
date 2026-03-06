@@ -9,7 +9,7 @@ This doc is intentionally opinionated and reality-first. Do not assume “Atlas-
 2. **LMS/CMS modulestore uses Atlas** (`openedx`) through `MONGODB_HOST` + Atlas-aware settings.
 3. **Legacy in-cluster MongoDB deployment is retired in production**:
    - `Deployment/mongodb` has been deleted after backup + runtime Atlas verification.
-   - `Service/mongodb` has been removed via `bbi-infrastructure` production overlay patching.
+   - `Service/mongodb` has been removed via `infrastructure` production overlay patching.
 
 Implication:
 - Active modulestore/forum traffic is Atlas-backed.

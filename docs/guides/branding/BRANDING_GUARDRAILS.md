@@ -195,7 +195,7 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
      - `./scripts/qa/audit-branding-surfaces.sh prod --strict`
 
 11. **[ELIMINATED]** Cross-repo CSS hash drift (runtime ConfigMap overlay)
-   - This failure mode existed when a runtime CSS ConfigMap in `bbi-infrastructure` was mounted
+   - This failure mode existed when a runtime CSS ConfigMap in `infrastructure` was mounted
      at a content-hashed path inside the LMS container. Image rebuilds changed the hash,
      but the ConfigMap mount path was not updated, causing silent branding loss.
    - **Root cause**: Tight coupling between Django `collectstatic` hash and a hardcoded path in a separate repo.

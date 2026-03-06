@@ -208,7 +208,7 @@ Use `configure-tenant-idp.sh` (or onboarding script) to create linkage. Runtime 
 
 ### Step 4: Enable per-tenant Feature Flag
 
-In LMS settings (via `bbi-infrastructure` overlay):
+In LMS settings (via `infrastructure` overlay):
 ```python
 ENABLE_ENTERPRISE_SSO_ACME_CORP = True
 ```
@@ -231,7 +231,7 @@ curl -L https://academyv2.mereka.io/enterprise/login/acme-corp
 Once the first enterprise tenant is confirmed working, toggle the feature flag:
 
 ```python
-# In mereka_lms.py or bbi-infrastructure overlay
+# In mereka_lms.py or infrastructure overlay
 MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"] = False
 ```
 

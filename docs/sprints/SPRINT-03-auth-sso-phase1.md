@@ -24,7 +24,7 @@
   - Covers: SAML config, IdP metadata validation, SP metadata generation, cert injection, OIDC flows
 - [ ] Auth SSO infrastructure: ExternalSecrets + PrometheusRules
   - **File**: `deploy/k8s/base/secrets/external-secrets.yaml` (SSO secrets)
-  - **File**: `deploy/k8s/base/monitoring/prometheusrule-sso.yaml` (SSO alerts)
+- **File**: `deploy/k8s/base/monitoring/prometheusrule-auth.yaml` (SSO alerts)
 
 ### Forum Moderation
 
@@ -47,29 +47,29 @@
 **Week 1: Configuration UI**
 
 - [ ] AC-AUTH-006: Tenant admin can upload SAML IdP metadata
-  - **File**: `deploy/k8s/base/apps/tenant-admin/` (UI)
+  - **File**: `deploy/k8s/base/apps/multi-tenancy/` (tenant admin app)
 - [ ] AC-AUTH-007: System validates IdP metadata XML
-  - **File**: `services/tenant-admin/validators/saml.py`
+  - **File**: `scripts/tenants/configure-tenant-idp.sh`
 - [ ] AC-AUTH-008: Store IdP config in TenantConfig model
   - **File**: `infrastructure/tutor/plugins/multi-tenancy/models.py` (enhance)
 - [ ] AC-AUTH-009: Generate SP metadata per tenant
-  - **File**: `infrastructure/tutor/custom-apps/saml_sp/metadata.py`
+  - **File**: `scripts/tenants/generate-saml-keypair.sh`
 
 **Week 2: SAML Login Flow (8 ACs)**
 
 - [ ] AC-AUTH-010: User clicks "Login with SSO" → redirect to IdP
-  - **File**: `deploy/k8s/base/apps/openedx/settings/lms/saml_config.py`
+  - **File**: `scripts/qa/verify-enterprise-sso.sh`
 - [ ] AC-AUTH-011: System validates SAML response signature
   - **File**: Tests for python3-saml validation
 - [ ] AC-AUTH-012: Extract user attributes from SAML assertion
-  - **File**: `infrastructure/tutor/custom-apps/saml_sp/attributes.py`
+  - **File**: `scripts/qa/verify-enterprise-sso.sh`
 - [ ] AC-AUTH-013-017: Error handling (invalid signature, expired, wrong tenant)
   - **File**: `tests/integration/test_saml_errors.py`
 
 **Week 3: User Provisioning (7 ACs)**
 
 - [ ] AC-AUTH-020: Create local user account on first SSO login (JIT)
-  - **File**: `infrastructure/tutor/custom-apps/saml_sp/provisioning.py`
+  - **File**: `scripts/tenants/provision-tenant.sh`
 - [ ] AC-AUTH-021: Map SAML attributes to user profile fields
   - **File**: Configuration-driven attribute mapping
 - [ ] AC-AUTH-022-025: Profile updates, email verification, role mapping

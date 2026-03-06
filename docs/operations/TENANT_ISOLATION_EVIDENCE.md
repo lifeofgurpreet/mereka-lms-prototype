@@ -235,7 +235,7 @@ the regression (check ArgoCD history or `git log deploy/k8s/overlays/production/
 **Step 3: Roll back the MFE image tag**
 
 ```bash
-# In the bbi-infrastructure GitOps repo, update the MFE image tag:
+# In the infrastructure GitOps repo, update the MFE image tag:
 # deploy/k8s/overlays/production/kustomization.yaml
 #   images:
 #     - name: mfe

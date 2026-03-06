@@ -18,8 +18,8 @@ Start here: **[MFE_OAUTH_FIX_CHECKLIST.md](./MFE_OAUTH_FIX_CHECKLIST.md)** - Ste
 |----------|---------|----------|
 | **[MFE_OAUTH_FIX_CHECKLIST.md](./MFE_OAUTH_FIX_CHECKLIST.md)** | Step-by-step deployment checklist | DevOps/Deployment |
 | **[MFE_OAUTH_FIX_SUMMARY.md](./MFE_OAUTH_FIX_SUMMARY.md)** | Technical overview and architecture | Technical leads |
-| **[docs/operations/MFE_OAUTH_FIX_DEPLOYMENT.md](./docs/operations/MFE_OAUTH_FIX_DEPLOYMENT.md)** | Detailed deployment guide with troubleshooting | DevOps/SRE |
-| **[infrastructure/tutor/custom-apps/mfe_oauth_fix/README.md](./infrastructure/tutor/custom-apps/mfe_oauth_fix/README.md)** | Custom app documentation | Developers |
+| **[docs/operations/MFE_OAUTH_FIX_DEPLOYMENT.md](../operations/MFE_OAUTH_FIX_DEPLOYMENT.md)** | Detailed deployment guide with troubleshooting | DevOps/SRE |
+| **[infrastructure/tutor/custom-apps/mfe_oauth_fix/README.md](../../infrastructure/tutor/custom-apps/mfe_oauth_fix/README.md)** | Custom app documentation | Developers |
 
 ## Quick Reference
 
@@ -174,7 +174,7 @@ infrastructure/tutor/apply-patches.sh
 - Check logs: `kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms`
 
 ### Troubleshooting
-- See [docs/operations/MFE_OAUTH_FIX_DEPLOYMENT.md](./docs/operations/MFE_OAUTH_FIX_DEPLOYMENT.md)
+- See [docs/operations/MFE_OAUTH_FIX_DEPLOYMENT.md](../operations/MFE_OAUTH_FIX_DEPLOYMENT.md)
 - Check "Troubleshooting" section in deployment guide
 
 ### Rollback

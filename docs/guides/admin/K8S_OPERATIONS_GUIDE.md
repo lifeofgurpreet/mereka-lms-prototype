@@ -484,7 +484,7 @@ For detailed secrets management architecture, see `/home/gurpreet/projects/secre
 
 ### Bump Production GitOps Base Ref (Required After App Repo Changes)
 
-Production is ArgoCD-managed from `Biji-Biji-Initiative/BBI-K8` (legacy docs may still reference `bbi-infrastructure`), and it pins this repo
+Production is ArgoCD-managed from `Biji-Biji-Initiative/BBI-K8` (legacy docs may still reference `infrastructure`), and it pins this repo
 as a remote Kustomize base.
 
 When you change anything under `deploy/k8s/base/` in this repo, you must bump the pinned ref:
@@ -866,7 +866,7 @@ gcloud artifacts docker images describe \
 
 **Production** (`overlays/production`):
 - Uses `production` tag for releases
-- Tagged by CI/CD: `.github/workflows/build-openedx.yml`
+- Tagged by CI/CD: `.github/workflows/build-tutor-images.yml`
 - Includes git SHA in image labels for traceability
 
 **Kustomize image overrides**:

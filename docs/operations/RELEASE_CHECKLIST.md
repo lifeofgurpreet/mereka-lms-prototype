@@ -11,12 +11,12 @@ Use this checklist for every `mereka-lms` release to production.
 - Confirm target tags are immutable and final:
   - `OPENEDX_TAG=<tag>`
   - `MFE_TAG=<tag>`
-- Confirm this repo and active GitOps repo (`BBI-K8`; legacy name `bbi-infrastructure`) are reachable from your environment.
+- Confirm this repo and active GitOps repo (`BBI-K8`; legacy name `infrastructure`) are reachable from your environment.
 
 ## 2. Run Policy Checks (Required)
 
 Run the manual workflow:
-- `.github/workflows/policy-checks.yml` (`workflow_dispatch`)
+- `.github/workflows/ci.yml` (dispatch from an issue/release branch workflow run)
 
 Or run locally:
 ```bash

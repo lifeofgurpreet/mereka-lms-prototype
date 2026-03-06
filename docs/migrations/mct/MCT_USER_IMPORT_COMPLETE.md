@@ -73,9 +73,9 @@ Each MCT user profile includes:
 ## Files Created
 
 ### Import Scripts
-1. `/scripts/migrations/mct/scripts/openedx_bulk_import_mct.py` - Main import script
-2. `/scripts/migrations/mct/scripts/run_user_import_k8s.sh` - K8s batch execution script
-3. `/scripts/migrations/mct/scripts/test_user_import.sh` - Test script
+1. `/scripts/migrations/mct/openedx_bulk_import_mct.py` - Main import script
+2. `/scripts/migrations/mct/run_user_import_k8s.sh` - K8s batch execution script
+3. `/scripts/migrations/mct/test_user_import.sh` - Test script
 
 ### State Files (in K8s pod)
 - `/tmp/mct_import/users.csv` - User data
@@ -162,7 +162,7 @@ kubectl exec -n mereka-lms lms-75c446d865-c77cn -- \
 
 ### Full Import
 ```bash
-/home/dev/code/mereka-lms/scripts/migrations/mct/scripts/run_user_import_k8s.sh
+/home/dev/code/mereka-lms/scripts/migrations/mct/run_user_import_k8s.sh
 ```
 
 ### Check Progress

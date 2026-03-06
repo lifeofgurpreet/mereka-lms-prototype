@@ -3,7 +3,7 @@
 _Audience: Platform Engineers • Owner: platform-engineering • Last verified: 2026-03-06 • Status: canonical_
 
 > **Owner**: platform-engineering
-> **Task**: T057 (bbi-infrastructure), T058 (platform-control-plane) — DR2:I-015, DR2:I-016
+> **Task**: T057 (infrastructure), T058 (platform-control-plane) — DR2:I-015, DR2:I-016
 > **Status**: TODO — cross-repo changes required
 
 ## Why This Matters
@@ -22,7 +22,7 @@ This document covers binary downloads in:
 
 | Repository | Task | Status |
 |------------|------|--------|
-| `bbi-infrastructure` | T057 | TODO |
+| `infrastructure` | T057 | TODO |
 | `platform-control-plane` | T058 | TODO |
 
 GitHub Actions `uses:` pinning (action SHA pinning) is a separate concern covered by `docs/ops/security/ALLOWED_ACTIONS_POLICY.md`.
@@ -125,7 +125,7 @@ curl -sSfL https://github.com/kubernetes-sigs/kustomize/releases/download/kustom
 
 Changes must be made in the following repositories. This repo (`mereka-lms`) contains only the verification script and this documentation.
 
-### bbi-infrastructure (T057)
+### infrastructure (T057)
 
 1. Audit all `.github/workflows/*.yml` for binary download patterns.
 2. For each download:
@@ -144,11 +144,11 @@ Same steps as above. See `T058` in TRACKER.md.
 Run the verification script after cross-repo changes are in place:
 
 ```bash
-# From the mereka-lms repo root, with bbi-infrastructure checked out locally:
-BBI_INFRA=/path/to/bbi-infrastructure ./scripts/qa/verify-binary-pinning-bbi-infra.sh
+# From the mereka-lms repo root, with infrastructure checked out locally:
+BBI_INFRA=/path/to/infrastructure ./scripts/qa/verify-binary-pinning-bbi-infra.sh
 ```
 
-The script will SKIP all cross-repo checks if `bbi-infrastructure` is not found locally, so it is safe to run in CI for this repo.
+The script will SKIP all cross-repo checks if `infrastructure` is not found locally, so it is safe to run in CI for this repo.
 
 ## Related Documents
 

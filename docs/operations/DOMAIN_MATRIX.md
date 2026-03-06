@@ -67,7 +67,7 @@
 | Enterprise Learner MFE | 1/1 Running | **No ingress** | `learner.academyv2.mereka.dev` not in any ingress |
 | Enterprise backends | 7 pods Running | — | Services exist, no external access needed |
 
-**Root cause**: bbi-infrastructure's dev Caddy config merged `admin.academyv2.mereka.dev` into the LMS host matcher. It doesn't have the enterprise routing blocks that prod has. **Fix required in bbi-infrastructure** (add enterprise Caddy routes for dev).
+**Root cause**: infrastructure's dev Caddy config merged `admin.academyv2.mereka.dev` into the LMS host matcher. It doesn't have the enterprise routing blocks that prod has. **Fix required in infrastructure** (add enterprise Caddy routes for dev).
 
 ### Staging — NOT DEPLOYED
 
@@ -130,20 +130,20 @@ These services are shared by design — Open edX's architecture does not support
 |---|---|---|
 | Domain variables | mereka-lms | `scripts/shared/config.sh` |
 | K8s overlays | mereka-lms | `deploy/k8s/overlays/` |
-| Caddy routing config | bbi-infrastructure | `apps/mereka-lms/overlays/*/caddy/` |
-| Ingress resources | Split | mereka-lms defines, bbi-infrastructure may override |
-| DNS records | bbi-infrastructure | Cloudflare IaC |
+| Caddy routing config | infrastructure | `apps/mereka-lms/overlays/*/caddy/` |
+| Ingress resources | Split | mereka-lms defines, infrastructure may override |
+| DNS records | infrastructure | Cloudflare IaC |
 | TLS certificates | Automatic | cert-manager + letsencrypt-prod |
-| ArgoCD Applications | bbi-infrastructure | ApplicationSet `bbi-kustomize-apps` |
+| ArgoCD Applications | infrastructure | ApplicationSet `bbi-kustomize-apps` |
 
 ## Action Items
 
 | # | Item | Owner | Priority |
 |---|---|---|---|
-| 1 | ~~Fix enterprise learner portal naming: standardise on `learner.*` across all envs~~ | ~~mereka-lms + bbi-infrastructure~~ | **DONE** (#206) |
-| 2 | Add enterprise Caddy routes to dev Caddy config (fixes admin/learner 503 on dev) | bbi-infrastructure | High |
-| 3 | Deploy staging overlay via ArgoCD | bbi-infrastructure | Medium |
-| 4 | Add dev/staging DNS records for staging.academyv2.mereka.io subdomains | bbi-infrastructure | Medium |
+| 1 | ~~Fix enterprise learner portal naming: standardise on `learner.*` across all envs~~ | ~~mereka-lms + infrastructure~~ | **DONE** (#206) |
+| 2 | Add enterprise Caddy routes to dev Caddy config (fixes admin/learner 503 on dev) | infrastructure | High |
+| 3 | Deploy staging overlay via ArgoCD | infrastructure | Medium |
+| 4 | Add dev/staging DNS records for staging.academyv2.mereka.io subdomains | infrastructure | Medium |
 | 5 | ~~Create EnterpriseCustomer records~~ | ~~mereka-lms~~ | **DONE** (verified 2026-03-05) |
 | 6 | ~~Add `course_org_filter` to SiteConfiguration~~ | ~~mereka-lms~~ | **DONE** (verified 2026-03-05) |
 | 7 | Verify Discovery `Partner` records exist for subsites | mereka-lms | Medium |

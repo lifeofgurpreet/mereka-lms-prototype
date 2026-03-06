@@ -153,8 +153,11 @@ Emergency-only overrides:
 ```bash
 # AC-DEP-004: update BOTH app repo overlay AND GitOps repo overlay to prevent drift
 APP_KUST="deploy/k8s/overlays/production/kustomization.yaml"
+INFRA_REPO="${INFRA_REPO:-/home/gurpreet/projects/k8s/infrastructure}"
+APP_REPO="${APP_REPO:-/home/gurpreet/projects/k8s/mereka-lms}"
 
 # Update app repo overlay
+cd "$APP_REPO"
 sed -i "s/newTag: .*/newTag: ${TAG}/g" "$APP_KUST"
 git add "$APP_KUST"
 git commit -m "release: branding ${TAG}
@@ -165,8 +168,8 @@ openedx digest: ${OPENEDX_DIGEST}
 mfe digest: ${MFE_DIGEST}"
 git push origin main
 
-# Update GitOps repo (bbi-infrastructure)
-cd /home/gurpreet/projects/k8s/bbi-infrastructure
+# Update GitOps repo (BBI-K8 / infrastructure)
+cd "$INFRA_REPO"
 git checkout main && git pull
 INFRA_KUST="apps/mereka-lms/overlays/prod/kustomization.yaml"
 sed -i "s/newTag: .*/newTag: ${TAG}/g" "$INFRA_KUST"
@@ -265,7 +268,7 @@ PREV_TAG="<previous-known-good-tag>"
 
 ```bash
 # Revert in GitOps repo (ArgoCD auto-syncs within ~3 min after push)
-cd /home/gurpreet/projects/k8s/bbi-infrastructure
+cd /home/gurpreet/projects/k8s/infrastructure
 git log --oneline -10 apps/mereka-lms/overlays/prod/kustomization.yaml   # find prior commit
 git revert HEAD --no-edit
 git push origin main
@@ -363,7 +366,7 @@ The smoke matrix covers:
 ## GitOps Drift Check (AC-DEP-004)
 
 The canonical drift check script is `scripts/qa/verify-gitops-drift.sh`. It validates that the
-GitOps overlay (bbi-infrastructure) reflects the same custom apps and middleware as the source repo.
+GitOps overlay (`infrastructure`) reflects the same custom apps and middleware as the source repo.
 
 ```bash
 ./scripts/qa/verify-gitops-drift.sh
@@ -380,7 +383,7 @@ grep -o "'[a-z_]*'" deploy/k8s/base/apps/openedx/settings/lms/production.py \
   | sort | uniq
 
 # Custom apps in GitOps overlay (path may vary)
-grep -o "'[a-z_]*'" /home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py \
+grep -o "'[a-z_]*'" /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py \
   | sort | uniq 2>/dev/null || echo "overlay not found locally"
 ```
 

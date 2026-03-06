@@ -57,7 +57,7 @@ The `mereka_lms.py` plugin is properly built:
 
 ## Part B: Infrastructure Agent Handoff (Source Convergence)
 
-The bbi-infrastructure agent made runtime fixes that need to be durable in mereka-lms source.
+The infrastructure agent made runtime fixes that need to be durable in mereka-lms source.
 
 ### Task 1: enterprise-catalog-worker Recreate strategy
 

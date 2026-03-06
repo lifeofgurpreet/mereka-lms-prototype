@@ -1,5 +1,6 @@
 # Multi-Tenant Branding Operations Model (Superseded)
 _Audience: Operations • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+superseded_by: docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md
 
 This document has moved to:
 - "docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md"

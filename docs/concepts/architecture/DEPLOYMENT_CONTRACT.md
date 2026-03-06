@@ -2,7 +2,7 @@
 
 > Status: DRAFT — establishes the interface between app repo and GitOps repo.
 >
-> **Canonical reference**: This document and [DEPLOYMENT_BOUNDARY.md](DEPLOYMENT_BOUNDARY.md) are the authoritative sources for all questions about what belongs in this repo vs `bbi-infrastructure`. When in doubt, consult these two docs first.
+> **Canonical reference**: This document and [DEPLOYMENT_BOUNDARY.md](DEPLOYMENT_BOUNDARY.md) are the authoritative sources for all questions about what belongs in this repo vs `infrastructure` (`infrastructure` in historical artifacts). When in doubt, consult these two docs first.
 
 ## Current State (as of 2026-03-06)
 
@@ -11,11 +11,11 @@
 | Repo | Role | URL |
 |------|------|-----|
 | `mereka-lms` | App repo (producer) | github.com/Biji-Biji-Initiative/mereka-lms |
-| `bbi-infrastructure` | GitOps repo (consumer) | github.com/Biji-Biji-Initiative/bbi-infrastructure |
+| `infrastructure` | GitOps repo (consumer) | github.com/Biji-Biji-Initiative/BBI-K8 (legacy `infrastructure`) |
 
 ### How GitOps Consumes Today
 
-**bbi-infrastructure has a full vendored copy** of the app repo's deploy tree at:
+**`infrastructure` has a full vendored copy** of the app repo's deploy tree at:
 ```
 apps/mereka-lms/base/deploy/k8s/
 ```
@@ -26,17 +26,17 @@ This is NOT a submodule or remote reference. It's a file copy that must be manua
 
 | App | Repo | Path | Namespace |
 |-----|------|------|-----------|
-| `mereka-lms-dev` | bbi-infrastructure | `apps/mereka-lms/overlays/profiles/dev` | `mereka-lms-dev` |
-| `mereka-lms-staging` | bbi-infrastructure | `apps/mereka-lms/overlays/staging` | `mereka-lms-staging` |
-| `mereka-lms-prod` | bbi-infrastructure | `apps/mereka-lms/overlays/prod` | `mereka-lms` |
+| `mereka-lms-dev` | infrastructure/BBI-K8 | `apps/mereka-lms/overlays/profiles/dev` | `mereka-lms-dev` |
+| `mereka-lms-staging` | infrastructure/BBI-K8 | `apps/mereka-lms/overlays/staging` | `mereka-lms-staging` |
+| `mereka-lms-prod` | infrastructure/BBI-K8 | `apps/mereka-lms/overlays/prod` | `mereka-lms` |
 
-**All ArgoCD apps point to bbi-infrastructure, not mereka-lms.**
+**All ArgoCD apps point to `infrastructure`, not `mereka-lms`.**
 
 ### Frozen Paths (Do Not Rename)
 
-These paths are consumed by ArgoCD through bbi-infrastructure:
+These paths are consumed by ArgoCD through `infrastructure`/BBI-K8:
 
-| Consumer Path (bbi-infra) | Status |
+| Consumer Path (`infrastructure`) | Status |
 |---------------------------|--------|
 | `apps/mereka-lms/overlays/profiles/dev/` | Active (dev) |
 | `apps/mereka-lms/overlays/staging/` | Active (staging) |
@@ -78,7 +78,7 @@ Does NOT contain:
 - Private key material
 - Generated artifacts (.pyc, __pycache__)
 
-### Consumer: bbi-infrastructure
+### Consumer: infrastructure
 
 Owns:
 - Environment overlays (dev, staging, prod)
@@ -129,6 +129,6 @@ Consumption method (target): git remote reference or submodule
 
 | Version | App Export | GitOps Overlay Owner | ArgoCD Source |
 |---------|-----------|---------------------|---------------|
-| v0 (current) | `deploy/k8s/base` (vendored copy in bbi-infra) | bbi-infrastructure | bbi-infrastructure |
-| v1 (after cleanup) | `deploy/k8s/base` (cleaned, env-neutral) | bbi-infrastructure | bbi-infrastructure |
-| v2 (future) | `deploy/k8s/base` (referenced, not copied) | bbi-infrastructure | bbi-infrastructure |
+| v0 (current) | `deploy/k8s/base` (vendored copy in `infrastructure`) | infrastructure | infrastructure |
+| v1 (after cleanup) | `deploy/k8s/base` (cleaned, env-neutral) | infrastructure | infrastructure |
+| v2 (future) | `deploy/k8s/base` (referenced, not copied) | infrastructure | infrastructure |

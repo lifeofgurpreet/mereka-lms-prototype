@@ -275,7 +275,7 @@ cat deploy/k8s/patches/argocd-configmap-ignore.yaml
 ```
 
 **Add ignoreDifferences for known volatile fields** (edit the ConfigMap patch
-or the Application spec in `bbi-infrastructure`):
+or the Application spec in `infrastructure`):
 
 ```yaml
 # In the ArgoCD Application spec
@@ -370,7 +370,7 @@ GitOps workflow.
    failure reason
 3. Check `kubectl get events -n mereka-lms --sort-by='.lastTimestamp'`
 4. If the root cause is a code bug (not config), raise a bead: `br new`
-5. Fix in git, raise a PR to `bbi-infrastructure`, wait for ArgoCD to reconcile
+5. Fix in git, raise a PR to `infrastructure`, wait for ArgoCD to reconcile
    (≤3 minutes after merge)
 
 ---

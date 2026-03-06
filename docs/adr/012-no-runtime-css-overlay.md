@@ -11,7 +11,7 @@
 
 ### The Runtime CSS Overlay Pattern
 
-To enable rapid CSS hotfixes without rebuilding the OpenEdX Docker image (~30 min), we introduced a **runtime CSS ConfigMap overlay** in `bbi-infrastructure`:
+To enable rapid CSS hotfixes without rebuilding the OpenEdX Docker image (~30 min), we introduced a **runtime CSS ConfigMap overlay** in `infrastructure`:
 
 1. A ConfigMap (`openedx-overrides-runtime-css`) containing the full `mereka-overrides.css` content
 2. A Kustomize strategic merge patch mounting the ConfigMap at the exact **content-hashed** path inside the container (e.g., `/openedx/staticfiles/mereka/css/mereka-overrides.3ce8308bd75d.css`)
@@ -21,7 +21,7 @@ This pattern had a fatal flaw: **tight cross-repo coupling via a content hash**.
 
 ### The Incident (2026-02-10)
 
-A routine OpenEdX image rebuild changed the collectstatic hash from `859d9914b5fe` to `3ce8308bd75d`. The `bbi-infrastructure` ConfigMap overlay was not updated and continued mounting CSS at the old hashed path. Result:
+A routine OpenEdX image rebuild changed the collectstatic hash from `859d9914b5fe` to `3ce8308bd75d`. The `infrastructure` ConfigMap overlay was not updated and continued mounting CSS at the old hashed path. Result:
 
 - The container served the new (empty-looking) in-image CSS at `3ce8308bd75d`
 - The ConfigMap mount at `859d9914b5fe` was silently ignored (no matching request)
@@ -43,7 +43,7 @@ A routine OpenEdX image rebuild changed the collectstatic hash from `859d9914b5f
 | `BRANDING_GUARDRAILS.md` | Not documented | 10 failure modes, none for cross-repo hash drift |
 | `RELEASE_CHECKLIST.md` | No | Branding checks listed as optional |
 
-**Zero automation existed to sync the collectstatic hash between image builds and the bbi-infrastructure ConfigMap.**
+**Zero automation existed to sync the collectstatic hash between image builds and the infrastructure ConfigMap.**
 
 ## Decision
 
@@ -51,7 +51,7 @@ A routine OpenEdX image rebuild changed the collectstatic hash from `859d9914b5f
 
 ### What Changes
 
-1. **Remove from bbi-infrastructure**:
+1. **Remove from infrastructure**:
    - Delete `patches/mereka-overrides-runtime.css`
    - Delete `patches/lms-overrides-runtime-mount.yaml`
    - Remove `openedx-overrides-runtime-css` ConfigMapGenerator entry from `kustomization.yaml`
@@ -100,7 +100,7 @@ A routine OpenEdX image rebuild changed the collectstatic hash from `859d9914b5f
 ### A. Automate Hash Sync
 
 - Extract hash from `collectstatic` during build
-- Automatically update bbi-infrastructure ConfigMap references
+- Automatically update infrastructure ConfigMap references
 - **Rejected because**: Adds complexity to maintain a pattern that shouldn't exist. Still fragile (what if extraction fails silently?). Treats the symptom, not the disease.
 
 ### B. Use Unhashed Path for ConfigMap Mount
@@ -121,4 +121,4 @@ A routine OpenEdX image rebuild changed the collectstatic hash from `859d9914b5f
 - [BRANDING_GUARDRAILS.md](../guides/branding/BRANDING_GUARDRAILS.md)
 - [RELEASE_CHECKLIST.md](../operations/RELEASE_CHECKLIST.md)
 - [Django ManifestStaticFilesStorage](https://docs.djangoproject.com/en/4.2/ref/contrib/staticfiles/#manifeststaticfilesstorage)
-- Incident: 2026-02-10 production branding regression (commit `6193b75` in bbi-infrastructure)
+- Incident: 2026-02-10 production branding regression (commit `6193b75` in infrastructure)

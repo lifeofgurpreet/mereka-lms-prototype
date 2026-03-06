@@ -369,9 +369,9 @@ kubectl exec -n mereka-lms $DISCOVERY_POD -- \
 
 ## Related Documentation
 
-- **Quick Start**: [DISCOVERY_QUICKSTART.md](../operations/DISCOVERY_QUICKSTART.md)
-- **Full Setup**: [DISCOVERY_DEMO_COURSE_SETUP.md](../operations/DISCOVERY_DEMO_COURSE_SETUP.md)
-- **MongoDB Issue**: [MONGODB_PERMISSIONS_ISSUE.md](../operations/MONGODB_PERMISSIONS_ISSUE.md)
+- **Quick Start**: [DISCOVERY_QUICKSTART.md](../../../operations/DISCOVERY_QUICKSTART.md)
+- **Full Setup**: [DISCOVERY_DEMO_COURSE_SETUP.md](../../../operations/DISCOVERY_DEMO_COURSE_SETUP.md)
+- **MongoDB Issue**: [MONGODB_PERMISSIONS_ISSUE.md](../../../operations/MONGODB_PERMISSIONS_ISSUE.md)
 - **Overall Status**: [DISCOVERY_SERVICE_STATUS.md](DISCOVERY_SERVICE_STATUS.md)
 
 ## Notes

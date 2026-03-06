@@ -1,11 +1,12 @@
 # Analytics Access Guide (Superseded)
 _Audience: Everyone • Owner: Data/Analytics • Last updated: 2025-11-12 • Status: superseded_
+superseded_by: docs/concepts/analytics/ANALYTICS_CONSOLE_ACCESS.md
 
 This document has moved to:
-- `docs/analytics/ANALYTICS_CONSOLE_ACCESS.md`
+- `docs/concepts/analytics/ANALYTICS_CONSOLE_ACCESS.md`
 
 Open:
-- `docs/analytics/ANALYTICS_CONSOLE_ACCESS.md`
+- `docs/concepts/analytics/ANALYTICS_CONSOLE_ACCESS.md`
 
 ## 📊 Superset Analytics Dashboard
 

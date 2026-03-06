@@ -41,7 +41,7 @@ Quick fix: `./scripts/infra/fix-service-selectors.sh`
 ./scripts/qa/verify-studio-sso-flow.sh
 ```
 
-**If middleware is missing**: Check that `production-prod.py` (bbi-infrastructure LMS settings overlay) contains `StudioSSOBypassMiddleware` in the `MIDDLEWARE` list. The middleware should be at index 1 (after forwarded-headers hardening).
+**If middleware is missing**: Check that `production-prod.py` (infrastructure LMS settings overlay) contains `StudioSSOBypassMiddleware` in the `MIDDLEWARE` list. The middleware should be at index 1 (after forwarded-headers hardening).
 
 **Manual check**:
 ```bash

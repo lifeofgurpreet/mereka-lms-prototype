@@ -70,7 +70,7 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
 | **Ingress** | NGINX Ingress | NGINX Ingress | NGINX Ingress |
 | **SSL** | Self-signed | Let's Encrypt (cert-manager) | Let's Encrypt (cert-manager) |
 | **Kyverno** | Active (non-root, no-latest, limits) | Active | Not deployed |
-| **Overlay** | `deploy/k8s/overlays/local/` | `bbi-infrastructure:apps/.../staging/` | `bbi-infrastructure:apps/.../prod/` |
+| **Overlay** | `deploy/k8s/overlays/local/` | `infrastructure:apps/.../staging/` | `infrastructure:apps/.../prod/` |
 | **Enterprise** | Scaled to 0 | TBD | Running (7 services) |
 | **Release script flag** | `--target-env staging` | `--target-env staging` | `--target-env production` |
 
@@ -149,7 +149,7 @@ The `tutor_env/` directory is gitignored. Docker images are cached locally:
 | Artifact | Owner | Location | Handoff To |
 |----------|-------|----------|------------|
 | Base manifests | LMS team | `deploy/k8s/base/` | Platform team (via GitOps) |
-| Production overlay | Platform team | `bbi-infrastructure:apps/.../prod/` | ArgoCD |
+| Production overlay | Platform team | `infrastructure:apps/.../prod/` | ArgoCD |
 | Image tags | LMS team | `kustomization.yaml` (both repos) | ArgoCD |
 | Secrets | Security team | GCP SM (`bbi-k8` project) | ExternalSecrets |
 | DNS records | Platform team | Cloudflare | NGINX Ingress |
@@ -157,8 +157,8 @@ The `tutor_env/` directory is gitignored. Docker images are cached locally:
 
 ## Related
 
-- Architecture: `docs/architecture/DEPLOYMENT_BOUNDARY.md` — authoritative boundary: what stays vs moves to infra repo
-- Architecture: `docs/architecture/DEPLOYMENT_CONTRACT.md` — interface contract between app repo and GitOps repo
+- Architecture: `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md` — authoritative boundary: what stays vs moves to infra repo
+- Architecture: `docs/concepts/architecture/DEPLOYMENT_CONTRACT.md` — interface contract between app repo and GitOps repo
 - Script: `scripts/infra/canonical-release.sh`
 - Script: `scripts/infra/release-openedx-gitops.sh`
 - Runbook: `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md`

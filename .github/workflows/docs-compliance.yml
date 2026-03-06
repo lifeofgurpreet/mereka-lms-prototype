@@ -1,0 +1,218 @@
+name: Docs Compliance
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs-compliance.yml"
+      - "docs/qa/verify-doc-command-refs.sh"
+      - "docs/qa/verify-doc-link-integrity.sh"
+      - "docs/qa/verify-doc-catalog-health-test.sh"
+      - "docs/qa/verify-docs-policy.sh"
+      - "docs/qa/verify-doc-catalog-health.py"
+      - "docs/qa/build-docs-scorecard.py"
+      - "docs/qa/build-docs-scorecard-test.sh"
+      - "docs/qa/build-docs-compliance-summary.py"
+      - "docs/qa/build-docs-compliance-summary-test.sh"
+      - "docs/qa/verify-doc-command-refs-test.sh"
+      - "docs/qa/compare-docs-scorecard-to-base.sh"
+      - "docs/qa/compare-docs-scorecard-to-base-test.sh"
+      - "docs/catalog.json"
+      - "scripts/qa/verify-repo-structure.sh"
+
+jobs:
+  docs-compliance:
+    name: Run docs compliance gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify docs policy
+        run: |
+          chmod +x docs/qa/verify-docs-policy.sh
+          ./docs/qa/verify-docs-policy.sh
+
+      - name: Verify repository structure
+        run: |
+          ./scripts/qa/verify-repo-structure.sh
+
+      - name: Verify doc command references
+        run: |
+          set -euo pipefail
+          chmod +x docs/qa/verify-doc-command-refs.sh
+          DOCS_CMDREF_SUMMARY="${RUNNER_TEMP}/docs-command-refs-summary.json"
+          mapfile -t CHANGED_DOCS < <(git diff --name-only "origin/${{ github.base_ref }}...${{ github.sha }}" -- 'docs/**/*.md' 'docs/*.md' || true)
+          CHANGED_DOCS_COUNT=${#CHANGED_DOCS[@]}
+
+          {
+            echo "### Docs Compliance Summary"
+            echo "- Changed docs (PR scope): ${CHANGED_DOCS_COUNT}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CHANGED_DOCS_COUNT" -gt 0 ]; then
+            echo "Changed docs (PR scoped):"
+            printf '%s\n' "${CHANGED_DOCS[@]}"
+            ./docs/qa/verify-doc-command-refs.sh --summary-json "$DOCS_CMDREF_SUMMARY" "${CHANGED_DOCS[@]}"
+          else
+            ./docs/qa/verify-doc-command-refs.sh --summary-json "$DOCS_CMDREF_SUMMARY"
+          fi
+
+          python3 - "$DOCS_CMDREF_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+missing = payload.get("missing", [])
+
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+            fp.write("### Docs Command Reference Summary\n")
+            fp.write(f"- files_checked={payload.get('files_checked', 0)}\n")
+            fp.write(f"- total_candidates={payload.get('total_candidates', 0)}\n")
+            fp.write(f"- missing_references={payload.get('missing_references', 0)}\n")
+            fp.write(f"- status={payload.get('status')}\n")
+            for item in missing[:15]:
+                fp.write(f"- {item}\n")
+
+      - name: Verify docs link integrity
+        run: |
+          set -euo pipefail
+          chmod +x docs/qa/verify-doc-link-integrity.sh
+          mapfile -t CHANGED_DOCS < <(git diff --name-only "origin/${{ github.base_ref }}...${{ github.sha }}" -- 'docs/**/*.md' 'docs/*.md' || true)
+          if [ "${#CHANGED_DOCS[@]}" -gt 0 ]; then
+            docs/qa/verify-doc-link-integrity.sh "${CHANGED_DOCS[@]}"
+          else
+            docs/qa/verify-doc-link-integrity.sh
+          fi
+
+      - name: Verify docs catalog health
+        run: |
+          set -euo pipefail
+          CATALOG_HEALTH_LOG="$(mktemp)"
+          CATALOG_HEALTH_SUMMARY="${RUNNER_TEMP}/docs-catalog-health-summary.json"
+          DOCS_SCORECARD_PATH="${RUNNER_TEMP}/docs-scorecard.json"
+          DOCS_SCORECARD_COMPARISON_PATH="${RUNNER_TEMP}/docs-scorecard-comparison.json"
+          DOCS_COMPLIANCE_SUMMARY_PATH="${RUNNER_TEMP}/docs-compliance-summary.json"
+          BASE_REF="origin/${{ github.base_ref }}"
+          if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
+            BASE_REF="origin/main"
+          fi
+          python3 docs/qa/verify-doc-catalog-health.py \
+            --max-stale-days 45 \
+            --summary-file "$CATALOG_HEALTH_SUMMARY" | tee "$CATALOG_HEALTH_LOG"
+          readarray -t CATALOG_HEALTH_FIELDS < <(
+            python3 - "$CATALOG_HEALTH_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    summary = json.load(fp)
+
+def _emit_list(label, items, limit=10):
+    print(f"{label}={len(items)}")
+    for item in items[:limit]:
+        print(f"{label}_item={item}")
+
+print(f"catalog_entries={summary['all_entries']}")
+print(f"canonical_entries={summary['canonical_total']}")
+print(f"canonical_stale={summary['canonical_stale']}")
+print(f"canonical_missing_owner={summary['canonical_missing_owner']}")
+print(f"canonical_missing_verified={summary['canonical_missing_verified']}")
+print(f"canonical_high_risk={summary['canonical_high_risk']}")
+print(f"canonical_missing_file={summary['canonical_missing_file']}")
+_emit_list("stale_entries", summary.get("stale_entries", []))
+_emit_list("canonical_missing_owner_entries", summary.get("missing_owner_entries", []))
+_emit_list("canonical_missing_verified_entries", summary.get("missing_verified_entries", []))
+_emit_list("canonical_missing_file_entries", summary.get("canonical_missing_file_entries", []))
+PY
+          )
+
+          {
+            echo "### Docs Catalog Health"
+            echo "- `max_stale_days`: 45"
+            printf '%s\n' "${CATALOG_HEALTH_FIELDS[@]}" | sed 's/^/ - /'
+            cat "$CATALOG_HEALTH_LOG" \
+              | sed 's/^/ - /'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          python3 docs/qa/build-docs-scorecard.py \
+            --summary-file "$CATALOG_HEALTH_SUMMARY" \
+            --out "$DOCS_SCORECARD_PATH" \
+            --min-score 80
+
+          python3 docs/qa/compare-docs-scorecard-to-base.sh \
+            --current-summary "$CATALOG_HEALTH_SUMMARY" \
+            --base-ref "$BASE_REF" \
+            --regression-threshold 10 \
+            --out "$DOCS_SCORECARD_COMPARISON_PATH"
+
+          python3 - "$DOCS_SCORECARD_COMPARISON_PATH" <<'PY'
+import json
+import os
+
+with open(os.environ["DOCS_SCORECARD_COMPARISON_PATH"], "r", encoding="utf-8") as fp:
+    trend = json.load(fp)
+
+with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Trend\n")
+    fp.write(f"- base_ref={trend['base_ref']}\n")
+    fp.write(f"- base_score={trend['base_score']}\n")
+    fp.write(f"- current_score={trend['current_score']}\n")
+    fp.write(f"- score_drop={trend['score_drop']}\n")
+    fp.write(f"- max_allowed_drop={trend['max_allowed_drop']}\n")
+    fp.write(f"- status={trend['status']}\n")
+PY
+
+          python3 docs/qa/build-docs-compliance-summary.py \
+            --catalog-summary "$CATALOG_HEALTH_SUMMARY" \
+            --cmdref-summary "$DOCS_CMDREF_SUMMARY" \
+            --scorecard "$DOCS_SCORECARD_PATH" \
+            --comparison "$DOCS_SCORECARD_COMPARISON_PATH" \
+            --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
+
+          python3 - "$DOCS_COMPLIANCE_SUMMARY_PATH" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import os
+
+with open(os.environ["DOCS_COMPLIANCE_SUMMARY_PATH"], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Compliance Summary\n")
+    fp.write(f"- overall_status={payload.get('overall_status')}\n")
+    fp.write(f"- catalog_health_status={payload.get('statuses', {}).get('catalog_health', 'n/a')}\n")
+    fp.write(f"- command_refs_status={payload.get('statuses', {}).get('command_references', 'n/a')}\n")
+    fp.write(f"- docs_scorecard_status={payload.get('statuses', {}).get('docs_scorecard', 'n/a')}\n")
+    fp.write(f"- scorecard_trend_status={payload.get('statuses', {}).get('scorecard_trend', 'n/a')}\n")
+PY
+
+      - name: Upload docs catalog health scorecard
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-catalog-health-scorecard
+          path: |
+            ${{ runner.temp }}/docs-catalog-health-summary.json
+            ${{ runner.temp }}/docs-scorecard.json
+            ${{ runner.temp }}/docs-scorecard-comparison.json
+            ${{ runner.temp }}/docs-command-refs-summary.json
+            ${{ runner.temp }}/docs-compliance-summary.json
+
+      - name: Verify docs catalog health self-test
+        run: |
+          chmod +x \
+            docs/qa/verify-doc-catalog-health-test.sh \
+            docs/qa/verify-doc-command-refs-test.sh \
+            docs/qa/verify-doc-link-integrity-test.sh \
+            docs/qa/build-docs-scorecard-test.sh \
+            docs/qa/compare-docs-scorecard-to-base-test.sh \
+            docs/qa/build-docs-compliance-summary-test.sh
+          docs/qa/verify-doc-catalog-health-test.sh
+          docs/qa/verify-doc-command-refs-test.sh
+          docs/qa/verify-doc-link-integrity-test.sh
+          docs/qa/build-docs-scorecard-test.sh
+          docs/qa/compare-docs-scorecard-to-base-test.sh
+          docs/qa/build-docs-compliance-summary-test.sh

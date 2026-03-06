@@ -43,7 +43,7 @@
 | mereka-checkout | Running 1/1 |
 | mereka-web | Running 1/1 |
 
-**LMS is absent from the RKE2 cluster.** The `mereka-lms` staging overlay exists in bbi-infrastructure but is disabled (empty `kustomization.yaml` with `resources: []`).
+**LMS is absent from the RKE2 cluster.** The `mereka-lms` staging overlay exists in infrastructure but is disabled (empty `kustomization.yaml` with `resources: []`).
 
 ---
 
@@ -78,15 +78,15 @@ ghcr.io/biji-biji-initiative/mereka-lms/openedx:<tag>
 ghcr.io/biji-biji-initiative/mereka-lms/mfe:<tag>
 ```
 
-Current production tags (from bbi-infrastructure prod overlay):
+Current production tags (from infrastructure prod overlay):
 - openedx: `mereka-brand`
 - openedx-mfe: `b732a7d-20260210161437`
 
-Current staging tags (from bbi-infrastructure staging overlay):
+Current staging tags (from infrastructure staging overlay):
 - openedx: `20260207-branding-pass7-5b26e45`
 - openedx-mfe: `20260208-mfe-discussions-pass4-c17df16`
 
-**Promotion flow**: Build in `mereka-lms` → push to Artifact Registry → update tag in bbi-infrastructure staging overlay → ArgoCD syncs to RKE2.
+**Promotion flow**: Build in `mereka-lms` → push to Artifact Registry → update tag in infrastructure staging overlay → ArgoCD syncs to RKE2.
 
 ### Expected Guardrails
 
@@ -109,13 +109,13 @@ Current staging tags (from bbi-infrastructure staging overlay):
 
 | Gate | Name | Status on RKE2 | Responsible Repo | LMS Dependencies |
 |------|------|----------------|-----------------|------------------|
-| **0** | Lock (nonprod-guardrails) | **DONE** | `bbi-infrastructure` | None |
-| **1** | Bootstrap (ArgoCD) | **DONE** | `bbi-infrastructure` | None |
-| **2** | Platform essentials (cert-manager, ingress, external-secrets, monitoring, kyverno, velero) | **DONE** | `bbi-infrastructure` | None |
-| **3** | Secrets provisioning | **PARTIAL** | `bbi-infrastructure` + GCP SM | LMS needs: `openedx-secrets`, `database-secrets`, `mereka-lms-runtime-secrets` provisioned in RKE2 `mereka-lms` namespace |
-| **4** | App packaging/deploy | **NOT STARTED** | `mereka-lms` (base manifests) + `bbi-infrastructure` (staging overlay) | Enable staging kustomization, create ArgoCD Application for mereka-lms-staging-rke2 |
+| **0** | Lock (nonprod-guardrails) | **DONE** | `infrastructure` | None |
+| **1** | Bootstrap (ArgoCD) | **DONE** | `infrastructure` | None |
+| **2** | Platform essentials (cert-manager, ingress, external-secrets, monitoring, kyverno, velero) | **DONE** | `infrastructure` | None |
+| **3** | Secrets provisioning | **PARTIAL** | `infrastructure` + GCP SM | LMS needs: `openedx-secrets`, `database-secrets`, `mereka-lms-runtime-secrets` provisioned in RKE2 `mereka-lms` namespace |
+| **4** | App packaging/deploy | **NOT STARTED** | `mereka-lms` (base manifests) + `infrastructure` (staging overlay) | Enable staging kustomization, create ArgoCD Application for mereka-lms-staging-rke2 |
 | **5** | Data migration/seed | **NOT STARTED** | `mereka-lms` (migration scripts) | MySQL + MongoDB data for staging |
-| **6** | Staging cutover | **NOT STARTED** | `bbi-infrastructure` (DNS, ingress) | All gates 0-5 complete, smoke tests pass |
+| **6** | Staging cutover | **NOT STARTED** | `infrastructure` (DNS, ingress) | All gates 0-5 complete, smoke tests pass |
 
 ### Gate 3 Detail: Secrets
 
@@ -132,7 +132,7 @@ Secrets needed before LMS can start on RKE2:
 ### Gate 4 Detail: App Deployment
 
 To enable LMS on RKE2:
-1. In `bbi-infrastructure`: Copy `kustomization.enabled.yaml` over `kustomization.yaml` in `clusters/staging/rke2/` (this enables `apps/mereka-lms/overlays/staging`)
+1. In `infrastructure`: Copy `kustomization.enabled.yaml` over `kustomization.yaml` in `clusters/staging/rke2/` (this enables `apps/mereka-lms/overlays/staging`)
 2. The staging overlay already exists with 17 patches (domain bindings, secrets wiring, SSO, workload profiles, etc.)
 3. Create `mereka-lms-staging-rke2` ArgoCD Application (or add to ApplicationSet)
 4. Ensure images are pullable (Artifact Registry auth or pre-load)
@@ -149,7 +149,7 @@ deploy/k8s/base/          # Base K8s resources (Deployments, Services, ConfigMap
 deploy/k8s/overlays/      # Local and production overlays (this repo)
 ```
 
-The staging overlay that targets RKE2 lives in **bbi-infrastructure**:
+The staging overlay that targets RKE2 lives in **infrastructure**:
 ```
 apps/mereka-lms/overlays/staging/    # 17 staging-specific patches
 clusters/staging/rke2/               # RKE2 bootstrap + platform resources
@@ -158,7 +158,7 @@ clusters/staging/rke2/               # RKE2 bootstrap + platform resources
 ### Workflow
 
 ```
-mereka-lms (this repo)              bbi-infrastructure (infra repo)
+mereka-lms (this repo)              infrastructure (infra repo)
 ─────────────────────               ────────────────────────────────
 1. App code + base manifests   →    2. Staging overlay selects version
    (deploy/k8s/base/)                  (apps/mereka-lms/overlays/staging/)
@@ -171,13 +171,13 @@ mereka-lms (this repo)              bbi-infrastructure (infra repo)
 
 All LMS-specific RKE2 evidence is written to:
 - **This repo**: `docs/operations/RKE2_LMS_HANDOFF.md` (this document)
-- **bbi-infrastructure**: `apps/mereka-lms/overlays/staging/` (overlay changes)
+- **infrastructure**: `apps/mereka-lms/overlays/staging/` (overlay changes)
 
 ### Sign-Off
 
 | Gate | Sign-Off Authority | Criteria |
 |------|-------------------|----------|
-| Gates 0-2 (platform) | Platform team (bbi-infrastructure) | ArgoCD apps Synced/Healthy |
+| Gates 0-2 (platform) | Platform team (infrastructure) | ArgoCD apps Synced/Healthy |
 | Gate 3 (secrets) | Platform team + Security | ExternalSecrets synced, no PLACEHOLDER values |
 | Gate 4 (app deploy) | LMS team (this repo) | LMS pods Running, health checks pass |
 | Gate 5 (data) | LMS team + DBA | Migration scripts complete, data verified |
@@ -195,8 +195,8 @@ All LMS-specific RKE2 evidence is written to:
 | GitOps workflow reference | `docs/ops/runbooks/GITOPS_WORKFLOW.md` | Existing |
 | Kind cluster recovery (context) | `docs/operations/KIND_CLUSTER_RECOVERY_EVIDENCE.md` | 2026-02-18T13:13Z |
 | GKE workload triage (context) | `docs/operations/GKE_WORKLOAD_TRIAGE_EVIDENCE.md` | 2026-02-18T13:21Z |
-| RKE2 staging overlay (infra repo) | `bbi-infrastructure:apps/mereka-lms/overlays/staging/kustomization.yaml` | Existing (17 patches) |
-| RKE2 bootstrap (infra repo) | `bbi-infrastructure:clusters/staging/rke2/` | Existing (disabled) |
+| RKE2 staging overlay (infra repo) | `infrastructure:apps/mereka-lms/overlays/staging/kustomization.yaml` | Existing (17 patches) |
+| RKE2 bootstrap (infra repo) | `infrastructure:clusters/staging/rke2/` | Existing (disabled) |
 
 ### Cluster Verification Commands
 
@@ -223,5 +223,5 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster get application -n
 - `docs/ops/runbooks/GITOPS_WORKFLOW.md` — Two-repo GitOps architecture
 - `docs/operations/KIND_CLUSTER_RECOVERY_EVIDENCE.md` — Kind cluster fixes (Kyverno, CMS OOM)
 - `docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md` — Current infra model
-- `bbi-infrastructure:ENVIRONMENTS.md` — All environments and URLs
-- `bbi-infrastructure:CLAUDE.md` — Infra repo rules (GKE protection, data protection, cost budget)
+- `infrastructure:ENVIRONMENTS.md` — All environments and URLs
+- `infrastructure:CLAUDE.md` — Infra repo rules (GKE protection, data protection, cost budget)

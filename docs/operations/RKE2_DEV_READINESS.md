@@ -2,12 +2,12 @@
 
 > **Cluster**: `rke2-nonprod` (single-node, v1.34.3+rke2r3)
 > **Namespace**: `mereka-lms`
-> **ArgoCD source**: `infrastructure` repo (legacy name: `bbi-infrastructure`), path `apps/mereka-lms/overlays/profiles/dev`
+> **ArgoCD source**: `infrastructure` repo (legacy name: `infrastructure`), path `apps/mereka-lms/overlays/profiles/dev`
 
 ## Architecture
 
 ```
-bbi-infrastructure repo
+infrastructure repo
   apps/mereka-lms/
     base/                         # Shared Tutor-generated manifests
     overlays/
@@ -49,7 +49,7 @@ The `profiles/dev` overlay layers on top of `overlays/dev`, adding resource gove
 
 ### 1. Switch ArgoCD to profiles/dev path
 
-In `bbi-infrastructure`, update the ArgoCD Application for `mereka-lms`:
+In `infrastructure`, update the ArgoCD Application for `mereka-lms`:
 
 ```yaml
 spec:

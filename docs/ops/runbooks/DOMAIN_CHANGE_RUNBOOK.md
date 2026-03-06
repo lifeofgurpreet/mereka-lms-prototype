@@ -6,7 +6,7 @@ This runbook enforces **zero-drift** changes for production (GKE) and dev (kind/
 ## Source Of Truth (No Drift)
 
 Production (`academyv2.mereka.io`) is **GitOps-managed by ArgoCD** from the `BBI-K8` repo:
-- Repo: `Biji-Biji-Initiative/BBI-K8` (legacy docs may still reference `bbi-infrastructure`)
+- Repo: `Biji-Biji-Initiative/BBI-K8` (legacy docs may still reference `infrastructure`)
 - Path: `apps/mereka-lms/overlays/prod`
 - Argo app: `mereka-lms-local` (namespace `argocd`)
 

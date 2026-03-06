@@ -11,7 +11,7 @@
 The mobile apps specification (`specs/mobile-apps-enterprise_spec.md`) outlines support for both iOS and Android mobile applications. Currently:
 
 1. **iOS app status**:
-   - Setup documentation exists (`docs/MOBILE_IOS_APP_SETUP.md`)
+- Setup documentation exists (`docs/archive/ios/MOBILE_IOS_APP_SETUP.md`)
    - Configuration claimed complete but **UNVERIFIED in production**
    - Mobile API status: claimed enabled but requires runtime confirmation
    - OAuth app (`mereka-mobile-app`): claimed configured but not verified
@@ -92,7 +92,7 @@ We are **deferring** Android app development indefinitely.
 ### Documentation Updates Required
 - [ ] Update `docs/operations/CAPABILITY_MATRIX.md`: Change Android app status from "DRAFT" to "DEFERRED"
 - [ ] Add deferral notice to `specs/mobile-apps-enterprise_spec.md` (Android section)
-- [ ] Update `docs/MOBILE_IOS_APP_SETUP.md` to remove references suggesting Android is coming soon
+- [ ] Update `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` to remove references suggesting Android is coming soon
 
 ### iOS Verification Checklist (prerequisite for reconsidering Android)
 Before Android development begins, iOS must be verified:
@@ -115,5 +115,5 @@ If/when Android development is approved:
 ## Related
 - ADR-017: Analytics target decision (similar deferral pattern)
 - `specs/mobile-apps-enterprise_spec.md` (mobile strategy)
-- `docs/MOBILE_IOS_APP_SETUP.md` (iOS setup)
+- `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` (iOS setup)
 - `docs/operations/CAPABILITY_MATRIX.md` (capability tracking)

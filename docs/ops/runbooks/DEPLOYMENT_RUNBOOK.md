@@ -49,7 +49,7 @@ Modules:
 
 ## 3. Tutor configuration
 
-1. Copy `infrastructure/tutor/config.example.yml` to `infrastructure/tutor/config.prod.yml` and adjust (do not copy secret values into git):
+1. Copy `infrastructure/tutor/config.example.yml` to `tutor_env/config.yml` and adjust (do not copy secret values into git):
    - `LMS_HOST`: `academyv2.mereka.io`
    - `CMS_HOST`: `studio.academyv2.mereka.io`
    - `MFE_HOST`: `apps.academyv2.mereka.io`
@@ -120,7 +120,7 @@ Modules:
   tutor images build openedx && tutor images build mfe
   ```
   The patch step copies the SCSS/fonts into the Indigo MFE build so all micro-frontends share the same palette.
-- Hook monitoring dashboards/alerts (see `docs/MONITORING.md` + JSON templates in `infrastructure/monitoring/`).
+- Hook monitoring dashboards/alerts (see `docs/ops/monitoring/MONITORING.md` + JSON templates in `infrastructure/monitoring/`).
 - Review the DR runbook and backup cadence in `docs/ops/runbooks/DISASTER_RECOVERY.md`.
 - Enforce cost guardrails via Terraform budgets. Populate `billing_account_id`, `monthly_budget_myr`, and `budget_thresholds` in `infrastructure/terraform/terraform.tfvars`, then apply:
   ```bash
@@ -215,4 +215,4 @@ We do not have a New Relic license, so the placeholder keys caused unnecessary s
 
 The `infrastructure/docker/enterprise-mfe-clean/` Dockerfiles extend the upstream images and remove
 the NREUM `<script>` block once at build time via `strip-nreum.sh`. See also:
-`docs/archive/evidence/operations/69qz-enterprise-mfe-clean-build.md`
+`docs/archive/evidence/operations/evidence/69qz-enterprise-mfe-clean-build.md`

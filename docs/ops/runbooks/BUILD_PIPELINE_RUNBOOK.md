@@ -92,7 +92,7 @@ spec.initContainers[3].name: Duplicate value: "dind"
 
 **Correct configuration**: Do NOT set `containerMode` at all. Define the full DinD template manually:
 ```yaml
-# In ArgoCD Application Helm values (bbi-infrastructure):
+# In ArgoCD Application Helm values (`infrastructure` / BBI-K8):
 # DO NOT set containerMode. Define template directly.
 template:
   spec:
@@ -119,7 +119,7 @@ template:
             value: unix:///var/run/docker.sock
 ```
 
-**Where this lives**: `bbi-infrastructure/clusters/dev/rke2/apps/arc-runners-heavy.yaml` (ArgoCD Application with Helm values). See also ADR-002 in bbi-infrastructure.
+**Where this lives**: `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/clusters/dev/rke2/apps/arc-runners-heavy.yaml` (ArgoCD Application with Helm values). See also ADR-002 in BBI-K8/`infrastructure`.
 
 **containerMode option matrix**:
 | Setting | Behavior | Works? |
@@ -196,7 +196,7 @@ Tutor v21 (Ulmo) uses Python 3.12. Any path referencing `site-packages` must use
 The `arc-runners-heavy` ArgoCD Application deploys the heavy runner AutoscalingRunnerSet via Helm chart `gha-runner-scale-set` v0.13.1. Changes to runner config must go through:
 
 ```
-Edit bbi-infrastructure/clusters/dev/rke2/apps/arc-runners-heavy.yaml
+Edit https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/clusters/dev/rke2/apps/arc-runners-heavy.yaml
   → Push to main
   → ArgoCD auto-syncs (selfHeal: true, 3-min poll)
 ```
@@ -272,7 +272,7 @@ Same steps but with MFE-specific context/Dockerfile and MFE branding verificatio
 
 ### Post-build
 - **SLSA Provenance**: cosign keyless attestation (Sigstore OIDC) — runs on ubuntu-24.04
-- **GitOps Update**: (manual dispatch only) Updates `bbi-infrastructure` with new digests
+- **GitOps Update**: (manual dispatch only) Updates the GitOps repo (`infrastructure`) with new digests
 
 ---
 
@@ -287,8 +287,8 @@ Same steps but with MFE-specific context/Dockerfile and MFE branding verificatio
 | `scripts/infra/resolve-image-digest.sh` | Digest resolution helper |
 | `scripts/qa/verify-mfe-image-branding.sh` | MFE branding contract check |
 | `deploy/k8s/base/arc/` | ARC manifests (local reference) |
-| `bbi-infrastructure/clusters/dev/rke2/apps/arc-runners-heavy.yaml` | Actual ARC config (ArgoCD) |
-| `bbi-infrastructure/docs/adr/002-arc-dind-mtu-configuration.md` | ADR for DinD MTU fix |
+| `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/clusters/dev/rke2/apps/arc-runners-heavy.yaml` | Actual ARC config (ArgoCD) |
+| `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/docs/adr/002-arc-dind-mtu-configuration.md` | ADR for DinD MTU fix |
 
 ---
 

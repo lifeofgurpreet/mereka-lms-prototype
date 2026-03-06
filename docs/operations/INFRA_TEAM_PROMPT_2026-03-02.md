@@ -1,6 +1,6 @@
 # Infra Team Action Items — 2026-03-02
 
-**Context**: CI hardening work on `mereka-lms` is complete. 148/162 scripts pass. The remaining 4 failures all require infra team action in **bbi-infrastructure** and/or image rebuilds.
+**Context**: CI hardening work on `mereka-lms` is complete. 148/162 scripts pass. The remaining 4 failures all require infra team action in **infrastructure** and/or image rebuilds.
 
 **Prerequisite**: PR #123 (`start/next-implementor-2026-03-01` → `main`) must be merged first. All image builds pull from `main`.
 
@@ -40,7 +40,7 @@ docker tag openedx:latest "$IMAGE:$TAG"
 docker push "$IMAGE:$TAG"
 ```
 
-**Then in bbi-infrastructure**:
+**Then in infrastructure**:
 ```bash
 # Update production overlay image tag
 # File: apps/mereka-lms/overlays/prod/kustomization.yaml
@@ -72,7 +72,7 @@ docker tag mfe:latest "$MFE_IMAGE:$MFE_TAG"
 docker push "$MFE_IMAGE:$MFE_TAG"
 ```
 
-**Then in bbi-infrastructure**: update MFE image tag in production overlay.
+**Then in infrastructure**: update MFE image tag in production overlay.
 
 **Verification**:
 ```bash
@@ -82,7 +82,7 @@ bash scripts/qa/verify-multisite-ux-consistency.sh
 
 ---
 
-## Action 4: Sync bbi-infrastructure Overlay
+## Action 4: Sync infrastructure Overlay
 
 **Why**: Two drift items detected by `verify-gitops-image-overrides.sh`:
 
@@ -100,10 +100,10 @@ The MFE Caddyfile in the infra repo is stale. Copy the canonical version:
 # mereka-lms/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile
 
 # Destination (infra repo):
-# bbi-infrastructure/apps/mereka-lms/base/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile
+# infrastructure/apps/mereka-lms/base/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile
 
 cp /path/to/mereka-lms/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile \
-   /path/to/bbi-infrastructure/apps/mereka-lms/base/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile
+   /path/to/infrastructure/apps/mereka-lms/base/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile
 ```
 
 **Verification**:
@@ -131,7 +131,7 @@ The script will:
 3. Push to `ghcr.io/biji-biji-initiative/mereka-lms/openedx-credentials:21.0.0-tzdata`
 4. Print the deployment manifest update instructions
 
-**Then update** `deploy/k8s/base/deployments.yml` (credentials section):
+**Then update** `deploy/k8s/base/kustomization.yaml` (credentials section):
 ```yaml
 # Change:
 image: docker.io/overhangio/openedx-credentials:21.0.0
@@ -147,8 +147,8 @@ image: ghcr.io/biji-biji-initiative/mereka-lms/openedx-credentials:21.0.0-tzdata
 2. Rebuild openedx image from `main`
 3. Rebuild MFE image from `main`
 4. Build credentials image with tzdata fix
-5. Update bbi-infrastructure overlay (image tags + Caddyfile)
-6. Commit and push bbi-infrastructure changes
+5. Update infrastructure overlay (image tags + Caddyfile)
+6. Commit and push infrastructure changes
 7. Wait for ArgoCD sync (3 min)
 8. Run verification scripts
 

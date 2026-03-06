@@ -49,7 +49,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/215
 
 ### Current State (evidence)
 
-- `docs/archive/evidence/operations/router-smoke/prod-route-health-20260219-1214.md` contains raw `set-cookie` with `sessionid` and `csrftoken`.
+- docs/archive/evidence/operations/router-smoke/prod-route-health-20260219-1214.md contains raw `set-cookie` with `sessionid` and `csrftoken`.
 - Raw evidence is committed under `docs/archive/evidence/operations/**` and `docs/archive/evidence/observability/**`.
 - `.gitignore` correctly ignores `var/`, but evidence discipline in `docs/` is policy-only today.
 - Existing secret scanning does not reliably block this class before commit in docs evidence paths.
@@ -76,7 +76,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/215
 
 1. Add `scripts/qa/verify-evidence-redaction.sh` and wire it into `.github/workflows/ci.yml`.
 2. Add pre-commit check for staged evidence files with same signature set.
-3. Add `docs/operations/EVIDENCE_STORAGE_POLICY.md` with redaction examples.
+3. Add docs/operations/EVIDENCE_STORAGE_POLICY.md with redaction examples.
 4. Refactor evidence-producing workflows to:
    - write raw files into `var/ci/**`
    - upload with `actions/upload-artifact`
@@ -137,7 +137,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/216
    - `scripts/infra/release-openedx-gitops.sh`
    - `scripts/infra/canonical-release.sh` (where used)
 3. Add CI grep gate preventing `tutor k8s init|apply` usage in release workflows.
-4. Add `docs/operations/IAC_BOUNDARY_CONTRACT.md` mapping:
+4. Add docs/operations/IAC_BOUNDARY_CONTRACT.md mapping:
    - `infrastructure/terraform` = cloud infra
    - `deploy/k8s` = app manifests
    - GitOps repo = live release pinning/overrides.
@@ -190,9 +190,9 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/217
    - iterate configured brand package directories
    - validate expected assets per brand.
 2. Update `sync-brand-assets.sh` to call multi-brand sync and remove absolute-path hard requirement (retain optional override env var only).
-3. Add `scripts/qa/verify-brand-packages-drift.sh`:
+3. Add scripts/qa/verify-brand-packages-drift.sh:
    - hash compare assets from canonical source to each target consumer.
-4. Add brand manifest file (e.g., `assets/branding/brand-packages.manifest.yml`) for declarative mapping.
+4. Add brand manifest file (e.g., assets/branding/brand-packages.manifest.yml) for declarative mapping.
 
 ### Rollback Plan
 
@@ -201,8 +201,8 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/217
 
 ### Verification
 
-- `./scripts/branding/sync-brand-assets.sh`
-- `./scripts/qa/verify-brand-packages-drift.sh`
+- ./scripts/branding/sync-brand-assets.sh
+- scripts/qa/verify-brand-packages-drift.sh (planned, not yet added in this wave)
 - `find infrastructure/tutor/brand-* -maxdepth 2 -type f | sort`
 
 ---
@@ -238,12 +238,12 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/218
 
 ### Migration Steps
 
-1. Add `docs/guides/branding/THEMING_ARTIFACT_POLICY.md` with table:
+1. Add docs/guides/branding/THEMING_ARTIFACT_POLICY.md with table:
    - source files
    - generated files
    - owner script
    - tracking policy.
-2. Add `scripts/qa/verify-theme-artifacts-determinism.sh`.
+2. Add scripts/qa/verify-theme-artifacts-determinism.sh.
 3. Choose one policy now:
    - Option A: keep tracking `*.min.css`, enforce strict regenerate gate.
    - Option B: stop tracking `*.min.css`, generate in image build and verify presence in CI.
@@ -291,16 +291,16 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/219
 
 ### Migration Steps
 
-1. Create `scripts/qa/verify-manifest.yml` with:
+1. Create scripts/qa/verify-manifest.yml with:
    - script path
    - class
    - owner
    - workflow bindings.
 2. Add `scripts/qa/verify-manifest-integrity.sh` to detect orphaned blocking checks.
 3. Create wrapper entrypoints by lane:
-   - `scripts/qa/run-lane-auth.sh`
-   - `scripts/qa/run-lane-branding.sh`
-   - `scripts/qa/run-lane-ops.sh`
+   - scripts/qa/run-lane-auth.sh
+   - scripts/qa/run-lane-branding.sh
+   - scripts/qa/run-lane-ops.sh
 4. Begin deprecating duplicate/narrow scripts with aliases to lane runners.
 
 ### Rollback Plan
@@ -351,7 +351,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/220
 ### Migration Steps
 
 1. Define `tenants/registry.yaml` as canonical tenant declaration.
-2. Implement `scripts/tenants/apply-tenant-registry.sh` to orchestrate:
+2. Implement scripts/tenants/apply-tenant-registry.sh to orchestrate:
    - Django `provision_tenant`
    - MFE config provisioning
    - generated patch artifacts for Caddy/DNS manifests.
@@ -366,7 +366,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/220
 
 ### Verification
 
-- `./scripts/tenants/apply-tenant-registry.sh --dry-run`
+- scripts/tenants/apply-tenant-registry.sh --dry-run (planned; command referenced for implementation target)
 - `./scripts/qa/verify-tenant-isolation-gates.sh --offline`
 - `./scripts/qa/verify-mfe-config-contract.sh --env prod`
 
@@ -462,7 +462,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/222
 2. Execute one canonical decision in one PR:
    - update `.gitmodules` (if path changes)
    - update docs/spec references
-   - add path contract check (`scripts/qa/verify-submodule-path-contract.sh`).
+   - add path contract check (scripts/qa/verify-submodule-path-contract.sh).
 3. If moving path, include migration note for local clones:
    - `git submodule sync --recursive`
    - `git submodule update --init --recursive`.

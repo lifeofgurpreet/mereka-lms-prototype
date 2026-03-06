@@ -40,7 +40,7 @@ The upstream LMS sets `DCS_SESSION_COOKIE_SAMESITE="None"` in `lms/envs/common.p
 
 ### 1. SESSION_COOKIE_SAMESITE = "None"
 
-`SESSION_COOKIE_SAMESITE` is set to `"None"` in the LMS production settings overlay (`bbi-infrastructure production-staging.py` and `production-prod.py`). This matches the upstream LMS default and eliminates the SameSite-related suppression across the Authentik redirect chain.
+`SESSION_COOKIE_SAMESITE` is set to `"None"` in the LMS production settings overlay (`infrastructure production-staging.py` and `production-prod.py`). This matches the upstream LMS default and eliminates the SameSite-related suppression across the Authentik redirect chain.
 
 `SameSite=None` requires `Secure=True`. `SESSION_COOKIE_SECURE = True` is already enforced in both overlays (all traffic arrives over HTTPS). No additional change is needed for this requirement.
 
@@ -60,7 +60,7 @@ The deduplication is a transitional measure. Once all active users have rotated 
 
 ### 3. SESSION_COOKIE_NAME = "studio_session_id" (Studio only)
 
-Studio's session cookie name remains `"studio_session_id"` (set in `bbi-infrastructure production-staging.py` for the CMS overlay). This decision predates this ADR and is preserved:
+Studio's session cookie name remains `"studio_session_id"` (set in `infrastructure production-staging.py` for the CMS overlay). This decision predates this ADR and is preserved:
 
 - The LMS sets `Domain=.academyv2.mereka.io` on its `sessionid` cookie. If Studio used the same name, the browser would send the LMS cookie to Studio, and `SafeSessionMiddleware` would read a session belonging to the LMS process — causing authentication inconsistency.
 - A distinct name means the two cookies coexist without interference.
@@ -69,9 +69,9 @@ Studio's session cookie name remains `"studio_session_id"` (set in `bbi-infrastr
 
 | File | Change |
 |---|---|
-| `bbi-infrastructure production-staging.py` | `SESSION_COOKIE_SAMESITE = "None"`, `_dedup_session_cookie()` method added to `MerekaCookieDomainMiddleware` |
-| `bbi-infrastructure production-prod.py` | Same |
-| `infrastructure/tutor/plugins/mereka_multisite.py` | Base class for middleware (not deployed via ConfigMap; serves as canonical reference) |
+| `infrastructure production-staging.py` | `SESSION_COOKIE_SAMESITE = "None"`, `_dedup_session_cookie()` method added to `MerekaCookieDomainMiddleware` |
+| `infrastructure production-prod.py` | Same |
+| `deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py` | Base class for middleware (not deployed via ConfigMap; serves as canonical reference) |
 
 ## Consequences
 

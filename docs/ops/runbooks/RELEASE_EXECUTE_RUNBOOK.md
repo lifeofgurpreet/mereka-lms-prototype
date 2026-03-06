@@ -62,12 +62,16 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
 
 **Rollback checkpoint**: Git commits are reversible. To rollback:
 ```bash
+# Canonical worktrees for release repos
+APP_REPO="${APP_REPO:-/home/gurpreet/projects/k8s/mereka-lms}"
+INFRA_REPO="${INFRA_REPO:-/home/gurpreet/projects/k8s/infrastructure}"
+
 # Revert app repo
-git -C /home/gurpreet/projects/k8s/mereka-lms revert HEAD
+git -C "$APP_REPO" revert HEAD
 git push
 
 # Revert infra repo
-git -C /home/gurpreet/projects/k8s/bbi-infrastructure revert HEAD
+git -C "$INFRA_REPO" revert HEAD
 git push
 ```
 
@@ -142,7 +146,7 @@ OK: HEAD matches origin/main
 Cache result: SKIP (both images unchanged)
 
 App repo:   /home/gurpreet/projects/k8s/mereka-lms
-Infra repo: /home/gurpreet/projects/k8s/bbi-infrastructure
+Infra repo: /home/gurpreet/projects/k8s/infrastructure
 Target env: production
 
 Done.
@@ -221,9 +225,9 @@ All routes respond 200 (pre-rollout, ArgoCD sync pending):
 | `scripts/qa/verify-enterprise-mfe-nreum-clean.sh` | ✅ Updated |
 | Production kustomization nreum-clean pin | ✅ Committed |
 | `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md` Section 9 | ✅ Committed |
-| `docs/archive/evidence/operations/69qz-enterprise-mfe-clean-build.md` | ✅ Committed |
+| `docs/archive/evidence/operations/evidence/69qz-enterprise-mfe-clean-build.md` | ✅ Committed |
 
-Full evidence: `docs/archive/evidence/operations/69qz-enterprise-mfe-clean-build.md`
+Full evidence: `docs/archive/evidence/operations/evidence/69qz-enterprise-mfe-clean-build.md`
 
 ---
 
@@ -281,4 +285,4 @@ bash scripts/qa/verify-enterprise-mfe-nreum-clean.sh
 | Enterprise portals NREUM: ArgoCD sync pending | `argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal` |
 | Credentials `/programs/` → 502 | Credentials worker may need restart |
 
-Full evidence: `docs/archive/evidence/operations/3k12-parity-smoke.md`
+Full evidence: `docs/archive/evidence/operations/evidence/3k12-parity-smoke.md`

@@ -26,7 +26,7 @@ exports/kajabi/
 ## Transform script
 
 ```
-python scripts/migrations/kajabi/scripts/transform_data.py \
+python scripts/migrations/kajabi/transform_data.py \
   --exports-dir exports/kajabi \
   --structure-dir exports/kajabi/structure \
   --output-dir scripts/migrations/kajabi/output
@@ -49,7 +49,7 @@ The script streams NDJSON files line-by-line, so it can be re-run safely as new 
 Convert the nested Kajabi structure into importable Open edX tarballs:
 
 ```
-python scripts/migrations/kajabi/scripts/build_course_packages.py \
+python scripts/migrations/kajabi/build_course_packages.py \
   --course-structure scripts/migrations/kajabi/output/course_structure.json \
   --courses-csv scripts/migrations/kajabi/output/courses.csv \
   --output-dir scripts/migrations/kajabi/output/course_packages \
@@ -71,7 +71,7 @@ Each tarball contains placeholder HTML units populated with the Kajabi lesson me
 Create CSVs that match Open edX’s built-in bulk import commands:
 
 ```
-python scripts/migrations/kajabi/scripts/prepare_openedx_imports.py \
+python scripts/migrations/kajabi/prepare_openedx_imports.py \
   --output-root scripts/migrations/kajabi/output \
   --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 ```
@@ -125,7 +125,7 @@ Instead of clicking through Studio 100+ times, use the automation script:
 
 ```
 source infrastructure/tutor/tutor-env.sh
-python scripts/migrations/kajabi/scripts/import_courses.py \
+python scripts/migrations/kajabi/import_courses.py \
   --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
   --packages-root scripts/migrations/kajabi/output/course_packages \
   --limit 5   # drop this flag to import everything

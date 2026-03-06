@@ -267,7 +267,7 @@ kubectl top pods -n mereka-lms -l 'app.kubernetes.io/name in (lms,cms)'
 #### HPA Configuration (Recommended for Production)
 
 ```yaml
-# File: deploy/k8s/base/apps/lms-hpa.yaml
+# File: deploy/k8s/base/apps/lms/hpa.yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -350,7 +350,7 @@ spec:
 
 ```bash
 # 1. Apply HPA configuration
-kubectl apply -f deploy/k8s/base/apps/lms-hpa.yaml
+kubectl apply -f deploy/k8s/base/apps/lms/hpa.yaml
 
 # 2. Verify HPA is active
 kubectl get hpa -n mereka-lms
@@ -492,7 +492,7 @@ spec:
 kubectl top pod -n mereka-lms -l app.kubernetes.io/name=mysql
 
 # 2. Backup before scaling (CRITICAL)
-./scripts/infra/backup-mysql.sh
+./scripts/infra/backup-db.sh
 
 # 3. Increase MySQL resources
 kubectl patch deployment mysql -n mereka-lms --type='json' -p='[
@@ -755,7 +755,7 @@ kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 909
 ./scripts/qa/smoke-test.sh
 
 # Load test (requires k6 or similar)
-k6 run --vus 100 --duration 5m scripts/qa/load-test.js
+./scripts/qa/load-test-libraries.sh
 ```
 
 **Monitor during load test**:
@@ -884,8 +884,8 @@ print('✓ MySQL connected')
 conn.close()
 "
 
-# 3. If data corruption suspected, restore from backup
-./scripts/infra/restore-mysql-backup.sh /path/to/backup
+# 3. If data corruption is suspected, follow disaster recovery steps:
+#    docs/ops/runbooks/DISASTER_RECOVERY.md
 ```
 
 **MongoDB Atlas rollback**:
@@ -972,7 +972,7 @@ After any scaling operation:
 1. **Document the change**:
    ```bash
    # Add entry to scaling log
-   echo "$(date): Scaled LMS from 2 to 4 replicas due to CPU >80%" >> docs/operations/logs/scaling-log.txt
+   echo "$(date): Scaled LMS from 2 to 4 replicas due to CPU >80%" >> /tmp/scaling-log.txt
    ```
 
 2. **Update capacity baselines** (if permanent):

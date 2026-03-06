@@ -175,7 +175,7 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
 ./scripts/infra/canonical-release.sh --dry-run \
   --openedx-tag ${OPENEDX_TAG}
 
-# 3. Apply (updates both mereka-lms + bbi-infrastructure repos)
+# 3. Apply (updates both mereka-lms + infrastructure repos)
 ./scripts/infra/canonical-release.sh \
   --openedx-tag ${OPENEDX_TAG} \
   --apply --commit --push --verify-runtime
@@ -224,9 +224,9 @@ curl -sI https://studio.academyv2.mereka.io | head -1
 ### Command Snippets
 
 ```bash
-# Revert mereka-lms and bbi-infrastructure in one go
+# Revert mereka-lms and infrastructure in one go
 REPO_ROOT="/home/gurpreet/projects/k8s/mereka-lms"
-INFRA_REPO="/home/gurpreet/projects/k8s/bbi-infrastructure"
+INFRA_REPO="/home/gurpreet/projects/k8s/infrastructure"
 
 # Revert latest commit in both repos
 git -C $REPO_ROOT revert HEAD --no-edit && git -C $REPO_ROOT push
@@ -296,7 +296,7 @@ canonical-release.sh exits non-zero
 | GKE (production) | ✅ Fully operational | 7/7 gates PASS |
 | RKE2 (staging) | ⚠️ Platform ready, LMS not deployed | Gates 0-2 PASS, Gate 3+ pending |
 
-**Overall**: PASS for production. WARN for staging (RKE2 gates 3+ pending — requires platform team action in bbi-infrastructure repo).
+**Overall**: PASS for production. WARN for staging (RKE2 gates 3+ pending — requires platform team action in infrastructure repo).
 
 ---
 

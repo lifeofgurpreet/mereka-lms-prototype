@@ -33,7 +33,7 @@ Production is GitOps-managed outside this repo.
 
 GitOps source of truth (prod):
 - ArgoCD Application: `mereka-lms-local` (namespace: `argocd`)
-- GitOps repo: `Biji-Biji-Initiative/BBI-K8` (older environments/docs may still refer to `bbi-infrastructure`)
+- GitOps repo: `Biji-Biji-Initiative/BBI-K8` (older environments/docs may still refer to `infrastructure`)
 - Path: `apps/mereka-lms/overlays/prod`
 
 Status:

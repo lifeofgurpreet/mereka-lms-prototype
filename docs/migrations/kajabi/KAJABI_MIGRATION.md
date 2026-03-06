@@ -14,7 +14,7 @@ _Last verified: 2025‑11‑09_
 ## 2. Transform Stage
 
 ```bash
-python scripts/migrations/kajabi/scripts/transform_data.py \
+python scripts/migrations/kajabi/transform_data.py \
   --exports-dir exports/kajabi \
   --structure-dir exports/kajabi/structure \
   --output-dir scripts/migrations/kajabi/output
@@ -29,7 +29,7 @@ Reference: [`KAJABI_MIGRATION_NOTES.md`](KAJABI_MIGRATION_NOTES.md) for column-l
 ## 3. Build Open edX Tarballs
 
 ```bash
-python scripts/migrations/kajabi/scripts/build_course_packages.py \
+python scripts/migrations/kajabi/build_course_packages.py \
   --course-structure scripts/migrations/kajabi/output/course_structure.json \
   --courses-csv scripts/migrations/kajabi/output/courses.csv \
   --output-dir scripts/migrations/kajabi/output/course_packages \
@@ -41,7 +41,7 @@ Result: `scripts/migrations/kajabi/output/course_packages/<slug>/<slug>.tar.gz` 
 ## 4. Produce Open edX-Friendly CSVs
 
 ```bash
-python scripts/migrations/kajabi/scripts/prepare_openedx_imports.py \
+python scripts/migrations/kajabi/prepare_openedx_imports.py \
   --output-root scripts/migrations/kajabi/output \
   --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 ```
@@ -57,24 +57,24 @@ source infrastructure/tutor/tutor-env.sh
 tutor local start -d
 
 # Users
-tutor local run --volume="$(pwd)/scripts/migrations/kajabi/scripts/openedx_bulk_import.py:/tmp/openedx_bulk_import.py:ro" \
+tutor local run --volume="$(pwd)/scripts/migrations/kajabi/openedx_bulk_import.py:/tmp/openedx_bulk_import.py:ro" \
   --volume="$(pwd)/scripts/migrations/kajabi/output/openedx/users_import.csv:/tmp/kajabi-users.csv:ro" \
   lms python /tmp/openedx_bulk_import.py users --csv /tmp/kajabi-users.csv --settings=lms.envs.tutor.production
 
 # Enrollments (same script, different sub-command)
-tutor local run --volume="$(pwd)/scripts/migrations/kajabi/scripts/openedx_bulk_import.py:/tmp/openedx_bulk_import.py:ro" \
+tutor local run --volume="$(pwd)/scripts/migrations/kajabi/openedx_bulk_import.py:/tmp/openedx_bulk_import.py:ro" \
   --volume="$(pwd)/scripts/migrations/kajabi/output/openedx/enrollments_import.csv:/tmp/kajabi-enrollments.csv:ro" \
   lms python /tmp/openedx_bulk_import.py enrollments --csv /tmp/kajabi-enrollments.csv --settings=lms.envs.tutor.production
 ```
 
-Course content imports can be automated via `scripts/migrations/kajabi/scripts/import_courses.py` or done manually through Studio (`http://studio.localhost` → Import Course). Details live in [`KAJABI_MIGRATION_HANDOVER.md`](KAJABI_MIGRATION_HANDOVER.md).
+Course content imports can be automated via `scripts/migrations/kajabi/import_courses.py` or done manually through Studio (`http://studio.localhost` → Import Course). Details live in [`KAJABI_MIGRATION_HANDOVER.md`](KAJABI_MIGRATION_HANDOVER.md).
 
 ### Tutor K8s (production)
 
-Use `scripts/migrations/kajabi/scripts/run_batches.py` to stream CSVs into the LMS pod with retryable batches:
+Use `scripts/migrations/kajabi/run_batches.py` to stream CSVs into the LMS pod with retryable batches:
 
 ```bash
-python scripts/migrations/kajabi/scripts/run_batches.py users \
+python scripts/migrations/kajabi/run_batches.py users \
   --csv scripts/migrations/kajabi/output/openedx/users_import.csv \
   --batch-size 2000
 ```

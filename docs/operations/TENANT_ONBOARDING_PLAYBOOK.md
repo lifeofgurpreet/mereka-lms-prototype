@@ -10,7 +10,7 @@ This playbook covers adding a new tenant subsite to Mereka Academy. A tenant get
 ## Prerequisites
 
 - kubectl access to `mereka-lms` namespace
-- Push access to `mereka-lms` and `bbi-infrastructure` repos
+- Push access to `mereka-lms` and `infrastructure` repos
 - DNS control for the new domain (Cloudflare or external)
 
 ## Current Tenants
@@ -663,7 +663,7 @@ vim infrastructure/tutor/multisite-sites.yml
 
 # Add to ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
 # This is handled by mereka_lms.py plugin — add domain to the tenant registry
-vim deploy/k8s/base/apps/tenant-registry-configmap.yaml
+vim deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml
 ```
 
 ### Step 3: Configure SiteConfiguration (plugin-first)

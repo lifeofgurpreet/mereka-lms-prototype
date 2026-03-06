@@ -140,7 +140,7 @@ framework, EnterpriseCustomer scoping), not at the infrastructure layer.
 |-----|--------|--------|
 | Discovery `Partner` records for subsites | **UNVERIFIED** | Check Discovery admin API |
 | Enterprise learner portal naming inconsistency | **OPEN** | See issue #206 |
-| Enterprise MFEs 503 on dev | **OPEN** | See issue #206 (bbi-infrastructure fix) |
+| Enterprise MFEs 503 on dev | **OPEN** | See issue #206 (infrastructure fix) |
 | No dev/staging domains for subsites | **BY DESIGN** | Subsites test on shared dev platform; prod-only custom domains are correct |
 
 ## Open edX Official Context

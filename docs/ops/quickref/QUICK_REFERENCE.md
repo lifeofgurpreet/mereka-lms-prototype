@@ -82,11 +82,11 @@ docker ps --filter "name=tutor_local"
 
 ## 📚 Documentation
 
-- **Setup:** `docs/LOCAL_DEVELOPMENT_GUIDE.md`
+- **Setup:** `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
 - **URLs:** `docs/ops/quickref/access-urls.md`
 - **Admin:** `docs/guides/admin/ADMIN_LOGIN_GUIDE.md`
 - **Analytics:** `docs/concepts/analytics/ANALYTICS_CONSOLE_ACCESS.md`
-- **Status:** `docs/OPERATIONAL_STATUS.md`
+- **Status:** `docs/archive/reports/status/OPERATIONAL_STATUS.md`
 
 ## ✅ Health Check
 

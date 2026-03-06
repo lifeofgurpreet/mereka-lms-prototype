@@ -49,7 +49,7 @@ Supported env vars:
 Canonical standards and ownership references:
 - `docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md` (ownership and SoT boundaries)
 - `scripts/qa/verify-sentry-wiring.sh` and `scripts/qa/verify-sentry-cli-contract.sh` (enforcement/audit contract)
-- `bbi-infrastructure/platform/monitoring/README.md` (platform monitoring stack SoT)
+- `infrastructure/monitoring/README.md` (platform monitoring stack SoT)
 
 Historical references (deprecated workspace, read-only context):
 - `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-STANDARD.md`

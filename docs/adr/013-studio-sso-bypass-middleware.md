@@ -29,7 +29,7 @@ Add `StudioSSOBypassMiddleware` to the LMS Django middleware stack that:
 
 The middleware is positioned early in the stack (index 1, after forwarded-headers hardening).
 
-Location: `StudioSSOBypassMiddleware` class in bbi-infrastructure production-prod.py (the LMS settings overlay).
+Location: `StudioSSOBypassMiddleware` class in infrastructure production-prod.py (the LMS settings overlay).
 
 ## Consequences
 

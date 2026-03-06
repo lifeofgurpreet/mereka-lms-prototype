@@ -1,5 +1,5 @@
 # Docs Program Scorecard 2026-03-13
-_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified: 2026-03-13 • Status: supporting_
+_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified: 2026-03-06 • Status: supporting_
 
 ## KPI Snapshot
 - Classification coverage: 100.00% (991/991)
@@ -8,6 +8,8 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified:
 - Root policy violations: 0
 - Stale canonical docs >90d: 0.00% (0/18)
 - Redirect-stub debt: 10 superseded docs outside `docs/archive/superseded/**` (down from 81 in 2026-03-06; 87.7% reduction)
+- Command-reference checks (changed scope): pass (`1` file checked, `0` missing refs, `6` candidates)
+- Docs scorecard trend vs `origin/main`: pass (`base=100`, `current=100`, `drop=0`, threshold `10`)
 
 ## Risks and Blocks
 - Governance approvals are still pending (see `docs/archive/reports/governance-approval-note-20260306.md` and `docs/archive/reports/canonical-authority-approval-matrix-20260306.md`).
@@ -15,6 +17,8 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified:
 - Duplicate canonical topic policy remains clean with 0 conflicts (`canonical_conflict_group` audit).
 - Operational evidence and contradiction audit trails remain current (`docs/archive/reports/*contradiction-audit-20260306.md`, `docs/archive/reports/evidence-retention-dry-run-20260306.md`).
 - No new code-path correctness risks were introduced by docs-only changes in this cycle.
+- Docs compliance summary is currently green (`pass`) for catalog health, command refs, scorecard, and trend checks.
+- Full-document command-reference sweep (non-archive scope) was executed for discovery; it reports `436` missing path refs across `644` files and is intentionally not fixed in this docs-only scope yet.
 
 ## Decisions Needed
 - Acknowledge and sign governance packet in `docs/archive/reports/governance-approval-note-20260306.md`.

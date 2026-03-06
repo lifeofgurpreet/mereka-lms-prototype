@@ -66,9 +66,9 @@ if user:
 ## Files Location
 
 ### In Repository
-- Import Script: `/scripts/migrations/mct/scripts/openedx_bulk_import_mct.py`
-- K8s Runner: `/scripts/migrations/mct/scripts/run_user_import_k8s.sh`
-- Test Script: `/scripts/migrations/mct/scripts/test_user_import.sh`
+- Import Script: `/scripts/migrations/mct/openedx_bulk_import_mct.py`
+- K8s Runner: `/scripts/migrations/mct/run_user_import_k8s.sh`
+- Test Script: `/scripts/migrations/mct/test_user_import.sh`
 - Import Log: `/var/migrations/mct/user_import_log_2025-12-18.txt`
 
 ### In K8s Pod

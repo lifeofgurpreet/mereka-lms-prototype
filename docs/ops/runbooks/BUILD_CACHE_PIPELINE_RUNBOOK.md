@@ -301,7 +301,7 @@ gh workflow run build-tutor-images.yml --ref main \
 gh workflow run build-tutor-images.yml --ref main \
   -f image_tag=my-custom-tag
 
-# Build and update GitOps (triggers kustomization update in bbi-infrastructure)
+# Build and update GitOps (triggers kustomization update in infrastructure / BBI-K8 repo)
 gh workflow run build-tutor-images.yml --ref main \
   -f update_gitops=true -f target_environment=production
 ```
@@ -326,10 +326,10 @@ deployment path.
 
 ### If `update_gitops` was NOT enabled
 
-You need to manually update the image tags in `bbi-infrastructure`:
+You need to manually update the image tags in the GitOps repo (`infrastructure`):
 
-1. Edit `bbi-infrastructure/apps/mereka-lms/overlays/dev/kustomization.yaml`
-2. Edit `bbi-infrastructure/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml`
+1. Edit `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/dev/kustomization.yaml`
+2. Edit `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml`
 3. Update both `newTag` fields to the new short SHA (8 chars from the build summary)
 
 ```yaml
@@ -340,7 +340,7 @@ images:
     newTag: "abc123de"
 ```
 
-4. Commit and push bbi-infrastructure
+4. Commit and push infrastructure repo
 5. ArgoCD auto-syncs within 3 minutes
 
 ### Verify rollout
@@ -366,7 +366,12 @@ kubectl get pod -n mereka-lms -l app.kubernetes.io/name=lms \
 Before committing a new tag to any kustomization file:
 
 ```bash
-INFRA_PROD_OVERLAY=/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml \
+APP_REPO="${APP_REPO:-/home/gurpreet/projects/k8s/mereka-lms}"
+INFRA_REPO="${INFRA_REPO:-/home/gurpreet/projects/k8s/infrastructure}"
+```
+
+```bash
+INFRA_PROD_OVERLAY="${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustomization.yaml" \
 APP_BASE=deploy/k8s/base/kustomization.yaml \
 APP_PROD_OVERLAY=deploy/k8s/overlays/production/kustomization.yaml \
   ./scripts/qa/verify-gitops-image-overrides.sh --check-infra
@@ -424,7 +429,7 @@ docker builder prune -af
 | Silent packet drops, npm/pip downloads hang or corrupt | MTU > 1280 on Cilium overlay | Set `--mtu=1280` on DinD `args` |
 | GitHub HTTP 500 during git clone | Transient GitHub infrastructure issue | Retry the run; not a local issue |
 | `docker exporter does not currently support exporting manifest lists` | `load: true` + `push: true` with `docker-container` buildx driver | Remove `load: true`; use `push: true` only |
-| LMS pods not rolling after GitOps update | bbi-infrastructure has stale tag on one of two override entries | Check all image entries in the prod kustomization: `grep newTag bbi-infrastructure/.../kustomization.yaml` |
+| LMS pods not rolling after GitOps update | GitOps repo has stale tag on one of two override entries | Check all image entries in the prod kustomization: `grep newTag infrastructure/.../kustomization.yaml` |
 | `mereka-brand` tag stale after manual trigger | `mereka-brand` is only pushed on `push` to `main`, not on `workflow_dispatch` | Trigger via push, or manually retag and push after a `workflow_dispatch` build |
 | DinD container does not start in time | Timing race between runner start and DinD daemon readiness | Add a readiness poll at the start of steps that need Docker: `until docker info >/dev/null 2>&1; do sleep 1; done` |
 | `loremipsum==1.0.5` build failure | `uv pip` does not provide `pkg_resources`; Tutor 21 default is `uv pip` | Always pass `-a PIP_COMMAND=pip` to `tutor images build openedx` |
@@ -432,19 +437,19 @@ docker builder prune -af
 
 ### Detailed: LMS pods not rolling after release
 
-Most common cause: two separate `newImage`/`newTag` entries in the bbi-infrastructure
+Most common cause: two separate `newImage`/`newTag` entries in the infrastructure
 overlay for the same base image name. If the release script only updates one, the
 other stays pinned to the old tag and ArgoCD sees a diff-free state for the pods
 that reference the stale entry.
 
 ```bash
 # Show all newTag lines in the prod overlay
-grep "newTag" /path/to/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+grep "newTag" https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/prod/kustomization.yaml
 
 # All openedx entries must match; all mfe entries must match
 ```
 
-If one entry is stale, edit and push bbi-infrastructure, then force ArgoCD refresh:
+If one entry is stale, edit and push infrastructure, then force ArgoCD refresh:
 
 ```bash
 kubectl annotate application mereka-lms-prod -n argocd \
@@ -585,8 +590,8 @@ workflow.
 | `deploy/k8s/base/arc/runner-scale-set-heavy.yaml` | ARC runner + DinD sidecar + PVC definitions |
 | `deploy/k8s/base/arc/` | Full ARC manifests directory (namespaces, Helm values, RunnerScaleSets) |
 | `requirements-tutor.txt` | Tutor version pin — single source of truth |
-| `bbi-infrastructure/apps/mereka-lms/overlays/dev/kustomization.yaml` | Dev image tag overrides (updated after build) |
-| `bbi-infrastructure/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml` | Profile-based dev overlay image tags |
+| `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/dev/kustomization.yaml` | Dev image tag overrides (updated after build) |
+| `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml` | Profile-based dev overlay image tags |
 | `scripts/infra/release-openedx-gitops.sh` | Release orchestrator (updates kustomization + commits + pushes) |
 | `scripts/qa/verify-gitops-image-overrides.sh` | Pre-push image override contract verifier |
 | `scripts/qa/verify-post-deploy-smoke.sh` | Post-deploy endpoint smoke matrix |

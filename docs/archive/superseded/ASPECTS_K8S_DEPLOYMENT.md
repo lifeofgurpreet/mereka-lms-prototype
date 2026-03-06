@@ -1,8 +1,9 @@
 # Aspects Analytics - Kubernetes Deployment Guide
 _Audience: Platform Eng • Owner: Analytics Guild • Last verified: 2025-11-09 • Status: superseded_
+superseded_by: docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md
 
 This document has moved to:
-- `../analytics/ASPECTS_K8S_DEPLOYMENT.md`
+- `docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md`
 
 This guide explains how to deploy Aspects Analytics on GKE Autopilot, addressing resource constraints.
 

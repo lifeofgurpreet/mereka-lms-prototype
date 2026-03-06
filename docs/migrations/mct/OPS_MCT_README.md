@@ -42,7 +42,7 @@ This creates NDJSON files in `var/exports/mct/`:
 Convert MCT exports to Open edX format:
 
 ```bash
-python scripts/migrations/mct/scripts/transform_data.py \
+python scripts/migrations/mct/transform_data.py \
   --exports-dir var/exports/mct \
   --output-dir var/migrations/mct
 ```
@@ -52,7 +52,7 @@ python scripts/migrations/mct/scripts/transform_data.py \
 Generate Open edX course tarballs:
 
 ```bash
-python scripts/migrations/mct/scripts/build_course_packages.py \
+python scripts/migrations/mct/build_course_packages.py \
   --course-structure var/migrations/mct/course_structure.json \
   --courses-csv var/migrations/mct/courses.csv \
   --output-dir var/migrations/mct/course_packages \
@@ -67,21 +67,21 @@ python scripts/migrations/mct/scripts/build_course_packages.py \
 Create bulk import CSVs:
 
 ```bash
-python scripts/migrations/mct/scripts/prepare_openedx_imports.py \
+python scripts/migrations/mct/prepare_openedx_imports.py \
   --output-root var/migrations/mct \
   --manifest var/migrations/mct/course_packages/course_packages_manifest.csv
 ```
 
 ### 5. Import into Open edX
 
-See `docs/MCT_MIGRATION_PLAN.md` for detailed import instructions.
+See `docs/migrations/mct/MIGRATION_PLAN.md` for detailed import instructions.
 
 ## Status
 
 ### User Import: ✅ COMPLETED (2025-12-18)
 - **Imported:** 68,565 users (98.77% success rate)
 - **Total Processed:** 69,419 users
-- **Script:** `scripts/openedx_bulk_import_mct.py`
+- **Script:** `scripts/migrations/mct/openedx_bulk_import_mct.py`
 - **Documentation:** `/docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md`
 
 ### Next Steps
@@ -97,11 +97,11 @@ See `docs/MCT_MIGRATION_PLAN.md` for detailed import instructions.
 ## User Import Scripts
 
 ### Main Import Script
-`scripts/openedx_bulk_import_mct.py` - Bulk import users and enrollments into Open edX
+`scripts/migrations/mct/openedx_bulk_import_mct.py` - Bulk import users and enrollments into Open edX
 
 #### User Import
 ```bash
-python3 openedx_bulk_import_mct.py users \
+python3 scripts/migrations/mct/openedx_bulk_import_mct.py users \
   --csv /path/to/users.csv \
   --offset 0 \
   --limit 5000 \
@@ -110,7 +110,7 @@ python3 openedx_bulk_import_mct.py users \
 
 #### Enrollment Import
 ```bash
-python3 openedx_bulk_import_mct.py enrollments \
+python3 scripts/migrations/mct/openedx_bulk_import_mct.py enrollments \
   --csv /path/to/enrollments.csv \
   --offset 0 \
   --limit 5000 \
@@ -118,8 +118,8 @@ python3 openedx_bulk_import_mct.py enrollments \
 ```
 
 ### K8s Execution Scripts
-- `scripts/run_user_import_k8s.sh` - Run full user import in K8s
-- `scripts/test_user_import.sh` - Test import with 100 users
+- `scripts/migrations/mct/run_user_import_k8s.sh` - Run full user import in K8s
+- `scripts/migrations/mct/test_user_import.sh` - Test import with 100 users
 
 ### CSV Format
 

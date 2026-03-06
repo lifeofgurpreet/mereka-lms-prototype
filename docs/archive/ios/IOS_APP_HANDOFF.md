@@ -186,7 +186,7 @@ git add . && git commit -m "trigger iOS build" && git push
 |------|---------|
 | `.github/workflows/build-ios-app.yml` | GitHub Actions workflow |
 | `docs/IOS_APP_CI_SETUP.md` | Detailed setup guide |
-| `docs/MOBILE_IOS_APP_SETUP.md` | Server + manual build guide |
+| `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` | Server + manual build guide |
 | `scripts/mobile/setup-ios-app.sh` | Mac setup script (optional) |
 | `scripts/infra/setup-mobile-api.sh` | Server-side setup script |
 

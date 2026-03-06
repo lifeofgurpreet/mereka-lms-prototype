@@ -57,7 +57,8 @@ and stores enterprise data-sharing consent decisions. Cookie consent uses a sepa
 
 When ready to implement, use the Olive/Ulmo MFE plugin slot approach:
 
-1. Create a consent banner component in `infrastructure/tutor/mfe/` as a plugin slot:
+1. Create a consent banner component in `infrastructure/tutor/plugins/mereka_lms.py` (or another
+   supported Tutor plugin location) as a plugin slot:
 
    ```js
    // Targets the PLUGIN_OPERATIONS.Insert slot in the LearningFooter MFE
@@ -418,7 +419,7 @@ Annually:
 
 ### Configuring Loki Retention
 
-The Loki configuration at `infrastructure/observability/` should set:
+The Loki configuration at `infrastructure/monitoring/` should set:
 
 ```yaml
 # loki-config.yaml

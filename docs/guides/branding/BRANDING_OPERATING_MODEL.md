@@ -84,7 +84,7 @@ Preferred deployment command:
      before MFE image tags are pushed.
 3. Update image tags under `deploy/k8s/base`.
 4. Commit/push this repo.
-5. Update GitOps checkout (`/home/gurpreet/projects/k8s/infrastructure`, typically tracking `BBI-K8`; legacy docs may say `bbi-infrastructure`) in both files:
+5. Update GitOps checkout (`/home/gurpreet/projects/k8s/infrastructure`, typically tracking `BBI-K8`; legacy docs may say `infrastructure`) in both files:
    - `apps/mereka-lms/base/kustomization.yaml` (`?ref=<sha>`)
    - `apps/mereka-lms/overlays/prod/kustomization.yaml` (openedx/openedx-mfe tags)
 6. Run `./scripts/qa/verify-gitops-image-overrides.sh --check-infra`.
@@ -169,7 +169,7 @@ Preferred deployment command:
 
 13. **Argo `ComparisonError` with `not our ref` during GitOps rollout**
 
-   - Cause: incorrect pinned SHA in active GitOps repo (`BBI-K8`/`bbi-infrastructure`) (`?ref=<sha>` typo or stale SHA).
+   - Cause: incorrect pinned SHA in active GitOps repo (`BBI-K8`/`infrastructure`) (`?ref=<sha>` typo or stale SHA).
    - Fix:
      1) get exact SHA from source repo: `git -C /home/gurpreet/projects/k8s/mereka-lms rev-parse HEAD`
      2) update `apps/mereka-lms/base/kustomization.yaml` with that exact SHA

@@ -16,7 +16,7 @@
 
 ## Quick Wins (hours)
 1. Fix hostname registry drift (ingress YAML vs spec)
-2. Fix gitops pin drift (bbi-infrastructure ref vs HEAD)
+2. Fix gitops pin drift (infrastructure ref vs HEAD)
 3. Fix verify-body-limits.sh grep pattern
 
 ## Medium Effort (days)

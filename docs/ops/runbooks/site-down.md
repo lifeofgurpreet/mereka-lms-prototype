@@ -274,7 +274,7 @@ echo | openssl s_client -servername academyv2.mereka.io -connect academyv2.merek
   - The hostname appears on an Ingress in `mereka-lms` (use `./scripts/qa/list-openedx-hostnames.sh`), and
   - The matching `Certificate` includes the hostname in `spec.dnsNames`.
 - Production is GitOps-managed; Ingress/Certificate changes must land in:
-  - `BBI-K8/apps/mereka-lms/overlays/prod/patches/*` (older docs may still say `bbi-infrastructure`)
+  - `BBI-K8/apps/mereka-lms/overlays/prod/patches/*` (older docs may still say `infrastructure`)
 - When enabling new services (credentials/forum), add/update DNS records in `infrastructure/cloudflare/records*.json` and re-run `./scripts/infra/cloudflare-sync.sh`.
 - Re-run `./scripts/infra/repair-routing.sh` after any selector drift.
 
@@ -620,7 +620,7 @@ kubectl rollout restart deployment/cms -n mereka-lms
 
 **Preferred fix (kind dev): use in-cluster MongoDB**
 Dev defaults to using the in-cluster `mongodb` service (no auth, no TLS) via the local overlay
-patch `deploy/k8s/overlays/local/patches/forum-dev.yaml`.
+`infrastructure/tutor` no longer uses a separate forum-dev patch; local overlay behavior is controlled by `deploy/k8s/overlays/local/kustomization.yaml` and image wiring in local manifests.
 
 ```bash
 kubectl apply -k deploy/k8s/overlays/local --context kind-dev
@@ -1582,7 +1582,7 @@ Verify Redis Streams consumers implement idempotent handling with deduplication 
 
 ## 📚 Related Documentation
 
-- [`docs/ops/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
+- [`docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
 - [`docs/ops/quickref/access-urls.md`](../../ops/quickref/access-urls.md) - Service URLs and access info
 - [`docs/concepts/architecture/DATABASE_ARCHITECTURE.md`](../../concepts/architecture/DATABASE_ARCHITECTURE.md) - Database connectivity guide
 

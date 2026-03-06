@@ -54,7 +54,7 @@ cd /home/gurpreet/projects/k8s/mereka-lms
 
 ### Option B: Manual GitOps
 
-1. Create `bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/warm-park-mode.yaml`:
+1. Create `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/prod/patches/warm-park-mode.yaml`:
    ```yaml
    # See scripts/ops/park-prod.sh for full content
    ```
@@ -65,9 +65,9 @@ cd /home/gurpreet/projects/k8s/mereka-lms
      - patches/warm-park-mode.yaml
    ```
 
-3. Commit and push to `bbi-infrastructure`:
+3. Commit and push to GitOps repo (`infrastructure`):
    ```bash
-   cd /home/gurpreet/projects/k8s/bbi-infrastructure
+   cd /home/gurpreet/projects/k8s/infrastructure
    git add apps/mereka-lms/overlays/prod/
    git commit -m "ops(mereka-lms): warm-park prod for cost savings"
    git push origin main
@@ -105,7 +105,7 @@ cd /home/gurpreet/projects/k8s/mereka-lms
 
 ### Option B: Manual GitOps
 
-1. Remove `warm-park-mode.yaml` from bbi-infrastructure:
+1. Remove `warm-park-mode.yaml` from GitOps repo overlay:
    ```bash
    rm apps/mereka-lms/overlays/prod/patches/warm-park-mode.yaml
    ```
@@ -206,4 +206,4 @@ but their login sessions are preserved.
 
 | Date | Action | Actor | Evidence |
 |------|--------|-------|---------|
-| 2026-02-21 | Warm-park activated (commit b26cdea) | bbi-infrastructure (another agent) | `docs/archive/evidence/operations/deploy/20260221-000000/park-mode-evidence.md` |
+| 2026-02-21 | Warm-park activated (commit b26cdea) | infrastructure (another agent) | `docs/archive/evidence/operations/evidence/deploy/20260221-000000/park-mode-evidence.md` |

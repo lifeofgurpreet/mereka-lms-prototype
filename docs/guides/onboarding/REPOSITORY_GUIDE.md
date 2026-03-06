@@ -57,8 +57,8 @@ mereka-lms/
 **Purpose**: Kubernetes deployment manifests and Kustomize overlays.
 
 > **Boundary reference**: For the authoritative classification of what belongs here vs in
-> `bbi-infrastructure`, see [DEPLOYMENT_BOUNDARY.md](../architecture/DEPLOYMENT_BOUNDARY.md)
-> and [DEPLOYMENT_CONTRACT.md](../architecture/DEPLOYMENT_CONTRACT.md).
+> `infrastructure` (historical name: `infrastructure`), see [DEPLOYMENT_BOUNDARY.md](../../concepts/architecture/DEPLOYMENT_BOUNDARY.md)
+> and [DEPLOYMENT_CONTRACT.md](../../concepts/architecture/DEPLOYMENT_CONTRACT.md).
 
 **Structure**:
 ```
@@ -67,18 +67,18 @@ deploy/k8s/
 │   ├── secrets/               # ExternalSecret manifests + ClusterSecretStore
 │   │   └── external-secrets.yaml  # Maps Infisical/GCP SM → K8s secrets
 │   ├── apps/                  # App-specific configs (lms, cms, enterprise, multi-tenancy, etc.)
-│   ├── arc/                   # ARC runner manifests (PLATFORM_SHARED — will move to bbi-infra)
-│   ├── logging/               # Promtail DaemonSet (PLATFORM_SHARED — will move to bbi-infra)
+│   ├── arc/                   # ARC runner manifests (PLATFORM_SHARED — ownership in infrastructure)
+│   ├── logging/               # Promtail DaemonSet (PLATFORM_SHARED — ownership in infrastructure)
 │   ├── monitoring/            # ServiceMonitors, PrometheusRules (APP_RUNTIME)
 │   ├── network-policies/      # Namespace network policies (APP_RUNTIME)
 │   ├── operational/           # PDB, HPA baselines (APP_RUNTIME)
-│   ├── policies/              # Kyverno ClusterPolicies (PLATFORM_SHARED — will move to bbi-infra)
+│   ├── policies/              # Kyverno ClusterPolicies (PLATFORM_SHARED — ownership in infrastructure)
 │   └── plugins/               # Plugin configs (discovery, mfe, credentials, notes, aspects)
 └── overlays/                  # Environment-specific overrides
     ├── local/                 # Local Kind development (APP_LOCAL_ONLY — stays here)
-    ├── production/            # Production GKE (ENVIRONMENT_SPECIFIC — will move to bbi-infra)
-    ├── rke2-nonprod/          # Dev RKE2 cluster (ENVIRONMENT_SPECIFIC — will move to bbi-infra)
-    └── staging/               # Staging overlay (ENVIRONMENT_SPECIFIC — consolidation pending)
+    ├── production/            # Production GKE (ENVIRONMENT_SPECIFIC — ownership in infrastructure)
+    ├── rke2-nonprod/          # Dev RKE2 cluster (ENVIRONMENT_SPECIFIC — ownership in infrastructure)
+    └── staging/               # Staging overlay (ENVIRONMENT_SPECIFIC — deprecated)
 ```
 
 **Key files**:
@@ -90,9 +90,9 @@ deploy/k8s/
 - New app K8s resource → `deploy/k8s/base/apps/<service>/`
 - New secret → Add to `external-secrets.yaml` (never hardcode secrets)
 - Local dev override → `deploy/k8s/overlays/local/`
-- Environment-specific config → `bbi-infrastructure` repo (not here)
+- Environment-specific config → `infrastructure` repo (not here)
 
-**Related docs**: `docs/architecture/DEPLOYMENT_BOUNDARY.md`, `docs/architecture/DEPLOYMENT_CONTRACT.md`, `docs/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `specs/k8s-deployment_spec.md`, `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
+**Related docs**: `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md`, `docs/concepts/architecture/DEPLOYMENT_CONTRACT.md`, `docs/concepts/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `specs/k8s-deployment_spec.md`, `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
 
 ---
 
@@ -194,8 +194,8 @@ tutor local restart
 **Where to add**:
 - Tutor patch → `infrastructure/tutor/patches/`
 - Custom Django app → `infrastructure/tutor/custom-apps/`
-- Monitoring rule → `infrastructure/monitoring/prometheus/rules/`
-- Terraform resource → `infrastructure/terraform/gcp/`
+- Monitoring rule → `deploy/k8s/base/monitoring/`
+- Terraform resource → `infrastructure/terraform/`
 
 **Related docs**: `specs/tutor-configuration_spec.md`, `CLAUDE.md` (Tutor lifecycle section)
 
@@ -430,7 +430,7 @@ Quick reference for frequently accessed files:
 
 ### Verification
 - Repo structure check: `scripts/qa/verify-repo-structure.sh`
-- Tutor config check: `scripts/qa/verify-tutor-config.sh`
+- Tutor config check: `scripts/infra/verify-tutor-config.sh`
 - Spec verification: `scripts/qa/spec-tools/spec_verify.py`
 - Coverage report: `scripts/qa/spec-tools/spec_coverage_report.py`
 
@@ -456,7 +456,7 @@ Quick reference for frequently accessed files:
 | Find URLs | `docs/ops/quickref/access-urls.md` |
 | Troubleshoot outage | `docs/operations/TROUBLESHOOTING.md` |
 | Add a secret | `deploy/k8s/base/secrets/external-secrets.yaml` |
-| Add monitoring | `infrastructure/monitoring/prometheus/rules/` |
+| Add monitoring | `infrastructure/monitoring/` |
 | Write an ADR | `docs/adr/NNN-<slug>.md` (next number) |
 
 ### By Technology
@@ -467,7 +467,7 @@ Quick reference for frequently accessed files:
 | Tutor | `infrastructure/tutor/`, `scripts/infra/tutor-*.sh` |
 | Open edX | `infrastructure/tutor/custom-apps/`, `infrastructure/tutor/themes/` |
 | Django | `infrastructure/tutor/custom-apps/` |
-| Prometheus | `infrastructure/monitoring/prometheus/` |
+| Prometheus | `infrastructure/monitoring/` |
 | Terraform | `infrastructure/terraform/` |
 | Cloudflare | `infrastructure/cloudflare/` |
 | Kajabi | `scripts/migrations/kajabi-*.sh`, `docs/migrations/kajabi/` |
@@ -528,7 +528,7 @@ Before adding a new file, ask:
 **Adding a new verification script**:
 ```bash
 # 1. Create the script
-cat > scripts/qa/verify-my-feature.sh <<'EOF'
+cat > /tmp/verify-my-feature.sh <<'EOF'
 #!/usr/bin/env bash
 # @covers AC-123, AC-124
 # @spec: my-feature_spec.md
@@ -540,10 +540,10 @@ source "$(dirname "$0")/../shared/config.sh"
 EOF
 
 # 2. Make it executable
-chmod +x scripts/qa/verify-my-feature.sh
+chmod +x /tmp/verify-my-feature.sh
 
 # 3. Test it
-./scripts/qa/verify-my-feature.sh
+/tmp/verify-my-feature.sh
 
 # 4. Run coverage report to verify @covers annotation is picked up
 python3 scripts/qa/spec-tools/spec_coverage_report.py
@@ -576,7 +576,7 @@ python3 scripts/qa/spec-tools/compute_dependency_graph.py \
 # Use SHOUTY_SNAKE_CASE.md naming
 
 # 3. Add metadata at top
-cat > docs/ops/runbooks/MY_NEW_RUNBOOK.md <<'EOF'
+cat > MY_NEW_RUNBOOK.md <<'EOF'
 # My New Runbook
 _Audience: Operations • Owner: Infra Team • Last updated: 2026-02-11_
 

@@ -71,7 +71,7 @@ Status: `supported` = evidence exists and passes, `partial` = some evidence exis
 | ID | Argument | Status | Evidence |
 |----|----------|--------|----------|
 | A-004-1 | Prometheus metrics exported from all services | supported | `specs/observability-stack_spec.md`, db exporters, `scripts/qa/audit-db-exporter-telemetry.sh` |
-| A-004-2 | Structured logs shipped to Loki | partial | Promtail + Loki deployment, `infrastructure/observability/` |
+| A-004-2 | Structured logs shipped to Loki | partial | Promtail + Loki deployment, `infrastructure/monitoring/` |
 | A-004-3 | Distributed tracing via Tempo | partial | `specs/observability-stack_spec.md`, 10% sampling configured |
 | A-004-4 | Alert routing delivers to correct channels | supported | `scripts/qa/verify-alert-routing.sh`, Slack + PagerDuty |
 | A-004-5 | Dashboards cover all critical services | supported | `scripts/qa/audit-grafana-dashboard.sh`, dashboard contract |
@@ -89,7 +89,7 @@ Status: `supported` = evidence exists and passes, `partial` = some evidence exis
 | A-005-1 | Consent management framework defined | partial | `specs/data-privacy-gdpr-compliance_spec.md` AC-008 to AC-012 |
 | A-005-2 | Right to erasure pipeline specified | partial | `specs/data-privacy-gdpr-compliance_spec.md` AC-031 to AC-034 |
 | A-005-3 | Data retention policies defined | partial | `specs/data-privacy-gdpr-compliance_spec.md` AC-013 to AC-015 |
-| A-005-4 | PII inventory maintained | unsupported | Planned: `services/privacy-tools/inventory/` |
+| A-005-4 | PII inventory maintained | unsupported | Planned: `docs/operations/PII_DATA_INVENTORY.md` |
 | A-005-5 | Processor DPAs tracked | unsupported | Planned: legal/operational prerequisite |
 
 ---

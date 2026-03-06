@@ -21,7 +21,7 @@ The bundle captures:
 - source identity (`repository`, `commit_sha`, workflow run metadata)
 - artifact references (`sbom-*`, `slsa-provenance`, `trivy-*`)
 - promotion target environment
-- release-to-gitops linkage (`release_bundle_id` + resulting `bbi-infrastructure` commit)
+- release-to-gitops linkage (`release_bundle_id` + resulting `infrastructure` commit)
 - signature material for blob verification (`.sig` + `.pem`) issued by GitHub OIDC identity
 
 ## Local Verification

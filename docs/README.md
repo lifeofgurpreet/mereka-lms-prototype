@@ -129,7 +129,7 @@ Fast lookup references for common tasks:
 ### Additional Operations Documentation
 
 Legacy note:
-- Some links below intentionally point to `docs/operations/**` transitional docs that have no finalized `docs/ops/**` replacement yet.
+- Some links below intentionally point to archived historical docs that are kept for audit/compliance references.
 - Prefer canonical `docs/ops/**` and `docs/guides/**` links when both exist.
 
 | Doc | Purpose | Last Verified |

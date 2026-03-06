@@ -150,15 +150,15 @@ Once the CSVs/tarballs under `scripts/migrations/kajabi/output/` are refreshed, 
 
 ### 2. Users & Enrollments (batch-safe)
 
-- Script: `scripts/migrations/kajabi/scripts/openedx_bulk_import.py` (runs *inside* the LMS container).
-- Driver: `scripts/migrations/kajabi/scripts/run_batches.py` (runs on the host, handles chunking/resume/retries/logs).
+- Script: `scripts/migrations/kajabi/openedx_bulk_import.py` (runs *inside* the LMS container).
+- Driver: `scripts/migrations/kajabi/run_batches.py` (runs on the host, handles chunking/resume/retries/logs).
 
 Steps:
 
 1. Copy the helper + CSVs into the LMS pod once. The driver does this automatically unless you pass `--skip-upload` (handy when resuming):
 
    ```bash
-   python3 scripts/migrations/kajabi/scripts/run_batches.py users \
+   python3 scripts/migrations/kajabi/run_batches.py users \
      --csv scripts/migrations/kajabi/output/openedx/users_import.csv \
      --batch-size 2000 \
      --remote-csv /tmp/kajabi-users.csv \
@@ -172,7 +172,7 @@ Steps:
 2. Repeat for enrollments (same script, different target file):
 
    ```bash
-   python3 scripts/migrations/kajabi/scripts/run_batches.py enrollments \
+   python3 scripts/migrations/kajabi/run_batches.py enrollments \
      --csv scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
      --batch-size 2000 \
      --remote-csv /tmp/kajabi-enrollments.csv \
@@ -185,13 +185,13 @@ Steps:
 
 ### 3. Course Imports (OLX tarballs)
 
-- Script: `scripts/migrations/kajabi/scripts/import_courses.py`
+- Script: `scripts/migrations/kajabi/import_courses.py`
 - Usage now supports Kubernetes through `--backend k8s --k8s-namespace mereka-lms` and automatically rewrites each extracted `course.xml` `url_name`/`run` to match `course_packages_manifest.csv` so the resulting IDs align with the enrollment CSV.
 
 Example (single dry run):
 
 ```bash
-python3 scripts/migrations/kajabi/scripts/import_courses.py \
+python3 scripts/migrations/kajabi/import_courses.py \
   --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
   --packages-root scripts/migrations/kajabi/output/course_packages \
   --backend k8s \
@@ -232,16 +232,16 @@ Key behaviour:
 
 ### 5. Real-time deltas via Kajabi webhooks
 
-Full refreshes keep production accurate, but we still need a way to capture purchases/tag changes that happen between export runs. The lightweight FastAPI receiver in `scripts/migrations/kajabi/webhook_app/` does the following:
+Full refreshes keep production accurate, but we still need a way to capture purchases/tag changes that happen between export runs. The lightweight FastAPI receiver in `services/kajabi-webhook/` does the following:
 
 1. Verifies the `X-Kajabi-Signature` header using `KAJABI_WEBHOOK_SECRET` (same value you provision in the Kajabi UI when adding the webhook).
-2. Writes each accepted event to `scripts/migrations/kajabi/webhook_app/outbox/<event>.ndjson` so downstream workers can pick them up (ship to Pub/Sub, append to BigQuery, etc.).
+2. Writes each accepted event to `services/kajabi-webhook/outbox/<event>.ndjson` so downstream workers can pick them up (ship to Pub/Sub, append to BigQuery, etc.).
 3. Responds with HTTP 202 to keep Kajabi happy; if the signature fails it returns HTTP 401 (Kajabi will retry a few times).
 
 Usage:
 
 ```bash
-cd scripts/migrations/kajabi/webhook_app
+cd services/kajabi-webhook
 python -m pip install -r requirements.txt
 KAJABI_WEBHOOK_SECRET=supersecret \
 KAJABI_WEBHOOK_OUTBOX=/var/tmp/kajabi-webhooks \
@@ -254,15 +254,15 @@ uvicorn main:APP --host 0.0.0.0 --port 8080
 
 ### 6. (Optional) Scrape lesson bodies when the API falls short
 
-Kajabi’s public API currently exposes lesson titles/status/media metadata but not the lesson body itself. When you need the actual HTML (e.g., to avoid placeholder content in Open edX), use the Playwright helper in `scripts/migrations/kajabi/scripts/scrape_lessons.py`:
+Kajabi’s public API currently exposes lesson titles/status/media metadata but not the lesson body itself. When you need the actual HTML (e.g., to avoid placeholder content in Open edX), use the Playwright helper in `scripts/migrations/kajabi/scrape_lessons.py`:
 
 ```bash
-pip install -r scripts/migrations/kajabi/scripts/requirements.txt
+pip install -r scripts/migrations/kajabi/requirements.txt
 playwright install chromium  # one-time browser download
 
 KAJABI_EMAIL=admin@example.com \
 KAJABI_PASSWORD=supersecret \
-python scripts/migrations/kajabi/scripts/scrape_lessons.py \
+python scripts/migrations/kajabi/scrape_lessons.py \
   --structure scripts/migrations/kajabi/output/course_structure.json \
   --output exports/kajabi/lesson_html \
   --ndjson-output exports/kajabi/structure/lesson_details.ndjson \
@@ -275,7 +275,7 @@ python scripts/migrations/kajabi/scripts/scrape_lessons.py \
 - After scraping, rerun the transformer so it ingests the lesson details and propagates them into the course structure:
 
   ```bash
-  python scripts/migrations/kajabi/scripts/transform_data.py \
+  python scripts/migrations/kajabi/transform_data.py \
     --exports-dir exports/kajabi \
     --structure-dir exports/kajabi/structure \
     --lesson-details-file exports/kajabi/structure/lesson_details.ndjson \

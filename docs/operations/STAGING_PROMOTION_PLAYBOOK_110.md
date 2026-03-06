@@ -21,7 +21,7 @@ Scope: Promotion execution checklist once operator signal is given.
   - refresh dev baseline evidence
   - keep rollback command path documented
   - post blocker status to `#110` with current evidence links
-- Do not touch `bbi-infrastructure` overlays or Argo resources in blocked mode.
+- Do not touch `infrastructure` overlays or Argo resources in blocked mode.
 
 ## Latest Repo-Local Baseline (2026-03-02T040727Z)
 

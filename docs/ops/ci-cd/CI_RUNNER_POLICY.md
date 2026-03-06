@@ -68,7 +68,7 @@ Apple platform jobs must use `workflow_dispatch` or tag-only triggers (never `pu
 
 Jobs that use `uses:` to call a reusable workflow do not set `runs-on` directly. The runner
 is determined by the called workflow. This applies to `build-enterprise-mfe.yml` and
-`build-purchase-gateway.yml` (both call `bbi-infrastructure` reusable workflows).
+`build-purchase-gateway.yml` (both call `infrastructure` reusable workflows).
 
 ---
 

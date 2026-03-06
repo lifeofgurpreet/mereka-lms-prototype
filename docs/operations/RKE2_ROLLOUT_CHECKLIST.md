@@ -395,7 +395,7 @@ Security reviewer sign-off: _____________  Date: _______________
 
 - `docs/operations/RKE2_DEV_READINESS.md` — bootstrap procedure
 - `docs/operations/RKE2_ROLLOUT_MATRIX.md` — gate-by-gate steps with rollback signals
-- `docs/operations/RKE2_LMS_HANDOFF.md` — cross-repo touchpoint (bbi-infrastructure)
+- `docs/operations/RKE2_LMS_HANDOFF.md` — cross-repo touchpoint (infrastructure)
 - `docs/operations/CANONICAL_DEPLOY_CONTRACT.md` — environment deltas
 - `scripts/qa/verify-rke2-rollout-readiness.sh` — automated verification (this checklist)
 - `scripts/qa/verify-rke2-deployment-readiness.sh` — deployment blocker detection

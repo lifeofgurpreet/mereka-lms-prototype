@@ -1,20 +1,26 @@
 # GitOps Workflow for Image Tag Management
-_Audience: Platform Eng + DevOps • Owner: Engineering Lead • Last updated: 2026-02-18_
+_Audience: Platform Eng + DevOps • Owner: Engineering Lead • Last updated: 2026-03-06_
 
 > **Deployment boundary**: For the authoritative classification of what belongs in this repo
-> vs `bbi-infrastructure`, see [DEPLOYMENT_BOUNDARY.md](../../architecture/DEPLOYMENT_BOUNDARY.md)
-> and [DEPLOYMENT_CONTRACT.md](../../architecture/DEPLOYMENT_CONTRACT.md).
+> vs `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`, previously known as `infrastructure`), see [DEPLOYMENT_BOUNDARY.md](../../concepts/architecture/DEPLOYMENT_BOUNDARY.md)
+> and [DEPLOYMENT_CONTRACT.md](../../concepts/architecture/DEPLOYMENT_CONTRACT.md).
 > Note: `deploy/k8s/overlays/production/` and `overlays/rke2-nonprod/` are classified
-> ENVIRONMENT_SPECIFIC and will migrate to `bbi-infrastructure` in a future phase (ADR-025).
+> ENVIRONMENT_SPECIFIC and are managed by the active GitOps repo in this environment.
 
 ## Overview
 
 Mereka LMS uses a **two-repository GitOps architecture**:
 
 1. **Application Repository** (`mereka-lms`): Source code, base K8s manifests, CI/CD pipeline
-2. **Infrastructure Repository** (`bbi-infrastructure`): Production overlay, ArgoCD configuration
+2. **Infrastructure Repository** (`BBI-K8`, previously `infrastructure`): Production overlay, ArgoCD configuration
 
-**CRITICAL**: ArgoCD syncs from `bbi-infrastructure`, NOT from `mereka-lms`. Any `kubectl patch` commands targeting production will be reverted on the next ArgoCD sync cycle.
+**CRITICAL**: ArgoCD syncs from `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`), NOT from `mereka-lms`. Any `kubectl patch` commands targeting production will be reverted on the next ArgoCD sync cycle.
+
+```bash
+# Optional defaults used by the examples below
+APP_REPO="${APP_REPO:-/home/gurpreet/projects/k8s/mereka-lms}"
+INFRA_REPO="${INFRA_REPO:-/home/gurpreet/projects/k8s/infrastructure}"
+```
 
 ## Architecture
 
@@ -31,7 +37,7 @@ Mereka LMS uses a **two-repository GitOps architecture**:
                               │ (but NOT used directly by ArgoCD)
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              bbi-infrastructure (Infra Repo)                    │
+│              BBI-K8 / infrastructure (Infra Repo)           │
 │  - Production overlay (apps/mereka-lms/overlays/prod/)          │
 │  - ArgoCD Application manifest                                 │
 │  - Production-specific patches (settings, ingress, secrets)     │
@@ -49,14 +55,14 @@ Image tags can diverge between repositories when:
 
 1. **CI/CD builds new images** in `mereka-lms` repo
    - Updates `deploy/k8s/overlays/production/kustomization.yaml` with new tag
-   - But `bbi-infrastructure` still references old tag
+   - But the active infra repo still references old tag
 
 2. **Manual tag updates** in `mereka-lms` for local testing
    - Developer updates app repo overlay for Kind/local testing
    - Forgets to sync tag to infra repo
 
 3. **Hotfixes applied directly to infra repo**
-   - Emergency rollback changes tag in `bbi-infrastructure`
+   - Emergency rollback changes tag in the infra repo
    - App repo never updated to match
 
 ## Current Image Tag Drift (2026-02-12)
@@ -90,7 +96,7 @@ yq eval '.images[] | "\(.name): \(.newTag)"' \
 
 # Infra repo production tags
 yq eval '.images[] | "\(.name): \(.newTag)"' \
-  /home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+  ${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustomization.yaml
 ```
 
 ### Check Live Cluster Images
@@ -102,7 +108,7 @@ kubectl get pods -n mereka-lms -o json | \
 
 ## Syncing Tags (Manual Process)
 
-**IMPORTANT**: Always commit to `bbi-infrastructure` for production changes. Do NOT use `kubectl patch`.
+**IMPORTANT**: Always commit to the GitOps infra repo for production changes. Do NOT use `kubectl patch`.
 
 ### Step 1: Determine Source of Truth
 
@@ -132,7 +138,7 @@ echo "  openedx: $APP_OPENEDX_TAG"
 echo "  openedx-mfe: $APP_MFE_TAG"
 
 # 2. Update infra repo
-cd /home/gurpreet/projects/k8s/bbi-infrastructure
+cd "$INFRA_REPO"
 
 # Update openedx tag
 yq eval -i "(.images[] | select(.name == \"docker.io/overhangio/openedx\") | .newTag) = \"$APP_OPENEDX_TAG\"" \
@@ -155,7 +161,7 @@ git commit -m "feat(mereka-lms): sync image tags from app repo
 - openedx: $APP_OPENEDX_TAG
 - openedx-mfe: $APP_MFE_TAG
 
-Source: mereka-lms deploy/k8s/overlays/production/kustomization.yaml"
+Source: ${APP_REPO}/deploy/k8s/overlays/production/kustomization.yaml"
 
 git push origin main
 
@@ -166,7 +172,7 @@ git push origin main
 
 ```bash
 # 1. Get tags from infra repo
-cd /home/gurpreet/projects/k8s/bbi-infrastructure
+cd "$INFRA_REPO"
 
 INFRA_OPENEDX_TAG=$(yq eval '.images[] | select(.name == "docker.io/overhangio/openedx") | .newTag' \
   apps/mereka-lms/overlays/prod/kustomization.yaml)
@@ -179,7 +185,7 @@ echo "  openedx: $INFRA_OPENEDX_TAG"
 echo "  openedx-mfe: $INFRA_MFE_TAG"
 
 # 2. Update app repo
-cd /home/gurpreet/projects/k8s/mereka-lms
+cd "$APP_REPO"
 
 # Update openedx tag
 yq eval -i "(.images[] | select(.name == \"docker.io/overhangio/openedx\") | .newTag) = \"$INFRA_OPENEDX_TAG\"" \
@@ -202,7 +208,7 @@ git commit -m "docs(k8s): sync production image tags from infra repo
 - openedx: $INFRA_OPENEDX_TAG
 - openedx-mfe: $INFRA_MFE_TAG
 
-Source: bbi-infrastructure apps/mereka-lms/overlays/prod/kustomization.yaml"
+Source: ${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustomization.yaml"
 
 git push origin main
 ```
@@ -218,7 +224,7 @@ git push origin main
 #   base: deploy/k8s/base/kustomization.yaml
 #   prod overlay: deploy/k8s/overlays/production/kustomization.yaml
 #   staging overlay: deploy/k8s/overlays/staging/kustomization.yaml
-#   infra overlay: /home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+#   infra overlay: ${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustomization.yaml
 ```
 
 ### Step 4: Verify Deployment
@@ -240,8 +246,8 @@ kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms
 # scripts/infra/sync-production-tags.sh
 set -euo pipefail
 
-APP_REPO="/home/gurpreet/projects/k8s/mereka-lms"
-INFRA_REPO="/home/gurpreet/projects/k8s/bbi-infrastructure"
+APP_REPO="${APP_REPO:-/home/gurpreet/projects/k8s/mereka-lms}"
+INFRA_REPO="${INFRA_REPO:-/home/gurpreet/projects/k8s/infrastructure}"
 
 # Get tags from app repo
 cd "$APP_REPO"
@@ -317,7 +323,7 @@ feat(mereka-lms): sync image tags from app repo
 - openedx: 20260210-v21-mfe-only-b988d63
 - openedx-mfe: 20260208-mfe-discussions-pass4-c17df16
 
-Source: mereka-lms deploy/k8s/overlays/production/kustomization.yaml
+Source: ${APP_REPO}/deploy/k8s/overlays/production/kustomization.yaml
 Reason: Promoting QA-approved build to production
 ```
 
@@ -332,7 +338,7 @@ kubectl patch deployment lms -n mereka-lms --type='json' \
 
 **RIGHT:**
 ```bash
-# Update bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+# Update ${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustomization.yaml
 # Commit and push
 # ArgoCD will sync automatically
 ```
@@ -371,7 +377,7 @@ Add `verify-gitops-image-overrides.sh` to pre-commit:
 kubectl get events -n mereka-lms --sort-by='.lastTimestamp' | grep -i "image pull"
 
 # 2. Update infra repo to previous tag
-cd /home/gurpreet/projects/k8s/bbi-infrastructure
+cd "$INFRA_REPO"
 yq eval -i '(.images[] | select(.name == "docker.io/overhangio/openedx") | .newTag) = "PREVIOUS_TAG"' \
   apps/mereka-lms/overlays/prod/kustomization.yaml
 
@@ -453,7 +459,7 @@ gcloud artifacts docker tags list \
 
 1. **Automated Tag Sync in CI/CD**
    - GitHub Action to auto-sync tags from app repo to infra repo after CI build
-   - Requires PAT with write access to `bbi-infrastructure`
+   - Requires PAT with write access to `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`)
 
 2. **Slack Notifications on Drift**
    - Daily cron job runs `verify-gitops-image-overrides.sh`

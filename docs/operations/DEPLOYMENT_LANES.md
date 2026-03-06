@@ -28,7 +28,7 @@ local (developer machine)
 ```
 
 Images travel forward-only. An image tag is promoted by updating the relevant overlay in
-`bbi-infrastructure` and merging the PR to main. ArgoCD reconciles within ~3 minutes.
+`infrastructure` and merging the PR to main. ArgoCD reconciles within ~3 minutes.
 Never patch clusters directly — see `docs/ops/runbooks/GITOPS_WORKFLOW.md`.
 
 ---
@@ -117,7 +117,7 @@ Configure ArgoCD repository with SSH key, not HTTPS.
 | Secrets | GCP Secret Manager (`gcp-secret-manager` ClusterSecretStore, Workload Identity) |
 | Image pull | GKE Workload Identity (no imagePullSecret needed) |
 | Replicas | 2 LMS, 2 lms-worker, 1 CMS, 1 cms-worker |
-| ArgoCD app | `mereka-lms-prod` (standalone Application in `bbi-infrastructure`) |
+| ArgoCD app | `mereka-lms-prod` (standalone Application in `infrastructure`) |
 
 **Key patches**:
 - `patches/resource-limits.yaml` — production CPU/memory limits

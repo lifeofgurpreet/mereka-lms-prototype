@@ -480,7 +480,7 @@ kubectl exec -n mereka-lms deploy/superset -- \
 
 ```bash
 # Daily Parquet export to GCS (automated via CronJob)
-kubectl apply -f deploy/k8s/base/plugins/aspects/backup-cronjob.yml
+kubectl apply -f deploy/k8s/base/plugins/aspects/jobs.yml
 ```
 
 ### 5. Update Superset Version
@@ -522,7 +522,7 @@ kubectl apply -f deploy/k8s/base/plugins/aspects/backup-cronjob.yml
 **Alert rules** (Prometheus):
 
 ```yaml
-# In infrastructure/observability/prometheus/rules/aspects-alerts.yml
+# In deploy/k8s/base/plugins/aspects/prometheusrule.yml
 - alert: AnalyticsEventLagHigh
   expr: |
     (time() - max(xapi_events_all_latest_event_timestamp)) / 60 > 10

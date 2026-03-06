@@ -1,0 +1,14 @@
+scripts/migrations/kajabi/output/
+scripts/migrations/mct/output/
+scripts/migrations/kajabi/logs/
+services/kajabi-webhook/outbox/
+docs/archive/evidence/*/
+docs/archive/reports/docs-program-scorecard-*.md
+# Legacy workflow references preserved in historical CI tracker docs.
+.github/workflows/verify-specs.yml
+.github/workflows/tutor-config-verify.yml
+.github/workflows/alert-routing-audit.yml
+.github/workflows/authenticated-sso-canary.yml
+.github/workflows/observability-audit.yml
+.github/workflows/observability-parity-runtime.yml
+.github/workflows/verify-patch-idempotency.yml

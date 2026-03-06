@@ -142,7 +142,7 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 - GCP dashboard JSON: `infrastructure/monitoring/dashboards/`  
 - Auth-focused: `infrastructure/monitoring/dashboards/auth.json`
 - Ops-focused: `infrastructure/monitoring/dashboards/operations-signals.json`
-- Platform Grafana dashboard source: `bbi-infrastructure/platform/monitoring/overlays/prod/dashboards/`  
+- Platform Grafana dashboard source: `infrastructure/monitoring/dashboards/`  
   Contract UID: `bbi-app-mereka-lms` (enforced via `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`)
 
 **Public health checks + TLS SAN validation**

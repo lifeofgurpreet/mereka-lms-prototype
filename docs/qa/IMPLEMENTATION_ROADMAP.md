@@ -164,7 +164,7 @@ python3 scripts/qa/spec-tools/spec_coverage_report.py --format text
 ```bash
 # Full report with unmapped ACs
 python3 scripts/qa/spec-tools/spec_coverage_report.py \
-  --format markdown > docs/reports/coverage-$(date +%Y-%m-%d).md
+  --format markdown > docs/archive/reports/coverage-$(date +%Y-%m-%d).md
 ```
 
 ### Per Sprint
@@ -178,7 +178,7 @@ python3 scripts/qa/spec-tools/spec_coverage_report.py \
 ## Resources
 
 - **Dependency graph**: `specs/IMPLEMENTATION_ORDER.md`
-- **Coverage reports**: `docs/reports/`
+- **Coverage reports**: `docs/archive/reports/`
 - **Sprint plans**: `docs/sprints/`
 - **Manual verifications**: `specs/manual_verifications.yaml`
 - **ADR**: `docs/adr/011-convention-based-spec-verification.md`

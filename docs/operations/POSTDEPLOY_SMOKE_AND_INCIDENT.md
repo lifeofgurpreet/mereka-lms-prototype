@@ -122,7 +122,7 @@ git add . && git commit -m "fix: <issue>" && git push
 ```bash
 # Revert last release commit in both repos
 git -C /home/gurpreet/projects/k8s/mereka-lms revert HEAD && git push
-git -C /home/gurpreet/projects/k8s/bbi-infrastructure revert HEAD && git push
+git -C /home/gurpreet/projects/k8s/infrastructure revert HEAD && git push
 # ArgoCD auto-syncs to previous state in ~2 min
 ```
 
@@ -181,7 +181,7 @@ curl -sI https://apps.academyv2.mereka.io | head -1
 |----------|-----------|----------|
 | Release PR | Permanent | GitHub PRs |
 | Dry-run logs | 30 days | `var/release-logs/` (gitignored) |
-| Incident reports | Permanent | `docs/operations/incidents/` |
+| Incident reports | Permanent | `docs/archive/evidence/operations/` |
 | Pod status snapshots | 30 days | PR comments |
 | ArgoCD sync status | 7 days | ArgoCD UI history |
 

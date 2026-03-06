@@ -3,7 +3,7 @@
 **Status:** Proposed
 **Date:** 2026-03-06
 **Deciders:** Platform Engineering
-**Related:** `docs/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `scripts/qa/inventory_k8s_resources.sh`
+**Related:** `docs/concepts/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `scripts/qa/inventory_k8s_resources.sh`
 
 ---
 
@@ -13,7 +13,7 @@ The `deploy/k8s/` tree in this repository (mereka-lms) contains a mix of concern
 
 1. App workloads and configuration that change with every code release (LMS, CMS, enterprise services, purchase gateway, settings, secrets).
 2. Platform-level resources that belong to cluster administration and outlive any single application release (ARC, Promtail, Kyverno policies, ClusterSecretStore, ArgoCD config).
-3. Environment-specific overlays that encode domain names, image digests, and provider-specific secrets — currently duplicated between this repo and `bbi-infrastructure`.
+3. Environment-specific overlays that encode domain names, image digests, and provider-specific secrets — currently duplicated between this repo and `infrastructure` (historical alias: `infrastructure`).
 4. Dead or placeholder manifests that are not rendered by any active kustomization and create confusion about intended scope.
 
 Without a defined boundary, every agent and engineer must guess which files they are allowed to modify and which are owned by the platform team or the infrastructure GitOps repo. This ADR defines that boundary.
@@ -28,7 +28,7 @@ Without a defined boundary, every agent and engineer must guess which files they
 
 | Question | App Repo (here) | Infrastructure/GitOps Repo |
 |---|---|---|
-| What image runs? | Yes — Dockerfiles, image tags | Yes — pins for prod overlays (bbi-infrastructure) |
+| What image runs? | Yes — Dockerfiles, image tags | Yes — pins for prod overlays (`infrastructure`) |
 | How does the app behave? | Yes — Django settings, Caddy config, secrets mapping | No |
 | Which cluster is it on? | No | Yes — ArgoCD Applications, overlays |
 | How does the cluster log? | No | Yes — Promtail DaemonSet |
@@ -45,7 +45,7 @@ Every file in `deploy/k8s/` is assigned one of six classifications:
 | **APP_RELEASE** | Migrations, bootstrap jobs, one-time init jobs, sync CronJobs | Stays in app repo |
 | **APP_LOCAL_ONLY** | Local developer support (Kind patches, dev secrets, local ClusterIssuer) | Stays in app repo; never promoted to prod |
 | **PLATFORM_SHARED** | Cluster logging, ARC runners, Kyverno policies, ClusterSecretStore, ArgoCD app config | Move to infrastructure repo |
-| **ENVIRONMENT_SPECIFIC** | Domain names, ingresses, provider-specific image digests, overlay patches | Move to infrastructure repo (bbi-infrastructure) |
+| **ENVIRONMENT_SPECIFIC** | Domain names, ingresses, provider-specific image digests, overlay patches | Move to `infrastructure` repo |
 | **DEAD_REFERENCE** | Placeholder images, commented-out resources, contradictory or obsolete files | Quarantine or delete |
 
 ---
@@ -73,7 +73,7 @@ The following categories belong here because they travel with the application co
 
 ## What Moves to the Infrastructure Repo
 
-These resources are cluster-level concerns. They do not change when the application code changes. They belong in `bbi-infrastructure` (or an equivalent cluster management repo):
+These resources are cluster-level concerns. They do not change when the application code changes. They belong in `infrastructure` (or an equivalent cluster management repo):
 
 ### Platform-Shared Resources (cluster-scoped)
 
@@ -85,8 +85,8 @@ These resources are cluster-level concerns. They do not change when the applicat
 
 ### Environment-Specific Resources (per-environment overlays)
 
-- `overlays/production/**` — Production GKE ingresses, image digests, replica counts. Managed by bbi-infrastructure.
-- `overlays/rke2-nonprod/**` — Dev/staging RKE2 ingresses, Infisical patches, domain env. Managed by bbi-infrastructure.
+- `overlays/production/**` — Production GKE ingresses, image digests, replica counts. Managed by infrastructure.
+- `overlays/rke2-nonprod/**` — Dev/staging RKE2 ingresses, Infisical patches, domain env. Managed by infrastructure.
 - `overlays/staging/**` — Staging overlay duplicating rke2-nonprod with different domains. This overlay has no independent cluster — it shares rke2-nonprod. Consolidate into rke2-nonprod or delete.
 
 ## What Needs Action (Dead References and Quarantine)
@@ -111,7 +111,7 @@ These resources are cluster-level concerns. They do not change when the applicat
 
 ### Negative
 
-- Moving files requires coordination with bbi-infrastructure repo and ArgoCD Application updates.
+- Moving files requires coordination with the infrastructure repo and ArgoCD Application updates.
 - During the transition, both repos may temporarily contain duplicate resources.
 - The `overlays/staging/` consolidation requires a decision: does staging share the rke2-nonprod namespace or get a dedicated namespace?
 
@@ -119,12 +119,12 @@ These resources are cluster-level concerns. They do not change when the applicat
 
 1. **Phase 1 (no-op, documentation):** This ADR. No file moves. Inventory and classify.
 2. **Phase 2 (quarantine dead files):** Move placeholder/obsolete manifests to `_quarantine/` with a README.
-3. **Phase 3 (PLATFORM_SHARED extraction):** Move `logging/`, `arc/`, `policies/`, `cluster-secret-store.yaml` to bbi-infrastructure. Update kustomization references.
-4. **Phase 4 (overlay consolidation):** Move `overlays/production/` and `overlays/rke2-nonprod/` into bbi-infrastructure. `overlays/local/` stays here for developer workflow.
+3. **Phase 3 (PLATFORM_SHARED extraction):** Move `logging/`, `arc/`, `policies/`, `cluster-secret-store.yaml` to infrastructure. Update kustomization references.
+4. **Phase 4 (overlay consolidation):** Move `overlays/production/` and `overlays/rke2-nonprod/` into infrastructure. `overlays/local/` stays here for developer workflow.
 5. **Phase 5 (staging decision):** Consolidate or formalize the staging overlay.
 
 ---
 
 ## Resource Ownership Matrix
 
-See `docs/architecture/RESOURCE_OWNERSHIP_MATRIX.md` for the full per-file classification table.
+See `docs/concepts/architecture/RESOURCE_OWNERSHIP_MATRIX.md` for the full per-file classification table.

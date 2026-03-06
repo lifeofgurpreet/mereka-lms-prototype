@@ -3,7 +3,7 @@
 <!-- Last verified: 2026-02-24 -->
 
 **Spec**: `specs/mobile-apps-enterprise_spec.md`
-**ADR**: `docs/adr/016-android-deferral.md` (Android deferred indefinitely)
+**ADR**: `docs/adr/016-android-app-support-decision.md` (Android deferred indefinitely)
 
 ## Overview
 
@@ -199,7 +199,7 @@ print('Done')
    gcloud secrets create MEREKA_LMS_FCM_SERVICE_ACCOUNT_KEY --data-file=service-account.json
    ```
 
-3. **Update ExternalSecrets** in `deploy/k8s/base/secrets/external-secrets-mobile.yaml` to include:
+3. **Update ExternalSecrets** in `deploy/k8s/base/secrets/external-secrets.yaml` to include:
    ```yaml
    - secretKey: FCM_PROJECT_ID
      remoteRef:
@@ -377,9 +377,9 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms-worker --tail=100 | gre
 
 ## Related Documentation
 
-- `docs/MOBILE_IOS_APP_SETUP.md` — Initial iOS setup guide
-- `docs/IOS_DEPLOYMENT_LEARNINGS.md` — CI/CD lessons learned
-- `docs/IOS_APP_CI_SETUP.md` — GitHub Actions CI setup walkthrough
-- `docs/adr/016-android-deferral.md` — Android deferral decision record
+- `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` — Initial iOS setup guide
+- `docs/archive/ios/IOS_DEPLOYMENT_LEARNINGS.md` — CI/CD lessons learned
+- `docs/archive/ios/IOS_APP_CI_SETUP.md` — GitHub Actions CI setup walkthrough
+- `docs/adr/016-android-app-support-decision.md` — Android deferral decision record
 - `specs/mobile-apps-enterprise_spec.md` — Full mobile spec (37 ACs)
 - `specs/mobile-apps-secrets-management_spec.md` — Secrets management spec

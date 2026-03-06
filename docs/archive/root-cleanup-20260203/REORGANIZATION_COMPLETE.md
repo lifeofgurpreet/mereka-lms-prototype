@@ -181,11 +181,11 @@ make format
 ## Documentation
 
 - [`REORGANIZATION_SUMMARY.md`](REORGANIZATION_SUMMARY.md) - Detailed reorganization plan
-- [`MIGRATION_CHECKLIST.md`](MIGRATION_CHECKLIST.md) - Team migration checklist
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) - Development workflow
-- [`docs/README.md`](docs/README.md) - Documentation index
-- [`scripts/README.md`](scripts/README.md) - Scripts documentation
-- [`infrastructure/README.md`](infrastructure/README.md) - Infrastructure docs
+- `MIGRATION_CHECKLIST.md` (not retained; historic reference) - Team migration checklist
+- [`CONTRIBUTING.md`](../../CONTRIBUTING.md) - Development workflow
+- [`docs/README.md`](../../README.md) - Documentation index
+- [`scripts/README.md`](../../../scripts/README.md) - Scripts documentation
+- [`infrastructure/README.md`](../../../infrastructure/README.md) - Infrastructure docs
 
 ## Verification
 
@@ -198,7 +198,7 @@ All critical files verified:
 
 ## Next Actions
 
-1. **Team**: Review [`MIGRATION_CHECKLIST.md`](MIGRATION_CHECKLIST.md) and migrate
+1. **Team**: Review `MIGRATION_CHECKLIST.md` (not retained; historic reference) and migrate
 2. **CI/CD**: Verify workflows pass with new paths
 3. **Documentation**: Update any team-specific docs
 4. **Testing**: Run `make tutor-start` to verify everything works

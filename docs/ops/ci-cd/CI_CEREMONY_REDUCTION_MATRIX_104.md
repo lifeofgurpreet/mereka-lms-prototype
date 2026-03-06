@@ -30,14 +30,14 @@ rg -n "^[A-Za-z0-9_.-]+:($|[^=])" Makefile | sed -E 's/:.*$//' | wc -l
 
 | Candidate | Type | Why redundant | Canonical replacement | Status |
 |---|---|---|---|---|
-| `.github/workflows/policy-checks.yml` | Workflow wrapper | Manual-only fanout of contract wrappers that duplicate checks already covered by `ci.yml` static lanes | `ci.yml` + `verify-ci-cd-pipeline.sh` | Completed |
-| `scripts/qa/verify-*-workflow.sh` family (18 files) | Meta wrapper scripts | Checks wrapper/workflow shape rather than runtime behavior; high ceremony, low signal | Direct source/runtime checks already in `ci-scripts-static.txt` | Completed |
+| .github/workflows/policy-checks.yml | Workflow wrapper | Manual-only fanout of contract wrappers that duplicate checks already covered by ci.yml static lanes | ci.yml + verify-ci-cd-pipeline.sh | Completed |
+| scripts/qa/verify-*-workflow.sh family (18 files) | Meta wrapper scripts | Checks wrapper/workflow shape rather than runtime behavior; high ceremony, low signal | Direct source/runtime checks already in ci-scripts-static.txt | Completed |
 | `Makefile` frontend QA wrapper aliases (env-specific duplicates) | Make target duplication | Multiple targets differ only by env/flags | Parameterized canonical target (`qa-frontend-closure` + `QA_ENV`/flag matrix) | Completed |
 | `Makefile` blocker sweep env aliases (`*-both/dev/prod`) | Make target duplication | Alias wrappers only delegated to the same sweep target with a different `QA_ENV` | Parameterized canonical target (`qa-frontend-runtime-blocker-sweep QA_ENV=...`) | Completed |
 
 ## Post-Tranche Counts
 
-After removing `policy-checks`, the 18-script workflow-wrapper family, and alias-only Make lanes:
+After removing policy-checks, the 18-script workflow-wrapper family, and alias-only Make lanes:
 
 | Metric | Baseline | Current | Delta |
 |---|---:|---:|---:|
@@ -67,24 +67,26 @@ After removing `policy-checks`, the 18-script workflow-wrapper family, and alias
 
 ## Wrapper Script Deletion Set (18)
 
-1. `scripts/qa/verify-a11y-tenant-branding-workflow.sh`
-2. `scripts/qa/verify-accessibility-audit-workflow.sh`
-3. `scripts/qa/verify-certificate-branding-workflow.sh`
-4. `scripts/qa/verify-cicd-tutor-config-workflow.sh`
-5. `scripts/qa/verify-cross-browser-branding-workflow.sh`
-6. `scripts/qa/verify-email-template-branding-workflow.sh`
-7. `scripts/qa/verify-frontend-before-after-visuals-workflow.sh`
-8. `scripts/qa/verify-frontend-branding-closure-workflow.sh`
-9. `scripts/qa/verify-frontend-performance-spotcheck-workflow.sh`
-10. `scripts/qa/verify-frontend-runtime-qa-workflow.sh`
-11. `scripts/qa/verify-mfe-live-dom-audit-workflow.sh`
-12. `scripts/qa/verify-mfe-selector-hardening-workflow.sh`
-13. `scripts/qa/verify-npm-start-smoke-workflow.sh`
-14. `scripts/qa/verify-paragon-runtime-contract-workflow.sh`
-15. `scripts/qa/verify-paragon-theme-budget-workflow.sh`
-16. `scripts/qa/verify-phase2-smoke-evidence-workflow.sh`
-17. `scripts/qa/verify-release-evidence-workflow.sh`
-18. `scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh`
+These entries were intentionally removed as part of CI simplification and are retained here for execution history.
+
+1. scripts/qa/verify-a11y-tenant-branding-workflow.sh
+2. scripts/qa/verify-accessibility-audit-workflow.sh
+3. scripts/qa/verify-certificate-branding-workflow.sh
+4. scripts/qa/verify-cicd-tutor-config-workflow.sh
+5. scripts/qa/verify-cross-browser-branding-workflow.sh
+6. scripts/qa/verify-email-template-branding-workflow.sh
+7. scripts/qa/verify-frontend-before-after-visuals-workflow.sh
+8. scripts/qa/verify-frontend-branding-closure-workflow.sh
+9. scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
+10. scripts/qa/verify-frontend-runtime-qa-workflow.sh
+11. scripts/qa/verify-mfe-live-dom-audit-workflow.sh
+12. scripts/qa/verify-mfe-selector-hardening-workflow.sh
+13. scripts/qa/verify-npm-start-smoke-workflow.sh
+14. scripts/qa/verify-paragon-runtime-contract-workflow.sh
+15. scripts/qa/verify-paragon-theme-budget-workflow.sh
+16. scripts/qa/verify-phase2-smoke-evidence-workflow.sh
+17. scripts/qa/verify-release-evidence-workflow.sh
+18. scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh
 
 ## Execution Note
 

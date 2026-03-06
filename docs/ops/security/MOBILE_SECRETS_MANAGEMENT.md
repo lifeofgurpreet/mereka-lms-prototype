@@ -249,7 +249,7 @@ Verify all mobile secrets exist in Infisical and GCP SM:
 - **OAuth Provisioning**: `docs/operations/MOBILE_OAUTH_PROVISIONING.md` - OAuth app creation and verification
 - **Secrets Management Spec**: `specs/secrets-management_spec.md` - Pipeline architecture and validation
 - **CI/CD Pipeline Spec**: `specs/ci-cd-pipeline_spec.md` - iOS build workflow
-- **iOS App Setup**: `docs/MOBILE_IOS_APP_SETUP.md` - iOS app configuration (if exists)
+- **iOS App Setup**: `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` - iOS app configuration (if exists)
 
 ## Troubleshooting
 

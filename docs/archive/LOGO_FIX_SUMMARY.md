@@ -267,13 +267,13 @@ $ ls -lh tutor_env/env/build/openedx/themes/mereka/lms/static/images/ | grep log
 ## Documentation
 
 **Primary Documentation**:
-- [LOGO_404_FIX.md](docs/operations/LOGO_404_FIX.md) - Technical details
+- [LOGO_404_FIX.md](../operations/LOGO_404_FIX.md) - Technical details
 - [LOGO_FIX_DEPLOYMENT_CHECKLIST.md](LOGO_FIX_DEPLOYMENT_CHECKLIST.md) - Deployment steps
 
 **Related Documentation**:
-- [BRANDING.md](docs/BRANDING.md) - Complete branding guide
-- [TROUBLESHOOTING.md](docs/operations/TROUBLESHOOTING.md) - General troubleshooting
-- [CLAUDE.md](CLAUDE.md) - Project context
+- [BRANDING.md](../branding/BRANDING.md) - Complete branding guide
+- [TROUBLESHOOTING.md](../operations/TROUBLESHOOTING.md) - General troubleshooting
+- [CLAUDE.md](../../CLAUDE.md) - Project context
 
 ---
 
@@ -284,7 +284,7 @@ $ ls -lh tutor_env/env/build/openedx/themes/mereka/lms/static/images/ | grep log
 - Deployment: team@mereka.io
 
 **Deployment Issues?**
-- Check: [LOGO_404_FIX.md](docs/operations/LOGO_404_FIX.md)
+- Check: [LOGO_404_FIX.md](../operations/LOGO_404_FIX.md)
 - Logs: `kubectl logs -n mereka-lms <pod-name>`
 
 ---

@@ -25,7 +25,7 @@ ArgoCD can report "Synced" while the in-cluster Application spec has been manual
 
 | Check | What it verifies |
 |-------|-----------------|
-| Overlay path exists | `bbi-infrastructure/apps/mereka-lms/overlays/{overlay}` is a real directory |
+| Overlay path exists | `infrastructure/apps/mereka-lms/overlays/{overlay}` is a real directory |
 | kustomization.yaml present | The overlay has a valid kustomization entry point |
 | Application manifest matches | Git-defined source.path and repoURL are correct |
 | ApplicationSet integrity (dev) | mereka-lms entry exists with correct overlay reference |
@@ -49,15 +49,15 @@ ArgoCD can report "Synced" while the in-cluster Application spec has been manual
 
 | App Name | Source Path | Repo |
 |----------|------------|------|
-| `mereka-lms-dev` | `apps/mereka-lms/overlays/profiles/dev` | `bbi-infrastructure.git` |
-| `mereka-lms-prod` | `apps/mereka-lms/overlays/prod` | `bbi-infrastructure.git` |
+| `mereka-lms-dev` | `apps/mereka-lms/overlays/profiles/dev` | `infrastructure.git` |
+| `mereka-lms-prod` | `apps/mereka-lms/overlays/prod` | `infrastructure.git` |
 
 ## Resolution Steps
 
 ### Drift in Application spec (source path, repoURL, namespace)
 
 1. **Do NOT** `kubectl patch` the Application. ArgoCD manages it from git.
-2. Verify the correct values in `bbi-infrastructure/applicationsets/`:
+2. Verify the correct values in the GitOps [`applicationsets`](https://github.com/Biji-Biji-Initiative/BBI-K8/tree/main/infrastructure/applicationsets):
    - `mereka-lms-prod.yaml` (standalone Application)
    - `kustomize-apps.yaml` (ApplicationSet for dev)
 3. If the git values are correct and the cluster is wrong, delete the Application and let ArgoCD recreate it:
@@ -74,7 +74,7 @@ Someone may have disabled `automated.prune` or `automated.selfHeal` while debugg
 1. Check if there's an active incident requiring manual sync control.
 2. If not, restore the sync policy by reapplying the Application from git:
    ```bash
-   kubectl apply -f bbi-infrastructure/applicationsets/mereka-lms-prod.yaml
+    kubectl apply -f https://raw.githubusercontent.com/Biji-Biji-Initiative/BBI-K8/main/infrastructure/applicationsets/mereka-lms-prod.yaml
    ```
 
 ### Degraded child resources
@@ -91,4 +91,4 @@ The drift check runs every 6 hours via `.github/workflows/argocd-drift-check.yml
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `BBI_INFRA` | `/home/gurpreet/projects/k8s/bbi-infrastructure` | Path to bbi-infrastructure repo clone |
+| `BBI_INFRA` | `/home/gurpreet/projects/k8s/infrastructure` | Path to infrastructure repo clone |
