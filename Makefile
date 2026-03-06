@@ -320,8 +320,7 @@ test: ## Run tests
 
 clean: ## Clean generated files
 	rm -rf var/logs/* var/exports/* var/migrations/*/output/*
-	find . -type d -name __pycache__ -exec rm -rf {} + || true
-	find . -type f -name "*.pyc" -delete || true
+	./scripts/qa/clean-python-caches.sh
 
 mobile-setup: ## Enable mobile API for iOS/Android apps
 	./scripts/infra/setup-mobile-api.sh
