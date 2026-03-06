@@ -17,6 +17,9 @@ scripts/qa/verify-deprecation-discipline.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
 scripts/qa/verify-tutor-config-path-contract.sh
 
+# ── QA verifier self-tests ───────────────────────────────────────────────────
+scripts/qa/test-verify-no-mux-asset-ids.sh
+
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh
 scripts/qa/verify-secrets-naming-convention.sh
@@ -412,6 +415,7 @@ scripts/qa/verify-forum-moderation.sh
 scripts/migrations/mct/verify_video_mapping.sh
 scripts/qa/verify-mux-upload-completeness.sh
 scripts/qa/verify-mux-video-upload.sh
+scripts/qa/verify-no-mux-asset-ids.sh
 scripts/qa/verify-video-content-protection.sh
 scripts/qa/verify-video-mct-migration.sh
 scripts/qa/verify-video-phase2.sh

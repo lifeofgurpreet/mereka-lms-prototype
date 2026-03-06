@@ -31,11 +31,6 @@ error() { echo -e "${RED}[ERROR]${NC} $*"; }
 # Configuration
 # =============================================================================
 OUTPUT_DIR="${OUTPUT_DIR:-tutor_env/env}"
-SEARCH_PATHS=(
-  "tutor_env/env/apps/openedx/templates"
-  "tutor_env/env/apps/mfe"
-  "tutor_env/env/build/openedx"
-)
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -56,11 +51,6 @@ done
 # =============================================================================
 # Mux asset ID format: alphanumeric string, typically 40+ chars
 # Examples: n58kT8AhCnMFBJ7e008ok8bA01C7hE4nf2P2TQre9X02Kc
-ASSET_ID_PATTERN='[A-Za-z0-9]{40,}'
-
-# Mux playback ID format: similar but typically shorter (32-42 chars)
-# We want to allow playback IDs but flag asset IDs
-
 # API credential patterns
 CREDENTIAL_PATTERNS=(
   'MUX_TOKEN_ID'
@@ -78,7 +68,7 @@ load_known_asset_ids() {
   local results_file="exports/mct/mux_upload_complete.json"
 
   if [[ ! -f "${results_file}" ]]; then
-    warn "Mux upload results not found: ${results_file}"
+    warn "Mux upload results not found: ${results_file}" >&2
     echo ""
     return
   fi
@@ -103,6 +93,12 @@ scan_for_asset_ids() {
   echo
 
   local found_issues=0
+  local scanned_paths=0
+  local search_paths=(
+    "${OUTPUT_DIR}/apps/openedx/templates"
+    "${OUTPUT_DIR}/apps/mfe"
+    "${OUTPUT_DIR}/build/openedx"
+  )
   local asset_ids
   asset_ids=$(load_known_asset_ids)
 
@@ -115,12 +111,13 @@ scan_for_asset_ids() {
   fi
 
   # Scan each path
-  for search_path in "${SEARCH_PATHS[@]}"; do
+  for search_path in "${search_paths[@]}"; do
     if [[ ! -d "${search_path}" ]]; then
       warn "Path not found: ${search_path}"
       continue
     fi
 
+    scanned_paths=$((scanned_paths + 1))
     info "Scanning ${search_path}..."
 
     # Look for known asset IDs
@@ -170,7 +167,7 @@ scan_for_asset_ids() {
     sample_playback_id=$(echo "${playback_ids}" | head -n1)
 
     if [[ -n "${sample_playback_id}" ]]; then
-      for search_path in "${SEARCH_PATHS[@]}"; do
+      for search_path in "${search_paths[@]}"; do
         if [[ ! -d "${search_path}" ]]; then
           continue
         fi
@@ -188,6 +185,10 @@ scan_for_asset_ids() {
     fi
   fi
 
+  if [[ "${scanned_paths}" -eq 0 ]]; then
+    warn "No build artifact paths found under OUTPUT_DIR=${OUTPUT_DIR}; content scan skipped"
+  fi
+
   return "${found_issues}"
 }
 
@@ -195,7 +196,7 @@ scan_for_asset_ids() {
 # Main
 # =============================================================================
 main() {
-  if ! scan_for_asset_ids; then
+  if scan_for_asset_ids; then
     echo
     info "✅ No Mux asset IDs or credentials exposed in build artifacts"
     return 0
