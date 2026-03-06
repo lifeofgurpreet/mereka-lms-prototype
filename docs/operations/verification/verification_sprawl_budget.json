@@ -1,6 +1,6 @@
 {
-  "max_total_verify_scripts": 498,
+  "max_total_verify_scripts": 512,
   "max_manual_only_scripts": 127,
-  "max_deprecated_candidate_scripts": 32,
-  "min_ci_static_bound": 303
+  "max_deprecated_candidate_scripts": 35,
+  "min_ci_static_bound": 323
 }

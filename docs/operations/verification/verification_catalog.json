@@ -1277,14 +1277,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-custom-app-install-contract.sh",
-      "reference_count": 0,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -3787,7 +3789,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-openedx-audit-tracker-sync.sh",
-      "reference_count": 1,
+      "reference_count": 3,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4118,6 +4120,18 @@
       "severity": "medium",
       "status": "active",
       "tier": "periodic_runtime"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-pr-handoff-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5876,18 +5890,18 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 5,
-    "ci_static_bound": 322,
+    "ci_static_bound": 324,
     "statuses": {
-      "active": 349,
-      "deprecated_candidate": 35,
+      "active": 351,
+      "deprecated_candidate": 34,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 162,
+      "exploratory_manual": 161,
       "periodic_runtime": 7,
-      "release_blocking": 342
+      "release_blocking": 344
     },
-    "total_verify_scripts": 511,
+    "total_verify_scripts": 512,
     "workflow_direct_bound": 49
   },
   "version": "1"

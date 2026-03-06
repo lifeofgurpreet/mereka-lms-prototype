@@ -8,19 +8,19 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **511**
+- Total `verify-*.sh` scripts: **512**
 - Archived deprecated scripts: **5**
-- CI static-bound scripts: **322**
+- CI static-bound scripts: **324**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 162
+- `exploratory_manual`: 161
 - `periodic_runtime`: 7
-- `release_blocking`: 342
+- `release_blocking`: 344
 
 ### Status Distribution
-- `active`: 349
-- `deprecated_candidate`: 35
+- `active`: 351
+- `deprecated_candidate`: 34
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -35,7 +35,6 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-cicd-scheduled-ops.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-cicd-tutor-plugin-test.sh` (owner: `platform-infra`, refs: 1)
 - `scripts/qa/verify-credentials-issuer.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-custom-app-install-contract.sh` (owner: `platform-core`, refs: 0)
 - `scripts/qa/verify-deprecation-discipline.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-ace-channels.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-bulk-campaigns.sh` (owner: `platform-core`, refs: 1)
