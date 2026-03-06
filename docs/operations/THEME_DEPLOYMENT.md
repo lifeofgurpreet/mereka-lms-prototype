@@ -192,15 +192,41 @@ This copies assets to:
 - `infrastructure/tutor/themes/mereka/common/static/` (LMS/Studio)
 - `infrastructure/tutor/themes/mereka/mfe/` (MFE bundling)
 
-It also refreshes the canonical design-system token export (`assets/branding/tokens.css`) from the
-local `bbbi-mereka-brand-assets` repo when present, and keeps a theme copy at:
+It also keeps a theme copy of canonical design tokens at:
 `infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css`.
+
+If you want to refresh `assets/branding/tokens.css` from an upstream export file in the same run,
+pass an explicit path:
+
+```bash
+BRAND_REPO_TOKENS=/absolute/path/to/tokens.css ./scripts/branding/sync-brand-assets.sh
+```
+
+Optional backward-compatible auto-discovery of the sibling `../bbbi-mereka-brand-assets` checkout
+is available only when explicitly enabled:
+
+```bash
+AUTO_BRAND_REPO_TOKENS=1 ./scripts/branding/sync-brand-assets.sh
+```
 
 After intentional token updates, refresh and commit provenance metadata:
 
 ```bash
-./scripts/branding/update-token-provenance.sh
+BRAND_ASSETS_REPO=/absolute/path/to/bbbi-mereka-brand-assets \
+  ./scripts/branding/update-token-provenance.sh
 ./scripts/branding/verify-token-drift.sh
+```
+
+Optional compatibility mode:
+
+```bash
+AUTO_BRAND_ASSETS_REPO=1 ./scripts/branding/update-token-provenance.sh
+```
+
+Portability guard (recommended before PR):
+
+```bash
+./scripts/qa/verify-branding-script-portability.sh
 ```
 
 ### Step 3: Apply Tutor Patches

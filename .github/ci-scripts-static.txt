@@ -115,6 +115,7 @@ scripts/qa/verify-paragon-runtime.sh
 scripts/qa/verify-font-loading.sh
 scripts/qa/verify-catalog-discovery.sh
 scripts/qa/verify-branding-asset-sync.sh
+scripts/qa/verify-branding-script-portability.sh
 scripts/qa/verify-brand-asset-drift.sh
 scripts/qa/verify-css-branding-overhead.sh
 scripts/qa/verify-caddy-cache-headers.sh

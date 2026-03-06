@@ -21,10 +21,11 @@ OVERRIDES_SRC="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/m
 OVERRIDES_LMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
 OVERRIDES_CMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
 BRAND_REPO_TOKENS="${BRAND_REPO_TOKENS:-}"
-if [[ -z "$BRAND_REPO_TOKENS" ]]; then
-  AUTO_BRAND_REPO_TOKENS="$REPO_ROOT/../bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css"
-  if [[ -f "$AUTO_BRAND_REPO_TOKENS" ]]; then
-    BRAND_REPO_TOKENS="$AUTO_BRAND_REPO_TOKENS"
+AUTO_BRAND_REPO_TOKENS="${AUTO_BRAND_REPO_TOKENS:-0}"
+if [[ -z "$BRAND_REPO_TOKENS" && "$AUTO_BRAND_REPO_TOKENS" == "1" ]]; then
+  AUTO_BRAND_REPO_TOKENS_PATH="$REPO_ROOT/../bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css"
+  if [[ -f "$AUTO_BRAND_REPO_TOKENS_PATH" ]]; then
+    BRAND_REPO_TOKENS="$AUTO_BRAND_REPO_TOKENS_PATH"
   fi
 fi
 BRAND_PACKAGE_SYNC="$REPO_ROOT/scripts/branding/sync-brand-package.sh"
@@ -34,11 +35,15 @@ if [[ ! -d "$SRC_FONTS" ]]; then
   exit 1
 fi
 
-# Optional: if the canonical brand-assets repo exists locally, refresh tokens.css
-# in this repo so we don't drift from the design system export.
-if [[ -n "$BRAND_REPO_TOKENS" && -f "$BRAND_REPO_TOKENS" ]]; then
+# Optional: refresh tokens.css from an explicit upstream export path.
+# Default is deterministic (no implicit local sibling repo probing).
+if [[ -n "$BRAND_REPO_TOKENS" ]]; then
+  if [[ ! -f "$BRAND_REPO_TOKENS" ]]; then
+    echo "BRAND_REPO_TOKENS points to a missing file: $BRAND_REPO_TOKENS" >&2
+    exit 1
+  fi
   cp "$BRAND_REPO_TOKENS" "$TOKENS_SRC"
-  echo "  ✓ Refreshed tokens.css from ${BRAND_REPO_TOKENS#"$REPO_ROOT/"}"
+  echo "  ✓ Refreshed tokens.css from $BRAND_REPO_TOKENS"
 fi
 
 mkdir -p "$THEME_FONT_DIR" "$MFE_FONT_DIR" "$IMG_DEST_DIR" "$MFE_IMG_DEST_DIR" "$LMS_IMG_DEST_DIR" "$CMS_IMG_DEST_DIR"

@@ -8,20 +8,20 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **487**
+- Total `verify-*.sh` scripts: **498**
 - Archived deprecated scripts: **5**
-- CI static-bound scripts: **303**
-- Workflow-direct bound scripts: **49**
+- CI static-bound scripts: **310**
+- Workflow-direct bound scripts: **51**
 
 ### Tier Distribution
-- `exploratory_manual`: 157
+- `exploratory_manual`: 159
 - `periodic_runtime`: 7
-- `release_blocking`: 323
+- `release_blocking`: 332
 
 ### Status Distribution
-- `active`: 330
-- `deprecated_candidate`: 31
-- `manual_only`: 126
+- `active`: 339
+- `deprecated_candidate`: 32
+- `manual_only`: 127
 
 ## Deprecated Candidates
 
@@ -52,6 +52,7 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-notifications-inapp.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-patch-modularity.sh` (owner: `platform-core`, refs: 1)
+- `scripts/qa/verify-repo-hygiene-artifacts.sh` (owner: `platform-core`, refs: 0)
 - `scripts/qa/verify-restore-drill.sh` (owner: `sre-security`, refs: 1)
 - `scripts/qa/verify-spec-dedupe-normalize.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-tutor-patches-inventory.sh` (owner: `platform-infra`, refs: 1)

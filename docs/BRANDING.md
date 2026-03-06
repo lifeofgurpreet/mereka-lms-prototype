@@ -81,6 +81,7 @@ When new assets arrive, drop them into `assets/branding/`, re-sync the theme cop
   - `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css` must stay identical to avoid drift.
 - The theme expects logos/favicons at `/static/mereka/images/*`; run `./scripts/branding/sync-brand-assets.sh` whenever you refresh files under `assets/branding/`.
   - `sync-brand-assets.sh` also syncs the runtime override CSS from common -> LMS to prevent drift.
+  - Upstream token refresh is explicit: use `BRAND_REPO_TOKENS=/absolute/path/to/tokens.css ./scripts/branding/sync-brand-assets.sh` when pulling new design-token exports.
 
 To preview locally:
 
@@ -442,6 +443,7 @@ find infrastructure/tutor/themes/mereka -name "*.scss"
 - `scripts/branding/sync-brand-assets.sh` - Sync assets to theme
 - `scripts/branding/sync-brand-package.sh` - Sync all `brand-*` OEP-48 packages from canonical asset sources
 - `scripts/qa/verify-brand-asset-drift.sh` - Verify theme + brand package asset drift
+- `scripts/qa/verify-branding-script-portability.sh` - Block workstation-specific paths in branding automation scripts
 - `scripts/branding/build-tokens.sh` - Generate/check runtime `/theme/*.min.css` artifacts
 - `scripts/branding/verify-branding-health.sh` - CI gate
 - `scripts/branding/verify-logo-setup.sh` - Logo verification

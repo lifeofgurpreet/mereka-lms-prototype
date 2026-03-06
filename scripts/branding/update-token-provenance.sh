@@ -5,12 +5,24 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-UPSTREAM_REPO="${BRAND_ASSETS_REPO:-/home/gurpreet/projects/bbbi-mereka-brand-assets}"
+UPSTREAM_REPO="${BRAND_ASSETS_REPO:-}"
+AUTO_BRAND_ASSETS_REPO="${AUTO_BRAND_ASSETS_REPO:-0}"
+if [[ -z "$UPSTREAM_REPO" && "$AUTO_BRAND_ASSETS_REPO" == "1" ]]; then
+  AUTO_UPSTREAM_REPO="$REPO_ROOT/../bbbi-mereka-brand-assets"
+  if [[ -d "$AUTO_UPSTREAM_REPO/.git" ]]; then
+    UPSTREAM_REPO="$AUTO_UPSTREAM_REPO"
+  fi
+fi
 UPSTREAM_PATH="${UPSTREAM_TOKEN_PATH:-brands/mereka/tokens/tokens.css}"
 PROVENANCE_PATH="$REPO_ROOT/assets/branding/tokens.provenance.json"
 TARGET_TOKENS="$REPO_ROOT/assets/branding/tokens.css"
 SYNC_FILE="${SYNC_FILE:-0}"
 
+if [[ -z "$UPSTREAM_REPO" ]]; then
+  echo "Set BRAND_ASSETS_REPO to your upstream branding repo checkout path." >&2
+  echo "Optional compatibility mode: AUTO_BRAND_ASSETS_REPO=1 (uses ../bbbi-mereka-brand-assets when present)." >&2
+  exit 2
+fi
 if [[ ! -d "$UPSTREAM_REPO/.git" ]]; then
   echo "Upstream repo not found: $UPSTREAM_REPO" >&2
   exit 1
