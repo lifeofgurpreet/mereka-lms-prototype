@@ -18,7 +18,34 @@ do_warn() { echo "⚠ $1"; WARN_COUNT=$((WARN_COUNT + 1)); }
 
 cd "$REPO_ROOT" || exit 1
 
+resolve_ace_settings_source() {
+    local candidates=()
+    if [[ -n "${EMAIL_TEMPLATE_SETTINGS_SOURCE:-}" ]]; then
+        candidates+=("${EMAIL_TEMPLATE_SETTINGS_SOURCE}")
+    fi
+    candidates+=(
+        "../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+        "../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+        "/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+        "/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+        "infrastructure/tutor/config.yml"
+        "tutor_env/config.yml"
+    )
+
+    local candidate
+    for candidate in "${candidates[@]}"; do
+        if [[ -n "$candidate" && -f "$candidate" ]]; then
+            printf "%s" "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+ACE_SETTINGS_SOURCE="$(resolve_ace_settings_source || true)"
+
 echo "=== Email & Notifications: Multi-Language Template Verification ==="
+echo "ACE settings source: ${ACE_SETTINGS_SOURCE:-not found}"
 echo
 
 # AC-025: Malay (ms) template existence
@@ -326,21 +353,13 @@ echo
 # Check for ACE configuration in runtime overlay settings or local Tutor config.
 echo "Checking ACE template configuration..."
 
-ACE_SETTINGS_FILES=(
-    "../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "infrastructure/tutor/config.yml"
-    "tutor_env/config.yml"
-)
-
 ACE_CONFIG_FOUND=0
-for settings_file in "${ACE_SETTINGS_FILES[@]}"; do
-    if [ -f "$settings_file" ] && grep -qE "(ACE_TEMPLATE|ACE_CHANNEL|ACE_ENABLED_CHANNELS|ACE_CHANNEL_DEFAULT_EMAIL|BULK_EMAIL_SEND_USING_EDX_ACE)" "$settings_file" 2>/dev/null; then
-        do_pass "ACE template configuration found in ${settings_file}"
+if [ -n "$ACE_SETTINGS_SOURCE" ] && [ -f "$ACE_SETTINGS_SOURCE" ]; then
+    if grep -qE "(ACE_TEMPLATE|ACE_CHANNEL|ACE_ENABLED_CHANNELS|ACE_CHANNEL_DEFAULT_EMAIL|BULK_EMAIL_SEND_USING_EDX_ACE)" "$ACE_SETTINGS_SOURCE" 2>/dev/null; then
+        do_pass "ACE template configuration found in ${ACE_SETTINGS_SOURCE}"
         ACE_CONFIG_FOUND=1
-        break
     fi
-done
+fi
 
 if [ "$ACE_CONFIG_FOUND" -eq 0 ]; then
     do_warn "ACE configuration not found in expected settings/config files"
