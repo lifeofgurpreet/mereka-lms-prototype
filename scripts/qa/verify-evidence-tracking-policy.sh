@@ -3,7 +3,9 @@
 #
 # Guardrail:
 #  1) prevent new binary/log/json evidence artifacts from entering git under
-#     evidence directories, and
+#     curated evidence directories
+#       (docs/operations/evidence, docs/evidence/observability,
+#        docs/archive/reports), and
 #  2) prevent newly introduced unredacted sensitive markers in changed
 #     markdown evidence files.
 # Existing historical files remain untouched.
@@ -153,7 +155,7 @@ if [[ "$violations" -gt 0 ]]; then
   cat >&2 <<'EOM'
 FAIL — evidence tracking policy violations found.
 Use CI artifacts/object storage for raw evidence payloads, and keep only
-human-readable markdown summaries plus links in docs/evidence.
+human-readable markdown summaries plus links in curated evidence paths.
 Redact cookie/session/bearer markers before committing markdown evidence.
 EOM
   exit 1
