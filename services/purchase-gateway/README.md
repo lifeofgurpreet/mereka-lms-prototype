@@ -49,6 +49,7 @@ All configuration via environment variables (see `app/config.py`):
 |--------|------|------|-------------|
 | POST | `/api/v1/checkout/` | Public | Create Stripe Checkout Session |
 | POST | `/webhooks/stripe/` | Stripe Signature | Receive Stripe webhook events |
+| DELETE | `/api/v1/admin/offerings/{offering_id}` | `X-API-Key` | Soft-delete an offering by setting `active=false` |
 | GET | `/api/v1/admin/stripe-events/` | `X-API-Key` | List/filter processed Stripe events for debugging |
 | GET | `/api/v1/admin/offerings/` | `X-API-Key` | List/filter offerings by tenant, type, and active state |
 | POST | `/api/v1/admin/entitlements/{entitlement_id}/resend-invitation/` | `X-API-Key` | Record invitation resend for pending entitlement |

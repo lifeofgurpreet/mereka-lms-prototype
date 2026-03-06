@@ -228,6 +228,59 @@ async def test_update_offering_with_zero_price_returns_422(mock_settings, client
     assert resp.status_code == 422
 
 
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_soft_delete_offering_with_valid_auth_returns_200(mock_settings, client):
+    """DELETE /admin/offerings/{id} with valid API key soft-deletes offering."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    offering = _make_offering(active=True)
+    mock_db = _make_mock_db(offering=offering)
+    _override_db(mock_db)
+    try:
+        resp = await client.delete(
+            f"/api/v1/admin/offerings/{offering.id}",
+            headers=HEADERS,
+        )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 200
+    assert resp.json()["id"] == str(offering.id)
+    assert resp.json()["active"] is False
+    mock_db.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_soft_delete_offering_without_auth_returns_401(mock_settings, client):
+    """DELETE /admin/offerings/{id} without API key is rejected."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    resp = await client.delete(f"/api/v1/admin/offerings/{uuid.uuid4()}")
+
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_soft_delete_offering_not_found_returns_404(mock_settings, client):
+    """DELETE /admin/offerings/{id} returns 404 when offering does not exist."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    mock_db = _make_mock_db()
+    _override_db(mock_db)
+    try:
+        resp = await client.delete(
+            f"/api/v1/admin/offerings/{uuid.uuid4()}",
+            headers=HEADERS,
+        )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 404
+
+
 # ---------------------------------------------------------------------------
 # Bulk assign — >500 emails returns 400
 # ---------------------------------------------------------------------------

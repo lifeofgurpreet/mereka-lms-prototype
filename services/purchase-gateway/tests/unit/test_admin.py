@@ -21,6 +21,7 @@ from app.routers.admin import (
     create_offering,
     list_orders,
     retry_order_fulfillment,
+    soft_delete_offering,
     update_offering,
 )
 
@@ -226,6 +227,35 @@ async def test_update_offering_partial_update_only_changes_provided_fields(mock_
     assert result.title == "New Title Only"
     assert result.price_cents == 9900  # unchanged
     assert result.active is True  # unchanged
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_offering_sets_active_false(mock_db):
+    """soft_delete_offering marks the offering inactive and persists the change."""
+    existing = _make_offering(active=True)
+    mock_db.execute.return_value = _mock_select_result(existing)
+
+    async def _fake_refresh(obj):
+        pass
+
+    mock_db.refresh.side_effect = _fake_refresh
+
+    result = await soft_delete_offering(existing.id, mock_db)
+
+    assert result.active is False
+    mock_db.commit.assert_awaited_once()
+    mock_db.refresh.assert_awaited_once_with(existing)
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_offering_not_found_raises_404(mock_db):
+    """soft_delete_offering returns 404 when offering does not exist."""
+    mock_db.execute.return_value = _mock_select_result(None)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await soft_delete_offering(uuid.uuid4(), mock_db)
+
+    assert exc_info.value.status_code == 404
 
 
 # ---------------------------------------------------------------------------

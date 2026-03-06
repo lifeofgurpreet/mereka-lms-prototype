@@ -177,6 +177,26 @@ async def update_offering(
     return offering
 
 
+@router.delete("/admin/offerings/{offering_id}", response_model=OfferingResponse)
+async def soft_delete_offering(
+    offering_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft-delete an existing offering by setting active=false."""
+    result = await db.execute(select(Offering).where(Offering.id == offering_id))
+    offering = result.scalar_one_or_none()
+    if not offering:
+        raise HTTPException(status_code=404, detail="Offering not found")
+
+    offering.active = False
+
+    await db.commit()
+    await db.refresh(offering)
+
+    logger.info("offering.soft_deleted", offering_uuid=str(offering.id))
+    return offering
+
+
 # --- Entitlements ---
 
 
