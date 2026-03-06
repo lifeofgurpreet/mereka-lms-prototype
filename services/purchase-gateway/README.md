@@ -51,6 +51,7 @@ All configuration via environment variables (see `app/config.py`):
 | POST | `/webhooks/stripe/` | Stripe Signature | Receive Stripe webhook events |
 | GET | `/api/v1/admin/stripe-events/` | `X-API-Key` | List/filter processed Stripe events for debugging |
 | GET | `/api/v1/admin/offerings/` | `X-API-Key` | List/filter offerings by tenant, type, and active state |
+| POST | `/api/v1/admin/entitlements/{entitlement_id}/resend-invitation/` | `X-API-Key` | Record invitation resend for pending entitlement |
 | GET | `/api/v1/admin/orders/{order_id}/` | `X-API-Key` | Get detailed order view with line items, audit timeline, and fulfillment job |
 | POST | `/api/v1/admin/orders/{order_id}/retry-fulfillment/` | `X-API-Key` | Force requeue fulfillment job for retryable orders |
 | POST | `/api/v1/admin/orders/{order_id}/refund/` | `X-API-Key` | Initiate Stripe refund (order state updates asynchronously via webhook) |
