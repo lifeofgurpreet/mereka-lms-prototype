@@ -10,6 +10,8 @@ links:
     - "docs/adr/022-session-cookie-samesite-policy.md"
   related_specs:
     - "specs/security-hardening_spec.md"
+  related_docs:
+    - "docs/operations/CSP_REPORTING_RUNBOOK.md"
 ---
 
 # ADR-025: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline
@@ -62,6 +64,8 @@ We adopt a **phased nonce-based migration** rather than a flag day:
 
 - Stand up a CSP report collector (e.g. sentry-csp-endpoint or a lightweight
   FastAPI endpoint behind `/csp-report`).
+- Ensure `CSP_REPORT_URI` derivation is robust for both sentry.io and
+  self-hosted Sentry DSN hosts (implemented via URL parsing + CI gate).
 - Switch the enforcement header to a strict nonce-based policy in report-only
   mode: `'strict-dynamic' 'nonce-{value}'` with `'unsafe-inline'` as fallback
   for legacy browsers.
@@ -117,6 +121,9 @@ We adopt a **phased nonce-based migration** rather than a flag day:
   `Content-Type: application/csp-report`.
 - Sentry's CSP endpoint (via `/_/csp-report/`) is a drop-in option if Sentry
   DSN is already configured.
+- Runtime collector smoke checks are documented in
+  `docs/operations/CSP_REPORTING_RUNBOOK.md` and enforced statically by
+  `scripts/qa/verify-csp-report-pipeline.sh`.
 - The `Content-Security-Policy-Report-Only` header is emitted by django-csp
   when `CSP_REPORT_ONLY = True`; the enforcement header is emitted when
   `CSP_REPORT_ONLY = False`. Both can coexist if Caddy adds the report-only

@@ -1811,15 +1811,31 @@ CSP_INCLUDE_NONCE_IN = ["script-src"]
 
 # CSP report endpoint (Phase 1 — ADR-025):
 # Auto-derive from SENTRY_DSN if CSP_REPORT_URI not explicitly set.
-# Sentry's security endpoint: https://sentry.io/api/<project_id>/security/?sentry_key=<key>
-import re as _re
-_csp_report_uri = os.environ.get("CSP_REPORT_URI", "")
+# Works with sentry.io and self-hosted Sentry DSN hosts.
+from urllib.parse import urlparse as _urlparse
+
+def _derive_sentry_csp_report_uri(_dsn):
+    if not _dsn:
+        return ""
+    try:
+        _parsed = _urlparse(_dsn)
+    except Exception:
+        return ""
+    _public_key = (_parsed.username or "").strip()
+    _project_id = ((_parsed.path or "").rstrip("/").split("/")[-1] or "").strip()
+    _netloc = (_parsed.netloc or "").split("@", 1)[-1]
+    _scheme = (_parsed.scheme or "https").strip()
+    if not (_public_key and _project_id.isdigit() and _netloc):
+        return ""
+    return "{}://{}/api/{}/security/?sentry_key={}".format(
+        _scheme, _netloc, _project_id, _public_key
+    )
+
+_csp_report_uri = (os.environ.get("CSP_REPORT_URI", "") or "").strip()
 if not _csp_report_uri:
-    _sentry_dsn = os.environ.get("SENTRY_DSN", "")
-    _dsn_match = _re.match(r'https://(\w+)@[^/]+/(\d+)', _sentry_dsn)
-    if _dsn_match:
-        _csp_report_uri = "https://sentry.io/api/{}/security/?sentry_key={}".format(
-            _dsn_match.group(2), _dsn_match.group(1))
+    _csp_report_uri = _derive_sentry_csp_report_uri(
+        (os.environ.get("SENTRY_DSN", "") or "").strip()
+    )
 if _csp_report_uri:
     CSP_REPORT_URI = _csp_report_uri
 
