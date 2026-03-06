@@ -13,6 +13,8 @@ set -euo pipefail
 
 STRICT=0
 [[ "${1:-}" == "--strict" ]] && STRICT=1
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 PASS=0
 FAIL=0
@@ -118,7 +120,7 @@ else
 fi
 
 BBI_INFRA=""
-for candidate in /home/gurpreet/projects/k8s/bbi-infrastructure /home/gurpreet/projects/k8s/infrastructure; do
+for candidate in "${WORKSPACE_ROOT}/bbi-infrastructure" "${WORKSPACE_ROOT}/infrastructure"; do
   if [[ -d "$candidate/.git" ]]; then
     BBI_INFRA="$candidate"
     break
