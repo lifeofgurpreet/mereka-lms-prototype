@@ -36,6 +36,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `normalize-mysql-secrets.sh` - Strip trailing CR/LF for MySQL password secrets (Infisical + GCP SM + K8s ESO target)
 - `provision-mysql-app-dbs.sh` - Create Notes/XQueue MySQL DBs + users (idempotent, non-destructive)
 - `repair-gke-mysql-users.sh` - Align prod MySQL users/passwords to K8s secrets (non-destructive)
+- `rebuild-dev-openedx-db.sh` - Guarded canonical non-prod Open edX DB rebuild (dry-run default, Velero pre-op backup, explicit confirm token)
 - `argocd-refresh.sh` - Force ArgoCD refresh for remote base updates
 - `apply-monitoring-configs.sh` - Apply uptime checks, log metrics, and alert policies
 - `validate-telemetry-connectivity.sh` - **📊 MONITORING** Validate Grafana datasource connectivity to GKE and VPS Prometheus
@@ -149,6 +150,10 @@ APPLY=1 ./scripts/infra/normalize-mysql-secrets.sh
 
 # Provision Notes/XQueue MySQL DBs/users (idempotent)
 ./scripts/infra/provision-mysql-app-dbs.sh
+
+# Guarded non-prod Open edX DB rebuild (dry-run first)
+./scripts/infra/rebuild-dev-openedx-db.sh
+RUN_DESTRUCTIVE=1 CONFIRM_REBUILD_DEV_DB=REBUILD_DEV_DB ./scripts/infra/rebuild-dev-openedx-db.sh
 
 # Sync Infisical -> GCP Secret Manager (ExternalSecrets source of truth)
 # NOTE: By default this is create-if-missing for safety. If you are fixing a bad

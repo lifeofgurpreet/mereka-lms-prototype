@@ -36,6 +36,7 @@ scripts/qa/verify-evidence-redaction.sh
 # ── Kubernetes & GitOps ──────────────────────────────────────────────────────
 scripts/qa/verify-k8s-deployment-spec.sh
 scripts/qa/verify-migration-init-contract.sh
+scripts/qa/verify-dev-db-rebuild-contract.sh
 scripts/qa/verify-k8s-externalsecrets.sh
 scripts/qa/verify-k8s-images.sh
 scripts/qa/verify-k8s-secrets-hygiene.sh
