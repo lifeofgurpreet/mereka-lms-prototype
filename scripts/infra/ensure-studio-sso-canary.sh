@@ -14,6 +14,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/../.." && pwd)}"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
 MODE="verify" # verify | apply
@@ -156,7 +157,8 @@ resolve_infisical_dir() {
     return
   fi
   local candidates=(
-    "/home/gurpreet/projects/secrets-management"
+    "${WORKSPACE_ROOT}/secrets-management"
+    "${HOME}/projects/secrets-management"
     "$REPO_ROOT"
   )
   for candidate in "${candidates[@]}"; do
