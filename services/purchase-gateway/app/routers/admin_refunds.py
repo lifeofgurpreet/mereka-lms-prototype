@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import require_admin_api_key
 from app.database import get_db
 from app.models.order import Order, OrderStatus
+from app.tenancy import request_tenant_scope
 
 router = APIRouter(tags=["admin"], dependencies=[Depends(require_admin_api_key)])
 logger = structlog.get_logger()
@@ -45,7 +46,7 @@ async def create_order_refund(
     """Initiate a Stripe refund for an order; local state updates via webhook."""
     body = request_body or CreateRefundRequest()
     query = select(Order).where(Order.id == order_id)
-    mw_tenant_id = getattr(request.state, "tenant_id", None)
+    mw_tenant_id = request_tenant_scope(request)
     if mw_tenant_id:
         query = query.where(Order.tenant_id == mw_tenant_id)
 

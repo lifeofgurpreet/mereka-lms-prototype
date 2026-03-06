@@ -19,6 +19,7 @@ from app.models.entitlement import Entitlement, EntitlementStatus
 from app.models.offering import Offering, OfferingType
 from app.models.order import Order, OrderStatus
 from app.services.fulfillment_outbox import enqueue_fulfillment_job
+from app.tenancy import request_tenant_scope
 
 router = APIRouter(tags=["admin"], dependencies=[Depends(require_admin_api_key)])
 logger = structlog.get_logger()
@@ -291,7 +292,7 @@ async def list_orders(
     query = select(Order)
 
     # Tenant isolation from middleware
-    mw_tenant_id = getattr(request.state, "tenant_id", None)
+    mw_tenant_id = request_tenant_scope(request)
     if mw_tenant_id:
         if tenant_id and tenant_id != mw_tenant_id:
             raise HTTPException(status_code=403, detail="Tenant scope mismatch")
@@ -334,7 +335,7 @@ async def retry_order_fulfillment(
 ):
     """Force requeue fulfillment for a retryable order state."""
     query = select(Order).where(Order.id == order_id)
-    mw_tenant_id = getattr(request.state, "tenant_id", None)
+    mw_tenant_id = request_tenant_scope(request)
     if mw_tenant_id:
         query = query.where(Order.tenant_id == mw_tenant_id)
 

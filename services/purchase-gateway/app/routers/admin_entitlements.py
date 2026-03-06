@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import require_admin_api_key
 from app.database import get_db
 from app.models.entitlement import Entitlement, EntitlementStatus
+from app.tenancy import request_tenant_scope
 
 router = APIRouter(tags=["admin"], dependencies=[Depends(require_admin_api_key)])
 
@@ -52,7 +53,7 @@ async def list_entitlements(
     """List entitlements with optional tenant/status/email filters."""
     query = select(Entitlement)
 
-    mw_tenant_id = getattr(request.state, "tenant_id", None)
+    mw_tenant_id = request_tenant_scope(request)
     if mw_tenant_id:
         if tenant_id and tenant_id != mw_tenant_id:
             raise HTTPException(status_code=403, detail="Tenant scope mismatch")

@@ -14,6 +14,7 @@ from app.auth import require_admin_api_key
 from app.database import get_db
 from app.models.fulfillment_job import FulfillmentJob
 from app.models.order import LineItem, Order, OrderAuditLog
+from app.tenancy import request_tenant_scope
 
 router = APIRouter(tags=["admin"], dependencies=[Depends(require_admin_api_key)])
 
@@ -77,7 +78,7 @@ async def get_order_detail(
 ):
     """Return order detail with line-items, fulfillment-job, and audit timeline."""
     query = select(Order).where(Order.id == order_id)
-    mw_tenant_id = getattr(request.state, "tenant_id", None)
+    mw_tenant_id = request_tenant_scope(request)
     if mw_tenant_id:
         query = query.where(Order.tenant_id == mw_tenant_id)
 

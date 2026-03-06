@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import require_admin_api_key
 from app.database import get_db
 from app.models.entitlement import Entitlement, EntitlementStatus
+from app.tenancy import request_tenant_scope
 
 router = APIRouter(tags=["admin"], dependencies=[Depends(require_admin_api_key)])
 logger = structlog.get_logger()
@@ -39,7 +40,7 @@ async def revoke_entitlement(
 ):
     """Revoke an entitlement (idempotent)."""
     query = select(Entitlement).where(Entitlement.id == entitlement_id)
-    mw_tenant_id = getattr(request.state, "tenant_id", None)
+    mw_tenant_id = request_tenant_scope(request)
     if mw_tenant_id:
         query = query.where(Entitlement.tenant_id == mw_tenant_id)
 
