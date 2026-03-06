@@ -9,6 +9,7 @@ DEST_PATH="${DEST_PATH:-/k8s/mereka-lms}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/../.." && pwd)}"
 INFISICAL_DIR="${INFISICAL_DIR:-}"
 INFISICAL_DOMAIN="${INFISICAL_DOMAIN:-https://secrets.mereka.io/api}"
 INFISICAL_PROJECT_ID="${INFISICAL_PROJECT_ID:-}"
@@ -24,7 +25,8 @@ resolve_infisical_dir() {
     return
   fi
   local candidates=(
-    "/home/gurpreet/projects/secrets-management"
+    "${WORKSPACE_ROOT}/secrets-management"
+    "${HOME}/projects/secrets-management"
     "$REPO_ROOT"
   )
   for candidate in "${candidates[@]}"; do
