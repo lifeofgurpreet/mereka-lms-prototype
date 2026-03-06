@@ -5,6 +5,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 cd "$REPO_ROOT"
 
 # Colors
@@ -61,8 +62,18 @@ else
 fi
 
 # Check Infisical for Kajabi secrets
-INFISICAL_WRAPPER="/home/gurpreet/projects/vps/infrastructure/scripts/infisical"
-if [[ -x "$INFISICAL_WRAPPER" ]]; then
+INFISICAL_WRAPPER="${INFISICAL_WRAPPER:-}"
+if [[ -z "$INFISICAL_WRAPPER" ]]; then
+  if command -v infisical >/dev/null 2>&1; then
+    INFISICAL_WRAPPER="infisical"
+  elif [[ -x "${WORKSPACE_ROOT}/../vps/infrastructure/scripts/infisical" ]]; then
+    INFISICAL_WRAPPER="${WORKSPACE_ROOT}/../vps/infrastructure/scripts/infisical"
+  elif [[ -x "${HOME}/projects/vps/infrastructure/scripts/infisical" ]]; then
+    INFISICAL_WRAPPER="${HOME}/projects/vps/infrastructure/scripts/infisical"
+  fi
+fi
+
+if [[ -n "$INFISICAL_WRAPPER" ]]; then
   if ${INFISICAL_WRAPPER} secrets get KAJABI_CLIENT_ID --domain https://secrets.mereka.io/api --env prod --path / --plain 2>/dev/null | grep -qv "PLACEHOLDER"; then
     pass "KAJABI_CLIENT_ID exists in Infisical with non-placeholder value"
   else
