@@ -27,18 +27,30 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-PROD_SETTINGS_CANDIDATES=(
-  "../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-  "../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-  "deploy/k8s/base/apps/openedx/settings/lms/production.py"
-)
-PROD_SETTINGS=""
-for candidate in "${PROD_SETTINGS_CANDIDATES[@]}"; do
-  if [[ -f "$candidate" ]]; then
-    PROD_SETTINGS="$candidate"
-    break
+resolve_prod_settings() {
+  local candidates=()
+  if [[ -n "${EMAIL_NOTIF_PROD_SETTINGS:-}" ]]; then
+    candidates+=("${EMAIL_NOTIF_PROD_SETTINGS}")
   fi
-done
+  candidates+=(
+    "../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "deploy/k8s/base/apps/openedx/settings/lms/production.py"
+  )
+
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if [[ -n "$candidate" && -f "$candidate" ]]; then
+      printf "%s" "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+PROD_SETTINGS="$(resolve_prod_settings || true)"
 
 # Colors
 RED='\033[0;31m'
@@ -57,6 +69,7 @@ fail() { echo -e "${RED}FAIL${NC} $1"; FAIL=$((FAIL + 1)); }
 skip() { echo -e "${YELLOW}SKIP${NC} $1"; SKIP=$((SKIP + 1)); }
 
 echo "=== Email Notifications Pipeline Verification ==="
+echo "Prod settings source: ${PROD_SETTINGS:-not found}"
 echo ""
 
 # Check 1: ACE configuration in production settings
