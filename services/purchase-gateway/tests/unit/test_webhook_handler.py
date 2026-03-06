@@ -111,6 +111,57 @@ async def test_checkout_completed_order_not_found_is_noop(mock_enqueue, mock_db)
 
 @pytest.mark.asyncio
 @patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock)
+async def test_checkout_completed_order_not_found_with_metadata_raises(mock_enqueue, mock_db):
+    """checkout.session.completed with metadata order_uuid raises to trigger retry path."""
+    missing_uuid = str(uuid.uuid4())
+    mock_db.execute.side_effect = [
+        _mock_select_result(None),  # lookup by stripe session id
+        _mock_select_result(None),  # fallback lookup by order_uuid
+    ]
+
+    event_data = {
+        "object": {
+            "id": "cs_unknown",
+            "payment_intent": "pi_abc",
+            "metadata": {"order_uuid": missing_uuid},
+        }
+    }
+
+    with pytest.raises(LookupError):
+        await _handle_checkout_completed(event_data, mock_db)
+
+    mock_db.commit.assert_not_awaited()
+    mock_enqueue.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock)
+async def test_checkout_completed_recovers_order_by_metadata_uuid(mock_enqueue, mock_db):
+    """checkout.session.completed recovers placeholder order using metadata.order_uuid."""
+    order = _make_order(session_id=f"pending-{uuid.uuid4()}")
+    mock_db.execute.side_effect = [
+        _mock_select_result(None),  # lookup by stripe session id
+        _mock_select_result(order),  # fallback lookup by order_uuid
+    ]
+
+    event_data = {
+        "object": {
+            "id": "cs_recovered",
+            "payment_intent": "pi_abc123",
+            "metadata": {"order_uuid": str(order.id)},
+        }
+    }
+    await _handle_checkout_completed(event_data, mock_db)
+
+    assert order.status == OrderStatus.paid
+    assert order.stripe_checkout_session_id == "cs_recovered"
+    assert order.stripe_payment_intent_id == "pi_abc123"
+    mock_db.commit.assert_awaited()
+    mock_enqueue.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+@patch("app.routers.webhooks.enqueue_fulfillment_job", new_callable=AsyncMock)
 async def test_checkout_completed_no_payment_intent(mock_enqueue, mock_db):
     """checkout.session.completed handles missing payment_intent gracefully."""
     order = _make_order()

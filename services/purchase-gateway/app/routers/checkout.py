@@ -16,7 +16,7 @@ from app.config import settings
 from app.database import get_db
 from app.metrics import record_checkout_created
 from app.models.offering import Offering
-from app.models.order import Order, OrderStatus
+from app.models.order import LineItem, Order, OrderStatus
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -87,6 +87,20 @@ async def create_checkout(
         currency=offering.currency,
         metadata_json=request.metadata,
     )
+    line_item = LineItem(
+        order_id=order_id,
+        offering_uuid=request.offering_uuid,
+        offering_type=offering.offering_type.value,
+        lms_resource_id=offering.lms_resource_id,
+        quantity=1,
+        unit_price_cents=offering.price_cents,
+        total_price_cents=offering.price_cents,
+    )
+
+    # Persist order + line item before contacting Stripe to avoid orphaned charges.
+    db.add(order)
+    db.add(line_item)
+    await db.commit()
 
     try:
         session = await asyncio.to_thread(
@@ -105,16 +119,17 @@ async def create_checkout(
             payment_intent_data={"capture_method": "automatic"},
         )
     except stripe.StripeError as e:
+        order.status = OrderStatus.canceled
+        await db.commit()
         logger.error(
             "checkout.stripe_error",
             error=str(e),
             tenant_id=str(tenant_id),
+            order_uuid=str(order_id),
         )
         raise HTTPException(status_code=503, detail="Payment service unavailable") from e
 
     order.stripe_checkout_session_id = session.id
-
-    db.add(order)
     await db.commit()
     record_checkout_created()
 

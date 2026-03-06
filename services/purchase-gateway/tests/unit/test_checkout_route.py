@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.offering import Offering, OfferingType
-from app.models.order import Order, OrderStatus
+from app.models.order import LineItem, Order, OrderStatus
 from app.routers.checkout import CheckoutRequest, _is_allowed_origin
 
 # ---------------------------------------------------------------------------
@@ -193,12 +193,18 @@ async def test_create_checkout_stripe_error_returns_503(
     request.success_url = "https://academyv2.mereka.io/success"
     request.cancel_url = "https://academyv2.mereka.io/cancel"
     request.metadata = None
+    added_entities = []
+    mock_db.add = MagicMock(side_effect=lambda obj: added_entities.append(obj))
 
     with pytest.raises(HTTPException) as exc_info:
         await create_checkout(request, mock_db)
 
     assert exc_info.value.status_code == 503
     mock_record_checkout_created.assert_not_called()
+    order = next((obj for obj in added_entities if isinstance(obj, Order)), None)
+    assert order is not None
+    assert order.status == OrderStatus.canceled
+    assert mock_db.commit.await_count == 2
 
 
 # ---------------------------------------------------------------------------
@@ -244,8 +250,10 @@ async def test_create_checkout_happy_path(
     assert isinstance(response, CheckoutResponse)
     assert response.checkout_url == "https://checkout.stripe.com/pay/cs_new123"
     assert response.session_id == "cs_new123"
-    mock_db.add.assert_called_once()
-    mock_db.commit.assert_awaited()
+    added_entities = [call.args[0] for call in mock_db.add.call_args_list]
+    assert any(isinstance(entity, Order) for entity in added_entities)
+    assert any(isinstance(entity, LineItem) for entity in added_entities)
+    assert mock_db.commit.await_count == 2
     mock_record_checkout_created.assert_called_once()
 
 

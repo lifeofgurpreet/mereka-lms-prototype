@@ -214,13 +214,13 @@ async def test_checkout_session_id_is_not_pending_placeholder(
     mock_stripe.checkout.Session.create.return_value = mock_session
     mock_stripe.StripeError = stripe_lib.StripeError
 
-    added_orders = []
+    added_entities = []
 
     mock_db = AsyncMock()
     mock_db.execute.return_value = _mock_select_result(offering)
     mock_db.commit = AsyncMock()
     # Use MagicMock (not AsyncMock) for .add so side_effect runs synchronously
-    mock_db.add = MagicMock(side_effect=lambda obj: added_orders.append(obj))
+    mock_db.add = MagicMock(side_effect=lambda obj: added_entities.append(obj))
 
     _override_db(mock_db)
     try:
@@ -229,8 +229,9 @@ async def test_checkout_session_id_is_not_pending_placeholder(
         _clear_overrides()
 
     assert resp.status_code == 200
-    assert len(added_orders) == 1
-    order = added_orders[0]
+    orders = [obj for obj in added_entities if isinstance(obj, Order)]
+    assert len(orders) == 1
+    order = orders[0]
     # The session ID must be the real Stripe ID, not the pending placeholder
     assert not order.stripe_checkout_session_id.startswith("pending-")
     assert order.stripe_checkout_session_id == "cs_real_session_id"

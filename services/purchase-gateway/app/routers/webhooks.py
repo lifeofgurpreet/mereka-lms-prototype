@@ -1,6 +1,7 @@
 # @covers AC-004, AC-006, AC-007, AC-008, AC-015, AC-016, AC-017, AC-018
 # @spec: ecommerce-purchase-gateway_spec.md
 
+import uuid
 from datetime import UTC, datetime
 from time import monotonic
 
@@ -82,13 +83,50 @@ async def _handle_checkout_completed(
     session = event_data["object"]
     session_id = session["id"]
     payment_intent_id = session.get("payment_intent")
+    session_metadata = session.get("metadata") or {}
+    order_uuid_raw = session_metadata.get("order_uuid")
 
     result = await db.execute(
         select(Order).where(Order.stripe_checkout_session_id == session_id)
     )
     order = result.scalar_one_or_none()
+    if not order and order_uuid_raw:
+        try:
+            order_uuid = uuid.UUID(order_uuid_raw)
+        except (TypeError, ValueError):
+            order_uuid = None
+            logger.warning(
+                "webhook.order_uuid_invalid",
+                session_id=session_id,
+                order_uuid=order_uuid_raw,
+            )
+        if order_uuid:
+            by_uuid_result = await db.execute(select(Order).where(Order.id == order_uuid))
+            order = by_uuid_result.scalar_one_or_none()
+            if order:
+                if order.stripe_checkout_session_id != session_id:
+                    order.stripe_checkout_session_id = session_id
+                logger.warning(
+                    "webhook.order_recovered_by_metadata",
+                    session_id=session_id,
+                    order_uuid=str(order.id),
+                )
     if not order:
-        logger.warning("webhook.order_not_found", session_id=session_id)
+        if order_uuid_raw:
+            logger.error(
+                "webhook.order_not_found_with_metadata",
+                session_id=session_id,
+                order_uuid=order_uuid_raw,
+            )
+            raise LookupError(
+                f"checkout.session.completed could not resolve order_uuid={order_uuid_raw}"
+            )
+
+        logger.warning(
+            "webhook.order_not_found",
+            session_id=session_id,
+            order_uuid=order_uuid_raw,
+        )
         return
 
     old_status = order.status
