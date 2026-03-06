@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: config-gen
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:pin-required  # TODO: pin to a real image digest or version tag
           command: ["python3", "-c"]
           args:
             - |
@@ -116,7 +116,7 @@ spec:
             - name: config
               mountPath: /config
         - name: migrate
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:pin-required  # TODO: pin to a real image digest or version tag
           command: ["python", "manage.py", "migrate", "--noinput"]
           env:
             - name: DJANGO_SETTINGS_MODULE
@@ -137,7 +137,7 @@ spec:
               mountPath: /config
       containers:
         - name: enterprise-subsidy
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:pin-required  # TODO: pin to a real image digest or version tag
           ports:
             - containerPort: 18280
           env:

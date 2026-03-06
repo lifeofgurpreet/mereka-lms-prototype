@@ -203,20 +203,9 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
 JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_CMS", "")
-JWT_AUTH["JWT_PRIVATE_SIGNING_JWK"] = json.dumps(
-    {
-        "kid": "openedx",
-        "kty": "RSA",
-        "e": "AQAB",
-        "d": "ETfA9ZrIT5lyV1WLm6x6vgPpNoinhPwmfY62AJmgOf_M57rngmoXNqePhoi2tlR96H3quAnTfAF9eYIbiXvHlU0exECjklKZ-uzs-3E9_qKOQNkHW75pE7C6_F-2uW_YIJOzhrM7hW0yEp1oH7JEVcKiN_1JxiE6W-iJP0-0yjdL3J65HSCC57G4pmwGJnNv11_m_EXV7ChiH0G9XkZ8tRm6FX3ytyBimVSVVva2evma2ykLAOmxEERyx-ggs-K-ypQNpPzz96uadqw79l5UyWDW-Vss24qmDO1MrYIiLPaVv9pWzrURS4AY6j99zPrnc1diBA_AZ_s2MTqsXLtlrQ",
-        "n": "nyKlrWYvtK405Rrvzb9zbtdyUvKgMyhySpiRNIvkhi8AqbmhyGYobRU6oOtjWdNTPy4Lfbx1TfB4EPo1BT2HIVenhm6TtTNwiKubJELwSOZSHNgq92GPzsXO868e86GWSzI9sLu4IXs1Egz81Sp5669YYmxDostWYZgyljXt7wdjOGbl-HQUgOppQMY1zH263A2pkTZ65kunEBzZyM_RtVb6yBi4hcSmU7q6jFbBniGjxY236hp6J9kRggsM-rHIuV0qHLlkBi23wVE0r866g6TwUcTqnHRn717RN1ZfHf76A3GN3UvgOgT4mEwaLoTijL8hzhLie1pgqCb7P2L3Yw",
-        "p": "waacG-oc-c9kSltIyVr2kZgMJ2yD0pPEaIwY8PTvAJLMmf06uGG6AFf28WSC-Vp44-O2OPovaqt6FX5VDwKCfdsK7XFO_9EsIkWcJyOHVM3_OLWqSF38E1O8H6j7dAXkHnfZbBLy-4nN3ScspVBG8OcKhUBii2J2oMJ1txYjKf0",
-        "q": "0l8mD6ZdgV_2eQEVmE2uPPRfPiGQOe6MVi6f75cj5Ay5hZqBkcuiRcqZGAnwKtADKEznF6kHbqeZDeWOY6KISS2Pj9TMT2zkGFKH2_NqF7g5YKqzyWuAkhg1SSvcb-IiNXrgGnvhyiNgIp6zQRRYzQ9kEKN0jIPh643JX6tCNN8",
-        "dq": "v6DwmLzg3CK_74WvWCcamme4Am6sZDkKGM8r3SF-DhQRQsR1Vot5670bK6yR203UMneq4gCUxpVgdCoxRE0ffBlGdqxO1-LG--jh3NekQqsLiSS11LpaSbpHf7m2eSwyISkmzrkd-fWzcpXBj3yrT0-_xPBAEGdp-hoT31OvYV0",
-        "dp": "MT-I9gRtCA75R3u9oA-1I0PS23facoRH7_qpISZ5XeD3jbX76AZaglncoHlaYcXjdrljj0v5IRyo-KxfP2j4_L7nIYmueJqeqbygQMflU-jrnmV8_9h_Ef86maalBFW3NRRvw-9xwgzCwRqEXSp0UDHB2C-OoDoTR0ENJNnJaZU",
-        "qi": "OsRjvkqA4XTl_NcTr66U8yniSXSiNC1PU_4FhV8eBpNVIQQ2ePv6_VhKrdnrATQEFXnGnLBNn6ytVTyAsq1xG8o3Y_opXLqcC-mZxvI21Z1meczrl79KtaUMMlcaOklVZV00KtSKu7K39nSvlJL3WB-uycWGsNI-efunJS-F0O0",
-    }
-)
+# JWT_PRIVATE_SIGNING_JWK: loaded from env var injected by ExternalSecret (MEREKA_LMS_JWT_PRIVATE_SIGNING_JWK).
+# Never hardcode private key material here — even for development.
+JWT_AUTH["JWT_PRIVATE_SIGNING_JWK"] = os.environ.get("JWT_PRIVATE_SIGNING_JWK", "")
 JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
     {
         "keys": [

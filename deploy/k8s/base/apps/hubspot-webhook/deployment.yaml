@@ -20,8 +20,13 @@ spec:
     spec:
       containers:
       - name: hubspot-webhook
-        # Placeholder image - replace with actual image after migration
-        image: placeholder/hubspot-webhook:latest
+        # NOT DEPLOYABLE: no container image has been published for this service.
+        # The current implementation lives in services/hubspot-webhook/ as a Firebase
+        # Cloud Function. This Deployment must NOT be included in any overlay until
+        # a real image is built and pushed to:
+        #   ghcr.io/biji-biji-initiative/mereka-lms/hubspot-webhook:<tag>
+        # See docs/migrations/ for the containerisation timeline.
+        image: ghcr.io/biji-biji-initiative/mereka-lms/hubspot-webhook:not-yet-built
         imagePullPolicy: IfNotPresent
         ports:
         - name: http

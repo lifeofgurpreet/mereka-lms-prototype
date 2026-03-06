@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: config-gen
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:pin-required  # TODO: pin to a real image digest or version tag
           command: ["python3", "-c"]
           args:
             - |
@@ -126,7 +126,7 @@ spec:
               mountPath: /config
       containers:
         - name: enterprise-catalog-worker
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:pin-required  # TODO: pin to a real image digest or version tag
           command: ["/venv/bin/celery"]
           args:
             - "-A"

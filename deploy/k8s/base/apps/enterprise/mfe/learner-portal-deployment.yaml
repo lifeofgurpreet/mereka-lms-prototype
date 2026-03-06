@@ -31,7 +31,7 @@ spec:
       # NREUM was stripped at build time; runtime HTML sanitization is not required.
       containers:
         - name: enterprise-learner-portal
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal:pin-required  # TODO: pin to a real image digest or version tag
           command:
             - /bin/sh
             - -c
