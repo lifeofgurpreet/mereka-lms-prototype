@@ -28,6 +28,11 @@ UPDATE_BASE_REF_MODE="auto" # auto|1|0
 APPLY=0
 COMMIT=0
 PUSH=0
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CONFIRM_RELEASE_OPENEDX_GITOPS="${CONFIRM_RELEASE_OPENEDX_GITOPS:-}"
+CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS="${CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS:-}"
+CONFIRM_APPLY_TOKEN="RELEASE_OPENEDX_GITOPS"
+CONFIRM_PUSH_TOKEN="PUSH_RELEASE_OPENEDX_GITOPS"
 VERIFY_RUNTIME=0
 ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD="${ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD:-1}"
 RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD="${RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD:-1}"
@@ -126,6 +131,13 @@ Options:
   --wait-seconds N      Max wait for runtime verification (default: 600).
   -h, --help            Show this help.
 
+Safety controls for write operations:
+  CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS
+                       Required when --apply is used.
+  CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS
+                       Required when --push is used.
+  ALLOW_PROD_APPLY=1   Required for production --apply.
+
 Examples:
   # Dry-run preview
   ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b
@@ -148,6 +160,18 @@ Examples:
     --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
     --apply --commit --push
 EOF
+}
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
 }
 
 while [[ $# -gt 0 ]]; do
@@ -678,6 +702,22 @@ require_git_repo "$APP_REPO"
 require_git_repo "$INFRA_REPO"
 
 TARGET_ENV="$(normalize_target_env "$TARGET_ENV")"
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+
+if [[ "$APPLY" -eq 1 && "$CONFIRM_RELEASE_OPENEDX_GITOPS" != "$CONFIRM_APPLY_TOKEN" ]]; then
+  echo "Refusing --apply without explicit confirmation token. Set CONFIRM_RELEASE_OPENEDX_GITOPS=${CONFIRM_APPLY_TOKEN}" >&2
+  exit 1
+fi
+
+if [[ "$PUSH" -eq 1 && "$CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS" != "$CONFIRM_PUSH_TOKEN" ]]; then
+  echo "Refusing --push without explicit confirmation token. Set CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=${CONFIRM_PUSH_TOKEN}" >&2
+  exit 1
+fi
+
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$ALLOW_PROD_APPLY" != "1" ]]; then
+  echo "Refusing production --apply without ALLOW_PROD_APPLY=1" >&2
+  exit 1
+fi
 
 if [[ "${CI:-}" == "true" && "$TARGET_ENV_SET" -ne 1 ]]; then
   echo "Error: CI mode requires explicit --target-env (production|staging)." >&2

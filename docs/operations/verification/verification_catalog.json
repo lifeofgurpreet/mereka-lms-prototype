@@ -4437,6 +4437,18 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-infra",
+      "path": "scripts/qa/verify-release-gitops-guardrails.sh",
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
       "cadence": "on_demand",
       "ci_binding": [],
       "owner": "platform-core",

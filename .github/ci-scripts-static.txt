@@ -104,6 +104,7 @@ scripts/qa/verify-verification-sprawl-budget.sh
 scripts/qa/verify-deprecated-verification-hygiene.sh
 scripts/qa/verify-post-deploy-health-gate-wiring.sh
 scripts/qa/verify-release-automation.sh
+scripts/qa/verify-release-gitops-guardrails.sh
 scripts/qa/verify-release-dry-run-contract.sh
 scripts/qa/verify-release-deployment-choreography.sh
 
