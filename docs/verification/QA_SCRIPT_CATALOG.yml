@@ -272,14 +272,6 @@ scripts:
     covers_acs: []
     makefile_target: null
 
-  - path: "scripts/qa/verify-branding-css.sh"
-    method: static
-    tier: P0
-    description: "Verify branding CSS compilation and structure"
-    covers_specs: ["branding-system_spec.md"]
-    covers_acs: []
-    makefile_target: null
-
   - path: "scripts/qa/verify-branding-health.sh"
     method: contract
     tier: P0
@@ -288,7 +280,7 @@ scripts:
     covers_acs: []
     makefile_target: null
 
-  - path: "scripts/qa/verify-logo-setup.sh"
+  - path: "scripts/branding/verify-logo-setup.sh"
     method: static
     tier: P0
     description: "Verify logo assets are properly set up"
@@ -1152,14 +1144,6 @@ scripts:
     covers_acs: []
     makefile_target: null
 
-  - path: "scripts/qa/verify-release-evidence-workflow.sh"
-    method: static
-    tier: P0
-    description: "Verify release evidence workflow"
-    covers_specs: ["ci-cd-pipeline_spec.md"]
-    covers_acs: []
-    makefile_target: null
-
   - path: "scripts/qa/verify-rollback-dry-run.sh"
     method: resilience
     tier: P1
@@ -1349,14 +1333,6 @@ scripts:
     tier: P0
     description: "Verify HTTP body size limits"
     covers_specs: ["k8s-deployment_spec.md"]
-    covers_acs: []
-    makefile_target: null
-
-  - path: "scripts/qa/verify-spec-lint-job.sh"
-    method: contract
-    tier: P0
-    description: "Verify spec lint job execution"
-    covers_specs: ["ci-cd-pipeline_spec.md"]
     covers_acs: []
     makefile_target: null
 
