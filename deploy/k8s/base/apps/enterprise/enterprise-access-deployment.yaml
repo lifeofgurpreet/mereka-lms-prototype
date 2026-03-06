@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: config-gen
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:pin-required  # TODO: pin to a real image digest or version tag
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:latest
           command: ["python3", "-c"]
           args:
             - |
@@ -124,29 +124,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
-        - name: migrate
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:pin-required  # TODO: pin to a real image digest or version tag
-          command: ["python", "manage.py", "migrate", "--noinput"]
-          env:
-            - name: DJANGO_SETTINGS_MODULE
-              value: enterprise_access.settings.production
-            - name: ENTERPRISE_ACCESS_CFG
-              value: /config/enterprise_access.yml
-          resources:
-            requests:
-              cpu: 50m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-          securityContext:
-            allowPrivilegeEscalation: false
-          volumeMounts:
-            - name: config
-              mountPath: /config
       containers:
         - name: enterprise-access
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:pin-required  # TODO: pin to a real image digest or version tag
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:latest
           ports:
             - containerPort: 18270
           env:

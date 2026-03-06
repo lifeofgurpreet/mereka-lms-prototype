@@ -204,13 +204,7 @@ spec:
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/bash
-                  - -lc
-                  - python /openedx/edx-platform/manage.py cms collectstatic --noinput >/tmp/collectstatic-cms.log 2>&1 || true
+          # collectstatic runs at image build time, not pod startup
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -501,13 +495,7 @@ spec:
             periodSeconds: 15
             failureThreshold: 3
             timeoutSeconds: 5
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/bash
-                  - -lc
-                  - python /openedx/edx-platform/manage.py lms collectstatic --noinput >/tmp/collectstatic-lms.log 2>&1 || true
+          # collectstatic runs at image build time, not pod startup
           securityContext:
             allowPrivilegeEscalation: false
       volumes:

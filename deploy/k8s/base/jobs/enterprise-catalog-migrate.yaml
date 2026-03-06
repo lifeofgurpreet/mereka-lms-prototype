@@ -1,0 +1,163 @@
+---
+# Migration Job for enterprise-catalog.
+# Run this Job BEFORE rolling out a new enterprise-catalog Deployment.
+# Migrations are idempotent; re-running is safe but unnecessary.
+#
+# Release sequence:
+#   1. kubectl apply -f deploy/k8s/base/jobs/enterprise-catalog-migrate.yaml
+#   2. kubectl wait --for=condition=complete job/enterprise-catalog-migrate -n mereka-lms --timeout=300s
+#   3. kubectl apply -k deploy/k8s/base   (or the relevant overlay)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: enterprise-catalog-migrate
+  labels:
+    app.kubernetes.io/name: enterprise-catalog-migrate
+    app.kubernetes.io/component: migration
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-catalog-migrate
+        app.kubernetes.io/component: migration
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-gen
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:latest
+          command: ["python3", "-c"]
+          args:
+            - |
+              import os, yaml
+              config = {
+                  'SECRET_KEY': os.environ['DJANGO_SECRET_KEY'],
+                  'ALLOWED_HOSTS': ['*'],
+                  'DATABASES': {
+                      'default': {
+                          'ENGINE': 'django.db.backends.mysql',
+                          'NAME': os.environ.get('DB_NAME', 'enterprise_catalog'),
+                          'USER': os.environ.get('DB_USER', 'enterprise_catalog'),
+                          'PASSWORD': os.environ['DB_PASSWORD'],
+                          'HOST': os.environ.get('DB_HOST', 'mysql'),
+                          'PORT': 3306,
+                          'ATOMIC_REQUESTS': False,
+                          'CONN_MAX_AGE': 60,
+                      }
+                  },
+                  'CACHES': {
+                      'default': {
+                          'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+                          'LOCATION': os.environ.get('CACHE_LOCATION', 'redis://redis:6379/8'),
+                          'KEY_PREFIX': 'enterprise_catalog',
+                      }
+                  },
+                  'CELERY_BROKER_TRANSPORT': 'redis',
+                  'CELERY_BROKER_USER': '',
+                  'CELERY_BROKER_PASSWORD': '',
+                  'CELERY_BROKER_HOSTNAME': os.environ.get('CELERY_BROKER_HOSTNAME', 'redis:6379'),
+                  'CELERY_BROKER_VHOST': os.environ.get('CELERY_BROKER_VHOST', '9'),
+                  'SOCIAL_AUTH_EDX_OAUTH2_KEY': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_KEY', 'enterprise-catalog-key'),
+                  'SOCIAL_AUTH_EDX_OAUTH2_SECRET': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_SECRET', ''),
+                  'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': 'http://lms:8000',
+                  'SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT': os.environ.get('LMS_ROOT_URL', 'https://academyv2.mereka.io'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_KEY': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_KEY', 'enterprise-catalog-key'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_SECRET': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET', ''),
+                  'LMS_BASE_URL': 'http://lms:8000',
+                  'LMS_ROOT_URL': os.environ.get('LMS_ROOT_URL', 'https://academyv2.mereka.io'),
+                  'DISCOVERY_SERVICE_URL': 'http://discovery:8000',
+                  'ENTERPRISE_CATALOG_SERVICE_URL': 'http://enterprise-catalog:8000',
+              }
+              with open('/config/enterprise_catalog.yml', 'w') as f:
+                  yaml.dump(config, f, default_flow_style=False)
+              print('Config generated successfully')
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_CATALOG_SECRET_KEY
+            - name: DB_NAME
+              value: enterprise_catalog
+            - name: DB_USER
+              value: enterprise_catalog
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: MYSQL_ENTERPRISE_CATALOG_PASSWORD
+            - name: DB_HOST
+              value: mysql
+            - name: CACHE_LOCATION
+              value: redis://redis:6379/8
+            - name: CELERY_BROKER_HOSTNAME
+              value: "redis:6379"
+            - name: CELERY_BROKER_VHOST
+              value: "9"
+            - name: SOCIAL_AUTH_EDX_OAUTH2_KEY
+              value: enterprise-catalog-key
+            - name: SOCIAL_AUTH_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_CATALOG_OAUTH2_SECRET
+            - name: BACKEND_SERVICE_EDX_OAUTH2_KEY
+              value: enterprise-catalog-key
+            - name: BACKEND_SERVICE_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_CATALOG_OAUTH2_SECRET
+            - name: LMS_ROOT_URL
+              value: "https://academyv2.mereka.io"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      containers:
+        - name: migrate
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:latest
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: enterprise_catalog.settings.production
+            - name: ENTERPRISE_CATALOG_CFG
+              value: /config/enterprise_catalog.yml
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          emptyDir: {}

@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: config-gen
-          image: ghcr.io/biji-biji-initiative/mereka-lms/license-manager:pin-required  # TODO: pin to a real image digest or version tag
+          image: ghcr.io/biji-biji-initiative/mereka-lms/license-manager:latest
           command: ["python3", "-c"]
           args:
             - |
@@ -124,29 +124,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
-        - name: migrate
-          image: ghcr.io/biji-biji-initiative/mereka-lms/license-manager:pin-required  # TODO: pin to a real image digest or version tag
-          command: ["python", "manage.py", "migrate", "--noinput"]
-          env:
-            - name: DJANGO_SETTINGS_MODULE
-              value: license_manager.settings.production
-            - name: LICENSE_MANAGER_CFG
-              value: /config/license_manager.yml
-          resources:
-            requests:
-              cpu: 50m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-          securityContext:
-            allowPrivilegeEscalation: false
-          volumeMounts:
-            - name: config
-              mountPath: /config
       containers:
         - name: license-manager
-          image: ghcr.io/biji-biji-initiative/mereka-lms/license-manager:pin-required  # TODO: pin to a real image digest or version tag
+          image: ghcr.io/biji-biji-initiative/mereka-lms/license-manager:latest
           ports:
             - containerPort: 18170
           env:

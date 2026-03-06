@@ -1,0 +1,154 @@
+---
+# Migration Job for enterprise-subsidy.
+# Run this Job BEFORE rolling out a new enterprise-subsidy Deployment.
+# Migrations are idempotent; re-running is safe but unnecessary.
+#
+# Release sequence:
+#   1. kubectl apply -f deploy/k8s/base/jobs/enterprise-subsidy-migrate.yaml
+#   2. kubectl wait --for=condition=complete job/enterprise-subsidy-migrate -n mereka-lms --timeout=300s
+#   3. kubectl apply -k deploy/k8s/base   (or the relevant overlay)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: enterprise-subsidy-migrate
+  labels:
+    app.kubernetes.io/name: enterprise-subsidy-migrate
+    app.kubernetes.io/component: migration
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-subsidy-migrate
+        app.kubernetes.io/component: migration
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-gen
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:latest
+          command: ["python3", "-c"]
+          args:
+            - |
+              import os, yaml
+              config = {
+                  'SECRET_KEY': os.environ['DJANGO_SECRET_KEY'],
+                  'ALLOWED_HOSTS': ['*'],
+                  'DATABASES': {
+                      'default': {
+                          'ENGINE': 'django.db.backends.mysql',
+                          'NAME': os.environ.get('DB_NAME', 'enterprise_subsidy'),
+                          'USER': os.environ.get('DB_USER', 'enterprise_subsidy'),
+                          'PASSWORD': os.environ['DB_PASSWORD'],
+                          'HOST': os.environ.get('DB_HOST', 'mysql'),
+                          'PORT': 3306,
+                          'ATOMIC_REQUESTS': False,
+                          'CONN_MAX_AGE': 60,
+                      }
+                  },
+                  'CACHES': {
+                      'default': {
+                          'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+                          'LOCATION': os.environ.get('CACHE_LOCATION', 'redis://redis:6379/10'),
+                          'KEY_PREFIX': 'enterprise_subsidy',
+                      }
+                  },
+                  'SOCIAL_AUTH_EDX_OAUTH2_KEY': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_KEY', 'enterprise-subsidy-key'),
+                  'SOCIAL_AUTH_EDX_OAUTH2_SECRET': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_SECRET', ''),
+                  'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': 'http://lms:8000',
+                  'SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT': os.environ.get('LMS_ROOT_URL', 'https://academyv2.mereka.io'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_KEY': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_KEY', 'enterprise-subsidy-key'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_SECRET': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET', ''),
+                  'LMS_BASE_URL': 'http://lms:8000',
+                  'LMS_ROOT_URL': os.environ.get('LMS_ROOT_URL', 'https://academyv2.mereka.io'),
+                  'ENTERPRISE_CATALOG_URL': 'http://enterprise-catalog:8000',
+                  'ENTERPRISE_SUBSIDY_URL': 'http://enterprise-subsidy:8000',
+              }
+              with open('/config/enterprise_subsidy.yml', 'w') as f:
+                  yaml.dump(config, f, default_flow_style=False)
+              print('Config generated successfully')
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_SUBSIDY_SECRET_KEY
+            - name: DB_NAME
+              value: enterprise_subsidy
+            - name: DB_USER
+              value: enterprise_subsidy
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: MYSQL_ENTERPRISE_SUBSIDY_PASSWORD
+            - name: DB_HOST
+              value: mysql
+            - name: CACHE_LOCATION
+              value: redis://redis:6379/10
+            - name: SOCIAL_AUTH_EDX_OAUTH2_KEY
+              value: enterprise-subsidy-key
+            - name: SOCIAL_AUTH_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_SUBSIDY_OAUTH2_SECRET
+            - name: BACKEND_SERVICE_EDX_OAUTH2_KEY
+              value: enterprise-subsidy-key
+            - name: BACKEND_SERVICE_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_SUBSIDY_OAUTH2_SECRET
+            - name: LMS_ROOT_URL
+              value: "https://academyv2.mereka.io"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      containers:
+        - name: migrate
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:latest
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: enterprise_subsidy.settings.production
+            - name: EDX_ENTERPRISE_SUBSIDY_CFG
+              value: /config/enterprise_subsidy.yml
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          emptyDir: {}

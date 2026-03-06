@@ -29,11 +29,6 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-        - name: migrate
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
       containers:
         - name: enterprise-catalog
           securityContext:
@@ -54,11 +49,6 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: config-gen
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
-        - name: migrate
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -87,11 +77,6 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-        - name: migrate
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
       containers:
         - name: enterprise-subsidy
           securityContext:
@@ -112,11 +97,6 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: config-gen
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
-        - name: migrate
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
