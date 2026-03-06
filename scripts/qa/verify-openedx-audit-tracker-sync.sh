@@ -41,6 +41,20 @@ tracker_path = Path(sys.argv[1])
 board_path = Path(sys.argv[2])
 
 
+PR_REF_PATTERNS = (
+    re.compile(r"#(\d+)"),
+    re.compile(r"/pull/(\d+)"),
+)
+
+
+def extract_pr_refs(value: str) -> set[int]:
+    refs: set[int] = set()
+    for pattern in PR_REF_PATTERNS:
+        for match in pattern.findall(value):
+            refs.add(int(match))
+    return refs
+
+
 def has_heading(path: Path, heading_prefix: str) -> bool:
     return any(
         line.startswith(heading_prefix)
@@ -69,9 +83,7 @@ def extract_table_prs(path: Path, heading_prefix: str) -> set[int]:
             in_table = True
             if "---" in line:
                 continue
-            matches = re.findall(r"#(\d+)", line)
-            for match in matches:
-                prs.add(int(match))
+            prs |= extract_pr_refs(line)
             continue
         if in_table:
             break

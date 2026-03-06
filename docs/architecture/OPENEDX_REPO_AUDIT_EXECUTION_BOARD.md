@@ -24,42 +24,49 @@ Parent issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/214
 | ARC runner policy (Linux) | Merged | [#234](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/234) |
 | Repository artifact bloat guard | Merged | [#235](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/235) |
 | Custom app packaging/state hygiene | Merged | [#236](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/236) |
-| Evidence growth control policy in docs evidence paths | Open | [#237](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/237) |
-| Purchase-gateway outbox/reconciliation static contract gate | Open | [#246](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/246) |
-| Purchase-gateway runtime metrics (checkout/webhook/fulfillment) | Open | [#247](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/247) |
-| Repo tool-cache hygiene hardening (`.ruff_cache`/pytest/mypy) | Open | [#248](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/248) |
-| Python cache cleanup utility + `make clean` integration | Open | [#249](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/249) |
-| Canonical verification manifest integrity gate (`verify-manifest-integrity.sh`) | Open | [#250](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/250) |
-| Tutor custom-app install contract integrity (`_CUSTOM_APPS` parity + package metadata) | Open | [#251](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/251) |
-| Custom-app hygiene detector hardening (nested SQLite/log/cache patterns) | Open | [#252](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/252) |
-| Verification script sprawl budget guard (catalog-backed) | Open | [#253](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/253) |
-| K8s control-plane boundary guard (`deploy/k8s` vs `infrastructure/k8s`) | Open | [#254](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/254) |
-| CI script-list signal hardening (release-blocking coverage + executable-bit cleanup) | Open | [#255](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/255) |
-| Tenant DNS inventory alignment guard (contract ↔ Cloudflare inventories) | Open | [#256](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/256) |
-| Evidence footprint growth budget guard (`docs/operations/evidence` + observability evidence) | Open | [#257](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/257) |
-| Verification strict-mode contract guard (`set -euo pipefail` + explicit waivers) | Open | [#258](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/258) |
-| Audit tracker synchronization guard (tracker ↔ execution board parity contract) | Open | [#259](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/259) |
-| Tutor config path contract hardening (`config.example.yml` guard + docs/spec path verifier) | Open | [#260](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/260) |
-| Static-validation kubeconform portability fix (`wget`-independent download on ARC) | Open | [#261](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/261) |
-| Evidence redaction header/token hardening (`cookie`/basic-auth/x-auth-token detection) | Open | [#262](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/262) |
-| Repo hygiene gate promotion + CI signal bundle | Open | [#263](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/263) |
-| Branding sync determinism hardening | Open | [#264](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/264) |
-| Custom-app statefile pattern hardening | Open | [#266](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/266) |
-| ARC runner policy parser hardening | Open | [#267](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/267) |
-| New verify-script metadata contract gate | Open | [#268](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/268) |
-| Purchase-gateway auth-expiry retry hardening | Open | [#269](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/269) |
-| Purchase-gateway failed webhook status durability | Open | [#270](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/270) |
-| Repo-wide local statefile artifact guard | Open | [#271](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/271) |
-| Static-list entry contract gate | Open | [#272](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/272) |
-| Purchase-gateway admin fulfillment retry API | Open | [#273](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/273) |
-| Purchase-gateway admin Stripe-event list API | Open | [#274](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/274) |
-| Purchase-gateway admin order-detail API | Open | [#275](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/275) |
-| Purchase-gateway admin refund initiation API | Open | [#276](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/276) |
-| Purchase-gateway admin entitlements list API | Open | [#282](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/282) |
+| Evidence locker growth control | Merged | [#237](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/237) |
+| Purchase-gateway durability guard | Merged | [#246](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/246) |
+| Purchase-gateway runtime telemetry | Merged | [#247](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/247) |
+| Repo cache artifact guardrails (v2) | Merged | [#248](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/248) |
+| Python cache cleanup ergonomics | Merged | [#249](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/249) |
+| Verification governance entrypoint | Merged | [#250](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/250) |
+| Tutor custom-app install parity | Merged | [#251](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/251) |
+| Custom-app state file pattern hardening | Merged | [#252](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/252) |
+| Verification script growth budget gate | Merged | [#253](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/253) |
+| IaC control-plane boundary guard | Merged | [#254](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/254) |
+| CI verifier signal hardening | Merged | [#255](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/255) |
+| Tenant DNS inventory drift guard | Merged | [#256](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/256) |
+| Evidence footprint budget guard | Merged | [#257](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/257) |
+| Verification strict-mode contract gate | Merged | [#258](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/258) |
+| Audit tracker synchronization guard | Merged | [#259](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/259) |
+| Tutor config path contract hardening | Merged | [#260](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/260) |
+| Static-validation kubeconform portability fix | Merged | [#261](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/261) |
+| Evidence redaction header/token hardening | Merged | [#262](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/262) |
+| Repo hygiene gate promotion + CI signal bundle | Merged | [#263](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/263) |
+| Branding sync determinism hardening | Merged | [#264](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/264) |
+| Custom-app statefile pattern hardening | Merged | [#266](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/266) |
+| ARC runner policy parser hardening | Merged | [#267](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/267) |
+| New verify-script metadata contract gate | Closed | [#268](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/268) |
+| Purchase-gateway auth-expiry retry hardening | Merged | [#269](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/269) |
+| Purchase-gateway failed webhook status durability | Merged | [#270](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/270) |
+| Repo-wide local statefile artifact guard | Closed | [#271](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/271) |
+| Static-list entry contract gate | Merged | [#272](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/272) |
+| Purchase-gateway admin fulfillment retry API | Merged | [#273](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/273) |
+| Purchase-gateway admin Stripe-event list API | Merged | [#274](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/274) |
+| Purchase-gateway admin order-detail API | Merged | [#275](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/275) |
+| Purchase-gateway admin refund initiation API | Merged | [#276](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/276) |
+| Purchase-gateway admin entitlements list API | Merged | [#282](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/282) |
 
 ## Purpose
 
 Operational board for implementors to execute child issues in safe order with clear entry PR, gate commands, and rollback triggers.
+
+## Maintenance Commands
+
+- Sync live PR statuses into tracker/board tables:
+  `./scripts/qa/sync-openedx-audit-pr-status.sh`
+- Verify tracker/board PR-set parity:
+  `./scripts/qa/verify-openedx-audit-tracker-sync.sh`
 
 ## Canonical Inputs
 
