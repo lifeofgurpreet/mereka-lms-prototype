@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-RS-001, AC-RS-002
+# @spec: repository-structure_spec.md
 # verify-custom-apps-hygiene.sh
 #
 # Enforce packaging and git hygiene rules for Tutor custom Django apps.
@@ -40,14 +42,16 @@ done < <(find "$CUSTOM_APPS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
 # 2) No tracked stateful/runtime artifacts in custom-apps.
 while IFS= read -r path; do
-  if [[ "$path" == infrastructure/tutor/custom-apps/*/db.sqlite3 ]]; then
-    fail "$path is a tracked SQLite runtime database"
-  elif [[ "$path" == infrastructure/tutor/custom-apps/* && "$path" == *.log ]]; then
+  if [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.(sqlite3|sqlite)$ ]]; then
+    fail "$path is a tracked SQLite runtime database file"
+  elif [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.log$ ]]; then
     fail "$path is a tracked runtime log file"
-  elif [[ "$path" == infrastructure/tutor/custom-apps/* && "$path" == *"/__pycache__/"* ]]; then
+  elif [[ "$path" == infrastructure/tutor/custom-apps/*"/__pycache__/"* ]]; then
     fail "$path is tracked Python bytecode cache content"
-  elif [[ "$path" == infrastructure/tutor/custom-apps/* && ( "$path" == *.pyc || "$path" == *.pyo ) ]]; then
+  elif [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.(pyc|pyo)$ ]]; then
     fail "$path is tracked compiled Python bytecode"
+  elif [[ "$path" =~ ^infrastructure/tutor/custom-apps/.+\.(pid|sock)$ ]]; then
+    fail "$path is a tracked runtime state file"
   else
     pass
   fi
