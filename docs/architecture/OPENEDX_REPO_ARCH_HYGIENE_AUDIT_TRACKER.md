@@ -188,6 +188,25 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 | High-signal governance/evidence verifier promotion | #335 | Merged | Promotes high-signal governance/evidence checks into static CI and standard entrypoints |
 | Verification catalog runtime status overrides | #336 | Merged | Adds runtime/manual override mechanism for catalog status resolution without breaking CI ownership contracts |
 | Final verification candidate classification + strictness fixes | #337 | Merged | Closes long-tail verification classification by fixing strict-mode script behavior and duplicate-AC detection, reducing deprecated-candidate scripts to zero |
+| Release invocation guardrail token wiring | #362 | Open | Wires release invocation guardrail token contract across wrappers/workflows and adds dedicated verifier to catch drift before runtime release steps |
+| CI sourced-guard lint annotation contract | #363 | Open | Marks sourced CI guard helpers as intentional strict-mode exceptions to eliminate false-positive lint noise without weakening executable scripts |
+| QA naming convention sync-prefix allowance | #364 | Open | Extends QA naming lint policy to allow `sync-*` script prefixes used by canonical audit synchronization tooling |
+| Archive report artifact ignore policy | #365 | Open | Ignores generated `docs/archive/reports/` artifacts to keep generated evidence summaries out of git history by default |
+| Canonical token CSS header regeneration | #366 | Closed | Regenerated generated token CSS header and was superseded by broader branding token sync contract hardening in #367 |
+| Branding token sync/drift contract alignment | #367 | Open | Aligns brand asset sync, token generation, and drift verifiers so generated token outputs remain deterministic and contract-consistent |
+| Repo hygiene cache-check deduplication | #368 | Open | Deduplicates overlapping cache pattern checks in repo hygiene verifier to reduce maintenance noise without changing enforcement scope |
+| Evidence tracking policy archive-report coverage | #369 | Open | Extends evidence tracking policy contract to include `docs/archive/reports` with markdown-only and sensitive-marker checks |
+| Evidence sprawl zero-budget archive-report enforcement | #370 | Open | Enforces zero-budget growth for archive report artifacts in evidence budget gates and baseline metadata |
+| Audit board consolidation for PR stream #362-#370 | #371 | Closed | Synchronizes tracker and execution-board post-audit tables with active PR set through #370 and preserves status parity gates |
+| Audit PR status sync performance hardening | #372 | Open | Refactors `sync-openedx-audit-pr-status.sh` to batch-fetch PR state and reduce GitHub API call fan-out with explicit fallback accounting |
+| Repo-conventions warning-budget signal hardening | #373 | Open | Caps future-work missing-script warning flood in `lint-repo-conventions.sh` via bounded sample output while retaining strict spec failure semantics |
+| Audit board incremental sync for #371-#373 | #374 | Closed | Keeps post-audit tracker tables aligned with active implementation stream as new hardening PRs are opened |
+| Custom-app hygiene statefile coverage expansion | #375 | Open | Extends custom-app artifact detector to block tracked `.db` files, sqlite sidecars, and coverage/test cache residues |
+| Repo hygiene statefile coverage expansion | #376 | Open | Extends repo-wide artifact hygiene gate to block tracked database state files, sidecars, runtime sockets/pids, coverage residues, and hypothesis caches |
+| Gitignore prevention for local state artifacts | #377 | Open | Adds ignore patterns for database/state sidecars and runtime residues so local artifacts are prevented at staging time before CI enforcement |
+| Audit board self-contained consolidation | #378 | Open | Consolidates post-audit tracker tables for PR stream `#362-#377` in one self-contained parity-checked docs update |
+| Pre-commit hook resilience hardening | #379 | Open | Fixes unbound `BLUE` variable and corrects repo-root resolution in pre-commit Tutor patch verification path; removes overlapping shellcheck patterns |
+| Dynamic brand-package sync target discovery | #380 | Open | Removes hardcoded tenant slug list from brand-package sync by discovering `brand-*` packages dynamically, reducing onboarding drift risk |
 
 ---
 
