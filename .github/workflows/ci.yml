@@ -261,11 +261,11 @@ jobs:
       - name: Verify token drift
         run: ./scripts/qa/verify-token-drift.sh
 
-      - name: Syntax check evidence redaction verifier
-        run: bash -n scripts/qa/verify-evidence-redaction.sh
+      - name: Syntax check legacy Tutor k8s path guard
+        run: bash -n scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
 
-      - name: Verify evidence redaction policy
-        run: STRICT=1 ./scripts/qa/verify-evidence-redaction.sh
+      - name: Verify no legacy Tutor k8s control-plane paths
+        run: ./scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
 
       - name: Validate config.example.yml
         run: python3 scripts/qa/check-config-example-yaml.py

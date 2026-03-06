@@ -1,6 +1,20 @@
 #!/bin/bash
 set -euo pipefail
 
+# DEPRECATED: legacy Tutor -> deploy/k8s export path.
+# Canonical release flow:
+#   scripts/infra/release-openedx-gitops.sh
+# Temporary bypass (emergency only):
+#   ALLOW_LEGACY_TUTOR_K8S=1 ./scripts/export-k8s-manifests.sh
+if [[ "${ALLOW_LEGACY_TUTOR_K8S:-0}" != "1" ]]; then
+  echo "DEPRECATED: scripts/export-k8s-manifests.sh is disabled by default." >&2
+  echo "Use scripts/infra/release-openedx-gitops.sh for canonical GitOps flow." >&2
+  echo "Set ALLOW_LEGACY_TUTOR_K8S=1 only for emergency legacy recovery." >&2
+  exit 1
+fi
+
+echo "WARNING: running deprecated legacy path (ALLOW_LEGACY_TUTOR_K8S=1)." >&2
+
 # Export K8s manifests from Tutor environment to GitOps deploy directory
 # This script re-exports manifests when Tutor configuration changes
 

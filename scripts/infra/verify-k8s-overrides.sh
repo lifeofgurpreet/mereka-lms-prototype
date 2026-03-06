@@ -5,6 +5,20 @@
 # This script checks that memory requests are set to 512Mi for core deployments
 set -euo pipefail
 
+# DEPRECATED: legacy Tutor k8s override verification path.
+# Canonical release flow:
+#   scripts/infra/release-openedx-gitops.sh
+# Temporary bypass (emergency only):
+#   ALLOW_LEGACY_TUTOR_K8S=1 ./scripts/infra/verify-k8s-overrides.sh
+if [[ "${ALLOW_LEGACY_TUTOR_K8S:-0}" != "1" ]]; then
+  echo "DEPRECATED: scripts/infra/verify-k8s-overrides.sh is disabled by default." >&2
+  echo "Use scripts/infra/release-openedx-gitops.sh for canonical GitOps flow." >&2
+  echo "Set ALLOW_LEGACY_TUTOR_K8S=1 only for emergency legacy recovery." >&2
+  exit 1
+fi
+
+echo "WARNING: running deprecated legacy path (ALLOW_LEGACY_TUTOR_K8S=1)." >&2
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DEPLOYMENTS_FILE="$REPO_ROOT/tutor_env/env/k8s/deployments.yml"
 OVERRIDE_FILE="$REPO_ROOT/tutor_env/env/k8s/override.yml"

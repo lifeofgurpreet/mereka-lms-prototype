@@ -42,7 +42,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `../qa/audit-grafana-dashboard.sh` - **📊 MONITORING** Validate Grafana panel/query coverage against contract
 - `cloudflare-sync.sh` - Cloudflare DNS sync
 - `mongodb-to-atlas.sh` - MongoDB migration to Atlas
-- `deploy-aspects-k8s.sh` - Deploy Aspects analytics to Kubernetes
+- `deploy-aspects-k8s.sh` - **Deprecated legacy path** (disabled by default; requires `ALLOW_LEGACY_TUTOR_K8S=1`)
 
 ## Usage
 

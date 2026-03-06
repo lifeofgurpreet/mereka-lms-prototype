@@ -2,6 +2,20 @@
 # Deploy Aspects Analytics to GKE Autopilot with appropriate resource limits
 set -euo pipefail
 
+# DEPRECATED: this script applies Tutor-generated k8s manifests directly.
+# Canonical release flow:
+#   scripts/infra/release-openedx-gitops.sh
+# Temporary bypass (emergency only):
+#   ALLOW_LEGACY_TUTOR_K8S=1 ./scripts/infra/deploy-aspects-k8s.sh
+if [[ "${ALLOW_LEGACY_TUTOR_K8S:-0}" != "1" ]]; then
+  echo "DEPRECATED: scripts/infra/deploy-aspects-k8s.sh is disabled by default." >&2
+  echo "Use scripts/infra/release-openedx-gitops.sh for canonical GitOps flow." >&2
+  echo "Set ALLOW_LEGACY_TUTOR_K8S=1 only for emergency legacy recovery." >&2
+  exit 1
+fi
+
+echo "WARNING: running deprecated legacy path (ALLOW_LEGACY_TUTOR_K8S=1)." >&2
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
@@ -95,7 +109,6 @@ echo "  Username: admin"
 echo "  Password: Check with: tutor config printvalue SUPERSET_ADMIN_PASSWORD"
 echo ""
 echo "=== Done ==="
-
 
 
 
