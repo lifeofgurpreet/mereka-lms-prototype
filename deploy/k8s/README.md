@@ -33,7 +33,7 @@ deploy/k8s/
 
 1. **Namespace**: Changed from `openedx` to `mereka-lms`
 2. **Labels**: Updated instance and part-of labels to `mereka-lms`
-3. **Jobs excluded**: One-time initialization jobs are not included in base (handle separately)
+3. **Initialization is in-graph**: Init/migration paths are encoded via `initContainers` and dedicated `Job`/`CronJob` manifests under `base/`
 4. **ConfigMaps**: All config files are managed via configMapGenerator in kustomization.yaml
 
 ## Deployments Included
@@ -131,5 +131,5 @@ See the main BBI-K8 repository for details on the GitOps workflow.
 
 - The base configuration uses hostPath volumes for local development
 - For production, you'll need to configure proper PersistentVolumes
-- Database initialization jobs should be run manually before first deployment
-- See Tutor documentation for migration and initialization procedures
+- Schema/data initialization contracts are versioned in manifests (`initContainers`, `base/jobs/`, `base/plugins/aspects/jobs.yml`)
+- Do not run ad-hoc manual migration commands as a deployment substitute; use declared GitOps/Tutor flows
