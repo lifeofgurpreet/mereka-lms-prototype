@@ -215,11 +215,13 @@ kind: Service
 metadata:
   name: notes
   labels:
-    app.kubernetes.io/name: caddy
+    app.kubernetes.io/name: notes
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   type: ClusterIP
   ports:
     - port: 8000
+      name: http
       protocol: TCP
   selector:
     app.kubernetes.io/name: notes
@@ -228,10 +230,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: xqueue
+  labels:
+    app.kubernetes.io/name: xqueue
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   type: NodePort
   ports:
     - port: 8000
+      name: http
       protocol: TCP
   selector:
     app.kubernetes.io/name: xqueue
