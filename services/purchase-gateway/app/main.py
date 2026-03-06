@@ -22,6 +22,7 @@ from app.routers import (
     admin_offerings,
     admin_orders,
     admin_refunds,
+    admin_reports,
     checkout,
     health,
     subscriptions,
@@ -84,6 +85,7 @@ app.include_router(admin_entitlements.router, prefix="/api/v1")
 app.include_router(admin_refunds.router, prefix="/api/v1")
 app.include_router(admin_events.router, prefix="/api/v1")
 app.include_router(admin_orders.router, prefix="/api/v1")
+app.include_router(admin_reports.router, prefix="/api/v1")
 app.include_router(webhooks.router)
 
 # Prometheus metrics
