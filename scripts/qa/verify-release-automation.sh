@@ -20,6 +20,7 @@ CREATE_RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
 
 RELEASE_INVOKE_CHECKER="$REPO_ROOT/scripts/qa/verify-release-workflow-invocation.sh"
 RELEASE_DRY_RUN_CHECKER="$REPO_ROOT/scripts/qa/verify-release-dry-run-contract.sh"
+RELEASE_PROMOTION_WIRING_CHECKER="$REPO_ROOT/scripts/qa/verify-release-promotion-wiring.sh"
 PHASE2_SMOKE_EVIDENCE_CONTRACT_CHECKER="$REPO_ROOT/scripts/qa/verify-phase2-smoke-evidence-contract.sh"
 BRANDING_EVIDENCE_A11Y_CONTRACT_CHECKER="$REPO_ROOT/scripts/qa/verify-branding-evidence-a11y-contract.sh"
 BRANDING_EVIDENCE_SCREENSHOT_CONTRACT_CHECKER="$REPO_ROOT/scripts/qa/verify-branding-evidence-screenshot-contract.sh"
@@ -99,6 +100,37 @@ if [[ -f "${RELEASE_WORKFLOW}" ]]; then
     pass "release.yml uses full git history (fetch-depth: 0)"
   else
     fail "release.yml missing fetch-depth: 0 (needed for git log changelog)"
+  fi
+
+  if grep -qE "promote-to-production|promote_to_production" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml has promote-to-production job"
+  else
+    fail "release.yml missing promote-to-production job (GitOps promotion not wired)"
+  fi
+
+  if grep -qE "environment:.*production" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml promotion job uses production environment (manual approval gate)"
+  else
+    fail "release.yml missing environment: production in promotion job"
+  fi
+
+  if grep -q "release-openedx-gitops.sh" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml calls release-openedx-gitops.sh for production promotion"
+  else
+    fail "release.yml does not call release-openedx-gitops.sh (promotion not wired)"
+  fi
+
+  if grep -q -- "--target-env" "${RELEASE_WORKFLOW}" && \
+     grep -q "release-openedx-gitops.sh" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml passes --target-env to release orchestrator"
+  else
+    fail "release.yml missing --target-env in release orchestrator call"
+  fi
+
+  if grep -q -- "--require-digests" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml requires digest pinning for production promotion"
+  else
+    fail "release.yml missing --require-digests (production promotion must use immutable image pins)"
   fi
 fi
 
@@ -259,7 +291,7 @@ if [[ -f "${BUILD_WORKFLOW}" ]]; then
 fi
 
 for checker_file in "${BUILD_WORKFLOW_CONTRACT}" "${RELEASE_INVOKE_CHECKER}" \
-                    "${RELEASE_DRY_RUN_CHECKER}" \
+                    "${RELEASE_DRY_RUN_CHECKER}" "${RELEASE_PROMOTION_WIRING_CHECKER}" \
                     "${PHASE2_SMOKE_EVIDENCE_CONTRACT_CHECKER}" \
                     "${BRANDING_EVIDENCE_A11Y_CONTRACT_CHECKER}" \
                     "${BRANDING_EVIDENCE_SCREENSHOT_CONTRACT_CHECKER}"; do

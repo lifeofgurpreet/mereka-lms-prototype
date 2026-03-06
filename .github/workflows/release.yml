@@ -7,6 +7,9 @@ on:
 
 permissions: {}
 
+env:
+  REGISTRY: ghcr.io/biji-biji-initiative/mereka-lms
+
 jobs:
   create-github-release:
     name: Create GitHub Release
@@ -187,3 +190,133 @@ jobs:
             --notes-file "${BODY_FILE}" \
             ${PRERELEASE_FLAG}
           echo "GitHub Release created: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+
+  promote-to-production:
+    name: Promote to Production
+    runs-on: mereka-k8s-runners
+    needs: create-github-release
+    # Manual approval is enforced by the 'production' GitHub environment protection rules.
+    # Configure required reviewers at: Settings → Environments → production
+    environment: production
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          # Full history so release-openedx-gitops.sh can read app SHA for GitOps base ref bump
+          fetch-depth: 0
+
+      - name: Validate semver tag
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          if ! echo "${TAG}" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "ERROR: Tag '${TAG}' is not a valid semver tag (expected vMAJOR.MINOR.PATCH)"
+            exit 1
+          fi
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+          # The image tag in GHCR is the full commit SHA of the tagged commit.
+          # build-tutor-images.yml pushes with: TAG="${{ inputs.image_tag || github.sha }}"
+          echo "IMAGE_TAG=${GITHUB_SHA}" >> "$GITHUB_ENV"
+
+      - name: Verify images exist in registry
+        # Gate: confirm both images were built and pushed before allowing promotion.
+        # resolve-image-digest.sh uses 'docker buildx imagetools inspect' which requires
+        # GHCR login for private packages.
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+          OPENEDX_REF="${{ env.REGISTRY }}/openedx:${IMAGE_TAG}"
+          MFE_REF="${{ env.REGISTRY }}/mfe:${IMAGE_TAG}"
+
+          echo "Verifying openedx image: ${OPENEDX_REF}"
+          OPENEDX_DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${OPENEDX_REF}")"
+          if [[ -z "${OPENEDX_DIGEST}" || ! "${OPENEDX_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::openedx image not found or digest invalid for ${OPENEDX_REF}"
+            echo "::error::The image must be built by build-tutor-images.yml before tagging a release."
+            exit 1
+          fi
+          echo "openedx digest: ${OPENEDX_DIGEST}"
+          echo "OPENEDX_DIGEST=${OPENEDX_DIGEST}" >> "$GITHUB_ENV"
+
+          echo "Verifying mfe image: ${MFE_REF}"
+          MFE_DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${MFE_REF}")"
+          if [[ -z "${MFE_DIGEST}" || ! "${MFE_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::mfe image not found or digest invalid for ${MFE_REF}"
+            echo "::error::The image must be built by build-tutor-images.yml before tagging a release."
+            exit 1
+          fi
+          echo "mfe digest: ${MFE_DIGEST}"
+          echo "MFE_DIGEST=${MFE_DIGEST}" >> "$GITHUB_ENV"
+
+          echo "Image existence gate passed: both images verified in registry."
+          echo "**openedx:** \`${OPENEDX_REF}\` → \`${OPENEDX_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**mfe:** \`${MFE_REF}\` → \`${MFE_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Checkout bbi-infrastructure
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          repository: Biji-Biji-Initiative/bbi-infrastructure
+          path: bbi-infrastructure
+          token: ${{ secrets.GITOPS_PAT }}
+
+      - name: Validate GitOps token
+        env:
+          GITOPS_PAT: ${{ secrets.GITOPS_PAT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${GITOPS_PAT}" ]]; then
+            echo "GITOPS_PAT secret is required to update bbi-infrastructure." >&2
+            exit 1
+          fi
+
+      - name: Configure git identity
+        run: |
+          set -euo pipefail
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Promote image tags to production via GitOps
+        run: |
+          set -euo pipefail
+          CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS \
+          CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS \
+          ALLOW_PROD_APPLY=1 \
+          ./scripts/infra/release-openedx-gitops.sh \
+            --target-env production \
+            --openedx-tag "${IMAGE_TAG}" \
+            --mfe-tag "${IMAGE_TAG}" \
+            --openedx-digest "${OPENEDX_DIGEST}" \
+            --mfe-digest "${MFE_DIGEST}" \
+            --require-digests \
+            --app-repo "$GITHUB_WORKSPACE" \
+            --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
+            --skip-branding-runtime-guard \
+            --skip-paragon-runtime-guard \
+            --skip-footer-runtime-guard \
+            --skip-mfe-route-runtime-guard \
+            --skip-mfe-route-smoke-guard \
+            --skip-enterprise-site-mapping-guard \
+            --skip-enterprise-readiness-integrity-guard \
+            --skip-enterprise-sso-runtime-guard \
+            --skip-enterprise-runtime-app-guard \
+            --skip-enterprise-schema-guard \
+            --apply --commit --push
+
+      - name: Summary
+        run: |
+          set -euo pipefail
+          GITOPS_COMMIT="$(git -C "$GITHUB_WORKSPACE/bbi-infrastructure" rev-parse HEAD)"
+          echo "### Production Promotion Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Semver tag:** \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image tag:** \`${IMAGE_TAG}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**openedx digest:** \`${OPENEDX_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**mfe digest:** \`${MFE_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**GitOps commit:** \`${GITOPS_COMMIT}\`" >> $GITHUB_STEP_SUMMARY
+          echo "ArgoCD will reconcile within 3 minutes. Monitor at: https://argocd.academyv2.mereka.io"
