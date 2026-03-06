@@ -37,6 +37,10 @@ scripts/qa/verify-evidence-redaction.sh
 scripts/qa/verify-k8s-deployment-spec.sh
 scripts/qa/verify-migration-init-contract.sh
 scripts/qa/verify-dev-db-rebuild-contract.sh
+scripts/qa/verify-destructive-ops-guardrails.sh
+scripts/qa/verify-credentials-zoneinfo-contract.sh
+scripts/qa/verify-no-manual-migration-state-hacks.sh
+scripts/qa/verify-enterprise-schema-repair-guardrails.sh
 scripts/qa/verify-k8s-externalsecrets.sh
 scripts/qa/verify-k8s-images.sh
 scripts/qa/verify-k8s-secrets-hygiene.sh
@@ -55,6 +59,9 @@ scripts/qa/verify-multisite-config.sh
 scripts/qa/verify-tutor-multisite-domains.sh
 scripts/qa/verify-tenant-contract-alignment.sh
 scripts/qa/verify-tenant-dns-inventory.sh
+scripts/qa/verify-tenant-lifecycle-guardrails.sh
+scripts/qa/verify-multisite-apply-guardrails.sh
+scripts/qa/verify-tenant-enterprise-mutation-guardrails.sh
 scripts/qa/verify-csrf-multisite.sh
 scripts/qa/verify-favicon-multisite.sh
 scripts/qa/verify-site-id-hardening.sh
@@ -84,6 +91,13 @@ scripts/qa/verify-cicd-tutor-plugin-test.sh
 scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/verify-argocd-impersonation-guardrail.sh
 scripts/qa/verify-pr-handoff-guardrails.sh
+scripts/qa/verify-provision-mysql-app-dbs-guardrails.sh
+scripts/qa/verify-mysql-user-repair-guardrails.sh
+scripts/qa/verify-prune-gcp-snapshots-guardrails.sh
+scripts/qa/verify-data-retention-jobs-guardrails.sh
+scripts/qa/verify-purge-frontend-cache-guardrails.sh
+scripts/qa/verify-authentik-apply-guardrails.sh
+scripts/qa/verify-studio-sso-canary-guardrails.sh
 scripts/qa/verify-new-ci-static-entries.sh
 scripts/qa/verify-verification-catalog.sh
 scripts/qa/verify-verification-sprawl-budget.sh

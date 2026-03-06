@@ -22,6 +22,10 @@ NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 CONTEXT_OVERRIDE=""
 CANONICAL_DOMAINS=0
 DRY_RUN=1
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CREATE_PREOP_BACKUP="${CREATE_PREOP_BACKUP:-1}"
+CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING="${CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING:-}"
+CONFIRM_TOKEN="SYNC_TENANT_ENTERPRISE_MAPPING"
 
 usage() {
   cat <<'USAGE'
@@ -35,7 +39,37 @@ Options:
   --apply                 Apply changes (default: dry-run)
   --dry-run               Preview only (default)
   -h, --help              Show this help
+
+Safety controls for --apply:
+  CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING=SYNC_TENANT_ENTERPRISE_MAPPING
+  ALLOW_PROD_APPLY=1      Required for prod-like contexts
+  CREATE_PREOP_BACKUP=1   Default for prod-like contexts (Velero pre-op backup)
 USAGE
+}
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+require_cmd() {
+  local cmd="$1"
+  command -v "$cmd" >/dev/null 2>&1 || {
+    echo "Missing command: $cmd" >&2
+    exit 1
+  }
+}
+
+is_prod_like_context() {
+  local ctx="$1"
+  [[ "$ctx" == *"gke_bbi-k8"* ]] || [[ "$ctx" == "prod" ]] || [[ "$ctx" == "production" ]] || [[ "$ctx" == "gke-prod" ]]
 }
 
 while [[ $# -gt 0 ]]; do
@@ -81,6 +115,10 @@ if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
   exit 1
 fi
 
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
+require_cmd kubectl
+
 DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
 DEFAULT_DEV_CTX="kind-dev"
 K8S_CONTEXT_EFFECTIVE="${CONTEXT_OVERRIDE}"
@@ -95,6 +133,29 @@ fi
 context_args=()
 if [[ -n "$K8S_CONTEXT_EFFECTIVE" ]]; then
   context_args+=(--context "$K8S_CONTEXT_EFFECTIVE")
+fi
+
+if [[ "$DRY_RUN" -eq 0 ]]; then
+  if [[ "$CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING" != "$CONFIRM_TOKEN" ]]; then
+    echo "Refusing --apply without explicit confirmation token. Set CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING=${CONFIRM_TOKEN}" >&2
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT_EFFECTIVE" && [[ "$ALLOW_PROD_APPLY" != "1" ]]; then
+    echo "Refusing --apply on prod-like context '$K8S_CONTEXT_EFFECTIVE' without ALLOW_PROD_APPLY=1" >&2
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT_EFFECTIVE"; then
+    if [[ "$CREATE_PREOP_BACKUP" == "1" ]]; then
+      require_cmd velero
+      backup_name="pre-op-${NAMESPACE}-tenant-mapping-$(date -u +%Y%m%d-%H%M)"
+      echo "Creating Velero pre-op backup: $backup_name"
+      velero backup create "$backup_name" --include-namespaces "$NAMESPACE" --wait
+    else
+      echo "WARNING: CREATE_PREOP_BACKUP=0 on prod-like context '$K8S_CONTEXT_EFFECTIVE' (operator override)"
+    fi
+  fi
 fi
 
 echo "=== Tenant Enterprise Mapping Sync ==="

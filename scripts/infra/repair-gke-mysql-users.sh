@@ -24,6 +24,10 @@ set -euo pipefail
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 GCP_PROJECT_ID="${GCP_PROJECT_ID:-bbi-k8}"
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CREATE_PREOP_BACKUP="${CREATE_PREOP_BACKUP:-1}"
+CONFIRM_REPAIR_GKE_MYSQL_USERS="${CONFIRM_REPAIR_GKE_MYSQL_USERS:-}"
+CONFIRM_TOKEN="REPAIR_GKE_MYSQL_USERS"
 
 MYSQL_DEPLOYMENT="${MYSQL_DEPLOYMENT:-mysql}"
 K8S_SECRET_NAME="${K8S_SECRET_NAME:-database-secrets}"
@@ -37,6 +41,23 @@ log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 || { echo "Missing required command: $1" >&2; exit 1; }
+}
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+is_prod_like_context() {
+  local ctx="$1"
+  [[ "$ctx" == *"gke_bbi-k8"* ]] || [[ "$ctx" == "prod" ]] || [[ "$ctx" == "production" ]] || [[ "$ctx" == "gke-prod" ]]
 }
 
 get_k8s_secret_raw() {
@@ -115,6 +136,29 @@ main() {
   need_cmd gcloud
   need_cmd python3
   need_cmd base64
+  require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+  require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
+
+  if [[ "$CONFIRM_REPAIR_GKE_MYSQL_USERS" != "$CONFIRM_TOKEN" ]]; then
+    echo "Refusing live mutation without explicit confirmation token. Set CONFIRM_REPAIR_GKE_MYSQL_USERS=${CONFIRM_TOKEN}" >&2
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT" && [[ "$ALLOW_PROD_APPLY" != "1" ]]; then
+    echo "Refusing live mutation on prod-like context '$K8S_CONTEXT' without ALLOW_PROD_APPLY=1" >&2
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT"; then
+    if [[ "$CREATE_PREOP_BACKUP" == "1" ]]; then
+      need_cmd velero
+      backup_name="pre-op-${K8S_NAMESPACE}-repair-gke-mysql-users-$(date -u +%Y%m%d-%H%M)"
+      log "Creating Velero pre-op backup: $backup_name"
+      velero backup create "$backup_name" --include-namespaces "$K8S_NAMESPACE" --wait
+    else
+      log "WARNING: CREATE_PREOP_BACKUP=0 on prod-like context '$K8S_CONTEXT' (operator override)"
+    fi
+  fi
 
   log "Context=${K8S_CONTEXT} namespace=${K8S_NAMESPACE}"
 
@@ -167,4 +211,3 @@ main() {
 }
 
 main "$@"
-

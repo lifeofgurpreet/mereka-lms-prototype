@@ -402,7 +402,8 @@ RETENTION_DAYS=90 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod
 
 # Purge frontend/theme cache entries after deploy if stale assets persist
 ./scripts/infra/purge-frontend-theme-cache.sh --env prod
-./scripts/infra/purge-frontend-theme-cache.sh --env prod --apply
+CONFIRM_PURGE_FRONTEND_THEME_CACHE=PURGE_FRONTEND_THEME_CACHE ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/purge-frontend-theme-cache.sh --env prod --apply
 
 # Single-browser smoke lane with screenshot artifacts (authn/learning/account/profile)
 ./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --learning-path /learning

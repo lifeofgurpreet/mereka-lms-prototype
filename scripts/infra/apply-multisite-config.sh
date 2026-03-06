@@ -17,6 +17,10 @@ ENVIRONMENT="${ENVIRONMENT:-prod}"
 DEFINITIONS_PATH=""
 ALLOWLIST_PATH="$REPO_ROOT/infrastructure/tutor/multisite-shared-host-allowlist.txt"
 SERVICE_TARGET="${SERVICE_TARGET:-lms}"
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CREATE_PREOP_BACKUP="${CREATE_PREOP_BACKUP:-1}"
+CONFIRM_APPLY_MULTISITE_CONFIG="${CONFIRM_APPLY_MULTISITE_CONFIG:-}"
+CONFIRM_TOKEN="APPLY_MULTISITE_CONFIG"
 
 log_info() {
   echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] INFO: $*"
@@ -42,6 +46,11 @@ OPTIONS:
   --apply                     Apply changes to database
   -h, --help                  Show this help message
 
+Safety controls for --apply:
+  CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG
+  ALLOW_PROD_APPLY=1          Required for prod-like contexts
+  CREATE_PREOP_BACKUP=1       Default for prod-like contexts (Velero pre-op backup)
+
 EXAMPLES:
   # Preview changes (dry run - default)
   $0 --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --dry-run
@@ -60,6 +69,31 @@ REQUIREMENTS:
   - Database credentials in lms.env.yml
 EOF
   exit 1
+}
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      log_error "Invalid ${var_name}='${value}' (expected 0 or 1)"
+      exit 1
+      ;;
+  esac
+}
+
+require_cmd() {
+  local cmd="$1"
+  command -v "$cmd" >/dev/null 2>&1 || {
+    log_error "Missing command: $cmd"
+    exit 1
+  }
+}
+
+is_prod_like_context() {
+  local ctx="$1"
+  [[ "$ctx" == *"gke_bbi-k8"* ]] || [[ "$ctx" == "prod" ]] || [[ "$ctx" == "production" ]] || [[ "$ctx" == "gke-prod" ]]
 }
 
 # Parse arguments
@@ -105,6 +139,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
+require_cmd kubectl
+
 if [[ -z "$DEFINITIONS_PATH" ]]; then
   if [[ "$ENVIRONMENT" == "prod" ]]; then
     DEFINITIONS_PATH="$REPO_ROOT/infrastructure/tutor/multisite-sites.yml"
@@ -126,6 +164,29 @@ fi
 if [[ "$SERVICE_TARGET" != "lms" && "$SERVICE_TARGET" != "cms" && "$SERVICE_TARGET" != "both" ]]; then
   log_error "Invalid --service value: $SERVICE_TARGET (expected lms|cms|both)"
   exit 1
+fi
+
+if [[ "$DRY_RUN" == "false" ]]; then
+  if [[ "$CONFIRM_APPLY_MULTISITE_CONFIG" != "$CONFIRM_TOKEN" ]]; then
+    log_error "Refusing --apply without explicit confirmation token. Set CONFIRM_APPLY_MULTISITE_CONFIG=${CONFIRM_TOKEN}"
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT" && [[ "$ALLOW_PROD_APPLY" != "1" ]]; then
+    log_error "Refusing --apply on prod-like context '$K8S_CONTEXT' without ALLOW_PROD_APPLY=1"
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT"; then
+    if [[ "$CREATE_PREOP_BACKUP" == "1" ]]; then
+      require_cmd velero
+      backup_name="pre-op-${NAMESPACE}-multisite-apply-$(date -u +%Y%m%d-%H%M)"
+      log_info "Creating Velero pre-op backup: $backup_name"
+      velero backup create "$backup_name" --include-namespaces "$NAMESPACE" --wait
+    else
+      log_info "WARNING: CREATE_PREOP_BACKUP=0 on prod-like context '$K8S_CONTEXT' (operator override)"
+    fi
+  fi
 fi
 
 SERVICES=(lms)

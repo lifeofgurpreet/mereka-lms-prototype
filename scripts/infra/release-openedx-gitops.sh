@@ -922,7 +922,25 @@ run_frontend_cache_purge() {
   fi
 
   echo "Running frontend cache purge helper..."
-  "${purge_cmd[@]}"
+  if [[ "$APPLY" -eq 1 ]]; then
+    local allow_prod_apply="0"
+    if [[ "$purge_env" == "prod" ]]; then
+      allow_prod_apply="1"
+    fi
+
+    if [[ "$FRONTEND_CACHE_PURGE_EVERYTHING" -eq 1 ]]; then
+      CONFIRM_PURGE_FRONTEND_THEME_CACHE="PURGE_FRONTEND_THEME_CACHE" \
+      CONFIRM_PURGE_EVERYTHING="PURGE_EVERYTHING" \
+      ALLOW_PROD_APPLY="$allow_prod_apply" \
+      "${purge_cmd[@]}"
+    else
+      CONFIRM_PURGE_FRONTEND_THEME_CACHE="PURGE_FRONTEND_THEME_CACHE" \
+      ALLOW_PROD_APPLY="$allow_prod_apply" \
+      "${purge_cmd[@]}"
+    fi
+  else
+    "${purge_cmd[@]}"
+  fi
 }
 
 if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then

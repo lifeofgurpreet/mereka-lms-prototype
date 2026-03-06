@@ -8,7 +8,8 @@
 #
 # Usage:
 #   ./scripts/infra/ensure-studio-sso-canary.sh --verify
-#   ./scripts/infra/ensure-studio-sso-canary.sh --apply
+#   CONFIRM_ENSURE_STUDIO_SSO_CANARY=ENSURE_STUDIO_SSO_CANARY ALLOW_PROD_APPLY=1 \
+#     ./scripts/infra/ensure-studio-sso-canary.sh --apply
 #
 set -euo pipefail
 
@@ -23,6 +24,10 @@ OPENEDX_NAMESPACE="${OPENEDX_NAMESPACE:-mereka-lms}"
 AUTHENTIK_NAMESPACE="${AUTHENTIK_NAMESPACE:-authentik}"
 AUTHENTIK_DEPLOY="${AUTHENTIK_DEPLOY:-authentik-server}"
 AUTHENTIK_AK_BIN="${AUTHENTIK_AK_BIN:-/lifecycle/ak}"
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CREATE_PREOP_BACKUP="${CREATE_PREOP_BACKUP:-1}"
+CONFIRM_ENSURE_STUDIO_SSO_CANARY="${CONFIRM_ENSURE_STUDIO_SSO_CANARY:-}"
+CONFIRM_TOKEN="ENSURE_STUDIO_SSO_CANARY"
 
 # Infisical source of truth
 INFISICAL_DOMAIN="${INFISICAL_DOMAIN:-https://secrets.mereka.io/api}"
@@ -63,6 +68,9 @@ Env:
   CANARY_EMAIL=$CANARY_EMAIL
   SYNC_GITHUB=1|0 (default: $SYNC_GITHUB)
   ENABLE_RUNTIME_GATE=1|0 (default: $ENABLE_RUNTIME_GATE)
+  ALLOW_PROD_APPLY=1 for --apply on prod-like contexts
+  CREATE_PREOP_BACKUP=1 (default for prod-like contexts)
+  CONFIRM_ENSURE_STUDIO_SSO_CANARY=ENSURE_STUDIO_SSO_CANARY
 
 Infisical:
   INFISICAL_DOMAIN=$INFISICAL_DOMAIN
@@ -86,16 +94,61 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+is_prod_like_context() {
+  local ctx="$1"
+  [[ "$ctx" == *"gke_bbi-k8"* ]] || [[ "$ctx" == "prod" ]] || [[ "$ctx" == "production" ]] || [[ "$ctx" == "gke-prod" ]]
+}
+
 need_cmd() {
   local cmd="$1"
   command -v "$cmd" >/dev/null 2>&1 || { echo "Missing required command: $cmd" >&2; exit 1; }
 }
+
+require_bool_01 "SYNC_GITHUB" "$SYNC_GITHUB"
+require_bool_01 "ENABLE_RUNTIME_GATE" "$ENABLE_RUNTIME_GATE"
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
 
 need_cmd kubectl
 need_cmd infisical
 need_cmd jq
 if [[ "$SYNC_GITHUB" == "1" ]]; then
   need_cmd gh
+fi
+
+if [[ "$MODE" == "apply" ]]; then
+  if [[ "$CONFIRM_ENSURE_STUDIO_SSO_CANARY" != "$CONFIRM_TOKEN" ]]; then
+    echo "Refusing --apply without explicit confirmation token. Set CONFIRM_ENSURE_STUDIO_SSO_CANARY=${CONFIRM_TOKEN}" >&2
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT" && [[ "$ALLOW_PROD_APPLY" != "1" ]]; then
+    echo "Refusing --apply on prod-like context '$K8S_CONTEXT' without ALLOW_PROD_APPLY=1" >&2
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT"; then
+    if [[ "$CREATE_PREOP_BACKUP" == "1" ]]; then
+      need_cmd velero
+      backup_name="pre-op-${OPENEDX_NAMESPACE}-studio-sso-canary-$(date -u +%Y%m%d-%H%M)"
+      echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] Creating Velero pre-op backup: $backup_name"
+      velero backup create "$backup_name" --include-namespaces "${OPENEDX_NAMESPACE},${AUTHENTIK_NAMESPACE}" --wait
+    else
+      echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] WARNING: CREATE_PREOP_BACKUP=0 on prod-like context '$K8S_CONTEXT' (operator override)"
+    fi
+  fi
 fi
 
 resolve_infisical_dir() {

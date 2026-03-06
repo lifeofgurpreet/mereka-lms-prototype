@@ -11,12 +11,21 @@ ENVIRONMENT="prod"
 NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 CONTEXT_OVERRIDE=""
 APPLY=0
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CREATE_PREOP_BACKUP="${CREATE_PREOP_BACKUP:-1}"
+CONFIRM_REPAIR_ENTERPRISE_SCHEMA="${CONFIRM_REPAIR_ENTERPRISE_SCHEMA:-}"
+CONFIRM_TOKEN="REPAIR_ENTERPRISE_SCHEMA"
 
 usage() {
   cat <<'USAGE'
 Usage: repair-enterprise-schema.sh [--env prod|dev] [--apply] [--namespace NS] [--context CTX]
 
 Default mode is read-only validation. Use --apply to run migrations.
+
+Safety controls for --apply:
+  - CONFIRM_REPAIR_ENTERPRISE_SCHEMA=REPAIR_ENTERPRISE_SCHEMA (required)
+  - ALLOW_PROD_APPLY=1 (required for --env prod)
+  - CREATE_PREOP_BACKUP=1 (default for prod apply; runs Velero pre-op backup)
 USAGE
 }
 
@@ -35,6 +44,30 @@ if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
   echo "Invalid --env '$ENVIRONMENT'" >&2
   exit 1
 fi
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+require_cmd() {
+  local cmd="$1"
+  command -v "$cmd" >/dev/null 2>&1 || {
+    echo "Missing command: $cmd" >&2
+    exit 1
+  }
+}
+
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
+require_cmd kubectl
 
 DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
 DEFAULT_DEV_CTX="kind-dev"
@@ -101,6 +134,25 @@ echo "=== Enterprise Schema Repair ==="
 echo "env=${ENVIRONMENT} context=${K8S_CONTEXT_EFFECTIVE} namespace=${NAMESPACE} apply=${APPLY}"
 
 if [[ "$APPLY" -eq 1 ]]; then
+  if [[ "$CONFIRM_REPAIR_ENTERPRISE_SCHEMA" != "$CONFIRM_TOKEN" ]]; then
+    echo "Refusing --apply: set CONFIRM_REPAIR_ENTERPRISE_SCHEMA=${CONFIRM_TOKEN}" >&2
+    exit 1
+  fi
+
+  if [[ "$ENVIRONMENT" == "prod" && "$ALLOW_PROD_APPLY" != "1" ]]; then
+    echo "Refusing production --apply without ALLOW_PROD_APPLY=1" >&2
+    exit 1
+  fi
+
+  if [[ "$ENVIRONMENT" == "prod" && "$CREATE_PREOP_BACKUP" == "1" ]]; then
+    require_cmd velero
+    backup_name="pre-op-${NAMESPACE}-enterprise-schema-repair-$(date -u +%Y%m%d-%H%M)"
+    echo "Creating Velero pre-op backup: $backup_name"
+    velero backup create "$backup_name" --include-namespaces "$NAMESPACE" --wait
+  elif [[ "$ENVIRONMENT" == "prod" ]]; then
+    echo "WARNING: CREATE_PREOP_BACKUP=0 for production apply (operator override)" >&2
+  fi
+
   echo "Running enterprise migrations in LMS pod..."
   kubectl "${context_args[@]}" exec -n "$NAMESPACE" deploy/lms -- python manage.py lms migrate enterprise --noinput
 fi

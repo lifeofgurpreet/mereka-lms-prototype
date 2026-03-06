@@ -74,19 +74,22 @@ Policy:
 Verify/apply:
 ```bash
 ./scripts/infra/ensure-authentik-admin.sh --verify
-./scripts/infra/ensure-authentik-admin.sh --apply
+CONFIRM_ENSURE_AUTHENTIK_ADMIN=ENSURE_AUTHENTIK_ADMIN ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/ensure-authentik-admin.sh --apply
 ```
 
 Authentik admin MFA policy (required for Authentik admins only):
 ```bash
 ./scripts/infra/ensure-authentik-admin-mfa.sh --verify
-./scripts/infra/ensure-authentik-admin-mfa.sh --apply
+CONFIRM_ENSURE_AUTHENTIK_ADMIN_MFA=ENSURE_AUTHENTIK_ADMIN_MFA ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/ensure-authentik-admin-mfa.sh --apply
 ```
 
 Recommended single entrypoint (runs admin policy + redirect URI allowlist + admin MFA):
 ```bash
 ./scripts/infra/ensure-authentik-hardening.sh --verify
-./scripts/infra/ensure-authentik-hardening.sh --apply
+CONFIRM_ENSURE_AUTHENTIK_HARDENING=ENSURE_AUTHENTIK_HARDENING ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/ensure-authentik-hardening.sh --apply
 ```
 
 ## Open edX (LMS/CMS) Permission Levels

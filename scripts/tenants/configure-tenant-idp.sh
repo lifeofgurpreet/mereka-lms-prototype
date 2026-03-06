@@ -16,6 +16,10 @@ IDP_SLUG=""
 DISPLAY_NAME=""
 DRY_RUN=1
 SKIP_ENTERPRISE_LINK=0
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CREATE_PREOP_BACKUP="${CREATE_PREOP_BACKUP:-1}"
+CONFIRM_CONFIGURE_TENANT_IDP="${CONFIRM_CONFIGURE_TENANT_IDP:-}"
+CONFIRM_TOKEN="CONFIGURE_TENANT_IDP"
 
 # SAML inputs
 SAML_METADATA_URL=""
@@ -45,6 +49,11 @@ Common options:
   --apply                           Apply changes (default is dry-run)
   --dry-run                         Preview changes only (default)
 
+Safety controls for --apply:
+  CONFIRM_CONFIGURE_TENANT_IDP=CONFIGURE_TENANT_IDP
+  ALLOW_PROD_APPLY=1                Required for prod-like contexts
+  CREATE_PREOP_BACKUP=1             Default for prod-like contexts (Velero pre-op backup)
+
 SAML options:
   --metadata-url <url>              Required for --idp-type saml
   --entity-id <idp-entity-id>       Recommended for --idp-type saml
@@ -69,6 +78,31 @@ Examples:
     --discovery-url https://idp.acme.com/.well-known/openid-configuration \
     --apply
 USAGE
+}
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+require_cmd() {
+  local cmd="$1"
+  command -v "$cmd" >/dev/null 2>&1 || {
+    echo "Missing command: $cmd" >&2
+    exit 1
+  }
+}
+
+is_prod_like_context() {
+  local ctx="$1"
+  [[ "$ctx" == *"gke_bbi-k8"* ]] || [[ "$ctx" == "prod" ]] || [[ "$ctx" == "production" ]] || [[ "$ctx" == "gke-prod" ]]
 }
 
 while [[ $# -gt 0 ]]; do
@@ -100,6 +134,9 @@ if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
   echo "Invalid --env '$ENVIRONMENT' (expected prod|dev)" >&2
   exit 1
 fi
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
+require_cmd kubectl
 
 if [[ -z "$TENANT_SLUG" || -z "$IDP_TYPE" ]]; then
   echo "--tenant-slug and --idp-type are required" >&2
@@ -155,6 +192,29 @@ fi
 context_args=()
 if [[ -n "$K8S_CONTEXT_EFFECTIVE" ]]; then
   context_args+=(--context "$K8S_CONTEXT_EFFECTIVE")
+fi
+
+if [[ "$DRY_RUN" -eq 0 ]]; then
+  if [[ "$CONFIRM_CONFIGURE_TENANT_IDP" != "$CONFIRM_TOKEN" ]]; then
+    echo "Refusing --apply without explicit confirmation token. Set CONFIRM_CONFIGURE_TENANT_IDP=${CONFIRM_TOKEN}" >&2
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT_EFFECTIVE" && [[ "$ALLOW_PROD_APPLY" != "1" ]]; then
+    echo "Refusing --apply on prod-like context '$K8S_CONTEXT_EFFECTIVE' without ALLOW_PROD_APPLY=1" >&2
+    exit 1
+  fi
+
+  if is_prod_like_context "$K8S_CONTEXT_EFFECTIVE"; then
+    if [[ "$CREATE_PREOP_BACKUP" == "1" ]]; then
+      require_cmd velero
+      backup_name="pre-op-${NAMESPACE}-tenant-idp-$(date -u +%Y%m%d-%H%M)"
+      echo "Creating Velero pre-op backup: $backup_name"
+      velero backup create "$backup_name" --include-namespaces "$NAMESPACE" --wait
+    else
+      echo "WARNING: CREATE_PREOP_BACKUP=0 on prod-like context '$K8S_CONTEXT_EFFECTIVE' (operator override)"
+    fi
+  fi
 fi
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then

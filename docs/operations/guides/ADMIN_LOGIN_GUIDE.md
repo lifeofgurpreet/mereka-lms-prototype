@@ -79,10 +79,12 @@ These commands are idempotent and safe when used intentionally, but they **do wr
 ./scripts/infra/ensure-platform-admins.sh
 
 # Ensure Authentik admin policy (writes to Authentik DB)
-./scripts/infra/ensure-authentik-admin.sh --apply
+CONFIRM_ENSURE_AUTHENTIK_ADMIN=ENSURE_AUTHENTIK_ADMIN ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/ensure-authentik-admin.sh --apply
 
 # Ensure Authentik redirect URIs cover all LMS hostnames (writes to Authentik DB)
-./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --apply
+CONFIRM_ENSURE_AUTHENTIK_OIDC_REDIRECT_URIS=ENSURE_AUTHENTIK_OIDC_REDIRECT_URIS ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --apply
 ```
 
 ## How To Access Admin (Prod + Dev)

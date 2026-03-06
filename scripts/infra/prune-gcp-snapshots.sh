@@ -8,8 +8,10 @@
 #
 # Usage:
 #   ./scripts/infra/prune-gcp-snapshots.sh
-#   ./scripts/infra/prune-gcp-snapshots.sh --apply --max-delete 300
-#   PROJECT_ID=bbi-k8 RETENTION_DAYS=30 ./scripts/infra/prune-gcp-snapshots.sh --apply
+#   CONFIRM_PRUNE_GCP_SNAPSHOTS=PRUNE_GCP_SNAPSHOTS ALLOW_PROD_APPLY=1 \
+#     ./scripts/infra/prune-gcp-snapshots.sh --apply --max-delete 300
+#   PROJECT_ID=bbi-k8 RETENTION_DAYS=30 CONFIRM_PRUNE_GCP_SNAPSHOTS=PRUNE_GCP_SNAPSHOTS \
+#     ALLOW_PROD_APPLY=1 ./scripts/infra/prune-gcp-snapshots.sh --apply --max-delete 300
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:-bbi-k8}"
@@ -17,6 +19,10 @@ RETENTION_DAYS="${RETENTION_DAYS:-30}"
 NAME_PREFIX="${NAME_PREFIX:-pvc-}"
 MAX_DELETE="${MAX_DELETE:-0}"   # 0 means no cap
 APPLY=0
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+REQUIRE_MAX_DELETE="${REQUIRE_MAX_DELETE:-1}"
+CONFIRM_PRUNE_GCP_SNAPSHOTS="${CONFIRM_PRUNE_GCP_SNAPSHOTS:-}"
+CONFIRM_TOKEN="PRUNE_GCP_SNAPSHOTS"
 
 usage() {
   cat <<USAGE
@@ -29,7 +35,42 @@ Options:
   --name-prefix PREFIX   Snapshot name prefix filter (default: $NAME_PREFIX)
   --max-delete N         Max snapshots to delete in apply mode (default: $MAX_DELETE; 0 = no cap)
   -h, --help             Show help
+
+Safety controls for --apply:
+  CONFIRM_PRUNE_GCP_SNAPSHOTS=PRUNE_GCP_SNAPSHOTS
+  ALLOW_PROD_APPLY=1     Required for prod-like projects (e.g., bbi-k8)
+  REQUIRE_MAX_DELETE=1   Default: require explicit --max-delete > 0 in apply mode
 USAGE
+}
+
+die() {
+  echo "$*" >&2
+  exit 1
+}
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *) die "Invalid ${var_name}='${value}' (expected 0 or 1)" ;;
+  esac
+}
+
+require_non_negative_int() {
+  local var_name="$1"
+  local value="$2"
+  [[ "$value" =~ ^[0-9]+$ ]] || die "Invalid ${var_name}='${value}' (expected non-negative integer)"
+}
+
+is_prod_like_project() {
+  local project="$1"
+  local normalized
+  normalized="$(tr '[:upper:]' '[:lower:]' <<<"$project")"
+  if [[ "$normalized" == *"nonprod"* ]] || [[ "$normalized" == *"staging"* ]] || [[ "$normalized" == *"dev"* ]]; then
+    return 1
+  fi
+  [[ "$normalized" == "bbi-k8" ]] || [[ "$normalized" == *"production"* ]] || [[ "$normalized" == *"prod"* ]]
 }
 
 while [[ $# -gt 0 ]]; do
@@ -43,6 +84,11 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1" >&2; usage; exit 1 ;;
   esac
 done
+
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+require_bool_01 "REQUIRE_MAX_DELETE" "$REQUIRE_MAX_DELETE"
+require_non_negative_int "RETENTION_DAYS" "$RETENTION_DAYS"
+require_non_negative_int "MAX_DELETE" "$MAX_DELETE"
 
 command -v gcloud >/dev/null 2>&1 || { echo "Missing gcloud" >&2; exit 2; }
 command -v python3 >/dev/null 2>&1 || { echo "Missing python3" >&2; exit 2; }
@@ -116,6 +162,18 @@ echo "Total candidates: $candidate_count"
 if [[ "$APPLY" -ne 1 ]]; then
   echo "Dry-run only. Re-run with --apply to delete candidates."
   exit 0
+fi
+
+if [[ "$CONFIRM_PRUNE_GCP_SNAPSHOTS" != "$CONFIRM_TOKEN" ]]; then
+  die "Refusing --apply without explicit confirmation token. Set CONFIRM_PRUNE_GCP_SNAPSHOTS=${CONFIRM_TOKEN}"
+fi
+
+if is_prod_like_project "$PROJECT_ID" && [[ "$ALLOW_PROD_APPLY" != "1" ]]; then
+  die "Refusing --apply on prod-like project '$PROJECT_ID' without ALLOW_PROD_APPLY=1"
+fi
+
+if [[ "$REQUIRE_MAX_DELETE" == "1" && "$MAX_DELETE" -le 0 ]]; then
+  die "Refusing --apply with REQUIRE_MAX_DELETE=1 unless --max-delete is set to a positive integer"
 fi
 
 echo "Applying deletions..."

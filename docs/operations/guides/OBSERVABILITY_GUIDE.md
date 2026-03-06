@@ -355,7 +355,8 @@ For controlled cleanup of over-retention snapshots (dry-run first):
 
 ```bash
 ./scripts/infra/prune-gcp-snapshots.sh
-./scripts/infra/prune-gcp-snapshots.sh --apply --max-delete 300
+CONFIRM_PRUNE_GCP_SNAPSHOTS=PRUNE_GCP_SNAPSHOTS ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/prune-gcp-snapshots.sh --apply --max-delete 300
 ```
 
 If `usage >= limit`, backup snapshots will fail until quota headroom is restored.

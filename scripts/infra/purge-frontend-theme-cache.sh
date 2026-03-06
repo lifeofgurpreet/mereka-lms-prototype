@@ -11,6 +11,11 @@ API_BASE="https://api.cloudflare.com/client/v4"
 ENVIRONMENT="prod"
 APPLY=0
 PURGE_EVERYTHING=0
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CONFIRM_PURGE_FRONTEND_THEME_CACHE="${CONFIRM_PURGE_FRONTEND_THEME_CACHE:-}"
+CONFIRM_PURGE_EVERYTHING="${CONFIRM_PURGE_EVERYTHING:-}"
+CONFIRM_APPLY_TOKEN="PURGE_FRONTEND_THEME_CACHE"
+CONFIRM_PURGE_EVERYTHING_TOKEN="PURGE_EVERYTHING"
 
 usage() {
   cat <<'EOF'
@@ -23,10 +28,27 @@ Options:
   -h, --help            Show this help
 
 Required for --apply:
+  CONFIRM_PURGE_FRONTEND_THEME_CACHE=PURGE_FRONTEND_THEME_CACHE
+  ALLOW_PROD_APPLY=1 for --env prod
   CLOUDFLARE_ZONE_ID and either:
   - CLOUDFLARE_API_TOKEN
   - CLOUDFLARE_EMAIL + CLOUDFLARE_API_KEY
+
+Required for --purge-everything with --apply:
+  CONFIRM_PURGE_EVERYTHING=PURGE_EVERYTHING
 EOF
+}
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "ERROR: Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 2
+      ;;
+  esac
 }
 
 while [[ $# -gt 0 ]]; do
@@ -55,6 +77,8 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
 
 case "$ENVIRONMENT" in
   prod|dev) ;;
@@ -106,6 +130,21 @@ if [[ "$APPLY" -ne 1 ]]; then
   echo ""
   echo "Dry-run complete. Re-run with --apply to execute Cloudflare purge."
   exit 0
+fi
+
+if [[ "$CONFIRM_PURGE_FRONTEND_THEME_CACHE" != "$CONFIRM_APPLY_TOKEN" ]]; then
+  echo "ERROR: Refusing --apply without explicit confirmation token. Set CONFIRM_PURGE_FRONTEND_THEME_CACHE=${CONFIRM_APPLY_TOKEN}" >&2
+  exit 2
+fi
+
+if [[ "$ENVIRONMENT" == "prod" && "$ALLOW_PROD_APPLY" != "1" ]]; then
+  echo "ERROR: Refusing --apply on prod environment without ALLOW_PROD_APPLY=1" >&2
+  exit 2
+fi
+
+if [[ "$PURGE_EVERYTHING" -eq 1 && "$CONFIRM_PURGE_EVERYTHING" != "$CONFIRM_PURGE_EVERYTHING_TOKEN" ]]; then
+  echo "ERROR: Refusing --purge-everything without explicit token. Set CONFIRM_PURGE_EVERYTHING=${CONFIRM_PURGE_EVERYTHING_TOKEN}" >&2
+  exit 2
 fi
 
 ZONE_ID="${CLOUDFLARE_ZONE_ID:-}"

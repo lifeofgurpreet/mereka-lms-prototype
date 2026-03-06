@@ -34,6 +34,12 @@ FORCE_DELETE=0
 GRACE_DAYS=30
 ACTOR="${USER:-unknown}"
 CONTEXT_OVERRIDE=""
+CONFIRM_OFFBOARD_TENANT="${CONFIRM_OFFBOARD_TENANT:-}"
+CONFIRM_FORCE_DELETE_TENANT="${CONFIRM_FORCE_DELETE_TENANT:-}"
+OFFBOARD_CONFIRM_TOKEN="OFFBOARD_TENANT"
+FORCE_DELETE_CONFIRM_TOKEN="FORCE_DELETE_TENANT"
+ALLOW_PROD_OFFBOARD="${ALLOW_PROD_OFFBOARD:-0}"
+CREATE_PREOP_BACKUP="${CREATE_PREOP_BACKUP:-1}"
 
 usage() {
   echo "Usage: $0 --slug SLUG [OPTIONS]"
@@ -49,6 +55,14 @@ usage() {
   echo "  --context NAME  kubectl context override (optional)"
   echo "  --dry-run       Show what would be done without executing"
   echo "  -h, --help      Show this help"
+  echo ""
+  echo "Safety controls (required when not using --dry-run):"
+  echo "  CONFIRM_OFFBOARD_TENANT=OFFBOARD_TENANT"
+  echo ""
+  echo "Additional controls for --force-delete:"
+  echo "  CONFIRM_FORCE_DELETE_TENANT=FORCE_DELETE_TENANT"
+  echo "  ALLOW_PROD_OFFBOARD=1 (required for prod-like kube contexts)"
+  echo "  CREATE_PREOP_BACKUP=1 (default for prod-like kube contexts)"
   exit 1
 }
 
@@ -66,6 +80,34 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo -e "${RED}ERROR${NC}: Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+require_cmd() {
+  local cmd="$1"
+  command -v "$cmd" >/dev/null 2>&1 || {
+    echo -e "${RED}ERROR${NC}: Missing command: $cmd" >&2
+    exit 1
+  }
+}
+
+is_prod_like_context() {
+  local ctx="$1"
+  [[ "$ctx" == *"gke_bbi-k8"* ]] || [[ "$ctx" == "prod" ]] || [[ "$ctx" == "production" ]] || [[ "$ctx" == "gke-prod" ]]
+}
+
+require_bool_01 "ALLOW_PROD_OFFBOARD" "$ALLOW_PROD_OFFBOARD"
+require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
+
 if [[ -z "$SLUG" ]]; then
   echo -e "${RED}ERROR${NC}: --slug is required"
   usage
@@ -73,6 +115,22 @@ fi
 
 if [[ -z "$EXPORT_DIR" ]]; then
   EXPORT_DIR="/tmp/tenant-export-${SLUG}"
+fi
+
+if [[ "$DRY_RUN" -eq 0 ]]; then
+  if [[ "$CONFIRM_OFFBOARD_TENANT" != "$OFFBOARD_CONFIRM_TOKEN" ]]; then
+    echo -e "${RED}ERROR${NC}: Refusing offboarding without explicit confirmation token."
+    echo "Set CONFIRM_OFFBOARD_TENANT=${OFFBOARD_CONFIRM_TOKEN} to execute."
+    exit 1
+  fi
+fi
+
+if [[ "$FORCE_DELETE" -eq 1 ]]; then
+  if [[ "$CONFIRM_FORCE_DELETE_TENANT" != "$FORCE_DELETE_CONFIRM_TOKEN" ]]; then
+    echo -e "${RED}ERROR${NC}: Refusing force-delete without explicit confirmation token."
+    echo "Set CONFIRM_FORCE_DELETE_TENANT=${FORCE_DELETE_CONFIRM_TOKEN} to execute force-delete."
+    exit 1
+  fi
 fi
 
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -109,8 +167,29 @@ elif [[ -n "${K8S_CONTEXT:-}" ]]; then
   context_args+=(--context "$K8S_CONTEXT")
 fi
 
+K8S_CONTEXT_EFFECTIVE="${CONTEXT_OVERRIDE:-${K8S_CONTEXT:-}}"
+if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]] && command -v kubectl &>/dev/null; then
+  K8S_CONTEXT_EFFECTIVE="$(kubectl config current-context 2>/dev/null || true)"
+fi
+
 # Detect execution context (K8s vs local Tutor).
 if command -v kubectl &>/dev/null && kubectl "${context_args[@]}" get namespace "$NAMESPACE" &>/dev/null 2>&1; then
+  if [[ "$DRY_RUN" -eq 0 && is_prod_like_context "$K8S_CONTEXT_EFFECTIVE" && "$ALLOW_PROD_OFFBOARD" != "1" ]]; then
+    echo -e "${RED}ERROR${NC}: Refusing non-dry-run offboarding on prod-like context '$K8S_CONTEXT_EFFECTIVE' without ALLOW_PROD_OFFBOARD=1"
+    exit 1
+  fi
+
+  if [[ "$DRY_RUN" -eq 0 && is_prod_like_context "$K8S_CONTEXT_EFFECTIVE" ]]; then
+    if [[ "$CREATE_PREOP_BACKUP" == "1" ]]; then
+      require_cmd velero
+      backup_name="pre-op-${NAMESPACE}-offboard-${SLUG}-$(date -u +%Y%m%d-%H%M)"
+      echo "Creating Velero pre-op backup: $backup_name"
+      velero backup create "$backup_name" --include-namespaces "$NAMESPACE" --wait
+    else
+      echo -e "${YELLOW}WARNING${NC}: CREATE_PREOP_BACKUP=0 on prod-like context '$K8S_CONTEXT_EFFECTIVE' (operator override)"
+    fi
+  fi
+
   echo "Detected Kubernetes environment (namespace: $NAMESPACE)"
   echo ""
 

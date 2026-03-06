@@ -35,6 +35,8 @@ ENTERPRISE_UUID=""
 DRY_RUN=0
 NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 CONTEXT_OVERRIDE=""
+CONFIRM_PROVISION_TENANT="${CONFIRM_PROVISION_TENANT:-}"
+CONFIRM_TOKEN="PROVISION_TENANT"
 
 usage() {
   echo "Usage: $0 --slug SLUG --name NAME --domain DOMAIN [OPTIONS]"
@@ -52,6 +54,9 @@ usage() {
   echo "  --context NAME      kubectl context override (optional)"
   echo "  --dry-run           Show what would be done without executing"
   echo "  -h, --help          Show this help"
+  echo ""
+  echo "Safety controls (required when not using --dry-run):"
+  echo "  CONFIRM_PROVISION_TENANT=PROVISION_TENANT"
   exit 1
 }
 
@@ -128,6 +133,12 @@ if [[ $DRY_RUN -eq 1 ]]; then
   echo "  5. Create enterprise catalog and subscription plans"
   echo "  6. Run: scripts/qa/verify-tenant-isolation-patterns.sh"
   exit 0
+fi
+
+if [[ "$CONFIRM_PROVISION_TENANT" != "$CONFIRM_TOKEN" ]]; then
+  echo -e "${RED}ERROR${NC}: Refusing live provisioning without explicit confirmation token."
+  echo "Set CONFIRM_PROVISION_TENANT=${CONFIRM_TOKEN} to execute."
+  exit 1
 fi
 
 context_args=()

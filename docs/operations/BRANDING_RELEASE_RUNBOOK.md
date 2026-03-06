@@ -202,7 +202,8 @@ kubectl get deploy lms cms mfe -n mereka-lms \
 # Purge frontend/theme cache entries (dry-run first, then apply)
 # Note: this is also integrated via release-openedx-gitops.sh --purge-frontend-cache.
 ./scripts/infra/purge-frontend-theme-cache.sh --env prod
-./scripts/infra/purge-frontend-theme-cache.sh --env prod --apply
+CONFIRM_PURGE_FRONTEND_THEME_CACHE=PURGE_FRONTEND_THEME_CACHE ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/purge-frontend-theme-cache.sh --env prod --apply
 
 # Frontend closure lane (cross-browser + a11y + performance, skips multisite baseline gates)
 ./scripts/qa/run-branding-evidence-pipeline.sh \
