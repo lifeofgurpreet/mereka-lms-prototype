@@ -188,6 +188,13 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 | High-signal governance/evidence verifier promotion | #335 | Merged | Promotes high-signal governance/evidence checks into static CI and standard entrypoints |
 | Verification catalog runtime status overrides | #336 | Merged | Adds runtime/manual override mechanism for catalog status resolution without breaking CI ownership contracts |
 | Final verification candidate classification + strictness fixes | #337 | Merged | Closes long-tail verification classification by fixing strict-mode script behavior and duplicate-AC detection, reducing deprecated-candidate scripts to zero |
+| Audit board consolidation for PR stream #362-#370 | #371 | Open | Synchronizes tracker and execution-board post-audit tables with active PR set through #370 and preserves status parity gates |
+| Audit PR status sync performance hardening | #372 | Open | Refactors `sync-openedx-audit-pr-status.sh` to batch-fetch PR state and reduce GitHub API call fan-out with explicit fallback accounting |
+| Repo-conventions warning-budget signal hardening | #373 | Open | Caps future-work missing-script warning flood in `lint-repo-conventions.sh` via bounded sample output while retaining strict spec failure semantics |
+| Audit board incremental sync for #371-#373 | #374 | Open | Keeps post-audit tracker tables aligned with active implementation stream as new hardening PRs are opened |
+| Custom-app hygiene statefile coverage expansion | #375 | Open | Extends custom-app artifact detector to block tracked `.db` files, sqlite sidecars, and coverage/test cache residues |
+| Repo hygiene statefile coverage expansion | #376 | Open | Extends repo-wide artifact hygiene gate to block tracked database state files, sidecars, runtime sockets/pids, coverage residues, and hypothesis caches |
+| Gitignore prevention for local state artifacts | #377 | Open | Adds ignore patterns for database/state sidecars and runtime residues so local artifacts are prevented at staging time before CI enforcement |
 
 ---
 

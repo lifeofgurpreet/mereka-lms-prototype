@@ -79,6 +79,13 @@ Parent issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/214
 | High-signal governance/evidence verifier promotion | Merged | [#335](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/335) |
 | Verification catalog runtime status overrides | Merged | [#336](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/336) |
 | Final verification candidate classification + strictness fixes | Merged | [#337](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/337) |
+| Audit board consolidation for PR stream #362-#370 | Open | [#371](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/371) |
+| Audit PR status sync performance hardening | Open | [#372](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/372) |
+| Repo-conventions warning-budget signal hardening | Open | [#373](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/373) |
+| Audit board incremental sync for #371-#373 | Open | [#374](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/374) |
+| Custom-app hygiene statefile coverage expansion | Open | [#375](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/375) |
+| Repo hygiene statefile coverage expansion | Open | [#376](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/376) |
+| Gitignore prevention for local state artifacts | Open | [#377](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/377) |
 
 ## Purpose
 
