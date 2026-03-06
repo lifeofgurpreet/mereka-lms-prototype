@@ -19,10 +19,26 @@ $mereka-font-path: "../fonts";
 /* RISK: LOW — html element selector, cannot be renamed */
 body {
   min-height: 100vh;
+  font-family: var(--mereka-font-body, "Poppins", var(--pgn-font-family-base, sans-serif));
   background-color: var(--mereka-color-surface-primary);
   background-image:
     radial-gradient(circle at top right, rgb(var(--mereka-color-blue-rgb) / 0.08), transparent 45%),
     radial-gradient(circle at 10% 20%, rgb(var(--mereka-color-magenta-rgb) / 0.06), transparent 35%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: var(--mereka-font-heading, "Lato", var(--mereka-font-body, sans-serif));
 }
 
 /* RISK: HIGH — .navbar is a structural layout class; breaks on Bootstrap or Paragon rename */

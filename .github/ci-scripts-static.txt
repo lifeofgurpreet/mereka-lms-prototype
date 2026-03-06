@@ -146,6 +146,7 @@ scripts/qa/verify-cms-oauth2-secret-present.sh
 # ── Branding & design tokens ─────────────────────────────────────────────────
 scripts/qa/verify-design-tokens.sh
 scripts/qa/verify-design-tokens-migration.sh
+scripts/qa/verify-design-token-ci.sh
 scripts/qa/verify-design-token-usage.sh
 scripts/qa/verify-token-definitions.sh
 scripts/qa/verify-token-reference-integrity.sh
