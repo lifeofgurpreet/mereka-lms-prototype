@@ -77,6 +77,31 @@ if [[ -z "$BBI_PROD" ]]; then
   done
 fi
 
+resolve_prod_settings() {
+  local candidates=()
+  if [[ -n "${FORUM_PROD_SETTINGS:-}" ]]; then
+    candidates+=("${FORUM_PROD_SETTINGS}")
+  fi
+  candidates+=(
+    "$REPO_ROOT/../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "$REPO_ROOT/../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "$LMS_PROD"
+  )
+
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if [[ -n "$candidate" && -f "$candidate" ]]; then
+      printf "%s" "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+BBI_PROD="$(resolve_prod_settings || true)"
+
 echo "=================================================================="
 echo "  Forum Moderation, Spam Controls & Performance"
 echo "  Contract Verification"
@@ -91,6 +116,7 @@ echo "  spam:   Spam controls configured (rate limits, depth limits)"
 echo "  rate:   Rate limiting settings present and valid"
 echo "=================================================================="
 echo "  Skip cluster: $SKIP_CLUSTER"
+echo "  Prod settings source: ${BBI_PROD:-not found}"
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -302,7 +328,7 @@ check_ac_008() {
       skip "AC-008: ENABLE_DISCUSSION_SERVICE not explicitly in production overlay (set in base)"
     fi
   else
-    skip "AC-008: bbi-infrastructure production overlay not found"
+    skip "AC-008: production settings source not found"
   fi
 
   # 9. Forum MongoDB stores moderation data (abuse_flags in contents collection)
