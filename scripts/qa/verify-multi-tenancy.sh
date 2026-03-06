@@ -124,7 +124,7 @@ echo ""
 # Check 3: SiteConfiguration branding support
 echo "Checking AC-MTA-009, AC-MTA-010: SiteConfiguration branding variables..."
 
-PROD_SETTINGS="../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+PROD_SETTINGS="deploy/k8s/base/apps/openedx/settings/lms/production.py"
 
 if [[ -f "$PROD_SETTINGS" ]]; then
   # Check for SiteConfiguration usage
@@ -154,7 +154,7 @@ if [[ -f "$PROD_SETTINGS" ]]; then
     skip "AC-MTA-014: SiteConfiguration not referenced in production settings"
   fi
 else
-  skip "AC-MTA-009/AC-MTA-010/AC-MTA-014: Production settings not available"
+  fail "AC-MTA-009/AC-MTA-010/AC-MTA-014: Production settings missing at $PROD_SETTINGS"
 fi
 
 echo ""
@@ -195,13 +195,13 @@ echo ""
 # Check 5: Caddy multi-domain configuration
 echo "Checking AC-MTA-012, AC-MTA-013: Caddy reverse proxy multi-domain support..."
 
-CADDY_PATCH="infrastructure/tutor/patches/caddy-Caddyfile"
+CADDYFILE="deploy/k8s/base/apps/caddy/Caddyfile"
 
-if [[ -f "$CADDY_PATCH" ]]; then
-  pass "AC-MTA-012: Caddy configuration patch file exists"
+if [[ -f "$CADDYFILE" ]]; then
+  pass "AC-MTA-012: Caddy configuration file exists"
 
   # Check for multiple domain handling
-  CADDY_DOMAINS=$(grep -o '[a-z0-9.-]*\.mereka\.[a-z]*\|[a-z0-9.-]*\.biji-biji\.com' "$CADDY_PATCH" 2>/dev/null | sort -u | wc -l)
+  CADDY_DOMAINS=$(grep -o '[a-z0-9.-]*\.mereka\.[a-z]*\|[a-z0-9.-]*\.biji-biji\.com' "$CADDYFILE" 2>/dev/null | sort -u | wc -l)
   if [[ $CADDY_DOMAINS -gt 1 ]]; then
     pass "AC-MTA-012/AC-MTA-013: Caddy handles $CADDY_DOMAINS domains"
   else
@@ -209,13 +209,13 @@ if [[ -f "$CADDY_PATCH" ]]; then
   fi
 
   # Check for wildcard or multi-site blocks
-  if grep -q "{\$default_site_port}\|\*.mereka\.\|multi" "$CADDY_PATCH"; then
+  if grep -q "{\$default_site_port}\|\*.mereka\.\|multi" "$CADDYFILE"; then
     pass "AC-MTA-012: Caddy multi-site routing configuration found"
   else
     skip "AC-MTA-012: Caddy multi-site configuration not detected"
   fi
 else
-  skip "AC-MTA-012/AC-MTA-013: Caddy patch file not found"
+  fail "AC-MTA-012/AC-MTA-013: Caddyfile missing at $CADDYFILE"
 fi
 
 echo ""
@@ -242,29 +242,23 @@ echo ""
 # Check 7: Tenant ConfigMap registry
 echo "Checking AC-MTA-014: Tenant registry ConfigMap..."
 
-TENANT_CONFIGMAP="deploy/k8s/base/configs/tenant-registry.yaml"
-TENANT_CONFIGMAP_ALT="deploy/k8s/base/apps/tenant-registry-configmap.yaml"
+TENANT_CONFIGMAP="deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml"
+TENANT_REGISTRY_SYNC="scripts/tenants/sync-tenant-registry-configmap.sh"
 
-CONFIGMAP_FOUND=false
-for cm_file in "$TENANT_CONFIGMAP" "$TENANT_CONFIGMAP_ALT"; do
-  if [[ -f "$cm_file" ]]; then
-    CONFIGMAP_FOUND=true
-    pass "AC-MTA-014: Tenant registry ConfigMap found at $cm_file"
+if [[ -f "$TENANT_CONFIGMAP" ]]; then
+  pass "AC-MTA-014: Tenant registry ConfigMap found at $TENANT_CONFIGMAP"
+else
+  fail "AC-MTA-014: Tenant registry ConfigMap missing at $TENANT_CONFIGMAP"
+fi
 
-    # Check ConfigMap structure
-    if grep -q "kind: ConfigMap" "$cm_file"; then
-      pass "AC-MTA-014: ConfigMap kind verified"
-    fi
-
-    # Check for tenant data
-    if grep -q "tenant\|TENANT" "$cm_file"; then
-      pass "AC-MTA-014: Tenant data found in ConfigMap"
-    fi
+if [[ -x "$TENANT_REGISTRY_SYNC" ]]; then
+  if "$TENANT_REGISTRY_SYNC" --check >/dev/null; then
+    pass "AC-MTA-014: tenant registry sync contract passes"
+  else
+    fail "AC-MTA-014: tenant registry drift detected (sync contract)"
   fi
-done
-
-if [[ "$CONFIGMAP_FOUND" = false ]]; then
-  skip "AC-MTA-014: Tenant registry ConfigMap not found (may not be implemented)"
+else
+  skip "AC-MTA-014: tenant registry sync script not present yet (merge #386 for strict sync enforcement)"
 fi
 
 echo ""
@@ -278,14 +272,14 @@ if [[ -d "$TENANT_PLUGIN_DIR" ]]; then
   pass "Multi-tenancy plugin directory exists at $TENANT_PLUGIN_DIR"
 
   # Check for TenantConfig model
-  if find "$TENANT_PLUGIN_DIR" -name "*.py" -exec grep -l "class TenantConfig" {} \; | grep -q .; then
+  if rg -n "class TenantConfig" "$TENANT_PLUGIN_DIR" -g "*.py" >/dev/null 2>&1; then
     pass "TenantConfig model defined in multi-tenancy plugin"
   else
     skip "TenantConfig model not found (may be defined elsewhere)"
   fi
 
   # Check for TenantResolutionMiddleware
-  if find "$TENANT_PLUGIN_DIR" -name "*.py" -exec grep -l "TenantResolutionMiddleware" {} \; | grep -q .; then
+  if rg -n "TenantResolutionMiddleware" "$TENANT_PLUGIN_DIR" -g "*.py" >/dev/null 2>&1; then
     pass "TenantResolutionMiddleware found in multi-tenancy plugin"
   else
     skip "TenantResolutionMiddleware not found"
