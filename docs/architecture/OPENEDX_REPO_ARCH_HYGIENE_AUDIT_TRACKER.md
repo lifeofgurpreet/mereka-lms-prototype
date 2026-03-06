@@ -1,7 +1,7 @@
 # Open edX Repository Architecture and Hygiene Audit Tracker
 
-Last updated: 2026-03-05  
-Auditor: Codex (read-only audit pass, no destructive cleanup executed)
+Last updated: 2026-03-06  
+Auditor/Implementor: Codex (audit + implementation guardrail rollout)
 
 ## Purpose
 
@@ -25,9 +25,9 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 
 ## Audit Guardrails
 
-- Scope: analysis only, no destructive changes.
-- Method: static repo inspection + workflow/script tracing + official Open edX/Tutor/Stripe/GitHub docs cross-reference.
-- Evidence style: file-backed findings with concrete paths.
+- Scope: non-destructive implementation guardrails first (CI policy, verifier scripts, `.gitignore` hardening).
+- Method: static repo inspection + workflow/script tracing + incremental atomic PRs.
+- Evidence style: file-backed findings with concrete paths + PR-linked execution trail.
 
 ## Executive Summary
 
@@ -38,7 +38,7 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 5. **IaC control planes are fragmented** across Tutor generation, Kustomize overlays, and GitOps repo pinning; legacy Tutor-K8s scripts still exist and can conflict with current GitOps flow.
 6. **Verification surface is oversized** (`490` `verify-*.sh` scripts), with relatively limited direct CI invocation and many scripts not referenced by workflows.
 7. **Tenant onboarding is still multi-system** (DB, DNS, Caddy, settings, MFE config, branding) with no single declarative source of truth.
-8. **Purchase gateway webhook flow lacks an internal durable saga/outbox**, relying primarily on Stripe retries plus synchronous fulfillment.
+8. **Purchase gateway durability has improved** (`#232` merged outbox + reconciliation), and operational recovery ergonomics are being hardened (`#273` adds admin retry endpoint); observability/regression guard coverage is still in progress (`#246`, `#247` open).
 
 ## Implementation Tracker (GitHub)
 
@@ -64,6 +64,71 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 - #220 → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/230
 - #221 → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/232
 - #222 → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/226
+- #180 → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/233
+- ARC runner policy hardening → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/234
+- Repo hygiene artifact guardrails → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/235
+- Custom apps hygiene guardrails → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/236
+- Evidence tracking forward policy → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/237
+- Verification strict-mode contract gate → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/258
+- Audit tracker synchronization gate → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/259
+- Local config cloud-IP guardrail path fix → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/260
+- Static-validation kubeconform portability fix → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/261
+- Evidence redaction header/token hardening → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/262
+- Repo hygiene static gate promotion + CI signal hardening bundle → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/263
+- Branding upstream token sync determinism hardening → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/264
+- Custom-app hygiene nested statefile hardening → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/266
+- ARC runner policy fail-closed parser hardening → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/267
+- New verify-script metadata contract gate → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/268
+- Purchase-gateway LMS auth-expiry self-heal retry → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/269
+- Purchase-gateway failed webhook status durability fix → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/270
+- Repo-wide local statefile artifact guard → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/271
+- New static-list entry contract gate → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/272
+- Purchase-gateway admin fulfillment retry endpoint → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/273
+- Purchase-gateway admin Stripe-event debug API → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/274
+- Purchase-gateway admin order-detail API → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/275
+- Purchase-gateway admin refund initiation API → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/276
+- Purchase-gateway admin entitlements list API → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/282
+
+### Post-Audit Implementation Status (2026-03-06)
+
+| Area | PR | Status | Key Outcome |
+|------|----|--------|-------------|
+| CSP reporting hardening | #233 | Merged | DSN-host-agnostic CSP report URI derivation + CI gate |
+| ARC runner policy (Linux) | #234 | Merged | `codeql`/`scorecard`/`dependency-review` moved to ARC; `ubuntu-*` blocked |
+| Repository artifact bloat guard | #235 | Merged | New CI verifier blocks tracked `var/`, `exports/`, cache/bytecode, non-placeholder brand `dist` outputs |
+| Custom app packaging/state hygiene | #236 | Merged | New CI verifier enforces `setup.py|pyproject` + blocks tracked runtime files |
+| Evidence locker growth control | #237 | Open | New CI verifier blocks newly added non-markdown evidence payloads in docs evidence paths |
+| Purchase-gateway durability guard | #246 | Open | Static CI gate validates webhook→outbox→worker/reconciliation contract anchors |
+| Purchase-gateway runtime telemetry | #247 | Open | Adds checkout/webhook/fulfillment/reconciliation Prometheus metrics + tests |
+| Repo cache artifact guardrails (v2) | #248 | Open | Blocks tracked `.ruff_cache`, `.pytest_cache`, and `.mypy_cache` via ignore + static verifier |
+| Python cache cleanup ergonomics | #249 | Open | Adds `clean-python-caches.sh` and integrates it with `make clean` |
+| Verification governance entrypoint | #250 | Open | Adds canonical `verify-manifest-integrity.sh` and wires it into static CI |
+| Tutor custom-app install parity | #251 | Open | Enforces `_CUSTOM_APPS` ↔ custom-app dir/package metadata install-map integrity |
+| Custom-app state file pattern hardening | #252 | Open | Expands custom-app hygiene detector for nested SQLite/log/cache/bytecode artifacts |
+| Verification script growth budget gate | #253 | Open | Adds static CI budget gate for verify-script count/status growth control |
+| IaC control-plane boundary guard | #254 | Open | Enforces `deploy/k8s` primacy and prevents `infrastructure/k8s` shadow-runtime drift |
+| CI verifier signal hardening | #255 | Open | Makes `verify-ci-script-list.sh` release-blocking aware and removes lingering executable-bit warning (`check-cluster-status.sh`) |
+| Tenant DNS inventory drift guard | #256 | Open | Verifies active tenant LMS domains against Cloudflare inventory files and surfaces onboarding DNS drift |
+| Evidence footprint budget guard | #257 | Open | Enforces tracked evidence file/size budget to slow git-based evidence locker growth |
+| Verification strict-mode contract gate | #258 | Open | Enforces `set -euo pipefail` across verification scripts with explicit waiver handling for legacy exceptions |
+| Audit tracker synchronization guard | #259 | Open | Enforces tracker ↔ execution-board issue/PR parity so the consolidated audit board stays actionable |
+| Tutor config path contract hardening | #260 | Open | Fixes stale cloud-IP guard path and adds CI verifier preventing stale `config.example` docs/spec references |
+| Static-validation kubeconform portability fix | #261 | Open | Removes `wget` dependency in CI kubeconform install step to prevent ARC runner static-validation hard-fail (`exit 127`) |
+| Evidence redaction header/token hardening | #262 | Open | Expands evidence leak detection for raw `cookie:` headers, basic auth credentials, and `x-auth-token` values |
+| Repo hygiene gate promotion + CI signal bundle | #263 | Open | Promotes `verify-repo-hygiene-artifacts.sh`, `verify-evidence-redaction.sh`, and `verify-evidence-tracking-policy.sh` into static CI; hardens `.ruff_cache`/`.pytest_cache`/`.mypy_cache` hygiene contracts; refreshes verification catalog; and bundles ci-script-list signal fixes from #255 |
+| Branding sync determinism hardening | #264 | Open | Makes upstream token refresh explicit in `sync-brand-assets.sh` and `update-token-provenance.sh` (opt-in env paths), removes implicit machine-dependent sibling-repo behavior, adds static CI portability guard (`verify-branding-script-portability.sh`), and updates branding runbook contract |
+| Custom-app statefile pattern hardening | #266 | Open | Expands custom-app hygiene detector coverage for nested `.sqlite3`/`.sqlite`/`.log`/`.pid`/`.sock` and compiled bytecode artifacts under `infrastructure/tutor/custom-apps/**` |
+| ARC runner policy parser hardening | #267 | Open | Rewrites `verify-ci-runner-policy.sh` to parse workflow jobs structurally (`yq` + `jq`) and fail closed on expression-based/missing/unknown runner labels while preserving explicit heavy-builder and macOS exception allowlists |
+| New verify-script metadata contract gate | #268 | Open | Adds `verify-new-verify-script-contract.sh` to enforce metadata/strict-mode/executable requirements for newly added `verify-*.sh` scripts and wires it into static CI to cap verification sprawl debt growth |
+| Purchase-gateway auth-expiry retry hardening | #269 | Open | Adds one-shot `401` token-refresh retry behavior in `LMSClient` (`get_user_by_email`, `enroll_user`, `deactivate_enrollment`) to reduce avoidable outbox retries and split-brain enrollment delays caused by transient OAuth token expiry |
+| Purchase-gateway failed webhook status durability | #270 | Open | Persists `StripeEvent.processing_status=failed` via explicit DB update after rollback on webhook handler exceptions, preventing detached-ORM-state drops and improving deterministic Stripe retry semantics |
+| Repo-wide local statefile artifact guard | #271 | Open | Extends repo hygiene verifier + `.gitignore` to block tracked local state artifacts (`*.sqlite*`, `*.db`, `.pid`, `.sock`) so database/runtime process files cannot silently enter git history |
+| Static-list entry contract gate | #272 | Open | Adds `verify-new-ci-static-entries.sh` to enforce integrity/metadata contracts for newly added `.github/ci-scripts-static.txt` entries (existence, executable + syntax for shell scripts, and `verify-*.sh` traceability hardening) |
+| Purchase-gateway admin fulfillment retry API | #273 | Open | Adds `POST /api/v1/admin/orders/{order_id}/retry-fulfillment/` with retryable-state guards + tenant scoping, force-requeues outbox jobs (`force=True`) for dead-letter recovery, and aligns service README/runbook recovery instructions with the new API contract |
+| Purchase-gateway admin Stripe-event list API | #274 | Open | Adds `GET /api/v1/admin/stripe-events/` with event/status/id filters, pagination, and opt-in payload exposure (`include_payload=true`) so operators can debug webhook/idempotency flows without exposing raw payloads by default |
+| Purchase-gateway admin order-detail API | #275 | Open | Adds `GET /api/v1/admin/orders/{order_id}/` returning line items + order audit timeline + fulfillment job state so operators can inspect end-to-end fulfillment state transitions from a single endpoint |
+| Purchase-gateway admin refund initiation API | #276 | Open | Adds `POST /api/v1/admin/orders/{order_id}/refund/` to trigger Stripe refunds (full by default, optional partial amount/reason) with explicit safety guards, while preserving webhook-driven local order-state transitions for idempotency |
+| Purchase-gateway admin entitlements list API | #282 | Open | Adds `GET /api/v1/admin/entitlements/` with tenant/status/recipient filters and pagination, providing direct operational visibility into pending/claimed/revoked entitlement state |
 
 ---
 
