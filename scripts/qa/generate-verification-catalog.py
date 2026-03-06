@@ -23,6 +23,7 @@ TEXT_SUFFIXES = {
     ".json",
     ".txt",
 }
+SCRIPT_REF_PATTERN = re.compile(r"scripts/[A-Za-z0-9_./-]*verify-[A-Za-z0-9_./-]*\.sh")
 
 ENTRYPOINTS = [
     {
@@ -106,17 +107,29 @@ def classify_tier(path: str, ci_binding: list[str], reference_count: int) -> tup
 
 def compute_reference_counts(repo_root: Path, scripts: list[str]) -> dict[str, int]:
     counts = dict.fromkeys(scripts, 0)
+    script_set = set(scripts)
     text_files: list[Path] = []
     excluded_generated = {
         repo_root / "docs/operations/verification/verification_catalog.json",
         repo_root / "docs/operations/verification/VERIFICATION_CATALOG.md",
+    }
+    excluded_dirs = {
+        ".git",
+        ".venv",
+        "node_modules",
+        "tutor_env",
+        "var",
+        "__pycache__",
+        ".ruff_cache",
+        ".pytest_cache",
+        ".mypy_cache",
     }
     for path in repo_root.rglob("*"):
         if not path.is_file():
             continue
         if path in excluded_generated:
             continue
-        if any(part in {".git", "node_modules", "tutor_env", "var"} for part in path.parts):
+        if any(part in excluded_dirs for part in path.parts):
             continue
         if path.suffix.lower() in TEXT_SUFFIXES or path.name == "Makefile":
             text_files.append(path)
@@ -126,9 +139,13 @@ def compute_reference_counts(repo_root: Path, scripts: list[str]) -> dict[str, i
             content = file_path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
-        for script in scripts:
-            if script in content:
-                counts[script] += 1
+        referenced = {
+            match.group(0)
+            for match in SCRIPT_REF_PATTERN.finditer(content)
+            if match.group(0) in script_set
+        }
+        for script in referenced:
+            counts[script] += 1
     return counts
 
 
@@ -153,10 +170,9 @@ def build_catalog(repo_root: Path) -> dict:
     ci_static = set(normalize_lines(ci_static_list)) if ci_static_list.exists() else set()
 
     workflow_refs: set[str] = set()
-    workflow_pattern = re.compile(r"scripts/[A-Za-z0-9_./-]*verify-[A-Za-z0-9_./-]*\.sh")
     for workflow in (repo_root / ".github/workflows").glob("*.y*ml"):
         text = workflow.read_text(encoding="utf-8", errors="ignore")
-        workflow_refs.update(workflow_pattern.findall(text))
+        workflow_refs.update(SCRIPT_REF_PATTERN.findall(text))
 
     reference_counts = compute_reference_counts(repo_root, script_paths)
 
