@@ -22,6 +22,15 @@ ENV/
 # Tutor generated artefacts (keep at root for compatibility)
 tutor_env/
 data/
+tutor_env/dev/frontend-app-*/
+
+# Local upstream MFE clones (allow only canonical authn submodule path)
+tmp/frontend-app-*/
+!tmp/frontend-app-authn/
+
+# Brand package generated outputs (keep placeholders only)
+infrastructure/tutor/brand-*/dist/**/*
+!infrastructure/tutor/brand-*/dist/**/.gitkeep
 
 # Runtime artifacts (new var/ structure)
 var/
