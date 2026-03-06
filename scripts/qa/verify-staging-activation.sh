@@ -21,6 +21,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 # ── Colors ────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -73,7 +74,8 @@ echo ""
 # ── Locate bbi-infrastructure repo ───────────────────────────────────────────
 BBI_INFRA=""
 for candidate in \
-  /home/gurpreet/projects/k8s/bbi-infrastructure \
+  "${WORKSPACE_ROOT}/bbi-infrastructure" \
+  "${WORKSPACE_ROOT}/infrastructure" \
   "${BBI_INFRA_PATH:-/nonexistent}"; do
   if [[ -d "$candidate" ]]; then
     BBI_INFRA="$candidate"
