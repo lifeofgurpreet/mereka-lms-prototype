@@ -1,0 +1,135 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-worker
+  labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
+    app.kubernetes.io/name: cms-worker
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
+      app.kubernetes.io/name: cms-worker
+      app.kubernetes.io/part-of: mereka-lms
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
+        app.kubernetes.io/name: cms-worker
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: cms-worker
+          image: docker.io/overhangio/openedx:21.0.0-indigo
+          args:
+
+          - "celery"
+          - "--app=cms.celery"
+          - "worker"
+          - "--loglevel=info"
+          - "--hostname=edx.cms.core.default.%h"
+          - "--queues=edx.cms.core.default,edx.cms.core.high,edx.cms.core.low"
+          - "--concurrency=2"
+          - "--max-tasks-per-child=100"
+          - "--prefetch-multiplier=1"
+          - "--without-gossip"
+          - "--without-mingle"
+          env:
+          - name: SERVICE_VARIANT
+            value: cms
+          - name: DJANGO_SETTINGS_MODULE
+            value: cms.envs.tutor.production
+          - name: OTEL_SERVICE_NAME
+            value: cms-worker
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://tempo.monitoring.svc.cluster.local:4318
+          - name: OTEL_EXPORTER_OTLP_PROTOCOL
+            value: http/protobuf
+          - name: OTEL_PROPAGATORS
+            value: tracecontext,baggage
+          - name: OTEL_TRACES_SAMPLER
+            value: parentbased_traceidratio
+          - name: OTEL_TRACES_SAMPLER_ARG
+            value: "0.1"
+          - name: MONGODB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: FORUM_MONGODB_HOST
+          # Open edX Tutor settings expect JWT_SECRET_KEY (not JWT_SECRET_KEY_LMS).
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: JWT_SECRET_KEY_CMS
+          # Open edX Tutor settings expect XQUEUE_PASSWORD (not XQUEUE_LMS_PASSWORD).
+          - name: XQUEUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: XQUEUE_LMS_PASSWORD
+          # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
+          - name: SOCIAL_AUTH_OIDC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: OIDC_CLIENT_SECRET
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: enterprise-sso-secrets
+                optional: true
+            - secretRef:
+                name: database-secrets
+            - secretRef:
+                name: mereka-lms-runtime-secrets
+                optional: true
+          volumeMounts:
+            - mountPath: /openedx/edx-platform/lms/envs/tutor/
+              name: settings-lms
+            - mountPath: /openedx/edx-platform/cms/envs/tutor/
+              name: settings-cms
+            - mountPath: /openedx/config
+              name: config
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
+          livenessProbe:
+            exec:
+              command:
+                - celery
+                - -A
+                - cms
+                - inspect
+                - ping
+                - -t
+                - "10"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 15
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings-lms
+          configMap:
+            name: openedx-settings-lms
+        - name: settings-cms
+          configMap:
+            name: openedx-settings-cms
+        - name: config
+          configMap:
+            name: openedx-config

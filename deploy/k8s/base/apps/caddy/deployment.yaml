@@ -1,0 +1,96 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy
+  labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
+    app.kubernetes.io/name: caddy
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  # Recreate strategy: Caddy uses a RWO PVC. RollingUpdate would schedule the
+  # new pod before the old one terminates, causing a volume mount deadlock on
+  # multi-node clusters. Recreate terminates first, then creates.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
+      app.kubernetes.io/name: caddy
+      app.kubernetes.io/part-of: mereka-lms
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
+        app.kubernetes.io/name: caddy
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      containers:
+        - name: caddy
+          image: docker.io/caddy:2.7.4
+          env:
+          - name: default_site_port
+            value: ":80"
+          # Domain env vars consumed by Caddyfile {$VAR} placeholders.
+          # Base defaults use localhost/placeholder values; overlays MUST override
+          # these with environment-specific hostnames.
+          - name: LMS_HOST
+            value: "localhost"
+          - name: LMS_HOST_PREVIEW
+            value: "preview.localhost"
+          - name: STUDIO_HOST
+            value: "studio.localhost"
+          - name: DISCOVERY_HOST
+            value: "discovery.localhost"
+          - name: MFE_HOST
+            value: "apps.localhost"
+          - name: NOTES_HOST
+            value: "notes.localhost"
+          - name: CREDENTIALS_HOST
+            value: "credentials.localhost"
+          - name: ENTERPRISE_ADMIN_HOST
+            value: "admin.localhost"
+          - name: ENTERPRISE_LEARNER_HOST
+            value: "learner.localhost"
+          volumeMounts:
+            - mountPath: /etc/caddy/
+              name: config
+            - mountPath: /data/
+              name: data
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+            - containerPort: 2019
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: config
+          configMap:
+            name: caddy-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: caddy

@@ -1,0 +1,119 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
+      app.kubernetes.io/name: mysql
+      app.kubernetes.io/part-of: mereka-lms
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
+        app.kubernetes.io/name: mysql
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        fsGroupChangePolicy: "OnRootMismatch"
+      containers:
+        - name: mysql
+          image: docker.io/mysql:8.4.0
+          args:
+            - "mysqld"
+            - "--character-set-server=utf8mb4"
+            - "--collation-server=utf8mb4_unicode_ci"
+            - "--binlog-expire-logs-seconds=259200"
+            - "--mysql-native-password=ON"
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: MYSQL_ROOT_PASSWORD
+          ports:
+            - containerPort: 3306
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          startupProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: data
+          securityContext:
+            allowPrivilegeEscalation: false
+        - name: mysqld-exporter
+          image: quay.io/prometheus/mysqld-exporter:v0.18.0
+          args:
+            - --mysqld.address=127.0.0.1:3306
+            - --mysqld.username=root
+          env:
+            - name: MYSQLD_EXPORTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: MYSQL_ROOT_PASSWORD
+          ports:
+            - containerPort: 9104
+              name: metrics
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mysql
