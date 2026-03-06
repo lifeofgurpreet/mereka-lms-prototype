@@ -4,7 +4,8 @@ set -euo pipefail
 
 NAMESPACE="mereka-lms"
 POD=$(kubectl get pod -n ${NAMESPACE} -l app.kubernetes.io/name=cms -o jsonpath='{.items[0].metadata.name}')
-BASE_DIR="/home/dev/code/mereka-lms/var/migrations/mct/course_packages_category"
+REPO_ROOT="${MEREKA_LMS_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+BASE_DIR="${BASE_DIR:-${REPO_ROOT}/var/migrations/mct/course_packages_category}"
 
 echo "🚀 Importing NEW MCT courses to pod: ${POD}"
 echo ""

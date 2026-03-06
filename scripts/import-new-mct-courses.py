@@ -6,6 +6,7 @@ NEW courses to import: 4, 17, 19, 20, 21, 28, 29, 34, 36, 37, 38, 39, 40, 41, 47
 """
 
 import csv
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -15,6 +16,24 @@ EXISTING_COURSES = {1, 14, 15, 16, 22, 24, 27, 30, 31, 32, 33, 35, 44, 45, 46}
 
 # NEW courses to import
 NEW_COURSES = {4, 17, 19, 20, 21, 28, 29, 34, 36, 37, 38, 39, 40, 41, 47}
+
+
+def resolve_repo_root() -> Path:
+    """Resolve repository root from env, git, then script-relative fallback."""
+    configured = os.environ.get('MEREKA_LMS_REPO_ROOT') or os.environ.get('REPO_ROOT')
+    if configured:
+        return Path(configured).expanduser().resolve()
+    try:
+        top = subprocess.check_output(
+            ['git', 'rev-parse', '--show-toplevel'],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        if top:
+            return Path(top)
+    except Exception:
+        pass
+    return Path(__file__).resolve().parents[1]
 
 
 def get_pod(namespace: str, service: str) -> str:
@@ -91,8 +110,9 @@ echo "Import complete!"
 
 
 def main():
-    manifest = Path('/home/dev/code/mereka-lms/var/migrations/mct/course_packages_category/course_packages_manifest.csv')
-    packages_root = Path('/home/dev/code/mereka-lms/var/migrations/mct/course_packages_category')
+    repo_root = resolve_repo_root()
+    packages_root = repo_root / 'var' / 'migrations' / 'mct' / 'course_packages_category'
+    manifest = packages_root / 'course_packages_manifest.csv'
     namespace = 'mereka-lms'
 
     if not manifest.exists():

@@ -6,18 +6,41 @@ Replaces expired SAS tokens with new one and downloads to local directory.
 
 import json
 import os
+import subprocess
 import ssl
 import sys
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 # Config
 STORAGE_ACCOUNT = "mctindonesiastj6v44p6u6o"
 SAS_TOKEN = os.environ.get("AZURE_SAS_TOKEN", "")
-INPUT_FILE = "/home/dev/code/mereka-lms/exports/mct/structure/course_content.ndjson"
-OUTPUT_DIR = "/home/dev/code/mereka-lms/var/migrations/mct/thumbnails"
 MAX_WORKERS = 10
+
+
+def resolve_repo_root() -> Path:
+    """Resolve repository root from env, git, then script-relative fallback."""
+    configured = os.environ.get("MEREKA_LMS_REPO_ROOT") or os.environ.get("REPO_ROOT")
+    if configured:
+        return Path(configured).expanduser().resolve()
+    try:
+        top = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        if top:
+            return Path(top)
+    except Exception:
+        pass
+    return Path(__file__).resolve().parents[3]
+
+
+REPO_ROOT = resolve_repo_root()
+INPUT_FILE = str(REPO_ROOT / "exports" / "mct" / "structure" / "course_content.ndjson")
+OUTPUT_DIR = str(REPO_ROOT / "var" / "migrations" / "mct" / "thumbnails")
 
 def extract_thumbnails():
     """Extract lesson thumbnails from course content."""

@@ -4,6 +4,7 @@ Verify downloaded MCT thumbnails are valid image files.
 """
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -38,8 +39,26 @@ def verify_image(file_path: Path) -> tuple[bool, str]:
         return False, str(e)
 
 
+def resolve_repo_root() -> Path:
+    """Resolve repository root from env, git, then script-relative fallback."""
+    configured = os.environ.get('MEREKA_LMS_REPO_ROOT') or os.environ.get('REPO_ROOT')
+    if configured:
+        return Path(configured).expanduser().resolve()
+    try:
+        top = subprocess.check_output(
+            ['git', 'rev-parse', '--show-toplevel'],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        if top:
+            return Path(top)
+    except Exception:
+        pass
+    return Path(__file__).resolve().parents[1]
+
+
 def main():
-    base_dir = Path('/home/dev/code/mereka-lms')
+    base_dir = resolve_repo_root()
     thumbnails_dir = base_dir / 'var' / 'migrations' / 'mct' / 'thumbnails'
     manifest_path = thumbnails_dir / 'manifest.json'
 

@@ -13,6 +13,8 @@ Strategy:
 
 import csv
 import json
+import os
+import subprocess
 from pathlib import Path
 
 
@@ -23,10 +25,29 @@ def load_ndjson(filepath):
         return [json.loads(line) for line in lines]
 
 
+def resolve_repo_root() -> Path:
+    """Resolve repository root from env, git, then script-relative fallback."""
+    configured = os.environ.get('MEREKA_LMS_REPO_ROOT') or os.environ.get('REPO_ROOT')
+    if configured:
+        return Path(configured).expanduser().resolve()
+    try:
+        top = subprocess.check_output(
+            ['git', 'rev-parse', '--show-toplevel'],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        if top:
+            return Path(top)
+    except Exception:
+        pass
+    return Path(__file__).resolve().parents[1]
+
+
 def main():
     # Paths
-    exports_dir = Path('/home/dev/code/mereka-lms/exports/mct')
-    output_dir = Path('/home/dev/code/mereka-lms/var/migrations/mct')
+    repo_root = resolve_repo_root()
+    exports_dir = repo_root / 'exports' / 'mct'
+    output_dir = repo_root / 'var' / 'migrations' / 'mct'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load data
