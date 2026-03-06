@@ -5,6 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/../.." && pwd)}"
 
 INFISICAL_DOMAIN="${INFISICAL_DOMAIN:-https://secrets.mereka.io/api}"
 INFISICAL_ENV="${INFISICAL_ENV:-prod}"
@@ -17,9 +18,12 @@ resolve_infisical_dir() {
   fi
   local candidates=(
     "$REPO_ROOT"
-    "/home/gurpreet/projects/secrets-management"
-    "/home/gurpreet/projects/k8s/reka-slackbot"
-    "/home/gurpreet/projects/standalone/spoken"
+    "${WORKSPACE_ROOT}/secrets-management"
+    "${WORKSPACE_ROOT}/k8s/reka-slackbot"
+    "${WORKSPACE_ROOT}/standalone/spoken"
+    "${HOME}/projects/secrets-management"
+    "${HOME}/projects/k8s/reka-slackbot"
+    "${HOME}/projects/standalone/spoken"
   )
   for candidate in "${candidates[@]}"; do
     if [[ -f "${candidate}/.infisical.json" ]]; then
