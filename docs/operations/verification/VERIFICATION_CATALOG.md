@@ -10,17 +10,17 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 ## Summary
 - Total `verify-*.sh` scripts: **511**
 - Archived deprecated scripts: **5**
-- CI static-bound scripts: **321**
+- CI static-bound scripts: **322**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 163
+- `exploratory_manual`: 162
 - `periodic_runtime`: 7
-- `release_blocking`: 341
+- `release_blocking`: 342
 
 ### Status Distribution
-- `active`: 348
-- `deprecated_candidate`: 36
+- `active`: 349
+- `deprecated_candidate`: 35
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -55,7 +55,6 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-notifications-inapp.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-patch-modularity.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-purchase-gateway-resilience.sh` (owner: `platform-core`, refs: 0)
 - `scripts/qa/verify-restore-drill.sh` (owner: `sre-security`, refs: 1)
 - `scripts/qa/verify-spec-dedupe-normalize.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-tutor-config-path-contract.sh` (owner: `platform-infra`, refs: 0)

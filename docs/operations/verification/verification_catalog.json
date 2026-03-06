@@ -4263,14 +4263,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-purchase-gateway-resilience.sh",
-      "reference_count": 0,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 1,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -5874,16 +5876,16 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 5,
-    "ci_static_bound": 321,
+    "ci_static_bound": 322,
     "statuses": {
-      "active": 348,
-      "deprecated_candidate": 36,
+      "active": 349,
+      "deprecated_candidate": 35,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 163,
+      "exploratory_manual": 162,
       "periodic_runtime": 7,
-      "release_blocking": 341
+      "release_blocking": 342
     },
     "total_verify_scripts": 511,
     "workflow_direct_bound": 49
