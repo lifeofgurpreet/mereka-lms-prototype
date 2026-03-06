@@ -124,6 +124,7 @@ check_glob_ability() {
            [[ ! "$basename" =~ ^public- ]] && [[ ! "$basename" =~ ^visual- ]] && \
            [[ ! "$basename" =~ ^fix- ]] && [[ ! "$basename" =~ ^course- ]] && \
            [[ ! "$basename" =~ ^analyze- ]] && [[ ! "$basename" =~ ^gate- ]] && \
+           [[ ! "$basename" =~ ^sync- ]] && \
            [[ ! "$basename" =~ ^load- ]] && [[ ! "$basename" =~ ^comprehensive- ]]; then
           # This is overly strict for existing codebase, just warn
           warn "Glob-ability: QA script doesn't follow standard naming: $file"
