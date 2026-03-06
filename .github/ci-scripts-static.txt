@@ -10,6 +10,7 @@ scripts/qa/verify-custom-apps-hygiene.sh
 scripts/qa/verify-custom-app-install-contract.sh
 scripts/qa/verify-authn-submodule-path-contract.sh
 scripts/qa/verify-evidence-tracking-policy.sh
+scripts/qa/verify-evidence-sprawl-budget.sh
 scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-documentation-links.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh

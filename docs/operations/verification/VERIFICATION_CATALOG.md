@@ -10,17 +10,17 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 ## Summary
 - Total `verify-*.sh` scripts: **503**
 - Archived deprecated scripts: **14**
-- CI static-bound scripts: **325**
+- CI static-bound scripts: **326**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 151
+- `exploratory_manual`: 150
 - `periodic_runtime`: 7
-- `release_blocking`: 345
+- `release_blocking`: 346
 
 ### Status Distribution
-- `active`: 352
-- `deprecated_candidate`: 24
+- `active`: 353
+- `deprecated_candidate`: 23
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -41,7 +41,6 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-email-inapp-code.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-preferences.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-push-code.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-evidence-sprawl-budget.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-libraries-core.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-notifications-inapp.sh` (owner: `platform-core`, refs: 1)

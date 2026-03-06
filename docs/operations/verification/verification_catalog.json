@@ -1957,14 +1957,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-evidence-sprawl-budget.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5856,16 +5858,16 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 14,
-    "ci_static_bound": 325,
+    "ci_static_bound": 326,
     "statuses": {
-      "active": 352,
-      "deprecated_candidate": 24,
+      "active": 353,
+      "deprecated_candidate": 23,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 151,
+      "exploratory_manual": 150,
       "periodic_runtime": 7,
-      "release_blocking": 345
+      "release_blocking": 346
     },
     "total_verify_scripts": 503,
     "workflow_direct_bound": 49
