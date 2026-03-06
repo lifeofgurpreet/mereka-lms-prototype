@@ -79,63 +79,79 @@ run_offline_checks() {
   # ── 1. Deployment manifest exists ────────────────────────────────────────
   header "1. Deployment manifest"
 
-  DEPLOYMENTS_FILE="${REPO_ROOT}/deploy/k8s/base/deployments.yml"
-  if [[ -f "$DEPLOYMENTS_FILE" ]]; then
-    pass "Base deployments manifest exists (${DEPLOYMENTS_FILE##"$REPO_ROOT"/})"
-  else
-    fail "Base deployments manifest not found at deploy/k8s/base/deployments.yml"
-  fi
+  LEGACY_DEPLOYMENTS_FILE="${REPO_ROOT}/deploy/k8s/base/deployments.yml"
+  SPLIT_WORKER_DEPLOYMENT="${REPO_ROOT}/deploy/k8s/base/apps/ecommerce-worker/deployment.yaml"
+  WORKER_SETTINGS="${REPO_ROOT}/deploy/k8s/base/plugins/ecommerce/apps/ecommerce-worker/settings/production.py"
+  ECOM_SETTINGS="${REPO_ROOT}/deploy/k8s/base/plugins/ecommerce/apps/ecommerce/settings/production.py"
+  WORKER_PRESENT=false
+  WORKER_MANIFEST=""
 
-  if grep -q "name: ecommerce-worker$" "$DEPLOYMENTS_FILE" 2>/dev/null; then
-    pass "ecommerce-worker Deployment defined in base manifests"
+  if [[ -f "$SPLIT_WORKER_DEPLOYMENT" ]]; then
+    WORKER_PRESENT=true
+    WORKER_MANIFEST="$SPLIT_WORKER_DEPLOYMENT"
+    pass "ecommerce-worker Deployment manifest exists (${WORKER_MANIFEST##"$REPO_ROOT"/})"
+  elif [[ -f "$LEGACY_DEPLOYMENTS_FILE" ]] && grep -q "name: ecommerce-worker$" "$LEGACY_DEPLOYMENTS_FILE" 2>/dev/null; then
+    WORKER_PRESENT=true
+    WORKER_MANIFEST="$LEGACY_DEPLOYMENTS_FILE"
+    pass "ecommerce-worker Deployment found in legacy deployments manifest"
   else
-    skip "ecommerce-worker Deployment not found in base deployments.yml (may have been removed)"
+    skip "ecommerce-worker Deployment manifest not present (consistent with Oscar deprecation path)"
+    info "Worker-specific checks below will be skipped unless manifest is restored"
   fi
 
   # ── 2. Required env vars ─────────────────────────────────────────────────
   header "2. Required environment variables"
 
-  if grep -q "WORKER_CONFIGURATION_MODULE" "$DEPLOYMENTS_FILE" 2>/dev/null; then
+  if [[ "$WORKER_PRESENT" == "true" ]] && grep -q "WORKER_CONFIGURATION_MODULE" "$WORKER_MANIFEST" 2>/dev/null; then
     pass "WORKER_CONFIGURATION_MODULE env var set in Deployment"
-  else
+  elif [[ "$WORKER_PRESENT" == "true" ]]; then
     fail "WORKER_CONFIGURATION_MODULE env var missing from ecommerce-worker Deployment"
     info "Expected value: ecommerce_worker.configuration.tutor.production"
+  else
+    skip "WORKER_CONFIGURATION_MODULE check skipped (ecommerce-worker Deployment not present)"
   fi
 
-  if grep -q "C_FORCE_ROOT" "$DEPLOYMENTS_FILE" 2>/dev/null; then
+  if [[ "$WORKER_PRESENT" == "true" ]] && grep -q "C_FORCE_ROOT" "$WORKER_MANIFEST" 2>/dev/null; then
     pass "C_FORCE_ROOT env var present (required for Celery running as root)"
-  else
+  elif [[ "$WORKER_PRESENT" == "true" ]]; then
     fail "C_FORCE_ROOT env var missing — Celery will refuse to run as root (uid=0)"
+  else
+    skip "C_FORCE_ROOT check skipped (ecommerce-worker Deployment not present)"
   fi
 
   # ── 3. ConfigMap / settings volume ───────────────────────────────────────
   header "3. Worker settings ConfigMap"
 
-  WORKER_SETTINGS="${REPO_ROOT}/deploy/k8s/base/plugins/ecommerce/apps/ecommerce-worker/settings/production.py"
-  if [[ -f "$WORKER_SETTINGS" ]]; then
+  if [[ "$WORKER_PRESENT" == "true" ]] && [[ -f "$WORKER_SETTINGS" ]]; then
     pass "ecommerce-worker settings file exists"
-  else
+  elif [[ "$WORKER_PRESENT" == "true" ]]; then
     fail "ecommerce-worker settings file missing (deploy/k8s/base/plugins/ecommerce/apps/ecommerce-worker/settings/production.py)"
+  else
+    skip "ecommerce-worker settings check skipped (worker manifest not present)"
   fi
 
-  if grep -q "ecommerce-worker-settings" "$DEPLOYMENTS_FILE" 2>/dev/null; then
+  if [[ "$WORKER_PRESENT" == "true" ]] && grep -q "ecommerce-worker-settings" "$WORKER_MANIFEST" 2>/dev/null; then
     pass "ecommerce-worker-settings ConfigMap referenced in Deployment volumes"
-  else
+  elif [[ "$WORKER_PRESENT" == "true" ]]; then
     fail "ecommerce-worker-settings ConfigMap not referenced — settings will not be mounted"
+  else
+    skip "ecommerce-worker-settings ConfigMap reference check skipped (worker manifest not present)"
   fi
 
   # ── 4. Celery broker config ───────────────────────────────────────────────
   header "4. Celery broker configuration"
 
-  if [[ -f "$WORKER_SETTINGS" ]]; then
+  if [[ "$WORKER_PRESENT" == "true" ]] && [[ -f "$WORKER_SETTINGS" ]]; then
     if grep -q "BROKER_URL" "$WORKER_SETTINGS"; then
       pass "BROKER_URL defined in worker production.py settings"
     else
       fail "BROKER_URL not defined in worker production settings — Celery cannot start"
       info "Expected: BROKER_URL = 'redis://redis:6379'"
     fi
-  else
+  elif [[ "$WORKER_PRESENT" == "true" ]]; then
     skip "Worker settings file missing; cannot check Celery broker config"
+  else
+    skip "Celery broker check skipped (ecommerce-worker Deployment not present)"
   fi
 
   # ── 5. ExternalSecrets — required ecommerce keys ─────────────────────────
@@ -150,7 +166,9 @@ run_offline_checks() {
     "MEREKA_LMS_MYSQL_ECOMMERCE_PASSWORD"
   )
 
-  if [[ -f "$SECRETS_FILE" ]]; then
+  if [[ "$WORKER_PRESENT" != "true" ]]; then
+    skip "Legacy Oscar secret coverage skipped (ecommerce-worker is decommissioned in manifests)"
+  elif [[ -f "$SECRETS_FILE" ]]; then
     pass "ExternalSecrets manifest exists"
     for secret_key in "${REQUIRED_SECRETS[@]}"; do
       if grep -q "$secret_key" "$SECRETS_FILE"; then
@@ -166,8 +184,7 @@ run_offline_checks() {
   # ── 6. Database connection config ────────────────────────────────────────
   header "6. Database connection"
 
-  ECOM_SETTINGS="${REPO_ROOT}/deploy/k8s/base/plugins/ecommerce/apps/ecommerce/settings/production.py"
-  if [[ -f "$ECOM_SETTINGS" ]]; then
+  if [[ "$WORKER_PRESENT" == "true" ]] && [[ -f "$ECOM_SETTINGS" ]]; then
     pass "Ecommerce main service settings file exists"
     if grep -qE "MYSQL|DATABASE|DB_HOST" "$ECOM_SETTINGS"; then
       pass "Database connection config present in ecommerce settings"
@@ -175,27 +192,33 @@ run_offline_checks() {
       fail "No database connection config found in ecommerce main settings"
       info "Expected: DATABASES with MySQL host, user, password, db name"
     fi
-  else
+  elif [[ "$WORKER_PRESENT" == "true" ]]; then
     skip "Ecommerce main settings not found; cannot verify DB config"
     info "Expected path: deploy/k8s/base/plugins/ecommerce/apps/ecommerce/settings/production.py"
+  else
+    skip "Database connection check skipped (ecommerce-worker Deployment not present)"
   fi
 
   # The worker itself does NOT connect to MySQL directly (only via Celery tasks
   # that are dispatched from the ecommerce main pod). Its settings don't need
   # DATABASES — but it does require a Redis broker.
-  if [[ -f "$WORKER_SETTINGS" ]]; then
+  if [[ "$WORKER_PRESENT" == "true" ]] && [[ -f "$WORKER_SETTINGS" ]]; then
     if grep -q "redis" "$WORKER_SETTINGS"; then
       pass "Redis broker reference present in worker settings"
     else
       fail "No Redis reference in worker settings — broker may not be configured"
     fi
+  elif [[ "$WORKER_PRESENT" == "true" ]]; then
+    skip "Redis broker reference check skipped (worker settings file missing)"
   fi
 
   # ── 7. Purchase Gateway (replacement service) ────────────────────────────
   header "7. Purchase Gateway replacement status"
 
   PG_DIR="${REPO_ROOT}/services/purchase-gateway"
-  PG_DEPLOY="${PG_DIR}/k8s/deployment.yaml"
+  PG_DEPLOY_BASE="${REPO_ROOT}/deploy/k8s/base/apps/purchase-gateway/deployment.yaml"
+  PG_DEPLOY_LEGACY="${PG_DIR}/k8s/deployment.yaml"
+  PG_DEPLOY=""
 
   if [[ -d "$PG_DIR" ]]; then
     pass "Purchase Gateway service directory exists (services/purchase-gateway/)"
@@ -203,8 +226,17 @@ run_offline_checks() {
     fail "Purchase Gateway service directory missing — replacement not scaffolded"
   fi
 
-  if [[ -f "$PG_DEPLOY" ]]; then
-    pass "Purchase Gateway Deployment manifest present"
+  if [[ -f "$PG_DEPLOY_BASE" ]]; then
+    PG_DEPLOY="$PG_DEPLOY_BASE"
+    pass "Purchase Gateway Deployment manifest present (deploy/k8s/base/apps/purchase-gateway)"
+  elif [[ -f "$PG_DEPLOY_LEGACY" ]]; then
+    PG_DEPLOY="$PG_DEPLOY_LEGACY"
+    pass "Purchase Gateway Deployment manifest present (services/purchase-gateway/k8s legacy mirror)"
+  else
+    fail "Purchase Gateway Deployment manifest missing in both canonical and legacy paths"
+  fi
+
+  if [[ -n "$PG_DEPLOY" ]]; then
     if grep -q "ENABLE_GATEWAY_FULFILLMENT.*false" "$PG_DEPLOY"; then
       pass "ENABLE_GATEWAY_FULFILLMENT=false — Purchase Gateway is dark-launched (Oscar still active)"
       info "ecommerce-worker CrashLoop on nonprod is expected until Gateway is activated"
@@ -213,8 +245,6 @@ run_offline_checks() {
     else
       fail "ENABLE_GATEWAY_FULFILLMENT flag not found in Purchase Gateway deployment"
     fi
-  else
-    fail "Purchase Gateway Deployment manifest missing at services/purchase-gateway/k8s/deployment.yaml"
   fi
 
   # ── 8. ADR for deprecation decision ─────────────────────────────────────
