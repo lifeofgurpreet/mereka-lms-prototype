@@ -89,6 +89,10 @@ match_violation() {
     return 0
   fi
 
+  if [[ "$line_lc" == *"cookie:"* ]] && [[ "$line_lc" == *"="* ]] && [[ "$line_lc" != *"<redacted>"* ]]; then
+    return 0
+  fi
+
   if [[ "$line_lc" == *"sessionid="* ]] && [[ "$line_lc" != *"<redacted>"* ]]; then
     return 0
   fi
@@ -101,7 +105,15 @@ match_violation() {
     return 0
   fi
 
+  if [[ "$line_lc" =~ authorization:[[:space:]]*basic[[:space:]]+[a-z0-9+/=]{16,} ]] && [[ "$line_lc" != *"<redacted>"* ]]; then
+    return 0
+  fi
+
   if [[ "$line_lc" =~ x-api-key:[[:space:]]*[a-z0-9._-]{12,} ]] && [[ "$line_lc" != *"<redacted>"* ]]; then
+    return 0
+  fi
+
+  if [[ "$line_lc" =~ x-auth-token:[[:space:]]*[a-z0-9._-]{12,} ]] && [[ "$line_lc" != *"<redacted>"* ]]; then
     return 0
   fi
 
