@@ -50,7 +50,7 @@ echo ""
 # Check 1: edx-proctoring package availability
 echo "Checking AC-001, AC-002: edx-proctoring backend infrastructure..."
 
-PROD_SETTINGS="../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+PROD_SETTINGS="deploy/k8s/base/apps/openedx/settings/lms/production.py"
 
 if [[ -f "$PROD_SETTINGS" ]]; then
   # Check for proctoring settings
