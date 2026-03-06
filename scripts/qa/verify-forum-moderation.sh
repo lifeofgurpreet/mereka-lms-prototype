@@ -24,6 +24,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+HOME_ROOT="${HOME:-}"
 cd "$REPO_ROOT"
 
 GREEN='\033[0;32m'
@@ -85,8 +86,10 @@ resolve_prod_settings() {
   candidates+=(
     "$REPO_ROOT/../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
     "$REPO_ROOT/../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "${HOME_ROOT}/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "${HOME_ROOT}/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
     "$LMS_PROD"
   )
 
