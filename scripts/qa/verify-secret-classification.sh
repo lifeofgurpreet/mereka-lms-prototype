@@ -6,7 +6,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-CLASSIFICATION_FILE="$REPO_ROOT/docs/operations/SECRETS_CLASSIFICATION.yml"
+CLASSIFICATION_FILE="$REPO_ROOT/deploy/k8s/base/secrets/SECRET_CLASSIFICATION.yaml"
 
 if [[ ! -f "$CLASSIFICATION_FILE" ]]; then
   echo "FAIL missing classification file: $CLASSIFICATION_FILE" >&2
@@ -54,18 +54,6 @@ def gather_external_secret_keys(root: Path) -> set[str]:
     return keys
 
 
-def as_set(payload: dict, key: str) -> set[str]:
-    value = payload.get(key)
-    if value is None:
-        return set()
-    if not isinstance(value, list):
-        raise SystemExit(f"FAIL classification classes.{key} must be a list")
-    bad = [item for item in value if not isinstance(item, str)]
-    if bad:
-        raise SystemExit(f"FAIL classification classes.{key} contains non-string entries")
-    return set(value)
-
-
 external_keys = gather_external_secret_keys(repo_root)
 if not external_keys:
     raise SystemExit("FAIL no MEREKA_LMS_* keys discovered in ExternalSecret manifests")
@@ -74,16 +62,40 @@ data = yaml.safe_load(classification_path.read_text(encoding="utf-8"))
 if not isinstance(data, dict):
     raise SystemExit("FAIL classification file must be a YAML mapping")
 
-classes = data.get("classes")
-if not isinstance(classes, dict):
-    raise SystemExit("FAIL classification file missing classes mapping")
+entries = data.get("secrets")
+if not isinstance(entries, list):
+    raise SystemExit("FAIL classification file must contain a top-level 'secrets' list")
 
-shared = as_set(classes, "shared")
-env_unique = as_set(classes, "env_unique")
-generated = as_set(classes, "generated")
+allowed_classes = {"env_unique", "shared_by_design", "generated_at_deploy"}
+shared: set[str] = set()
+env_unique: set[str] = set()
+generated: set[str] = set()
+all_classified: set[str] = set()
 
-coverage_set = shared | env_unique
-unknown = sorted((shared | env_unique | generated) - external_keys)
+for index, item in enumerate(entries):
+    if not isinstance(item, dict):
+        raise SystemExit(f"FAIL classification entry {index} must be a mapping")
+    key = item.get("key")
+    cls = item.get("class")
+    if not isinstance(key, str) or not key.startswith("MEREKA_LMS_"):
+        raise SystemExit(f"FAIL classification entry {index} has invalid key: {key!r}")
+    if cls not in allowed_classes:
+        raise SystemExit(
+            f"FAIL classification entry {index} has invalid class {cls!r}; "
+            f"expected one of {sorted(allowed_classes)}"
+        )
+    if key in all_classified:
+        raise SystemExit(f"FAIL duplicate key in classification file: {key}")
+    all_classified.add(key)
+    if cls == "shared_by_design":
+        shared.add(key)
+    elif cls == "env_unique":
+        env_unique.add(key)
+    elif cls == "generated_at_deploy":
+        generated.add(key)
+
+coverage_set = shared | env_unique | generated
+unknown = sorted(all_classified - external_keys)
 if unknown:
     print("FAIL unknown keys in classification (not present in ExternalSecret manifests):")
     for key in unknown:
@@ -92,7 +104,7 @@ if unknown:
 
 missing = sorted(external_keys - coverage_set)
 if missing:
-    print("FAIL missing keys in shared/env_unique classification coverage:")
+    print("FAIL missing keys in classification coverage:")
     for key in missing:
         print(f"  - {key}")
     raise SystemExit(1)
@@ -104,15 +116,8 @@ if overlap:
         print(f"  - {key}")
     raise SystemExit(1)
 
-not_subset = sorted(generated - coverage_set)
-if not_subset:
-    print("FAIL generated keys must also be classified as shared or env_unique:")
-    for key in not_subset:
-        print(f"  - {key}")
-    raise SystemExit(1)
-
 print(f"PASS external keys discovered: {len(external_keys)}")
 print(f"PASS shared classified keys: {len(shared)}")
 print(f"PASS env_unique classified keys: {len(env_unique)}")
-print(f"PASS generated classified keys: {len(generated)}")
+print(f"PASS generated_at_deploy classified keys: {len(generated)}")
 PY
