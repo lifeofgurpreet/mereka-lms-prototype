@@ -1,5 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+# DEPRECATED: staging overlay is retained as a historical/future-ready artifact.
+# Active deployment lanes are local, rke2-nonprod, and production.
 
 # Staging overlay — rke2-nonprod cluster, staging domains
 #

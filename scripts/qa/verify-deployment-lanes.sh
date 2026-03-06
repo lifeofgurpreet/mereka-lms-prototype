@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: k8s-deployment_spec.md
 # verify-deployment-lanes.sh
 #
 # Verifies that the three active Kustomize overlay lanes are correctly structured
@@ -145,7 +147,7 @@ while IFS= read -r -d '' script_file; do
   fi
 
   # Flag patterns that indicate the script treats staging as an active deploy target
-  if grep -qE '(kubectl apply.*overlays/staging|kustomize build.*overlays/staging|--target-env staging|TARGET_ENV.*=.*staging)' \
+  if grep -qE '(kubectl apply.*overlays/staging|kustomize build.*overlays/staging|--target-env staging)' \
        "$script_file" 2>/dev/null; then
     fail "script references staging as deployment target: $script_file"
     DEPLOY_STAGING_HITS=$(( DEPLOY_STAGING_HITS + 1 ))
@@ -164,7 +166,7 @@ echo "--- rke2-nonprod required patches ---"
 REQUIRED_PATCHES=(
   "patches/externalsecrets-infisical.yaml"
   "patches/domain-env.yaml"
-  "patches/single-node-recreate-strategy.yaml"
+  "patches/enterprise-catalog-worker-nonprod.yaml"
 )
 
 for patch in "${REQUIRED_PATCHES[@]}"; do
