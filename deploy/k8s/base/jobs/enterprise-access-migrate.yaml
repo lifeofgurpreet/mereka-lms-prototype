@@ -36,7 +36,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: config-gen
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:pin-required
           command: ["python3", "-c"]
           args:
             - |
@@ -137,7 +137,7 @@ spec:
               mountPath: /config
       containers:
         - name: migrate
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:pin-required
           command: ["python", "manage.py", "migrate", "--noinput"]
           env:
             - name: DJANGO_SETTINGS_MODULE

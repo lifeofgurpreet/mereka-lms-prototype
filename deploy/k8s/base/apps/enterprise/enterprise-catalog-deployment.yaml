@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: config-gen
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:pin-required
           command: ["python3", "-c"]
           args:
             - |
@@ -127,7 +127,7 @@ spec:
               mountPath: /config
       containers:
         - name: enterprise-catalog
-          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:latest
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:pin-required
           ports:
             - containerPort: 8160
           env:
