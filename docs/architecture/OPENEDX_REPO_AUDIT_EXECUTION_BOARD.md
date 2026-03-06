@@ -56,6 +56,29 @@ Parent issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/214
 | Purchase-gateway admin order-detail API | Merged | [#275](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/275) |
 | Purchase-gateway admin refund initiation API | Merged | [#276](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/276) |
 | Purchase-gateway admin entitlements list API | Merged | [#282](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/282) |
+| PR handoff discipline guardrails | Merged | [#312](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/312) |
+| Verification catalog performance hardening | Merged | [#314](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/314) |
+| Purchase-gateway checkout durability + webhook recovery hardening | Merged | [#317](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/317) |
+| Purchase-gateway resilience gate promotion into static CI | Merged | [#318](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/318) |
+| Audit tracker PR status sync automation | Merged | [#319](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/319) |
+| Purchase-gateway resilience assertions expansion | Merged | [#320](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/320) |
+| Verification catalog/sprawl baseline refresh | Merged | [#321](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/321) |
+| Docs-only CI heavy-scan skip contract | Merged | [#322](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/322) |
+| Archive unbound verify-bash-strict-mode check | Merged | [#323](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/323) |
+| Tutor config path contract static validation | Merged | [#324](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/324) |
+| Archive stale verify-ux-audit-coverage check | Merged | [#325](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/325) |
+| Archive stale verify-k8s-validation-job check | Merged | [#326](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/326) |
+| Archive stale verify-lint-job check | Merged | [#327](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/327) |
+| QA script catalog stale-path cleanup | Merged | [#328](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/328) |
+| Archive stale GitHub Actions cost verifiers | Merged | [#329](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/329) |
+| Archive stale CI/CD point-check verifiers | Merged | [#330](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/330) |
+| Evidence sprawl budget gate promotion | Merged | [#331](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/331) |
+| Stable CI/CD contract verifier promotion | Merged | [#332](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/332) |
+| Archive stale Tutor patch governance verifiers | Merged | [#333](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/333) |
+| Archive stale email plugin code verifiers | Merged | [#334](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/334) |
+| High-signal governance/evidence verifier promotion | Merged | [#335](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/335) |
+| Verification catalog runtime status overrides | Merged | [#336](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/336) |
+| Final verification candidate classification + strictness fixes | Merged | [#337](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/337) |
 
 ## Purpose
 

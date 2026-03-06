@@ -31,6 +31,17 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 - Status refresh command: `./scripts/qa/sync-openedx-audit-pr-status.sh`
 - Parity verification command: `./scripts/qa/verify-openedx-audit-tracker-sync.sh`
 
+## Audit Closure Snapshot (2026-03-06)
+
+- Parent tracker `#214` plus child issues `#215` through `#222` are implemented; child issues are closed.
+- Verification governance stream is completed through `#337` with current catalog posture:
+  - total `verify-*` scripts: `496`
+  - `active`: `366`
+  - `manual_only`: `127`
+  - `deprecated_candidate`: `0`
+  - `ci_static` bound scripts: `334`
+- Where domain findings below conflict with the merged remediation trail, treat `### Post-Audit Implementation Status` as canonical.
+
 ## Executive Summary
 
 1. **Git hygiene is partially healthy but inconsistent**: critical runtime artifact directories (`exports/`, `var/`, `tutor_env/`) are ignored, but production evidence artifacts are still committed under `docs/operations/evidence`, including live `Set-Cookie` headers.
@@ -38,9 +49,9 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 3. **Theming stack is in a transitional hybrid** (design tokens + SCSS bridge + runtime minified CSS). This is currently functional but has multiple generated layers that can drift.
 4. **Custom Django apps are structurally installable** (all app dirs include `setup.py`) and not tracking stateful files in git, but local cache noise is widespread.
 5. **IaC control planes are fragmented** across Tutor generation, Kustomize overlays, and GitOps repo pinning; legacy Tutor-K8s scripts still exist and can conflict with current GitOps flow.
-6. **Verification surface is oversized** (`490` `verify-*.sh` scripts), with relatively limited direct CI invocation and many scripts not referenced by workflows.
+6. **Verification surface remains large but is now governed** (`496` `verify-*.sh` scripts) with catalog ownership metadata, CI/static contracts, status overrides, and `deprecated_candidate=0`.
 7. **Tenant onboarding is still multi-system** (DB, DNS, Caddy, settings, MFE config, branding) with no single declarative source of truth.
-8. **Purchase gateway durability has improved** (`#232` merged outbox + reconciliation), and operational recovery ergonomics are being hardened (`#273` adds admin retry endpoint); observability/regression guard coverage is still in progress (`#246`, `#247` open).
+8. **Purchase gateway durability and operator controls are implemented** with outbox + reconciliation, admin recovery APIs, and resilience gates promoted into static CI.
 
 ## Implementation Tracker (GitHub)
 
@@ -94,6 +105,25 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 - Verification catalog reference-scan performance optimization → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/314
 - Purchase-gateway checkout durability + webhook recovery hardening → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/317
 - Purchase-gateway resilience gate promotion into static CI → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/318
+- Audit tracker PR status sync automation → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/319
+- Purchase-gateway resilience assertions expansion → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/320
+- Verification catalog baseline refresh → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/321
+- Docs-only CI heavy-scan skip contract → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/322
+- Archive unbound verify-bash-strict-mode check → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/323
+- Promote Tutor config path contract static validation → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/324
+- Archive stale verify-ux-audit-coverage check → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/325
+- Archive stale verify-k8s-validation-job check → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/326
+- Archive stale verify-lint-job check → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/327
+- Remove stale paths from QA script catalog → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/328
+- Archive stale GitHub Actions cost verifiers → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/329
+- Archive stale CI/CD point-check verifiers → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/330
+- Promote evidence sprawl budget gate → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/331
+- Promote stable CI/CD contract verifiers → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/332
+- Archive stale Tutor patch governance verifiers → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/333
+- Archive stale email plugin code verifiers → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/334
+- Promote high-signal governance and evidence verifiers → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/335
+- Verification catalog runtime status overrides → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/336
+- Final candidate classification + strictness fixes → https://github.com/Biji-Biji-Initiative/mereka-lms/pull/337
 
 ### Post-Audit Implementation Status (2026-03-06)
 
@@ -139,6 +169,25 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 | Verification catalog performance hardening | #314 | Merged | Refactors verification-catalog reference counting to single-pass regex extraction with cache-dir exclusion, reducing generation runtime and keeping governance gates responsive as script inventory grows |
 | Purchase-gateway checkout durability + webhook recovery hardening | #317 | Merged | Persists checkout order+line-item before Stripe call, marks failed checkout attempts as canceled, and recovers `checkout.session.completed` by `metadata.order_uuid` when session-id lookup misses so fulfillment can proceed without lost paid orders |
 | Purchase-gateway resilience gate promotion into static CI | #318 | Merged | Promotes `verify-purchase-gateway-resilience.sh` into release-blocking static validation so outbox/webhook/worker durability contracts are continuously enforced in CI rather than manually |
+| Audit tracker PR status sync automation | #319 | Merged | Adds `sync-openedx-audit-pr-status.sh` and CI wiring so tracker/board status cells stay aligned with live GitHub PR state |
+| Purchase-gateway resilience assertion expansion | #320 | Merged | Deepens `verify-purchase-gateway-resilience.sh` checks for outbox retries, dead-letter semantics, and reconciliation anchors |
+| Verification catalog/sprawl baseline refresh | #321 | Merged | Regenerates catalog artifacts and updates sprawl-budget baselines after governance and deprecation work |
+| Docs-only CI heavy-scan skip contract | #322 | Merged | Skips expensive static scans for docs-only pull requests while preserving required release-blocking checks |
+| Archive unbound verify-bash-strict-mode check | #323 | Merged | Moves stale unbound verifier into deprecated namespace and removes dead references from active CI paths |
+| Tutor config path contract static validation | #324 | Merged | Promotes stale Tutor config path detector into static CI to prevent drift in docs/spec/runtime path contracts |
+| Archive stale verify-ux-audit-coverage check | #325 | Merged | Archives unused UX audit verifier and removes it from active governance surfaces |
+| Archive stale verify-k8s-validation-job check | #326 | Merged | Archives stale K8s validation-job verifier to reduce false signal and maintenance load |
+| Archive stale verify-lint-job check | #327 | Merged | Archives stale lint-job verifier and keeps active lint contract checks consolidated |
+| QA script catalog stale-path cleanup | #328 | Merged | Removes stale script paths from verification catalog docs and manifests |
+| Archive stale GitHub Actions cost verifiers | #329 | Merged | Retires dead cost-check scripts and keeps cost governance under current canonical gates |
+| Archive stale CI/CD point-check verifiers | #330 | Merged | Retires obsolete CI/CD point checks to reduce duplicate verification paths |
+| Evidence sprawl budget gate promotion | #331 | Merged | Promotes evidence footprint budget verifier into static CI for continuous anti-locker enforcement |
+| Stable CI/CD contract verifier promotion | #332 | Merged | Promotes durable CI/CD contract verifiers and de-emphasizes brittle legacy checks |
+| Archive stale Tutor patch governance verifiers | #333 | Merged | Archives obsolete Tutor patch governance scripts replaced by current patch contract gates |
+| Archive stale email plugin code verifiers | #334 | Merged | Archives unused email plugin implementation verifiers and trims inactive QA surface |
+| High-signal governance/evidence verifier promotion | #335 | Merged | Promotes high-signal governance/evidence checks into static CI and standard entrypoints |
+| Verification catalog runtime status overrides | #336 | Merged | Adds runtime/manual override mechanism for catalog status resolution without breaking CI ownership contracts |
+| Final verification candidate classification + strictness fixes | #337 | Merged | Closes long-tail verification classification by fixing strict-mode script behavior and duplicate-AC detection, reducing deprecated-candidate scripts to zero |
 
 ---
 
@@ -440,29 +489,29 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 ### Current State
 
 - Webhook flow:
-  - Stripe event dedupe table (`stripe_events`) with status tracking.
-  - `checkout.session.completed` marks order paid, commits, then calls synchronous `fulfill_order`.
-  - errors mark event failed and return HTTP 500, relying on Stripe redelivery.
+  - Stripe event dedupe table (`stripe_events`) with explicit processing-status transitions.
+  - `checkout.session.completed` resolves order (including metadata fallback), marks paid, and enqueues fulfillment via durable outbox.
+  - failures persist failed status and remain retryable through Stripe redelivery plus internal reconciliation.
 - Fulfillment:
-  - LMS lookup + enrollment API call inline.
-  - entitlement creation for users not yet in LMS.
-  - no internal persistent outbox/worker saga in current implementation.
-- Config includes retry-related knobs and Redis URL, but webhook fulfillment path is synchronous.
+  - async outbox worker claims jobs with retry/backoff and dead-letter handling.
+  - reconciliation loop requeues recoverable paid orders lacking successful fulfillment.
+  - operator APIs support manual retry and inspection for event/order state.
+- Config includes fulfillment retry/backoff/reconciliation controls and worker polling cadence.
 
 ### Architectural Smells
 
-- **Charge-confirmed but fulfillment-failed split-brain risk** depends on external webhook retries.
-- **README/config suggest queue architecture not reflected in code path**.
-- **No explicit reconciliation worker shown for stuck failed events in this path.**
+- **Cross-system split-brain risk is reduced but not eliminated** (Stripe/LMS remain separate systems with eventual consistency).
+- **Recovery correctness now depends on operational SLOs** for worker liveness, retry budget, and dead-letter triage.
+- **Telemetry and gate drift can silently erode resilience** if resilience contracts are not continuously enforced.
 
 ### Recommended Refactor
 
-1. **Adopt transactional outbox/inbox pattern**:
-   - persist fulfillment jobs atomically with payment state update.
-2. **Async worker + retry policy**:
-   - controlled retries, DLQ, and observability.
-3. **Reconciliation loop**:
-   - periodic scan of `failed/processing` events and order states.
+1. **Keep outbox contract release-blocking**:
+   - preserve static CI resilience gates and update them with any schema/flow changes.
+2. **Harden runtime operations loop**:
+   - keep reconciliation enabled with monitored cadence and explicit dead-letter runbooks.
+3. **Expand failure-mode tests**:
+   - continue adding integration tests for partial failure paths (`paid` + deferred LMS availability, idempotent replay, admin retry race cases).
 
 ### Stripe Guidance Reference
 
@@ -472,40 +521,28 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 
 ---
 
-## Priority Backlog for Implementor
+## Initial Backlog (Now Completed)
 
 ### P0 (Security / Correctness)
 
-1. Redact/remove committed cookie-bearing evidence files and add CI guard against raw session/token artifacts.
-2. Decide and enforce canonical location for `frontend-app-authn` submodule path.
-3. Add explicit fulfillment durability plan (outbox + retry worker) for purchase gateway.
+- [x] Redact/remove committed cookie-bearing evidence files and add CI guard against raw session/token artifacts (`#215`, follow-up hardening PRs through `#337`).
+- [x] Decide and enforce canonical location for `frontend-app-authn` submodule path (`#222`).
+- [x] Add explicit fulfillment durability plan (outbox + retry worker) for purchase gateway (`#221` + follow-up resilience hardening).
 
 ### P1 (Architecture Stabilization)
 
-1. Publish single authoritative IaC flow and deprecate legacy Tutor-K8s runtime scripts.
-2. Standardize multi-brand asset sync coverage and drift checks across all brand packages.
-3. Classify/curate verify script inventory into enforceable suites.
+- [x] Publish single authoritative IaC flow and deprecate legacy Tutor-K8s runtime scripts (`#216`).
+- [x] Standardize multi-brand asset sync coverage and drift checks across all brand packages (`#217`/`#218`).
+- [x] Classify/curate verify script inventory into enforceable suites (`#219`, completed through `#337`).
 
 ### P2 (Debt Reduction)
 
-1. Normalize docs/spec path references where current repository reality differs.
-2. Improve local cache cleanup ergonomics for large Python cache footprints.
+- [x] Normalize docs/spec path references where current repository reality differs (completed in post-audit follow-ups).
+- [x] Improve local cache cleanup ergonomics for large Python cache footprints (`#249` + repo hygiene follow-ups).
 
-## Recommended Execution Sequencing
+## Recommended Execution Sequencing (Historical)
 
-1. **Start immediately (parallel-safe):**
-   - #215 evidence pipeline hardening
-   - #216 IaC control-plane unification draft contract
-   - #219 verification suite inventory/classification
-2. **Begin once #215 policy is decided:**
-   - #217 multi-brand sync/drift contract
-   - #218 theming generated artifact governance
-3. **Begin once #216 contract is stable:**
-   - #220 multi-tenancy declarative source-of-truth design
-4. **Run as backend reliability track:**
-   - #221 purchase-gateway outbox/saga design + implementation
-5. **Quick hygiene alignment track:**
-   - #222 submodule canonicalization + docs/spec path normalization
+This historical sequencing was executed. Keep for audit provenance only; use `### Post-Audit Implementation Status` for active state.
 
 ---
 
