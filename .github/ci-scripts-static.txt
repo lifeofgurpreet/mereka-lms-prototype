@@ -80,6 +80,7 @@ scripts/qa/verify-cicd-lessons-compliance.sh
 scripts/qa/verify-cicd-ios-build.sh
 scripts/qa/verify-cicd-tutor-plugin-test.sh
 scripts/qa/verify-ci-runner-policy.sh
+scripts/qa/verify-argocd-impersonation-guardrail.sh
 scripts/qa/verify-pr-handoff-guardrails.sh
 scripts/qa/verify-new-ci-static-entries.sh
 scripts/qa/verify-verification-catalog.sh

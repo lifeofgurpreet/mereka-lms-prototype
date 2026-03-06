@@ -478,6 +478,18 @@
       "tier": "exploratory_manual"
     },
     {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-infra",
+      "path": "scripts/qa/verify-argocd-impersonation-guardrail.sh",
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
       "cadence": "on_demand",
       "ci_binding": [],
       "owner": "platform-core",
@@ -5882,18 +5894,18 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 337,
+    "ci_static_bound": 338,
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 372,
+      "active": 373,
       "manual_only": 127
     },
     "tiers": {
       "exploratory_manual": 130,
       "periodic_runtime": 12,
-      "release_blocking": 357
+      "release_blocking": 358
     },
-    "total_verify_scripts": 499,
+    "total_verify_scripts": 500,
     "workflow_direct_bound": 49
   },
   "version": "1"
