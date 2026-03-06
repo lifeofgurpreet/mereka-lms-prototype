@@ -1,5 +1,14 @@
 # Migration Jobs
 
+> **IMPORTANT**: The one-shot migration Jobs in this directory are intentionally
+> excluded from `deploy/k8s/base/kustomization.yaml`.  They must be applied
+> manually during releases — **not** via `kubectl apply -k` or ArgoCD sync.
+>
+> Reason: Kubernetes Jobs are immutable once created.  Re-applying a completed Job
+> via kustomize/ArgoCD fails with `field is immutable`, breaking every sync after
+> the first run.  The `discovery-sync-cronjob.yaml` **is** included in kustomize
+> because it is a CronJob (recurring), not a one-shot Job.
+
 This directory contains one-shot database migration Jobs for every service that
 manages a schema.  Jobs run to completion once; they are NOT run on pod startup.
 

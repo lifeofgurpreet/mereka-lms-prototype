@@ -325,12 +325,9 @@
   },
 
   "jobs": [
-    "jobs/discovery-sync-cronjob.yaml",
-    "jobs/enterprise-catalog-migrate.yaml",
-    "jobs/enterprise-access-migrate.yaml",
-    "jobs/enterprise-subsidy-migrate.yaml",
-    "jobs/license-manager-migrate.yaml"
+    "jobs/discovery-sync-cronjob.yaml"
   ],
+  "_jobs_note": "Only recurring CronJobs are listed here and included in the kustomize render graph. One-shot migration Jobs (enterprise-catalog-migrate, enterprise-access-migrate, enterprise-subsidy-migrate, license-manager-migrate) live in deploy/k8s/base/jobs/ but are applied manually during releases. See deploy/k8s/base/jobs/README.md.",
 
   "migrations": {
     "registry": "migrations/registry.yaml",

@@ -30,10 +30,10 @@ resources:
 - apps/preview-redirect
 - apps/purchase-gateway
 - jobs/discovery-sync-cronjob.yaml
-- jobs/enterprise-catalog-migrate.yaml
-- jobs/enterprise-access-migrate.yaml
-- jobs/enterprise-subsidy-migrate.yaml
-- jobs/license-manager-migrate.yaml
+# Migration Jobs (enterprise-catalog, enterprise-access, enterprise-subsidy, license-manager)
+# are NOT included here. One-shot Jobs are immutable — re-applying fails with
+# "field is immutable". Apply them manually during releases only.
+# See deploy/k8s/base/jobs/README.md for the correct release sequence.
 
 # Mereka-branded OpenEdX images.
 # Base uses sentinel tag `pin-required` — this tag does NOT exist in the registry.
