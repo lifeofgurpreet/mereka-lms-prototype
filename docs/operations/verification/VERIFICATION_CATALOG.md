@@ -10,17 +10,17 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 ## Summary
 - Total `verify-*.sh` scripts: **503**
 - Archived deprecated scripts: **14**
-- CI static-bound scripts: **326**
+- CI static-bound scripts: **328**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 150
+- `exploratory_manual`: 148
 - `periodic_runtime`: 7
-- `release_blocking`: 346
+- `release_blocking`: 348
 
 ### Status Distribution
-- `active`: 353
-- `deprecated_candidate`: 23
+- `active`: 355
+- `deprecated_candidate`: 21
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -29,8 +29,6 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-audit-logging.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-branding-evidence-a11y-contract.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-branding-evidence-screenshot-contract.sh` (owner: `frontend-platform`, refs: 1)
-- `scripts/qa/verify-cicd-ios-build.sh` (owner: `frontend-platform`, refs: 1)
-- `scripts/qa/verify-cicd-tutor-plugin-test.sh` (owner: `platform-infra`, refs: 1)
 - `scripts/qa/verify-credentials-issuer.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-deprecation-discipline.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-ace-channels.sh` (owner: `platform-core`, refs: 1)
