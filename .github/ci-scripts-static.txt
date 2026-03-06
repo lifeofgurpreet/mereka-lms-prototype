@@ -150,6 +150,7 @@ scripts/qa/verify-cms-oauth2-secret-present.sh
 
 # ── Branding & design tokens ─────────────────────────────────────────────────
 scripts/qa/verify-design-tokens.sh
+scripts/qa/verify-design-token-ci.sh
 scripts/qa/verify-design-tokens-migration.sh
 scripts/qa/verify-design-token-ci.sh
 scripts/qa/verify-design-token-usage.sh
@@ -420,6 +421,7 @@ scripts/qa/verify-forum-moderation.sh
 
 # ── Video & Mux ──────────────────────────────────────────────────────
 scripts/migrations/mct/verify_video_mapping.sh
+scripts/qa/verify-no-mux-asset-ids.sh
 scripts/qa/verify-mux-upload-completeness.sh
 scripts/qa/verify-mux-video-upload.sh
 scripts/qa/verify-no-mux-asset-ids.sh
