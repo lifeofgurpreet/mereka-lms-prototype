@@ -13,6 +13,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 TARGET_REPO="${TARGET_REPO:-}"
 TARGET_FILE_REL="apps/mereka-lms/base/kustomization.yaml"
@@ -62,8 +63,8 @@ fi
 
 if [[ -z "$TARGET_REPO" ]]; then
   for candidate in \
-    /home/gurpreet/projects/k8s/infrastructure \
-    /home/gurpreet/projects/k8s/bbi-infrastructure; do
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${WORKSPACE_ROOT}/bbi-infrastructure"; do
     if [[ -f "$candidate/$TARGET_FILE_REL" ]]; then
       TARGET_REPO="$candidate"
       break
