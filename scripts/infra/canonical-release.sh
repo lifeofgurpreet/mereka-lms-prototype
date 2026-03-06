@@ -23,8 +23,9 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # ── AC-OPS-082: Canonical path and worktree enforcement ──────────────
 
-CANONICAL_PATH="/home/gurpreet/projects/k8s/mereka-lms"
-CANONICAL_BRANCH="main"
+DEFAULT_CANONICAL_PATH="$(git -C "$REPO_ROOT" worktree list --porcelain 2>/dev/null | awk '/^worktree /{sub(/^worktree /, ""); print; exit}')"
+CANONICAL_PATH="${CANONICAL_PATH:-${DEFAULT_CANONICAL_PATH:-$REPO_ROOT}}"
+CANONICAL_BRANCH="${CANONICAL_BRANCH:-main}"
 CACHE_DIR="${REPO_ROOT}/var/build-cache"
 
 RED='\033[0;31m'
