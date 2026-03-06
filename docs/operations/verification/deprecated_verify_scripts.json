@@ -36,6 +36,12 @@
       "archived_at": "2026-03-06",
       "reason": "Unbound exploratory check with zero references; strict-mode posture is already enforced by release-gate scripts and repo lint contracts.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-ux-audit-coverage.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with zero references and stale section contracts that no longer match the active UI/UX audit report.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ]
 }

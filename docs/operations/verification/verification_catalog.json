@@ -35,6 +35,12 @@
       "path": "scripts/qa/deprecated/verify-bash-strict-mode.sh",
       "reason": "Unbound exploratory check with zero references; strict-mode posture is already enforced by release-gate scripts and repo lint contracts.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-03-06",
+      "path": "scripts/qa/deprecated/verify-ux-audit-coverage.sh",
+      "reason": "Unbound exploratory check with zero references and stale section contracts that no longer match the active UI/UX audit report.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ],
   "entrypoints": [
@@ -5594,16 +5600,6 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "frontend-platform",
-      "path": "scripts/qa/verify-ux-audit-coverage.sh",
-      "reference_count": 0,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
-    },
-    {
       "cadence": "per_pr_and_push",
       "ci_binding": [
         "ci_static"
@@ -5885,19 +5881,19 @@
     }
   ],
   "summary": {
-    "archived_deprecated_scripts": 6,
+    "archived_deprecated_scripts": 7,
     "ci_static_bound": 324,
     "statuses": {
       "active": 351,
-      "deprecated_candidate": 33,
+      "deprecated_candidate": 32,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 160,
+      "exploratory_manual": 159,
       "periodic_runtime": 7,
       "release_blocking": 344
     },
-    "total_verify_scripts": 511,
+    "total_verify_scripts": 510,
     "workflow_direct_bound": 49
   },
   "version": "1"

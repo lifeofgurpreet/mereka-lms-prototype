@@ -8,19 +8,19 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **511**
-- Archived deprecated scripts: **6**
+- Total `verify-*.sh` scripts: **510**
+- Archived deprecated scripts: **7**
 - CI static-bound scripts: **324**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 160
+- `exploratory_manual`: 159
 - `periodic_runtime`: 7
 - `release_blocking`: 344
 
 ### Status Distribution
 - `active`: 351
-- `deprecated_candidate`: 33
+- `deprecated_candidate`: 32
 - `manual_only`: 127
 
 ## Deprecated Candidates
@@ -57,7 +57,6 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-spec-dedupe-normalize.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-tutor-config-path-contract.sh` (owner: `platform-infra`, refs: 0)
 - `scripts/qa/verify-tutor-patches-inventory.sh` (owner: `platform-infra`, refs: 1)
-- `scripts/qa/verify-ux-audit-coverage.sh` (owner: `frontend-platform`, refs: 0)
 - `scripts/qa/verify-video-protection.sh` (owner: `migration-platform`, refs: 1)
 
 ## Archived Deprecated Scripts
@@ -68,6 +67,7 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/deprecated/verify-data-retention.sh` → `scripts/qa/run-release-verification-gates.sh` (Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.)
 - `scripts/qa/deprecated/verify-devcontainer.sh` → `scripts/qa/run-release-verification-gates.sh` (Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.)
 - `scripts/qa/deprecated/verify-bash-strict-mode.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with zero references; strict-mode posture is already enforced by release-gate scripts and repo lint contracts.)
+- `scripts/qa/deprecated/verify-ux-audit-coverage.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with zero references and stale section contracts that no longer match the active UI/UX audit report.)
 
 ## Lifecycle Policy
 - `release_blocking`: MUST stay bound to CI static or direct workflow execution.
