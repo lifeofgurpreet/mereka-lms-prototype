@@ -60,7 +60,7 @@ OFFLINE CHECKS (always run):
   - YAML validity for all manifests
   - Deployment spec: name, probes, ports, securityContext, secrets, resources
   - Service: ClusterIP type, port 8080
-  - ExternalSecret: all 6 GCP secret mappings present
+  - ExternalSecret: all 7 GCP secret mappings present
   - HPA: target + CPU utilisation configured
   - PostgreSQL: Recreate strategy, 5Gi PVC, readiness probe
   - kustomization.yaml references purchase-gateway path
@@ -159,6 +159,7 @@ check_contains "$DEPLOYMENT" "runAsGroup: 1000"                  "Pod securityCo
 check_contains "$DEPLOYMENT" "allowPrivilegeEscalation: false"   "allowPrivilegeEscalation: false"
 check_contains "$DEPLOYMENT" "secretKeyRef"                      "Secrets injected via secretKeyRef"
 check_contains "$DEPLOYMENT" "payments-gateway-secrets"          "References payments-gateway-secrets secret"
+check_contains "$DEPLOYMENT" "ADMIN_API_KEY"                     "ADMIN_API_KEY env var present"
 check_contains "$DEPLOYMENT" "ENABLE_GATEWAY_FULFILLMENT"        "ENABLE_GATEWAY_FULFILLMENT env var present"
 check_contains "$DEPLOYMENT" "TENANT_ISOLATION_ENABLED"          "TENANT_ISOLATION_ENABLED env var present"
 check_contains "$DEPLOYMENT" 'command: \["python".*"alembic"'   "Alembic migration init container present" || \
@@ -179,10 +180,10 @@ check_contains "$SERVICE" "port: 8080"                "Service port 8080"
 check_contains "$SERVICE" "app.kubernetes.io/name: $DEPLOYMENT_NAME" "Service selector targets $DEPLOYMENT_NAME"
 
 # ---------------------------------------------------------------------------
-# Offline: ExternalSecret (6 GCP SM keys)
+# Offline: ExternalSecret (7 GCP SM keys)
 # ---------------------------------------------------------------------------
 echo ""
-echo "[4/9] ExternalSecret — 6 GCP Secret Manager references"
+echo "[4/9] ExternalSecret — 7 GCP Secret Manager references"
 
 ES="$K8S_DIR/external-secrets.yaml"
 
@@ -191,6 +192,7 @@ check_contains "$ES" "MEREKA_LMS_PAYMENTS_GATEWAY_DATABASE_URL"        "GCP key:
 check_contains "$ES" "MEREKA_LMS_STRIPE_SECRET_KEY"                    "GCP key: STRIPE_SECRET_KEY"
 check_contains "$ES" "MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY"        "GCP key: STRIPE_WEBHOOK_SECRET_GATEWAY"
 check_contains "$ES" "MEREKA_LMS_PAYMENTS_GATEWAY_OAUTH2_SECRET"       "GCP key: OAUTH2_SECRET"
+check_contains "$ES" "MEREKA_LMS_ADMIN_API_KEY"                        "GCP key: ADMIN_API_KEY"
 check_contains "$ES" "MEREKA_LMS_PAYMENTS_GATEWAY_POSTGRESQL_PASSWORD" "GCP key: POSTGRESQL_PASSWORD"
 check_contains "$ES" "gcp-secret-manager"                              "Uses gcp-secret-manager ClusterSecretStore"
 check_contains "$ES" "refreshInterval: 1h"                             "refreshInterval: 1h"
@@ -263,10 +265,12 @@ check_contains "$PGW_KUSTOMIZATION" "postgresql-pvc.yaml"        "kustomization.
 check_contains "$PGW_KUSTOMIZATION" "postgresql-service.yaml"    "kustomization.yaml includes postgresql-service.yaml"
 
 if [[ -f "$BASE_KUSTOMIZATION" ]]; then
-  if grep -q "services/purchase-gateway/k8s" "$BASE_KUSTOMIZATION"; then
-    pass "deploy/k8s/base/kustomization.yaml references services/purchase-gateway/k8s"
+  if grep -q "apps/purchase-gateway" "$BASE_KUSTOMIZATION"; then
+    pass "deploy/k8s/base/kustomization.yaml references apps/purchase-gateway"
+  elif grep -q "services/purchase-gateway/k8s" "$BASE_KUSTOMIZATION"; then
+    pass "deploy/k8s/base/kustomization.yaml references services/purchase-gateway/k8s (legacy layout)"
   else
-    fail "deploy/k8s/base/kustomization.yaml does NOT reference services/purchase-gateway/k8s"
+    fail "deploy/k8s/base/kustomization.yaml does not reference purchase-gateway path"
   fi
 else
   skip "Base kustomization not found: $BASE_KUSTOMIZATION"
@@ -393,10 +397,17 @@ else
     if kubectl get secret "payments-gateway-secrets" -n "$NAMESPACE" &>/dev/null; then
       SECRET_KEYS=$(kubectl get secret "payments-gateway-secrets" -n "$NAMESPACE" \
         -o jsonpath='{.data}' 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d))" 2>/dev/null || echo "0")
-      if [[ "${SECRET_KEYS:-0}" -ge 6 ]]; then
-        pass "payments-gateway-secrets: ${SECRET_KEYS} keys synced (expected >= 6)"
+      if [[ "${SECRET_KEYS:-0}" -ge 7 ]]; then
+        pass "payments-gateway-secrets: ${SECRET_KEYS} keys synced (expected >= 7)"
       else
-        fail "payments-gateway-secrets: only ${SECRET_KEYS:-0} keys (expected >= 6)"
+        fail "payments-gateway-secrets: only ${SECRET_KEYS:-0} keys (expected >= 7)"
+      fi
+      ADMIN_API_KEY_VALUE=$(kubectl get secret "payments-gateway-secrets" -n "$NAMESPACE" \
+        -o jsonpath='{.data.ADMIN_API_KEY}' 2>/dev/null || echo "")
+      if [[ -n "$ADMIN_API_KEY_VALUE" ]]; then
+        pass "payments-gateway-secrets includes ADMIN_API_KEY key"
+      else
+        fail "payments-gateway-secrets missing ADMIN_API_KEY key"
       fi
     else
       fail "K8s Secret payments-gateway-secrets not found (ExternalSecret not synced?)"

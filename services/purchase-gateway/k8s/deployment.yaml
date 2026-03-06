@@ -83,6 +83,11 @@ spec:
                 secretKeyRef:
                   name: payments-gateway-secrets
                   key: SECRET_KEY
+            - name: ADMIN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: payments-gateway-secrets
+                  key: ADMIN_API_KEY
             - name: ENABLE_GATEWAY_FULFILLMENT
               value: "true"
             - name: FULFILLMENT_WORKER_ENABLED
