@@ -3,7 +3,7 @@
 # @spec: ecommerce-purchase-gateway_spec.md
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -495,6 +495,62 @@ async def test_list_orders_with_tenant_filter(mock_db):
 
     assert mock_db.execute.await_count == 1
     assert result == [order]
+
+
+@pytest.mark.asyncio
+async def test_list_orders_filters_by_date_range(mock_db):
+    """list_orders applies created_from/created_to filters when provided."""
+    order = _make_order(created_at=datetime.now(UTC))
+    mock_db.execute.return_value = _mock_scalars_result([order])
+
+    request = MagicMock()
+    request.state = MagicMock(spec=[])
+
+    created_from = datetime.now(UTC) - timedelta(days=2)
+    created_to = datetime.now(UTC)
+    result = await list_orders(
+        request=request,
+        db=mock_db,
+        tenant_id=None,
+        status=None,
+        buyer_email=None,
+        created_from=created_from,
+        created_to=created_to,
+        limit=50,
+        offset=0,
+    )
+
+    assert result == [order]
+    executed_query = str(mock_db.execute.await_args.args[0])
+    assert "orders.created_at >=" in executed_query
+    assert "orders.created_at <=" in executed_query
+
+
+@pytest.mark.asyncio
+async def test_list_orders_invalid_date_range_returns_400(mock_db):
+    """list_orders rejects created_from values that are after created_to."""
+    request = MagicMock()
+    request.state = MagicMock(spec=[])
+
+    created_from = datetime.now(UTC)
+    created_to = created_from - timedelta(days=1)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await list_orders(
+            request=request,
+            db=mock_db,
+            tenant_id=None,
+            status=None,
+            buyer_email=None,
+            created_from=created_from,
+            created_to=created_to,
+            limit=50,
+            offset=0,
+        )
+
+    assert exc_info.value.status_code == 400
+    assert "created_from" in exc_info.value.detail
+    mock_db.execute.assert_not_awaited()
 
 
 # ---------------------------------------------------------------------------

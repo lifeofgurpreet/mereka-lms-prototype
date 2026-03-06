@@ -3,7 +3,7 @@
 # @spec: ecommerce-purchase-gateway_spec.md
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -342,6 +342,59 @@ async def test_list_orders_with_valid_auth_returns_200(mock_settings, client):
 
     assert resp.status_code == 200
     assert resp.json() == []
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_list_orders_with_date_range_filters_returns_200(mock_settings, client):
+    """GET /admin/orders/ accepts created_from and created_to query filters."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    scalars = MagicMock()
+    scalars.all.return_value = []
+    mock_result = MagicMock()
+    mock_result.scalars.return_value = scalars
+
+    mock_db = AsyncMock()
+    mock_db.execute.return_value = mock_result
+    _override_db(mock_db)
+    try:
+        created_from = (datetime.now(UTC) - timedelta(days=7)).isoformat()
+        created_to = datetime.now(UTC).isoformat()
+        resp = await client.get(
+            "/api/v1/admin/orders/",
+            headers=HEADERS,
+            params={"created_from": created_from, "created_to": created_to},
+        )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_list_orders_invalid_date_range_returns_400(mock_settings, client):
+    """GET /admin/orders/ returns 400 when created_from is after created_to."""
+    mock_settings.ADMIN_API_KEY = VALID_API_KEY
+
+    mock_db = AsyncMock()
+    _override_db(mock_db)
+    try:
+        created_from = datetime.now(UTC).isoformat()
+        created_to = (datetime.now(UTC) - timedelta(days=1)).isoformat()
+        resp = await client.get(
+            "/api/v1/admin/orders/",
+            headers=HEADERS,
+            params={"created_from": created_from, "created_to": created_to},
+        )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 400
+    assert "created_from" in resp.json()["detail"]
+    mock_db.execute.assert_not_awaited()
 
 
 @pytest.mark.asyncio

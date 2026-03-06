@@ -282,6 +282,8 @@ async def list_orders(
     tenant_id: uuid.UUID | None = Query(default=None),
     status: str | None = Query(default=None),
     buyer_email: str | None = Query(default=None),
+    created_from: datetime | None = None,
+    created_to: datetime | None = None,
     limit: int = Query(default=50, le=200),
     offset: int = Query(default=0, ge=0),
 ):
@@ -300,6 +302,18 @@ async def list_orders(
 
     if buyer_email:
         query = query.where(Order.buyer_email == buyer_email)
+
+    if created_from and created_to and created_from > created_to:
+        raise HTTPException(
+            status_code=400,
+            detail="created_from must be less than or equal to created_to",
+        )
+
+    if created_from:
+        query = query.where(Order.created_at >= created_from)
+
+    if created_to:
+        query = query.where(Order.created_at <= created_to)
 
     query = query.order_by(Order.created_at.desc()).offset(offset).limit(limit)
 
