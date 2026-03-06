@@ -41,6 +41,12 @@
       "path": "scripts/qa/deprecated/verify-ux-audit-coverage.sh",
       "reason": "Unbound exploratory check with zero references and stale section contracts that no longer match the active UI/UX audit report.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-03-06",
+      "path": "scripts/qa/deprecated/verify-k8s-validation-job.sh",
+      "reason": "Unbound exploratory check with stale kubeconform bootstrap assumptions and broken pass/fail counters under strict-mode shell semantics.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ],
   "entrypoints": [
@@ -2434,16 +2440,6 @@
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
-    },
-    {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "platform-infra",
-      "path": "scripts/qa/verify-k8s-validation-job.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5883,19 +5879,19 @@
     }
   ],
   "summary": {
-    "archived_deprecated_scripts": 7,
+    "archived_deprecated_scripts": 8,
     "ci_static_bound": 325,
     "statuses": {
       "active": 352,
-      "deprecated_candidate": 31,
+      "deprecated_candidate": 30,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 158,
+      "exploratory_manual": 157,
       "periodic_runtime": 7,
       "release_blocking": 345
     },
-    "total_verify_scripts": 510,
+    "total_verify_scripts": 509,
     "workflow_direct_bound": 49
   },
   "version": "1"
