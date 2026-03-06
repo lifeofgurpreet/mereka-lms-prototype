@@ -39,6 +39,20 @@ compare_file() {
   fi
 }
 
+verify_theme_tokens_sync() {
+  local generator="$REPO_ROOT/scripts/branding/generate-tokens-from-canonical.sh"
+  if [[ ! -x "$generator" ]]; then
+    fail "theme tokens sync contract missing generator ($generator)"
+    return
+  fi
+
+  if "$generator" --check >/dev/null 2>&1; then
+    pass "theme tokens sync"
+  else
+    fail "theme tokens sync drift detected"
+  fi
+}
+
 FONTS=(
   Poppins-Regular.woff2
   Poppins-SemiBold.woff2
@@ -181,10 +195,7 @@ for target_dir in "${THEME_FONT_TARGETS[@]}"; do
   done
 done
 
-compare_file \
-  "$REPO_ROOT/assets/branding/tokens.css" \
-  "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css" \
-  "theme tokens sync"
+verify_theme_tokens_sync
 
 compare_file \
   "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css" \
