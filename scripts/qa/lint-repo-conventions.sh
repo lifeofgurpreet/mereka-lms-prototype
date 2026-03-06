@@ -341,7 +341,13 @@ check_architectural_boundaries() {
   local missing_script_refs=0
   local missing_script_warns=0
   local missing_script_warn_duplicates=0
+  local missing_script_warn_limit="${MISSING_PLAN_WARN_LIMIT:-20}"
   declare -A seen_missing_plan_refs=()
+  declare -a missing_plan_warn_samples=()
+
+  if ! [[ "$missing_script_warn_limit" =~ ^[0-9]+$ ]]; then
+    missing_script_warn_limit=20
+  fi
   if [[ -d specs ]]; then
     while IFS= read -r -d '' file; do
       local basename
@@ -362,9 +368,11 @@ check_architectural_boundaries() {
           # Only warn for plan/testplan files (future work), fail for spec files
           if [[ "$basename" =~ _plan\.md$ ]] || [[ "$basename" =~ _testplan\.md$ ]]; then
             if [[ -z "${seen_missing_plan_refs[$script_path]+x}" ]]; then
-              warn "Architectural boundaries: Plan references non-existent file (future work): $script_path"
               seen_missing_plan_refs[$script_path]=1
               missing_script_warns=$((missing_script_warns + 1))
+              if [[ ${#missing_plan_warn_samples[@]} -lt "$missing_script_warn_limit" ]]; then
+                missing_plan_warn_samples+=("$script_path")
+              fi
             else
               missing_script_warn_duplicates=$((missing_script_warn_duplicates + 1))
             fi
@@ -379,6 +387,17 @@ check_architectural_boundaries() {
 
   if [[ $missing_script_refs -eq 0 ]] && [[ -d specs ]]; then
     pass "Architectural boundaries: All spec-referenced scripts exist"
+  fi
+  if [[ $missing_script_warns -gt 0 ]]; then
+    warn "Architectural boundaries: $missing_script_warns unique future-work plan refs point to non-existent scripts (non-blocking)"
+    for sample in "${missing_plan_warn_samples[@]}"; do
+      warn "Architectural boundaries: Sample missing future-work script ref: $sample"
+    done
+    if [[ $missing_script_warns -gt "$missing_script_warn_limit" ]]; then
+      local suppressed_unique
+      suppressed_unique=$((missing_script_warns - missing_script_warn_limit))
+      warn "Architectural boundaries: Suppressed $suppressed_unique additional unique future-work script warnings (set MISSING_PLAN_WARN_LIMIT to adjust)"
+    fi
   fi
   if [[ $missing_script_warn_duplicates -gt 0 ]]; then
     pass "Architectural boundaries: Suppressed $missing_script_warn_duplicates duplicate future-work missing-file warnings"
