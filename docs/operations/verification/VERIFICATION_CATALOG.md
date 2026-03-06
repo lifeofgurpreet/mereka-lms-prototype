@@ -12,28 +12,24 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - Archived deprecated scripts: **21**
 - CI static-bound scripts: **334**
 - Workflow-direct bound scripts: **49**
+- Status overrides applied: **5**
 
 ### Tier Distribution
-- `exploratory_manual`: 135
-- `periodic_runtime`: 7
+- `exploratory_manual`: 130
+- `periodic_runtime`: 12
 - `release_blocking`: 354
 
 ### Status Distribution
-- `active`: 361
-- `deprecated_candidate`: 8
+- `active`: 366
+- `deprecated_candidate`: 3
 - `manual_only`: 127
 
 ## Deprecated Candidates
 
 Scripts currently not CI-bound and with near-zero references:
-- `scripts/qa/verify-credentials-issuer.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-email-preferences.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-libraries-core.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-notifications-inapp.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-restore-drill.sh` (owner: `sre-security`, refs: 1)
 - `scripts/qa/verify-spec-dedupe-normalize.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-video-protection.sh` (owner: `migration-platform`, refs: 1)
 
 ## Archived Deprecated Scripts
 

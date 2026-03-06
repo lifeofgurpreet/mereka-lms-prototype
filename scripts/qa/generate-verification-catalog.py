@@ -24,6 +24,7 @@ TEXT_SUFFIXES = {
     ".txt",
 }
 SCRIPT_REF_PATTERN = re.compile(r"scripts/[A-Za-z0-9_./-]*verify-[A-Za-z0-9_./-]*\.sh")
+STATUS_OVERRIDE_KEYS = {"owner", "tier", "cadence", "severity", "status"}
 
 ENTRYPOINTS = [
     {
@@ -54,6 +55,36 @@ class ScriptMeta:
     ci_binding: list[str]
     reference_count: int
     status: str
+
+
+def load_status_overrides(repo_root: Path) -> dict[str, dict[str, str]]:
+    overrides_path = (
+        repo_root / "docs/operations/verification/verification_status_overrides.json"
+    )
+    if not overrides_path.exists():
+        return {}
+
+    payload = json.loads(overrides_path.read_text(encoding="utf-8"))
+    raw_overrides = payload.get("overrides", [])
+    if not isinstance(raw_overrides, list):
+        return {}
+
+    normalized: dict[str, dict[str, str]] = {}
+    for item in raw_overrides:
+        if not isinstance(item, dict):
+            continue
+        path = item.get("path")
+        if not isinstance(path, str) or not path:
+            continue
+
+        cleaned = {
+            key: str(value)
+            for key, value in item.items()
+            if key in STATUS_OVERRIDE_KEYS and isinstance(value, str) and value
+        }
+        if cleaned:
+            normalized[path] = cleaned
+    return normalized
 
 
 def normalize_lines(path: Path) -> list[str]:
@@ -174,9 +205,11 @@ def build_catalog(repo_root: Path) -> dict:
         text = workflow.read_text(encoding="utf-8", errors="ignore")
         workflow_refs.update(SCRIPT_REF_PATTERN.findall(text))
 
+    status_overrides = load_status_overrides(repo_root)
     reference_counts = compute_reference_counts(repo_root, script_paths)
 
     catalog_entries: list[dict] = []
+    overrides_applied = 0
     for script_path in script_paths:
         ci_binding: list[str] = []
         if script_path in ci_static:
@@ -190,15 +223,19 @@ def build_catalog(repo_root: Path) -> dict:
             reference_counts.get(script_path, 0),
         )
 
+        override = status_overrides.get(script_path, {})
+        if override:
+            overrides_applied += 1
+
         entry = ScriptMeta(
             path=script_path,
-            owner=classify_owner(script_path),
-            tier=tier,
-            cadence=cadence,
-            severity=severity,
+            owner=override.get("owner", classify_owner(script_path)),
+            tier=override.get("tier", tier),
+            cadence=override.get("cadence", cadence),
+            severity=override.get("severity", severity),
             ci_binding=ci_binding,
             reference_count=reference_counts.get(script_path, 0),
-            status=status,
+            status=override.get("status", status),
         )
         catalog_entries.append(
             {
@@ -232,6 +269,7 @@ def build_catalog(repo_root: Path) -> dict:
             "workflow_direct_bound": sum(
                 1 for x in catalog_entries if "workflow_direct" in x["ci_binding"]
             ),
+            "status_overrides_applied": overrides_applied,
         },
         "scripts": catalog_entries,
         "deprecated_archive": deprecated_manifest,
@@ -262,6 +300,7 @@ def render_markdown(catalog: dict) -> str:
             f"- Archived deprecated scripts: **{summary['archived_deprecated_scripts']}**",
             f"- CI static-bound scripts: **{summary['ci_static_bound']}**",
             f"- Workflow-direct bound scripts: **{summary['workflow_direct_bound']}**",
+            f"- Status overrides applied: **{summary['status_overrides_applied']}**",
             "",
             "### Tier Distribution",
         ]
@@ -355,3 +394,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+    status_overrides = load_status_overrides(repo_root)

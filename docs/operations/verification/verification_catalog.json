@@ -1179,14 +1179,14 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "scheduled_or_post_deploy",
       "ci_binding": [],
       "owner": "platform-core",
       "path": "scripts/qa/verify-credentials-issuer.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "medium",
+      "status": "active",
+      "tier": "periodic_runtime"
     },
     {
       "cadence": "scheduled_or_post_deploy",
@@ -1665,14 +1665,14 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "scheduled_or_post_deploy",
       "ci_binding": [],
       "owner": "platform-core",
       "path": "scripts/qa/verify-email-preferences.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "medium",
+      "status": "active",
+      "tier": "periodic_runtime"
     },
     {
       "cadence": "on_demand",
@@ -3494,14 +3494,14 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "scheduled_or_post_deploy",
       "ci_binding": [],
       "owner": "platform-core",
       "path": "scripts/qa/verify-notifications-inapp.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "medium",
+      "status": "active",
+      "tier": "periodic_runtime"
     },
     {
       "cadence": "per_pr_and_push",
@@ -4424,14 +4424,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "scheduled_or_post_deploy",
       "ci_binding": [],
       "owner": "sre-security",
       "path": "scripts/qa/verify-restore-drill.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "medium",
+      "status": "active",
+      "tier": "periodic_runtime"
     },
     {
       "cadence": "on_demand",
@@ -5728,14 +5728,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "scheduled_or_post_deploy",
       "ci_binding": [],
       "owner": "migration-platform",
       "path": "scripts/qa/verify-video-protection.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "medium",
+      "status": "active",
+      "tier": "periodic_runtime"
     },
     {
       "cadence": "on_demand",
@@ -5847,14 +5847,15 @@
   "summary": {
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 334,
+    "status_overrides_applied": 5,
     "statuses": {
-      "active": 361,
-      "deprecated_candidate": 8,
+      "active": 366,
+      "deprecated_candidate": 3,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 135,
-      "periodic_runtime": 7,
+      "exploratory_manual": 130,
+      "periodic_runtime": 12,
       "release_blocking": 354
     },
     "total_verify_scripts": 496,
