@@ -14,6 +14,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 # Source shared config for domain variables
 source "$REPO_ROOT/scripts/shared/config.sh"
@@ -56,7 +57,17 @@ skip_() { SKIP=$((SKIP + 1)); printf "SKIP: %s\n" "$1"; }
 
 # Key file paths
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
-BBI_PROD="/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+BBI_PROD="${BBI_PROD:-}"
+if [[ -z "$BBI_PROD" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py" \
+    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"; do
+    if [[ -f "$candidate" ]]; then
+      BBI_PROD="$candidate"
+      break
+    fi
+  done
+fi
 EXTERNAL_SECRETS="$REPO_ROOT/deploy/k8s/base/secrets/external-secrets.yaml"
 SAML_KEYGEN="$REPO_ROOT/scripts/tenants/generate-saml-keypair.sh"
 MFA_SCRIPT="$REPO_ROOT/scripts/infra/ensure-authentik-admin-mfa.sh"
