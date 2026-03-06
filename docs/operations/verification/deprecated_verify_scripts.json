@@ -30,6 +30,12 @@
       "archived_at": "2026-03-05",
       "reason": "Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-bash-strict-mode.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with zero references; strict-mode posture is already enforced by release-gate scripts and repo lint contracts.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ]
 }

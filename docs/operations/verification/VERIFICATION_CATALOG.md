@@ -8,26 +8,25 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **512**
-- Archived deprecated scripts: **5**
+- Total `verify-*.sh` scripts: **511**
+- Archived deprecated scripts: **6**
 - CI static-bound scripts: **324**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 161
+- `exploratory_manual`: 160
 - `periodic_runtime`: 7
 - `release_blocking`: 344
 
 ### Status Distribution
 - `active`: 351
-- `deprecated_candidate`: 34
+- `deprecated_candidate`: 33
 - `manual_only`: 127
 
 ## Deprecated Candidates
 
 Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-audit-logging.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-bash-strict-mode.sh` (owner: `platform-core`, refs: 0)
 - `scripts/qa/verify-branding-evidence-a11y-contract.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-branding-evidence-screenshot-contract.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-cicd-image-build.sh` (owner: `frontend-platform`, refs: 1)
@@ -68,6 +67,7 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/deprecated/verify-capacity-planning.sh` → `scripts/qa/run-release-verification-gates.sh` (Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.)
 - `scripts/qa/deprecated/verify-data-retention.sh` → `scripts/qa/run-release-verification-gates.sh` (Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.)
 - `scripts/qa/deprecated/verify-devcontainer.sh` → `scripts/qa/run-release-verification-gates.sh` (Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.)
+- `scripts/qa/deprecated/verify-bash-strict-mode.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check with zero references; strict-mode posture is already enforced by release-gate scripts and repo lint contracts.)
 
 ## Lifecycle Policy
 - `release_blocking`: MUST stay bound to CI static or direct workflow execution.

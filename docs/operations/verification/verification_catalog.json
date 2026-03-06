@@ -29,6 +29,12 @@
       "path": "scripts/qa/deprecated/verify-devcontainer.sh",
       "reason": "Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-03-06",
+      "path": "scripts/qa/deprecated/verify-bash-strict-mode.sh",
+      "reason": "Unbound exploratory check with zero references; strict-mode posture is already enforced by release-gate scripts and repo lint contracts.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ],
   "entrypoints": [
@@ -569,16 +575,6 @@
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
-    },
-    {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "platform-core",
-      "path": "scripts/qa/verify-bash-strict-mode.sh",
-      "reference_count": 0,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -5889,19 +5885,19 @@
     }
   ],
   "summary": {
-    "archived_deprecated_scripts": 5,
+    "archived_deprecated_scripts": 6,
     "ci_static_bound": 324,
     "statuses": {
       "active": 351,
-      "deprecated_candidate": 34,
+      "deprecated_candidate": 33,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 161,
+      "exploratory_manual": 160,
       "periodic_runtime": 7,
       "release_blocking": 344
     },
-    "total_verify_scripts": 512,
+    "total_verify_scripts": 511,
     "workflow_direct_bound": 49
   },
   "version": "1"
