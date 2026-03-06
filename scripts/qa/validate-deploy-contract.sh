@@ -135,11 +135,11 @@ if [[ $STRICT -eq 1 ]]; then
     fail_check "no-environment-domains-in-base"
   fi
 else
-  echo "  Mode: WARN (use --strict to make blocking; expected to fail until PR-04 lands)"
+  echo "  Mode: WARN (use --strict to enforce)"
   if run_sub "${QA_DIR}/no_environment_domains_in_base.sh" "${REPO_ROOT}/deploy/k8s/base"; then
     pass_check "no-environment-domains-in-base"
   else
-    warn_check "no-environment-domains-in-base" "environment domains in base/ (non-blocking until PR-04)"
+    warn_check "no-environment-domains-in-base" "environment domains found in base/"
   fi
 fi
 
@@ -154,11 +154,11 @@ if [[ $STRICT -eq 1 ]]; then
     fail_check "no-upward-relative-paths"
   fi
 else
-  echo "  Mode: WARN (use --strict to make blocking; expected to fail until PR-04 lands)"
+  echo "  Mode: WARN (use --strict to enforce)"
   if run_sub "${QA_DIR}/no_upward_relative_paths_in_kustomize.sh" "${REPO_ROOT}/deploy/k8s"; then
     pass_check "no-upward-relative-paths"
   else
-    warn_check "no-upward-relative-paths" "upward traversal paths in kustomize (non-blocking until PR-04)"
+    warn_check "no-upward-relative-paths" "upward traversal paths found in kustomize files"
   fi
 fi
 
