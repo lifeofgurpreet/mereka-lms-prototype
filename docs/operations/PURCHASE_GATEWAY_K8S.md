@@ -51,17 +51,35 @@ Referenced by `deploy/k8s/base/kustomization.yaml` as `../../../services/purchas
 
 All secrets sync via `ExternalSecret` -> `ClusterSecretStore: gcp-secret-manager` (project `bbi-k8`, not `mereka-lms`).
 
-### Dark Launch Mode
+### Caddy Route
 
-The gateway is deployed but **not yet handling live traffic**:
+All Purchase Gateway traffic enters the cluster through the LMS Caddy reverse proxy:
 
-```yaml
-# deploy/k8s/base/apps/.../deployment.yaml
-- name: ENABLE_GATEWAY_FULFILLMENT
-  value: "false"
+```
+# deploy/k8s/base/apps/caddy/Caddyfile (production/dev server block)
+handle /payments/* {
+    uri strip_prefix /payments
+    reverse_proxy payments-gateway:8080 { ... }
+}
 ```
 
-Set to `"true"` only after Stripe keys are verified and the Oscar decommission is complete (AC-027, AC-028).
+The `/payments` prefix is stripped before forwarding — paths map as follows:
+
+| External URL | Internal FastAPI route |
+|---|---|
+| `/payments/webhooks/stripe/` | `/webhooks/stripe/` |
+| `/payments/health/` | `/health/` |
+| `/payments/ready/` | `/ready/` |
+| `/payments/api/v1/checkout/` | `/api/v1/checkout/` |
+
+**Stripe webhook endpoints:**
+
+| Environment | Webhook URL |
+|---|---|
+| Production | `https://academyv2.mereka.io/payments/webhooks/stripe/` |
+| Dev | `https://academyv2.mereka.dev/payments/webhooks/stripe/` |
+
+Register these URLs in the Stripe Dashboard → Developers → Webhooks. The gateway validates the `Stripe-Signature` header using `STRIPE_WEBHOOK_SECRET` (synced from GCP SM `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY`).
 
 ---
 
@@ -264,31 +282,33 @@ kubectl rollout restart deployment/payments-gateway -n mereka-lms
 
 ---
 
-## Activating Live Traffic (ENABLE_GATEWAY_FULFILLMENT)
+## Live Traffic Status (ENABLE_GATEWAY_FULFILLMENT)
 
-The gateway ships with `ENABLE_GATEWAY_FULFILLMENT=false`. To activate:
+`ENABLE_GATEWAY_FULFILLMENT=true` is set in `services/purchase-gateway/k8s/deployment.yaml`.
 
-**Pre-conditions (all must be true before flipping the flag)**:
+The gateway is activated. Before routing real user traffic, confirm:
 
 - [ ] Real Stripe live-mode keys set in GCP SM (not test keys)
-- [ ] Stripe webhook endpoint configured and verified with a test event
+- [ ] Stripe webhook endpoint registered in the Stripe Dashboard:
+  - Production: `https://academyv2.mereka.io/payments/webhooks/stripe/`
+  - Dev: `https://academyv2.mereka.dev/payments/webhooks/stripe/`
+- [ ] Stripe sends a test event and the gateway returns `{"status": "received"}`
 - [ ] OAuth2 client `payments-gateway` registered in the LMS Django admin
 - [ ] `LMS_OAUTH_CLIENT_SECRET` set correctly in GCP SM
 - [ ] Legacy Oscar ecommerce service decommissioned (or routing rules updated)
 - [ ] `./scripts/qa/verify-purchase-gateway-k8s.sh --online` returns 0 FAILs
+- [ ] `./scripts/qa/verify-caddy-payments-route.sh` returns 0 FAILs
 - [ ] Load test run against staging (100 concurrent checkouts target)
 
-**To activate**:
-
-1. Edit `services/purchase-gateway/k8s/deployment.yaml`:
+To disable fulfillment without removing the service (dark launch mode):
 
 ```yaml
+# services/purchase-gateway/k8s/deployment.yaml
 - name: ENABLE_GATEWAY_FULFILLMENT
-  value: "true"    # was "false"
+  value: "false"
 ```
 
-2. Commit, push, and wait for ArgoCD sync.
-3. Verify with `./scripts/qa/verify-purchase-gateway-k8s.sh --online` — the dark launch guard check will now expect `true`.
+Commit, push, and wait for ArgoCD sync.
 
 ---
 
@@ -393,17 +413,25 @@ Logs are structured JSON and ship via Promtail to Loki. Filter by service in Gra
 
 ---
 
-## Verification Script
+## Verification Scripts
 
 ```bash
-# Offline manifest checks (CI-safe, no cluster needed)
+# Caddy /payments/* route — prefix stripping, upstream, path mapping (CI-safe)
+./scripts/qa/verify-caddy-payments-route.sh
+
+# K8s manifest checks — deployment, service, ExternalSecrets, HPA, PostgreSQL (CI-safe)
 ./scripts/qa/verify-purchase-gateway-k8s.sh
 
-# Full verification including live cluster
+# Full K8s verification including live cluster
 ./scripts/qa/verify-purchase-gateway-k8s.sh --online
 
-# Help
-./scripts/qa/verify-purchase-gateway-k8s.sh --help
+# Comprehensive gateway checks — scaffold, Stripe, models, security, resilience
+./scripts/qa/verify-purchase-gateway.sh
+./scripts/qa/verify-purchase-gateway-stripe.sh
+./scripts/qa/verify-purchase-gateway-security.sh
+./scripts/qa/verify-purchase-gateway-resilience.sh
+./scripts/qa/verify-purchase-gateway-models.sh
+./scripts/qa/verify-purchase-gateway-metrics-contract.sh
 ```
 
-Exit code 0 = all non-skipped checks passed.
+All scripts exit 0 when all non-skipped checks pass. All are included in `.github/ci-scripts-static.txt` and run on every PR.
