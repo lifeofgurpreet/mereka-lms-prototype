@@ -8,7 +8,7 @@
 #   1. Every script listed actually exists on disk
 #   2. No duplicate entries
 #   3. Every script is executable
-#   4. No scripts in scripts/qa/verify-*.sh are missing from the list
+#   4. Release-blocking verify scripts remain CI-bound (static list or direct workflow)
 
 set -euo pipefail
 
@@ -29,6 +29,7 @@ do_fail() { echo -e "${RED}FAIL${NC} $1"; FAILED=$((FAILED + 1)); }
 do_warn() { echo -e "${YELLOW}WARN${NC} $1"; WARNED=$((WARNED + 1)); }
 
 LIST_FILE="$REPO_ROOT/.github/ci-scripts-static.txt"
+CATALOG_JSON="$REPO_ROOT/docs/operations/verification/verification_catalog.json"
 
 echo "=== CI Script List Validation ==="
 echo
@@ -91,29 +92,98 @@ if [[ $non_exec -eq 0 ]]; then
   do_pass "All scripts are executable"
 fi
 
-# --- Check 4: Missing verify-*.sh scripts ---
-echo "--- Check 4: Missing scripts ---"
-listed_scripts=$(grep -v '^\s*$' "$LIST_FILE" | grep -v '^\s*#' | awk '{print $1}' | sort)
-missing=0
+# --- Check 4: Release-blocking coverage is enforced ---
+echo "--- Check 4: Release-blocking coverage ---"
+coverage_fail=0
+coverage_warn=0
+coverage_pass=0
 
-# Check scripts/qa/verify-*.sh that are NOT in the list
-# Exclude scripts that are intentionally not in CI (need cluster, need auth, etc.)
-SKIP_PATTERNS="verify-public-branding|verify-authenticated|verify-image-freshness"
+if [[ ! -f "$CATALOG_JSON" ]]; then
+  do_warn "Verification catalog missing; cannot evaluate release-blocking script coverage"
+else
+  while IFS=$'\t' read -r level message; do
+    [[ -z "${level:-}" ]] && continue
+    case "$level" in
+      FAIL)
+        do_fail "$message"
+        coverage_fail=$((coverage_fail + 1))
+        ;;
+      WARN)
+        do_warn "$message"
+        coverage_warn=$((coverage_warn + 1))
+        ;;
+      PASS)
+        do_pass "$message"
+        coverage_pass=$((coverage_pass + 1))
+        ;;
+      *)
+        do_warn "Unknown coverage checker output: $level $message"
+        coverage_warn=$((coverage_warn + 1))
+        ;;
+    esac
+  done < <(python3 - "$CATALOG_JSON" "$LIST_FILE" <<'PY'
+from __future__ import annotations
 
-while IFS= read -r script; do
-  rel_path="${script#$REPO_ROOT/}"
-  if ! echo "$listed_scripts" | grep -qF "$rel_path"; then
-    basename_script=$(basename "$script")
-    if echo "$basename_script" | grep -qE "$SKIP_PATTERNS"; then
-      continue  # Intentionally excluded
-    fi
-    do_warn "Not in CI: $rel_path"
-    missing=$((missing + 1))
-  fi
-done < <(find "$REPO_ROOT/scripts/qa" -maxdepth 1 -name "verify-*.sh" -type f | sort)
+import json
+import sys
+from pathlib import Path
 
-if [[ $missing -eq 0 ]]; then
-  do_pass "All verify-*.sh scripts are in CI list"
+catalog_path = Path(sys.argv[1])
+list_path = Path(sys.argv[2])
+
+catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+
+listed: set[str] = set()
+for raw in list_path.read_text(encoding="utf-8").splitlines():
+    stripped = raw.strip()
+    if not stripped or stripped.startswith("#"):
+        continue
+    clean = stripped.split(" #", 1)[0].strip()
+    if not clean:
+        continue
+    listed.add(clean.split()[0])
+
+release_scripts = []
+for entry in catalog.get("scripts", []):
+    path = entry.get("path", "")
+    if not path.startswith("scripts/qa/verify-"):
+        continue
+    if entry.get("tier") != "release_blocking":
+        continue
+    if entry.get("status") != "active":
+        continue
+    release_scripts.append(entry)
+
+failed = 0
+warned = 0
+for entry in sorted(release_scripts, key=lambda item: item.get("path", "")):
+    path = entry.get("path", "")
+    binding = set(entry.get("ci_binding") or [])
+    in_list = path in listed
+    workflow_direct = "workflow_direct" in binding
+    ci_static = "ci_static" in binding
+
+    if ci_static and not in_list:
+        print(f"FAIL\t{path}: catalog says ci_static but script is missing from ci-scripts-static.txt")
+        failed += 1
+        continue
+
+    if in_list and not ci_static:
+        print(f"WARN\t{path}: listed in ci-scripts-static.txt but catalog ci_binding lacks ci_static (regenerate catalog)")
+        warned += 1
+
+    if not in_list and not workflow_direct:
+        print(f"FAIL\t{path}: release-blocking script is not CI-bound (neither static list nor workflow_direct)")
+        failed += 1
+
+if failed == 0:
+    print(f"PASS\trelease-blocking coverage intact for {len(release_scripts)} scripts")
+else:
+    print(f"FAIL\trelease-blocking coverage failures: {failed}")
+if warned > 0:
+    print(f"WARN\trelease-blocking coverage warnings: {warned}")
+PY
+)
 fi
 
 # --- Summary ---

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-RS-001, AC-RS-002, AC-RS-003, AC-RS-004
+# @spec: repository-structure_spec.md
 # verify-repo-hygiene-artifacts.sh
 #
 # Enforces repository hygiene by blocking tracked runtime artifacts, local caches,
@@ -54,6 +56,15 @@ while IFS= read -r -d '' path; do
       ;;
     *__pycache__/*|*/__pycache__)
       fail "$path is tracked bytecode cache content (__pycache__)"
+      ;;
+    .ruff_cache/*|*/.ruff_cache/*|.ruff_cache)
+      fail "$path is tracked Ruff cache content (.ruff_cache)"
+      ;;
+    .pytest_cache/*|*/.pytest_cache/*|.pytest_cache)
+      fail "$path is tracked pytest cache content (.pytest_cache)"
+      ;;
+    .mypy_cache/*|*/.mypy_cache/*|.mypy_cache)
+      fail "$path is tracked mypy cache content (.mypy_cache)"
       ;;
     *.pyc|*.pyo)
       fail "$path is tracked compiled Python bytecode"

@@ -5,7 +5,9 @@
 
 # ── Repository structure & documentation ────────────────────────────────────
 scripts/qa/verify-repo-structure.sh
+scripts/qa/verify-repo-hygiene-artifacts.sh
 scripts/qa/verify-custom-apps-hygiene.sh
+scripts/qa/verify-evidence-tracking-policy.sh
 scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-documentation-links.sh
 
@@ -21,6 +23,7 @@ scripts/qa/verify-security-hardening.sh
 scripts/qa/verify-csp-headers.sh
 scripts/qa/verify-csp-report-pipeline.sh
 scripts/qa/verify-domain-url-invariants.sh
+scripts/qa/verify-evidence-redaction.sh
 
 # ── Kubernetes & GitOps ──────────────────────────────────────────────────────
 scripts/qa/verify-k8s-deployment-spec.sh
