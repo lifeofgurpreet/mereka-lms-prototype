@@ -364,7 +364,7 @@ check_gitops() {
 
   # AC-020: Frontend contract/extended-surface gates are consolidated into ci.yml lanes
   if [[ -f "$CI_WF" && -f "$CI_STATIC_LIST" ]] \
-    && grep -q 'run-scripts-parallel\.sh .github/ci-scripts-static\.txt' "$CI_WF" \
+    && grep -qE 'run-scripts-parallel\.sh .github/ci-scripts-static\.txt|run-release-verification-gates\.sh' "$CI_WF" \
     && grep -q '^scripts/qa/verify-paragon-token-coverage\.sh$' "$CI_STATIC_LIST" \
     && grep -q 'verify-certificate-branding\.sh' "$CI_WF" \
     ; then
