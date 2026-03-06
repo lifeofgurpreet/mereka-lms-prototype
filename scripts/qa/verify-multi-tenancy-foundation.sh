@@ -15,13 +15,39 @@
 # Usage:
 #   ./scripts/qa/verify-multi-tenancy-foundation.sh [DOMAIN]
 #   DOMAIN defaults to academyv2.mereka.io
+#   ./scripts/qa/verify-multi-tenancy-foundation.sh --skip-live
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../shared/config.sh"
 
-DOMAIN="${1:-${LMS_DOMAIN}}"
+DOMAIN="${LMS_DOMAIN}"
+SKIP_LIVE=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --skip-live)
+      SKIP_LIVE=true
+      shift
+      ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: verify-multi-tenancy-foundation.sh [DOMAIN] [--skip-live]
+
+Options:
+  DOMAIN       Optional LMS domain to probe (default: LMS_DOMAIN from config)
+  --skip-live  Skip public endpoint checks and validate static foundations only
+  --help       Show this help
+EOF
+      exit 0
+      ;;
+    *)
+      DOMAIN="$1"
+      shift
+      ;;
+  esac
+done
 
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -32,13 +58,39 @@ log_fail() { printf "FAIL: %s\n" "$1"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
 log_skip() { printf "SKIP: %s\n" "$1"; SKIP_COUNT=$((SKIP_COUNT + 1)); }
 log_info() { printf "INFO: %s\n" "$1"; }
 
-PROD_SETTINGS="$REPO_ROOT/../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+resolve_prod_settings() {
+  local candidates=()
+  if [[ -n "${MTA_PROD_SETTINGS:-}" ]]; then
+    candidates+=("${MTA_PROD_SETTINGS}")
+  fi
+  candidates+=(
+    "$REPO_ROOT/../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "$REPO_ROOT/../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
+  )
+
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if [[ -n "$candidate" && -f "$candidate" ]]; then
+      printf "%s" "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+PROD_SETTINGS="$(resolve_prod_settings || true)"
 
 echo "========================================"
 echo "  Multi-Tenancy Foundation Verification"
 echo "========================================"
 echo "Date:   $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "Domain: $DOMAIN"
+echo "Prod settings source: ${PROD_SETTINGS:-not found}"
+echo "Live checks: $(if $SKIP_LIVE; then echo SKIPPED; else echo ENABLED; fi)"
 echo
 
 # ============================================================
@@ -113,23 +165,26 @@ echo
 # @covers: domain-isolation
 # ============================================================
 echo "--- Domain Isolation (Live Endpoints) ---"
+if $SKIP_LIVE; then
+  log_skip "Domain isolation endpoint probes skipped (--skip-live)"
+else
+  TENANT_DOMAINS=(
+    "$DOMAIN"
+    "$BIJI_DOMAIN"
+    "$SKILLOURFUTURE_DOMAIN"
+  )
 
-TENANT_DOMAINS=(
-  "$LMS_DOMAIN"
-  "$BIJI_DOMAIN"
-  "$SKILLOURFUTURE_DOMAIN"
-)
-
-for td in "${TENANT_DOMAINS[@]}"; do
-  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://$td/" 2>/dev/null || echo "000")
-  if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
-    log_pass "https://$td/ returns HTTP $HTTP_CODE"
-  elif [ "$HTTP_CODE" = "000" ]; then
-    log_skip "https://$td/ unreachable (timeout/DNS)"
-  else
-    log_fail "https://$td/ returns HTTP $HTTP_CODE (expected 200 or 302)"
-  fi
-done
+  for td in "${TENANT_DOMAINS[@]}"; do
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://$td/" 2>/dev/null || echo "000")
+    if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
+      log_pass "https://$td/ returns HTTP $HTTP_CODE"
+    elif [ "$HTTP_CODE" = "000" ]; then
+      log_skip "https://$td/ unreachable (timeout/DNS)"
+    else
+      log_fail "https://$td/ returns HTTP $HTTP_CODE (expected 200 or 302)"
+    fi
+  done
+fi
 
 echo
 
@@ -173,22 +228,26 @@ else
 fi
 
 # Check 3.4: Live cookie domain check for primary domain
-COOKIE_HEADERS=$(curl -sL -D - -o /dev/null --max-time 10 "https://$LMS_DOMAIN/login" 2>/dev/null || echo "")
-if [ -n "$COOKIE_HEADERS" ]; then
-  if echo "$COOKIE_HEADERS" | grep -iq "set-cookie"; then
-    log_pass "https://$LMS_DOMAIN/login sets cookies"
-    # Check cookie domain matches the tenant
-    if echo "$COOKIE_HEADERS" | grep -i "set-cookie" | grep -iq "domain="; then
-      COOKIE_DOMAIN=$(echo "$COOKIE_HEADERS" | grep -i "set-cookie" | grep -io "domain=[^;]*" | head -1 | cut -d= -f2)
-      log_info "  Cookie domain observed: $COOKIE_DOMAIN"
+if $SKIP_LIVE; then
+  log_skip "Cookie header probe skipped (--skip-live)"
+else
+  COOKIE_HEADERS=$(curl -sL -D - -o /dev/null --max-time 10 "https://$DOMAIN/login" 2>/dev/null || echo "")
+  if [ -n "$COOKIE_HEADERS" ]; then
+    if echo "$COOKIE_HEADERS" | grep -iq "set-cookie"; then
+      log_pass "https://$DOMAIN/login sets cookies"
+      # Check cookie domain matches the tenant
+      if echo "$COOKIE_HEADERS" | grep -i "set-cookie" | grep -iq "domain="; then
+        COOKIE_DOMAIN=$(echo "$COOKIE_HEADERS" | grep -i "set-cookie" | grep -io "domain=[^;]*" | head -1 | cut -d= -f2)
+        log_info "  Cookie domain observed: $COOKIE_DOMAIN"
+      else
+        log_info "  Cookies are host-only (no explicit domain attribute)"
+      fi
     else
-      log_info "  Cookies are host-only (no explicit domain attribute)"
+      log_skip "No Set-Cookie headers from https://$DOMAIN/login"
     fi
   else
-    log_skip "No Set-Cookie headers from https://$LMS_DOMAIN/login"
+    log_skip "Could not reach https://$DOMAIN/login for cookie check"
   fi
-else
-  log_skip "Could not reach https://$LMS_DOMAIN/login for cookie check"
 fi
 
 echo
@@ -226,28 +285,36 @@ fi
 
 # Check 4.3: Live branding check - primary domain has Mereka references
 # Note: use grep -c instead of grep -q to avoid SIGPIPE with pipefail on large HTML
-MEREKA_MATCHES=$(curl -sL --max-time 10 "https://$LMS_DOMAIN/" 2>/dev/null | grep -ic "mereka" || true)
-if [ "$MEREKA_MATCHES" -gt 0 ] 2>/dev/null; then
-  log_pass "https://$LMS_DOMAIN/ contains Mereka branding ($MEREKA_MATCHES occurrences)"
+if $SKIP_LIVE; then
+  log_skip "Primary branding probe skipped (--skip-live)"
 else
-  HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://$LMS_DOMAIN/" 2>/dev/null || echo "000")
-  if [ "$HTTP" = "000" ]; then
-    log_skip "Could not fetch https://$LMS_DOMAIN/ for branding check"
+  MEREKA_MATCHES=$(curl -sL --max-time 10 "https://$DOMAIN/" 2>/dev/null | grep -ic "mereka" || true)
+  if [ "$MEREKA_MATCHES" -gt 0 ] 2>/dev/null; then
+    log_pass "https://$DOMAIN/ contains Mereka branding ($MEREKA_MATCHES occurrences)"
   else
-    log_fail "https://$LMS_DOMAIN/ does not contain Mereka branding"
+    HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://$DOMAIN/" 2>/dev/null || echo "000")
+    if [ "$HTTP" = "000" ]; then
+      log_skip "Could not fetch https://$DOMAIN/ for branding check"
+    else
+      log_fail "https://$DOMAIN/ does not contain Mereka branding"
+    fi
   fi
 fi
 
 # Check 4.4: Live branding check - Biji-Biji domain
-BIJI_MATCHES=$(curl -sL --max-time 10 "https://$BIJI_DOMAIN/" 2>/dev/null | grep -ic "biji\|mereka" || true)
-if [ "$BIJI_MATCHES" -gt 0 ] 2>/dev/null; then
-  log_pass "https://$BIJI_DOMAIN/ contains branding content ($BIJI_MATCHES occurrences)"
+if $SKIP_LIVE; then
+  log_skip "Biji-Biji branding probe skipped (--skip-live)"
 else
-  HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://$BIJI_DOMAIN/" 2>/dev/null || echo "000")
-  if [ "$HTTP" = "000" ]; then
-    log_skip "Could not fetch https://$BIJI_DOMAIN/ for branding check"
+  BIJI_MATCHES=$(curl -sL --max-time 10 "https://$BIJI_DOMAIN/" 2>/dev/null | grep -ic "biji\|mereka" || true)
+  if [ "$BIJI_MATCHES" -gt 0 ] 2>/dev/null; then
+    log_pass "https://$BIJI_DOMAIN/ contains branding content ($BIJI_MATCHES occurrences)"
   else
-    log_fail "https://$BIJI_DOMAIN/ lacks expected branding"
+    HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://$BIJI_DOMAIN/" 2>/dev/null || echo "000")
+    if [ "$HTTP" = "000" ]; then
+      log_skip "Could not fetch https://$BIJI_DOMAIN/ for branding check"
+    else
+      log_fail "https://$BIJI_DOMAIN/ lacks expected branding"
+    fi
   fi
 fi
 
