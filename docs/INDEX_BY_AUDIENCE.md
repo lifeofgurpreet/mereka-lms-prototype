@@ -409,7 +409,7 @@ _Security configs, compliance, audit logs, secrets management_
 ### Migrations & Data
 - **Kajabi Migration**: [migrations/kajabi/](migrations/kajabi/) - Kajabi → Open edX migration
 - **MCT Migration**: [migrations/mct/](migrations/mct/) - MCT → Open edX migration
-- **Drive + Airtable Video Inventory**: [migrations/drive-airtable/README.md](migrations/drive-airtable/README.md), [migrations/drive-airtable/STATUS.md](migrations/drive-airtable/STATUS.md) - Course-first pipeline for nested Drive video mapping with migration-readiness gates, blocker queues, subtitle review, and Open edX contract tracking.
+- **Drive + Airtable Video Inventory**: [migrations/drive-airtable/README.md](migrations/drive-airtable/README.md), [migrations/drive-airtable/STATUS.md](migrations/drive-airtable/STATUS.md), [migrations/drive-airtable/REVIEW_QUEUE.md](migrations/drive-airtable/REVIEW_QUEUE.md) - Course-first pipeline for nested Drive video mapping with migration-readiness gates, blocker queues, subtitle review, and Open edX contract tracking. REVIEW_QUEUE.md is the human-review checklist for waiver-pending items and the orphan subtitle.
 - **BBI K8s Migration**: [BBI-K8-MIGRATION.md](migrations/BBI-K8-MIGRATION.md) - Infrastructure migration
 
 ### Analytics & Reporting
