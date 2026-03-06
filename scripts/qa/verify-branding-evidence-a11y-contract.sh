@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @spec: branding-system_spec.md
+# @covers AC-BRAND-EVIDENCE-001
 # verify-branding-evidence-a11y-contract.sh — enforce canonical a11y wiring in branding evidence pipeline.
 set -euo pipefail
 

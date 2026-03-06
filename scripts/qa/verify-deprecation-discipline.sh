@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @spec: repository-structure_spec.md
+# @covers AC-REPO-DEPRECATION-001
 # verify-deprecation-discipline.sh — Verify OEP-21 deprecation discipline.
 #
 # Checks:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @spec: observability-stack_spec.md
+# @covers AC-OBS-ALOG-001
 # verify-audit-logging.sh — Audit logging capability assessment for Mereka LMS.
 #
 # Verifies that audit logging surfaces are present and configured:

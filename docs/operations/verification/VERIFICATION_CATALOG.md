@@ -10,29 +10,23 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 ## Summary
 - Total `verify-*.sh` scripts: **496**
 - Archived deprecated scripts: **21**
-- CI static-bound scripts: **328**
+- CI static-bound scripts: **334**
 - Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 141
+- `exploratory_manual`: 135
 - `periodic_runtime`: 7
-- `release_blocking`: 348
+- `release_blocking`: 354
 
 ### Status Distribution
-- `active`: 355
-- `deprecated_candidate`: 14
+- `active`: 361
+- `deprecated_candidate`: 8
 - `manual_only`: 127
 
 ## Deprecated Candidates
 
 Scripts currently not CI-bound and with near-zero references:
-- `scripts/qa/verify-audit-logging.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-branding-evidence-a11y-contract.sh` (owner: `frontend-platform`, refs: 1)
-- `scripts/qa/verify-branding-evidence-screenshot-contract.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-credentials-issuer.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-deprecation-discipline.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-email-digests.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-email-gdpr-code.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-preferences.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-libraries-core.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)

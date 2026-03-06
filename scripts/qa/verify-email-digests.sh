@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @spec: email-notifications-pipeline_spec.md
-# @covers Phase 6: Digests + Analytics (AC-037 to AC-042)
+# @covers AC-037, AC-038, AC-039, AC-040, AC-041, AC-042
 #
 # Verification of Email Phase 6: Digests + Analytics spec compliance.
 # Static checks run against Django app structure, LMS settings, and config files.

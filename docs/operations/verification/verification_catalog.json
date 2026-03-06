@@ -579,14 +579,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-audit-logging.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -777,24 +779,28 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-branding-evidence-a11y-contract.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-branding-evidence-screenshot-contract.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -1435,14 +1441,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-deprecation-discipline.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -1613,24 +1621,28 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-email-digests.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-email-gdpr-code.sh",
-      "reference_count": 1,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -5834,16 +5846,16 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 328,
+    "ci_static_bound": 334,
     "statuses": {
-      "active": 355,
-      "deprecated_candidate": 14,
+      "active": 361,
+      "deprecated_candidate": 8,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 141,
+      "exploratory_manual": 135,
       "periodic_runtime": 7,
-      "release_blocking": 348
+      "release_blocking": 354
     },
     "total_verify_scripts": 496,
     "workflow_direct_bound": 49

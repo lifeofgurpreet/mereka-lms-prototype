@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @spec: branding-system_spec.md
+# @covers AC-BRAND-EVIDENCE-002
 # verify-branding-evidence-screenshot-contract.sh
 # Guard screenshot-scope contract across branding evidence pipeline + closure workflow.
 set -euo pipefail
