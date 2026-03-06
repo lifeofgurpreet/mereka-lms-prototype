@@ -69,6 +69,15 @@ while IFS= read -r -d '' path; do
     *.pyc|*.pyo)
       fail "$path is tracked compiled Python bytecode"
       ;;
+    .ruff_cache/*|*/.ruff_cache/*|.ruff_cache)
+      fail "$path is tracked Ruff cache content (.ruff_cache)"
+      ;;
+    .pytest_cache/*|*/.pytest_cache/*|.pytest_cache)
+      fail "$path is tracked pytest cache content (.pytest_cache)"
+      ;;
+    .mypy_cache/*|*/.mypy_cache/*|.mypy_cache)
+      fail "$path is tracked mypy cache content (.mypy_cache)"
+      ;;
     infrastructure/tutor/brand-*/dist/*)
       if [[ "$(basename "$path")" == ".gitkeep" ]]; then
         pass
