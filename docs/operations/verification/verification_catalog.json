@@ -561,7 +561,7 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
-        "workflow_direct"
+        "ci_static"
       ],
       "owner": "identity-access",
       "path": "scripts/qa/verify-authn-submodule-path-contract.sh",
@@ -569,6 +569,16 @@
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
+    },
+    {
+      "cadence": "on_demand",
+      "ci_binding": [],
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-bash-strict-mode.sh",
+      "reference_count": 0,
+      "severity": "low",
+      "status": "deprecated_candidate",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -865,7 +875,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-ci-script-list.sh",
-      "reference_count": 1,
+      "reference_count": 2,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -1267,6 +1277,16 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "on_demand",
+      "ci_binding": [],
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-custom-app-install-contract.sh",
+      "reference_count": 0,
+      "severity": "low",
+      "status": "deprecated_candidate",
+      "tier": "exploratory_manual"
+    },
+    {
       "cadence": "per_pr_and_push",
       "ci_binding": [
         "ci_static"
@@ -1337,7 +1357,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-deprecated-verification-hygiene.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -1899,16 +1919,6 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "platform-core",
-      "path": "scripts/qa/verify-evidence-redaction.sh",
-      "reference_count": 6,
-      "severity": "low",
-      "status": "manual_only",
-      "tier": "exploratory_manual"
-    },
-    {
       "cadence": "per_pr_and_push",
       "ci_binding": [
         "ci_static"
@@ -1919,6 +1929,16 @@
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
+    },
+    {
+      "cadence": "on_demand",
+      "ci_binding": [],
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-evidence-sprawl-budget.sh",
+      "reference_count": 1,
+      "severity": "low",
+      "status": "deprecated_candidate",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -2381,6 +2401,18 @@
         "ci_static"
       ],
       "owner": "platform-infra",
+      "path": "scripts/qa/verify-k8s-repo-boundaries.sh",
+      "reference_count": 3,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-infra",
       "path": "scripts/qa/verify-k8s-secret-scan.sh",
       "reference_count": 3,
       "severity": "high",
@@ -2675,6 +2707,16 @@
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
+    },
+    {
+      "cadence": "on_demand",
+      "ci_binding": [],
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-manifest-integrity.sh",
+      "reference_count": 4,
+      "severity": "low",
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -3446,7 +3488,7 @@
     {
       "cadence": "per_pr_and_push",
       "ci_binding": [
-        "workflow_direct"
+        "ci_static"
       ],
       "owner": "platform-infra",
       "path": "scripts/qa/verify-no-legacy-tutor-k8s-paths.sh",
@@ -3734,6 +3776,18 @@
       "owner": "platform-core",
       "path": "scripts/qa/verify-olx-packages.sh",
       "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-openedx-audit-tracker-sync.sh",
+      "reference_count": 1,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -4212,6 +4266,16 @@
       "cadence": "on_demand",
       "ci_binding": [],
       "owner": "platform-core",
+      "path": "scripts/qa/verify-purchase-gateway-resilience.sh",
+      "reference_count": 0,
+      "severity": "low",
+      "status": "deprecated_candidate",
+      "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "on_demand",
+      "ci_binding": [],
+      "owner": "platform-core",
       "path": "scripts/qa/verify-purchase-gateway-scaffold.sh",
       "reference_count": 3,
       "severity": "low",
@@ -4344,16 +4408,6 @@
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
-    },
-    {
-      "cadence": "on_demand",
-      "ci_binding": [],
-      "owner": "platform-core",
-      "path": "scripts/qa/verify-repo-hygiene-artifacts.sh",
-      "reference_count": 0,
-      "severity": "low",
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5028,6 +5082,18 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "per_pr_and_push",
+      "ci_binding": [
+        "ci_static"
+      ],
+      "owner": "multisite-governance",
+      "path": "scripts/qa/verify-tenant-dns-inventory.sh",
+      "reference_count": 2,
+      "severity": "high",
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
       "cadence": "on_demand",
       "ci_binding": [],
       "owner": "multisite-governance",
@@ -5384,6 +5450,16 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "on_demand",
+      "ci_binding": [],
+      "owner": "platform-infra",
+      "path": "scripts/qa/verify-tutor-config-path-contract.sh",
+      "reference_count": 0,
+      "severity": "low",
+      "status": "deprecated_candidate",
+      "tier": "exploratory_manual"
+    },
+    {
       "cadence": "per_pr_and_push",
       "ci_binding": [
         "ci_static"
@@ -5582,7 +5658,7 @@
       ],
       "owner": "platform-core",
       "path": "scripts/qa/verify-verification-catalog.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "severity": "high",
       "status": "active",
       "tier": "release_blocking"
@@ -5798,19 +5874,19 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 5,
-    "ci_static_bound": 313,
+    "ci_static_bound": 321,
     "statuses": {
-      "active": 342,
-      "deprecated_candidate": 32,
+      "active": 348,
+      "deprecated_candidate": 36,
       "manual_only": 127
     },
     "tiers": {
-      "exploratory_manual": 159,
+      "exploratory_manual": 163,
       "periodic_runtime": 7,
-      "release_blocking": 335
+      "release_blocking": 341
     },
-    "total_verify_scripts": 499,
-    "workflow_direct_bound": 51
+    "total_verify_scripts": 511,
+    "workflow_direct_bound": 49
   },
   "version": "1"
 }

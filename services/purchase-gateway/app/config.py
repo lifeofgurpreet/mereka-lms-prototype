@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     # Application
     SECRET_KEY: str = ""
     ADMIN_API_KEY: str = ""
+    ADMIN_JWT_SECRET: str = ""
+    ADMIN_JWT_ALGORITHMS: list[str] = ["HS256"]
+    ADMIN_JWT_ISSUER: str | None = None
+    ADMIN_JWT_AUDIENCE: str | None = None
+    ADMIN_ALLOWED_ROLES: list[str] = ["payments_admin", "enterprise_admin"]
+    ADMIN_REQUIRE_JWT: bool = False
     ALLOWED_ORIGINS: list[str] = [
         "https://academyv2.mereka.io",
         "https://apps.academyv2.mereka.io",

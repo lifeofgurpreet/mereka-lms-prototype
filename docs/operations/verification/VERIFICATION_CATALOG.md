@@ -8,25 +8,26 @@ Machine-readable source: `docs/operations/verification/verification_catalog.json
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **499**
+- Total `verify-*.sh` scripts: **511**
 - Archived deprecated scripts: **5**
-- CI static-bound scripts: **313**
-- Workflow-direct bound scripts: **51**
+- CI static-bound scripts: **321**
+- Workflow-direct bound scripts: **49**
 
 ### Tier Distribution
-- `exploratory_manual`: 159
+- `exploratory_manual`: 163
 - `periodic_runtime`: 7
-- `release_blocking`: 335
+- `release_blocking`: 341
 
 ### Status Distribution
-- `active`: 342
-- `deprecated_candidate`: 32
+- `active`: 348
+- `deprecated_candidate`: 36
 - `manual_only`: 127
 
 ## Deprecated Candidates
 
 Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-audit-logging.sh` (owner: `platform-core`, refs: 1)
+- `scripts/qa/verify-bash-strict-mode.sh` (owner: `platform-core`, refs: 0)
 - `scripts/qa/verify-branding-evidence-a11y-contract.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-branding-evidence-screenshot-contract.sh` (owner: `frontend-platform`, refs: 1)
 - `scripts/qa/verify-cicd-image-build.sh` (owner: `frontend-platform`, refs: 1)
@@ -34,6 +35,7 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-cicd-scheduled-ops.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-cicd-tutor-plugin-test.sh` (owner: `platform-infra`, refs: 1)
 - `scripts/qa/verify-credentials-issuer.sh` (owner: `platform-core`, refs: 1)
+- `scripts/qa/verify-custom-app-install-contract.sh` (owner: `platform-core`, refs: 0)
 - `scripts/qa/verify-deprecation-discipline.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-ace-channels.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-bulk-campaigns.sh` (owner: `platform-core`, refs: 1)
@@ -43,6 +45,7 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-email-inapp-code.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-preferences.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-email-push-code.sh` (owner: `platform-core`, refs: 1)
+- `scripts/qa/verify-evidence-sprawl-budget.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-gh-actions-budget-config.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-gh-actions-cost-dashboard.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-gh-actions-cost-tracking.sh` (owner: `platform-core`, refs: 1)
@@ -52,9 +55,10 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-mobile-backend-api.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-notifications-inapp.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-patch-modularity.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-repo-hygiene-artifacts.sh` (owner: `platform-core`, refs: 0)
+- `scripts/qa/verify-purchase-gateway-resilience.sh` (owner: `platform-core`, refs: 0)
 - `scripts/qa/verify-restore-drill.sh` (owner: `sre-security`, refs: 1)
 - `scripts/qa/verify-spec-dedupe-normalize.sh` (owner: `platform-core`, refs: 1)
+- `scripts/qa/verify-tutor-config-path-contract.sh` (owner: `platform-infra`, refs: 0)
 - `scripts/qa/verify-tutor-patches-inventory.sh` (owner: `platform-infra`, refs: 1)
 - `scripts/qa/verify-ux-audit-coverage.sh` (owner: `frontend-platform`, refs: 0)
 - `scripts/qa/verify-video-protection.sh` (owner: `migration-platform`, refs: 1)

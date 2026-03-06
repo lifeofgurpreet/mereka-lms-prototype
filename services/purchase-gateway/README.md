@@ -35,6 +35,11 @@ All configuration via environment variables (see `app/config.py`):
 | `LMS_OAUTH_CLIENT_ID` | Yes | OAuth2 client ID for LMS |
 | `LMS_OAUTH_CLIENT_SECRET` | Yes | OAuth2 client secret for LMS |
 | `SECRET_KEY` | Yes | Application secret key |
+| `ADMIN_API_KEY` | No | Shared admin API key used by `X-API-Key` fallback auth |
+| `ADMIN_JWT_SECRET` | No | HMAC secret used to validate admin Bearer JWTs |
+| `ADMIN_JWT_ALGORITHMS` | No | Accepted JWT algorithms (default: `HS256`) |
+| `ADMIN_ALLOWED_ROLES` | No | Allowed JWT roles (default: `payments_admin,enterprise_admin`) |
+| `ADMIN_REQUIRE_JWT` | No | Require Bearer JWT and disable API-key fallback (default: false) |
 | `ENABLE_GATEWAY_FULFILLMENT` | No | Enable fulfillment processing (default: false) |
 | `TENANT_ISOLATION_ENABLED` | No | Enable multi-tenant isolation (default: true) |
 | `FULFILLMENT_WORKER_ENABLED` | No | Run background outbox worker (default: true) |
@@ -49,17 +54,17 @@ All configuration via environment variables (see `app/config.py`):
 |--------|------|------|-------------|
 | POST | `/api/v1/checkout/` | Public | Create Stripe Checkout Session |
 | POST | `/webhooks/stripe/` | Stripe Signature | Receive Stripe webhook events |
-| DELETE | `/api/v1/admin/offerings/{offering_id}` | `X-API-Key` | Soft-delete an offering by setting `active=false` |
-| GET | `/api/v1/admin/stripe-events/` | `X-API-Key` | List/filter processed Stripe events for debugging |
-| GET | `/api/v1/admin/offerings/` | `X-API-Key` | List/filter offerings by tenant, type, and active state |
-| POST | `/api/v1/admin/entitlements/{entitlement_id}/resend-invitation/` | `X-API-Key` | Record invitation resend for pending entitlement |
-| GET | `/api/v1/admin/orders/` | `X-API-Key` | List/filter orders by tenant, status, buyer email, and `created_from`/`created_to` date range |
-| GET | `/api/v1/admin/orders/{order_id}/` | `X-API-Key` | Get detailed order view with line items, audit timeline, and fulfillment job |
-| POST | `/api/v1/admin/orders/{order_id}/retry-fulfillment/` | `X-API-Key` | Force requeue fulfillment job for retryable orders |
-| POST | `/api/v1/admin/orders/{order_id}/refund/` | `X-API-Key` | Initiate Stripe refund (order state updates asynchronously via webhook) |
-| GET | `/api/v1/admin/entitlements/` | `X-API-Key` | List/filter entitlements by tenant, status, and recipient email |
-| POST | `/api/v1/admin/entitlements/{entitlement_id}/revoke/` | `X-API-Key` | Revoke entitlement (idempotent) |
-| GET | `/api/v1/admin/tenants/{tenant_id}/reports/` | `X-API-Key` | Return aggregate tenant purchase metrics (orders, revenue, refund rates) |
+| DELETE | `/api/v1/admin/offerings/{offering_id}` | Bearer JWT or `X-API-Key` | Soft-delete an offering by setting `active=false` |
+| GET | `/api/v1/admin/stripe-events/` | Bearer JWT or `X-API-Key` | List/filter processed Stripe events for debugging |
+| GET | `/api/v1/admin/offerings/` | Bearer JWT or `X-API-Key` | List/filter offerings by tenant, type, and active state |
+| POST | `/api/v1/admin/entitlements/{entitlement_id}/resend-invitation/` | Bearer JWT or `X-API-Key` | Record invitation resend for pending entitlement |
+| GET | `/api/v1/admin/orders/` | Bearer JWT or `X-API-Key` | List/filter orders by tenant, status, buyer email, and `created_from`/`created_to` date range |
+| GET | `/api/v1/admin/orders/{order_id}/` | Bearer JWT or `X-API-Key` | Get detailed order view with line items, audit timeline, and fulfillment job |
+| POST | `/api/v1/admin/orders/{order_id}/retry-fulfillment/` | Bearer JWT or `X-API-Key` | Force requeue fulfillment job for retryable orders |
+| POST | `/api/v1/admin/orders/{order_id}/refund/` | Bearer JWT or `X-API-Key` | Initiate Stripe refund (order state updates asynchronously via webhook) |
+| GET | `/api/v1/admin/entitlements/` | Bearer JWT or `X-API-Key` | List/filter entitlements by tenant, status, and recipient email |
+| POST | `/api/v1/admin/entitlements/{entitlement_id}/revoke/` | Bearer JWT or `X-API-Key` | Revoke entitlement (idempotent) |
+| GET | `/api/v1/admin/tenants/{tenant_id}/reports/` | Bearer JWT or `X-API-Key` | Return aggregate tenant purchase metrics (orders, revenue, refund rates) |
 | GET | `/health/` | None | Liveness probe |
 | GET | `/ready/` | None | Readiness probe |
 | GET | `/metrics/` | None | Prometheus metrics |

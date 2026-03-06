@@ -6,6 +6,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import jwt
 import pytest
 
 from app.database import get_db
@@ -25,6 +26,7 @@ LINE_ITEM_ID = uuid.UUID("00000000-0000-0000-0000-000000000003")
 
 VALID_API_KEY = "test-admin-key-for-integration"
 HEADERS = {"X-API-Key": VALID_API_KEY}
+JWT_SECRET = "integration-jwt-secret"
 
 VALID_OFFERING_PAYLOAD = {
     "offering_type": "course_seat",
@@ -175,6 +177,76 @@ async def test_create_offering_with_correct_api_key_reaches_handler(mock_setting
 
     # Auth passed — not 401/403. Handler returned 201 with valid response.
     assert resp.status_code == 201
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_create_offering_with_valid_bearer_jwt_reaches_handler(mock_settings, client):
+    """POST /admin/offerings/ with valid Bearer JWT passes admin auth."""
+    mock_settings.ADMIN_API_KEY = ""
+    mock_settings.ADMIN_JWT_SECRET = JWT_SECRET
+    mock_settings.ADMIN_JWT_ALGORITHMS = ["HS256"]
+    mock_settings.ADMIN_JWT_ISSUER = None
+    mock_settings.ADMIN_JWT_AUDIENCE = None
+    mock_settings.ADMIN_ALLOWED_ROLES = ["payments_admin", "enterprise_admin"]
+    mock_settings.ADMIN_REQUIRE_JWT = False
+
+    token = jwt.encode(
+        {"sub": "admin-user", "roles": ["payments_admin"]},
+        JWT_SECRET,
+        algorithm="HS256",
+    )
+
+    mock_db = AsyncMock()
+    mock_db.commit = AsyncMock()
+    mock_db.add = MagicMock()
+
+    async def _fake_refresh(obj):
+        if not getattr(obj, "created_at", None):
+            obj.created_at = datetime(2024, 1, 1, tzinfo=UTC)
+        if not getattr(obj, "updated_at", None):
+            obj.updated_at = datetime(2024, 1, 1, tzinfo=UTC)
+
+    mock_db.refresh.side_effect = _fake_refresh
+
+    _override_db(mock_db)
+    try:
+        resp = await client.post(
+            "/api/v1/admin/offerings/",
+            json=VALID_OFFERING_PAYLOAD,
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 201
+
+
+@pytest.mark.asyncio
+@patch("app.auth.settings")
+async def test_create_offering_with_disallowed_bearer_role_returns_403(mock_settings, client):
+    """POST /admin/offerings/ with JWT lacking admin role is rejected."""
+    mock_settings.ADMIN_API_KEY = ""
+    mock_settings.ADMIN_JWT_SECRET = JWT_SECRET
+    mock_settings.ADMIN_JWT_ALGORITHMS = ["HS256"]
+    mock_settings.ADMIN_JWT_ISSUER = None
+    mock_settings.ADMIN_JWT_AUDIENCE = None
+    mock_settings.ADMIN_ALLOWED_ROLES = ["payments_admin"]
+    mock_settings.ADMIN_REQUIRE_JWT = False
+
+    token = jwt.encode(
+        {"sub": "observer-user", "roles": ["read_only"]},
+        JWT_SECRET,
+        algorithm="HS256",
+    )
+
+    resp = await client.post(
+        "/api/v1/admin/offerings/",
+        json=VALID_OFFERING_PAYLOAD,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert resp.status_code == 403
 
 
 # ---------------------------------------------------------------------------
