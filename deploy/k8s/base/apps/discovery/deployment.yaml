@@ -33,7 +33,7 @@ spec:
             - containerPort: 8000
           env:
             - name: MEREKA_PLATFORM_ADMIN_EMAILS
-              value: "gurpreet@biji-biji.com,malasari@mereka.my"
+              value: ""
           envFrom:
             - secretRef:
                 name: openedx-secrets

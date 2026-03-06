@@ -44,6 +44,7 @@ ALLOWED_PATTERNS=(
   'plugins/credentials/apps/credentials/settings'
   'plugins/notes/apps/settings'
   'plugins/xqueue/apps/settings'
+  'secrets/SECRET_CLASSIFICATION\.yaml'
 )
 
 FAIL=0

@@ -15,7 +15,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: analytics.academyv2.mereka.io
+    - host: analytics.localhost
       http:
         paths:
           - backend:
@@ -27,5 +27,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - analytics.academyv2.mereka.io
+        - analytics.localhost
       secretName: superset-tls

@@ -126,13 +126,13 @@ data:
             "remote_app": {
                 "client_id": os.environ.get("OAUTH_CLIENT_ID", "superset-analytics"),
                 "client_secret": os.environ.get("OAUTH_CLIENT_SECRET", ""),
-                "api_base_url": "https://auth0.mereka.io/application/o/",
-                "access_token_url": "https://auth0.mereka.io/application/o/token/",
-                "authorize_url": "https://auth0.mereka.io/application/o/authorize/",
+                "api_base_url": os.environ.get("OAUTH_ISSUER_URL", "http://localhost") + "/application/o/",
+                "access_token_url": os.environ.get("OAUTH_ISSUER_URL", "http://localhost") + "/application/o/token/",
+                "authorize_url": os.environ.get("OAUTH_ISSUER_URL", "http://localhost") + "/application/o/authorize/",
                 "client_kwargs": {
                     "scope": "openid email profile",
                 },
-                "jwks_uri": "https://auth0.mereka.io/application/o/superset-analytics/jwks/",
+                "jwks_uri": os.environ.get("OAUTH_ISSUER_URL", "http://localhost") + "/application/o/superset-analytics/jwks/",
             },
         }
     ]
@@ -148,7 +148,7 @@ data:
         def oauth_user_info(self, provider, response=None):
             if provider == "authentik":
                 me = self.appbuilder.sm.oauth_remotes[provider].get(
-                    "https://auth0.mereka.io/application/o/userinfo/"
+                    os.environ.get("OAUTH_ISSUER_URL", "http://localhost") + "/application/o/userinfo/"
                 )
                 me.raise_for_status()
                 data = me.json()

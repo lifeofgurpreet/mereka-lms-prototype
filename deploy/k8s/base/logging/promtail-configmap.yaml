@@ -21,7 +21,8 @@ data:
       filename: /tmp/positions.yaml
 
     clients:
-      - url: https://loki.mereka.dev/loki/api/v1/push
+      # Overlays override with environment-specific Loki endpoint
+      - url: http://localhost:3100/loki/api/v1/push
         # TLS verification enabled (Cloudflare tunnel provides valid cert)
         tls_config:
           insecure_skip_verify: false

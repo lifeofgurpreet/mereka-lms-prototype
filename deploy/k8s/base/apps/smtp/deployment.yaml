@@ -44,8 +44,9 @@ spec:
                 secretKeyRef:
                   name: ses-smtp-credentials
                   key: RELAY_PASSWORD
+            # Overlays override HOSTNAME with environment-specific mail domain
             - name: HOSTNAME
-              value: "mail.academyv2.mereka.io"
+              value: "localhost"
           resources:
             requests:
               cpu: 10m

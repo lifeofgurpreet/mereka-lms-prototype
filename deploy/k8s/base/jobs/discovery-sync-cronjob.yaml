@@ -105,11 +105,11 @@ spec:
                   name: database-secrets
                   key: MYSQL_DISCOVERY_PASSWORD
 
-            # LMS connection for OAuth (overridden per-environment)
+            # Overlays override with environment-specific public URLs
             - name: LMS_URL
-              value: "https://academyv2.mereka.io"
+              value: "http://lms:8000"
             - name: DISCOVERY_URL
-              value: "https://discovery.academyv2.mereka.io"
+              value: "http://discovery:8000"
             - name: MEREKA_SCHEME
               value: "https"
 
