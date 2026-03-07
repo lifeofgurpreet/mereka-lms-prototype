@@ -70,6 +70,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - normalize missing `candidate_sources` keys to zero in consolidated compliance outputs.
   - preserve `baseline_enabled=true` / `baseline_entries=<n>` semantics even when effective scan scope is zero after filters.
   - preserve zero-scope schema for nonexistent explicit input paths (`baseline_enabled=false`, `baseline_entries=0`, all source counters zero).
+  - verify consolidated compliance output normalizes `candidate_sources` keys to zero even when command-ref summary omits that object.
   - fail on missing or unresolved references.
 - [ ] Use backlog snapshot for execution:
   - `docs/archive/reports/cmdref-backlog-snapshot-20260306.md`
