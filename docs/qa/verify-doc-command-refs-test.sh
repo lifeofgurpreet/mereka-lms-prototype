@@ -150,6 +150,34 @@ cat > "$ROOT_DIR/docs/.doc-command-ref-allowlist-extra" <<'EOF_DOC'
 scripts/custom/preview/outbox/
 EOF_DOC
 
+cat > "$ROOT_DIR/docs/cmdref-line-anchor-pass.md" <<'EOF_DOC'
+# cmdref-line-anchor-pass
+
+Line/anchor suffixed references:
+
+`docs/qa/verify-docs-policy.sh:12`
+`docs/qa/verify-docs-policy.sh#L12`
+
+```bash
+cat docs/qa/verify-docs-policy.sh:8
+cat docs/qa/verify-docs-policy.sh#L8
+```
+EOF_DOC
+
+cat > "$ROOT_DIR/docs/cmdref-diff-style-pass.md" <<'EOF_DOC'
+# cmdref-diff-style-pass
+
+Diff-style references:
+
+`a/docs/qa/verify-docs-policy.sh`
+`b/docs/qa/verify-docs-policy.sh`
+`a/docs/qa/verify-docs-policy.sh:20`
+
+```bash
+cat b/docs/qa/verify-docs-policy.sh#L20
+```
+EOF_DOC
+
 printf '%s\n' "$ROOT_DIR/docs/cmdref-pass.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-pass"
 printf '%s\n' "$ROOT_DIR/docs/cmdref-fail.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-fail"
 
@@ -159,6 +187,8 @@ ALLOWED_SUMMARY=$(run_case allowed-missing docs/cmdref-allowed-missing.md 0)
 OVERRIDE_SUMMARY=$(run_case allowed-missing-override docs/cmdref-allowed-missing-override.md 0 "$ROOT_DIR/docs/.doc-command-ref-allowlist-extra")
 BASELINE_PASS_SUMMARY=$(run_case baseline-pass docs/cmdref-pass.md 0 "" "$ROOT_DIR/docs/.doc-command-ref-baseline-pass")
 BASELINE_FAIL_SUMMARY=$(run_case baseline-fail docs/cmdref-pass.md 1 "" "$ROOT_DIR/docs/.doc-command-ref-baseline-fail")
+LINE_ANCHOR_SUMMARY=$(run_case line-anchor-pass docs/cmdref-line-anchor-pass.md 0)
+DIFF_STYLE_SUMMARY=$(run_case diff-style-pass docs/cmdref-diff-style-pass.md 0)
 
 grep -q "DOCS_CMDREF_ERRORS" /tmp/cmd_ref_test_fail.out
 assert_summary_status "$FAIL_SUMMARY" fail 1
@@ -167,5 +197,7 @@ assert_summary_status "$ALLOWED_SUMMARY" pass 0
 assert_summary_status "$OVERRIDE_SUMMARY" pass 0
 assert_summary_status "$BASELINE_PASS_SUMMARY" pass 0
 assert_summary_status "$BASELINE_FAIL_SUMMARY" fail 1
+assert_summary_status "$LINE_ANCHOR_SUMMARY" pass 0
+assert_summary_status "$DIFF_STYLE_SUMMARY" pass 0
 
 echo "verify-doc-command-refs self-test: OK"
