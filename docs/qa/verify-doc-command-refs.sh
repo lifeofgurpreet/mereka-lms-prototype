@@ -221,6 +221,9 @@ def sanitize(token: str) -> str:
     token = token.strip()
     for suffix in (";", ")", "(", "{", "}", "]", "[", "\\", ",", ":", "|", "&", "`"):
         token = token.rstrip(suffix)
+    # Allow markdown/file references with optional line/column suffixes.
+    token = re.sub(r"#L\d+(?:C\d+)?$", "", token)
+    token = re.sub(r":\d+(?::\d+)?$", "", token)
     token = token.lstrip("./") if token.startswith("./") else token
     return token
 
