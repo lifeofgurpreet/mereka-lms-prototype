@@ -70,6 +70,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - normalize missing `candidate_sources` keys to zero in consolidated compliance outputs.
   - normalize all `candidate_sources` values to nonnegative integers before emitting compliance/scorecard artifacts.
   - normalize malformed command-ref metric shapes (`candidate_sources` non-object, numeric strings, negative/non-numeric counts).
+  - normalize `baseline_enabled` to a strict boolean in consolidated compliance outputs (`true|false` only).
   - preserve `baseline_enabled=true` / `baseline_entries=<n>` semantics even when effective scan scope is zero after filters.
   - preserve zero-scope schema for nonexistent explicit input paths (`baseline_enabled=false`, `baseline_entries=0`, all source counters zero).
   - verify consolidated compliance output normalizes `candidate_sources` keys to zero even when command-ref summary omits that object.
