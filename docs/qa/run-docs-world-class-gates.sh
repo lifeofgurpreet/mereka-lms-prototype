@@ -91,6 +91,17 @@ run_step() {
   log "END ${name}"
 }
 
+enforce_branch_safety() {
+  local current_branch
+  current_branch=$(git branch --show-current)
+  if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
+    log "FAIL: run docs world-class gates from a dedicated docs branch, not ${current_branch}."
+    log "Use docs/docs-first-class-20260307-followup-7 (or another docs branch) in the isolated docs worktree."
+    return 1
+  fi
+  return 0
+}
+
 check_sync_age() {
   if [ ! -f "$STATE_FILE" ]; then
     log "No sync state file found: $STATE_FILE"
@@ -171,10 +182,12 @@ sync_branch_to_origin_main() {
 }
 
 if [ "$DO_SYNC" -eq 1 ]; then
+  enforce_branch_safety
   log "Refreshing from origin/main for docs branch safety (strategy=$SYNC_STRATEGY)"
   sync_branch_to_origin_main
   update_sync_state
 else
+  enforce_branch_safety
   check_sync_age
 fi
 

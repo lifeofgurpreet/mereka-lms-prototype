@@ -11,6 +11,8 @@ fi
 grep -q "SYNC_STRATEGY=\"auto\"" "$SCRIPT_PATH"
 grep -q -- "--sync-strategy" "$SCRIPT_PATH"
 grep -q "Invalid --sync-strategy" "$SCRIPT_PATH"
+grep -q "FAIL: run docs world-class gates from a dedicated docs branch, not" "$SCRIPT_PATH"
+grep -q "Use docs/docs-first-class-20260307-followup-7 (or another docs branch) in the isolated docs worktree." "$SCRIPT_PATH"
 grep -q "Worktree has local changes; using merge fallback without rebase attempt." "$SCRIPT_PATH"
 grep -q "Rebase failed; falling back to merge strategy." "$SCRIPT_PATH"
 grep -q "FAIL: rebase strategy requested but worktree has local changes." "$SCRIPT_PATH"
