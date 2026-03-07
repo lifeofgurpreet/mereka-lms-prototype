@@ -94,6 +94,12 @@ internal_services:
     release_critical: false
     k8s_kind: Deployment
 
+  - name: xqueue
+    schema_owner: true
+    release_critical: false
+    k8s_kind: Deployment
+    notes: "Disabled by default (replicas: 0); retained for migration parity."
+
   - name: enterprise-catalog
     schema_owner: true
     release_critical: false
