@@ -58,6 +58,10 @@ jobs:
           if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
             BASE_REF="origin/main"
           fi
+          if ! git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+            echo "Resolved base ref not found: $BASE_REF" >&2
+            exit 1
+          fi
           POLICY_RANGE="${BASE_REF}...${{ github.sha }}"
           echo "DOCS_BASE_REF=${BASE_REF}" >> "$GITHUB_ENV"
           echo "DOCS_POLICY_RANGE=${POLICY_RANGE}" >> "$GITHUB_ENV"
