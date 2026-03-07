@@ -286,6 +286,8 @@ def main() -> int:
         f"policy_content_consistency_status={statuses['foundation_policy_content_consistency']} "
         f"policy_content_consistent={str(policy_content_consistent).lower()} "
         f"cmdref_baseline={cmdref_baseline_status} "
+        f"cmdref_baseline_enabled={str(cmdref.get('baseline_enabled', False)).lower()} "
+        f"cmdref_baseline_entries={cmdref.get('baseline_entries', 0)} "
         f"catalog={catalog_status} link_integrity={link_integrity_status} cmdref={cmdref_status} "
         f"cmdref_missing_refs={cmdref.get('missing_references', 0)} "
         f"cmdref_candidates_total={cmdref.get('total_candidates', 0)} "

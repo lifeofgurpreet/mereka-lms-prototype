@@ -392,6 +392,8 @@ python3 docs/qa/build-docs-compliance-summary.py \
 grep -q "policy_content=pass" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "policy_content_consistency_status=pass" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "policy_content_consistent=true" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_baseline_enabled=false" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_baseline_entries=0" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "cmdref_missing_refs=0" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "cmdref_candidates_inline=1" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "cmdref_candidates_md_link=1" /tmp/build-docs-compliance-summary-pass-stdout.out
