@@ -370,6 +370,8 @@ if statuses.get("foundation_policy_content_alignment") != "pass":
     raise SystemExit("expected statuses.foundation_policy_content_alignment=pass")
 if command_refs.get("candidate_sources", {}).get("inline_code") != 1:
     raise SystemExit("expected command_refs.candidate_sources.inline_code=1 in pass payload")
+if command_refs.get("candidate_sources", {}).get("shell_block") != 1:
+    raise SystemExit("expected command_refs.candidate_sources.shell_block=1 in pass payload")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
@@ -453,6 +455,8 @@ import sys
 payload = json.load(open(sys.argv[1], encoding="utf-8"))
 if payload.get("overall_status") != "fail":
     raise SystemExit("expected overall_status=fail")
+if payload.get("command_refs", {}).get("candidate_sources", {}).get("shell_block") != 2:
+    raise SystemExit("expected command_refs.candidate_sources.shell_block=2 in fail payload")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
