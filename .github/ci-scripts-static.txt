@@ -68,6 +68,7 @@ scripts/qa/test-build-validator-drift-review-packet.sh
 # ── QA verifier self-tests ───────────────────────────────────────────────────
 scripts/qa/test-verify-no-mux-asset-ids.sh
 scripts/qa/test-verify-kustomize-no-deprecated-keys.sh
+scripts/qa/test-verify-secret-inventory.sh
 scripts/qa/test-verify-script-portability.sh
 scripts/qa/test-verify-qa-readonly-contract.sh
 
