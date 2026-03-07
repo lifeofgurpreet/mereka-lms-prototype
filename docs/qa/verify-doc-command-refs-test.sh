@@ -231,7 +231,6 @@ cat > "$ROOT_DIR/docs/archive/cmdref-archive-only.md" <<'EOF_DOC'
 
 `docs/qa/does-not-exist.sh`
 EOF_DOC
-
 printf '%s\n' "$ROOT_DIR/docs/cmdref-pass.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-pass"
 printf '%s\n' "$ROOT_DIR/docs/cmdref-fail.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-fail"
 
