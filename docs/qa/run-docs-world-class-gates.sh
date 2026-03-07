@@ -134,8 +134,23 @@ update_sync_state() {
 
 sync_branch_to_origin_main() {
   run_step "git fetch origin" git fetch origin
+  local dirty=0
+  if ! git diff --quiet || ! git diff --cached --quiet; then
+    dirty=1
+  fi
 
   if [ "$SYNC_STRATEGY" = "merge" ]; then
+    run_step "git merge --no-ff origin/main" git merge --no-ff origin/main
+    return 0
+  fi
+
+  if [ "$dirty" -eq 1 ] && [ "$SYNC_STRATEGY" = "rebase" ]; then
+    log "FAIL: rebase strategy requested but worktree has local changes."
+    return 1
+  fi
+
+  if [ "$dirty" -eq 1 ] && [ "$SYNC_STRATEGY" = "auto" ]; then
+    log "Worktree has local changes; using merge fallback without rebase attempt."
     run_step "git merge --no-ff origin/main" git merge --no-ff origin/main
     return 0
   fi
