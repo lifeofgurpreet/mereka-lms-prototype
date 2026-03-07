@@ -461,6 +461,7 @@ with open(sys.argv[2], "a", encoding="utf-8") as fp:
     fp.write(f"- foundation_policy_root_allowlist_violations={foundation.get('policy_root_allowlist_violations', 'n/a')}\n")
     fp.write(f"- foundation_policy_changed_markdown_files={foundation.get('policy_changed_markdown_files', 'n/a')}\n")
     fp.write(f"- foundation_policy_content_detail={foundation_detail_content}\n")
+    fp.write(f"- foundation_policy_content_consistency_aligned={str(payload.get('statuses', {}).get('foundation_policy_content_consistency', 'n/a') == foundation.get('policy_content_consistency_status', 'n/a')).lower()}\n")
     fp.write(f"- foundation_policy_content_consistent={str(foundation_content_consistent).lower()}\n")
     fp.write(f"- foundation_policy_content_errors={len(foundation.get('policy_content_errors', []))}\n")
     fp.write(f"- command_reference_baseline_status={payload.get('statuses', {}).get('command_reference_baseline', 'n/a')}\n")
