@@ -61,4 +61,28 @@ if ! rg -q "GitHub-hosted Linux runner" /tmp/test-runner-policy-fail.log; then
   exit 1
 fi
 
+rm -f ".github/workflows/fail-linux.yml"
+
+cat > ".github/workflows/fail-malformed.yml" <<'YAML'
+name: malformed
+on: [push]
+jobs:
+  bad
+    runs-on: mereka-k8s-runners
+    steps:
+      - run: echo bad
+YAML
+
+if ./scripts/qa/verify-ci-runner-policy.sh >/tmp/test-runner-policy-malformed.log 2>&1; then
+  echo "Expected malformed workflow YAML to fail, but verifier passed."
+  cat /tmp/test-runner-policy-malformed.log
+  exit 1
+fi
+
+if ! rg -q "invalid workflow YAML" /tmp/test-runner-policy-malformed.log; then
+  echo "Expected failure log to mention invalid workflow YAML."
+  cat /tmp/test-runner-policy-malformed.log
+  exit 1
+fi
+
 echo "PASS test-verify-ci-runner-policy"

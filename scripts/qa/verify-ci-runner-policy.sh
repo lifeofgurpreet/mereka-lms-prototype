@@ -137,6 +137,19 @@ echo ""
 
 for wf_path in "${workflow_files[@]}"; do
   wf_name="$(basename "$wf_path")"
+  jobs_json=""
+  if ! jobs_json="$(yq -o=json '.jobs // {}' "$wf_path" 2>&1)"; then
+    parse_error="$(head -n1 <<<"$jobs_json")"
+    error "$wf_name has invalid workflow YAML: ${parse_error}"
+    continue
+  fi
+
+  job_rows=""
+  if ! job_rows="$(jq -c 'to_entries[] | {job: .key, uses: (.value.uses // ""), runs_on: (.value["runs-on"] // null)}' <<<"$jobs_json" 2>&1)"; then
+    parse_error="$(head -n1 <<<"$job_rows")"
+    error "$wf_name has invalid jobs structure: ${parse_error}"
+    continue
+  fi
 
   while IFS= read -r job_row; do
     [[ -z "$job_row" ]] && continue
@@ -168,10 +181,7 @@ for wf_path in "${workflow_files[@]}"; do
       label_index=$((label_index + 1))
       validate_runner_label "$wf_name" "$job_name[$label_index]" "$label"
     done
-  done < <(
-    yq -o=json '.jobs // {}' "$wf_path" \
-      | jq -c 'to_entries[] | {job: .key, uses: (.value.uses // ""), runs_on: (.value["runs-on"] // null)}'
-  )
+  done <<<"$job_rows"
 done
 
 echo ""
