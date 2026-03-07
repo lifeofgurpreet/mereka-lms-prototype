@@ -96,7 +96,7 @@ enforce_branch_safety() {
   current_branch=$(git branch --show-current)
   if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
     log "FAIL: run docs world-class gates from a dedicated docs branch, not ${current_branch}."
-    log "Use docs/docs-first-class-20260307-followup-7 (or another docs branch) in the isolated docs worktree."
+    log "Use a docs/* branch in the isolated docs worktree (do not run from ${current_branch})."
     return 1
   fi
   return 0
