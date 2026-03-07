@@ -13,7 +13,7 @@
 #   ./scripts/qa/verify-rollback-dry-run.sh
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(git rev-parse --show-toplevel)}"
 cd "$REPO_ROOT"
 
 failures=0
