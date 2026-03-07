@@ -10,12 +10,12 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 2
 fi
 
-if ! command -v git >/dev/null 2>&1; then
+if [[ -z "${REPO_ROOT_OVERRIDE:-}" ]] && ! command -v git >/dev/null 2>&1; then
   echo "ERROR: git is required" >&2
   exit 2
 fi
 
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 # Check both canonical and legacy paths (docs were reorganized)
 if [[ -f "$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md" ]]; then
   TRACKER="$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md"

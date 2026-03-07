@@ -5,7 +5,7 @@
 # Guardrail: prevent control-plane drift between deploy/k8s and infrastructure/k8s.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$REPO_ROOT"
 
 BOUNDARY_DOC="docs/operations/REPO_BOUNDARIES.md"
@@ -51,14 +51,24 @@ else
 fi
 
 # infrastructure/k8s must remain a tightly scoped support namespace.
+if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  tracked_k8s_files_cmd=(git -C "$REPO_ROOT" ls-files infrastructure/k8s)
+else
+  if [[ ! -d "$REPO_ROOT/infrastructure/k8s" ]]; then
+    fail "infrastructure/k8s directory missing"
+  fi
+  tracked_k8s_files_cmd=(find "$REPO_ROOT/infrastructure/k8s" -type f -print)
+fi
+
 while IFS= read -r path; do
   [[ -z "$path" ]] && continue
+  path="${path#"$REPO_ROOT/"}"
   if is_allowlisted "$path"; then
     pass
   else
     fail "$path is tracked under infrastructure/k8s but not allowlisted (introduces shadow infra risk)"
   fi
-done < <(git ls-files infrastructure/k8s)
+done < <("${tracked_k8s_files_cmd[@]}")
 
 if [[ -f "$LEGACY_MONGODB_FILE" ]]; then
   if rg -q "^#.*DEPRECATED: In-cluster MongoDB" "$LEGACY_MONGODB_FILE"; then

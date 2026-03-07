@@ -4,10 +4,11 @@
 # Enforce canonical authn submodule path contract.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$REPO_ROOT"
 
 CANONICAL_PATH="tmp/frontend-app-authn"
+CANONICAL_URL="https://github.com/openedx/frontend-app-authn"
 LEGACY_PATH="apps/frontend-app-authn"
 
 red=$'\033[0;31m'
@@ -16,9 +17,43 @@ reset=$'\033[0m'
 
 findings=0
 
-# 1) .gitmodules must declare canonical submodule path.
+# 1a) .gitmodules must declare canonical submodule path.
 if ! git config -f .gitmodules --get-regexp '^submodule\..*\.path$' | grep -q "${CANONICAL_PATH}$"; then
   printf '%sFAIL%s .gitmodules missing canonical path: %s\n' "$red" "$reset" "$CANONICAL_PATH"
+  findings=$((findings + 1))
+fi
+
+# 1b) .gitmodules must pin canonical upstream URL.
+if ! git config -f .gitmodules --get-regexp '^submodule\..*\.url$' | grep -q "${CANONICAL_URL}$"; then
+  printf '%sFAIL%s .gitmodules missing canonical URL: %s\n' "$red" "$reset" "$CANONICAL_URL"
+  findings=$((findings + 1))
+fi
+
+# 1c) canonical path must be tracked as a gitlink.
+if ! git ls-files -s "$CANONICAL_PATH" | awk '{print $1}' | grep -q '^160000$'; then
+  printf '%sFAIL%s canonical submodule is not tracked as gitlink: %s\n' "$red" "$reset" "$CANONICAL_PATH"
+  findings=$((findings + 1))
+fi
+
+# 1d) forbid additional tracked tmp/frontend-app-* clones/submodules.
+while IFS= read -r entry; do
+  [[ -z "$entry" ]] && continue
+  path="$(awk '{print $4}' <<<"$entry")"
+  mode="$(awk '{print $1}' <<<"$entry")"
+  if [[ "$path" == "$CANONICAL_PATH" ]]; then
+    continue
+  fi
+  printf '%sFAIL%s tracked tmp frontend app path outside canonical allowlist: %s (mode=%s)\n' "$red" "$reset" "$path" "$mode"
+  findings=$((findings + 1))
+done < <(git ls-files -s 'tmp/frontend-app-*' || true)
+
+# 1e) .gitignore must ignore tmp/frontend-app-* with explicit canonical allowlist exception.
+if ! rg -n -F 'tmp/frontend-app-*/' .gitignore >/dev/null 2>&1; then
+  printf '%sFAIL%s .gitignore missing tmp frontend clone ignore rule\n' "$red" "$reset"
+  findings=$((findings + 1))
+fi
+if ! rg -n -F '!tmp/frontend-app-authn/' .gitignore >/dev/null 2>&1; then
+  printf '%sFAIL%s .gitignore missing canonical submodule exception rule\n' "$red" "$reset"
   findings=$((findings + 1))
 fi
 

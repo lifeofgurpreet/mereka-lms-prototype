@@ -14,7 +14,7 @@
 #   STRICT_RUNTIME=1     (fail when runtime endpoint cannot be resolved/reached)
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 GREEN='\033[0;32m'

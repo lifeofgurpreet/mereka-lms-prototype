@@ -11,7 +11,7 @@
 # Existing historical files remain untouched.
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 cd "$REPO_ROOT"
 
 BASE_REF="${EVIDENCE_POLICY_BASE_REF:-origin/main}"
