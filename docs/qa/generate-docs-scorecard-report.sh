@@ -289,6 +289,7 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 - Catalog score: ${dict[score]:-0} / threshold ${dict[min_score]:-0} (${dict[score_status]:-unknown})
 - Scorecard trend: base=${dict[base_score]:-0}, current=${dict[current_score]:-0}, drop=${dict[score_drop]:-0}, threshold=${dict[max_allowed_drop]:-0}, status=${dict[trend_status]}
 - Command reference checks: ${dict[cmdref_status]:-unknown} (${dict[files_checked]:-0} files, ${dict[missing_references]:-0} missing)
+- Command reference baseline coverage: enabled=${dict[cmdref_baseline_enabled]:-false}, entries=${dict[cmdref_baseline_entries]:-0}
 - Command reference source breakdown: inline=${dict[candidates_inline_code]:-0}, shell=${dict[candidates_shell_block]:-0}, md_link=${dict[candidates_markdown_link]:-0}, md_autolink=${dict[candidates_markdown_autolink]:-0}, md_refdef=${dict[candidates_markdown_refdef]:-0}
 - Link integrity checks: ${dict[link_integrity_status]:-unknown} (${dict[link_integrity_files_checked]:-0} files, ${dict[link_integrity_broken_links]:-0} broken)
 
