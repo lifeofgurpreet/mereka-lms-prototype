@@ -133,6 +133,7 @@ if not files:
     raise SystemExit(0)
 
 inline_code_re = re.compile(r"`([^`]+)`")
+markdown_link_re = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 fence_start_re = re.compile(r"^```(.*)$")
 
 ALLOWED_PREFIXES = (
@@ -336,6 +337,16 @@ for path in files:
                     total_candidates += 1
                     if not candidate_exists(token):
                         all_missing.append(f"{rel}:{idx}: missing inline path reference `{token}`")
+            for match in markdown_link_re.finditer(raw):
+                target = (match.group(1) or "").strip()
+                if not target:
+                    continue
+                token = sanitize(target.split()[0])
+                if not is_repo_path_candidate(token):
+                    continue
+                total_candidates += 1
+                if not candidate_exists(token):
+                    all_missing.append(f"{rel}:{idx}: missing markdown-link path reference `{token}`")
             continue
 
         # inside shell block

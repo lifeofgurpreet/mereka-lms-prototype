@@ -178,6 +178,23 @@ cat b/docs/qa/verify-docs-policy.sh#L20
 ```
 EOF_DOC
 
+cat > "$ROOT_DIR/docs/cmdref-markdown-link-pass.md" <<'EOF_DOC'
+# cmdref-markdown-link-pass
+
+Markdown link references:
+
+- [policy](docs/qa/verify-docs-policy.sh#L12)
+- [policy line](docs/qa/verify-docs-policy.sh:12)
+EOF_DOC
+
+cat > "$ROOT_DIR/docs/cmdref-markdown-link-fail.md" <<'EOF_DOC'
+# cmdref-markdown-link-fail
+
+Markdown link references:
+
+- [missing](docs/qa/does-not-exist.md#L9)
+EOF_DOC
+
 printf '%s\n' "$ROOT_DIR/docs/cmdref-pass.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-pass"
 printf '%s\n' "$ROOT_DIR/docs/cmdref-fail.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-fail"
 
@@ -189,6 +206,8 @@ BASELINE_PASS_SUMMARY=$(run_case baseline-pass docs/cmdref-pass.md 0 "" "$ROOT_D
 BASELINE_FAIL_SUMMARY=$(run_case baseline-fail docs/cmdref-pass.md 1 "" "$ROOT_DIR/docs/.doc-command-ref-baseline-fail")
 LINE_ANCHOR_SUMMARY=$(run_case line-anchor-pass docs/cmdref-line-anchor-pass.md 0)
 DIFF_STYLE_SUMMARY=$(run_case diff-style-pass docs/cmdref-diff-style-pass.md 0)
+MARKDOWN_LINK_PASS_SUMMARY=$(run_case markdown-link-pass docs/cmdref-markdown-link-pass.md 0)
+MARKDOWN_LINK_FAIL_SUMMARY=$(run_case markdown-link-fail docs/cmdref-markdown-link-fail.md 1)
 
 grep -q "DOCS_CMDREF_ERRORS" /tmp/cmd_ref_test_fail.out
 assert_summary_status "$FAIL_SUMMARY" fail 1
@@ -199,5 +218,7 @@ assert_summary_status "$BASELINE_PASS_SUMMARY" pass 0
 assert_summary_status "$BASELINE_FAIL_SUMMARY" fail 1
 assert_summary_status "$LINE_ANCHOR_SUMMARY" pass 0
 assert_summary_status "$DIFF_STYLE_SUMMARY" pass 0
+assert_summary_status "$MARKDOWN_LINK_PASS_SUMMARY" pass 0
+assert_summary_status "$MARKDOWN_LINK_FAIL_SUMMARY" fail 1
 
 echo "verify-doc-command-refs self-test: OK"
