@@ -30,7 +30,7 @@ rg -n "^[A-Za-z0-9_.-]+:($|[^=])" Makefile | sed -E 's/:.*$//' | wc -l
 
 | Candidate | Type | Why redundant | Canonical replacement | Status |
 |---|---|---|---|---|
-| .github/workflows/policy-checks.yml | Workflow wrapper | Manual-only fanout of contract wrappers that duplicate checks already covered by ci.yml static lanes | ci.yml + verify-ci-cd-pipeline.sh | Completed |
+| .github/workflows/docs-policy.yml | Workflow wrapper | Manual-only fanout of contract wrappers that duplicate checks already covered by ci.yml static lanes | ci.yml + verify-ci-cd-pipeline.sh | Completed |
 | scripts/qa/verify-*-workflow.sh family (18 files) | Meta wrapper scripts | Checks wrapper/workflow shape rather than runtime behavior; high ceremony, low signal | Direct source/runtime checks already in ci-scripts-static.txt | Completed |
 | `Makefile` frontend QA wrapper aliases (env-specific duplicates) | Make target duplication | Multiple targets differ only by env/flags | Parameterized canonical target (`qa-frontend-closure` + `QA_ENV`/flag matrix) | Completed |
 | `Makefile` blocker sweep env aliases (`*-both/dev/prod`) | Make target duplication | Alias wrappers only delegated to the same sweep target with a different `QA_ENV` | Parameterized canonical target (`qa-frontend-runtime-blocker-sweep QA_ENV=...`) | Completed |

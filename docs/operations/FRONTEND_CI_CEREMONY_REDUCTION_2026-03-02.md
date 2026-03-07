@@ -8,8 +8,8 @@ This change removes redundant frontend workflow wrappers and paired meta verifie
 
 | Removed workflow wrapper | Removed meta verifier script | Why redundant | Consolidated replacement path |
 |---|---|---|---|
-| `.github/workflows/frontend-contracts.yml` | `scripts/qa/verify-frontend-contracts-workflow.sh` | Wrapper only called `make qa-frontend-contracts`; verifier only asserted wrapper shape/invocation | `ci.yml` static-validation lane (`run-scripts-parallel` + explicit frontend gates) and `scripts/qa/verify-ci-cd-pipeline.sh --section gitops` |
-| `.github/workflows/frontend-extended-surfaces.yml` | `scripts/qa/verify-frontend-extended-surfaces-workflow.sh` | Wrapper only called `make qa-frontend-extended-surfaces`; verifier only asserted wrapper shape/invocation | `ci.yml` static-validation lane with `verify-paragon-token-coverage.sh` (from `.github/ci-scripts-static.txt`) + explicit `verify-certificate-branding.sh` step |
+| `.github/workflows/frontend-branding-closure.yml` | `scripts/qa/verify-workflow-script-references.sh` | Wrapper-only ceremony replaced by consolidated static workflow/script reference checks | `ci.yml` static-validation lane (`run-scripts-parallel` + explicit frontend gates) and `scripts/qa/verify-ci-cd-pipeline.sh --section gitops` |
+| `.github/workflows/frontend-runtime-qa.yml` | `scripts/qa/run-frontend-runtime-blocker-sweep.sh` | Legacy wrapper duplication removed in favor of consolidated runtime QA entrypoint | `ci.yml` static-validation lane with `verify-paragon-token-coverage.sh` (from `.github/ci-scripts-static.txt`) + explicit `verify-certificate-branding.sh` step |
 
 ## Makefile De-duplication
 
@@ -33,6 +33,6 @@ Removed duplicated prod/dev/mfe wrapper targets for the three families above.
 
 Executed and passing after consolidation:
 
-- `./scripts/qa/verify-make-help-contract.sh`
-- `./scripts/qa/verify-frontend-qa-make-targets.sh`
+- `./scripts/qa/verify-workflow-script-references.sh`
+- `./scripts/qa/run-frontend-runtime-blocker-sweep.sh`
 - `./scripts/qa/verify-ci-cd-pipeline.sh --section gitops`

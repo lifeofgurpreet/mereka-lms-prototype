@@ -217,7 +217,7 @@ run_step "verify-docs-scorecard-report-consistency" ./docs/qa/verify-docs-scorec
 run_step "verify-docs-scorecard-head-freshness" ./docs/qa/verify-docs-scorecard-head-freshness.sh --summary-json "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY"
 run_step "verify-docs-scorecard-report-timestamp" ./docs/qa/verify-docs-scorecard-report-timestamp.sh --summary-json "$DOCS_SCORECARD_TIMESTAMP_SUMMARY"
 run_step "verify-docs-scorecard-delta-artifact" ./docs/qa/verify-docs-scorecard-delta-artifact.sh --summary-json "$DOCS_SCORECARD_DELTA_SUMMARY"
-run_step "verify-docs-scorecard-generation-drift" ./docs/qa/verify-docs-scorecard-generation-drift.sh --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY"
+run_step "verify-docs-scorecard-generation-drift" ./docs/qa/verify-docs-scorecard-generation-drift.sh --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY" --policy-range "${BASE_REF}...HEAD"
 run_step "verify-doc-link-integrity" ./docs/qa/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY"
 run_step "verify-doc-catalog-health" python3 docs/qa/verify-doc-catalog-health.py \
   --max-stale-days 45 \

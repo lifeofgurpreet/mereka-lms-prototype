@@ -165,12 +165,12 @@ Review the output, then run without `--dry-run` to execute.
 ### Step 1: Create Brand Pack
 
 ```bash
-# Copy template to new tenant directory
-cp -r infrastructure/tutor/themes/mereka/tenants/_template \
-      infrastructure/tutor/themes/mereka/tenants/acme-corp
+# Start from tracked tenant brand-pack template and adjust values
+cp scripts/tenants/brand-pack-template.json /tmp/acme-branding.json
+vim /tmp/acme-branding.json
 
-# Edit branding.json with tenant-specific values
-vim infrastructure/tutor/themes/mereka/tenants/acme-corp/branding.json
+# Example tracked reference payload
+cp scripts/tenants/acme-branding.json /tmp/acme-branding.example.json
 ```
 
 **branding.json Example**:
@@ -202,17 +202,14 @@ vim infrastructure/tutor/themes/mereka/tenants/acme-corp/branding.json
 ### Step 2: Add Assets
 
 ```bash
-# Upload logo (PNG/SVG, max 400×100px, <500KB)
-cp acme-logo.png infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo.png
+# Validate the brand-pack JSON (path points to your working file)
+./scripts/tenants/validate-tenant-brand-pack.sh --slug acme-corp
 
-# Upload favicon (ICO/PNG, 32×32px or 64×64px, <500KB)
-cp acme-favicon.ico infrastructure/tutor/themes/mereka/tenants/acme-corp/favicons/favicon.ico
+# Sync tenant branding assets from canonical tenant sources
+./scripts/tenants/sync-tenant-branding.sh --tenant acme-corp
 
-# Optional: Square logo
-cp acme-logo-square.png infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo-square.png
-
-# Optional: White logo (for dark backgrounds)
-cp acme-logo-white.png infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo-white.png
+# Optional: repo-wide asset sync after tenant update
+./scripts/branding/sync-brand-assets.sh
 ```
 
 **Asset Requirements**:
@@ -578,7 +575,7 @@ cp acme-logo.png themes/mereka/tenants/acme-corp/logos/logo.png
 cp acme-favicon.ico themes/mereka/tenants/acme-corp/favicons/favicon.ico
 
 # Sync to Tutor
-./scripts/branding/sync-branding.sh
+./scripts/branding/sync-brand-assets.sh
 ```
 
 ### 5. Create Enterprise Catalog

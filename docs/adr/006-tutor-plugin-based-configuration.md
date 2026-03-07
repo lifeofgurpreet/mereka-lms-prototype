@@ -147,10 +147,10 @@ Contribute all patches upstream to the Tutor project so they become part of the 
 
 ## Implementation Notes
 
-- Plugin location: `infrastructure/tutor/tutor-plugin-mereka/`
+- Plugin location: `infrastructure/tutor/plugins/_mereka_lms/`
 - Patch manifest: `infrastructure/tutor/patch-manifest.yml`
 - Verification tool: `scripts/infra/verify-tutor-patches.sh`
-- CI workflow: `.github/workflows/verify-tutor-config.yml`
+- CI workflow: `.github/workflows/tutor-plugin-test.yml`
 - Pre-commit hook: `.pre-commit-config.yaml` (local hook entry)
 - Related spec: `specs/tutor-configuration-resilience_spec.md`
 - Related spec (patch content): `specs/tutor-configuration_spec.md`

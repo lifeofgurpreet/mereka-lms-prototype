@@ -276,7 +276,7 @@ SkillOurFuture (`skillourfuture`) is already represented as a tenant domain in `
 
 1. Collect brand assets from the SkillOurFuture design brief.
 2. Upload assets to `assets/branding/tenants/skillourfuture/`.
-3. Create `infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json` using `brand-config-schema.json`.
+3. Create `scripts/tenants/brand-pack-template.json` copy for `skillourfuture` using `brand-config-schema.json`.
 4. Validate: `scripts/tenants/validate-tenant-brand-pack.sh skillourfuture`.
 5. Open a PR with `tenant | branding | skillourfuture` in the title to trigger all contract gates.
 6. After PR approval, apply: `scripts/tenants/provision-tenant.sh --update-brand skillourfuture`.
@@ -329,7 +329,7 @@ All brand profile changes must include a `_meta` block with `approved_by`, `appr
 scripts/tenants/provision-tenant.sh --update-brand skillourfuture
 ```
 
-Changes are logged in `docs/operations/CONFIG_REVIEW_YYYY-MM-DD.md` under a "Tenant Brand Profile" section.
+Changes are logged in `docs/operations/CONFIG_REVIEW_2026-02-03.md` under a "Tenant Brand Profile" section.
 
 ### Quarterly Review
 

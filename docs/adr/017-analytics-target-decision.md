@@ -50,7 +50,8 @@ The platform requires analytics capabilities for learning insights (enrollments,
 
 ## Decision
 
-We are **proceeding** with Aspects deployment. Initial deployment targets dev (rke2-nonprod), with production promotion after 2-week stability period.
+Aspects is the **target analytics architecture**, but deployment is **deferred** until readiness gates are met.  
+Current policy is no production Aspects deployment until the conditions below are satisfied.
 
 **Rationale**:
 - Core platform requires stabilization before adding analytics stack
@@ -101,7 +102,7 @@ We are **proceeding** with Aspects deployment. Initial deployment targets dev (r
    - No cleanup required - just don't deploy
 
 3. **Document interim analytics approach**:
-   - [ ] Create `docs/concepts/analytics/INTERIM_ANALYTICS.md` documenting built-in LMS analytics usage
+   - [ ] Create `docs/concepts/analytics/ASPECTS_ANALYTICS.md` documenting built-in LMS analytics usage
 
 ## Alternatives Considered
 
@@ -139,7 +140,7 @@ kubectl get pods -n mereka-lms | grep aspects
 ```
 
 ### Future Deployment Procedure (when approved)
-When analytics deployment is reconsidered:
+When analytics deployment is approved:
 
 1. **Build images** (30-45 minutes):
    ```bash

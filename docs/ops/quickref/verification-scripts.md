@@ -307,9 +307,9 @@ export NAMESPACE=mereka-lms
 ./scripts/infra/verify-tutor-config.sh
 
 # Run service verifications
-./scripts/qa/verify-lms-health.sh
-./scripts/qa/verify-cms-health.sh
-./scripts/qa/verify-mfe-health.sh
+./scripts/qa/public-health-check.sh prod
+./scripts/qa/verify-auth-surfaces.sh prod
+./scripts/qa/verify-credentials-readiness.sh --cluster
 ```
 
 ### Validation Results (2026-02-11)

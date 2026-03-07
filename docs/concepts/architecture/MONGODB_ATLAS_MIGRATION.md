@@ -46,7 +46,7 @@ mongodb_parameters = {
 ```
 
 ### Forum Service
-- `deploy/k8s/base/deployments.yml`
+- `deploy/k8s/base/apps/lms/deployment.yaml`
 
 Environment variables:
 ```yaml
@@ -66,8 +66,8 @@ The following files have been commented out/deprecated:
 
 | File | Contents |
 |------|----------|
-| `deploy/k8s/base/deployments.yml` | MongoDB deployment (commented) |
-| `deploy/k8s/base/services.yml` | MongoDB service (commented) |
+| `deploy/k8s/base/apps/lms/deployment.yaml` | LMS runtime wiring that consumes Atlas-backed Mongo settings |
+| `deploy/k8s/base/apps/cms/deployment.yaml` | CMS runtime wiring that consumes Atlas-backed Mongo settings |
 | `deploy/k8s/base/volumes.yml` | MongoDB PVC (commented) |
 | `infrastructure/k8s/mongodb.yaml` | Deprecated with explanation |
 
@@ -136,9 +136,9 @@ print('Courses:', db['modulestore.active_versions'].count_documents({}))
 
 If rollback to in-cluster MongoDB is needed:
 
-1. Uncomment the MongoDB sections in:
-   - `deploy/k8s/base/deployments.yml`
-   - `deploy/k8s/base/services.yml`
+1. Restore legacy MongoDB manifests/wiring in:
+   - `deploy/k8s/base/apps/mongodb/service.yaml`
+   - `deploy/k8s/base/apps/lms/deployment.yaml`
    - `deploy/k8s/base/volumes.yml`
 
 2. Update `mongodb_parameters` in production.py files:

@@ -32,7 +32,7 @@
 - [ ] Delete ecommerce-worker Deployment: `kubectl delete deployment ecommerce-worker -n mereka-lms`
 - [ ] Delete ecommerce Service: `kubectl delete service ecommerce -n mereka-lms`
 - [ ] Delete ecommerce ConfigMaps (if any)
-- [ ] Remove ecommerce manifests from `deploy/k8s/base/apps/ecommerce/`
+- [ ] Remove legacy ecommerce references from `deploy/k8s/base/apps/purchase-gateway/`
 - [ ] Remove ecommerce references from Kustomize overlays
 
 ---
@@ -53,7 +53,7 @@
 
 ## Documentation Updates
 
-- [ ] Archive legacy ecommerce docs to `docs/archive/legacy-ecommerce/`:
+- [ ] Archive legacy ecommerce docs to `docs/archive/superseded/operations/`:
   - `docs/operations/ECOMMERCE_THEMING.md`
   - `docs/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md`
   - `docs/operations/STRIPE_WEBHOOKS_SETUP.md` (if Oscar-specific sections)

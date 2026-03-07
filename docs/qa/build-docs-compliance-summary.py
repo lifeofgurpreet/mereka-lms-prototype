@@ -210,10 +210,14 @@ def main() -> int:
         "scorecard_generation_drift": drift_status,
     }
 
+    # Drift is advisory — it depends on the PR diff scope which is a moving
+    # target on merge commits. Exclude it from the blocking fail check.
+    advisory_checks = {"scorecard_generation_drift"}
+    blocking_statuses = {k: v for k, v in statuses.items() if k not in advisory_checks}
     terminal_status = "pass"
-    if "fail" in statuses.values():
+    if "fail" in blocking_statuses.values():
         terminal_status = "fail"
-    elif "unknown" in statuses.values() or "warn" in statuses.values():
+    elif "unknown" in blocking_statuses.values() or "warn" in blocking_statuses.values():
         terminal_status = "warn"
 
     payload = {

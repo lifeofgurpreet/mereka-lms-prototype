@@ -82,7 +82,7 @@ We chose **in-cluster deployment** for both MySQL and Redis, backed by GKE Persi
   - Separate logical databases for cache (0), Celery (1), Streams (2)
 
 ### Backup Verification
-- Monthly backup restoration tests (automated via `scripts/infra/test-backup-restore.sh`)
+- Monthly backup restoration tests (automated via `scripts/infra/fix-velero-restore-test.sh`)
 - Backup success/failure alerts via Prometheus + Alertmanager
 
 ## Scale-Out Plan

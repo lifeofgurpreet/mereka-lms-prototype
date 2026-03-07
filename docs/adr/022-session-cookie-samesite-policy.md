@@ -1,13 +1,27 @@
 ---
-title: "Session Cookie SameSite Policy and Stale Cookie Mitigation"
-type: "adr"
-status: "accepted"
-owner: "engineering"
-last_updated: "2026-03-04"
-links:
-  related_adrs:
-    - "docs/adr/013-studio-sso-bypass-middleware.md"
-    - "docs/adr/002-multisite-architecture.md"
+id: ADR-022
+title: Session Cookie SameSite Policy and Stale Cookie Mitigation
+decision_status: accepted
+decision_type: exception
+rollout_state: temporary
+owner: auth-platform
+created: 2026-03-04
+last_reviewed: 2026-03-07
+review_due: 2026-06-30
+supersedes: []
+amends: ["ADR-002", "ADR-013"]
+depends_on: ["ADR-029", "ADR-031"]
+read_next: []
+governs: ["session-cookie-samesite-exception", "stale-cookie-dedup-workaround"]
+does_not_govern: ["final steady-state cross-domain identity architecture"]
+related_oep: []
+related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
+related_specs: []
+related_runbooks: ["docs/operations/FORUM_AUTH_E2E.md"]
+related_evidence: []
+fitness_functions: ["scripts/qa/verify-auth-surfaces.sh prod", "scripts/qa/verify-mfe-config-contract.sh --env prod"]
+expiry_date: 2026-09-30
+removal_condition: SameSite and dedup exception removed after stable federated auth flow without stale-cookie reliance.
 ---
 
 # ADR-022: Session Cookie SameSite Policy and Stale Cookie Mitigation

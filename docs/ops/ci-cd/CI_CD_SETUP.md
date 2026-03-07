@@ -149,7 +149,7 @@ When using `build-tutor-images.yml` with `update_gitops=true`:
 
 ### On-demand Policy Checks
 
-Use workflow `.github/workflows/policy-checks.yml` via `workflow_dispatch` to run:
+Use workflow `.github/workflows/docs-policy.yml` via `workflow_dispatch` to run:
 - release automation contract checks
 - build workflow contract checks
 - release workflow invocation contract checks (`--target-env --apply --commit --push`, plus production runtime verify wiring)

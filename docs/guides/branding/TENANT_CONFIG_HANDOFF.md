@@ -18,7 +18,7 @@ commands, rollback and recovery actions, and links to related subsystem docs.
 When the platform renders a page for a given hostname, branding assets are resolved in this
 order (last match wins):
 
-1. **Platform defaults** — `assets/branding/tokens.css`, `assets/branding/logo-mereka.svg`
+1. **Platform defaults** — `assets/branding/tokens.css`, `assets/branding/logo.svg`
 2. **Tenant base** — `infrastructure/tutor/themes/mereka/` SCSS variables and overrides
 3. **Domain-specific** — `SITE_VARIANTS[hostname]` in `infrastructure/tutor/plugins/mereka_lms.py`
 
@@ -142,7 +142,7 @@ ls infrastructure/tutor/themes/mereka/lms/static/images/logo-<slug>.svg
 ### Step 5 — Create/update tenant ConfigMap entry
 
 Add a `TenantConfig` entry in the tenant registry ConfigMap at
-`deploy/k8s/base/apps/tenant-registry-configmap.yaml` (if applicable):
+`deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml` (if applicable):
 
 ```yaml
 tenants:
@@ -154,7 +154,7 @@ tenants:
 Apply to cluster:
 
 ```bash
-kubectl apply -f deploy/k8s/base/apps/tenant-registry-configmap.yaml -n mereka-lms
+kubectl apply -f deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml -n mereka-lms
 ```
 
 ### Step 6 — Run provision-tenant.sh

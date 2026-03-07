@@ -143,7 +143,7 @@ tutor local exec clickhouse clickhouse-client
 
 ## Documentation
 
-- **Full Guide**: `docs/ASPECTS_ANALYTICS.md`
-- **Installation**: `docs/ASPECTS_INSTALLATION.md`
-- **Comparison**: `docs/ASPECTS_VS_PANORAMA.md`
+- **Full Guide**: `docs/concepts/analytics/ASPECTS_ANALYTICS.md`
+- **Installation**: `docs/concepts/analytics/ASPECTS_INSTALLATION.md`
+- **Comparison**: `docs/concepts/analytics/ASPECTS_VS_PANORAMA.md`
 

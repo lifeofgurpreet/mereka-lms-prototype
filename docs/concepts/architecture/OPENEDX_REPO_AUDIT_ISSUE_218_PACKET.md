@@ -36,9 +36,9 @@ The packet optimizes governance without forcing premature migration.
 ### File Changes
 
 1. Add policy doc:
-   - `docs/guides/branding/THEMING_ARTIFACT_POLICY.md`
+- `docs/concepts/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md`
 2. Add determinism verifier:
-   - `scripts/qa/verify-theme-artifacts-determinism.sh`
+- `scripts/qa/verify-theme-consistency.sh`
 3. Wire to CI:
    - `.github/workflows/ci.yml`
 4. Optional doc cross-link:
@@ -73,7 +73,7 @@ Table must define for each artifact:
 ```bash
 ./scripts/branding/generate-tokens-from-canonical.sh --check
 ./scripts/qa/verify-token-drift.sh
-./scripts/qa/verify-theme-artifacts-determinism.sh
+./scripts/qa/verify-theme-consistency.sh
 ```
 
 ---

@@ -1,0 +1,126 @@
+version: 1
+generated_on: '2026-03-07'
+entries:
+  ADR-001:
+    path: docs/adr/001-mongodb-atlas.md
+    decision_type: domain
+  ADR-002:
+    path: docs/adr/002-multisite-architecture.md
+    decision_type: domain
+  ADR-003:
+    path: docs/adr/003-image-build-pipeline.md
+    decision_type: domain
+  ADR-004:
+    path: docs/adr/004-secrets-management.md
+    decision_type: domain
+  ADR-005:
+    path: docs/adr/005-domain-migration.md
+    decision_type: migration
+  ADR-006:
+    path: docs/adr/006-tutor-plugin-based-configuration.md
+    decision_type: domain
+  ADR-007:
+    path: docs/adr/007-forum-migration-ruby-to-python.md
+    decision_type: migration
+  ADR-008:
+    path: docs/adr/008-redis-streams-event-bus.md
+    decision_type: domain
+  ADR-009:
+    path: docs/adr/009-in-cluster-storage.md
+    decision_type: domain
+  ADR-010:
+    path: docs/adr/010-monorepo-architecture.md
+    decision_type: domain
+  ADR-011:
+    path: docs/adr/011-convention-based-spec-verification.md
+    decision_type: domain
+  ADR-012:
+    path: docs/adr/012-no-runtime-css-overlay.md
+    decision_type: migration
+  ADR-013:
+    path: docs/adr/013-studio-sso-bypass-middleware.md
+    decision_type: exception
+  ADR-014:
+    path: docs/adr/014-mfe-branding-strategy.md
+    decision_type: domain
+  ADR-015:
+    path: docs/adr/015-mobile-push-notification-provider.md
+    decision_type: domain
+  ADR-016:
+    path: docs/adr/016-android-app-support-decision.md
+    decision_type: domain
+  ADR-017:
+    path: docs/adr/017-analytics-target-decision.md
+    decision_type: migration
+  ADR-018:
+    path: docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md
+    decision_type: migration
+  ADR-019:
+    path: docs/adr/019-tutor-upgrade-policy.md
+    decision_type: foundation
+  ADR-020:
+    path: docs/adr/020-tracing-scope-and-pilot-decision.md
+    decision_type: domain
+  ADR-021:
+    path: docs/adr/021-openedx-tutor-methodology.md
+    decision_type: foundation
+  ADR-022:
+    path: docs/adr/022-session-cookie-samesite-policy.md
+    decision_type: exception
+  ADR-023:
+    path: docs/adr/023-enterprise-images-ghcr-migration.md
+    decision_type: domain
+  ADR-024:
+    path: docs/adr/024-multi-tenancy-true-tenants.md
+    decision_type: foundation
+  ADR-025:
+    path: docs/adr/025-csp-nonce-migration.md
+    decision_type: domain
+  ADR-026:
+    path: docs/adr/026-cicd-build-pipeline-lessons.md
+    decision_type: domain
+  ADR-027:
+    path: docs/adr/027-deployment-contract-ownership-lanes.md
+    decision_type: foundation
+  ADR-028:
+    path: docs/adr/028-platform-sources-of-truth-and-control-planes.md
+    decision_type: foundation
+  ADR-029:
+    path: docs/adr/029-identity-session-and-domain-boundary-strategy.md
+    decision_type: foundation
+  ADR-030:
+    path: docs/adr/030-feature-flag-and-rollout-lifecycle.md
+    decision_type: foundation
+  ADR-031:
+    path: docs/adr/031-deprecation-and-removal-policy.md
+    decision_type: foundation
+  ADR-032:
+    path: docs/adr/032-data-governance-pii-retention-and-deletion.md
+    decision_type: foundation
+  ADR-033:
+    path: docs/adr/033-tenant-lifecycle-contract.md
+    decision_type: foundation
+  ADR-034:
+    path: docs/adr/034-event-contract-and-transport-independence.md
+    decision_type: domain
+  ADR-035:
+    path: docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md
+    decision_type: domain
+  ADR-036:
+    path: docs/adr/036-cache-topology-and-invalidation-strategy.md
+    decision_type: domain
+  ADR-037:
+    path: docs/adr/037-async-task-user-facing-contract.md
+    decision_type: domain
+  ADR-038:
+    path: docs/adr/038-commerce-system-of-record-and-reconciliation.md
+    decision_type: domain
+  ADR-039:
+    path: docs/adr/039-translations-and-internationalization-strategy.md
+    decision_type: domain
+  ADR-040:
+    path: docs/adr/040-internal-packages-plugins-and-versioning-policy.md
+    decision_type: domain
+  ADR-041:
+    path: docs/adr/041-authorization-and-role-boundary-model.md
+    decision_type: domain

@@ -128,7 +128,7 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=forum --tail=50 | grep -i a
 **Fix**:
 ```bash
 # Sync API_KEY from Infisical
-./scripts/infra/sync-secrets.sh
+./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 
 # Restart services
 kubectl rollout restart -n mereka-lms deploy/lms deploy/forum
@@ -184,7 +184,7 @@ kubectl exec -it -n mereka-lms deploy/lms -- python manage.py lms shell
 Use the verification script to test the complete flow:
 
 ```bash
-./scripts/qa/verify-forum-integration.sh
+./scripts/qa/verify-forum-smoke.sh
 ```
 
 **Note**: Script needs to be created to verify:

@@ -279,7 +279,7 @@ Runner pods inside the cluster use Kubernetes ServiceAccounts (RBAC) for direct 
 | Change | Files | Impact |
 |--------|-------|--------|
 | Create `setup-python-env` composite action | `.github/actions/setup-python-env/action.yml` | DRY Python setup across 25+ workflows |
-| Create `auth-gcp-gke` composite action | `.github/actions/auth-gcp-gke/action.yml` | DRY GCP auth across 6+ workflows |
+| Create `auth-gcp-gke` composite action | `.github/actions/gcp-gke-auth/action.yml` | DRY GCP auth across 6+ workflows |
 | Create `setup-playwright` composite action | `.github/actions/setup-playwright/action.yml` | Consistent version + cached browsers |
 | Add pip caching globally | All Python workflows | ~30-60s saved per job |
 | Pin Playwright version across all E2E workflows | All E2E workflows | Reproducible, cacheable |

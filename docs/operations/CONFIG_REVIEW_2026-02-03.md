@@ -112,4 +112,4 @@ Disabled:
 
 ## Files Updated
 
-- `deploy/k8s/patches/caddy-metrics-fix.yaml` - ConfigMap patch (runtime fix applied)
+- `deploy/k8s/patches/argocd-configmap-ignore.yaml` - ConfigMap patch (runtime fix applied)

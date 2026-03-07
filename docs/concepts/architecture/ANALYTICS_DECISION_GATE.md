@@ -81,14 +81,14 @@ The platform **already has** comprehensive operational monitoring. This decision
 - Recent major infrastructure work (multi-tenancy, enterprise SSO foundation, purchase gateway)
 
 **What would satisfy this**:
-- Run `docs/operations/INCIDENT_LOG.md` tracking for 90 days
+- Run `docs/status/NEXT10_TASKS.md` incident-tracking section updates for 90 days
 - Zero P0 (site down) or P1 (critical feature broken) incidents
 - SLO compliance at 99.5%+ for 90 days
 
 **Check command**:
 ```bash
 # Future: Query incident log
-grep -c "severity: critical" docs/operations/INCIDENT_LOG.md  # Should be 0
+grep -c "severity: critical" docs/status/NEXT10_TASKS.md  # Should be 0
 ```
 
 #### 2. Course Creator Demand (❌ NOT MET)
@@ -102,12 +102,12 @@ grep -c "severity: critical" docs/operations/INCIDENT_LOG.md  # Should be 0
 
 **What would satisfy this**:
 - 3+ course creators request cohort analysis, engagement funnels, or completion trend dashboards
-- Documented in `docs/product/FEATURE_REQUESTS.md`
+- Documented in `docs/status/NEXT10_TASKS.md`
 
 **Validation**:
 ```bash
 # Future: Check feature request log
-grep -c "analytics\|dashboard\|engagement" docs/product/FEATURE_REQUESTS.md
+grep -c "analytics\|dashboard\|engagement" docs/status/NEXT10_TASKS.md
 ```
 
 #### 3. Team Capacity (❌ NOT MET)

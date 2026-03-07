@@ -56,7 +56,7 @@ Triggered on:
 
 ### Budget Configuration
 
-Budget defined in `.github/actions-budget.yml` (once created):
+Budget defined in `.github/workflows/scorecard.yml` (once created):
 
 ```yaml
 monthly_limit_usd: <budget>

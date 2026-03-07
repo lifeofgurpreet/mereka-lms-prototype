@@ -164,10 +164,10 @@ For each child issue:
 |------:|-------------------------------|
 | #215 | `bash -n scripts/qa/verify-evidence-redaction.sh` and `STRICT=1 ./scripts/qa/verify-evidence-redaction.sh` |
 | #216 | `bash -n scripts/qa/verify-no-legacy-tutor-k8s-paths.sh` and `./scripts/qa/verify-no-legacy-tutor-k8s-paths.sh` |
-| #217 | `./scripts/branding/sync-brand-assets.sh` and `./scripts/qa/verify-brand-packages-drift.sh` |
-| #218 | `./scripts/qa/verify-theme-artifacts-determinism.sh` and `./scripts/qa/verify-token-drift.sh` |
+| #217 | `./scripts/branding/sync-brand-assets.sh` and `./scripts/qa/verify-brand-asset-drift.sh` |
+| #218 | `./scripts/qa/verify-theme-consistency.sh` and `./scripts/qa/verify-token-drift.sh` |
 | #219 | `./scripts/qa/verify-manifest-integrity.sh` |
-| #220 | `./scripts/tenants/validate-tenant-registry.sh` and `./scripts/qa/verify-tenant-registry-drift.sh --mode local` |
+| #220 | `./scripts/tenants/sync-tenant-registry-configmap.sh` and `./scripts/qa/verify-multitenant-brand-platform.sh` |
 | #221 | `pytest services/purchase-gateway/tests` and stripe webhook replay test |
 | #222 | `./scripts/qa/verify-authn-submodule-path-contract.sh` and `git submodule status` |
 

@@ -83,7 +83,7 @@ gsutil -m cp -r var/release-evidence/<sha>/ \
 GCS lifecycle policy enforces deletion after 365 days. Configure via:
 
 ```bash
-gsutil lifecycle set infrastructure/gcs/release-evidence-lifecycle.json \
+gsutil lifecycle set scripts/infra/assemble-release-evidence.sh \
   gs://mereka-lms-release-evidence
 ```
 

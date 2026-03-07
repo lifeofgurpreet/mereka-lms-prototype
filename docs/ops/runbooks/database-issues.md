@@ -482,13 +482,13 @@ After resolution:
 
 ```bash
 # 1. Verify MySQL health
-./scripts/qa/verify-mysql-health.sh
+./scripts/qa/public-health-check.sh prod
 
 # 2. Verify MongoDB health
-./scripts/qa/verify-mongodb-health.sh
+./scripts/qa/verify-atlas-health.sh
 
 # 3. Verify Redis health
-./scripts/qa/verify-redis-health.sh
+./scripts/qa/verify-atlas-modulestore-path.sh --mode runtime
 
 # 4. Test application functionality
 curl -I https://academyv2.mereka.io

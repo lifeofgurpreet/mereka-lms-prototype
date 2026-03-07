@@ -10,7 +10,7 @@ Prevent sensitive operational artifacts from entering git history while preservi
 
 ## Confirmed Risks
 
-- `docs/archive/evidence/operations/router-smoke/prod-route-health-20260219-1214.md` contains raw `set-cookie` headers with `sessionid` and `csrftoken`.
+- `docs/archive/evidence/operations/evidence/router-smoke/prod-route-health-20260219-1214.md` contains raw `set-cookie` headers with `sessionid` and `csrftoken`.
 - `.githooks/pre-commit` currently skips `*.md`, so evidence markdown is not scanned pre-commit.
 - Existing evidence schema docs focus on path conventions and retention, not redaction enforcement.
 
@@ -128,7 +128,7 @@ rg -n "upload-artifact" .github/workflows
 ### File Changes
 
 - Redact known unsafe files, starting with:
-  - `docs/archive/evidence/operations/router-smoke/prod-route-health-20260219-1214.md`
+  - `docs/archive/evidence/operations/evidence/router-smoke/prod-route-health-20260219-1214.md`
 
 ### Redaction Rules
 

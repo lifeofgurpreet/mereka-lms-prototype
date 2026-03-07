@@ -92,18 +92,11 @@ python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
 Remove enrollments imported from Kajabi:
 
 ```bash
-# Dry run first
-python scripts/migrations/kajabi/rollback-openedx-imports.py \
-  --django-settings lms.envs.tutor.production \
-  --import-file scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
-  --action unenroll \
-  --dry-run
+# Dry run first (replace with your rollback helper command)
+tutor local run lms ./manage.py lms shell -c "print('dry-run unenroll plan')"
 
-# Actually unenroll
-python scripts/migrations/kajabi/rollback-openedx-imports.py \
-  --django-settings lms.envs.tutor.production \
-  --import-file scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
-  --action unenroll
+# Actually unenroll (replace with your rollback helper command)
+tutor local run lms ./manage.py lms shell -c "print('execute unenroll plan')"
 ```
 
 #### Option 2: Database Restore (Complete Rollback)
@@ -125,15 +118,12 @@ Remove only specific courses/users:
 
 ```bash
 # Create a filtered CSV with enrollments to remove
-python scripts/migrations/kajabi/create-rollback-csv.py \
-  --course-ids "course-v1:MEREKA+MEKA-2148875088+R2148875088" \
-  --output rollback_specific.csv
+python scripts/migrations/kajabi/prepare_openedx_imports.py \
+  --source scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
+  --output scripts/migrations/kajabi/output/openedx/rollback_specific.csv
 
-# Unenroll from filtered CSV
-python scripts/migrations/kajabi/rollback-openedx-imports.py \
-  --django-settings lms.envs.tutor.production \
-  --import-file rollback_specific.csv \
-  --action unenroll
+# Unenroll from filtered CSV (replace with your rollback helper command)
+tutor local run lms ./manage.py lms shell -c "print('unenroll from rollback_specific.csv')"
 ```
 
 ### Safe Import Process
@@ -215,12 +205,8 @@ After importing:
 If something goes wrong:
 
 ```bash
-# Quick unenroll all Kajabi enrollments
-python scripts/migrations/kajabi/rollback-openedx-imports.py \
-  --django-settings lms.envs.tutor.production \
-  --import-file scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
-  --action unenroll \
-  --dry-run  # Remove --dry-run to actually do it
+# Quick unenroll all Kajabi enrollments (replace with your rollback helper command)
+tutor local run lms ./manage.py lms shell -c "print('dry-run full Kajabi unenroll rollback')"
 ```
 
 ## Questions Answered

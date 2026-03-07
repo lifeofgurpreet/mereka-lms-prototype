@@ -31,8 +31,8 @@
 
 ### Credentials Service
 
-- **Deployment**: `deploy/k8s/base/deployments.yml` — `overhangio/openedx-credentials:21.0.0` at port 8000
-- **Service**: `deploy/k8s/base/services.yml` — NodePort 8000, selector `app.kubernetes.io/name: credentials`
+- **Deployment**: `deploy/k8s/base/apps/credentials/deployment.yaml` — `overhangio/openedx-credentials:21.0.0` at port 8000
+- **Service**: `deploy/k8s/base/apps/credentials/service.yaml` — NodePort 8000, selector `app.kubernetes.io/name: credentials`
 - **Ingress**: `deploy/k8s/overlays/production/ingress-openedx-lms.yaml` — `credentials.academyv2.mereka.io` → Caddy port 80, TLS via Let's Encrypt
 - **Caddy proxy block**: `deploy/k8s/base/apps/caddy/Caddyfile` lines 213–243 — `http://credentials.academyv2.mereka.io` → `credentials:8000`, with `/authn/*` and `/admin/login` re-routed through MFE
 
@@ -309,8 +309,8 @@ For live cluster checks (requires `kubectl` access):
 
 | File | Purpose |
 |---|---|
-| `deploy/k8s/base/deployments.yml` | Credentials Deployment manifest |
-| `deploy/k8s/base/services.yml` | Credentials Service (NodePort 8000) |
+| `deploy/k8s/base/apps/credentials/deployment.yaml` | Credentials Deployment manifest |
+| `deploy/k8s/base/apps/credentials/service.yaml` | Credentials Service (NodePort 8000) |
 | `deploy/k8s/overlays/production/ingress-openedx-lms.yaml` | Ingress for `credentials.academyv2.mereka.io` |
 | `deploy/k8s/base/apps/caddy/Caddyfile` | Caddy proxy block for credentials subdomain |
 | `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` | MFE Caddyfile — **missing learner-record route** |

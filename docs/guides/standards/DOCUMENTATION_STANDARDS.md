@@ -498,7 +498,7 @@ entries:
 3. **Move to archive** (if not referenced elsewhere):
    - Specs: Keep in place (for historical reference)
    - Runbooks: Move to `docs/archive/superseded/runbooks/`
-   - Guides: Move to `docs/archive/guides/`
+   - Guides: Move to `docs/archive/superseded/`
 
 4. **Update links**: Search for references and update to new document.
 
@@ -839,7 +839,7 @@ markdown-link-check docs/**/*.md
 ## Questions?
 
 - **Spec format**: See existing specs in `specs/`
-- **Runbook format**: See `docs/archive/superseded/runbooks/DEPLOYMENT_RUNBOOK.md`
+- **Runbook format**: See `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
 - **ADR format**: See `docs/adr/001-mongodb-atlas.md`
 - **Verification scripts**: See `scripts/qa/verify-*.sh`
 

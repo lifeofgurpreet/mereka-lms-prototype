@@ -149,7 +149,7 @@ CELERYBEAT_SCHEDULE['proctored-exam-completion-expired'] = {
 
 ### Step 5: Enterprise Per-Tenant Config (AC-008, AC-033, AC-034)
 
-**File**: `infrastructure/tutor/plugins/multi-tenancy/mereka_tenancy/models.py`
+**File**: `infrastructure/tutor/plugins/multi-tenancy/models.py`
 
 Add proctoring fields to `TenantConfig`:
 ```python
@@ -209,8 +209,8 @@ print('Config:', b.get_configuration())
 |------|--------|-------------|
 | `deploy/k8s/base/secrets/external-secrets.yaml` | Add 3 proctoring secret mappings | AC-002, AC-019 |
 | `deploy/k8s/base/apps/openedx/settings/lms/production.py` | Update PROCTORING_BACKENDS + ENABLE_PROCTORED_EXAMS + Celery beat | AC-001..008, AC-014..022 |
-| `infrastructure/tutor/plugins/multi-tenancy/mereka_tenancy/models.py` | Add proctoring_provider + review_sla_hours fields | AC-008, AC-033, AC-034 |
-| `infrastructure/tutor/plugins/multi-tenancy/mereka_tenancy/migrations/` | New migration for tenant model fields | AC-008 |
+| `infrastructure/tutor/plugins/multi-tenancy/models.py` | Add proctoring_provider + review_sla_hours fields | AC-008, AC-033, AC-034 |
+| `infrastructure/tutor/plugins/multi-tenancy/migrations/` | New migration for tenant model fields | AC-008 |
 | `docs/ops/runbooks/PROCTORING_RUNBOOK.md` | Update "Current State" table with live provider + test evidence | All |
 | `docs/operations/PROCTORING_VENDOR_READINESS.md` | Update blocker tracker (mark resolved) | All |
 

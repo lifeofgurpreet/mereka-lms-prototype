@@ -194,7 +194,7 @@ Before activating proctoring for any enterprise customer, the following must be 
 
 ### Operational Readiness
 - [ ] `docs/operations/PROCTORING_VENDOR_READINESS.md` updated with provider details
-- [ ] Runbook (`docs/archive/superseded/runbooks/PROCTORING_RUNBOOK.md`) reviewed and approved
+- [ ] Runbook (`docs/ops/runbooks/PROCTORING_RUNBOOK.md`) reviewed and approved
 - [ ] Grafana alert added for webhook delivery failures
 - [ ] Exam attempt state machine tested with no-op backend in staging
 - [ ] Provider support contact and escalation path documented
@@ -214,7 +214,7 @@ Before activating proctoring for any enterprise customer, the following must be 
 | `specs/proctoring-integration_spec.md` | 38-AC machine-checkable specification |
 | `docs/concepts/architecture/proctoring-architecture-overview.md` | Detailed component diagram + data flows |
 | `docs/operations/PROCTORING_VENDOR_READINESS.md` | Provider evaluation matrix |
-| `docs/archive/superseded/runbooks/PROCTORING_RUNBOOK.md` | Operational runbook |
+| `docs/ops/runbooks/PROCTORING_RUNBOOK.md` | Operational runbook |
 | `scripts/qa/verify-proctoring-integration.sh` | Consolidated verification script |
 | `scripts/qa/verify-proctoring.sh` | Core AC verification (AC-001–002, 006–008, 020–022, 036–038) |
 | `scripts/qa/verify-proctoring-environment.sh` | Browser/environment AC verification (AC-003, 014–019, 023) |

@@ -154,7 +154,7 @@ kubectl exec -n mereka-lms deployment/lms -- \
 
 - Theme source: `infrastructure/tutor/themes/mereka/common/static/images/`
 - Theme patches: `infrastructure/tutor/apply-patches.sh`
-- Deployment: `deploy/k8s/base/apps/lms.yaml`
+- Deployment: `deploy/k8s/base/apps/lms/deployment.yaml`
 
 ## Timeline
 

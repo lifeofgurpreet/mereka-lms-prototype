@@ -386,7 +386,7 @@ _Security configs, compliance, audit logs, secrets management_
 ### Audit Artifacts
 
 **Verification Scripts**:
-- `scripts/qa/verify-secrets-sync.sh` - Secrets sync verification
+- `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` - Secrets sync verification
 - `scripts/qa/verify-atlas-modulestore-path.sh` - MongoDB Atlas verification
 - `scripts/infra/ensure-platform-admins.sh` - Admin access verification
 - `scripts/qa/audit-velero.sh` - Backup audit

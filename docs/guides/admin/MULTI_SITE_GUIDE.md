@@ -172,7 +172,7 @@ Checks:
    ./infrastructure/tutor/apply-patches.sh
    ```
 
-4. **Update K8s Ingress** (`deploy/k8s/base/apps/caddy/ingress.yaml`):
+4. **Update K8s Ingress** (`deploy/k8s/overlays/production/ingress-openedx-lms.yaml`):
    ```yaml
    spec:
      rules:
@@ -443,7 +443,7 @@ Must pass all 3 checks:
 **Configuration Files**:
 - `deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py` - Django settings
 - `infrastructure/tutor/patches/caddyfile` - Caddy reverse proxy config
-- `deploy/k8s/base/apps/caddy/ingress.yaml` - K8s Ingress rules
+- `deploy/k8s/overlays/production/ingress-openedx-lms.yaml` - K8s Ingress rules
 
 **Branding**:
 - `docs/guides/branding/BRANDING.md` - Theme system overview

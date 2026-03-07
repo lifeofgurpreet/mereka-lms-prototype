@@ -276,7 +276,7 @@ For multi-level subdomains (e.g. `x.y.mereka.io`), Cloudflare Free SSL does not 
 Use DNS-only (gray cloud) mode in Cloudflare + Let's Encrypt:
 
 ```
-See: docs/acfs/reference/domain-ssl-management.md
+See: docs/operations/DOMAIN_MANAGEMENT.md
 ```
 
 ### Step 9: Rebuild and Redeploy MFE

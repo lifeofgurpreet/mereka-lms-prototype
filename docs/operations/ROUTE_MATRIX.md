@@ -158,7 +158,7 @@ Each application surface uses a different mechanism for footer rendering.
 |---------|-----------------|-----------|-----------------|
 | **LMS** (all domains) | `infrastructure/tutor/themes/mereka/lms/templates/footer.html` | Mako template override via Open edX Comprehensive Theming | Single template; multi-site copy via `PLATFORM_NAME` + per-site `SiteConfiguration` |
 | **Studio** (CMS) | `infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html` | Mako template override (canonical renderer) | White-label Studio footer; Mereka Academy + LMS link |
-| **MFEs** (authn, learning, account…) | `infrastructure/tutor/plugins/mereka_lms/plugin.py` → `MerekaFooter` | Tutor MFE plugin + FPF `footer_slot` Replace | `SITE_VARIANTS` map keyed by hostname; 4 domains configured |
+| **MFEs** (authn, learning, account…) | `infrastructure/tutor/plugins/mereka_lms.py` → `MerekaFooter` | Tutor MFE plugin + FPF `footer_slot` Replace | `SITE_VARIANTS` map keyed by hostname; 4 domains configured |
 | **Enterprise portals** (admin, learner) | Open edX default footer (no `MerekaFooter` wiring) | N/A — enterprise portals unthemed | P4 backlog (WARN in `verify-footer-parity.sh`) |
 
 **Update trigger**: LMS/CMS footer changes require `tutor images build openedx` + rolling restart.

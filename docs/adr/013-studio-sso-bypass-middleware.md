@@ -1,3 +1,29 @@
+---
+id: ADR-013
+title: Studio SSO Bypass Middleware
+decision_status: accepted
+decision_type: exception
+rollout_state: temporary
+owner: auth-platform
+created: 2026-02-12
+last_reviewed: 2026-03-07
+review_due: 2026-06-30
+supersedes: []
+amends: []
+depends_on: ["ADR-029", "ADR-031"]
+read_next: ["ADR-022"]
+governs: ["studio-sso-oauth-next-preservation-workaround"]
+does_not_govern: ["long-term authn frontend architecture"]
+related_oep: []
+related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
+related_specs: []
+related_runbooks: ["docs/operations/AUTHENTICATED_SMOKE_A11Y.md"]
+related_evidence: []
+fitness_functions: ["scripts/qa/verify-auth-surfaces.sh prod"]
+expiry_date: 2026-09-30
+removal_condition: Upstream/frontend authn flow preserves OAuth next state without middleware bypass.
+---
+
 # ADR-013: Studio SSO Bypass Middleware
 
 **Status**: Accepted

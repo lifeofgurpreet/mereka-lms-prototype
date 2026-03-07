@@ -26,7 +26,7 @@
 - [x] Add MUX_TOKEN_ID/MUX_TOKEN_SECRET to ExternalSecrets
   - **File**: `deploy/k8s/base/secrets/external-secrets.yaml`
 - [x] Delete orphaned forum-dev.yaml (Forum v2 runs in-process)
-  - **File**: `deploy/k8s/overlays/local/patches/forum-dev.yaml` (deleted)
+  - **File**: `deploy/k8s/overlays/local/patches/meilisearch-security-context.yaml` (deleted)
 - [x] Add Trivy container scanning to CI build pipeline
   - **File**: `.github/workflows/build-tutor-images.yml`
 

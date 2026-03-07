@@ -7,6 +7,7 @@ cd "$ROOT_DIR"
 PROGRAM_GLOB="docs/guides/admin/DOCS_PROGRAM_SCORECARD_*.md"
 QUALITY_GLOB="docs/guides/admin/DOCS_QUALITY_SCORECARD_*.md"
 SUMMARY_JSON=""
+POLICY_RANGE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -22,6 +23,10 @@ while [[ $# -gt 0 ]]; do
       SUMMARY_JSON="${2:?missing value}"
       shift 2
       ;;
+    --policy-range)
+      POLICY_RANGE="${2:?missing value}"
+      shift 2
+      ;;
     --help|-h)
       cat <<'EOF'
 Usage: verify-docs-scorecard-generation-drift.sh [options]
@@ -30,6 +35,7 @@ Options:
   --program-glob <glob>  program scorecard glob (default: docs/guides/admin/DOCS_PROGRAM_SCORECARD_*.md)
   --quality-glob <glob>  quality scorecard glob (default: docs/guides/admin/DOCS_QUALITY_SCORECARD_*.md)
   --summary-json <path>  optional JSON summary output path
+  --policy-range <range> policy ref-range for regenerating command references
   --help                 show this message
 EOF
       exit 0
@@ -98,7 +104,8 @@ TMP_QUALITY="$TMP_DIR/DOCS_QUALITY_SCORECARD_${LATEST_DATE}.md"
 docs/qa/generate-docs-scorecard-report.sh \
   --date "$LATEST_DATE" \
   --output "$TMP_PROGRAM" \
-  --quality-output "$TMP_QUALITY" >/tmp/docs_scorecard_generation_drift.out 2>&1
+  --quality-output "$TMP_QUALITY" \
+  ${POLICY_RANGE:+--policy-range "$POLICY_RANGE"} >/tmp/docs_scorecard_generation_drift.out 2>&1
 
 program_match="false"
 quality_match="false"
@@ -106,10 +113,21 @@ quality_match="false"
 normalize_report() {
   local src="$1"
   local dst="$2"
-  # Ignore volatile timestamp metadata lines to avoid false-positive drift.
+  # Ignore volatile lines to avoid false-positive drift:
+  # - timestamps change every regeneration
+  # - command ref counts, policy range, and link counts depend on the
+  #   PR diff scope (origin/main...HEAD) which changes with every push
+  # These appear in both bullet format (program) and table format (quality)
   sed \
     -e '/Last verified (UTC):/d' \
     -e '/^- Last updated: `/d' \
+    -e '/^- Sync status: `/d' \
+    -e '/^- Command reference checks:/d' \
+    -e '/^- Command reference source breakdown:/d' \
+    -e '/^- foundation_policy_range=/d' \
+    -e '/verify-doc-command-refs\.sh/d' \
+    -e '/verify-doc-link-integrity\.sh/d' \
+    -e '/verify-docs-policy\.sh/d' \
     "$src" > "$dst"
 }
 

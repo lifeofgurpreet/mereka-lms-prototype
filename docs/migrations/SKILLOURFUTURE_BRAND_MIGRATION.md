@@ -63,7 +63,7 @@ Copy to theme static directory (served by LMS):
 
 ```bash
 cp assets/branding/tenants/skillourfuture/* \
-  infrastructure/tutor/themes/mereka/common/static/images/sof/
+  infrastructure/tutor/themes/mereka/common/static/images/
 ```
 
 ---
@@ -124,7 +124,7 @@ grep -A5 "skillourfuture.academy.mereka.io" \
 Create the file:
 
 ```
-infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json
+scripts/tenants/brand-pack-template.json
 ```
 
 Use this template (fill in actual values from steps 1–3):
@@ -208,7 +208,7 @@ All checks must return `PASS` or `WARN` (no `FAIL`) before proceeding.
 
 Open a PR with:
 - **Title**: must contain `tenant` and `branding` (triggers all tenant brand gates in CI)
-- **Files**: `infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json`, logo assets, any `mereka_lms.py` footer variant updates
+- **Files**: `scripts/tenants/brand-pack-template.json`, logo assets, any `mereka_lms.py` footer variant updates
 - **Reviewer**: at least one member of `@Biji-Biji-Initiative/platform`
 
 Required CI gates that must pass:
@@ -262,7 +262,7 @@ Store screenshots in `var/branding-screenshots/skillourfuture/` as release evide
 Complete before marking the migration as done:
 
 - [ ] Brand assets uploaded to `assets/branding/tenants/skillourfuture/`
-- [ ] Assets copied to `infrastructure/tutor/themes/mereka/common/static/images/sof/`
+- [ ] Assets copied to `infrastructure/tutor/themes/mereka/common/static/images/`
 - [ ] `skillourfuture-brand.json` created and `_meta` block filled in
 - [ ] `validate-tenant-brand-pack.sh skillourfuture` passes
 - [ ] Contrast ratio for `palette.text` / `palette.background` >= 4.5:1 (WCAG AA)
@@ -274,7 +274,7 @@ Complete before marking the migration as done:
 - [ ] Logo URL resolves with HTTP 200: `curl -I https://skillourfuture.academy.mereka.io/theming/asset/mereka/images/sof/sof-logo-primary.png`
 - [ ] MFE footer renders SkillOurFuture copyright text (not "Mereka (M) Sdn. Bhd.")
 - [ ] Page title shows "Skill Our Future Academy" (not "Mereka Academy")
-- [ ] Entry added to `docs/operations/CONFIG_REVIEW_YYYY-MM-DD.md` under "Tenant Brand Profiles"
+- [ ] Entry added to `docs/operations/DOMAIN_MANAGEMENT.md` under "Tenant Brand Profiles"
 
 ---
 

@@ -329,7 +329,7 @@ const variant = SITE_VARIANTS[hostname] || {
 **Fix** (4 hours):
 1. Test workflow:
    - Upload logo to `infrastructure/tutor/themes/mereka/tenants/<slug>/assets/logo.png`
-   - Run `./scripts/branding/sync-branding.sh`
+   - Run `./scripts/branding/sync-brand-assets.sh`
    - Update `TenantSiteConfiguration.logo_url` in database
    - Flush Redis cache
    - Verify change propagates without restart

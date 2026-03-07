@@ -79,7 +79,7 @@ Create a script to mark courses complete for migrated users:
 
 ```bash
 # For each course, mark users as complete if they were eligible in Kajabi
-python scripts/migrations/kajabi/mark-courses-complete-from-kajabi.py \
+python scripts/migrations/kajabi/openedx_bulk_import.py \
   --certificate-eligibility exports/kajabi/certificate_eligibility.ndjson \
   --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 ```

@@ -133,7 +133,7 @@ logcli query '{namespace="mereka-lms"}' --limit=100 --since=1h
 
 ### PrometheusRules
 
-**Location**: `deploy/k8s/base/monitoring/prometheus-rules.yaml`
+**Location**: `deploy/k8s/base/monitoring/prometheusrule-services.yaml`
 
 **Current alerts**:
 
@@ -482,7 +482,7 @@ Checks:
 - `scripts/qa/audit-observability.sh` - Audit observability coverage
 
 **Configuration**:
-- `infrastructure/monitoring/prometheus/` - Prometheus rules and configs
+- `infrastructure/monitoring/` - Prometheus rules and configs
 - `infrastructure/monitoring/grafana/` - Grafana dashboards
 - `deploy/k8s/base/monitoring/` - ServiceMonitors, PrometheusRules
 

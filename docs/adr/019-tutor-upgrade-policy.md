@@ -6,7 +6,7 @@
 
 ## Context
 
-We run **Tutor 21.0.0 (Ulmo)**, the latest community-supported Open edX release as of March 2026. The canonical version pin lives in `requirements-tutor.txt`.
+We run **Tutor 21.0.0 (Ulmo)**, the latest community-supported Open edX release as of March 2026. The canonical version pin lives in `requirements-tutor.txt` and all workflows/scripts consume that pin.
 
 Open edX named releases follow alphabetical naming: Palm → Quince → Redwood → Sumac → Teak → Ulmo. Community support for each named release is typically ~12 months after the next release ships, though exact EOL dates are not formally published and must be monitored via the Open edX forum and GitHub.
 
@@ -15,7 +15,7 @@ Key constraints that make upgrades costly:
 - `infrastructure/tutor/apply-patches.sh` and `infrastructure/tutor/plugins/mereka_lms.py` cover MySQL auth plugin, MongoDB Atlas SRV support, multi-domain CSRF config, Mereka footer components, webpack memory limits, theme compilation, and build retry logic. Each major Tutor release regenerates templates, requiring a full audit and re-port of these patches.
 - No automated compatibility test suite exists (tracked as T067). Manual verification is the only gate.
 - Team is 2-3 engineers with limited bandwidth for upgrade spikes.
-- Production runs on GKE with custom image builds (30-45 min per image). Rollback requires maintaining last-known-good image tags in Artifact Registry.
+- Production runs on GKE with custom image builds (30-45 min per image). Rollback requires maintaining last-known-good image tags in GHCR and GitOps overlays.
 
 ### History
 
@@ -38,7 +38,7 @@ The original decision (2026-02-24) was to stay on Redwood (18.x) until an EOL tr
 **Pre-upgrade checklist** (must be complete before any upgrade begins):
 - [ ] T067 compatibility test suite exists and passes on current version
 - [ ] Full database backup verified restorable (`tutor local do backup-db`)
-- [ ] Last-known-good image tags pinned in Artifact Registry
+- [ ] Last-known-good image tags pinned in GHCR and GitOps overlays
 - [ ] `apply-patches.sh` and `mereka_lms.py` audit complete against new version's template diff
 - [ ] Nonprod environment available and tested
 

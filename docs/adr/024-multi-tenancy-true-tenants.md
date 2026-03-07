@@ -69,7 +69,7 @@ This is the critical table. Every agent working on multi-tenancy MUST understand
 | **Forum (openedx-forum v2)** | NO | None needed | `course_id` scoping (in-process) | Runs inside LMS process. Thread isolation by course membership. If two tenants share a course, learners see each other's posts (expected) |
 | **Credentials** | YES | Site + SiteConfig | Django Sites framework | `CourseCertificate` has unique constraint on `(site, course_id, certificate_type)` |
 | **Discovery** | YES | Site + Partner | Partner model | Each tenant needs a Partner + Site for catalog scoping. `course_org_filter` restricts visible courses |
-| **Ecommerce / Purchase Gateway** | YES | Partner + Site + SiteConfig | Partner + Oscar Site model | Each tenant needs separate payment flow records |
+| **Commerce / Purchase Gateway** | YES | Tenant + site-bound config | Purchase Gateway tenant/domain contract | Each tenant needs separate payment flow records and reconciliation scope |
 | **Enterprise Learner Portal** | NO | EnterpriseCustomer | Slug-based URL routing (`/:slug/`) | Single MFE instance serves all — designed for multi-tenant from the start |
 | **Enterprise Admin Portal** | NO | EnterpriseCustomer | Slug-based URL routing (`/:slug/`) | Same as learner portal |
 | **MFEs (Learning, Authn, etc.)** | Depends | Config via MFE_CONFIG_API | Runtime config per tenant | Branding via `SiteConfiguration` values at runtime |
@@ -98,8 +98,8 @@ This is the critical table. Every agent working on multi-tenancy MUST understand
 To be crystal clear on the shared-everything model:
 
 - **NOT separate K8s namespaces** — all tenants share `mereka-lms` namespace
-- **NOT separate databases** — all tenants share Cloud SQL and MongoDB Atlas
-- **NOT separate Redis instances** — shared Redis with namespace-prefixed keys
+- **NOT separate databases by default** — datastore topology is environment/runtime-governed and can vary by platform evolution
+- **NOT separate Redis instances by default** — shared Redis with namespace-prefixed keys unless explicitly changed by platform ADR
 - **NOT separate service deployments** — one LMS, one Discovery, one set of enterprise services
 - **NOT separate Docker images** — all tenants run the same platform version
 

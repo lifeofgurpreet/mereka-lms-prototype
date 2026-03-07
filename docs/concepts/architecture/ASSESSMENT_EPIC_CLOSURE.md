@@ -65,7 +65,7 @@ Student → LMS → POST /xqueue/submit/ → XQueue (uWSGI) → MySQL queue
 
 - ServiceMonitor `xqueue-metrics` deployed
 - **Known issue**: Selector needs `app.kubernetes.io/name: xqueue` label on service + port name `http` to start scraping
-- Documented in `docs/archive/superseded/runbooks/XQUEUE_HEALTH_RUNBOOK.md`
+- Documented in `docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md`
 
 ## 4. Spec AC Coverage
 
@@ -101,7 +101,7 @@ Student → LMS → POST /xqueue/submit/ → XQueue (uWSGI) → MySQL queue
 | File | Bead | Content |
 |------|------|---------|
 | `docs/concepts/architecture/ASSESSMENT_XQUEUE_EVIDENCE.md` | 1si5.1 | XQueue deployment state, LMS integration, grader inventory |
-| `docs/archive/superseded/runbooks/XQUEUE_HEALTH_RUNBOOK.md` | 1si5.2 | Health checks, alert reference, troubleshooting |
+| `docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md` | 1si5.2 | Health checks, alert reference, troubleshooting |
 | `docs/concepts/architecture/ASSESSMENT_EPIC_CLOSURE.md` | 1si5 | This file — parent closure evidence |
 
 ## 6. Remaining Work (Future Phases)

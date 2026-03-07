@@ -129,7 +129,7 @@ grep -n "const MerekaFooter" infrastructure/tutor/plugins/mereka_lms.py
 
 ## Before/After Diff Evidence
 
-Full diff evidence at: `docs/archive/evidence/operations/footer-migration-diff.md`
+Full diff evidence at: `docs/archive/evidence/operations/evidence/footer-migration-diff.md`
 
 ---
 

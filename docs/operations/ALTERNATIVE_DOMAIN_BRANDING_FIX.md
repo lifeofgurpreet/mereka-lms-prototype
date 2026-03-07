@@ -176,7 +176,7 @@ not an alias of the main `academyv2.mereka.io` site. This means:
 
 If/when `academy.biji-biji.com` needs a dedicated theme:
 
-1. Create a new theme directory: `infrastructure/tutor/themes/biji-biji/`
+1. Create a new theme directory: `assets/branding/tenants/biji-biji/`
 2. Update the site configuration for `academy.biji-biji.com`:
    ```python
    "THEME_NAME": "biji-biji",

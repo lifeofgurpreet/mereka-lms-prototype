@@ -151,7 +151,7 @@ Each tenant domain maps to a distinct Django `Site` record (SITE_ID). The `Tenan
 resolves the current site from the `Host` header on every request:
 
 ```python
-# infrastructure/tutor/plugins/multi-tenancy/mereka_tenancy/middleware.py
+# infrastructure/tutor/plugins/multi-tenancy/middleware.py
 class TenantResolutionMiddleware:
     def __call__(self, request):
         tenant = TenantConfig.objects.filter(domain=request.get_host()).first()

@@ -134,7 +134,7 @@ kubectl exec -n mereka-lms deploy/ecommerce-worker -- \
 ```
 
 **Fix**: Verify the `ecommerce-worker-settings` ConfigMap is present and correctly
-mounted in the Deployment manifest (`deploy/k8s/base/deployments.yml`).
+mounted in the Deployment manifest (`deploy/k8s/base/apps/purchase-gateway/deployment.yaml`).
 
 ---
 
@@ -147,7 +147,7 @@ mounted in the Deployment manifest (`deploy/k8s/base/deployments.yml`).
 is explicitly set.
 
 **Fix**: Verify the Deployment has `C_FORCE_ROOT: "1"` in its env block. If it's
-missing, add it to `deploy/k8s/base/deployments.yml` under the ecommerce-worker
+missing, add it to `deploy/k8s/base/apps/purchase-gateway/deployment.yaml` under the ecommerce-worker
 container spec.
 
 ---

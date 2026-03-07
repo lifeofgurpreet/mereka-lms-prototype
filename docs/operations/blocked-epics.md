@@ -67,7 +67,7 @@
 | Phase 1 | 503/833 video lessons mapped; 330 unmapped = non-video lessons (expected) |
 | 3 failed Mux assets | Stuck "preparing" since Dec 29 2025 — require re-upload once creds active |
 | ArgoCD drift | `mux-delivery-monitor` deployment reads wrong secret (`mereka-lms-runtime-secrets` vs repo's `openedx-secrets`) — ArgoCD sync fixes this automatically |
-| Execution doc | `docs/archive/evidence/operations/1bdm1-mux-creds-mapping-cleanup.md` |
+| Execution doc | `docs/archive/evidence/operations/evidence/1bdm1-mux-creds-mapping-cleanup.md` |
 | **Next actions** | 1. Obtain real Mux API credentials from `console.mux.com` |
 | | 2. `printf '%s' 'REAL_TOKEN_ID' \| gcloud secrets versions add MEREKA_LMS_MUX_TOKEN_ID --data-file=- --project=bbi-k8` |
 | | 3. Same for `MEREKA_LMS_MUX_TOKEN_SECRET` |
@@ -92,5 +92,5 @@
 
 - `docs/operations/PROCTORING_IMPLEMENTATION_READINESS.md`
 - `docs/operations/MOBILE_OAUTH_PREPARATION.md`
-- `docs/archive/evidence/operations/1bdm1-mux-creds-mapping-cleanup.md`
+- `docs/archive/evidence/operations/evidence/1bdm1-mux-creds-mapping-cleanup.md`
 - `deploy/k8s/base/secrets/external-secrets.yaml` — ExternalSecret mappings

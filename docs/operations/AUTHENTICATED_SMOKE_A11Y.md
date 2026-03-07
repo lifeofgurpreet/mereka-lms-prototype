@@ -124,7 +124,7 @@ RESULT: PASS
    - MFE overrides: `infrastructure/tutor/themes/mereka/mfe/mereka.scss`
 3. Either darken the foreground color or lighten the background to increase contrast.
 4. Use the WCAG contrast checker at https://webaim.org/resources/contrastchecker/ to validate the new values before committing.
-5. Update `docs/archive/evidence/operations/authenticated-smoke-a11y-report.md` with the new ratio.
+5. Update `docs/archive/evidence/operations/evidence/authenticated-smoke-a11y-report.md` with the new ratio.
 6. Re-run `./scripts/qa/verify-authenticated-smoke-a11y.sh` to confirm PASS.
 
 ### When a required route is missing
@@ -132,14 +132,14 @@ RESULT: PASS
 1. Add the route to the `AUTHENTICATED_ROUTES` array in `scripts/qa/verify-authenticated-smoke-a11y.sh`.
 2. Ensure the entry follows the format: `"path|auth_level|description"`.
 3. Valid `auth_level` values: `learner`, `staff`.
-4. Update the route table in this runbook and in `docs/archive/evidence/operations/authenticated-smoke-a11y-report.md`.
+4. Update the route table in this runbook and in `docs/archive/evidence/operations/evidence/authenticated-smoke-a11y-report.md`.
 
 ### When the evidence report is missing
 
 ```bash
 # Re-create from the report template in the evidence directory
-cp docs/archive/evidence/operations/authenticated-smoke-a11y-report.md.example \
-   docs/archive/evidence/operations/authenticated-smoke-a11y-report.md
+cp docs/archive/evidence/operations/evidence/authenticated-smoke-a11y-report.md \
+   docs/archive/evidence/operations/evidence/authenticated-smoke-a11y-report.md.bak
 # Or regenerate manually following the structure in the existing report.
 ```
 

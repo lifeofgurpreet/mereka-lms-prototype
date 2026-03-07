@@ -29,8 +29,8 @@ Meilisearch **v1.8.4** (`docker.io/getmeili/meilisearch:v1.8.4`), deployed as a 
 
 ### Deployment
 
-- K8s Deployment: `deploy/k8s/base/deployments.yml` (name: `meilisearch`)
-- K8s Service: `deploy/k8s/base/services.yml` (name: `meilisearch`, ClusterIP, port 7700)
+- K8s Deployment: `deploy/k8s/base/apps/meilisearch/deployment.yaml` (name: `meilisearch`)
+- K8s Service: `deploy/k8s/base/apps/meilisearch/service.yaml` (name: `meilisearch`, ClusterIP, port 7700)
 - PersistentVolumeClaim: `deploy/k8s/base/volumes.yml` (name: `meilisearch`, 10Gi SSD)
 
 Meilisearch is **required** for forum search. Browse and read operations continue if Meilisearch is unavailable (degraded mode), but all search queries will fail.

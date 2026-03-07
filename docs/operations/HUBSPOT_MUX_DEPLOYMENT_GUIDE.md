@@ -85,7 +85,7 @@ done
 
 #### Phase 2: Create K8s Manifests
 
-**Directory**: `deploy/k8s/base/apps/hubspot-registration/`
+**Directory**: `deploy/k8s/base/apps/hubspot-webhook/`
 
 **1. Deployment** (`deployment.yaml`):
 
@@ -176,7 +176,7 @@ spec:
     app.kubernetes.io/name: hubspot-registration
 ```
 
-**3. ExternalSecret** (`deploy/k8s/base/secrets/hubspot-registration-secrets.yaml`):
+**3. ExternalSecret** (`deploy/k8s/base/secrets/external-secrets.yaml`):
 
 ```yaml
 apiVersion: external-secrets.io/v1beta1
@@ -254,7 +254,7 @@ docker push asia-southeast1-docker.pkg.dev/mereka-lms/services/hubspot-registrat
 
 #### Phase 4: Observability Setup
 
-**PrometheusRule** (`deploy/k8s/base/monitoring/prometheusrule-hubspot.yaml`):
+**PrometheusRule** (`deploy/k8s/base/monitoring/prometheusrule-services.yaml`):
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -328,7 +328,7 @@ spec:
         description: "Email delivery issues, check SendGrid integration"
 ```
 
-**ServiceMonitor** (`deploy/k8s/base/monitoring/servicemonitor-hubspot.yaml`):
+**ServiceMonitor** (`deploy/k8s/base/monitoring/servicemonitor-caddy.yaml`):
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -463,7 +463,7 @@ MUX_ENABLED = bool(MUX_TOKEN_ID and MUX_TOKEN_SECRET)
 
 #### Phase 4: Observability Setup
 
-**PrometheusRule** (`deploy/k8s/base/monitoring/prometheusrule-mux.yaml`):
+**PrometheusRule** (`deploy/k8s/base/monitoring/prometheusrule-video.yaml`):
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1

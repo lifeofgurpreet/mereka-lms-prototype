@@ -1,0 +1,45 @@
+# Architecture Governance Overlay
+
+## Purpose
+
+This document defines the architecture-governance control plane for Mereka LMS.
+It is an overlay re-platform on top of the existing ADR corpus in `docs/adr/`.
+
+Wave 1 is in-place:
+- ADR file paths remain stable.
+- Governance is introduced via metadata, manifest, validators, and generated bundles.
+- Physical ADR reshaping is deferred until graph/index/redirect tooling is mature.
+
+## Sources Of Truth
+
+- ADR corpus: `docs/adr/*.md`
+- ADR manifest: `docs/adr/manifest.yaml`
+- ADR generated outputs: `docs/adr/_generated/`
+- Contradictions register: `docs/adr/contradictions-register.md`
+- Classification map: `docs/adr/classification-map.yaml`
+- Status map: `docs/adr/status-map.yaml`
+
+## Progressive Disclosure Model
+
+Agents MUST read:
+1. `docs/adr/_generated/bundles/00-foundations.md`
+2. One domain bundle relevant to changed files
+3. Any linked migration/exception ADRs required by `depends_on` / `read_next`
+
+Agents MUST NOT bulk-load the full ADR corpus unless explicitly required.
+
+## Official Source Policy
+
+For Open edX/Tutor architecture and operations guidance:
+- MUST use official sources first:
+  - `https://docs.openedx.org`
+  - `https://docs.tutor.edly.io`
+- SHOULD use OEP pages referenced by ADR metadata (`related_oep`).
+- MUST treat non-official summaries as secondary.
+
+## Operating Rules
+
+- ADR indexes/maps are generated artifacts, not hand-maintained truth.
+- New exception ADRs MUST include `expiry_date` and `removal_condition`.
+- Contradictions MUST be logged before they are rewritten.
+- Decision text MUST separate architecture policy from runbook/evidence material.

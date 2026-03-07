@@ -271,11 +271,11 @@ Add the four new modules to `PATCH_FILES` and remove `build-optimizations.sh`.
 
 | File | Action |
 |------|--------|
-| `infrastructure/tutor/patches/build-opt-dockerfile.sh` | CREATE (from Dockerfile section) |
-| `infrastructure/tutor/patches/build-opt-settings.sh` | CREATE (from production.py + assets.py) |
-| `infrastructure/tutor/patches/build-opt-routing.sh` | CREATE (from lms.conf + Caddyfile) |
-| `infrastructure/tutor/patches/build-opt-theme-sync.sh` | CREATE (from Phase B) |
+| `infrastructure/tutor/patches/build-optimizations.sh` | KEEP/REFINE (single optimized patch entrypoint) |
+| `infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py` | UPDATE (Dockerfile-related build optimization hooks) |
+| `infrastructure/tutor/plugins/_mereka_lms/asset_settings.py` | UPDATE (asset and settings optimization wiring) |
+| `infrastructure/tutor/plugins/_mereka_lms/infrastructure.py` | UPDATE (runtime/infra optimization wiring) |
 | `infrastructure/tutor/patches/build-optimizations.sh` | DELETE (after all modules extracted) |
 | `infrastructure/tutor/apply-patches.sh` | UPDATE (source + call 4 modules) |
-| `scripts/qa/verify-patch-modularity.sh` | UPDATE (PATCH_FILES map) |
+| `scripts/qa/verify-patch-idempotency.sh` | UPDATE (patch behavior contract) |
 | `docs/concepts/architecture/TUTOR_PATCHES_INVENTORY.md` | UPDATE (replace entry) |

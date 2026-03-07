@@ -76,9 +76,9 @@ tutor local exec superset bash -c "superset fab reset-password --username admin 
 
 ## Documentation
 
-- **Access Guide**: `docs/ASPECTS_ACCESS.md`
-- **Full Guide**: `docs/ASPECTS_ANALYTICS.md`
-- **Installation**: `docs/ASPECTS_INSTALLATION.md`
+- **Access Guide**: `docs/concepts/analytics/ASPECTS_ACCESS.md`
+- **Full Guide**: `docs/concepts/analytics/ASPECTS_ANALYTICS.md`
+- **Installation**: `docs/concepts/analytics/ASPECTS_INSTALLATION.md`
 
 ---
 

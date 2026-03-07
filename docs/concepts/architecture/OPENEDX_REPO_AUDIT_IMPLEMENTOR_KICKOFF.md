@@ -40,7 +40,7 @@ bash -n scripts/qa/verify-no-legacy-tutor-k8s-paths.sh || true
 ```bash
 git checkout -b audit/217-a-multibrand-sync
 ./scripts/branding/sync-brand-assets.sh
-./scripts/qa/verify-brand-packages-drift.sh || true
+./scripts/qa/verify-brand-asset-drift.sh || true
 ```
 
 ## Issue #218 (PR-218-A)
@@ -49,7 +49,7 @@ git checkout -b audit/217-a-multibrand-sync
 git checkout -b audit/218-a-theme-artifact-policy
 ./scripts/branding/generate-tokens-from-canonical.sh --check || true
 ./scripts/qa/verify-token-drift.sh || true
-./scripts/qa/verify-theme-artifacts-determinism.sh || true
+./scripts/qa/verify-theme-consistency.sh || true
 ```
 
 ## Issue #219 (PR-219-A)
@@ -63,7 +63,7 @@ git checkout -b audit/219-a-verify-manifest
 
 ```bash
 git checkout -b audit/220-a-tenant-registry
-./scripts/tenants/validate-tenant-registry.sh || true
+./scripts/tenants/sync-tenant-registry-configmap.sh || true
 ```
 
 ## Issue #221 (PR-221-A)

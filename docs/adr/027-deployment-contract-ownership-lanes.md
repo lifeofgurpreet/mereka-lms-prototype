@@ -110,10 +110,10 @@ The contract version follows semver:
 Overlays are **moved, not copied**. Old locations receive a README tombstone:
 
 ```
-deploy/k8s/overlays/rke2-nonprod/README.md
-deploy/k8s/overlays/staging/README.md
-deploy/k8s/overlays/production/README.md
-deploy/k8s/base/arc/README.md
+deploy/k8s/overlays/rke2-nonprod/kustomization.yaml
+deploy/k8s/overlays/staging/kustomization.yaml
+deploy/k8s/overlays/production/kustomization.yaml
+deploy/k8s/base/arc/kustomization.yaml
 ```
 
 Each tombstone contains:

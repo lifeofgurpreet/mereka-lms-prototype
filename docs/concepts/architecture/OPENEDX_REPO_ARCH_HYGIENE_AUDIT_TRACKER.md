@@ -233,7 +233,7 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 ### Architectural Smells
 
 - **Committed operational evidence with sensitive headers**:
-  - `docs/archive/evidence/operations/router-smoke/prod-route-health-20260219-1214.md` contains live `set-cookie` values (`sessionid`, `csrftoken`).
+  - `docs/archive/evidence/operations/evidence/router-smoke/prod-route-health-20260219-1214.md` contains live `set-cookie` values (`sessionid`, `csrftoken`).
 - **Submodule path hygiene drift**:
   - authn MFE submodule is under `tmp/frontend-app-authn` while repository guide/specs reference `apps/frontend-app-authn`.
 - **Local cache sprawl risk**:
@@ -401,7 +401,7 @@ This tracker consolidates audit findings across repository hygiene, theming, IaC
 2. **Quarantine/deprecate legacy scripts**:
    - mark `tutor k8s` override scripts deprecated unless explicitly needed.
 3. **Boundary doc refresh**:
-   - reconcile outdated references (e.g., missing `infrastructure/k8s/README.md`, stale path guidance).
+   - reconcile outdated references (e.g., `infrastructure/k8s/cronjobs/kustomization.yaml`, stale path guidance).
 
 ---
 
@@ -572,7 +572,7 @@ This historical sequencing was executed. Keep for audit provenance only; use `##
 - `README.md`
 - `docs/guides/onboarding/REPOSITORY_GUIDE.md`
 - `specs/repository-structure_spec.md`
-- `docs/archive/evidence/operations/router-smoke/prod-route-health-20260219-1214.md`
+- `docs/archive/evidence/operations/evidence/router-smoke/prod-route-health-20260219-1214.md`
 - `scripts/branding/sync-brand-assets.sh`
 - `scripts/branding/sync-brand-package.sh`
 - `scripts/branding/build-tokens.sh`

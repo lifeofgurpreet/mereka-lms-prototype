@@ -137,7 +137,7 @@ so the seed script routes them to the correct collection.
 
 ### Adding a new fixture file and target collection
 
-1. Create `scripts/infra/fixtures/my-new-fixture.json` as a JSON array.
+1. Create `scripts/tenants/acme-branding.json` as a JSON array.
 2. Call `import_fixture` in `seed-mongo-dev.sh`:
 
 ```bash

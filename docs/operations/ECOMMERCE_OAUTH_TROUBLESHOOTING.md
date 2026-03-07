@@ -97,7 +97,7 @@ Verify in Ecommerce admin:
 
 ## ✅ Ecommerce Settings (K8s)
 
-`deploy/k8s/base/plugins/ecommerce/apps/ecommerce/settings/production.py` must keep the backend key aligned with the backend OAuth2 client:
+`deploy/k8s/base/apps/purchase-gateway/deployment.yaml` must keep the backend key aligned with the backend OAuth2 client:
 
 - `BACKEND_SERVICE_EDX_OAUTH2_KEY = ECOMMERCE_BACKEND_OAUTH2_KEY`
 - `BACKEND_SERVICE_EDX_OAUTH2_SECRET = ECOMMERCE_BACKEND_OAUTH2_SECRET`

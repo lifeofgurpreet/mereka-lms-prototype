@@ -12,6 +12,7 @@
 - [ ] Tests added or updated
 - [ ] No secrets hardcoded
 - [ ] CI passes
+- [ ] ADR impact output reviewed (`scripts/qa/resolve_adr_impact.py --diff-range <base>...<head>`) and required ADR bundle links included below
 
 ## Handoff Guardrails (Required)
 
@@ -29,3 +30,7 @@
 ## Verification
 
 <!-- How to verify this works? Steps, commands, or screenshots -->
+
+## ADR Reading Bundle (if ADR-governed paths changed)
+
+<!-- Paste impacted ADR IDs from CI ADR Governance summary and list required read order -->

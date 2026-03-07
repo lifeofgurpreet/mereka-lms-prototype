@@ -1,4 +1,13 @@
 repos:
+  - repo: local
+    hooks:
+      - id: adr-governance-suite
+        name: ADR governance suite
+        entry: scripts/qa/verify_adr_precommit.sh
+        language: system
+        pass_filenames: false
+        files: ^(docs/adr/|docs/architecture/|docs/evidence/|docs/runbooks/|scripts/qa/verify_adr_|scripts/qa/build_decision_graph\.py|scripts/qa/resolve_adr_impact\.py)
+
   # Python formatting and linting
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.7.0

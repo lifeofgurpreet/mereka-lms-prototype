@@ -34,7 +34,7 @@ This matrix tracks readiness across 5 dimensions to activate production multi-te
 |-----------|--------|----------------|
 | TenantSiteMapping model | ✅ Complete | `infrastructure/tutor/custom-apps/openedx_tenant_cache/models.py:14-101` |
 | TenantSiteConfiguration model | ✅ Complete | `infrastructure/tutor/custom-apps/openedx_tenant_cache/models.py:103-177` |
-| TenantResolutionMiddleware | ✅ Complete | `infrastructure/tutor/custom-apps/mereka_tenancy/middleware.py` |
+| TenantResolutionMiddleware | ✅ Complete | `infrastructure/tutor/plugins/multi-tenancy/middleware.py` |
 | inject_mfe_branding() | ✅ Complete | `infrastructure/tutor/custom-apps/openedx_tenant_cache/branding.py:109-137` |
 | provision_tenant management command | ✅ Complete | `infrastructure/tutor/custom-apps/openedx_tenant_cache/management/commands/provision_tenant.py` |
 | apply_tenant_branding management command | ✅ Complete | `infrastructure/tutor/custom-apps/openedx_tenant_cache/management/commands/apply_tenant_branding.py` |

@@ -23,7 +23,7 @@ This document covers theming Open edX ecommerce templates for Mereka branding, i
 
 ### Mereka Design Tokens
 
-Tokens defined in `infrastructure/tutor/branding/design-tokens.yml`:
+Tokens defined in `infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css`:
 
 ```yaml
 colors:
@@ -351,4 +351,4 @@ kubectl exec -it -n mereka-lms deploy/ecommerce -- ls -la /openedx/ecommerce/tem
 
 - `docs/operations/THEME_DEPLOYMENT.md` - Full deployment guide
 - `docs/guides/branding/BRANDING.md` - Branding system overview
-- `infrastructure/tutor/branding/` - Design tokens and assets
+- `infrastructure/tutor/themes/mereka/` - Design tokens and assets

@@ -195,7 +195,7 @@ Panorama may have:
 
 If Panorama doesn't meet your needs, consider:
 
-1. **Aspects Analytics**: OpenEdX's native solution (see `docs/ASPECTS_ANALYTICS.md`)
+1. **Aspects Analytics**: OpenEdX's native solution (see `docs/concepts/analytics/ASPECTS_ANALYTICS.md`)
 2. **Custom Dashboards**: Build using OpenEdX APIs
 3. **Third-Party BI Tools**: Integrate with Power BI, Tableau, etc.
 4. **Self-Hosted Solutions**: Deploy your own analytics stack
@@ -229,7 +229,7 @@ If Panorama doesn't meet your needs, consider:
 
 ## Next Steps
 
-1. **Evaluate Aspects** first (see `docs/ASPECTS_ANALYTICS.md`)
+1. **Evaluate Aspects** first (see `docs/concepts/analytics/ASPECTS_ANALYTICS.md`)
 2. **Contact Panorama provider** if you need Panorama-specific features
 3. **Compare costs** and features
 4. **Make decision** based on your needs and budget

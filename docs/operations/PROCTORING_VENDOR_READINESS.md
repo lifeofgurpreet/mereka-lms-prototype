@@ -71,7 +71,7 @@
 - [ ] Signed contract PDF → `docs/operations/contracts/PROCTORING_CONTRACT_<provider>.pdf`
 - [ ] DPA acknowledgement → `docs/operations/contracts/PROCTORING_DPA_<provider>.pdf`
 - [ ] API credentials → GCP SM `bbi-k8` project (see §3)
-- [ ] Sandbox test evidence → `docs/operations/PROCTORING_SANDBOX_TEST_EVIDENCE.md`
+- [ ] Sandbox test evidence → `docs/operations/PROCTORING_IMPLEMENTATION_READINESS.md`
 
 ---
 

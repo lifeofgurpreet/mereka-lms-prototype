@@ -133,9 +133,9 @@ tutor local restart mysql
 ## 📚 Documentation
 
 - **Quick Reference:** `docs/ops/quickref/QUICK_REFERENCE.md`
-- **Complete Guide:** `docs/LOCAL_DEVELOPMENT_GUIDE.md`
-- **Setup Checklist:** `docs/AGENT_SETUP_CHECKLIST.md`
-- **Operational Status:** `docs/OPERATIONAL_STATUS.md`
+- **Complete Guide:** `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
+- **Setup Checklist:** `docs/guides/onboarding/AGENT_SETUP_CHECKLIST.md`
+- **Operational Status:** `docs/status/NEXT10_TASKS.md`
 
 ## 🔍 Verify Production Parity
 
@@ -160,13 +160,13 @@ To compare local with production:
 3. Access LMS and explore
 
 ### Day 2: Development
-1. Read `docs/LOCAL_DEVELOPMENT_GUIDE.md`
+1. Read `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
 2. Bookmark `docs/ops/quickref/QUICK_REFERENCE.md`
 3. Start making changes
 
 ### Ongoing
 1. Use `docs/ops/quickref/QUICK_REFERENCE.md` for daily commands
-2. Check `docs/OPERATIONAL_STATUS.md` for system status
+2. Check `docs/status/NEXT10_TASKS.md` for system status
 3. Run `./scripts/qa/comprehensive-test.sh` before committing
 
 ## ✅ Success Checklist

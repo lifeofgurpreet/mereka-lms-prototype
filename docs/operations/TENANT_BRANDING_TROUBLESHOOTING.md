@@ -348,7 +348,7 @@ kubectl exec -n mereka-lms -it deploy/lms -- \
 **Fix**: Upload tenant logo and update configuration:
 
 1. Upload logo to theme assets: `infrastructure/tutor/themes/mereka/tenants/<slug>/assets/logo.png`
-2. Run `./scripts/branding/sync-branding.sh`
+2. Run `./scripts/branding/sync-brand-assets.sh`
 3. Update `TenantSiteConfiguration`:
 
 ```bash

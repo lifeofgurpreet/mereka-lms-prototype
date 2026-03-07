@@ -222,7 +222,7 @@ dig analytics.academyv2.mereka.dev +short
 
 ### Step 1.6 — Create Dev Ingress Overlay Patch
 
-Create `deploy/k8s/overlays/rke2-nonprod/ingress-aspects-superset.yaml` with the dev hostname:
+Create `deploy/k8s/overlays/rke2-nonprod/patches/aspects-ingress-dev.yaml` with the dev hostname:
 ```yaml
 ---
 apiVersion: networking.k8s.io/v1
@@ -253,7 +253,7 @@ spec:
       secretName: superset-tls-dev
 ```
 
-- [ ] `deploy/k8s/overlays/rke2-nonprod/ingress-aspects-superset.yaml` created
+- [ ] `deploy/k8s/overlays/rke2-nonprod/patches/aspects-ingress-dev.yaml` created
 
 ---
 
@@ -461,7 +461,7 @@ Edit `deploy/k8s/overlays/production/kustomization.yaml`:
 2. Add `ingress-aspects-superset.yaml` to `resources` (new file with prod hostname)
 3. Add replica counts for clickhouse, superset, superset-worker
 
-Create `deploy/k8s/overlays/production/ingress-aspects-superset.yaml`:
+Create `deploy/k8s/overlays/production/ingress-openedx-mfe.yaml` update entry for the production analytics hostname:
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress

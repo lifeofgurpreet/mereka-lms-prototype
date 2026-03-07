@@ -161,7 +161,7 @@ Follow this checklist when onboarding a 4th (or nth) branded domain:
   - `ALLOWED_HOSTS` (via apply-patches.sh or tutor config)
 
 - [ ] **7. SSL certificate** — for multi-level subdomains (`x.y.mereka.io`), use DNS-only
-  (gray cloud) + Let's Encrypt. See `docs/acfs/reference/domain-ssl-management.md`.
+  (gray cloud) + Let's Encrypt. See `docs/operations/DOMAIN_MANAGEMENT.md`.
 
 - [ ] **8. Rebuild and redeploy MFE**:
   ```bash

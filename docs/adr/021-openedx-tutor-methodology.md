@@ -36,7 +36,7 @@ Rules:
 - No mixing of release tooling across release lines (e.g., no Tutor 18.x plugins in a Tutor 21.x environment).
 - `tutor` from PyPI is the only supported install method. The `main`/`master` branch of the Tutor repository is **not for production** — it may generate templates that break patching assumptions without warning.
 - Patch releases within 21.x (e.g., 21.0.1, 21.1.0) may be applied as needed. Major version upgrades (e.g., 21.x → 22.x) follow the process in ADR-019.
-- The version pin is canonical at `.github/workflows/build-tutor-images.yml`. Any reference in documentation that disagrees with the workflow file is incorrect.
+- The version pin is canonical at `requirements-tutor.txt`. Any workflow/script reference that diverges is incorrect.
 
 ### 2. Customization Method: Tutor Plugin API
 
@@ -154,7 +154,7 @@ Example of conflating tracks (wrong): "We're staying on Tutor 18.x (release line
 
 - **Tutor hook API changes**: If Tutor changes hook names between 21.x and 22.x, the plugin will need updates. Mitigation: ADR-006 Layer 2 (git hook) and Layer 3 (CI verification) will catch hook API drift before it reaches production.
 - **Design token adoption gap**: MFE styling is partially on the old SCSS overlay path. Until the phased migration (ADR-014) completes, there is dual-mode complexity. Do not introduce new SCSS overlay patches; route all new styling through `@edx/brand` tokens.
-- **ARC runner availability**: If ARC heavy runners are unavailable (e.g., after a cluster incident), image builds in CI will be blocked. Mitigation: maintain the ability to run `tutor images build` locally and push images directly to Artifact Registry via `gcloud` auth.
+- **ARC runner availability**: If ARC heavy runners are unavailable (e.g., after a cluster incident), image builds in CI will be blocked. Mitigation: maintain the ability to run `tutor images build` locally and push images directly to GHCR.
 
 ## References
 

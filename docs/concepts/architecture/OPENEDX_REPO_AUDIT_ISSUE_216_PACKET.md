@@ -84,7 +84,7 @@ rg -n "tutor k8s init|tutor k8s apply|export-k8s-manifests|setup-k8s-overrides|d
 ### File Changes
 
 1. Add boundary contract doc:
-   - `docs/operations/IAC_BOUNDARY_CONTRACT.md`
+   - `docs/operations/REPO_BOUNDARIES.md`
 2. Update active runbooks/docs:
    - `docs/operations/CANONICAL_DEPLOY_CONTRACT.md`
    - `scripts/infra/README.md`

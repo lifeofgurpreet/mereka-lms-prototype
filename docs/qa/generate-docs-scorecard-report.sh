@@ -11,6 +11,8 @@ MAX_STALE_DAYS=45
 REGRESSION_THRESHOLD=10
 OUT_PATH=""
 QUALITY_OUT_PATH=""
+POLICY_RANGE=""
+CMDREF_FILES=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -38,6 +40,10 @@ while [[ $# -gt 0 ]]; do
       QUALITY_OUT_PATH="${2:?missing value}"
       shift 2
       ;;
+    --policy-range)
+      POLICY_RANGE="${2:?missing value}"
+      shift 2
+      ;;
     --help|-h)
       cat <<'EOF_HELP'
 Usage: generate-docs-scorecard-report.sh [options]
@@ -49,6 +55,7 @@ Options:
   --regression-threshold <n> max allowed score drop (default: 10)
   --output <path>            report output path (default: docs/guides/admin/DOCS_PROGRAM_SCORECARD_<date>.md)
   --quality-output <path>    quality delta output path (default: docs/guides/admin/DOCS_QUALITY_SCORECARD_<date>.md)
+  --policy-range <range>     command reference scope (default: HEAD~1...HEAD)
   --help                     show this message
 EOF_HELP
       exit 0
@@ -80,12 +87,17 @@ COMPLIANCE_SUMMARY="$WORKDIR/docs-compliance-summary.json"
 REPORT_FILE="${OUT_PATH:-docs/guides/admin/DOCS_PROGRAM_SCORECARD_${DATE}.md}"
 QUALITY_REPORT_FILE="${QUALITY_OUT_PATH:-docs/guides/admin/DOCS_QUALITY_SCORECARD_${DATE}.md}"
 
+if [ -n "$POLICY_RANGE" ]; then
+  mapfile -t CMDREF_FILES < <(git diff --name-only "$POLICY_RANGE" -- 'docs/**/*.md' 'docs/*.md' || true)
+fi
+
 python3 docs/qa/verify-doc-catalog-health.py \
   --max-stale-days "$MAX_STALE_DAYS" \
   --summary-file "$CATALOG_SUMMARY"
 
 bash docs/qa/verify-docs-foundation-gates.sh \
-  --summary-json "$FOUNDATION_SUMMARY"
+  --summary-json "$FOUNDATION_SUMMARY" \
+  ${POLICY_RANGE:+--policy-range "$POLICY_RANGE"}
 
 bash docs/qa/verify-doc-command-ref-baseline.sh \
   --summary-json "$CMDREF_BASELINE_SUMMARY"
@@ -97,7 +109,8 @@ python3 docs/qa/build-docs-scorecard.py \
 
 bash docs/qa/verify-doc-command-refs.sh \
   --include-baseline \
-  --summary-json "$CMDREF_SUMMARY"
+  --summary-json "$CMDREF_SUMMARY" \
+  "${CMDREF_FILES[@]}"
 
 docs/qa/compare-docs-scorecard-to-base.sh \
   --current-summary "$CATALOG_SUMMARY" \

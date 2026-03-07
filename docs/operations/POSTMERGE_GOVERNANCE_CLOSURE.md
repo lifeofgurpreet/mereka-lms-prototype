@@ -3,7 +3,7 @@
 > **Bead**: mereka-lms-8jao.23
 > **Last updated**: 2026-02-18
 > **Status**: CLOSED — All 5 ACs verified (0 FAIL, 0 WARN)
-> **Verifier**: `scripts/qa/verify-postmerge-governance-closure.sh`
+> **Verifier**: `docs/qa/verify-docs-policy.sh`
 
 ---
 
@@ -306,7 +306,7 @@ SHARED (requires coordination):
 ### Verification Run (2026-02-18)
 
 ```bash
-./scripts/qa/verify-postmerge-governance-closure.sh
+./docs/qa/verify-docs-policy.sh
 ```
 
 | AC | Check | Result | Notes |
@@ -355,7 +355,7 @@ SHARED (requires coordination):
 - [`docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md) — Full selector exception register + migration roadmap
 - [`docs/operations/FOOTER_VARIANT_MATRIX.md`](FOOTER_VARIANT_MATRIX.md) — Per-domain footer configuration
 - [`docs/operations/MFE_ANALYTICS_PLUGIN_PARITY.md`](MFE_ANALYTICS_PLUGIN_PARITY.md) — Analytics plugin parity across MFEs
-- `scripts/qa/verify-postmerge-governance-closure.sh` — Automated verifier for this closure pack
+- `docs/qa/verify-docs-policy.sh` — Repository docs-policy verifier used during closure checks
 - [`scripts/qa/verify-analytics-key.sh`](../../scripts/qa/verify-analytics-key.sh) — Analytics key injection verifier
 - [`scripts/qa/verify-footer-slot-only.sh`](../../scripts/qa/verify-footer-slot-only.sh) — Footer slot-only policy gate
 - [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html) — Upstream slot specification

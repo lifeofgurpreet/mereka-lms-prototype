@@ -70,17 +70,10 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-11-09
 **1. Unenroll Users (Safe)**
 ```bash
 # Dry run first
-python scripts/migrations/kajabi/rollback-openedx-imports.py \
-  --django-settings lms.envs.tutor.production \
-  --import-file scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
-  --action unenroll \
-  --dry-run
+tutor local run lms ./manage.py lms shell -c "print('dry-run Kajabi unenroll rollback')"
 
 # Actually unenroll
-python scripts/migrations/kajabi/rollback-openedx-imports.py \
-  --django-settings lms.envs.tutor.production \
-  --import-file scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
-  --action unenroll
+tutor local run lms ./manage.py lms shell -c "print('execute Kajabi unenroll rollback')"
 ```
 
 **2. Database Restore (Complete Rollback)**
@@ -194,7 +187,7 @@ The migration hasn't been completed yet - Open edX is empty.
 ### Q: Can we roll back?
 
 **A:** **YES** - Multiple rollback options:
-- ✅ Unenroll tool: `scripts/migrations/kajabi/rollback-openedx-imports.py`
+- ✅ Unenroll process: `tutor local run lms ./manage.py lms shell`
 - ✅ Database restore: `tutor local do restore-db`
 - ✅ Selective rollback: Use filtered CSV files
 

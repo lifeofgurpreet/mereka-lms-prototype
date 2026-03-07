@@ -370,6 +370,10 @@ spec-dashboard: ## Show per-spec coverage dashboard
 check: lint-specs validate-testmaps lint-conventions verify-specs spec-coverage ## Full spec quality suite
 	@echo "All spec checks passed."
 
+.PHONY: adr-governance
+adr-governance: ## Run ADR governance suite (impact summary runs in CI with proper diff range)
+	./scripts/qa/verify_adr_suite.sh
+
 ## Spec Quality Gates
 check-specs: lint-specs validate-testmaps ## Run all spec quality checks
 	@echo "All spec quality checks passed."

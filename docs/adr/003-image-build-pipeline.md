@@ -18,15 +18,15 @@ We needed a reliable image build and distribution pipeline.
 
 ## Decision
 
-We use **Tutor-based builds** with images pushed to **GCP Artifact Registry**.
+We use **Tutor-based builds** with images pushed to **GHCR** (`ghcr.io/biji-biji-initiative/mereka-lms`).
+GitOps overlays pin runtime image tags/digests as the deployment source of truth.
 
 ## Consequences
 
 ### Positive
 - Tutor handles complex Open edX build configuration
-- Artifact Registry integrates natively with GKE
-- Regional storage (asia-southeast1) for low latency
-- Built-in vulnerability scanning
+- GHCR integrates directly with GitHub-native CI release flow
+- Digest pinning in GitOps overlays supports deterministic rollouts
 - Immutable image tags for reproducibility
 
 ### Negative
@@ -43,11 +43,11 @@ We use **Tutor-based builds** with images pushed to **GCP Artifact Registry**.
 ### GitHub Container Registry (GHCR)
 - Free for public images
 - Good GitHub Actions integration
-- **Rejected because**: Cross-cloud egress, less integration with GKE
+- **Selected**: aligns with current CI/CD pipeline and release contracts.
 
 ## Implementation Notes
 
 - Registry: `ghcr.io/biji-biji-initiative/mereka-lms`
 - Image tags: `dev`, `production`, or git SHA (legacy `staging` tag is deprecated/unused)
-- Build script: `scripts/branding/deploy-branded-image.sh`
+- Build/release path: `scripts/infra/release-openedx-gitops.sh`
 - Memory requirement: Docker Desktop needs 12GB+ RAM for webpack builds

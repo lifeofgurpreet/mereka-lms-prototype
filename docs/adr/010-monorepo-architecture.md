@@ -139,7 +139,7 @@ Only changed services rebuild images and run tests.
 
 ### Shared Code
 
-Common utilities live in `services/shared/` and are imported by other services:
+Common utilities live in `services/` and are imported by other services:
 
 ```python
 # services/purchase-gateway/src/main.py

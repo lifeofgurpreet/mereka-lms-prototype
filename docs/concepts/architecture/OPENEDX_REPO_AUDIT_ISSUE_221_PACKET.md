@@ -67,11 +67,11 @@ pytest services/purchase-gateway/tests -k "webhook and idempot"
 ### File Changes
 
 1. Worker entrypoint:
-   - `services/purchase-gateway/app/workers/fulfillment_worker.py`
+- `services/purchase-gateway/app/services/fulfillment.py`
 2. Queue abstraction:
    - Redis-backed or DB polling implementation (choose one explicitly).
 3. K8s deployment:
-   - `services/purchase-gateway/k8s/deployment-worker.yaml`
+- `services/purchase-gateway/k8s/deployment.yaml`
    - optional update to kustomization.
 
 ### Worker Contract
@@ -102,7 +102,7 @@ kubectl get deploy -n mereka-lms | rg payments-gateway
 ### File Changes
 
 1. Reconciliation task:
-   - `services/purchase-gateway/app/workers/reconciliation.py`
+- `services/purchase-gateway/app/services/fulfillment_outbox.py`
 2. Metrics/logging:
    - queue depth, retry count, dead-letter count, oldest pending age
 3. Docs:

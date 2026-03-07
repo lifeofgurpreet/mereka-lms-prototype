@@ -162,5 +162,5 @@ Use Infisical for edits, and consume via ESO-synced K8s secrets at runtime (see 
 - SES message ID returned (delivery confirmed)
 
 **Files Updated:**
-- `deploy/k8s/base/deployments.yml` - SMTP deployment with SES config
+- `deploy/k8s/base/apps/lms/deployment.yaml` - SMTP deployment with SES config
 - `deploy/k8s/patches/smtp-ses-relay.yaml` - Patch file for reference

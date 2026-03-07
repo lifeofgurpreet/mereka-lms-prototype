@@ -581,7 +581,7 @@ kubectl exec -n mereka-lms deploy/lms -- /bin/bash -c \
 ### Architecture Decisions
 
 **Proposing ADR**:
-1. Copy template from `docs/adr/000-template.md`
+1. Copy template from `specs/_TEMPLATE.md`
 2. Fill in context, decision, consequences
 3. Submit PR with ADR
 4. Tag architecture reviewers

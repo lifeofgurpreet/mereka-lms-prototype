@@ -164,8 +164,8 @@ tutor local restart aspects-clickhouse aspects-superset
 
 ## Documentation
 
-- **Full Guide**: See `docs/ASPECTS_ANALYTICS.md`
-- **Main Analytics Guide**: See `docs/OPENEDX_ANALYTICS.md`
+- **Full Guide**: See `docs/concepts/analytics/ASPECTS_ANALYTICS.md`
+- **Main Analytics Guide**: See `docs/concepts/analytics/OPENEDX_ANALYTICS.md`
 - **Official Docs**: https://docs.openedx.org/projects/openedx-aspects/
 
 ## Notes

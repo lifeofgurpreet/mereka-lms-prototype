@@ -243,7 +243,7 @@ Same as access request; specify JSON format explicitly in the delivery email.
 
 ### Tracking
 
-All DSARs are tracked in a private register (`docs/operations/dsar-register/` — not committed to the public repo). Each entry includes: request hash, request type, received date, verified date, completed date, and steps executed.
+All DSARs are tracked in a private register (`docs/operations/DATA_RETENTION_POLICY.md` — not committed to the public repo). Each entry includes: request hash, request type, received date, verified date, completed date, and steps executed.
 
 ---
 

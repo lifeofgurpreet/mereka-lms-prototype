@@ -260,7 +260,7 @@ Execute these steps in order when prerequisites are satisfied:
 
 1. **Apply PrometheusRules**:
    ```bash
-   kubectl apply -f infrastructure/monitoring/prometheus-rules/aspects-alerts.yaml
+   kubectl apply -f deploy/k8s/base/plugins/aspects/prometheusrule.yml
    ```
 
 2. **Verify ServiceMonitors**:

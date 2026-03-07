@@ -299,7 +299,7 @@ HTTP request arrives at Caddy
             → Tenant-specific brand rendered to user
 ```
 
-The middleware (`infrastructure/tutor/plugins/multi-tenancy/mereka_tenancy/middleware.py`) uses `request.get_host()` to look up the active `TenantConfig`, then injects branding into the request context.
+The middleware (`infrastructure/tutor/plugins/multi-tenancy/middleware.py`) uses `request.get_host()` to look up the active `TenantConfig`, then injects branding into the request context.
 
 ### 3.2 CI Jobs and Coverage
 

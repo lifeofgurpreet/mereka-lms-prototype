@@ -49,7 +49,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/215
 
 ### Current State (evidence)
 
-- docs/archive/evidence/operations/router-smoke/prod-route-health-20260219-1214.md contains raw `set-cookie` with `sessionid` and `csrftoken`.
+- docs/archive/evidence/operations/evidence/router-smoke/prod-route-health-20260219-1214.md contains raw `set-cookie` with `sessionid` and `csrftoken`.
 - Raw evidence is committed under `docs/archive/evidence/operations/**` and `docs/archive/evidence/observability/**`.
 - `.gitignore` correctly ignores `var/`, but evidence discipline in `docs/` is policy-only today.
 - Existing secret scanning does not reliably block this class before commit in docs evidence paths.
@@ -137,7 +137,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/216
    - `scripts/infra/release-openedx-gitops.sh`
    - `scripts/infra/canonical-release.sh` (where used)
 3. Add CI grep gate preventing `tutor k8s init|apply` usage in release workflows.
-4. Add docs/operations/IAC_BOUNDARY_CONTRACT.md mapping:
+4. Add docs/operations/REPO_BOUNDARIES.md mapping:
    - `infrastructure/terraform` = cloud infra
    - `deploy/k8s` = app manifests
    - GitOps repo = live release pinning/overrides.

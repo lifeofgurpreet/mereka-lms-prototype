@@ -8,8 +8,8 @@ This guide explains how to access course analytics in OpenEdX, including enrollm
 | Need | Solution | Documentation |
 |------|----------|---------------|
 | **Per-course analytics only** | Instructor Dashboard | Built-in, see below |
-| **Platform-wide analytics** (all courses) | **Aspects Analytics** ⭐ | [`docs/ASPECTS_ANALYTICS.md`](ASPECTS_ANALYTICS.md) |
-| **Third-party analytics** (if Aspects doesn't meet needs) | Panorama Analytics | [`docs/PANORAMA_ANALYTICS.md`](PANORAMA_ANALYTICS.md) |
+| **Platform-wide analytics** (all courses) | **Aspects Analytics** ⭐ | [`docs/concepts/analytics/ASPECTS_ANALYTICS.md`](ASPECTS_ANALYTICS.md) |
+| **Third-party analytics** (if Aspects doesn't meet needs) | Panorama Analytics | [`docs/concepts/analytics/PANORAMA_ANALYTICS.md`](PANORAMA_ANALYTICS.md) |
 
 **Recommendation**: If you need platform-wide analytics (enrollments across all courses, completion rates, certificates issued platform-wide), install **Aspects Analytics**. It's free, native to OpenEdX, and provides comprehensive platform-wide dashboards.
 
@@ -77,7 +77,7 @@ To see certificates issued for a course:
 
 #### Installation
 
-See **[`docs/ASPECTS_ANALYTICS.md`](ASPECTS_ANALYTICS.md)** for complete installation instructions.
+See **[`docs/concepts/analytics/ASPECTS_ANALYTICS.md`](ASPECTS_ANALYTICS.md)** for complete installation instructions.
 
 **Quick install**:
 ```bash
@@ -119,7 +119,7 @@ tutor local start -d
 
 #### Installation
 
-See **[`docs/PANORAMA_ANALYTICS.md`](PANORAMA_ANALYTICS.md)** for installation details.
+See **[`docs/concepts/analytics/PANORAMA_ANALYTICS.md`](PANORAMA_ANALYTICS.md)** for installation details.
 
 **Note**: Panorama requires separate installation and may have licensing costs. Check with provider.
 
@@ -468,7 +468,7 @@ For production monitoring, consider:
 2. **Dashboard Integration**: Export data to your monitoring stack (Grafana, Data Studio, etc.)
 3. **Alerting**: Set up alerts for completion rate drops or enrollment anomalies
 
-See `docs/MONITORING.md` for infrastructure monitoring setup.
+See `docs/ops/monitoring/MONITORING.md` for infrastructure monitoring setup.
 
 ## Troubleshooting
 

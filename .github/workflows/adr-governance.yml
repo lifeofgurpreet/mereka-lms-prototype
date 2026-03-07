@@ -1,0 +1,71 @@
+name: ADR Governance
+
+on:
+  pull_request:
+    paths:
+      - "docs/adr/**"
+      - "docs/architecture/**"
+      - "docs/evidence/**"
+      - "docs/runbooks/**"
+      - "scripts/qa/verify_adr_*"
+      - "scripts/qa/build_decision_graph.py"
+      - "scripts/qa/generate_adr_readme.py"
+      - "scripts/qa/resolve_adr_impact.py"
+      - "scripts/qa/verify_adr_suite.sh"
+  push:
+    branches: ["main"]
+    paths:
+      - "docs/adr/**"
+      - "docs/architecture/**"
+      - "docs/evidence/**"
+      - "docs/runbooks/**"
+      - "scripts/qa/verify_adr_*"
+      - "scripts/qa/build_decision_graph.py"
+      - "scripts/qa/generate_adr_readme.py"
+      - "scripts/qa/resolve_adr_impact.py"
+      - "scripts/qa/verify_adr_suite.sh"
+
+jobs:
+  adr-suite:
+    name: ADR Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Run ADR suite
+        run: |
+          make adr-governance
+
+      - name: ADR impact summary (pull request)
+        if: github.event_name == 'pull_request'
+        run: |
+          RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          python3 scripts/qa/resolve_adr_impact.py --diff-range "$RANGE" > adr-impact.md
+          {
+            echo "## ADR Impact Bundle"
+            echo ""
+            cat adr-impact.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: ADR impact summary (push)
+        if: github.event_name == 'push'
+        run: |
+          python3 scripts/qa/resolve_adr_impact.py --diff-range "HEAD~1...HEAD" > adr-impact.md
+          {
+            echo "## ADR Impact Bundle"
+            echo ""
+            cat adr-impact.md
+          } >> "$GITHUB_STEP_SUMMARY"

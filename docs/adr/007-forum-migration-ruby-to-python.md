@@ -79,7 +79,7 @@ curl -I https://academyv2.mereka.io/api/discussion/v1/threads/  # HTTP 401 (auth
 ```
 
 **Removed components:**
-- Ruby forum deployment (`deploy/k8s/base/deployments.yml`)
+- Ruby forum deployment (`deploy/k8s/base/apps/lms/deployment.yaml`)
 - Ruby forum service (port 4567)
 - Forum-specific Caddy routing
 - Ruby forum patches in `apply-patches.sh`

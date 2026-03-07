@@ -46,7 +46,7 @@ This table is the canonical decision reference for where branding changes belong
 | **CSS design tokens** (`mereka-design-tokens.css`) | Global | `sync-brand-assets.sh` + image rebuild | All tenants share the same base palette |
 | **LMS footer content/structure** | Global | LMS image rebuild | Single Mako template; tenant copy via `SiteConfiguration.PLATFORM_NAME` |
 | **Studio footer** | Global | LMS image rebuild | CMS Mako template (`widgets/footer.html`) |
-| **MFE footer copy/links/copyright** | Per-tenant | `SITE_VARIANTS` update in plugin → MFE image rebuild | Keyed by hostname in `infrastructure/tutor/plugins/mereka_lms/plugin.py` |
+| **MFE footer copy/links/copyright** | Per-tenant | `SITE_VARIANTS` update in plugin → MFE image rebuild | Keyed by hostname in `infrastructure/tutor/plugins/mereka_lms.py` |
 | **Platform-level color tokens** | Global | LMS + MFE image rebuild | Defined in `common/static/css/mereka-design-tokens.css` + MFE SCSS |
 | **Tenant logo (LMS/Studio)** | Per-tenant | Runtime (no rebuild) | `LOGO_URL` in `TenantSiteConfiguration.mfe_config` or `/theming/asset/` |
 | **Tenant favicon** | Per-tenant | Runtime (no rebuild) | `FAVICON_URL` in `TenantSiteConfiguration.mfe_config` |
@@ -323,7 +323,7 @@ For multi-level subdomains (e.g., `acme.academyv2.mereka.io`):
 - Use DNS-only mode (gray cloud) + Let's Encrypt via cert-manager (K8s) or Caddy (standalone)
 - Cert-manager issues wildcard certs automatically for `*.academyv2.mereka.io`
 
-**Reference**: `docs/reference/domain-ssl-management.md`
+**Reference**: `docs/operations/DOMAIN_MANAGEMENT.md`
 
 ---
 
@@ -400,10 +400,10 @@ Host: acme.academyv2.mereka.io
 
 ```bash
 # Upload new logo to tenant directory
-cp acme-new-logo.png infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo.png
+cp acme-new-logo.png infrastructure/tutor/themes/mereka/common/static/images/logo.png
 
 # Upload new favicon
-cp acme-new-favicon.ico infrastructure/tutor/themes/mereka/tenants/acme-corp/favicons/favicon.ico
+cp acme-new-favicon.ico infrastructure/tutor/themes/mereka/common/static/images/logo-square.png
 ```
 
 ### Step 2: Sync to Static Directory
@@ -702,7 +702,7 @@ curl -s https://studio.academyv2.mereka.io/ | grep -i "powered by open edx" && e
 - **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Branding Model**: `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
-- **Domain/SSL**: `docs/reference/domain-ssl-management.md`
+- **Domain/SSL**: `docs/operations/DOMAIN_MANAGEMENT.md`
 
 ---
 
