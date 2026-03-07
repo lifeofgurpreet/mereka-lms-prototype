@@ -39,6 +39,10 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] If branch push is rejected after rebase due remote race, run:
   - `git push --force-with-lease origin docs/docs-first-class-20260307-followup-7`
     (keeps branch rebased to latest `origin/main` while protecting against blind overwrite)
+- [ ] If repeated rebase conflicts block sync, use controlled fallback:
+  - `git rebase --abort` (if mid-rebase)
+  - `git merge --no-edit origin/main`
+  - resolve conflicts favoring stricter docs-gate behavior, then commit and push
 - [ ] `./docs/qa/run-docs-world-class-gates.sh --sync --require-sync --max-age-seconds 1200`
 - [ ] `git status --short` is clean
 - [ ] `git rev-list --left-right --count origin/main...HEAD`
