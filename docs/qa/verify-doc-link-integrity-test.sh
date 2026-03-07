@@ -25,15 +25,16 @@ run_case() {
   local file=$2
   local expect_fail=$3
   local out="/tmp/link_integrity_test_${name}.out"
+  local summary="/tmp/link_integrity_test_${name}.json"
 
   if [ "$expect_fail" -eq 1 ]; then
-    if docs/qa/verify-doc-link-integrity.sh "$ROOT_DIR/$file" >"$out" 2>&1; then
+    if docs/qa/verify-doc-link-integrity.sh --summary-json "$summary" "$ROOT_DIR/$file" >"$out" 2>&1; then
       echo "[${name}] expected failure, got success"
       cat "$out"
       return 1
     fi
   else
-    if ! docs/qa/verify-doc-link-integrity.sh "$ROOT_DIR/$file" >"$out" 2>&1; then
+    if ! docs/qa/verify-doc-link-integrity.sh --summary-json "$summary" "$ROOT_DIR/$file" >"$out" 2>&1; then
       echo "[${name}] expected success, got failure"
       cat "$out"
       return 1
@@ -42,8 +43,20 @@ run_case() {
 
   if [ "$expect_fail" -eq 1 ]; then
     grep -q "DOCS_LINK_INTEGRITY_ERRORS" "$out"
+    python3 - "$summary" <<'PY'
+import json, sys
+payload = json.load(open(sys.argv[1], encoding='utf-8'))
+assert payload["status"] == "fail"
+assert payload["broken_links"] > 0
+PY
   else
     grep -q "DOCS_LINK_INTEGRITY_OK" "$out"
+    python3 - "$summary" <<'PY'
+import json, sys
+payload = json.load(open(sys.argv[1], encoding='utf-8'))
+assert payload["status"] == "pass"
+assert payload["broken_links"] == 0
+PY
   fi
 }
 

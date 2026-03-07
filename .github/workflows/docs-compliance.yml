@@ -6,6 +6,8 @@ on:
       - "docs/**"
       - ".github/workflows/docs-compliance.yml"
       - "docs/qa/verify-doc-command-refs.sh"
+      - "docs/qa/verify-doc-command-ref-baseline.sh"
+      - "docs/qa/verify-doc-command-ref-baseline-test.sh"
       - "docs/qa/verify-doc-link-integrity.sh"
       - "docs/qa/verify-doc-link-integrity.py"
       - "docs/qa/verify-doc-catalog-health-test.sh"
@@ -15,6 +17,8 @@ on:
       - "docs/qa/build-docs-scorecard-test.sh"
       - "docs/qa/build-docs-compliance-summary.py"
       - "docs/qa/build-docs-compliance-summary-test.sh"
+      - "docs/qa/verify-docs-foundation-gates.sh"
+      - "docs/qa/verify-docs-foundation-gates-test.sh"
       - "docs/qa/generate-docs-scorecard-report.sh"
       - "docs/qa/generate-docs-scorecard-report-test.sh"
       - "docs/qa/verify-docs-scorecard-recency.sh"
@@ -25,6 +29,10 @@ on:
       - "docs/qa/verify-docs-scorecard-head-freshness-test.sh"
       - "docs/qa/verify-docs-scorecard-report-timestamp.sh"
       - "docs/qa/verify-docs-scorecard-report-timestamp-test.sh"
+      - "docs/qa/verify-docs-scorecard-delta-artifact.sh"
+      - "docs/qa/verify-docs-scorecard-delta-artifact-test.sh"
+      - "docs/qa/verify-docs-scorecard-generation-drift.sh"
+      - "docs/qa/verify-docs-scorecard-generation-drift-test.sh"
       - "docs/qa/verify-doc-command-refs-test.sh"
       - "docs/qa/compare-docs-scorecard-to-base.sh"
       - "docs/qa/compare-docs-scorecard-to-base-test.sh"
@@ -34,7 +42,7 @@ on:
 jobs:
   docs-compliance:
     name: Run docs compliance gates
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -54,7 +62,9 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x docs/qa/verify-doc-command-refs.sh
+          chmod +x docs/qa/verify-doc-command-ref-baseline.sh
           DOCS_CMDREF_SUMMARY="${RUNNER_TEMP}/docs-command-refs-summary.json"
+          DOCS_CMDREF_BASELINE_SUMMARY="${RUNNER_TEMP}/docs-cmdref-baseline-summary.json"
           mapfile -t CHANGED_DOCS < <(git diff --name-only "origin/${{ github.base_ref }}...${{ github.sha }}" -- 'docs/**/*.md' 'docs/*.md' || true)
           CHANGED_DOCS_COUNT=${#CHANGED_DOCS[@]}
 
@@ -63,36 +73,75 @@ jobs:
             echo "- Changed docs (PR scope): ${CHANGED_DOCS_COUNT}"
           } >> "$GITHUB_STEP_SUMMARY"
 
+          ./docs/qa/verify-doc-command-ref-baseline.sh --summary-json "$DOCS_CMDREF_BASELINE_SUMMARY"
+
           if [ "$CHANGED_DOCS_COUNT" -gt 0 ]; then
             echo "Changed docs (PR scoped):"
             printf '%s\n' "${CHANGED_DOCS[@]}"
-            ./docs/qa/verify-doc-command-refs.sh --summary-json "$DOCS_CMDREF_SUMMARY" "${CHANGED_DOCS[@]}"
+            ./docs/qa/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_CMDREF_SUMMARY" "${CHANGED_DOCS[@]}"
           else
-            ./docs/qa/verify-doc-command-refs.sh --summary-json "$DOCS_CMDREF_SUMMARY"
+            ./docs/qa/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_CMDREF_SUMMARY"
           fi
 
-          mapfile -t CMDREF_MISSING < <(jq -r '.missing[]?' "$DOCS_CMDREF_SUMMARY")
-          {
-            echo "### Docs Command Reference Summary"
-            echo "- files_checked=$(jq -r '.files_checked // 0' "$DOCS_CMDREF_SUMMARY")"
-            echo "- total_candidates=$(jq -r '.total_candidates // 0' "$DOCS_CMDREF_SUMMARY")"
-            echo "- missing_references=$(jq -r '.missing_references // 0' "$DOCS_CMDREF_SUMMARY")"
-            echo "- status=$(jq -r '.status // \"unknown\"' "$DOCS_CMDREF_SUMMARY")"
-            for item in "${CMDREF_MISSING[@]:0:15}"; do
-              echo "- ${item}"
-            done
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$DOCS_CMDREF_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+missing = payload.get("missing", [])
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Command Reference Summary\n")
+    fp.write(f"- files_checked={payload.get('files_checked', 0)}\n")
+    fp.write(f"- total_candidates={payload.get('total_candidates', 0)}\n")
+    fp.write(f"- missing_references={payload.get('missing_references', 0)}\n")
+    fp.write(f"- status={payload.get('status')}\n")
+    for item in missing[:15]:
+        fp.write(f"- {item}\n")
+PY
+
+          python3 - "$DOCS_CMDREF_BASELINE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Command Reference Baseline\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- entries={payload.get('entries', 'n/a')}\n")
+    fp.write(f"- duplicates={len(payload.get('duplicates', []))}\n")
+    fp.write(f"- missing={len(payload.get('missing', []))}\n")
+    fp.write(f"- invalid_non_markdown={len(payload.get('invalid_non_markdown', []))}\n")
+PY
 
       - name: Verify docs link integrity
         run: |
           set -euo pipefail
           chmod +x docs/qa/verify-doc-link-integrity.sh
+          DOCS_LINK_INTEGRITY_SUMMARY="${RUNNER_TEMP}/docs-link-integrity-summary.json"
           mapfile -t CHANGED_DOCS < <(git diff --name-only "origin/${{ github.base_ref }}...${{ github.sha }}" -- 'docs/**/*.md' 'docs/*.md' || true)
           if [ "${#CHANGED_DOCS[@]}" -gt 0 ]; then
-            docs/qa/verify-doc-link-integrity.sh "${CHANGED_DOCS[@]}"
+            docs/qa/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY" "${CHANGED_DOCS[@]}"
           else
-            docs/qa/verify-doc-link-integrity.sh
+            docs/qa/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY"
           fi
+          python3 - "$DOCS_LINK_INTEGRITY_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Link Integrity\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- files_checked={payload.get('files_checked', 'n/a')}\n")
+    fp.write(f"- broken_links={payload.get('broken_links', 'n/a')}\n")
+PY
 
       - name: Verify docs scorecard recency
         run: |
@@ -102,14 +151,21 @@ jobs:
           docs/qa/verify-docs-scorecard-recency.sh \
             --max-age-days 7 \
             --summary-json "$DOCS_SCORECARD_RECENCY_SUMMARY"
-          {
-            echo "### Docs Scorecard Recency"
-            echo "- status=$(jq -r '.status // \"unknown\"' "$DOCS_SCORECARD_RECENCY_SUMMARY")"
-            echo "- latest_report=$(jq -r '.latest_report // \"n/a\"' "$DOCS_SCORECARD_RECENCY_SUMMARY")"
-            echo "- latest_date=$(jq -r '.latest_date // \"n/a\"' "$DOCS_SCORECARD_RECENCY_SUMMARY")"
-            echo "- age_days=$(jq -r '.age_days // \"n/a\"' "$DOCS_SCORECARD_RECENCY_SUMMARY")"
-            echo "- max_age_days=$(jq -r '.max_age_days // \"n/a\"' "$DOCS_SCORECARD_RECENCY_SUMMARY")"
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$DOCS_SCORECARD_RECENCY_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Recency\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- latest_report={payload.get('latest_report', 'n/a')}\n")
+    fp.write(f"- latest_date={payload.get('latest_date', 'n/a')}\n")
+    fp.write(f"- age_days={payload.get('age_days', 'n/a')}\n")
+    fp.write(f"- max_age_days={payload.get('max_age_days', 'n/a')}\n")
+PY
 
       - name: Verify docs scorecard report consistency
         run: |
@@ -118,12 +174,19 @@ jobs:
           DOCS_SCORECARD_CONSISTENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-consistency-summary.json"
           docs/qa/verify-docs-scorecard-report-consistency.sh \
             --summary-json "$DOCS_SCORECARD_CONSISTENCY_SUMMARY"
-          {
-            echo "### Docs Scorecard Report Consistency"
-            echo "- status=$(jq -r '.status // \"unknown\"' "$DOCS_SCORECARD_CONSISTENCY_SUMMARY")"
-            echo "- reports_checked=$(jq -r '.reports_checked // \"n/a\"' "$DOCS_SCORECARD_CONSISTENCY_SUMMARY")"
-            echo "- invalid_reports=$(jq -r '.invalid_reports // \"n/a\"' "$DOCS_SCORECARD_CONSISTENCY_SUMMARY")"
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Report Consistency\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- reports_checked={payload.get('reports_checked', 'n/a')}\n")
+    fp.write(f"- invalid_reports={payload.get('invalid_reports', 'n/a')}\n")
+PY
 
       - name: Verify docs scorecard head freshness
         run: |
@@ -132,13 +195,20 @@ jobs:
           DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY="${RUNNER_TEMP}/docs-scorecard-head-freshness-summary.json"
           docs/qa/verify-docs-scorecard-head-freshness.sh \
             --summary-json "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY"
-          {
-            echo "### Docs Scorecard Head Freshness"
-            echo "- status=$(jq -r '.status // \"unknown\"' "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY")"
-            echo "- latest_report=$(jq -r '.latest_report // \"n/a\"' "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY")"
-            echo "- latest_date=$(jq -r '.latest_date // \"n/a\"' "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY")"
-            echo "- reference_date=$(jq -r '.reference_date // \"n/a\"' "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY")"
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Head Freshness\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- latest_report={payload.get('latest_report', 'n/a')}\n")
+    fp.write(f"- latest_date={payload.get('latest_date', 'n/a')}\n")
+    fp.write(f"- reference_date={payload.get('reference_date', 'n/a')}\n")
+PY
 
       - name: Verify docs scorecard timestamp format
         run: |
@@ -147,16 +217,70 @@ jobs:
           DOCS_SCORECARD_TIMESTAMP_SUMMARY="${RUNNER_TEMP}/docs-scorecard-timestamp-summary.json"
           docs/qa/verify-docs-scorecard-report-timestamp.sh \
             --summary-json "$DOCS_SCORECARD_TIMESTAMP_SUMMARY"
-          {
-            echo "### Docs Scorecard Timestamp Format"
-            echo "- status=$(jq -r '.status // \"unknown\"' "$DOCS_SCORECARD_TIMESTAMP_SUMMARY")"
-            echo "- reports_checked=$(jq -r '.reports_checked // \"n/a\"' "$DOCS_SCORECARD_TIMESTAMP_SUMMARY")"
-            echo "- invalid_reports=$(jq -r '.invalid_reports // \"n/a\"' "$DOCS_SCORECARD_TIMESTAMP_SUMMARY")"
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$DOCS_SCORECARD_TIMESTAMP_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Timestamp Format\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- reports_checked={payload.get('reports_checked', 'n/a')}\n")
+    fp.write(f"- invalid_reports={payload.get('invalid_reports', 'n/a')}\n")
+PY
+
+      - name: Verify docs scorecard delta artifact
+        run: |
+          set -euo pipefail
+          chmod +x docs/qa/verify-docs-scorecard-delta-artifact.sh
+          DOCS_SCORECARD_DELTA_SUMMARY="${RUNNER_TEMP}/docs-scorecard-delta-summary.json"
+          docs/qa/verify-docs-scorecard-delta-artifact.sh \
+            --summary-json "$DOCS_SCORECARD_DELTA_SUMMARY"
+          python3 - "$DOCS_SCORECARD_DELTA_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Delta Artifact\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- latest_program_date={payload.get('latest_program_date', 'n/a')}\n")
+    fp.write(f"- latest_delta_date={payload.get('latest_delta_date', 'n/a')}\n")
+    fp.write(f"- date_match={payload.get('date_match', 'n/a')}\n")
+    fp.write(f"- has_delta_section={payload.get('has_delta_section', 'n/a')}\n")
+PY
+
+      - name: Verify docs scorecard generation drift
+        run: |
+          set -euo pipefail
+          chmod +x docs/qa/verify-docs-scorecard-generation-drift.sh
+          DOCS_SCORECARD_DRIFT_SUMMARY="${RUNNER_TEMP}/docs-scorecard-drift-summary.json"
+          docs/qa/verify-docs-scorecard-generation-drift.sh \
+            --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY"
+          python3 - "$DOCS_SCORECARD_DRIFT_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Generation Drift\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- latest_date={payload.get('latest_date', 'n/a')}\n")
+    fp.write(f"- program_match={payload.get('program_match', 'n/a')}\n")
+    fp.write(f"- quality_match={payload.get('quality_match', 'n/a')}\n")
+PY
 
       - name: Verify docs catalog health
         run: |
           set -euo pipefail
+          DOCS_FOUNDATION_SUMMARY="${RUNNER_TEMP}/docs-foundation-summary.json"
+          DOCS_CMDREF_BASELINE_SUMMARY="${RUNNER_TEMP}/docs-cmdref-baseline-summary.json"
           CATALOG_HEALTH_LOG="$(mktemp)"
           CATALOG_HEALTH_SUMMARY="${RUNNER_TEMP}/docs-catalog-health-summary.json"
           DOCS_SCORECARD_PATH="${RUNNER_TEMP}/docs-scorecard.json"
@@ -165,6 +289,9 @@ jobs:
           DOCS_SCORECARD_CONSISTENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-consistency-summary.json"
           DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY="${RUNNER_TEMP}/docs-scorecard-head-freshness-summary.json"
           DOCS_SCORECARD_TIMESTAMP_SUMMARY="${RUNNER_TEMP}/docs-scorecard-timestamp-summary.json"
+          DOCS_SCORECARD_DELTA_SUMMARY="${RUNNER_TEMP}/docs-scorecard-delta-summary.json"
+          DOCS_SCORECARD_DRIFT_SUMMARY="${RUNNER_TEMP}/docs-scorecard-drift-summary.json"
+          DOCS_LINK_INTEGRITY_SUMMARY="${RUNNER_TEMP}/docs-link-integrity-summary.json"
           DOCS_COMPLIANCE_SUMMARY_PATH="${RUNNER_TEMP}/docs-compliance-summary.json"
           BASE_REF="origin/${{ github.base_ref }}"
           if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
@@ -173,16 +300,33 @@ jobs:
           python3 docs/qa/verify-doc-catalog-health.py \
             --max-stale-days 45 \
             --summary-file "$CATALOG_HEALTH_SUMMARY" | tee "$CATALOG_HEALTH_LOG"
+          docs/qa/verify-docs-foundation-gates.sh \
+            --summary-json "$DOCS_FOUNDATION_SUMMARY"
           readarray -t CATALOG_HEALTH_FIELDS < <(
-            jq -r '
-              "catalog_entries=\(.all_entries // 0)",
-              "canonical_entries=\(.canonical_total // 0)",
-              "canonical_stale=\(.canonical_stale // 0)",
-              "canonical_missing_owner=\(.canonical_missing_owner // 0)",
-              "canonical_missing_verified=\(.canonical_missing_verified // 0)",
-              "canonical_high_risk=\(.canonical_high_risk // 0)",
-              "canonical_missing_file=\(.canonical_missing_file // 0)"
-            ' "$CATALOG_HEALTH_SUMMARY"
+            python3 - "$CATALOG_HEALTH_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    summary = json.load(fp)
+
+def _emit_list(label, items, limit=10):
+    print(f"{label}={len(items)}")
+    for item in items[:limit]:
+        print(f"{label}_item={item}")
+
+print(f"catalog_entries={summary['all_entries']}")
+print(f"canonical_entries={summary['canonical_total']}")
+print(f"canonical_stale={summary['canonical_stale']}")
+print(f"canonical_missing_owner={summary['canonical_missing_owner']}")
+print(f"canonical_missing_verified={summary['canonical_missing_verified']}")
+print(f"canonical_high_risk={summary['canonical_high_risk']}")
+print(f"canonical_missing_file={summary['canonical_missing_file']}")
+_emit_list("stale_entries", summary.get("stale_entries", []))
+_emit_list("canonical_missing_owner_entries", summary.get("missing_owner_entries", []))
+_emit_list("canonical_missing_verified_entries", summary.get("missing_verified_entries", []))
+_emit_list("canonical_missing_file_entries", summary.get("canonical_missing_file_entries", []))
+PY
           )
 
           {
@@ -205,6 +349,8 @@ jobs:
             --out "$DOCS_SCORECARD_COMPARISON_PATH"
 
           python3 docs/qa/build-docs-compliance-summary.py \
+            --foundation-summary "$DOCS_FOUNDATION_SUMMARY" \
+            --cmdref-baseline-summary "$DOCS_CMDREF_BASELINE_SUMMARY" \
             --catalog-summary "$CATALOG_HEALTH_SUMMARY" \
             --cmdref-summary "$DOCS_CMDREF_SUMMARY" \
             --scorecard "$DOCS_SCORECARD_PATH" \
@@ -213,30 +359,54 @@ jobs:
             --scorecard-consistency-summary "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" \
             --scorecard-head-freshness-summary "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" \
             --scorecard-timestamp-summary "$DOCS_SCORECARD_TIMESTAMP_SUMMARY" \
+            --scorecard-delta-summary "$DOCS_SCORECARD_DELTA_SUMMARY" \
+            --scorecard-drift-summary "$DOCS_SCORECARD_DRIFT_SUMMARY" \
+            --link-integrity-summary "$DOCS_LINK_INTEGRITY_SUMMARY" \
             --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
 
-          {
-            echo "### Docs Scorecard Trend"
-            echo "- base_ref=$(jq -r '.base_ref // \"n/a\"' "$DOCS_SCORECARD_COMPARISON_PATH")"
-            echo "- base_score=$(jq -r '.base_score // \"n/a\"' "$DOCS_SCORECARD_COMPARISON_PATH")"
-            echo "- current_score=$(jq -r '.current_score // \"n/a\"' "$DOCS_SCORECARD_COMPARISON_PATH")"
-            echo "- score_drop=$(jq -r '.score_drop // \"n/a\"' "$DOCS_SCORECARD_COMPARISON_PATH")"
-            echo "- max_allowed_drop=$(jq -r '.max_allowed_drop // \"n/a\"' "$DOCS_SCORECARD_COMPARISON_PATH")"
-            echo "- status=$(jq -r '.status // \"unknown\"' "$DOCS_SCORECARD_COMPARISON_PATH")"
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$DOCS_SCORECARD_COMPARISON_PATH" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
 
-          {
-            echo "### Docs Compliance Summary"
-            echo "- overall_status=$(jq -r '.overall_status // \"unknown\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-            echo "- catalog_health_status=$(jq -r '.statuses.catalog_health // \"n/a\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-            echo "- command_refs_status=$(jq -r '.statuses.command_references // \"n/a\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-            echo "- docs_scorecard_status=$(jq -r '.statuses.docs_scorecard // \"n/a\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-            echo "- scorecard_trend_status=$(jq -r '.statuses.scorecard_trend // \"n/a\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-            echo "- scorecard_recency_status=$(jq -r '.statuses.scorecard_recency // \"n/a\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-            echo "- scorecard_consistency_status=$(jq -r '.statuses.scorecard_consistency // \"n/a\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-            echo "- scorecard_head_freshness_status=$(jq -r '.statuses.scorecard_head_freshness // \"n/a\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-            echo "- scorecard_timestamp_format_status=$(jq -r '.statuses.scorecard_timestamp_format // \"n/a\"' "$DOCS_COMPLIANCE_SUMMARY_PATH")"
-          } >> "$GITHUB_STEP_SUMMARY"
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    trend = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Scorecard Trend\n")
+    fp.write(f"- base_ref={trend['base_ref']}\n")
+    fp.write(f"- base_score={trend['base_score']}\n")
+    fp.write(f"- current_score={trend['current_score']}\n")
+    fp.write(f"- score_drop={trend['score_drop']}\n")
+    fp.write(f"- max_allowed_drop={trend['max_allowed_drop']}\n")
+    fp.write(f"- status={trend['status']}\n")
+PY
+
+          python3 - "$DOCS_COMPLIANCE_SUMMARY_PATH" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Compliance Summary\n")
+    fp.write(f"- overall_status={payload.get('overall_status')}\n")
+    fp.write(f"- foundation_gates_status={payload.get('statuses', {}).get('foundation_gates', 'n/a')}\n")
+    fp.write(f"- foundation_policy_status={payload.get('statuses', {}).get('foundation_policy', 'n/a')}\n")
+    fp.write(f"- foundation_repo_structure_status={payload.get('statuses', {}).get('foundation_repo_structure', 'n/a')}\n")
+    fp.write(f"- command_reference_baseline_status={payload.get('statuses', {}).get('command_reference_baseline', 'n/a')}\n")
+    fp.write(f"- catalog_health_status={payload.get('statuses', {}).get('catalog_health', 'n/a')}\n")
+    fp.write(f"- link_integrity_status={payload.get('statuses', {}).get('link_integrity', 'n/a')}\n")
+    fp.write(f"- command_refs_status={payload.get('statuses', {}).get('command_references', 'n/a')}\n")
+    fp.write(f"- docs_scorecard_status={payload.get('statuses', {}).get('docs_scorecard', 'n/a')}\n")
+    fp.write(f"- scorecard_trend_status={payload.get('statuses', {}).get('scorecard_trend', 'n/a')}\n")
+    fp.write(f"- scorecard_recency_status={payload.get('statuses', {}).get('scorecard_recency', 'n/a')}\n")
+    fp.write(f"- scorecard_consistency_status={payload.get('statuses', {}).get('scorecard_consistency', 'n/a')}\n")
+    fp.write(f"- scorecard_head_freshness_status={payload.get('statuses', {}).get('scorecard_head_freshness', 'n/a')}\n")
+    fp.write(f"- scorecard_timestamp_format_status={payload.get('statuses', {}).get('scorecard_timestamp_format', 'n/a')}\n")
+    fp.write(f"- scorecard_delta_artifact_status={payload.get('statuses', {}).get('scorecard_delta_artifact', 'n/a')}\n")
+    fp.write(f"- scorecard_generation_drift_status={payload.get('statuses', {}).get('scorecard_generation_drift', 'n/a')}\n")
+PY
 
       - name: Upload docs catalog health scorecard
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
@@ -244,6 +414,9 @@ jobs:
           name: docs-catalog-health-scorecard
           path: |
             ${{ runner.temp }}/docs-catalog-health-summary.json
+            ${{ runner.temp }}/docs-foundation-summary.json
+            ${{ runner.temp }}/docs-cmdref-baseline-summary.json
+            ${{ runner.temp }}/docs-link-integrity-summary.json
             ${{ runner.temp }}/docs-scorecard.json
             ${{ runner.temp }}/docs-scorecard-comparison.json
             ${{ runner.temp }}/docs-command-refs-summary.json
@@ -251,31 +424,42 @@ jobs:
             ${{ runner.temp }}/docs-scorecard-consistency-summary.json
             ${{ runner.temp }}/docs-scorecard-head-freshness-summary.json
             ${{ runner.temp }}/docs-scorecard-timestamp-summary.json
+            ${{ runner.temp }}/docs-scorecard-delta-summary.json
+            ${{ runner.temp }}/docs-scorecard-drift-summary.json
             ${{ runner.temp }}/docs-compliance-summary.json
 
       - name: Generate docs scorecard report markdown
         run: |
           set -euo pipefail
           REPORT_PATH="${RUNNER_TEMP}/DOCS_PROGRAM_SCORECARD_${{ github.run_id }}.md"
+          QUALITY_REPORT_PATH="${RUNNER_TEMP}/DOCS_QUALITY_SCORECARD_${{ github.run_id }}.md"
           chmod +x docs/qa/generate-docs-scorecard-report.sh
           ./docs/qa/generate-docs-scorecard-report.sh \
             --base-ref "origin/${{ github.base_ref }}" \
-            --output "$REPORT_PATH"
+            --output "$REPORT_PATH" \
+            --quality-output "$QUALITY_REPORT_PATH"
           {
             echo "### Docs Program Scorecard Report"
             echo "- report_path=${REPORT_PATH}"
+            echo "- quality_report_path=${QUALITY_REPORT_PATH}"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload docs scorecard markdown report
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: docs-program-scorecard-report
-          path: ${{ runner.temp }}/DOCS_PROGRAM_SCORECARD_${{ github.run_id }}.md
+          path: |
+            ${{ runner.temp }}/DOCS_PROGRAM_SCORECARD_${{ github.run_id }}.md
+            ${{ runner.temp }}/DOCS_QUALITY_SCORECARD_${{ github.run_id }}.md
 
       - name: Verify docs catalog health self-test
         run: |
           chmod +x \
             docs/qa/verify-doc-catalog-health-test.sh \
+            docs/qa/verify-docs-foundation-gates.sh \
+            docs/qa/verify-docs-foundation-gates-test.sh \
+            docs/qa/verify-doc-command-ref-baseline.sh \
+            docs/qa/verify-doc-command-ref-baseline-test.sh \
             docs/qa/verify-doc-command-refs-test.sh \
             docs/qa/verify-doc-link-integrity-test.sh \
             docs/qa/verify-docs-scorecard-recency.sh \
@@ -286,18 +470,26 @@ jobs:
             docs/qa/verify-docs-scorecard-head-freshness-test.sh \
             docs/qa/verify-docs-scorecard-report-timestamp.sh \
             docs/qa/verify-docs-scorecard-report-timestamp-test.sh \
+            docs/qa/verify-docs-scorecard-delta-artifact.sh \
+            docs/qa/verify-docs-scorecard-delta-artifact-test.sh \
+            docs/qa/verify-docs-scorecard-generation-drift.sh \
+            docs/qa/verify-docs-scorecard-generation-drift-test.sh \
             docs/qa/generate-docs-scorecard-report.sh \
             docs/qa/generate-docs-scorecard-report-test.sh \
             docs/qa/build-docs-scorecard-test.sh \
             docs/qa/compare-docs-scorecard-to-base-test.sh \
             docs/qa/build-docs-compliance-summary-test.sh
           docs/qa/verify-doc-catalog-health-test.sh
+          docs/qa/verify-docs-foundation-gates-test.sh
+          docs/qa/verify-doc-command-ref-baseline-test.sh
           docs/qa/verify-doc-command-refs-test.sh
           docs/qa/verify-doc-link-integrity-test.sh
           docs/qa/verify-docs-scorecard-recency-test.sh
           docs/qa/verify-docs-scorecard-report-consistency-test.sh
           docs/qa/verify-docs-scorecard-head-freshness-test.sh
           docs/qa/verify-docs-scorecard-report-timestamp-test.sh
+          docs/qa/verify-docs-scorecard-delta-artifact-test.sh
+          docs/qa/verify-docs-scorecard-generation-drift-test.sh
           docs/qa/generate-docs-scorecard-report-test.sh
           docs/qa/build-docs-scorecard-test.sh
           docs/qa/compare-docs-scorecard-to-base-test.sh

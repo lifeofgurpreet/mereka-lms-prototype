@@ -24,11 +24,17 @@ run_case() {
   local file=$2
   local expect_fail=$3
   local allowlist_file=${4-}
+  local baseline_file=${5-}
   local summary_file="$ROOT_DIR/${name}-summary.json"
-  local -a args=("--summary-json" "$summary_file" "$ROOT_DIR/$file")
+  local -a args=("--summary-json" "$summary_file")
+  if [ -n "${baseline_file}" ]; then
+    args+=("--include-baseline" "--baseline-file" "$baseline_file")
+  fi
+  args+=("$ROOT_DIR/$file")
   local cmd=(bash docs/qa/verify-doc-command-refs.sh "${args[@]}")
   local return_code=0
 
+  set +e
   if [ -n "${allowlist_file}" ]; then
     DOC_COMMAND_REF_ALLOWLIST_FILE="$allowlist_file" "${cmd[@]}" >"/tmp/cmd_ref_test_${name}.out" 2>&1
     return_code=$?
@@ -36,6 +42,7 @@ run_case() {
     "${cmd[@]}" >"/tmp/cmd_ref_test_${name}.out" 2>&1
     return_code=$?
   fi
+  set -e
 
   if [ "$expect_fail" -eq 1 ]; then
     if [ "$return_code" -eq 0 ]; then
@@ -143,15 +150,22 @@ cat > "$ROOT_DIR/docs/.doc-command-ref-allowlist-extra" <<'EOF_DOC'
 scripts/custom/preview/outbox/
 EOF_DOC
 
+printf '%s\n' "$ROOT_DIR/docs/cmdref-pass.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-pass"
+printf '%s\n' "$ROOT_DIR/docs/cmdref-fail.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-fail"
+
 PASS_SUMMARY=$(run_case pass docs/cmdref-pass.md 0)
 FAIL_SUMMARY=$(run_case fail docs/cmdref-fail.md 1)
 ALLOWED_SUMMARY=$(run_case allowed-missing docs/cmdref-allowed-missing.md 0)
 OVERRIDE_SUMMARY=$(run_case allowed-missing-override docs/cmdref-allowed-missing-override.md 0 "$ROOT_DIR/docs/.doc-command-ref-allowlist-extra")
+BASELINE_PASS_SUMMARY=$(run_case baseline-pass docs/cmdref-pass.md 0 "" "$ROOT_DIR/docs/.doc-command-ref-baseline-pass")
+BASELINE_FAIL_SUMMARY=$(run_case baseline-fail docs/cmdref-pass.md 1 "" "$ROOT_DIR/docs/.doc-command-ref-baseline-fail")
 
 grep -q "DOCS_CMDREF_ERRORS" /tmp/cmd_ref_test_fail.out
 assert_summary_status "$FAIL_SUMMARY" fail 1
 assert_summary_status "$PASS_SUMMARY" pass 0
 assert_summary_status "$ALLOWED_SUMMARY" pass 0
 assert_summary_status "$OVERRIDE_SUMMARY" pass 0
+assert_summary_status "$BASELINE_PASS_SUMMARY" pass 0
+assert_summary_status "$BASELINE_FAIL_SUMMARY" fail 1
 
 echo "verify-doc-command-refs self-test: OK"

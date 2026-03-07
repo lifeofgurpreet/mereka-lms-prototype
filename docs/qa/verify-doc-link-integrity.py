@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 from pathlib import Path
@@ -56,6 +57,7 @@ def collect_markdown_files(raw_files: Iterable[str]) -> list[Path]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("files", nargs="*", help="Optional explicit list of docs files")
+    parser.add_argument("--summary-json", default="", help="Optional JSON summary output path")
     args = parser.parse_args()
 
     if args.files:
@@ -64,6 +66,11 @@ def main() -> int:
         files = [Path(p) for p in list_changed_files()]
 
     if not files:
+        if args.summary_json:
+            Path(args.summary_json).write_text(
+                json.dumps({"status": "pass", "files_checked": 0, "broken_links": 0, "broken": []}, indent=2) + "\n",
+                encoding="utf-8",
+            )
         print("DOCS_LINK_INTEGRITY_OK (0 files, 0 broken links)")
         return 0
 
@@ -89,11 +96,34 @@ def main() -> int:
             broken.append(f"{rel}: {raw}")
 
     if broken:
+        if args.summary_json:
+            Path(args.summary_json).write_text(
+                json.dumps(
+                    {
+                        "status": "fail",
+                        "files_checked": len(files),
+                        "broken_links": len(broken),
+                        "broken": broken,
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
         print(f"DOCS_LINK_INTEGRITY_ERRORS ({len(broken)} missing)")
         for item in broken:
             print(f"- {item}")
         return 1
 
+    if args.summary_json:
+        Path(args.summary_json).write_text(
+            json.dumps(
+                {"status": "pass", "files_checked": len(files), "broken_links": 0, "broken": []},
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
     print(f"DOCS_LINK_INTEGRITY_OK ({len(files)} files, 0 broken links)")
     return 0
 

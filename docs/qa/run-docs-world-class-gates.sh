@@ -7,14 +7,19 @@ cd "$REPO_ROOT"
 
 WORK_DIR=$(mktemp -d)
 trap 'rm -rf "$WORK_DIR"' EXIT
+DOCS_FOUNDATION_SUMMARY="$WORK_DIR/docs-foundation-summary.json"
 CATALOG_HEALTH_SUMMARY="$WORK_DIR/docs-catalog-health-summary.json"
 DOCS_SCORECARD_PATH="$WORK_DIR/docs-scorecard.json"
 DOCS_SCORECARD_COMPARISON_PATH="$WORK_DIR/docs-scorecard-comparison.json"
 DOCS_COMMAND_REFS_SUMMARY="$WORK_DIR/docs-command-refs-summary.json"
+DOCS_CMDREF_BASELINE_SUMMARY="$WORK_DIR/docs-cmdref-baseline-summary.json"
 DOCS_SCORECARD_RECENCY_SUMMARY="$WORK_DIR/docs-scorecard-recency-summary.json"
 DOCS_SCORECARD_CONSISTENCY_SUMMARY="$WORK_DIR/docs-scorecard-consistency-summary.json"
 DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY="$WORK_DIR/docs-scorecard-head-freshness-summary.json"
 DOCS_SCORECARD_TIMESTAMP_SUMMARY="$WORK_DIR/docs-scorecard-timestamp-summary.json"
+DOCS_SCORECARD_DELTA_SUMMARY="$WORK_DIR/docs-scorecard-delta-summary.json"
+DOCS_SCORECARD_DRIFT_SUMMARY="$WORK_DIR/docs-scorecard-drift-summary.json"
+DOCS_LINK_INTEGRITY_SUMMARY="$WORK_DIR/docs-link-integrity-summary.json"
 DOCS_COMPLIANCE_SUMMARY_PATH="$WORK_DIR/docs-compliance-summary.json"
 
 MAX_AGE_SECONDS=1200
@@ -124,12 +129,16 @@ fi
 
 run_step "verify-docs-policy" ./docs/qa/verify-docs-policy.sh
 run_step "verify-repo-structure" ./scripts/qa/verify-repo-structure.sh
-run_step "verify-doc-command-refs" ./docs/qa/verify-doc-command-refs.sh --summary-json "$DOCS_COMMAND_REFS_SUMMARY"
+run_step "verify-docs-foundation-gates" ./docs/qa/verify-docs-foundation-gates.sh --summary-json "$DOCS_FOUNDATION_SUMMARY"
+run_step "verify-doc-command-ref-baseline" ./docs/qa/verify-doc-command-ref-baseline.sh --summary-json "$DOCS_CMDREF_BASELINE_SUMMARY"
+run_step "verify-doc-command-refs" ./docs/qa/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_COMMAND_REFS_SUMMARY"
 run_step "verify-docs-scorecard-recency" ./docs/qa/verify-docs-scorecard-recency.sh --max-age-days 7 --summary-json "$DOCS_SCORECARD_RECENCY_SUMMARY"
 run_step "verify-docs-scorecard-report-consistency" ./docs/qa/verify-docs-scorecard-report-consistency.sh --summary-json "$DOCS_SCORECARD_CONSISTENCY_SUMMARY"
 run_step "verify-docs-scorecard-head-freshness" ./docs/qa/verify-docs-scorecard-head-freshness.sh --summary-json "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY"
 run_step "verify-docs-scorecard-report-timestamp" ./docs/qa/verify-docs-scorecard-report-timestamp.sh --summary-json "$DOCS_SCORECARD_TIMESTAMP_SUMMARY"
-run_step "verify-doc-link-integrity" ./docs/qa/verify-doc-link-integrity.sh
+run_step "verify-docs-scorecard-delta-artifact" ./docs/qa/verify-docs-scorecard-delta-artifact.sh --summary-json "$DOCS_SCORECARD_DELTA_SUMMARY"
+run_step "verify-docs-scorecard-generation-drift" ./docs/qa/verify-docs-scorecard-generation-drift.sh --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY"
+run_step "verify-doc-link-integrity" ./docs/qa/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY"
 run_step "verify-doc-catalog-health" python3 docs/qa/verify-doc-catalog-health.py \
   --max-stale-days 45 \
   --summary-file "$CATALOG_HEALTH_SUMMARY"
@@ -143,6 +152,8 @@ run_step "compare-docs-scorecard-to-base" docs/qa/compare-docs-scorecard-to-base
   --regression-threshold 10 \
   --out "$DOCS_SCORECARD_COMPARISON_PATH"
 run_step "build-docs-compliance-summary" python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$DOCS_FOUNDATION_SUMMARY" \
+  --cmdref-baseline-summary "$DOCS_CMDREF_BASELINE_SUMMARY" \
   --catalog-summary "$CATALOG_HEALTH_SUMMARY" \
   --cmdref-summary "$DOCS_COMMAND_REFS_SUMMARY" \
   --scorecard "$DOCS_SCORECARD_PATH" \
@@ -151,14 +162,21 @@ run_step "build-docs-compliance-summary" python3 docs/qa/build-docs-compliance-s
   --scorecard-consistency-summary "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" \
   --scorecard-head-freshness-summary "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" \
   --scorecard-timestamp-summary "$DOCS_SCORECARD_TIMESTAMP_SUMMARY" \
+  --scorecard-delta-summary "$DOCS_SCORECARD_DELTA_SUMMARY" \
+  --scorecard-drift-summary "$DOCS_SCORECARD_DRIFT_SUMMARY" \
+  --link-integrity-summary "$DOCS_LINK_INTEGRITY_SUMMARY" \
   --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
 run_step "verify-doc-catalog-health-test" ./docs/qa/verify-doc-catalog-health-test.sh
+run_step "verify-docs-foundation-gates-test" ./docs/qa/verify-docs-foundation-gates-test.sh
+run_step "verify-doc-command-ref-baseline-test" ./docs/qa/verify-doc-command-ref-baseline-test.sh
 run_step "verify-doc-link-integrity-test" ./docs/qa/verify-doc-link-integrity-test.sh
 run_step "verify-doc-command-refs-test" ./docs/qa/verify-doc-command-refs-test.sh
 run_step "verify-docs-scorecard-recency-test" ./docs/qa/verify-docs-scorecard-recency-test.sh
 run_step "verify-docs-scorecard-report-consistency-test" ./docs/qa/verify-docs-scorecard-report-consistency-test.sh
 run_step "verify-docs-scorecard-head-freshness-test" ./docs/qa/verify-docs-scorecard-head-freshness-test.sh
 run_step "verify-docs-scorecard-report-timestamp-test" ./docs/qa/verify-docs-scorecard-report-timestamp-test.sh
+run_step "verify-docs-scorecard-delta-artifact-test" ./docs/qa/verify-docs-scorecard-delta-artifact-test.sh
+run_step "verify-docs-scorecard-generation-drift-test" ./docs/qa/verify-docs-scorecard-generation-drift-test.sh
 run_step "generate-docs-scorecard-report-test" ./docs/qa/generate-docs-scorecard-report-test.sh
 run_step "build-docs-scorecard-test" ./docs/qa/build-docs-scorecard-test.sh
 run_step "compare-docs-scorecard-to-base-test" ./docs/qa/compare-docs-scorecard-to-base-test.sh

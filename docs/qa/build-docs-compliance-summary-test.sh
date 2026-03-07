@@ -23,6 +23,62 @@ PASS_OUT="$ROOT_DIR/summary-pass.json"
 FAIL_OUT="$ROOT_DIR/summary-fail.json"
 WARN_OUT="$ROOT_DIR/summary-warn.json"
 
+cat > "$ROOT_DIR/foundation-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "policy_status": "pass",
+  "repo_structure_status": "pass"
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/foundation-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "policy_status": "fail",
+  "repo_structure_status": "pass"
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-baseline-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "baseline_file": "docs/qa/.doc-command-ref-baseline",
+  "entries": 4,
+  "duplicates": [],
+  "missing": [],
+  "invalid_non_markdown": []
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-baseline-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "baseline_file": "docs/qa/.doc-command-ref-baseline",
+  "entries": 4,
+  "duplicates": ["docs/a.md"],
+  "missing": ["docs/missing.md"],
+  "invalid_non_markdown": []
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/link-integrity-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": 2,
+  "broken_links": 0,
+  "broken": []
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/link-integrity-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "files_checked": 2,
+  "broken_links": 1,
+  "broken": ["docs/a.md: ./missing.md"]
+}
+EOF_JSON
+
 cat > "$ROOT_DIR/catalog-pass.json" <<'EOF_JSON'
 {
   "failed": false,
@@ -184,7 +240,56 @@ cat > "$ROOT_DIR/scorecard-timestamp-fail.json" <<'EOF_JSON'
 }
 EOF_JSON
 
+cat > "$ROOT_DIR/scorecard-delta-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "latest_program_report": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
+  "latest_program_date": "20260307",
+  "latest_delta_report": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260307.md",
+  "latest_delta_date": "20260307",
+  "date_match": true,
+  "has_delta_section": true
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-delta-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "latest_program_report": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
+  "latest_program_date": "20260307",
+  "latest_delta_report": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260306.md",
+  "latest_delta_date": "20260306",
+  "date_match": false,
+  "has_delta_section": true
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-drift-pass.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "latest_date": "20260307",
+  "program_report": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
+  "quality_report": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260307.md",
+  "program_match": true,
+  "quality_match": true
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/scorecard-drift-fail.json" <<'EOF_JSON'
+{
+  "status": "fail",
+  "latest_date": "20260307",
+  "program_report": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
+  "quality_report": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260307.md",
+  "program_match": true,
+  "quality_match": false
+}
+EOF_JSON
+
 python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
   --catalog-summary "$ROOT_DIR/catalog-pass.json" \
   --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
   --scorecard "$ROOT_DIR/scorecard-pass.json" \
@@ -193,6 +298,8 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
   --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
   --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
   --out "$PASS_OUT"
 
 python3 - "$PASS_OUT" <<'PY'
@@ -205,6 +312,9 @@ if payload.get("overall_status") != "pass":
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
   --catalog-summary "$ROOT_DIR/catalog-pass.json" \
   --cmdref-summary "$ROOT_DIR/cmdref-fail.json" \
   --scorecard "$ROOT_DIR/scorecard-pass.json" \
@@ -213,6 +323,8 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
   --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
   --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
   --out "$FAIL_OUT" || true
 
 python3 - "$FAIL_OUT" <<'PY'
@@ -225,6 +337,9 @@ if payload.get("overall_status") != "fail":
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
   --catalog-summary "$ROOT_DIR/catalog-pass.json" \
   --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
   --scorecard "$ROOT_DIR/scorecard-warn.json" \
@@ -233,6 +348,8 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
   --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
   --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
   --out "$WARN_OUT"
 
 python3 - "$WARN_OUT" <<'PY'
@@ -245,6 +362,9 @@ if payload.get("overall_status") != "warn":
 PY
 
 if python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-fail.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-fail.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-fail.json" \
   --catalog-summary "$ROOT_DIR/catalog-pass.json" \
   --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
   --scorecard "$ROOT_DIR/scorecard-fail.json" \
@@ -253,6 +373,8 @@ if python3 docs/qa/build-docs-compliance-summary.py \
   --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-fail.json" \
   --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-fail.json" \
   --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-fail.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-fail.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-fail.json" \
   --out /tmp/does-not-exist.json >/tmp/compliance-summary-fail.out 2>&1; then
   echo "expected command to fail for terminal fail status"
   cat /tmp/compliance-summary-fail.out

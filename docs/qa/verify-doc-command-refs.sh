@@ -6,6 +6,8 @@ cd "$REPO_ROOT"
 
 SUMMARY_JSON=""
 FILES=()
+INCLUDE_BASELINE=0
+BASELINE_FILE="docs/qa/.doc-command-ref-baseline"
 
 while (($# > 0)); do
   case "$1" in
@@ -13,13 +15,23 @@ while (($# > 0)); do
       SUMMARY_JSON="${2-}"
       shift 2
       ;;
+    --include-baseline)
+      INCLUDE_BASELINE=1
+      shift
+      ;;
+    --baseline-file)
+      BASELINE_FILE="${2-}"
+      shift 2
+      ;;
     --help|-h)
       cat <<'EOF'
 Usage:
-  verify-doc-command-refs.sh [--summary-json <path>] [docs/...]
+  verify-doc-command-refs.sh [--summary-json <path>] [--include-baseline] [--baseline-file <path>] [docs/...]
 
 Options:
   --summary-json <path>   write JSON summary for CI/reporting
+  --include-baseline      include baseline high-risk docs from --baseline-file
+  --baseline-file <path>  baseline docs list (default: docs/qa/.doc-command-ref-baseline)
 EOF
       exit 0
       ;;
@@ -49,6 +61,21 @@ else
   else
     mapfile -t FILES < <(git ls-files 'docs/**/*.md' 'docs/*.md')
   fi
+fi
+
+if [ "$INCLUDE_BASELINE" -eq 1 ]; then
+  if [ ! -f "$BASELINE_FILE" ]; then
+    echo "Baseline file not found: $BASELINE_FILE" >&2
+    exit 1
+  fi
+  mapfile -t BASELINE_FILES < <(grep -v '^[[:space:]]*#' "$BASELINE_FILE" | sed '/^[[:space:]]*$/d')
+  if ((${#BASELINE_FILES[@]} > 0)); then
+    FILES+=("${BASELINE_FILES[@]}")
+  fi
+fi
+
+if ((${#FILES[@]} > 0)); then
+  mapfile -t FILES < <(printf "%s\n" "${FILES[@]}" | awk '!seen[$0]++')
 fi
 
 if ((${#FILES[@]} == 0)); then

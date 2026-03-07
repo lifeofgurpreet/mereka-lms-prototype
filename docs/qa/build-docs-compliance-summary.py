@@ -11,6 +11,8 @@ from pathlib import Path
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--foundation-summary", required=False, default="", help="docs-foundation-summary.json")
+    p.add_argument("--cmdref-baseline-summary", required=False, default="", help="docs-cmdref-baseline-summary.json")
     p.add_argument("--catalog-summary", required=True, help="docs-catalog-health-summary.json")
     p.add_argument("--cmdref-summary", required=True, help="docs-command-refs-summary.json")
     p.add_argument("--scorecard", required=False, default="", help="docs-scorecard.json")
@@ -33,6 +35,24 @@ def parse_args() -> argparse.Namespace:
         required=False,
         default="",
         help="docs-scorecard-timestamp-summary.json",
+    )
+    p.add_argument(
+        "--scorecard-delta-summary",
+        required=False,
+        default="",
+        help="docs-scorecard-delta-summary.json",
+    )
+    p.add_argument(
+        "--scorecard-drift-summary",
+        required=False,
+        default="",
+        help="docs-scorecard-drift-summary.json",
+    )
+    p.add_argument(
+        "--link-integrity-summary",
+        required=False,
+        default="",
+        help="docs-link-integrity-summary.json",
     )
     p.add_argument("--out", required=False, default="docs-compliance-summary.json", help="output path")
     return p.parse_args()
@@ -84,6 +104,8 @@ def _normalized_status(value: str) -> str:
 def main() -> int:
     args = parse_args()
 
+    foundation = _safe_load(args.foundation_summary, {})
+    cmdref_baseline = _safe_load(args.cmdref_baseline_summary, {})
     catalog = _safe_load(args.catalog_summary, {})
     cmdref = _safe_load(args.cmdref_summary, {})
     scorecard = _safe_load(args.scorecard, {})
@@ -92,7 +114,14 @@ def main() -> int:
     scorecard_consistency = _safe_load(args.scorecard_consistency_summary, {})
     scorecard_head_freshness = _safe_load(args.scorecard_head_freshness_summary, {})
     scorecard_timestamp = _safe_load(args.scorecard_timestamp_summary, {})
+    scorecard_delta = _safe_load(args.scorecard_delta_summary, {})
+    scorecard_drift = _safe_load(args.scorecard_drift_summary, {})
+    link_integrity = _safe_load(args.link_integrity_summary, {})
 
+    foundation_status = _normalized_status(_status_from_scorecard(foundation))
+    foundation_policy_status = _normalized_status(str(foundation.get("policy_status", "unknown")))
+    foundation_repo_status = _normalized_status(str(foundation.get("repo_structure_status", "unknown")))
+    cmdref_baseline_status = _normalized_status(_status_from_scorecard(cmdref_baseline))
     catalog_status = _status_from_catalog(catalog)
     cmdref_status = _normalized_status(_status_from_cmdref(cmdref))
     scorecard_status = _normalized_status(_status_from_scorecard(scorecard))
@@ -101,10 +130,18 @@ def main() -> int:
     consistency_status = _normalized_status(_status_from_scorecard(scorecard_consistency))
     head_freshness_status = _normalized_status(_status_from_scorecard(scorecard_head_freshness))
     timestamp_status = _normalized_status(_status_from_scorecard(scorecard_timestamp))
+    delta_status = _normalized_status(_status_from_scorecard(scorecard_delta))
+    drift_status = _normalized_status(_status_from_scorecard(scorecard_drift))
+    link_integrity_status = _normalized_status(_status_from_scorecard(link_integrity))
     catalog_status = _normalized_status(catalog_status)
 
     statuses = {
         "catalog_health": catalog_status,
+        "foundation_gates": foundation_status,
+        "foundation_policy": foundation_policy_status,
+        "foundation_repo_structure": foundation_repo_status,
+        "command_reference_baseline": cmdref_baseline_status,
+        "link_integrity": link_integrity_status,
         "command_references": cmdref_status,
         "docs_scorecard": scorecard_status,
         "scorecard_trend": comparison_status,
@@ -112,6 +149,8 @@ def main() -> int:
         "scorecard_consistency": consistency_status,
         "scorecard_head_freshness": head_freshness_status,
         "scorecard_timestamp_format": timestamp_status,
+        "scorecard_delta_artifact": delta_status,
+        "scorecard_generation_drift": drift_status,
     }
 
     terminal_status = "pass"
@@ -134,12 +173,31 @@ def main() -> int:
             "canonical_high_risk": catalog.get("canonical_high_risk", 0),
             "failed": catalog.get("failed", False),
         },
+        "foundation_gates": {
+            "status": foundation_status,
+            "policy_status": foundation_policy_status,
+            "repo_structure_status": foundation_repo_status,
+        },
+        "command_reference_baseline": {
+            "status": cmdref_baseline_status,
+            "baseline_file": cmdref_baseline.get("baseline_file", ""),
+            "entries": cmdref_baseline.get("entries", 0),
+            "duplicates": cmdref_baseline.get("duplicates", []),
+            "missing": cmdref_baseline.get("missing", []),
+            "invalid_non_markdown": cmdref_baseline.get("invalid_non_markdown", []),
+        },
         "command_refs": {
             "status": cmdref_status,
             "files_checked": cmdref.get("files_checked", 0),
             "total_candidates": cmdref.get("total_candidates", 0),
             "missing_references": cmdref.get("missing_references", 0),
             "missing": cmdref.get("missing", []),
+        },
+        "link_integrity": {
+            "status": link_integrity_status,
+            "files_checked": link_integrity.get("files_checked", 0),
+            "broken_links": link_integrity.get("broken_links", 0),
+            "broken": link_integrity.get("broken", []),
         },
         "docs_scorecard": {
             "status": scorecard_status,
@@ -180,6 +238,23 @@ def main() -> int:
             "invalid_reports": scorecard_timestamp.get("invalid_reports", 0),
             "mismatches": scorecard_timestamp.get("mismatches", []),
         },
+        "docs_scorecard_delta_artifact": {
+            "status": delta_status,
+            "latest_program_report": scorecard_delta.get("latest_program_report", ""),
+            "latest_program_date": scorecard_delta.get("latest_program_date", ""),
+            "latest_delta_report": scorecard_delta.get("latest_delta_report", ""),
+            "latest_delta_date": scorecard_delta.get("latest_delta_date", ""),
+            "date_match": scorecard_delta.get("date_match", False),
+            "has_delta_section": scorecard_delta.get("has_delta_section", False),
+        },
+        "docs_scorecard_generation_drift": {
+            "status": drift_status,
+            "latest_date": scorecard_drift.get("latest_date", ""),
+            "program_report": scorecard_drift.get("program_report", ""),
+            "quality_report": scorecard_drift.get("quality_report", ""),
+            "program_match": scorecard_drift.get("program_match", False),
+            "quality_match": scorecard_drift.get("quality_match", False),
+        },
     }
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
@@ -188,10 +263,13 @@ def main() -> int:
     print(
         "DOCS_COMPLIANCE_SUMMARY "
         f"overall_status={terminal_status} "
-        f"catalog={catalog_status} cmdref={cmdref_status} "
+        f"foundation={foundation_status} policy={foundation_policy_status} repo_structure={foundation_repo_status} "
+        f"cmdref_baseline={cmdref_baseline_status} "
+        f"catalog={catalog_status} link_integrity={link_integrity_status} cmdref={cmdref_status} "
         f"scorecard={scorecard_status} trend={comparison_status} "
         f"recency={recency_status} consistency={consistency_status} "
-        f"head_freshness={head_freshness_status} timestamp={timestamp_status}"
+        f"head_freshness={head_freshness_status} timestamp={timestamp_status} "
+        f"delta={delta_status} drift={drift_status}"
     )
 
     if terminal_status == "fail":
