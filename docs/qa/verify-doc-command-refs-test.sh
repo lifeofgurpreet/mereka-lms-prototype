@@ -251,6 +251,7 @@ MARKDOWN_REFDEF_PASS_SUMMARY=$(run_case markdown-refdef-pass docs/cmdref-markdow
 MARKDOWN_REFDEF_FAIL_SUMMARY=$(run_case markdown-refdef-fail docs/cmdref-markdown-refdef-fail.md 1)
 ARCHIVE_SKIP_SUMMARY=$(run_case archive-skip docs/archive/cmdref-archive-only.md 0)
 BASELINE_ARCHIVE_ZERO_SCOPE_SUMMARY=$(run_case baseline-archive-zero-scope docs/archive/cmdref-archive-only.md 0 "" "$ROOT_DIR/docs/.doc-command-ref-baseline-archive")
+NONEXISTENT_INPUT_ZERO_SCOPE_SUMMARY=$(run_case nonexistent-input-zero-scope docs/does-not-exist-anywhere.md 0)
 
 grep -q "DOCS_CMDREF_ERRORS" /tmp/cmd_ref_test_fail.out
 assert_summary_status "$FAIL_SUMMARY" fail 1
@@ -269,6 +270,7 @@ assert_summary_status "$MARKDOWN_REFDEF_PASS_SUMMARY" pass 0
 assert_summary_status "$MARKDOWN_REFDEF_FAIL_SUMMARY" fail 1
 assert_summary_status "$ARCHIVE_SKIP_SUMMARY" pass 0
 assert_summary_status "$BASELINE_ARCHIVE_ZERO_SCOPE_SUMMARY" pass 0
+assert_summary_status "$NONEXISTENT_INPUT_ZERO_SCOPE_SUMMARY" pass 0
 
 python3 - "$PASS_SUMMARY" <<'PY'
 import json
@@ -304,6 +306,21 @@ summary = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 if summary.get("baseline_enabled") is not True:
     raise SystemExit(1)
 if summary.get("baseline_entries") != 1:
+    raise SystemExit(1)
+sources = summary.get("candidate_sources", {})
+if any(v != 0 for v in sources.values()):
+    raise SystemExit(1)
+PY
+
+python3 - "$NONEXISTENT_INPUT_ZERO_SCOPE_SUMMARY" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+summary = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+if summary.get("baseline_enabled") is not False:
+    raise SystemExit(1)
+if summary.get("baseline_entries") != 0:
     raise SystemExit(1)
 sources = summary.get("candidate_sources", {})
 if any(v != 0 for v in sources.values()):
