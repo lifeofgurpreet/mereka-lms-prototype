@@ -51,8 +51,29 @@ jobs:
 
       - name: Verify docs policy
         run: |
+          set -euo pipefail
           chmod +x docs/qa/verify-docs-policy.sh
-          ./docs/qa/verify-docs-policy.sh --range "origin/${{ github.base_ref }}...${{ github.sha }}"
+          DOCS_POLICY_SUMMARY="${RUNNER_TEMP}/docs-policy-summary.json"
+          ./docs/qa/verify-docs-policy.sh \
+            --range "origin/${{ github.base_ref }}...${{ github.sha }}" \
+            --summary-json "$DOCS_POLICY_SUMMARY"
+          python3 - "$DOCS_POLICY_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Policy\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- range={payload.get('range', 'n/a')}\n")
+    fp.write(f"- root_allowlist_violations={payload.get('root_allowlist_violations', 0)}\n")
+    fp.write(f"- changed_markdown_files={payload.get('changed_markdown_files', 0)}\n")
+    fp.write(f"- content_status={payload.get('content_status', 'unknown')}\n")
+    fp.write(f"- content_files_checked={payload.get('content_files_checked', 0)}\n")
+    fp.write(f"- content_errors={len(payload.get('content_errors', []))}\n")
+PY
 
       - name: Verify repository structure
         run: |
@@ -69,7 +90,7 @@ jobs:
           CHANGED_DOCS_COUNT=${#CHANGED_DOCS[@]}
 
           {
-            echo "### Docs Compliance Summary"
+            echo "### Docs Command Reference Scope"
             echo "- Changed docs (PR scope): ${CHANGED_DOCS_COUNT}"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -317,7 +338,27 @@ PY
             --max-stale-days 45 \
             --summary-file "$CATALOG_HEALTH_SUMMARY" | tee "$CATALOG_HEALTH_LOG"
           docs/qa/verify-docs-foundation-gates.sh \
+            --policy-range "origin/${{ github.base_ref }}...${{ github.sha }}" \
             --summary-json "$DOCS_FOUNDATION_SUMMARY"
+          python3 - "$DOCS_FOUNDATION_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    fp.write("### Docs Foundation Gates\n")
+    fp.write(f"- status={payload.get('status', 'unknown')}\n")
+    fp.write(f"- policy_status={payload.get('policy_status', 'unknown')}\n")
+    fp.write(f"- repo_structure_status={payload.get('repo_structure_status', 'unknown')}\n")
+    fp.write(f"- policy_range={payload.get('policy_range', 'n/a')}\n")
+    fp.write(f"- policy_root_allowlist_violations={payload.get('policy_root_allowlist_violations', 0)}\n")
+    fp.write(f"- policy_changed_markdown_files={payload.get('policy_changed_markdown_files', 0)}\n")
+    fp.write(f"- policy_content_status={payload.get('policy_content_status', 'unknown')}\n")
+    fp.write(f"- policy_content_consistent={str(payload.get('policy_content_consistent', 'n/a')).lower()}\n")
+    fp.write(f"- policy_content_errors={len(payload.get('policy_content_errors', []))}\n")
+PY
           readarray -t CATALOG_HEALTH_FIELDS < <(
             python3 - "$CATALOG_HEALTH_SUMMARY" <<'PY'
 import json
@@ -405,11 +446,23 @@ with open(sys.argv[1], "r", encoding="utf-8") as fp:
     payload = json.load(fp)
 
 with open(sys.argv[2], "a", encoding="utf-8") as fp:
+    foundation = payload.get("foundation_gates", {})
+    foundation_status_content = payload.get('statuses', {}).get('foundation_policy_content', 'n/a')
+    foundation_detail_content = foundation.get('policy_content_status', 'n/a')
+    foundation_content_consistent = foundation.get('policy_content_consistent', 'n/a')
     fp.write("### Docs Compliance Summary\n")
     fp.write(f"- overall_status={payload.get('overall_status')}\n")
     fp.write(f"- foundation_gates_status={payload.get('statuses', {}).get('foundation_gates', 'n/a')}\n")
     fp.write(f"- foundation_policy_status={payload.get('statuses', {}).get('foundation_policy', 'n/a')}\n")
     fp.write(f"- foundation_repo_structure_status={payload.get('statuses', {}).get('foundation_repo_structure', 'n/a')}\n")
+    fp.write(f"- foundation_policy_content_status={foundation_status_content}\n")
+    fp.write(f"- foundation_policy_content_consistency_status={payload.get('statuses', {}).get('foundation_policy_content_consistency', 'n/a')}\n")
+    fp.write(f"- foundation_policy_range={foundation.get('policy_range', 'n/a')}\n")
+    fp.write(f"- foundation_policy_root_allowlist_violations={foundation.get('policy_root_allowlist_violations', 'n/a')}\n")
+    fp.write(f"- foundation_policy_changed_markdown_files={foundation.get('policy_changed_markdown_files', 'n/a')}\n")
+    fp.write(f"- foundation_policy_content_detail={foundation_detail_content}\n")
+    fp.write(f"- foundation_policy_content_consistent={str(foundation_content_consistent).lower()}\n")
+    fp.write(f"- foundation_policy_content_errors={len(foundation.get('policy_content_errors', []))}\n")
     fp.write(f"- command_reference_baseline_status={payload.get('statuses', {}).get('command_reference_baseline', 'n/a')}\n")
     fp.write(f"- catalog_health_status={payload.get('statuses', {}).get('catalog_health', 'n/a')}\n")
     fp.write(f"- link_integrity_status={payload.get('statuses', {}).get('link_integrity', 'n/a')}\n")
@@ -429,6 +482,7 @@ PY
         with:
           name: docs-catalog-health-scorecard
           path: |
+            ${{ runner.temp }}/docs-policy-summary.json
             ${{ runner.temp }}/docs-catalog-health-summary.json
             ${{ runner.temp }}/docs-foundation-summary.json
             ${{ runner.temp }}/docs-cmdref-baseline-summary.json

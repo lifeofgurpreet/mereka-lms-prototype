@@ -22,12 +22,18 @@ trap cleanup EXIT
 PASS_OUT="$ROOT_DIR/summary-pass.json"
 FAIL_OUT="$ROOT_DIR/summary-fail.json"
 WARN_OUT="$ROOT_DIR/summary-warn.json"
+INCONSISTENT_OUT="$ROOT_DIR/summary-inconsistent.json"
 
 cat > "$ROOT_DIR/foundation-pass.json" <<'EOF_JSON'
 {
   "status": "pass",
   "policy_status": "pass",
-  "repo_structure_status": "pass"
+  "repo_structure_status": "pass",
+  "policy_range": "origin/main...HEAD",
+  "policy_root_allowlist_violations": 0,
+  "policy_changed_markdown_files": 2,
+  "policy_content_status": "pass",
+  "policy_content_errors": []
 }
 EOF_JSON
 
@@ -35,7 +41,29 @@ cat > "$ROOT_DIR/foundation-fail.json" <<'EOF_JSON'
 {
   "status": "fail",
   "policy_status": "fail",
-  "repo_structure_status": "pass"
+  "repo_structure_status": "pass",
+  "policy_range": "origin/main...HEAD",
+  "policy_root_allowlist_violations": 1,
+  "policy_changed_markdown_files": 2,
+  "policy_content_status": "fail",
+  "policy_content_errors": [
+    "docs/example.md: canonical subtitle metadata missing `Owner`"
+  ]
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/foundation-inconsistent.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "policy_status": "pass",
+  "repo_structure_status": "pass",
+  "policy_range": "origin/main...HEAD",
+  "policy_root_allowlist_violations": 0,
+  "policy_changed_markdown_files": 2,
+  "policy_content_status": "pass",
+  "policy_content_errors": [
+    "docs/example.md: canonical subtitle metadata missing `Owner`"
+  ]
 }
 EOF_JSON
 
@@ -309,6 +337,74 @@ import sys
 payload = json.load(open(sys.argv[1], encoding="utf-8"))
 if payload.get("overall_status") != "pass":
     raise SystemExit("expected overall_status=pass")
+foundation = payload.get("foundation_gates", {})
+statuses = payload.get("statuses", {})
+if foundation.get("policy_range") != "origin/main...HEAD":
+    raise SystemExit("expected foundation policy_range to be preserved")
+if foundation.get("policy_root_allowlist_violations") != 0:
+    raise SystemExit("expected no root allowlist violations in pass payload")
+if foundation.get("policy_content_status") != "pass":
+    raise SystemExit("expected policy_content_status=pass in pass payload")
+if foundation.get("policy_content_consistent") is not True:
+    raise SystemExit("expected policy_content_consistent=true in pass payload")
+if statuses.get("foundation_policy_content") != "pass":
+    raise SystemExit("expected statuses.foundation_policy_content=pass")
+if statuses.get("foundation_policy_content_consistency") != "pass":
+    raise SystemExit("expected statuses.foundation_policy_content_consistency=pass")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out /tmp/build-docs-compliance-summary-pass-stdout.json >/tmp/build-docs-compliance-summary-pass-stdout.out 2>&1
+grep -q "policy_content=pass" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "policy_content_consistency_status=pass" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "policy_content_consistent=true" /tmp/build-docs-compliance-summary-pass-stdout.out
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-inconsistent.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$INCONSISTENT_OUT" || true
+
+python3 - "$INCONSISTENT_OUT" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+if payload.get("overall_status") != "fail":
+    raise SystemExit("expected overall_status=fail for inconsistent foundation policy content")
+foundation = payload.get("foundation_gates", {})
+statuses = payload.get("statuses", {})
+if foundation.get("policy_content_status") != "fail":
+    raise SystemExit("expected policy_content_status=fail when content_errors are present")
+if foundation.get("policy_content_consistent") is not False:
+    raise SystemExit("expected policy_content_consistent=false for inconsistent input")
+if statuses.get("foundation_policy_content") != "fail":
+    raise SystemExit("expected statuses.foundation_policy_content=fail for inconsistent input")
+if statuses.get("foundation_policy_content_consistency") != "fail":
+    raise SystemExit("expected statuses.foundation_policy_content_consistency=fail for inconsistent input")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \

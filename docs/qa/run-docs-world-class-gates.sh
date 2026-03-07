@@ -129,7 +129,7 @@ fi
 
 run_step "verify-docs-policy" ./docs/qa/verify-docs-policy.sh --range "origin/main...HEAD"
 run_step "verify-repo-structure" ./scripts/qa/verify-repo-structure.sh
-run_step "verify-docs-foundation-gates" ./docs/qa/verify-docs-foundation-gates.sh --summary-json "$DOCS_FOUNDATION_SUMMARY"
+run_step "verify-docs-foundation-gates" ./docs/qa/verify-docs-foundation-gates.sh --policy-range "origin/main...HEAD" --summary-json "$DOCS_FOUNDATION_SUMMARY"
 run_step "verify-doc-command-ref-baseline" ./docs/qa/verify-doc-command-ref-baseline.sh --summary-json "$DOCS_CMDREF_BASELINE_SUMMARY"
 run_step "verify-doc-command-refs" ./docs/qa/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_COMMAND_REFS_SUMMARY"
 run_step "verify-docs-scorecard-recency" ./docs/qa/verify-docs-scorecard-recency.sh --max-age-days 7 --summary-json "$DOCS_SCORECARD_RECENCY_SUMMARY"

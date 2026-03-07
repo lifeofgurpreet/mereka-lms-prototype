@@ -5,6 +5,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 RANGE_OVERRIDE=""
+SUMMARY_JSON=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -12,13 +13,18 @@ while [[ $# -gt 0 ]]; do
       RANGE_OVERRIDE="${2:?missing value for --range}"
       shift 2
       ;;
+    --summary-json)
+      SUMMARY_JSON="${2:?missing value for --summary-json}"
+      shift 2
+      ;;
     --help|-h)
       cat <<'EOF_HELP'
-Usage: verify-docs-policy.sh [--range <git-diff-range>]
+Usage: verify-docs-policy.sh [--range <git-diff-range>] [--summary-json <path>]
 
 Options:
-  --range <range>  explicit git diff range (example: origin/main...HEAD)
-  --help           show this message
+  --range <range>         explicit git diff range (example: origin/main...HEAD)
+  --summary-json <path>   optional JSON summary output path
+  --help                  show this message
 EOF_HELP
       exit 0
       ;;
@@ -43,6 +49,9 @@ fi
 
 echo "Docs policy range: ${RANGE}"
 
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
 ALLOWLIST=("README.md" "CONTRIBUTING.md" "DOCS_REMEDIATION_PLAN_AND_TRACKER.md" "catalog.json")
 
 is_allowlisted_root_file() {
@@ -57,6 +66,12 @@ is_allowlisted_root_file() {
 }
 
 failures=0
+root_violation_paths=()
+content_status="pass"
+CONTENT_SUMMARY_JSON="$TMP_DIR/content-summary.json"
+cat > "$CONTENT_SUMMARY_JSON" <<'EOF_CONTENT_SUMMARY'
+{"status":"pass","files_checked":0,"errors":[]}
+EOF_CONTENT_SUMMARY
 
 echo "Check 1/4: root allowlist for newly added docs root files"
 while IFS=$'\t' read -r status path1 path2; do
@@ -74,6 +89,7 @@ while IFS=$'\t' read -r status path1 path2; do
     if ! is_allowlisted_root_file "$base"; then
       echo "FAIL: non-allowlisted docs root addition: $candidate"
       failures=$((failures + 1))
+      root_violation_paths+=("$candidate")
     fi
   fi
 done < <(git diff --name-status "$RANGE" -- docs/)
@@ -87,13 +103,15 @@ echo "Changed markdown files in range: ${#changed_md[@]}"
 
 echo "Check 2/4 + 3/4 + 4/4: canonical metadata, superseded pointers, broken links"
 if [[ "${#changed_md[@]}" -gt 0 ]]; then
-  python3 - "$REPO_ROOT" "${changed_md[@]}" <<'PY'
+  if ! python3 - "$REPO_ROOT" "$CONTENT_SUMMARY_JSON" "${changed_md[@]}" <<'PY'
 import re
 import sys
+import json
 from pathlib import Path
 
 repo = Path(sys.argv[1])
-files = [Path(p) for p in sys.argv[2:] if (repo / p).exists()]
+summary_path = Path(sys.argv[2])
+files = [Path(p) for p in sys.argv[3:] if (repo / p).exists()]
 
 link_re = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 
@@ -158,19 +176,74 @@ for rel in files:
     all_errors += check_links(rel, text)
 
 if all_errors:
+    summary_path.write_text(
+        json.dumps({"status": "fail", "files_checked": len(files), "errors": all_errors}, indent=2),
+        encoding="utf-8",
+    )
     print("DOCS_POLICY_ERRORS")
     for e in all_errors:
         print(f"- {e}")
     sys.exit(1)
 
+summary_path.write_text(
+    json.dumps({"status": "pass", "files_checked": len(files), "errors": []}, indent=2),
+    encoding="utf-8",
+)
 print("DOCS_POLICY_OK")
 PY
+  then
+    content_status="fail"
+  fi
 else
   echo "No changed markdown docs in scope."
 fi
 
+status="pass"
+if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]]; then
+  status="fail"
+fi
+
+if [[ -n "$SUMMARY_JSON" ]]; then
+  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+out_path = Path(sys.argv[1])
+range_value = sys.argv[2]
+root_allowlist_violations = int(sys.argv[3])
+content_status = sys.argv[4]
+changed_markdown_files = int(sys.argv[5])
+content_summary_path = Path(sys.argv[6])
+
+content_summary = {"status": "pass", "files_checked": 0, "errors": []}
+if content_summary_path.exists():
+    content_summary = json.loads(content_summary_path.read_text(encoding="utf-8"))
+
+overall_status = "pass"
+if root_allowlist_violations > 0 or content_status != "pass":
+    overall_status = "fail"
+
+payload = {
+    "status": overall_status,
+    "range": range_value,
+    "root_allowlist_violations": root_allowlist_violations,
+    "changed_markdown_files": changed_markdown_files,
+    "content_status": content_summary.get("status", content_status),
+    "content_files_checked": content_summary.get("files_checked", 0),
+    "content_errors": content_summary.get("errors", []),
+}
+out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+PY
+fi
+
 if [[ "$failures" -gt 0 ]]; then
   echo "Docs policy failed with ${failures} root allowlist violation(s)."
+fi
+if [[ "$content_status" = "fail" ]]; then
+  echo "Docs policy failed due to canonical metadata/superseded/link errors."
+fi
+if [[ "$status" = "fail" ]]; then
   exit 1
 fi
 

@@ -121,6 +121,12 @@ def main() -> int:
     foundation_status = _normalized_status(_status_from_scorecard(foundation))
     foundation_policy_status = _normalized_status(str(foundation.get("policy_status", "unknown")))
     foundation_repo_status = _normalized_status(str(foundation.get("repo_structure_status", "unknown")))
+    foundation_policy_content_source_status = _normalized_status(str(foundation.get("policy_content_status", "unknown")))
+    foundation_policy_content_errors = foundation.get("policy_content_errors", [])
+    foundation_policy_content_status = foundation_policy_content_source_status
+    if foundation_policy_content_errors and foundation_policy_content_status == "pass":
+        foundation_policy_content_status = "fail"
+    policy_content_consistent = foundation_policy_content_status == foundation_policy_content_source_status
     cmdref_baseline_status = _normalized_status(_status_from_scorecard(cmdref_baseline))
     catalog_status = _status_from_catalog(catalog)
     cmdref_status = _normalized_status(_status_from_cmdref(cmdref))
@@ -140,6 +146,8 @@ def main() -> int:
         "foundation_gates": foundation_status,
         "foundation_policy": foundation_policy_status,
         "foundation_repo_structure": foundation_repo_status,
+        "foundation_policy_content": foundation_policy_content_status,
+        "foundation_policy_content_consistency": "pass" if policy_content_consistent else "fail",
         "command_reference_baseline": cmdref_baseline_status,
         "link_integrity": link_integrity_status,
         "command_references": cmdref_status,
@@ -177,6 +185,12 @@ def main() -> int:
             "status": foundation_status,
             "policy_status": foundation_policy_status,
             "repo_structure_status": foundation_repo_status,
+            "policy_range": foundation.get("policy_range", ""),
+            "policy_root_allowlist_violations": foundation.get("policy_root_allowlist_violations", 0),
+            "policy_changed_markdown_files": foundation.get("policy_changed_markdown_files", 0),
+            "policy_content_status": foundation_policy_content_status,
+            "policy_content_consistent": policy_content_consistent,
+            "policy_content_errors": foundation_policy_content_errors,
         },
         "command_reference_baseline": {
             "status": cmdref_baseline_status,
@@ -266,6 +280,9 @@ def main() -> int:
         "DOCS_COMPLIANCE_SUMMARY "
         f"overall_status={terminal_status} "
         f"foundation={foundation_status} policy={foundation_policy_status} repo_structure={foundation_repo_status} "
+        f"policy_content={foundation_policy_content_status} "
+        f"policy_content_consistency_status={statuses['foundation_policy_content_consistency']} "
+        f"policy_content_consistent={str(policy_content_consistent).lower()} "
         f"cmdref_baseline={cmdref_baseline_status} "
         f"catalog={catalog_status} link_integrity={link_integrity_status} cmdref={cmdref_status} "
         f"scorecard={scorecard_status} trend={comparison_status} "
