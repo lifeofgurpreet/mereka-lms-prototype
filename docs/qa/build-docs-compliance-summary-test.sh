@@ -193,6 +193,21 @@ cat > "$ROOT_DIR/cmdref-invalid-shape.json" <<'EOF_JSON'
 }
 EOF_JSON
 
+cat > "$ROOT_DIR/cmdref-mixed-list.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": 1,
+  "baseline_enabled": false,
+  "baseline_entries": 0,
+  "total_candidates": 1,
+  "candidate_sources": {
+    "inline_code": 1
+  },
+  "missing_references": 1,
+  "missing": [123, "docs/example.md: missing x", true, "  "]
+}
+EOF_JSON
+
 cat > "$ROOT_DIR/cmdref-baseline-invalid-shape.json" <<'EOF_JSON'
 {
   "status": "pass",
@@ -541,6 +556,32 @@ if baseline.get("duplicates") != [] or baseline.get("missing") != [] or baseline
 link_integrity = payload.get("link_integrity", {})
 if link_integrity.get("broken") != []:
     raise SystemExit("expected non-list broken links field to normalize to []")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-mixed-list.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$ROOT_DIR/summary-mixed-list.json"
+
+python3 - "$ROOT_DIR/summary-mixed-list.json" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+missing = payload.get("command_refs", {}).get("missing", [])
+if missing != ["123", "docs/example.md: missing x", "True"]:
+    raise SystemExit("expected mixed-type missing list items to normalize to non-empty strings")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
