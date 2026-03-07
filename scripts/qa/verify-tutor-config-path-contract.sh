@@ -6,7 +6,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 PASS=0
 FAIL=0
@@ -40,15 +40,26 @@ STALE_PATHS=(
   "infrastructure/tutor/config.yml.example"
 )
 
+TMP_OUT="$(mktemp -t tutor-config-path-contract.XXXXXX)"
+trap 'rm -f "$TMP_OUT"' EXIT
+
+SCAN_PATHS=()
+for path in docs specs README.md AGENTS.md; do
+  [[ -e "$REPO_ROOT/$path" ]] && SCAN_PATHS+=("$REPO_ROOT/$path")
+done
+
 for stale in "${STALE_PATHS[@]}"; do
-  if rg -n --glob 'docs/**' --glob 'specs/**' --glob 'README.md' --glob 'AGENTS.md' "$stale" "$REPO_ROOT" >/tmp/tutor-config-path-contract.out 2>/dev/null; then
+  if ((${#SCAN_PATHS[@]} == 0)); then
+    pass "No docs/spec paths found to scan for stale references"
+    continue
+  fi
+  if rg -n "$stale" "${SCAN_PATHS[@]}" >"$TMP_OUT" 2>/dev/null; then
     fail "Stale Tutor config path found: $stale"
-    sed 's/^/    /' /tmp/tutor-config-path-contract.out
+    sed 's/^/    /' "$TMP_OUT"
   else
     pass "No stale references to $stale in docs/specs"
   fi
 done
-rm -f /tmp/tutor-config-path-contract.out
 
 echo ""
 echo "=== Summary ==="

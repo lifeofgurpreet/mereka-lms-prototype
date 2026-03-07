@@ -9617,7 +9617,7 @@
       "mutability": "mutating",
       "owner": "sre-security",
       "path": "scripts/qa/verify-no-hardcoded-secrets.sh",
-      "reference_count": 19,
+      "reference_count": 20,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15523,7 +15523,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-config-path-contract.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
