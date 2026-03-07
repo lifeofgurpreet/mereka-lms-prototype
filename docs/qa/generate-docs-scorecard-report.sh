@@ -295,6 +295,7 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 - verify-doc-catalog-health.py (summary + freshness gate)
 - build-docs-scorecard.py (min-score gate)
 - verify-doc-command-refs.sh (command/path references)
+- verify-doc-link-integrity.sh (broken-doc-link references)
 - compare-docs-scorecard-to-base.sh (base trend + regression threshold)
 - build-docs-compliance-summary.py (consolidated status)
 
@@ -325,6 +326,7 @@ cat > "$QUALITY_REPORT_FILE" <<EOF_QUALITY
 | \`docs/qa/verify-docs-policy.sh\` | ${dict[status_foundation_policy_content]:-unknown} | foundation policy metrics | consistency_status=${dict[status_foundation_policy_content_consistency]:-unknown}, consistency_detail=${dict[foundation_policy_content_consistency_detail]:-unknown}, consistency_aligned=${dict[foundation_policy_content_consistency_aligned]:-unknown}, range=${dict[foundation_policy_range]:-n/a}, root_allowlist_violations=${dict[foundation_policy_root_allowlist_violations]:-0}, consistent=${dict[foundation_policy_content_consistent]:-unknown}, content_errors=${dict[foundation_policy_content_errors]:-0} |
 | \`docs/qa/verify-doc-command-ref-baseline.sh\` | ${dict[status_cmdref_baseline]:-unknown} | baseline summary | baseline file integrity contract |
 | \`docs/qa/verify-doc-command-refs.sh\` | ${dict[status_cmdref]:-unknown} | command refs summary | docs command/path references, files=${dict[files_checked]:-0}, candidates=${dict[total_candidates]:-0}, missing_refs=${dict[missing_references]:-0} |
+| \`docs/qa/verify-doc-link-integrity.sh\` | ${dict[status_link_integrity]:-unknown} | link integrity summary | files=${dict[link_integrity_files_checked]:-0}, broken_links=${dict[link_integrity_broken_links]:-0} |
 | \`docs/qa/verify-docs-scorecard-recency.sh\` | ${dict[status_recency]:-unknown} | scorecard recency summary | max-age-days contract |
 | \`docs/qa/verify-docs-scorecard-report-consistency.sh\` | ${dict[status_consistency]:-unknown} | consistency summary | filename/title date contract |
 | \`docs/qa/verify-docs-scorecard-head-freshness.sh\` | ${dict[status_head_freshness]:-unknown} | head freshness summary | latest report aligned with HEAD date |
