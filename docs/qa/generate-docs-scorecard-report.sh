@@ -216,6 +216,7 @@ import sys
 payload = json.load(open(sys.argv[1], encoding='utf-8'))
 statuses = payload.get("statuses", {})
 foundation = payload.get("foundation_gates", {})
+foundation_alignment_status = statuses.get('foundation_policy_content_alignment', 'unknown')
 print(f"compliance_overall={payload.get('overall_status', 'unknown')}")
 print(f"status_foundation_gates={statuses.get('foundation_gates', 'unknown')}")
 print(f"status_foundation_policy={statuses.get('foundation_policy', 'unknown')}")
@@ -239,7 +240,7 @@ print(f"foundation_policy_root_allowlist_violations={foundation.get('policy_root
 print(f"foundation_policy_changed_markdown_files={foundation.get('policy_changed_markdown_files', 0)}")
 print(f"foundation_policy_content_status={foundation.get('policy_content_status', 'unknown')}")
 print(f"foundation_policy_content_consistency_detail={foundation.get('policy_content_consistency_status', 'unknown')}")
-print(f"foundation_policy_content_consistency_aligned={str(statuses.get('foundation_policy_content_consistency', 'unknown') == foundation.get('policy_content_consistency_status', 'unknown')).lower()}")
+print(f"foundation_policy_content_consistency_aligned={str(foundation_alignment_status == 'pass').lower()}")
 print(f"foundation_policy_content_consistent={str(foundation.get('policy_content_consistent', True)).lower()}")
 print(f"foundation_policy_content_errors={len(foundation.get('policy_content_errors', []))}")
 PY
