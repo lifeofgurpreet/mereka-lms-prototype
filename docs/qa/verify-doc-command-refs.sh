@@ -87,12 +87,19 @@ if ((${#FILES[@]} == 0)); then
   echo "No docs files to validate."
   if [ -n "$SUMMARY_JSON" ]; then
     mkdir -p "$(dirname "$SUMMARY_JSON")"
-    cat > "$SUMMARY_JSON" <<'EOF_JSON'
+    cat > "$SUMMARY_JSON" <<EOF_JSON
 {
   "files_checked": 0,
-  "baseline_enabled": false,
-  "baseline_entries": 0,
+  "baseline_enabled": $([ "$INCLUDE_BASELINE" -eq 1 ] && echo "true" || echo "false"),
+  "baseline_entries": ${BASELINE_ENTRIES},
   "total_candidates": 0,
+  "candidate_sources": {
+    "inline_code": 0,
+    "shell_block": 0,
+    "markdown_link": 0,
+    "markdown_autolink": 0,
+    "markdown_refdef": 0
+  },
   "missing_references": 0,
   "status": "pass",
   "missing": []
@@ -130,6 +137,31 @@ files = [
 
 if not files:
     print("DOCS_CMDREF_OK (0 files to check)")
+    if summary_path:
+        Path(summary_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(summary_path).write_text(
+            json.dumps(
+                {
+                    "files_checked": 0,
+                    "baseline_enabled": baseline_enabled,
+                    "baseline_entries": baseline_entries,
+                    "total_candidates": 0,
+                    "candidate_sources": {
+                        "inline_code": 0,
+                        "shell_block": 0,
+                        "markdown_link": 0,
+                        "markdown_autolink": 0,
+                        "markdown_refdef": 0,
+                    },
+                    "missing_references": 0,
+                    "status": "pass",
+                    "missing": [],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
     raise SystemExit(0)
 
 inline_code_re = re.compile(r"`([^`]+)`")
