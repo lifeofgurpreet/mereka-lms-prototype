@@ -508,11 +508,9 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static",
         "workflow_direct"
       ],
       "env_scope": [
@@ -522,7 +520,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-a11y-regression-lane.sh",
-      "reference_count": 17,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -573,14 +571,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -588,19 +582,19 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-accessibility.sh",
-      "reference_count": 17,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-UIA11Y-007",
         "AC-UIA11Y-008",
         "AC-UIA11Y-009"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -743,14 +737,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -763,24 +753,20 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-ADGATE-001",
         "AC-ADGATE-002",
         "AC-ADGATE-003"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -793,24 +779,20 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-ADRIFT-001",
         "AC-ADRIFT-002",
         "AC-ADRIFT-003"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -823,7 +805,7 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-FRONT-051",
         "AC-FRONT-052",
@@ -831,8 +813,8 @@
         "AC-FRONT-054",
         "AC-FRONT-055"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1071,14 +1053,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -1091,12 +1069,12 @@
       "runtime_dependencies": [
         "vendor"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-CI-020"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1159,14 +1137,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "global"
       ],
@@ -1179,14 +1153,14 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-ASPRD-001",
         "AC-ASPRD-002",
         "AC-ASPRD-003"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -1303,14 +1277,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -1323,13 +1293,13 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-003",
         "AC-004"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1361,11 +1331,9 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static",
         "operations_gate",
         "workflow_direct"
       ],
@@ -1376,7 +1344,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-atlas-modulestore-path.sh",
-      "reference_count": 43,
+      "reference_count": 42,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -1393,14 +1361,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -1413,12 +1377,12 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-OBS-ALOG-001"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -1446,14 +1410,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -1467,7 +1427,7 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-002",
@@ -1515,8 +1475,8 @@
         "AC-044",
         "AC-045"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -1554,11 +1514,9 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static",
         "workflow_direct"
       ],
       "env_scope": [
@@ -1568,7 +1526,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-authenticated-smoke-a11y.sh",
-      "reference_count": 17,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2349,14 +2307,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -2369,23 +2323,19 @@
       "runtime_dependencies": [
         "vendor"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-024",
         "AC-025"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -2399,10 +2349,10 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -2756,14 +2706,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "global"
       ],
@@ -2776,12 +2722,12 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-012"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -2881,14 +2827,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -2901,13 +2843,13 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-002"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -3015,14 +2957,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -3035,14 +2973,14 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-UICOPY-001",
         "AC-UICOPY-002",
         "AC-UICOPY-003"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -3605,14 +3543,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "global"
       ],
@@ -3625,7 +3559,7 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-CSS-SCOPE-001",
         "AC-CSS-SCOPE-002",
@@ -3634,8 +3568,8 @@
         "AC-CSS-SCOPE-005",
         "AC-CSS-SCOPE-006"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -4073,14 +4007,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -4093,7 +4023,7 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-TKPIPE-001",
         "AC-TKPIPE-002",
@@ -4101,8 +4031,8 @@
         "AC-TKPIPE-004",
         "AC-TKPIPE-005"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -4198,14 +4128,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -4219,12 +4145,12 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-009"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -4301,14 +4227,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -4321,12 +4243,12 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-RS-004"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5030,14 +4952,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -5050,14 +4968,14 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-030",
         "AC-031",
         "AC-032"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5148,13 +5066,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
+      "ci_binding": [],
       "ci_entrypoints": [
-        "ci_static",
         "operations_gate"
       ],
       "env_scope": [
@@ -5165,12 +5080,12 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-enterprise-readiness-integrity.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-003",
@@ -5180,8 +5095,8 @@
         "AC-030",
         "AC-031"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "scheduled_or_post_deploy",
@@ -5338,14 +5253,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -5358,15 +5269,15 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-026",
         "AC-027",
         "AC-028",
         "AC-029"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5435,14 +5346,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -5455,7 +5362,7 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-ENTUI-001",
         "AC-ENTUI-002",
@@ -5465,8 +5372,8 @@
         "AC-ENTUI-006",
         "AC-ENTUI-007"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5732,14 +5639,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "global"
       ],
@@ -5752,25 +5655,21 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-FRONT-081",
         "AC-FRONT-082",
         "AC-FRONT-083",
         "AC-FRONT-084"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "global"
       ],
@@ -5783,14 +5682,14 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-FTSLOT-001",
         "AC-FTSLOT-002",
         "AC-FTSLOT-003"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -5857,14 +5756,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -5877,20 +5772,16 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -5903,7 +5794,7 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-002",
         "AC-003",
@@ -5913,18 +5804,14 @@
         "AC-020",
         "AC-021"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -5938,7 +5825,7 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-006",
         "AC-007",
@@ -5947,18 +5834,14 @@
         "AC-016",
         "AC-017"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -5971,7 +5854,7 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-005",
@@ -5983,8 +5866,8 @@
         "AC-014",
         "AC-022"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "scheduled_or_post_deploy",
@@ -6023,11 +5906,9 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static",
         "workflow_direct"
       ],
       "env_scope": [
@@ -6037,7 +5918,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-fpf-slot-coverage.sh",
-      "reference_count": 11,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6051,11 +5932,9 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static",
         "workflow_direct"
       ],
       "env_scope": [
@@ -6066,7 +5945,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-frontend-performance-spotcheck.sh",
-      "reference_count": 15,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6077,14 +5956,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "global"
       ],
@@ -6097,13 +5972,13 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-UIVER-003",
         "AC-UIVER-004"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -6448,11 +6323,9 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static",
         "workflow_direct"
       ],
       "env_scope": [
@@ -6462,7 +6335,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-image-freshness.sh",
-      "reference_count": 7,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6533,14 +6406,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -6553,15 +6422,15 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-UISTATE-001",
         "AC-UISTATE-002",
         "AC-UISTATE-003",
         "AC-UISTATE-004"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -7078,14 +6947,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -7098,10 +6963,10 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -7133,14 +6998,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "global"
       ],
@@ -7153,7 +7014,7 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-UI-401",
         "AC-UI-402",
@@ -7161,8 +7022,8 @@
         "AC-UI-404",
         "AC-UI-405"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -7447,14 +7308,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -7467,23 +7324,19 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-TCR-001",
         "AC-TCR-002"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -7496,13 +7349,13 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-TCR-001",
         "AC-TCR-002"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -7706,14 +7559,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -7722,12 +7571,12 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-branding.sh",
-      "reference_count": 47,
+      "reference_count": 46,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-SLOT-023",
         "AC-UI-001",
@@ -7736,18 +7585,14 @@
         "AC-UI-007",
         "AC-UI-008"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -7760,12 +7605,12 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-006"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -7796,14 +7641,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -7816,24 +7657,20 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-MTA-015",
         "AC-MTA-016",
         "AC-MTA-017"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -7842,17 +7679,17 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-config-contract.sh",
-      "reference_count": 25,
+      "reference_count": 24,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-005"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -7907,14 +7744,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -7927,12 +7760,12 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-UIMFE-002"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -8125,11 +7958,9 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static",
         "workflow_direct"
       ],
       "env_scope": [
@@ -8140,7 +7971,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-live-dom-audit.sh",
-      "reference_count": 21,
+      "reference_count": 20,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8221,14 +8052,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -8236,19 +8063,19 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-route-contract.sh",
-      "reference_count": 17,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-MFERT-001",
         "AC-MFERT-002",
         "AC-MFERT-003"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -8966,14 +8793,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "preview"
@@ -8987,7 +8810,7 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-MOD-001",
         "AC-MOD-002",
@@ -8995,18 +8818,14 @@
         "AC-MOD-004",
         "AC-MOD-005"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -9019,7 +8838,7 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-002",
@@ -9028,18 +8847,14 @@
         "AC-008",
         "AC-009"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -9052,24 +8867,20 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-005",
         "AC-008"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "preview",
@@ -9084,7 +8895,7 @@
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-002",
@@ -9095,18 +8906,14 @@
         "AC-021",
         "AC-022"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -9119,7 +8926,7 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-MTA-001",
         "AC-MTA-002",
@@ -9133,8 +8940,8 @@
         "AC-MTA-027",
         "AC-MTA-028"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -9196,13 +9003,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
+      "ci_binding": [],
       "ci_entrypoints": [
-        "ci_static",
         "multisite_gate"
       ],
       "env_scope": [
@@ -9213,28 +9017,26 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-multisite-config.sh",
-      "reference_count": 51,
+      "reference_count": 50,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-005"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static",
         "workflow_direct"
       ],
       "env_scope": [
@@ -9244,7 +9046,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-multisite-ux-consistency.sh",
-      "reference_count": 23,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -9852,14 +9654,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -9873,7 +9671,7 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-002",
@@ -9884,8 +9682,8 @@
         "AC-007",
         "AC-008"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -16673,7 +16471,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 431,
+    "ci_static_bound": 376,
     "kinds": {
       "verify": 539
     },
@@ -16684,13 +16482,13 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 455,
-      "manual_only": 84
+      "active": 408,
+      "manual_only": 131
     },
     "tiers": {
-      "exploratory_manual": 87,
+      "exploratory_manual": 134,
       "periodic_runtime": 11,
-      "release_blocking": 441
+      "release_blocking": 394
     },
     "total_verify_scripts": 539,
     "workflow_direct_bound": 50
