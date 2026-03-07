@@ -104,6 +104,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - canonical coverage %
   - duplicate canonical conflicts
   - broken links in changed scope
+  - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - root policy violations
   - redirect-stub debt
 - [ ] Publish scorecard delta in handoff artifact.
