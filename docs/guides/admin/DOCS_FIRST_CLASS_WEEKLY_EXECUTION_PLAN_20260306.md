@@ -3,7 +3,7 @@
 _Audience: Docs Team • Owner: Docs Lead • Last verified: 2026-03-06 • Status: supporting_
 
 ## Scope
-This is a concrete PR-ready one-week execution package to continue from the current handover state in the docs remediation branch (`docs/docs-remediation-20260306-codex-agent1`).
+This is a concrete PR-ready one-week execution package to continue from the current handover state in the isolated docs worktree branch (`docs/docs-first-class-20260307-followup-7`).
 
 Use this as the next agent’s executable plan, not prose. Each day ends with a small PR and a closed tracker row.
 
@@ -29,11 +29,16 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 
 ## 3) Day 1 — Sync, baseline, and lock scope
 
-### AC-DOCS-101: Pull latest main safely in isolated worktree
+### AC-DOCS-101: Keep branch synced to latest `origin/main` every 20 minutes
 - [ ] `cd /home/gurpreet/projects/k8s/mereka-lms-wt-docs-remediation`
 - [ ] `git fetch origin`
-- [ ] `git checkout docs/docs-remediation-20260306-codex-agent1`
+- [ ] `git checkout docs/docs-first-class-20260307-followup-7`
 - [ ] `git rebase origin/main`
+- [ ] Never `git checkout main` in this worktree; stay on the docs branch.
+- [ ] Repeat fetch+rebase at least every 20 minutes during long editing sessions.
+- [ ] If branch push is rejected after rebase due remote race, run:
+  - `git push --force-with-lease origin docs/docs-first-class-20260307-followup-7`
+    (keeps branch rebased to latest `origin/main` while protecting against blind overwrite)
 - [ ] `./docs/qa/run-docs-world-class-gates.sh --sync --require-sync --max-age-seconds 1200`
 - [ ] `git status --short` is clean
 - [ ] `git rev-list --left-right --count origin/main...HEAD`
@@ -55,6 +60,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] Create a script: `docs/qa/verify-doc-command-refs.sh`
 - [ ] Script must:
   - scan canonical docs for command snippets in fenced code blocks and inline command references;
+  - parse markdown path targets in inline code, markdown links (`[x](path)`), and markdown autolinks (`<path>`);
   - validate each referenced command/script exists in repo (`scripts/**`, `.github/workflows/**`, canonical runbook commands);
   - fail on missing or unresolved references.
 - [ ] Use backlog snapshot for execution:
@@ -84,6 +90,10 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] Add a step/job output block that prints:
   - changed canonical docs count
   - broken links count
+  - link-integrity files checked
+  - command-reference files checked
+  - command-reference total candidates
+  - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - stale canonical count
   - command-reference miss count
 
@@ -97,6 +107,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - canonical coverage %
   - duplicate canonical conflicts
   - broken links in changed scope
+  - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - root policy violations
   - redirect-stub debt
 - [ ] Publish scorecard delta in handoff artifact.

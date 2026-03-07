@@ -124,6 +124,13 @@ cat > "$ROOT_DIR/cmdref-pass.json" <<'EOF_JSON'
   "status": "pass",
   "files_checked": 2,
   "total_candidates": 3,
+  "candidate_sources": {
+    "inline_code": 1,
+    "shell_block": 1,
+    "markdown_link": 1,
+    "markdown_autolink": 0,
+    "markdown_refdef": 0
+  },
   "missing_references": 0,
   "missing": []
 }
@@ -134,6 +141,13 @@ cat > "$ROOT_DIR/cmdref-fail.json" <<'EOF_JSON'
   "status": "fail",
   "files_checked": 2,
   "total_candidates": 3,
+  "candidate_sources": {
+    "inline_code": 1,
+    "shell_block": 2,
+    "markdown_link": 0,
+    "markdown_autolink": 0,
+    "markdown_refdef": 0
+  },
   "missing_references": 1,
   "missing": [
     "docs/example.md: missing /tmp/cmd"
@@ -339,6 +353,7 @@ if payload.get("overall_status") != "pass":
     raise SystemExit("expected overall_status=pass")
 foundation = payload.get("foundation_gates", {})
 statuses = payload.get("statuses", {})
+command_refs = payload.get("command_refs", {})
 if foundation.get("policy_range") != "origin/main...HEAD":
     raise SystemExit("expected foundation policy_range to be preserved")
 if foundation.get("policy_root_allowlist_violations") != 0:
@@ -351,6 +366,12 @@ if statuses.get("foundation_policy_content") != "pass":
     raise SystemExit("expected statuses.foundation_policy_content=pass")
 if statuses.get("foundation_policy_content_consistency") != "pass":
     raise SystemExit("expected statuses.foundation_policy_content_consistency=pass")
+if statuses.get("foundation_policy_content_alignment") != "pass":
+    raise SystemExit("expected statuses.foundation_policy_content_alignment=pass")
+if command_refs.get("candidate_sources", {}).get("inline_code") != 1:
+    raise SystemExit("expected command_refs.candidate_sources.inline_code=1 in pass payload")
+if command_refs.get("candidate_sources", {}).get("shell_block") != 1:
+    raise SystemExit("expected command_refs.candidate_sources.shell_block=1 in pass payload")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
@@ -371,6 +392,8 @@ python3 docs/qa/build-docs-compliance-summary.py \
 grep -q "policy_content=pass" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "policy_content_consistency_status=pass" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "policy_content_consistent=true" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_missing_refs=0" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_candidates_inline=1" /tmp/build-docs-compliance-summary-pass-stdout.out
 
 python3 docs/qa/build-docs-compliance-summary.py \
   --foundation-summary "$ROOT_DIR/foundation-inconsistent.json" \
@@ -405,6 +428,8 @@ if statuses.get("foundation_policy_content") != "fail":
     raise SystemExit("expected statuses.foundation_policy_content=fail for inconsistent input")
 if statuses.get("foundation_policy_content_consistency") != "fail":
     raise SystemExit("expected statuses.foundation_policy_content_consistency=fail for inconsistent input")
+if statuses.get("foundation_policy_content_alignment") != "fail":
+    raise SystemExit("expected statuses.foundation_policy_content_alignment=fail for inconsistent input")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
@@ -430,6 +455,8 @@ import sys
 payload = json.load(open(sys.argv[1], encoding="utf-8"))
 if payload.get("overall_status") != "fail":
     raise SystemExit("expected overall_status=fail")
+if payload.get("command_refs", {}).get("candidate_sources", {}).get("shell_block") != 2:
+    raise SystemExit("expected command_refs.candidate_sources.shell_block=2 in fail payload")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \

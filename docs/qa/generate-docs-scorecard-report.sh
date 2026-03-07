@@ -207,6 +207,22 @@ print(f"cmdref_status={payload.get('status', 'unknown')}")
 print(f"files_checked={payload.get('files_checked', 0)}")
 print(f"total_candidates={payload.get('total_candidates', 0)}")
 print(f"missing_references={payload.get('missing_references', 0)}")
+sources = payload.get('candidate_sources', {})
+print(f"candidates_inline_code={sources.get('inline_code', 0)}")
+print(f"candidates_shell_block={sources.get('shell_block', 0)}")
+print(f"candidates_markdown_link={sources.get('markdown_link', 0)}")
+print(f"candidates_markdown_autolink={sources.get('markdown_autolink', 0)}")
+print(f"candidates_markdown_refdef={sources.get('markdown_refdef', 0)}")
+PY
+)
+
+readarray -t LINK_FIELDS < <(python3 - "$LINK_INTEGRITY_SUMMARY" <<'PY'
+import json
+import sys
+payload = json.load(open(sys.argv[1], encoding='utf-8'))
+print(f"link_integrity_status={payload.get('status', 'unknown')}")
+print(f"link_integrity_files_checked={payload.get('files_checked', 0)}")
+print(f"link_integrity_broken_links={payload.get('broken_links', 0)}")
 PY
 )
 
@@ -216,12 +232,14 @@ import sys
 payload = json.load(open(sys.argv[1], encoding='utf-8'))
 statuses = payload.get("statuses", {})
 foundation = payload.get("foundation_gates", {})
+foundation_alignment_status = statuses.get('foundation_policy_content_alignment', 'unknown')
 print(f"compliance_overall={payload.get('overall_status', 'unknown')}")
 print(f"status_foundation_gates={statuses.get('foundation_gates', 'unknown')}")
 print(f"status_foundation_policy={statuses.get('foundation_policy', 'unknown')}")
 print(f"status_foundation_repo_structure={statuses.get('foundation_repo_structure', 'unknown')}")
 print(f"status_foundation_policy_content={statuses.get('foundation_policy_content', 'unknown')}")
 print(f"status_foundation_policy_content_consistency={statuses.get('foundation_policy_content_consistency', 'unknown')}")
+print(f"status_foundation_policy_content_alignment={statuses.get('foundation_policy_content_alignment', 'unknown')}")
 print(f"status_catalog={statuses.get('catalog_health', 'unknown')}")
 print(f"status_cmdref_baseline={statuses.get('command_reference_baseline', 'unknown')}")
 print(f"status_cmdref={statuses.get('command_references', 'unknown')}")
@@ -237,13 +255,15 @@ print(f"foundation_policy_range={foundation.get('policy_range', '')}")
 print(f"foundation_policy_root_allowlist_violations={foundation.get('policy_root_allowlist_violations', 0)}")
 print(f"foundation_policy_changed_markdown_files={foundation.get('policy_changed_markdown_files', 0)}")
 print(f"foundation_policy_content_status={foundation.get('policy_content_status', 'unknown')}")
+print(f"foundation_policy_content_consistency_detail={foundation.get('policy_content_consistency_status', 'unknown')}")
+print(f"foundation_policy_content_consistency_aligned={str(foundation_alignment_status == 'pass').lower()}")
 print(f"foundation_policy_content_consistent={str(foundation.get('policy_content_consistent', True)).lower()}")
 print(f"foundation_policy_content_errors={len(foundation.get('policy_content_errors', []))}")
 PY
 )
 
 declare -A dict
-for kv in "${SCORECARD_FIELDS[@]}" "${TREND_FIELDS[@]}" "${CATALOG_FIELDS[@]}" "${CMDREF_FIELDS[@]}" "${COMPLIANCE_FIELDS[@]}"; do
+for kv in "${SCORECARD_FIELDS[@]}" "${TREND_FIELDS[@]}" "${CATALOG_FIELDS[@]}" "${CMDREF_FIELDS[@]}" "${LINK_FIELDS[@]}" "${COMPLIANCE_FIELDS[@]}"; do
   key=${kv%%=*}
   value=${kv#*=}
   dict["$key"]="$value"
@@ -267,19 +287,22 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 - Catalog score: ${dict[score]:-0} / threshold ${dict[min_score]:-0} (${dict[score_status]:-unknown})
 - Scorecard trend: base=${dict[base_score]:-0}, current=${dict[current_score]:-0}, drop=${dict[score_drop]:-0}, threshold=${dict[max_allowed_drop]:-0}, status=${dict[trend_status]}
 - Command reference checks: ${dict[cmdref_status]:-unknown} (${dict[files_checked]:-0} files, ${dict[missing_references]:-0} missing)
+- Command reference source breakdown: inline=${dict[candidates_inline_code]:-0}, shell=${dict[candidates_shell_block]:-0}, md_link=${dict[candidates_markdown_link]:-0}, md_autolink=${dict[candidates_markdown_autolink]:-0}, md_refdef=${dict[candidates_markdown_refdef]:-0}
+- Link integrity checks: ${dict[link_integrity_status]:-unknown} (${dict[link_integrity_files_checked]:-0} files, ${dict[link_integrity_broken_links]:-0} broken)
 
 ## Compliance Gate Snapshot
 - Overall compliance status: ${dict[compliance_overall]:-unknown}
 - catalog=${dict[status_catalog]:-unknown}, cmdref_baseline=${dict[status_cmdref_baseline]:-unknown}, cmdref=${dict[status_cmdref]:-unknown}, scorecard=${dict[status_scorecard]:-unknown}, trend=${dict[status_trend]:-unknown}
 - recency=${dict[status_recency]:-unknown}, consistency=${dict[status_consistency]:-unknown}, head_freshness=${dict[status_head_freshness]:-unknown}, timestamp=${dict[status_timestamp]:-unknown}, delta=${dict[status_delta]:-unknown}, drift=${dict[status_drift]:-unknown}
 - foundation_policy_range=${dict[foundation_policy_range]:-n/a}, root_allowlist_violations=${dict[foundation_policy_root_allowlist_violations]:-0}, changed_markdown_files=${dict[foundation_policy_changed_markdown_files]:-0}
-- foundation_policy_content_status=${dict[status_foundation_policy_content]:-unknown}, foundation_policy_content_consistency=${dict[status_foundation_policy_content_consistency]:-unknown}, foundation_policy_content_consistent=${dict[foundation_policy_content_consistent]:-unknown}, foundation_policy_content_errors=${dict[foundation_policy_content_errors]:-0}
+- foundation_policy_content_status=${dict[status_foundation_policy_content]:-unknown}, foundation_policy_content_consistency=${dict[status_foundation_policy_content_consistency]:-unknown}, foundation_policy_content_alignment=${dict[status_foundation_policy_content_alignment]:-unknown}, foundation_policy_content_consistency_detail=${dict[foundation_policy_content_consistency_detail]:-unknown}, foundation_policy_content_consistency_aligned=${dict[foundation_policy_content_consistency_aligned]:-unknown}, foundation_policy_content_consistent=${dict[foundation_policy_content_consistent]:-unknown}, foundation_policy_content_errors=${dict[foundation_policy_content_errors]:-0}
 
 ## Evidence Inputs
 - base_ref=${dict[base_ref]:-origin/main}
 - verify-doc-catalog-health.py (summary + freshness gate)
 - build-docs-scorecard.py (min-score gate)
 - verify-doc-command-refs.sh (command/path references)
+- verify-doc-link-integrity.sh (broken-doc-link references)
 - compare-docs-scorecard-to-base.sh (base trend + regression threshold)
 - build-docs-compliance-summary.py (consolidated status)
 
@@ -306,10 +329,11 @@ cat > "$QUALITY_REPORT_FILE" <<EOF_QUALITY
 
 | Gate | Status | Evidence | Notes |
 |---|---|---|---|
-| \`docs/qa/verify-docs-foundation-gates.sh\` | ${dict[status_foundation_gates]:-unknown} | foundation summary | policy=${dict[status_foundation_policy]:-unknown}, repo_structure=${dict[status_foundation_repo_structure]:-unknown}, policy_content_consistency=${dict[status_foundation_policy_content_consistency]:-unknown} |
-| \`docs/qa/verify-docs-policy.sh\` | ${dict[status_foundation_policy_content]:-unknown} | foundation policy metrics | consistency_status=${dict[status_foundation_policy_content_consistency]:-unknown}, range=${dict[foundation_policy_range]:-n/a}, root_allowlist_violations=${dict[foundation_policy_root_allowlist_violations]:-0}, consistent=${dict[foundation_policy_content_consistent]:-unknown}, content_errors=${dict[foundation_policy_content_errors]:-0} |
+| \`docs/qa/verify-docs-foundation-gates.sh\` | ${dict[status_foundation_gates]:-unknown} | foundation summary | policy=${dict[status_foundation_policy]:-unknown}, repo_structure=${dict[status_foundation_repo_structure]:-unknown}, policy_content_consistency=${dict[status_foundation_policy_content_consistency]:-unknown}, policy_content_alignment=${dict[status_foundation_policy_content_alignment]:-unknown} |
+| \`docs/qa/verify-docs-policy.sh\` | ${dict[status_foundation_policy_content]:-unknown} | foundation policy metrics | consistency_status=${dict[status_foundation_policy_content_consistency]:-unknown}, consistency_detail=${dict[foundation_policy_content_consistency_detail]:-unknown}, consistency_aligned=${dict[foundation_policy_content_consistency_aligned]:-unknown}, range=${dict[foundation_policy_range]:-n/a}, root_allowlist_violations=${dict[foundation_policy_root_allowlist_violations]:-0}, consistent=${dict[foundation_policy_content_consistent]:-unknown}, content_errors=${dict[foundation_policy_content_errors]:-0} |
 | \`docs/qa/verify-doc-command-ref-baseline.sh\` | ${dict[status_cmdref_baseline]:-unknown} | baseline summary | baseline file integrity contract |
-| \`docs/qa/verify-doc-command-refs.sh\` | ${dict[status_cmdref]:-unknown} | command refs summary | docs command/path references |
+| \`docs/qa/verify-doc-command-refs.sh\` | ${dict[status_cmdref]:-unknown} | command refs summary | docs command/path references, files=${dict[files_checked]:-0}, candidates=${dict[total_candidates]:-0}, inline=${dict[candidates_inline_code]:-0}, shell=${dict[candidates_shell_block]:-0}, md_link=${dict[candidates_markdown_link]:-0}, md_autolink=${dict[candidates_markdown_autolink]:-0}, md_refdef=${dict[candidates_markdown_refdef]:-0}, missing_refs=${dict[missing_references]:-0} |
+| \`docs/qa/verify-doc-link-integrity.sh\` | ${dict[status_link_integrity]:-unknown} | link integrity summary | files=${dict[link_integrity_files_checked]:-0}, broken_links=${dict[link_integrity_broken_links]:-0} |
 | \`docs/qa/verify-docs-scorecard-recency.sh\` | ${dict[status_recency]:-unknown} | scorecard recency summary | max-age-days contract |
 | \`docs/qa/verify-docs-scorecard-report-consistency.sh\` | ${dict[status_consistency]:-unknown} | consistency summary | filename/title date contract |
 | \`docs/qa/verify-docs-scorecard-head-freshness.sh\` | ${dict[status_head_freshness]:-unknown} | head freshness summary | latest report aligned with HEAD date |

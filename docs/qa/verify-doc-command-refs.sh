@@ -133,9 +133,14 @@ if not files:
     raise SystemExit(0)
 
 inline_code_re = re.compile(r"`([^`]+)`")
+markdown_link_re = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+markdown_autolink_re = re.compile(r"<([^>\s]+)>")
+markdown_ref_def_re = re.compile(r"^\s*\[[^\]]+\]:\s+(<[^>]+>|[^ ]+)")
 fence_start_re = re.compile(r"^```(.*)$")
 
 ALLOWED_PREFIXES = (
+    "a/",
+    "b/",
     "docs/",
     "scripts/",
     "deploy/",
@@ -221,6 +226,9 @@ def sanitize(token: str) -> str:
     token = token.strip()
     for suffix in (";", ")", "(", "{", "}", "]", "[", "\\", ",", ":", "|", "&", "`"):
         token = token.rstrip(suffix)
+    # Allow markdown/file references with optional line/column suffixes.
+    token = re.sub(r"#L\d+(?:C\d+)?$", "", token)
+    token = re.sub(r":\d+(?::\d+)?$", "", token)
     token = token.lstrip("./") if token.startswith("./") else token
     return token
 
@@ -274,14 +282,19 @@ def candidate_exists(token: str) -> bool:
     if re.search(r"\\{\\{.*\\}\\}", token_path):
         return True
 
-    target = (repo_root / token_path).resolve()
-    try:
-        target.relative_to(repo_root)
-    except ValueError:
-        return False
+    candidate_paths = [token_path]
+    if token_path.startswith(("a/", "b/")):
+        candidate_paths.append(token_path[2:])
 
-    if target.is_file() or target.is_dir():
-        return True
+    for candidate_path in candidate_paths:
+        target = (repo_root / candidate_path).resolve()
+        try:
+            target.relative_to(repo_root)
+        except ValueError:
+            continue
+        if target.is_file() or target.is_dir():
+            return True
+
     for allowed_prefix in ALLOWED_MISSING_PREFIXES:
         if any(c in allowed_prefix for c in ("*", "?", "[")):
             if fnmatch.fnmatch(token_path, allowed_prefix):
@@ -293,6 +306,13 @@ def candidate_exists(token: str) -> bool:
 
 all_missing = []
 total_candidates = 0
+candidate_sources = {
+    "inline_code": 0,
+    "shell_block": 0,
+    "markdown_link": 0,
+    "markdown_autolink": 0,
+    "markdown_refdef": 0,
+}
 
 for path in files:
     rel = path.as_posix()
@@ -324,8 +344,36 @@ for path in files:
                     if not is_repo_path_candidate(token):
                         continue
                     total_candidates += 1
+                    candidate_sources["inline_code"] += 1
                     if not candidate_exists(token):
                         all_missing.append(f"{rel}:{idx}: missing inline path reference `{token}`")
+            for match in markdown_link_re.finditer(raw):
+                target = (match.group(1) or "").strip()
+                if not target:
+                    continue
+                token = sanitize(target.split()[0])
+                if not is_repo_path_candidate(token):
+                    continue
+                total_candidates += 1
+                candidate_sources["markdown_link"] += 1
+                if not candidate_exists(token):
+                    all_missing.append(f"{rel}:{idx}: missing markdown-link path reference `{token}`")
+            for match in markdown_autolink_re.finditer(raw):
+                token = sanitize(match.group(1) or "")
+                if not is_repo_path_candidate(token):
+                    continue
+                total_candidates += 1
+                candidate_sources["markdown_autolink"] += 1
+                if not candidate_exists(token):
+                    all_missing.append(f"{rel}:{idx}: missing markdown-autolink path reference `{token}`")
+            ref_def_match = markdown_ref_def_re.match(raw)
+            if ref_def_match:
+                token = sanitize(ref_def_match.group(1))
+                if is_repo_path_candidate(token):
+                    total_candidates += 1
+                    candidate_sources["markdown_refdef"] += 1
+                    if not candidate_exists(token):
+                        all_missing.append(f"{rel}:{idx}: missing markdown-refdef path reference `{token}`")
             continue
 
         # inside shell block
@@ -353,6 +401,7 @@ for path in files:
             if not is_repo_path_candidate(token):
                 continue
             total_candidates += 1
+            candidate_sources["shell_block"] += 1
             if not candidate_exists(token):
                 all_missing.append(f"{rel}:{idx}: missing shell path reference `{token}`")
 
@@ -374,6 +423,7 @@ if all_missing:
                     "total_candidates": total_candidates,
                     "missing_references": len(all_missing),
                     "status": "fail",
+                    "candidate_sources": candidate_sources,
                     "missing": all_missing,
                 },
                 indent=2,
@@ -394,6 +444,7 @@ if summary_path:
                 "total_candidates": total_candidates,
                 "missing_references": len(all_missing),
                 "status": "pass",
+                "candidate_sources": candidate_sources,
                 "missing": [],
             },
             indent=2,

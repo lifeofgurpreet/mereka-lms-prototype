@@ -148,6 +148,7 @@ def main() -> int:
         "foundation_repo_structure": foundation_repo_status,
         "foundation_policy_content": foundation_policy_content_status,
         "foundation_policy_content_consistency": "pass" if policy_content_consistent else "fail",
+        "foundation_policy_content_alignment": "pass" if policy_content_consistent else "fail",
         "command_reference_baseline": cmdref_baseline_status,
         "link_integrity": link_integrity_status,
         "command_references": cmdref_status,
@@ -206,6 +207,7 @@ def main() -> int:
             "baseline_enabled": cmdref.get("baseline_enabled", False),
             "baseline_entries": cmdref.get("baseline_entries", 0),
             "total_candidates": cmdref.get("total_candidates", 0),
+            "candidate_sources": cmdref.get("candidate_sources", {}),
             "missing_references": cmdref.get("missing_references", 0),
             "missing": cmdref.get("missing", []),
         },
@@ -285,6 +287,13 @@ def main() -> int:
         f"policy_content_consistent={str(policy_content_consistent).lower()} "
         f"cmdref_baseline={cmdref_baseline_status} "
         f"catalog={catalog_status} link_integrity={link_integrity_status} cmdref={cmdref_status} "
+        f"cmdref_missing_refs={cmdref.get('missing_references', 0)} "
+        f"cmdref_candidates_total={cmdref.get('total_candidates', 0)} "
+        f"cmdref_candidates_inline={cmdref.get('candidate_sources', {}).get('inline_code', 0)} "
+        f"cmdref_candidates_shell={cmdref.get('candidate_sources', {}).get('shell_block', 0)} "
+        f"cmdref_candidates_md_link={cmdref.get('candidate_sources', {}).get('markdown_link', 0)} "
+        f"cmdref_candidates_md_autolink={cmdref.get('candidate_sources', {}).get('markdown_autolink', 0)} "
+        f"cmdref_candidates_md_refdef={cmdref.get('candidate_sources', {}).get('markdown_refdef', 0)} "
         f"scorecard={scorecard_status} trend={comparison_status} "
         f"recency={recency_status} consistency={consistency_status} "
         f"head_freshness={head_freshness_status} timestamp={timestamp_status} "
