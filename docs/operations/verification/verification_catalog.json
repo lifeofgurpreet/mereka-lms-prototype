@@ -12332,7 +12332,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-repo-structure.sh",
-      "reference_count": 36,
+      "reference_count": 38,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16467,30 +16467,52 @@
       ],
       "status": "manual_only",
       "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "migration-platform",
+      "path": "scripts/release/verify-zero-pending-migrations.sh",
+      "reference_count": 2,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster"
+      ],
+      "severity": "low",
+      "spec_ids": [],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     }
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 376,
     "kinds": {
-      "verify": 539
+      "verify": 540
     },
     "mutability": {
       "destructive": 8,
       "mutating": 16,
-      "read-only": 515
+      "read-only": 516
     },
     "status_overrides_applied": 8,
     "statuses": {
       "active": 408,
-      "manual_only": 131
+      "manual_only": 132
     },
     "tiers": {
-      "exploratory_manual": 134,
+      "exploratory_manual": 135,
       "periodic_runtime": 11,
       "release_blocking": 394
     },
-    "total_verify_scripts": 539,
+    "total_verify_scripts": 540,
     "workflow_direct_bound": 50
   },
   "version": "1"

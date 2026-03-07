@@ -28,6 +28,10 @@ canonical_entrypoints:
   secrets_sync: scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
   # Deployment contract verification
   deploy_contract: scripts/qa/verify-deployment-contract.sh
+  # Release gate (canonical release verification entrypoint)
+  release_gate: scripts/release/release-gate.sh
+  # Migration preflight (pre-migration safety gate)
+  migration_preflight: scripts/release/migration-preflight.sh
 
 scripts:
 
@@ -603,3 +607,72 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/branding/deploy-branded-image.sh --help 2>&1 || true"
     criticality: release-supporting
+
+  - path: scripts/release/release-gate.sh
+    owner: platform-team
+    purpose: >
+      Canonical release verification entrypoint. Validates kustomize renders,
+      contract bundle, migration registry, deploy contract, and boundary audit.
+    inputs:
+      - "--overlay PATH (default: deploy/k8s/base)"
+      - "--skip-cluster (skip live cluster checks)"
+    outputs:
+      - stdout (gate results)
+      - var/proof/release-gate.json (proof artifact)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/release-gate.sh --skip-cluster"
+    criticality: release-blocking
+
+  - path: scripts/release/migration-preflight.sh
+    owner: platform-team
+    purpose: >
+      Pre-migration safety gate. Verifies cluster access, deployment readiness,
+      image parity, database reachability (including Atlas vs in-cluster FM-001),
+      settings modules, and pending migration counts.
+    inputs:
+      - "--namespace NS (default: mereka-lms)"
+      - "--skip-atlas-check"
+    outputs:
+      - stdout (preflight results)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/migration-preflight.sh --help 2>&1 || true"
+    criticality: release-blocking
+
+  - path: scripts/release/verify-zero-pending-migrations.sh
+    owner: platform-team
+    purpose: >
+      Post-migration proof. Reads migration registry and verifies each
+      schema-owning service reports zero pending migrations.
+    inputs:
+      - "--namespace NS (default: mereka-lms)"
+      - "--json (structured output)"
+    outputs:
+      - stdout (pass/fail per service)
+      - JSON proof artifact (with --json flag)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/verify-zero-pending-migrations.sh --help 2>&1 || true"
+    criticality: release-blocking
+
+  - path: scripts/release/smoke-after-migrate.sh
+    owner: platform-team
+    purpose: >
+      Post-migration smoke verification. Checks health endpoints from
+      contract.json and optional external domain checks.
+    inputs:
+      - "--namespace NS (default: mereka-lms)"
+      - "--domain DOMAIN (optional external checks)"
+      - "--json (structured output)"
+    outputs:
+      - stdout (smoke results)
+      - JSON proof artifact (with --json flag)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/smoke-after-migrate.sh --help 2>&1 || true"
+    criticality: release-blocking
