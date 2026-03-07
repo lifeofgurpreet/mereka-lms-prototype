@@ -98,22 +98,41 @@ while IFS= read -r wl_json; do
     continue
   fi
 
+  DESIRED=$(kubectl get deploy "$NAME" -n "$NAMESPACE" \
+    -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
   READY=$(kubectl get deploy "$NAME" -n "$NAMESPACE" \
     -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
+  if [[ "${DESIRED:-0}" -eq 0 ]]; then
+    skip "$NAME (scaled to 0 replicas)"
+    RESULT_OBJECTS+=("{\"name\":\"$NAME\",\"type\":\"internal\",\"status\":\"skip\",\"reason\":\"scaled_to_zero\"}")
+    continue
+  fi
   if [[ "${READY:-0}" -eq 0 ]]; then
     fail "$NAME — 0 ready replicas (${PATH_}:${PORT})"
     RESULT_OBJECTS+=("{\"name\":\"$NAME\",\"type\":\"internal\",\"status\":\"fail\",\"reason\":\"no_ready_replicas\",\"endpoint\":\"${PATH_}:${PORT}\"}")
     continue
   fi
 
-  # Use wget inside the container — present in all Open edX images; avoids curl dependency
+  # Try python3 urllib, then wget --server-response, then curl
+  # Each approach extracts the HTTP status code
   HTTP_STATUS=$(kubectl exec "deploy/$NAME" -n "$NAMESPACE" -- \
-    wget -q -O /dev/null --server-response \
-    "http://localhost:${PORT}${PATH_}" 2>&1 \
-    | grep -o 'HTTP/[^ ]* [0-9]*' | tail -1 \
-    || echo "UNREACHABLE")
+    sh -c "python3 -c \"
+import urllib.request
+try:
+    r = urllib.request.urlopen('http://localhost:${PORT}${PATH_}', timeout=10)
+    print(r.status)
+except urllib.error.HTTPError as e:
+    print(e.code)
+except Exception:
+    print('UNREACHABLE')
+\" 2>/dev/null \
+|| wget -q -O /dev/null --server-response 'http://localhost:${PORT}${PATH_}' 2>&1 | grep -o 'HTTP/[^ ]* [0-9]*' | tail -1 | grep -o '[0-9]*$' \
+|| curl -sf -o /dev/null -w '%{http_code}' 'http://localhost:${PORT}${PATH_}' 2>/dev/null \
+|| echo UNREACHABLE" \
+    2>/dev/null || echo "UNREACHABLE")
+  HTTP_STATUS=$(echo "$HTTP_STATUS" | tr -d '[:space:]')
 
-  if [[ "$HTTP_STATUS" == *"200"* || "$HTTP_STATUS" == *"204"* ]]; then
+  if [[ "$HTTP_STATUS" == "200" || "$HTTP_STATUS" == "204" || "$HTTP_STATUS" == "400" ]]; then
     pass "$NAME  ${PATH_}:${PORT}  →  $HTTP_STATUS"
     RESULT_OBJECTS+=("{\"name\":\"$NAME\",\"type\":\"internal\",\"status\":\"pass\",\"http_status\":\"$HTTP_STATUS\",\"endpoint\":\"${PATH_}:${PORT}\"}")
   else

@@ -142,7 +142,7 @@ services:
     schema_owner: true
     database: postgresql
     migration_command: "python -m alembic upgrade head"
-    pending_check: "python -m alembic current 2>&1 | grep -c '(head)' || echo 0"
+    pending_check: "cd /app && PYTHONPATH=/app python -m alembic current 2>/dev/null | grep -q '(head)' && echo 0 || echo 1"
     health_endpoint: "/health/"
     health_port: 8080
     release_critical: true
