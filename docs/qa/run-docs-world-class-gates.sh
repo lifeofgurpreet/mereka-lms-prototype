@@ -97,6 +97,14 @@ run_step() {
   log "END ${name}"
 }
 
+validate_base_ref() {
+  if ! git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+    log "FAIL: base ref not found: ${BASE_REF}"
+    return 1
+  fi
+  return 0
+}
+
 enforce_branch_safety() {
   local current_branch
   current_branch=$(git branch --show-current)
@@ -188,11 +196,13 @@ sync_branch_to_base_ref() {
 }
 
 if [ "$DO_SYNC" -eq 1 ]; then
+  validate_base_ref
   enforce_branch_safety
   log "Refreshing from ${BASE_REF} for docs branch safety (strategy=$SYNC_STRATEGY)"
   sync_branch_to_base_ref
   update_sync_state
 else
+  validate_base_ref
   enforce_branch_safety
   check_sync_age
 fi
