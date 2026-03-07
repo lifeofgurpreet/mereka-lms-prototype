@@ -66,6 +66,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - scan canonical docs for command snippets in fenced code blocks and inline command references;
   - parse markdown path targets in inline code, markdown links (`[x](path)`), and markdown autolinks (`<path>`);
   - validate each referenced command/script exists in repo (`scripts/**`, `.github/workflows/**`, canonical runbook commands);
+  - emit summary JSON with stable schema even for zero-scope runs (include `candidate_sources` keys with zero values);
   - fail on missing or unresolved references.
 - [ ] Use backlog snapshot for execution:
   - `docs/archive/reports/cmdref-backlog-snapshot-20260306.md`
