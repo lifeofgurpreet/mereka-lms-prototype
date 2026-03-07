@@ -60,7 +60,7 @@ while [[ $# -gt 0 ]]; do
 Usage: run-docs-world-class-gates.sh [--sync] [--sync-strategy auto|rebase|merge] [--base-ref ref] [--max-age-seconds N] [--state-file path] [--require-sync]
 
 Options:
-  --sync                  run branch sync with origin/main before checks
+  --sync                  run branch sync with --base-ref before checks
   --sync-strategy MODE    sync mode: auto (default), rebase, or merge
   --base-ref ref          base ref for sync/comparison/policy range (default: origin/main)
   --max-age-seconds N     warn if last sync is older than N (default: 1200 = 20 min)
@@ -149,7 +149,7 @@ update_sync_state() {
   printf "%s %s\n" "$(date +%s)" "$head" > "$STATE_FILE"
 }
 
-sync_branch_to_origin_main() {
+sync_branch_to_base_ref() {
   run_step "git fetch origin" git fetch origin
   local dirty=0
   if ! git diff --quiet || ! git diff --cached --quiet; then
@@ -190,7 +190,7 @@ sync_branch_to_origin_main() {
 if [ "$DO_SYNC" -eq 1 ]; then
   enforce_branch_safety
   log "Refreshing from ${BASE_REF} for docs branch safety (strategy=$SYNC_STRATEGY)"
-  sync_branch_to_origin_main
+  sync_branch_to_base_ref
   update_sync_state
 else
   enforce_branch_safety
