@@ -14,7 +14,8 @@
 #   migrate verify   Verify zero pending migrations post-apply
 #   proof            Emit GitOps-conformant evidence envelopes
 #   release-gate     Run the release gate (structural integrity checks)
-#   smoke            Post-migration/post-deploy runtime smoke
+#   smoke [basic]     Post-migration/post-deploy runtime smoke
+#   smoke wave        Service-wave grouped smoke (5 waves: core→workers→services→enterprise→platform)
 #   preflight        Pre-migration safety gate
 #
 # Global options:
@@ -236,10 +237,24 @@ do_release_gate() {
 
 # ── Concern: smoke ────────────────────────────────────────────────────────
 do_smoke() {
-  local args=("--namespace" "$NAMESPACE")
-  [[ "$FORMAT" == "json" ]] && args+=("--json")
-  args+=("${PASSTHROUGH_ARGS[@]}")
-  exec "$REPO_ROOT/scripts/release/smoke-after-migrate.sh" "${args[@]}"
+  case "${SUBCONCERN:-basic}" in
+    basic|"")
+      local args=("--namespace" "$NAMESPACE")
+      [[ "$FORMAT" == "json" ]] && args+=("--json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec "$REPO_ROOT/scripts/release/smoke-after-migrate.sh" "${args[@]}"
+      ;;
+    wave)
+      local args=("--lane" "$CANONICAL_LANE")
+      [[ "$FORMAT" == "json" ]] && args+=("--json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec "$REPO_ROOT/scripts/release/smoke-by-service-wave.sh" "${args[@]}"
+      ;;
+    *)
+      echo "Unknown smoke subconcern: $SUBCONCERN (expected: basic, wave)" >&2
+      exit 1
+      ;;
+  esac
 }
 
 # ── Concern: preflight ────────────────────────────────────────────────────
