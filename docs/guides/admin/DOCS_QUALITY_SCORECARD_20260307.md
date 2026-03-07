@@ -1,8 +1,8 @@
 # Docs Quality Scorecard — 2026-03-07
 
 - Branch: `docs/docs-first-class-20260307-followup-4`
-- Last updated: `2026-03-07T00:28:40Z`
-- Sync status: `origin/main` delta `0 8`
+- Last updated: `2026-03-07T00:38:00Z`
+- Sync status: `origin/main` delta `0 2`
 
 ## One-Week Scorecard Delta (Docs Compliance Gates)
 

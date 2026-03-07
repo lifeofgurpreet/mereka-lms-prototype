@@ -1,5 +1,5 @@
 # Docs Program Scorecard 20260307
-_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified (UTC): 2026-03-07T00:28:40Z • Status: supporting_
+_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified (UTC): 2026-03-07T00:38:00Z • Status: supporting_
 
 ## KPI Snapshot
 - Total docs scope: 991

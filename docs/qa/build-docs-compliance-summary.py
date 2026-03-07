@@ -189,6 +189,8 @@ def main() -> int:
         "command_refs": {
             "status": cmdref_status,
             "files_checked": cmdref.get("files_checked", 0),
+            "baseline_enabled": cmdref.get("baseline_enabled", False),
+            "baseline_entries": cmdref.get("baseline_entries", 0),
             "total_candidates": cmdref.get("total_candidates", 0),
             "missing_references": cmdref.get("missing_references", 0),
             "missing": cmdref.get("missing", []),

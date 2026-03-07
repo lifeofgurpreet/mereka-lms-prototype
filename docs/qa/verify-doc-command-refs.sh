@@ -78,6 +78,11 @@ if ((${#FILES[@]} > 0)); then
   mapfile -t FILES < <(printf "%s\n" "${FILES[@]}" | awk '!seen[$0]++')
 fi
 
+BASELINE_ENTRIES=0
+if [ "$INCLUDE_BASELINE" -eq 1 ]; then
+  BASELINE_ENTRIES=${#BASELINE_FILES[@]}
+fi
+
 if ((${#FILES[@]} == 0)); then
   echo "No docs files to validate."
   if [ -n "$SUMMARY_JSON" ]; then
@@ -85,6 +90,8 @@ if ((${#FILES[@]} == 0)); then
     cat > "$SUMMARY_JSON" <<'EOF_JSON'
 {
   "files_checked": 0,
+  "baseline_enabled": false,
+  "baseline_entries": 0,
   "total_candidates": 0,
   "missing_references": 0,
   "status": "pass",
@@ -96,6 +103,8 @@ EOF_JSON
 fi
 
 DOCS_CMDREF_SUMMARY_PATH="$SUMMARY_JSON" \
+DOCS_CMDREF_BASELINE_ENABLED="$INCLUDE_BASELINE" \
+DOCS_CMDREF_BASELINE_ENTRIES="$BASELINE_ENTRIES" \
 python3 - "$REPO_ROOT" "${FILES[@]}" <<'PY'
 import re
 import shlex
@@ -107,6 +116,8 @@ import fnmatch
 
 repo_root = Path(sys.argv[1])
 summary_path = os.environ.get("DOCS_CMDREF_SUMMARY_PATH", "")
+baseline_enabled = os.environ.get("DOCS_CMDREF_BASELINE_ENABLED", "0") == "1"
+baseline_entries = int(os.environ.get("DOCS_CMDREF_BASELINE_ENTRIES", "0"))
 SKIP_PATH_PREFIXES = (
     "docs/archive/",
 )
@@ -358,6 +369,8 @@ if all_missing:
             json.dumps(
                 {
                     "files_checked": len(files),
+                    "baseline_enabled": baseline_enabled,
+                    "baseline_entries": baseline_entries,
                     "total_candidates": total_candidates,
                     "missing_references": len(all_missing),
                     "status": "fail",
@@ -376,6 +389,8 @@ if summary_path:
         json.dumps(
             {
                 "files_checked": len(files),
+                "baseline_enabled": baseline_enabled,
+                "baseline_entries": baseline_entries,
                 "total_candidates": total_candidates,
                 "missing_references": len(all_missing),
                 "status": "pass",
