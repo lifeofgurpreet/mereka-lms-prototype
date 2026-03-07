@@ -267,6 +267,18 @@ assert_summary_status "$MARKDOWN_REFDEF_PASS_SUMMARY" pass 0
 assert_summary_status "$MARKDOWN_REFDEF_FAIL_SUMMARY" fail 1
 assert_summary_status "$ARCHIVE_SKIP_SUMMARY" pass 0
 
+python3 - "$PASS_SUMMARY" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+summary = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+sources = summary.get("candidate_sources", {})
+required = {"inline_code", "shell_block", "markdown_link", "markdown_autolink", "markdown_refdef"}
+if set(sources.keys()) != required:
+    raise SystemExit(1)
+PY
+
 python3 - "$ARCHIVE_SKIP_SUMMARY" <<'PY'
 import json
 import sys
