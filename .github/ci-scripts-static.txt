@@ -582,3 +582,5 @@ scripts/governance/validate-registry.sh
 scripts/qa/scan-secrets-fast.sh
 scripts/qa/verify-release-readiness.sh --dry-run
 scripts/qa/verify-script-registry-completeness.sh
+scripts/qa/verify-canonical-entrypoints.sh
+scripts/qa/test-verify-canonical-entrypoints.sh
