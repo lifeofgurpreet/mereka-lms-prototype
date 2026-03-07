@@ -3442,7 +3442,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-csp-headers.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -5446,7 +5446,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-evidence-redaction.sh",
-      "reference_count": 15,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6393,7 +6393,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-infisical-env-validation-coverage.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "vendor"
@@ -6526,7 +6526,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-k8s-externalsecrets.sh",
-      "reference_count": 17,
+      "reference_count": 18,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6670,7 +6670,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-k8s-secrets-hygiene.sh",
-      "reference_count": 17,
+      "reference_count": 18,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8513,7 +8513,7 @@
       "mutability": "read-only",
       "owner": "migration-platform",
       "path": "scripts/qa/verify-migration-rollback.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9419,7 +9419,7 @@
       "mutability": "mutating",
       "owner": "sre-security",
       "path": "scripts/qa/verify-no-hardcoded-secrets.sh",
-      "reference_count": 20,
+      "reference_count": 21,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11096,7 +11096,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-gate.sh",
-      "reference_count": 11,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11128,7 +11128,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-health-gate-wiring.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11474,7 +11474,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-promotion-record.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12063,7 +12063,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-bundle.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12151,7 +12151,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-release-gitops-guardrails.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12179,7 +12179,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-release-invocation-guardrail-wiring.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12207,7 +12207,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-promotion-wiring.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12271,7 +12271,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-workflow-invocation.sh",
-      "reference_count": 15,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12521,7 +12521,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-rollback-dry-run.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12906,7 +12906,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secrets-isolation.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -12967,7 +12967,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secrets-management.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12995,7 +12995,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secrets-naming-convention.sh",
-      "reference_count": 16,
+      "reference_count": 17,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13076,7 +13076,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-security-hardening.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13689,7 +13689,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-slsa-provenance.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16367,7 +16367,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-wif-readiness.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
