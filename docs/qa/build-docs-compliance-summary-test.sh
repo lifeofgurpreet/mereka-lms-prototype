@@ -394,6 +394,9 @@ grep -q "policy_content_consistency_status=pass" /tmp/build-docs-compliance-summ
 grep -q "policy_content_consistent=true" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "cmdref_missing_refs=0" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "cmdref_candidates_inline=1" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_candidates_md_link=1" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_candidates_md_autolink=0" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_candidates_md_refdef=0" /tmp/build-docs-compliance-summary-pass-stdout.out
 
 python3 docs/qa/build-docs-compliance-summary.py \
   --foundation-summary "$ROOT_DIR/foundation-inconsistent.json" \
