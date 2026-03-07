@@ -68,6 +68,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - validate each referenced command/script exists in repo (`scripts/**`, `.github/workflows/**`, canonical runbook commands);
   - emit summary JSON with stable schema even for zero-scope runs (include `candidate_sources` keys with zero values);
   - normalize missing `candidate_sources` keys to zero in consolidated compliance outputs.
+  - normalize all `candidate_sources` values to nonnegative integers before emitting compliance/scorecard artifacts.
   - preserve `baseline_enabled=true` / `baseline_entries=<n>` semantics even when effective scan scope is zero after filters.
   - preserve zero-scope schema for nonexistent explicit input paths (`baseline_enabled=false`, `baseline_entries=0`, all source counters zero).
   - verify consolidated compliance output normalizes `candidate_sources` keys to zero even when command-ref summary omits that object.
