@@ -69,11 +69,16 @@ if [[ ! "${MFE_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
   exit 1
 fi
 case "${TARGET_ENV}" in
-  dev|nonprod|staging|production) ;;
+  dev|nonprod|staging|production|prod|rke2-nonprod) ;;
   *)
     echo "Invalid target environment: ${TARGET_ENV}" >&2
     exit 1
     ;;
+esac
+# Normalize to canonical lane names for proof artifacts
+case "${TARGET_ENV}" in
+  rke2-nonprod|nonprod) TARGET_ENV="dev" ;;
+  production) TARGET_ENV="prod" ;;
 esac
 
 mkdir -p "$(dirname "${OUTPUT}")"

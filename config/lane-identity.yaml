@@ -1,0 +1,136 @@
+# Lane Identity Contract — Mereka LMS
+#
+# Canonical mapping between LMS overlay names and GitOps lane identifiers.
+# This is the single source of truth for cross-repo identity alignment.
+#
+# Rules:
+# - All LMS proof artifacts, migration metadata, and release evidence MUST
+#   use the canonical lane names (dev, staging, prod) — not legacy names.
+# - Legacy overlay directory names are retained for backward compatibility
+#   but MUST NOT appear in proof artifacts or cross-repo communication.
+# - The gitops_service_id is what GitOps promotion rules and topology
+#   enforcement use to identify this application.
+#
+# Ref: bbi-infrastructure config/service-topology-catalog.yaml
+# Ref: mereka-lms#723 (Wave 1)
+
+contract_version: "1"
+
+# GitOps identity for this application
+gitops_service_id: mereka-lms
+gitops_scope: env
+
+# Lane mapping: canonical name → LMS overlay directory
+# Canonical names match GitOps exactly: dev, staging, prod
+lanes:
+  dev:
+    overlay_dir: deploy/k8s/overlays/rke2-nonprod
+    namespace: mereka-lms-dev
+    domain: academyv2.mereka.dev
+    legacy_aliases:
+      - local        # developer workstation overlay (not a real lane)
+      - rke2-nonprod # original directory name
+    notes: >
+      The rke2-nonprod overlay is the canonical dev deployment.
+      The local overlay is for developer workstations only and is
+      NOT a lane — it does not participate in promotion or proof.
+
+  staging:
+    overlay_dir: deploy/k8s/overlays/staging
+    namespace: stg-mereka-lms
+    domain: staging.academyv2.mereka.io
+    legacy_aliases: []
+
+  prod:
+    overlay_dir: deploy/k8s/overlays/production
+    namespace: mereka-lms
+    domain: academyv2.mereka.io
+    legacy_aliases:
+      - production   # original directory name
+
+# Internal service names within the LMS application.
+# These are workload-level identities, not top-level GitOps services.
+# They map to contract.json workloads[].name and registry.yaml services[].name.
+internal_services:
+  - name: lms
+    schema_owner: true
+    release_critical: true
+    k8s_kind: Deployment
+    k8s_labels:
+      app.kubernetes.io/name: lms
+      app.kubernetes.io/component: lms
+
+  - name: cms
+    schema_owner: true
+    release_critical: true
+    k8s_kind: Deployment
+    k8s_labels:
+      app.kubernetes.io/name: cms
+      app.kubernetes.io/component: cms
+
+  - name: discovery
+    schema_owner: true
+    release_critical: true
+    k8s_kind: Deployment
+    k8s_labels:
+      app.kubernetes.io/name: discovery
+      app.kubernetes.io/component: discovery
+
+  - name: credentials
+    schema_owner: true
+    release_critical: false
+    k8s_kind: Deployment
+
+  - name: notes
+    schema_owner: true
+    release_critical: false
+    k8s_kind: Deployment
+
+  - name: enterprise-catalog
+    schema_owner: true
+    release_critical: false
+    k8s_kind: Deployment
+
+  - name: enterprise-access
+    schema_owner: true
+    release_critical: false
+    k8s_kind: Deployment
+
+  - name: enterprise-subsidy
+    schema_owner: true
+    release_critical: false
+    k8s_kind: Deployment
+
+  - name: license-manager
+    schema_owner: true
+    release_critical: false
+    k8s_kind: Deployment
+
+  - name: payments-gateway
+    schema_owner: true
+    release_critical: true
+    k8s_kind: Deployment
+    notes: "Uses PostgreSQL + Alembic (not Django migrations)"
+
+  - name: caddy
+    schema_owner: false
+    release_critical: false
+    k8s_kind: Deployment
+    notes: "Reverse proxy, no schema"
+
+  - name: cms-worker
+    schema_owner: false
+    release_critical: false
+    k8s_kind: Deployment
+    notes: "Celery worker for CMS"
+
+  - name: lms-worker
+    schema_owner: false
+    release_critical: false
+    k8s_kind: Deployment
+    notes: "Celery worker for LMS"
+
+# Naming drift resolution
+# These are names that appeared inconsistently; the canonical form is on the left.
+naming_aliases:
+  payments-gateway: ["purchase-gateway"]

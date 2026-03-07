@@ -30,7 +30,7 @@ if payload.get("schema_version") != "1.0.0":
     errors.append("schema_version must be 1.0.0")
 
 check_rx(payload.get("commit_sha"), r"[0-9a-f]{40}", "commit_sha")
-if payload.get("target_environment") not in {"dev", "nonprod", "staging", "production"}:
+if payload.get("target_environment") not in {"dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"}:
     errors.append(f"target_environment invalid: {payload.get('target_environment')}")
 check_rx(payload.get("release_bundle_id"), r"rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z", "release_bundle_id")
 

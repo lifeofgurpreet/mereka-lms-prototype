@@ -378,11 +378,14 @@ normalize_target_env() {
     prod|production)
       echo "production"
       ;;
-    stage|staging)
+    stage|staging|stg)
       echo "staging"
       ;;
+    dev|rke2-nonprod|nonprod)
+      echo "dev"
+      ;;
     *)
-      echo "Unsupported --target-env: $1 (expected production|staging)" >&2
+      echo "Unsupported --target-env: $1 (expected prod|staging|dev)" >&2
       exit 1
       ;;
   esac

@@ -123,6 +123,7 @@ scripts/qa/verify-k8s-repo-boundaries.sh
 scripts/qa/verify-kustomize-no-deprecated-keys.sh
 scripts/qa/verify-kustomize-render.sh
 scripts/qa/verify-deployment-lanes.sh
+scripts/qa/verify-lane-identity.sh
 scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
 scripts/qa/verify-network-policies.sh
 scripts/qa/verify-no-latest-prod-tags.sh

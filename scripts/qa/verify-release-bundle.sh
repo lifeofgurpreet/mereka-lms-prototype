@@ -85,7 +85,7 @@ for image_key in ("openedx", "mfe"):
         errors.append(f"images.{image_key}.digest invalid: {digest}")
 
 target_environment = bundle.get("target_environment")
-if target_environment not in {"dev", "nonprod", "staging", "production"}:
+if target_environment not in {"dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"}:
     errors.append(f"target_environment invalid: {target_environment}")
 
 build = bundle.get("build", {})

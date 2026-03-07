@@ -1,10 +1,17 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "contract_schema_version": "1",
   "base_path": "deploy/k8s/base",
   "local_overlay": "deploy/k8s/overlays/local",
   "namespace": "mereka-lms",
   "min_kustomize_version": "5.0.0",
+
+  "gitops_identity": {
+    "service_id": "mereka-lms",
+    "lane_identity": "config/lane-identity.yaml",
+    "canonical_lanes": ["dev", "staging", "prod"],
+    "_note": "Lane names match GitOps exactly. See config/lane-identity.yaml for overlay mapping."
+  },
 
   "workloads": [
     {
