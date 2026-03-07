@@ -1,0 +1,81 @@
+---
+# Migration Job for CMS / Studio (Open edX platform).
+# Run this Job BEFORE rolling out a new CMS Deployment when Django
+# schema migrations are pending.  Migrations are idempotent.
+#
+# Release sequence:
+#   1. kubectl delete job/cms-migrate -n mereka-lms --ignore-not-found
+#   2. kubectl apply -f deploy/k8s/base/jobs/cms-migrate.yaml -n mereka-lms
+#   3. kubectl wait --for=condition=complete job/cms-migrate -n mereka-lms --timeout=600s
+#   4. kubectl apply -k deploy/k8s/overlays/<env>
+#
+# PARITY RULE: This Job MUST use the same image, settings module,
+# configMaps, secrets, and env vars as the CMS Deployment.
+# If you change the CMS Deployment, update this Job to match.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cms-migrate
+  labels:
+    app.kubernetes.io/name: cms-migrate
+    app.kubernetes.io/component: migration
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cms-migrate
+        app.kubernetes.io/component: migration
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          # Image MUST match the CMS Deployment image.
+          # Overlays pin the real tag via kustomize image transformer.
+          image: ghcr.io/biji-biji-initiative/mereka-lms/openedx:pin-required
+          command: ["python", "manage.py", "cms", "migrate", "--noinput"]
+          env:
+            - name: SERVICE_VARIANT
+              value: cms
+            - name: DJANGO_SETTINGS_MODULE
+              value: cms.envs.tutor.production
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: settings-lms
+              mountPath: /openedx/edx-platform/lms/envs/tutor/
+            - name: settings-cms
+              mountPath: /openedx/edx-platform/cms/envs/tutor/
+            - name: config
+              mountPath: /openedx/config
+      volumes:
+        - name: settings-lms
+          configMap:
+            name: openedx-settings-lms
+        - name: settings-cms
+          configMap:
+            name: openedx-settings-cms
+        - name: config
+          configMap:
+            name: openedx-config

@@ -55,6 +55,8 @@ kubectl apply -k deploy/k8s/overlays/production
 
 | File | Service | Settings module |
 |------|---------|-----------------|
+| `lms-migrate.yaml` | lms | `lms.envs.tutor.production` |
+| `cms-migrate.yaml` | cms | `cms.envs.tutor.production` |
 | `enterprise-catalog-migrate.yaml` | enterprise-catalog | `enterprise_catalog.settings.production` |
 | `enterprise-access-migrate.yaml` | enterprise-access | `enterprise_access.settings.production` |
 | `enterprise-subsidy-migrate.yaml` | enterprise-subsidy | `enterprise_subsidy.settings.production` |
