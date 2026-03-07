@@ -233,6 +233,7 @@ cat > "$ROOT_DIR/docs/archive/cmdref-archive-only.md" <<'EOF_DOC'
 EOF_DOC
 printf '%s\n' "$ROOT_DIR/docs/cmdref-pass.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-pass"
 printf '%s\n' "$ROOT_DIR/docs/cmdref-fail.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-fail"
+printf '%s\n' "$ROOT_DIR/docs/archive/cmdref-archive-only.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-archive"
 
 PASS_SUMMARY=$(run_case pass docs/cmdref-pass.md 0)
 FAIL_SUMMARY=$(run_case fail docs/cmdref-fail.md 1)
@@ -249,6 +250,7 @@ MARKDOWN_AUTOLINK_FAIL_SUMMARY=$(run_case markdown-autolink-fail docs/cmdref-mar
 MARKDOWN_REFDEF_PASS_SUMMARY=$(run_case markdown-refdef-pass docs/cmdref-markdown-refdef-pass.md 0)
 MARKDOWN_REFDEF_FAIL_SUMMARY=$(run_case markdown-refdef-fail docs/cmdref-markdown-refdef-fail.md 1)
 ARCHIVE_SKIP_SUMMARY=$(run_case archive-skip docs/archive/cmdref-archive-only.md 0)
+BASELINE_ARCHIVE_ZERO_SCOPE_SUMMARY=$(run_case baseline-archive-zero-scope docs/archive/cmdref-archive-only.md 0 "" "$ROOT_DIR/docs/.doc-command-ref-baseline-archive")
 
 grep -q "DOCS_CMDREF_ERRORS" /tmp/cmd_ref_test_fail.out
 assert_summary_status "$FAIL_SUMMARY" fail 1
@@ -266,6 +268,7 @@ assert_summary_status "$MARKDOWN_AUTOLINK_FAIL_SUMMARY" fail 1
 assert_summary_status "$MARKDOWN_REFDEF_PASS_SUMMARY" pass 0
 assert_summary_status "$MARKDOWN_REFDEF_FAIL_SUMMARY" fail 1
 assert_summary_status "$ARCHIVE_SKIP_SUMMARY" pass 0
+assert_summary_status "$BASELINE_ARCHIVE_ZERO_SCOPE_SUMMARY" pass 0
 
 python3 - "$PASS_SUMMARY" <<'PY'
 import json
@@ -289,6 +292,21 @@ sources = summary.get("candidate_sources", {})
 if sources.get("inline_code") != 0:
     raise SystemExit(1)
 if sources.get("markdown_refdef") != 0:
+    raise SystemExit(1)
+PY
+
+python3 - "$BASELINE_ARCHIVE_ZERO_SCOPE_SUMMARY" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+summary = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+if summary.get("baseline_enabled") is not True:
+    raise SystemExit(1)
+if summary.get("baseline_entries") != 1:
+    raise SystemExit(1)
+sources = summary.get("candidate_sources", {})
+if any(v != 0 for v in sources.values()):
     raise SystemExit(1)
 PY
 
