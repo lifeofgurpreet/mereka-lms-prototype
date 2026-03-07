@@ -30,6 +30,10 @@ RECONCILEABLE_ORDER_STATUSES = (
 )
 
 
+def _stale_processing_cutoff(now: datetime) -> datetime:
+    return now - timedelta(seconds=max(1, settings.FULFILLMENT_STALE_PROCESSING_SECONDS))
+
+
 async def enqueue_fulfillment_job(
     db: AsyncSession,
     *,
@@ -56,6 +60,11 @@ async def enqueue_fulfillment_job(
         )
         db.add(job)
         return job
+
+    if job.status == FulfillmentJobStatus.processing and not force:
+        # Keep actively processing jobs in place to avoid duplicate concurrent attempts.
+        if job.last_attempt_at is None or job.last_attempt_at > _stale_processing_cutoff(now):
+            return job
 
     if job.status == FulfillmentJobStatus.succeeded and not force:
         return job

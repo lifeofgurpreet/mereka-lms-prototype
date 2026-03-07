@@ -101,6 +101,68 @@ async def test_enqueue_fulfillment_job_requeues_existing_job(mock_db):
 
 
 @pytest.mark.asyncio
+async def test_enqueue_fulfillment_job_keeps_active_processing_job(mock_db):
+    order = _make_order()
+    original_next_attempt = datetime.now(UTC) + timedelta(minutes=5)
+    existing = FulfillmentJob(
+        id=uuid.uuid4(),
+        order_id=order.id,
+        tenant_id=order.tenant_id,
+        status=FulfillmentJobStatus.processing,
+        attempts=2,
+        max_attempts=10,
+        next_attempt_at=original_next_attempt,
+        last_attempt_at=datetime.now(UTC) - timedelta(minutes=2),
+        triggered_by="worker.loop",
+    )
+    mock_db.execute.return_value = _mock_select_result(existing)
+
+    job = await enqueue_fulfillment_job(
+        mock_db,
+        order=order,
+        triggered_by="stripe.checkout.session.completed",
+    )
+
+    assert job.id == existing.id
+    assert job.status == FulfillmentJobStatus.processing
+    assert job.attempts == 2
+    assert job.next_attempt_at == original_next_attempt
+    assert job.triggered_by == "worker.loop"
+    mock_db.add.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_enqueue_fulfillment_job_requeues_stale_processing_job(mock_db):
+    order = _make_order()
+    existing = FulfillmentJob(
+        id=uuid.uuid4(),
+        order_id=order.id,
+        tenant_id=order.tenant_id,
+        status=FulfillmentJobStatus.processing,
+        attempts=3,
+        max_attempts=10,
+        next_attempt_at=datetime.now(UTC) + timedelta(minutes=5),
+        last_attempt_at=datetime.now(UTC) - timedelta(hours=2),
+        triggered_by="worker.loop",
+        last_error="old error",
+    )
+    mock_db.execute.return_value = _mock_select_result(existing)
+
+    job = await enqueue_fulfillment_job(
+        mock_db,
+        order=order,
+        triggered_by="manual.requeue",
+    )
+
+    assert job.id == existing.id
+    assert job.status == FulfillmentJobStatus.pending
+    assert job.attempts == 3
+    assert job.triggered_by == "manual.requeue"
+    assert job.last_error is None
+    mock_db.add.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_claim_next_fulfillment_job_marks_processing(mock_db):
     order = _make_order()
     job = FulfillmentJob(
