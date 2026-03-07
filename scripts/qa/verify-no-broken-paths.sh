@@ -154,6 +154,7 @@ DOC_DIRS=("docs" "specs" "specdocs")
 
 # Build exclude flags for grep
 doc_exclude_flags=(
+  "--include=*.md"
   "--exclude=DEPR.md"
   "--exclude=README.md"
   "--exclude-dir=archive"
@@ -171,7 +172,7 @@ for dep_dir in "${DEPRECATED_DIRS[@]}"; do
     # Only match markdown link destinations: ](path) where path starts with dep_dir/
     check_grep_hits \
       "Docs hyperlink to deprecated ${dep_dir}/" \
-      "${doc_exclude_flags[@]}" --include="*.md" \
+      "${doc_exclude_flags[@]}" \
       -- "\]\(\.?/?(${dep_dir}/)" \
       "${active_doc_dirs[@]}"
   else
@@ -187,7 +188,7 @@ for dep_file in "${DEPRECATED_FILES[@]}"; do
   if [[ "${#active_doc_dirs[@]}" -gt 0 ]]; then
     check_grep_hits \
       "Docs hyperlink to deprecated ${dep_file}" \
-      "${doc_exclude_flags[@]}" --include="*.md" \
+      "${doc_exclude_flags[@]}" \
       -- "\]\([^)]*${dep_file}" \
       "${active_doc_dirs[@]}"
   fi
