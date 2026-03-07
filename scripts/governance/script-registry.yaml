@@ -58,6 +58,7 @@ scripts:
     lanes: [prod]
     proof_command: "bash scripts/infra/canonical-release.sh --check-only"
     criticality: release-blocking
+    entrypoint_role: release  # canonical-entrypoints.yaml workflow: release
 
   - path: scripts/infra/release-openedx-gitops.sh
     owner: platform-team
@@ -85,6 +86,7 @@ scripts:
     lanes: [prod, staging]
     proof_command: "bash scripts/infra/release-openedx-gitops.sh --dry-run --openedx-tag latest --mfe-tag latest 2>&1 | head -5"
     criticality: release-blocking
+    entrypoint_role: promote  # canonical-entrypoints.yaml workflow: promote
 
   - path: scripts/infra/create-release.sh
     owner: platform-team
@@ -247,6 +249,7 @@ scripts:
     lanes: [dev]
     proof_command: "bash scripts/infra/apply-kind-overlay.sh --help 2>&1 || true"
     criticality: release-supporting
+    entrypoint_role: deploy-local-kind  # canonical-entrypoints.yaml workflow: deploy-local-kind
 
   - path: scripts/infra/post-k8s-apply-hook.sh
     owner: platform-team
@@ -380,6 +383,7 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/release/release-gate.sh --skip-cluster 2>&1 | tail -10"
     criticality: release-blocking
+    entrypoint_role: deploy  # canonical-entrypoints.yaml workflow: deploy
 
   # ── Quality Gates & Verification ─────────────────────────────────────────────
 
@@ -624,6 +628,7 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/release/release-gate.sh --skip-cluster"
     criticality: release-blocking
+    entrypoint_role: deploy  # canonical-entrypoints.yaml workflow: deploy
 
   - path: scripts/release/migration-preflight.sh
     owner: platform-team
@@ -641,6 +646,7 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/release/migration-preflight.sh --help 2>&1 || true"
     criticality: release-blocking
+    entrypoint_role: migrate  # canonical-entrypoints.yaml workflow: migrate
 
   - path: scripts/release/verify-zero-pending-migrations.sh
     owner: platform-team
@@ -658,6 +664,7 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/release/verify-zero-pending-migrations.sh --help 2>&1 || true"
     criticality: release-blocking
+    entrypoint_role: migrate-post-verify  # canonical-entrypoints.yaml workflow: migrate-post-verify
 
   - path: scripts/release/smoke-after-migrate.sh
     owner: platform-team
@@ -676,3 +683,28 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/release/smoke-after-migrate.sh --help 2>&1 || true"
     criticality: release-blocking
+    entrypoint_role: runtime-validation-post-migrate  # canonical-entrypoints.yaml workflow: runtime-validation-post-migrate
+
+  # ── Runtime Validation ───────────────────────────────────────────────────────
+
+  - path: scripts/infra/verify-deployment.sh
+    owner: platform-team
+    purpose: >
+      Post-deployment verification wrapper. Checks pod + deployment readiness,
+      rollout status for core deployments (lms/cms/caddy), and public auth
+      surface checks. Canonical runtime-validation entrypoint for operators
+      after ArgoCD sync or kind apply.
+    inputs:
+      - --env prod|dev (default: prod)
+      - --namespace NAMESPACE
+      - --context CONTEXT
+      - NAMESPACE (env var)
+      - K8S_CONTEXT (env var)
+    outputs:
+      - stdout (PASS/FAIL per check)
+    side_effects: none  # read-only verification
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/verify-deployment.sh --help 2>&1 | head -5"
+    criticality: release-blocking
+    entrypoint_role: runtime-validation  # canonical-entrypoints.yaml workflow: runtime-validation

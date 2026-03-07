@@ -1,0 +1,260 @@
+# Canonical Entrypoints — Mereka LMS
+# Governance Agent PR2 deliverable.
+#
+# Rule: ONE canonical entrypoint per critical workflow.
+# Every dangerous or release-critical execution path must be registered here.
+#
+# Fields:
+#   workflow          - Logical workflow name (release | migrate | promote |
+#                       publish-image | deploy | runtime-validation)
+#   path              - Repo-relative path to the canonical script or workflow file
+#   owner             - Agent or team that owns this entrypoint
+#   callers           - What invokes this entrypoint (CI workflow name, manual,
+#                       or another script)
+#   status            - canonical | planned | legacy
+#   contract_version  - contract.json version this entrypoint consumes (if any)
+#   proof_artifact    - What proof this entrypoint emits on success
+#   notes             - Rationale, caveats, or migration notes
+#
+# Maintained by: governance-agent
+# Last updated:  2026-03-07
+
+version: "1.0.0"
+
+entrypoints:
+
+  # ── 1. release ────────────────────────────────────────────────────────────────
+  #
+  # The single script that orchestrates a full production release.
+  # Enforces: canonical path/branch, no stale worktrees, image hash cache check.
+  # Delegates to release-openedx-gitops.sh for the actual GitOps write.
+  #
+  # Authoritative path: scripts/infra/canonical-release.sh
+  # scripts/infra/create-release.sh handles semver tagging (git tag + push),
+  # which triggers release.yml, which then calls release-openedx-gitops.sh
+  # directly. canonical-release.sh is the LOCAL operator path; release.yml is
+  # the CI path. Both are registered; canonical-release.sh is the top-level
+  # wrapper for human operators.
+
+  - workflow: release
+    path: scripts/infra/canonical-release.sh
+    owner: platform-team
+    callers:
+      - manual  # human operator on the canonical worktree
+    status: canonical
+    contract_version: null  # does not consume contract.json; delegates to release-openedx-gitops.sh
+    proof_artifact: >
+      stdout release summary; delegates git commit + push proof to
+      release-openedx-gitops.sh; exit code 0 on success
+    notes: >
+      Requires CONFIRM_CANONICAL_RELEASE=CANONICAL_RELEASE and
+      CONFIRM_PUSH_CANONICAL_RELEASE=PUSH_CANONICAL_RELEASE env vars plus
+      ALLOW_PROD_APPLY=1 for production apply. --check-only and --dry-run flags
+      available for safe preflight. The CI equivalent path is release.yml
+      (tag-triggered), which calls release-openedx-gitops.sh directly after
+      image verification. create-release.sh (semver tagging) is the prerequisite
+      that triggers the CI release path.
+
+  # ── 2. migrate ────────────────────────────────────────────────────────────────
+  #
+  # Migrations in this repo are Kubernetes Jobs declared in
+  # deploy/k8s/migrations/registry.yaml (one entry per schema-owning service).
+  # There is no single "run all migrations" shell script — migrations are
+  # applied via kubectl on the K8s Jobs. The governance lifecycle is:
+  #
+  #   migration-preflight.sh  →  kubectl apply Job manifests (external)
+  #   →  verify-zero-pending-migrations.sh
+  #   →  smoke-after-migrate.sh
+  #
+  # The preflight and post-migration gates are canonical.
+
+  - workflow: migrate
+    path: scripts/release/migration-preflight.sh
+    owner: platform-team
+    callers:
+      - manual  # run by operator before applying migration Jobs
+      - release-gate  # scripts/release/release-gate.sh invokes this implicitly
+                      # via migration-registry gate
+    status: canonical
+    contract_version: "1.1.0"  # reads deploy/k8s/contract.json for health endpoints
+    proof_artifact: >
+      stdout PASS/FAIL per preflight check; exit code 0 means safe to proceed
+      with kubectl Job apply
+    notes: >
+      This is the PRE-migration gate. The actual migration execution is a
+      kubectl apply of the Job manifests listed in
+      deploy/k8s/migrations/registry.yaml — there is no single shell script
+      that runs all migrations. After Jobs complete,
+      scripts/release/verify-zero-pending-migrations.sh must be run to confirm
+      zero pending migrations, and scripts/release/smoke-after-migrate.sh for
+      functional smoke verification. --skip-atlas-check bypasses MongoDB Atlas
+      reachability for local/CI use.
+
+  - workflow: migrate-post-verify
+    path: scripts/release/verify-zero-pending-migrations.sh
+    owner: platform-team
+    callers:
+      - manual  # run by operator after migration Jobs complete
+      - release-gate  # migration-registry gate in release-gate.sh
+    status: canonical
+    contract_version: null  # reads deploy/k8s/migrations/registry.yaml directly
+    proof_artifact: >
+      stdout PASS/FAIL per service; JSON proof artifact with --json flag;
+      exit code 0 means zero pending migrations across all schema-owning services
+    notes: >
+      Companion to migration-preflight.sh. Must be run after kubectl Job
+      completion. --json flag produces structured output suitable for
+      evidence archives.
+
+  # ── 3. promote ────────────────────────────────────────────────────────────────
+  #
+  # Image promotion = writing new image digests into the GitOps overlay and
+  # pushing to bbi-infrastructure. The canonical script for this is
+  # scripts/infra/release-openedx-gitops.sh. It is called by both CI
+  # (build-tutor-images.yml, release.yml) and the local canonical-release.sh
+  # wrapper. generate-promotion-record.sh emits the auditable promotion record.
+
+  - workflow: promote
+    path: scripts/infra/release-openedx-gitops.sh
+    owner: platform-team
+    callers:
+      - .github/workflows/build-tutor-images.yml  # update-gitops job
+      - .github/workflows/release.yml              # promote-to-production job
+      - .github/workflows/release-evidence.yml     # evidence-bundle job
+      - scripts/infra/canonical-release.sh         # local operator path
+    status: canonical
+    contract_version: null  # reads deploy/k8s/overlays/production/kustomization.yaml
+    proof_artifact: >
+      Modified deploy/k8s/overlays/production/kustomization.yaml (image tags +
+      digests); git commit pushed to origin; ArgoCD sync triggered;
+      stdout ArgoCD sync status; exit code 0 on success
+    notes: >
+      Requires CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS and
+      CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS.
+      ALLOW_PROD_APPLY=1 required for production. --require-digests flag
+      enforces sha256 digest pinning (mandatory in CI). --verify-runtime
+      flag triggers post-deploy runtime guards. --dry-run is safe for
+      preflight. sync-gitops-prod-image-tags.sh is a narrower tool for
+      cross-repo overlay drift detection only (not the promote entrypoint).
+
+  # ── 4. publish-image ──────────────────────────────────────────────────────────
+  #
+  # The single workflow that builds and publishes container images to GHCR.
+  # This is a CI workflow, not a shell script.
+  # Registry: ghcr.io/biji-biji-initiative/mereka-lms/{openedx,mfe}
+
+  - workflow: publish-image
+    path: .github/workflows/build-tutor-images.yml
+    owner: ci
+    callers:
+      - push to main branch (paths: infrastructure/tutor/**, assets/branding/**)
+      - workflow_dispatch  # manual trigger with optional update_gitops=true
+    status: canonical
+    contract_version: null  # does not consume contract.json
+    proof_artifact: >
+      GHCR image push (ghcr.io/biji-biji-initiative/mereka-lms/openedx:SHA and
+      ghcr.io/biji-biji-initiative/mereka-lms/mfe:SHA); sha256 digest outputs
+      from build-openedx and build-mfe jobs; var/ci/promotion-record.json
+      artifact (when update_gitops=true); exit 0 on success
+    notes: >
+      Uses mereka-k8s-heavy-builders ARC runner (4CPU/12GB + DinD sidecar) for
+      the build jobs. The lint job runs on mereka-k8s-runners. When
+      update_gitops=true and target_environment is set, calls
+      scripts/infra/release-openedx-gitops.sh and emits a promotion record
+      via scripts/infra/generate-promotion-record.sh. Concurrency group
+      prevents concurrent builds on main. build-purchase-gateway.yml is a
+      separate workflow for the purchase-gateway service image.
+
+  # ── 5. deploy ─────────────────────────────────────────────────────────────────
+  #
+  # "Deploy" in this repo is a GitOps operation: ArgoCD syncs the cluster from
+  # bbi-infrastructure. There is no imperative deploy script for production.
+  # For local kind dev clusters, apply-kind-overlay.sh is the entrypoint.
+  # For release readiness (static preflight before any deploy), release-gate.sh
+  # is the canonical gate.
+
+  - workflow: deploy
+    path: scripts/release/release-gate.sh
+    owner: platform-team
+    callers:
+      - manual  # run by operator as pre-deploy gate before GitOps push
+      - release-gate  # self-documenting; this IS the release gate
+    status: canonical
+    contract_version: "1.1.0"  # validates deploy/k8s/contract.json
+    proof_artifact: >
+      stdout PASS/SKIP/FAIL per gate (Kustomize render, deployment contract,
+      migration registry, image pin, secret key completeness, cluster
+      connectivity); var/proof/release-gate.json proof artifact; exit code 0
+      means all gates pass
+    notes: >
+      This is the STATIC pre-deploy gate. It validates that the repo is in a
+      deployable state without touching the cluster. --skip-cluster flag
+      bypasses live K8s checks for CI/offline use. For production, ArgoCD
+      performs the actual deploy after release-openedx-gitops.sh pushes to
+      bbi-infrastructure. For local kind dev, scripts/infra/apply-kind-overlay.sh
+      is the imperative deploy entrypoint. apply-kind-overlay.sh is NOT
+      registered here as it only applies to local dev clusters.
+
+  - workflow: deploy-local-kind
+    path: scripts/infra/apply-kind-overlay.sh
+    owner: platform-team
+    callers:
+      - manual  # local developer deploying to kind-dev cluster
+    status: canonical
+    contract_version: null
+    proof_artifact: >
+      stdout kubectl apply output; exit code 0 means all resources applied
+    notes: >
+      Local kind dev cluster only. Not used for staging or production.
+      Loads the Open edX image into kind nodes then applies the local
+      Kustomize overlay (overlays/local). Production deploys are GitOps-only
+      via ArgoCD.
+
+  # ── 6. runtime-validation ─────────────────────────────────────────────────────
+  #
+  # Post-deploy runtime health verification. Two tiers:
+  #
+  # Tier A — Immediate post-deploy (lightweight, pod-level):
+  #   scripts/infra/verify-deployment.sh
+  #   Called as post-k8s-apply-hook.sh from release orchestration.
+  #
+  # Tier B — Full E2E gate (Playwright + public HTTP, CI-scheduled):
+  #   .github/workflows/post-deploy-e2e.yml
+  #   Triggered by workflow_run on build-tutor-images.yml completion.
+
+  - workflow: runtime-validation
+    path: scripts/infra/verify-deployment.sh
+    owner: platform-team
+    callers:
+      - scripts/infra/post-k8s-apply-hook.sh  # called automatically by release orchestration
+      - manual  # operator can run directly after ArgoCD sync
+    status: canonical
+    contract_version: "1.1.0"  # reads deploy/k8s/contract.json health endpoints implicitly
+    proof_artifact: >
+      stdout PASS/FAIL per check (pod readiness, rollout status, public auth
+      surface); exit code 0 means core runtime healthy
+    notes: >
+      Checks pod + deployment readiness, rollout status for lms/cms/caddy,
+      and public auth surface. Does not print secret values. For post-migration
+      smoke specifically, use scripts/release/smoke-after-migrate.sh. For the
+      full E2E gate (Playwright critical paths), see post-deploy-e2e.yml.
+
+  - workflow: runtime-validation-e2e
+    path: .github/workflows/post-deploy-e2e.yml
+    owner: ci
+    callers:
+      - workflow_run on "Build Tutor Images" (automatic, on success)
+      - workflow_dispatch  # manual trigger with target_url + environment inputs
+    status: canonical
+    contract_version: null  # reads deploy/k8s/contract.json via verify-post-deploy-gate.sh
+    proof_artifact: >
+      GitHub Actions job summary; E2E test results artifact
+      (post-deploy-e2e-<run-id>-<attempt>); exit code 0 means all critical
+      paths pass; scripts/qa/verify-post-deploy-gate.sh --mode online can
+      query last run status via GitHub API
+    notes: >
+      Runs scripts/qa/verify-post-deploy-gate.sh --mode offline (structural
+      check) and Playwright tests against the live LMS URL. Only runs if the
+      triggering build-tutor-images.yml workflow succeeded. Concurrency group
+      prevents parallel E2E runs per environment.
+
