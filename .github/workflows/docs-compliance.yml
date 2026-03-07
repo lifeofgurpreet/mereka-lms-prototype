@@ -21,6 +21,7 @@ on:
       - "docs/qa/verify-docs-foundation-gates-test.sh"
       - "docs/qa/run-docs-world-class-gates.sh"
       - "docs/qa/run-docs-world-class-gates-test.sh"
+      - "docs/qa/verify-docs-compliance-workflow-contract-test.sh"
       - "docs/qa/generate-docs-scorecard-report.sh"
       - "docs/qa/generate-docs-scorecard-report-test.sh"
       - "docs/qa/verify-docs-scorecard-recency.sh"
@@ -557,6 +558,7 @@ PY
             docs/qa/verify-docs-foundation-gates-test.sh \
             docs/qa/run-docs-world-class-gates.sh \
             docs/qa/run-docs-world-class-gates-test.sh \
+            docs/qa/verify-docs-compliance-workflow-contract-test.sh \
             docs/qa/verify-doc-command-ref-baseline.sh \
             docs/qa/verify-doc-command-ref-baseline-test.sh \
             docs/qa/verify-doc-command-refs-test.sh \
@@ -582,6 +584,7 @@ PY
           docs/qa/verify-docs-policy-test.sh
           docs/qa/verify-docs-foundation-gates-test.sh
           docs/qa/run-docs-world-class-gates-test.sh
+          docs/qa/verify-docs-compliance-workflow-contract-test.sh
           docs/qa/verify-doc-command-ref-baseline-test.sh
           docs/qa/verify-doc-command-refs-test.sh
           docs/qa/verify-doc-link-integrity-test.sh
