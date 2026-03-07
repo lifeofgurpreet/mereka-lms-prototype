@@ -249,6 +249,14 @@ do_preflight() {
   exec "$REPO_ROOT/scripts/release/migration-preflight.sh" "${args[@]}"
 }
 
+# ── Concern: topology ─────────────────────────────────────────────────
+do_topology() {
+  local args=("--lane" "$LANE")
+  [[ -n "${NAMESPACE:-}" ]] && args+=("--namespace" "$NAMESPACE")
+  args+=("${PASSTHROUGH_ARGS[@]}")
+  exec "$REPO_ROOT/scripts/qa/verify-topology-selectors.sh" "${args[@]}"
+}
+
 # ── Dispatch ──────────────────────────────────────────────────────────────
 case "$CONCERN" in
   migrate)      do_migrate ;;
@@ -256,8 +264,9 @@ case "$CONCERN" in
   release-gate) do_release_gate ;;
   smoke)        do_smoke ;;
   preflight)    do_preflight ;;
+  topology)     do_topology ;;
   *)
     echo "Unknown concern: $CONCERN" >&2
-    echo "Valid concerns: migrate, proof, release-gate, smoke, preflight" >&2
+    echo "Valid concerns: migrate, proof, release-gate, smoke, preflight, topology" >&2
     exit 1 ;;
 esac
