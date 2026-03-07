@@ -1,10 +1,22 @@
 {
   "version": 1,
+  "mutating_prefixes": [
+    "fix-",
+    "repair-",
+    "cleanup-",
+    "prune-",
+    "retire-",
+    "park-",
+    "unpark-",
+    "sync-",
+    "apply-",
+    "create-",
+    "provision-",
+    "bootstrap-",
+    "rollback-",
+    "load-"
+  ],
   "allowed_scripts": [
-    {
-      "path": "scripts/qa/build-validator-drift-evidence-bundle.sh",
-      "reason": "Evidence bundling may optionally execute seeded defect scripts and therefore is intentionally not read-only."
-    },
     {
       "path": "scripts/qa/fix-admin-login.sh",
       "reason": "Remediation helper script intentionally mutates LMS user state."
@@ -24,38 +36,6 @@
     {
       "path": "scripts/qa/sync-openedx-audit-pr-status.sh",
       "reason": "Synchronization script intentionally writes PR status back to tracker artifacts."
-    },
-    {
-      "path": "scripts/qa/verify-aspects-wiring.sh",
-      "reason": "Runtime verification path performs controlled cluster operations for Aspects wiring checks."
-    },
-    {
-      "path": "scripts/qa/verify-deployment-lanes.sh",
-      "reason": "Lane verification includes controlled mutating probes on deployment overlays."
-    },
-    {
-      "path": "scripts/qa/verify-disaster-recovery.sh",
-      "reason": "DR verification executes restore drill operations by design."
-    },
-    {
-      "path": "scripts/qa/verify-ecommerce-worker-health.sh",
-      "reason": "Worker health check may run mutating recovery probes in runtime mode."
-    },
-    {
-      "path": "scripts/qa/verify-enterprise-mfe-nreum-clean.sh",
-      "reason": "Enterprise cleanup verification includes controlled mutation for stale instrumentation artifacts."
-    },
-    {
-      "path": "scripts/qa/verify-ora2-operations.sh",
-      "reason": "ORA2 operations verification includes mutation-capable maintenance commands."
-    },
-    {
-      "path": "scripts/qa/verify-tenant-hardening.sh",
-      "reason": "Tenant hardening verifier applies runtime guardrail enforcement checks."
-    },
-    {
-      "path": "scripts/qa/verify-xqueue-graders.sh",
-      "reason": "XQueue grader verification may execute mutating probes to validate grader lifecycle."
     }
   ],
   "notes": "Explicit allowlist for scripts/qa entries that are intentionally mutating under the QA namespace."

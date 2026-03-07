@@ -60,10 +60,8 @@
     "scripts/qa/verify-plugin-surface-matrix.sh",
     "scripts/qa/verify-post-deploy-smoke.sh",
     "scripts/qa/verify-proctoring-advanced.sh",
-    "scripts/qa/verify-qa-readonly-contract.sh",
     "scripts/qa/verify-regression-detection.sh",
     "scripts/qa/verify-restore-drill.sh",
-    "scripts/qa/verify-script-basename-governance.sh",
     "scripts/qa/verify-rke2-deployment-readiness.sh",
     "scripts/qa/verify-rke2-dev-readiness.sh",
     "scripts/qa/verify-rke2-tenant-routes.sh",
@@ -87,7 +85,6 @@
     "scripts/qa/verify-video-protection.sh",
     "scripts/qa/verify-video-upload.sh",
     "scripts/qa/verify-xqueue-deployment.sh",
-    "scripts/qa/verify-workflow-script-references.sh",
     "scripts/qa/verify-xqueue-graders.sh"
   ],
   "notes": "Baseline freeze for verify scripts intentionally not wired via CI/workflows/gate runners."

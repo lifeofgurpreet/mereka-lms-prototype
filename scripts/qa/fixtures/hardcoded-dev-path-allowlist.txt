@@ -1,0 +1,7 @@
+scripts/download-mct-thumbnails.py
+scripts/import-mct-batch.sh
+scripts/import-new-mct-courses.py
+scripts/import-new-mct-courses.sh
+scripts/migrations/mct/download_thumbnails.py
+scripts/transform_mct_to_course_packages.py
+scripts/verify-mct-thumbnails.py
