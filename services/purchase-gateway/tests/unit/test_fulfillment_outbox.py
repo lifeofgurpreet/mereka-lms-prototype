@@ -125,6 +125,47 @@ async def test_claim_next_fulfillment_job_marks_processing(mock_db):
 
 
 @pytest.mark.asyncio
+async def test_claim_next_fulfillment_job_reclaims_stale_processing_job(mock_db):
+    order = _make_order()
+    job = FulfillmentJob(
+        id=uuid.uuid4(),
+        order_id=order.id,
+        tenant_id=order.tenant_id,
+        status=FulfillmentJobStatus.processing,
+        attempts=1,
+        max_attempts=10,
+        next_attempt_at=datetime.now(UTC) + timedelta(hours=1),
+        last_attempt_at=datetime.now(UTC) - timedelta(hours=1),
+        triggered_by="worker.loop",
+    )
+    mock_db.execute.return_value = _mock_select_result(job)
+
+    claimed = await claim_next_fulfillment_job(mock_db)
+
+    assert claimed is job
+    assert job.status == FulfillmentJobStatus.processing
+    assert job.attempts == 2
+    mock_db.commit.assert_awaited_once()
+    mock_db.refresh.assert_awaited_once_with(job)
+
+
+@pytest.mark.asyncio
+async def test_claim_next_fulfillment_job_query_includes_stale_processing_clause(mock_db):
+    mock_db.execute.return_value = _mock_select_result(None)
+
+    claimed = await claim_next_fulfillment_job(mock_db)
+
+    assert claimed is None
+    stmt = mock_db.execute.call_args.args[0]
+    sql = str(stmt)
+    assert "fulfillment_jobs.status = " in sql
+    assert "fulfillment_jobs.last_attempt_at <=" in sql
+    assert "fulfillment_jobs.last_attempt_at IS NOT NULL" in sql
+    mock_db.commit.assert_not_called()
+    mock_db.refresh.assert_not_called()
+
+
+@pytest.mark.asyncio
 @patch("app.services.fulfillment_outbox.record_reconciliation_queued")
 async def test_reconcile_paid_orders_enqueues_jobs_and_commits(
     mock_record_reconciliation_queued,

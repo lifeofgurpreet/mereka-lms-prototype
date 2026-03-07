@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from time import monotonic
 
 import structlog
-from sqlalchemy import Select, select
+from sqlalchemy import Select, and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -115,13 +115,25 @@ async def _mark_retry(
 async def claim_next_fulfillment_job(db: AsyncSession) -> FulfillmentJob | None:
     """Claim the next runnable fulfillment job with row locking."""
     now = datetime.now(UTC)
+    stale_processing_cutoff = now - timedelta(
+        seconds=max(1, settings.FULFILLMENT_STALE_PROCESSING_SECONDS)
+    )
     stmt: Select[tuple[FulfillmentJob]] = (
         select(FulfillmentJob)
         .where(
-            FulfillmentJob.status.in_(
-                [FulfillmentJobStatus.pending, FulfillmentJobStatus.failed]
+            or_(
+                and_(
+                    FulfillmentJob.status.in_(
+                        [FulfillmentJobStatus.pending, FulfillmentJobStatus.failed]
+                    ),
+                    FulfillmentJob.next_attempt_at <= now,
+                ),
+                and_(
+                    FulfillmentJob.status == FulfillmentJobStatus.processing,
+                    FulfillmentJob.last_attempt_at.is_not(None),
+                    FulfillmentJob.last_attempt_at <= stale_processing_cutoff,
+                ),
             ),
-            FulfillmentJob.next_attempt_at <= now,
             FulfillmentJob.attempts < FulfillmentJob.max_attempts,
         )
         .order_by(FulfillmentJob.next_attempt_at.asc(), FulfillmentJob.created_at.asc())
