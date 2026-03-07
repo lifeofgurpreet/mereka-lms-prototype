@@ -93,7 +93,7 @@ These resources are cluster-level concerns. They do not change when the applicat
 
 - `base/apps/hubspot-webhook/**` — Uses `placeholder/hubspot-webhook:latest` image. The actual implementation lives in `services/hubspot-webhook/` (Firebase Cloud Function) and is NOT ready for K8s. This directory is NOT referenced by any active kustomization. **Action: quarantine (move to `_quarantine/`) until K8s migration is ready.**
 - `base/apps/xqueue-graders/**` — Has full deployment, HPA, PrometheusRule, and NetworkPolicy, but xqueue is set to `count: 0` in all overlays. The deployment uses `imagePullPolicy: Always` with `:latest` tag (violates immutable tag policy). NOT referenced by base kustomization. **Action: assess — either register in base kustomization with proper image tag or quarantine.**
-- `base/apps/permissions/setowners.sh` — A shell script orphan. No kustomization references this file. It is not a Kubernetes resource. **Action: move to `scripts/` or delete.**
+- ~~`base/apps/permissions/setowners.sh`~~ — **DELETED** (2026-03-07, Phase 2 quarantine). Orphan shell script with zero references.
 - ~~`patches/caddy-staging-fix.yaml`~~ — **DELETED** (2026-03-07, Phase 2 quarantine). Legacy emergency patch with hardcoded prod domains; never referenced by any kustomization.
 - ~~`patches/smtp-ses-relay.yaml`~~ — **DELETED** (2026-03-07, Phase 2 quarantine). Manual-apply patch never integrated into any overlay.
 - `base/secrets/openedx-secrets.yaml` — Commented out in `base/secrets/kustomization.yaml`. Only for local reference. **Action: document status; do not re-enable without review.**
