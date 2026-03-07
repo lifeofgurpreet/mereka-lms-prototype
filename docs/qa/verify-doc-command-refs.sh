@@ -129,10 +129,15 @@ SKIP_PATH_PREFIXES = (
     "docs/archive/",
 )
 
+def _is_skipped_path(path_text: str) -> bool:
+    normalized = path_text.replace("\\", "/")
+    return normalized.startswith(SKIP_PATH_PREFIXES) or "/docs/archive/" in normalized
+
+
 files = [
     Path(p)
     for p in sys.argv[2:]
-    if (repo_root / p).exists() and not str(p).startswith(SKIP_PATH_PREFIXES)
+    if (repo_root / p).exists() and not _is_skipped_path(str(p))
 ]
 
 if not files:

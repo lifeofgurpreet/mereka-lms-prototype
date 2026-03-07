@@ -25,6 +25,7 @@ DOCS_COMPLIANCE_SUMMARY_PATH="$WORK_DIR/docs-compliance-summary.json"
 MAX_AGE_SECONDS=1200
 DO_SYNC=0
 REQUIRE_SYNC=0
+SYNC_STRATEGY="auto"
 STATE_FILE=".docs-world-class-sync-state"
 
 while [[ $# -gt 0 ]]; do
@@ -45,12 +46,17 @@ while [[ $# -gt 0 ]]; do
       STATE_FILE="${2:?missing value}"
       shift 2
       ;;
+    --sync-strategy)
+      SYNC_STRATEGY="${2:?missing value}"
+      shift 2
+      ;;
     --help|-h)
       cat <<'EOF'
-Usage: run-docs-world-class-gates.sh [--sync] [--max-age-seconds N] [--state-file path] [--require-sync]
+Usage: run-docs-world-class-gates.sh [--sync] [--sync-strategy auto|rebase|merge] [--max-age-seconds N] [--state-file path] [--require-sync]
 
 Options:
-  --sync                  run `git fetch origin` and `git rebase origin/main` before checks
+  --sync                  run branch sync with origin/main before checks
+  --sync-strategy MODE    sync mode: auto (default), rebase, or merge
   --max-age-seconds N     warn if last sync is older than N (default: 1200 = 20 min)
   --state-file path       path for sync-state marker (default: .docs-world-class-sync-state)
   --require-sync          fail if sync state is older than --max-age-seconds
@@ -64,6 +70,14 @@ EOF
       ;;
   esac
 done
+
+case "$SYNC_STRATEGY" in
+  auto|rebase|merge) ;;
+  *)
+    echo "Invalid --sync-strategy: $SYNC_STRATEGY (expected auto|rebase|merge)"
+    exit 1
+    ;;
+esac
 
 log() {
   echo "[docs-world-class] $*"
@@ -118,10 +132,32 @@ update_sync_state() {
   printf "%s %s\n" "$(date +%s)" "$head" > "$STATE_FILE"
 }
 
-if [ "$DO_SYNC" -eq 1 ]; then
-  log "Refreshing from origin/main for docs branch safety"
+sync_branch_to_origin_main() {
   run_step "git fetch origin" git fetch origin
-  run_step "git rebase origin/main" git rebase origin/main
+
+  if [ "$SYNC_STRATEGY" = "merge" ]; then
+    run_step "git merge --no-ff origin/main" git merge --no-ff origin/main
+    return 0
+  fi
+
+  if git rebase origin/main; then
+    log "Sync strategy result: rebase succeeded"
+    return 0
+  fi
+
+  if [ "$SYNC_STRATEGY" = "rebase" ]; then
+    log "FAIL: rebase strategy requested and rebase failed."
+    return 1
+  fi
+
+  log "Rebase failed; falling back to merge strategy."
+  git rebase --abort >/dev/null 2>&1 || true
+  run_step "git merge --no-ff origin/main" git merge --no-ff origin/main
+}
+
+if [ "$DO_SYNC" -eq 1 ]; then
+  log "Refreshing from origin/main for docs branch safety (strategy=$SYNC_STRATEGY)"
+  sync_branch_to_origin_main
   update_sync_state
 else
   check_sync_age
