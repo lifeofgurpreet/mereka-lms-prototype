@@ -90,12 +90,11 @@ jobs:
           ./scripts/qa/verify-authenticated-sso-canary.sh --env "$INPUT_ENV_SCOPE"
 
       - name: Authenticate to GCP and get GKE credentials
-        if: ${{ (vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '') || vars.HAS_GCP_SA_KEY == 'true' }}
+        if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '' }}
         uses: ./.github/actions/gcp-gke-auth
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           wif_service_account: ${{ vars.GCP_WIF_SA }}
-          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
           auth_mode: auto
           gcloud_project: mereka-lms
           gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}

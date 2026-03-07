@@ -129,7 +129,7 @@ echo ""
 # ---------------------------------------------------------------------------
 # 4. Check for google-github-actions/auth usage
 # ---------------------------------------------------------------------------
-echo "== Section 4: google-github-actions/auth usage =="
+echo "== Section 4: GCP auth action usage =="
 
 AUTH_ACTION_WORKFLOWS=()
 for wf in "${WORKFLOW_FILES[@]}"; do
@@ -141,10 +141,20 @@ done
 
 AUTH_COUNT="${#AUTH_ACTION_WORKFLOWS[@]}"
 
-if [[ "$AUTH_COUNT" -gt 0 ]]; then
-  pass "${AUTH_COUNT} workflow(s) use google-github-actions/auth"
+CUSTOM_AUTH_WORKFLOWS=()
+for wf in "${WORKFLOW_FILES[@]}"; do
+  _filtered="$(grep -vE '^\s*echo\s' "$wf" 2>/dev/null || true)"
+  if grep -q '\.github/actions/gcp-gke-auth' <<< "$_filtered"; then
+    CUSTOM_AUTH_WORKFLOWS+=("$(basename "$wf")")
+  fi
+done
+
+CUSTOM_AUTH_COUNT="${#CUSTOM_AUTH_WORKFLOWS[@]}"
+
+if [[ "$AUTH_COUNT" -gt 0 || "$CUSTOM_AUTH_COUNT" -gt 0 ]]; then
+  pass "found GCP auth action usage (google-github-actions/auth: ${AUTH_COUNT}, custom gcp-gke-auth: ${CUSTOM_AUTH_COUNT})"
 else
-  warn "no workflows use google-github-actions/auth — is GCP auth needed?"
+  warn "no workflows use google-github-actions/auth or .github/actions/gcp-gke-auth — is GCP auth needed?"
 fi
 
 echo ""
@@ -261,7 +271,7 @@ if [[ "$FAILED" -gt 0 ]]; then
   exit 1
 elif [[ "$WARNED" -gt 0 ]]; then
   echo -e "${YELLOW}WIF readiness check complete with warnings.${NC}"
-  echo "  Action required: migrate remaining workflows."
+  echo "  Review warning details above and resolve any remaining gaps."
   echo "  See docs/operations/WORKLOAD_IDENTITY_FEDERATION.md for steps."
   echo ""
   exit 0

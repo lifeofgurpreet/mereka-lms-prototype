@@ -2,10 +2,6 @@ name: 'Authenticate to GCP and GKE'
 description: 'Sets up GCP auth, gcloud CLI, and optionally fetches GKE cluster credentials'
 
 inputs:
-  gcp_sa_key:
-    description: 'GCP Service Account JSON key'
-    required: false
-    default: ''
   workload_identity_provider:
     description: 'Workload Identity Provider resource name (projects/.../providers/...)'
     required: false
@@ -15,7 +11,7 @@ inputs:
     required: false
     default: ''
   auth_mode:
-    description: 'Auth mode: auto (prefer WIF), wif, or key'
+    description: 'Auth mode: auto (WIF) or wif'
     required: false
     default: 'auto'
   gcloud_project:
@@ -68,22 +64,16 @@ runs:
         AUTH_MODE: ${{ inputs.auth_mode }}
         WIF_PROVIDER: ${{ inputs.workload_identity_provider }}
         WIF_SERVICE_ACCOUNT: ${{ inputs.wif_service_account }}
-        GCP_SA_KEY: ${{ inputs.gcp_sa_key }}
       run: |
         mode="${AUTH_MODE}"
-        if [[ "$mode" != "auto" && "$mode" != "wif" && "$mode" != "key" ]]; then
-          echo "ERROR: auth_mode must be one of auto|wif|key (got: ${mode})" >&2
+        if [[ "$mode" != "auto" && "$mode" != "wif" ]]; then
+          echo "ERROR: auth_mode must be one of auto|wif (got: ${mode})" >&2
           exit 1
         fi
 
         has_wif=false
         if [[ -n "$WIF_PROVIDER" && -n "$WIF_SERVICE_ACCOUNT" ]]; then
           has_wif=true
-        fi
-
-        has_key=false
-        if [[ -n "$GCP_SA_KEY" ]]; then
-          has_key=true
         fi
 
         resolved=""
@@ -95,20 +85,11 @@ runs:
             fi
             resolved="wif"
             ;;
-          key)
-            if [[ "$has_key" != true ]]; then
-              echo "ERROR: auth_mode=key requires gcp_sa_key." >&2
-              exit 1
-            fi
-            resolved="key"
-            ;;
           auto)
             if [[ "$has_wif" == true ]]; then
               resolved="wif"
-            elif [[ "$has_key" == true ]]; then
-              resolved="key"
             else
-              echo "ERROR: auth_mode=auto could not resolve credentials. Provide WIF inputs or gcp_sa_key." >&2
+              echo "ERROR: auth_mode=auto could not resolve credentials. Provide WIF inputs." >&2
               exit 1
             fi
             ;;
@@ -123,12 +104,6 @@ runs:
       with:
         workload_identity_provider: ${{ inputs.workload_identity_provider }}
         service_account: ${{ inputs.wif_service_account }}
-
-    - name: Authenticate to GCP (service account key)
-      if: ${{ steps.auth-mode.outputs.mode == 'key' }}
-      uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
-      with:
-        credentials_json: ${{ inputs.gcp_sa_key }}
 
     - name: Install gcloud
       if: ${{ inputs.skip_gcloud != 'true' }}
