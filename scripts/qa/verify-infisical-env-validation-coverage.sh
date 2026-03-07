@@ -5,7 +5,7 @@
 # Ensure CI validates Infisical secrets for prod/dev and conditionally staging.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 WORKFLOW_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 
 PASS=0

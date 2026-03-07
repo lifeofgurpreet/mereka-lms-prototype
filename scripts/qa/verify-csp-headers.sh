@@ -22,7 +22,7 @@
 #   STRICT=1 ./scripts/qa/verify-csp-headers.sh     # treat WARNs as FAILs
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 GREEN='\033[0;32m'

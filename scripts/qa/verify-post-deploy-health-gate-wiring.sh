@@ -5,7 +5,7 @@
 # Enforce that deployment flows keep post-deploy health gate wiring intact.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 
 POST_DEPLOY_WORKFLOW="$REPO_ROOT/.github/workflows/post-deploy-e2e.yml"
 OPERATIONS_GATES_WORKFLOW="$REPO_ROOT/.github/workflows/operations-gates-runtime.yml"

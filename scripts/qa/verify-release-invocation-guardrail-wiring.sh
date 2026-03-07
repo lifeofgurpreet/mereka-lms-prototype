@@ -4,7 +4,7 @@
 # Verify release orchestrator invocations propagate required confirmation/prod-apply guardrail env vars.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 CANONICAL_SCRIPT="$REPO_ROOT/scripts/infra/canonical-release.sh"
 BUILD_WORKFLOW="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
 CREATE_RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"

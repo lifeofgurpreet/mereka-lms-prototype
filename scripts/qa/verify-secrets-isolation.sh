@@ -24,7 +24,7 @@
 #   - kubectl or kustomize in PATH for render checks (optional; skipped if absent)
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$REPO_ROOT"
 
 # ── colours ───────────────────────────────────────────────────────────────────
@@ -54,10 +54,8 @@ PROD_KUSTOMIZE="deploy/k8s/overlays/production"
 RKE2_PATCH="deploy/k8s/overlays/rke2-nonprod/patches/externalsecrets-infisical.yaml"
 
 PROD_STORE="gcp-secret-manager"
-# On rke2-nonprod, the ClusterSecretStore is named infisical-secret-store
-# (single store pointing to Infisical dev environment via environmentSlug).
-# The -dev suffix naming convention was planned but not implemented.
-RKE2_DEV_STORE="infisical-secret-store"
+# On rke2-nonprod, the ClusterSecretStore must point to the dev Infisical environment.
+RKE2_DEV_STORE="infisical-secret-store-dev"
 RKE2_PROD_STORE="gcp-secret-manager"  # GKE-only store; should NOT appear in rke2-nonprod
 
 # ── Python helper written to a temp file so stdin is not consumed ─────────────
