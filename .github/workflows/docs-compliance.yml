@@ -529,15 +529,20 @@ PY
       - name: Generate docs scorecard report markdown
         run: |
           set -euo pipefail
+          BASE_REF="origin/${{ github.base_ref }}"
+          if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
+            BASE_REF="origin/main"
+          fi
           REPORT_PATH="${RUNNER_TEMP}/DOCS_PROGRAM_SCORECARD_${{ github.run_id }}.md"
           QUALITY_REPORT_PATH="${RUNNER_TEMP}/DOCS_QUALITY_SCORECARD_${{ github.run_id }}.md"
           chmod +x docs/qa/generate-docs-scorecard-report.sh
           ./docs/qa/generate-docs-scorecard-report.sh \
-            --base-ref "origin/${{ github.base_ref }}" \
+            --base-ref "$BASE_REF" \
             --output "$REPORT_PATH" \
             --quality-output "$QUALITY_REPORT_PATH"
           {
             echo "### Docs Program Scorecard Report"
+            echo "- base_ref=${BASE_REF}"
             echo "- report_path=${REPORT_PATH}"
             echo "- quality_report_path=${QUALITY_REPORT_PATH}"
           } >> "$GITHUB_STEP_SUMMARY"
