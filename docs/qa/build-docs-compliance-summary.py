@@ -113,6 +113,10 @@ def _as_dict(value) -> dict:
     return value if isinstance(value, dict) else {}
 
 
+def _as_list(value) -> list:
+    return value if isinstance(value, list) else []
+
+
 def _normalized_bool(value) -> bool:
     if isinstance(value, bool):
         return value
@@ -156,7 +160,7 @@ def main() -> int:
     foundation_policy_status = _normalized_status(str(foundation.get("policy_status", "unknown")))
     foundation_repo_status = _normalized_status(str(foundation.get("repo_structure_status", "unknown")))
     foundation_policy_content_source_status = _normalized_status(str(foundation.get("policy_content_status", "unknown")))
-    foundation_policy_content_errors = foundation.get("policy_content_errors", [])
+    foundation_policy_content_errors = _as_list(foundation.get("policy_content_errors", []))
     foundation_policy_content_status = foundation_policy_content_source_status
     if foundation_policy_content_errors and foundation_policy_content_status == "pass":
         foundation_policy_content_status = "fail"
@@ -231,9 +235,9 @@ def main() -> int:
             "status": cmdref_baseline_status,
             "baseline_file": cmdref_baseline.get("baseline_file", ""),
             "entries": cmdref_baseline.get("entries", 0),
-            "duplicates": cmdref_baseline.get("duplicates", []),
-            "missing": cmdref_baseline.get("missing", []),
-            "invalid_non_markdown": cmdref_baseline.get("invalid_non_markdown", []),
+            "duplicates": _as_list(cmdref_baseline.get("duplicates", [])),
+            "missing": _as_list(cmdref_baseline.get("missing", [])),
+            "invalid_non_markdown": _as_list(cmdref_baseline.get("invalid_non_markdown", [])),
         },
         "command_refs": {
             "status": cmdref_status,
@@ -243,13 +247,13 @@ def main() -> int:
             "total_candidates": _normalized_nonnegative_int(cmdref.get("total_candidates", 0)),
             "candidate_sources": cmdref_candidate_sources,
             "missing_references": _normalized_nonnegative_int(cmdref.get("missing_references", 0)),
-            "missing": cmdref.get("missing", []),
+            "missing": _as_list(cmdref.get("missing", [])),
         },
         "link_integrity": {
             "status": link_integrity_status,
             "files_checked": link_integrity.get("files_checked", 0),
             "broken_links": link_integrity.get("broken_links", 0),
-            "broken": link_integrity.get("broken", []),
+            "broken": _as_list(link_integrity.get("broken", [])),
         },
         "docs_scorecard": {
             "status": scorecard_status,

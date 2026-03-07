@@ -189,7 +189,27 @@ cat > "$ROOT_DIR/cmdref-invalid-shape.json" <<'EOF_JSON'
   "total_candidates": "-8",
   "candidate_sources": "not-an-object",
   "missing_references": "bad",
-  "missing": []
+  "missing": "not-a-list"
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-baseline-invalid-shape.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "baseline_file": "docs/qa/.doc-command-ref-baseline",
+  "entries": 4,
+  "duplicates": "bad",
+  "missing": "bad",
+  "invalid_non_markdown": "bad"
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/link-integrity-invalid-shape.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": 2,
+  "broken_links": 0,
+  "broken": "bad"
 }
 EOF_JSON
 
@@ -477,8 +497,8 @@ PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
   --foundation-summary "$ROOT_DIR/foundation-pass.json" \
-  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
-  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-invalid-shape.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-invalid-shape.json" \
   --catalog-summary "$ROOT_DIR/catalog-pass.json" \
   --cmdref-summary "$ROOT_DIR/cmdref-invalid-shape.json" \
   --scorecard "$ROOT_DIR/scorecard-pass.json" \
@@ -507,12 +527,20 @@ if command_refs.get("total_candidates") != 0:
     raise SystemExit("expected negative total_candidates to normalize to 0")
 if command_refs.get("missing_references") != 0:
     raise SystemExit("expected non-numeric missing_references to normalize to 0")
+if command_refs.get("missing") != []:
+    raise SystemExit("expected non-list missing field to normalize to []")
 sources = command_refs.get("candidate_sources", {})
 required = {"inline_code", "shell_block", "markdown_link", "markdown_autolink", "markdown_refdef"}
 if set(sources.keys()) != required:
     raise SystemExit("expected candidate_sources non-dict input to normalize to required keys")
 if any(sources[k] != 0 for k in required):
     raise SystemExit("expected candidate_sources non-dict input to normalize to zeros")
+baseline = payload.get("command_reference_baseline", {})
+if baseline.get("duplicates") != [] or baseline.get("missing") != [] or baseline.get("invalid_non_markdown") != []:
+    raise SystemExit("expected non-list baseline fields to normalize to []")
+link_integrity = payload.get("link_integrity", {})
+if link_integrity.get("broken") != []:
+    raise SystemExit("expected non-list broken links field to normalize to []")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
