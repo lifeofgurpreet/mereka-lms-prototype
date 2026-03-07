@@ -52,7 +52,7 @@ jobs:
       - name: Verify docs policy
         run: |
           chmod +x docs/qa/verify-docs-policy.sh
-          ./docs/qa/verify-docs-policy.sh
+          ./docs/qa/verify-docs-policy.sh --range "origin/${{ github.base_ref }}...${{ github.sha }}"
 
       - name: Verify repository structure
         run: |
@@ -472,6 +472,7 @@ PY
         run: |
           chmod +x \
             docs/qa/verify-doc-catalog-health-test.sh \
+            docs/qa/verify-docs-policy-test.sh \
             docs/qa/verify-docs-foundation-gates.sh \
             docs/qa/verify-docs-foundation-gates-test.sh \
             docs/qa/verify-doc-command-ref-baseline.sh \
@@ -496,6 +497,7 @@ PY
             docs/qa/compare-docs-scorecard-to-base-test.sh \
             docs/qa/build-docs-compliance-summary-test.sh
           docs/qa/verify-doc-catalog-health-test.sh
+          docs/qa/verify-docs-policy-test.sh
           docs/qa/verify-docs-foundation-gates-test.sh
           docs/qa/verify-doc-command-ref-baseline-test.sh
           docs/qa/verify-doc-command-refs-test.sh

@@ -127,7 +127,7 @@ else
   check_sync_age
 fi
 
-run_step "verify-docs-policy" ./docs/qa/verify-docs-policy.sh
+run_step "verify-docs-policy" ./docs/qa/verify-docs-policy.sh --range "origin/main...HEAD"
 run_step "verify-repo-structure" ./scripts/qa/verify-repo-structure.sh
 run_step "verify-docs-foundation-gates" ./docs/qa/verify-docs-foundation-gates.sh --summary-json "$DOCS_FOUNDATION_SUMMARY"
 run_step "verify-doc-command-ref-baseline" ./docs/qa/verify-doc-command-ref-baseline.sh --summary-json "$DOCS_CMDREF_BASELINE_SUMMARY"
@@ -167,6 +167,7 @@ run_step "build-docs-compliance-summary" python3 docs/qa/build-docs-compliance-s
   --link-integrity-summary "$DOCS_LINK_INTEGRITY_SUMMARY" \
   --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
 run_step "verify-doc-catalog-health-test" ./docs/qa/verify-doc-catalog-health-test.sh
+run_step "verify-docs-policy-test" ./docs/qa/verify-docs-policy-test.sh
 run_step "verify-docs-foundation-gates-test" ./docs/qa/verify-docs-foundation-gates-test.sh
 run_step "verify-doc-command-ref-baseline-test" ./docs/qa/verify-doc-command-ref-baseline-test.sh
 run_step "verify-doc-link-integrity-test" ./docs/qa/verify-doc-link-integrity-test.sh

@@ -4,7 +4,34 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-if [[ -n "${DOCS_POLICY_RANGE:-}" ]]; then
+RANGE_OVERRIDE=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --range)
+      RANGE_OVERRIDE="${2:?missing value for --range}"
+      shift 2
+      ;;
+    --help|-h)
+      cat <<'EOF_HELP'
+Usage: verify-docs-policy.sh [--range <git-diff-range>]
+
+Options:
+  --range <range>  explicit git diff range (example: origin/main...HEAD)
+  --help           show this message
+EOF_HELP
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -n "$RANGE_OVERRIDE" ]]; then
+  RANGE="$RANGE_OVERRIDE"
+elif [[ -n "${DOCS_POLICY_RANGE:-}" ]]; then
   RANGE="$DOCS_POLICY_RANGE"
 elif [[ -n "${GITHUB_EVENT_BEFORE:-}" && -n "${GITHUB_SHA:-}" && "$GITHUB_EVENT_BEFORE" != "0000000000000000000000000000000000000000" ]]; then
   RANGE="${GITHUB_EVENT_BEFORE}...${GITHUB_SHA}"
