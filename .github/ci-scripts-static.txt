@@ -80,6 +80,9 @@ scripts/qa/test-verify-csp-headers.sh
 scripts/qa/test-verify-evidence-redaction.sh
 scripts/qa/test-verify-post-deploy-health-gate-wiring.sh
 scripts/qa/test-verify-release-invocation-guardrail-wiring.sh
+scripts/qa/test-verify-release-gitops-guardrails.sh
+scripts/qa/test-verify-release-promotion-wiring.sh
+scripts/qa/test-verify-release-workflow-invocation.sh
 
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh
