@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 
 BUNDLE_PATH="${1:-${REPO_ROOT}/var/ci/release-bundle.json}"
 SCHEMA_PATH="${REPO_ROOT}/infrastructure/ci/release-bundle.schema.json"
