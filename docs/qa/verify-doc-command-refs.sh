@@ -136,6 +136,8 @@ inline_code_re = re.compile(r"`([^`]+)`")
 fence_start_re = re.compile(r"^```(.*)$")
 
 ALLOWED_PREFIXES = (
+    "a/",
+    "b/",
     "docs/",
     "scripts/",
     "deploy/",
@@ -277,14 +279,19 @@ def candidate_exists(token: str) -> bool:
     if re.search(r"\\{\\{.*\\}\\}", token_path):
         return True
 
-    target = (repo_root / token_path).resolve()
-    try:
-        target.relative_to(repo_root)
-    except ValueError:
-        return False
+    candidate_paths = [token_path]
+    if token_path.startswith(("a/", "b/")):
+        candidate_paths.append(token_path[2:])
 
-    if target.is_file() or target.is_dir():
-        return True
+    for candidate_path in candidate_paths:
+        target = (repo_root / candidate_path).resolve()
+        try:
+            target.relative_to(repo_root)
+        except ValueError:
+            continue
+        if target.is_file() or target.is_dir():
+            return True
+
     for allowed_prefix in ALLOWED_MISSING_PREFIXES:
         if any(c in allowed_prefix for c in ("*", "?", "[")):
             if fnmatch.fnmatch(token_path, allowed_prefix):
