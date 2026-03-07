@@ -195,6 +195,23 @@ Markdown link references:
 - [missing](docs/qa/does-not-exist.md#L9)
 EOF_DOC
 
+cat > "$ROOT_DIR/docs/cmdref-markdown-autolink-pass.md" <<'EOF_DOC'
+# cmdref-markdown-autolink-pass
+
+Autolink references:
+
+<docs/qa/verify-docs-policy.sh>
+<docs/qa/verify-docs-policy.sh#L10>
+EOF_DOC
+
+cat > "$ROOT_DIR/docs/cmdref-markdown-autolink-fail.md" <<'EOF_DOC'
+# cmdref-markdown-autolink-fail
+
+Autolink references:
+
+<docs/qa/missing-file.md>
+EOF_DOC
+
 printf '%s\n' "$ROOT_DIR/docs/cmdref-pass.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-pass"
 printf '%s\n' "$ROOT_DIR/docs/cmdref-fail.md" > "$ROOT_DIR/docs/.doc-command-ref-baseline-fail"
 
@@ -208,6 +225,8 @@ LINE_ANCHOR_SUMMARY=$(run_case line-anchor-pass docs/cmdref-line-anchor-pass.md 
 DIFF_STYLE_SUMMARY=$(run_case diff-style-pass docs/cmdref-diff-style-pass.md 0)
 MARKDOWN_LINK_PASS_SUMMARY=$(run_case markdown-link-pass docs/cmdref-markdown-link-pass.md 0)
 MARKDOWN_LINK_FAIL_SUMMARY=$(run_case markdown-link-fail docs/cmdref-markdown-link-fail.md 1)
+MARKDOWN_AUTOLINK_PASS_SUMMARY=$(run_case markdown-autolink-pass docs/cmdref-markdown-autolink-pass.md 0)
+MARKDOWN_AUTOLINK_FAIL_SUMMARY=$(run_case markdown-autolink-fail docs/cmdref-markdown-autolink-fail.md 1)
 
 grep -q "DOCS_CMDREF_ERRORS" /tmp/cmd_ref_test_fail.out
 assert_summary_status "$FAIL_SUMMARY" fail 1
@@ -220,5 +239,7 @@ assert_summary_status "$LINE_ANCHOR_SUMMARY" pass 0
 assert_summary_status "$DIFF_STYLE_SUMMARY" pass 0
 assert_summary_status "$MARKDOWN_LINK_PASS_SUMMARY" pass 0
 assert_summary_status "$MARKDOWN_LINK_FAIL_SUMMARY" fail 1
+assert_summary_status "$MARKDOWN_AUTOLINK_PASS_SUMMARY" pass 0
+assert_summary_status "$MARKDOWN_AUTOLINK_FAIL_SUMMARY" fail 1
 
 echo "verify-doc-command-refs self-test: OK"
