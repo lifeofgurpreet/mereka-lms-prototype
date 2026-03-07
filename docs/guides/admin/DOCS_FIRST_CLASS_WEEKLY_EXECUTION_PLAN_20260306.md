@@ -114,7 +114,9 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - stale canonical count
   - command-reference miss count
 - [ ] Resolve PR workflow base reference deterministically:
+  - resolve once per workflow run and export via environment for downstream steps
   - compute `BASE_REF` with fallback to `origin/main` when `${{ github.base_ref }}` is empty
+  - fail fast if resolved `BASE_REF` cannot be verified in git (`git rev-parse --verify "$BASE_REF"`)
   - reuse one `POLICY_RANGE="${BASE_REF}...${{ github.sha }}"` across policy, changed-doc scope, and foundation checks
 - [ ] `build-docs-compliance-summary.py` stdout contract must include:
   - `cmdref_baseline_enabled=<true|false>`
