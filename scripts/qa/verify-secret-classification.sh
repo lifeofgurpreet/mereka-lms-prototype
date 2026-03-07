@@ -5,7 +5,7 @@
 # Validate secret classification coverage for all MEREKA_LMS_* ExternalSecret keys.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 CLASSIFICATION_FILE="$REPO_ROOT/deploy/k8s/base/secrets/SECRET_CLASSIFICATION.yaml"
 
 if [[ ! -f "$CLASSIFICATION_FILE" ]]; then

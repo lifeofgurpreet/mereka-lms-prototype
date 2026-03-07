@@ -46,6 +46,8 @@ scripts/qa/test-verify-documentation-standards.sh
 scripts/qa/test-verify-evidence-tracking-policy.sh
 scripts/qa/test-verify-tutor-config-path-contract.sh
 scripts/qa/test-verify-no-hardcoded-secrets.sh
+scripts/qa/test-verify-secrets-naming-convention.sh
+scripts/qa/test-verify-secret-classification.sh
 scripts/qa/verify-custom-apps-hygiene.sh
 scripts/qa/verify-custom-app-install-contract.sh
 scripts/qa/test-verify-custom-app-install-contract.sh
