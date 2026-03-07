@@ -211,3 +211,35 @@ entrypoints:
           runtime verification gate. Run with --skip-cluster for CI static
           checks; use run-release-verification-gates.sh for the full suite.
     status: canonical
+
+  # ── 7. Proof-envelope ──────────────────────────────────────────────────
+  - workflow_id: proof-envelope
+    label: "Emit GitOps-conformant evidence envelopes (schema v1)"
+    canonical_script: scripts/release/emit-proof-envelope.sh
+    owner: platform-team
+    invocation: |
+      # Single concern:
+      bash scripts/release/emit-proof-envelope.sh \
+        --concern release-gate --lane dev --skip-cluster
+
+      # All concerns (aggregate):
+      bash scripts/release/emit-proof-envelope.sh \
+        --concern aggregate --lane staging --namespace stg-mereka-lms \
+        --domain staging.academyv2.mereka.io
+    proof_output: |
+      - var/proof/release-gate.json: evidence envelope (schema v1)
+      - var/proof/migration-proof.json: evidence envelope (schema v1)
+      - var/proof/runtime-smoke.json: evidence envelope (schema v1)
+      - var/proof/aggregate.json: combined verdict envelope
+    alternatives:
+      - path: scripts/release/release-gate.sh
+        reason: >
+          Produces a proof artifact but in non-conformant format.
+          emit-proof-envelope.sh wraps this into the standard
+          GitOps evidence envelope schema v1.
+      - path: scripts/release/smoke-after-migrate.sh
+        reason: >
+          Produces JSON output with --json but not in evidence
+          envelope format. Use emit-proof-envelope.sh --concern
+          migration-proof for conformant output.
+    status: canonical
