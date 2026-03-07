@@ -156,12 +156,12 @@ for dir in "${ACTIVE_SCRIPT_DIRS[@]}"; do
     [[ "$f" == *"verify-deprecation-discipline.sh" ]] && continue
     [[ "$f" == *.md ]] && continue
     bad_tools_refs+=("$f")
-  done < <(grep -rl --include='*.sh' 'source.*\btools/' "$dir" 2>/dev/null || true)
+  done < <(grep -rl --include='*.sh' '^\s*source\s.*\btools/' "$dir" 2>/dev/null || true)
   while IFS= read -r f; do
     [[ "$f" == *"verify-deprecation-discipline.sh" ]] && continue
     [[ "$f" == *.md ]] && continue
     bad_ops_refs+=("$f")
-  done < <(grep -rl --include='*.sh' 'source.*\bops/' "$dir" 2>/dev/null || true)
+  done < <(grep -rl --include='*.sh' '^\s*source\s.*\bops/' "$dir" 2>/dev/null || true)
 done
 
 if [[ "${#bad_tools_refs[@]}" -gt 0 ]]; then

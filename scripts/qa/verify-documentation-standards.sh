@@ -49,6 +49,10 @@ check_runbook_metadata() {
 
     local missing_metadata=()
     while IFS= read -r -d '' file; do
+        # Skip superseded stubs (YAML frontmatter with status: superseded)
+        if head -10 "$file" | grep -qE '^status:\s*superseded'; then
+            continue
+        fi
         # Check for metadata line (starts with underscore)
         if ! head -5 "$file" | grep -qE "^_.*Audience.*•.*Owner.*•.*Last (verified|updated):"; then
             missing_metadata+=("$(basename "$file")")
