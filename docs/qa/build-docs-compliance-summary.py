@@ -117,6 +117,14 @@ def main() -> int:
     scorecard_delta = _safe_load(args.scorecard_delta_summary, {})
     scorecard_drift = _safe_load(args.scorecard_drift_summary, {})
     link_integrity = _safe_load(args.link_integrity_summary, {})
+    cmdref_candidate_sources = {
+        "inline_code": 0,
+        "shell_block": 0,
+        "markdown_link": 0,
+        "markdown_autolink": 0,
+        "markdown_refdef": 0,
+    }
+    cmdref_candidate_sources.update(cmdref.get("candidate_sources", {}))
 
     foundation_status = _normalized_status(_status_from_scorecard(foundation))
     foundation_policy_status = _normalized_status(str(foundation.get("policy_status", "unknown")))
@@ -207,7 +215,7 @@ def main() -> int:
             "baseline_enabled": cmdref.get("baseline_enabled", False),
             "baseline_entries": cmdref.get("baseline_entries", 0),
             "total_candidates": cmdref.get("total_candidates", 0),
-            "candidate_sources": cmdref.get("candidate_sources", {}),
+            "candidate_sources": cmdref_candidate_sources,
             "missing_references": cmdref.get("missing_references", 0),
             "missing": cmdref.get("missing", []),
         },
@@ -291,11 +299,11 @@ def main() -> int:
         f"catalog={catalog_status} link_integrity={link_integrity_status} cmdref={cmdref_status} "
         f"cmdref_missing_refs={cmdref.get('missing_references', 0)} "
         f"cmdref_candidates_total={cmdref.get('total_candidates', 0)} "
-        f"cmdref_candidates_inline={cmdref.get('candidate_sources', {}).get('inline_code', 0)} "
-        f"cmdref_candidates_shell={cmdref.get('candidate_sources', {}).get('shell_block', 0)} "
-        f"cmdref_candidates_md_link={cmdref.get('candidate_sources', {}).get('markdown_link', 0)} "
-        f"cmdref_candidates_md_autolink={cmdref.get('candidate_sources', {}).get('markdown_autolink', 0)} "
-        f"cmdref_candidates_md_refdef={cmdref.get('candidate_sources', {}).get('markdown_refdef', 0)} "
+        f"cmdref_candidates_inline={cmdref_candidate_sources.get('inline_code', 0)} "
+        f"cmdref_candidates_shell={cmdref_candidate_sources.get('shell_block', 0)} "
+        f"cmdref_candidates_md_link={cmdref_candidate_sources.get('markdown_link', 0)} "
+        f"cmdref_candidates_md_autolink={cmdref_candidate_sources.get('markdown_autolink', 0)} "
+        f"cmdref_candidates_md_refdef={cmdref_candidate_sources.get('markdown_refdef', 0)} "
         f"scorecard={scorecard_status} trend={comparison_status} "
         f"recency={recency_status} consistency={consistency_status} "
         f"head_freshness={head_freshness_status} timestamp={timestamp_status} "

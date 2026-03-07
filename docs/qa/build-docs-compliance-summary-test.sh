@@ -145,8 +145,7 @@ cat > "$ROOT_DIR/cmdref-fail.json" <<'EOF_JSON'
     "inline_code": 1,
     "shell_block": 2,
     "markdown_link": 0,
-    "markdown_autolink": 0,
-    "markdown_refdef": 0
+    "markdown_autolink": 0
   },
   "missing_references": 1,
   "missing": [
@@ -462,6 +461,8 @@ if payload.get("overall_status") != "fail":
     raise SystemExit("expected overall_status=fail")
 if payload.get("command_refs", {}).get("candidate_sources", {}).get("shell_block") != 2:
     raise SystemExit("expected command_refs.candidate_sources.shell_block=2 in fail payload")
+if payload.get("command_refs", {}).get("candidate_sources", {}).get("markdown_refdef") != 0:
+    raise SystemExit("expected missing command_refs.candidate_sources.markdown_refdef to normalize to 0")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
