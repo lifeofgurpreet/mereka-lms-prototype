@@ -1,6 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# DEPRECATED — boundary.debt — NOT consumed by ArgoCD.
+# ArgoCD deploys from bbi-infrastructure/apps/mereka-lms/overlays/dev/.
+# This overlay is retained for reference only. Do NOT add new files here.
+# Scheduled for removal in Wave 9 (legacy deletion).
+#
 # rke2-nonprod overlay — bbi-infrastructure dev/staging cluster
 #
 # Differences from production (GKE):

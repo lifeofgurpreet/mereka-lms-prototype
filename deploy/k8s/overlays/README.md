@@ -2,47 +2,37 @@
 
 This directory contains Kustomize overlays for different deployment environments.
 
-> **Boundary note (ADR-025)**: Only `overlays/local/` permanently belongs in this app repo.
-> `overlays/production/`, `overlays/rke2-nonprod/`, and `overlays/staging/` are classified
-> ENVIRONMENT_SPECIFIC and will migrate to `bbi-infrastructure` in a future phase. All three
-> currently remain here for operational continuity during the transition period.
-> See [docs/architecture/DEPLOYMENT_BOUNDARY.md](../../docs/architecture/DEPLOYMENT_BOUNDARY.md).
+## Ownership Boundary
 
-See **`docs/operations/DEPLOYMENT_LANES.md`** for the canonical reference on active lanes,
-promotion path, and differences between environments.
+**ArgoCD deploys from `bbi-infrastructure`, NOT from this repo.**
 
-## Active Lanes
+| Overlay | Owner | ArgoCD Source | Status |
+|---------|-------|---------------|--------|
+| `local/` | **mereka-lms** (this repo) | N/A (local dev) | Active |
+| `rke2-nonprod/` | **bbi-infrastructure** | `apps/mereka-lms/overlays/dev/` | DEPRECATED here |
+| `staging/` | **bbi-infrastructure** | `apps/mereka-lms/overlays/staging/` | DEPRECATED here |
+| `production/` | **bbi-infrastructure** | `apps/mereka-lms/overlays/prod/` | DEPRECATED here |
 
-| Overlay | Cluster | Domain | Secrets | Status |
-|---------|---------|--------|---------|--------|
-| `local` | Kind / Minikube | `localhost` | dev literals | Active |
-| `rke2-nonprod` | RKE2 VPS (`154.26.132.35`) | `*.academyv2.mereka.dev` | Infisical | Active — canonical non-prod |
-| `production` | GKE (`bbi-k8`) | `*.academyv2.mereka.io` | GCP Secret Manager | Active |
-| ~~`staging`~~ | *(never activated)* | — | — | **DEPRECATED** |
+The non-local overlays in this repo are **legacy artifacts** retained for reference.
+They are NOT consumed by ArgoCD and have drifted from the authoritative overlays
+in bbi-infrastructure. Do NOT add new files to deprecated overlays.
 
-## Promotion Path
+**Authoritative deployment overlays**: `bbi-infrastructure/apps/mereka-lms/overlays/{dev,staging,prod}/`
 
-```
-local → rke2-nonprod → production
-```
+Scheduled for removal in Wave 9 (legacy deletion).
 
-## Usage
+## App-Owned Overlay: local
+
+The `local/` overlay is the only overlay permanently owned by this repo.
+Use it for local development with Kind or Minikube.
 
 ```bash
-# Deploy to production (via ArgoCD GitOps — do not apply directly)
-kubectl apply -k deploy/k8s/overlays/production
-
-# Deploy to rke2-nonprod (via ArgoCD GitOps — do not apply directly)
-kubectl apply -k deploy/k8s/overlays/rke2-nonprod
-
-# Deploy locally (Kind/Minikube)
 kubectl apply -k deploy/k8s/overlays/local
 ```
 
-## Customizing
+## Base (Vendored by bbi-infrastructure)
 
-Each overlay can be customized with:
-- `images` — Container image tags
-- `replicas` — Pod counts
-- `patches` — Environment-specific patches
-- `configMapGenerator` — Environment-specific config
+The `deploy/k8s/base/` directory is vendored into bbi-infrastructure at
+`apps/mereka-lms/vendor/mereka-lms/deploy/k8s/base/`. Environment overlays
+in bbi-infrastructure reference this vendored base and apply per-env patches
+(image tags, secret stores, domains, replicas, etc.).

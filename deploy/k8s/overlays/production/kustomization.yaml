@@ -1,5 +1,10 @@
 # @covers AC-021
 # @spec: disaster-recovery-business-continuity_spec.md
+#
+# DEPRECATED — boundary.debt — NOT consumed by ArgoCD.
+# ArgoCD deploys from bbi-infrastructure/apps/mereka-lms/overlays/prod/.
+# This overlay is retained for reference only. Do NOT add new files here.
+# Scheduled for removal in Wave 9 (legacy deletion).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 

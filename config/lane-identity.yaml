@@ -20,29 +20,37 @@ contract_version: "1"
 gitops_service_id: mereka-lms
 gitops_scope: env
 
-# Lane mapping: canonical name → LMS overlay directory
+# Lane mapping: canonical name → deployment overlay
 # Canonical names match GitOps exactly: dev, staging, prod
+#
+# IMPORTANT: ArgoCD deploys from bbi-infrastructure, not this repo.
+# The overlay_dir fields below point to THIS repo's legacy overlays
+# (retained for reference). The authoritative overlays are in
+# bbi-infrastructure at apps/mereka-lms/overlays/{dev,staging,prod}/.
 lanes:
   dev:
     overlay_dir: deploy/k8s/overlays/rke2-nonprod
-    namespace: mereka-lms-dev
+    overlay_owner: bbi-infrastructure  # apps/mereka-lms/overlays/dev/
+    namespace: mereka-lms
     domain: academyv2.mereka.dev
     legacy_aliases:
       - local        # developer workstation overlay (not a real lane)
       - rke2-nonprod # original directory name
     notes: >
-      The rke2-nonprod overlay is the canonical dev deployment.
+      ArgoCD source: bbi-infrastructure/apps/mereka-lms/overlays/dev/.
       The local overlay is for developer workstations only and is
       NOT a lane — it does not participate in promotion or proof.
 
   staging:
     overlay_dir: deploy/k8s/overlays/staging
+    overlay_owner: bbi-infrastructure  # apps/mereka-lms/overlays/staging/
     namespace: stg-mereka-lms
     domain: staging.academyv2.mereka.io
     legacy_aliases: []
 
   prod:
     overlay_dir: deploy/k8s/overlays/production
+    overlay_owner: bbi-infrastructure  # apps/mereka-lms/overlays/prod/
     namespace: mereka-lms
     domain: academyv2.mereka.io
     legacy_aliases:

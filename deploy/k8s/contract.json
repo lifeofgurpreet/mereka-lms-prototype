@@ -10,7 +10,13 @@
     "service_id": "mereka-lms",
     "lane_identity": "config/lane-identity.yaml",
     "canonical_lanes": ["dev", "staging", "prod"],
-    "_note": "Lane names match GitOps exactly. See config/lane-identity.yaml for overlay mapping."
+    "overlay_ownership": {
+      "app_owned": ["deploy/k8s/overlays/local"],
+      "infra_owned": ["dev", "staging", "prod"],
+      "infra_repo": "bbi-infrastructure",
+      "infra_path_template": "apps/mereka-lms/overlays/{lane}/"
+    },
+    "boundary_note": "ArgoCD deploys from bbi-infrastructure, not this repo. Non-local overlays here are deprecated."
   },
 
   "workloads": [
