@@ -555,6 +555,7 @@ PY
             docs/qa/verify-docs-policy-test.sh \
             docs/qa/verify-docs-foundation-gates.sh \
             docs/qa/verify-docs-foundation-gates-test.sh \
+            docs/qa/run-docs-world-class-gates.sh \
             docs/qa/run-docs-world-class-gates-test.sh \
             docs/qa/verify-doc-command-ref-baseline.sh \
             docs/qa/verify-doc-command-ref-baseline-test.sh \

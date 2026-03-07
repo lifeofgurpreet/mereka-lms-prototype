@@ -35,6 +35,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] `git checkout docs/docs-first-class-20260307-followup-7`
 - [ ] `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
 - [ ] Keep world-class gate `--base-ref` configurable (default `origin/main`) and reuse it for sync, policy range, and trend comparison.
+- [ ] World-class gate runner must fail fast when `--base-ref` cannot be resolved (`git rev-parse --verify "$BASE_REF"`).
 - [ ] Never `git checkout main` in this worktree; stay on the docs branch.
 - [ ] World-class gate runner must fail-fast on `main`/`master` and require a dedicated docs branch in the isolated worktree.
 - [ ] Repeat sync at least every 20 minutes during long editing sessions.
