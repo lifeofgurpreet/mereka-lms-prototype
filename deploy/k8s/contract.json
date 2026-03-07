@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "contract_schema_version": "1",
   "base_path": "deploy/k8s/base",
   "local_overlay": "deploy/k8s/overlays/local",
@@ -422,5 +422,122 @@
         "release_critical": true
       }
     ]
+  },
+
+  "allowedGitOpsOverrides": [
+    {
+      "type": "namespace",
+      "description": "Set namespace for entire app",
+      "example": "namespace: mereka-lms-dev"
+    },
+    {
+      "type": "image_pin",
+      "description": "Override image tag/digest per environment",
+      "example": "newTag: sha-abc123"
+    },
+    {
+      "type": "ingress_host",
+      "description": "Domain names per environment",
+      "example": "host: academyv2.mereka.io"
+    },
+    {
+      "type": "tls_certificate",
+      "description": "TLS cert and issuer per environment"
+    },
+    {
+      "type": "secret_store_ref",
+      "description": "ClusterSecretStore backend per cluster",
+      "example": "name: infisical-secret-store-dev"
+    },
+    {
+      "type": "env_var_injection",
+      "description": "Environment-specific values via env vars",
+      "allowed_vars": [
+        "LMS_ROOT_URL", "CMS_ROOT_URL", "MFE_HOST",
+        "MYSQL_HOST", "REDIS_HOST", "MONGODB_HOST",
+        "SENTRY_DSN", "SENTRY_ENVIRONMENT",
+        "ENABLE_GATEWAY_FULFILLMENT",
+        "MEREKA_LMS_DOMAIN", "MEREKA_CREDENTIALS_DOMAIN"
+      ]
+    },
+    {
+      "type": "resource_sizing",
+      "description": "CPU/memory requests and limits per environment"
+    },
+    {
+      "type": "replica_count",
+      "description": "Scale per environment capacity"
+    },
+    {
+      "type": "argocd_application",
+      "description": "ArgoCD Application/ApplicationSet definitions"
+    },
+    {
+      "type": "sync_policy",
+      "description": "ArgoCD sync policy and health checks"
+    },
+    {
+      "type": "storage_class",
+      "description": "PVC storageClassName per cluster"
+    }
+  ],
+
+  "forbiddenGitOpsMutations": [
+    {
+      "type": "python_settings_logic",
+      "description": "Django production.py variants or FEATURES/INSTALLED_APPS in overlay YAML",
+      "fix": "Add env var read in production.py, set env var in overlay"
+    },
+    {
+      "type": "configmap_hash_hardcoding",
+      "description": "Hardcoded Kustomize content-hash names (e.g. openedx-settings-lms-45kb8hh58m)",
+      "fix": "Use patchesStrategicMerge with name-based matching"
+    },
+    {
+      "type": "full_caddyfile_override",
+      "description": "Replacing entire Caddyfile with app routing logic",
+      "fix": "App repo owns Caddyfile, overlay patches only hosts/TLS"
+    },
+    {
+      "type": "mutable_base_image_tag",
+      "description": ":latest, :main, or branch tags in production overlay",
+      "fix": "Always use SHA-pinned tags from build pipeline"
+    },
+    {
+      "type": "cluster_scoped_resource",
+      "description": "ClusterPolicy, ClusterRole, ClusterSecretStore in app overlay",
+      "fix": "Cluster-scoped resources go in platform-control-plane repo"
+    },
+    {
+      "type": "positional_array_patch",
+      "description": "JSON6902 patches using array indices (e.g. /spec/template/spec/volumes/0)",
+      "fix": "Use strategic merge or named patch targets"
+    },
+    {
+      "type": "app_middleware_sequencing",
+      "description": "Django middleware or auth configuration in overlay",
+      "fix": "Middleware config belongs in app repo production.py"
+    }
+  ],
+
+  "stableResourceNames": {
+    "configMaps": [
+      "caddy-config", "openedx-settings-lms", "openedx-settings-cms",
+      "openedx-config", "openedx-uwsgi-config", "openedx-theme-head-extra",
+      "redis-config", "discovery-settings", "credentials-settings",
+      "mfe-caddy-config", "notes-settings", "xqueue-settings",
+      "enterprise-access-settings"
+    ],
+    "secrets": [
+      "openedx-secrets", "database-secrets", "enterprise-secrets",
+      "enterprise-sso-secrets", "aspects-secrets", "payments-gateway-secrets",
+      "ses-smtp-credentials"
+    ],
+    "labels": {
+      "instance": "app.kubernetes.io/instance: mereka-lms",
+      "partOf": "app.kubernetes.io/part-of: mereka-lms",
+      "name": "app.kubernetes.io/name: <workload-name>"
+    },
+    "_note": "Overlays must reference these names. Kustomize content-hashes ConfigMap names — NEVER hardcode the hashed suffix."
   }
 }

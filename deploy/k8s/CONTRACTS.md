@@ -71,8 +71,20 @@ override individual files using `behavior: merge` or `behavior: replace`.
 
 ### Images
 
-The base uses mutable `mereka-brand` tags. Non-local overlays **MUST** pin to
-immutable `tag+digest` references.
+The base uses `pin-required` sentinel tags for openedx and MFE images. Non-local overlays **MUST** pin to immutable `tag+digest` references.
+
+### GitOps Boundary
+
+The contract defines exactly what the GitOps consumer repo may override.
+See `contract.json` fields `allowedGitOpsOverrides` and `forbiddenGitOpsMutations`.
+
+**Allowed**: namespace, image pins, ingress hosts, TLS, secret store refs,
+env var injection (specific vars listed), resource sizing, replica counts,
+ArgoCD config, storage class.
+
+**Forbidden**: Python settings logic, hardcoded configmap hashes, full Caddyfile
+overrides, mutable image tags, cluster-scoped resources in app overlay,
+positional array patches, app middleware sequencing.
 
 ## What the GitOps Repo Must Provide
 

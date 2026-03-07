@@ -51,10 +51,12 @@ done
 PASS=0
 FAIL=0
 SKIP=0
+WARN=0
 
 pass()  { echo -e "${GREEN}[PASS]${NC} $*"; PASS=$((PASS + 1)); }
 fail()  { echo -e "${RED}[FAIL]${NC} $*"; FAIL=$((FAIL + 1)); }
 skip()  { echo -e "${YELLOW}[SKIP]${NC} $*"; SKIP=$((SKIP + 1)); }
+warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; WARN=$((WARN + 1)); }
 info()  { echo -e "${CYAN}[INFO]${NC} $*"; }
 header(){ echo -e "\n${BOLD}=== $* ===${NC}"; }
 
@@ -243,11 +245,70 @@ else
   fi
 fi
 
+# ── Gate 7: Contract bundle version consistency ───────────────────────────
+header "Gate 7: Contract Bundle Version"
+
+VERSION_FILE="deploy/k8s/VERSION"
+if [[ -f "$CONTRACT" ]] && [[ -f "$VERSION_FILE" ]]; then
+  CONTRACT_VER=$(python3 -c "import json; print(json.load(open('$CONTRACT'))['version'])" 2>/dev/null || true)
+  FILE_VER=$(tr -d '[:space:]' < "$VERSION_FILE")
+  if [[ -z "$CONTRACT_VER" ]]; then
+    fail "contract.json is missing 'version' field"
+  elif [[ "$CONTRACT_VER" == "$FILE_VER" ]]; then
+    pass "Contract v$CONTRACT_VER matches VERSION file"
+  else
+    fail "Contract version mismatch: contract.json=$CONTRACT_VER, VERSION=$FILE_VER"
+  fi
+else
+  if [[ ! -f "$CONTRACT" ]] && [[ ! -f "$VERSION_FILE" ]]; then
+    skip "Contract bundle incomplete (missing contract.json and VERSION)"
+  elif [[ ! -f "$CONTRACT" ]]; then
+    skip "contract.json not found — skipping version consistency check"
+  else
+    skip "VERSION file not found at $VERSION_FILE — skipping version consistency check"
+  fi
+fi
+
+# ── Gate 8: Boundary audit (advisory) ─────────────────────────────────────
+header "Gate 8: Deployment Boundary Audit (ADR-025)"
+
+BOUNDARY_WARNS=0
+for platform_dir in arc logging policies; do
+  if [[ -d "$REPO_ROOT/deploy/k8s/base/$platform_dir" ]]; then
+    warn "Platform resource still in app repo: deploy/k8s/base/$platform_dir (ADR-025 Phase 3 — migrate to bbi-infrastructure)"
+    BOUNDARY_WARNS=$((BOUNDARY_WARNS + 1))
+  fi
+done
+if [[ $BOUNDARY_WARNS -eq 0 ]]; then
+  pass "No platform-shared resources found in app repo (ADR-025 compliant)"
+fi
+
+# ── Proof artifact ────────────────────────────────────────────────────────
+PROOF_DIR="$REPO_ROOT/var/proof"
+mkdir -p "$PROOF_DIR"
+VERDICT="pass"
+[[ $FAIL -gt 0 ]] && VERDICT="fail"
+cat > "$PROOF_DIR/release-gate.json" <<PROOF
+{
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "sha": "$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo "unknown")",
+  "overlay": "$OVERLAY",
+  "skip_cluster": $SKIP_CLUSTER,
+  "gates_pass": $PASS,
+  "gates_fail": $FAIL,
+  "gates_warn": $WARN,
+  "gates_skip": $SKIP,
+  "verdict": "$VERDICT"
+}
+PROOF
+info "Proof artifact written: $PROOF_DIR/release-gate.json"
+
 # ── Summary ───────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}━━━ Release Gate Summary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "  ${GREEN}PASS${NC}  $PASS"
 echo -e "  ${YELLOW}SKIP${NC}  $SKIP"
+echo -e "  ${YELLOW}WARN${NC}  $WARN"
 echo -e "  ${RED}FAIL${NC}  $FAIL"
 echo ""
 

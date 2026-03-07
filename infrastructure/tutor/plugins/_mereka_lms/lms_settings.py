@@ -109,6 +109,8 @@ CSP_IMG_SRC = (
     "https://i.ytimg.com",             # YouTube video thumbnails
     "https://img.youtube.com",         # YouTube video thumbnails
     "https://www.gravatar.com",        # User avatar images
+    "https://stream.mux.com",          # Mux video poster / thumbnail frames
+    "https://image.mux.com",           # Mux image API (thumbnails, storyboards)
 )
 CSP_CONNECT_SRC = (
     "'self'",
