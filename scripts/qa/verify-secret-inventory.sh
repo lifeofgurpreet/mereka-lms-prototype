@@ -5,9 +5,9 @@ set -euo pipefail
 # Validates that every ExternalSecret remoteRef.key exists in GCP Secret Manager.
 # Skips GCP check if not authenticated; always validates YAML parseability.
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 EXTERNAL_SECRETS_FILE="${REPO_ROOT}/deploy/k8s/base/secrets/external-secrets.yaml"
-GCP_PROJECT="bbi-k8"
+GCP_PROJECT="${GCP_PROJECT_OVERRIDE:-bbi-k8}"
 
 PASS=0
 FAIL=0
