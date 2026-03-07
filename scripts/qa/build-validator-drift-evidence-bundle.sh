@@ -199,9 +199,11 @@ for wf in (root / ".github/workflows").glob("*.y*ml"):
 
 rows = []
 for script in scripts:
+    status = "deprecated" if "/deprecated/" in script else "active"
     rows.append(
         {
             "path": script,
+            "status": status,
             "in_ci_static": script in static,
             "workflow_refs": sorted(set(wf_refs.get(script, []))),
             "reachable": bool(script in static or wf_refs.get(script)),
@@ -263,7 +265,16 @@ if reachability_file.is_file():
 else:
     data = {"scripts": []}
 
-unreachable = [s["path"] for s in data.get("scripts", []) if not s.get("reachable")]
+unreachable = [
+    s["path"]
+    for s in data.get("scripts", [])
+    if s.get("status") != "deprecated" and not s.get("reachable")
+]
+deprecated_unreachable = [
+    s["path"]
+    for s in data.get("scripts", [])
+    if s.get("status") == "deprecated" and not s.get("reachable")
+]
 print("# Open Risks")
 if unreachable:
     print("- Unreachable validators (not in ci-scripts-static or workflow refs):")
@@ -273,6 +284,8 @@ if unreachable:
         print(f"  - ... {len(unreachable)-50} more")
 else:
     print("- No unreachable verify scripts detected by static map.")
+if deprecated_unreachable:
+    print(f"- Deprecated unreachable validators ignored in risk list: {len(deprecated_unreachable)}")
 print("- Review 06_mutability_scan.txt for mutating/destructive commands under qa surfaces.")
 print("- Review 08_generated_artifact_leakage.txt for tracked generated artifacts.")
 PY

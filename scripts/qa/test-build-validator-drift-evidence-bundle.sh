@@ -41,5 +41,10 @@ grep -q '"canonical_hypothesis"' "$OUT_DIR/02_claims.json"
 head -n1 "$OUT_DIR/command-status.tsv" | grep -q "name"
 head -n1 "$OUT_DIR/command-status.tsv" | grep -q "exit_code"
 head -n1 "$OUT_DIR/command-status.tsv" | grep -q "output_path"
+if grep -q 'scripts/qa/deprecated/' "$OUT_DIR/11_open_risks.md"; then
+  echo "FAIL deprecated validators should not appear as open unreachable risks"
+  cat "$OUT_DIR/11_open_risks.md"
+  exit 1
+fi
 
 echo "PASS test-build-validator-drift-evidence-bundle"
