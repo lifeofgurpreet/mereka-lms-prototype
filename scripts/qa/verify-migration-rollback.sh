@@ -13,7 +13,7 @@ set -euo pipefail
 # 2. The rollback script (rollback-openedx-imports.py) exists
 # 3. Backup scripts/procedures are documented
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
