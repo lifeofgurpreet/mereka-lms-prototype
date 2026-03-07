@@ -5,9 +5,22 @@ set -euo pipefail
 # Usage: ./scripts/tools/sync-beads-viewer.sh [--force]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${MEREKA_LMS_REPO_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "${REPO_ROOT}/.." && pwd)}"
+
 BEADS_DB="${BEADS_DB:-${REPO_ROOT}/.beads/beads.db}"
-VIEWER_DIR="${VIEWER_DIR:-/home/projects/mcp_agent_mail/beads-hub/lms}"
+VIEWER_DIR="${VIEWER_DIR:-}"
+if [[ -z "$VIEWER_DIR" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/mcp_agent_mail/beads-hub/lms" \
+    "${HOME}/projects/mcp_agent_mail/beads-hub/lms" \
+    "/home/projects/mcp_agent_mail/beads-hub/lms"; do
+    if [[ -d "$candidate" ]]; then
+      VIEWER_DIR="$candidate"
+      break
+    fi
+  done
+fi
 VIEWER_DB="${VIEWER_DIR}/beads.sqlite3"
 VIEWER_CONFIG="${VIEWER_DIR}/beads.sqlite3.config.json"
 
@@ -28,6 +41,11 @@ if [[ ! -d "$VIEWER_DIR" ]]; then
   exit 1
 fi
 
+VIEWER_OWNER="${VIEWER_OWNER:-$(stat -c '%U:%G' "$VIEWER_DIR" 2>/dev/null || true)}"
+if [[ -z "$VIEWER_OWNER" ]]; then
+  VIEWER_OWNER="$(id -un):$(id -gn)"
+fi
+
 # Calculate hash of source database
 SOURCE_HASH=$(sha256sum "$BEADS_DB" | awk '{print $1}')
 SOURCE_SIZE=$(stat -c%s "$BEADS_DB")
@@ -44,11 +62,10 @@ fi
 # Copy the database
 echo "📦 Syncing beads database..."
 sudo cp "$BEADS_DB" "$VIEWER_DB"
-sudo chown gurpreet:gurpreet "$VIEWER_DB"
+sudo chown "$VIEWER_OWNER" "$VIEWER_DB"
 
 # Generate config.json
-TMP_CONFIG="$(mktemp -t beads-config.XXXXXX.json)"
-cat > "$TMP_CONFIG" <<EOF
+cat > /tmp/beads.config.json <<EOF
 {
   "chunked": false,
   "chunk_count": 0,
@@ -58,9 +75,9 @@ cat > "$TMP_CONFIG" <<EOF
 }
 EOF
 
-sudo cp "$TMP_CONFIG" "$VIEWER_CONFIG"
-sudo chown gurpreet:gurpreet "$VIEWER_CONFIG"
-rm -f "$TMP_CONFIG"
+sudo cp /tmp/beads.config.json "$VIEWER_CONFIG"
+sudo chown "$VIEWER_OWNER" "$VIEWER_CONFIG"
+rm /tmp/beads.config.json
 
 # Get bead statistics
 TOTAL=0
@@ -90,8 +107,8 @@ echo "  Hash: ${SOURCE_HASH:0:12}..."
 echo "  Size: $(numfmt --to=iec-i --suffix=B ${SOURCE_SIZE} 2>/dev/null || echo "${SOURCE_SIZE} bytes")"
 
 # Print cron setup instructions
-cat <<'EOF'
+cat <<EOF
 
 💡 To auto-sync every 15 minutes, add to crontab:
-   */15 * * * * <repo-root>/scripts/tools/sync-beads-viewer.sh >> /tmp/beads-sync.log 2>&1
+   */15 * * * * ${REPO_ROOT}/scripts/tools/sync-beads-viewer.sh >> /tmp/beads-sync.log 2>&1
 EOF

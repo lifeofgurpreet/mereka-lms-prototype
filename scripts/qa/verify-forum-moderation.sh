@@ -24,7 +24,6 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
-HOME_ROOT="${HOME:-}"
 cd "$REPO_ROOT"
 
 GREEN='\033[0;32m'
@@ -62,48 +61,24 @@ skip() { echo -e "${YELLOW}SKIP${NC} $1"; SKIPPED=$((SKIPPED + 1)); }
 
 # Key file paths
 LMS_PROD="deploy/k8s/base/apps/openedx/settings/lms/production.py"
-DEPLOYMENTS="deploy/k8s/base/deployments.yml"
-SERVICES="deploy/k8s/base/services.yml"
-EXT_SECRETS="deploy/k8s/base/secrets/external-secrets.yaml"
-APPLY_PATCHES="infrastructure/tutor/apply-patches.sh"
-BBI_PROD="${BBI_PROD:-}"
-if [[ -z "$BBI_PROD" ]]; then
+BBI_INFRA_ROOT="${BBI_INFRA_PATH:-}"
+if [[ -z "$BBI_INFRA_ROOT" ]]; then
   for candidate in \
-    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py" \
-    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"; do
-    if [[ -f "$candidate" ]]; then
-      BBI_PROD="$candidate"
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
+    "${HOME}/projects/k8s/infrastructure"; do
+    if [[ -d "$candidate" ]]; then
+      BBI_INFRA_ROOT="$candidate"
       break
     fi
   done
 fi
-
-resolve_prod_settings() {
-  local candidates=()
-  if [[ -n "${FORUM_PROD_SETTINGS:-}" ]]; then
-    candidates+=("${FORUM_PROD_SETTINGS}")
-  fi
-  candidates+=(
-    "$REPO_ROOT/../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "$REPO_ROOT/../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "${HOME_ROOT}/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "${HOME_ROOT}/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "$LMS_PROD"
-  )
-
-  local candidate
-  for candidate in "${candidates[@]}"; do
-    if [[ -n "$candidate" && -f "$candidate" ]]; then
-      printf "%s" "$candidate"
-      return 0
-    fi
-  done
-  return 1
-}
-
-BBI_PROD="$(resolve_prod_settings || true)"
+BBI_PROD="${BBI_INFRA_ROOT}/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+DEPLOYMENTS="deploy/k8s/base/deployments.yml"
+SERVICES="deploy/k8s/base/services.yml"
+EXT_SECRETS="deploy/k8s/base/secrets/external-secrets.yaml"
+APPLY_PATCHES="infrastructure/tutor/apply-patches.sh"
 
 echo "=================================================================="
 echo "  Forum Moderation, Spam Controls & Performance"
@@ -119,7 +94,6 @@ echo "  spam:   Spam controls configured (rate limits, depth limits)"
 echo "  rate:   Rate limiting settings present and valid"
 echo "=================================================================="
 echo "  Skip cluster: $SKIP_CLUSTER"
-echo "  Prod settings source: ${BBI_PROD:-not found}"
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -331,7 +305,7 @@ check_ac_008() {
       skip "AC-008: ENABLE_DISCUSSION_SERVICE not explicitly in production overlay (set in base)"
     fi
   else
-    skip "AC-008: production settings source not found"
+    skip "AC-008: bbi-infrastructure production overlay not found"
   fi
 
   # 9. Forum MongoDB stores moderation data (abuse_flags in contents collection)

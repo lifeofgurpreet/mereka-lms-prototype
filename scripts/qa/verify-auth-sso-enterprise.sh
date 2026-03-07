@@ -57,17 +57,20 @@ skip_() { SKIP=$((SKIP + 1)); printf "SKIP: %s\n" "$1"; }
 
 # Key file paths
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
-BBI_PROD="${BBI_PROD:-}"
-if [[ -z "$BBI_PROD" ]]; then
+BBI_INFRA_ROOT="${BBI_INFRA_PATH:-}"
+if [[ -z "$BBI_INFRA_ROOT" ]]; then
   for candidate in \
-    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py" \
-    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"; do
-    if [[ -f "$candidate" ]]; then
-      BBI_PROD="$candidate"
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
+    "${HOME}/projects/k8s/infrastructure"; do
+    if [[ -d "$candidate" ]]; then
+      BBI_INFRA_ROOT="$candidate"
       break
     fi
   done
 fi
+BBI_PROD="${BBI_INFRA_ROOT}/apps/mereka-lms/overlays/prod/patches/production-prod.py"
 EXTERNAL_SECRETS="$REPO_ROOT/deploy/k8s/base/secrets/external-secrets.yaml"
 SAML_KEYGEN="$REPO_ROOT/scripts/tenants/generate-saml-keypair.sh"
 MFA_SCRIPT="$REPO_ROOT/scripts/infra/ensure-authentik-admin-mfa.sh"

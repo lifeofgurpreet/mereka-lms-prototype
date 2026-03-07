@@ -30,17 +30,17 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Auto-detect bbi-infrastructure repo (matches pattern used in verify-gitops-image-overrides.sh)
-BBI_INFRA="${BBI_INFRA:-}"
-if [[ -z "$BBI_INFRA" ]]; then
-  for candidate in \
-    "${WORKSPACE_ROOT}/bbi-infrastructure" \
-    "${WORKSPACE_ROOT}/infrastructure"; do
-    if [[ -d "$candidate" ]]; then
-      BBI_INFRA="$candidate"
-      break
-    fi
-  done
-fi
+BBI_INFRA=""
+for candidate in \
+  "${WORKSPACE_ROOT}/bbi-infrastructure" \
+  "${WORKSPACE_ROOT}/infrastructure" \
+  "${HOME}/projects/k8s/bbi-infrastructure" \
+  "${HOME}/projects/k8s/infrastructure"; do
+  if [[ -d "$candidate" ]]; then
+    BBI_INFRA="$candidate"
+    break
+  fi
+done
 
 PASS=0
 FAIL=0

@@ -4,6 +4,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 APP_BASE="${APP_BASE:-$REPO_ROOT/deploy/k8s/base/kustomization.yaml}"
 APP_PROD_OVERLAY="${APP_PROD_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml}"
@@ -11,12 +12,13 @@ APP_STAGING_OVERLAY="${APP_STAGING_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/stagi
 APP_MFE_CADDYFILE="${APP_MFE_CADDYFILE:-$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile}"
 INFRA_PROD_OVERLAY="${INFRA_PROD_OVERLAY:-}"
 CHECK_INFRA="${CHECK_INFRA:-auto}" # auto|1|0
-WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
   for candidate in \
     "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml" \
-    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"; do
+    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml" \
+    "${HOME}/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml" \
+    "${HOME}/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"; do
     if [[ -f "$candidate" ]]; then
       INFRA_PROD_OVERLAY="$candidate"
       break

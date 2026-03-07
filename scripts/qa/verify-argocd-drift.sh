@@ -26,14 +26,15 @@ BBI_INFRA="${BBI_INFRA:-}"
 if [[ -z "$BBI_INFRA" ]]; then
   for candidate in \
     "${WORKSPACE_ROOT}/bbi-infrastructure" \
-    "${WORKSPACE_ROOT}/infrastructure"; do
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
+    "${HOME}/projects/k8s/infrastructure"; do
     if [[ -d "$candidate" ]]; then
       BBI_INFRA="$candidate"
       break
     fi
   done
 fi
-BBI_INFRA="${BBI_INFRA:-${WORKSPACE_ROOT}/bbi-infrastructure}"
 ARGOCD_NAMESPACE="argocd"
 
 # Known-good source paths per app (git is the source of truth)

@@ -50,7 +50,10 @@ BBI_INFRA="${BBI_INFRA:-}"
 if [[ -z "$BBI_INFRA" ]]; then
   for candidate in \
     "${WORKSPACE_ROOT}/bbi-infrastructure" \
-    "${WORKSPACE_ROOT}/infrastructure"; do
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
+    "${HOME}/projects/k8s/infrastructure" \
+    "${REPO_ROOT}/../bbi-infrastructure"; do
     if [[ -d "$candidate/.github/workflows" ]]; then
       BBI_INFRA="$candidate"
       break

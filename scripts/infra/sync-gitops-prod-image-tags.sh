@@ -62,7 +62,9 @@ done
 if [[ -z "$INFRA_REPO" ]]; then
   for candidate in \
     "${WORKSPACE_ROOT}/infrastructure" \
-    "${WORKSPACE_ROOT}/bbi-infrastructure"; do
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${HOME}/projects/k8s/infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure"; do
     if [[ -d "$candidate/.git" ]]; then
       INFRA_REPO="$candidate"
       break

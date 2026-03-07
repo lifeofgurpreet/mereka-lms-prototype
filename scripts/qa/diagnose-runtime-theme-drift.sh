@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "${REPO_ROOT}/.." && pwd)}"
 LOG_DIR="$REPO_ROOT/var/qa"
 mkdir -p "$LOG_DIR"
 
@@ -17,6 +17,7 @@ FAIL_DEV_PREFLIGHT=0
 FAIL_GITOPS_PARITY=0
 INFRA_REPO=""
 INFRA_BRANCH=""
+INFRA_HINT="<infra-repo>"
 
 run_check() {
   local fail_var="$1"
@@ -38,7 +39,9 @@ echo "Runtime theme drift diagnosis started at ${TIMESTAMP}" | tee "$LOG_FILE"
 
 for candidate in \
   "${WORKSPACE_ROOT}/infrastructure" \
-  "${WORKSPACE_ROOT}/bbi-infrastructure"; do
+  "${WORKSPACE_ROOT}/bbi-infrastructure" \
+  "${HOME}/projects/k8s/infrastructure" \
+  "${HOME}/projects/k8s/bbi-infrastructure"; do
   if [[ -d "$candidate/.git" ]]; then
     INFRA_REPO="$candidate"
     break
@@ -46,6 +49,7 @@ for candidate in \
 done
 
 if [[ -n "$INFRA_REPO" ]]; then
+  INFRA_HINT="$INFRA_REPO"
   INFRA_BRANCH="$(git -C "$INFRA_REPO" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
   if [[ -n "$INFRA_BRANCH" ]]; then
     echo "Detected infra checkout: $INFRA_REPO (branch: $INFRA_BRANCH)" | tee -a "$LOG_FILE"
@@ -82,7 +86,6 @@ if [[ "$FAILURES" -ne 0 ]]; then
   echo "Targeted remediation:" | tee -a "$LOG_FILE"
 
   if [[ "$FAIL_GITOPS_PARITY" -eq 1 ]]; then
-    INFRA_HINT="${INFRA_REPO:-${WORKSPACE_ROOT}/infrastructure}"
     cat <<EOF | tee -a "$LOG_FILE"
 1. Fix app/infra GitOps parity first:
    - scripts/infra/sync-gitops-prod-image-tags.sh --infra-repo ${INFRA_HINT} --apply

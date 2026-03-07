@@ -50,7 +50,9 @@ fi
 if [[ -z "${GITOPS_REPO_ROOT}" ]]; then
   for candidate in \
     "${WORKSPACE_ROOT}/bbi-infrastructure" \
-    "${WORKSPACE_ROOT}/infrastructure"; do
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
+    "${HOME}/projects/k8s/infrastructure"; do
     if [[ -d "$candidate/.git" ]]; then
       GITOPS_REPO_ROOT="$candidate"
       break

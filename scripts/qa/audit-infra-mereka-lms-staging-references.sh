@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "${REPO_ROOT}/.." && pwd)}"
 
 INFRA_REPO="${INFRA_REPO:-}"
 STRICT=0
@@ -49,7 +49,9 @@ done
 if [[ -z "$INFRA_REPO" ]]; then
   for candidate in \
     "${WORKSPACE_ROOT}/infrastructure" \
-    "${WORKSPACE_ROOT}/bbi-infrastructure"; do
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${HOME}/projects/k8s/infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure"; do
     if [[ -d "$candidate/.git" ]]; then
       INFRA_REPO="$candidate"
       break

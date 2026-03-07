@@ -14,7 +14,20 @@ set -euo pipefail
 DOMAIN="${1:-academyv2.mereka.io}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
-HOME_ROOT="${HOME:-}"
+
+BBI_INFRA_ROOT="${BBI_INFRA_PATH:-}"
+if [[ -z "$BBI_INFRA_ROOT" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
+    "${HOME}/projects/k8s/infrastructure"; do
+    if [[ -d "$candidate" ]]; then
+      BBI_INFRA_ROOT="$candidate"
+      break
+    fi
+  done
+fi
 
 # Settings file locations (base repo)
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
@@ -22,45 +35,6 @@ MW_PLATFORM_ADMIN="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_p
 MW_MULTISITE="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py"
 MW_FORWARDED="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py"
 MW_JWT_SESSION="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_jwt_session.py"
-BBI_PROD="${BBI_PROD:-}"
-if [[ -z "$BBI_PROD" ]]; then
-  for candidate in \
-    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py" \
-    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"; do
-    if [[ -f "$candidate" ]]; then
-      BBI_PROD="$candidate"
-      break
-    fi
-  done
-fi
-
-resolve_prod_settings() {
-  local candidates=()
-  if [[ -n "${PLATFORM_MW_PROD_SETTINGS:-}" ]]; then
-    candidates+=("${PLATFORM_MW_PROD_SETTINGS}")
-  fi
-  candidates+=(
-    "$REPO_ROOT/../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "$REPO_ROOT/../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "${HOME_ROOT}/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "${HOME_ROOT}/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
-    "$LMS_SETTINGS"
-  )
-
-  local candidate
-  for candidate in "${candidates[@]}"; do
-    if [[ -n "$candidate" && -f "$candidate" ]]; then
-      printf "%s" "$candidate"
-      return 0
-    fi
-  done
-
-  return 1
-}
-
-BBI_PROD="$(resolve_prod_settings || true)"
 
 # Counters
 PASS=0
@@ -75,7 +49,6 @@ echo "=== Platform Middleware Verification ==="
 echo "Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "Domain: $DOMAIN"
 echo "Repo: $REPO_ROOT"
-echo "Prod settings source: ${BBI_PROD:-not found}"
 echo
 
 # ─── Helper: check if live endpoint is reachable ────────────────────────
@@ -722,6 +695,7 @@ echo
 echo "--- Studio SSO Bypass ---"
 
 # Check: StudioSSOBypassMiddleware exists in bbi-infrastructure overlay
+BBI_PROD="${BBI_INFRA_ROOT}/apps/mereka-lms/overlays/prod/patches/production-prod.py"
 if [ -f "$BBI_PROD" ] && grep -q 'class StudioSSOBypassMiddleware' "$BBI_PROD"; then
   pass_ "SSO Bypass: StudioSSOBypassMiddleware class defined in production overlay"
 else

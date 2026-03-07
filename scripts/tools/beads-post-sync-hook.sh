@@ -5,9 +5,22 @@ set -euo pipefail
 # Usage: ./scripts/tools/beads-post-sync-hook.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${MEREKA_LMS_REPO_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "${REPO_ROOT}/.." && pwd)}"
 BEADS_DB="${BEADS_DB:-${REPO_ROOT}/.beads/beads.db}"
-HUB_INDEX="${HUB_INDEX:-/home/projects/mcp_agent_mail/beads-hub/index.html}"
+
+HUB_INDEX="${HUB_INDEX:-}"
+if [[ -z "$HUB_INDEX" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/mcp_agent_mail/beads-hub/index.html" \
+    "${HOME}/projects/mcp_agent_mail/beads-hub/index.html" \
+    "/home/projects/mcp_agent_mail/beads-hub/index.html"; do
+    if [[ -f "$candidate" ]]; then
+      HUB_INDEX="$candidate"
+      break
+    fi
+  done
+fi
 
 echo "🔄 Running beads post-sync hook..."
 

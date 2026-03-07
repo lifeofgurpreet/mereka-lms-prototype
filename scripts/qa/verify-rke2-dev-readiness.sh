@@ -27,10 +27,16 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 DEFAULT_INFRA_DIR="${DEFAULT_INFRA_DIR:-${WORKSPACE_ROOT}/infrastructure}"
 LEGACY_INFRA_DIR="${LEGACY_INFRA_DIR:-${WORKSPACE_ROOT}/bbi-infrastructure}"
+HOME_DEFAULT_INFRA_DIR="${HOME}/projects/k8s/infrastructure"
+HOME_LEGACY_INFRA_DIR="${HOME}/projects/k8s/bbi-infrastructure"
 if [[ -n "${BBI_INFRA_DIR:-}" ]]; then
   BBI_INFRA_DIR="$BBI_INFRA_DIR"
 elif [[ -d "$DEFAULT_INFRA_DIR" ]]; then
   BBI_INFRA_DIR="$DEFAULT_INFRA_DIR"
+elif [[ -d "$HOME_DEFAULT_INFRA_DIR" ]]; then
+  BBI_INFRA_DIR="$HOME_DEFAULT_INFRA_DIR"
+elif [[ -d "$HOME_LEGACY_INFRA_DIR" ]]; then
+  BBI_INFRA_DIR="$HOME_LEGACY_INFRA_DIR"
 else
   BBI_INFRA_DIR="$LEGACY_INFRA_DIR"
 fi

@@ -74,10 +74,12 @@ echo ""
 # ── Locate bbi-infrastructure repo ───────────────────────────────────────────
 BBI_INFRA=""
 for candidate in \
+  "${BBI_INFRA_PATH:-}" \
   "${WORKSPACE_ROOT}/bbi-infrastructure" \
   "${WORKSPACE_ROOT}/infrastructure" \
-  "${BBI_INFRA_PATH:-/nonexistent}"; do
-  if [[ -d "$candidate" ]]; then
+  "${HOME}/projects/k8s/bbi-infrastructure" \
+  "${HOME}/projects/k8s/infrastructure"; do
+  if [[ -n "$candidate" && -d "$candidate" ]]; then
     BBI_INFRA="$candidate"
     break
   fi
