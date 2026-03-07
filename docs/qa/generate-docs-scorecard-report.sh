@@ -205,6 +205,8 @@ import sys
 payload = json.load(open(sys.argv[1], encoding='utf-8'))
 print(f"cmdref_status={payload.get('status', 'unknown')}")
 print(f"files_checked={payload.get('files_checked', 0)}")
+print(f"cmdref_baseline_enabled={str(payload.get('baseline_enabled', False)).lower()}")
+print(f"cmdref_baseline_entries={payload.get('baseline_entries', 0)}")
 print(f"total_candidates={payload.get('total_candidates', 0)}")
 print(f"missing_references={payload.get('missing_references', 0)}")
 sources = payload.get('candidate_sources', {})
@@ -287,6 +289,7 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 - Catalog score: ${dict[score]:-0} / threshold ${dict[min_score]:-0} (${dict[score_status]:-unknown})
 - Scorecard trend: base=${dict[base_score]:-0}, current=${dict[current_score]:-0}, drop=${dict[score_drop]:-0}, threshold=${dict[max_allowed_drop]:-0}, status=${dict[trend_status]}
 - Command reference checks: ${dict[cmdref_status]:-unknown} (${dict[files_checked]:-0} files, ${dict[missing_references]:-0} missing)
+- Command reference baseline coverage: enabled=${dict[cmdref_baseline_enabled]:-false}, entries=${dict[cmdref_baseline_entries]:-0}
 - Command reference source breakdown: inline=${dict[candidates_inline_code]:-0}, shell=${dict[candidates_shell_block]:-0}, md_link=${dict[candidates_markdown_link]:-0}, md_autolink=${dict[candidates_markdown_autolink]:-0}, md_refdef=${dict[candidates_markdown_refdef]:-0}
 - Link integrity checks: ${dict[link_integrity_status]:-unknown} (${dict[link_integrity_files_checked]:-0} files, ${dict[link_integrity_broken_links]:-0} broken)
 
@@ -331,7 +334,7 @@ cat > "$QUALITY_REPORT_FILE" <<EOF_QUALITY
 |---|---|---|---|
 | \`docs/qa/verify-docs-foundation-gates.sh\` | ${dict[status_foundation_gates]:-unknown} | foundation summary | policy=${dict[status_foundation_policy]:-unknown}, repo_structure=${dict[status_foundation_repo_structure]:-unknown}, policy_content_consistency=${dict[status_foundation_policy_content_consistency]:-unknown}, policy_content_alignment=${dict[status_foundation_policy_content_alignment]:-unknown} |
 | \`docs/qa/verify-docs-policy.sh\` | ${dict[status_foundation_policy_content]:-unknown} | foundation policy metrics | consistency_status=${dict[status_foundation_policy_content_consistency]:-unknown}, consistency_detail=${dict[foundation_policy_content_consistency_detail]:-unknown}, consistency_aligned=${dict[foundation_policy_content_consistency_aligned]:-unknown}, range=${dict[foundation_policy_range]:-n/a}, root_allowlist_violations=${dict[foundation_policy_root_allowlist_violations]:-0}, consistent=${dict[foundation_policy_content_consistent]:-unknown}, content_errors=${dict[foundation_policy_content_errors]:-0} |
-| \`docs/qa/verify-doc-command-ref-baseline.sh\` | ${dict[status_cmdref_baseline]:-unknown} | baseline summary | baseline file integrity contract |
+| \`docs/qa/verify-doc-command-ref-baseline.sh\` | ${dict[status_cmdref_baseline]:-unknown} | baseline summary | baseline file integrity contract, baseline_enabled=${dict[cmdref_baseline_enabled]:-false}, baseline_entries=${dict[cmdref_baseline_entries]:-0} |
 | \`docs/qa/verify-doc-command-refs.sh\` | ${dict[status_cmdref]:-unknown} | command refs summary | docs command/path references, files=${dict[files_checked]:-0}, candidates=${dict[total_candidates]:-0}, inline=${dict[candidates_inline_code]:-0}, shell=${dict[candidates_shell_block]:-0}, md_link=${dict[candidates_markdown_link]:-0}, md_autolink=${dict[candidates_markdown_autolink]:-0}, md_refdef=${dict[candidates_markdown_refdef]:-0}, missing_refs=${dict[missing_references]:-0} |
 | \`docs/qa/verify-doc-link-integrity.sh\` | ${dict[status_link_integrity]:-unknown} | link integrity summary | files=${dict[link_integrity_files_checked]:-0}, broken_links=${dict[link_integrity_broken_links]:-0} |
 | \`docs/qa/verify-docs-scorecard-recency.sh\` | ${dict[status_recency]:-unknown} | scorecard recency summary | max-age-days contract |

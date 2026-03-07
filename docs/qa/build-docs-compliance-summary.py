@@ -94,11 +94,51 @@ def _status_from_scorecard(summary: dict) -> str:
     return str(summary.get("status", "unknown")).lower()
 
 
-def _normalized_status(value: str) -> str:
-    value = value.lower()
+def _normalized_status(value) -> str:
+    value = str(value).lower()
     if value in {"pass", "warn", "fail", "unknown"}:
         return value
     return "unknown"
+
+
+def _normalized_nonnegative_int(value) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return 0
+    return parsed if parsed >= 0 else 0
+
+
+def _as_dict(value) -> dict:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value) -> list:
+    return value if isinstance(value, list) else []
+
+
+def _normalized_string_list(value) -> list[str]:
+    items = _as_list(value)
+    out: list[str] = []
+    for item in items:
+        text = str(item).strip()
+        if text:
+            out.append(text)
+    return out
+
+
+def _normalized_bool(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"1", "true", "yes", "y", "on"}:
+            return True
+        if normalized in {"0", "false", "no", "n", "off"}:
+            return False
+    return False
 
 
 def main() -> int:
@@ -117,12 +157,20 @@ def main() -> int:
     scorecard_delta = _safe_load(args.scorecard_delta_summary, {})
     scorecard_drift = _safe_load(args.scorecard_drift_summary, {})
     link_integrity = _safe_load(args.link_integrity_summary, {})
+    cmdref_candidate_sources_raw = _as_dict(cmdref.get("candidate_sources", {}))
+    cmdref_candidate_sources = {
+        "inline_code": _normalized_nonnegative_int(cmdref_candidate_sources_raw.get("inline_code", 0)),
+        "shell_block": _normalized_nonnegative_int(cmdref_candidate_sources_raw.get("shell_block", 0)),
+        "markdown_link": _normalized_nonnegative_int(cmdref_candidate_sources_raw.get("markdown_link", 0)),
+        "markdown_autolink": _normalized_nonnegative_int(cmdref_candidate_sources_raw.get("markdown_autolink", 0)),
+        "markdown_refdef": _normalized_nonnegative_int(cmdref_candidate_sources_raw.get("markdown_refdef", 0)),
+    }
 
     foundation_status = _normalized_status(_status_from_scorecard(foundation))
     foundation_policy_status = _normalized_status(str(foundation.get("policy_status", "unknown")))
     foundation_repo_status = _normalized_status(str(foundation.get("repo_structure_status", "unknown")))
     foundation_policy_content_source_status = _normalized_status(str(foundation.get("policy_content_status", "unknown")))
-    foundation_policy_content_errors = foundation.get("policy_content_errors", [])
+    foundation_policy_content_errors = _normalized_string_list(foundation.get("policy_content_errors", []))
     foundation_policy_content_status = foundation_policy_content_source_status
     if foundation_policy_content_errors and foundation_policy_content_status == "pass":
         foundation_policy_content_status = "fail"
@@ -197,25 +245,25 @@ def main() -> int:
             "status": cmdref_baseline_status,
             "baseline_file": cmdref_baseline.get("baseline_file", ""),
             "entries": cmdref_baseline.get("entries", 0),
-            "duplicates": cmdref_baseline.get("duplicates", []),
-            "missing": cmdref_baseline.get("missing", []),
-            "invalid_non_markdown": cmdref_baseline.get("invalid_non_markdown", []),
+            "duplicates": _normalized_string_list(cmdref_baseline.get("duplicates", [])),
+            "missing": _normalized_string_list(cmdref_baseline.get("missing", [])),
+            "invalid_non_markdown": _normalized_string_list(cmdref_baseline.get("invalid_non_markdown", [])),
         },
         "command_refs": {
             "status": cmdref_status,
-            "files_checked": cmdref.get("files_checked", 0),
-            "baseline_enabled": cmdref.get("baseline_enabled", False),
-            "baseline_entries": cmdref.get("baseline_entries", 0),
-            "total_candidates": cmdref.get("total_candidates", 0),
-            "candidate_sources": cmdref.get("candidate_sources", {}),
-            "missing_references": cmdref.get("missing_references", 0),
-            "missing": cmdref.get("missing", []),
+            "files_checked": _normalized_nonnegative_int(cmdref.get("files_checked", 0)),
+            "baseline_enabled": _normalized_bool(cmdref.get("baseline_enabled", False)),
+            "baseline_entries": _normalized_nonnegative_int(cmdref.get("baseline_entries", 0)),
+            "total_candidates": _normalized_nonnegative_int(cmdref.get("total_candidates", 0)),
+            "candidate_sources": cmdref_candidate_sources,
+            "missing_references": _normalized_nonnegative_int(cmdref.get("missing_references", 0)),
+            "missing": _normalized_string_list(cmdref.get("missing", [])),
         },
         "link_integrity": {
             "status": link_integrity_status,
             "files_checked": link_integrity.get("files_checked", 0),
             "broken_links": link_integrity.get("broken_links", 0),
-            "broken": link_integrity.get("broken", []),
+            "broken": _normalized_string_list(link_integrity.get("broken", [])),
         },
         "docs_scorecard": {
             "status": scorecard_status,
@@ -286,14 +334,16 @@ def main() -> int:
         f"policy_content_consistency_status={statuses['foundation_policy_content_consistency']} "
         f"policy_content_consistent={str(policy_content_consistent).lower()} "
         f"cmdref_baseline={cmdref_baseline_status} "
+        f"cmdref_baseline_enabled={str(cmdref.get('baseline_enabled', False)).lower()} "
+        f"cmdref_baseline_entries={cmdref.get('baseline_entries', 0)} "
         f"catalog={catalog_status} link_integrity={link_integrity_status} cmdref={cmdref_status} "
         f"cmdref_missing_refs={cmdref.get('missing_references', 0)} "
         f"cmdref_candidates_total={cmdref.get('total_candidates', 0)} "
-        f"cmdref_candidates_inline={cmdref.get('candidate_sources', {}).get('inline_code', 0)} "
-        f"cmdref_candidates_shell={cmdref.get('candidate_sources', {}).get('shell_block', 0)} "
-        f"cmdref_candidates_md_link={cmdref.get('candidate_sources', {}).get('markdown_link', 0)} "
-        f"cmdref_candidates_md_autolink={cmdref.get('candidate_sources', {}).get('markdown_autolink', 0)} "
-        f"cmdref_candidates_md_refdef={cmdref.get('candidate_sources', {}).get('markdown_refdef', 0)} "
+        f"cmdref_candidates_inline={cmdref_candidate_sources.get('inline_code', 0)} "
+        f"cmdref_candidates_shell={cmdref_candidate_sources.get('shell_block', 0)} "
+        f"cmdref_candidates_md_link={cmdref_candidate_sources.get('markdown_link', 0)} "
+        f"cmdref_candidates_md_autolink={cmdref_candidate_sources.get('markdown_autolink', 0)} "
+        f"cmdref_candidates_md_refdef={cmdref_candidate_sources.get('markdown_refdef', 0)} "
         f"scorecard={scorecard_status} trend={comparison_status} "
         f"recency={recency_status} consistency={consistency_status} "
         f"head_freshness={head_freshness_status} timestamp={timestamp_status} "

@@ -145,13 +145,101 @@ cat > "$ROOT_DIR/cmdref-fail.json" <<'EOF_JSON'
     "inline_code": 1,
     "shell_block": 2,
     "markdown_link": 0,
-    "markdown_autolink": 0,
-    "markdown_refdef": 0
+    "markdown_autolink": 0
   },
   "missing_references": 1,
   "missing": [
     "docs/example.md: missing /tmp/cmd"
   ]
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-minimal.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": 0,
+  "total_candidates": 0,
+  "missing_references": 0,
+  "missing": []
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-invalid-sources.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": 1,
+  "total_candidates": 1,
+  "candidate_sources": {
+    "inline_code": "2",
+    "shell_block": -3,
+    "markdown_link": "x",
+    "markdown_autolink": null
+  },
+  "missing_references": 0,
+  "missing": []
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-invalid-shape.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": "7",
+  "baseline_enabled": "yes",
+  "baseline_entries": "3",
+  "total_candidates": "-8",
+  "candidate_sources": "not-an-object",
+  "missing_references": "bad",
+  "missing": "not-a-list"
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-invalid-status.json" <<'EOF_JSON'
+{
+  "status": 123,
+  "files_checked": 1,
+  "baseline_enabled": false,
+  "baseline_entries": 0,
+  "total_candidates": 1,
+  "candidate_sources": {
+    "inline_code": 1
+  },
+  "missing_references": 0,
+  "missing": []
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-mixed-list.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": 1,
+  "baseline_enabled": false,
+  "baseline_entries": 0,
+  "total_candidates": 1,
+  "candidate_sources": {
+    "inline_code": 1
+  },
+  "missing_references": 1,
+  "missing": [123, "docs/example.md: missing x", true, "  "]
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/cmdref-baseline-invalid-shape.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "baseline_file": "docs/qa/.doc-command-ref-baseline",
+  "entries": 4,
+  "duplicates": "bad",
+  "missing": "bad",
+  "invalid_non_markdown": "bad"
+}
+EOF_JSON
+
+cat > "$ROOT_DIR/link-integrity-invalid-shape.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": 2,
+  "broken_links": 0,
+  "broken": "bad"
 }
 EOF_JSON
 
@@ -379,6 +467,168 @@ python3 docs/qa/build-docs-compliance-summary.py \
   --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
   --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
   --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-minimal.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$ROOT_DIR/summary-minimal-cmdref.json"
+
+python3 - "$ROOT_DIR/summary-minimal-cmdref.json" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+sources = payload.get("command_refs", {}).get("candidate_sources", {})
+required = {"inline_code", "shell_block", "markdown_link", "markdown_autolink", "markdown_refdef"}
+if set(sources.keys()) != required:
+    raise SystemExit("expected normalized candidate_sources keys for minimal cmdref summary")
+if any(sources[k] != 0 for k in required):
+    raise SystemExit("expected normalized candidate_sources values to be zero for minimal cmdref summary")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-invalid-sources.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$ROOT_DIR/summary-invalid-sources.json"
+
+python3 - "$ROOT_DIR/summary-invalid-sources.json" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+sources = payload.get("command_refs", {}).get("candidate_sources", {})
+if sources.get("inline_code") != 2:
+    raise SystemExit("expected inline_code string to normalize to int")
+if sources.get("shell_block") != 0:
+    raise SystemExit("expected negative shell_block to normalize to 0")
+if sources.get("markdown_link") != 0:
+    raise SystemExit("expected non-numeric markdown_link to normalize to 0")
+if sources.get("markdown_autolink") != 0:
+    raise SystemExit("expected null markdown_autolink to normalize to 0")
+if sources.get("markdown_refdef") != 0:
+    raise SystemExit("expected missing markdown_refdef to normalize to 0")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-invalid-shape.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-invalid-shape.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-invalid-shape.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$ROOT_DIR/summary-invalid-shape.json"
+
+python3 - "$ROOT_DIR/summary-invalid-shape.json" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+command_refs = payload.get("command_refs", {})
+if command_refs.get("files_checked") != 7:
+    raise SystemExit("expected files_checked string to normalize to int")
+if command_refs.get("baseline_enabled") is not True:
+    raise SystemExit("expected baseline_enabled string to normalize to true")
+if command_refs.get("baseline_entries") != 3:
+    raise SystemExit("expected baseline_entries string to normalize to int")
+if command_refs.get("total_candidates") != 0:
+    raise SystemExit("expected negative total_candidates to normalize to 0")
+if command_refs.get("missing_references") != 0:
+    raise SystemExit("expected non-numeric missing_references to normalize to 0")
+if command_refs.get("missing") != []:
+    raise SystemExit("expected non-list missing field to normalize to []")
+sources = command_refs.get("candidate_sources", {})
+required = {"inline_code", "shell_block", "markdown_link", "markdown_autolink", "markdown_refdef"}
+if set(sources.keys()) != required:
+    raise SystemExit("expected candidate_sources non-dict input to normalize to required keys")
+if any(sources[k] != 0 for k in required):
+    raise SystemExit("expected candidate_sources non-dict input to normalize to zeros")
+baseline = payload.get("command_reference_baseline", {})
+if baseline.get("duplicates") != [] or baseline.get("missing") != [] or baseline.get("invalid_non_markdown") != []:
+    raise SystemExit("expected non-list baseline fields to normalize to []")
+link_integrity = payload.get("link_integrity", {})
+if link_integrity.get("broken") != []:
+    raise SystemExit("expected non-list broken links field to normalize to []")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-invalid-status.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$ROOT_DIR/summary-invalid-status.json"
+
+python3 - "$ROOT_DIR/summary-invalid-status.json" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+if payload.get("statuses", {}).get("command_references") != "unknown":
+    raise SystemExit("expected non-string command_refs.status to normalize to unknown")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-mixed-list.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$ROOT_DIR/summary-mixed-list.json"
+
+python3 - "$ROOT_DIR/summary-mixed-list.json" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+missing = payload.get("command_refs", {}).get("missing", [])
+if missing != ["123", "docs/example.md: missing x", "True"]:
+    raise SystemExit("expected mixed-type missing list items to normalize to non-empty strings")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
   --cmdref-summary "$ROOT_DIR/cmdref-pass.json" \
   --scorecard "$ROOT_DIR/scorecard-pass.json" \
   --comparison "$ROOT_DIR/trend-pass.json" \
@@ -392,8 +642,13 @@ python3 docs/qa/build-docs-compliance-summary.py \
 grep -q "policy_content=pass" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "policy_content_consistency_status=pass" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "policy_content_consistent=true" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_baseline_enabled=false" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_baseline_entries=0" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "cmdref_missing_refs=0" /tmp/build-docs-compliance-summary-pass-stdout.out
 grep -q "cmdref_candidates_inline=1" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_candidates_md_link=1" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_candidates_md_autolink=0" /tmp/build-docs-compliance-summary-pass-stdout.out
+grep -q "cmdref_candidates_md_refdef=0" /tmp/build-docs-compliance-summary-pass-stdout.out
 
 python3 docs/qa/build-docs-compliance-summary.py \
   --foundation-summary "$ROOT_DIR/foundation-inconsistent.json" \
@@ -457,6 +712,8 @@ if payload.get("overall_status") != "fail":
     raise SystemExit("expected overall_status=fail")
 if payload.get("command_refs", {}).get("candidate_sources", {}).get("shell_block") != 2:
     raise SystemExit("expected command_refs.candidate_sources.shell_block=2 in fail payload")
+if payload.get("command_refs", {}).get("candidate_sources", {}).get("markdown_refdef") != 0:
+    raise SystemExit("expected missing command_refs.candidate_sources.markdown_refdef to normalize to 0")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \

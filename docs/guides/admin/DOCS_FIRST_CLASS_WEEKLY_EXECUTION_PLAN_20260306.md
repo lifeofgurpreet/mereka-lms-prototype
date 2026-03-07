@@ -33,13 +33,18 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] `cd /home/gurpreet/projects/k8s/mereka-lms-wt-docs-remediation`
 - [ ] `git fetch origin`
 - [ ] `git checkout docs/docs-first-class-20260307-followup-7`
-- [ ] `git rebase origin/main`
+- [ ] `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
+- [ ] Keep world-class gate `--base-ref` configurable (default `origin/main`) and reuse it for sync, policy range, and trend comparison.
 - [ ] Never `git checkout main` in this worktree; stay on the docs branch.
-- [ ] Repeat fetch+rebase at least every 20 minutes during long editing sessions.
+- [ ] World-class gate runner must fail-fast on `main`/`master` and require a dedicated docs branch in the isolated worktree.
+- [ ] Repeat sync at least every 20 minutes during long editing sessions.
 - [ ] If branch push is rejected after rebase due remote race, run:
   - `git push --force-with-lease origin docs/docs-first-class-20260307-followup-7`
     (keeps branch rebased to latest `origin/main` while protecting against blind overwrite)
-- [ ] `./docs/qa/run-docs-world-class-gates.sh --sync --require-sync --max-age-seconds 1200`
+- [ ] If repeated rebase conflicts block sync, use controlled fallback:
+  - `git rebase --abort` (if mid-rebase)
+  - `git merge --no-edit origin/main`
+  - resolve conflicts favoring stricter docs-gate behavior, then commit and push
 - [ ] `git status --short` is clean
 - [ ] `git rev-list --left-right --count origin/main...HEAD`
 
@@ -49,7 +54,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - `./scripts/qa/verify-repo-structure.sh`
 - [ ] Record `git rev-parse --short HEAD` and baseline in PR notes.
 - [ ] Before any large content-edit burst, run:
-  - `./docs/qa/run-docs-world-class-gates.sh --require-sync --max-age-seconds 1200`
+  - `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
     (`1200s` defaults to 20 minutes)
 - [ ] Open/confirm existing blocker gates:
   - `GOV-01`, `GOV-02`, `CLS-02`
@@ -60,8 +65,18 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] Create a script: `docs/qa/verify-doc-command-refs.sh`
 - [ ] Script must:
   - scan canonical docs for command snippets in fenced code blocks and inline command references;
-  - parse markdown path targets in inline code, markdown links (`[x](path)`), and markdown autolinks (`<path>`);
+  - parse markdown path targets in inline code, markdown links (`[x](docs/operations/TROUBLESHOOTING.md)`), and markdown autolinks (`<docs/operations/TROUBLESHOOTING.md>`);
   - validate each referenced command/script exists in repo (`scripts/**`, `.github/workflows/**`, canonical runbook commands);
+  - emit summary JSON with stable schema even for zero-scope runs (include `candidate_sources` keys with zero values);
+  - normalize missing `candidate_sources` keys to zero in consolidated compliance outputs.
+  - normalize all `candidate_sources` values to nonnegative integers before emitting compliance/scorecard artifacts.
+  - normalize malformed command-ref metric shapes (`candidate_sources` non-object, numeric strings, negative/non-numeric counts).
+  - normalize `baseline_enabled` to a strict boolean in consolidated compliance outputs (`true|false` only).
+  - normalize status fields from any input type to the canonical set (`pass|warn|fail|unknown`).
+  - normalize malformed list fields to arrays and normalize list items to non-empty strings (`missing`, `broken`, `duplicates`, `invalid_non_markdown`, `policy_content_errors`).
+  - preserve `baseline_enabled=true` / `baseline_entries=<n>` semantics even when effective scan scope is zero after filters.
+  - preserve zero-scope schema for nonexistent explicit input paths (`baseline_enabled=false`, `baseline_entries=0`, all source counters zero).
+  - verify consolidated compliance output normalizes `candidate_sources` keys to zero even when command-ref summary omits that object.
   - fail on missing or unresolved references.
 - [ ] Use backlog snapshot for execution:
   - `docs/archive/reports/cmdref-backlog-snapshot-20260306.md`
@@ -93,9 +108,17 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - link-integrity files checked
   - command-reference files checked
   - command-reference total candidates
+  - command-reference baseline enabled flag
+  - command-reference baseline entries count
   - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - stale canonical count
   - command-reference miss count
+- [ ] Resolve PR workflow base reference deterministically:
+  - compute `BASE_REF` with fallback to `origin/main` when `${{ github.base_ref }}` is empty
+  - reuse one `POLICY_RANGE="${BASE_REF}...${{ github.sha }}"` across policy, changed-doc scope, and foundation checks
+- [ ] `build-docs-compliance-summary.py` stdout contract must include:
+  - `cmdref_baseline_enabled=<true|false>`
+  - `cmdref_baseline_entries=<n>`
 
 ## 6) Day 4 — Scorecard + drift gates
 
@@ -107,6 +130,8 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - canonical coverage %
   - duplicate canonical conflicts
   - broken links in changed scope
+  - command-reference baseline coverage (`enabled`, `entries`) in both program and quality scorecards
+  - program scorecard assertions verify baseline coverage values (not only heading presence)
   - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - root policy violations
   - redirect-stub debt
