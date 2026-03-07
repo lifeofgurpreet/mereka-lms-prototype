@@ -71,6 +71,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - normalize all `candidate_sources` values to nonnegative integers before emitting compliance/scorecard artifacts.
   - normalize malformed command-ref metric shapes (`candidate_sources` non-object, numeric strings, negative/non-numeric counts).
   - normalize `baseline_enabled` to a strict boolean in consolidated compliance outputs (`true|false` only).
+  - normalize status fields from any input type to the canonical set (`pass|warn|fail|unknown`).
   - normalize malformed list fields to arrays and normalize list items to non-empty strings (`missing`, `broken`, `duplicates`, `invalid_non_markdown`, `policy_content_errors`).
   - preserve `baseline_enabled=true` / `baseline_entries=<n>` semantics even when effective scan scope is zero after filters.
   - preserve zero-scope schema for nonexistent explicit input paths (`baseline_enabled=false`, `baseline_entries=0`, all source counters zero).
