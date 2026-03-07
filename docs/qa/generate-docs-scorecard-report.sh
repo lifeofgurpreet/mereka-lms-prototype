@@ -205,6 +205,8 @@ import sys
 payload = json.load(open(sys.argv[1], encoding='utf-8'))
 print(f"cmdref_status={payload.get('status', 'unknown')}")
 print(f"files_checked={payload.get('files_checked', 0)}")
+print(f"cmdref_baseline_enabled={str(payload.get('baseline_enabled', False)).lower()}")
+print(f"cmdref_baseline_entries={payload.get('baseline_entries', 0)}")
 print(f"total_candidates={payload.get('total_candidates', 0)}")
 print(f"missing_references={payload.get('missing_references', 0)}")
 sources = payload.get('candidate_sources', {})
