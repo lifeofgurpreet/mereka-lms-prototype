@@ -66,7 +66,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$ENV_LABEL" || -z "$DISPATCH_PROFILE" || -z "$K8S_CONTEXT" || -z "$GCP_PROJECT" ]]; then
-  usage
+  usage >&2
   exit 1
 fi
 
