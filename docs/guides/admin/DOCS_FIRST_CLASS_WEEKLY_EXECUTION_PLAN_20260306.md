@@ -122,6 +122,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - duplicate canonical conflicts
   - broken links in changed scope
   - command-reference baseline coverage (`enabled`, `entries`) in both program and quality scorecards
+  - program scorecard assertions verify baseline coverage values (not only heading presence)
   - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - root policy violations
   - redirect-stub debt
