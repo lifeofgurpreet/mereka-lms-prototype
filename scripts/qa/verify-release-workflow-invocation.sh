@@ -8,7 +8,7 @@
 #   - Release process doc exists
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 RELEASE_WF="$REPO_ROOT/.github/workflows/release.yml"
 RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
 RELEASE_DOC="$REPO_ROOT/docs/operations/RELEASE_PROCESS.md"

@@ -13,7 +13,7 @@
 #   - Permissions are scoped (contents: write for GitOps commit)
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 RELEASE_WF="$REPO_ROOT/.github/workflows/release.yml"
 
 PASS=0

@@ -4,7 +4,7 @@
 # Verify release-openedx-gitops write modes enforce explicit confirmation and production safety controls.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 TARGET_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
 
 RED='\033[0;31m'
