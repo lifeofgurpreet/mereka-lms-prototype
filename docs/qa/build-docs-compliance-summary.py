@@ -101,6 +101,14 @@ def _normalized_status(value: str) -> str:
     return "unknown"
 
 
+def _normalized_nonnegative_int(value) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return 0
+    return parsed if parsed >= 0 else 0
+
+
 def main() -> int:
     args = parse_args()
 
@@ -118,13 +126,12 @@ def main() -> int:
     scorecard_drift = _safe_load(args.scorecard_drift_summary, {})
     link_integrity = _safe_load(args.link_integrity_summary, {})
     cmdref_candidate_sources = {
-        "inline_code": 0,
-        "shell_block": 0,
-        "markdown_link": 0,
-        "markdown_autolink": 0,
-        "markdown_refdef": 0,
+        "inline_code": _normalized_nonnegative_int(cmdref.get("candidate_sources", {}).get("inline_code", 0)),
+        "shell_block": _normalized_nonnegative_int(cmdref.get("candidate_sources", {}).get("shell_block", 0)),
+        "markdown_link": _normalized_nonnegative_int(cmdref.get("candidate_sources", {}).get("markdown_link", 0)),
+        "markdown_autolink": _normalized_nonnegative_int(cmdref.get("candidate_sources", {}).get("markdown_autolink", 0)),
+        "markdown_refdef": _normalized_nonnegative_int(cmdref.get("candidate_sources", {}).get("markdown_refdef", 0)),
     }
-    cmdref_candidate_sources.update(cmdref.get("candidate_sources", {}))
 
     foundation_status = _normalized_status(_status_from_scorecard(foundation))
     foundation_policy_status = _normalized_status(str(foundation.get("policy_status", "unknown")))
