@@ -457,6 +457,7 @@ with open(sys.argv[2], "a", encoding="utf-8") as fp:
     fp.write(f"- foundation_repo_structure_status={payload.get('statuses', {}).get('foundation_repo_structure', 'n/a')}\n")
     fp.write(f"- foundation_policy_content_status={foundation_status_content}\n")
     fp.write(f"- foundation_policy_content_consistency_status={payload.get('statuses', {}).get('foundation_policy_content_consistency', 'n/a')}\n")
+    fp.write(f"- foundation_policy_content_alignment_status={payload.get('statuses', {}).get('foundation_policy_content_alignment', 'n/a')}\n")
     fp.write(f"- foundation_policy_range={foundation.get('policy_range', 'n/a')}\n")
     fp.write(f"- foundation_policy_root_allowlist_violations={foundation.get('policy_root_allowlist_violations', 'n/a')}\n")
     fp.write(f"- foundation_policy_changed_markdown_files={foundation.get('policy_changed_markdown_files', 'n/a')}\n")

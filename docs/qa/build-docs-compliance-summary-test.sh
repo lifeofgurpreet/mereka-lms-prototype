@@ -351,6 +351,8 @@ if statuses.get("foundation_policy_content") != "pass":
     raise SystemExit("expected statuses.foundation_policy_content=pass")
 if statuses.get("foundation_policy_content_consistency") != "pass":
     raise SystemExit("expected statuses.foundation_policy_content_consistency=pass")
+if statuses.get("foundation_policy_content_alignment") != "pass":
+    raise SystemExit("expected statuses.foundation_policy_content_alignment=pass")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
@@ -405,6 +407,8 @@ if statuses.get("foundation_policy_content") != "fail":
     raise SystemExit("expected statuses.foundation_policy_content=fail for inconsistent input")
 if statuses.get("foundation_policy_content_consistency") != "fail":
     raise SystemExit("expected statuses.foundation_policy_content_consistency=fail for inconsistent input")
+if statuses.get("foundation_policy_content_alignment") != "fail":
+    raise SystemExit("expected statuses.foundation_policy_content_alignment=fail for inconsistent input")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \

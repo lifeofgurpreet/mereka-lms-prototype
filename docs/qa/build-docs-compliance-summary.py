@@ -148,6 +148,7 @@ def main() -> int:
         "foundation_repo_structure": foundation_repo_status,
         "foundation_policy_content": foundation_policy_content_status,
         "foundation_policy_content_consistency": "pass" if policy_content_consistent else "fail",
+        "foundation_policy_content_alignment": "pass" if policy_content_consistent else "fail",
         "command_reference_baseline": cmdref_baseline_status,
         "link_integrity": link_integrity_status,
         "command_references": cmdref_status,
