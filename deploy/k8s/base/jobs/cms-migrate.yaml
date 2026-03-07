@@ -51,6 +51,28 @@ spec:
               value: cms
             - name: DJANGO_SETTINGS_MODULE
               value: cms.envs.tutor.production
+            # Remapped secret keys — must match CMS Deployment env block.
+            - name: MONGODB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: FORUM_MONGODB_HOST
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: JWT_SECRET_KEY_CMS
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: enterprise-sso-secrets
+                optional: true
+            - secretRef:
+                name: database-secrets
+            - secretRef:
+                name: mereka-lms-runtime-secrets
+                optional: true
           resources:
             requests:
               cpu: 100m

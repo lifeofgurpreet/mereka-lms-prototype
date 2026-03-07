@@ -7,10 +7,14 @@ on:
       - ".github/workflows/docs-policy.yml"
       - "docs/qa/verify-docs-policy.sh"
 
+permissions: {}
+
 jobs:
   docs-policy:
     name: Enforce docs anti-regression gates
     runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
