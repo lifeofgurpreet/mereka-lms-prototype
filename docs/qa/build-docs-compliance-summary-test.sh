@@ -180,6 +180,19 @@ cat > "$ROOT_DIR/cmdref-invalid-sources.json" <<'EOF_JSON'
 }
 EOF_JSON
 
+cat > "$ROOT_DIR/cmdref-invalid-shape.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": "7",
+  "baseline_enabled": true,
+  "baseline_entries": "3",
+  "total_candidates": "-8",
+  "candidate_sources": "not-an-object",
+  "missing_references": "bad",
+  "missing": []
+}
+EOF_JSON
+
 cat > "$ROOT_DIR/scorecard-pass.json" <<'EOF_JSON'
 {
   "status": "pass",
@@ -460,6 +473,44 @@ if sources.get("markdown_autolink") != 0:
     raise SystemExit("expected null markdown_autolink to normalize to 0")
 if sources.get("markdown_refdef") != 0:
     raise SystemExit("expected missing markdown_refdef to normalize to 0")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-invalid-shape.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$ROOT_DIR/summary-invalid-shape.json"
+
+python3 - "$ROOT_DIR/summary-invalid-shape.json" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+command_refs = payload.get("command_refs", {})
+if command_refs.get("files_checked") != 7:
+    raise SystemExit("expected files_checked string to normalize to int")
+if command_refs.get("baseline_entries") != 3:
+    raise SystemExit("expected baseline_entries string to normalize to int")
+if command_refs.get("total_candidates") != 0:
+    raise SystemExit("expected negative total_candidates to normalize to 0")
+if command_refs.get("missing_references") != 0:
+    raise SystemExit("expected non-numeric missing_references to normalize to 0")
+sources = command_refs.get("candidate_sources", {})
+required = {"inline_code", "shell_block", "markdown_link", "markdown_autolink", "markdown_refdef"}
+if set(sources.keys()) != required:
+    raise SystemExit("expected candidate_sources non-dict input to normalize to required keys")
+if any(sources[k] != 0 for k in required):
+    raise SystemExit("expected candidate_sources non-dict input to normalize to zeros")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
