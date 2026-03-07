@@ -9,7 +9,7 @@
 #   ./scripts/qa/verify-dev-prod-secret-separation.sh
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+ROOT_DIR="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$ROOT_DIR"
 
 source "$ROOT_DIR/scripts/shared/ci-skip-guards.sh"

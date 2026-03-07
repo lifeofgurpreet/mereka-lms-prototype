@@ -10,16 +10,18 @@
 #   ./scripts/qa/verify-secrets-inventory.sh
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+ROOT_DIR="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$ROOT_DIR"
 
-python3 - <<'PY'
+python3 - "$ROOT_DIR" <<'PY'
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 import yaml
+
+root = Path(sys.argv[1]).resolve()
 
 def load_external_secret(path: Path, name: str) -> dict:
     docs = list(yaml.safe_load_all(path.read_text(encoding="utf-8")))
@@ -30,7 +32,7 @@ def load_external_secret(path: Path, name: str) -> dict:
                 return d
     raise KeyError(f"ExternalSecret {name!r} not found in {path}")
 
-base = Path("deploy/k8s/base/secrets/external-secrets.yaml")
+base = root / "deploy/k8s/base/secrets/external-secrets.yaml"
 if not base.exists():
     print("[FAIL] Missing deploy/k8s/base/secrets/external-secrets.yaml", file=sys.stderr)
     raise SystemExit(1)
@@ -74,7 +76,7 @@ if missing:
     raise SystemExit(1)
 
 # database-secrets: base is represented via placeholder Secret manifest today.
-placeholder = Path("deploy/k8s/base/secrets/openedx-secrets.yaml")
+placeholder = root / "deploy/k8s/base/secrets/openedx-secrets.yaml"
 if not placeholder.exists():
     print("[FAIL] Missing deploy/k8s/base/secrets/openedx-secrets.yaml", file=sys.stderr)
     raise SystemExit(1)
