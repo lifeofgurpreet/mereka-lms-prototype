@@ -18,6 +18,10 @@ cat >"$tmpdir/scripts/qa/verify-manual.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 EOF
+cat >"$tmpdir/scripts/qa/verify-chained.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+EOF
 cat >"$tmpdir/scripts/qa/deprecated/verify-old.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -29,6 +33,7 @@ EOF
 cat >"$tmpdir/scripts/qa/run-release-verification-gates.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
+./scripts/qa/run-wrapper.sh
 EOF
 cat >"$tmpdir/scripts/qa/run-operations-gates.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -42,6 +47,11 @@ cat >"$tmpdir/.github/workflows/ci.yml" <<'EOF'
 name: ci
 on: [push]
 jobs: {}
+EOF
+cat >"$tmpdir/scripts/qa/run-wrapper.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+./scripts/qa/verify-chained.sh
 EOF
 
 ALLOWLIST="$tmpdir/allowlist.json"

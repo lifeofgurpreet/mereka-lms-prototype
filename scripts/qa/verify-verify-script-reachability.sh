@@ -15,6 +15,7 @@ ALLOWLIST_PATH="${VERIFY_REACHABILITY_ALLOWLIST_OVERRIDE:-$REPO_ROOT/scripts/qa/
 python3 - "$REPO_ROOT" "$ALLOWLIST_PATH" <<'PY'
 from __future__ import annotations
 
+from collections import deque
 import json
 import re
 import sys
@@ -78,20 +79,47 @@ for raw in (repo_root / ".github/ci-scripts-static.txt").read_text(encoding="utf
     ci_static.add(line.split()[0])
 
 reference_text = ""
+direct_entrypoints: set[str] = set()
 for path in [
     repo_root / "scripts/qa/run-release-verification-gates.sh",
     repo_root / "scripts/qa/run-operations-gates.sh",
     repo_root / "scripts/qa/run-multisite-governance-gates.sh",
 ]:
     if path.exists():
+        rel_path = rel(path)
+        direct_entrypoints.add(rel_path)
         reference_text += path.read_text(encoding="utf-8", errors="ignore") + "\n"
 for workflow in (repo_root / ".github/workflows").glob("*.y*ml"):
     reference_text += workflow.read_text(encoding="utf-8", errors="ignore") + "\n"
 
-ref_pattern = re.compile(r"scripts/qa/verify-[A-Za-z0-9_./-]+\.sh")
+ref_pattern = re.compile(r"scripts/[A-Za-z0-9_./-]+\.sh")
 direct_refs = set(ref_pattern.findall(reference_text))
+direct_entrypoints.update(path for path in direct_refs if path.startswith("scripts/"))
 
-reachable = {path for path in verify_scripts if path in ci_static or path in direct_refs}
+all_script_paths: set[str] = set()
+for path in (repo_root / "scripts").rglob("*.sh"):
+    all_script_paths.add(rel(path))
+
+script_edges: dict[str, set[str]] = {path: set() for path in all_script_paths}
+for script in sorted(all_script_paths):
+    script_path = repo_root / script
+    content = script_path.read_text(encoding="utf-8", errors="ignore")
+    for ref in ref_pattern.findall(content):
+        if ref in all_script_paths and ref != script:
+            script_edges[script].add(ref)
+
+chain_reachable: set[str] = set()
+queue: deque[str] = deque(sorted(path for path in direct_entrypoints if path in all_script_paths))
+while queue:
+    current = queue.popleft()
+    if current in chain_reachable:
+        continue
+    chain_reachable.add(current)
+    for nxt in sorted(script_edges.get(current, set())):
+        if nxt not in chain_reachable:
+            queue.append(nxt)
+
+reachable = {path for path in verify_scripts if path in ci_static or path in direct_refs or path in chain_reachable}
 manual_only = sorted(verify_scripts - reachable)
 
 ok(f"reachable verify scripts: {len(reachable)}")
