@@ -474,7 +474,10 @@ with open(sys.argv[2], "a", encoding="utf-8") as fp:
     fp.write(f"- link_integrity_files_checked={link_integrity.get('files_checked', 'n/a')}\n")
     fp.write(f"- link_integrity_broken_links={link_integrity.get('broken_links', 'n/a')}\n")
     fp.write(f"- command_refs_status={payload.get('statuses', {}).get('command_references', 'n/a')}\n")
-    fp.write(f"- command_refs_baseline_enabled={command_refs.get('baseline_enabled', 'n/a')}\n")
+    baseline_enabled = command_refs.get('baseline_enabled', 'n/a')
+    if isinstance(baseline_enabled, bool):
+        baseline_enabled = str(baseline_enabled).lower()
+    fp.write(f"- command_refs_baseline_enabled={baseline_enabled}\n")
     fp.write(f"- command_refs_baseline_entries={command_refs.get('baseline_entries', 'n/a')}\n")
     fp.write(f"- command_refs_files_checked={command_refs.get('files_checked', 'n/a')}\n")
     fp.write(f"- command_refs_total_candidates={command_refs.get('total_candidates', 'n/a')}\n")
