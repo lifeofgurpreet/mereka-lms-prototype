@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-RECORD_PATH="${1:-var/ci/promotion-record.json}"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+RECORD_PATH="${1:-${REPO_ROOT}/var/ci/promotion-record.json}"
 
 if [[ ! -f "${RECORD_PATH}" ]]; then
   echo "FAIL: promotion record not found at ${RECORD_PATH}" >&2
