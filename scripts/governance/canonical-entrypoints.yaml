@@ -16,7 +16,24 @@
 #   alternatives     - Scripts that exist but are NOT the canonical path
 #   status           - canonical | legacy | deprecated (only canonical is valid)
 
-version: "1.0.0"
+version: "2.0.0"
+
+# Canonical operator front door
+# All app-owned operational concerns MUST route through bin/lms-ops.
+# Direct invocation of underlying scripts is acceptable only for CI gates
+# and automated workflows that predate this cutover.
+front_door:
+  canonical: bin/lms-ops
+  concerns:
+    - migrate     # plan/apply/verify
+    - proof       # evidence envelope emission
+    - release-gate
+    - smoke
+    - preflight
+    - topology
+  note: >
+    bin/lms-ops mirrors bin/gitops-ops in bbi-infrastructure.
+    App-owned concerns go through lms-ops; env-owned concerns go through gitops-ops.
 
 entrypoints:
 
