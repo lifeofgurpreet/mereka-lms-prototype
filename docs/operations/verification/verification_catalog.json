@@ -12990,7 +12990,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secret-classification.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13197,7 +13197,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secrets-naming-convention.sh",
-      "reference_count": 15,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

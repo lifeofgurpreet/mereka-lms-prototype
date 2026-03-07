@@ -9,10 +9,10 @@
 #   ./scripts/qa/verify-secrets-naming-convention.sh
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+ROOT_DIR="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$ROOT_DIR"
 
-python3 - <<'PY'
+python3 - "$ROOT_DIR" <<'PY'
 from __future__ import annotations
 
 import sys
@@ -20,10 +20,12 @@ from pathlib import Path
 
 import yaml
 
+root = Path(sys.argv[1]).resolve()
+
 paths: list[Path] = []
 for p in [
-    Path("deploy/k8s/base/secrets"),
-    Path("deploy/k8s/overlays"),
+    root / "deploy/k8s/base/secrets",
+    root / "deploy/k8s/overlays",
 ]:
     if p.exists():
         paths.extend(sorted(p.rglob("*.y*ml")))
@@ -52,9 +54,9 @@ for f in paths:
             remote_ref = item.get("remoteRef") or {}
             remote_key = str(remote_ref.get("key") or "").strip()
             if secret_key and secret_key.startswith("MEREKA_LMS_"):
-                bad_local.append((str(f), secret_key))
+                bad_local.append((str(f.relative_to(root)), secret_key))
             if remote_key and not remote_key.startswith("MEREKA_LMS_"):
-                bad_remote.append((str(f), secret_key, remote_key))
+                bad_remote.append((str(f.relative_to(root)), secret_key, remote_key))
 
 if bad_local:
     for f, sk in bad_local[:50]:
