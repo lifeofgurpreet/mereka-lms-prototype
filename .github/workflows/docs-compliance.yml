@@ -20,6 +20,7 @@ on:
       - "docs/qa/verify-docs-foundation-gates.sh"
       - "docs/qa/verify-docs-foundation-gates-test.sh"
       - "docs/qa/run-docs-world-class-gates.sh"
+      - "docs/qa/run-docs-world-class-gates-test.sh"
       - "docs/qa/generate-docs-scorecard-report.sh"
       - "docs/qa/generate-docs-scorecard-report-test.sh"
       - "docs/qa/verify-docs-scorecard-recency.sh"
@@ -301,6 +302,7 @@ PY
       - name: Verify docs catalog health
         run: |
           set -euo pipefail
+          SYNC_STRATEGY="auto"
           DOCS_FOUNDATION_SUMMARY="${RUNNER_TEMP}/docs-foundation-summary.json"
           DOCS_CMDREF_BASELINE_SUMMARY="${RUNNER_TEMP}/docs-cmdref-baseline-summary.json"
           CATALOG_HEALTH_LOG="$(mktemp)"
@@ -319,6 +321,12 @@ PY
           if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
             BASE_REF="origin/main"
           fi
+          {
+            echo "### Docs Compliance Runtime Context"
+            echo "- sync_strategy=${SYNC_STRATEGY}"
+            echo "- base_ref=${BASE_REF}"
+            echo "- head_sha=${{ github.sha }}"
+          } >> "$GITHUB_STEP_SUMMARY"
           python3 docs/qa/verify-doc-catalog-health.py \
             --max-stale-days 45 \
             --summary-file "$CATALOG_HEALTH_SUMMARY" | tee "$CATALOG_HEALTH_LOG"
@@ -534,6 +542,7 @@ PY
             docs/qa/verify-docs-policy-test.sh \
             docs/qa/verify-docs-foundation-gates.sh \
             docs/qa/verify-docs-foundation-gates-test.sh \
+            docs/qa/run-docs-world-class-gates-test.sh \
             docs/qa/verify-doc-command-ref-baseline.sh \
             docs/qa/verify-doc-command-ref-baseline-test.sh \
             docs/qa/verify-doc-command-refs-test.sh \
@@ -558,6 +567,7 @@ PY
           docs/qa/verify-doc-catalog-health-test.sh
           docs/qa/verify-docs-policy-test.sh
           docs/qa/verify-docs-foundation-gates-test.sh
+          docs/qa/run-docs-world-class-gates-test.sh
           docs/qa/verify-doc-command-ref-baseline-test.sh
           docs/qa/verify-doc-command-refs-test.sh
           docs/qa/verify-doc-link-integrity-test.sh
