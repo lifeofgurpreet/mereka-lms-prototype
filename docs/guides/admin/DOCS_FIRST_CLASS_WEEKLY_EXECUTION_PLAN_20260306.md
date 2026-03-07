@@ -69,6 +69,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - emit summary JSON with stable schema even for zero-scope runs (include `candidate_sources` keys with zero values);
   - normalize missing `candidate_sources` keys to zero in consolidated compliance outputs.
   - preserve `baseline_enabled=true` / `baseline_entries=<n>` semantics even when effective scan scope is zero after filters.
+  - preserve zero-scope schema for nonexistent explicit input paths (`baseline_enabled=false`, `baseline_entries=0`, all source counters zero).
   - fail on missing or unresolved references.
 - [ ] Use backlog snapshot for execution:
   - `docs/archive/reports/cmdref-backlog-snapshot-20260306.md`
