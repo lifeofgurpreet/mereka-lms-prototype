@@ -207,6 +207,12 @@ print(f"cmdref_status={payload.get('status', 'unknown')}")
 print(f"files_checked={payload.get('files_checked', 0)}")
 print(f"total_candidates={payload.get('total_candidates', 0)}")
 print(f"missing_references={payload.get('missing_references', 0)}")
+sources = payload.get('candidate_sources', {})
+print(f"candidates_inline_code={sources.get('inline_code', 0)}")
+print(f"candidates_shell_block={sources.get('shell_block', 0)}")
+print(f"candidates_markdown_link={sources.get('markdown_link', 0)}")
+print(f"candidates_markdown_autolink={sources.get('markdown_autolink', 0)}")
+print(f"candidates_markdown_refdef={sources.get('markdown_refdef', 0)}")
 PY
 )
 
@@ -325,7 +331,7 @@ cat > "$QUALITY_REPORT_FILE" <<EOF_QUALITY
 | \`docs/qa/verify-docs-foundation-gates.sh\` | ${dict[status_foundation_gates]:-unknown} | foundation summary | policy=${dict[status_foundation_policy]:-unknown}, repo_structure=${dict[status_foundation_repo_structure]:-unknown}, policy_content_consistency=${dict[status_foundation_policy_content_consistency]:-unknown}, policy_content_alignment=${dict[status_foundation_policy_content_alignment]:-unknown} |
 | \`docs/qa/verify-docs-policy.sh\` | ${dict[status_foundation_policy_content]:-unknown} | foundation policy metrics | consistency_status=${dict[status_foundation_policy_content_consistency]:-unknown}, consistency_detail=${dict[foundation_policy_content_consistency_detail]:-unknown}, consistency_aligned=${dict[foundation_policy_content_consistency_aligned]:-unknown}, range=${dict[foundation_policy_range]:-n/a}, root_allowlist_violations=${dict[foundation_policy_root_allowlist_violations]:-0}, consistent=${dict[foundation_policy_content_consistent]:-unknown}, content_errors=${dict[foundation_policy_content_errors]:-0} |
 | \`docs/qa/verify-doc-command-ref-baseline.sh\` | ${dict[status_cmdref_baseline]:-unknown} | baseline summary | baseline file integrity contract |
-| \`docs/qa/verify-doc-command-refs.sh\` | ${dict[status_cmdref]:-unknown} | command refs summary | docs command/path references, files=${dict[files_checked]:-0}, candidates=${dict[total_candidates]:-0}, missing_refs=${dict[missing_references]:-0} |
+| \`docs/qa/verify-doc-command-refs.sh\` | ${dict[status_cmdref]:-unknown} | command refs summary | docs command/path references, files=${dict[files_checked]:-0}, candidates=${dict[total_candidates]:-0}, inline=${dict[candidates_inline_code]:-0}, shell=${dict[candidates_shell_block]:-0}, md_link=${dict[candidates_markdown_link]:-0}, md_autolink=${dict[candidates_markdown_autolink]:-0}, md_refdef=${dict[candidates_markdown_refdef]:-0}, missing_refs=${dict[missing_references]:-0} |
 | \`docs/qa/verify-doc-link-integrity.sh\` | ${dict[status_link_integrity]:-unknown} | link integrity summary | files=${dict[link_integrity_files_checked]:-0}, broken_links=${dict[link_integrity_broken_links]:-0} |
 | \`docs/qa/verify-docs-scorecard-recency.sh\` | ${dict[status_recency]:-unknown} | scorecard recency summary | max-age-days contract |
 | \`docs/qa/verify-docs-scorecard-report-consistency.sh\` | ${dict[status_consistency]:-unknown} | consistency summary | filename/title date contract |
