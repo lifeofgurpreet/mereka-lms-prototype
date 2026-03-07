@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     STRIPE_SECRET_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
     STRIPE_PUBLISHABLE_KEY: str = ""
+    STRIPE_EVENT_STALE_PROCESSING_SECONDS: int = 900
 
     # Open edX LMS
     LMS_BASE_URL: str = "http://lms:8000"

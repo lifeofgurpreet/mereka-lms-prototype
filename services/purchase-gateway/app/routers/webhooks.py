@@ -2,7 +2,7 @@
 # @spec: ecommerce-purchase-gateway_spec.md
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from time import monotonic
 
 import stripe
@@ -276,13 +276,28 @@ async def stripe_webhook(
             logger.info("webhook.retrying_failed", stripe_event_id=event_id)
             stripe_event_record = existing_event
         else:
-            observe_webhook_processing(
-                event_type=event_type,
-                status="duplicate",
-                duration_seconds=monotonic() - started_at,
+            stale_after_seconds = max(0, settings.STRIPE_EVENT_STALE_PROCESSING_SECONDS)
+            stale_cutoff = datetime.now(UTC) - timedelta(seconds=stale_after_seconds)
+            is_stale_processing = bool(
+                stale_after_seconds
+                and existing_event.received_at
+                and existing_event.received_at <= stale_cutoff
             )
-            logger.info("webhook.already_processing", stripe_event_id=event_id)
-            return {"status": "duplicate"}
+            if is_stale_processing:
+                logger.warning(
+                    "webhook.retrying_stale_processing",
+                    stripe_event_id=event_id,
+                    stale_after_seconds=stale_after_seconds,
+                )
+                stripe_event_record = existing_event
+            else:
+                observe_webhook_processing(
+                    event_type=event_type,
+                    status="duplicate",
+                    duration_seconds=monotonic() - started_at,
+                )
+                logger.info("webhook.already_processing", stripe_event_id=event_id)
+                return {"status": "duplicate"}
     else:
         # Log event in stripe_events table (handle race with IntegrityError)
         stripe_event_record = StripeEvent(

@@ -7,6 +7,7 @@ import hmac
 import json
 import time
 import uuid
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -226,6 +227,59 @@ async def test_duplicate_in_processing_state_returns_duplicate(mock_stripe, clie
 
     assert resp.status_code == 200
     assert resp.json() == {"status": "duplicate"}
+
+
+@pytest.mark.asyncio
+@patch("app.routers.webhooks.observe_webhook_processing")
+@patch("app.routers.webhooks._handle_checkout_completed", new_callable=AsyncMock)
+@patch("app.routers.webhooks.stripe")
+async def test_stale_processing_event_is_retried(
+    mock_stripe,
+    mock_handle_checkout_completed,
+    mock_observe_webhook_processing,
+    client,
+):
+    """Stale processing events are retried instead of being permanently deduplicated."""
+    import stripe as stripe_lib
+
+    event = _checkout_event()
+    payload = json.dumps(event).encode()
+
+    mock_stripe.Webhook.construct_event.return_value = event
+    mock_stripe.SignatureVerificationError = stripe_lib.SignatureVerificationError
+
+    in_progress = StripeEvent(
+        stripe_event_id=event["id"],
+        event_type=event["type"],
+        payload_json=event,
+        processing_status=ProcessingStatus.processing,
+        received_at=datetime.now(UTC) - timedelta(minutes=30),
+    )
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = in_progress
+
+    mock_db = AsyncMock()
+    mock_db.execute.return_value = mock_result
+    mock_db.commit = AsyncMock()
+    mock_db.rollback = AsyncMock()
+
+    _override_db(mock_db)
+    try:
+        with patch("app.routers.webhooks.settings.STRIPE_EVENT_STALE_PROCESSING_SECONDS", 300):
+            resp = await client.post(
+                "/webhooks/stripe/",
+                content=payload,
+                headers={"Stripe-Signature": "t=1,v1=sig"},
+            )
+    finally:
+        _clear_overrides()
+
+    assert resp.status_code == 200
+    assert resp.json() == {"status": "received"}
+    mock_handle_checkout_completed.assert_awaited_once()
+    _, kwargs = mock_observe_webhook_processing.call_args
+    assert kwargs["event_type"] == "checkout.session.completed"
+    assert kwargs["status"] == "processed"
 
 
 # ---------------------------------------------------------------------------
