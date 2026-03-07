@@ -34,11 +34,11 @@ Reduce tenant onboarding blast radius by driving DB, routing, and MFE config cha
 ### File Changes
 
 1. Add canonical registry:
-   - `tenants/registry.yaml`
+   - `infrastructure/tenants/tenant-contracts.yml`
 2. Add schema/validator:
-   - `scripts/tenants/validate-tenant-registry.sh`
+   - `scripts/tenants/sync-tenant-registry-configmap.sh` (validation mode)
 3. Add docs:
-   - `docs/operations/TENANT_REGISTRY_CONTRACT.md`
+   - `docs/operations/tenant-hosting-readiness.md`
 
 ### Registry Minimum Fields
 
@@ -60,8 +60,8 @@ Reduce tenant onboarding blast radius by driving DB, routing, and MFE config cha
 ### Verification Commands
 
 ```bash
-./scripts/tenants/validate-tenant-registry.sh
-yq e '.tenants[].slug' tenants/registry.yaml
+./scripts/tenants/sync-tenant-registry-configmap.sh --check
+yq e '.tenants[].slug' infrastructure/tenants/tenant-contracts.yml
 ```
 
 ---
@@ -71,9 +71,9 @@ yq e '.tenants[].slug' tenants/registry.yaml
 ### File Changes
 
 1. Add orchestrator:
-   - `scripts/tenants/apply-tenant-registry.sh`
+   - `scripts/tenants/sync-tenant-registry-configmap.sh`
 2. Add generation step:
-   - `scripts/tenants/render-tenant-configmap.sh`
+   - `scripts/tenants/sync-tenant-registry-configmap.sh` (generate/update mode)
 3. Update existing scripts to become sub-commands/helpers:
    - `scripts/tenants/provision-tenant.sh`
    - `scripts/tenants/provision-mfe-config.sh`
@@ -95,8 +95,8 @@ For each tenant entry:
 ### Verification Commands
 
 ```bash
-./scripts/tenants/apply-tenant-registry.sh --dry-run
-./scripts/tenants/apply-tenant-registry.sh --tenant <slug> --dry-run
+./scripts/tenants/sync-tenant-registry-configmap.sh --check
+./scripts/tenants/sync-tenant-registry-configmap.sh --apply
 ```
 
 ---
@@ -106,7 +106,7 @@ For each tenant entry:
 ### File Changes
 
 1. Add drift checker:
-   - `scripts/qa/verify-tenant-registry-drift.sh`
+   - `scripts/qa/verify-tenant-isolation-gates.sh`
 2. CI/workflow integration:
    - `.github/workflows/tenant-isolation-check.yml`
    - `.github/workflows/ci.yml` (offline consistency check)
@@ -131,6 +131,6 @@ For each tenant entry:
 ### Verification Commands
 
 ```bash
-./scripts/qa/verify-tenant-registry-drift.sh --mode local
+./scripts/qa/verify-tenant-isolation-gates.sh --offline
 ./scripts/qa/verify-tenant-isolation-gates.sh --offline
 ```

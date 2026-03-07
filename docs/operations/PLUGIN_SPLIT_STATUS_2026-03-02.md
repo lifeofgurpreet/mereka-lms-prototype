@@ -23,7 +23,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 Validation after refactor:
 - `python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py` PASS
 - `./scripts/qa/verify-paragon-theme-urls.sh` PASS
-- `./scripts/qa/verify-tutor-patches-inventory.sh` PASS
+- `./scripts/qa/deprecated/verify-tutor-patches-inventory.sh` PASS
 
 ## Progress Update (Phase 2, QA compatibility contract layer)
 
@@ -35,7 +35,7 @@ Validation after refactor:
   - `scripts/qa/verify-security-hardening.sh`
   - `scripts/qa/verify-plugin-slot-wiring.sh`
   - `scripts/qa/verify-footer-slot-only.sh`
-  - `scripts/qa/verify-tutor-patches-inventory.sh`
+  - `scripts/qa/deprecated/verify-tutor-patches-inventory.sh`
 - Outcome: staged split prep is now in place for critical gates without moving runtime hook payloads yet.
 
 Validation after phase 2:
@@ -43,7 +43,7 @@ Validation after phase 2:
 - `./scripts/qa/verify-security-hardening.sh` PASS (`PASS=30 WARN=1 FAIL=0`)
 - `./scripts/qa/verify-plugin-slot-wiring.sh` PASS (`PASS=39 FAIL=0 WARN=0`)
 - `./scripts/qa/verify-footer-slot-only.sh` PASS (`PASS=15 FAIL=0 WARN=0`)
-- `./scripts/qa/verify-tutor-patches-inventory.sh` PASS (`23 PASS 0 FAIL 0 SKIP`)
+- `./scripts/qa/deprecated/verify-tutor-patches-inventory.sh` PASS (`23 PASS 0 FAIL 0 SKIP`)
 
 ## Progress Update (Phase 3, wider verifier adoption)
 
@@ -168,7 +168,7 @@ Validation after phase 7:
 
 - Extended compatibility-layer adoption to additional resilience/visual/slot QA verifiers:
   - `scripts/qa/verify-tutor-resilience-full.sh`
-  - `scripts/qa/verify-tutor-patches-inventory.sh`
+  - `scripts/qa/deprecated/verify-tutor-patches-inventory.sh`
   - `scripts/qa/verify-visual-parity-checkpoints.sh`
   - `scripts/qa/verify-slot-migration-readiness.sh`
   - `scripts/qa/verify-selector-to-slot-migration.sh`
@@ -181,7 +181,7 @@ Validation after phase 7:
 
 Validation after phase 8:
 - `./scripts/qa/verify-tutor-resilience-full.sh --skip-cluster` PASS (`Passed: 45 / Failed: 0 / Skipped: 0`)
-- `./scripts/qa/verify-tutor-patches-inventory.sh` PASS (`23 PASS / 0 FAIL / 0 SKIP`)
+- `./scripts/qa/deprecated/verify-tutor-patches-inventory.sh` PASS (`23 PASS / 0 FAIL / 0 SKIP`)
 - `./scripts/qa/verify-visual-parity-checkpoints.sh` PASS (`42 PASS / 0 FAIL / 0 WARN`)
 - `./scripts/qa/verify-slot-migration-readiness.sh` PASS (`11 PASS / 0 FAIL / 2 WARN`)
 - `./scripts/qa/verify-selector-to-slot-migration.sh` PASS (`60 PASS / 0 FAIL`)
@@ -258,10 +258,10 @@ Validation after phase 11:
 
 - Extended compatibility-layer adoption to additional governance/branding/tenancy QA verifiers:
   - `scripts/qa/verify-certificate-branding.sh`
-  - `scripts/qa/verify-postmerge-governance-closure.sh`
+  - `scripts/qa/verify-cross-cutting-requirements.sh`
   - `scripts/qa/verify-legacy-ecommerce-ui-refs.sh`
   - `scripts/qa/verify-paragon-theme-urls.sh`
-  - `scripts/qa/verify-cross-cutting-requirements.sh`
+  - `scripts/qa/verify-cross-cutting-requirements.sh --skip-cluster`
   - `scripts/qa/verify-mereka-tenancy.sh`
 - Outcome:
   - direct path-coupling reduced from `10` to `4`
@@ -270,7 +270,7 @@ Validation after phase 11:
 
 Validation after phase 12:
 - `./scripts/qa/verify-certificate-branding.sh` PASS (`PASS=25 / WARN=0 / FAIL=0`)
-- `./scripts/qa/verify-postmerge-governance-closure.sh` PASS (`PASS=23 / FAIL=0 / WARN=0`)
+- `./scripts/qa/verify-cross-cutting-requirements.sh` PASS (`Passed: 42 / Failed: 0 / Skipped: 2`)
 - `./scripts/qa/verify-legacy-ecommerce-ui-refs.sh` PASS (`PASS=10 / WARN=8 / FAIL=0`)
 - `./scripts/qa/verify-paragon-theme-urls.sh` PASS (`PASS=27 / WARN=0 / FAIL=0`)
 - `./scripts/qa/verify-cross-cutting-requirements.sh --skip-cluster` PASS (`Passed: 42 / Failed: 0 / Skipped: 2`)

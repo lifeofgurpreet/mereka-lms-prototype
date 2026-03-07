@@ -29,11 +29,11 @@ Make the verify-script ecosystem operable by introducing classification, ownersh
 ### File Changes
 
 1. Add machine-readable manifest:
-   - `scripts/qa/verify-manifest.yml`
+   - `scripts/qa/verify-manifest-integrity.sh`
 2. Add validator:
    - `scripts/qa/verify-manifest-integrity.sh`
 3. Add doc:
-   - `docs/operations/VERIFY_SUITE_OPERATING_MODEL.md`
+   - Internal operating model for lane ownership and maintenance cadence (to be documented separately)
 
 ### Manifest Contract
 
@@ -63,11 +63,8 @@ find scripts -type f -name 'verify-*.sh' | wc -l
 
 ### File Changes
 
-1. Add lane wrappers:
-   - `scripts/qa/run-lane-infra.sh`
-   - `scripts/qa/run-lane-branding.sh`
-   - `scripts/qa/run-lane-auth.sh`
-   - `scripts/qa/run-lane-observability.sh`
+1. Add lane-style execution groups:
+   - group verify scripts by domain (infra, branding, auth, observability) and execute via shared entrypoints
 2. Update CI/workflows:
    - `.github/workflows/ci.yml`
    - other scheduled workflows to use lane runners where possible.
@@ -81,9 +78,9 @@ find scripts -type f -name 'verify-*.sh' | wc -l
 ### Verification Commands
 
 ```bash
-bash -n scripts/qa/run-lane-*.sh
-./scripts/qa/run-lane-infra.sh --dry-run
-rg -n "run-lane-" .github/workflows
+bash -n scripts/qa/verify-manifest-integrity.sh
+rg -n "verify-.*\.sh" .github/workflows
+./scripts/qa/verify-manifest-integrity.sh
 ```
 
 ---
@@ -112,5 +109,5 @@ rg -n "run-lane-" .github/workflows
 
 ```bash
 ./scripts/qa/verify-manifest-integrity.sh
-rg -n "deprecated|run-lane" scripts/qa
+rg -n "deprecated|lane" scripts/qa
 ```

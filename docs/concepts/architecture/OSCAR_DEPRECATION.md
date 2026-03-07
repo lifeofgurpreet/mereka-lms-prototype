@@ -106,11 +106,11 @@ The decommission script to implement at `scripts/infra/decommission-legacy-ecomm
    ```
 
 2. **Remove K8s resources** (commit to git, let ArgoCD apply — do NOT `kubectl delete` directly)
-   - `deploy/k8s/base/deployments.yml`: remove `ecommerce` and `ecommerce-worker` Deployment blocks
-   - `deploy/k8s/base/services.yml`: remove `ecommerce` Service
-   - `deploy/k8s/base/kustomization.yaml`: remove `ecommerce-settings` and `ecommerce-worker-settings` ConfigMap references
-   - `deploy/k8s/base/plugins/ecommerce/`: remove entire directory
-   - `deploy/k8s/overlays/production/patches/resource-limits.yaml`: remove ecommerce/ecommerce-worker patches
+- `deploy/k8s/base/apps/` legacy ecommerce deployment and service manifests (legacy, removed from current repo)
+- `deploy/k8s/base/plugins/` legacy Oscar plugin manifest subtree (legacy, removed from current repo)
+- `deploy/k8s/base/kustomization.yaml`: remove `ecommerce-settings` and `ecommerce-worker-settings` ConfigMap references
+- `deploy/k8s/base/plugins/` legacy Oscar plugin manifests (if present)
+- `deploy/k8s/overlays/production/patches/resource-limits.yaml`: remove ecommerce/ecommerce-worker patches
 
 3. **Remove Caddy routing**
    - `deploy/k8s/base/apps/caddy/Caddyfile`: remove both ecommerce server blocks (localhost and production)
@@ -126,7 +126,7 @@ The decommission script to implement at `scripts/infra/decommission-legacy-ecomm
    - Apply via Cloudflare API or Terraform
 
 6. **Remove LMS settings** (after Purchase Gateway is sole purchase path)
-   - `deploy/k8s/base/apps/openedx/settings/lms/production.py`: remove `ECOMMERCE_PUBLIC_URL_ROOT`, `ECOMMERCE_API_URL`
+- `deploy/k8s/base/apps/openedx/settings/lms/*.py`: remove `ECOMMERCE_PUBLIC_URL_ROOT`, `ECOMMERCE_API_URL`
 
 7. **Remove Oscar OAuth2 clients from LMS** (in-cluster)
    ```bash
@@ -157,8 +157,8 @@ The decommission script to implement at `scripts/infra/decommission-legacy-ecomm
    - Remove ecommerce from `infrastructure/k8s/cronjobs/auth-verify-prod.yaml`
 
 10. **Archive Oscar settings**
-    - Move `deploy/k8s/base/plugins/ecommerce/` → `docs/archive/oscar-ecommerce-settings/`
-    - Retain for reference during any incident post-mortem
+    - Retain legacy Oscar references in `docs/archive/` (for incident post-mortem and rollback notes)
+    - Replace archived references with current canonical manifests and runbooks once they are reintroduced into a cleanup PR
 
 11. **Update documentation**
     - `CLAUDE.md`: remove ecommerce from plugin list

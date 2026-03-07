@@ -31,13 +31,13 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 
 ### AC-DOCS-101: Keep branch synced to latest `origin/main` every 20 minutes
 - [ ] `cd /home/gurpreet/projects/k8s/mereka-lms-wt-docs-remediation`
-- [ ] `git fetch origin`
-- [ ] `git checkout docs/docs-first-class-20260307-followup-7`
-- [ ] `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
-- [ ] Keep world-class gate `--base-ref` configurable (default `origin/main`) and reuse it for sync, policy range, and trend comparison.
-- [ ] World-class gate runner must fail fast when `--base-ref` cannot be resolved (`git rev-parse --verify "$BASE_REF"`).
-- [ ] Never `git checkout main` in this worktree; stay on the docs branch.
-- [ ] World-class gate runner must fail-fast on `main`/`master` and require a dedicated docs branch in the isolated worktree.
+- [x] `git fetch origin`
+- [x] `git checkout docs/docs-first-class-20260307-followup-7`
+- [x] `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
+- [x] Keep world-class gate `--base-ref` configurable (default `origin/main`) and reuse it for sync, policy range, and trend comparison.
+- [x] World-class gate runner must fail fast when `--base-ref` cannot be resolved (`git rev-parse --verify "$BASE_REF"`).
+- [x] Never `git checkout main` in this worktree; stay on the docs branch.
+- [x] World-class gate runner must fail-fast on `main`/`master` and require a dedicated docs branch in the isolated worktree.
 - [ ] Repeat sync at least every 20 minutes during long editing sessions.
 - [ ] If branch push is rejected after rebase due remote race, run:
   - `git push --force-with-lease origin docs/docs-first-class-20260307-followup-7`
@@ -46,24 +46,24 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - `git rebase --abort` (if mid-rebase)
   - `git merge --no-edit origin/main`
   - resolve conflicts favoring stricter docs-gate behavior, then commit and push
-- [ ] `git status --short` is clean
-- [ ] `git rev-list --left-right --count origin/main...HEAD`
+- [x] `git status --short` is clean
+- [x] `git rev-list --left-right --count origin/main...HEAD`
 
 ### AC-DOCS-102: Baseline for this execution week
-- [ ] Re-run baseline checks in branch:
+- [x] Re-run baseline checks in branch:
   - `docs/qa/verify-docs-policy.sh`
   - `./scripts/qa/verify-repo-structure.sh`
-- [ ] Record `git rev-parse --short HEAD` and baseline in PR notes.
-- [ ] Before any large content-edit burst, run:
+- [x] Record `git rev-parse --short HEAD` and baseline in PR notes.
+- [x] Before any large content-edit burst, run:
   - `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
     (`1200s` defaults to 20 minutes)
-- [ ] Open/confirm existing blocker gates:
+- [x] Open/confirm existing blocker gates:
   - `GOV-01`, `GOV-02`, `CLS-02`
 
 ## 4) Day 2 — Command-accuracy hardening (code-reflective docs)
 
 ### AC-DOCS-201: Draft command reference verifier
-- [ ] Create a script: `docs/qa/verify-doc-command-refs.sh`
+- [x] Create a script: `docs/qa/verify-doc-command-refs.sh`
 - [ ] Script must:
   - scan canonical docs for command snippets in fenced code blocks and inline command references;
   - parse markdown path targets in inline code, markdown links (`[x](docs/operations/TROUBLESHOOTING.md)`), and markdown autolinks (`<docs/operations/TROUBLESHOOTING.md>`);
@@ -83,27 +83,27 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - `docs/archive/reports/cmdref-backlog-snapshot-20260306.md`
 
 ### AC-DOCS-202: Seed initial high-risk doc checks
-- [ ] Apply checks at least to these documents:
+- [x] Apply checks at least to these documents:
   - `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
   - `docs/ops/quickref/QUICK_REFERENCE.md`
   - `docs/guides/branding/BRANDING_OPERATOR_GUIDE.md`
   - `docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md`
-- [ ] Fix any broken references in the same PR.
+- [x] Fix any broken references in the same PR.
 
 ## 5) Day 3 — CI pipeline enforcement
 
 ### AC-DOCS-301: Add docs compliance workflow
-- [ ] Add workflow: `.github/workflows/docs-compliance.yml`
-- [ ] Trigger: `on: [pull_request]` for paths under `docs/**` and command-verifier inputs.
-- [ ] Required jobs:
+- [x] Add workflow: `.github/workflows/docs-compliance.yml`
+- [x] Trigger: `on: [pull_request]` for paths under `docs/**` and command-verifier inputs.
+- [x] Required jobs:
   - `verify-docs-policy`: run `docs/qa/verify-docs-policy.sh`
   - `verify-repo-structure`: run `./scripts/qa/verify-repo-structure.sh`
   - `verify-doc-command-refs`: run `docs/qa/verify-doc-command-refs.sh`
   - `verify-doc-link-integrity`: run docs link check scoped to changed files
-- [ ] PR gate must print status summary and fail hard on any command-reference miss.
+- [x] PR gate must print status summary and fail hard on any command-reference miss.
 
 ### AC-DOCS-302: PR summary contract
-- [ ] Add a step/job output block that prints:
+- [x] Add a step/job output block that prints:
   - changed canonical docs count
   - broken links count
   - link-integrity files checked
@@ -114,20 +114,20 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - stale canonical count
   - command-reference miss count
-- [ ] Resolve PR workflow base reference deterministically:
+- [x] Resolve PR workflow base reference deterministically:
   - resolve once per workflow run and export via environment for downstream steps
   - compute `BASE_REF` with fallback to `origin/main` when `${{ github.base_ref }}` is empty
   - fail fast if resolved `BASE_REF` cannot be verified in git (`git rev-parse --verify "$BASE_REF"`)
   - reuse one `POLICY_RANGE="${BASE_REF}...${{ github.sha }}"` across policy, changed-doc scope, and foundation checks
-- [ ] `build-docs-compliance-summary.py` stdout contract must include:
+- [x] `build-docs-compliance-summary.py` stdout contract must include:
   - `cmdref_baseline_enabled=<true|false>`
   - `cmdref_baseline_entries=<n>`
 
 ## 6) Day 4 — Scorecard + drift gates
 
 ### AC-DOCS-401: Weekly KPI scorecard (single source output)
-- [ ] Create/update `docs/guides/admin/DOCS_PROGRAM_SCORECARD_<YYYYMMDD>.md` for this week.
-- [ ] Generate from canonical tooling (do not hand-edit metrics):
+- [x] Create/update `docs/guides/admin/DOCS_PROGRAM_SCORECARD_<YYYYMMDD>.md` for this week.
+- [x] Generate from canonical tooling (do not hand-edit metrics):
   - `./docs/qa/generate-docs-scorecard-report.sh --date <YYYYMMDD>`
 - [ ] Include at minimum:
   - canonical coverage %
@@ -138,22 +138,23 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - root policy violations
   - redirect-stub debt
-- [ ] Publish scorecard delta in handoff artifact.
+- [x] Publish scorecard delta in handoff artifact.
 
 ### AC-DOCS-402: Stale canonical escalation policy
-- [ ] Run freshness scan against canonical docs in `docs/catalog.json`.
-- [ ] Run `python3 docs/qa/verify-doc-catalog-health.py --max-stale-days 45`.
-- [ ] Create follow-up tracker ticket per stale canonical (owner + due date).
+- [x] Run freshness scan against canonical docs in `docs/catalog.json`.
+- [x] Run `python3 docs/qa/verify-doc-catalog-health.py --max-stale-days 45`.
+- [x] Create follow-up tracker ticket per stale canonical (owner + due date).  
+      No stale canonical files found; no tracker items needed for this run.
 
 ## 7) Day 5 — Merge readiness and closure continuity
 
 ### AC-DOCS-501: Governance closure prep
-- [ ] Confirm ownership and approvals are present:
+- [x] Confirm ownership and approvals are present:
   - `docs/archive/reports/governance-approval-note-20260306.md`
   - `docs/archive/reports/escalation-appendix-20260306.md`
   - `docs/archive/reports/canonical-authority-approval-matrix-20260306.md`
-- [ ] Update `docs/archive/reports/program-closure-readiness-20260306.md` with final status.
-- [ ] Run final compliance checks + `git push`.
+- [x] Update `docs/archive/reports/program-closure-readiness-20260306.md` with final status.
+- [x] Run final compliance checks + `git push`.
 
 ## 8) PR-ready template (copy/paste)
 

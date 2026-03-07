@@ -341,7 +341,7 @@ All logo assets must be **<500KB** per file.
 **Validation**:
 ```bash
 # Check file size
-ls -lh infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo.png
+ls -lh assets/branding/tenants/biji-biji/logo.png
 # Should be <500KB
 ```
 
@@ -445,8 +445,8 @@ The schema is defined in `specs/brand-pack-schema.json` (JSON Schema draft 2020-
 # Check if jq and ajv-cli are installed
 which jq ajv
 
-# Validate branding.json against schema
-ajv validate -s specs/brand-pack-schema.json -d infrastructure/tutor/themes/mereka/tenants/acme-corp/branding.json
+# Validate branding JSON against schema
+ajv validate -s specs/brand-pack-schema.json -d scripts/tenants/brand-pack-template.json
 ```
 
 ### Automated Validation
@@ -562,12 +562,12 @@ jobs:
 ### Using Template
 
 ```bash
-# Copy template to new tenant directory
+# Copy template for tenant package
 cp scripts/tenants/brand-pack-template.json \
-   infrastructure/tutor/themes/mereka/tenants/new-tenant/branding.json
+   assets/branding/tenants/<tenant_slug>/branding.json
 
-# Edit with tenant-specific values
-vim infrastructure/tutor/themes/mereka/tenants/new-tenant/branding.json
+# Edit with tenant-specific values in `assets/branding/tenants/<tenant_slug>/branding.json`
+vim assets/branding/tenants/<tenant_slug>/branding.json
 
 # Validate
 ./scripts/tenants/validate-tenant-brand-pack.sh --slug new-tenant
@@ -617,13 +617,13 @@ vim infrastructure/tutor/themes/mereka/tenants/new-tenant/branding.json
 **Fix**: Ensure file exists and path is correct:
 ```bash
 # Check if file exists
-ls -lh infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo.png
+ls -lh assets/branding/tenants/biji-biji/logo.png
 
 # If file is in different location, move it:
-mv logo.png infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo.png
+mv logo.png assets/branding/tenants/biji-biji/logo.png
 
 # Update branding.json path
-vim infrastructure/tutor/themes/mereka/tenants/acme-corp/branding.json
+vim scripts/tenants/acme-branding.json
 ```
 
 ---

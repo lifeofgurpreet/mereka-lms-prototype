@@ -33,11 +33,11 @@ Guarantee deterministic brand asset synchronization across all in-repo brand pac
 ### File Changes
 
 1. Add manifest:
-   - `assets/branding/brand-packages.manifest.yml`
+   - `assets/branding/` (manifest-like source for per-brand sync inputs)
 2. Add new orchestrator:
-   - `scripts/branding/sync-brand-packages.sh`
+   - `scripts/branding/sync-brand-assets.sh` and `scripts/branding/sync-brand-package.sh`
 3. Keep compatibility wrapper:
-   - `scripts/branding/sync-brand-package.sh` (calls orchestrator for `brand-mereka`)
+   - `scripts/branding/sync-brand-package.sh` (keeps brand-package sync entrypoint stable)
 4. Update existing sync entrypoint:
    - `scripts/branding/sync-brand-assets.sh`
 
@@ -64,8 +64,8 @@ Example keys:
 ### Verification Commands
 
 ```bash
+./scripts/branding/sync-brand-package.sh --all
 ./scripts/branding/sync-brand-assets.sh
-./scripts/branding/sync-brand-packages.sh --check
 find infrastructure/tutor/brand-* -maxdepth 2 -type f | sort
 ```
 
@@ -76,11 +76,11 @@ find infrastructure/tutor/brand-* -maxdepth 2 -type f | sort
 ### File Changes
 
 1. Add drift verifier:
-   - `scripts/qa/verify-brand-packages-drift.sh`
+   - `scripts/qa/verify-branding-asset-sync.sh`
 2. Wire to CI:
    - `.github/workflows/ci.yml`
 3. Document contract:
-   - `docs/guides/branding/BRAND_ASSET_SYNC_CONTRACT.md`
+   - `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 
 ### Drift Verifier Contract
 
@@ -97,8 +97,8 @@ find infrastructure/tutor/brand-* -maxdepth 2 -type f | sort
 ### Verification Commands
 
 ```bash
-bash -n scripts/qa/verify-brand-packages-drift.sh
-./scripts/qa/verify-brand-packages-drift.sh
+bash -n scripts/qa/verify-branding-asset-sync.sh
+./scripts/qa/verify-branding-asset-sync.sh
 ```
 
 ---
