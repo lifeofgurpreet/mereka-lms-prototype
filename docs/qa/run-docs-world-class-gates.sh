@@ -229,6 +229,7 @@ run_step "verify-docs-scorecard-head-freshness-test" ./docs/qa/verify-docs-score
 run_step "verify-docs-scorecard-report-timestamp-test" ./docs/qa/verify-docs-scorecard-report-timestamp-test.sh
 run_step "verify-docs-scorecard-delta-artifact-test" ./docs/qa/verify-docs-scorecard-delta-artifact-test.sh
 run_step "verify-docs-scorecard-generation-drift-test" ./docs/qa/verify-docs-scorecard-generation-drift-test.sh
+run_step "run-docs-world-class-gates-test" ./docs/qa/run-docs-world-class-gates-test.sh
 run_step "generate-docs-scorecard-report-test" ./docs/qa/generate-docs-scorecard-report-test.sh
 run_step "build-docs-scorecard-test" ./docs/qa/build-docs-scorecard-test.sh
 run_step "compare-docs-scorecard-to-base-test" ./docs/qa/compare-docs-scorecard-to-base-test.sh
