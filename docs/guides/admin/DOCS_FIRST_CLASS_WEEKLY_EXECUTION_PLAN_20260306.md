@@ -36,6 +36,9 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] `git rebase origin/main`
 - [ ] Never `git checkout main` in this worktree; stay on the docs branch.
 - [ ] Repeat fetch+rebase at least every 20 minutes during long editing sessions.
+- [ ] If branch push is rejected after rebase due remote race, run:
+  - `git push --force-with-lease origin docs/docs-first-class-20260307-followup-7`
+    (keeps branch rebased to latest `origin/main` while protecting against blind overwrite)
 - [ ] `./docs/qa/run-docs-world-class-gates.sh --sync --require-sync --max-age-seconds 1200`
 - [ ] `git status --short` is clean
 - [ ] `git rev-list --left-right --count origin/main...HEAD`
