@@ -173,6 +173,7 @@ PY
 # 5) CI/workflow reachability map
 python3 - <<'PY' >"$OUT_DIR/05_ci_reachability.json"
 from __future__ import annotations
+from collections import deque
 import json
 import re
 from pathlib import Path
@@ -180,6 +181,7 @@ from pathlib import Path
 root = Path(".")
 pattern = re.compile(r"scripts/[A-Za-z0-9_./-]+\.sh")
 scripts = sorted(str(p) for p in root.glob("scripts/**/verify-*.sh"))
+all_shell_scripts = {str(p) for p in root.glob("scripts/**/*.sh")}
 static = set()
 static_file = root / ".github/ci-scripts-static.txt"
 if static_file.exists():
@@ -190,23 +192,76 @@ if static_file.exists():
         static.add(line.split(" #", 1)[0].strip().split()[0])
 
 wf_refs: dict[str, list[str]] = {s: [] for s in scripts}
+entrypoint_scripts: set[str] = set()
 for wf in (root / ".github/workflows").glob("*.y*ml"):
     text = wf.read_text(encoding="utf-8", errors="ignore")
     found = sorted(set(pattern.findall(text)))
     for script in found:
+        if script in all_shell_scripts:
+            entrypoint_scripts.add(script)
         if script in wf_refs:
             wf_refs[script].append(str(wf))
+
+for script in static:
+    if script in all_shell_scripts:
+        entrypoint_scripts.add(script)
+
+manual_docs_refs: dict[str, set[str]] = {s: set() for s in scripts}
+manual_sources: list[Path] = []
+manual_sources.extend((root / "docs/ops/runbooks").glob("**/*.md"))
+manual_sources.extend((root / "docs/guides").glob("**/*.md"))
+manual_sources.extend((root / "docs/operations").glob("**/*.md"))
+manual_sources.extend((root / "scripts").glob("**/README.md"))
+readme = root / "README.md"
+if readme.exists():
+    manual_sources.append(readme)
+
+for source in manual_sources:
+    source_rel = str(source.relative_to(root))
+    if source_rel.startswith("docs/operations/verification/"):
+        continue
+    text = source.read_text(encoding="utf-8", errors="ignore")
+    for script in sorted(set(pattern.findall(text))):
+        if script in manual_docs_refs and "/deprecated/" not in script:
+            manual_docs_refs[script].add(source_rel)
+
+invocation_graph: dict[str, set[str]] = {}
+for script_path in sorted(all_shell_scripts):
+    text = (root / script_path).read_text(encoding="utf-8", errors="ignore")
+    refs = {
+        ref
+        for ref in pattern.findall(text)
+        if ref in all_shell_scripts
+    }
+    invocation_graph[script_path] = refs
+
+reachable_via_chain: set[str] = set()
+queue: deque[str] = deque(sorted(entrypoint_scripts))
+while queue:
+    current = queue.popleft()
+    if current in reachable_via_chain:
+        continue
+    reachable_via_chain.add(current)
+    for nxt in sorted(invocation_graph.get(current, set())):
+        if nxt not in reachable_via_chain:
+            queue.append(nxt)
 
 rows = []
 for script in scripts:
     status = "deprecated" if "/deprecated/" in script else "active"
+    via_chain = script in reachable_via_chain
+    via_direct = bool(script in static or wf_refs.get(script))
+    docs_refs = sorted(manual_docs_refs.get(script, set()))
+    via_manual = bool(docs_refs)
     rows.append(
         {
             "path": script,
             "status": status,
             "in_ci_static": script in static,
             "workflow_refs": sorted(set(wf_refs.get(script, []))),
-            "reachable": bool(script in static or wf_refs.get(script)),
+            "reachable_via_script_chain": via_chain,
+            "manual_runbook_refs": docs_refs,
+            "reachable": bool(via_direct or via_chain or via_manual),
         }
     )
 
@@ -277,7 +332,7 @@ deprecated_unreachable = [
 ]
 print("# Open Risks")
 if unreachable:
-    print("- Unreachable validators (not in ci-scripts-static or workflow refs):")
+    print("- Unreachable validators (not in ci-scripts-static, workflow refs, script-invocation chain, or manual runbook refs):")
     for path in unreachable[:50]:
         print(f"  - `{path}`")
     if len(unreachable) > 50:

@@ -38,6 +38,21 @@ done
 grep -q "## 1. Scope" "$OUT_DIR/index.md"
 grep -q "## 12. Limits" "$OUT_DIR/index.md"
 grep -q '"canonical_hypothesis"' "$OUT_DIR/02_claims.json"
+python3 - "$OUT_DIR/05_ci_reachability.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as fp:
+    payload = json.load(fp)
+
+scripts = payload.get("scripts", [])
+if not scripts:
+    raise SystemExit("expected at least one script entry in 05_ci_reachability.json")
+if "reachable_via_script_chain" not in scripts[0]:
+    raise SystemExit("missing reachable_via_script_chain in reachability rows")
+if "manual_runbook_refs" not in scripts[0]:
+    raise SystemExit("missing manual_runbook_refs in reachability output")
+PY
 head -n1 "$OUT_DIR/command-status.tsv" | grep -q "name"
 head -n1 "$OUT_DIR/command-status.tsv" | grep -q "exit_code"
 head -n1 "$OUT_DIR/command-status.tsv" | grep -q "output_path"
