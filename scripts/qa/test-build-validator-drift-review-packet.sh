@@ -37,6 +37,31 @@ done
 grep -q 'run_seeded_defects=0' "$OUT_DIR/09_seeded_defect_results.txt"
 grep -q 'SKIP seeded-defect execution' "$OUT_DIR/09_seeded_defect_results.txt"
 
+python3 - "$OUT_DIR/05_ci_reachability.json" <<'PY'
+from __future__ import annotations
+import json
+import sys
+from pathlib import Path
+
+reachability = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+rows = reachability.get("verify_scripts", [])
+if not rows:
+    raise SystemExit("FAIL reachability map has no verify_scripts entries")
+
+sample = rows[0]
+required = {
+    "status",
+    "workflow_refs",
+    "multisite_gate",
+    "manual_runbook_refs",
+    "reachable_via_script_chain",
+    "reachable_any",
+}
+missing = sorted(required.difference(sample))
+if missing:
+    raise SystemExit(f"FAIL reachability entry missing keys: {', '.join(missing)}")
+PY
+
 OUT_DIR_SEEDED="$TMP_DIR/review-seeded"
 "$BUILD_SCRIPT" --out-dir "$OUT_DIR_SEEDED" --run-seeded-defects >/dev/null
 

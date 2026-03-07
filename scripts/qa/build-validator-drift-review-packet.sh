@@ -119,9 +119,25 @@ if ci_static_file.exists():
         ci_static_paths.add(line.split()[0])
 
 workflow_refs: set[str] = set()
+workflow_ref_map: dict[str, set[str]] = defaultdict(set)
 for wf in (repo_root / ".github/workflows").glob("*.y*ml"):
     text = wf.read_text(encoding="utf-8", errors="ignore")
-    workflow_refs.update(SCRIPT_RE.findall(text))
+    for script in SCRIPT_RE.findall(text):
+        workflow_refs.add(script)
+        workflow_ref_map[script].add(str(wf.relative_to(repo_root)))
+
+manual_ref_map: dict[str, set[str]] = defaultdict(set)
+for docs_root in [repo_root / "docs", repo_root / "README.md"]:
+    if docs_root.is_file():
+        candidates = [docs_root]
+    elif docs_root.is_dir():
+        candidates = [p for p in docs_root.rglob("*") if p.is_file() and p.suffix.lower() in {".md", ".txt", ".yaml", ".yml"}]
+    else:
+        candidates = []
+    for candidate in candidates:
+        text = candidate.read_text(encoding="utf-8", errors="ignore")
+        for script in SCRIPT_RE.findall(text):
+            manual_ref_map[script].add(str(candidate.relative_to(repo_root)))
 
 deprecated_manifest = read_json(
     repo_root / "docs/operations/verification/deprecated_verify_scripts.json",
@@ -163,6 +179,17 @@ for path in (repo_root / "scripts").rglob("*"):
         continue
     all_scripts.append(str(path.relative_to(repo_root)))
 all_scripts.sort()
+all_script_set = set(all_scripts)
+script_contents: dict[str, str] = {
+    script: (repo_root / script).read_text(encoding="utf-8", errors="ignore")
+    for script in all_scripts
+}
+
+script_call_graph: dict[str, set[str]] = {script: set() for script in all_scripts}
+for script, content in script_contents.items():
+    for ref in SCRIPT_RE.findall(content):
+        if ref in all_script_set and ref != script:
+            script_call_graph[script].add(ref)
 
 clusters: dict[str, list[str]] = defaultdict(list)
 for script in all_scripts:
@@ -181,6 +208,35 @@ run_ops_gate_text = (
     if (repo_root / "scripts/qa/run-operations-gates.sh").exists()
     else ""
 )
+run_multisite_gate_text = (
+    (repo_root / "scripts/qa/run-multisite-governance-gates.sh").read_text(encoding="utf-8", errors="ignore")
+    if (repo_root / "scripts/qa/run-multisite-governance-gates.sh").exists()
+    else ""
+)
+
+reachability_seeds = {
+    script
+    for script in all_scripts
+    if (
+        script in ci_static_paths
+        or script in workflow_refs
+        or script in {
+            "scripts/qa/run-release-verification-gates.sh",
+            "scripts/qa/run-operations-gates.sh",
+            "scripts/qa/run-multisite-governance-gates.sh",
+        }
+    )
+}
+reachable_via_script_chain: set[str] = set()
+frontier = list(sorted(reachability_seeds))
+while frontier:
+    current = frontier.pop()
+    if current in reachable_via_script_chain:
+        continue
+    reachable_via_script_chain.add(current)
+    for nxt in sorted(script_call_graph.get(current, set())):
+        if nxt not in reachable_via_script_chain:
+            frontier.append(nxt)
 
 
 def classify_kind(path: str) -> str:
@@ -258,8 +314,7 @@ reachability: list[dict] = []
 mutability_audit: list[dict] = []
 
 for script in all_scripts:
-    file_path = repo_root / script
-    content = file_path.read_text(encoding="utf-8", errors="ignore")
+    content = script_contents.get(script, "")
     kind = classify_kind(script)
     status = classify_status(script)
     mutability = classify_mutability(script, content)
@@ -310,13 +365,30 @@ for script in all_scripts:
         )
 
     if script.startswith("scripts/qa/verify-"):
+        workflow_direct_refs = sorted(workflow_ref_map.get(script, set()))
+        manual_runbook_refs = sorted(manual_ref_map.get(script, set()))
+        reachability_flags = {
+            "in_ci_static": script in ci_static_paths,
+            "workflow_direct": bool(workflow_direct_refs),
+            "release_gate": script in run_release_gate_text,
+            "operations_gate": script in run_ops_gate_text,
+            "multisite_gate": script in run_multisite_gate_text,
+            "manual_runbook_refs": bool(manual_runbook_refs),
+            "reachable_via_script_chain": script in reachable_via_script_chain,
+        }
         reachability.append(
             {
                 "path": script,
-                "in_ci_static": script in ci_static_paths,
-                "workflow_direct": script in workflow_refs,
-                "release_gate": script in run_release_gate_text,
-                "operations_gate": script in run_ops_gate_text,
+                "status": status,
+                "in_ci_static": reachability_flags["in_ci_static"],
+                "workflow_direct": reachability_flags["workflow_direct"],
+                "workflow_refs": workflow_direct_refs,
+                "release_gate": reachability_flags["release_gate"],
+                "operations_gate": reachability_flags["operations_gate"],
+                "multisite_gate": reachability_flags["multisite_gate"],
+                "manual_runbook_refs": manual_runbook_refs,
+                "reachable_via_script_chain": reachability_flags["reachable_via_script_chain"],
+                "reachable_any": any(reachability_flags.values()),
             }
         )
 
@@ -360,7 +432,7 @@ claims = {
 unreachable_verify = [
     item["path"]
     for item in reachability
-    if not any(item[key] for key in ("in_ci_static", "workflow_direct", "release_gate", "operations_gate"))
+    if item.get("status") == "active" and not item.get("reachable_any")
 ]
 qa_mutating_unallowlisted = [
     item["path"]
