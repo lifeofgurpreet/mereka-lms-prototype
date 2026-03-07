@@ -12316,10 +12316,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
       "env_scope": [
         "dev",
         "prod"
@@ -12328,21 +12332,21 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-readiness.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
         "vendor"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-DEP-001",
         "AC-DEP-002",
         "AC-DEP-003",
         "AC-DEP-004"
       ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -12722,6 +12726,32 @@
       "owner": "platform-core",
       "path": "scripts/qa/verify-script-portability.sh",
       "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-script-registry-completeness.sh",
+      "reference_count": 2,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16373,26 +16403,26 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 419,
+    "ci_static_bound": 421,
     "kinds": {
-      "verify": 528
+      "verify": 529
     },
     "mutability": {
       "destructive": 8,
       "mutating": 13,
-      "read-only": 507
+      "read-only": 508
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 443,
-      "manual_only": 85
+      "active": 445,
+      "manual_only": 84
     },
     "tiers": {
-      "exploratory_manual": 88,
+      "exploratory_manual": 87,
       "periodic_runtime": 11,
-      "release_blocking": 429
+      "release_blocking": 431
     },
-    "total_verify_scripts": 528,
+    "total_verify_scripts": 529,
     "workflow_direct_bound": 50
   },
   "version": "1"

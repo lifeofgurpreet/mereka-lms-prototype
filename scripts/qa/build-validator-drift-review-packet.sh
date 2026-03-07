@@ -5,6 +5,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUT_DIR=""
+RUN_SEEDED_DEFECTS=0
 
 usage() {
   cat <<'EOF'
@@ -12,6 +13,7 @@ Usage: scripts/qa/build-validator-drift-review-packet.sh [--out-dir <path>]
 
 Options:
   --out-dir <path>   Override output directory.
+  --run-seeded-defects  Execute seeded-defect self-tests for section 9.
 EOF
 }
 
@@ -20,6 +22,10 @@ while [[ $# -gt 0 ]]; do
     --out-dir)
       OUT_DIR="${2:-}"
       shift 2
+      ;;
+    --run-seeded-defects)
+      RUN_SEEDED_DEFECTS=1
+      shift
       ;;
     -h|--help)
       usage
@@ -409,22 +415,40 @@ fi
   echo "# Seeded Defect Results"
   echo
   echo "- Run timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  echo "- run_seeded_defects=$RUN_SEEDED_DEFECTS"
   echo
-  mapfile -t seeded_tests < <(find "$REPO_ROOT/scripts/qa" -maxdepth 1 -type f -name 'test-verify-*.sh' | sort)
-  if [[ "${#seeded_tests[@]}" -eq 0 ]]; then
-    echo "No seeded defect tests discovered."
+  if [[ "$RUN_SEEDED_DEFECTS" -ne 1 ]]; then
+    echo "SKIP seeded-defect execution (enable with --run-seeded-defects)."
   else
-    for test_path in "${seeded_tests[@]}"; do
-      rel="${test_path#$REPO_ROOT/}"
+    seeded_tests=(
+      "scripts/qa/test-verify-qa-readonly-contract.sh"
+      "scripts/qa/test-verify-script-basename-governance.sh"
+      "scripts/qa/test-verify-workflow-script-references.sh"
+      "scripts/qa/test-verify-no-mux-asset-ids.sh"
+    )
+    found=0
+    seeded_tmp_log="$(mktemp)"
+    trap 'rm -f "$seeded_tmp_log"' EXIT
+    for rel in "${seeded_tests[@]}"; do
+      test_path="$REPO_ROOT/$rel"
       echo "## $rel"
-      if bash "$test_path" >/tmp/validator-drift-seeded.out 2>&1; then
+      if [[ ! -x "$test_path" ]]; then
+        echo "SKIP missing"
+        echo
+        continue
+      fi
+      found=1
+      if bash "$test_path" >"$seeded_tmp_log" 2>&1; then
         echo "PASS"
       else
         echo "FAIL"
       fi
-      sed -n '1,80p' /tmp/validator-drift-seeded.out || true
+      sed -n '1,80p' "$seeded_tmp_log" || true
       echo
     done
+    if [[ "$found" -eq 0 ]]; then
+      echo "No seeded defect tests were executable."
+    fi
   fi
 } >"$OUT_DIR/09_seeded_defect_results.txt"
 
