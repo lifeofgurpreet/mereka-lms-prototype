@@ -454,8 +454,8 @@ not included by any kustomization and require action.
 |---|---|---|---|---|
 | `patches/README.md` | — | NOT RENDERED | KEEP | Patches documentation |
 | `patches/argocd-configmap-ignore.yaml` | PLATFORM_SHARED | NOT RENDERED (manual apply only) | MOVE_INFRA | ArgoCD Application ignoreDifferences patch; belongs in ArgoCD Application manifest in infrastructure |
-| `patches/caddy-staging-fix.yaml` | DEAD_REFERENCE | NOT RENDERED (manual apply only) | DELETE | Legacy emergency ConfigMap patch with hardcoded prod domains; superseded by proper Tutor/overlay config |
-| `patches/smtp-ses-relay.yaml` | DEAD_REFERENCE | NOT RENDERED (manual apply only) | ASSESS | SES relay Deployment patch; should be integrated into base or overlay rather than applied manually |
+| ~~`patches/caddy-staging-fix.yaml`~~ | DELETED | — | DONE | Deleted 2026-03-07 (Phase 2 quarantine) |
+| ~~`patches/smtp-ses-relay.yaml`~~ | DELETED | — | DONE | Deleted 2026-03-07 (Phase 2 quarantine) |
 
 ---
 
@@ -468,7 +468,7 @@ not included by any kustomization and require action.
 | APP_LOCAL_ONLY | 13 | Keep in app repo |
 | PLATFORM_SHARED | 15 | Move to infrastructure repo |
 | ENVIRONMENT_SPECIFIC | 47 | Move to infrastructure |
-| DEAD_REFERENCE | 14 | Quarantine or delete |
+| DEAD_REFERENCE | 12 | Quarantine or delete (2 deleted 2026-03-07) |
 
 **Total files classified:** 204 (excluding docs-only files)
 
@@ -480,18 +480,18 @@ These files exist under `deploy/k8s/` but are not included in any kustomization 
 |---|---|---|---|
 | `base/apps/hubspot-webhook/**` (3 files) | DEAD_REFERENCE | Not in base/kustomization.yaml | Quarantine |
 | `base/apps/xqueue-graders/**` (6 files) | DEAD_REFERENCE | Not in base/kustomization.yaml | Assess |
-| `base/apps/permissions/setowners.sh` | DEAD_REFERENCE | Not a K8s manifest | Delete or move to scripts/ |
+| ~~`base/apps/permissions/setowners.sh`~~ | DELETED | Deleted 2026-03-07 | Done |
 | `base/apps/openedx/settings/lms/mereka_jwt_session.py` | APP_RUNTIME | Not in configMapGenerator list | Assess — add to configMapGenerator or delete |
 | `base/plugins/discovery/apps/settings/tutor/__init__.py` | APP_RUNTIME | Not in configMapGenerator | Assess |
 | `base/plugins/discovery/apps/settings/tutor/development.py` | APP_RUNTIME | Not in configMapGenerator | Assess |
-| `base/monitoring/cronjob-library-export.yaml` | APP_RELEASE | Not in monitoring/kustomization.yaml | Add to kustomization or assess |
-| `base/monitoring/cronjob-tenant-isolation.yaml` | APP_RELEASE | Not in monitoring/kustomization.yaml | Add to kustomization or assess |
+| `base/monitoring/cronjob-library-export.yaml` | APP_RELEASE | In monitoring/kustomization.yaml | Done |
+| `base/monitoring/cronjob-tenant-isolation.yaml` | APP_RELEASE | In monitoring/kustomization.yaml | Done |
 | `base/monitoring/verify.sh` | — | Not a K8s manifest | Move to scripts/qa/ |
 | `base/monitoring/grafana-dashboard-ora2.json` | APP_RUNTIME | Not a K8s manifest | Provision via Grafana sidecar ConfigMap or document |
 | `base/arc/**` (6 files) | PLATFORM_SHARED | Applied separately by design | Move to infra repo |
 | `patches/argocd-configmap-ignore.yaml` | PLATFORM_SHARED | Manual apply | Move to infra repo |
-| `patches/caddy-staging-fix.yaml` | DEAD_REFERENCE | Legacy, superseded | Delete |
-| `patches/smtp-ses-relay.yaml` | DEAD_REFERENCE | Manual apply, not integrated | Assess |
+| ~~`patches/caddy-staging-fix.yaml`~~ | DELETED | Deleted 2026-03-07 | Done |
+| ~~`patches/smtp-ses-relay.yaml`~~ | DELETED | Deleted 2026-03-07 | Done |
 | `base/secrets/openedx-secrets.yaml` | APP_LOCAL_ONLY | Commented out in kustomization | Document status |
 | `base/apps/enterprise/mfe/biji-biji-mfe-env.js` | APP_RUNTIME | ADR-024: per-tenant delivered at runtime | Document as reference only |
 | `base/apps/enterprise/mfe/skillourfuture-mfe-env.js` | APP_RUNTIME | ADR-024: per-tenant delivered at runtime | Document as reference only |

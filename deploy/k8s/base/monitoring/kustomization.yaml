@@ -19,8 +19,9 @@ resources:
   - servicemonitor-redis.yaml
   - servicemonitor-enterprise.yaml
   - servicemonitor-notes.yaml
-  - servicemonitor-xqueue.yaml
   # ── QUARANTINED ServiceMonitors (not rendered) ───────────────────────────
+  # servicemonitor-xqueue.yaml  — xqueue disabled (replicas=0 in all overlays).
+  #                               Re-enable when xqueue is activated.
   # servicemonitor-forum.yaml   — Forum v2 is in-process with LMS; no separate
   #                               Service. Use job="lms-metrics" for forum data.
   # servicemonitor-mfe.yaml     — MFE Caddy proxy has no /metrics endpoint.
@@ -32,7 +33,8 @@ resources:
   - prometheusrule-lms.yaml
   - prometheusrule-enterprise.yaml
   - prometheusrule-services.yaml
-  - prometheusrule-xqueue.yaml
+  # prometheusrule-xqueue.yaml     — xqueue disabled (replicas=0 in all overlays).
+  #                                  Re-enable when xqueue is activated.
   - prometheusrule-velero.yaml
   - prometheusrule-slo.yaml
   - prometheusrule-auth.yaml
