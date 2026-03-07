@@ -57,6 +57,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] Create a script: `docs/qa/verify-doc-command-refs.sh`
 - [ ] Script must:
   - scan canonical docs for command snippets in fenced code blocks and inline command references;
+  - parse markdown path targets in inline code, markdown links (`[x](path)`), and markdown autolinks (`<path>`);
   - validate each referenced command/script exists in repo (`scripts/**`, `.github/workflows/**`, canonical runbook commands);
   - fail on missing or unresolved references.
 - [ ] Use backlog snapshot for execution:
@@ -86,6 +87,9 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] Add a step/job output block that prints:
   - changed canonical docs count
   - broken links count
+  - link-integrity files checked
+  - command-reference files checked
+  - command-reference total candidates
   - stale canonical count
   - command-reference miss count
 
