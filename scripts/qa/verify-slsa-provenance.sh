@@ -18,7 +18,7 @@
 #   ./scripts/qa/verify-slsa-provenance.sh [--online]
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$REPO_ROOT"
 
 GREEN='\033[0;32m'
