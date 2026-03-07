@@ -13,7 +13,12 @@ trap 'rm -rf "$tmpdir"' EXIT
 mkdir -p "$tmpdir"/{deploy,k8s,scripts,infrastructure,docs,specs,services,assets,var,tutor_env}
 mkdir -p "$tmpdir/deploy/k8s/overlays/local" "$tmpdir/deploy/k8s/overlays/production" "$tmpdir/deploy/k8s/base/secrets"
 mkdir -p "$tmpdir/scripts"/{shared,infra,migrations,branding,analytics,qa}
-mkdir -p "$tmpdir/docs"/{adr,onboarding,operations,migrations,architecture,archive}
+mkdir -p "$tmpdir/docs/adr" \
+  "$tmpdir/docs/guides/onboarding" \
+  "$tmpdir/docs/ops" \
+  "$tmpdir/docs/migrations" \
+  "$tmpdir/docs/concepts/architecture" \
+  "$tmpdir/docs/archive"
 mkdir -p "$tmpdir/infrastructure"/{tutor,cloudflare,terraform,monitoring}
 
 cat >"$tmpdir/.gitignore" <<'EOF'

@@ -179,15 +179,35 @@ for app in custom_dirs:
 print("")
 print("--- Tracked runtime-artifact hygiene under custom-apps ---")
 
-try:
-    tracked_files = subprocess.check_output(
-        ["git", "ls-files", str(custom_apps_dir)],
-        text=True,
-        stderr=subprocess.DEVNULL,
-    ).splitlines()
-except Exception as exc:
-    fail(f"Unable to enumerate tracked files under custom-apps ({exc})")
-    tracked_files = []
+tracked_files: list[str] = []
+git_root = None
+git_root_probe = subprocess.run(
+    ["git", "-C", str(custom_apps_dir), "rev-parse", "--show-toplevel"],
+    text=True,
+    capture_output=True,
+)
+if git_root_probe.returncode == 0:
+    git_root = git_root_probe.stdout.strip()
+if git_root:
+    relative_target = str(custom_apps_dir.resolve().relative_to(Path(git_root).resolve()))
+    try:
+        tracked_files = subprocess.check_output(
+            ["git", "-C", git_root, "ls-files", relative_target],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).splitlines()
+        ok("Enumerated tracked files under custom-apps via git ls-files")
+    except Exception as exc:
+        fail(f"Unable to enumerate tracked files under custom-apps ({exc})")
+        tracked_files = []
+else:
+    # In isolated fixtures without git metadata, fall back to filesystem scanning.
+    tracked_files = [
+        str(path.relative_to(custom_apps_dir.parent.parent.parent))
+        for path in custom_apps_dir.rglob("*")
+        if path.is_file()
+    ]
+    ok("Git metadata unavailable; scanned filesystem files under custom-apps")
 
 runtime_artifact_violations: list[str] = []
 for rel_path in tracked_files:
