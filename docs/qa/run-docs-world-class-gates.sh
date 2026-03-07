@@ -26,6 +26,7 @@ MAX_AGE_SECONDS=1200
 DO_SYNC=0
 REQUIRE_SYNC=0
 SYNC_STRATEGY="auto"
+BASE_REF="origin/main"
 STATE_FILE=".docs-world-class-sync-state"
 
 while [[ $# -gt 0 ]]; do
@@ -50,13 +51,18 @@ while [[ $# -gt 0 ]]; do
       SYNC_STRATEGY="${2:?missing value}"
       shift 2
       ;;
+    --base-ref)
+      BASE_REF="${2:?missing value}"
+      shift 2
+      ;;
     --help|-h)
       cat <<'EOF'
-Usage: run-docs-world-class-gates.sh [--sync] [--sync-strategy auto|rebase|merge] [--max-age-seconds N] [--state-file path] [--require-sync]
+Usage: run-docs-world-class-gates.sh [--sync] [--sync-strategy auto|rebase|merge] [--base-ref ref] [--max-age-seconds N] [--state-file path] [--require-sync]
 
 Options:
   --sync                  run branch sync with origin/main before checks
   --sync-strategy MODE    sync mode: auto (default), rebase, or merge
+  --base-ref ref          base ref for sync/comparison/policy range (default: origin/main)
   --max-age-seconds N     warn if last sync is older than N (default: 1200 = 20 min)
   --state-file path       path for sync-state marker (default: .docs-world-class-sync-state)
   --require-sync          fail if sync state is older than --max-age-seconds
@@ -151,7 +157,7 @@ sync_branch_to_origin_main() {
   fi
 
   if [ "$SYNC_STRATEGY" = "merge" ]; then
-    run_step "git merge --no-ff origin/main" git merge --no-ff origin/main
+    run_step "git merge --no-ff ${BASE_REF}" git merge --no-ff "$BASE_REF"
     return 0
   fi
 
@@ -162,11 +168,11 @@ sync_branch_to_origin_main() {
 
   if [ "$dirty" -eq 1 ] && [ "$SYNC_STRATEGY" = "auto" ]; then
     log "Worktree has local changes; using merge fallback without rebase attempt."
-    run_step "git merge --no-ff origin/main" git merge --no-ff origin/main
+    run_step "git merge --no-ff ${BASE_REF}" git merge --no-ff "$BASE_REF"
     return 0
   fi
 
-  if git rebase origin/main; then
+  if git rebase "$BASE_REF"; then
     log "Sync strategy result: rebase succeeded"
     return 0
   fi
@@ -178,12 +184,12 @@ sync_branch_to_origin_main() {
 
   log "Rebase failed; falling back to merge strategy."
   git rebase --abort >/dev/null 2>&1 || true
-  run_step "git merge --no-ff origin/main" git merge --no-ff origin/main
+  run_step "git merge --no-ff ${BASE_REF}" git merge --no-ff "$BASE_REF"
 }
 
 if [ "$DO_SYNC" -eq 1 ]; then
   enforce_branch_safety
-  log "Refreshing from origin/main for docs branch safety (strategy=$SYNC_STRATEGY)"
+  log "Refreshing from ${BASE_REF} for docs branch safety (strategy=$SYNC_STRATEGY)"
   sync_branch_to_origin_main
   update_sync_state
 else
@@ -191,9 +197,9 @@ else
   check_sync_age
 fi
 
-run_step "verify-docs-policy" ./docs/qa/verify-docs-policy.sh --range "origin/main...HEAD"
+run_step "verify-docs-policy" ./docs/qa/verify-docs-policy.sh --range "${BASE_REF}...HEAD"
 run_step "verify-repo-structure" ./scripts/qa/verify-repo-structure.sh
-run_step "verify-docs-foundation-gates" ./docs/qa/verify-docs-foundation-gates.sh --policy-range "origin/main...HEAD" --summary-json "$DOCS_FOUNDATION_SUMMARY"
+run_step "verify-docs-foundation-gates" ./docs/qa/verify-docs-foundation-gates.sh --policy-range "${BASE_REF}...HEAD" --summary-json "$DOCS_FOUNDATION_SUMMARY"
 run_step "verify-doc-command-ref-baseline" ./docs/qa/verify-doc-command-ref-baseline.sh --summary-json "$DOCS_CMDREF_BASELINE_SUMMARY"
 run_step "verify-doc-command-refs" ./docs/qa/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_COMMAND_REFS_SUMMARY"
 run_step "verify-docs-scorecard-recency" ./docs/qa/verify-docs-scorecard-recency.sh --max-age-days 7 --summary-json "$DOCS_SCORECARD_RECENCY_SUMMARY"
@@ -212,7 +218,7 @@ run_step "build-docs-scorecard" python3 docs/qa/build-docs-scorecard.py \
   --min-score 80
 run_step "compare-docs-scorecard-to-base" docs/qa/compare-docs-scorecard-to-base.sh \
   --current-summary "$CATALOG_HEALTH_SUMMARY" \
-  --base-ref origin/main \
+  --base-ref "$BASE_REF" \
   --regression-threshold 10 \
   --out "$DOCS_SCORECARD_COMPARISON_PATH"
 run_step "build-docs-compliance-summary" python3 docs/qa/build-docs-compliance-summary.py \
@@ -249,7 +255,7 @@ run_step "compare-docs-scorecard-to-base-test" ./docs/qa/compare-docs-scorecard-
 run_step "build-docs-compliance-summary-test" ./docs/qa/build-docs-compliance-summary-test.sh
 
 if [ "$DO_SYNC" -eq 1 ]; then
-  log "Final sync status (origin/main...HEAD): $(git rev-list --left-right --count origin/main...HEAD | tr '\t' ' ')"
+  log "Final sync status (${BASE_REF}...HEAD): $(git rev-list --left-right --count "${BASE_REF}"...HEAD | tr '\t' ' ')"
 fi
 
 log "Docs world-class gate run completed successfully"
