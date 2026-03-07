@@ -154,6 +154,16 @@ cat > "$ROOT_DIR/cmdref-fail.json" <<'EOF_JSON'
 }
 EOF_JSON
 
+cat > "$ROOT_DIR/cmdref-minimal.json" <<'EOF_JSON'
+{
+  "status": "pass",
+  "files_checked": 0,
+  "total_candidates": 0,
+  "missing_references": 0,
+  "missing": []
+}
+EOF_JSON
+
 cat > "$ROOT_DIR/scorecard-pass.json" <<'EOF_JSON'
 {
   "status": "pass",
@@ -371,6 +381,35 @@ if command_refs.get("candidate_sources", {}).get("inline_code") != 1:
     raise SystemExit("expected command_refs.candidate_sources.inline_code=1 in pass payload")
 if command_refs.get("candidate_sources", {}).get("shell_block") != 1:
     raise SystemExit("expected command_refs.candidate_sources.shell_block=1 in pass payload")
+PY
+
+python3 docs/qa/build-docs-compliance-summary.py \
+  --foundation-summary "$ROOT_DIR/foundation-pass.json" \
+  --cmdref-baseline-summary "$ROOT_DIR/cmdref-baseline-pass.json" \
+  --link-integrity-summary "$ROOT_DIR/link-integrity-pass.json" \
+  --catalog-summary "$ROOT_DIR/catalog-pass.json" \
+  --cmdref-summary "$ROOT_DIR/cmdref-minimal.json" \
+  --scorecard "$ROOT_DIR/scorecard-pass.json" \
+  --comparison "$ROOT_DIR/trend-pass.json" \
+  --scorecard-recency-summary "$ROOT_DIR/scorecard-recency-pass.json" \
+  --scorecard-consistency-summary "$ROOT_DIR/scorecard-consistency-pass.json" \
+  --scorecard-head-freshness-summary "$ROOT_DIR/scorecard-head-freshness-pass.json" \
+  --scorecard-timestamp-summary "$ROOT_DIR/scorecard-timestamp-pass.json" \
+  --scorecard-delta-summary "$ROOT_DIR/scorecard-delta-pass.json" \
+  --scorecard-drift-summary "$ROOT_DIR/scorecard-drift-pass.json" \
+  --out "$ROOT_DIR/summary-minimal-cmdref.json"
+
+python3 - "$ROOT_DIR/summary-minimal-cmdref.json" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+sources = payload.get("command_refs", {}).get("candidate_sources", {})
+required = {"inline_code", "shell_block", "markdown_link", "markdown_autolink", "markdown_refdef"}
+if set(sources.keys()) != required:
+    raise SystemExit("expected normalized candidate_sources keys for minimal cmdref summary")
+if any(sources[k] != 0 for k in required):
+    raise SystemExit("expected normalized candidate_sources values to be zero for minimal cmdref summary")
 PY
 
 python3 docs/qa/build-docs-compliance-summary.py \
