@@ -3,7 +3,7 @@
 _Audience: Docs Team • Owner: Docs Lead • Last verified: 2026-03-06 • Status: supporting_
 
 ## Scope
-This is a concrete PR-ready one-week execution package to continue from the current handover state in the docs remediation branch (`docs/docs-remediation-20260306-codex-agent1`).
+This is a concrete PR-ready one-week execution package to continue from the current handover state in the isolated docs worktree branch (`docs/docs-first-class-20260307-followup-7`).
 
 Use this as the next agent’s executable plan, not prose. Each day ends with a small PR and a closed tracker row.
 
@@ -29,11 +29,13 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 
 ## 3) Day 1 — Sync, baseline, and lock scope
 
-### AC-DOCS-101: Pull latest main safely in isolated worktree
+### AC-DOCS-101: Keep branch synced to latest `origin/main` every 20 minutes
 - [ ] `cd /home/gurpreet/projects/k8s/mereka-lms-wt-docs-remediation`
 - [ ] `git fetch origin`
-- [ ] `git checkout docs/docs-remediation-20260306-codex-agent1`
+- [ ] `git checkout docs/docs-first-class-20260307-followup-7`
 - [ ] `git rebase origin/main`
+- [ ] Never `git checkout main` in this worktree; stay on the docs branch.
+- [ ] Repeat fetch+rebase at least every 20 minutes during long editing sessions.
 - [ ] `./docs/qa/run-docs-world-class-gates.sh --sync --require-sync --max-age-seconds 1200`
 - [ ] `git status --short` is clean
 - [ ] `git rev-list --left-right --count origin/main...HEAD`
