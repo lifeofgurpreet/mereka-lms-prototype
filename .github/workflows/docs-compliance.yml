@@ -55,9 +55,14 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x docs/qa/verify-docs-policy.sh
+          BASE_REF="origin/${{ github.base_ref }}"
+          if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
+            BASE_REF="origin/main"
+          fi
+          POLICY_RANGE="${BASE_REF}...${{ github.sha }}"
           DOCS_POLICY_SUMMARY="${RUNNER_TEMP}/docs-policy-summary.json"
           ./docs/qa/verify-docs-policy.sh \
-            --range "origin/${{ github.base_ref }}...${{ github.sha }}" \
+            --range "$POLICY_RANGE" \
             --summary-json "$DOCS_POLICY_SUMMARY"
           python3 - "$DOCS_POLICY_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
 import json
@@ -86,9 +91,14 @@ PY
           set -euo pipefail
           chmod +x docs/qa/verify-doc-command-refs.sh
           chmod +x docs/qa/verify-doc-command-ref-baseline.sh
+          BASE_REF="origin/${{ github.base_ref }}"
+          if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
+            BASE_REF="origin/main"
+          fi
+          POLICY_RANGE="${BASE_REF}...${{ github.sha }}"
           DOCS_CMDREF_SUMMARY="${RUNNER_TEMP}/docs-command-refs-summary.json"
           DOCS_CMDREF_BASELINE_SUMMARY="${RUNNER_TEMP}/docs-cmdref-baseline-summary.json"
-          mapfile -t CHANGED_DOCS < <(git diff --name-only "origin/${{ github.base_ref }}...${{ github.sha }}" -- 'docs/**/*.md' 'docs/*.md' || true)
+          mapfile -t CHANGED_DOCS < <(git diff --name-only "$POLICY_RANGE" -- 'docs/**/*.md' 'docs/*.md' || true)
           CHANGED_DOCS_COUNT=${#CHANGED_DOCS[@]}
 
           {
@@ -145,8 +155,13 @@ PY
         run: |
           set -euo pipefail
           chmod +x docs/qa/verify-doc-link-integrity.sh
+          BASE_REF="origin/${{ github.base_ref }}"
+          if [ -z "${BASE_REF}" ] || [ "$BASE_REF" = "origin/" ]; then
+            BASE_REF="origin/main"
+          fi
+          POLICY_RANGE="${BASE_REF}...${{ github.sha }}"
           DOCS_LINK_INTEGRITY_SUMMARY="${RUNNER_TEMP}/docs-link-integrity-summary.json"
-          mapfile -t CHANGED_DOCS < <(git diff --name-only "origin/${{ github.base_ref }}...${{ github.sha }}" -- 'docs/**/*.md' 'docs/*.md' || true)
+          mapfile -t CHANGED_DOCS < <(git diff --name-only "$POLICY_RANGE" -- 'docs/**/*.md' 'docs/*.md' || true)
           if [ "${#CHANGED_DOCS[@]}" -gt 0 ]; then
             docs/qa/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY" "${CHANGED_DOCS[@]}"
           else
@@ -331,7 +346,7 @@ PY
             --max-stale-days 45 \
             --summary-file "$CATALOG_HEALTH_SUMMARY" | tee "$CATALOG_HEALTH_LOG"
           docs/qa/verify-docs-foundation-gates.sh \
-            --policy-range "origin/${{ github.base_ref }}...${{ github.sha }}" \
+            --policy-range "${BASE_REF}...${{ github.sha }}" \
             --summary-json "$DOCS_FOUNDATION_SUMMARY"
           python3 - "$DOCS_FOUNDATION_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
 import json
