@@ -12,6 +12,7 @@ scripts/qa/verify-custom-apps-hygiene.sh
 scripts/qa/verify-custom-app-install-contract.sh
 scripts/qa/test-verify-custom-app-install-contract.sh
 scripts/qa/verify-authn-submodule-path-contract.sh
+scripts/qa/verify-qa-readonly-contract.sh
 scripts/qa/verify-evidence-tracking-policy.sh
 scripts/qa/verify-evidence-sprawl-budget.sh
 scripts/qa/test-verify-evidence-sprawl-budget.sh
@@ -27,6 +28,7 @@ scripts/qa/test-build-validator-drift-review-packet.sh
 # ── QA verifier self-tests ───────────────────────────────────────────────────
 scripts/qa/test-verify-no-mux-asset-ids.sh
 scripts/qa/test-verify-script-portability.sh
+scripts/qa/test-verify-qa-readonly-contract.sh
 
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh

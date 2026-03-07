@@ -1202,7 +1202,7 @@
       "mutability": "destructive",
       "owner": "platform-core",
       "path": "scripts/qa/verify-aspects-wiring.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -3941,7 +3941,7 @@
       "mutability": "destructive",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-deployment-lanes.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -4267,7 +4267,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-disaster-recovery.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -4494,7 +4494,7 @@
       "mutability": "destructive",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ecommerce-worker-health.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -5103,7 +5103,7 @@
       "mutability": "destructive",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-enterprise-mfe-nreum-clean.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "vendor"
@@ -10537,7 +10537,7 @@
       "mutability": "destructive",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ora2-operations.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -12078,6 +12078,33 @@
         "AC-018",
         "AC-019"
       ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-qa-readonly-contract.sh",
+      "reference_count": 2,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster",
+        "vendor"
+      ],
+      "severity": "high",
+      "spec_ids": [],
       "status": "active",
       "tier": "release_blocking"
     },
@@ -14428,7 +14455,7 @@
       "mutability": "destructive",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-hardening.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -16377,7 +16404,7 @@
       "mutability": "destructive",
       "owner": "platform-core",
       "path": "scripts/qa/verify-xqueue-graders.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -16403,26 +16430,26 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 421,
+    "ci_static_bound": 422,
     "kinds": {
-      "verify": 529
+      "verify": 530
     },
     "mutability": {
       "destructive": 8,
       "mutating": 13,
-      "read-only": 508
+      "read-only": 509
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 445,
+      "active": 446,
       "manual_only": 84
     },
     "tiers": {
       "exploratory_manual": 87,
       "periodic_runtime": 11,
-      "release_blocking": 431
+      "release_blocking": 432
     },
-    "total_verify_scripts": 529,
+    "total_verify_scripts": 530,
     "workflow_direct_bound": 50
   },
   "version": "1"
