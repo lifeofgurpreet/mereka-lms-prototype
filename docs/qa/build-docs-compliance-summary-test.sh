@@ -184,7 +184,7 @@ cat > "$ROOT_DIR/cmdref-invalid-shape.json" <<'EOF_JSON'
 {
   "status": "pass",
   "files_checked": "7",
-  "baseline_enabled": true,
+  "baseline_enabled": "yes",
   "baseline_entries": "3",
   "total_candidates": "-8",
   "candidate_sources": "not-an-object",
@@ -499,6 +499,8 @@ payload = json.load(open(sys.argv[1], encoding="utf-8"))
 command_refs = payload.get("command_refs", {})
 if command_refs.get("files_checked") != 7:
     raise SystemExit("expected files_checked string to normalize to int")
+if command_refs.get("baseline_enabled") is not True:
+    raise SystemExit("expected baseline_enabled string to normalize to true")
 if command_refs.get("baseline_entries") != 3:
     raise SystemExit("expected baseline_entries string to normalize to int")
 if command_refs.get("total_candidates") != 0:

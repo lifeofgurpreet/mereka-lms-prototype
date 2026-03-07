@@ -113,6 +113,20 @@ def _as_dict(value) -> dict:
     return value if isinstance(value, dict) else {}
 
 
+def _normalized_bool(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"1", "true", "yes", "y", "on"}:
+            return True
+        if normalized in {"0", "false", "no", "n", "off"}:
+            return False
+    return False
+
+
 def main() -> int:
     args = parse_args()
 
@@ -224,7 +238,7 @@ def main() -> int:
         "command_refs": {
             "status": cmdref_status,
             "files_checked": _normalized_nonnegative_int(cmdref.get("files_checked", 0)),
-            "baseline_enabled": cmdref.get("baseline_enabled", False),
+            "baseline_enabled": _normalized_bool(cmdref.get("baseline_enabled", False)),
             "baseline_entries": _normalized_nonnegative_int(cmdref.get("baseline_entries", 0)),
             "total_candidates": _normalized_nonnegative_int(cmdref.get("total_candidates", 0)),
             "candidate_sources": cmdref_candidate_sources,
