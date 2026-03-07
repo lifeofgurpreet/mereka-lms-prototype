@@ -157,11 +157,11 @@ not included by any kustomization and require action.
 | `base/apps/openedx/theme/head-extra.html` | APP_RUNTIME | base (configMapGenerator openedx-theme-head-extra) | KEEP | Theme head-extra HTML template |
 | `base/apps/openedx/uwsgi.ini` | APP_RUNTIME | base (configMapGenerator openedx-uwsgi-config) | KEEP | uWSGI config |
 
-### base/apps/permissions/
+### base/apps/permissions/ (DELETED 2026-03-07)
 
 | File | Classification | Rendered By | Action | Notes |
 |---|---|---|---|---|
-| `base/apps/permissions/setowners.sh` | DEAD_REFERENCE | NOT RENDERED | DELETE | Shell script; not a K8s manifest; not referenced by any kustomization; likely leftover from early Tutor setup |
+| ~~`base/apps/permissions/setowners.sh`~~ | DELETED | — | DONE | Deleted 2026-03-07 (Phase 2 quarantine). Directory removed. |
 
 ### base/apps/preview-redirect/
 
