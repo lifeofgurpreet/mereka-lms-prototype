@@ -94,8 +94,8 @@ def _status_from_scorecard(summary: dict) -> str:
     return str(summary.get("status", "unknown")).lower()
 
 
-def _normalized_status(value: str) -> str:
-    value = value.lower()
+def _normalized_status(value) -> str:
+    value = str(value).lower()
     if value in {"pass", "warn", "fail", "unknown"}:
         return value
     return "unknown"
