@@ -285,9 +285,9 @@ run_capture "08_generated_artifact_leakage.txt" sh -lc "git ls-files | rg '(__py
 
 if [[ "$RUN_SEEDED_DEFECTS" -eq 1 ]]; then
   for script in \
-    "./scripts/qa/test-verify-qa-readonly-contract.sh" \
-    "./scripts/qa/test-verify-script-basename-governance.sh" \
-    "./scripts/qa/test-verify-workflow-script-references.sh" \
+    "./scripts/qa/test-verify-script-basename-overlap.sh" \
+    "./scripts/qa/test-verify-verify-script-reachability.sh" \
+    "./scripts/qa/test-verify-repo-hygiene-artifacts.sh" \
     "./scripts/qa/test-verify-no-mux-asset-ids.sh"
   do
     if [[ -x "$script" ]]; then

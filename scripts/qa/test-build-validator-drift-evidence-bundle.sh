@@ -62,4 +62,12 @@ if grep -q 'scripts/qa/deprecated/' "$OUT_DIR/11_open_risks.md"; then
   exit 1
 fi
 
+OUT_DIR_SEEDED="$TMP_DIR/bundle-seeded"
+"$BUILD_SCRIPT" --out-dir "$OUT_DIR_SEEDED" --run-seeded-defects >/dev/null
+if grep -q '^SKIP .* (missing)$' "$OUT_DIR_SEEDED/09_seeded_defect_results.txt"; then
+  echo "FAIL seeded defect run contains missing test references"
+  cat "$OUT_DIR_SEEDED/09_seeded_defect_results.txt"
+  exit 1
+fi
+
 echo "PASS test-build-validator-drift-evidence-bundle"
