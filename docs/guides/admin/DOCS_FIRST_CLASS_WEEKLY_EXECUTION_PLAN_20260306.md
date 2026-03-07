@@ -103,6 +103,9 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - command-reference candidate source breakdowns (inline, shell, markdown-link, markdown-autolink, markdown-refdef)
   - stale canonical count
   - command-reference miss count
+- [ ] `build-docs-compliance-summary.py` stdout contract must include:
+  - `cmdref_baseline_enabled=<true|false>`
+  - `cmdref_baseline_entries=<n>`
 
 ## 6) Day 4 — Scorecard + drift gates
 
