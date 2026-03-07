@@ -85,6 +85,7 @@ scripts/qa/test-verify-release-promotion-wiring.sh
 scripts/qa/test-verify-release-workflow-invocation.sh
 scripts/qa/test-verify-release-bundle.sh
 scripts/qa/test-verify-promotion-record.sh
+scripts/qa/test-verify-rollback-dry-run.sh
 
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh
