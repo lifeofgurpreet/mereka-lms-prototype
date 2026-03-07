@@ -493,9 +493,9 @@ fi
     echo "SKIP seeded-defect execution (enable with --run-seeded-defects)."
   else
     seeded_tests=(
-      "scripts/qa/test-verify-qa-readonly-contract.sh"
-      "scripts/qa/test-verify-script-basename-governance.sh"
-      "scripts/qa/test-verify-workflow-script-references.sh"
+      "scripts/qa/test-verify-script-basename-overlap.sh"
+      "scripts/qa/test-verify-verify-script-reachability.sh"
+      "scripts/qa/test-verify-repo-hygiene-artifacts.sh"
       "scripts/qa/test-verify-no-mux-asset-ids.sh"
     )
     found=0
@@ -554,15 +554,46 @@ for ref, sources in sorted(refs.items()):
     if not (repo_root / ref).exists():
         missing.append((ref, sorted(sources)))
 
+def is_non_actionable_source(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    if normalized.startswith("docs/archive/"):
+        return True
+    if "DOCS_CMDREF_BACKLOG_" in normalized:
+        return True
+    return False
+
+actionable: list[tuple[str, list[str]]] = []
+non_actionable: list[tuple[str, list[str]]] = []
+for ref, sources in missing:
+    if any(not is_non_actionable_source(src) for src in sources):
+        actionable.append((ref, sources))
+    else:
+        non_actionable.append((ref, sources))
+
 if not missing:
     lines.append("No broken script-path references found in docs/.github markdown/yaml surfaces.")
 else:
-    lines.append(f"Broken references: {len(missing)}")
+    lines.append(f"Broken references (total): {len(missing)}")
+    lines.append(f"Actionable broken references: {len(actionable)}")
+    lines.append(f"Non-actionable broken references (archive/backlog only): {len(non_actionable)}")
     lines.append("")
-    for ref, sources in missing:
-        lines.append(f"- {ref}")
-        for src in sources:
-            lines.append(f"  - {src}")
+    lines.append("## Actionable")
+    if actionable:
+        for ref, sources in actionable:
+            lines.append(f"- {ref}")
+            for src in sources:
+                lines.append(f"  - {src}")
+    else:
+        lines.append("- none")
+    lines.append("")
+    lines.append("## Non-actionable (archive/backlog only)")
+    if non_actionable:
+        for ref, sources in non_actionable:
+            lines.append(f"- {ref}")
+            for src in sources:
+                lines.append(f"  - {src}")
+    else:
+        lines.append("- none")
 
 out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 PY

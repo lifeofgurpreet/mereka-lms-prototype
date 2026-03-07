@@ -66,6 +66,15 @@ OUT_DIR_SEEDED="$TMP_DIR/review-seeded"
 "$BUILD_SCRIPT" --out-dir "$OUT_DIR_SEEDED" --run-seeded-defects >/dev/null
 
 grep -q 'run_seeded_defects=1' "$OUT_DIR_SEEDED/09_seeded_defect_results.txt"
-grep -q '^## scripts/qa/test-verify-qa-readonly-contract.sh$' "$OUT_DIR_SEEDED/09_seeded_defect_results.txt"
+grep -q '^## scripts/qa/test-verify-script-basename-overlap.sh$' "$OUT_DIR_SEEDED/09_seeded_defect_results.txt"
+grep -q '^## scripts/qa/test-verify-verify-script-reachability.sh$' "$OUT_DIR_SEEDED/09_seeded_defect_results.txt"
+grep -q '^Actionable broken references:' "$OUT_DIR_SEEDED/10_docs_truth_scan.txt"
+grep -q '^## Actionable$' "$OUT_DIR_SEEDED/10_docs_truth_scan.txt"
+grep -q '^## Non-actionable (archive/backlog only)$' "$OUT_DIR_SEEDED/10_docs_truth_scan.txt"
+if grep -q '^SKIP missing$' "$OUT_DIR_SEEDED/09_seeded_defect_results.txt"; then
+  echo "FAIL seeded defect run contains missing test references"
+  cat "$OUT_DIR_SEEDED/09_seeded_defect_results.txt"
+  exit 1
+fi
 
 echo "PASS test-build-validator-drift-review-packet"
