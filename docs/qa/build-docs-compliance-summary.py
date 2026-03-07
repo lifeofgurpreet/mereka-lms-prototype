@@ -207,6 +207,7 @@ def main() -> int:
             "baseline_enabled": cmdref.get("baseline_enabled", False),
             "baseline_entries": cmdref.get("baseline_entries", 0),
             "total_candidates": cmdref.get("total_candidates", 0),
+            "candidate_sources": cmdref.get("candidate_sources", {}),
             "missing_references": cmdref.get("missing_references", 0),
             "missing": cmdref.get("missing", []),
         },
