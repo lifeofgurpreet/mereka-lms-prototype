@@ -26,7 +26,7 @@ def _strip_port(host: str) -> str:
 def _candidate_site_domains(host: str) -> list[str]:
     host = _strip_port(host.lower())
     candidates = [host]
-    for prefix in ("apps.", "studio.", "preview."):
+    for prefix in ("apps.", "studio.", "preview.", "admin."):
         if host.startswith(prefix):
             candidates.append(host[len(prefix) :])
             break
@@ -123,8 +123,8 @@ def _cookie_policy_for_host(host: str) -> _CookiePolicy:
     tenant = _candidate_site_domains(host)[-1]
     if not tenant:
         return _CookiePolicy(domain=None)
-    if tenant.endswith("biji-biji.com"):
-        return _CookiePolicy(domain=".biji-biji.com")
+    # Scope to tenant root, not bare second-level domain,
+    # to prevent staging cookies leaking to production.
     return _CookiePolicy(domain=f".{tenant}")
 
 

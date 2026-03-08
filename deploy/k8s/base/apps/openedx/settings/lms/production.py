@@ -829,6 +829,7 @@ else:
 _lms_multisite_module = "lms.envs.tutor.mereka_multisite"
 if _module_available(_lms_multisite_module):
     MIDDLEWARE.append("lms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware")
+    MIDDLEWARE.append("lms.envs.tutor.mereka_multisite.MerekaLoginRedirectMiddleware")
 else:
     logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _lms_multisite_module)
 

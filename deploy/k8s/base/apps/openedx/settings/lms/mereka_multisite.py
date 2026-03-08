@@ -8,6 +8,7 @@ Goals:
   the tenant's LMS domain).
 - Ensure cookies never set an invalid Domain attribute when serving multiple
   root domains (academyv2.mereka.io vs biji-biji.com).
+- Rewrite /login redirects to the tenant's MFE authn surface (not the global one).
 
 This module is imported via middleware in production settings.
 """
@@ -18,9 +19,12 @@ This module is imported via middleware in production settings.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 import os
 from typing import Optional
 from urllib.parse import urlsplit
+
+_log = logging.getLogger(__name__)
 
 
 _PATCHED = False
@@ -43,7 +47,7 @@ def _candidate_site_domains(host: str) -> list[str]:
     """
     host = _strip_port(host.lower())
     candidates = [host]
-    for prefix in ("apps.", "studio.", "preview."):
+    for prefix in ("apps.", "studio.", "preview.", "admin."):
         if host.startswith(prefix):
             candidates.append(host[len(prefix) :])
             break
@@ -163,10 +167,11 @@ def _cookie_policy_for_host(host: str) -> _CookiePolicy:
 
     # Multi-root handling:
     # - academyv2.mereka.io (+ its subdomains) => .academyv2.mereka.io
-    # - academy.biji-biji.com (+ its subdomains) => .biji-biji.com
+    # - academy.biji-biji.com (+ its subdomains) => .academy.biji-biji.com
+    # - staging.academy.biji-biji.com => .staging.academy.biji-biji.com
     # - skillourfuture.academy.mereka.io => .skillourfuture.academy.mereka.io
-    if tenant.endswith("biji-biji.com"):
-        return _CookiePolicy(domain=".biji-biji.com")
+    # Note: we scope to the tenant root, not the bare second-level domain,
+    # to prevent staging cookies from leaking to production.
 
     return _CookiePolicy(domain=f".{tenant}")
 
@@ -196,4 +201,80 @@ class MerekaCookieDomainMiddleware:
             if name in response.cookies:
                 response.cookies[name]["domain"] = policy.domain
 
+        return response
+
+
+def _mfe_base_url_for_host(host: str) -> Optional[str]:
+    """
+    Resolve the tenant's MFE base URL from SiteConfiguration.
+
+    Returns the full MFE_BASE_URL (e.g. https://apps.staging.academy.biji-biji.com)
+    or None if no SiteConfiguration override exists.
+    """
+    from django.contrib.sites.models import Site
+
+    for candidate in _candidate_site_domains(host):
+        site = Site.objects.filter(domain__iexact=candidate).first()
+        if not site:
+            continue
+        cfg = getattr(site, "configuration", None)
+        values = (getattr(cfg, "site_values", None) or {}) if cfg else {}
+        mfe_base = (values.get("MFE_BASE_URL") or "").strip().rstrip("/")
+        if mfe_base:
+            return mfe_base
+    return None
+
+
+class MerekaLoginRedirectMiddleware:
+    """
+    Rewrite LMS /login redirects to the tenant's MFE authn surface.
+
+    Open edX's login view (student.views.login.login_and_registration_form)
+    reads settings.AUTHN_MICROFRONTEND_URL which is a global static value.
+    For multi-tenant, the redirect must point to the tenant's own MFE app,
+    not the primary tenant's.
+
+    This middleware intercepts 302 responses from /login and rewrites the
+    Location header to use the tenant's MFE_BASE_URL from SiteConfiguration.
+    """
+
+    def __init__(self, get_response):
+        patch_sites_framework()
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        path = getattr(request, "path", "") or ""
+        if path != "/login":
+            return response
+
+        if getattr(response, "status_code", 0) not in (301, 302, 303, 307, 308):
+            return response
+
+        location = response.get("Location") if hasattr(response, "get") else None
+        if not location:
+            return response
+
+        # Only rewrite redirects that point to an MFE authn path.
+        parts = urlsplit(location)
+        if "/authn" not in parts.path:
+            return response
+
+        host = getattr(request, "get_host", lambda: "")()
+        mfe_base = _mfe_base_url_for_host(host)
+        if not mfe_base:
+            return response
+
+        # Reconstruct: {tenant_mfe_base}/authn{/remaining_path}
+        authn_index = parts.path.find("/authn")
+        authn_path = parts.path[authn_index:]  # e.g. /authn/login
+        new_location = f"{mfe_base}{authn_path}"
+        if parts.query:
+            new_location += f"?{parts.query}"
+
+        if new_location != location:
+            _log.info("MerekaLoginRedirect: %s -> %s (host=%s)", location, new_location, host)
+
+        response["Location"] = new_location
         return response
