@@ -175,18 +175,16 @@ expected_cookie_domain_for_host() {
   local host="${1,,}"
   local tenant="$host"
 
-  for prefix in apps. studio. preview.; do
+  for prefix in apps. studio. preview. admin.; do
     if [[ "$tenant" == "$prefix"* ]]; then
       tenant="${tenant#"$prefix"}"
       break
     fi
   done
 
-  if [[ "$tenant" == *"biji-biji.com" ]]; then
-    printf ".biji-biji.com\n"
-    return 0
-  fi
-
+  # Cookie domain scopes to the tenant root, not the bare second-level domain.
+  # e.g. staging.academy.biji-biji.com → .staging.academy.biji-biji.com
+  #      academy.biji-biji.com          → .academy.biji-biji.com
   printf ".%s\n" "$tenant"
 }
 

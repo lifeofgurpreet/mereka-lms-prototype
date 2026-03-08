@@ -147,7 +147,7 @@ def _strip_port(host):
 def _candidate_site_domains(host):
     host = _strip_port(host.lower())
     candidates = [host]
-    for prefix in ("apps.", "studio.", "preview."):
+    for prefix in ("apps.", "studio.", "preview.", "admin."):
         if host.startswith(prefix):
             candidates.append(host[len(prefix):])
             break
@@ -172,17 +172,19 @@ def _cookie_policy_for_host(host):
     tenant = _candidate_site_domains(host)[-1]
     if not tenant:
         return _CookiePolicy(domain=None)
-    if tenant.endswith("biji-biji.com"):
-        return _CookiePolicy(domain=".biji-biji.com")
     return _CookiePolicy(domain=f".{tenant}")
 """, "<test>", "exec"), ns)
 
 tests = [
     ("apps.academyv2.mereka.io", ".academyv2.mereka.io", "AC-004"),
-    ("academy.biji-biji.com", ".biji-biji.com", "AC-005"),
-    ("apps.academy.biji-biji.com", ".biji-biji.com", "AC-006"),
+    ("academy.biji-biji.com", ".academy.biji-biji.com", "AC-005"),
+    ("apps.academy.biji-biji.com", ".academy.biji-biji.com", "AC-006"),
     ("localhost:8000", None, "AC-007"),
     ("localhost", None, "AC-007"),
+    ("staging.academy.biji-biji.com", ".staging.academy.biji-biji.com", "AC-005"),
+    ("apps.staging.academy.biji-biji.com", ".staging.academy.biji-biji.com", "AC-006"),
+    ("studio.staging.academy.biji-biji.com", ".staging.academy.biji-biji.com", "AC-006"),
+    ("admin.staging.academyv2.mereka.io", ".staging.academyv2.mereka.io", "AC-004"),
 ]
 ok = True
 for host, expected, ac in tests:
@@ -247,7 +249,7 @@ def _strip_port(host):
 def _candidate_site_domains(host):
     host = _strip_port(host.lower())
     candidates = [host]
-    for prefix in ("apps.", "studio.", "preview."):
+    for prefix in ("apps.", "studio.", "preview.", "admin."):
         if host.startswith(prefix):
             candidates.append(host[len(prefix):])
             break
@@ -264,6 +266,10 @@ tests = [
     ("studio.academyv2.mereka.io", ["studio.academyv2.mereka.io", "academyv2.mereka.io"]),
     ("preview.academyv2.mereka.io", ["preview.academyv2.mereka.io", "academyv2.mereka.io"]),
     ("academyv2.mereka.io", ["academyv2.mereka.io"]),
+    ("admin.staging.academyv2.mereka.io", ["admin.staging.academyv2.mereka.io", "staging.academyv2.mereka.io"]),
+    ("apps.staging.academy.biji-biji.com", ["apps.staging.academy.biji-biji.com", "staging.academy.biji-biji.com"]),
+    ("studio.staging.academy.biji-biji.com", ["studio.staging.academy.biji-biji.com", "staging.academy.biji-biji.com"]),
+    ("staging.academy.biji-biji.com", ["staging.academy.biji-biji.com"]),
 ]
 ok = True
 for host, expected in tests:
