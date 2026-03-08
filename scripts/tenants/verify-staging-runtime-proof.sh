@@ -254,9 +254,14 @@ _check_host() {
   local critical="${3:-true}"
 
   local http_code
+  # curl -w "%{http_code}" always prints a 3-digit code (000 on failure) to stdout,
+  # even when it exits non-zero. Capture stdout directly; do not append a fallback
+  # via || echo because that would double the output on connection errors.
   http_code=$(curl -s -o /dev/null -w "%{http_code}" \
     --max-time "$CURL_TIMEOUT" \
-    "https://${host}/" 2>/dev/null || echo "000")
+    "https://${host}/" 2>/dev/null; true)
+  # Normalise: keep only the last 3 characters in case of any capture noise
+  http_code="${http_code: -3}"
 
   local accepted="false"
   local verdict
@@ -304,6 +309,9 @@ for h in "${P0_STUDIO_HOSTS[@]}"; do _check_host "$h" "studio" "true"; done
 
 echo "MFE hosts:"
 for h in "${P0_MFE_HOSTS[@]}"; do _check_host "$h" "mfe" "true"; done
+
+echo "Admin hosts:"
+_check_host "staging.admin.academyv2.mereka.io" "admin" "true"
 
 printf '%s' "$HOST_ACCEPT_JSON" | python3 -m json.tool \
   > "$OUTPUT_DIR/staging-host-acceptance.json" 2>/dev/null \
@@ -484,6 +492,7 @@ lms_host = '$lms'
 studio_host = '$studio'
 mfe_host = '$mfe'
 primary_lms = 'staging.academyv2.mereka.io'   # Mereka is the primary tenant
+primary_mfe = 'staging.apps.academyv2.mereka.io'  # Mereka staging MFE host
 
 try:
     cfg = json.loads(sys.stdin.read())
@@ -516,7 +525,7 @@ if lms_base and (lms_host not in lms_base):
 
 # Check BASE_URL — must reference THIS tenant's MFE host
 if base_url and (mfe_host not in base_url):
-    if primary_lms.replace('staging.', 'apps.staging.') in base_url and slug != 'mereka':
+    if primary_mfe in base_url and slug != 'mereka':
         result['issues'].append(f'CROSS_CONTAMINATION: BASE_URL={base_url!r} points to primary MFE')
         result['status'] = 'contaminated'
 
@@ -596,7 +605,7 @@ for tenant in "${TENANTS[@]}"; do
   CSRFTOKEN_LINE=$(printf '%s' "$SET_COOKIE_LINES" | grep -i 'csrftoken' || true)
 
   if [[ -z "$CSRFTOKEN_LINE" ]]; then
-    skip_ "Cookie[$slug]: no csrftoken Set-Cookie header from https://$lms/login (may be cached response)"
+    skip_ "Cookie[$slug]: csrftoken not set on GET /login (expected — only set on POST). Cookie domain proof requires POST-based test."
     continue
   fi
 
@@ -686,7 +695,7 @@ slug = '$slug'
 lms = '$lms'
 mfe = '$mfe'
 location = '$LOCATION'
-primary_mfe = 'apps.staging.academyv2.mereka.io'
+primary_mfe = 'staging.apps.academyv2.mereka.io'
 
 result = {
     'slug': slug,
@@ -772,8 +781,57 @@ def load_json(path):
 
 artifact_dir = '$OUTPUT_DIR'
 
+tenants_meta = [
+    {'slug': 'mereka',        'lms': 'staging.academyv2.mereka.io',             'mfe': 'staging.apps.academyv2.mereka.io'},
+    {'slug': 'biji-biji',     'lms': 'staging.academy.biji-biji.com',           'mfe': 'apps.staging.academy.biji-biji.com'},
+    {'slug': 'skillourfuture','lms': 'staging.skillourfuture.academy.mereka.io','mfe': 'apps.staging.skillourfuture.academy.mereka.io'},
+]
+
+host_data   = load_json(os.path.join(artifact_dir, 'staging-host-acceptance.json'))   or []
+sc_data     = load_json(os.path.join(artifact_dir, 'staging-siteconfig-proof.json'))  or []
+mfe_data    = load_json(os.path.join(artifact_dir, 'staging-mfe-config-proof.json'))  or []
+cookie_data = load_json(os.path.join(artifact_dir, 'staging-cookie-proof.json'))      or []
+auth_data   = load_json(os.path.join(artifact_dir, 'staging-auth-redirect-proof.json')) or []
+
+def classify_tenant(slug, lms, mfe):
+    # host_accepted: lms host returned a non-5xx/non-000 response
+    host_entry = next((h for h in host_data if h.get('host') == lms), None)
+    host_accepted = host_entry.get('accepted', False) if host_entry else False
+
+    # sc_ok: SiteConfiguration exists and is enabled for this tenant
+    sc_entry = next((s for s in sc_data if s.get('domain') == lms), None)
+    sc_ok = bool(sc_entry and sc_entry.get('sc_exists') and sc_entry.get('sc_enabled'))
+
+    # mfe_ok: MFE config returned without contamination
+    mfe_entry = next((m for m in mfe_data if m.get('slug') == slug), None)
+    mfe_ok = bool(mfe_entry and mfe_entry.get('status') in ('ok',))
+
+    # auth_ok: auth redirect went to correct tenant MFE, or no redirect (inline login)
+    auth_entry = next((a for a in auth_data if a.get('slug') == slug), None)
+    auth_status = auth_entry.get('status', '') if auth_entry else ''
+    auth_ok = auth_status in ('correct', 'no_redirect')
+
+    app_ok = sc_ok and auth_ok
+    if app_ok and host_accepted and mfe_ok:
+        return 'proven_now'
+    elif app_ok and not host_accepted:
+        return 'app_proven_external_blocked'
+    elif not app_ok:
+        return 'app_blocked'
+    else:
+        return 'unproven'
+
+tenant_classification = {
+    t['slug']: {
+        'classification': classify_tenant(t['slug'], t['lms'], t['mfe']),
+        'lms': t['lms'],
+        'mfe': t['mfe'],
+    }
+    for t in tenants_meta
+}
+
 proof = {
-    'schema_version': '1.0',
+    'schema_version': '1.1',
     'proof_type': 'staging-runtime-proof',
     'collected_at': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
     'namespace': ns,
@@ -786,17 +844,14 @@ proof = {
         'skip': skip_count,
         'critical_fail': critical_fail,
     },
-    'tenants': [
-        {'slug': 'mereka',        'lms': 'staging.academyv2.mereka.io',             'mfe': 'apps.staging.academyv2.mereka.io'},
-        {'slug': 'biji-biji',     'lms': 'staging.academy.biji-biji.com',           'mfe': 'apps.staging.academy.biji-biji.com'},
-        {'slug': 'skillourfuture','lms': 'staging.skillourfuture.academy.mereka.io','mfe': 'apps.staging.skillourfuture.academy.mereka.io'},
-    ],
+    'tenants': tenants_meta,
+    'tenant_classification': tenant_classification,
     'artifacts': {
-        'host_acceptance':  load_json(os.path.join(artifact_dir, 'staging-host-acceptance.json')),
-        'siteconfig':       load_json(os.path.join(artifact_dir, 'staging-siteconfig-proof.json')),
-        'mfe_config':       load_json(os.path.join(artifact_dir, 'staging-mfe-config-proof.json')),
-        'cookie_domain':    load_json(os.path.join(artifact_dir, 'staging-cookie-proof.json')),
-        'auth_redirect':    load_json(os.path.join(artifact_dir, 'staging-auth-redirect-proof.json')),
+        'host_acceptance':  host_data,
+        'siteconfig':       sc_data,
+        'mfe_config':       mfe_data,
+        'cookie_domain':    cookie_data,
+        'auth_redirect':    auth_data,
     },
 }
 
@@ -804,6 +859,24 @@ with open('$PROOF_FILE', 'w') as f:
     json.dump(proof, f, indent=2)
 print('Proof written to $PROOF_FILE')
 " 2>/dev/null || echo "WARNING: could not write consolidated proof JSON" >&2
+
+# ── Tenant classification display ────────────────────────────────────────────
+echo "--- Tenant classification ---"
+python3 -c "
+import json, os
+try:
+    with open('$PROOF_FILE') as f:
+        proof = json.load(f)
+    classification = proof.get('tenant_classification', {})
+    width = max(len(s) for s in classification) if classification else 10
+    for slug, info in classification.items():
+        label = info.get('classification', 'unproven')
+        lms   = info.get('lms', '')
+        print(f'  {slug:<{width}}  {label}  ({lms})')
+except Exception as e:
+    print(f'  (classification unavailable: {e})')
+" 2>/dev/null || echo "  (classification unavailable)"
+echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Summary
