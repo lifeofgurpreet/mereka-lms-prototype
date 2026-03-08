@@ -34,10 +34,10 @@ This runbook defines the mandatory authoring flow for ADR updates under `docs/ad
 
 ## When not to write an ADR
 
-- Use `docs/architecture/constitution/` when the content is living policy that will be reviewed over time.
-- Use `docs/architecture/rfc/` when the decision is still open.
-- Use `docs/runbooks/` for procedures.
-- Use `evidence/` for proof, logs, screenshots, or verification bundles.
+- Use `docs/concepts/architecture/` when the content is living policy that will be reviewed over time.
+- Use `docs/adr/rfc/` when the decision is still open.
+- Use `docs/ops/runbooks/` for operator procedures and `docs/guides/` for contributor-facing workflows.
+- Use `docs/evidence/` for active proof, logs, screenshots, or verification bundles.
 
 ## Controlled vocabulary
 

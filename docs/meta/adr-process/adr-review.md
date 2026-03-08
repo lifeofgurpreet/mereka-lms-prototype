@@ -20,10 +20,11 @@ This runbook defines review gates for ADR-bearing pull requests.
 6. Validate Open edX/Tutor references:
    - official-source allowlist only.
 7. Validate artifact classification:
-   - constitution for living policy
+   - `docs/concepts/architecture/**` for living policy
    - ADR for accepted decision history
-   - RFC for undecided design
-   - runbook/evidence for operations and proof
+   - `docs/adr/rfc/**` for undecided design
+   - `docs/ops/runbooks/**` or `docs/guides/**` for procedures
+   - `docs/evidence/**` for active proof
 8. Validate vocabulary discipline:
    - `governs` and `does_not_govern` use controlled tokens from `docs/architecture/glossary.yaml`.
 
