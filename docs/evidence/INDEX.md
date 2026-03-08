@@ -30,3 +30,7 @@ Each pack should include:
 ## Current active domains
 
 - `docs/evidence/operations/`
+
+## Standards
+
+- [Evidence Pack Standard](../guides/standards/EVIDENCE_PACK_STANDARD.md)

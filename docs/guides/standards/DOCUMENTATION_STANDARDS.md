@@ -15,6 +15,7 @@ This guide defines standards for all documentation in the Mereka Academy Open ed
 - [Writing Style](#writing-style)
 - [Code Examples](#code-examples)
 - [Verification Requirements](#verification-requirements)
+- [Winning Root Standards](#winning-root-standards)
 - [Maintenance Requirements](#maintenance-requirements)
 - [Review Checklist](#review-checklist)
 
@@ -291,6 +292,23 @@ cms-7c9d8e6f5-fghij        1/1     Running   0
 ```
 
 ---
+
+## Winning Root Standards
+
+When writing new docs, contributors MUST use the winning roots defined by the authority resolver:
+
+- operator procedures: `docs/ops/**`
+- living architecture standards: `docs/concepts/architecture/**`
+- evidence: `docs/evidence/**`
+- active reporting: `docs/status/**`
+
+Do not introduce new active content under transitional roots such as `docs/operations/**`, `docs/architecture/**`, `docs/runbooks/**`, `docs/branding/**`, or `docs/onboarding/**`.
+
+Supporting standards:
+
+- [Docs / Specs Contract](./DOCS_SPECS_CONTRACT.md)
+- [Evidence Pack Standard](./EVIDENCE_PACK_STANDARD.md)
+- [Status Reporting Standard](./STATUS_REPORTING_STANDARD.md)
 
 ## Verification Requirements
 

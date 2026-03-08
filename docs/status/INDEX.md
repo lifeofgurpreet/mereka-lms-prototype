@@ -25,3 +25,7 @@ Use `docs/status/**` for:
 - `docs/status/migrations/`
 - `docs/status/weekly/`
 - `docs/status/incidents/`
+
+## Standards
+
+- [Status Reporting Standard](../guides/standards/STATUS_REPORTING_STANDARD.md)
