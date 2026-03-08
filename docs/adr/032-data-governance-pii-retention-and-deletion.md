@@ -17,7 +17,7 @@ does_not_govern: ["business analytics questions"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org"]
 related_specs: []
-related_runbooks: ["docs/operations/DATA_RETENTION_POLICY.md"]
+related_runbooks: ["docs/policies/operations/DATA_RETENTION_POLICY.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-evidence-redaction.sh", "scripts/qa/scan-secrets-fast.sh"]
 expiry_date: null

@@ -14,10 +14,10 @@ links:
   related_docs:
     - "docs/operations/K8S_OPERATIONS_GUIDE.md"
     - "docs/operations/DEPLOYMENT_RUNBOOK.md"
-    - "docs/operations/TROUBLESHOOTING.md"
-    - "docs/operations/MONITORING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/reference/operations/MONITORING.md"
     - "docs/operations/DISASTER_RECOVERY.md"
-    - "docs/operations/RELEASE_CHECKLIST.md"
+    - "docs/runbooks/operations/RELEASE_CHECKLIST.md"
   related_specs:
     - "specs/secrets-management_spec.md"
     - "specs/observability-stack_spec.md"

@@ -92,7 +92,7 @@ Before starting:
 - [ ] **[M]** Create operational runbook for MongoDB Atlas (`docs/operations/MONGODB_ATLAS_RUNBOOK.md`) | Depends: None
   - **Done**: Runbook covers: connection troubleshooting, DNSresolution failures, IP allowlist management, connection pool exhaustion, Atlas maintenance windows, rollback procedures(copy-paste ready).
 
-- [ ] **[S]** Update `docs/operations/TROUBLESHOOTING.md` with MongoDB Atlas-specific troubleshooting entries | Depends: Runbook
+- [ ] **[S]** Update `docs/runbooks/operations/TROUBLESHOOTING.md` with MongoDB Atlas-specific troubleshooting entries | Depends: Runbook
   - **Done**: Troubleshooting doc includes MongoDB Atlas section with symptom-to-fix table.
 
 - [ ] **[S]** Verify ADR-001 is up to date with current state(`docs/adr/001-mongodb-atlas.md`) | Depends: None

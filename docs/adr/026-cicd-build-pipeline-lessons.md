@@ -10,7 +10,7 @@ links:
     - "docs/adr/023-enterprise-images-ghcr-migration.md"
   related_docs:
     - "docs/ops/ci-cd/CI_CD_RUNNERS.md"
-    - "docs/ops/ci-cd/CI_OPTIMIZATION_TRACKER.md"
+    - "docs/status/active/CI_OPTIMIZATION_TRACKER.md"
 ---
 
 # ADR-026: CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)
@@ -331,7 +331,7 @@ Checks:
 - [ADR-003: Image Build Pipeline](003-image-build-pipeline.md)
 - [ADR-023: Enterprise Images GHCR Migration](023-enterprise-images-ghcr-migration.md)
 - [docs/ops/ci-cd/CI_CD_RUNNERS.md](../ops/ci-cd/CI_CD_RUNNERS.md)
-- [docs/ops/ci-cd/CI_OPTIMIZATION_TRACKER.md](../ops/ci-cd/CI_OPTIMIZATION_TRACKER.md)
+- [docs/status/active/CI_OPTIMIZATION_TRACKER.md](../../docs/status/active/CI_OPTIMIZATION_TRACKER.md)
 - [deploy/k8s/base/arc/dind-daemon-config.yaml](../../deploy/k8s/base/arc/dind-daemon-config.yaml)
 - [deploy/k8s/base/arc/runner-scale-set-heavy.yaml](../../deploy/k8s/base/arc/runner-scale-set-heavy.yaml)
 - [.github/workflows/build-tutor-images.yml](../../.github/workflows/build-tutor-images.yml)

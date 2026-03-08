@@ -57,7 +57,7 @@ fi
 
 PLUGIN="${PLUGIN_BUNDLE:-$PLUGIN_MAIN}"
 FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
-EVIDENCE_DOC="$REPO_ROOT/docs/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md"
+EVIDENCE_DOC="$REPO_ROOT/docs/evidence/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md"
 CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
 LMS_HEAD_EXTRA="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html"
 CMS_HEAD_EXTRA="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"
@@ -439,7 +439,7 @@ echo "================================================================"
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Remediation:"
-  echo "  AC-UI-501: Create docs/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md."
+  echo "  AC-UI-501: Create docs/evidence/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md."
   echo "             Document the symptom (undefined_license_key network calls),"
   echo "             affected hosts (admin/authn/apps), error codes (403/405),"
   echo "             and a root-cause section explaining the injection failure chain."

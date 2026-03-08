@@ -142,7 +142,6 @@ async def test_create_checkout_tenant_mismatch(mock_stripe, mock_settings, mock_
     mock_settings.STRIPE_SECRET_KEY = "sk_test_xxx"
     mock_settings.TENANT_ISOLATION_ENABLED = True
 
-    http_request = MagicMock()
     body = MagicMock()
     body.offering_uuid = offering.id
     body.buyer_email = "buyer@example.com"

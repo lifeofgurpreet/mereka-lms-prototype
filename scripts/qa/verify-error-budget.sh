@@ -26,7 +26,7 @@ cd "$ROOT_DIR"
 
 if [[ "$MODE" == "local" ]]; then
   # Contract: alert severity matrix exists + ops gates script exists.
-  [[ -f "docs/operations/ALERT_SEVERITY_MATRIX.md" ]] || { echo "[FAIL] Missing docs/operations/ALERT_SEVERITY_MATRIX.md" >&2; exit 1; }
+  [[ -f "docs/reference/operations/ALERT_SEVERITY_MATRIX.md" ]] || { echo "[FAIL] Missing docs/reference/operations/ALERT_SEVERITY_MATRIX.md" >&2; exit 1; }
   [[ -x "scripts/qa/run-operations-gates.sh" ]] || { echo "[FAIL] Missing scripts/qa/run-operations-gates.sh" >&2; exit 1; }
   echo "OK"
   exit 0

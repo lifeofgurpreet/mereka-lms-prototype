@@ -1,7 +1,7 @@
 # Mereka LMS Observability Review & Implementation Blueprint (Execution Ready)
 
 > Status: Archive-candidate (historical context only).
-> Use `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md` and
+> Use `docs/status/readiness/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md` and
 > `.github/workflows/observability-compliance.yml` as the active execution contract.
 
 Date: 2026-02-25

@@ -5,7 +5,7 @@
 > **Bead**: mereka-lms-8jao.25
 > **AC**: AC-WC-007, AC-WC-008
 > **Last updated**: 2026-02-20
-> **Related**: `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` (MFE-only subset)
+> **Related**: `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` (MFE-only subset)
 
 ## Scope
 
@@ -122,7 +122,7 @@ These patches exist in BOTH `apply-patches.sh` AND `mereka_lms.py`. The script r
 
 ## E. MFE Plugin Slot Overrides
 
-Detailed in `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`. Summary:
+Detailed in `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`. Summary:
 
 | # | Override | Status | Slot Available | Priority |
 |---|----------|--------|----------------|----------|
@@ -220,7 +220,7 @@ See `docs/guides/branding/BRANDING_OPERATING_MODEL.md` for the full exception po
 
 ## Related Documents
 
-- `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — MFE slot details
+- `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — MFE slot details
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — Operating model + exception policy
 - `docs/guides/branding/BRANDING_GUARDRAILS.md` — Verification gates
 - `infrastructure/tutor/plugins/mereka_lms.py` — Tutor plugin

@@ -14,24 +14,24 @@ _Audience: Platform Eng + Docs Lead • Owner: Platform Team • Last verified: 
 
 ### `scripts/qa/deprecated/verify-data-retention.sh`
 - Legacy references to replace: 1
-  - `docs/operations/DATA_ERASURE_RUNBOOK.md` -> `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md`
+  - `docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md` -> `docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md`
 
 ### `scripts/qa/lint-active-docs-env-model.sh`
 - Legacy references to replace: 2
   - `docs/branding/BRANDING_OPERATING_MODEL.md` -> `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
-  - `docs/operations/CI_CD_SETUP.md` -> `docs/ops/ci-cd/CI_CD_SETUP.md`
+  - `docs/operations/CI_CD_SETUP.md` -> `docs/reference/operations/CI_CD_SETUP.md`
 
 ### `scripts/qa/verify-a11y-authenticated-routes.sh`
 - Legacy references to replace: 1
-  - `docs/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` -> `docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
+  - `docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` -> `docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
 
 ### `scripts/qa/verify-a11y-tenant-branding.sh`
 - Legacy references to replace: 1
-  - `docs/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` -> `docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
+  - `docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` -> `docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
 
 ### `scripts/qa/verify-actions-pinned.sh`
 - Legacy references to replace: 1
-  - `docs/operations/ALLOWED_ACTIONS_POLICY.md` -> `docs/ops/security/ALLOWED_ACTIONS_POLICY.md`
+  - `docs/policies/operations/ALLOWED_ACTIONS_POLICY.md` -> `docs/policies/operations/ALLOWED_ACTIONS_POLICY.md`
 
 ### `scripts/qa/verify-brand-pack-schema.sh`
 - Legacy references to replace: 1
@@ -39,7 +39,7 @@ _Audience: Platform Eng + Docs Lead • Owner: Platform Team • Last verified: 
 
 ### `scripts/qa/verify-ci-runner-policy.sh`
 - Legacy references to replace: 1
-  - `docs/operations/CI_RUNNER_POLICY.md` -> `docs/ops/ci-cd/CI_RUNNER_POLICY.md`
+  - `docs/operations/CI_RUNNER_POLICY.md` -> `docs/policies/operations/CI_RUNNER_POLICY.md`
 
 ### `scripts/qa/verify-credentials-issuer.sh`
 - Legacy references to replace: 1
@@ -54,11 +54,11 @@ _Audience: Platform Eng + Docs Lead • Owner: Platform Team • Last verified: 
 
 ### `scripts/qa/verify-disaster-recovery.sh`
 - Legacy references to replace: 1
-  - `docs/operations/SECRET_ROTATION_CHECKLIST.md` -> `docs/ops/security/SECRET_ROTATION_CHECKLIST.md`
+  - `docs/operations/SECRET_ROTATION_CHECKLIST.md` -> `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`
 
 ### `scripts/qa/verify-enterprise-all-acs.sh`
 - Legacy references to replace: 1
-  - `docs/operations/ENTERPRISE_SERVICES_RUNBOOK.md` -> `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`
+  - `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md` -> `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md`
 
 ### `scripts/qa/verify-enterprise-sso-readiness.sh`
 - Legacy references to replace: 1
@@ -83,21 +83,21 @@ _Audience: Platform Eng + Docs Lead • Owner: Platform Team • Last verified: 
 ### `scripts/qa/verify-operator-dashboards.sh`
 - Legacy references to replace: 3
   - `docs/operations/ACCESS_URLS.md` -> `docs/ops/quickref/access-urls.md`
-  - `docs/operations/MONITORING.md` -> `docs/ops/monitoring/MONITORING.md`
+  - `docs/operations/MONITORING.md` -> `docs/reference/operations/MONITORING.md`
   - `docs/operations/OBSERVABILITY_QUICKSTART.md` -> `docs/ops/monitoring/OBSERVABILITY_QUICKSTART.md`
 
 ### `scripts/qa/verify-pii-inventory.sh`
 - Legacy references to replace: 1
-  - `docs/operations/DATA_ERASURE_RUNBOOK.md` -> `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md`
+  - `docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md` -> `docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md`
 
 ### `scripts/qa/verify-rke2-rollout-readiness.sh`
 - Legacy references to replace: 2
   - `docs/operations/LOGGING_AND_SENTRY.md` -> `docs/ops/monitoring/LOGGING_AND_SENTRY.md`
-  - `docs/operations/MONITORING.md` -> `docs/ops/monitoring/MONITORING.md`
+  - `docs/operations/MONITORING.md` -> `docs/reference/operations/MONITORING.md`
 
 ### `scripts/qa/verify-security-exceptions.sh`
 - Legacy references to replace: 1
-  - `docs/operations/SECURITY_EXCEPTIONS.md` -> `docs/ops/security/SECURITY_EXCEPTIONS.md`
+  - `docs/operations/SECURITY_EXCEPTIONS.md` -> `docs/policies/operations/SECURITY_EXCEPTIONS.md`
 
 ### `scripts/qa/verify-tenant-branding-contract.sh`
 - Legacy references to replace: 1
@@ -109,12 +109,12 @@ _Audience: Platform Eng + Docs Lead • Owner: Platform Team • Last verified: 
 
 ### `scripts/qa/verify-tenant-ui-smoke.sh`
 - Legacy references to replace: 1
-  - `docs/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` -> `docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
+  - `docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` -> `docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
 
 ### `scripts/qa/verify-ui-ux-hardening-bundle.sh`
 - Legacy references to replace: 2
   - `docs/branding/VISUAL_PARITY_CHECKPOINTS.md` -> `docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md`
-  - `docs/operations/VISUAL_REGRESSION_RUNBOOK.md` -> `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`
+  - `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md` -> `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md`
 
 ### `scripts/qa/verify-vc-issuer.sh`
 - Legacy references to replace: 1
@@ -129,24 +129,24 @@ _Audience: Platform Eng + Docs Lead • Owner: Platform Team • Last verified: 
 
 ### `scripts/qa/verify-visual-baselines.sh`
 - Legacy references to replace: 1
-  - `docs/operations/VISUAL_REGRESSION.md` -> `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`
+  - `docs/operations/VISUAL_REGRESSION.md` -> `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md`
 
 ### `scripts/qa/verify-visual-parity-checkpoints.sh`
 - Legacy references to replace: 3
   - `docs/branding/BRANDING_OPERATING_MODEL.md` -> `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
   - `docs/branding/VISUAL_PARITY_CHECKPOINTS.md` -> `docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md`
-  - `docs/operations/VISUAL_REGRESSION_RUNBOOK.md` -> `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`
+  - `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md` -> `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md`
 
 ### `scripts/qa/verify-visual-smoke-baseline.sh`
 - Legacy references to replace: 1
-  - `docs/operations/VISUAL_REGRESSION_RUNBOOK.md` -> `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`
+  - `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md` -> `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md`
 
 ## Workflow Batches
-- `.github/workflows/observability-compliance.yml`: `docs/operations/OBSERVABILITY_PARITY_MATRIX.md` -> `docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md`
-- `.github/workflows/security-exceptions.yml`: `docs/operations/SECURITY_EXCEPTIONS.md` -> `docs/ops/security/SECURITY_EXCEPTIONS.md`
+- `.github/workflows/observability-compliance.yml`: `docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md` -> `docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md`
+- `.github/workflows/security-exceptions.yml`: `docs/operations/SECURITY_EXCEPTIONS.md` -> `docs/policies/operations/SECURITY_EXCEPTIONS.md`
 
 ## Execution Checklist
 1. Completed: for each script/workflow batch, replaced legacy doc paths with canonical targets.
-2. Completed: ran `docs/qa/verify-docs-policy.sh` and changed-scope link checks.
+2. Completed: ran `tools/docs/verify/verify-docs-policy.sh` and changed-scope link checks.
 3. Completed: reclassified corresponding stubs from `superseded` to `archive-candidate`.
-4. Completed: refreshed `docs/catalog.json`, blocker matrix, and scorecard.
+4. Completed: refreshed `generated/catalogs/docs-catalog.json`, blocker matrix, and scorecard.

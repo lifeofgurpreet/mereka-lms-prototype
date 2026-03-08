@@ -34,7 +34,7 @@ spec:
     name: openedx-secrets
 EOF
 
-  cat >"$tmpdir/docs/operations/WORKLOAD_IDENTITY_FEDERATION.md" <<'EOF'
+  cat >"$tmpdir/docs/runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md" <<'EOF'
 # Workload Identity Federation
 EOF
 }

@@ -18,10 +18,10 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 
 ## 2) Hard Acceptance Gates (must be true before close)
 
-- `docs/qa/verify-docs-policy.sh` passes.
+- `tools/docs/verify/verify-docs-policy.sh` passes.
 - `./scripts/qa/verify-repo-structure.sh` passes.
-- `docs/qa/verify-docs-scorecard-recency.sh --max-age-days 7` passes.
-- `docs/qa/verify-docs-scorecard-head-freshness.sh` passes.
+- `tools/docs/verify/verify-docs-scorecard-recency.sh --max-age-days 7` passes.
+- `tools/docs/verify/verify-docs-scorecard-head-freshness.sh` passes.
 - Changed canonical docs include metadata (`Status`, `Owner`, `Last verified`) in subtitle or frontmatter.
 - Every moved/renamed file has updated inbound+outbound links in the same PR.
 - No `docs/` root files outside allowlist unless explicitly approved.
@@ -33,7 +33,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [ ] `cd /home/gurpreet/projects/k8s/mereka-lms-wt-docs-remediation`
 - [x] `git fetch origin`
 - [x] `git checkout docs/docs-first-class-20260307-followup-7`
-- [x] `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
+- [x] `./tools/docs/verify/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
 - [x] Keep world-class gate `--base-ref` configurable (default `origin/main`) and reuse it for sync, policy range, and trend comparison.
 - [x] World-class gate runner must fail fast when `--base-ref` cannot be resolved (`git rev-parse --verify "$BASE_REF"`).
 - [x] Never `git checkout main` in this worktree; stay on the docs branch.
@@ -51,11 +51,11 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 
 ### AC-DOCS-102: Baseline for this execution week
 - [x] Re-run baseline checks in branch:
-  - `docs/qa/verify-docs-policy.sh`
+  - `tools/docs/verify/verify-docs-policy.sh`
   - `./scripts/qa/verify-repo-structure.sh`
 - [x] Record `git rev-parse --short HEAD` and baseline in PR notes.
 - [x] Before any large content-edit burst, run:
-  - `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
+  - `./tools/docs/verify/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200`
     (`1200s` defaults to 20 minutes)
 - [x] Open/confirm existing blocker gates:
   - `GOV-01`, `GOV-02`, `CLS-02`
@@ -63,10 +63,10 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 ## 4) Day 2 — Command-accuracy hardening (code-reflective docs)
 
 ### AC-DOCS-201: Draft command reference verifier
-- [x] Create a script: `docs/qa/verify-doc-command-refs.sh`
+- [x] Create a script: `tools/docs/verify/verify-doc-command-refs.sh`
 - [ ] Script must:
   - scan canonical docs for command snippets in fenced code blocks and inline command references;
-  - parse markdown path targets in inline code, markdown links (`[x](docs/operations/TROUBLESHOOTING.md)`), and markdown autolinks (`<docs/operations/TROUBLESHOOTING.md>`);
+  - parse markdown path targets in inline code, markdown links (`[x](docs/runbooks/operations/TROUBLESHOOTING.md)`), and markdown autolinks (`<docs/runbooks/operations/TROUBLESHOOTING.md>`);
   - validate each referenced command/script exists in repo (`scripts/**`, `.github/workflows/**`, canonical runbook commands);
   - emit summary JSON with stable schema even for zero-scope runs (include `candidate_sources` keys with zero values);
   - normalize missing `candidate_sources` keys to zero in consolidated compliance outputs.
@@ -87,7 +87,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
   - `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
   - `docs/ops/quickref/QUICK_REFERENCE.md`
   - `docs/guides/branding/BRANDING_OPERATOR_GUIDE.md`
-  - `docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md`
+  - `docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md`
 - [x] Fix any broken references in the same PR.
 
 ## 5) Day 3 — CI pipeline enforcement
@@ -96,9 +96,9 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [x] Add workflow: `.github/workflows/docs-compliance.yml`
 - [x] Trigger: `on: [pull_request]` for paths under `docs/**` and command-verifier inputs.
 - [x] Required jobs:
-  - `verify-docs-policy`: run `docs/qa/verify-docs-policy.sh`
+  - `verify-docs-policy`: run `tools/docs/verify/verify-docs-policy.sh`
   - `verify-repo-structure`: run `./scripts/qa/verify-repo-structure.sh`
-  - `verify-doc-command-refs`: run `docs/qa/verify-doc-command-refs.sh`
+  - `verify-doc-command-refs`: run `tools/docs/verify/verify-doc-command-refs.sh`
   - `verify-doc-link-integrity`: run docs link check scoped to changed files
 - [x] PR gate must print status summary and fail hard on any command-reference miss.
 
@@ -128,7 +128,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 ### AC-DOCS-401: Weekly KPI scorecard (single source output)
 - [x] Create/update `docs/guides/admin/DOCS_PROGRAM_SCORECARD_<YYYYMMDD>.md` for this week.
 - [x] Generate from canonical tooling (do not hand-edit metrics):
-  - `./docs/qa/generate-docs-scorecard-report.sh --date <YYYYMMDD>`
+  - `./tools/docs/scorecards/generate-docs-scorecard-report.sh --date <YYYYMMDD>`
 - [ ] Include at minimum:
   - canonical coverage %
   - duplicate canonical conflicts
@@ -141,8 +141,8 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [x] Publish scorecard delta in handoff artifact.
 
 ### AC-DOCS-402: Stale canonical escalation policy
-- [x] Run freshness scan against canonical docs in `docs/catalog.json`.
-- [x] Run `python3 docs/qa/verify-doc-catalog-health.py --max-stale-days 45`.
+- [x] Run freshness scan against canonical docs in `generated/catalogs/docs-catalog.json`.
+- [x] Run `python3 tools/docs/verify/verify-doc-catalog-health.py --max-stale-days 45`.
 - [x] Create follow-up tracker ticket per stale canonical (owner + due date).  
       No stale canonical files found; no tracker items needed for this run.
 
@@ -164,10 +164,10 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 ### PR Body checklist
 - [ ] Scope: one-week hardening cycle complete
 - [ ] Validation run:
-  - `docs/qa/verify-docs-policy.sh`
+  - `tools/docs/verify/verify-docs-policy.sh`
   - `./scripts/qa/verify-repo-structure.sh`
-  - `docs/qa/verify-doc-command-refs.sh` (new)
-  - `python3 docs/qa/verify-doc-catalog-health.py --max-stale-days 45`
+  - `tools/docs/verify/verify-doc-command-refs.sh` (new)
+  - `python3 tools/docs/verify/verify-doc-catalog-health.py --max-stale-days 45`
   - docs policy workflow passes
 - [ ] Contradictions resolved:
   - onboarding / access / branding / runbooks clusters

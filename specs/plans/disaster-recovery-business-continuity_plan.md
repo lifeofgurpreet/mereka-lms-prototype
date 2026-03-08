@@ -37,7 +37,7 @@ The codebase already provides substantial coverage:
 - **Restore-test CronJob**: Exists at `infrastructure/k8s/velero/restore-test-script.sh` and the CronJob manifest.
 - **DR evidence bundle**: Exists at `scripts/qa/build-dr-evidence-bundle.sh` with GitHub Actions workflow `.github/workflows/dr-evidence-bundle.yml`.
 - **Audit scripts**: `scripts/qa/audit-velero.sh` and `scripts/qa/audit-velero-alert-pipeline.sh` exist.
-- **Backup coverage matrix**: `docs/operations/BACKUP_COVERAGE_MATRIX.md` exists.
+- **Backup coverage matrix**: `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md` exists.
 - **Monitoring**: Prometheus, Loki, Grafana operational per observability stack.
 - **Atlas**: MongoDB Atlas cluster at `cluster-mereka-lms.2pjex4s.mongodb.net` with continuous backup.
 
@@ -73,7 +73,7 @@ The codebase already provides substantial coverage:
 
 - [ ] **[S]** B-05: Verify GCS backup bucket encryption and IAM -- confirm Google-managed encryption at rest, Velero service account is sole IAM principal with write access (`scripts/qa/verify-velero-gcs-security.sh`) | AC: Observability/Security NFRs | Depends: None
 
-- [ ] **[M]** B-06: Update `docs/operations/BACKUP_COVERAGE_MATRIX.md` to match spec requirements -- map every stateful component to its backup mechanism and verification command (`docs/operations/BACKUP_COVERAGE_MATRIX.md`) | AC: #019 (data integrity) | Depends: None
+- [ ] **[M]** B-06: Update `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md` to match spec requirements -- map every stateful component to its backup mechanism and verification command (`docs/reference/operations/BACKUP_COVERAGE_MATRIX.md`) | AC: #019 (data integrity) | Depends: None
 
 - [ ] **[S]** B-07: Verify Cloud SQL backup workflow exists in disabled state at `.github/workflows/cloud-sql-backup.yml` with `ENABLE_CLOUD_SQL_BACKUPS` activation gate (`.github/workflows/cloud-sql-backup.yml`) | AC: Backup strategy (legacy Cloud SQL) | Depends: None
 
@@ -155,7 +155,7 @@ The codebase already provides substantial coverage:
 
 - [ ] **[L]** B-26: Document and validate all disaster scenario response procedures (DR-001 through DR-011) -- create or update runbook entries for each scenario with step-by-step recovery commands, expected RTO, and verification commands (`docs/operations/DISASTER_RECOVERY.md`) | AC: #015-#018 | Depends: None
 
-- [ ] **[M]** B-27: Create secret rotation checklist -- document the full rotation procedure for all K8s secrets via Infisical + GCP SM, including post-rotation pod restart verification (`docs/operations/SECRET_ROTATION_CHECKLIST.md`) | AC: #017 | Depends: None
+- [ ] **[M]** B-27: Create secret rotation checklist -- document the full rotation procedure for all K8s secrets via Infisical + GCP SM, including post-rotation pod restart verification (`docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`) | AC: #017 | Depends: None
 
 - [ ] **[M]** B-28: Verify Terraform/Kustomize IaC is deployable to any GKE cluster -- run `kubectl kustomize deploy/k8s/overlays/production` and validate manifests are self-contained (`scripts/qa/verify-cross-region-iac.sh`) | AC: #021 | Depends: None
 
@@ -193,7 +193,7 @@ The codebase already provides substantial coverage:
 
 #### Docs
 
-- [ ] **[M]** D-01: Update `docs/operations/TROUBLESHOOTING.md` with all edge cases from spec (zero-snapshot backup, broken CronJob, stuck namespace, Atlas verification, partial restore, secrets desync, GCS inaccessible, concurrent backup/restore, clock skew) (`docs/operations/TROUBLESHOOTING.md`) | Depends: None
+- [ ] **[M]** D-01: Update `docs/runbooks/operations/TROUBLESHOOTING.md` with all edge cases from spec (zero-snapshot backup, broken CronJob, stuck namespace, Atlas verification, partial restore, secrets desync, GCS inaccessible, concurrent backup/restore, clock skew) (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: None
 
 - [ ] **[S]** D-02: Update `docs/operations/DEPLOYMENT_RUNBOOK.md` to reference pre-operation backup procedure (`docs/operations/DEPLOYMENT_RUNBOOK.md`) | Depends: B-08
 

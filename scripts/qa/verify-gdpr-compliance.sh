@@ -108,11 +108,11 @@ run_offline_checks() {
   fi
 
   # Check for GDPR compliance runbook
-  gdpr_runbook="$REPO_ROOT/docs/operations/GDPR_COMPLIANCE.md"
+  gdpr_runbook="$REPO_ROOT/docs/runbooks/operations/GDPR_COMPLIANCE.md"
   if [[ -f "$gdpr_runbook" ]]; then
     pass "GDPR_COMPLIANCE.md operational runbook exists"
   else
-    fail "docs/operations/GDPR_COMPLIANCE.md does not exist — create it"
+    fail "docs/runbooks/operations/GDPR_COMPLIANCE.md does not exist — create it"
   fi
 
   # ── 2. Cookie consent configuration in LMS settings ────────────────────

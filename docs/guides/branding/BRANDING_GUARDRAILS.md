@@ -205,7 +205,7 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
 
 ## Deployment Reference
 
-Use `docs/operations/THEME_DEPLOYMENT.md` as the canonical deployment runbook.
+Use `docs/runbooks/operations/THEME_DEPLOYMENT.md` as the canonical deployment runbook.
 
 ## Roadmap
 

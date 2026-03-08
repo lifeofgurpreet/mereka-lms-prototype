@@ -68,7 +68,7 @@ We are **deferring** Android app development indefinitely.
 - May delay mobile-first clients who require Android support
 
 ### Immediate Actions
-1. **Remove misleading references**: Update `docs/operations/CAPABILITY_MATRIX.md` to clearly mark Android app as "DEFERRED" (currently shows "DRAFT" which implies it may be built)
+1. **Remove misleading references**: Update `docs/reference/operations/CAPABILITY_MATRIX.md` to clearly mark Android app as "DEFERRED" (currently shows "DRAFT" which implies it may be built)
 2. **Update mobile spec**: Add deferral notice to `specs/mobile-apps-enterprise_spec.md` indicating Android is not in scope for v1
 3. **Keep mobile API enabled**: The backend mobile API should remain enabled to support potential future Android deployment and current iOS work
 
@@ -90,7 +90,7 @@ We are **deferring** Android app development indefinitely.
 ## Implementation Notes
 
 ### Documentation Updates Required
-- [ ] Update `docs/operations/CAPABILITY_MATRIX.md`: Change Android app status from "DRAFT" to "DEFERRED"
+- [ ] Update `docs/reference/operations/CAPABILITY_MATRIX.md`: Change Android app status from "DRAFT" to "DEFERRED"
 - [ ] Add deferral notice to `specs/mobile-apps-enterprise_spec.md` (Android section)
 - [ ] Update `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` to remove references suggesting Android is coming soon
 
@@ -116,4 +116,4 @@ If/when Android development is approved:
 - ADR-017: Analytics target decision (similar deferral pattern)
 - `specs/mobile-apps-enterprise_spec.md` (mobile strategy)
 - `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` (iOS setup)
-- `docs/operations/CAPABILITY_MATRIX.md` (capability tracking)
+- `docs/reference/operations/CAPABILITY_MATRIX.md` (capability tracking)

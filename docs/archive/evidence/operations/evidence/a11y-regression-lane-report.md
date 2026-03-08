@@ -11,7 +11,7 @@
 
 Bead 2dcy.3 shipped `scripts/qa/verify-authenticated-smoke-a11y.sh` (18 PASS) covering:
 - Authenticated route manifest with 5 routes (AC-FRONT-031)
-- Runbook at `docs/operations/AUTHENTICATED_SMOKE_A11Y.md` (AC-FRONT-032)
+- Runbook at `docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md` (AC-FRONT-032)
 - WCAG AA contrast validation for 5 color pairs (AC-FRONT-033)
 - Evidence report at `docs/archive/evidence/operations/evidence/authenticated-smoke-a11y-report.md` (AC-FRONT-034)
 
@@ -78,7 +78,7 @@ The profile / account-settings route renders Paragon `<Form.Control>` inputs. Th
 |---|---|
 | Parent verification script | `scripts/qa/verify-authenticated-smoke-a11y.sh` |
 | This verification script | `scripts/qa/verify-a11y-regression-lane.sh` |
-| A11y regression lane runbook | `docs/operations/A11Y_REGRESSION_LANE.md` |
+| A11y regression lane runbook | `docs/runbooks/operations/A11Y_REGRESSION_LANE.md` |
 | Parent evidence report | `docs/archive/evidence/operations/evidence/authenticated-smoke-a11y-report.md` |
 | This evidence report | `docs/archive/evidence/operations/evidence/a11y-regression-lane-report.md` |
 | Focus ring source | `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |

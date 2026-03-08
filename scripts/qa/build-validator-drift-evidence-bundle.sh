@@ -78,7 +78,7 @@ cat >"$OUT_DIR/01_scope.md" <<EOF
   - \`scripts/infra/\`
   - \`scripts/branding/\`
   - \`.github/workflows/\`
-  - \`docs/operations/verification/\`
+  - \`verification/\`
   - \`docs/archive/reports/\`
 - Explicit non-scope:
   - live cluster/runtime state (no kubectl calls in this bundle)
@@ -123,7 +123,7 @@ import csv
 import json
 from pathlib import Path
 
-catalog_path = Path("docs/operations/verification/verification_catalog.json")
+catalog_path = Path("verification/catalogs/verification_catalog.json")
 fields = [
     "path",
     "status",
@@ -218,7 +218,7 @@ if readme.exists():
 
 for source in manual_sources:
     source_rel = str(source.relative_to(root))
-    if source_rel.startswith("docs/operations/verification/"):
+    if source_rel.startswith("verification/"):
         continue
     text = source.read_text(encoding="utf-8", errors="ignore")
     for script in sorted(set(pattern.findall(text))):

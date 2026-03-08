@@ -172,7 +172,7 @@ Same as above - multisite_bootstrap.py creates both
 
 After verification, update:
 - `docs/archive/reports/status/OPERATIONAL_STATUS.md` with production findings
-- `docs/concepts/architecture/MULTISITE_ANALYSIS.md` with actual distribution
+- `reports/2025/audits/MULTISITE_ANALYSIS.md` with actual distribution
 - `docs/ops/quickref/access-urls.md` with verified URLs
 
 ---

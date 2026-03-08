@@ -145,7 +145,7 @@ jobs:
                 '### What to check',
                 '1. Download the log artifacts from the workflow run above',
                 '2. Look for `FAIL` lines indicating drift',
-                '3. Follow the runbook: `docs/operations/ARGOCD_DRIFT.md`',
+                '3. Follow the runbook: `docs/runbooks/operations/ARGOCD_DRIFT.md`',
                 '',
                 '### Common causes',
                 '- Manual `kubectl patch` on ArgoCD-managed Application or ApplicationSet',

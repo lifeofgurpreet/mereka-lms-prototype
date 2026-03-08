@@ -14,7 +14,7 @@ links:
     - "docs/adr/006-tutor-plugin-based-configuration.md"
     - "docs/onboarding/QUICK_START_LOCAL.md"
     - "docs/onboarding/DEVELOPER_ONBOARDING.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/operations/DEPLOYMENT_RUNBOOK.md"
   related_specs:
     - "specs/tutor-configuration_spec.md"

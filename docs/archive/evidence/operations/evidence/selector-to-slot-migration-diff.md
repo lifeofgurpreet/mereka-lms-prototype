@@ -14,7 +14,7 @@ completed across the mereka-lms MFE branding stack.
 
 Three structural MFE customizations that previously relied on CSS selectors (or string surgery)
 were migrated to explicit `frontend-plugin-framework` plugin slot registrations. The remaining
-high-risk selectors have been documented in `docs/operations/MFE_SELECTOR_EXCEPTIONS.md` with
+high-risk selectors have been documented in `docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md` with
 risk rationale and expiry dates.
 
 ---
@@ -203,7 +203,7 @@ The following RISK: HIGH selectors could not be migrated (no upstream slot avail
 | Learning media column guard | HIGH | No inner card media slot | 2026-Q3 |
 | List vertical rhythm | HIGH | CSS spacing; no slot equivalent | 2026-Q3 |
 
-Full rationale for each exception: `docs/operations/MFE_SELECTOR_EXCEPTIONS.md`.
+Full rationale for each exception: `docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md`.
 
 ---
 
@@ -247,7 +247,7 @@ except ImportError:
 |------|--------|
 | `infrastructure/tutor/plugins/mereka_lms.py` | Added 3 `PLUGIN_SLOTS.add_item` registrations (prior bead) |
 | `infrastructure/tutor/themes/mereka/mfe/mereka.scss` | 17+ RISK: HIGH selectors tagged (prior bead) |
-| `docs/operations/MFE_SELECTOR_EXCEPTIONS.md` | **NEW** — exception documentation (this bead) |
+| `docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md` | **NEW** — exception documentation (this bead) |
 | `docs/archive/evidence/operations/evidence/selector-to-slot-migration-diff.md` | **NEW** — this file (this bead) |
 | `scripts/qa/verify-selector-to-slot-migration.sh` | **NEW** — verification script (this bead) |
 | `.github/workflows/ci.yml` | **NEW** — `selector-to-slot-migration` CI job (this bead) |

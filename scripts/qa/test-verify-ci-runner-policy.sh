@@ -14,7 +14,7 @@ mkdir -p "$tmpdir/scripts/qa" "$tmpdir/.github/workflows" "$tmpdir/docs/ops/ci-c
 cp "$SOURCE_SCRIPT" "$tmpdir/scripts/qa/verify-ci-runner-policy.sh"
 chmod +x "$tmpdir/scripts/qa/verify-ci-runner-policy.sh"
 
-cat > "$tmpdir/docs/ops/ci-cd/CI_RUNNER_POLICY.md" <<'MD'
+cat > "$tmpdir/docs/policies/operations/CI_RUNNER_POLICY.md" <<'MD'
 # CI Runner Policy
 ARC-first policy document (test fixture).
 MD

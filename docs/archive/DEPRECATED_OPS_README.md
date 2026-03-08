@@ -10,7 +10,7 @@
 | `infrastructure/tutor/multisite-sites.yml` | `infrastructure/tutor/multisite-sites.yml` |
 | `scripts/migrations/kajabi/scripts/` | `scripts/migrations/kajabi/` |
 | `scripts/migrations/mct/scripts/` | `scripts/migrations/mct/` |
-| `scripts/migrations/kajabi/README.md` | `docs/migrations/kajabi/OPS_KAJABI_README.md` |
+| `scripts/migrations/kajabi/README.md` | `docs/reference/migrations/kajabi/OPS_KAJABI_README.md` |
 | `scripts/migrations/mct/README.md` | `docs/migrations/mct/OPS_MCT_README.md` |
 | `infrastructure/tutor/config.example.yml` | `infrastructure/tutor/config.example.yml` (duplicate removed) |
 | `infrastructure/tutor/apply-patches.sh` | `infrastructure/tutor/apply-patches.sh` (symlink removed) |

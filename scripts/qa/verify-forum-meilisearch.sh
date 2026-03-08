@@ -196,7 +196,7 @@ if [ "$FAILED" -eq 0 ]; then
   echo "  Image  : docker.io/getmeili/meilisearch:v1.8.4"
   echo "  Service: meilisearch.mereka-lms.svc.cluster.local:7700"
   echo "  Secrets: MEREKA_LMS_MEILISEARCH_MASTER_KEY / MEREKA_LMS_MEILISEARCH_API_KEY"
-  echo "  Doc    : docs/operations/FORUM_MEILISEARCH.md"
+  echo "  Doc    : docs/reference/operations/FORUM_MEILISEARCH.md"
   exit 0
 else
   echo -e "${RED}NOT CONFIGURED${NC} — Forum Meilisearch dependency has gaps."
@@ -205,6 +205,6 @@ else
   echo "  Deployment missing  : Add Meilisearch Deployment/Service to deploy/k8s/base/"
   echo "  Settings missing    : Add MEILISEARCH_URL/API_KEY to lms/production.py"
   echo "  ExternalSecret gap  : Map MEREKA_LMS_MEILISEARCH_* in external-secrets.yaml"
-  echo "  Full doc            : docs/operations/FORUM_MEILISEARCH.md"
+  echo "  Full doc            : docs/reference/operations/FORUM_MEILISEARCH.md"
   exit 1
 fi

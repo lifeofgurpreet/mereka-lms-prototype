@@ -14,7 +14,7 @@ links:
   related_docs:
     - "docs/architecture/proctoring-architecture-overview.md"
     - "docs/runbooks/proctoring-operations-runbook.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
   related_specs:
     - "specs/enterprise-microservices_spec.md"
     - "specs/k8s-deployment_spec.md"

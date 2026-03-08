@@ -12,7 +12,7 @@ FAIL=0
 WARN=0
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-MATRIX_DOC="${REPO_ROOT}/docs/operations/MFE_PLUGIN_SLOT_MATRIX.md"
+MATRIX_DOC="${REPO_ROOT}/docs/reference/operations/MFE_PLUGIN_SLOT_MATRIX.md"
 INVENTORY_DOC="${REPO_ROOT}/docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
 
 # Colors for output
@@ -41,9 +41,9 @@ echo ""
 
 # AC-UISLOT-005: Matrix document exists
 if [[ -f "$MATRIX_DOC" ]]; then
-  pass "Matrix document exists at docs/operations/MFE_PLUGIN_SLOT_MATRIX.md"
+  pass "Matrix document exists at docs/reference/operations/MFE_PLUGIN_SLOT_MATRIX.md"
 else
-  fail "Matrix document missing at docs/operations/MFE_PLUGIN_SLOT_MATRIX.md"
+  fail "Matrix document missing at docs/reference/operations/MFE_PLUGIN_SLOT_MATRIX.md"
   echo "=== Summary: $PASS passed, $FAIL failed, $WARN warnings ==="
   exit 1
 fi

@@ -20,7 +20,7 @@
 #   ./scripts/qa/verify-binary-pinning-bbi-infra.sh
 #   BBI_INFRA=/path/to/bbi-infrastructure ./scripts/qa/verify-binary-pinning-bbi-infra.sh
 #
-# Cross-repo reference: docs/ops/security/BINARY_PINNING.md
+# Cross-repo reference: docs/policies/operations/BINARY_PINNING.md
 # Task: T057 / DR2:I-015
 
 set -euo pipefail
@@ -64,18 +64,18 @@ fi
 echo "=== verify-binary-pinning-bbi-infra (T057) ==="
 echo "    Source repo:  ${REPO_ROOT}"
 echo "    GitOps repo:  ${BBI_INFRA:-<not found>}"
-echo "    Policy doc:   docs/ops/security/BINARY_PINNING.md"
+echo "    Policy doc:   docs/policies/operations/BINARY_PINNING.md"
 echo ""
 
 # ---------------------------------------------------------------------------
 # Check 1: Cross-repo task is documented
 # ---------------------------------------------------------------------------
 
-POLICY_DOC="${REPO_ROOT}/docs/ops/security/BINARY_PINNING.md"
+POLICY_DOC="${REPO_ROOT}/docs/policies/operations/BINARY_PINNING.md"
 if [[ -f "$POLICY_DOC" ]]; then
-  pass "Binary pinning policy documented at docs/ops/security/BINARY_PINNING.md"
+  pass "Binary pinning policy documented at docs/policies/operations/BINARY_PINNING.md"
 else
-  fail "Binary pinning policy doc missing: docs/ops/security/BINARY_PINNING.md"
+  fail "Binary pinning policy doc missing: docs/policies/operations/BINARY_PINNING.md"
 fi
 
 # ---------------------------------------------------------------------------
@@ -277,7 +277,7 @@ echo "PASSED=$PASSED FAILED=$FAILED SKIPPED=$SKIPPED"
 
 if [[ "$TOTAL_VIOLATIONS" -gt 0 ]]; then
   echo ""
-  echo "  Fix: See docs/ops/security/BINARY_PINNING.md for pinning patterns."
+  echo "  Fix: See docs/policies/operations/BINARY_PINNING.md for pinning patterns."
   echo "  Changes must be made in the bbi-infrastructure repository (cross-repo task T057)."
 fi
 

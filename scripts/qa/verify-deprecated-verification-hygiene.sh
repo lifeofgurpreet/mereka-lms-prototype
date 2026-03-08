@@ -4,7 +4,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-MANIFEST="$REPO_ROOT/docs/operations/verification/deprecated_verify_scripts.json"
+MANIFEST="$REPO_ROOT/verification/manifests/deprecated_verify_scripts.json"
 CI_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
 WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
 

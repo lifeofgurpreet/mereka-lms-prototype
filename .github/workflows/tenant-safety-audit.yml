@@ -95,7 +95,7 @@ jobs:
           if [[ "$FAILURES" -gt 0 ]]; then
             echo "ERROR: prod tenant config audit found $FAILURES blocking failure(s)." >&2
             echo "See tenant-safety-audit-prod.json artifact for details." >&2
-            echo "Runbook: docs/operations/TENANT_DRIFT_INVESTIGATION.md" >&2
+            echo "Runbook: docs/runbooks/operations/TENANT_DRIFT_INVESTIGATION.md" >&2
             exit 1
           fi
 
@@ -105,7 +105,7 @@ jobs:
           if [[ "$FAILURES" -gt 0 ]]; then
             echo "ERROR: dev tenant config audit found $FAILURES blocking failure(s)." >&2
             echo "See tenant-safety-audit-dev.json artifact for details." >&2
-            echo "Runbook: docs/operations/TENANT_DRIFT_INVESTIGATION.md" >&2
+            echo "Runbook: docs/runbooks/operations/TENANT_DRIFT_INVESTIGATION.md" >&2
             exit 1
           fi
 

@@ -17,7 +17,7 @@ does_not_govern: ["incident-response runtime triage"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org"]
 related_specs: []
-related_runbooks: ["docs/operations/POSTMERGE_GOVERNANCE_CLOSURE.md"]
+related_runbooks: ["reports/2026/closures/POSTMERGE_GOVERNANCE_CLOSURE.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify_exception_expiry.py"]
 expiry_date: null

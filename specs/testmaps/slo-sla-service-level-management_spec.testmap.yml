@@ -160,7 +160,7 @@ acceptance_criteria:
     file: scripts/qa/verify-slo-contracts.sh
     command: scripts/qa/verify-slo-contracts.sh
   - type: manual
-    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
+    runbook: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md
     section: Verification > Simulate Budget Burn
     justification: Requires scaling LMS to 0 replicas to trigger real alert; not safe
       to automate in production
@@ -223,7 +223,7 @@ acceptance_criteria:
     file: scripts/qa/verify-regression-detection.sh
     command: scripts/qa/verify-regression-detection.sh
   - type: manual
-    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
+    runbook: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md
     section: Verification > Simulate Latency Regression
     justification: Requires injecting artificial latency in production to verify alert
       fires within 15 minutes; not safe to automate
@@ -315,7 +315,7 @@ acceptance_criteria:
     is excluded from both numerator and denominator
   verify:
   - type: manual
-    runbook: docs/operations/MAINTENANCE_WINDOWS.md
+    runbook: docs/policies/operations/MAINTENANCE_WINDOWS.md
     section: Verification > SLA Exclusion Test
     justification: Requires declaring a real maintenance window and generating a monthly
       report to verify exclusion; involves calendar-dependent data that cannot be
@@ -330,7 +330,7 @@ acceptance_criteria:
     file: scripts/qa/generate-sla-report.sh
     command: scripts/qa/generate-sla-report.sh
   - type: manual
-    runbook: docs/operations/SLA_REPORTING.md
+    runbook: docs/policies/operations/SLA_REPORTING.md
     section: Report Sections > Maintenance Windows
     justification: Requires actual maintenance window data to verify start/end/scope
       appear correctly; dry-run only checks section existence
@@ -339,7 +339,7 @@ acceptance_criteria:
     then acknowledgement occurs within 15 minutes of alert firing
   verify:
   - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
+    runbook: docs/policies/operations/ONCALL_ROTATION.md
     section: Incident Response > P1 Acknowledgement
     justification: Tests human response time to P1 alerts; requires a real or simulated
       incident with on-call engineer availability
@@ -353,7 +353,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/INCIDENT_TEMPLATES.md
+    runbook: docs/runbooks/operations/INCIDENT_TEMPLATES.md
     section: Postmortem > Required Sections Checklist
     justification: Tests organizational process (postmortem published within 5 business
       days with required sections); cannot be automated without incident tracking
@@ -368,7 +368,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
+    runbook: docs/policies/operations/ONCALL_ROTATION.md
     section: Schedule Verification
     justification: Requires inspecting on-call schedule for primary/secondary assignment
       and consecutive-day limits; format depends on tool choice (Slack, PagerDuty,
@@ -386,7 +386,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
+    runbook: docs/policies/operations/ONCALL_ROTATION.md
     section: Escalation > Auto-Escalation Test
     justification: Full end-to-end escalation test requires primary on-call to be
       unreachable for 15 minutes; automated check verifies Alertmanager config only

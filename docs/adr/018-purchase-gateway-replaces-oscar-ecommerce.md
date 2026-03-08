@@ -17,7 +17,7 @@ does_not_govern: ["pricing-strategy", "catalog-content-authoring"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
 related_specs: ["specs/ecommerce-purchase-gateway_spec.md"]
-related_runbooks: ["docs/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md", "docs/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md"]
+related_runbooks: ["docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md", "docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-ecommerce-worker-health.sh", "scripts/qa/verify-repo-structure.sh"]
 expiry_date: null
@@ -61,7 +61,7 @@ Legacy Oscar is archived upstream, operationally expensive, and misaligned with 
 
 - `scripts/qa/verify-ecommerce-worker-health.sh`
 - service-level tests under `services/purchase-gateway/tests`
-- retirement checklist evidence in `docs/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md`
+- retirement checklist evidence in `docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md`
 
 ## Failure modes
 

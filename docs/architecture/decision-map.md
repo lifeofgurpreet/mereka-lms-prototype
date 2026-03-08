@@ -1,3 +1,3 @@
 # Architecture Decision Map
 
-See `docs/adr/_generated/decision-map.md`.
+See `generated/decision-maps/adr-decision-map.md`.

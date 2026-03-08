@@ -208,7 +208,7 @@ Before starting Phase 0, confirm:
 
 - [ ] **[M]** T-091: Create enterprise SSO runbook (`docs/runbooks/auth-sso-enterprise-runbook.md`) -- operational procedures, troubleshooting, rollback steps, break-glass MFA recovery, IdP compromise response | AC: Docs gate | Depends: T-080
 - [ ] **[S]** T-092: Update `docs/operations/AUTH_HARDENING_SPEC.md` to reference this spec as the authoritative contract| AC: Docs | Depends: None
-- [ ] **[S]** T-093: Update `docs/operations/TROUBLESHOOTING.md` with enterprise SSO troubleshooting section | AC: Docs |Depends: T-091
+- [ ] **[S]** T-093: Update `docs/runbooks/operations/TROUBLESHOOTING.md` with enterprise SSO troubleshooting section | AC: Docs |Depends: T-091
 - [ ] **[S]** T-094: Document SAML signing key rotation procedure | AC: Security (annual rotation) | Depends: T-002
 - [ ] **[S]** T-095: Document break-glass MFA recovery procedure | AC: MFA recovery | Depends: T-015
 

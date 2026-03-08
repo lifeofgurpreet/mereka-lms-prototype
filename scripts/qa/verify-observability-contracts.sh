@@ -252,7 +252,7 @@ if [[ -f "$ds" ]]; then
 fi
 
 # Log retention documented
-loki_doc="docs/operations/GKE_LOKI_FORWARDING.md"
+loki_doc="docs/runbooks/operations/GKE_LOKI_FORWARDING.md"
 if [[ -f "$loki_doc" ]]; then
   report PASS "Loki forwarding documentation exists: $loki_doc"
 else
@@ -361,12 +361,12 @@ else
   report SKIP "Tracing scope ADR missing: docs/adr/020-tracing-scope-and-pilot-decision.md"
 fi
 
-if [[ -f "docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md" ]]; then
-  report PASS "Tracing pilot contract exists: docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
+if [[ -f "docs/reference/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md" ]]; then
+  report PASS "Tracing pilot contract exists: docs/reference/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
 elif [[ "$TRACING_REQUIRED" == "1" ]]; then
-  report FAIL "Tracing pilot contract missing: docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
+  report FAIL "Tracing pilot contract missing: docs/reference/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
 else
-  report SKIP "Tracing pilot contract missing: docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
+  report SKIP "Tracing pilot contract missing: docs/reference/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
 fi
 
 tracing_configs=(

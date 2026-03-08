@@ -12,7 +12,7 @@ Execution rules for v2:
    - `https://docs.openedx.org`
    - `https://docs.tutor.edly.io`
 7. Exception/workaround ADRs are invalid without expiry and removal conditions.
-8. Do not delete overloaded content without extracting to `docs/evidence/` or `docs/runbooks/`.
+8. Do not delete overloaded content without extracting to `evidence/` or `docs/runbooks/`.
 
 Immediate priorities:
 - Install ADR manifest/frontmatter/graph tooling.

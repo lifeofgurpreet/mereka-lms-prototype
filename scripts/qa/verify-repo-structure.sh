@@ -227,8 +227,8 @@ print("[PASS] No committed Secret data/stringData values under deploy/k8s/base/s
 PY
 fi
 
-# AC-007: Deprecated dirs absent or tombstones.
-check_deprecated_dir "tools"
+# AC-007: Canonical tools/ exists; legacy ops/ absent or tombstone.
+check_dir "tools"
 check_deprecated_dir "ops"
 
 # AC-008: docs canonical + transition directories.

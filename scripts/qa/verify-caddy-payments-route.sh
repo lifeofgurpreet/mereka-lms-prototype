@@ -213,7 +213,7 @@ if [[ $FAIL -gt 0 ]]; then
   echo "  Webhooks:   services/purchase-gateway/app/routers/webhooks.py"
   echo "  Health:     services/purchase-gateway/app/routers/health.py"
   echo "  Checkout:   services/purchase-gateway/app/routers/checkout.py"
-  echo "  Ops guide:  docs/operations/PURCHASE_GATEWAY_K8S.md"
+  echo "  Ops guide:  docs/runbooks/operations/PURCHASE_GATEWAY_K8S.md"
   echo ""
   exit 1
 fi

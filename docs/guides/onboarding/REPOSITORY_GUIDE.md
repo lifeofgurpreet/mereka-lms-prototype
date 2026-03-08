@@ -92,7 +92,7 @@ deploy/k8s/
 - Local dev override → `deploy/k8s/overlays/local/`
 - Environment-specific config → `infrastructure` repo (not here)
 
-**Related docs**: `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md`, `docs/concepts/architecture/DEPLOYMENT_CONTRACT.md`, `docs/concepts/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `specs/k8s-deployment_spec.md`, `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
+**Related docs**: `docs/architecture/rfc/ADR-025-deployment-boundary.md`, `docs/reference/architecture/DEPLOYMENT_CONTRACT.md`, `docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `specs/k8s-deployment_spec.md`, `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
 
 ---
 
@@ -277,7 +277,7 @@ specs/
 
 **Where to add**: New feature spec → `specs/<feature-name>_spec.md`
 
-**Related docs**: `../qa/IMPLEMENTATION_ROADMAP.md`, `team-skills/ONBOARDING.md` (V3 verification method)
+**Related docs**: `../meta/docs-program/IMPLEMENTATION_ROADMAP.md`, `team-skills/ONBOARDING.md` (V3 verification method)
 
 ---
 
@@ -424,7 +424,7 @@ Quick reference for frequently accessed files:
 
 ### Documentation
 - Quick start: `docs/guides/onboarding/QUICK_START_LOCAL.md`
-- Troubleshooting: `docs/operations/TROUBLESHOOTING.md`
+- Troubleshooting: `docs/runbooks/operations/TROUBLESHOOTING.md`
 - Service URLs: `docs/ops/quickref/access-urls.md`
 - Doc index: `docs/README.md`
 
@@ -454,7 +454,7 @@ Quick reference for frequently accessed files:
 | Update branding | `infrastructure/tutor/themes/mereka/` + `scripts/branding/` |
 | Verify a spec | `scripts/qa/verify-*.sh` matching the spec name |
 | Find URLs | `docs/ops/quickref/access-urls.md` |
-| Troubleshoot outage | `docs/operations/TROUBLESHOOTING.md` |
+| Troubleshoot outage | `docs/runbooks/operations/TROUBLESHOOTING.md` |
 | Add a secret | `deploy/k8s/base/secrets/external-secrets.yaml` |
 | Add monitoring | `infrastructure/monitoring/` |
 | Write an ADR | `docs/adr/NNN-<slug>.md` (next number) |
@@ -622,7 +622,7 @@ RESULT: PASS (all checks passed)
 ## Related Resources
 
 - **Spec**: `specs/repository-structure_spec.md` — Full specification
-- **Roadmap**: `../qa/IMPLEMENTATION_ROADMAP.md` — Implementation progress
+- **Roadmap**: `../meta/docs-program/IMPLEMENTATION_ROADMAP.md` — Implementation progress
 - **Onboarding**: `docs/guides/onboarding/DEVELOPER_ONBOARDING.md` — Complete setup guide
 - **Quick Start**: `docs/guides/onboarding/QUICK_START_LOCAL.md` — 5-minute setup
 - **Agent Guide**: `AGENTS.md` — Agent-specific guidelines

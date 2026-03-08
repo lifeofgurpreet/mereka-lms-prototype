@@ -6,8 +6,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-CATALOG_JSON="$REPO_ROOT/docs/operations/verification/verification_catalog.json"
-BUDGET_JSON="$REPO_ROOT/docs/operations/verification/verification_sprawl_budget.json"
+CATALOG_JSON="$REPO_ROOT/verification/catalogs/verification_catalog.json"
+BUDGET_JSON="$REPO_ROOT/verification/manifests/verification_sprawl_budget.json"
 
 if [[ ! -f "$CATALOG_JSON" ]]; then
   echo "FAIL verification catalog missing: $CATALOG_JSON" >&2

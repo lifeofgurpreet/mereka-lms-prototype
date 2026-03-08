@@ -224,5 +224,5 @@ kubectl exec -n mereka-lms -l app.kubernetes.io/name=prometheus -- \
 ## Related Documentation
 - **Spec**: `specs/ecommerce-purchase-gateway_spec.md`
 - **Architecture**: `docs/architecture/purchase-gateway-overview.md`
-- **Stripe Webhooks Setup**: `docs/operations/STRIPE_WEBHOOKS_SETUP.md`
-- **General Troubleshooting**: `docs/operations/TROUBLESHOOTING.md`
+- **Stripe Webhooks Setup**: `docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md`
+- **General Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`

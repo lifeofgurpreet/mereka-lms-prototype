@@ -121,7 +121,7 @@ tutor local restart
 - **Complete Guide:** `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
 - **Workflow:** `docs/guides/onboarding/WORKFLOW_LOCAL.md`
 - **Setup Details:** `docs/guides/onboarding/LOCAL_SETUP.md`
-- **Troubleshooting:** `docs/operations/TROUBLESHOOTING.md`
+- **Troubleshooting:** `docs/runbooks/operations/TROUBLESHOOTING.md`
 
 ## 🌐 Access URLs
 

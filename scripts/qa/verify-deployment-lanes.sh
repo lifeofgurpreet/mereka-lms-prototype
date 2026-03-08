@@ -6,7 +6,7 @@
 # Verifies that the three active Kustomize overlay lanes are correctly structured
 # and that the deprecated staging overlay is properly marked.
 #
-# See: docs/operations/DEPLOYMENT_LANES.md
+# See: docs/reference/operations/DEPLOYMENT_LANES.md
 #
 # Usage:
 #   ./scripts/qa/verify-deployment-lanes.sh
@@ -182,11 +182,11 @@ done
 echo ""
 echo "--- Documentation ---"
 
-lanes_doc="$REPO_ROOT/docs/operations/DEPLOYMENT_LANES.md"
+lanes_doc="$REPO_ROOT/docs/reference/operations/DEPLOYMENT_LANES.md"
 if [[ -f "$lanes_doc" ]]; then
-  pass "DEPLOYMENT_LANES.md exists: docs/operations/DEPLOYMENT_LANES.md"
+  pass "DEPLOYMENT_LANES.md exists: docs/reference/operations/DEPLOYMENT_LANES.md"
 else
-  fail "DEPLOYMENT_LANES.md MISSING: docs/operations/DEPLOYMENT_LANES.md"
+  fail "DEPLOYMENT_LANES.md MISSING: docs/reference/operations/DEPLOYMENT_LANES.md"
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────

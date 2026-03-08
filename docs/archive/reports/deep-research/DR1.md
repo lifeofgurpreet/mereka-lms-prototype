@@ -78,9 +78,9 @@ Evidence: Your CI build workflow pins Tutor to tutor[full]==18.2.2 and tutor-mfe
 Exact file path(s):
 
 .github/workflows/build-tutor-images.yml
-docs/concepts/architecture/MFE_VERSIONS.md
+docs/reference/architecture/MFE_VERSIONS.md
 infrastructure/tutor/MIGRATION_TO_PLUGIN.md
-Recommendation: Make one file the “source of operational truth” (ideally docs/concepts/architecture/MFE_VERSIONS.md) and have CI verify it by printing Tutor version during builds and failing if it diverges from documented expectations.
+Recommendation: Make one file the “source of operational truth” (ideally docs/reference/architecture/MFE_VERSIONS.md) and have CI verify it by printing Tutor version during builds and failing if it diverges from documented expectations.
 P2 findings
 P2 — Over-customized “global” elements increase unintended side effects
 Impact: Styling .card, .btn-primary, .navbar, etc., globally can unintentionally affect third-party blocks (XBlocks, legacy Studio/Indigo surfaces) where you don’t control markup, creating “whack-a-mole UI.”

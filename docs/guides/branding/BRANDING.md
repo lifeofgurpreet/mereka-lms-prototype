@@ -437,7 +437,7 @@ find infrastructure/tutor/themes/mereka -name "*.scss"
 - `docs/guides/branding/BRANDING_ROADMAP.md` - Future branding plans
 - `docs/guides/branding/BRANDING_VERIFICATION_CHECKLIST.md` - Pre-deploy checklist
 - `docs/guides/branding/BRANDING_PLAN.md` - Rollout plan
-- `docs/concepts/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md` - Source vs generated theming contract
+- `docs/reference/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md` - Source vs generated theming contract
 
 **Scripts**:
 - `scripts/branding/sync-brand-assets.sh` - Sync assets to theme

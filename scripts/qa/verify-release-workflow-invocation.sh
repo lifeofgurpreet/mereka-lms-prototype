@@ -11,7 +11,7 @@ set -euo pipefail
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 RELEASE_WF="$REPO_ROOT/.github/workflows/release.yml"
 RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
-RELEASE_DOC="$REPO_ROOT/docs/operations/RELEASE_PROCESS.md"
+RELEASE_DOC="$REPO_ROOT/docs/reference/operations/RELEASE_PROCESS.md"
 
 PASS=0 FAIL=0
 

@@ -12,9 +12,9 @@ depends_on:
   - "specs/mongodb-atlas-integration_spec.md"
 links:
   related_docs:
-    - "docs/operations/OBSERVABILITY_QUICKSTART.md"
-    - "docs/operations/SLO_DASHBOARDS_SETUP.md"
-    - "docs/operations/MONITORING.md"
+    - "docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md"
+    - "docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md"
+    - "docs/reference/operations/MONITORING.md"
   related_specs:
     - "specs/observability-stack_spec.md"
     - "specs/data-privacy-gdpr-compliance_spec.md"

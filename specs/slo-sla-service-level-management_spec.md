@@ -10,14 +10,14 @@ depends_on:
   - "specs/observability-stack_spec.md"
 links:
   related_docs:
-    - "docs/operations/SLO_DASHBOARDS_SETUP.md"
-    - "docs/operations/MONITORING.md"
+    - "docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md"
+    - "docs/reference/operations/MONITORING.md"
     - "docs/operations/ALERT_SEVERITY_MATRIX.md"
-    - "docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
-    - "docs/operations/OBSERVABILITY_OWNERSHIP.md"
+    - "docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+    - "docs/policies/operations/OBSERVABILITY_OWNERSHIP.md"
     - "docs/operations/OBSERVABILITY_ENHANCEMENT_PLAN.md"
     - "docs/operations/DEPLOYMENT_RUNBOOK.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/operations/DISASTER_RECOVERY.md"
   related_specs:
     - "specs/observability-stack_spec.md"

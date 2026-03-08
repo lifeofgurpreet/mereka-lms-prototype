@@ -12,7 +12,7 @@ _fail() { echo "FAIL $*"; FAIL=$((FAIL + 1)); }
 
 # ── Section 1: Document existence and required sections ──────────────────────
 
-DOC="$REPO_ROOT/docs/operations/CAPACITY_PLANNING.md"
+DOC="$REPO_ROOT/docs/reference/operations/CAPACITY_PLANNING.md"
 _check_doc_section() {
   local label="$1" pattern="$2"
   if grep -qiE "$pattern" "$DOC" 2>/dev/null; then
@@ -25,7 +25,7 @@ _check_doc_section() {
 if [[ -f "$DOC" ]]; then
   _pass "CAPACITY_PLANNING.md exists"
 else
-  _fail "CAPACITY_PLANNING.md missing at docs/operations/CAPACITY_PLANNING.md"
+  _fail "CAPACITY_PLANNING.md missing at docs/reference/operations/CAPACITY_PLANNING.md"
 fi
 
 _check_doc_section "resource allocation table"  "CPU Request|CPU Limit|Mem"

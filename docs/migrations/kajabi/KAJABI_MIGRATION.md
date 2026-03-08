@@ -9,7 +9,7 @@ _Last verified: 2025‑11‑09_
 
 1. Pull fresh NDJSON dumps from Kajabi (`contacts.ndjson`, `customers.ndjson`, `offers.ndjson`, `products.ndjson`, `courses_index.ndjson`, and `structure/*.ndjson`).
 2. Drop them under `exports/kajabi/` (git-ignored) on your workstation.
-3. Update `docs/migrations/kajabi/KAJABI_MIGRATION_STATUS.md` with the export date.
+3. Update `docs/status/migrations/KAJABI_MIGRATION_STATUS.md` with the export date.
 
 ## 2. Transform Stage
 
@@ -84,7 +84,7 @@ The script uploads `openedx_bulk_import.py`, runs it inside the LMS pod, and tra
 ## 6. Verification & Sign-off
 
 1. Follow [`KAJABI_MIGRATION_VERIFICATION.md`](KAJABI_MIGRATION_VERIFICATION.md) to spot-check users, enrollments, and course content.
-2. Record progress in `docs/migrations/kajabi/KAJABI_MIGRATION_STATUS.md`.
-3. Update `docs/migrations/kajabi/KAJABI_MIGRATION_HANDOVER.md` once Ops validates prod and QA signs off.
+2. Record progress in `docs/status/migrations/KAJABI_MIGRATION_STATUS.md`.
+3. Update `reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md` once Ops validates prod and QA signs off.
 
 > Need to debug a broken lesson or mismatched structure? See `docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md` and `docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md` for known patterns and scripts.

@@ -274,7 +274,7 @@ Complete before marking the migration as done:
 - [ ] Logo URL resolves with HTTP 200: `curl -I https://skillourfuture.academy.mereka.io/theming/asset/mereka/images/sof/sof-logo-primary.png`
 - [ ] MFE footer renders SkillOurFuture copyright text (not "Mereka (M) Sdn. Bhd.")
 - [ ] Page title shows "Skill Our Future Academy" (not "Mereka Academy")
-- [ ] Entry added to `docs/operations/DOMAIN_MANAGEMENT.md` under "Tenant Brand Profiles"
+- [ ] Entry added to `docs/runbooks/operations/DOMAIN_MANAGEMENT.md` under "Tenant Brand Profiles"
 
 ---
 

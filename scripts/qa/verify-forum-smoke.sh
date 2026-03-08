@@ -396,7 +396,7 @@ if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "  - Ruby forum image still referenced in deployments.yml"
   echo "  - apply-patches.sh not run after tutor config save"
   echo ""
-  echo "See docs/operations/TROUBLESHOOTING.md and docs/operations/FORUM_MEILISEARCH.md"
+  echo "See docs/runbooks/operations/TROUBLESHOOTING.md and docs/reference/operations/FORUM_MEILISEARCH.md"
   exit 1
 fi
 

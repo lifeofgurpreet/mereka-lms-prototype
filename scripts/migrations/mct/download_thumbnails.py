@@ -6,8 +6,8 @@ Replaces expired SAS tokens with new one and downloads to local directory.
 
 import json
 import os
-import subprocess
 import ssl
+import subprocess
 import sys
 import urllib.parse
 import urllib.request

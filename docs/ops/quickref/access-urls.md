@@ -4,7 +4,7 @@ _Audience: Everyone • Owner: Platform Team • Last verified: 2026-03-06 • S
 ## 🌐 Environment URLs
 
 Canonical hostname registry (prod + dev + kind-local):
-- `docs/ops/security/OPENEDX_HOSTNAMES.md`
+- `docs/reference/operations/OPENEDX_HOSTNAMES.md`
 
 ### Local Development
 

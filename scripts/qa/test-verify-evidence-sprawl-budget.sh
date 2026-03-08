@@ -18,7 +18,7 @@ cd "$tmpdir"
 git init -q
 
 mkdir -p docs/operations/verification docs/operations/evidence
-cat > docs/operations/verification/evidence_sprawl_budget.json <<'EOF_BUDGET'
+cat > verification/manifests/evidence_sprawl_budget.json <<'EOF_BUDGET'
 {
   "tracked_evidence_max_files": 5,
   "tracked_evidence_max_bytes": 1000000,
@@ -31,7 +31,7 @@ cat > docs/operations/evidence/example.md <<'EOF_EVIDENCE'
 # Example evidence
 EOF_EVIDENCE
 
-git add scripts/qa/verify-evidence-sprawl-budget.sh docs/operations/verification/evidence_sprawl_budget.json docs/operations/evidence/example.md
+git add scripts/qa/verify-evidence-sprawl-budget.sh verification/manifests/evidence_sprawl_budget.json docs/operations/evidence/example.md
 
 if ./scripts/qa/verify-evidence-sprawl-budget.sh >/tmp/test-evidence-budget-pass.log 2>&1; then
   :

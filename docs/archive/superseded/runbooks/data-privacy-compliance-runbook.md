@@ -214,4 +214,4 @@ This runbook covers operational procedures for GDPR/PDPA compliance, data deleti
 ## Related Documentation
 - **Spec**: `specs/data-privacy-gdpr-compliance_spec.md`
 - **Architecture**: `docs/architecture/multi-tenancy-overview.md`
-- **General Troubleshooting**: `docs/operations/TROUBLESHOOTING.md`
+- **General Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`

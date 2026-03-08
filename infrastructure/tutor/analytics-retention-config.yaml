@@ -1,7 +1,7 @@
 retention_policy:
   version: "1.0"
   last_reviewed: "2026-02-24"
-  doc: "docs/operations/ANALYTICS_DATA_RETENTION.md"
+  doc: "docs/policies/operations/ANALYTICS_DATA_RETENTION.md"
   tiers:
     raw_events:
       target_table: "tracking.events"

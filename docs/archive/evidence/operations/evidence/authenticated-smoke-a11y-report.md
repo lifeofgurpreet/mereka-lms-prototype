@@ -80,7 +80,7 @@ Contrast: `(lighter + 0.05) / (darker + 0.05)`
 
 1. Update `AUTHENTICATED_ROUTES` in `scripts/qa/verify-authenticated-smoke-a11y.sh`.
 2. Replace the removed route with an equivalent authenticated route at the same or higher auth level.
-3. Update the route table in `docs/operations/AUTHENTICATED_SMOKE_A11Y.md` and this report.
+3. Update the route table in `docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md` and this report.
 4. Open a follow-up bead if the route removal represents a functional regression.
 
 ### If the CI job `authenticated-smoke-a11y` fails unexpectedly
@@ -88,7 +88,7 @@ Contrast: `(lighter + 0.05) / (darker + 0.05)`
 1. Check if a new script or doc was deleted or renamed.
 2. Verify all four referenced files exist:
    - `scripts/qa/verify-authenticated-smoke-a11y.sh`
-   - `docs/operations/AUTHENTICATED_SMOKE_A11Y.md`
+   - `docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md`
    - `docs/archive/evidence/operations/evidence/authenticated-smoke-a11y-report.md`
 3. Check for Python availability on the CI runner (`python3 --version`).
 4. Re-run the script locally to reproduce.

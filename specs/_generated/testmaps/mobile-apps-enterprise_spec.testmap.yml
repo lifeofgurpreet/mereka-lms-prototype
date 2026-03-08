@@ -1,0 +1,545 @@
+spec: mobile-apps-enterprise_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given a new user on iOS, when they tap "Sign In", then the system browser
+    opens to the LMS OAuth authorize endpoint with PKCE parameters (`code_challenge`,
+    `code_challenge_method=S256`, `response_type=code`, `client_id=mereka-mobile-app`)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: OAuth PKCE Flow
+    justification: Feature not yet implemented; mobile app not yet developed
+- id: AC-002
+  description: Given a new user on Android, when they tap "Sign In", then a Custom
+    Tab opens to the LMS OAuth authorize endpoint with identical PKCE parameters
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: OAuth PKCE Flow
+    justification: Feature not yet implemented; mobile app not yet developed
+- id: AC-003
+  description: Given a successful authorization code callback, when the app exchanges
+    the code for tokens, then the access token and refresh token are stored in platform-secure
+    storage (Keychain on iOS, EncryptedSharedPreferences on Android)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Token Storage Security
+    justification: Feature not yet implemented; secure token storage not yet implemented
+      in mobile app
+- id: AC-004
+  description: Given a stored access token with < 5 minutes remaining validity, when
+    the app makes an API call, then the token is refreshed proactively before the
+    call proceeds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Token Refresh Logic
+    justification: Feature not yet implemented; proactive token refresh not yet implemented
+- id: AC-005
+  description: Given a concurrent burst of 10 API calls during token refresh, when
+    the refresh is in-flight, then exactly one token refresh request is sent to the
+    backend (single-flight)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Token Refresh Deduplication
+    justification: Feature not yet implemented; single-flight token refresh not yet
+      implemented
+- id: AC-006
+  description: Given a 401 response from the API, when the refresh token is still
+    valid, then the app refreshes the token and retries the original request exactly
+    once
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: 401 Retry Flow
+    justification: Feature not yet implemented; 401 retry with refresh not yet implemented
+- id: AC-007
+  description: Given a failed token refresh (invalid/expired refresh token), when
+    the app detects the failure, then the user is redirected to the login screen and
+    all tokens are cleared
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Token Failure Handling
+    justification: Feature not yet implemented; token failure handling not yet implemented
+- id: AC-008
+  description: Given an authenticated user who taps "Logout", when logout completes,
+    then the refresh token is revoked server-side and all local tokens, cached user
+    data, and branding overrides are cleared
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Logout Flow
+    justification: Feature not yet implemented; logout with server-side revocation
+      not yet implemented
+- id: AC-009
+  description: Given a freshly installed app after first login, when the user reaches
+    the dashboard, then the app requests push notification permission (not at app
+    launch, not before login)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Push Notification Permission
+    justification: Feature not yet implemented; mobile app push permission flow not
+      yet built
+- id: AC-010
+  description: Given notification permission granted, when the device token is obtained,
+    then the app registers it with the backend including `device_token`, `platform`,
+    `app_version`, and `org_slug`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Device Registration
+    justification: Feature not yet implemented; device token registration API not
+      yet built
+- id: AC-011
+  description: Given a course announcement is published, when the backend sends a
+    push notification, then the notification appears in the system notification center
+    within 60 seconds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Push Notification Delivery
+    justification: Feature not yet implemented; requires physical device with FCM/APNs
+      configured
+- id: AC-012
+  description: Given a notification with `type=assignment_due` and a valid `deep_link_url`,
+    when the user taps it, then the app navigates directly to the assignment within
+    the course
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Notification Deep Linking
+    justification: Feature not yet implemented; notification deep link handling not
+      yet implemented
+- id: AC-013
+  description: Given a user logs out, when logout completes, then the device token
+    is unregistered from the backend
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Device Token Deregistration on Logout
+    justification: Feature not yet implemented; logout-triggered device deregistration
+      not yet implemented
+- id: AC-014
+  description: Given the AASA file is served at `https://academyv2.mereka.io/.well-known/apple-app-site-association`,
+    when iOS validates it, then Universal Links are recognized for `academyv2.mereka.io`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Universal Links Verification
+    justification: Feature not yet implemented; AASA file not yet configured in LMS
+      web server
+- id: AC-015
+  description: Given the `assetlinks.json` is served at `https://academyv2.mereka.io/.well-known/assetlinks.json`,
+    when Android validates it, then App Links are recognized
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: App Links Verification
+    justification: Feature not yet implemented; assetlinks.json not yet configured
+      in LMS web server
+- id: AC-016
+  description: Given a URL `https://academyv2.mereka.io/courses/course-v1:Mereka+101+2026/courseware/section1/`,
+    when the app receives it as a deep link, then it navigates to section1 of the
+    course
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Deep Link Routing
+    justification: Feature not yet implemented; mobile app deep link routing not yet
+      built
+- id: AC-017
+  description: Given an unauthenticated user opens a deep link, when the link is received,
+    then the app stores the URL, presents login, and navigates to the stored URL after
+    successful authentication
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Authenticated Deep Link Flow
+    justification: Feature not yet implemented; stored URL post-login navigation not
+      yet implemented
+- id: AC-018
+  description: Given a deep link to an unsupported path (e.g., `/admin/`), when the
+    app receives it, then it opens the URL in an in-app browser
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Fallback Deep Link Handling
+    justification: Feature not yet implemented; in-app browser fallback not yet implemented
+- id: AC-019
+  description: Given a user taps "Download" on a course section, when the download
+    completes, then all video, HTML, and PDF content for that section is available
+    without network connectivity
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Offline Content Download
+    justification: Feature not yet implemented; offline content download not yet implemented
+- id: AC-020
+  description: Given a user completes a quiz while offline, when the device regains
+    connectivity, then the completion and score data sync to the backend within 60
+    seconds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Offline Sync
+    justification: Feature not yet implemented; offline-first sync layer not yet built
+- id: AC-021
+  description: Given the device has less than 500 MB free storage, when the user attempts
+    to start a download, then the app displays a storage warning before proceeding
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Download Storage Warning
+    justification: Feature not yet implemented; storage check before download not
+      yet implemented
+- id: AC-022
+  description: Given downloaded content exists, when the user views "Manage Downloads",
+    then they see per-section storage usage and can delete individual sections
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Download Management UI
+    justification: Feature not yet implemented; download management screen not yet
+      built
+- id: AC-023
+  description: 'Given a download is in progress and the user backgrounds the app,
+    when the download completes in the background, then a local notification confirms
+    completion (iOS: background URLSession; Android: WorkManager)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Background Download
+    justification: Feature not yet implemented; background download infrastructure
+      not yet implemented
+- id: AC-024
+  description: Given `org_slug=client-a` with branding config specifying `primary_color=#FF5733`,
+    when the app renders, then the navigation bar and primary UI elements use `#FF5733`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Multi-Tenant Branding
+    justification: Feature not yet implemented; tenant branding in mobile app not
+      yet built
+- id: AC-025
+  description: Given the branding config endpoint is unreachable and a cached config
+    exists, when the app launches, then it renders using the cached branding
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Branding Cache Fallback
+    justification: Feature not yet implemented; branding cache fallback not yet implemented
+- id: AC-026
+  description: Given the branding config endpoint is unreachable and no cache exists,
+    when the app launches, then it renders using default Mereka Academy branding
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Default Branding Fallback
+    justification: Feature not yet implemented; default branding fallback not yet
+      implemented
+- id: AC-027
+  description: Given a user authenticated under `org_slug=client-a`, when they request
+    course listings, then they see only courses associated with `client-a` (no cross-tenant
+    leakage)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Tenant Course Isolation
+    justification: Feature not yet implemented; tenant-scoped course listing not yet
+      implemented in mobile app
+- id: AC-028
+  description: Given the app is running on a device, when it connects to `academyv2.mereka.io`,
+    then the TLS certificate is validated against pinned intermediate CA certificates
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Certificate Pinning
+    justification: Feature not yet implemented; certificate pinning not yet implemented
+      in mobile app
+- id: AC-029
+  description: Given a certificate pin mismatch (MITM scenario), when the connection
+    fails, then the app displays a security warning and does not send any data
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Certificate Pin Mismatch Handling
+    justification: Feature not yet implemented; MITM detection and warning not yet
+      implemented
+- id: AC-030
+  description: Given the app enters the background, when the OS captures a task-switcher
+    screenshot, then the screenshot shows a branded splash screen (not sensitive content)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Screenshot Protection
+    justification: Feature not yet implemented; screenshot masking in task switcher
+      not yet implemented
+- id: AC-031
+  description: Given a release build artifact, when inspected, then it contains no
+    debug logging statements, test API endpoints, or hardcoded credentials
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Release Build Security Audit
+    justification: Feature not yet implemented; release build security audit process
+      not yet established
+- id: AC-032
+  description: Given a push to `mobile/ios/**` on the `main` branch, when the iOS
+    CI workflow triggers, then it produces a signed IPA and uploads it to TestFlight
+    without manual intervention
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: iOS CI Pipeline
+    justification: Feature not yet implemented; iOS CI pipeline and TestFlight upload
+      not yet configured
+- id: AC-033
+  description: Given a push to `mobile/android/**` on the `main` branch, when the
+    Android CI workflow triggers, then it produces a signed AAB and uploads it to
+    Google Play Internal Testing without manual intervention
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Android CI Pipeline
+    justification: Feature not yet implemented; Android CI pipeline and Play Store
+      upload not yet configured
+- id: AC-034
+  description: Given a new client `org_slug=new-client` is added to the branding configuration,
+    when the CI pipeline runs, then no code changes or pipeline modifications are
+    required (configuration-only onboarding)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Configuration-Only Tenant Onboarding
+    justification: Feature not yet implemented; configuration-only tenant onboarding
+      for mobile not yet built
+- id: AC-035
+  description: 'Given a release candidate build, when submitted to the Apple App Store,
+    then the submission includes: app description, screenshots (6.7" and 6.1" iPhones),
+    privacy nutrition labels, and age rating'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Push Notification Testing
+    justification: Requires physical mobile device with configured FCM/APNs credentials
+      for end-to-end push verification
+    file: N/A (manual verification)
+- id: AC-036
+  description: 'Given a release candidate build, when submitted to Google Play Store,
+    then the submission includes: store listing, screenshots (phone), content rating
+    questionnaire, and data safety form'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Offline Mode Testing
+    justification: Requires mobile device in airplane mode to verify offline content
+      caching and sync behavior
+    file: N/A (manual verification)
+- id: AC-037
+  description: 'Given a production release is approved, when the app is published,
+    then it uses a phased/staged rollout (iOS: phased release over 7 days; Android:
+    staged rollout starting at 10%)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    section: Deep Link Testing
+    justification: Requires mobile device with installed app to verify deep link routing
+      from email/web to native screens
+    file: N/A (manual verification)
+

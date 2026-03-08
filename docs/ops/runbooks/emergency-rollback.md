@@ -676,7 +676,7 @@ Use this checklist for the post-mortem document:
 - [ ] **Process improvements**: What runbook or process changes are needed?
 - [ ] **Blameless review**: Focus on systems, not individuals
 
-**Template**: Use the post-mortem template at `docs/operations/POST_MORTEM_TEMPLATE.md`.
+**Template**: Use the post-mortem template at `docs/meta/templates/POST_MORTEM_TEMPLATE.md`.
 
 ---
 
@@ -752,7 +752,7 @@ kubectl exec -n mereka-lms deploy/mysql -- mysql -uroot -p"${MYSQL_ROOT_PASSWORD
 | Multi-hour downtime | Engineering Lead + CTO + CEO | Immediate |
 | Legal/compliance impact | CTO + Legal | <2 hours |
 
-**Emergency contacts**: See `docs/operations/ONCALL_ROTATION.md` for on-call details and team contact handoff.
+**Emergency contacts**: See `docs/policies/operations/ONCALL_ROTATION.md` for on-call details and team contact handoff.
 
 ---
 

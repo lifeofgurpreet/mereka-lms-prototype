@@ -91,7 +91,7 @@ echo ""
 # Check 1: DNS documentation exists
 echo "Checking AC-001, AC-002, AC-004: DNS record documentation..."
 
-DNS_DOC="docs/operations/EMAIL_DNS_RECORDS.md"
+DNS_DOC="docs/reference/operations/EMAIL_DNS_RECORDS.md"
 if [[ -f "$DNS_DOC" ]]; then
   pass "AC-001/AC-002/AC-004: DNS documentation exists at $DNS_DOC"
 

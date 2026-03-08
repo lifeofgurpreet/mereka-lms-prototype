@@ -103,13 +103,13 @@ referenced as the safety net for slot-wiring failures.
 
 The guide links to:
 
-- `docs/operations/MULTITENANT_BRAND_PLATFORM.md`
+- `docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md`
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - `docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md`
-- `docs/operations/LEGACY_FOOTER_REMOVAL.md`
+- `docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md`
 - `docs/operations/MULTISITE.md`
-- `docs/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md`
+- `docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md`
 - `infrastructure/tutor/plugins/mereka_lms.py`
 - `deploy/k8s/base/apps/`
 

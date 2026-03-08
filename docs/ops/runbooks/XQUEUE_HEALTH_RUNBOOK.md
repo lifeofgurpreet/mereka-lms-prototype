@@ -143,4 +143,4 @@ When code assessment courses are created, deploy the grader:
 4. Verify end-to-end: submit code → XQueue → grader → callback → LMS gradebook
 5. Enable HPA + monitoring alerts for grader pods
 
-See `docs/concepts/architecture/ASSESSMENT_XQUEUE_EVIDENCE.md` for full deployment analysis.
+See `docs/evidence/operations/ASSESSMENT_XQUEUE_EVIDENCE.md` for full deployment analysis.

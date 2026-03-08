@@ -475,7 +475,7 @@ run_local_checks() {
       if grep -q "pull_request:" "$compliance_workflow"; then
         has_pull_request_trigger=1
       fi
-      if grep -q "validate-observability-compliance.sh --mode local --strict" "$compliance_workflow"; then
+      if grep -Eq "validate-observability-compliance\\.sh --mode local --strict|run-observability-first-class\\.sh --mode local --strict" "$compliance_workflow"; then
         has_local_mode_strict=1
       fi
       if grep -q "deploy/k8s/base/monitoring" "$compliance_workflow" \

@@ -20,7 +20,7 @@ All MCT export documentation has been created and is ready for use by future age
    - Credential management
    - Quick reference commands
 
-2. **`docs/migrations/mct/DOCUMENTATION_INDEX.md`** (Index)
+2. **`docs/reference/migrations/mct/DOCUMENTATION_INDEX.md`** (Index)
    - Quick reference to all docs
    - Documentation hierarchy
    - Common tasks

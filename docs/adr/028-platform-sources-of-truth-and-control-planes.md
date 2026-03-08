@@ -17,7 +17,7 @@ does_not_govern: ["feature-level business logic", "tenant-specific UX copy"]
 related_oep: []
 related_tutor_docs: ["https://docs.tutor.edly.io"]
 related_specs: ["specs/repository-structure_spec.md"]
-related_runbooks: ["docs/operations/REPO_BOUNDARIES.md", "docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md"]
+related_runbooks: ["docs/policies/operations/REPO_BOUNDARIES.md", "docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-repo-structure.sh", "scripts/qa/verify-gitops-image-overrides.sh --check-infra"]
 expiry_date: null

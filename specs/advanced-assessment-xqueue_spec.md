@@ -12,9 +12,9 @@ depends_on:
   - "specs/k8s-deployment_spec.md"
 links:
   related_docs:
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/operations/DEPLOYMENT_RUNBOOK.md"
-    - "docs/operations/OBSERVABILITY_QUICKSTART.md"
+    - "docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md"
   related_specs:
     - "specs/proctoring-integration_spec.md"
     - "specs/enterprise-microservices_spec.md"

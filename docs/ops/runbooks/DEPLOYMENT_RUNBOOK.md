@@ -59,7 +59,7 @@ Modules:
    - `XQUEUE_DOCKER_IMAGE`: `ghcr.io/biji-biji-initiative/mereka-lms/openedx-xqueue:12.1.0`
    - `MONGODB_URI`: Atlas connection string (for forum and the Atlas-only target state).
    - Configure external service endpoints (GCS buckets, etc). For DB/cache, prefer in-cluster service DNS.
-   - For additional LMS domains (microsites), see `docs/concepts/architecture/MULTISITE.md` and re-run `./infrastructure/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
+   - For additional LMS domains (microsites), see `docs/architecture/overviews/MULTISITE.md` and re-run `./infrastructure/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
 2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
 3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=ghcr.io/biji-biji-initiative/mereka-lms`.
 
@@ -91,7 +91,7 @@ Modules:
    tutor k8s init
    tutor k8s start
    ```
-4. MongoDB (production): Atlas-only. Keep `MONGODB_HOST` wired to `openedx-secrets/FORUM_MONGODB_SRV` and ensure legacy `Service/mongodb` remains removed via production overlay patching (see `docs/concepts/architecture/ARCHITECTURE_MONGODB.md`).
+4. MongoDB (production): Atlas-only. Keep `MONGODB_HOST` wired to `openedx-secrets/FORUM_MONGODB_SRV` and ensure legacy `Service/mongodb` remains removed via production overlay patching (see `docs/architecture/overviews/ARCHITECTURE_MONGODB.md`).
 5. Verify pods: `kubectl get pods -n mereka-lms`.
 6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `academyv2-mereka-io`.
    - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./scripts/infra/cloudflare-sync.sh` keeps the `academyv2`, `studio.academyv2`, and `apps.academyv2` hostnames pointed at the GKE ingress (records defined in `infrastructure/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.
@@ -110,7 +110,7 @@ Modules:
   - Audit posture: `./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
   - Pre-op backup before risky operations:
     `velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait`
-  - Docs: `docs/operations/VELERO_BACKUP_AUDIT.md`, `docs/ops/runbooks/DISASTER_RECOVERY.md`
+  - Docs: `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`, `docs/ops/runbooks/DISASTER_RECOVERY.md`
 - Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and Atlas host/user/password inputs for `FORUM_MONGODB_SRV`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
 - Apply the Mereka branding pack after each upgrade:
   ```bash
@@ -120,7 +120,7 @@ Modules:
   tutor images build openedx && tutor images build mfe
   ```
   The patch step copies the SCSS/fonts into the Indigo MFE build so all micro-frontends share the same palette.
-- Hook monitoring dashboards/alerts (see `docs/ops/monitoring/MONITORING.md` + JSON templates in `infrastructure/monitoring/`).
+- Hook monitoring dashboards/alerts (see `docs/reference/operations/MONITORING.md` + JSON templates in `infrastructure/monitoring/`).
 - Review the DR runbook and backup cadence in `docs/ops/runbooks/DISASTER_RECOVERY.md`.
 - Enforce cost guardrails via Terraform budgets. Populate `billing_account_id`, `monthly_budget_myr`, and `budget_thresholds` in `infrastructure/terraform/terraform.tfvars`, then apply:
   ```bash
@@ -133,7 +133,7 @@ Modules:
 ## 7. GitHub integration
 
 - Repo: `https://github.com/Biji-Biji-Initiative/mereka-lms` (remote `origin` already configured locally).
-- Backups: Cloud SQL backup workflow is legacy and manual-only. Production backups are Velero-driven (see `docs/operations/VELERO_BACKUP_AUDIT.md`).
+- Backups: Cloud SQL backup workflow is legacy and manual-only. Production backups are Velero-driven (see `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`).
 - Next pipeline work: add workflows for (a) Tutor image build/push + smoke tests and (b) Terraform plan/apply with manual approvals. Store any additional credentials (Artifact Registry robot, MongoDB Atlas API, etc.) as repo secrets instead of committing them here.
 
 ## 8. Cutover checklist

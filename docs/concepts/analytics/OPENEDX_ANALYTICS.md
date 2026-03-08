@@ -468,7 +468,7 @@ For production monitoring, consider:
 2. **Dashboard Integration**: Export data to your monitoring stack (Grafana, Data Studio, etc.)
 3. **Alerting**: Set up alerts for completion rate drops or enrollment anomalies
 
-See `docs/ops/monitoring/MONITORING.md` for infrastructure monitoring setup.
+See `docs/reference/operations/MONITORING.md` for infrastructure monitoring setup.
 
 ## Troubleshooting
 

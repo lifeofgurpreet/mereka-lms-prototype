@@ -1,13 +1,10 @@
-## Auth Impact
+# Auth PR Section (Superseded)
+_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
 
-- Pattern: `<native-oidc|forward-auth|app-level-oidc|none>`
-- Domains touched: `<list>`
-- Canonical infra PR: `<link>`
-- This repo PR: `<link>`
-- Secret changes: `<none|rotated|added (path only)>`
-- Auth registry/spec updates: `<yes/no + link>`
-- Validation evidence:
-  - `<command 1 + summary>`
-  - `<command 2 + summary>`
-- Rollout scope: `<dev|staging|prod>`
+superseded_by: `../../meta/templates/AUTH_PR_SECTION.md`
 
+This document has moved to:
+- `../../meta/templates/AUTH_PR_SECTION.md`
+
+Reason:
+- Reusable PR/report snippets now live under `docs/meta/templates/`.

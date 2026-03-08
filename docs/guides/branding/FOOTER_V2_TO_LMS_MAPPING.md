@@ -70,4 +70,4 @@ To update footer content:
 - **SCSS**: `infrastructure/tutor/themes/mereka/scss/theme.scss` (`.mereka-footer--v2` styles)
 - **Verifier**: `scripts/qa/verify-mfe-footer-slot.sh`
 - **Angular Source**: `projects/mereka/ui/src/lib/components/footer/` (design reference)
-- **Plugin-Slot Inventory**: `docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md`
+- **Plugin-Slot Inventory**: `docs/reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md`

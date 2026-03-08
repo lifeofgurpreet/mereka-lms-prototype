@@ -27,7 +27,7 @@ echo "release helper"
 EOF
   chmod +x "$tmpdir/scripts/infra/create-release.sh"
 
-  cat >"$tmpdir/docs/operations/RELEASE_PROCESS.md" <<'EOF'
+  cat >"$tmpdir/docs/reference/operations/RELEASE_PROCESS.md" <<'EOF'
 # Release Process
 EOF
 }

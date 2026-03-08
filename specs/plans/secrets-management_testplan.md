@@ -57,7 +57,7 @@ This spec covers infrastructure-as-code and operational tooling. There is no app
 | EC-4: Placeholder values in production | `infisical-validate-mereka-lms.sh` rejects `REPLACE_ME`, `CHANGE_ME`, `TODO`, `TBD` values | `shell_verification` | `scripts/infra/infisical-validate-mereka-lms.sh` | P1 |
 | EC-5: GCP SM secret missing | `sync-mereka-lms-secrets-to-gcpsm.sh` creates missing secrets in create-if-missing mode |`manual_verification` | `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` | P2 |
 | EC-6: Kind MySQL auth drift after rotation | Dev overlay uses `*_DEV` keys to isolate from production rotations | `shell_verification` | `scripts/qa/verify-dev-prod-secret-separation.sh` | P1 |
-| EC-7: Concurrent secret updates | No automated test (coordination via rotation checklist) | `manual_verification` | `docs/operations/SECRET_ROTATION_CHECKLIST.md` | P3 |
+| EC-7: Concurrent secret updates | No automated test (coordination via rotation checklist) | `manual_verification` | `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` | P3 |
 | EC-8: ESO service account IAM drift | ClusterSecretStore requires both `secretAccessor` and `viewer` roles | `manual_verification` | `gcloud projects get-iam-policy-binding` check |P2 |
 
 ---

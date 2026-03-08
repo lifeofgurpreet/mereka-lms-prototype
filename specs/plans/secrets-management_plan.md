@@ -163,15 +163,15 @@ Before starting implementation:
 ### Docs
 
 #### D1. Update SECRET_ROTATION_CHECKLIST.md to match spec procedures
-- [ ] **[S]** Ensure `docs/operations/SECRET_ROTATION_CHECKLIST.md` matches the rotation procedure in the spec's Rollout section (7-step sequence).
-- **Files**: `docs/operations/SECRET_ROTATION_CHECKLIST.md`
+- [ ] **[S]** Ensure `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` matches the rotation procedure in the spec's Rollout section (7-step sequence).
+- **Files**: `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`
 - **AC**: Rollout/Rotation (spec requirement)
 - **Depends**: None
 - **Done**: Checklist steps match spec.
 
 #### D2. Create or update SECRETS_SNAPSHOT.md with current inventory
-- [ ] **[S]** Regenerate `docs/operations/SECRETS_SNAPSHOT.md` with the current key inventory matching the spec's 33+7+4+8+6 keys.
-- **Files**: `docs/operations/SECRETS_SNAPSHOT.md`
+- [ ] **[S]** Regenerate `docs/reference/operations/SECRETS_SNAPSHOT.md` with the current key inventory matching the spec's 33+7+4+8+6 keys.
+- **Files**: `docs/reference/operations/SECRETS_SNAPSHOT.md`
 - **AC**: AC-009, AC-010, AC-011
 - **Depends**: B1, B8
 - **Done**: Snapshot doc lists all keys from spec inventory.

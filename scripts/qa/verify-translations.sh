@@ -113,10 +113,10 @@ else
 fi
 
 # TRANSLATION_WORKFLOW.md
-if [[ -f "${REPO_ROOT}/docs/operations/TRANSLATION_WORKFLOW.md" ]]; then
-  pass "docs/operations/TRANSLATION_WORKFLOW.md exists"
+if [[ -f "${REPO_ROOT}/docs/runbooks/operations/TRANSLATION_WORKFLOW.md" ]]; then
+  pass "docs/runbooks/operations/TRANSLATION_WORKFLOW.md exists"
 else
-  fail "docs/operations/TRANSLATION_WORKFLOW.md missing"
+  fail "docs/runbooks/operations/TRANSLATION_WORKFLOW.md missing"
 fi
 
 # sync-translations.sh is present and executable

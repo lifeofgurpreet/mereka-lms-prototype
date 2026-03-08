@@ -12,7 +12,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PR_TEMPLATE="$REPO_ROOT/.github/PULL_REQUEST_TEMPLATE.md"
 HANDOFF_SCRIPT="$REPO_ROOT/scripts/infra/check-pr-handoff-discipline.sh"
-POLICY_DOC="$REPO_ROOT/docs/operations/PR_HANDOFF_POLICY.md"
+POLICY_DOC="$REPO_ROOT/docs/policies/operations/PR_HANDOFF_POLICY.md"
 
 violations=0
 checks=0

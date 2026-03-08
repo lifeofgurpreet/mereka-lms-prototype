@@ -59,7 +59,7 @@ PLUGIN_SLOTS.add_item(("header_logo_slot", { "keepDefault": False, ... }))
 PLUGIN_SLOTS.add_item(("learner_dashboard.sidebar.v1", { "keepDefault": True, ... }))
 ```
 
-**CSS exceptions**: `docs/operations/MFE_SELECTOR_EXCEPTIONS.md`
+**CSS exceptions**: `docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md`
 - 10 documented exceptions (EX-01 through EX-10)
 - Exception count explicitly documented in the exceptions file Risk Summary Matrix
 
@@ -90,7 +90,7 @@ PLUGIN_SLOTS.add_item(("learner_dashboard.sidebar.v1", { "keepDefault": True, ..
 
 ### Rollback Playbook Location
 
-`docs/operations/LEGACY_FOOTER_REMOVAL.md` → "Rollback Procedure" section
+`docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md` → "Rollback Procedure" section
 
 ### Rollback Steps (from LEGACY_FOOTER_REMOVAL.md)
 
@@ -124,5 +124,5 @@ observable for debugging and verification.
 - `docs/archive/evidence/operations/evidence/mfe-surface-inventory.md` — Surface inventory (AC-FRONT-081)
 - `docs/archive/evidence/operations/evidence/footer-migration-diff.md` — Before/after diff from bead 1rns
 - `docs/archive/evidence/operations/evidence/selector-to-slot-migration-diff.md` — Slot migration diff from bead 2dcy.2
-- `docs/operations/MFE_SELECTOR_EXCEPTIONS.md` — CSS exception documentation (AC-FRONT-082)
-- `docs/operations/LEGACY_FOOTER_REMOVAL.md` — Rollback playbook (AC-FRONT-084)
+- `docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md` — CSS exception documentation (AC-FRONT-082)
+- `docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md` — Rollback playbook (AC-FRONT-084)

@@ -17,7 +17,7 @@ does_not_govern: ["final steady-state cross-domain identity architecture"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
 related_specs: []
-related_runbooks: ["docs/operations/FORUM_AUTH_E2E.md"]
+related_runbooks: ["docs/runbooks/operations/FORUM_AUTH_E2E.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-auth-surfaces.sh prod", "scripts/qa/verify-mfe-config-contract.sh --env prod"]
 expiry_date: 2026-09-30

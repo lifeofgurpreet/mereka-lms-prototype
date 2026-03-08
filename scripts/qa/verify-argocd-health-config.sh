@@ -727,7 +727,7 @@ echo -e "  ${YELLOW}Warnings${NC}: ${WARN_COUNT}"
 echo ""
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
-  echo "See docs/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md for remediation steps."
+  echo "See docs/runbooks/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md for remediation steps."
   exit 1
 fi
 exit 0

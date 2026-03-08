@@ -22,20 +22,20 @@ This PR advances the docs remediation and compliance program from cleanup into a
 - Added tracked handoff continuity for next agent:
   - [DOCS_WORLD_CLASS_HANDOFF_20260306](../../DOCS_WORLD_CLASS_HANDOFF_20260306.md)
 - Added world-class operator gate script:
-  - [run-docs-world-class-gates.sh](../../qa/run-docs-world-class-gates.sh)
+  - [run-docs-world-class-gates.sh](../../../tools/docs/verify/run-docs-world-class-gates.sh)
 - Added tracked scorecard report generator + latest cycle output:
-  - [generate-docs-scorecard-report.sh](../../qa/generate-docs-scorecard-report.sh)
+  - [generate-docs-scorecard-report.sh](../../../tools/docs/scorecards/generate-docs-scorecard-report.sh)
   - [DOCS_PROGRAM_SCORECARD_20260307](./DOCS_PROGRAM_SCORECARD_20260307.md)
 
 ### Verification performed
-- `docs/qa/verify-docs-policy.sh`
+- `tools/docs/verify/verify-docs-policy.sh`
 - `./scripts/qa/verify-repo-structure.sh`
-- `docs/qa/verify-doc-catalog-health-test.sh`
+- `tools/docs/verify/verify-doc-catalog-health-test.sh`
 - `docs/qa/verify-doc-command-refs-test.sh`
-- `docs/qa/build-docs-scorecard-test.sh`
-- `docs/qa/compare-docs-scorecard-to-base-test.sh`
+- `tools/docs/scorecards/build-docs-scorecard-test.sh`
+- `tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh`
 - `docs/qa/build-docs-compliance-summary-test.sh`
-- `docs/qa/run-docs-world-class-gates.sh --sync`
+- `tools/docs/verify/run-docs-world-class-gates.sh --sync`
 
 ### Merge criteria
 - `GOV-01`, `GOV-02`, `CLS-02` governance/closure sign-offs in tracker are required before merge.
@@ -43,7 +43,7 @@ This PR advances the docs remediation and compliance program from cleanup into a
 
 ### Current state refresh commands
 - Latest docs branch head: `git rev-parse --short HEAD`
-- Gate outcome: `./docs/qa/run-docs-world-class-gates.sh --sync --require-sync`
+- Gate outcome: `./tools/docs/verify/run-docs-world-class-gates.sh --sync --require-sync`
 - Sync delta: `git rev-list --left-right --count origin/main...HEAD`
 - Latest scorecard report: `docs/guides/admin/DOCS_PROGRAM_SCORECARD_<YYYYMMDD>.md`
 - PR title/URL: [#443](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/443)
@@ -55,10 +55,10 @@ This PR advances the docs remediation and compliance program from cleanup into a
    - `GOV-01`, `GOV-02`, `CLS-02`
 2. Final tracker updates and status closure in existing handoff doc.
 3. Confirm PR mergeability and run:
-   - `docs/qa/verify-docs-policy.sh`
+   - `tools/docs/verify/verify-docs-policy.sh`
    - `./scripts/qa/verify-repo-structure.sh`
-   - `docs/qa/run-docs-world-class-gates.sh --sync` (mandatory before any final merge push)
-   - `docs/qa/run-docs-world-class-gates.sh --require-sync` (for periodic operator checks every ~20 minutes)
+   - `tools/docs/verify/run-docs-world-class-gates.sh --sync` (mandatory before any final merge push)
+   - `tools/docs/verify/run-docs-world-class-gates.sh --require-sync` (for periodic operator checks every ~20 minutes)
 4. If any new docs are added/modified:
    - run `git status` and check changed docs command refs
    - ensure no regressions against catalog metrics.

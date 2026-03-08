@@ -15,7 +15,7 @@
 # AC-ROUTE-001: Routes mapped from runtime Caddyfile expectations
 # AC-ROUTE-002: Both /authoring and /course-authoring tested
 # AC-ROUTE-003: Intended to gate CI (syntax-checked in monitoring-guardrails)
-# AC-ROUTE-004: Evidence and log commands documented in docs/operations/MFE_ROUTING_PARITY.md
+# AC-ROUTE-004: Evidence and log commands documented in docs/runbooks/architecture/MFE_ROUTING_PARITY.md
 #
 # Usage: ./scripts/qa/verify-mfe-routing-parity.sh
 
@@ -27,7 +27,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 MFE_CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 OUTER_CADDYFILE="$REPO_ROOT/deploy/k8s/base/apps/caddy/Caddyfile"
 BRANDING_VERIFIER="$REPO_ROOT/scripts/qa/verify-mfe-branding.sh"
-RUNBOOK="$REPO_ROOT/docs/operations/MFE_ROUTING_PARITY.md"
+RUNBOOK="$REPO_ROOT/docs/runbooks/architecture/MFE_ROUTING_PARITY.md"
 
 PASS=0
 FAIL=0
@@ -64,9 +64,9 @@ fi
 do_pass "AC-ROUTE-001: Outer Caddyfile exists at deploy/k8s/base/apps/caddy/Caddyfile"
 
 if [ -f "$RUNBOOK" ]; then
-  do_pass "AC-ROUTE-004: Runbook exists at docs/operations/MFE_ROUTING_PARITY.md"
+  do_pass "AC-ROUTE-004: Runbook exists at docs/runbooks/architecture/MFE_ROUTING_PARITY.md"
 else
-  do_fail "AC-ROUTE-004: Runbook missing at docs/operations/MFE_ROUTING_PARITY.md"
+  do_fail "AC-ROUTE-004: Runbook missing at docs/runbooks/architecture/MFE_ROUTING_PARITY.md"
 fi
 
 echo ""
@@ -384,7 +384,7 @@ if [ "$FAIL" -gt 0 ]; then
   echo "       deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
   echo "  2. /authoring and /course-authoring must both serve dist/course-authoring"
   echo "  3. All routes must use file_server (not reverse_proxy) except API passthroughs"
-  echo "  4. See docs/operations/MFE_ROUTING_PARITY.md for the full runbook"
+  echo "  4. See docs/runbooks/architecture/MFE_ROUTING_PARITY.md for the full runbook"
   echo ""
   exit 1
 fi

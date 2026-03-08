@@ -663,7 +663,7 @@ echo ""
 
 if [[ $FAIL -gt 0 ]]; then
   echo "FAIL: $FAIL check(s) failed. Review output above and consult:"
-  echo "  docs/operations/CREDENTIALS_READINESS.md"
+  echo "  docs/status/readiness/CREDENTIALS_READINESS.md"
   echo ""
   # Emit targeted guidance for the known gap
   if ! grep -q 'learner-record' "$MFE_CADDYFILE" 2>/dev/null; then

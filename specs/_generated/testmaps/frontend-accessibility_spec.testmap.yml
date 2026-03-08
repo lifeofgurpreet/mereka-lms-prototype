@@ -1,0 +1,11 @@
+spec: frontend-accessibility_spec.md
+acceptance_criteria:
+- id: AC-INT-001
+  description: Given `branding-system_spec.md` AC-BRD-NFR-002 states "Branding elements
+    SHOULD meet WCAG 2.1 AA contrast ratios", when this spec is approved, then the
+    SHOULD in branding-system is upgraded to MUST for all Mereka color combinations
+    verified by AC-A11Y-001 through AC-A11Y-007.
+  verify: []
+_unmapped:
+- AC-INT-001
+

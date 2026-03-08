@@ -1,0 +1,36 @@
+version: 1
+domains:
+  platform:
+    - platform.control-plane
+    - platform.repo-boundary
+    - platform.extension-model
+    - platform.change-policy
+  build:
+    - build.image.registry
+    - build.version-pin
+    - build.gitops-promotion
+  auth:
+    - auth.oidc
+    - auth.cookie-boundary
+    - auth.authorization.roles
+  tenant:
+    - tenant.lifecycle
+    - tenant.isolation
+    - tenant.domain-boundary
+  data:
+    - data.retention
+    - data.pii
+    - data.deletion
+  events:
+    - events.schema
+    - events.transport
+  frontend:
+    - frontend.composition
+    - frontend.brand.tokens
+    - frontend.i18n
+  runtime:
+    - runtime.cache
+    - runtime.async-task
+  commerce:
+    - commerce.system-of-record
+    - commerce.reconciliation

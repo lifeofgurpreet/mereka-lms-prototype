@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-from pathlib import Path
 from datetime import date
+from pathlib import Path
+
 import yaml
 
 MANIFEST = Path('docs/adr/manifest.yaml')
+GLOSSARY = Path('docs/architecture/glossary.yaml')
 ALLOWED_DOC_DOMAINS = ('https://docs.openedx.org', 'https://docs.tutor.edly.io')
 ALLOWED_STATUSES = {'proposed', 'accepted', 'deprecated', 'superseded', 'deferred', 'rejected'}
 ALLOWED_TYPES = {'foundation', 'domain', 'migration', 'exception'}
@@ -17,6 +19,12 @@ def parse_iso_date(value):
 
 def main():
     data = yaml.safe_load(MANIFEST.read_text(encoding='utf-8'))
+    glossary = yaml.safe_load(GLOSSARY.read_text(encoding='utf-8'))
+    allowed_governs = {
+        token
+        for tokens in (glossary.get('domains') or {}).values()
+        for token in (tokens or [])
+    }
     adrs = data.get('adrs', [])
     errors = []
     seen_ids = set()
@@ -82,6 +90,10 @@ def main():
             errors.append(f'{aid}: ADR-028+ must set frontmatter_required=true')
         if num >= 28 and not (adr.get('governs') or []):
             errors.append(f'{aid}: ADR-028+ must declare non-empty governs')
+        if num >= 28:
+            for governs_token in adr.get('governs') or []:
+                if governs_token not in allowed_governs:
+                    errors.append(f'{aid}: governs token not in glossary `{governs_token}`')
         if adr.get('frontmatter_required', False):
             title = str(adr.get('title', '')).strip()
             if not title or title == '---':

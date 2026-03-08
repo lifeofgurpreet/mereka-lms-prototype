@@ -1,0 +1,371 @@
+spec: mfe-plugin-slots_spec.md
+acceptance_criteria:
+- id: AC-SLOT-001
+  description: Given the Mereka LMS plugin is active, when any MFE page loads on desktop,
+    then the header displays the Mereka logo (from `/static/images/logo-horizontal.svg`
+    or equivalent brand asset) instead of the default Open edX logo.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Requires UI validation across deployed MFE surfaces and hostnames
+- id: AC-SLOT-002
+  description: Given the Mereka LMS plugin is active, when any MFE page loads on a
+    mobile viewport, then the mobile header displays the Mereka square logo (from
+    `/static/images/logo-square.png` or equivalent) instead of the default Open edX
+    mobile logo.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Requires viewport-specific visual verification
+- id: AC-SLOT-003
+  description: Given the header logo slot is activated, when a user clicks the logo
+    on desktop or mobile, then the user is navigated to the LMS dashboard (`/dashboard`),
+    not the Open edX default homepage.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Navigation behavior is validated through browser interaction
+- id: AC-SLOT-004
+  description: Given the header logo slot is activated for multi-site, when a user
+    visits `academy.biji-biji.com`, then the header displays the Biji-Biji branded
+    logo variant (matching `SITE_VARIANTS` hostname lookup pattern from MerekaFooter).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Requires live tenant-host verification
+- id: AC-SLOT-005
+  description: 'Given the desktop main menu slot is activated, when a user views the
+    header navigation on desktop, then the menu includes Mereka-specific items: "Dashboard",
+    "Discover Courses", and "Support" (linking to `helpUrl` from `SITE_VARIANTS`).'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Menu content must be verified in rendered UI state
+- id: AC-SLOT-006
+  description: Given the desktop main menu slot is activated, when a user views the
+    header on a mobile viewport, then the navigation items are accessible via the
+    mobile menu/hamburger and match the desktop items.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Requires cross-viewport parity validation
+- id: AC-SLOT-007
+  description: Given all Phase 1 slots are activated, when the MFE image is built,
+    then the build completes without errors and the `env.config.jsx` contains slot
+    registrations for `desktop_logo_slot`, `mobile_logo_slot`, and `desktop_main_menu_slot`
+    (or their canonical FPF IDs).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Header Branding
+    justification: Build and runtime-rendered config evidence is environment-dependent
+- id: AC-SLOT-008
+  description: Given the Learning MFE is loaded, when a learner views a course unit,
+    then the course outline sidebar displays Mereka branding (brand color accents,
+    Mereka logo in sidebar header) via the course outline sidebar slot.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Learning Surface
+    justification: Requires visual validation in a live course context
+- id: AC-SLOT-009
+  description: Given the Learning MFE is loaded, when a learner navigates between
+    course units, then the sequence navigation area renders with Mereka-branded styling
+    (progress indicators use brand primary color) via a sequence navigation slot or
+    CSS override injected through the slot.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Learning Surface
+    justification: Styling verification is visual and runtime-specific
+- id: AC-SLOT-010
+  description: Given a course has no custom course image, when the learner views the
+    course outline sidebar, then the default placeholder uses Mereka brand colors
+    rather than the Open edX default gray.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Learning Surface
+    justification: Requires controlled course-state UI check
+- id: AC-SLOT-011
+  description: Given all Phase 2 slots are activated, when the Learning MFE image
+    is built, then the build completes without errors and the slot registrations are
+    present in `env.config.jsx`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Learning Surface
+    justification: Build/runtime verification is environment-coupled
+- id: AC-SLOT-012
+  description: Given the Account MFE is loaded, when a user views their profile settings,
+    then additional enterprise profile fields (organization, job title, department)
+    are rendered via the `additional_profile_fields_slot` (or canonical FPF ID).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Account And Profile
+    justification: Requires authenticated UI verification
+- id: AC-SLOT-013
+  description: Given the Profile MFE is loaded, when any user views a public profile,
+    then the profile page header section shows Mereka branding (brand colors, logo)
+    via the appropriate profile header slot.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Account And Profile
+    justification: Public profile surface branding requires visual validation
+- id: AC-SLOT-014
+  description: Given enterprise profile fields are activated, when a user saves their
+    profile with the additional fields populated, then the values persist and are
+    retrievable via the user profile API (`/api/user/v1/accounts`).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-profile-persistence.sh
+    command: scripts/qa/verify-mfe-slot-profile-persistence.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Account And Profile
+    justification: Requires stateful API/UI roundtrip checks
+- id: AC-SLOT-015
+  description: Given all Phase 3 slots are activated, when the Account and Profile
+    MFE images are built, then the builds complete without errors and slot registrations
+    are present in `env.config.jsx`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Account And Profile
+    justification: Build/runtime verification is environment-coupled
+- id: AC-SLOT-016
+  description: 'Given any new slot activation, when the slot is registered in `mereka_lms.py`,
+    then the registration MUST follow the established pattern: `PLUGIN_SLOTS.add_items()`
+    with a tuple of `(mfe_name, slot_id, operations_string)` where the operations
+    string uses `PLUGIN_OPERATIONS.Hide` (for default content removal) and/or `PLUGIN_OPERATIONS.Insert`
+    (for custom widget injection).'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Pattern compliance is verified via source + rendered behavior audit
+- id: AC-SLOT-017
+  description: Given any new slot activation requiring a custom component, when the
+    component is defined, then it MUST be defined in a `mfe-env-config-runtime-definitions`
+    ENV_PATCH (inline JSX), not in an external file or forked MFE.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Requires source and generated runtime patch inspection
+- id: AC-SLOT-018
+  description: Given a slot activation targets a multi-site deployment, when the component
+    renders on different hostnames (`academyv2.mereka.io`, `academy.biji-biji.com`,
+    `skillourfuture.academy.mereka.io`), then the component MUST use the `SITE_VARIANTS`
+    hostname-lookup pattern to select tenant-appropriate content.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Requires multi-host runtime checks
+- id: AC-SLOT-019
+  description: Given the `"all"` MFE target is used for a slot registration, when
+    the slot exists in multiple MFEs, then the slot override applies to every MFE
+    that defines that slot ID.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Cross-MFE runtime verification required
+- id: AC-SLOT-020
+  description: Given an MFE does not define a particular slot ID, when the plugin
+    registers an override for that slot, then the MFE MUST build and render without
+    errors (graceful no-op).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Slot Registration Pattern
+    justification: Requires negative-path runtime validation
+- id: AC-SLOT-021
+  description: Given a slot activation is deployed, when the visual regression test
+    suite runs, then screenshots of pages containing the activated slot are captured
+    and compared against approved baselines.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/visual-regression-branding.sh
+    command: scripts/qa/visual-regression-branding.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Test Execution
+    justification: Screenshot baseline review requires operator adjudication
+- id: AC-SLOT-022
+  description: Given a new slot activation PR is submitted, when CI runs, then a verification
+    script (`scripts/qa/verify-mfe-plugin-slots.sh`) confirms that the expected slot
+    IDs are registered in the generated `env.config.jsx`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-023
+  description: Given all Phase 1 slots are activated, when a smoke test hits the LMS
+    homepage, authn login page, and learner dashboard, then no page renders the default
+    Open edX logo in the header.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Test Execution
+    justification: Requires page-level visual checks across several routes
+- id: AC-SLOT-024
+  description: Given a slot activation causes a build failure, when the MFE build
+    is attempted, then the build error message identifies the failing slot ID and
+    component name to enable rapid debugging.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Test Execution
+    justification: Requires intentional failure injection and build-log review
+- id: AC-SLOT-025
+  description: Given any slot component is rendered, when the page loads, then the
+    slot component MUST render within 100ms of the parent slot container mounting
+    (no perceptible delay vs. the default widget).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Non-Functional Checks
+    justification: Timing measurements require runtime instrumentation and interpretation
+- id: AC-SLOT-026
+  description: Given all activated slots across all MFEs, when the total bundle size
+    is measured, then the incremental JavaScript added by slot components MUST NOT
+    exceed 15KB gzipped (inline JSX components are small by design).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Non-Functional Checks
+    justification: Requires build artifact analysis in release pipeline context
+- id: AC-SLOT-027
+  description: Given any slot component, when rendered on screen sizes from 320px
+    to 1920px wide, then the component MUST be responsive and not cause layout overflow
+    or horizontal scrolling.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Non-Functional Checks
+    justification: Requires viewport matrix UI checks
+- id: AC-SLOT-028
+  description: Given the branding system provides logo assets at the paths specified
+    in branding-system_spec (logo.png, logo-horizontal.svg, logo-square.png, logo-horizontal-white.png),
+    when header slots reference these assets, then the logos render correctly without
+    404 errors.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Cross-Spec Checks
+    justification: Requires network and page render validation across surfaces
+- id: AC-SLOT-029
+  description: Given the branding system's Google Fonts stripping is active, when
+    header and learning slot components render, then no Google Fonts requests are
+    generated by slot components.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    section: Cross-Spec Checks
+    justification: Requires runtime network inspection
+

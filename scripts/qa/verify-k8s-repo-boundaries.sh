@@ -8,7 +8,7 @@ set -euo pipefail
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$REPO_ROOT"
 
-BOUNDARY_DOC="docs/operations/REPO_BOUNDARIES.md"
+BOUNDARY_DOC="docs/policies/operations/REPO_BOUNDARIES.md"
 LEGACY_MONGODB_FILE="infrastructure/k8s/mongodb.yaml"
 
 ALLOWED_INFRA_K8S_FILES=(

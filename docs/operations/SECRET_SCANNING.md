@@ -1,9 +1,10 @@
-# SECRET SCANNING (Superseded)
-_Audience: Operations Team • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+# Secret Scanning (Superseded)
+_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
 
-superseded_by: `../ops/security/SECRET_SCANNING.md`
+superseded_by: `../reference/operations/SECRET_SCANNING.md`
+
 This document has moved to:
-- `../ops/security/SECRET_SCANNING.md`
+- `../reference/operations/SECRET_SCANNING.md`
 
 Reason:
-- Canonicalized to the docs/ops run location to keep operations documentation single-source-of-truth.
+- Security reference material now lives under docs/reference/operations/.

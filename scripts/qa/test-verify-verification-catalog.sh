@@ -21,7 +21,7 @@ else
   exit 1
 fi
 
-cat > docs/operations/verification/verification_catalog.json <<'EOF_DRIFT'
+cat > verification/catalogs/verification_catalog.json <<'EOF_DRIFT'
 {}
 EOF_DRIFT
 

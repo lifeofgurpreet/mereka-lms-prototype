@@ -15,8 +15,8 @@ skip() { echo "SKIP: $1"; SKIP=$((SKIP + 1)); }
 
 # ── File existence ────────────────────────────────────────────────────────────
 
-PII_DOC="$REPO_ROOT/docs/operations/PII_DATA_INVENTORY.md"
-ERASURE_DOC="$REPO_ROOT/docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md"
+PII_DOC="$REPO_ROOT/docs/policies/operations/PII_DATA_INVENTORY.md"
+ERASURE_DOC="$REPO_ROOT/docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md"
 
 if [[ -f "$PII_DOC" ]]; then
   pass "PII_DATA_INVENTORY.md exists"
@@ -147,7 +147,7 @@ fi
 
 # ── GDPR compliance doc cross-reference ──────────────────────────────────────
 
-GDPR_DOC="$REPO_ROOT/docs/operations/GDPR_COMPLIANCE.md"
+GDPR_DOC="$REPO_ROOT/docs/runbooks/operations/GDPR_COMPLIANCE.md"
 if [[ -f "$GDPR_DOC" ]]; then
   pass "GDPR_COMPLIANCE.md exists (referenced by erasure runbook)"
 else

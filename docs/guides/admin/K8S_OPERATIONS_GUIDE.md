@@ -382,7 +382,7 @@ If secrets are scattered across root paths, run:
 ./scripts/infra/infisical-sync-mereka-lms.sh dev
 ```
 
-Full key inventory: `docs/ops/security/INFISICAL_MEREKA_LMS_KEYS.md`.
+Full key inventory: `docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md`.
 
 ### ExternalSecrets Pipeline
 
@@ -584,7 +584,7 @@ velero restore describe <restore-name>
 
 Use Atlas Console for point-in-time recovery or restore from snapshot.
 
-Note: production modulestore/forum traffic is Atlas-backed. Legacy in-cluster MongoDB deployment has been retired; keep the production overlay patch that deletes `Service/mongodb` so this path cannot reappear silently (see `docs/concepts/architecture/ARCHITECTURE_MONGODB.md`).
+Note: production modulestore/forum traffic is Atlas-backed. Legacy in-cluster MongoDB deployment has been retired; keep the production overlay patch that deletes `Service/mongodb` so this path cannot reappear silently (see `docs/architecture/overviews/ARCHITECTURE_MONGODB.md`).
 
 ### Velero Commands Reference
 

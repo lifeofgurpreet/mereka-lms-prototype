@@ -2,7 +2,7 @@
 
 > Status: Archive-candidate for current execution flow.
 > This file is retained for historical tracker context only.
-> Active execution source of truth is `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md`
+> Active execution source of truth is `docs/status/readiness/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md`
 > and `.github/workflows/observability-compliance.yml`.
 
 Date: 2026-02-25  

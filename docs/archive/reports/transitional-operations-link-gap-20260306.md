@@ -35,4 +35,4 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified:
 1. Confirm canonical destination per row with domain owner.
 2. Move/update doc path and links in same change set.
 3. Keep redirect stub only when inbound references still exist.
-4. Re-run `./docs/qa/verify-docs-policy.sh` after each batch.
+4. Re-run `./tools/docs/verify/verify-docs-policy.sh` after each batch.

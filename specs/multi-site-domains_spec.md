@@ -12,9 +12,9 @@ depends_on:
   - "specs/tutor-configuration_spec.md"
 links:
   related_docs:
-    - "docs/operations/OPENEDX_HOSTNAMES.md"
-    - "docs/operations/TROUBLESHOOTING.md"
-    - "docs/operations/AUTH_AND_PERMISSIONS.md"
+    - "docs/reference/operations/OPENEDX_HOSTNAMES.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/reference/operations/AUTH_AND_PERMISSIONS.md"
     - "docs/branding/BRANDING_OPERATING_MODEL.md"
     - "docs/operations/K8S_OPERATIONS_GUIDE.md"
   related_specs:

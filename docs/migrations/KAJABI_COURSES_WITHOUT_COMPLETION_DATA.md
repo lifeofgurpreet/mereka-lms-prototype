@@ -60,4 +60,4 @@ Only issue certificates for new completions in Open edX. Historical completions 
 ## Related Documentation
 
 - Kajabi migration guide: `docs/migrations/BBI-K8-MIGRATION.md`
-- Certificate configuration: `docs/operations/COURSE_CERTIFICATES_UI.md`
+- Certificate configuration: `docs/guides/admin/COURSE_CERTIFICATES_UI.md`

@@ -17,7 +17,7 @@ does_not_govern: ["business-feature-priorities"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
 related_specs: []
-related_runbooks: ["docs/operations/TROUBLESHOOTING.md"]
+related_runbooks: ["docs/runbooks/operations/TROUBLESHOOTING.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-mfe-config-contract.sh --env prod"]
 expiry_date: null

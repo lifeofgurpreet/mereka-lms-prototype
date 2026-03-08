@@ -59,7 +59,7 @@
 
 ### 3. ✅ Production Infrastructure Planning
 
-**Created comprehensive production plan:** `docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`
+**Created comprehensive production plan:** `docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`
 
 #### Key Specifications:
 
@@ -199,7 +199,7 @@
 7. **Begin Production Environment Setup**
    - Create GCP project: `mereka-lms-prod`
    - Provision via Terraform using production plan
-   - See: `docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`
+   - See: `docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`
 
 8. **Set Up CI/CD Workflows (Task #5)**
    - GitHub Actions for image builds
@@ -227,7 +227,7 @@
 - ✅ `GCP_BILLING_ANALYSIS.md` (new)
 - ✅ `TUTOR_K8S_OVERRIDE_GUIDE.md` (new)
 - ✅ `K8S_OVERRIDE_SUMMARY.md` (new)
-- ✅ `docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md` (new)
+- ✅ `docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md` (new)
 - ✅ `docs/NEXT10_TASKS.md` (updated)
 - ✅ `SETUP_STATUS.md` (new)
 

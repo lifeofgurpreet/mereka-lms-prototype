@@ -7,7 +7,7 @@
 # Defaults to HEAD when no argument is provided.
 # Output: var/release-evidence/<sha>/
 #
-# See docs/operations/RELEASE_EVIDENCE.md for full bundle spec.
+# See docs/reference/operations/RELEASE_EVIDENCE.md for full bundle spec.
 
 set -euo pipefail
 

@@ -152,12 +152,19 @@ def load_manual_verifications(
 
 
 def load_testmap_verifications(repo_root: Path, spec_path: Path) -> dict[str, dict]:
-    """Load AC verification entries from specs/testmaps/<spec>.testmap.y*ml."""
-    testmaps_dir = repo_root / "specs" / "testmaps"
-    candidates = [
-        testmaps_dir / f"{spec_path.stem}.testmap.yml",
-        testmaps_dir / f"{spec_path.stem}.testmap.yaml",
+    """Load AC verification entries from generated testmaps with legacy fallback."""
+    candidate_dirs = [
+        repo_root / "specs" / "_generated" / "testmaps",
+        repo_root / "specs" / "testmaps",
     ]
+    candidates = []
+    for testmaps_dir in candidate_dirs:
+        candidates.extend(
+            [
+                testmaps_dir / f"{spec_path.stem}.testmap.yml",
+                testmaps_dir / f"{spec_path.stem}.testmap.yaml",
+            ]
+        )
     testmap_file = next((p for p in candidates if p.exists()), None)
     if not testmap_file:
         return {}

@@ -17,7 +17,7 @@ does_not_govern: ["pricing-policy"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
 related_specs: ["specs/ecommerce-purchase-gateway_spec.md"]
-related_runbooks: ["docs/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md"]
+related_runbooks: ["docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-ecommerce-worker-health.sh"]
 expiry_date: null

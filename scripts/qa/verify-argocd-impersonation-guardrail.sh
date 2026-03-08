@@ -10,8 +10,8 @@ cd "$REPO_ROOT"
 
 PATTERN="--as=system:serviceaccount:argocd:argocd-application-controller"
 ALLOWED_FILES=(
-  "docs/operations/BUILD_PIPELINE_RUNBOOK.md"
-  "docs/operations/SECURITY_INCIDENT_SUPPLY_CHAIN.md"
+  "docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md"
+  "docs/runbooks/operations/SECURITY_INCIDENT_SUPPLY_CHAIN.md"
 )
 
 PASS=0

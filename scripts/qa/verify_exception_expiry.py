@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from datetime import date
 from pathlib import Path
+
 import yaml
 
 MANIFEST = Path('docs/adr/manifest.yaml')

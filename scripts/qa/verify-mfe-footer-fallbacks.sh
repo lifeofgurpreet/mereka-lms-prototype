@@ -27,8 +27,8 @@ skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
-REGISTER="$REPO_ROOT/docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
-EXCEPTIONS="$REPO_ROOT/docs/operations/footer-slot-exceptions.md"
+REGISTER="$REPO_ROOT/docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
+EXCEPTIONS="$REPO_ROOT/docs/policies/architecture/footer-slot-exceptions.md"
 ENTERPRISE_ENV="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 

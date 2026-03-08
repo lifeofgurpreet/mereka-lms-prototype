@@ -15,10 +15,13 @@ Deliverables:
 Owner: Harness Engineer
 
 Deliverables:
+- `docs/architecture/charter.md`
+- `docs/architecture/glossary.yaml`
+- `docs/architecture/bundle-rules.yaml`
 - ADR templates
 - ADR suite scripts
 - decision graph generator
-- generated bundle framework under `docs/adr/_generated/`
+- generated bundle framework under `generated/adr-bundles/`
 
 ## Packet 02 — Constitutional ADRs
 
@@ -42,3 +45,11 @@ Owner: Harness Engineer
 Deliverables:
 - ADR suite in CI
 - failure on missing manifest/frontmatter links and expired exceptions
+
+## Packet 05 — Constitution Extraction
+
+Owner: Constitution Author
+
+Deliverables:
+- living standards derived from ADR-019, ADR-021, ADR-028 through ADR-033
+- ADR scope reduced to decision history where practical

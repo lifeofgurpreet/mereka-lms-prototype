@@ -19,7 +19,7 @@ depends_on:
   - "specs/tutor-configuration_spec.md"
 links:
   related_docs:
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/operations/DEPLOYMENT_RUNBOOK.md"
     - "docs/operations/K8S_OPERATIONS_GUIDE.md"
     - "docs/architecture/DATABASE_ARCHITECTURE.md"

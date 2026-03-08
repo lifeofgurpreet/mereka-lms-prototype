@@ -92,7 +92,7 @@ Current policy is no production Aspects deployment until the conditions below ar
 ### Immediate Actions
 1. **Document deferral status**:
    - [x] Update `docs/concepts/analytics/README.md` with deferral notice (already includes deployment status warning)
-   - [ ] Update `docs/operations/CAPABILITY_MATRIX.md`: Change Aspects from "IN-PROGRESS" to "DEFERRED"
+   - [ ] Update `docs/reference/operations/CAPABILITY_MATRIX.md`: Change Aspects from "IN-PROGRESS" to "DEFERRED"
    - [ ] Update `specs/analytics-pipeline_spec.md`: Add deferral notice at top
 
 2. **Keep plugin configuration intact**:
@@ -185,5 +185,5 @@ If Aspects is deployed in the future, ensure:
 - `specs/analytics-pipeline_spec.md` (analytics requirements)
 - `docs/concepts/analytics/ASPECTS_INSTALLATION.md` (deployment guide)
 - `docs/concepts/analytics/ASPECTS_VS_PANORAMA.md` (comparison with commercial alternative)
-- `docs/operations/CAPABILITY_MATRIX.md` (capability tracking)
-- `docs/operations/ASPECTS_WIRING_CHECKLIST.md` (deployment checklist)
+- `docs/reference/operations/CAPABILITY_MATRIX.md` (capability tracking)
+- `docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md` (deployment checklist)

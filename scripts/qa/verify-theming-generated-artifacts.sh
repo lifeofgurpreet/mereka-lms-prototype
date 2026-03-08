@@ -45,7 +45,7 @@ require_contains() {
 
 echo "=== Theming Generated Artifact Contract ==="
 
-CONTRACT_DOC_NEW="$REPO_ROOT/docs/concepts/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md"
+CONTRACT_DOC_NEW="$REPO_ROOT/docs/reference/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md"
 CONTRACT_DOC_LEGACY="$REPO_ROOT/docs/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md"
 
 if [[ -f "$CONTRACT_DOC_NEW" ]]; then

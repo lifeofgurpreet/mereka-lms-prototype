@@ -18,7 +18,7 @@
 | AC-SPEC-303 | Each deployment-critical spec has a plan file | PASS |
 | AC-SPEC-303 | Each deployment-critical spec has a testplan file | PASS |
 | AC-SPEC-303 | Plans/testplans contain AC reference markers | PASS (with WARN on ci-cd-pipeline_testplan.md) |
-| AC-SPEC-304 | Gap report exists at docs/qa/DEPLOYMENT_CRITICAL_GAP_REPORT.md | PASS |
+| AC-SPEC-304 | Gap report exists at reports/2026/audits/DEPLOYMENT_CRITICAL_GAP_REPORT.md | PASS |
 | AC-SPEC-304 | Gap report includes command outputs | PASS |
 | AC-SPEC-304 | Gap report includes owner/domain mapping | PASS |
 
@@ -73,7 +73,7 @@ PASS specs/multi-tenancy-architecture_spec.md
 - 0 duplicate AC IDs across all seven specs
 - All AC prefix conventions are consistent within each spec
 - All seven specs have matching plan and testplan files in `specs/plans/`
-- Gap report published at `docs/qa/DEPLOYMENT_CRITICAL_GAP_REPORT.md`
+- Gap report published at `reports/2026/audits/DEPLOYMENT_CRITICAL_GAP_REPORT.md`
 
 No blocking issues. All unmapped ACs are live-cluster integration criteria that are exercised
 by the nightly integration test suite.

@@ -69,8 +69,8 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-041 | P0 | Governance | Add CI lint for non-canonical observability command drift in `docs/` (global) | OBS-005 | lint script/workflow | CI blocks non-canonical runtime command references | done |
 | OBS-042 | P1 | Governance | Add AC coverage map for observability scripts -> specs | OBS-041 | coverage map doc/json | each AC has at least one enforcing check mapped | done |
 | OBS-043 | P1 | Governance | Add script contract tests for parity-delta/review/rollup tools | OBS-042 | scripts/qa/test-observability-parity-contracts.sh | tools fail fast on malformed inputs and pass valid fixtures | done |
-| OBS-044 | P1 | Governance | Add artifact retention policy matrix (CI + long-term archive) | OBS-032 | docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md | retention windows defined and enforceable per artifact class | done |
-| OBS-045 | P1 | Governance | Add "observability release checklist" gate to deployment playbook | OBS-041 | docs/operations/RELEASE_CHECKLIST.md | release process requires observability sign-off step | done |
+| OBS-044 | P1 | Governance | Add artifact retention policy matrix (CI + long-term archive) | OBS-032 | docs/policies/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md | retention windows defined and enforceable per artifact class | done |
+| OBS-045 | P1 | Governance | Add "observability release checklist" gate to deployment playbook | OBS-041 | docs/runbooks/operations/RELEASE_CHECKLIST.md | release process requires observability sign-off step | done |
 | OBS-046 | P1 | Ops | Add weekly parity review issue template in repo | OBS-005 | template markdown | weekly review can be opened in <2 minutes with standard fields | done |
 | OBS-047 | P1 | Ops | Add incident postmortem section for observability misses | OBS-046 | postmortem template update | postmortems classify monitoring detection gap explicitly | done |
 | OBS-048 | P2 | Ops | Add operator training drill for alert triage with evidence artifacts | OBS-046 | drill runbook | drill completed once per month with attendance log | done |
@@ -86,8 +86,8 @@ Execution mode: Tracker-ready implementation backlog
 4. Extend `scripts/qa/verify-observability-contracts.sh` so tracing checks are explicit (present config, runtime service presence, rule/docs existence), not only `SKIP`. **Done** (`scripts/qa/verify-observability-contracts.sh`)
 5. Add a first-class evidence script for tracing (`scripts/qa/verify-observability-tracing.sh`) and hook it into `run-observability-first-class.sh` + first-class artifact set. **Done** (already wired in `scripts/qa/run-observability-first-class.sh`)
 6. Complete `scripts/qa/verify-logging-pipeline.sh` by wiring existing AC-LOG checks (log source presence, label schema, structured JSON, retention) and strict-mode behavior.
-7. Update `docs/qa/OBSERVABILITY_SCRIPT_AC_COVERAGE_MAP.md` and `specs/testmaps/observability-stack_spec.testmap.yml` for OBS-024/025 and AC-LOG/AC-005 evidence paths. **Done** (`docs/qa/OBSERVABILITY_SCRIPT_AC_COVERAGE_MAP.md` updated; testmap already maps `verify-observability-contracts.sh` and `verify-observability-tracing.sh` to AC-005/AC-007)
-8. Add nonprod tracing evidence runbook step to `docs/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md` and `OBSERVABILITY_PARITY_MATRIX.md`. **Done** (nonprod step and tracing artifact requirements documented).
+7. Update `verification/catalogs/OBSERVABILITY_SCRIPT_AC_COVERAGE_MAP.md` and `specs/testmaps/observability-stack_spec.testmap.yml` for OBS-024/025 and AC-LOG/AC-005 evidence paths. **Done** (`verification/catalogs/OBSERVABILITY_SCRIPT_AC_COVERAGE_MAP.md` updated; testmap already maps `verify-observability-contracts.sh` and `verify-observability-tracing.sh` to AC-005/AC-007)
+8. Add nonprod tracing evidence runbook step to `docs/runbooks/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md` and `OBSERVABILITY_PARITY_MATRIX.md`. **Done** (nonprod step and tracing artifact requirements documented).
 9. Produce the first pilot evidence artifact bundle (`docs/archive/evidence/observability/`), including one canonical flow trace ID + log correlation proof.
 10. Prepare handoff ticket set `OBS-PILOT-TRACING-01` in docs/qa tracker for implementation agents with explicit acceptance gates and ownership. **Done** (`docs/qa/OBS-PILOT-TRACING-01.md`)
 
@@ -167,7 +167,7 @@ OBSERVABILITY_GCP_PROJECT=${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms} \
 Use `nonprod` for `lane=dev|nonprod`; use `prod` for `lane=prod`.
 
 Required artifacts to close each wave:
-- Hand-off issue set: `docs/qa/OBS-EXT-WAVE-2-HANDOFF.md` for implementation sequencing and sign-off closure criteria.
+- Hand-off issue set: `reports/2026/closures/OBS-EXT-WAVE-2-HANDOFF.md` for implementation sequencing and sign-off closure criteria.
 - `observability-compliance-runtime.json`
 - `observability-runtime-verify-runtime.md`
 - `observability-first-class-runtime-evidence-index.json`
@@ -210,8 +210,8 @@ Required artifacts to close each wave:
 
 | ID | Priority | Workstream | Task | Depends on | Deliverable | Definition of done | Status |
 |---|---|---|---|---|---|---|---|
-| OBS-051 | P0 | Parity | Restore GCP monitoring dashboard `Open edX SLO Dashboard - Service Level Objectives` in production/runtime environments | OBS-041 | Dashboard definition + deployment command in infra playbook | `audit-observability.sh --mode runtime --strict-runtime` no longer fails on missing SLO dashboard in prod/nonprod/dev and returns false positives in non-strict mode | done |
-| OBS-052 | P0 | Parity | Define and document dashboard parity scope: GCP dashboards vs Grafana dashboards (artifact classification) | OBS-051 | `docs/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md` update | Runtime parity script and parity matrix ignore/handle non-GCP dashboard artifacts without silent false negatives | done |
+| OBS-051 | P0 | Parity | Restore GCP monitoring dashboard `Open edX SLO Dashboard - Service Level Objectives` in production/runtime environments | OBS-041 | Dashboard definition + deployment command in infra playbook | `OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict` no longer fails on missing SLO dashboard in prod/nonprod/dev and returns false positives in non-strict mode | done |
+| OBS-052 | P0 | Parity | Define and document dashboard parity scope: GCP dashboards vs Grafana dashboards (artifact classification) | OBS-051 | `docs/runbooks/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md` update | Runtime parity script and parity matrix ignore/handle non-GCP dashboard artifacts without silent false negatives | done |
 | OBS-053 | P1 | Coverage | Deploy `caddy-metrics` ServiceMonitor and `caddy-alerts` PrometheusRule in dev/nonprod/prod where required | OBS-051 | monitoring manifests + runtime evidence files | kind-dev, rke2-nonprod, and production report both resources in Prometheus targets/rules and identity-stable evidence | in_progress (wiring checks now asserted by `verify-observability-runtime.sh`) |
 | OBS-054 | P1 | Coverage | Deploy `mfe-metrics` ServiceMonitor and `services-alerts` PrometheusRule in dev/nonprod/prod where missing | OBS-053 | monitoring manifests + runtime evidence files | runtime coverage checks pass for both objects in all parity lanes | in_progress (script now checks for `services-alerts`) |
 | OBS-055 | P1 | Coverage | Deploy `forum-metrics`, `discovery-metrics`, `ecommerce-metrics`, `credentials-metrics`, `purchase-gateway-metrics` where missing by environment | OBS-054 | monitoring manifests + namespace selectors | runtime coverage checks show all required ServiceMonitors in Prometheus targets | in_progress (checks added in runtime verifier sequence) |
@@ -264,4 +264,4 @@ If a lane fails on one object:
 ## Reference for next execution sprint
 
 For the strict, lane-safe next-wave task runbook, use:
-- `docs/qa/OBSERVABILITY_CLOSEOUT_QUEUE_2026-02-27.md`
+- `reports/2026/closures/OBSERVABILITY_CLOSEOUT_QUEUE_2026-02-27.md`

@@ -2,8 +2,8 @@
 """Generate or verify verification-suite governance catalog artifacts.
 
 Outputs:
-- docs/operations/verification/verification_catalog.json
-- docs/operations/verification/VERIFICATION_CATALOG.md
+- verification/catalogs/verification_catalog.json
+- verification/catalogs/VERIFICATION_CATALOG.md
 """
 
 from __future__ import annotations
@@ -77,7 +77,7 @@ class ScriptMeta:
 
 def load_status_overrides(repo_root: Path) -> dict[str, dict[str, str]]:
     overrides_path = (
-        repo_root / "docs/operations/verification/verification_status_overrides.json"
+        repo_root / "verification/catalogs/verification_status_overrides.json"
     )
     if not overrides_path.exists():
         return {}
@@ -238,8 +238,8 @@ def compute_reference_counts(repo_root: Path, scripts: list[str]) -> dict[str, i
     script_set = set(scripts)
     text_files: list[Path] = []
     excluded_generated = {
-        repo_root / "docs/operations/verification/verification_catalog.json",
-        repo_root / "docs/operations/verification/VERIFICATION_CATALOG.md",
+        repo_root / "verification/catalogs/verification_catalog.json",
+        repo_root / "verification/catalogs/VERIFICATION_CATALOG.md",
     }
     excluded_dirs = {
         ".git",
@@ -286,7 +286,7 @@ def build_catalog(repo_root: Path) -> dict:
     )
 
     deprecated_manifest_path = (
-        repo_root / "docs/operations/verification/deprecated_verify_scripts.json"
+        repo_root / "verification/manifests/deprecated_verify_scripts.json"
     )
     deprecated_manifest = []
     if deprecated_manifest_path.exists():
@@ -441,7 +441,7 @@ def render_markdown(catalog: dict) -> str:
     lines = [
         "# Verification Catalog",
         "",
-        "Machine-readable source: `docs/operations/verification/verification_catalog.json`.",
+        "Machine-readable source: `verification/catalogs/verification_catalog.json`.",
         "",
         "## Core Entrypoints",
     ]
@@ -526,8 +526,8 @@ def main() -> int:
     repo_root = Path(__file__).resolve().parents[2]
     catalog = build_catalog(repo_root)
 
-    json_path = repo_root / "docs/operations/verification/verification_catalog.json"
-    md_path = repo_root / "docs/operations/verification/VERIFICATION_CATALOG.md"
+    json_path = repo_root / "verification/catalogs/verification_catalog.json"
+    md_path = repo_root / "verification/catalogs/VERIFICATION_CATALOG.md"
 
     json_payload = json.dumps(catalog, indent=2, sort_keys=True) + "\n"
     md_payload = render_markdown(catalog)

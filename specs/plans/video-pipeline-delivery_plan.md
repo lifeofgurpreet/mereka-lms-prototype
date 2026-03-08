@@ -206,7 +206,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - How to store credentials in Infisical
   - How to test Mux API connection
 
-- [ ] **[S]** Update main troubleshooting doc with video section (`docs/operations/TROUBLESHOOTING.md`) | Depends: All build tasks
+- [ ] **[S]** Update main troubleshooting doc with video section (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: All build tasks
   - Add video diagnostic commands
   - Add video playback issues to 5-command diagnostic flow
 

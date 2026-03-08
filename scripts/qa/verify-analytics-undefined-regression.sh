@@ -54,8 +54,8 @@ fi
 
 PLUGIN="${PLUGIN_BUNDLE:-$PLUGIN_MAIN}"
 FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
-REGRESSION_DOC="$REPO_ROOT/docs/operations/ANALYTICS_UNDEFINED_REGRESSION_FIX.md"
-PARITY_DOC="$REPO_ROOT/docs/operations/MFE_ANALYTICS_PLUGIN_PARITY.md"
+REGRESSION_DOC="$REPO_ROOT/reports/2026/learnings/ANALYTICS_UNDEFINED_REGRESSION_FIX.md"
+PARITY_DOC="$REPO_ROOT/docs/reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md"
 CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
 
 echo "========================================================"
@@ -369,7 +369,7 @@ echo "========================================================"
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Remediation:"
-  echo "  AC-FRONT-071: Create docs/operations/ANALYTICS_UNDEFINED_REGRESSION_FIX.md"
+  echo "  AC-FRONT-071: Create reports/2026/learnings/ANALYTICS_UNDEFINED_REGRESSION_FIX.md"
   echo "                Document: symptom (undefined_license_key calls), affected hosts,"
   echo "                403/405 errors, root cause, and smoke check commands."
   echo "  AC-FRONT-072: Ensure mereka_lms.py uses os.environ.get('MEREKA_SEGMENT_KEY', '')"

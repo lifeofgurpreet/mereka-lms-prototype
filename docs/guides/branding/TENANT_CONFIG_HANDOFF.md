@@ -343,13 +343,13 @@ Check the `_PLUGIN_SLOTS_AVAILABLE` flag in logs to confirm whether slot wiring 
 
 | Document | Location | Purpose |
 |----------|----------|---------|
-| Multi-Tenant Branding Ops | `docs/operations/MULTITENANT_BRAND_PLATFORM.md` | Brand platform gate, per-tenant branding matrix |
+| Multi-Tenant Branding Ops | `docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md` | Brand platform gate, per-tenant branding matrix |
 | Branding Operating Model | `docs/guides/branding/BRANDING_OPERATING_MODEL.md` | Canonical branding workflow, non-negotiable rules |
 | Tenant Branding Contract | `docs/guides/branding/TENANT_BRANDING_CONTRACT.md` | Contract between tenant config and rendering layer |
 | Brand Pack Schema | `docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md` | Required fields for a tenant brand pack |
-| Legacy Footer Removal | `docs/operations/LEGACY_FOOTER_REMOVAL.md` | Rollback steps for footer slot migration |
-| Multisite Config | `docs/concepts/architecture/MULTISITE.md` | Hostname routing and SITE_ID configuration |
-| Enterprise Navigation | `docs/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md` | Enterprise host mapping and navigation |
+| Legacy Footer Removal | `docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md` | Rollback steps for footer slot migration |
+| Multisite Config | `docs/architecture/overviews/MULTISITE.md` | Hostname routing and SITE_ID configuration |
+| Enterprise Navigation | `docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md` | Enterprise host mapping and navigation |
 
 ### Plugin and Config Files
 
@@ -370,5 +370,5 @@ Check the `_PLUGIN_SLOTS_AVAILABLE` flag in logs to confirm whether slot wiring 
 | `skillourfuture.academy.mereka.io` | Skill Our Future | Government programme host |
 
 For the full subsystem mapping (Studio, MFEs, discovery, forum), see
-`docs/concepts/architecture/MULTISITE.md` and the Caddyfile template in
+`docs/architecture/overviews/MULTISITE.md` and the Caddyfile template in
 `infrastructure/tutor/apply-patches.sh`.

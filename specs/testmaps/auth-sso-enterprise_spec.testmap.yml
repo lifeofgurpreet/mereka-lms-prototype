@@ -170,7 +170,7 @@ acceptance_criteria:
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
   - type: manual
-    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
+    runbook: docs/reference/operations/AUTH_AND_PERMISSIONS.md
     section: Authentik Admin (Separate)
     justification: Authentik admin MFA enforcement is validated against the live Authentik
       instance; this cannot be fully verified in CI without cluster credentials.
@@ -448,7 +448,7 @@ acceptance_criteria:
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
   - type: manual
-    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
+    runbook: docs/reference/operations/AUTH_AND_PERMISSIONS.md
     section: How Login Works
     justification: Enterprise tenant SSO flows depend on tenant-specific IdP configuration
       and cannot be verified generically without tenant credentials and live runtime.

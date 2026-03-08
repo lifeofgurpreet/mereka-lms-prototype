@@ -16,7 +16,7 @@ mkdir -p \
   "$tmpdir/scripts/infra" \
   "$tmpdir/scripts/qa"
 
-cat >"$tmpdir/docs/operations/REPO_BOUNDARIES.md" <<'EOF'
+cat >"$tmpdir/docs/policies/operations/REPO_BOUNDARIES.md" <<'EOF'
 # Repo boundaries
 EOF
 

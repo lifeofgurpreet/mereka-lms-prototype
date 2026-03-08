@@ -103,7 +103,7 @@ echo ""
 check_drill_schedule_doc() {
   echo "--- Check: DR drill schedule documentation exists ---"
 
-  local doc="${REPO_ROOT}/docs/operations/DR_DRILL_SCHEDULE.md"
+  local doc="${REPO_ROOT}/docs/runbooks/operations/DR_DRILL_SCHEDULE.md"
   if [[ ! -f "$doc" ]]; then
     fail "DR_DRILL_SCHEDULE.md not found at $doc"
     return
@@ -141,7 +141,7 @@ check_drill_schedule_doc() {
 check_backup_coverage_matrix() {
   echo "--- Check: Backup coverage matrix documented ---"
 
-  local matrix="${REPO_ROOT}/docs/operations/BACKUP_COVERAGE_MATRIX.md"
+  local matrix="${REPO_ROOT}/docs/reference/operations/BACKUP_COVERAGE_MATRIX.md"
   if [[ -f "$matrix" ]]; then
     pass "BACKUP_COVERAGE_MATRIX.md exists"
   else
@@ -234,7 +234,7 @@ check_restore_drill_docs() {
   local found_velero=false
 
   # Check DR_DRILL_SCHEDULE.md first (primary location)
-  local drill_doc="${REPO_ROOT}/docs/operations/DR_DRILL_SCHEDULE.md"
+  local drill_doc="${REPO_ROOT}/docs/runbooks/operations/DR_DRILL_SCHEDULE.md"
   if [[ -f "$drill_doc" ]]; then
     grep -qi "MySQL\|Cloud SQL" "$drill_doc" && found_mysql=true
     grep -qi "MongoDB\|Atlas" "$drill_doc" && found_mongo=true
@@ -243,7 +243,7 @@ check_restore_drill_docs() {
   fi
 
   # Also check CLOUD_SQL_RESTORE_DRILL.md
-  local cloud_sql_doc="${REPO_ROOT}/docs/operations/CLOUD_SQL_RESTORE_DRILL.md"
+  local cloud_sql_doc="${REPO_ROOT}/docs/runbooks/operations/CLOUD_SQL_RESTORE_DRILL.md"
   [[ -f "$cloud_sql_doc" ]] && found_mysql=true
 
   # Check for any doc mentioning Atlas backup
@@ -267,7 +267,7 @@ check_restore_drill_docs() {
 check_drill_criteria() {
   echo "--- Check: Drill pass/fail criteria and release gate integration documented ---"
 
-  local drill_doc="${REPO_ROOT}/docs/operations/DR_DRILL_SCHEDULE.md"
+  local drill_doc="${REPO_ROOT}/docs/runbooks/operations/DR_DRILL_SCHEDULE.md"
   if [[ ! -f "$drill_doc" ]]; then
     skip "Drill pass/fail criteria" "DR_DRILL_SCHEDULE.md not found"
     return
@@ -293,7 +293,7 @@ check_drill_criteria() {
 check_escalation_path() {
   echo "--- Check: Escalation path for failed drills documented ---"
 
-  local drill_doc="${REPO_ROOT}/docs/operations/DR_DRILL_SCHEDULE.md"
+  local drill_doc="${REPO_ROOT}/docs/runbooks/operations/DR_DRILL_SCHEDULE.md"
   if [[ ! -f "$drill_doc" ]]; then
     skip "Escalation path" "DR_DRILL_SCHEDULE.md not found"
     return

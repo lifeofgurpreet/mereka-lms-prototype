@@ -33,10 +33,10 @@ warn() {
 
 PLUGIN="$PLUGIN_MAIN"
 FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
-MIGRATION_REGISTER="$REPO_ROOT/docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
+MIGRATION_REGISTER="$REPO_ROOT/docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
-ANALYTICS_DOC="$REPO_ROOT/docs/operations/MFE_ANALYTICS_PLUGIN_PARITY.md"
+ANALYTICS_DOC="$REPO_ROOT/docs/reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md"
 
 echo "========================================"
 echo "MFE Analytics + Plugin Parity Verifier"
@@ -361,7 +361,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "             Analytics injection belongs exclusively in mereka_lms.py (Tutor plugin hook), not footer.html."
   echo "  AC-AN-003: Replace DOM overrides with plugin slot registrations."
   echo "             Use 'mfe-env-config' hook and PLUGIN_SLOTS for all MFE customizations."
-  echo "  AC-AN-004: Create docs/operations/MFE_ANALYTICS_PLUGIN_PARITY.md."
+  echo "  AC-AN-004: Create docs/reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md."
   echo "             Add 'mfe-analytics-plugin-parity' job to .github/workflows/ci.yml."
   exit 1
 fi

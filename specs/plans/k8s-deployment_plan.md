@@ -102,7 +102,7 @@ The codebase already provides substantial coverage:
 
 - [ ] **[S]** D-02: Update docs/operations/DEPLOYMENT_RUNBOOK.md rollout and rollback sections to match spec procedures (docs/operations/DEPLOYMENT_RUNBOOK.md) | Depends: None
 
-- [ ] **[S]** D-03: Add edge case troubleshooting entries from spec to docs/operations/TROUBLESHOOTING.md (CrashLoopBackOff, Celery worker starvation, volume data corruption, partial deployment) (docs/operations/TROUBLESHOOTING.md) | Depends: None
+- [ ] **[S]** D-03: Add edge case troubleshooting entries from spec to docs/runbooks/operations/TROUBLESHOOTING.md (CrashLoopBackOff, Celery worker starvation, volume data corruption, partial deployment) (docs/runbooks/operations/TROUBLESHOOTING.md) | Depends: None
 
 ### Rollout
 

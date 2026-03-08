@@ -53,9 +53,9 @@ echo ""
 # Key file paths
 # ---------------------------------------------------------------------------
 BRAND_SCHEMA="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json"
-BRAND_PLATFORM_DOC="$REPO_ROOT/docs/operations/MULTITENANT_BRAND_PLATFORM.md"
+BRAND_PLATFORM_DOC="$REPO_ROOT/docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md"
 SOF_MIGRATION_DOC="$REPO_ROOT/docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md"
-MULTISITE_GOV="$REPO_ROOT/docs/operations/MULTISITE_GOVERNANCE.md"
+MULTISITE_GOV="$REPO_ROOT/docs/policies/operations/MULTISITE_GOVERNANCE.md"
 TENANT_MODEL="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy/models.py"
 FOOTER_MATRIX_SCRIPT="$REPO_ROOT/scripts/qa/verify-footer-variant-matrix.sh"
 BRANDING_CONTRACT_SCRIPT="$REPO_ROOT/scripts/qa/verify-tenant-branding-contract.sh"
@@ -157,7 +157,7 @@ if [[ -f "$BRAND_PLATFORM_DOC" ]]; then
     fail "AC-MB-001: platform doc does not document the brand config model"
   fi
 else
-  fail "AC-MB-001: docs/operations/MULTITENANT_BRAND_PLATFORM.md missing"
+  fail "AC-MB-001: docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md missing"
 fi
 
 echo ""
@@ -508,7 +508,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Action required: Fix FAIL items above."
   echo "  - AC-MB-001: Create infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json"
-  echo "  - AC-MB-002: Document fallback rules in docs/operations/MULTITENANT_BRAND_PLATFORM.md"
+  echo "  - AC-MB-002: Document fallback rules in docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md"
   echo "  - AC-MB-003: Document per-tenant smoke paths in MULTITENANT_BRAND_PLATFORM.md"
   echo "  - AC-MB-004: Ensure contract test scripts exist (verify-footer-variant-matrix.sh, etc.)"
   echo "  - AC-MB-005: Create docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md"

@@ -361,7 +361,7 @@ adrs:
   - https://docs.tutor.edly.io
   related_specs: []
   related_runbooks:
-  - docs/operations/AUTHENTICATED_SMOKE_A11Y.md
+  - docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-auth-surfaces.sh prod
@@ -507,8 +507,8 @@ adrs:
   related_specs:
   - specs/ecommerce-purchase-gateway_spec.md
   related_runbooks:
-  - docs/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
-  - docs/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md
+  - docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+  - docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-ecommerce-worker-health.sh
@@ -630,7 +630,7 @@ adrs:
   - https://docs.tutor.edly.io
   related_specs: []
   related_runbooks:
-  - docs/operations/FORUM_AUTH_E2E.md
+  - docs/runbooks/operations/FORUM_AUTH_E2E.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-auth-surfaces.sh prod
@@ -801,10 +801,9 @@ adrs:
   - ADR-032
   - ADR-033
   governs:
-  - repo-boundary
-  - gitops-contract
-  - image-source-of-truth
-  - runtime-control-plane
+  - platform.control-plane
+  - platform.repo-boundary
+  - build.gitops-promotion
   does_not_govern:
   - feature-level business logic
   - tenant-specific UX copy
@@ -814,8 +813,8 @@ adrs:
   related_specs:
   - specs/repository-structure_spec.md
   related_runbooks:
-  - docs/operations/REPO_BOUNDARIES.md
-  - docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md
+  - docs/policies/operations/REPO_BOUNDARIES.md
+  - docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-repo-structure.sh
@@ -844,10 +843,9 @@ adrs:
   read_next:
   - ADR-033
   governs:
-  - oidc
-  - cookie-boundaries
-  - cross-domain-auth
-  - session-policy
+  - auth.oidc
+  - auth.cookie-boundary
+  - tenant.domain-boundary
   does_not_govern:
   - branding copy
   - course-content permissions
@@ -857,8 +855,8 @@ adrs:
   - https://docs.tutor.edly.io
   related_specs: []
   related_runbooks:
-  - docs/operations/OPENEDX_HOSTNAMES.md
-  - docs/operations/DOMAIN_MATRIX.md
+  - docs/reference/operations/OPENEDX_HOSTNAMES.md
+  - docs/reference/operations/DOMAIN_MATRIX.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-auth-surfaces.sh prod
@@ -883,9 +881,7 @@ adrs:
   read_next:
   - ADR-031
   governs:
-  - feature-flag-lifecycle
-  - rollout-safety
-  - flag-removal
+  - platform.change-policy
   does_not_govern:
   - product-prioritization
   related_oep: []
@@ -893,10 +889,10 @@ adrs:
   - https://docs.openedx.org
   related_specs: []
   related_runbooks:
-  - docs/operations/RELEASE_EVIDENCE.md
+  - docs/reference/operations/RELEASE_EVIDENCE.md
   related_evidence: []
   fitness_functions:
-  - docs/qa/verify-docs-policy.sh
+  - tools/docs/verify/verify-docs-policy.sh
   expiry_date: null
   removal_condition: null
   frontmatter_required: true
@@ -919,9 +915,7 @@ adrs:
   - ADR-030
   read_next: []
   governs:
-  - deprecation-policy
-  - sunset-lifecycle
-  - exception-expiry
+  - platform.change-policy
   does_not_govern:
   - incident-response runtime triage
   related_oep: []
@@ -929,7 +923,7 @@ adrs:
   - https://docs.openedx.org
   related_specs: []
   related_runbooks:
-  - docs/operations/POSTMERGE_GOVERNANCE_CLOSURE.md
+  - reports/2026/closures/POSTMERGE_GOVERNANCE_CLOSURE.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify_exception_expiry.py
@@ -954,10 +948,9 @@ adrs:
   read_next:
   - ADR-033
   governs:
-  - pii-handling
-  - retention-policy
-  - deletion-workflows
-  - evidence-hygiene
+  - data.pii
+  - data.retention
+  - data.deletion
   does_not_govern:
   - business analytics questions
   related_oep: []
@@ -965,7 +958,7 @@ adrs:
   - https://docs.openedx.org
   related_specs: []
   related_runbooks:
-  - docs/operations/DATA_RETENTION_POLICY.md
+  - docs/policies/operations/DATA_RETENTION_POLICY.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-evidence-redaction.sh
@@ -992,9 +985,10 @@ adrs:
   - ADR-032
   read_next: []
   governs:
-  - tenant-create-update-disable-offboard
-  - tenant-isolation-contract
-  - tenant-branding-governance
+  - tenant.lifecycle
+  - tenant.isolation
+  - tenant.domain-boundary
+  - frontend.brand.tokens
   does_not_govern:
   - tenant commercial terms
   related_oep: []
@@ -1004,7 +998,7 @@ adrs:
   related_specs:
   - specs/multi-tenancy-architecture_spec.md
   related_runbooks:
-  - docs/operations/TENANT_PROVISIONING.md
+  - docs/runbooks/operations/TENANT_PROVISIONING.md
   - docs/guides/branding/TENANT_CONFIG_HANDOFF.md
   related_evidence: []
   fitness_functions:
@@ -1031,9 +1025,8 @@ adrs:
   read_next:
   - ADR-037
   governs:
-  - event-schema-contract
-  - transport-abstraction
-  - producer-consumer-compatibility
+  - events.schema
+  - events.transport
   does_not_govern:
   - single-broker-implementation-details
   related_oep: []
@@ -1067,9 +1060,9 @@ adrs:
   - ADR-029
   read_next: []
   governs:
-  - mfe-runtime-composition
-  - plugin-slot-contract
-  - dependency-alignment
+  - frontend.composition
+  - frontend.brand.tokens
+  - build.version-pin
   does_not_govern:
   - visual-brand-campaign-content
   related_oep: []
@@ -1102,9 +1095,7 @@ adrs:
   - ADR-033
   read_next: []
   governs:
-  - cache-boundaries
-  - invalidation-rules
-  - staleness-budget
+  - runtime.cache
   does_not_govern:
   - business-feature-priorities
   related_oep: []
@@ -1113,7 +1104,7 @@ adrs:
   - https://docs.tutor.edly.io
   related_specs: []
   related_runbooks:
-  - docs/operations/TROUBLESHOOTING.md
+  - docs/runbooks/operations/TROUBLESHOOTING.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-mfe-config-contract.sh --env prod
@@ -1136,9 +1127,7 @@ adrs:
   - ADR-034
   read_next: []
   governs:
-  - async-task-state-model
-  - user-visible-status
-  - retry-compensation
+  - runtime.async-task
   does_not_govern:
   - internal-task-runner-selection
   related_oep: []
@@ -1171,9 +1160,8 @@ adrs:
   - ADR-033
   read_next: []
   governs:
-  - commerce-ledger-source-of-truth
-  - reconciliation-contract
-  - financial-auditability
+  - commerce.system-of-record
+  - commerce.reconciliation
   does_not_govern:
   - pricing-policy
   related_oep: []
@@ -1183,7 +1171,7 @@ adrs:
   related_specs:
   - specs/ecommerce-purchase-gateway_spec.md
   related_runbooks:
-  - docs/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+  - docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-ecommerce-worker-health.sh
@@ -1206,9 +1194,7 @@ adrs:
   - ADR-035
   read_next: []
   governs:
-  - i18n-message-contract
-  - translation-release-flow
-  - locale-fallback-policy
+  - frontend.i18n
   does_not_govern:
   - content-authoring-language-policy
   related_oep: []
@@ -1242,9 +1228,8 @@ adrs:
   - ADR-030
   read_next: []
   governs:
-  - internal-package-versioning
-  - plugin-contract-stability
-  - semver-policy
+  - platform.extension-model
+  - build.version-pin
   does_not_govern:
   - external-upstream-release-timelines
   related_oep: []
@@ -1279,9 +1264,8 @@ adrs:
   - ADR-033
   read_next: []
   governs:
-  - role-boundary-contract
-  - admin-scope
-  - tenant-role-isolation
+  - auth.authorization.roles
+  - tenant.isolation
   does_not_govern:
   - identity-provider-protocol-selection
   related_oep: []

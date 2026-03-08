@@ -5,7 +5,7 @@ This document is intentionally conservative: it prioritizes **prod-safe verifica
 “quick fixes” that mutate databases unless you explicitly intend to do that.
 
 For how auth/permissions work (and what does not sync), see:
-- `docs/ops/security/AUTH_AND_PERMISSIONS.md`
+- `docs/reference/operations/AUTH_AND_PERMISSIONS.md`
 
 ## ✅ Required Platform Admins (Authoritative)
 
@@ -43,7 +43,7 @@ Use these shared credentials for:
 - both **GKE production** (`academyv2.mereka.io`) and **VPS kind dev** (`academyv2.mereka.dev`)
 
 Authentik **admin UI access** is separate from Open edX admin access and is restricted to Gurpreet
-(see `docs/ops/security/AUTH_AND_PERMISSIONS.md`).
+(see `docs/reference/operations/AUTH_AND_PERMISSIONS.md`).
 
 Important:
 - The shared SSO test user is **not** the platform admin mechanism.
@@ -183,7 +183,7 @@ else:
   that can start an OIDC flow (including aliases like Preview and tenant microsites).
 
   Canonical hostname list:
-  - `docs/ops/security/OPENEDX_HOSTNAMES.md`
+  - `docs/reference/operations/OPENEDX_HOSTNAMES.md`
 
   Required callback format:
   - `https://<lms-host>/auth/complete/oidc/`

@@ -1,8 +1,6 @@
-# Infra Team Action Items (2026-03-05) (Archived)
+# INFRA_TEAM_ACTION_ITEMS.md (Superseded)
 
-_Audience: Infra Team • Owner: Infra Team • Last verified: 2026-03-06 • Status: archive-candidate_
+This document has moved to:
+- `docs/status/active/INFRA_TEAM_ACTION_ITEMS.md`
 
-## Archive
-This content moved to: `archive/reports/INFRA_TEAM_ACTION_ITEMS.md`
-
-It is kept as historical record for work planning and handoff context.
+Use the canonical path above.

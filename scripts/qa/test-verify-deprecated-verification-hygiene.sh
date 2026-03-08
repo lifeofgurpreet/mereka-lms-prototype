@@ -21,7 +21,7 @@ echo "legacy"
 EOF
 chmod +x "$tmpdir/$SCRIPT_PATH"
 
-cat >"$tmpdir/docs/operations/verification/deprecated_verify_scripts.json" <<EOF
+cat >"$tmpdir/verification/manifests/deprecated_verify_scripts.json" <<EOF
 {
   "scripts": [
     {

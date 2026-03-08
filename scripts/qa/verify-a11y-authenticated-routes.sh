@@ -35,14 +35,14 @@ do_pass() { PASS=$((PASS + 1)); echo -e "${GREEN}[PASS]${NC} $1"; }
 do_fail() { FAIL=$((FAIL + 1)); echo -e "${RED}[FAIL]${NC} $1"; }
 do_warn() { WARN=$((WARN + 1)); echo -e "${YELLOW}[WARN]${NC} $1"; }
 
-RUNBOOK="$REPO_ROOT/docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
+RUNBOOK="$REPO_ROOT/docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
 VAR_DIR="$REPO_ROOT/var"
 ARTIFACT="$VAR_DIR/a11y-authenticated-routes-gate.txt"
 A11Y_LIVE="${A11Y_LIVE:-0}"
 
 echo -e "${BLUE}=== A11y Authenticated Route Focus/Landmark Gate ===${NC}"
 echo "  Mode: $([ "$A11Y_LIVE" = "1" ] && echo "LIVE (authenticated)" || echo "OFFLINE (documentation)")"
-echo "  Runbook: docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
+echo "  Runbook: docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
 echo ""
 
 # ── AC-ACCSS-201: Route scenarios defined ────────────────────────────
@@ -51,7 +51,7 @@ echo -e "${BLUE}## AC-ACCSS-201: Authenticated Route Scenario Coverage${NC}"
 if [[ ! -f "$RUNBOOK" ]]; then
   do_fail "AC-ACCSS-201: ACCESSIBILITY_CONFORMANCE_RUNBOOK.md not found at docs/operations/"
   echo ""
-  echo "  Create the runbook at docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
+  echo "  Create the runbook at docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
   echo "  It must document route scenarios for dashboard, account/profile, and learning routes."
 else
   do_pass "AC-ACCSS-201: ACCESSIBILITY_CONFORMANCE_RUNBOOK.md exists"
@@ -255,14 +255,14 @@ if [[ "$FAIL" -eq 0 ]]; then
     echo ""
     echo "Notes:"
     echo "  - WARN items are improvements (not blocking)"
-    echo "  - See docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md for full details"
+    echo "  - See docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md for full details"
   fi
   exit 0
 else
   echo -e "${RED}Some a11y authenticated route checks failed${NC}"
   echo ""
   echo "Fix FAIL items before merging."
-  echo "See docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md for the remediation process."
+  echo "See docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md for the remediation process."
   echo ""
   echo "Regression guard — suggested ticket title for each FAIL:"
   echo "  a11y(authenticated-routes): <route> landmark/focus failure — <AC-ACCSS-NNN>"

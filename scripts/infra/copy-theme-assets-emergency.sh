@@ -58,5 +58,5 @@ echo
 echo "Next steps:"
 echo "  1. Test logo URLs return HTTP 200"
 echo "  2. Schedule Docker image rebuild for permanent fix"
-echo "  3. See docs/operations/LOGO-404-EMERGENCY-FIX.md"
+echo "  3. See reports/2026/closures/LOGO-404-EMERGENCY-FIX.md"
 echo

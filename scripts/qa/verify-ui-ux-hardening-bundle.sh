@@ -48,12 +48,12 @@ echo ""
 # ---------------------------------------------------------------------------
 # Canonical paths used across multiple ACs
 # ---------------------------------------------------------------------------
-HARDENING_DOC="$REPO_ROOT/docs/operations/UI_UX_HARDENING_BUNDLE.md"
+HARDENING_DOC="$REPO_ROOT/docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md"
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 PERF_BUDGET_DOC="$REPO_ROOT/docs/architecture/PERFORMANCE_BUDGETS.md"
-A11Y_GATE_DOC="$REPO_ROOT/docs/operations/A11Y_CONTRAST_FOCUS_GATE.md"
-VISUAL_BASELINE_DOC="$REPO_ROOT/docs/operations/VISUAL_SMOKE_BASELINE.md"
-VISUAL_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
+A11Y_GATE_DOC="$REPO_ROOT/docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md"
+VISUAL_BASELINE_DOC="$REPO_ROOT/docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md"
+VISUAL_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md"
 VISUAL_PARITY_DOC="$REPO_ROOT/docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
 
 # ===========================================================================
@@ -456,14 +456,14 @@ echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Action required: Fix FAIL items above."
-  echo "  - Create or update docs/operations/UI_UX_HARDENING_BUNDLE.md"
+  echo "  - Create or update docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md"
   echo "  - Ensure 10+ critical routes listed in the visual regression baseline"
   echo "  - Declare a11y gate (focus/landmark/contrast) + route-level exception policy"
   echo "  - Define bundle size, LCP proxy, and JS error budget thresholds"
   echo "  - Add ui-ux-hardening-bundle job to .github/workflows/ci.yml"
   echo "  - Include weekly trend report template and triage template in doc"
   echo "  - Document exception register with rollback safety and owner/expiry fields"
-  echo "  See: docs/operations/UI_UX_HARDENING_BUNDLE.md for full specification."
+  echo "  See: docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md for full specification."
   exit 1
 fi
 

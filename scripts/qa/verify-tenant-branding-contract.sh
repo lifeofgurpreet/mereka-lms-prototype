@@ -62,10 +62,10 @@ warn() {
 echo -e "${BLUE}## Documentation Checks${NC}"
 
 # AC-TBR-001: RAG matrix exists
-if [[ -f "docs/operations/TENANT_BRANDING_READINESS_RAG.md" ]]; then
-  pass "RAG matrix exists (docs/operations/TENANT_BRANDING_READINESS_RAG.md)"
+if [[ -f "docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md" ]]; then
+  pass "RAG matrix exists (docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md)"
 else
-  fail "RAG matrix missing (docs/operations/TENANT_BRANDING_READINESS_RAG.md)"
+  fail "RAG matrix missing (docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md)"
 fi
 
 # AC-TBR-002: Contract doc exists
@@ -76,10 +76,10 @@ else
 fi
 
 # Tenant provisioning guide exists
-if [[ -f "docs/operations/TENANT_PROVISIONING.md" ]]; then
+if [[ -f "docs/runbooks/operations/TENANT_PROVISIONING.md" ]]; then
   pass "Tenant provisioning guide exists"
 else
-  fail "Tenant provisioning guide missing (docs/operations/TENANT_PROVISIONING.md)"
+  fail "Tenant provisioning guide missing (docs/runbooks/operations/TENANT_PROVISIONING.md)"
 fi
 
 # Multi-tenancy architecture overview exists
@@ -315,7 +315,7 @@ DIMENSIONS=(
 )
 
 for dimension in "${DIMENSIONS[@]}"; do
-  if grep -q "$dimension" docs/operations/TENANT_BRANDING_READINESS_RAG.md 2>/dev/null; then
+  if grep -q "$dimension" docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md 2>/dev/null; then
     pass "RAG matrix includes dimension: $dimension"
   else
     fail "RAG matrix missing dimension: $dimension"
@@ -323,21 +323,21 @@ for dimension in "${DIMENSIONS[@]}"; do
 done
 
 # RAG matrix includes evidence links
-if grep -q "Evidence" docs/operations/TENANT_BRANDING_READINESS_RAG.md 2>/dev/null; then
+if grep -q "Evidence" docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md 2>/dev/null; then
   pass "RAG matrix includes evidence links"
 else
   fail "RAG matrix missing evidence section"
 fi
 
 # RAG matrix includes gaps
-if grep -q "Gaps" docs/operations/TENANT_BRANDING_READINESS_RAG.md 2>/dev/null; then
+if grep -q "Gaps" docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md 2>/dev/null; then
   pass "RAG matrix includes gap analysis"
 else
   fail "RAG matrix missing gap section"
 fi
 
 # RAG matrix includes action items
-if grep -q "Action to Reach GREEN" docs/operations/TENANT_BRANDING_READINESS_RAG.md 2>/dev/null; then
+if grep -q "Action to Reach GREEN" docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md 2>/dev/null; then
   pass "RAG matrix includes action items for GREEN status"
 else
   fail "RAG matrix missing action items"

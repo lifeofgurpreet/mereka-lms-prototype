@@ -7,8 +7,8 @@ Use this checklist to close remaining governance gates for docs remediation and 
 ## Current Status Snapshot
 
 - Branch: `docs/docs-first-class-20260307-followup-7`
-- Command/path reference drift: `0 missing` (`docs/qa/verify-doc-command-refs.sh --include-baseline ...`)
-- World-class docs gates: `PASS` (`docs/qa/run-docs-world-class-gates.sh --sync --max-age-seconds 0`)
+- Command/path reference drift: `0 missing` (`tools/docs/verify/verify-doc-command-refs.sh --include-baseline ...`)
+- World-class docs gates: `PASS` (`tools/docs/verify/run-docs-world-class-gates.sh --sync --max-age-seconds 0`)
 - Remaining closure dependency: governance approvals
 
 ## Required Governance Gates
@@ -30,9 +30,9 @@ Evidence to attach:
 
 Evidence to attach:
 - Output snippet from:
-  - `docs/qa/verify-docs-policy.sh`
+  - `tools/docs/verify/verify-docs-policy.sh`
   - `scripts/qa/verify-repo-structure.sh`
-  - `docs/qa/run-docs-world-class-gates.sh --sync --max-age-seconds 0`
+  - `tools/docs/verify/run-docs-world-class-gates.sh --sync --max-age-seconds 0`
 
 ### CLS-02 — Program Closure Authorization
 
@@ -47,9 +47,9 @@ Evidence to attach:
 ## Final Closure Procedure
 
 1. Run final checks:
-   - `docs/qa/verify-docs-policy.sh`
+   - `tools/docs/verify/verify-docs-policy.sh`
    - `scripts/qa/verify-repo-structure.sh`
-   - `docs/qa/run-docs-world-class-gates.sh --sync --max-age-seconds 0`
+   - `tools/docs/verify/run-docs-world-class-gates.sh --sync --max-age-seconds 0`
 2. Post evidence summary to PR #718.
 3. Obtain explicit governance approvals for `GOV-01`, `GOV-02`, `CLS-02`.
 4. Merge PR #718.

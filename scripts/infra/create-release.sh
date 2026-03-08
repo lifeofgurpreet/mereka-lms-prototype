@@ -257,4 +257,4 @@ if [[ -n "${PREV_TAG}" ]]; then
   echo "    --apply --commit --push --verify-runtime"
 fi
 echo ""
-echo "See docs/operations/RELEASE_PROCESS.md for full rollback instructions."
+echo "See docs/reference/operations/RELEASE_PROCESS.md for full rollback instructions."

@@ -46,7 +46,7 @@ entries:
     MFA ...
   verify:
   - type: manual
-    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
+    runbook: docs/reference/operations/AUTH_AND_PERMISSIONS.md
     section: Authentik Admin (Separate)
     justification: Authentik admin MFA enforcement is validated against the live Authentik instance; this cannot be fully
       verified in CI without cluster credentials.
@@ -57,7 +57,7 @@ entries:
     --env=...
   verify:
   - type: manual
-    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
+    runbook: docs/reference/operations/AUTH_AND_PERMISSIONS.md
     section: How Login Works
     justification: Enterprise tenant SSO flows depend on tenant-specific IdP configuration and cannot be verified generically
       without tenant credentials and live runtime.
@@ -231,7 +231,7 @@ entries:
     section: Release Process Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
-    file: docs/operations/RELEASE_CHECKLIST.md
+    file: docs/runbooks/operations/RELEASE_CHECKLIST.md
 - id: AC-022
   spec: ci-cd-pipeline_spec.md
   description: Given the public-health-check.yml runs on schedule, when branding is correct on prod and dev, then no failures
@@ -270,7 +270,7 @@ entries:
   description: PARAGON_THEME_URLS brandOverride updates are reflected after cache clear without MFE image rebuild.
   verify:
   - type: manual
-    runbook: docs/operations/FRONTEND_BRANDING_METHOD.md
+    runbook: docs/reference/operations/FRONTEND_BRANDING_METHOD.md
     section: PARAGON_THEME_URLS rollout and cache behavior
     justification: Requires live browser verification against deployed MFE runtime and cache invalidation behavior.
 - id: AC-TKN-019
@@ -278,7 +278,7 @@ entries:
   description: Production PARAGON_THEME_URLS CDN endpoint serves CSS with HTTP 200 and expected headers.
   verify:
   - type: manual
-    runbook: docs/operations/FRONTEND_BRANDING_METHOD.md
+    runbook: docs/reference/operations/FRONTEND_BRANDING_METHOD.md
     section: Runtime theme URL validation
     justification: Header contract must be validated against live production ingress/Caddy responses.
 - id: AC-TKN-024
@@ -477,7 +477,7 @@ entries:
   description: Tenant data isolation — API responses must contain zero records from other tenants
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Tenant Isolation Testing
     justification: Requires multi-tenant test data and authenticated API calls across tenant contexts
 - id: AC-CCR-003
@@ -485,7 +485,7 @@ entries:
   description: All log entries must be structured JSON with timestamp, level, service, request_id
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Log Format Verification
     justification: Requires running pods and log stream inspection via kubectl
 - id: AC-CCR-006
@@ -500,7 +500,7 @@ entries:
   description: Tenant offboarding must produce cryptographic deletion certificate
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Tenant Offboarding
     justification: Requires actual tenant data and deletion workflow — not yet implemented
 - id: AC-CCR-010
@@ -508,7 +508,7 @@ entries:
   description: Financial write operations must be idempotent
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Payment Idempotency Testing
     justification: Requires ecommerce/purchase-gateway service with test transactions — not yet implemented
 - id: AC-CCR-011
@@ -516,7 +516,7 @@ entries:
   description: Background job failure logs must include error code, message, context, and stack trace
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Celery Worker Log Verification
     justification: Requires running Celery workers with forced failure scenarios
 - id: AC-CCR-012
@@ -524,7 +524,7 @@ entries:
   description: Redis Streams consumers must implement idempotent handling with deduplication
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Event Bus Verification
     justification: Redis Streams event bus not yet implemented — deferred to Tier 4
 - id: AC-014
@@ -580,7 +580,7 @@ entries:
   description: Valid webhook with HMAC signature persists event to outbox
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service and valid HMAC signature computation
 - id: AC-041
@@ -588,7 +588,7 @@ entries:
   description: Invalid signature returns HTTP 401
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with crafted invalid signature
 - id: AC-042
@@ -596,7 +596,7 @@ entries:
   description: Missing event key returns HTTP 400
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with crafted payload
 - id: AC-043
@@ -604,7 +604,7 @@ entries:
   description: Unknown event type written to unknown__ outbox file
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with non-standard event type
 - id: AC-044
@@ -612,7 +612,7 @@ entries:
   description: Missing KAJABI_WEBHOOK_SECRET returns HTTP 500 on healthcheck
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service without secret env var
 - id: AC-011
@@ -666,7 +666,7 @@ entries:
   description: Secret rotation completes within 1 hour following DR-006 checklist
   verify:
   - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
     section: Full Rotation Procedure
     justification: Secret rotation touches Infisical, GCP SM, and K8s in sequence; requires human verification of non-disruption
 - id: AC-018
@@ -914,7 +914,7 @@ entries:
   description: Profile image upload from MFE succeeds
   verify:
   - type: manual
-    runbook: docs/operations/DOMAIN_MANAGEMENT.md
+    runbook: docs/runbooks/operations/DOMAIN_MANAGEMENT.md
     section: Verification > Profile Image Upload
     justification: Full upload flow requires authenticated browser session with file selection; curl can only test rejection
       path
@@ -932,7 +932,7 @@ entries:
   description: 'Grafana shows pod CPU/memory: Dashboard visible at https://grafana.mereka.io'
   verify:
   - type: manual
-    runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
+    runbook: docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md
     section: Dashboard Verification
     justification: Dashboard load time and visual correctness require human verification in browser
 - id: AC-006
@@ -940,7 +940,7 @@ entries:
   description: 'Alerts fire on OOM: Simulate OOM and verify alert in Slack'
   verify:
   - type: manual
-    runbook: docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
+    runbook: docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
     section: Alert Verification > OOM Simulation
     justification: OOM simulation requires deliberate resource exhaustion which cannot be safely automated in production
 - id: AC-007
@@ -948,7 +948,7 @@ entries:
   description: 'Log correlation works: Click trace ID in Grafana, jumps to Loki logs'
   verify:
   - type: manual
-    runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
+    runbook: docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md
     section: Trace-Log Correlation
     justification: Click-through navigation from logs to traces requires visual verification in Grafana UI
 - id: AC-020
@@ -1045,7 +1045,7 @@ entries:
   description: ExternalSecrets show STATUS=SecretSynced for openedx-secrets and database-secrets
   verify:
   - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
     section: Verification > ExternalSecrets are synced
     justification: Requires live GKE cluster access; cannot be verified in CI without cluster credentials
 - id: AC-002
@@ -1053,7 +1053,7 @@ entries:
   description: Deployments use envFrom with secretRef foropenedx-secrets and database-secrets
   verify:
   - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
     section: Verification > Pods have envFrom referencing secrets
     justification: Requires live GKE cluster access; K8sdeploy manifests reference envFrom but runtime verificationneeds cluster
 - id: AC-003
@@ -1061,7 +1061,7 @@ entries:
   description: LMS pod has non-empty OPENEDX_SECRET_KEY environment variable
   verify:
   - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
     section: Verification > Runtime health
     justification: Requires live GKE cluster with running LMS pod; cannot be simulated in CI
 - id: AC-009
@@ -1085,7 +1085,7 @@ entries:
   description: Atlas secrets (ATLAS_PUBLIC_KEY, ATLAS_PRIVATE_KEY, ATLAS_ORG_ID, ATLAS_PROJECT_ID) exist at /k8s/mereka-lms/atlas
   verify:
   - type: manual
-    runbook: docs/operations/INFISICAL_MEREKA_LMS_KEYS.md
+    runbook: docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md
     section: Atlas Automation Keys
     justification: Atlas path is not referenced in ExternalSecrets (not synced to K8s); requires direct Infisical CLIaccess
 - id: AC-013
@@ -1101,7 +1101,7 @@ entries:
   description: Rotated secret propagates end-to-end aftersync + force-sync annotation + pod restart
   verify:
   - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
     section: Full Rotation Procedure
     justification: End-to-end rotation test requires live Infisical, GCP SM, GKE cluster, and running pods; executedquarterly
       during game days
@@ -1119,7 +1119,7 @@ entries:
     the engineering channel within 5 minutes
   verify:
   - type: manual
-    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
+    runbook: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md
     section: Verification > Simulate Budget Burn
     justification: Requires scaling LMS to 0 replicas to trigger real alert; not safe to automate in production
 - id: AC-013
@@ -1128,7 +1128,7 @@ entries:
     then a P2 alert fires and is delivered to on-call
   verify:
   - type: manual
-    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
+    runbook: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md
     section: Verification > Simulate Latency Regression
     justification: Requires injecting artificial latency in production to verify alert fires within 15 minutes; not safe to
       automate
@@ -1146,7 +1146,7 @@ entries:
     then the maintenance window duration is excluded from both numerator and denominator
   verify:
   - type: manual
-    runbook: docs/operations/MAINTENANCE_WINDOWS.md
+    runbook: docs/policies/operations/MAINTENANCE_WINDOWS.md
     section: Verification > SLA Exclusion Test
     justification: Requires declaring a real maintenance window and generating a monthly report to verify exclusion; involves
       calendar-dependent data that cannot be unit tested
@@ -1156,7 +1156,7 @@ entries:
     in the report with start time, end time, and scope
   verify:
   - type: manual
-    runbook: docs/operations/SLA_REPORTING.md
+    runbook: docs/policies/operations/SLA_REPORTING.md
     section: Report Sections > Maintenance Windows
     justification: Requires actual maintenance window data to verify start/end/scope appear correctly; dry-run only checks
       section existence
@@ -1166,7 +1166,7 @@ entries:
     15 minutes of alert firing
   verify:
   - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
+    runbook: docs/policies/operations/ONCALL_ROTATION.md
     section: Incident Response > P1 Acknowledgement
     justification: Tests human response time to P1 alerts; requires a real or simulated incident with on-call engineer availability
 - id: AC-019
@@ -1175,7 +1175,7 @@ entries:
     days and contains: timeline, root cause, impact, remediation, and prevention sections'
   verify:
   - type: manual
-    runbook: docs/operations/INCIDENT_TEMPLATES.md
+    runbook: docs/runbooks/operations/INCIDENT_TEMPLATES.md
     section: Postmortem > Required Sections Checklist
     justification: Tests organizational process (postmortem published within 5 business days with required sections); cannot
       be automated without incident tracking system integration
@@ -1185,7 +1185,7 @@ entries:
     and no engineer has consecutive on-call duty exceeding 7 days
   verify:
   - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
+    runbook: docs/policies/operations/ONCALL_ROTATION.md
     section: Schedule Verification
     justification: Requires inspecting on-call schedule for primary/secondary assignment and consecutive-day limits; format
       depends on tool choice (Slack, PagerDuty, wiki)
@@ -1195,7 +1195,7 @@ entries:
     escalates to the secondary on-call
   verify:
   - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
+    runbook: docs/policies/operations/ONCALL_ROTATION.md
     section: Escalation > Auto-Escalation Test
     justification: Full end-to-end escalation test requires primary on-call to be unreachable for 15 minutes; automated check
       verifies Alertmanager config only
@@ -2650,7 +2650,7 @@ entries:
     includes --mysql-native-password=ON flag and LMS connects without authentication errors
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: MySQL Authentication Verification
     justification: Requires running MySQL 8 pod in GKE; kubectl exec to verify flag; cannot run against live cluster in CI
     file: scripts/infra/verify-tutor-config.sh
@@ -2660,7 +2660,7 @@ entries:
     then ALLOWED_HOSTS contains all three domains
   verify:
   - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
+    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
     section: Multi-Site Domain Verification
     justification: Requires running LMS pod with kubectl exec; cannot inspect runtime settings without live cluster access
     file: scripts/qa/verify-tutor-multisite-domains.sh
@@ -3752,7 +3752,7 @@ entries:
   description: Lighthouse budgets include LCP <= 2500ms across required entries
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Budget Thresholds
     justification: Verified by periodic operator review of budget JSON plus CI budget script output
 - id: AC-PERF-002
@@ -3760,7 +3760,7 @@ entries:
   description: Lighthouse budgets include INP <= 200ms and do not include FID
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Budget Thresholds
     justification: Verified by periodic operator review of budget JSON plus CI budget script output
 - id: AC-PERF-003
@@ -3768,7 +3768,7 @@ entries:
   description: Lighthouse budgets include CLS <= 0.10 equivalent threshold
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Budget Thresholds
     justification: Verified by periodic operator review of budget JSON plus CI budget script output
 - id: AC-PERF-004
@@ -3776,7 +3776,7 @@ entries:
   description: Lighthouse budgets cover required MFE paths
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Path Coverage
     justification: Required path list is checked as part of release checklist review
 - id: AC-PERF-005
@@ -3784,7 +3784,7 @@ entries:
   description: JS resourceSize budget ceiling enforced
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Bundle Limits
     justification: Current CI script validates absolute bundle ceilings; operator reviews warnings for per-MFE drift
 - id: AC-PERF-006
@@ -3792,7 +3792,7 @@ entries:
   description: CSS resourceSize budget ceiling enforced
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Bundle Limits
     justification: Current CI script validates absolute bundle ceilings; operator reviews warnings for per-MFE drift
 - id: AC-PERF-007
@@ -3800,7 +3800,7 @@ entries:
   description: CI flags per-MFE JS growth and fails absolute cap breaches
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: CI Gate Behavior
     justification: Growth-warning behavior is reviewed in CI logs during release checks
 - id: AC-PERF-008
@@ -3808,7 +3808,7 @@ entries:
   description: Initial CSS bundle size remains <= 100KB gzipped
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Bundle Limits
     justification: Verified during release review from Lighthouse artifacts and bundle reports
 - id: AC-PERF-012
@@ -3824,7 +3824,7 @@ entries:
   description: Below-the-fold images are lazy-loaded
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Runtime Verification
     justification: Requires browser inspection of rendered pages and network waterfall
 - id: AC-PERF-015
@@ -3832,7 +3832,7 @@ entries:
   description: verify-lighthouse-budgets script exits successfully only for valid thresholds
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: CI Gate Behavior
     justification: Script behavior is validated in CI run logs on budget changes
 - id: AC-PERF-016
@@ -3840,7 +3840,7 @@ entries:
   description: Lighthouse score thresholds (Performance >= 50, Accessibility >= 90) hold
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Score Thresholds
     justification: Requires live Lighthouse runs against production endpoints
 - id: AC-PERF-017
@@ -3848,7 +3848,7 @@ entries:
   description: Lighthouse workflow validates budget structure and ranges
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Workflow Validation
     justification: Verified via GitHub Actions workflow execution history
 - id: AC-PERF-021
@@ -3872,7 +3872,7 @@ entries:
   description: NODE_OPTIONS includes required memory cap for webpack builds
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: Build Preconditions
     justification: Validated by source/config inspection and CI environment logging
 - id: AC-PERF-024
@@ -3880,7 +3880,7 @@ entries:
   description: Production bundles collect and report core web vitals metrics
   verify:
   - type: manual
-    runbook: docs/operations/LIGHTHOUSE_BUDGETS.md
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
     section: RUM Verification
     justification: Requires live browser and telemetry backend validation
 - id: AC-PERF-025

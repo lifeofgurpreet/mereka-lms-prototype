@@ -65,8 +65,6 @@ REQUIRED_SMS=(
   "servicemonitor-xqueue.yaml"
   "servicemonitor-mux.yaml"
   "servicemonitor-caddy.yaml"
-  "servicemonitor-mfe.yaml"
-  "servicemonitor-forum.yaml"
   "servicemonitor-discovery.yaml"
   "servicemonitor-credentials.yaml"
   "servicemonitor-notes.yaml"
@@ -145,9 +143,20 @@ for sm_file in "$MON_DIR"/servicemonitor-*.yaml; do
   base=$(basename "$sm_file")
 
   # Mux delivery monitor has a dedicated scrape shape and is excluded from generic
-  # app-service relabeling expectations.
+  # app-service relabeling expectations. Forum v2 is in-process with LMS, and MFE
+  # metrics are intentionally captured via the shared Caddy monitor, so both
+  # standalone ServiceMonitor files stay quarantined and are intentionally not
+  # held to the generic ServiceMonitor contract here.
   if [[ "$base" == "servicemonitor-mux.yaml" ]]; then
     skip "AC-OVR-008: $base uses dedicated delivery-monitor scrape contract"
+    continue
+  fi
+  if [[ "$base" == "servicemonitor-mfe.yaml" ]]; then
+    skip "AC-OVR-008: $base is intentionally quarantined because MFE metrics are captured via caddy-metrics"
+    continue
+  fi
+  if [[ "$base" == "servicemonitor-forum.yaml" ]]; then
+    skip "AC-OVR-008: $base is intentionally quarantined because forum metrics are scraped via lms-metrics"
     continue
   fi
 
@@ -196,8 +205,6 @@ if has_kubectl; then
     "redis-metrics"
     "enterprise-catalog-metrics"
     "caddy-metrics"
-    "mfe-metrics"
-    "forum-metrics"
     "discovery-metrics"
     "credentials-metrics"
     "purchase-gateway-metrics"

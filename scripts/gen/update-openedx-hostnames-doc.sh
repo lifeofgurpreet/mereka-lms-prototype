@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate docs/operations/OPENEDX_HOSTNAMES.md from scripts/shared/config.sh.
+# Generate docs/reference/operations/OPENEDX_HOSTNAMES.md from scripts/shared/config.sh.
 #
 # Why:
 # - Hostnames are easy to let drift across docs/specs/scripts.
@@ -13,7 +13,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-OUT="$REPO_ROOT/docs/operations/OPENEDX_HOSTNAMES.md"
+OUT="$REPO_ROOT/docs/reference/operations/OPENEDX_HOSTNAMES.md"
 
 last_updated="$(
   git -C "$REPO_ROOT" log -1 --format=%cs 2>/dev/null || date -u +%Y-%m-%d

@@ -17,7 +17,7 @@ links:
   related_docs:
     - "docs/architecture/enterprise-services-overview.md"
     - "docs/runbooks/enterprise-services-runbook.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
   related_specs:
     - "specs/k8s-deployment_spec.md"
     - "specs/secrets-management_spec.md"

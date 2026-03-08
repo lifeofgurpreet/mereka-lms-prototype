@@ -18,7 +18,7 @@ links:
   related_docs:
     - "docs/architecture/multi-tenancy-overview.md"
     - "docs/runbooks/tenant-provisioning-runbook.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
   related_specs:
     - "specs/enterprise-microservices_spec.md"
     - "specs/branding-system_spec.md"

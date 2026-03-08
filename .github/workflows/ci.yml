@@ -59,12 +59,17 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Prepare local tool cache
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+
       # ── Install kubeconform (cached) ──────────────────────────────────────
       - name: Cache kubeconform
         id: cache-kubeconform
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
         with:
-          path: /usr/local/bin/kubeconform
+          path: .cache/bin/kubeconform
           key: kubeconform-v0.6.4-linux-amd64
 
       - name: Install kubeconform
@@ -74,23 +79,30 @@ jobs:
           EXPECTED_SHA="2b4ebeaa4d5ac4843cf8f7b7e66a8874252b6b71bc7cbfc4ef1cbf85acec7c07"
           TARBALL="kubeconform-linux-amd64.tar.gz"
           KUBECONFORM_URL="https://github.com/yannh/kubeconform/releases/download/v0.6.4/${TARBALL}"
-          python3 - "$KUBECONFORM_URL" "$TARBALL" <<'PY'
-          import sys
-          import urllib.request
-
-          url, output_path = sys.argv[1], sys.argv[2]
-          urllib.request.urlretrieve(url, output_path)
-          PY
+          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+            --output "${TARBALL}" "${KUBECONFORM_URL}"
           echo "${EXPECTED_SHA}  ${TARBALL}" | sha256sum -c -
           tar xzf "${TARBALL}"
-          sudo mv kubeconform /usr/local/bin/
+          install -m 0755 kubeconform "$GITHUB_WORKSPACE/.cache/bin/kubeconform"
           rm "${TARBALL}"
+          kubeconform -v
 
       # ── Install ripgrep (needed by verification scripts) ──────────────────
       - name: Install ripgrep
         run: |
           if ! command -v rg &>/dev/null; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq ripgrep
+            RG_VERSION="15.1.0"
+            RG_TARBALL="ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+            RG_BASE_URL="https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}" "${RG_BASE_URL}/${RG_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}.sha256" "${RG_BASE_URL}/${RG_TARBALL}.sha256"
+            sha256sum -c "${RG_TARBALL}.sha256"
+            tar xzf "${RG_TARBALL}"
+            install -m 0755 "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl/rg" \
+              "$GITHUB_WORKSPACE/.cache/bin/rg"
+            rm -rf "${RG_TARBALL}" "${RG_TARBALL}.sha256" "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl"
           fi
 
       # ── Phase A: Shell script syntax check (all scripts in parallel) ───────
@@ -133,8 +145,18 @@ jobs:
       - name: Verify spec-testmap mapping (informational)
         run: python3 scripts/qa/spec-tools/mereka_spec_verify.py specs/ --repo-root . || true
 
-      - name: Validate testmap format
-        run: python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/
+      - name: Generate compatibility testmaps
+        run: |
+          mkdir -p specs/_generated/testmaps
+          python3 scripts/qa/spec-tools/discover_testmap.py \
+            --all-specs specs/ \
+            --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+            --manual-file specs/manual_verifications.yaml \
+            --repo-root . \
+            --output-dir specs/_generated/testmaps
+
+      - name: Validate generated testmap format
+        run: python3 scripts/qa/spec-tools/validate_testmap_format.py specs/_generated/testmaps/
 
       - name: Spec coverage report
         run: |
@@ -522,17 +544,85 @@ jobs:
         with:
           fetch-depth: 2  # TruffleHog needs parent commit for diff
 
+      - name: Prepare local tool cache
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install TruffleHog
+        run: |
+          TH_VERSION="3.93.7"
+          TH_TARBALL="trufflehog_${TH_VERSION}_linux_amd64.tar.gz"
+          TH_BASE_URL="https://github.com/trufflesecurity/trufflehog/releases/download/v${TH_VERSION}"
+          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+            --output "${TH_TARBALL}" "${TH_BASE_URL}/${TH_TARBALL}"
+          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+            --output "trufflehog_checksums.txt" "${TH_BASE_URL}/trufflehog_${TH_VERSION}_checksums.txt"
+          grep " ${TH_TARBALL}\$" trufflehog_checksums.txt | sha256sum -c -
+          tar xzf "${TH_TARBALL}"
+          install -m 0755 trufflehog "$GITHUB_WORKSPACE/.cache/bin/trufflehog"
+          rm -f "${TH_TARBALL}" trufflehog trufflehog_checksums.txt
+          trufflehog --version
+
       - name: TruffleHog secret scan (HEAD only, verified only)
-        uses: trufflesecurity/trufflehog@be889fa341b7a3b1c8d5fbd9e5c6ab378f417da8  # main
-        with:
-          path: ./
-          extra_args: --only-verified
+        run: |
+          BASE_SHA=""
+          HEAD_SHA=""
+          case "${{ github.event_name }}" in
+            pull_request)
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+              HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+              ;;
+            push)
+              if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+                BASE_SHA="${{ github.event.before }}"
+              fi
+              HEAD_SHA="${{ github.sha }}"
+              ;;
+          esac
+
+          if [ -n "$BASE_SHA" ] && [ -n "$HEAD_SHA" ]; then
+            trufflehog git "file://$PWD" \
+              --since-commit "$BASE_SHA" \
+              --branch "$HEAD_SHA" \
+              --fail \
+              --no-update \
+              --github-actions \
+              --only-verified
+          else
+            trufflehog filesystem . \
+              --fail \
+              --no-update \
+              --github-actions \
+              --only-verified
+          fi
+
+      - name: Install hadolint
+        run: |
+          HADOLINT_VERSION="2.14.0"
+          HADOLINT_BINARY="hadolint-linux-x86_64"
+          HADOLINT_URL="https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/${HADOLINT_BINARY}"
+          HADOLINT_SHA_URL="${HADOLINT_URL}.sha256"
+          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+            --output "${HADOLINT_BINARY}" "${HADOLINT_URL}"
+          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+            --output "${HADOLINT_BINARY}.sha256" "${HADOLINT_SHA_URL}"
+          sha256sum -c "${HADOLINT_BINARY}.sha256"
+          install -m 0755 "${HADOLINT_BINARY}" "$GITHUB_WORKSPACE/.cache/bin/hadolint"
+          rm -f "${HADOLINT_BINARY}" "${HADOLINT_BINARY}.sha256"
+          hadolint --version
 
       - name: Hadolint Dockerfile lint
-        uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5  # v3.3.0
-        with:
-          recursive: true
-          no-fail: true  # Advisory — pre-existing Dockerfile style warnings
+        run: |
+          mapfile -t dockerfiles < <(find . -type f \( -name 'Dockerfile' -o -name '*.Dockerfile' \) | sort)
+          if [ "${#dockerfiles[@]}" -eq 0 ]; then
+            echo "No Dockerfiles found"
+            exit 0
+          fi
+          for dockerfile in "${dockerfiles[@]}"; do
+            echo "Linting ${dockerfile}"
+            hadolint "${dockerfile}" || true
+          done
 
       - name: Set up Python for pip-audit
         uses: ./.github/actions/setup-python-env

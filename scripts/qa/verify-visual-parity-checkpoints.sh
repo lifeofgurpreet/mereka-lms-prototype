@@ -48,8 +48,8 @@ echo ""
 # Paths used across multiple ACs
 # ---------------------------------------------------------------------------
 CHECKPOINT_DOC="$REPO_ROOT/docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
-BASELINE_DOC="$REPO_ROOT/docs/operations/VISUAL_SMOKE_BASELINE.md"
-VISUAL_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
+BASELINE_DOC="$REPO_ROOT/docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md"
+VISUAL_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md"
 BRANDING_OPS="$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 COMMON_CSS_DIR="$THEME_DIR/common/static/css"
@@ -68,7 +68,7 @@ echo "--- AC-UI-101: Visual Checkpoint Matrix ---"
 if [[ -f "$CHECKPOINT_DOC" ]]; then
   do_pass "AC-UI-101: VISUAL_PARITY_CHECKPOINTS.md exists"
 else
-  do_fail "AC-UI-101: VISUAL_PARITY_CHECKPOINTS.md not found at docs/branding/"
+  do_fail "AC-UI-101: VISUAL_PARITY_CHECKPOINTS.md not found at docs/guides/branding/"
 fi
 
 # 1b. Must cover the 5 required authn surfaces.
@@ -438,7 +438,7 @@ fi
 if [[ -f "$BRANDING_OPS" ]]; then
   do_pass "AC-UI-106: BRANDING_OPERATING_MODEL.md exists (release ops context)"
 else
-  do_warn "AC-UI-106: BRANDING_OPERATING_MODEL.md not found at docs/branding/"
+  do_warn "AC-UI-106: BRANDING_OPERATING_MODEL.md not found at docs/guides/branding/"
 fi
 
 # 6e. CI wiring present — the script itself must appear in ci.yml syntax checks.

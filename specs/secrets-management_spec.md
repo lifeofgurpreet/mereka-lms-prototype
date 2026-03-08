@@ -10,10 +10,10 @@ depends_on:
   - "specs/repository-structure_spec.md"
 links:
   related_docs:
-    - "docs/operations/SECRETS_SNAPSHOT.md"
-    - "docs/operations/SECRET_ROTATION_CHECKLIST.md"
-    - "docs/operations/INFISICAL_MEREKA_LMS_KEYS.md"
-    - "docs/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md"
+    - "docs/reference/operations/SECRETS_SNAPSHOT.md"
+    - "docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md"
+    - "docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md"
+    - "docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md"
     - "docs/adr/004-secrets-management.md"
   related_specs:
     - "specs/k8s-deployment_spec.md"
@@ -392,7 +392,7 @@ Secrets mismanagement is a top-tier operational risk. A hardcoded password commi
 
 ### Rotating an Existing Secret
 
-Follow `docs/operations/SECRET_ROTATION_CHECKLIST.md`:
+Follow `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`:
 
 1. **Contain**: Identify the compromised or expired credential and its blast radius.
 2. **Rotate in Infisical**: Update the value at `/k8s/mereka-lms` (source of truth only).

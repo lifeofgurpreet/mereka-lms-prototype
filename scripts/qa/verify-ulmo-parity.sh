@@ -650,7 +650,7 @@ echo "========================================"
 
 if [[ $FAIL -gt 0 ]]; then
   echo ""
-  echo "See docs/operations/ULMO_DEV_STAGING_PARITY.md for remediation steps."
+  echo "See docs/status/active/ULMO_DEV_STAGING_PARITY.md for remediation steps."
 fi
 
 exit $((FAIL > 0 ? 1 : 0))

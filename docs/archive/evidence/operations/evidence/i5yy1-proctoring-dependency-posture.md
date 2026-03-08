@@ -52,7 +52,7 @@ When contract is signed, assign `mereka-lms-i8lo` with this pre-mapped checklist
 4. Configure Celery beat schedule for auto-expiry (AC-022)
 5. Implement `on_review_callback()` handler (AC-004)
 6. Run `verify-proctoring.sh`, `verify-proctoring-environment.sh`, `verify-proctoring-advanced.sh`
-7. Close i8lo children in sequence per `docs/operations/PROCTORING_IMPLEMENTATION_READINESS.md`
+7. Close i8lo children in sequence per `docs/status/readiness/PROCTORING_IMPLEMENTATION_READINESS.md`
 
 **Estimated effort once unblocked**: 2-3 days (all code changes pre-mapped in PROCTORING_IMPLEMENTATION_READINESS.md)
 
@@ -60,7 +60,7 @@ When contract is signed, assign `mereka-lms-i8lo` with this pre-mapped checklist
 
 ## References
 
-- `docs/operations/PROCTORING_IMPLEMENTATION_READINESS.md` — full AC execution checklist
-- `docs/operations/PROCTORING_VENDOR_READINESS.md` — vendor onboarding requirements
+- `docs/status/readiness/PROCTORING_IMPLEMENTATION_READINESS.md` — full AC execution checklist
+- `docs/status/readiness/PROCTORING_VENDOR_READINESS.md` — vendor onboarding requirements
 - `docs/architecture/proctoring-architecture-overview.md` — architecture overview
 - `docs/ops/runbooks/proctoring-operations-runbook.md` — operational runbook

@@ -124,7 +124,7 @@ Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local 
   rm -rf tutor_env/data/mysql tutor_env/data/mongodb tutor_env/data/redis
   tutor local launch -I --skip-build
   ```
-- Production uses Cloud SQL / Atlas / managed Redis—never copy secrets or dumps back into git. Store sanitized dumps in the secure bucket referenced in `docs/ops/security/SECRETS_SNAPSHOT.md`.
+- Production uses Cloud SQL / Atlas / managed Redis—never copy secrets or dumps back into git. Store sanitized dumps in the secure bucket referenced in `docs/reference/operations/SECRETS_SNAPSHOT.md`.
 
 ### Access
 

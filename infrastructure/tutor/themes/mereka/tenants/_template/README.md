@@ -103,7 +103,7 @@ See `specs/brand-pack-schema.json` for the complete JSON Schema.
 
 - **Schema Docs**: `docs/branding/TENANT_BRAND_PACK_SCHEMA.md`
 - **Contract**: `docs/branding/TENANT_BRANDING_CONTRACT.md`
-- **Provisioning**: `docs/operations/TENANT_PROVISIONING.md`
+- **Provisioning**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
 - **JSON Schema**: `specs/brand-pack-schema.json`
 
 ## Example

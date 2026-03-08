@@ -1,3 +1,5 @@
-# ADR Runbooks
+# Runbooks
 
-Operational procedures for ADR authoring/review/rollout.
+This directory is reserved for active operator procedures.
+
+ADR process material now lives under `docs/meta/adr-process/`.

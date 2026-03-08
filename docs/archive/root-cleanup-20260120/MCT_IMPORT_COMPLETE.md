@@ -185,7 +185,7 @@ All 15 NEW courses are now available in Open edX. Recommended next actions:
 
 - **MCT Migration Guide**: `/home/dev/code/mereka-lms/docs/migrations/mct/`
 - **Course Package Manifest**: `/home/dev/code/mereka-lms/var/migrations/mct/course_packages_category/course_packages_manifest.csv`
-- **Troubleshooting Guide**: `/home/dev/code/mereka-lms/docs/operations/TROUBLESHOOTING.md`
+- **Troubleshooting Guide**: `/home/dev/code/mereka-lms/docs/runbooks/operations/TROUBLESHOOTING.md`
 - **Service Selector Fix Script**: `/home/dev/code/mereka-lms/scripts/infra/fix-service-selectors.sh`
 
 ---

@@ -37,7 +37,7 @@ CMS_PRODUCTION="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.
 LMS_DEV="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/development.py"
 CMS_DEV="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/development.py"
 TERRAFORM_STORAGE="$REPO_ROOT/infrastructure/terraform/modules/storage/main.tf"
-GCS_DOC="$REPO_ROOT/docs/operations/LIBRARIES_GCS_SETUP.md"
+GCS_DOC="$REPO_ROOT/docs/reference/operations/LIBRARIES_GCS_SETUP.md"
 
 echo "========================================================"
 echo "  Libraries Phase 0: Foundation Audit"

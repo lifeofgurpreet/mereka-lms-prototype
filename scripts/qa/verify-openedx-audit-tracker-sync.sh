@@ -17,20 +17,20 @@ fi
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 # Check both canonical and legacy paths (docs were reorganized)
-if [[ -f "$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md" ]]; then
-  TRACKER="$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md"
+if [[ -f "$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md" ]]; then
+  TRACKER="$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md"
 elif [[ -f "$REPO_ROOT/docs/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md" ]]; then
   TRACKER="$REPO_ROOT/docs/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md"
 else
-  TRACKER="$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md"
+  TRACKER="$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md"
 fi
 
-if [[ -f "$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md" ]]; then
-  BOARD="$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md"
+if [[ -f "$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md" ]]; then
+  BOARD="$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md"
 elif [[ -f "$REPO_ROOT/docs/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md" ]]; then
   BOARD="$REPO_ROOT/docs/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md"
 else
-  BOARD="$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md"
+  BOARD="$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md"
 fi
 
 echo "=== Open edX Audit Tracker Sync Verification ==="

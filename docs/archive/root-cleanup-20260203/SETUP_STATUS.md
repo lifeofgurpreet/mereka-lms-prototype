@@ -225,5 +225,5 @@ AWS SES:
 
 **Questions?** Check:
 - `docs/onboarding/QUICK_START_LOCAL.md` - 5-minute setup guide
-- `docs/operations/TROUBLESHOOTING.md` - Common issues
+- `docs/runbooks/operations/TROUBLESHOOTING.md` - Common issues
 - `CLAUDE.md` - Project overview and commands

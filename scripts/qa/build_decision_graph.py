@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import json
+from pathlib import Path
+
 import yaml
-from collections import defaultdict
 
 manifest = yaml.safe_load(Path('docs/adr/manifest.yaml').read_text(encoding='utf-8'))
+bundle_rules = yaml.safe_load(Path('docs/architecture/bundle-rules.yaml').read_text(encoding='utf-8'))
 adrs = manifest.get('adrs', [])
 nodes = []
 links = []
@@ -16,52 +17,31 @@ for a in adrs:
         for tgt in a.get(k, []) or []:
             links.append({'source': a['id'], 'target': tgt, 'kind': k})
 
-out_json = Path('docs/adr/_generated/graph.json')
+out_json = Path('generated/graphs/adr-graph.json')
 out_json.parent.mkdir(parents=True, exist_ok=True)
 out_json.write_text(json.dumps({'nodes': nodes, 'links': links}, indent=2) + '\n', encoding='utf-8')
 
 lines = ['# Decision Map', '', '```mermaid', 'graph LR']
-for l in links:
-    lines.append(f"  {l['source']} -->|{l['kind']}| {l['target']}")
+for link in links:
+    lines.append(f"  {link['source']} -->|{link['kind']}| {link['target']}")
 if not links:
     lines.append('  ADR028 --> ADR029')
 lines.append('```')
-Path('docs/adr/_generated/decision-map.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+Path('generated/decision-maps/adr-decision-map.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
-bundles_dir = Path('docs/adr/_generated/bundles')
+bundles_dir = Path('generated/adr-bundles')
 bundles_dir.mkdir(parents=True, exist_ok=True)
 
-bundle_defs = [
-    ('00-foundations.md', 'Foundations Bundle', lambda a: a.get('decision_type') == 'foundation'),
-    (
-        '10-auth-and-tenancy.md',
-        'Auth and Tenancy Bundle',
-        lambda a: any(k in ' '.join((a.get('governs') or [])).lower() for k in ('auth', 'session', 'tenant', 'domain-boundary', 'oidc')),
-    ),
-    (
-        '20-build-and-release.md',
-        'Build and Release Bundle',
-        lambda a: any(k in ' '.join((a.get('governs') or [])).lower() for k in ('build', 'release', 'deploy', 'gitops', 'control-plane')),
-    ),
-    (
-        '30-frontend.md',
-        'Frontend Bundle',
-        lambda a: any(k in ' '.join((a.get('governs') or [])).lower() for k in ('frontend', 'mfe', 'branding', 'runtime-composition')),
-    ),
-    (
-        '40-data-and-events.md',
-        'Data and Events Bundle',
-        lambda a: any(k in ' '.join((a.get('governs') or [])).lower() for k in ('data', 'pii', 'event', 'cache', 'async')),
-    ),
-    (
-        '50-commerce.md',
-        'Commerce Bundle',
-        lambda a: any(k in ' '.join((a.get('governs') or [])).lower() for k in ('commerce', 'purchase', 'payment', 'reconciliation')),
-    ),
-]
-
-for bundle_file, title, matcher in bundle_defs:
-    selected = [a for a in adrs if matcher(a)]
+for bundle in bundle_rules.get('bundles', []):
+    bundle_id = bundle['id']
+    bundle_file = f"{bundle_id}.md"
+    title = f"{bundle.get('title', bundle_id)} Bundle"
+    include_tokens = set(bundle.get('include_tokens') or [])
+    selected = [
+        a for a in adrs
+        if a.get('decision_type') == 'foundation' and bundle_id == '00-foundations'
+        or bool(set(a.get('governs') or []) & include_tokens)
+    ]
     ordered = sorted(selected, key=lambda x: x['id'])
     lines = [f'# {title}', '', 'This file is generated from `docs/adr/manifest.yaml`.', '']
     if not ordered:

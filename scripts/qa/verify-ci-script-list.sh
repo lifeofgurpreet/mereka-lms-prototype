@@ -29,7 +29,7 @@ do_fail() { echo -e "${RED}FAIL${NC} $1"; FAILED=$((FAILED + 1)); }
 do_warn() { echo -e "${YELLOW}WARN${NC} $1"; WARNED=$((WARNED + 1)); }
 
 LIST_FILE="$REPO_ROOT/.github/ci-scripts-static.txt"
-CATALOG_JSON="$REPO_ROOT/docs/operations/verification/verification_catalog.json"
+CATALOG_JSON="$REPO_ROOT/verification/catalogs/verification_catalog.json"
 
 echo "=== CI Script List Validation ==="
 echo

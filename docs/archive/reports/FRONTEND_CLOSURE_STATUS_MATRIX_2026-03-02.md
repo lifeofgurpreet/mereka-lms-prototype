@@ -8,14 +8,14 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 | Issue | Status | Evidence |
 |---|---|---|
 | `#103` Frontend phase handover + closure epic | CLOSED | Final handover update posted (`issuecomment-3981836140`) with runtime proofs, residual risks, rollback path |
-| `#104` CI ceremony reduction + workflow consolidation | CLOSED | Initial consolidation: `docs/operations/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md`, commit `776adce7`; canonical wrapper-prune follow-on completed (`e2937e6b`), plus canonical-only Make lane enforcement via alias removal (`a64711a7`) in `docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md` |
+| `#104` CI ceremony reduction + workflow consolidation | CLOSED | Initial consolidation: `docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md`, commit `776adce7`; canonical wrapper-prune follow-on completed (`e2937e6b`), plus canonical-only Make lane enforcement via alias removal (`a64711a7`) in `docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md` |
 | `#105` Runtime branding stabilization + deterministic screenshot evidence | CLOSED | Deterministic screenshots + runtime gates; focused closure capture mode added (`capture-branding-screenshots.sh --core-routes`), latest strict MFE artifacts `var/screenshots/dev/20260303T221705Z/` + `capture-summary.tsv`; runtime gates PASS (`verify-paragon-runtime.sh`, `verify-studio-authoring-branding.sh`; logs `var/qa/paragon-runtime-dev-20260303T221801Z.log`, `var/qa/studio-authoring-branding-dev-20260303T221811Z.log`); cross-browser matrix rerun PASS (`./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser`, `15 passed`, log `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`) |
 | `#106` PDF certificate branding closure | CLOSED | `verify-certificate-branding.sh` PASS; issue closure evidence on thread |
 | `#107` Phase 7 BEM live DOM audit + selector pruning | CLOSED | DOM audit rerun PASS after stability hardening (`issuecomment-3981799304`) |
 | `#108` Accessibility closure (contrast + focus) | CLOSED | `verify-a11y-contrast-focus.sh` + `verify-wcag-contrast-v2.sh` PASS |
 | `#109` `mereka_lms.py` maintainability split | CLOSED | Phase-14 extraction complete (`issuecomment-3981834322`): `mereka_lms.py` `3426 -> 2226`, new `mereka_lms_mfe_slots.py` (`1110`), QA path coupling `98 -> 0`; post-close no-behavior-change maintainability cleanup commits: `9f23cc0d`, `8b172c83`, `fb43eeb1`, `72fc2f8e` |
 | `#111` Phase 6 slot decision (freeze vs continue) | CLOSED | Freeze decision recorded in `docs/guides/branding/BRANDING_PLAN.md` and issue thread |
-| `#110` staging promotion + rollback evidence | OPEN (BLOCKED BY SIGNAL) | Blocking notes posted (`issuecomment-3981835559`, `issuecomment-3981860415`, `issuecomment-3981904379`); offline preflight `verify-staging-activation.sh --offline` (`30 PASS / 0 FAIL / 3 SKIP`); repo-local rollback contract checks pass (`verify-cicd-release-rollback.sh`, `verify-release-dry-run-contract.sh`); staging-target release dry-run rehearsal passed (`var/qa/staging-release-dryrun-rehearsal-20260302T040104Z.log`); strict frontend stability sweep baseline is green (`var/qa/frontend-stability-sweep-20260302T040727Z.summary.log`, screenshots `var/screenshots/dev/20260302T040827Z/`); latest online read-only probe captured (`6 PASS / 3 FAIL / 1 SKIP`) with blockers in `var/qa/staging-activation-online-20260302T040504Z.log` (Argo `OutOfSync/Degraded`, `enterprise-secrets Ready=False SecretSyncedError`); staging auth-surface pre-signal baseline refreshed via `./scripts/qa/verify-auth-surfaces.sh staging` (`OK` with unresolved optional host warnings, log `var/qa/auth-surfaces-staging-20260302T101941Z.log`); execution playbook: `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` |
+| `#110` staging promotion + rollback evidence | OPEN (BLOCKED BY SIGNAL) | Blocking notes posted (`issuecomment-3981835559`, `issuecomment-3981860415`, `issuecomment-3981904379`); offline preflight `verify-staging-activation.sh --offline` (`30 PASS / 0 FAIL / 3 SKIP`); repo-local rollback contract checks pass (`verify-cicd-release-rollback.sh`, `verify-release-dry-run-contract.sh`); staging-target release dry-run rehearsal passed (`var/qa/staging-release-dryrun-rehearsal-20260302T040104Z.log`); strict frontend stability sweep baseline is green (`var/qa/frontend-stability-sweep-20260302T040727Z.summary.log`, screenshots `var/screenshots/dev/20260302T040827Z/`); latest online read-only probe captured (`6 PASS / 3 FAIL / 1 SKIP`) with blockers in `var/qa/staging-activation-online-20260302T040504Z.log` (Argo `OutOfSync/Degraded`, `enterprise-secrets Ready=False SecretSyncedError`); staging auth-surface pre-signal baseline refreshed via `./scripts/qa/verify-auth-surfaces.sh staging` (`OK` with unresolved optional host warnings, log `var/qa/auth-surfaces-staging-20260302T101941Z.log`); execution playbook: `docs/status/migrations/STAGING_PROMOTION_PLAYBOOK_110.md` |
 
 ## Current Blocker
 
@@ -69,7 +69,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 ## Notes
 
 - “OPEN (BLOCKED BY SIGNAL)” means the issue is execution-ready but deferred by current no-infra/no-GitOps instruction.
-- Once signal is granted, follow `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` and attach promotion + rollback evidence back to `#110`.
+- Once signal is granted, follow `docs/status/migrations/STAGING_PROMOTION_PLAYBOOK_110.md` and attach promotion + rollback evidence back to `#110`.
 - Latest repo-only stabilization update (while infra sync pending):
   - Script hardening: `scripts/qa/capture-branding-screenshots.sh` now includes route-aware readiness probes, retry capture logic, `capture-summary.tsv`, and `--core-routes` mode for canonical closure paths.
   - Runtime proof refresh on dev:
@@ -113,7 +113,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
         - `owner` (responsible lane)
         - `next_action` (recommended immediate remediation)
       - platform-auth checklist for non-credentials host reachability incidents is documented in:
-        - `docs/operations/HANDOFF_NEXT_AGENT_2026-03-01.md` (`Platform-Auth Reachability Checklist`)
+        - `reports/2026/closures/HANDOFF_NEXT_AGENT_2026-03-01.md` (`Platform-Auth Reachability Checklist`)
   - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `25`, WARN `0`, FAIL `0`).
   - Latest #104 consolidation contract reruns:
     - `make help` canonical target list check (PASS; legacy `qa-frontend-closure-*` aliases removed, canonical `qa-frontend-closure` retained)

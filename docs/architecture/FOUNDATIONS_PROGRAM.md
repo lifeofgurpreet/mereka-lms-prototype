@@ -2,12 +2,20 @@
 
 ## Mission
 
-Refactor architecture decisions into a durable, machine-checkable governance layer without breaking existing ADR paths in wave 1.
+Refactor architecture knowledge into a durable, machine-checkable governance layer without breaking existing ADR paths in wave 1.
 
 ## Execution Model
 
 - Wave 1: in-place governance overlay
 - Wave 2: optional physical ADR restructuring after graph/index safety
+
+## Target Steady State
+
+- Constitution docs are the living law.
+- ADRs are the historical decision ledger.
+- RFCs hold undecided future architecture.
+- Contracts define machine-checkable interfaces.
+- Runbooks and evidence sit outside ADR bodies.
 
 ## Phases
 
@@ -22,7 +30,7 @@ Exit gate:
 
 ### Phase 1 — Install Overlay OS
 
-- Add templates, validator suite, decision-graph generator, generated bundle artifacts.
+- Add charter, glossary, bundle rules, validator suite, decision-graph generator, generated bundle artifacts.
 - Keep existing ADR filenames and paths.
 
 Exit gate:
@@ -44,7 +52,8 @@ Resolve known conflicts across ADR-003, ADR-017, ADR-019, ADR-021, ADR-024, and 
 
 ### Phase 4 — Domain Completeness
 
-Author next ring: ADR-034..ADR-041 (eventing, frontend composition, cache, async, commerce, i18n, versioning, authz).
+Author next ring as proposals first, then accept selectively:
+- RFC/ADR-034..ADR-041 (eventing, frontend composition, cache, async, commerce, i18n, versioning, authz)
 
 ### Phase 5 — CI Enforcement
 
@@ -54,4 +63,4 @@ Author next ring: ADR-034..ADR-041 (eventing, frontend composition, cache, async
 ### Phase 6 — Operating Rhythm
 
 - Monthly: contradiction + exception review.
-- Quarterly: foundation review.
+- Quarterly: constitution review.

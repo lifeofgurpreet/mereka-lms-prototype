@@ -17,9 +17,9 @@ does_not_govern: ["product-prioritization"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org"]
 related_specs: []
-related_runbooks: ["docs/operations/RELEASE_EVIDENCE.md"]
+related_runbooks: ["docs/reference/operations/RELEASE_EVIDENCE.md"]
 related_evidence: []
-fitness_functions: ["docs/qa/verify-docs-policy.sh"]
+fitness_functions: ["tools/docs/verify/verify-docs-policy.sh"]
 expiry_date: null
 removal_condition: null
 ---

@@ -176,5 +176,5 @@ terraform force-unlock LOCK_ID
 ## Related Documentation
 
 - [GCP Roadmap](../../docs/operations/GCP_ROADMAP.md)
-- [CI/CD Setup](../../docs/operations/CI_CD_SETUP.md)
+- [CI/CD Setup](../../docs/reference/operations/CI_CD_SETUP.md)
 - [Disaster Recovery](../../docs/operations/DR_TEST_RESULTS.md)

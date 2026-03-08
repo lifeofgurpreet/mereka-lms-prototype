@@ -312,4 +312,4 @@ kubectl exec -n mereka-lms prometheus-0 -- \
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Architecture**: `docs/architecture/multi-tenancy-overview.md`
 - **Enterprise Services**: `specs/enterprise-microservices_spec.md`
-- **General Troubleshooting**: `docs/operations/TROUBLESHOOTING.md`
+- **General Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`

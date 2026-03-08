@@ -172,6 +172,6 @@ Sources:
 
 - `specs/multi-tenancy-architecture_spec.md` — Full spec with 50+ ACs
 - `specs/multi-site-domains_spec.md` — Domain configuration contract
-- `docs/operations/DOMAIN_MATRIX.md` — Current domain inventory
+- `docs/reference/operations/DOMAIN_MATRIX.md` — Current domain inventory
 - GitHub issue #206 — Domain infrastructure gaps
 - `scripts/tenants/provision-tenant.sh` — Tenant provisioning automation

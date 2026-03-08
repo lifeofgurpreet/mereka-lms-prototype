@@ -196,11 +196,11 @@ fi
 echo ""
 echo "--- Operational Documentation ---"
 
-OPS_DOC="$REPO_ROOT/docs/operations/POST_DEPLOY_GATE.md"
+OPS_DOC="$REPO_ROOT/docs/runbooks/operations/POST_DEPLOY_GATE.md"
 if [[ -f "$OPS_DOC" ]]; then
-  pass "Operational doc exists: docs/operations/POST_DEPLOY_GATE.md"
+  pass "Operational doc exists: docs/runbooks/operations/POST_DEPLOY_GATE.md"
 else
-  fail "Operational doc missing: docs/operations/POST_DEPLOY_GATE.md"
+  fail "Operational doc missing: docs/runbooks/operations/POST_DEPLOY_GATE.md"
 fi
 
 # ── Section 8: Online Mode — GitHub API Check ────────────────────────────────

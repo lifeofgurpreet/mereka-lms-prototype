@@ -7,9 +7,9 @@
 - Head at memo time: `030eb2a4`
 
 ## Final validation evidence
-- `docs/qa/verify-docs-policy.sh` -> `PASS`
+- `tools/docs/verify/verify-docs-policy.sh` -> `PASS`
 - `./scripts/qa/verify-repo-structure.sh` -> `PASS`
-- `./docs/qa/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200` -> `PASS`
+- `./tools/docs/verify/run-docs-world-class-gates.sh --sync --sync-strategy auto --require-sync --max-age-seconds 1200` -> `PASS`
 
 ## Current blocker checklist (from tracker + linked governance artifacts)
 - `GOV-01` -> `BLOCKED`

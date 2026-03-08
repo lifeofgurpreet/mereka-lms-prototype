@@ -333,8 +333,8 @@ Before starting implementation:
 - **Done**: Runbook covers all operational scenarios
 
 #### D3. Update TROUBLESHOOTING.md with HubSpot registration section
-- [ ] **[S]** Add HubSpot registration troubleshooting section to `docs/operations/TROUBLESHOOTING.md`: common errors, how to check logs, how to verify ExternalSecrets, how to test signature verification
-- **Files**: `docs/operations/TROUBLESHOOTING.md`
+- [ ] **[S]** Add HubSpot registration troubleshooting section to `docs/runbooks/operations/TROUBLESHOOTING.md`: common errors, how to check logs, how to verify ExternalSecrets, how to test signature verification
+- **Files**: `docs/runbooks/operations/TROUBLESHOOTING.md`
 - **AC**: Documentation (implicit)
 - **Depends**: K1
 - **Done**: Troubleshooting section added

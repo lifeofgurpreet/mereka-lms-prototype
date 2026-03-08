@@ -5,41 +5,41 @@ on:
     paths:
       - "docs/**"
       - ".github/workflows/docs-compliance.yml"
-      - "docs/qa/verify-doc-command-refs.sh"
-      - "docs/qa/verify-doc-command-ref-baseline.sh"
+      - "tools/docs/verify/verify-doc-command-refs.sh"
+      - "tools/docs/verify/verify-doc-command-ref-baseline.sh"
       - "docs/qa/verify-doc-command-ref-baseline-test.sh"
-      - "docs/qa/verify-doc-link-integrity.sh"
-      - "docs/qa/verify-doc-link-integrity.py"
-      - "docs/qa/verify-doc-catalog-health-test.sh"
-      - "docs/qa/verify-docs-policy.sh"
-      - "docs/qa/verify-doc-catalog-health.py"
-      - "docs/qa/build-docs-scorecard.py"
-      - "docs/qa/build-docs-scorecard-test.sh"
-      - "docs/qa/build-docs-compliance-summary.py"
+      - "tools/docs/verify/verify-doc-link-integrity.sh"
+      - "tools/docs/verify/verify-doc-link-integrity.py"
+      - "tools/docs/verify/verify-doc-catalog-health-test.sh"
+      - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/docs/verify/verify-doc-catalog-health.py"
+      - "tools/docs/scorecards/build-docs-scorecard.py"
+      - "tools/docs/scorecards/build-docs-scorecard-test.sh"
+      - "tools/docs/scorecards/build-docs-compliance-summary.py"
       - "docs/qa/build-docs-compliance-summary-test.sh"
-      - "docs/qa/verify-docs-foundation-gates.sh"
+      - "tools/docs/verify/verify-docs-foundation-gates.sh"
       - "docs/qa/verify-docs-foundation-gates-test.sh"
-      - "docs/qa/run-docs-world-class-gates.sh"
-      - "docs/qa/run-docs-world-class-gates-test.sh"
+      - "tools/docs/verify/run-docs-world-class-gates.sh"
+      - "tools/docs/verify/run-docs-world-class-gates-test.sh"
       - "docs/qa/verify-docs-compliance-workflow-contract-test.sh"
-      - "docs/qa/generate-docs-scorecard-report.sh"
-      - "docs/qa/generate-docs-scorecard-report-test.sh"
-      - "docs/qa/verify-docs-scorecard-recency.sh"
+      - "tools/docs/scorecards/generate-docs-scorecard-report.sh"
+      - "tools/docs/scorecards/generate-docs-scorecard-report-test.sh"
+      - "tools/docs/verify/verify-docs-scorecard-recency.sh"
       - "docs/qa/verify-docs-scorecard-recency-test.sh"
-      - "docs/qa/verify-docs-scorecard-report-consistency.sh"
+      - "tools/docs/verify/verify-docs-scorecard-report-consistency.sh"
       - "docs/qa/verify-docs-scorecard-report-consistency-test.sh"
-      - "docs/qa/verify-docs-scorecard-head-freshness.sh"
+      - "tools/docs/verify/verify-docs-scorecard-head-freshness.sh"
       - "docs/qa/verify-docs-scorecard-head-freshness-test.sh"
-      - "docs/qa/verify-docs-scorecard-report-timestamp.sh"
+      - "tools/docs/verify/verify-docs-scorecard-report-timestamp.sh"
       - "docs/qa/verify-docs-scorecard-report-timestamp-test.sh"
-      - "docs/qa/verify-docs-scorecard-delta-artifact.sh"
+      - "tools/docs/verify/verify-docs-scorecard-delta-artifact.sh"
       - "docs/qa/verify-docs-scorecard-delta-artifact-test.sh"
       - "docs/qa/verify-docs-scorecard-generation-drift.sh"
       - "docs/qa/verify-docs-scorecard-generation-drift-test.sh"
       - "docs/qa/verify-doc-command-refs-test.sh"
-      - "docs/qa/compare-docs-scorecard-to-base.sh"
-      - "docs/qa/compare-docs-scorecard-to-base-test.sh"
-      - "docs/catalog.json"
+      - "tools/docs/scorecards/compare-docs-scorecard-to-base.sh"
+      - "tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh"
+      - "generated/catalogs/docs-catalog.json"
       - "scripts/qa/verify-repo-structure.sh"
 
 jobs:
@@ -74,9 +74,9 @@ jobs:
       - name: Verify docs policy
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-docs-policy.sh
+          chmod +x tools/docs/verify/verify-docs-policy.sh
           DOCS_POLICY_SUMMARY="${RUNNER_TEMP}/docs-policy-summary.json"
-          ./docs/qa/verify-docs-policy.sh \
+          ./tools/docs/verify/verify-docs-policy.sh \
             --range "$DOCS_POLICY_RANGE" \
             --summary-json "$DOCS_POLICY_SUMMARY"
           python3 docs/qa/helpers/summarize-docs-policy.py "$DOCS_POLICY_SUMMARY" "$GITHUB_STEP_SUMMARY"
@@ -88,8 +88,17 @@ jobs:
       - name: Verify doc command references
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-doc-command-refs.sh
-          chmod +x docs/qa/verify-doc-command-ref-baseline.sh
+          chmod +x tools/docs/verify/verify-doc-command-refs.sh
+          chmod +x tools/docs/verify/verify-doc-command-ref-baseline.sh
+          if [ ! -f tools/docs/verify/.doc-command-ref-baseline ]; then
+            cat > tools/docs/verify/.doc-command-ref-baseline <<'EOF'
+# Baseline high-risk docs that must always be command-reference validated.
+docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md
+docs/ops/quickref/QUICK_REFERENCE.md
+docs/guides/branding/BRANDING_OPERATOR_GUIDE.md
+docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md
+EOF
+          fi
           DOCS_CMDREF_SUMMARY="${RUNNER_TEMP}/docs-command-refs-summary.json"
           DOCS_CMDREF_BASELINE_SUMMARY="${RUNNER_TEMP}/docs-cmdref-baseline-summary.json"
           mapfile -t CHANGED_DOCS < <(git diff --name-only "$DOCS_POLICY_RANGE" -- 'docs/**/*.md' 'docs/*.md' || true)
@@ -100,14 +109,14 @@ jobs:
             echo "- Changed docs (PR scope): ${CHANGED_DOCS_COUNT}"
           } >> "$GITHUB_STEP_SUMMARY"
 
-          ./docs/qa/verify-doc-command-ref-baseline.sh --summary-json "$DOCS_CMDREF_BASELINE_SUMMARY"
+          ./tools/docs/verify/verify-doc-command-ref-baseline.sh --summary-json "$DOCS_CMDREF_BASELINE_SUMMARY"
 
           if [ "$CHANGED_DOCS_COUNT" -gt 0 ]; then
             echo "Changed docs (PR scoped):"
             printf '%s\n' "${CHANGED_DOCS[@]}"
-            ./docs/qa/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_CMDREF_SUMMARY" "${CHANGED_DOCS[@]}"
+            ./tools/docs/verify/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_CMDREF_SUMMARY" "${CHANGED_DOCS[@]}"
           else
-            ./docs/qa/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_CMDREF_SUMMARY"
+            ./tools/docs/verify/verify-doc-command-refs.sh --include-baseline --summary-json "$DOCS_CMDREF_SUMMARY"
           fi
 
           python3 docs/qa/helpers/summarize-cmdref.py "$DOCS_CMDREF_SUMMARY" "$GITHUB_STEP_SUMMARY"
@@ -116,22 +125,22 @@ jobs:
       - name: Verify docs link integrity
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-doc-link-integrity.sh
+          chmod +x tools/docs/verify/verify-doc-link-integrity.sh
           DOCS_LINK_INTEGRITY_SUMMARY="${RUNNER_TEMP}/docs-link-integrity-summary.json"
           mapfile -t CHANGED_DOCS < <(git diff --name-only "$DOCS_POLICY_RANGE" -- 'docs/**/*.md' 'docs/*.md' || true)
           if [ "${#CHANGED_DOCS[@]}" -gt 0 ]; then
-            docs/qa/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY" "${CHANGED_DOCS[@]}"
+            tools/docs/verify/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY" "${CHANGED_DOCS[@]}"
           else
-            docs/qa/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY"
+            tools/docs/verify/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY"
           fi
           python3 docs/qa/helpers/summarize-link-integrity.py "$DOCS_LINK_INTEGRITY_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard recency
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-docs-scorecard-recency.sh
+          chmod +x tools/docs/verify/verify-docs-scorecard-recency.sh
           DOCS_SCORECARD_RECENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-recency-summary.json"
-          docs/qa/verify-docs-scorecard-recency.sh \
+          tools/docs/verify/verify-docs-scorecard-recency.sh \
             --max-age-days 7 \
             --summary-json "$DOCS_SCORECARD_RECENCY_SUMMARY"
           python3 docs/qa/helpers/summarize-scorecard-recency.py "$DOCS_SCORECARD_RECENCY_SUMMARY" "$GITHUB_STEP_SUMMARY"
@@ -139,36 +148,36 @@ jobs:
       - name: Verify docs scorecard report consistency
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-docs-scorecard-report-consistency.sh
+          chmod +x tools/docs/verify/verify-docs-scorecard-report-consistency.sh
           DOCS_SCORECARD_CONSISTENCY_SUMMARY="${RUNNER_TEMP}/docs-scorecard-consistency-summary.json"
-          docs/qa/verify-docs-scorecard-report-consistency.sh \
+          tools/docs/verify/verify-docs-scorecard-report-consistency.sh \
             --summary-json "$DOCS_SCORECARD_CONSISTENCY_SUMMARY"
           python3 docs/qa/helpers/summarize-scorecard-consistency.py "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard head freshness
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-docs-scorecard-head-freshness.sh
+          chmod +x tools/docs/verify/verify-docs-scorecard-head-freshness.sh
           DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY="${RUNNER_TEMP}/docs-scorecard-head-freshness-summary.json"
-          docs/qa/verify-docs-scorecard-head-freshness.sh \
+          tools/docs/verify/verify-docs-scorecard-head-freshness.sh \
             --summary-json "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY"
           python3 docs/qa/helpers/summarize-scorecard-head-freshness.py "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard timestamp format
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-docs-scorecard-report-timestamp.sh
+          chmod +x tools/docs/verify/verify-docs-scorecard-report-timestamp.sh
           DOCS_SCORECARD_TIMESTAMP_SUMMARY="${RUNNER_TEMP}/docs-scorecard-timestamp-summary.json"
-          docs/qa/verify-docs-scorecard-report-timestamp.sh \
+          tools/docs/verify/verify-docs-scorecard-report-timestamp.sh \
             --summary-json "$DOCS_SCORECARD_TIMESTAMP_SUMMARY"
           python3 docs/qa/helpers/summarize-scorecard-timestamp.py "$DOCS_SCORECARD_TIMESTAMP_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard delta artifact
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-docs-scorecard-delta-artifact.sh
+          chmod +x tools/docs/verify/verify-docs-scorecard-delta-artifact.sh
           DOCS_SCORECARD_DELTA_SUMMARY="${RUNNER_TEMP}/docs-scorecard-delta-summary.json"
-          docs/qa/verify-docs-scorecard-delta-artifact.sh \
+          tools/docs/verify/verify-docs-scorecard-delta-artifact.sh \
             --summary-json "$DOCS_SCORECARD_DELTA_SUMMARY"
           python3 docs/qa/helpers/summarize-scorecard-delta.py "$DOCS_SCORECARD_DELTA_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
@@ -212,10 +221,10 @@ jobs:
             echo "- policy_range=${DOCS_POLICY_RANGE}"
             echo "- head_sha=${{ github.sha }}"
           } >> "$GITHUB_STEP_SUMMARY"
-          python3 docs/qa/verify-doc-catalog-health.py \
+          python3 tools/docs/verify/verify-doc-catalog-health.py \
             --max-stale-days 45 \
             --summary-file "$CATALOG_HEALTH_SUMMARY" | tee "$CATALOG_HEALTH_LOG"
-          docs/qa/verify-docs-foundation-gates.sh \
+          tools/docs/verify/verify-docs-foundation-gates.sh \
             --policy-range "$DOCS_POLICY_RANGE" \
             --summary-json "$DOCS_FOUNDATION_SUMMARY"
           python3 docs/qa/helpers/summarize-foundation-gates.py "$DOCS_FOUNDATION_SUMMARY" "$GITHUB_STEP_SUMMARY"
@@ -231,18 +240,18 @@ jobs:
               | sed 's/^/ - /'
           } >> "$GITHUB_STEP_SUMMARY"
 
-          python3 docs/qa/build-docs-scorecard.py \
+          python3 tools/docs/scorecards/build-docs-scorecard.py \
             --summary-file "$CATALOG_HEALTH_SUMMARY" \
             --out "$DOCS_SCORECARD_PATH" \
             --min-score 80
 
-          bash docs/qa/compare-docs-scorecard-to-base.sh \
+          bash tools/docs/scorecards/compare-docs-scorecard-to-base.sh \
             --current-summary "$CATALOG_HEALTH_SUMMARY" \
             --base-ref "$DOCS_BASE_REF" \
             --regression-threshold 10 \
             --out "$DOCS_SCORECARD_COMPARISON_PATH"
 
-          python3 docs/qa/build-docs-compliance-summary.py \
+          python3 tools/docs/scorecards/build-docs-compliance-summary.py \
             --foundation-summary "$DOCS_FOUNDATION_SUMMARY" \
             --cmdref-baseline-summary "$DOCS_CMDREF_BASELINE_SUMMARY" \
             --catalog-summary "$CATALOG_HEALTH_SUMMARY" \
@@ -288,8 +297,8 @@ jobs:
           CI_DATE="$(date -u +%Y%m%d)"
           REPORT_PATH="${RUNNER_TEMP}/DOCS_PROGRAM_SCORECARD_${CI_DATE}.md"
           QUALITY_REPORT_PATH="${RUNNER_TEMP}/DOCS_QUALITY_SCORECARD_${CI_DATE}.md"
-          chmod +x docs/qa/generate-docs-scorecard-report.sh
-          ./docs/qa/generate-docs-scorecard-report.sh \
+          chmod +x tools/docs/scorecards/generate-docs-scorecard-report.sh
+          ./tools/docs/scorecards/generate-docs-scorecard-report.sh \
             --base-ref "$DOCS_BASE_REF" \
             --output "$REPORT_PATH" \
             --quality-output "$QUALITY_REPORT_PATH"
@@ -311,38 +320,38 @@ jobs:
       - name: Verify docs catalog health self-test
         run: |
           chmod +x \
-            docs/qa/verify-doc-catalog-health-test.sh \
+            tools/docs/verify/verify-doc-catalog-health-test.sh \
             docs/qa/verify-docs-policy-test.sh \
-            docs/qa/verify-docs-foundation-gates.sh \
+            tools/docs/verify/verify-docs-foundation-gates.sh \
             docs/qa/verify-docs-foundation-gates-test.sh \
-            docs/qa/run-docs-world-class-gates.sh \
-            docs/qa/run-docs-world-class-gates-test.sh \
+            tools/docs/verify/run-docs-world-class-gates.sh \
+            tools/docs/verify/run-docs-world-class-gates-test.sh \
             docs/qa/verify-docs-compliance-workflow-contract-test.sh \
-            docs/qa/verify-doc-command-ref-baseline.sh \
+            tools/docs/verify/verify-doc-command-ref-baseline.sh \
             docs/qa/verify-doc-command-ref-baseline-test.sh \
             docs/qa/verify-doc-command-refs-test.sh \
             docs/qa/verify-doc-link-integrity-test.sh \
-            docs/qa/verify-docs-scorecard-recency.sh \
+            tools/docs/verify/verify-docs-scorecard-recency.sh \
             docs/qa/verify-docs-scorecard-recency-test.sh \
-            docs/qa/verify-docs-scorecard-report-consistency.sh \
+            tools/docs/verify/verify-docs-scorecard-report-consistency.sh \
             docs/qa/verify-docs-scorecard-report-consistency-test.sh \
-            docs/qa/verify-docs-scorecard-head-freshness.sh \
+            tools/docs/verify/verify-docs-scorecard-head-freshness.sh \
             docs/qa/verify-docs-scorecard-head-freshness-test.sh \
-            docs/qa/verify-docs-scorecard-report-timestamp.sh \
+            tools/docs/verify/verify-docs-scorecard-report-timestamp.sh \
             docs/qa/verify-docs-scorecard-report-timestamp-test.sh \
-            docs/qa/verify-docs-scorecard-delta-artifact.sh \
+            tools/docs/verify/verify-docs-scorecard-delta-artifact.sh \
             docs/qa/verify-docs-scorecard-delta-artifact-test.sh \
             docs/qa/verify-docs-scorecard-generation-drift.sh \
             docs/qa/verify-docs-scorecard-generation-drift-test.sh \
-            docs/qa/generate-docs-scorecard-report.sh \
-            docs/qa/generate-docs-scorecard-report-test.sh \
-            docs/qa/build-docs-scorecard-test.sh \
-            docs/qa/compare-docs-scorecard-to-base-test.sh \
+            tools/docs/scorecards/generate-docs-scorecard-report.sh \
+            tools/docs/scorecards/generate-docs-scorecard-report-test.sh \
+            tools/docs/scorecards/build-docs-scorecard-test.sh \
+            tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh \
             docs/qa/build-docs-compliance-summary-test.sh
-          docs/qa/verify-doc-catalog-health-test.sh
+          tools/docs/verify/verify-doc-catalog-health-test.sh
           docs/qa/verify-docs-policy-test.sh
           docs/qa/verify-docs-foundation-gates-test.sh
-          docs/qa/run-docs-world-class-gates-test.sh
+          tools/docs/verify/run-docs-world-class-gates-test.sh
           docs/qa/verify-docs-compliance-workflow-contract-test.sh
           docs/qa/verify-doc-command-ref-baseline-test.sh
           docs/qa/verify-doc-command-refs-test.sh
@@ -353,7 +362,7 @@ jobs:
           docs/qa/verify-docs-scorecard-report-timestamp-test.sh
           docs/qa/verify-docs-scorecard-delta-artifact-test.sh
           docs/qa/verify-docs-scorecard-generation-drift-test.sh
-          docs/qa/generate-docs-scorecard-report-test.sh
-          docs/qa/build-docs-scorecard-test.sh
-          docs/qa/compare-docs-scorecard-to-base-test.sh
+          tools/docs/scorecards/generate-docs-scorecard-report-test.sh
+          tools/docs/scorecards/build-docs-scorecard-test.sh
+          tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh
           docs/qa/build-docs-compliance-summary-test.sh

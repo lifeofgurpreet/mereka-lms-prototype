@@ -292,7 +292,7 @@ fi
 section "7. Data Retention Policy Alignment"
 
 RETENTION_CONFIG="${REPO_ROOT}/infrastructure/tutor/analytics-retention-config.yaml"
-RETENTION_DOC="${REPO_ROOT}/docs/operations/ANALYTICS_DATA_RETENTION.md"
+RETENTION_DOC="${REPO_ROOT}/docs/policies/operations/ANALYTICS_DATA_RETENTION.md"
 
 if [[ -f "${RETENTION_CONFIG}" ]]; then
   pass "Analytics retention config exists: infrastructure/tutor/analytics-retention-config.yaml"
@@ -301,9 +301,9 @@ else
 fi
 
 if [[ -f "${RETENTION_DOC}" ]]; then
-  pass "Analytics data retention doc exists: docs/operations/ANALYTICS_DATA_RETENTION.md"
+  pass "Analytics data retention doc exists: docs/policies/operations/ANALYTICS_DATA_RETENTION.md"
 else
-  fail "Analytics data retention doc missing: docs/operations/ANALYTICS_DATA_RETENTION.md"
+  fail "Analytics data retention doc missing: docs/policies/operations/ANALYTICS_DATA_RETENTION.md"
 fi
 
 # KPI doc must reference retention policy

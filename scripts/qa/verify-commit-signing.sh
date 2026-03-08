@@ -178,7 +178,7 @@ if [[ "$ERROR_COUNT" -gt 0 ]]; then
 fi
 
 if [[ "$UNSIGNED" -gt 0 ]]; then
-  warn "${UNSIGNED} unsigned commit(s) found — see docs/operations/COMMIT_SIGNING.md to get started"
+  warn "${UNSIGNED} unsigned commit(s) found — see docs/reference/operations/COMMIT_SIGNING.md to get started"
 fi
 
 # ---------------------------------------------------------------------------

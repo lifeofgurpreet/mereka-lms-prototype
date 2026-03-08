@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-AUDIT_REPORT="$REPO_ROOT/docs/operations/UI_UX_AUDIT_REPORT.md"
+AUDIT_REPORT="$REPO_ROOT/reports/2026/audits/UI_UX_AUDIT_REPORT.md"
 
 PASS=0
 FAIL=0

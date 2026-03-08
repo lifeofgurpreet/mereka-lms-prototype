@@ -7,6 +7,7 @@ plus manual_verifications.yaml for non-automated entries.
 Usage:
   python3 discover_testmap.py --spec specs/feature_spec.md --scan-dirs scripts/ tests/
   python3 discover_testmap.py --all-specs specs/ --scan-dirs scripts/ tests/ --format summary
+  python3 discover_testmap.py --all-specs specs/ --scan-dirs scripts/ tests/ --output-dir specs/_generated/testmaps
 """
 
 from __future__ import annotations
@@ -225,6 +226,12 @@ def main() -> int:
     ap.add_argument(
         "--output", type=str, default=None, help="Output file (default: stdout)"
     )
+    ap.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Directory for per-spec generated testmaps (writes <spec>.testmap.yml)",
+    )
     args = ap.parse_args()
 
     repo_root = Path(args.repo_root).resolve()
@@ -246,23 +253,37 @@ def main() -> int:
         tm = generate_testmap(spec_path, scan_directories, manual_file, repo_root)
 
         if args.format == "summary":
-            outputs.append(format_summary(tm))
+            rendered = format_summary(tm)
         elif args.format == "yaml":
-            outputs.append(
-                yaml.dump(
-                    tm,
-                    default_flow_style=False,
-                    sort_keys=False,
-                    allow_unicode=True,
-                )
+            rendered = yaml.dump(
+                tm,
+                default_flow_style=False,
+                sort_keys=False,
+                allow_unicode=True,
             )
-        elif args.format == "json":
+        else:
             import json
 
-            outputs.append(json.dumps(tm, indent=2))
+            rendered = json.dumps(tm, indent=2)
+
+        if args.output_dir:
+            suffix = {
+                "yaml": ".testmap.yml",
+                "json": ".testmap.json",
+                "summary": ".summary.txt",
+            }[args.format]
+            output_dir = Path(args.output_dir)
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir / f"{spec_path.stem}{suffix}"
+            output_path.write_text(rendered + "\n", encoding="utf-8")
+            outputs.append(f"Written {output_path}")
+        else:
+            outputs.append(rendered)
 
     result = "\n---\n".join(outputs) if args.format == "yaml" else "\n".join(outputs)
 
+    if args.output and args.output_dir:
+        raise SystemExit("--output and --output-dir are mutually exclusive")
     if args.output:
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
         Path(args.output).write_text(result + "\n", encoding="utf-8")

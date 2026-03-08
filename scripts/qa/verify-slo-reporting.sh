@@ -312,7 +312,7 @@ fi
 # ── Operational Documentation ────────────────────────────────────
 
 # Check SLA reporting runbook
-SLA_RUNBOOK="docs/operations/SLA_REPORTING.md"
+SLA_RUNBOOK="docs/policies/operations/SLA_REPORTING.md"
 if [[ -f "$SLA_RUNBOOK" ]]; then
   pass "SLA reporting runbook exists ($SLA_RUNBOOK)"
 
@@ -356,7 +356,7 @@ else
 fi
 
 # Check maintenance window policy documentation
-MAINTENANCE_DOC="docs/operations/MAINTENANCE_WINDOWS.md"
+MAINTENANCE_DOC="docs/policies/operations/MAINTENANCE_WINDOWS.md"
 if [[ -f "$MAINTENANCE_DOC" ]]; then
   pass "Maintenance window policy documentation exists ($MAINTENANCE_DOC)"
 

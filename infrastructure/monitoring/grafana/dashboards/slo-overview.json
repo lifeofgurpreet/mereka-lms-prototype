@@ -55,7 +55,7 @@
       "targetBlank": true,
       "title": "On-Call Playbook",
       "type": "link",
-      "url": "https://github.com/mereka-lms/mereka-lms/blob/main/docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+      "url": "https://github.com/mereka-lms/mereka-lms/blob/main/docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
     },
     {
       "icon": "doc",
@@ -71,7 +71,7 @@
       "targetBlank": true,
       "title": "Troubleshooting Guide",
       "type": "link",
-      "url": "https://github.com/mereka-lms/mereka-lms/blob/main/docs/operations/TROUBLESHOOTING.md"
+      "url": "https://github.com/mereka-lms/mereka-lms/blob/main/docs/runbooks/operations/TROUBLESHOOTING.md"
     }
   ],
   "liveNow": false,

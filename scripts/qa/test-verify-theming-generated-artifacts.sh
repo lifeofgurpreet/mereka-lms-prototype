@@ -31,7 +31,7 @@ EOF
 
 chmod +x "$tmpdir/scripts/branding/generate-tokens-from-canonical.sh" "$tmpdir/scripts/branding/build-tokens.sh"
 
-cat >"$tmpdir/docs/concepts/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md" <<'EOF'
+cat >"$tmpdir/docs/reference/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md" <<'EOF'
 # Contract
 
 Run `build-tokens.sh --check`.

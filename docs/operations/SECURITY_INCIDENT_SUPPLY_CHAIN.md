@@ -1,9 +1,10 @@
-# SECURITY INCIDENT SUPPLY CHAIN (Superseded)
-_Audience: Operations Team • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+# Security Incident Supply Chain (Superseded)
+_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
 
-superseded_by: `../ops/security/SECURITY_INCIDENT_SUPPLY_CHAIN.md`
+superseded_by: `../runbooks/operations/SECURITY_INCIDENT_SUPPLY_CHAIN.md`
+
 This document has moved to:
-- `../ops/security/SECURITY_INCIDENT_SUPPLY_CHAIN.md`
+- `../runbooks/operations/SECURITY_INCIDENT_SUPPLY_CHAIN.md`
 
 Reason:
-- Canonicalized to the docs/ops run location to keep operations documentation single-source-of-truth.
+- Operational incident guides now live under docs/runbooks/operations/.

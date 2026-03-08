@@ -14,7 +14,7 @@ depends_on:
 links:
   related_docs:
     - "services/hubspot-webhook/README.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/runbooks/external-registration-runbook.md"
   related_specs:
     - "specs/secrets-management_spec.md"

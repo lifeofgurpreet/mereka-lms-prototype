@@ -71,7 +71,7 @@ whether the surface is customized via plugin slot, CSS-only, or not customized.
 
 **Total exception entries**: 10 (EX-01 through EX-10)
 
-See `docs/operations/MFE_SELECTOR_EXCEPTIONS.md` for the full exception inventory
+See `docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md` for the full exception inventory
 with risk levels, rationale, and expiry dates.
 
 | Risk level | Count |
@@ -83,8 +83,8 @@ with risk levels, rationale, and expiry dates.
 
 ## Related Documents
 
-- `docs/operations/MFE_SELECTOR_EXCEPTIONS.md` — CSS exception inventory
-- `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — Full migration register
+- `docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md` — CSS exception inventory
+- `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — Full migration register
 - `infrastructure/tutor/plugins/mereka_lms.py` — Canonical slot registrations
 - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` — CSS overrides source
 - `docs/archive/evidence/operations/evidence/selector-to-slot-migration-diff.md` — Before/after diff

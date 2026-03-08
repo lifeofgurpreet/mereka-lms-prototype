@@ -9,7 +9,7 @@ version: "1.0.0"
 depends_on: []
 links:
   related_docs:
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/architecture/multi-tenancy-overview.md"
   related_specs:
     - "specs/multi-tenancy-architecture_spec.md"

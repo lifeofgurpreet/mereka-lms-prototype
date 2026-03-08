@@ -1,10 +1,10 @@
 # CI Pipeline Cost Optimization (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
 
-superseded_by: `../ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md`
+superseded_by: `../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md`
 
 This document has moved to:
-- `../ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md`
+- `../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md`
 
 Reason:
-- Canonicalized to `docs/ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md` per docs remediation.
+- Dated cost analysis and phased optimization plans now live under `reports/2026/learnings/`.

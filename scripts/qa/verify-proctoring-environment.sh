@@ -41,7 +41,7 @@ echo "(Infrastructure readiness checks — full verification requires live provi
 echo ""
 
 LMS_PROD="deploy/k8s/base/apps/openedx/settings/lms/production.py"
-VENDOR_READINESS="docs/operations/PROCTORING_VENDOR_READINESS.md"
+VENDOR_READINESS="docs/status/readiness/PROCTORING_VENDOR_READINESS.md"
 RUNBOOK="docs/operations/runbooks/PROCTORING_RUNBOOK.md"
 
 # --- AC-003: Respondus LockDown Browser detection ---

@@ -31,7 +31,7 @@ The multisite bootstrap configuration was missing:
    - Updated documentation to match implementation
    - Added missing fields (course_org_filter, homepage_banner_enabled)
 
-5. **docs/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md** (NEW)
+5. **docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md** (NEW)
    - Comprehensive documentation
    - Troubleshooting guide
    - Technical details
@@ -128,7 +128,7 @@ If issues occur after deployment:
 
 ## Related Documentation
 
-- **Main Fix Documentation**: docs/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
+- **Main Fix Documentation**: docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
 - **Multisite Setup**: docs/operations/MULTISITE.md
 - **Deployment Script**: scripts/infra/apply-multisite-config.sh
 - **Bootstrap Script (Django)**: scripts/shared/multisite_bootstrap_django.py
@@ -190,7 +190,7 @@ Modified:
 Created:
   scripts/shared/multisite_bootstrap_django.py
   scripts/infra/apply-multisite-config.sh
-  docs/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
+  docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
   ALTERNATIVE_DOMAIN_FIX_SUMMARY.md (this file)
 ```
 

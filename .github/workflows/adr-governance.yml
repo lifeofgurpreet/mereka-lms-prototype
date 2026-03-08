@@ -5,7 +5,7 @@ on:
     paths:
       - "docs/adr/**"
       - "docs/architecture/**"
-      - "docs/evidence/**"
+      - "evidence/**"
       - "docs/runbooks/**"
       - "scripts/qa/verify_adr_*"
       - "scripts/qa/build_decision_graph.py"
@@ -17,7 +17,7 @@ on:
     paths:
       - "docs/adr/**"
       - "docs/architecture/**"
-      - "docs/evidence/**"
+      - "evidence/**"
       - "docs/runbooks/**"
       - "scripts/qa/verify_adr_*"
       - "scripts/qa/build_decision_graph.py"

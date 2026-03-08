@@ -14,12 +14,12 @@ depends_on:
 links:
   related_docs:
     - "docs/operations/OBSERVABILITY_GUIDE.md"
-    - "docs/operations/MONITORING.md"
-    - "docs/operations/SLO_DASHBOARDS_SETUP.md"
+    - "docs/reference/operations/MONITORING.md"
+    - "docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md"
     - "docs/operations/ALERT_SEVERITY_MATRIX.md"
-    - "docs/operations/ALERT_TUNING_SOP.md"
-    - "docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/ALERT_TUNING_SOP.md"
+    - "docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
   related_specs:
     - "specs/observability-stack_spec.md"
     - "specs/slo-sla-service-level-management_spec.md"

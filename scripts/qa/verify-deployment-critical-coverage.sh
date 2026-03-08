@@ -237,7 +237,7 @@ done
 echo ""
 echo "--- AC-SPEC-304: Gap report exists ---"
 
-GAP_REPORT="docs/qa/DEPLOYMENT_CRITICAL_GAP_REPORT.md"
+GAP_REPORT="reports/2026/audits/DEPLOYMENT_CRITICAL_GAP_REPORT.md"
 
 if [[ -f "$GAP_REPORT" ]]; then
   pass_check "Gap report exists: ${GAP_REPORT}"

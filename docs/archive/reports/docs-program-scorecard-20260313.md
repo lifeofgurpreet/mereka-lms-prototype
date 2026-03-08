@@ -4,7 +4,7 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified:
 ## KPI Snapshot
 - Classification coverage: 100.00% (991/991)
 - Duplicate canonical topics: 0
-- Broken links (changed scope): 0 (per `./docs/qa/verify-docs-policy.sh`)
+- Broken links (changed scope): 0 (per `./tools/docs/verify/verify-docs-policy.sh`)
 - Root policy violations: 0
 - Stale canonical docs >90d: 0.00% (0/18)
 - Redirect-stub debt: 10 superseded docs outside `docs/archive/superseded/**` (down from 81 in 2026-03-06; 87.7% reduction)

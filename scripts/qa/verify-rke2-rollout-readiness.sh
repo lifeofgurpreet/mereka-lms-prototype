@@ -311,9 +311,9 @@ else
 fi
 
 # DR evidence doc exists
-DR_DOC="$REPO_ROOT/docs/operations/DR_TEST_RESULTS.md"
+DR_DOC="$REPO_ROOT/docs/status/readiness/DR_TEST_RESULTS.md"
 if [[ -f "$DR_DOC" ]]; then
-  pass_check "DR test results document exists (docs/operations/DR_TEST_RESULTS.md)"
+  pass_check "DR test results document exists (docs/status/readiness/DR_TEST_RESULTS.md)"
 else
   fail_check "DR test results document missing — run DR drill and capture evidence"
 fi
@@ -347,19 +347,19 @@ else
 fi
 
 # Observability docs exist
-OBS_DOC="$REPO_ROOT/docs/ops/monitoring/MONITORING.md"
+OBS_DOC="$REPO_ROOT/docs/reference/operations/MONITORING.md"
 if [[ -f "$OBS_DOC" ]]; then
-  pass_check "Monitoring documentation exists (docs/ops/monitoring/MONITORING.md)"
+  pass_check "Monitoring documentation exists (docs/reference/operations/MONITORING.md)"
 else
   fail_check "Monitoring documentation missing"
 fi
 
 # Logging pipeline runbook
-LOGGING_RUNBOOK="$REPO_ROOT/docs/ops/monitoring/LOGGING_AND_SENTRY.md"
+LOGGING_RUNBOOK="$REPO_ROOT/docs/reference/operations/LOGGING_AND_SENTRY.md"
 if [[ -f "$LOGGING_RUNBOOK" ]]; then
-  pass_check "Logging runbook exists (docs/ops/monitoring/LOGGING_AND_SENTRY.md)"
+  pass_check "Logging runbook exists (docs/reference/operations/LOGGING_AND_SENTRY.md)"
 else
-  fail_check "Logging runbook missing (docs/ops/monitoring/LOGGING_AND_SENTRY.md)"
+  fail_check "Logging runbook missing (docs/reference/operations/LOGGING_AND_SENTRY.md)"
 fi
 
 # Verify logging pipeline script
@@ -531,13 +531,13 @@ echo ""
 echo "S7: Runbook Completeness"
 
 REQUIRED_DOCS=(
-  "docs/operations/TROUBLESHOOTING.md"
-  "docs/operations/RKE2_DEV_READINESS.md"
-  "docs/operations/RKE2_ROLLOUT_MATRIX.md"
-  "docs/operations/MAINTENANCE_WINDOWS.md"
-  "docs/operations/INCIDENT_TEMPLATES.md"
-  "docs/operations/ONCALL_ROTATION.md"
-  "docs/operations/BACKUP_COVERAGE_MATRIX.md"
+  "docs/runbooks/operations/TROUBLESHOOTING.md"
+  "docs/runbooks/operations/RKE2_DEV_READINESS.md"
+  "docs/status/migrations/RKE2_ROLLOUT_MATRIX.md"
+  "docs/policies/operations/MAINTENANCE_WINDOWS.md"
+  "docs/runbooks/operations/INCIDENT_TEMPLATES.md"
+  "docs/policies/operations/ONCALL_ROTATION.md"
+  "docs/reference/operations/BACKUP_COVERAGE_MATRIX.md"
 )
 for doc in "${REQUIRED_DOCS[@]}"; do
   if [[ -f "$REPO_ROOT/$doc" ]]; then
@@ -548,11 +548,11 @@ for doc in "${REQUIRED_DOCS[@]}"; do
 done
 
 # Checklist for this rollout
-ROLLOUT_CHECKLIST="$REPO_ROOT/docs/operations/RKE2_ROLLOUT_CHECKLIST.md"
+ROLLOUT_CHECKLIST="$REPO_ROOT/docs/runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md"
 if [[ -f "$ROLLOUT_CHECKLIST" ]]; then
   pass_check "RKE2 rollout checklist exists"
 else
-  fail_check "RKE2 rollout checklist missing (docs/operations/RKE2_ROLLOUT_CHECKLIST.md)"
+  fail_check "RKE2 rollout checklist missing (docs/runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md)"
 fi
 
 echo ""
@@ -571,11 +571,11 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  S2 (security):  Add securityContext to deployments or rely on Kyverno policies"
   echo "  S3 (monitoring): Add missing ServiceMonitors/PrometheusRules to deploy/k8s/base/monitoring/"
   echo "  S4 (backup):    Configure Velero schedule; run: scripts/qa/audit-velero.sh"
-  echo "  S5 (logs):      Verify Loki/Promtail pipeline; see docs/ops/monitoring/LOGGING_AND_SENTRY.md"
+  echo "  S5 (logs):      Verify Loki/Promtail pipeline; see docs/reference/operations/LOGGING_AND_SENTRY.md"
   echo "  S6 (live):      Run with --online after fixing offline checks"
   echo "  S7 (runbooks):  Create missing docs in docs/operations/"
   echo ""
-  echo "See docs/operations/RKE2_ROLLOUT_CHECKLIST.md for full sign-off procedure."
+  echo "See docs/runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md for full sign-off procedure."
   exit 1
 fi
 

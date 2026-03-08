@@ -53,7 +53,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- AC-001, AC-002, AC-004: SES domain DNS documentation ---"
 
-DNS_DOC="docs/operations/EMAIL_DNS_RECORDS.md"
+DNS_DOC="docs/reference/operations/EMAIL_DNS_RECORDS.md"
 if [[ -f "$DNS_DOC" ]]; then
   pass "AC-001/AC-002: DNS documentation exists at $DNS_DOC"
 
@@ -173,7 +173,7 @@ else
 fi
 
 # Verify SES endpoint is documented in EMAIL_PIPELINE.md
-PIPELINE_DOC="docs/operations/EMAIL_PIPELINE.md"
+PIPELINE_DOC="docs/reference/operations/EMAIL_PIPELINE.md"
 if [[ -f "$PIPELINE_DOC" ]]; then
   if grep -q "email-smtp.ap-southeast-1.amazonaws.com" "$PIPELINE_DOC"; then
     pass "AC-003: SES SMTP endpoint documented in EMAIL_PIPELINE.md"

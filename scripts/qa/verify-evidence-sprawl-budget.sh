@@ -6,7 +6,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-BUDGET_JSON="$REPO_ROOT/docs/operations/verification/evidence_sprawl_budget.json"
+BUDGET_JSON="$REPO_ROOT/verification/manifests/evidence_sprawl_budget.json"
 
 if [[ ! -f "$BUDGET_JSON" ]]; then
   echo "FAIL evidence budget missing: $BUDGET_JSON" >&2

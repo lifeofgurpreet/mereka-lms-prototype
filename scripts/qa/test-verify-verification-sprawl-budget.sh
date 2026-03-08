@@ -10,8 +10,8 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p "$tmpdir/docs/operations/verification"
 
-CATALOG_JSON="$tmpdir/docs/operations/verification/verification_catalog.json"
-BUDGET_JSON="$tmpdir/docs/operations/verification/verification_sprawl_budget.json"
+CATALOG_JSON="$tmpdir/verification/catalogs/verification_catalog.json"
+BUDGET_JSON="$tmpdir/verification/manifests/verification_sprawl_budget.json"
 
 cat >"$CATALOG_JSON" <<'EOF'
 {

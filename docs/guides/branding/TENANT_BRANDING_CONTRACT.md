@@ -5,7 +5,7 @@ _Audience: Platform Engineering + Operations + Design • Last updated: 2026-02-
 **Purpose**: Define required inputs, fallback rules, and ownership for tenant branding in Mereka Academy multi-tenant Open edX.
 
 **Spec Reference**: `specs/multi-tenancy-architecture_spec.md`
-**Readiness Assessment**: `docs/operations/TENANT_BRANDING_READINESS_RAG.md`
+**Readiness Assessment**: `docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`
 **Verification**: `scripts/qa/verify-tenant-branding-contract.sh`
 
 ---
@@ -323,7 +323,7 @@ For multi-level subdomains (e.g., `acme.academyv2.mereka.io`):
 - Use DNS-only mode (gray cloud) + Let's Encrypt via cert-manager (K8s) or Caddy (standalone)
 - Cert-manager issues wildcard certs automatically for `*.academyv2.mereka.io`
 
-**Reference**: `docs/operations/DOMAIN_MANAGEMENT.md`
+**Reference**: `docs/runbooks/operations/DOMAIN_MANAGEMENT.md`
 
 ---
 
@@ -697,12 +697,12 @@ curl -s https://studio.academyv2.mereka.io/ | grep -i "powered by open edx" && e
 
 ## Related Documents
 
-- **Provisioning Guide**: `docs/operations/TENANT_PROVISIONING.md`
-- **RAG Assessment**: `docs/operations/TENANT_BRANDING_READINESS_RAG.md`
-- **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
+- **Provisioning Guide**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
+- **RAG Assessment**: `docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`
+- **Architecture**: `docs/architecture/overviews/multi-tenancy-overview.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Branding Model**: `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
-- **Domain/SSL**: `docs/operations/DOMAIN_MANAGEMENT.md`
+- **Domain/SSL**: `docs/runbooks/operations/DOMAIN_MANAGEMENT.md`
 
 ---
 

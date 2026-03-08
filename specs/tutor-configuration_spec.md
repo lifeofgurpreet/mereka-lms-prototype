@@ -12,8 +12,8 @@ links:
   related_docs:
     - "docs/onboarding/QUICK_START_LOCAL.md"
     - "docs/onboarding/DEVELOPER_ONBOARDING.md"
-    - "docs/operations/TROUBLESHOOTING.md"
-    - "docs/operations/THEME_DEPLOYMENT.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/THEME_DEPLOYMENT.md"
     - "docs/operations/DEPLOYMENT_RUNBOOK.md"
   related_specs:
     - "specs/branding-system_spec.md"

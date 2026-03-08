@@ -127,12 +127,12 @@ make tutor-apply  # or ./infrastructure/tutor/apply-patches.sh
 **Old paths**:
 - `docs/QUICK_START_LOCAL.md`
 - `docs/ops/TROUBLESHOOTING.md`
-- `docs/migrations/kajabi/README.md`
+- `docs/reference/migrations/kajabi/README.md`
 
 **New paths**:
 - `docs/onboarding/QUICK_START_LOCAL.md`
-- `docs/operations/TROUBLESHOOTING.md`
-- `docs/migrations/kajabi/README.md` (unchanged)
+- `docs/runbooks/operations/TROUBLESHOOTING.md`
+- `docs/reference/migrations/kajabi/README.md` (unchanged)
 
 ## Verification Checklist
 

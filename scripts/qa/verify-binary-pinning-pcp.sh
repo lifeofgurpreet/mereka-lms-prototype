@@ -7,7 +7,7 @@
 # Cross-repo check: scans platform-control-plane CI workflows for binary
 # downloads that lack checksum verification.
 #
-# This is the companion script to docs/ops/security/BINARY_PINNING.md (T057).
+# This is the companion script to docs/policies/operations/BINARY_PINNING.md (T057).
 # Actual remediation belongs in the platform-control-plane repository.
 #
 # Exit codes:
@@ -67,7 +67,7 @@ fi
 echo
 echo -e "${BOLD}=== verify-binary-pinning-pcp ===${NC}"
 echo -e "      Checks: unpinned curl/wget binary downloads in pcp CI workflows"
-echo -e "      Policy: docs/ops/security/BINARY_PINNING.md"
+echo -e "      Policy: docs/policies/operations/BINARY_PINNING.md"
 echo
 
 if [[ -z "${PCP_REPO}" || ! -d "${PCP_REPO}" ]]; then
@@ -199,7 +199,7 @@ echo
 if [[ ${FAIL} -gt 0 ]]; then
   echo -e "${RED}${BOLD}RESULT: FAIL — ${FAIL} check(s) failed${NC}"
   echo -e "  Remediate in the platform-control-plane repository."
-  echo -e "  See docs/ops/security/BINARY_PINNING.md for the pinning process."
+  echo -e "  See docs/policies/operations/BINARY_PINNING.md for the pinning process."
   exit 1
 else
   echo -e "${GREEN}${BOLD}RESULT: PASS — all checks passed${NC}"

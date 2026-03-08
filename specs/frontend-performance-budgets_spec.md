@@ -15,7 +15,7 @@ depends_on_optional:
 links:
   related_docs:
     - "docs/architecture/PERFORMANCE_BUDGETS.md"
-    - "docs/operations/LIGHTHOUSE_BUDGETS.md"
+    - "docs/policies/architecture/LIGHTHOUSE_BUDGETS.md"
     - "docs/BRANDING.md"
   related_specs:
     - "specs/cross-cutting-requirements_spec.md"

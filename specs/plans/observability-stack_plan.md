@@ -224,9 +224,9 @@ This plan implements a production-grade observability stack for Mereka Academy's
 - [ ] **[M] Task D.1**: Update observability documentation |AC: N/A | Depends: Phase 1-5
   - **Description**: Update existing operational docs to reflect the full stack deployment. Update MONITORING.md, create Grafana quickstart, update TROUBLESHOOTING.md with observability-specific sections.
   - **Files**:
-    - `docs/operations/MONITORING.md` (modify: update with current stack)
-    - `docs/operations/OBSERVABILITY_QUICKSTART.md` (modify:update access instructions)
-    - `docs/operations/TROUBLESHOOTING.md` (modify: add observability troubleshooting section)
+    - `docs/reference/operations/MONITORING.md` (modify: update with current stack)
+    - `docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md` (modify:update access instructions)
+    - `docs/runbooks/operations/TROUBLESHOOTING.md` (modify: add observability troubleshooting section)
     - `deploy/k8s/base/monitoring/IMPLEMENTATION_STATUS.md` (modify: update status)
     - `deploy/k8s/base/monitoring/README.md` (modify: add dashboard and retention info)
   - **Done**: All docs reference current stack state; IMPLEMENTATION_STATUS.md shows "COMPLETE" for all components

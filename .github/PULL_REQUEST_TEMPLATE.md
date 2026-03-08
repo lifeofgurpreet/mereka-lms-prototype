@@ -1,36 +1,38 @@
-## What changed
+## Summary
 
-<!-- Brief description of the changes -->
+- What changed:
+- Why:
 
-## Why
+## Authority routing
 
-<!-- Motivation, context, link to issue/spec -->
+- Governed scope tokens:
+- Canonical roots touched:
+- Transitional roots touched:
+- Archive roots touched:
 
-## Checklist
+## Documentation control-plane checklist
 
-- [ ] Specs updated (if applicable)
-- [ ] Tests added or updated
-- [ ] No secrets hardcoded
-- [ ] CI passes
-- [ ] ADR impact output reviewed (`scripts/qa/resolve_adr_impact.py --diff-range <base>...<head>`) and required ADR bundle links included below
+- [ ] I used the winning root for each artifact kind.
+- [ ] I did not introduce new canonical content under transitional roots.
+- [ ] I updated or added superseded stubs where paths moved.
+- [ ] I regenerated derived artifacts instead of hand-editing them.
+- [ ] I reviewed `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`.
+- [ ] I reviewed `docs/guides/standards/DOCS_SPECS_CONTRACT.md` if specs or testmaps changed.
 
-## Handoff Guardrails (Required)
+## Specs / verification
 
-- [ ] I ran `./scripts/infra/check-pr-handoff-discipline.sh` and it passed
-- [ ] `git status --porcelain` is empty in my source worktree before task switch
-- [ ] `git stash list` has no feature work parked
-- [ ] If scope was deferred, I linked a follow-up issue/PR in this description
+- Specs touched:
+- Generated testmaps regenerated:
+- Manual verification metadata touched:
 
-## For infrastructure changes
+## Validation
 
-- [ ] Rollout plan documented
-- [ ] Rollback steps identified
-- [ ] `apply-patches.sh` re-run (if Tutor config changed)
+- [ ] `tools/docs/verify/verify-docs-policy.sh`
+- [ ] `python3 scripts/qa/spec-tools/spec_verify.py specs/ --scan-dirs tests/ scripts/ --repo-root .`
+- [ ] other relevant checks:
 
-## Verification
+## Compatibility / migration notes
 
-<!-- How to verify this works? Steps, commands, or screenshots -->
-
-## ADR Reading Bundle (if ADR-governed paths changed)
-
-<!-- Paste impacted ADR IDs from CI ADR Governance summary and list required read order -->
+- Stubs added or updated:
+- Legacy paths intentionally retained:
+- Follow-up cleanup still needed:

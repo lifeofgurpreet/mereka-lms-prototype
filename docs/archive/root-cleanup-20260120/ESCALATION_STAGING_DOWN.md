@@ -108,6 +108,6 @@
 ---
 
 ## Notes & Risks
-- Selector drift is the historically documented top cause of outages in this repo (`docs/operations/TROUBLESHOOTING.md`). Without automation, it will recur after pod churn.  
+- Selector drift is the historically documented top cause of outages in this repo (`docs/runbooks/operations/TROUBLESHOOTING.md`). Without automation, it will recur after pod churn.  
 - GKE Autopilot may recreate pods during maintenance; schedule a daily endpoint check until guardrails are in place.  
 - If HTTPS still fails after ports/health checks are confirmed, inspect Caddy logs (`kubectl logs -n mereka-lms deploy/caddy --tail=200`) for TLS issuance/renewal issues.

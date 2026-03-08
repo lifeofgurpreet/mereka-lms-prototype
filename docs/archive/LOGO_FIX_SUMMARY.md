@@ -67,7 +67,7 @@ Fixed critical logo 404 issues blocking production readiness by updating templat
    - Runs collectstatic in production
    - Usage: `./scripts/branding/deploy-logo-fix.sh`
 
-3. **`docs/operations/LOGO_404_FIX.md`**
+3. **`reports/2026/closures/LOGO_404_FIX.md`**
    - Complete technical documentation
    - Troubleshooting guide
    - Rollback procedures

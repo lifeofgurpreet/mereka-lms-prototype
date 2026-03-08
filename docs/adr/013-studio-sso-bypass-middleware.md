@@ -17,7 +17,7 @@ does_not_govern: ["long-term authn frontend architecture"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
 related_specs: []
-related_runbooks: ["docs/operations/AUTHENTICATED_SMOKE_A11Y.md"]
+related_runbooks: ["docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-auth-surfaces.sh prod"]
 expiry_date: 2026-09-30

@@ -5,7 +5,7 @@
 set -euo pipefail
 
 WORKFLOWS_DIR=".github/workflows"
-POLICY_DOC="docs/ops/ci-cd/CI_RUNNER_POLICY.md"
+POLICY_DOC="docs/policies/operations/CI_RUNNER_POLICY.md"
 
 # Workflows permitted to use GitHub-hosted macOS runners (Class D exceptions)
 MACOS_HOSTED_EXCEPTIONS=(

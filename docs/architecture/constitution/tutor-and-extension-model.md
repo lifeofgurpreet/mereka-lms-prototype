@@ -1,0 +1,33 @@
+# Tutor And Extension Model
+
+Owner: Platform Team
+Review cadence: quarterly
+
+## Governs
+
+- platform.extension-model
+- build.version-pin
+- build.image.registry
+
+## Non-goals
+
+- feature-level UI decisions
+- product release sequencing
+
+## Standard
+
+- `requirements-tutor.txt` is the canonical Tutor version pin.
+- Simple platform customization MUST prefer Tutor plugins and hooks over ad hoc Dockerfile surgery.
+- Local proof-of-work happens before CI-heavy builds.
+- Internal plugin and package compatibility must be declared rather than implied.
+
+## Fitness Functions
+
+- `scripts/qa/verify-tutor-version-governance.sh`
+- `scripts/qa/verify-openedx-settings-modularity.sh`
+
+## Source ADRs
+
+- `ADR-019`
+- `ADR-021`
+- `ADR-040`

@@ -175,7 +175,7 @@ Use this deterministic mapping unless explicitly overridden by owner approval.
 | `docs/architecture/**` | `docs/concepts/architecture/**` | conceptual architecture |
 | `docs/analytics/**` | `docs/concepts/analytics/**` | analytics concepts and references |
 | `docs/branding/**` | `docs/guides/branding/**` and `docs/concepts/branding/**` | split by procedural vs conceptual content |
-| `docs/evidence/**` | `docs/archive/evidence/**` (tiered) | evidence lifecycle policy applies |
+| `evidence/**` | `archive/evidence/**` (tiered) | evidence lifecycle policy applies |
 | `docs/operations/evidence/**` | `docs/archive/evidence/**` (tiered) | evidence lifecycle policy applies |
 | `docs/ci-cd/**` | `docs/ops/ci-cd/**` | operational pipeline docs |
 | `docs/status/**` | `docs/archive/reports/**` or `docs/qa/reports/**` | depends on active operational relevance |
@@ -488,7 +488,7 @@ Exit gate:
 ## Phase 1 — Inventory and Classification (Days 2-4)
 
 Goal:
-- produce complete `docs/catalog.json`.
+- produce complete `generated/catalogs/docs-catalog.json`.
 
 Actions:
 - classify every file by type and status;
@@ -554,7 +554,7 @@ Exit gate:
 Use these objective checks before closing each phase.
 
 Phase 1 acceptance:
-- `docs/catalog.json` exists and includes every file under `docs/**`.
+- `generated/catalogs/docs-catalog.json` exists and includes every file under `docs/**`.
 - Every record has type + status + owner/null + freshness risk.
 
 Phase 2 acceptance:
@@ -613,7 +613,7 @@ Hard safety rules:
 
 ```text
 You are executing Phase 1 (Inventory and Classification) from docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md.
-Create docs/catalog.json with one record per file in docs/** containing:
+Create generated/catalogs/docs-catalog.json with one record per file in docs/** containing:
 - path
 - type (adr|concept|guide|runbook|evidence|index|status|other)
 - status (canonical|supporting|superseded|archive-candidate)
@@ -630,7 +630,7 @@ Do not move, rename, or delete files in this task.
 
 ```text
 You are executing Phase 1 continuation.
-Using docs/catalog.json, produce docs/archive/reports/canonical-resolution-map-YYYYMMDD.md.
+Using generated/catalogs/docs-catalog.json, produce docs/archive/reports/canonical-resolution-map-YYYYMMDD.md.
 For each overlap cluster:
 - nominate canonical doc
 - list supporting docs
@@ -752,11 +752,11 @@ Status values: `TODO`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 |---|---|---|---|---|---|---|---|---|
 | GOV-01 | 0 | Approve governance, owner map, root allowlist | Docs Lead | BLOCKED | This playbook | Governance approval note | Approved by docs lead + domain owners | 2026-03-06: governance packet published at `docs/archive/reports/governance-approval-note-20260306.md`; blocked pending docs lead + domain owner signatures |
 | GOV-02 | 0 | Publish escalation path and decision rights | Docs Lead | BLOCKED | This playbook | Escalation appendix | Team can route blockers deterministically | 2026-03-06: escalation routing appendix published at `docs/archive/reports/escalation-appendix-20260306.md`; blocked pending docs lead acknowledgment |
-| INV-01 | 1 | Build complete catalog | Agent Operator | DONE | `docs/**` | `docs/catalog.json` | 100% files classified | 2026-03-13: `docs/catalog.json` regenerated with 991 records and validated against filesystem |
+| INV-01 | 1 | Build complete catalog | Agent Operator | DONE | `docs/**` | `generated/catalogs/docs-catalog.json` | 100% files classified | 2026-03-13: `generated/catalogs/docs-catalog.json` regenerated with 991 records and validated against filesystem |
 | INV-02 | 1 | Generate overlap matrix | Agent Operator | DONE | catalog + docs | `overlap-matrix-YYYYMMDD.md` | All major clusters mapped | 2026-03-06: `docs/archive/reports/overlap-matrix-20260306.md` generated |
 | INV-03 | 1 | Canonical conflict report | Agent Operator | DONE | overlap matrix | `canonical-resolution-map-YYYYMMDD.md` | One canonical proposed per cluster | 2026-03-06: `docs/archive/reports/canonical-resolution-map-20260306.md` generated with canonical proposals; major-cluster approval matrix published at `docs/archive/reports/canonical-authority-approval-matrix-20260306.md` (owner approvals pending) |
 | STR-01 | 2 | Runbook tree authority consolidation | Agent Operator | DONE | approved map | move ledger + stubs | No dual canonical runbook trees | 2026-03-06: legacy runbook duplicates in `docs/operations/**` converted to superseded stubs with canonical pointers to `docs/ops/runbooks/**`; latest overlap (`VISUAL_REGRESSION.md`) retired in move-ledger; runbook contradiction audit published at `docs/archive/reports/runbooks-contradiction-audit-20260306.md` |
-| STR-02 | 2 | Root cleanup by allowlist | Agent Operator | DONE | root docs | move ledger updates | Root reduced to allowlist only | 2026-03-06: docs root matches allowlist exactly (`README.md`, `CONTRIBUTING.md`, `DOCS_REMEDIATION_PLAN_AND_TRACKER.md`, `catalog.json`); transitional deprecation timeline published at `docs/archive/reports/transitional-path-deprecation-timeline-20260306.md`; migration queue advanced with `docs/operations/DISCOVERY_QUICKSTART.md -> docs/ops/quickref/discovery-quickstart.md`, `docs/operations/LOCAL_ACCESS_INFO.md -> docs/ops/quickref/local-access-info.md`, `docs/operations/LOCAL_PRODUCTION_PARITY.md -> docs/ops/quickref/local-production-parity.md`, `docs/operations/LOCAL_WORK_REMAINING.md -> docs/ops/quickref/local-work-remaining.md`, `docs/operations/IN_CLUSTER_AUTH_VERIFICATION.md -> docs/ops/security/in-cluster-auth-verification.md`, `docs/operations/DJANGO_RAW_SQL_BYPASS.md -> docs/ops/runbooks/django-raw-sql-bypass.md`, `docs/operations/TASK3_SES_SMTP_GUIDE.md -> docs/ops/runbooks/task3-ses-smtp-guide.md`, `docs/operations/COST_ESTIMATE.md -> docs/ops/ci-cd/cost-estimate.md`, and `docs/operations/PRODUCTION_VERIFICATION_CHECKLIST.md -> docs/ops/runbooks/production-verification-checklist.md` (superseded stubs retained) |
+| STR-02 | 2 | Root cleanup by allowlist | Agent Operator | DONE | root docs | move ledger updates | Root reduced to allowlist only | 2026-03-06: docs root matches allowlist exactly (`README.md`, `CONTRIBUTING.md`, `DOCS_REMEDIATION_PLAN_AND_TRACKER.md`, `catalog.json`); transitional deprecation timeline published at `docs/archive/reports/transitional-path-deprecation-timeline-20260306.md`; migration queue advanced with `docs/operations/DISCOVERY_QUICKSTART.md -> docs/ops/quickref/discovery-quickstart.md`, `docs/operations/LOCAL_ACCESS_INFO.md -> docs/ops/quickref/local-access-info.md`, `docs/operations/LOCAL_PRODUCTION_PARITY.md -> docs/ops/quickref/local-production-parity.md`, `docs/operations/LOCAL_WORK_REMAINING.md -> docs/ops/quickref/local-work-remaining.md`, `docs/operations/IN_CLUSTER_AUTH_VERIFICATION.md -> docs/runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md`, `docs/operations/DJANGO_RAW_SQL_BYPASS.md -> docs/ops/runbooks/django-raw-sql-bypass.md`, `docs/operations/TASK3_SES_SMTP_GUIDE.md -> docs/ops/runbooks/task3-ses-smtp-guide.md`, `docs/operations/COST_ESTIMATE.md -> docs/ops/ci-cd/cost-estimate.md`, and `docs/operations/PRODUCTION_VERIFICATION_CHECKLIST.md -> docs/ops/runbooks/production-verification-checklist.md` (superseded stubs retained) |
 | CNT-01 | 3 | Onboarding cluster consolidation | Agent Operator | DONE | approved map | updated canonical + stubs | No contradictory setup paths | 2026-03-06: canonical onboarding index set to `docs/guides/onboarding/README.md`; duplicate indexes superseded; contradictions resolved in `docs/archive/reports/onboarding-contradiction-audit-20260306.md` |
 | CNT-02 | 3 | Access URLs consolidation | Agent Operator | DONE | approved map | canonical + local subset | One access canonical source | 2026-03-06: canonical moved to `docs/ops/quickref/access-urls.md`; legacy `docs/operations/ACCESS_URLS.md` transitioned to `archive-candidate` shim after dependency cleanup; contradictions resolved in `docs/archive/reports/access-contradiction-audit-20260306.md` |
 | CNT-03 | 3 | Branding docs role-boundary consolidation | Agent Operator | DONE | approved map | contract/guardrail/reference split | No duplicated gate definitions | 2026-03-06: canonical role-boundary index added at `docs/guides/branding/README.md`; legacy `docs/branding/README.md` retained as transitional archive-candidate shim; contradictions resolved in `docs/archive/reports/branding-contradiction-audit-20260306.md` |
@@ -764,7 +764,7 @@ Status values: `TODO`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | EVD-02 | 3 | Evidence archive moves (approved only) | Agent Operator | DONE | approved dry-run | archive move ledger | tiered lifecycle applied | 2026-03-06: no-op execution for this cycle (`0` approved candidates); lifecycle workflow remains active and canonical archive evidence path is enforced in QA tooling defaults/checks |
 | LNK-01 | 4 | Link repair in changed scope | Agent Operator | DONE | moved file list | link update patch | 0 broken links in changed scope | 2026-03-06: changed-scope link validation completed with 0 missing links; repo-wide markdown link audit now reports 0 hard failures and 0 warnings in `docs/**` |
 | QLT-01 | 4 | TODO/DRAFT audit | Agent Operator | DONE | canonical docs | closeout report | unresolved queue created | 2026-03-06: `docs/archive/reports/consolidation-closeout-20260306.md` generated with unresolved queue entries |
-| QLT-02 | 4 | CI docs policy checks | Agent Operator | DONE | CI workflows | policy checks in CI | metadata/root/link policies enforced | 2026-03-06: `.github/workflows/docs-policy.yml` + `docs/qa/verify-docs-policy.sh` enforce root allowlist, canonical metadata, superseded pointer, and changed-scope link checks |
+| QLT-02 | 4 | CI docs policy checks | Agent Operator | DONE | CI workflows | policy checks in CI | metadata/root/link policies enforced | 2026-03-06: `.github/workflows/docs-policy.yml` + `tools/docs/verify/verify-docs-policy.sh` enforce root allowlist, canonical metadata, superseded pointer, and changed-scope link checks |
 | CLS-01 | 4 | Weekly KPI scorecard | Docs Lead | DONE | tracker + reports | scorecard report | KPI targets on track | 2026-03-13: first and second cycle scorecards published (`docs/archive/reports/docs-program-scorecard-20260306.md`, `docs/archive/reports/docs-program-scorecard-20260313.md`); KPI metrics captured on schedule; still pending governance sign-off for closure handoff (`docs/archive/reports/canonical-authority-approval-matrix-20260306.md`) |
 | CLS-02 | 4 | Program closure decision | Docs Lead | BLOCKED | all artifacts | closure memo | DoD met for 2 consecutive weeks | 2026-03-06: closure-readiness memo published at `docs/archive/reports/program-closure-readiness-20260306.md`; blocked pending GOV approvals and second KPI cycle (next check no earlier than 2026-03-13) |
 

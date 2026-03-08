@@ -10,7 +10,7 @@ Provide the Phase 0 governance packet for final sign-off under `GOV-01`.
   - `docs/README.md`
   - `docs/CONTRIBUTING.md`
   - `docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md`
-  - `docs/catalog.json`
+  - `generated/catalogs/docs-catalog.json`
 - Current root state: compliant with allowlist (no extra root docs).
 
 ## Domain Owner Map (Approval Register)

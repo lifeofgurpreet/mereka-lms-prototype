@@ -12,10 +12,10 @@ Validates testmap files for:
 - Empty verify lists (warning only)
 
 Usage:
-  python3 validate_testmap_format.py specs/testmaps/
-  python3 validate_testmap_format.py specs/testmaps/feature.testmap.yml
-  python3 validate_testmap_format.py specs/testmaps/ --format json
-  python3 validate_testmap_format.py specs/testmaps/ --strict
+  python3 validate_testmap_format.py specs/_generated/testmaps/
+  python3 validate_testmap_format.py specs/_generated/testmaps/feature.testmap.yml
+  python3 validate_testmap_format.py specs/_generated/testmaps/ --format json
+  python3 validate_testmap_format.py specs/_generated/testmaps/ --strict
 """
 
 from __future__ import annotations

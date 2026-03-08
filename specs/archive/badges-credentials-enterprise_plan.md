@@ -508,7 +508,7 @@ status: "draft"
   - OpenBadges compliance
   - Blockchain anchoring architecture
 
-- [ ] **[S]** Update troubleshooting guide (`docs/operations/TROUBLESHOOTING.md`) | Depends: All implementations
+- [ ] **[S]** Update troubleshooting guide (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: All implementations
   - Add badges section: common issues + fixes
   - Badge not issued after course completion
   - Verification endpoint returns 404

@@ -1,9 +1,29 @@
 # Documentation Index
-_Audience: Everyone • Owner: Infra Team • Last verified: 2026-03-06 • Status: canonical_
+_Audience: Everyone • Owner: Infra Team • Last verified: 2026-03-08 • Status: canonical_
 
 Use this file as the front door to the Mereka Academy Open edX docs. Each link below includes a short description plus the last-known verification date so you can see freshness at a glance.
 
 ---
+
+## Authority quickstart
+
+Use these winners first:
+
+- [`concepts/architecture/ARCHITECTURE_CHARTER.md`](concepts/architecture/ARCHITECTURE_CHARTER.md) - living architecture control model
+- [`concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md) - canonical vs transitional vs archive routing
+- [`guides/standards/DOCS_SPECS_CONTRACT.md`](guides/standards/DOCS_SPECS_CONTRACT.md) - docs/specs/testmap truth split
+- [`ops/`](ops/) - canonical operator-doc root
+- [`evidence/INDEX.md`](evidence/INDEX.md) - active evidence root
+- [`status/INDEX.md`](status/INDEX.md) - active reporting and status root
+- [`adr/`](adr/) - decision ledger
+
+Transitional compatibility roots that MUST NOT be treated as the winning authority:
+
+- `docs/operations/**`
+- `docs/onboarding/**`
+- `docs/branding/**`
+- `docs/runbooks/**`
+- `docs/architecture/**`
 
 ## 🔍 Find Docs by Your Role
 
@@ -16,6 +36,9 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 **Contributing documentation?**
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Docs contribution rules, placement policy, metadata requirements
 - **[DOCS_REMEDIATION_PLAN_AND_TRACKER.md](DOCS_REMEDIATION_PLAN_AND_TRACKER.md)** - Canonical remediation operating system and tracker
+- **[ARCHITECTURE_CHARTER.md](concepts/architecture/ARCHITECTURE_CHARTER.md)** - Architecture control-plane charter
+- **[DOCUMENTATION_AUTHORITY_RESOLVER.md](concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)** - Resolver for canonical vs transitional docs
+- **[DOCS_SPECS_CONTRACT.md](guides/standards/DOCS_SPECS_CONTRACT.md)** - Specs vs docs vs generated verification contract
 - **[governance-approval-note-20260306.md](archive/reports/governance-approval-note-20260306.md)** - Governance packet and owner-map sign-off register (`GOV-01`)
 - **[escalation-appendix-20260306.md](archive/reports/escalation-appendix-20260306.md)** - Deterministic escalation routing (`GOV-02`)
 - **[canonical-authority-approval-matrix-20260306.md](archive/reports/canonical-authority-approval-matrix-20260306.md)** - Major-cluster canonical approval matrix
@@ -28,7 +51,24 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 
 ## 📂 Documentation Structure
 
-Operations documentation is now organized into three categories for easier navigation:
+Winning roots for Wave 2:
+
+- `docs/concepts/architecture/**` - living architecture standards and narrative
+- `docs/ops/**` - operator docs
+- `docs/guides/**` - human guidance
+- `docs/evidence/**` - proof
+- `docs/status/**` - active reporting
+- `docs/adr/**` - decision ledger
+
+Transitional roots remain for compatibility only and should collapse to stubs:
+
+- `docs/operations/**`
+- `docs/onboarding/**`
+- `docs/branding/**`
+- `docs/runbooks/**`
+- `docs/architecture/**`
+
+Operations documentation is organized into three canonical categories:
 
 ### `guides/admin/` - Administration Guides
 Essential guides for understanding and operating core systems:
@@ -134,10 +174,10 @@ Legacy note:
 
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |
-| [`ops/security/AUTH_AND_PERMISSIONS.md`](ops/security/AUTH_AND_PERMISSIONS.md) | How Authentik SSO and Open edX permissions fit together (and what does not sync) | 2026-02-06 |
+| [`reference/operations/AUTH_AND_PERMISSIONS.md`](reference/operations/AUTH_AND_PERMISSIONS.md) | How Authentik SSO and Open edX permissions fit together (and what does not sync) | 2026-02-06 |
 | [`ops/security/AUTH_HARDENING_SPEC.md`](ops/security/AUTH_HARDENING_SPEC.md) | Hardening spec: verification + drift prevention across the ecosystem | 2026-02-06 |
 | [`ops/security/in-cluster-auth-verification.md`](ops/security/in-cluster-auth-verification.md) | Verify-only CronJob template for continuous public auth surface checks | 2026-03-06 |
-| [`ops/security/OPENEDX_HOSTNAMES.md`](ops/security/OPENEDX_HOSTNAMES.md) | Canonical registry of all Open edX hostnames (prod + dev + kind-local) | 2026-02-06 |
+| [`reference/operations/OPENEDX_HOSTNAMES.md`](reference/operations/OPENEDX_HOSTNAMES.md) | Canonical registry of all Open edX hostnames (prod + dev + kind-local) | 2026-02-06 |
 | [`concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md`](concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md) | Draft RFC: optional claim-based role sync (Authentik -> Open edX) | 2026-02-06 |
 | [`ops/quickref/local-access-info.md`](ops/quickref/local-access-info.md) | Local development URLs and credentials | 2026-03-06 |
 | [`ops/quickref/local-production-parity.md`](ops/quickref/local-production-parity.md) | Local/production parity guide | 2026-03-06 |
@@ -148,7 +188,7 @@ Legacy note:
 | [`ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md`](ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md) | MongoDB Atlas permissions issue and resolution | 2026-02-03 |
 | [`ops/runbooks/django-raw-sql-bypass.md`](ops/runbooks/django-raw-sql-bypass.md) | Bypass Django signals with raw SQL (when Celery broker unavailable) | 2026-03-06 |
 | [`archive/reports/GCP_ROADMAP.md`](archive/reports/GCP_ROADMAP.md) | Cloud architecture plan and outstanding infra tasks | 2025-10-15 ⚠️ STALE |
-| [`ops/monitoring/MONITORING.md`](ops/monitoring/MONITORING.md) | Stack monitoring and alerting strategy | 2026-03-06 |
+| [`reference/operations/MONITORING.md`](reference/operations/MONITORING.md) | Stack monitoring and alerting strategy | 2026-03-06 |
 | [`archive/reports/CLOUDFLARE_DNS.md`](archive/reports/CLOUDFLARE_DNS.md) | DNS zones plus automation via Cloudflare API | 2025-09-05 ⚠️ STALE |
 | [`ops/security/SECRETS_SNAPSHOT.md`](ops/security/SECRETS_SNAPSHOT.md) | Inventory of non-git secrets and how they're stored | 2026-02-06 |
 | [`concepts/architecture/MULTISITE.md`](concepts/architecture/MULTISITE.md) | Microsite strategy and shared theme tokens | 2025-09-10 ⚠️ STALE |
@@ -163,9 +203,9 @@ Legacy note:
 
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |
-| [`migrations/kajabi/README.md`](migrations/kajabi/README.md) | Entry point for Kajabi export/transform/import docs | 2025-11-09 |
+| [`reference/migrations/kajabi/README.md`](reference/migrations/kajabi/README.md) | Entry point for Kajabi export/transform/import docs | 2025-11-09 |
 | [`migrations/kajabi/KAJABI_MIGRATION.md`](migrations/kajabi/KAJABI_MIGRATION.md) | Canonical playbook spanning export -> transform -> import | 2025-11-09 |
-| [`migrations/kajabi/KAJABI_MIGRATION_STATUS.md`](migrations/kajabi/KAJABI_MIGRATION_STATUS.md) | Progress tracker for processed courses/users | 2025-11-09 |
+| [`status/migrations/KAJABI_MIGRATION_STATUS.md`](status/migrations/KAJABI_MIGRATION_STATUS.md) | Progress tracker for processed courses/users | 2025-11-09 |
 | [`migrations/kajabi/ROLLBACK_AND_SAFETY.md`](migrations/kajabi/ROLLBACK_AND_SAFETY.md) | Safety/rollback guidance before rerunning imports | 2025-11-09 |
 | [`migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md`](migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md) | Lesson content migration fixes | 2025-11-12 |
 
@@ -173,11 +213,11 @@ Legacy note:
 
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |
-| [`migrations/mct/README.md`](migrations/mct/README.md) | Entry point for the legacy MCT migration docs | 2025-08-31 |
+| [`reference/migrations/mct/README.md`](reference/migrations/mct/README.md) | Entry point for the legacy MCT migration docs | 2025-08-31 |
 | [`migrations/mct/MIGRATION_PLAN.md`](migrations/mct/MIGRATION_PLAN.md) | End-to-end plan for migrating from MCT | 2025-08-31 |
 | [`migrations/mct/EXPORT_GUIDE.md`](migrations/mct/EXPORT_GUIDE.md) | How to export data from MCT | 2025-08-20 |
 | [`migrations/mct/MCT_TO_OPENEDX_MAPPING.md`](migrations/mct/MCT_TO_OPENEDX_MAPPING.md) | Field mapping between MCT and Open edX | 2025-08-31 |
-| [`migrations/mct/MCT_MIGRATION_STATUS.md`](migrations/mct/MCT_MIGRATION_STATUS.md) | Status tracker for the MCT effort | 2025-08-31 |
+| [`status/migrations/MCT_MIGRATION_STATUS.md`](status/migrations/MCT_MIGRATION_STATUS.md) | Status tracker for the MCT effort | 2025-08-31 |
 
 ## 🏗️ Architecture
 

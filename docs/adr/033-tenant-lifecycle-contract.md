@@ -17,7 +17,7 @@ does_not_govern: ["tenant commercial terms"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
 related_specs: ["specs/multi-tenancy-architecture_spec.md"]
-related_runbooks: ["docs/operations/TENANT_PROVISIONING.md", "docs/guides/branding/TENANT_CONFIG_HANDOFF.md"]
+related_runbooks: ["docs/runbooks/operations/TENANT_PROVISIONING.md", "docs/guides/branding/TENANT_CONFIG_HANDOFF.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-tenant-isolation.sh", "scripts/qa/verify-multisite-config.sh prod"]
 expiry_date: null

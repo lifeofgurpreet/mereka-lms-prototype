@@ -39,6 +39,16 @@
 # Documentation — documentation team
 # ---------------------------------------------------------------------------
 /docs/ @Biji-Biji-Initiative/docs
+/docs/adr/ @Biji-Biji-Initiative/architecture
+/docs/concepts/architecture/ @Biji-Biji-Initiative/architecture
+/docs/ops/ @Biji-Biji-Initiative/platform
+/docs/evidence/ @Biji-Biji-Initiative/platform
+/docs/status/ @Biji-Biji-Initiative/platform
+/docs/archive/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/architecture
+/docs/guides/standards/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/architecture
+/docs/operations/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/platform
+/docs/runbooks/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/platform
+/docs/architecture/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/architecture
 
 # ---------------------------------------------------------------------------
 # Branding & design assets — design team
@@ -57,3 +67,4 @@
 /.github/ @Biji-Biji-Initiative/infra
 /.github/workflows/ @Biji-Biji-Initiative/infra
 /.github/CODEOWNERS @Biji-Biji-Initiative/infra
+/.github/PULL_REQUEST_TEMPLATE.md @Biji-Biji-Initiative/infra @Biji-Biji-Initiative/docs

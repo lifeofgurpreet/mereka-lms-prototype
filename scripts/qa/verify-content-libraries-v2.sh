@@ -263,7 +263,7 @@ if [[ "$MODE" == "local" || "$MODE" == "all" ]]; then
   if grep -q "cronjob-library-export" "$PROM_KUST" 2>/dev/null; then
     check_pass "cronjob-library-export.yaml already added to kustomization"
   else
-    check_skip "cronjob-library-export.yaml NOT yet in kustomization — operator action needed (see docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md step 3)"
+    check_skip "cronjob-library-export.yaml NOT yet in kustomization — operator action needed (see docs/runbooks/operations/CONTENT_LIBRARIES_V2_MIGRATION.md step 3)"
   fi
 
   # ── 21. LIBRARY_ACCESS_LOGGING_ENABLED wired in LMS ─────────────
@@ -487,18 +487,18 @@ if [[ "$FAILED" -eq 0 ]]; then
   echo -e "${GREEN}All checks passed (or skipped). Content Libraries v2 foundation is in place.${NC}"
   echo ""
   echo "Operator actions still needed before going live:"
-  echo "  1. Create GCS bucket 'lms-blockstore' (docs/operations/LIBRARIES_GCS_SETUP.md)"
+  echo "  1. Create GCS bucket 'lms-blockstore' (docs/reference/operations/LIBRARIES_GCS_SETUP.md)"
   echo "  2. Set CONTENT_LIBRARIES_V2_ENABLED=true on LMS and CMS pods"
   echo "  3. Add cronjob-library-export.yaml to Kustomize resources"
   echo "  4. Wire BLOCKSTORE_BUCKET_NAME into ExternalSecrets"
   echo "  5. Run: python manage.py lms migrate openedx_content_libraries"
   echo "  6. Run: python manage.py lms create_platform_library (for shared-templates lib)"
   echo ""
-  echo "See docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md for the full runbook."
+  echo "See docs/runbooks/operations/CONTENT_LIBRARIES_V2_MIGRATION.md for the full runbook."
   exit 0
 else
   echo -e "${RED}$FAILED check(s) FAILED. Review the output above and consult the runbook.${NC}"
   echo ""
-  echo "Runbook: docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md"
+  echo "Runbook: docs/runbooks/operations/CONTENT_LIBRARIES_V2_MIGRATION.md"
   exit 1
 fi

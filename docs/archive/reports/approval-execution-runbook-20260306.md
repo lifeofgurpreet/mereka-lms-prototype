@@ -32,8 +32,8 @@ Close the remaining governance gates with deterministic approvals and evidence u
 
 ## Verification Commands
 ```bash
-./docs/qa/verify-docs-policy.sh
-jq '[.[] | select((.path|startswith("archive/superseded/")|not) and .status=="superseded")] | length' docs/catalog.json
+./tools/docs/verify/verify-docs-policy.sh
+jq '[.[] | select((.path|startswith("archive/superseded/")|not) and .status=="superseded")] | length' generated/catalogs/docs-catalog.json
 rg -n "\| GOV-01|\| GOV-02|\| CLS-01|\| CLS-02" docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md
 ```
 

@@ -907,7 +907,7 @@ if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "  Logs:       kubectl --context ${KUBE_CONTEXT} logs -n ${NAMESPACE} -l app.kubernetes.io/name=lms --tail=50"
   echo "  TLS:        openssl s_client -connect ${LMS_DOMAIN}:443 -servername ${LMS_DOMAIN}"
   echo ""
-  echo "Reference: docs/operations/RKE2_TENANT_ROUTES.md"
+  echo "Reference: docs/runbooks/operations/RKE2_TENANT_ROUTES.md"
   echo ""
   exit 1
 fi

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import yaml
 
+import yaml
 
 MANIFEST = Path("docs/adr/manifest.yaml")
 README = Path("docs/adr/README.md")

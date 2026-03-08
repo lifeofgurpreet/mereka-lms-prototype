@@ -212,5 +212,5 @@ VS Code auto-forwards ports 80, 443, 8000, 8001, 8002. Check the Ports panel (`C
 
 - Quick start: `docs/guides/onboarding/QUICK_START_LOCAL.md`
 - Full setup guide: `docs/guides/onboarding/DEVELOPER_ONBOARDING.md`
-- Troubleshooting: `docs/operations/TROUBLESHOOTING.md`
+- Troubleshooting: `docs/runbooks/operations/TROUBLESHOOTING.md`
 - CLAUDE.md: project conventions and agent workflow

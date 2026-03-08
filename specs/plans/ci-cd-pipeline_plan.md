@@ -182,7 +182,7 @@ status: "draft"
   - Require linear history (no merge commits)
   - Disable force pushes
   - Allow admin bypass for emergency hotfixes only
-  - Document protection rules in `docs/operations/RELEASE_CHECKLIST.md`
+  - Document protection rules in `docs/runbooks/operations/RELEASE_CHECKLIST.md`
 
 #### Artifact Management
 
@@ -201,7 +201,7 @@ status: "draft"
 
 #### Rollback Mechanism
 
-- [ ] **[M]** Document rollback procedure in release checklist (`docs/operations/RELEASE_CHECKLIST.md` section 7) | AC: #2| Depends: None
+- [ ] **[M]** Document rollback procedure in release checklist (`docs/runbooks/operations/RELEASE_CHECKLIST.md` section 7) | AC: #2| Depends: None
   - Step-by-step rollback instructions
   - How to identify last 5 successful production deployments
   - Command to re-run `release-openedx-gitops.sh` with priortags
@@ -373,14 +373,14 @@ status: "draft"
   - Emergency bypass procedures
   - Rollback procedures
 
-- [ ] **[M]** Update release checklist with CI/CD integration(`docs/operations/RELEASE_CHECKLIST.md`) | AC: #21 | Depends: None
+- [ ] **[M]** Update release checklist with CI/CD integration(`docs/runbooks/operations/RELEASE_CHECKLIST.md`) | AC: #21 | Depends: None
   - Pre-release: run policy checks, generate release evidence
   - Release: trigger build workflow with GitOps update
   - Post-release: verify deployment, check observability
   - Rollback: procedure with time estimates
   - Link to CI/CD runbook for detailed troubleshooting
 
-- [ ] **[S]** Document branch protection rules (`docs/operations/BRANCH_PROTECTION.md`) | AC: #7, #8 | Depends: Branch protection setup
+- [ ] **[S]** Document branch protection rules (`docs/policies/operations/BRANCH_PROTECTION.md`) | AC: #7, #8 | Depends: Branch protection setup
   - Current protection rules for main branch
   - Rationale for each rule
   - Emergency hotfix bypass procedure

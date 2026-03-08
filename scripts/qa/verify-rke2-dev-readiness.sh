@@ -413,6 +413,6 @@ echo "========================================="
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo ""
-  echo "See docs/operations/RKE2_DEV_READINESS.md for remediation steps."
+  echo "See docs/runbooks/operations/RKE2_DEV_READINESS.md for remediation steps."
   exit 1
 fi

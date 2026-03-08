@@ -34,7 +34,7 @@ PLUGIN_BUNDLE=""
 PLUGIN_FILE="$PLUGIN_MAIN"
 PATCHES_FILE="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 BRANDING_DOC="$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
-OPS_DOC="$REPO_ROOT/docs/operations/MFE_FOOTER_SLOT_MIGRATION.md"
+OPS_DOC="$REPO_ROOT/docs/runbooks/architecture/MFE_FOOTER_SLOT_MIGRATION.md"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
   PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"

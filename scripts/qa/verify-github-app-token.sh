@@ -11,7 +11,7 @@
 #   scripts/qa/verify-github-app-token.sh
 #   scripts/qa/verify-github-app-token.sh [--advisory]   # always exit 0 (for CI during migration)
 #
-# See docs/operations/GITHUB_APP_TOKEN.md for the full migration guide.
+# See docs/reference/operations/GITHUB_APP_TOKEN.md for the full migration guide.
 
 set -euo pipefail
 
@@ -82,7 +82,7 @@ APP_TOKEN_PATTERN='actions/create-github-app-token'
 echo
 echo -e "${BOLD}=== verify-github-app-token ===${NC}"
 echo -e "      Workflows : ${WORKFLOWS_DIR}"
-echo -e "      Policy    : docs/operations/GITHUB_APP_TOKEN.md"
+echo -e "      Policy    : docs/reference/operations/GITHUB_APP_TOKEN.md"
 if [[ "${ADVISORY}" == "true" ]]; then
   echo -e "      Mode      : advisory (exit always 0)"
 fi
@@ -163,7 +163,7 @@ done
 
 if [[ ${APP_TOKEN_REF_COUNT} -eq 0 ]]; then
   warn "No workflows use 'actions/create-github-app-token' yet (migration not started)"
-  info "See docs/operations/GITHUB_APP_TOKEN.md for setup instructions."
+  info "See docs/reference/operations/GITHUB_APP_TOKEN.md for setup instructions."
 else
   pass "App token action found in ${APP_TOKEN_REF_COUNT} workflow file(s):"
   for f in "${APP_TOKEN_FILES[@]}"; do
@@ -234,7 +234,7 @@ elif [[ ${PAT_REF_COUNT} -gt 0 && ${APP_TOKEN_REF_COUNT} -gt 0 ]]; then
 else
   MIGRATION_STATUS="NOT_STARTED"
   warn "Migration status: NOT STARTED — ${PAT_REF_COUNT} PAT ref(s) found, 0 workflows migrated"
-  info "See docs/operations/GITHUB_APP_TOKEN.md to begin migration."
+  info "See docs/reference/operations/GITHUB_APP_TOKEN.md to begin migration."
 fi
 
 echo
@@ -256,14 +256,14 @@ if [[ ${FAIL_COUNT} -eq 0 && ${WARN_COUNT} -eq 0 ]]; then
   exit 0
 elif [[ ${FAIL_COUNT} -eq 0 ]]; then
   echo -e "${YELLOW}${BOLD}RESULT: WARN — migration in progress or not started${NC}"
-  echo -e "  See docs/operations/GITHUB_APP_TOKEN.md for next steps."
+  echo -e "  See docs/reference/operations/GITHUB_APP_TOKEN.md for next steps."
   if [[ "${ADVISORY}" == "true" ]]; then
     exit 0
   fi
   exit 0  # WARNs alone are not blocking; FAIL blocks
 else
   echo -e "${RED}${BOLD}RESULT: FAIL — ${FAIL_COUNT} PAT reference(s) remain${NC}"
-  echo -e "  Migrate to GitHub App token. See docs/operations/GITHUB_APP_TOKEN.md"
+  echo -e "  Migrate to GitHub App token. See docs/reference/operations/GITHUB_APP_TOKEN.md"
   if [[ "${ADVISORY}" == "true" ]]; then
     echo -e "  (advisory mode — exiting 0)"
     exit 0

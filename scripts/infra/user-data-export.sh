@@ -448,7 +448,7 @@ METADATA=$(cat <<EOF
     "consent/consent_records.json": "Data sharing consent decisions (BEHAVIORAL PII)",
     "files/gcs_objects.json": "GCS object paths (profile images, certificate PDFs)"
   },
-  "retention_policy_reference": "docs/operations/DATA_RETENTION_POLICY.md",
+  "retention_policy_reference": "docs/policies/operations/DATA_RETENTION_POLICY.md",
   "generated_by": "scripts/infra/user-data-export.sh"
 }
 EOF

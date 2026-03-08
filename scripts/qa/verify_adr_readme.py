@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from generate_adr_readme import render  # noqa: E402
-
 
 README = Path("docs/adr/README.md")
 

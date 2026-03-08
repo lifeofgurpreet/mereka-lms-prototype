@@ -337,9 +337,9 @@ This plan converts the SLO/SLA spec's 23 acceptance criteriainto actionable impl
 
 #### Docs
 
-- [ ] **[L]** Document on-call rotation and escalation matrix(`docs/operations/ONCALL_ROTATION.md`) | AC: #20, #21 | Depends: None
+- [ ] **[L]** Document on-call rotation and escalation matrix(`docs/policies/operations/ONCALL_ROTATION.md`) | AC: #20, #21 | Depends: None
   - **Done**: Documents primary/secondary rotation, escalation tiers, response time commitments
-  - **Files**: Update `docs/operations/ONCALL_ROTATION.md`
+  - **Files**: Update `docs/policies/operations/ONCALL_ROTATION.md`
 
 - [ ] **[M]** Document incident communication SLA (`docs/operations/INCIDENT_COMMUNICATION_SLA.md`) | AC: #18, #19 | Depends: None
   - **Done**: Documents severity classification, response times, update cadence, postmortem requirements
@@ -379,9 +379,9 @@ This plan converts the SLO/SLA spec's 23 acceptance criteriainto actionable impl
 
 ### Documentation
 
-- [ ] **[M]** Update `docs/operations/MONITORING.md` with SLO/SLA references | Depends: All docs
+- [ ] **[M]** Update `docs/reference/operations/MONITORING.md` with SLO/SLA references | Depends: All docs
   - **Done**: Central monitoring doc links to all SLO/SLA docs
-  - **Files**: `docs/operations/MONITORING.md`
+  - **Files**: `docs/reference/operations/MONITORING.md`
 
 - [ ] **[S]** Add SLO/SLA section to onboarding docs (`docs/onboarding/DEVELOPER_ONBOARDING.md`) | Depends: All docs
   - **Done**: New developers understand SLO measurement and error budget policy

@@ -7,12 +7,12 @@ set -euo pipefail
 # Usage: ./scripts/qa/gate-timing-tracker.sh <gate_name> <command...>
 # Example: ./scripts/qa/gate-timing-tracker.sh spec_lint make check-specs
 #
-# Output: Appends JSON line to docs/verification/gate_timings.jsonl
+# Output: Appends JSON line to verification/manifests/gate_timings.jsonl
 
 GATE_NAME="${1:?Usage: gate-timing-tracker.sh <gate_name> <command...>}"
 shift
 COMMAND="$*"
-TIMINGS_FILE="docs/verification/gate_timings.jsonl"
+TIMINGS_FILE="verification/manifests/gate_timings.jsonl"
 START_EPOCH=$(date +%s%N)
 
 # Run the command, capture exit code

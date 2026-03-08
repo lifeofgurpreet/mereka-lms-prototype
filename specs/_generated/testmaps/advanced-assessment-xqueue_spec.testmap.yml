@@ -1,0 +1,669 @@
+spec: advanced-assessment-xqueue_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given a course author in Studio, when they add an ORA2 component to
+    a unit, then they can configure a rubric with 3 criteria, each with 4 options,
+    and set peer assessment to require 3 reviews per submission and 5 reviews given
+    per student
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 Configuration
+    justification: Feature not yet implemented; requires Studio UI interaction and
+      live course data
+- id: AC-002
+  description: Given a student who has submitted an ORA2 response, when 3 peers have
+    completed their reviews and the grading deadline has passed, then the student
+    sees a final grade that is the median of the 3 peer scores (middle value for odd
+    count, average of two middle values for even count) displayed on their submission
+    page
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 Peer Grading
+    justification: Feature not yet implemented; requires populated peer review data
+      in running LMS
+- id: AC-003
+  description: Given an ORA2 assignment configured with file uploads allowing PDF
+    and PNG up to 10 MB, when a student uploads a 9.5 MB PDF, then the upload succeeds
+    and the file is stored at `/openedx/data/ora2/`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 File Upload
+    justification: Feature not yet implemented; requires live LMS with student session
+- id: AC-004
+  description: Given an ORA2 assignment configured with file uploads, when a student
+    attempts to upload a `.exe` file, then the upload is rejected with a validation
+    error message listing allowed file types
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 File Upload Validation
+    justification: Feature not yet implemented; requires live LMS with student session
+- id: AC-005
+  description: Given an ORA2 assignment where the rubric has been configured and one
+    student has already submitted, when the course author attempts to modify the rubric
+    criteria, then Studio prevents the change and displays a warning that the rubric
+    is locked
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 Rubric Locking
+    justification: Feature not yet implemented; requires Studio UI with active submissions
+- id: AC-006
+  description: Given an ORA2 assignment with peer calibration enabled, when a student
+    attempts to start peer grading without completing calibration, then they are redirected
+    to the calibration step first
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 Calibration
+    justification: Feature not yet implemented; requires live LMS with calibration
+      configured
+- id: AC-007
+  description: Given a course staff member navigating to `apps.academyv2.mereka.io/ora-grading`,
+    when they select a course with 10 ORA2 submissions awaiting staff assessment,
+    then the grading queue displays all 10 submissions ordered by submission time
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA Grading MFE
+    justification: Feature not yet implemented; requires live MFE deployment with
+      submissions
+- id: AC-008
+  description: Given a staff grader reviewing a submission in the ORA Grading MFE,
+    when they select options for all rubric criteria and enter feedback text, then
+    they can submit the grade and the next submission loads automatically
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA Grading MFE
+    justification: Feature not yet implemented; requires live MFE with authenticated
+      staff session
+- id: AC-009
+  description: Given a staff grader who submits a grade via the ORA Grading MFE, when
+    the grade is saved, then it appears in the Open edX gradebook within 5 minutes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 Gradebook Sync
+    justification: Feature not yet implemented; requires live LMS with gradebook integration
+- id: AC-010
+  description: Given a course author in Studio, when they set a subsection's `exam_type`
+    to `timed` with `time_limit_minutes=60`, then the subsection is displayed to students
+    with a 60-minute countdown timer and no proctoring prompts
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Timed Exams
+    justification: Feature not yet implemented; requires live LMS with timed exam
+      configured
+- id: AC-011
+  description: Given a student taking a timed exam with 5 minutes remaining, when
+    the timer reaches 5:00, then a visual and screen-reader-accessible warning is
+    displayed
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Timed Exams
+    justification: Feature not yet implemented; requires live LMS with running timed
+      exam
+- id: AC-012
+  description: Given a student taking a timed exam, when the timer reaches 0:00, then
+    all current answers are auto-submitted and the student sees a "Time expired --
+    your exam has been submitted" message
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Timed Exam Auto-Submit
+    justification: Feature not yet implemented; requires live LMS with timer reaching
+      zero
+- id: AC-013
+  description: Given a timed exam that has been auto-submitted, when the student attempts
+    to re-access the exam, then they see a read-only view of their submitted answers
+    (if `show_correctness` allows) and cannot modify responses
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Timed Exam Post-Submit
+    justification: Feature not yet implemented; requires live LMS with auto-submitted
+      exam
+- id: AC-014
+  description: Given an instructor who grants a 30-minute time extension to a specific
+    student, when that student starts the timed exam, then they receive 90 minutes
+    (60 + 30) on the timer
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Timed Exam Extensions
+    justification: Feature not yet implemented; requires live LMS with instructor-granted
+      extension
+- id: AC-015
+  description: Given a timed exam, when a student submits before the timer expires,
+    then the grade is released to the gradebook immediately (no proctoring review
+    hold)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-audit.sh
+    command: scripts/qa/verify-assessment-audit.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Timed Exam Grading
+    justification: Feature not yet implemented; requires live LMS with timed exam
+      grading
+- id: AC-016
+  description: Given the XQueue service running at `http://xqueue:8000` and a Python
+    code grader worker deployed, when a student submits a Python code answer to an
+    XQueue-backed problem, then the code is executed in a sandboxed environment and
+    a grade result is returned within 30 seconds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Grader Verification
+    justification: Feature not yet implemented; requires XQueue service with grader
+      worker deployed
+- id: AC-017
+  description: 'Given a student submission containing an infinite loop, when the grader
+    worker processes it, then the execution is terminated after the configured CPU
+    time limit (10 seconds) and the student receives feedback message "Code execution
+    timeout". Note: Additional security vectors that SHOULD be addressed include memory
+    exhaustion (256MB limit), disk write outside /tmp, network access blocking, and
+    fork bomb protection'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Security Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with sandbox
+      configured
+- id: AC-018
+  description: Given a student submission containing `import os; os.system("rm -rf
+    /")`, when the grader worker processes it, then the sandboxed environment blocks
+    the system call and the student receives feedback indicating a security violation
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Security Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with seccomp/syscall
+      filtering
+- id: AC-019
+  description: Given the XQueue grader worker crashes during processing, when the
+    visibility timeout (60 seconds) expires, then the submission reappears in the
+    queue and is picked up by another worker
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Queue Resilience
+    justification: Feature not yet implemented; requires XQueue with configurable
+      visibility timeout
+- id: AC-020
+  description: Given an XQueue-graded problem, when the grader returns a result, then
+    the grade (scaled to the problem's maximum points) appears in the gradebook within
+    5 minutes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Gradebook Integration
+    justification: Feature not yet implemented; requires live LMS with XQueue grader
+      integration
+- id: AC-021
+  description: 'Given a student submission containing `x = [0] * (256 * 1024 * 1024)`
+    (256MB array allocation), when the grader worker processes it, then the execution
+    is terminated when memory usage exceeds 256MB and the student receives feedback:
+    "Your code exceeded the memory limit (256MB)"'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-graders.sh
+    command: scripts/qa/verify-xqueue-graders.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Memory Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with memory
+      limit enforcement
+- id: AC-022
+  description: Given a student submission containing `import os; [os.fork() for _
+    in range(100)]`, when the grader worker processes it, then the sandboxed environment
+    blocks the fork() system call and the student receives feedback indicating a security
+    violation
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-graders.sh
+    command: scripts/qa/verify-xqueue-graders.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Security Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with seccomp
+      profile
+- id: AC-023
+  description: 'Given a student submission containing `import socket; s = socket.socket();
+    s.connect(("evil.com", 80))`, when the grader worker processes it, then the network
+    access is blocked by the sandbox and the student receives feedback: "Network access
+    is not permitted in the grading environment"'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-graders.sh
+    command: scripts/qa/verify-xqueue-graders.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Network Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with network
+      namespace isolation
+- id: AC-024
+  description: Given a student submission containing `open("/etc/passwd").read()`,
+    when the grader worker processes it, then the file access is blocked (sandbox
+    restricts reads to /tmp and the submission directory only) and the student receives
+    feedback indicating a security violation
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-graders.sh
+    command: scripts/qa/verify-xqueue-graders.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Filesystem Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with filesystem
+      restrictions
+- id: AC-025
+  description: Given a student submission containing `import os; print(os.environ)`,
+    when the grader worker processes it, then the output contains only a minimal set
+    of safe environment variables (PATH, HOME) and does NOT contain any secrets (database
+    credentials, API keys, Infisical tokens)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-graders.sh
+    command: scripts/qa/verify-xqueue-graders.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: XQueue Secret Isolation
+    justification: Feature not yet implemented; requires XQueue grader with minimal
+      env vars
+- id: AC-026
+  description: Given a course author in Studio, when they add a new advanced component,
+    then drag-and-drop v2 and math expression input are available in the component
+    picker
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Advanced Components
+    justification: Feature not yet implemented; requires Studio with advanced components
+      installed
+- id: AC-027
+  description: Given a drag-and-drop v2 problem with 5 items and 3 zones, when a student
+    correctly places all items using keyboard navigation only, then the problem is
+    scored as correct
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Drag-and-Drop Accessibility
+    justification: Feature not yet implemented; requires live LMS with drag-and-drop
+      configured
+- id: AC-028
+  description: Given a math expression input problem expecting `x^2 + 2*x + 1`, when
+    a student enters `(x+1)^2` (mathematically equivalent), then the SymPy-based grader
+    marks it as correct
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Math Expression Grading
+    justification: Feature not yet implemented; requires live LMS with SymPy-based
+      grader
+- id: AC-029
+  description: Given a randomized problem pool of 20 questions configured to show
+    10, when two different students access the subsection, then each student sees
+    a different subset of 10 questions
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Randomized Assessments
+    justification: Feature not yet implemented; requires live LMS with randomized
+      problem pool
+- id: AC-030
+  description: Given an exam subsection configured with randomized question order,
+    when two students access the same exam, then the questions appear in different
+    orders
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Randomized Question Order
+    justification: Feature not yet implemented; requires live LMS with order randomization
+      configured
+- id: AC-031
+  description: Given a multiple-choice problem with answer shuffling enabled, when
+    two students view the same problem, then the answer options appear in different
+    orders
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Answer Shuffling
+    justification: Feature not yet implemented; requires live LMS with answer shuffling
+      enabled
+- id: AC-032
+  description: Given an exam configured with one-at-a-time question display, when
+    a student advances to question 3, then questions 1 and 2 are no longer accessible
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: One-at-a-Time Exams
+    justification: Feature not yet implemented; requires live LMS with one-at-a-time
+      mode
+- id: AC-033
+  description: Given an exam configured with `max_attempts=1`, when a student submits
+    their answer, then the submit button is disabled and no further attempts are allowed
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Attempt Limits
+    justification: Feature not yet implemented; requires live LMS with attempt limit
+      set
+- id: AC-034
+  description: 'Given a course with an ORA2 assignment (weight: 20%), a timed exam
+    (weight: 40%), and standard problems (weight: 40%), when all three are graded
+    for a student, then the final course grade accurately reflects the weighted sum'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Grade Weighting
+    justification: Feature not yet implemented; requires live LMS with all three graded
+      components
+- id: AC-035
+  description: Given an instructor who overrides a student's ORA2 grade from 70% to
+    85% with a reason, then the gradebook reflects 85%, the original 70% is preserved
+    in the audit log, and the reason is recorded
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Grade Overrides
+    justification: Feature not yet implemented; requires live LMS with instructor
+      grade override
+- id: AC-036
+  description: 'Given an instructor who performs a bulk grade export for a 500-student
+    course, when the CSV is generated, then it contains one row per student per graded
+    assessment with columns: student_id, assessment_name, assessment_type, score,
+    max_score, submission_timestamp, grading_source'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Bulk Grade Export
+    justification: Feature not yet implemented; requires live LMS with course enrollment
+      data
+- id: AC-037
+  description: Given a course with 2,000 submissions for a single problem, when an
+    instructor triggers a bulk regrade, then the operation runs asynchronously, reports
+    progress, and completes without LMS service degradation
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Bulk Regrade
+    justification: Feature not yet implemented; requires live LMS with 2000 submissions
+- id: AC-038
+  description: Given an instructor who uploads a CSV with grade overrides for 100
+    students, when the bulk import is processed, then each student's grade is updated
+    and an audit log entry is created for each override
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Bulk Grade Import
+    justification: Feature not yet implemented; requires live LMS with bulk import
+      capability
+- id: AC-039
+  description: Given a bulk regrade operation in progress, when the instructor checks
+    the operation status, then they see a progress percentage and estimated time remaining
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Bulk Regrade Progress
+    justification: Feature not yet implemented; requires live LMS with async regrade
+      job
+- id: AC-040
+  description: Given an ORA2 rubric with criteria labels in both English and Malay,
+    when a student whose language preference is Malay views the rubric, then the Malay
+    labels are displayed
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 i18n
+    justification: Feature not yet implemented; requires live LMS with Malay translation
+      configured
+- id: AC-041
+  description: Given a timed exam timer with 1 minute remaining, when a screen reader
+    user is taking the exam, then the screen reader announces "1 minute remaining"
+    via an ARIA live region
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Timed Exam Accessibility
+    justification: Feature not yet implemented; requires live LMS with screen reader
+      testing
+- id: AC-042
+  description: Given a drag-and-drop v2 problem, when a keyboard-only user presses
+    Tab to navigate items and Enter/Space to select and drop, then the interaction
+    completes successfully
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Drag-and-Drop Keyboard Access
+    justification: Feature not yet implemented; requires live LMS with keyboard-only
+      user testing
+- id: AC-043
+  description: Given an ORA2 submission that receives a final staff grade, when the
+    grade is posted, then the student receives an email notification within 10 minutes
+    containing the course name, assignment name, and a link to view feedback
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: ORA2 Email Notifications
+    justification: Feature not yet implemented; requires live LMS with email pipeline
+      configured
+- id: AC-044
+  description: Given an auto-graded problem with `show_correctness=past_due`, when
+    the student submits before the due date, then they see "Answer submitted" but
+    not whether it is correct; after the due date, the correct answer and explanation
+    are shown
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-assessment-bulk.sh
+    command: scripts/qa/verify-assessment-bulk.sh
+  - type: manual
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    section: Show Correctness Policy
+    justification: Feature not yet implemented; requires live LMS with show_correctness
+      configured
+

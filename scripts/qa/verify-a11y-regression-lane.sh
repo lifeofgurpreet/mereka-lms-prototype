@@ -20,7 +20,7 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 PARENT_SCRIPT="$REPO_ROOT/scripts/qa/verify-authenticated-smoke-a11y.sh"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
-A11Y_RUNBOOK="$REPO_ROOT/docs/operations/A11Y_REGRESSION_LANE.md"
+A11Y_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/A11Y_REGRESSION_LANE.md"
 EVIDENCE_REPORT="$REPO_ROOT/docs/operations/evidence/a11y-regression-lane-report.md"
 
 RED='\033[0;31m'
@@ -196,9 +196,9 @@ fi
 
 # A11y runbook doc must exist
 if [[ -f "$A11Y_RUNBOOK" ]]; then
-  pass_check "AC-FRONT-073: A11y regression lane runbook exists at docs/operations/A11Y_REGRESSION_LANE.md"
+  pass_check "AC-FRONT-073: A11y regression lane runbook exists at docs/runbooks/operations/A11Y_REGRESSION_LANE.md"
 else
-  fail_check "AC-FRONT-073: A11y regression lane runbook missing at docs/operations/A11Y_REGRESSION_LANE.md"
+  fail_check "AC-FRONT-073: A11y regression lane runbook missing at docs/runbooks/operations/A11Y_REGRESSION_LANE.md"
 fi
 
 # Runbook must list all 3 target routes

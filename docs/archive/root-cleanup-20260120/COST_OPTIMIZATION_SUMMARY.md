@@ -411,7 +411,7 @@ kubectl scale deployment clickhouse superset ralph superset-worker superset-work
 ## Contact
 
 For questions or issues with these optimizations:
-- Check: `docs/operations/TROUBLESHOOTING.md`
+- Check: `docs/runbooks/operations/TROUBLESHOOTING.md`
 - Review: `CLAUDE.md` for Tutor best practices
 - Monitor: GCP Billing dashboard weekly
 

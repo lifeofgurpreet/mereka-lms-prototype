@@ -46,11 +46,11 @@ jobs:
             elif grep -q "migration in progress" var/ci/wif-readiness.log 2>/dev/null; then
               echo "**Status**: Migration in progress"
             else
-              echo "**Status**: Migration not started — see \`docs/operations/WORKLOAD_IDENTITY_FEDERATION.md\`"
+              echo "**Status**: Migration not started — see \`docs/runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md\`"
             fi
             echo ""
             echo "### Next steps"
-            echo "- See \`docs/operations/WORKLOAD_IDENTITY_FEDERATION.md\` for setup commands"
+            echo "- See \`docs/runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md\` for setup commands"
             echo "- Run \`./scripts/qa/verify-wif-readiness.sh\` locally to track progress"
           } >> "$GITHUB_STEP_SUMMARY"
 

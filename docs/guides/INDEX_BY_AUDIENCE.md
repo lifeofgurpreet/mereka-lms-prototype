@@ -91,7 +91,7 @@ _Incident response, performance troubleshooting, disaster recovery_
 #### Advanced Topics
 10. [Auth Alert Runbook](../ops/runbooks/AUTH_ALERT_RUNBOOK.md) - Authentication incident response
 11. [Velero Backup Audit](../operations/VELERO_BACKUP_AUDIT.md) - Backup verification
-12. [DR Test Results](../operations/DR_TEST_RESULTS.md) - Recovery test outcomes
+12. [DR Test Results](../status/readiness/DR_TEST_RESULTS.md) - Recovery test outcomes
 13. [Incident Templates](../operations/INCIDENT_TEMPLATES.md) - Postmortem structure
 14. [Alert Tuning SOP](../operations/ALERT_TUNING_SOP.md) - Noise reduction process
 
@@ -370,7 +370,7 @@ _Security configs, compliance, audit logs, secrets management_
 **Audit & Compliance**:
 - [DISASTER_RECOVERY.md](../ops/runbooks/DISASTER_RECOVERY.md) - DR procedures
 - [VELERO_BACKUP_AUDIT.md](../operations/VELERO_BACKUP_AUDIT.md) - Backup audits
-- [DR_TEST_RESULTS.md](../operations/DR_TEST_RESULTS.md) - Recovery test results
+- [DR_TEST_RESULTS.md](../status/readiness/DR_TEST_RESULTS.md) - Recovery test results
 
 ### Architecture Understanding
 
@@ -429,7 +429,7 @@ _Security configs, compliance, audit logs, secrets management_
 ### Status & Planning
 - **[Next 10 Tasks**: archive/reports/status/NEXT10_TASKS.md](../archive/reports/status/NEXT10_TASKS.md)
 - **[Operational Status**: archive/reports/status/OPERATIONAL_STATUS.md](../archive/reports/status/OPERATIONAL_STATUS.md)
-- **[Implementation Roadmap**: IMPLEMENTATION_ROADMAP.md](../qa/IMPLEMENTATION_ROADMAP.md)
+- **[Implementation Roadmap**: IMPLEMENTATION_ROADMAP.md](../meta/docs-program/IMPLEMENTATION_ROADMAP.md)
 
 ### Postmortems
 - **[Postmortem Directory**: operations/postmortems/](../operations/postmortems/)

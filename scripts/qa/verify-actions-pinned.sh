@@ -11,7 +11,7 @@
 #   scripts/qa/verify-actions-pinned.sh
 #   scripts/qa/verify-actions-pinned.sh [--workflows-dir <path>]
 #
-# See docs/ops/security/ALLOWED_ACTIONS_POLICY.md for the full policy.
+# See docs/policies/operations/ALLOWED_ACTIONS_POLICY.md for the full policy.
 
 set -euo pipefail
 
@@ -51,7 +51,7 @@ info() { echo -e "      $*"; }
 
 echo
 echo -e "${BOLD}=== verify-actions-pinned ===${RESET}"
-echo -e "      Policy: docs/ops/security/ALLOWED_ACTIONS_POLICY.md"
+echo -e "      Policy: docs/policies/operations/ALLOWED_ACTIONS_POLICY.md"
 echo -e "      Scanning: ${WORKFLOWS_DIR}"
 echo
 
@@ -135,7 +135,7 @@ echo
 if [[ ${violations} -gt 0 ]]; then
   echo -e "${RED}${BOLD}RESULT: FAIL — ${violations} unpinned action(s) found${RESET}"
   echo -e "  Fix: pin each action to a full 40-char commit SHA."
-  echo -e "  See docs/ops/security/ALLOWED_ACTIONS_POLICY.md for the process."
+  echo -e "  See docs/policies/operations/ALLOWED_ACTIONS_POLICY.md for the process."
   exit 1
 else
   echo -e "${GREEN}${BOLD}RESULT: PASS — all ${total_actions} action references are SHA-pinned${RESET}"

@@ -13,11 +13,11 @@ depends_on:
 links:
   related_docs:
     - "docs/operations/DISASTER_RECOVERY.md"
-    - "docs/operations/VELERO_BACKUP_AUDIT.md"
-    - "docs/operations/BACKUP_COVERAGE_MATRIX.md"
+    - "docs/runbooks/operations/VELERO_BACKUP_AUDIT.md"
+    - "docs/reference/operations/BACKUP_COVERAGE_MATRIX.md"
     - "docs/operations/DR_TEST_RESULTS.md"
-    - "docs/operations/COURSE_DATA_RECOVERY.md"
-    - "docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+    - "docs/runbooks/operations/COURSE_DATA_RECOVERY.md"
+    - "docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
     - "docs/operations/DEPLOYMENT_RUNBOOK.md"
   related_specs:
     - "specs/k8s-deployment_spec.md"
@@ -174,7 +174,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 - The system SHOULD verify MySQL data integrity post-restore by running `SELECT COUNT(*) FROM openedx.auth_user` and comparing against the last known user count (within 5% tolerance)
 - The system MUST verify MongoDB Atlas data accessibility post-incident by confirming modulestore course count is non-zero: `sum(1 for _ in modulestore().get_courses()) > 0`
 - The system SHOULD verify post-restore data consistency by running `./scripts/qa/public-health-check.sh prod` against the restored environment
-- The system MUST maintain a backup coverage matrix (`docs/operations/BACKUP_COVERAGE_MATRIX.md`) that maps every stateful component to its backup mechanism and verification command
+- The system MUST maintain a backup coverage matrix (`docs/reference/operations/BACKUP_COVERAGE_MATRIX.md`) that maps every stateful component to its backup mechanism and verification command
 
 #### Cross-Region Failover Readiness
 
@@ -189,7 +189,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 
 - The system MUST be able to restore all K8s secrets from Infisical + GCP Secret Manager without relying on in-cluster secret state
 - The system MUST rotate all secrets after a security-related DR event (compromise scenario DR-006)
-- The system MUST document the secret rotation checklist in `docs/operations/SECRET_ROTATION_CHECKLIST.md`
+- The system MUST document the secret rotation checklist in `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`
 - The system SHOULD complete full secret rotation within 1 hour of incident declaration
 
 #### Business Continuity
@@ -476,7 +476,7 @@ This spec formalizes existing infrastructure. Rollout is incremental:
 1. Verify all existing Velero schedules match the requirements in this spec
 2. Enable Atlas continuous backup + verify snapshot policy
 3. Verify GCS backup bucket encryption and IAM restrictions
-4. Update `docs/operations/BACKUP_COVERAGE_MATRIX.md` to match spec requirements
+4. Update `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md` to match spec requirements
 5. Gate: `./scripts/qa/audit-velero.sh` returns all-green
 
 **Phase 2 -- Monitoring and Alerting (Week 3-4)**

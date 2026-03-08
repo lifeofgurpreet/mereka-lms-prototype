@@ -1,10 +1,10 @@
-# In-Cluster Auth Verification (CronJob) (Superseded)
-_Audience: Platform Operators • Owner: Security Domain Owner • Last verified: 2026-03-06 • Status: superseded_
+# In-Cluster Auth Verification (Superseded)
+_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
 
-superseded_by: `../ops/security/in-cluster-auth-verification.md`
+superseded_by: `../runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md`
 
 This document has moved to:
-- `../ops/security/in-cluster-auth-verification.md`
+- `../runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md`
 
 Reason:
-- Consolidated under canonical security docs to reduce transitional `docs/operations/**` drift.
+- Runtime verification procedures now live under `docs/runbooks/operations/`.

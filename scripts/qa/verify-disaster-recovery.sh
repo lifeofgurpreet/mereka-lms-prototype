@@ -549,7 +549,7 @@ check_ac_016() {
 check_ac_017() {
   echo "--- AC-017: Secret rotation checklist documented ---"
 
-  local checklist="${REPO_ROOT}/docs/ops/security/SECRET_ROTATION_CHECKLIST.md"
+  local checklist="${REPO_ROOT}/docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md"
   if [[ -f "$checklist" ]]; then
     pass "AC-017: SECRET_ROTATION_CHECKLIST.md exists"
   else
@@ -680,7 +680,7 @@ check_ac_022() {
 check_backup_coverage_matrix() {
   echo "--- Supplemental: Backup Coverage Matrix documented ---"
 
-  local matrix="${REPO_ROOT}/docs/operations/BACKUP_COVERAGE_MATRIX.md"
+  local matrix="${REPO_ROOT}/docs/reference/operations/BACKUP_COVERAGE_MATRIX.md"
   if [[ -f "$matrix" ]]; then
     pass "Supplemental: BACKUP_COVERAGE_MATRIX.md exists"
   else

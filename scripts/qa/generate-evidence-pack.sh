@@ -28,23 +28,23 @@ br list > "$OUTPUT_DIR/beads-open.txt" 2>/dev/null || echo "br not available" > 
 
 # 4. Verification results (if gate timings exist)
 echo "--- Verification Timing ---"
-if [ -f "docs/verification/gate_timings.jsonl" ]; then
-  tail -20 docs/verification/gate_timings.jsonl > "$OUTPUT_DIR/recent-gate-timings.jsonl"
+if [ -f "verification/manifests/gate_timings.jsonl" ]; then
+  tail -20 verification/manifests/gate_timings.jsonl > "$OUTPUT_DIR/recent-gate-timings.jsonl"
 else
   echo "No gate timings recorded yet" > "$OUTPUT_DIR/recent-gate-timings.jsonl"
 fi
 
 # 5. Flake quarantine state
 echo "--- Flake Quarantine ---"
-cp docs/verification/FLAKE_QUARANTINE.yml "$OUTPUT_DIR/flake-quarantine.yml" 2>/dev/null || echo "No quarantine file" > "$OUTPUT_DIR/flake-quarantine.yml"
+cp verification/baselines/FLAKE_QUARANTINE.yml "$OUTPUT_DIR/flake-quarantine.yml" 2>/dev/null || echo "No quarantine file" > "$OUTPUT_DIR/flake-quarantine.yml"
 
 # 6. Certification scorecard
 echo "--- Certification Scorecard ---"
-cp docs/verification/CERTIFICATION_SCORECARD.yml "$OUTPUT_DIR/certification-scorecard.yml" 2>/dev/null || echo "No scorecard" > "$OUTPUT_DIR/certification-scorecard.yml"
+cp verification/scorecards/CERTIFICATION_SCORECARD.yml "$OUTPUT_DIR/certification-scorecard.yml" 2>/dev/null || echo "No scorecard" > "$OUTPUT_DIR/certification-scorecard.yml"
 
 # 7. Assurance case
 echo "--- Assurance Case ---"
-cp docs/verification/ASSURANCE_CASE.md "$OUTPUT_DIR/assurance-case.md" 2>/dev/null || echo "No assurance case" > "$OUTPUT_DIR/assurance-case.md"
+cp verification/assurance/ASSURANCE_CASE.md "$OUTPUT_DIR/assurance-case.md" 2>/dev/null || echo "No assurance case" > "$OUTPUT_DIR/assurance-case.md"
 
 # 8. Summary manifest
 cat > "$OUTPUT_DIR/MANIFEST.md" << MANIFEST_EOF

@@ -181,7 +181,7 @@ Significant implementation has already been completed by prior agents. Below is 
   - **Done definition**: Runbook covers Phase 1-3 migration with rollback procedures and version compatibility.
   - **Complexity**: S (2-3h).
 
-- [ ] **[S] Task D-4: Update troubleshooting guide** (`docs/operations/TROUBLESHOOTING.md`) | AC: (Rollout) | Depends: B-2
+- [ ] **[S] Task D-4: Update troubleshooting guide** (`docs/runbooks/operations/TROUBLESHOOTING.md`) | AC: (Rollout) | Depends: B-2
   - **Description**: Add section on patch verification failures with symptom-to-fix mapping. Include CI bypass instructions for emergencies.
   - **Done definition**: Troubleshooting guide includes patch-related failure scenarios.
   - **Complexity**: S (1-2h).

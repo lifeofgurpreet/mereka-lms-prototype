@@ -14,7 +14,7 @@ depends_on:
 links:
   related_docs:
     - "docs/runbooks/email-notifications-runbook.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/architecture/notification-pipeline-overview.md"
   related_specs:
     - "specs/mobile-apps-enterprise_spec.md"

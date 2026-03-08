@@ -8,17 +8,9 @@ from pathlib import Path
 
 import yaml
 
-
 MANIFEST = Path("docs/adr/manifest.yaml")
+BUNDLE_RULES = Path("docs/architecture/bundle-rules.yaml")
 REL_KEYS = ("depends_on", "read_next", "amends", "supersedes")
-BUNDLES = [
-    ("00-foundations", "docs/adr/_generated/bundles/00-foundations.md"),
-    ("10-auth-and-tenancy", "docs/adr/_generated/bundles/10-auth-and-tenancy.md"),
-    ("20-build-and-release", "docs/adr/_generated/bundles/20-build-and-release.md"),
-    ("30-frontend", "docs/adr/_generated/bundles/30-frontend.md"),
-    ("40-data-and-events", "docs/adr/_generated/bundles/40-data-and-events.md"),
-    ("50-commerce", "docs/adr/_generated/bundles/50-commerce.md"),
-]
 
 
 def git_changed_files(diff_range: str) -> list[str]:
@@ -39,7 +31,7 @@ def normalized_tokens(adr: dict) -> set[str]:
 
 def domain_match(changed_path: str, adr: dict) -> bool:
     p = changed_path.lower()
-    g = " ".join((adr.get("governs") or [])).lower()
+    g = " ".join(adr.get("governs") or []).lower()
     rules = [
         (("auth", "oidc", "session", "identity"), ("auth", "oidc", "session", "login", "oauth")),
         (("tenant", "multisite", "domain-boundary"), ("tenant", "multisite", "siteconfiguration", "domain")),
@@ -58,20 +50,16 @@ def domain_match(changed_path: str, adr: dict) -> bool:
 
 
 def bundles_for_adr(adr: dict) -> set[str]:
-    governs = " ".join((adr.get("governs") or [])).lower()
+    rules = yaml.safe_load(BUNDLE_RULES.read_text(encoding="utf-8"))
     out: set[str] = set()
-    if adr.get("decision_type") == "foundation":
-        out.add("00-foundations")
-    if any(k in governs for k in ("auth", "oidc", "session", "tenant", "domain-boundary")):
-        out.add("10-auth-and-tenancy")
-    if any(k in governs for k in ("build", "release", "deploy", "gitops", "control-plane")):
-        out.add("20-build-and-release")
-    if any(k in governs for k in ("frontend", "mfe", "branding", "runtime-composition")):
-        out.add("30-frontend")
-    if any(k in governs for k in ("data", "pii", "event", "cache", "async")):
-        out.add("40-data-and-events")
-    if any(k in governs for k in ("commerce", "purchase", "payment", "reconciliation")):
-        out.add("50-commerce")
+    governs = set(adr.get("governs") or [])
+    for bundle in rules.get("bundles", []):
+        bundle_id = bundle["id"]
+        include_tokens = set(bundle.get("include_tokens") or [])
+        if bundle_id == "00-foundations" and adr.get("decision_type") == "foundation":
+            out.add(bundle_id)
+        elif governs & include_tokens:
+            out.add(bundle_id)
     return out
 
 
@@ -83,6 +71,7 @@ def main() -> int:
     args = parser.parse_args()
 
     data = yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))
+    rules = yaml.safe_load(BUNDLE_RULES.read_text(encoding="utf-8"))
     adrs = data.get("adrs", [])
     adr_by_id = {a["id"]: a for a in adrs}
 
@@ -121,10 +110,13 @@ def main() -> int:
         recommended_bundle_ids.update(bundles_for_adr(adr_by_id[aid]))
     if ordered:
         recommended_bundle_ids.add("00-foundations")
-    bundle_path_by_id = {bid: bpath for bid, bpath in BUNDLES}
+    bundle_path_by_id = {
+        bundle["id"]: f"generated/adr-bundles/{bundle['id']}.md"
+        for bundle in rules.get("bundles", [])
+    }
     recommended_bundles = [
         {"id": bid, "path": bundle_path_by_id[bid]}
-        for bid in [b[0] for b in BUNDLES]
+        for bid in [bundle["id"] for bundle in rules.get("bundles", [])]
         if bid in recommended_bundle_ids
     ]
     payload = {

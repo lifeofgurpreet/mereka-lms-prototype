@@ -209,7 +209,7 @@ echo ""
 echo -e "${BLUE}## AC-UIAUTH-004: Secrets Documentation${NC}"
 
 DOCS_CANDIDATES=(
-  "$REPO_ROOT/docs/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md"
+  "$REPO_ROOT/docs/reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md"
   "$REPO_ROOT/docs/operations/smoke-credentials.md"
   "$REPO_ROOT/docs/operations/ci-credentials.md"
 )

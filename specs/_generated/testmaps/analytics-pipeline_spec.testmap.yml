@@ -1,0 +1,138 @@
+spec: analytics-pipeline_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: 'Aspects plugin enabled: `tutor plugins list | grep aspects` shows
+    enabled'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-analytics-pipeline.sh
+    command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-aspects-analytics.sh
+    command: scripts/qa/verify-aspects-analytics.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-002
+  description: 'xAPI events flow to ClickHouse: `clickhouse-client --query "SELECT
+    count() FROM xapi_events_all"`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-analytics-pipeline.sh
+    command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-aspects-analytics.sh
+    command: scripts/qa/verify-aspects-analytics.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: monitoring
+    metric: clickhouse_xapi_events_count
+    dashboard: grafana://dashboards/analytics-pipeline
+- id: AC-003
+  description: 'ClickHouse retention policy active: Events older than 90 days are
+    deleted'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-analytics-pipeline.sh
+    command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-aspects-analytics.sh
+    command: scripts/qa/verify-aspects-analytics.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
+    section: ClickHouse Disk Space
+    justification: Verifying actual TTL-based deletion requires inserting backdated
+      data and waiting for merge cycle orforcing OPTIMIZE TABLE -- not automatable
+      in a stateless CI run
+- id: AC-004
+  description: Superset accessible at configured URL (e.g., `https://analytics.mereka.io`)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/smoke-test-analytics.sh
+    command: scripts/qa/smoke-test-analytics.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-aspects-analytics.sh
+    command: scripts/qa/verify-aspects-analytics.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: monitoring
+    metric: superset_health_status
+    dashboard: grafana://dashboards/analytics-pipeline
+- id: AC-005
+  description: Pre-built dashboards visible in Superset for staff users
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-analytics-pipeline.sh
+    command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+  - type: manual
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
+    section: Dashboard Verification
+    justification: Verifying dashboard load time < 5s andvisual correctness requires
+      browser interaction that cannot be automated with kubectl alone
+- id: AC-006
+  description: 'No PII in events: `clickhouse-client --query "SELECT * FROM xapi_events_all
+    LIMIT 10"` shows hashed IDs'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-analytics-pii.sh
+    command: scripts/qa/audit-analytics-pii.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-analytics-pipeline.sh
+    command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-007
+  description: Instructor dashboard embeds in LMS course pages
+  verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
+    section: Dashboard Embedding Verification
+    justification: Dashboard embedding requires browser-based verification of iframe
+      rendering within LMS course pages;no headless equivalent available in the current
+      test infrastructure
+- id: AC-008
+  description: 'Data deletion works: Deleting user removes their events from ClickHouse'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/analytics/delete-user-events.sh
+    command: scripts/analytics/delete-user-events.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/analytics/verify-user-deletion.sh
+    command: scripts/analytics/verify-user-deletion.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+

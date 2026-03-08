@@ -9,7 +9,7 @@ This directory is the source of truth for GCP Monitoring templates used by Merek
 - `logging-metrics/`: log-based metric definitions
 - `alerts/`: alert policies
 - `dashboards/`: GCP Monitoring dashboards and Grafana-only dashboard artifacts used for legacy video signals.
-  - GCP dashboards are expected by runtime parity (`audit-observability.sh --mode runtime`).
+  - GCP dashboards are expected by runtime parity (`OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`).
   - Grafana-only files are intentionally excluded from parity parity checks unless explicitly opted in.
 - `grafana/`: Grafana dashboard coverage contracts (for parity/audit automation)
 

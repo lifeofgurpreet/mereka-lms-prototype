@@ -13,11 +13,11 @@ depends_on:
   - "specs/secrets-management_spec.md"
 links:
   related_docs:
-    - "docs/operations/STRIPE_WEBHOOKS_SETUP.md"
-    - "docs/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md"
+    - "docs/runbooks/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md"
     - "docs/runbooks/purchase-gateway-runbook.md"
     - "docs/architecture/purchase-gateway-overview.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
   related_specs:
     - "specs/enterprise-microservices_spec.md"
     - "specs/multi-tenancy-architecture_spec.md"
@@ -109,7 +109,7 @@ Revenue impact is direct: every course purchase, program enrollment, and enterpr
 
 ## Assumptions
 
-- Stripe account is already provisioned and operational (confirmed: webhook delivery probe accepted HTTP 200 per `docs/operations/STRIPE_WEBHOOKS_SETUP.md`)
+- Stripe account is already provisioned and operational (confirmed: webhook delivery probe accepted HTTP 200 per `docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md`)
 - The Open edX Enrollment API (`/api/enrollment/v1/enrollment`) is stable and available for programmatic enrollment creation
 - The Open edX user creation API or registration flow supports account creation triggered by an invitation link
 - The existing GKE cluster has capacity for 2 additional Deployments (gateway API + worker) with estimated 1 vCPU / 2 GB RAM total at baseline

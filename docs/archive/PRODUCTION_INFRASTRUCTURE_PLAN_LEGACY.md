@@ -2554,10 +2554,10 @@ gcloud sql instances delete mereka-lms-mysql-read-prod
 - **Cloudflare Support**: (if using Cloudflare for DNS)
 
 **Documentation References:**
-- This Plan: `docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`
+- This Plan: `docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`
 - GCP Roadmap: `docs/operations/GCP_ROADMAP.md`
 - Cost Analysis: `GCP_BILLING_ANALYSIS.md`
-- Troubleshooting: `docs/operations/TROUBLESHOOTING.md`
+- Troubleshooting: `docs/runbooks/operations/TROUBLESHOOTING.md`
 - Tutor Guide: `CLAUDE.md`
 
 ---

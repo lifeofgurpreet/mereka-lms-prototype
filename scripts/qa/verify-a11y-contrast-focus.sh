@@ -38,7 +38,7 @@ TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 TOKENS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
-EXCEPTION_DOC="$REPO_ROOT/docs/operations/A11Y_CONTRAST_FOCUS_GATE.md"
+EXCEPTION_DOC="$REPO_ROOT/docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md"
 
 echo -e "${BLUE}=== A11y Contrast + Focus-Visible Gate ===${NC}"
 echo "  Token source: assets/branding/tokens.css"
@@ -415,13 +415,13 @@ if [[ "$FAIL" -eq 0 ]]; then
     echo ""
     echo "Notes:"
     echo "  - WARN items are documented gaps with Q2 2026 timelines (not blocking)"
-    echo "  - See docs/operations/A11Y_CONTRAST_FOCUS_GATE.md for exception process"
+    echo "  - See docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md for exception process"
   fi
   exit 0
 else
   echo -e "${RED}Some a11y contrast + focus checks failed${NC}"
   echo ""
   echo "Fix FAIL items before merging. WARN items are documented gaps (not blocking)."
-  echo "See docs/operations/A11Y_CONTRAST_FOCUS_GATE.md for the exception/reviewer process."
+  echo "See docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md for the exception/reviewer process."
   exit 1
 fi

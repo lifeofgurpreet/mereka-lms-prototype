@@ -55,7 +55,7 @@ cat >"$OUT_DIR/01_scope.md" <<'EOF'
   - `scripts/migrations/`
   - `.github/workflows/`
   - `.github/ci-scripts-static.txt`
-  - `docs/operations/verification/`
+  - `verification/`
 - Reviewed script types:
   - `*.sh`
   - `*.py`
@@ -140,7 +140,7 @@ for docs_root in [repo_root / "docs", repo_root / "README.md"]:
             manual_ref_map[script].add(str(candidate.relative_to(repo_root)))
 
 deprecated_manifest = read_json(
-    repo_root / "docs/operations/verification/deprecated_verify_scripts.json",
+    repo_root / "verification/manifests/deprecated_verify_scripts.json",
     {"scripts": []},
 )
 deprecated_map: dict[str, str] = {}

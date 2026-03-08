@@ -30,7 +30,7 @@ pass() { echo "[PASS] $1"; PASS=$((PASS + 1)); }
 fail() { echo "[FAIL] $1" >&2; FAIL=$((FAIL + 1)); }
 skip() { echo "[SKIP] $1"; SKIP=$((SKIP + 1)); }
 
-SLO_POLICY="docs/operations/SLO_POLICY.md"
+SLO_POLICY="docs/policies/operations/SLO_POLICY.md"
 BURN_RATE_FILE="deploy/k8s/base/monitoring/slo-burn-rate-rules.yaml"
 EXISTING_SLO_FILE="deploy/k8s/base/monitoring/prometheusrule-slo.yaml"
 KUSTOMIZATION="deploy/k8s/base/monitoring/kustomization.yaml"

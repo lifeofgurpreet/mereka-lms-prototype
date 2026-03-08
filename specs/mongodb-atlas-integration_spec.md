@@ -16,7 +16,7 @@ links:
     - "docs/architecture/MONGODB_ATLAS_MIGRATION.md"
     - "docs/architecture/DATABASE_ARCHITECTURE.md"
     - "docs/operations/MONGODB_PERMISSIONS_ISSUE.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/operations/DEPLOYMENT_RUNBOOK.md"
   related_specs:
     - "specs/secrets-management_spec.md"

@@ -6,7 +6,7 @@ set -euo pipefail
 [[ -f atlas.yml ]] || { echo "FAIL: atlas.yml missing from repo root"; exit 1; }
 echo "PASS: atlas.yml present"
 
-[[ -f docs/operations/TRANSLATION_WORKFLOW.md ]] || { echo "FAIL: TRANSLATION_WORKFLOW.md missing"; exit 1; }
+[[ -f docs/runbooks/operations/TRANSLATION_WORKFLOW.md ]] || { echo "FAIL: TRANSLATION_WORKFLOW.md missing"; exit 1; }
 echo "PASS: TRANSLATION_WORKFLOW.md present"
 
 [[ -x scripts/infra/sync-translations.sh ]] || { echo "FAIL: sync-translations.sh missing or not executable"; exit 1; }

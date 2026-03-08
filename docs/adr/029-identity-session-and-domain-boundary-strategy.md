@@ -17,7 +17,7 @@ does_not_govern: ["branding copy", "course-content permissions"]
 related_oep: []
 related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
 related_specs: []
-related_runbooks: ["docs/operations/OPENEDX_HOSTNAMES.md", "docs/operations/DOMAIN_MATRIX.md"]
+related_runbooks: ["docs/reference/operations/OPENEDX_HOSTNAMES.md", "docs/reference/operations/DOMAIN_MATRIX.md"]
 related_evidence: []
 fitness_functions: ["scripts/qa/verify-auth-surfaces.sh prod", "scripts/qa/verify-mfe-config-contract.sh --env prod"]
 expiry_date: null

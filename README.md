@@ -86,6 +86,6 @@ Remaining images (MySQL init job, Android builder, etc.) still come from the ups
 - **Makefile**: Common tasks (`make tutor-start`, `make tutor-apply`, `make branding-sync`, etc.)
 - **Pre-commit hooks**: Automatic code formatting and linting
 - **CI/CD**: `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
-- **Backups**: production backups are Velero-driven (see `docs/operations/VELERO_BACKUP_AUDIT.md`). The Cloud SQL export workflow is legacy and gated via `ENABLE_CLOUD_SQL_BACKUPS=true` (see `.github/workflows/cloud-sql-backup.yml`).
+- **Backups**: production backups are Velero-driven (see `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`). The Cloud SQL export workflow is legacy and gated via `ENABLE_CLOUD_SQL_BACKUPS=true` (see `.github/workflows/cloud-sql-backup.yml`).
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development workflow and code style guidelines.

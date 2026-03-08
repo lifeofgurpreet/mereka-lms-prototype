@@ -135,7 +135,7 @@ tutor local restart mysql
 - **Quick Reference:** `docs/ops/quickref/QUICK_REFERENCE.md`
 - **Complete Guide:** `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
 - **Setup Checklist:** `docs/guides/onboarding/AGENT_SETUP_CHECKLIST.md`
-- **Operational Status:** `docs/status/NEXT10_TASKS.md`
+- **Operational Status:** `docs/status/active/NEXT10_TASKS.md`
 
 ## 🔍 Verify Production Parity
 
@@ -166,7 +166,7 @@ To compare local with production:
 
 ### Ongoing
 1. Use `docs/ops/quickref/QUICK_REFERENCE.md` for daily commands
-2. Check `docs/status/NEXT10_TASKS.md` for system status
+2. Check `docs/status/active/NEXT10_TASKS.md` for system status
 3. Run `./scripts/qa/comprehensive-test.sh` before committing
 
 ## ✅ Success Checklist
@@ -191,7 +191,7 @@ After setup, you should be able to:
 1. Check `docs/` directory for guides
 2. Run `./scripts/qa/verify-setup.sh` to diagnose issues
 3. Check logs: `tutor local logs --tail=50 <service>`
-4. Review `docs/operations/TROUBLESHOOTING.md`
+4. Review `docs/runbooks/operations/TROUBLESHOOTING.md`
 
 ---
 

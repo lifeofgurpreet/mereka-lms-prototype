@@ -370,12 +370,11 @@ spec-dashboard: ## Show per-spec coverage dashboard
 check: lint-specs validate-testmaps lint-conventions verify-specs spec-coverage ## Full spec quality suite
 	@echo "All spec checks passed."
 
-.PHONY: adr-governance
-adr-governance: ## Run ADR governance suite (pure local validation, no git history dependency)
+.PHONY: adr-governance adr-impact
+adr-governance: ## Run ADR governance suite (blocking local gate)
 	./scripts/qa/verify_adr_suite.sh
 
-.PHONY: adr-impact
-adr-impact: ## Run ADR impact summary (requires DIFF_RANGE, e.g. make adr-impact DIFF_RANGE=HEAD~1...HEAD)
+adr-impact: ## Print ADR impact summary for a diff range (requires DIFF_RANGE, e.g. make adr-impact DIFF_RANGE=HEAD~1...HEAD)
 	@test -n "$(DIFF_RANGE)" || (echo "DIFF_RANGE is required (e.g. make adr-impact DIFF_RANGE=HEAD~1...HEAD)"; exit 2)
 	python3 scripts/qa/resolve_adr_impact.py --diff-range "$(DIFF_RANGE)"
 

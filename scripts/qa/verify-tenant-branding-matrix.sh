@@ -19,8 +19,8 @@ source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
-MATRIX_DOC="$REPO_ROOT/docs/operations/TENANT_BRANDING_MATRIX.md"
-FOOTER_MATRIX="$REPO_ROOT/docs/operations/FOOTER_VARIANT_MATRIX.md"
+MATRIX_DOC="$REPO_ROOT/docs/reference/operations/TENANT_BRANDING_MATRIX.md"
+FOOTER_MATRIX="$REPO_ROOT/docs/reference/operations/FOOTER_VARIANT_MATRIX.md"
 TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then

@@ -19,7 +19,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 BRANDING_VERIFIER="$REPO_ROOT/scripts/qa/verify-mfe-branding.sh"
-EVIDENCE_DOC="$REPO_ROOT/docs/operations/TOKEN_INTEGRITY_ROUTING.md"
+EVIDENCE_DOC="$REPO_ROOT/docs/evidence/operations/TOKEN_INTEGRITY_ROUTING.md"
 
 PASS=0
 FAIL=0
@@ -197,7 +197,7 @@ echo "--- AC-FRONT-014: Evidence artifact ---"
 echo ""
 
 if [ -f "$EVIDENCE_DOC" ]; then
-  pass_msg "AC-FRONT-014: docs/operations/TOKEN_INTEGRITY_ROUTING.md exists"
+  pass_msg "AC-FRONT-014: docs/evidence/operations/TOKEN_INTEGRITY_ROUTING.md exists"
 
   # Check the doc has key sections
   if grep -q "Token Inventory" "$EVIDENCE_DOC" 2>/dev/null; then
@@ -218,7 +218,7 @@ if [ -f "$EVIDENCE_DOC" ]; then
     warn_msg "AC-FRONT-014: Evidence doc missing 'Expected Command Output' section"
   fi
 else
-  fail_msg "AC-FRONT-014: docs/operations/TOKEN_INTEGRITY_ROUTING.md not found"
+  fail_msg "AC-FRONT-014: docs/evidence/operations/TOKEN_INTEGRITY_ROUTING.md not found"
 fi
 
 echo ""
@@ -253,7 +253,7 @@ if [ "$FAIL" -gt 0 ]; then
   echo "    infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
   echo "    (the canonical runtime token source)"
   echo "  AC-FRONT-013: Update verify-mfe-branding.sh MFE_ROUTES or Caddyfile to match."
-  echo "  AC-FRONT-014/015: Create docs/operations/TOKEN_INTEGRITY_ROUTING.md."
+  echo "  AC-FRONT-014/015: Create docs/evidence/operations/TOKEN_INTEGRITY_ROUTING.md."
   echo ""
   exit 1
 fi

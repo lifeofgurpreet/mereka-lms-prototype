@@ -1,0 +1,678 @@
+spec: ci-cd-pipeline_spec.md
+acceptance_criteria:
+- id: AC-INT-001
+  description: Given K8s manifests pass `validate-k8s.sh`, when CI builds and pushes
+    images to Artifact Registry, then production Kustomize overlay references the
+    new image tags and `kubectl apply` succeeds without resource validation errors.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Integration Tests
+    justification: Requires live CI pipeline run with new image build; validated each
+      release via release-openedx-gitops.sh dry-run + ArgoCD sync
+- id: AC-INT-002
+  description: Given K8s Deployments require specific ExternalSecrets, when CI deployment
+    workflow runs, then it verifies ExternalSecrets reach `SecretSynced` before declaring
+    deployment success.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-migration-init-contract.sh
+    command: scripts/qa/verify-migration-init-contract.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Integration Tests
+    justification: ExternalSecret sync gate not yet implemented in CI pipeline; operator
+      manually confirms kubectl get externalsecrets -n mereka-lms shows READY=True
+- id: AC-INT-003
+  description: Given `secrets-management_spec.md` defines required secret keys, when
+    CI runs secret validation (`infisical-validate-mereka-lms.sh`), then it fails
+    the build if any required `MEREKA_LMS_*` key is missing or contains placeholder
+    values in the target environment.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-infisical-env-validation-coverage.sh
+    command: scripts/qa/verify-infisical-env-validation-coverage.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Secrets Validation
+    justification: infisical-validate CI step not yet wired into GitHub Actions workflow;
+      runs manually pre-deploy
+- id: AC-INT-004
+  description: Given branding assets are synced via `apply-patches.sh`, when CI builds
+    openedx image, then `branding-preflight.sh` passes and verifies Mereka logo presence
+    and Google Fonts absence in compiled artifacts.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Branding Preflight Verification
+    justification: Requires active GitHub Actions runner building the full openedx
+      Docker image; cannot run image build in CI without Docker-in-Docker
+    file: scripts/branding/run-branding-gates.sh
+- id: AC-001
+  description: Given a PR is opened against `main`, when CI runs, then all 12 CI jobs
+    execute and their pass/fail status is reported as GitHub commit status checks.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Quality Gates Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-002
+  description: Given the `spec-lint` job runs, when specs in `specs/` have structural
+    issues (missing frontmatter, missing required sections), then the job fails with
+    specific error messages identifying the non-conforming spec.
+  verify:
+  - type: automated
+    test_type: automated
+    file: scripts/qa/spec-tools/mereka_spec_lint.py
+    command: pytest scripts/qa/spec-tools/mereka_spec_lint.py
+  - type: automated
+    test_type: automated
+    file: scripts/qa/spec-tools/spec_coverage_dashboard.py
+    command: pytest scripts/qa/spec-tools/spec_coverage_dashboard.py
+  - type: automated
+    test_type: automated
+    file: scripts/qa/spec-tools/spec_fix.py
+    command: pytest scripts/qa/spec-tools/spec_fix.py
+  - type: automated
+    test_type: unit
+    file: scripts/qa/spec-tools/validate_testmap_format.py
+    command: pytest scripts/qa/spec-tools/validate_testmap_format.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-003
+  description: Given the `lint` job runs, when Python files in `scripts/` or `services/`
+    have ruff violations, then the job fails.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/shared/ci-skip-guards.sh
+    command: scripts/shared/ci-skip-guards.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Quality Gates Verification
+    justification: Ruff lint gate is verified by running the CI workflow; individual
+      Python files can be checked locally with ruff check scripts/ services/
+    file: N/A
+- id: AC-004
+  description: Given the `validate-k8s` job runs, when any YAML in `deploy/k8s/` is
+    not a valid Kubernetes manifest, then kubeconform fails the job.
+  verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: K8s Validation Verification
+    justification: kubeconform gate is verified by running the CI workflow; manifest
+      validation requires kubeconform binary not present in all local environments
+    file: N/A
+- id: AC-005
+  description: Given the `security-scan` job runs, when verified secrets are detected
+    by TruffleHog, then the job fails and the finding is reported.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-006
+  description: Given the `prod-tag-guard` job runs, when any production overlay references
+    a `:latest` tag, then the job fails.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-no-latest-prod-tags.sh
+    command: scripts/qa/verify-no-latest-prod-tags.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-007
+  description: Given all CI jobs pass, when the PR is reviewed and approved, then
+    the merge button is enabled.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    command: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-008
+  description: Given a CI job fails, when a developer views the PR, then the merge
+    button is disabled.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    command: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-009
+  description: Given a push to `main` modifies `infrastructure/tutor/**`, when the
+    build workflow triggers, then both openedx and MFE images are built, tagged with
+    the git SHA and short SHA, and pushed to `ghcr.io/biji-biji-initiative/mereka-lms/`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-binary-pinning-bbi-infra.sh
+    command: scripts/qa/verify-binary-pinning-bbi-infra.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-binary-pinning-pcp.sh
+    command: scripts/qa/verify-binary-pinning-pcp.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dev-prod-image-parity.sh
+    command: scripts/qa/verify-dev-prod-image-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slsa-provenance.sh
+    command: scripts/qa/verify-slsa-provenance.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-010
+  description: Given the openedx image is built, when it is pushed to Artifact Registry,
+    then the job output contains the resolved image digest (sha256:...).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/resolve-image-digest.sh
+    command: scripts/infra/resolve-image-digest.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-011
+  description: Given the MFE image is built, when the branding verification runs,
+    then it validates that the authn index.html contains the expected branding revision
+    marker.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-012
+  description: Given a manual dispatch with `build_openedx=true` and `image_tag=v1.2.3`,
+    when the build completes, then the image is tagged as `openedx:v1.2.3` and `openedx:<short-sha>`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-image-build.sh
+    command: scripts/qa/deprecated/verify-cicd-image-build.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-013
+  description: Given the build workflow, when images are pushed, then no `:latest`
+    tag is published to Artifact Registry.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-no-latest-prod-tags.sh
+    command: scripts/qa/verify-no-latest-prod-tags.sh
+- id: AC-014
+  description: Given `update_gitops=true` and `target_environment=production`, when
+    both builds succeed with digests, then `release-openedx-gitops.sh` is invoked
+    with `--apply --commit --push --require-digests` and both digest flags.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/release-openedx-gitops.sh
+    command: scripts/infra/release-openedx-gitops.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gitops-image-overrides.sh
+    command: scripts/qa/verify-gitops-image-overrides.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gitops-mereka-lms-pin.sh
+    command: scripts/qa/verify-gitops-mereka-lms-pin.sh
+- id: AC-015
+  description: Given `update_gitops=true` and `target_environment=select-environment`,
+    when the workflow runs, then it fails with an error requiring explicit environment
+    selection.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-image-build.sh
+    command: scripts/qa/deprecated/verify-cicd-image-build.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: GitOps Deployment Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-016
+  description: Given `update_gitops=true` and `target_environment=staging`, when `ENABLE_STAGING_ENV`
+    is not set to `true`, then the workflow fails with a message indicating staging
+    is disabled.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-image-build.sh
+    command: scripts/qa/deprecated/verify-cicd-image-build.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: GitOps Deployment Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-017
+  description: Given `deploy_to_staging=true` is used in manual dispatch, when the
+    workflow runs, then it fails with a deprecation error directing the user to `update_gitops`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-image-build.sh
+    command: scripts/qa/deprecated/verify-cicd-image-build.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: GitOps Deployment Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-018
+  description: Given `update_gitops=true` but `build_openedx=false`, when the workflow
+    runs, then it fails requiring both builds for deterministic digest capture.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-image-build.sh
+    command: scripts/qa/deprecated/verify-cicd-image-build.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: GitOps Deployment Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-019
+  description: 'Given the `release-evidence.yml` workflow is dispatched with valid
+    tags, when it completes, then a `release-evidence-<env>-<run>` artifact is uploaded
+    containing: policy check logs, dry-run plan, resolved digests, and `release-metadata.json`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Release Process Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-020
+  description: Given the `policy-checks.yml` workflow is dispatched, when all verification
+    scripts pass, then the workflow succeeds.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/bump-image-tags.sh
+    command: scripts/infra/bump-image-tags.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-binary-pinning-bbi-infra.sh
+    command: scripts/qa/verify-binary-pinning-bbi-infra.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-binary-pinning-pcp.sh
+    command: scripts/qa/verify-binary-pinning-pcp.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-no-latest-tags.sh
+    command: scripts/qa/verify-no-latest-tags.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-release-automation.sh
+    command: scripts/qa/verify-release-automation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-release-dry-run-contract.sh
+    command: scripts/qa/verify-release-dry-run-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-release-promotion-wiring.sh
+    command: scripts/qa/verify-release-promotion-wiring.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slsa-provenance.sh
+    command: scripts/qa/verify-slsa-provenance.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-021
+  description: Given a production rollback is needed, when the operator runs `release-openedx-gitops.sh`
+    with prior known-good tags, then the rollback completes without building new images
+    and pods converge within 10 minutes.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/release-openedx-gitops.sh
+    command: scripts/infra/release-openedx-gitops.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-release-rollback.sh
+    command: scripts/qa/verify-cicd-release-rollback.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-release-promotion-wiring.sh
+    command: scripts/qa/verify-release-promotion-wiring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Release Process Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: docs/runbooks/operations/RELEASE_CHECKLIST.md
+- id: AC-022
+  description: Given the `public-health-check.yml` runs on schedule, when branding
+    is correct on prod and dev, then no failures are reported and logs are uploaded
+    as artifacts.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Scheduled Operations Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-023
+  description: Given the `operations-gates-runtime.yml` runs on schedule, when GKE
+    authentication succeeds, then operations gates execute against the live cluster
+    and artifacts are uploaded with 30-day retention.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Scheduled Operations Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-024
+  description: Given the `dr-evidence-bundle.yml` runs on the 1st of the month, when
+    GKE access is available, then a DR evidence bundle is generated and uploaded with
+    120-day retention.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Scheduled Operations Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-025
+  description: Given the iOS workflow is manually dispatched, when it completes successfully,
+    then a signed IPA is uploaded to TestFlight via App Store Connect API.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-ios-build.sh
+    command: scripts/qa/verify-cicd-ios-build.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: iOS Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-026
+  description: Given the iOS workflow runs, when it completes (pass or fail), then
+    SSH keys used for Match are cleaned up.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-ios-build.sh
+    command: scripts/qa/verify-cicd-ios-build.sh
+- id: AC-027
+  description: Given the pre-commit hook is installed, when a developer attempts to
+    commit a file containing a hardcoded secret pattern, then the commit is rejected
+    with a warning.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-precommit-secret-scan.sh
+    command: scripts/qa/verify-precommit-secret-scan.sh
+- id: AC-028
+  description: Given any workflow runs, when secrets are used, then no secret values
+    appear in workflow logs (GitHub Actions masking).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cd-pipeline.sh
+    command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    command: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+- id: AC-029
+  description: Given the `authenticated-sso-canary.yml` workflow runs on schedule
+    (every 6h), when SSO credentials are valid, then the workflow successfully authenticates
+    to both LMS and Studio (if configured) and uploads canary artifacts with 30-day
+    retention.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: SSO Canary Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-030
+  description: Given the SSO canary fails authentication, when the workflow completes,
+    then artifacts (screenshots, logs) are uploaded showing the failure point for
+    debugging.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/deprecated/verify-cicd-scheduled-ops.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: SSO Canary Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-031
+  description: Given the `tutor-config-verify.yml` workflow runs when changes are
+    made to `tutor_env/config.yml` or `infrastructure/tutor/**`, when all patches
+    are correctly applied, then the workflow succeeds with verification passing for
+    MySQL auth patch, MFE Node.js patch, multi-site domains, and custom apps.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Tutor Configuration Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-032
+  description: Given the Tutor config verification runs, when required patches are
+    missing, then the job fails with specific error messages identifying which patch
+    (MySQL, MFE, domains, or apps) is not applied.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Tutor Configuration Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-033
+  description: Given the patch idempotency check runs, when patches are applied twice,
+    then the checksums of all generated files remain identical.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Tutor Configuration Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-034
+  description: Given the Tutor config verification fails on a PR, when a developer
+    views the PR, then a comment is posted with common issues and remediation steps.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Tutor Configuration Verification
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-035
+  description: Given the `tutor-plugin-test.yml` workflow runs when changes are made
+    to `infrastructure/tutor/plugins/**`, when the plugin code is valid, then the
+    workflow succeeds with plugin syntax verification, enable/disable lifecycle tests,
+    and integration tests passing.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Tutor Plugin Testing
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-036
+  description: Given the plugin tests run, when the plugin patches are correctly applied,
+    then the LMS settings file contains the expected plugin configuration (mfe_oauth_fix
+    installed).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Tutor Plugin Testing
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-037
+  description: Given the plugin lifecycle test runs, when the plugin is enabled, disabled,
+    and re-enabled, then all state transitions succeed without errors.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Tutor Plugin Testing
+    justification: Requires active GitHub Actions runner with repository secrets;
+      workflow dispatch cannot be fully automated in isolated test environment
+    file: N/A
+- id: AC-038
+  description: Given the integration test runs, when both plugin and apply-patches.sh
+    are used together, then both sets of patches are present in the generated configuration.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Plugin Integration Testing
+    justification: Requires triggering actual GitHub Actions workflow run and inspecting
+      its logs for plugin+patches integration result
+    file: N/A
+- id: AC-039
+  description: Given plugin tests fail on a PR, when a developer views the PR, then
+    a comment is posted with plugin-specific troubleshooting guidance.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: PR Failure Comment Verification
+    justification: Requires triggering a real PR with a failing plugin test and verifying
+      the bot posts a troubleshooting comment
+    file: N/A
+

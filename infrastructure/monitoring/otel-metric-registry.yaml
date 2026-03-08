@@ -1,6 +1,6 @@
 # OTel Metric Registry — Mereka LMS
 # Naming convention: mereka.lms.<service>.<metric_name>
-# Full spec: docs/operations/OTEL_NAMING_CONVENTIONS.md
+# Full spec: docs/policies/operations/OTEL_NAMING_CONVENTIONS.md
 # Verified by: scripts/qa/verify-otel-naming.sh
 #
 # Fields

@@ -24,7 +24,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-POLICY_DOC="$REPO_ROOT/docs/operations/FOOTER_SLOT_ONLY_POLICY.md"
+POLICY_DOC="$REPO_ROOT/docs/policies/operations/FOOTER_SLOT_ONLY_POLICY.md"
 
 echo "========================================"
 echo "Footer Slot-Only Policy Verifier"

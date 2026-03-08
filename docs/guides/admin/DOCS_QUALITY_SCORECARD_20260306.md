@@ -9,9 +9,9 @@
 
 | Gate | Status | Evidence | Notes |
 |---|---|---|---|
-| `docs/qa/verify-docs-policy.sh` | ✅ PASS | Ran on branch after each hardening pass | `All docs policy checks passed.` |
+| `tools/docs/verify/verify-docs-policy.sh` | ✅ PASS | Ran on branch after each hardening pass | `All docs policy checks passed.` |
 | `scripts/qa/verify-repo-structure.sh` | ✅ PASS | Ran on branch after each hardening pass | `Repo structure checks passed.` |
-| `docs/qa/verify-doc-command-refs.sh` | ✅ PASS | `DOCS_CMDREF_OK (2 files, 0 missing command references, 0 candidate path refs)` | Scoped to changed docs + direct run in current pass |
+| `tools/docs/verify/verify-doc-command-refs.sh` | ✅ PASS | `DOCS_CMDREF_OK (2 files, 0 missing command references, 0 candidate path refs)` | Scoped to changed docs + direct run in current pass |
 | PR-scope command-ref CI input handling | ✅ PASS | `.github/workflows/docs-compliance.yml` now uses `mapfile` + quoted args | Deterministic argument handling added |
 
 ## Structural Accuracy Pass (active path)

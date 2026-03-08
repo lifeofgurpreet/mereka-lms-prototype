@@ -224,9 +224,9 @@ RESULT: PASS
 
 | Document | Purpose |
 |---|---|
-| `docs/operations/ANALYTICS_UNDEFINED_REGRESSION_FIX.md` | Root cause analysis for 2dcy.7 |
-| `docs/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md` | Key elimination evidence for 1h41 |
-| `docs/operations/MFE_ANALYTICS_PLUGIN_PARITY.md` | Surface mapping and exception policy |
+| `reports/2026/learnings/ANALYTICS_UNDEFINED_REGRESSION_FIX.md` | Root cause analysis for 2dcy.7 |
+| `docs/evidence/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md` | Key elimination evidence for 1h41 |
+| `docs/reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md` | Surface mapping and exception policy |
 | `scripts/qa/verify-analytics-hardening.sh` | This bead's verification script |
 | `scripts/qa/verify-analytics-undefined-regression.sh` | Prior bead 2dcy.7 regression script |
 | `scripts/qa/verify-analytics-key-elimination.sh` | Prior bead 1h41 elimination script |

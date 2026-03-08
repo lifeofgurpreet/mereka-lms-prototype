@@ -16,7 +16,7 @@ source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
-MATRIX_DOC="$REPO_ROOT/docs/operations/FOOTER_VARIANT_MATRIX.md"
+MATRIX_DOC="$REPO_ROOT/docs/reference/operations/FOOTER_VARIANT_MATRIX.md"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
   PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
@@ -186,7 +186,7 @@ echo "AC-FTVAR-003: Footer variant matrix document"
 if [[ ! -f "$MATRIX_DOC" ]]; then
   fail "Matrix document missing: $MATRIX_DOC"
 else
-  pass "Matrix document exists: docs/operations/FOOTER_VARIANT_MATRIX.md"
+  pass "Matrix document exists: docs/reference/operations/FOOTER_VARIANT_MATRIX.md"
 
   if grep -q "academyv2.mereka.io" "$MATRIX_DOC"; then
     pass "Matrix doc documents 'academyv2.mereka.io'"

@@ -61,10 +61,10 @@ declare -a REQUIRED_ROUTES=(
   "course-authoring"
 )
 
-SMOKE_DOC="$REPO_ROOT/docs/operations/UI_UX_POSTDEPLOY_SMOKE.md"
+SMOKE_DOC="$REPO_ROOT/docs/runbooks/operations/UI_UX_POSTDEPLOY_SMOKE.md"
 A11Y_SCRIPT="$REPO_ROOT/scripts/qa/verify-a11y-authenticated-routes.sh"
-A11Y_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
-VISUAL_BASELINE_DOC="$REPO_ROOT/docs/operations/VISUAL_SMOKE_BASELINE.md"
+A11Y_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
+VISUAL_BASELINE_DOC="$REPO_ROOT/docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md"
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 
 # ===========================================================================
@@ -74,7 +74,7 @@ CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 echo "--- AC-UVIS-301: Route × Domain Matrix (15 checkpoints) ---"
 
 if [[ ! -f "$SMOKE_DOC" ]]; then
-  do_fail "AC-UVIS-301: UI_UX_POSTDEPLOY_SMOKE.md not found — create docs/operations/UI_UX_POSTDEPLOY_SMOKE.md"
+  do_fail "AC-UVIS-301: UI_UX_POSTDEPLOY_SMOKE.md not found — create docs/runbooks/operations/UI_UX_POSTDEPLOY_SMOKE.md"
 else
   do_pass "AC-UVIS-301: UI_UX_POSTDEPLOY_SMOKE.md exists"
 
@@ -160,7 +160,7 @@ else
   if [[ -f "$VISUAL_BASELINE_DOC" ]]; then
     do_pass "AC-UVIS-302: VISUAL_SMOKE_BASELINE.md exists (RMSE threshold authority)"
   else
-    do_warn "AC-UVIS-302: VISUAL_SMOKE_BASELINE.md not found — create docs/operations/VISUAL_SMOKE_BASELINE.md"
+    do_warn "AC-UVIS-302: VISUAL_SMOKE_BASELINE.md not found — create docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md"
   fi
 fi
 
@@ -358,7 +358,7 @@ echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Action required: Fix FAIL items above."
-  echo "  - Create docs/operations/UI_UX_POSTDEPLOY_SMOKE.md if missing"
+  echo "  - Create docs/runbooks/operations/UI_UX_POSTDEPLOY_SMOKE.md if missing"
   echo "  - Ensure all 3 tenant domains and 5 routes are documented"
   echo "  - Add artifact naming + retention guidance (30 days, var/smoke/)"
   echo "  - Add world-class baseline rationale with failure → bead mapping"

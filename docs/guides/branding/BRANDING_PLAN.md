@@ -248,7 +248,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 ### Release Gate (`#110`)
 
 - Keep repo-local readiness fresh; do not mutate infra/GitOps repositories in this lane until explicit promotion signal.
-- When signal is granted, execute `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` and attach promotion + rollback evidence.
+- When signal is granted, execute `docs/status/migrations/STAGING_PROMOTION_PLAYBOOK_110.md` and attach promotion + rollback evidence.
 
 ### Phase 6 Slot Work (`#111` decision)
 
@@ -263,7 +263,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 | **Dark mode** | Add `variants.dark` to PARAGON_THEME_URLS. Currently light-only. |
 | **Performance budgets in CI** | Lighthouse CI with LCP < 2.5s, bundle < 300KB gzip, theme CSS < 50KB. |
 | **CI Phase 5 — ARC migration** | Migrate heavy builds to `mereka-k8s-heavy-builders`. See `CI_OPTIMIZATION_TRACKER.md`. Requires ARC deployed to rke2-nonprod. |
-| **Plugin file splitting** | Extract 47 React component strings from `mereka_lms.py` into separate file(s). Status: staged/in-progress (`#109` phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 + phase 12 + phase 13 + phase 14 complete; MFE slot registration moved to `mereka_lms_mfe_slots.py`, main plugin reduced 3426→2226 lines, verifier compatibility layer expanded, QA coupling reduced 98→0). Post-close no-behavior-change maintainability cleanup landed in `9f23cc0d`, `8b172c83`, `fb43eeb1`, and `72fc2f8e`. See `docs/operations/PLUGIN_SPLIT_STATUS_2026-03-02.md`. |
+| **Plugin file splitting** | Extract 47 React component strings from `mereka_lms.py` into separate file(s). Status: staged/in-progress (`#109` phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 + phase 12 + phase 13 + phase 14 complete; MFE slot registration moved to `mereka_lms_mfe_slots.py`, main plugin reduced 3426→2226 lines, verifier compatibility layer expanded, QA coupling reduced 98→0). Post-close no-behavior-change maintainability cleanup landed in `9f23cc0d`, `8b172c83`, `fb43eeb1`, and `72fc2f8e`. See `docs/status/active/PLUGIN_SPLIT_STATUS_2026-03-02.md`. |
 | **Hardcoded brand name** | Replace "Mereka Academy" literals in enterprise profile fields with `{variant.brand}`. |
 
 ---

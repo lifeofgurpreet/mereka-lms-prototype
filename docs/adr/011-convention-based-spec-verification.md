@@ -87,7 +87,7 @@ manual_verifications:
     justification: "Visual verification required for theme rendering"
   - ac_id: AC-MON-001
     verification_type: monitoring
-    runbook: docs/ops/monitoring/MONITORING.md
+    runbook: docs/reference/operations/MONITORING.md
     section: "Prometheus Alerts"
     justification: "Runtime monitoring, not testable in CI"
 ```
@@ -141,7 +141,7 @@ manual_verifications:
 
 ## Implementation Notes
 
-### Migration Process (Completed 2026-02-10)
+### Migration Process (Completed 2026-02-10, reconciled 2026-03-08)
 
 1. **Extract manual entries**: `extract_manual_entries.py` scanned 31 testmaps, consolidated to `specs/manual_verifications.yaml`
 2. **Annotate scripts**: `annotate_scripts.py` added `@covers` annotations to 119 scripts based on old testmaps
@@ -149,11 +149,11 @@ manual_verifications:
 4. **Rewrite tooling**:
    - `spec_verify.py`: Query which scripts verify a given AC
    - `spec_coverage_report.py`: Generate HTML coverage report from annotations
-   - `discover_testmap.py`: Compute testmap YAML from annotations (for backward compatibility)
+   - `discover_testmap.py`: Compute testmap YAML from annotations into generated output
    - `compute_dependency_graph.py`: Generate `specs/IMPLEMENTATION_ORDER.md` from `depends_on`
    - `mereka_spec_verify.py`: Shell wrapper for CI/CD integration
 5. **Update spec integrity gates**: `run-spec-integrity-gates.sh` now runs annotation-based tools
-6. **Delete old tooling**: Removed `specs/testmaps/` directory and related validation scripts
+6. **Compatibility reality**: the repository retained `specs/testmaps/` longer than intended. Wave 2 declares generated testmaps canonical under `specs/_generated/testmaps/`, with `specs/testmaps/` treated as legacy compatibility output until migration completes.
 
 ### Coverage Improvement
 
@@ -184,7 +184,7 @@ Gates run in CI/CD and block merge if any check fails.
 |------|---------|
 | `spec_verify.py` | Query which scripts verify a given AC |
 | `spec_coverage_report.py` | Generate HTML coverage report |
-| `discover_testmap.py` | Compute testmap YAML from annotations |
+| `discover_testmap.py` | Compute generated testmap YAML from annotations |
 | `compute_dependency_graph.py` | Generate implementation order from `depends_on` |
 | `annotate_scripts.py` | Migrate old testmaps to annotations (one-time) |
 | `extract_manual_entries.py` | Extract manual verifications to YAML (one-time) |
@@ -248,3 +248,11 @@ Estimated effort: 1-2 weeks for tool setup and import
 - [Spec Verification Tools](../../scripts/qa/spec-tools/)
 - [Implementation Order](../../specs/IMPLEMENTATION_ORDER.md)
 - [Manual Verifications](../../specs/manual_verifications.yaml)
+
+## Wave 2 alignment note
+
+ADR-011 remains accepted, but the repository briefly diverged from its own contract by keeping `specs/testmaps/` as an active-looking surface. Wave 2 closes that split by:
+
+- treating `@covers` annotations and manual verification metadata as the source of truth
+- generating compatibility testmaps into `specs/_generated/testmaps/`
+- keeping `specs/testmaps/` as legacy fallback only until consumers are migrated

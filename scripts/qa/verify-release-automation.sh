@@ -2,7 +2,7 @@
 # Verify release automation artefacts are present and well-formed.
 #
 # Checks:
-#   1. docs/operations/RELEASE_PROCESS.md exists
+#   1. docs/reference/operations/RELEASE_PROCESS.md exists
 #   2. .github/workflows/release.yml exists and is triggered on tag push
 #   3. scripts/infra/create-release.sh exists and is executable
 #   4. Recent commits follow conventional commit format (informational)
@@ -14,7 +14,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-RELEASE_PROCESS_DOC="$REPO_ROOT/docs/operations/RELEASE_PROCESS.md"
+RELEASE_PROCESS_DOC="$REPO_ROOT/docs/reference/operations/RELEASE_PROCESS.md"
 RELEASE_WORKFLOW="$REPO_ROOT/.github/workflows/release.yml"
 CREATE_RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
 
@@ -43,9 +43,9 @@ echo ""
 echo "--- Release process document ---"
 
 if [[ -f "${RELEASE_PROCESS_DOC}" ]]; then
-  pass "docs/operations/RELEASE_PROCESS.md exists"
+  pass "docs/reference/operations/RELEASE_PROCESS.md exists"
 else
-  fail "docs/operations/RELEASE_PROCESS.md is MISSING"
+  fail "docs/reference/operations/RELEASE_PROCESS.md is MISSING"
 fi
 
 # Spot-check key sections

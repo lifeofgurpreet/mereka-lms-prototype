@@ -35,8 +35,8 @@ do_skip() { SKIP=$((SKIP + 1)); echo -e "${YELLOW}[SKIP]${NC} $1"; }
 ASPECTS_DIR="$REPO_ROOT/deploy/k8s/base/plugins/aspects"
 BASE_KUSTOMIZATION="$REPO_ROOT/deploy/k8s/base/kustomization.yaml"
 ANALYTICS_SPEC="$REPO_ROOT/specs/analytics-pipeline_spec.md"
-SETUP_DOC="$REPO_ROOT/docs/operations/ASPECTS_ANALYTICS_SETUP.md"
-RETENTION_DOC="$REPO_ROOT/docs/operations/ANALYTICS_DATA_RETENTION.md"
+SETUP_DOC="$REPO_ROOT/docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md"
+RETENTION_DOC="$REPO_ROOT/docs/policies/operations/ANALYTICS_DATA_RETENTION.md"
 
 echo -e "${BLUE}=== Aspects Analytics Readiness Check ===${NC}"
 echo "  Manifests dir: deploy/k8s/base/plugins/aspects/"
@@ -282,15 +282,15 @@ else
 fi
 
 if [[ -f "$SETUP_DOC" ]]; then
-  do_pass "Aspects setup doc exists: docs/operations/ASPECTS_ANALYTICS_SETUP.md"
+  do_pass "Aspects setup doc exists: docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md"
 else
-  do_fail "Aspects setup doc missing: docs/operations/ASPECTS_ANALYTICS_SETUP.md"
+  do_fail "Aspects setup doc missing: docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md"
 fi
 
 if [[ -f "$RETENTION_DOC" ]]; then
-  do_pass "Analytics data retention policy exists: docs/operations/ANALYTICS_DATA_RETENTION.md"
+  do_pass "Analytics data retention policy exists: docs/policies/operations/ANALYTICS_DATA_RETENTION.md"
 else
-  do_fail "Analytics data retention policy missing: docs/operations/ANALYTICS_DATA_RETENTION.md"
+  do_fail "Analytics data retention policy missing: docs/policies/operations/ANALYTICS_DATA_RETENTION.md"
 fi
 
 echo ""
@@ -345,7 +345,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Next steps:"
   echo "  - Fix failing checks above"
-  echo "  - See docs/operations/ASPECTS_ANALYTICS_SETUP.md for deployment plan"
+  echo "  - See docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md for deployment plan"
   echo "  - T148 will wire Aspects into the kustomization when ready"
   exit 1
 else

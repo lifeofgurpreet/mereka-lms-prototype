@@ -423,7 +423,7 @@ This plan implements a multi-tenancy architecture for MerekaAcademy Open edX, en
   - ADR: Why application-level isolation instead of database-level
   - ADR: Why `EnterpriseCustomer` as tenant boundary (not custom model)
 
-- [ ] **[S]** Update troubleshooting guide (`docs/operations/TROUBLESHOOTING.md`) | Depends: All implementations
+- [ ] **[S]** Update troubleshooting guide (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: All implementations
   - Section: Multi-tenancy troubleshooting
   - Symptom: Tenant sees wrong branding → Check SiteConfiguration resolution
   - Symptom: Tenant admin sees other tenant's data → Check isolation test results, RLS configuration

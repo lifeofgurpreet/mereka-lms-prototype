@@ -204,8 +204,8 @@ fi
 # Check documentation references
 echo ""
 echo "Checking for export documentation..."
-if [[ -f "docs/migrations/kajabi/KAJABI_MIGRATION_HANDOVER.md" ]]; then
-  pass "Migration handover doc exists: docs/migrations/kajabi/KAJABI_MIGRATION_HANDOVER.md"
+if [[ -f "reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md" ]]; then
+  pass "Migration handover doc exists: reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md"
 else
   skip "Migration handover doc not found (may be in different location)"
 fi

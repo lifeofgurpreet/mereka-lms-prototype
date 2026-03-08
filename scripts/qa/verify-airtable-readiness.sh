@@ -16,9 +16,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-STATUS_FILE="docs/migrations/drive-airtable/STATUS.md"
-REVIEW_QUEUE_FILE="docs/migrations/drive-airtable/REVIEW_QUEUE.md"
-README_FILE="docs/migrations/drive-airtable/README.md"
+STATUS_FILE="docs/status/migrations/drive-airtable-STATUS.md"
+REVIEW_QUEUE_FILE="docs/reference/migrations/drive-airtable/REVIEW_QUEUE.md"
+README_FILE="docs/reference/migrations/drive-airtable/README.md"
 
 failures=0
 

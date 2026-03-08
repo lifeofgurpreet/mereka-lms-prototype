@@ -50,8 +50,6 @@ async def rate_limit_client(mock_stripe_session):
     """HTTP client with DB mocked so requests reach the rate limiter."""
     offering = _make_offering()
     mock_db_post = _mock_db_with_offering(offering)
-    # GET status: DB returns None so endpoint returns 404 (not 429) until limit is hit
-    mock_db_get = _mock_db_with_offering(None)
 
     call_count = 0
 

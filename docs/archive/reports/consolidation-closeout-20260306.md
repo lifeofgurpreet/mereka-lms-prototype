@@ -34,9 +34,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 - Marker `TBD` in `docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md:679` -> `- TODO/DRAFT/TBD/FIXME scan for canonical docs`
 - Marker `FIXME` in `docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md:542` -> `- run TODO/DRAFT/TBD/FIXME audit;`
 - Marker `FIXME` in `docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md:679` -> `- TODO/DRAFT/TBD/FIXME scan for canonical docs`
-- Marker `TODO` in `docs/ops/security/BINARY_PINNING.md:7` -> `> **Status**: TODO — cross-repo changes required`
-- Marker `TODO` in `docs/ops/security/BINARY_PINNING.md:25` -> `| `bbi-infrastructure` | T057 | TODO |`
-- Marker `TODO` in `docs/ops/security/BINARY_PINNING.md:26` -> `| `platform-control-plane` | T058 | TODO |`
+- Marker `TODO` in `docs/policies/operations/BINARY_PINNING.md:7` -> `> **Status**: TODO — cross-repo changes required`
+- Marker `TODO` in `docs/policies/operations/BINARY_PINNING.md:25` -> `| `bbi-infrastructure` | T057 | TODO |`
+- Marker `TODO` in `docs/policies/operations/BINARY_PINNING.md:26` -> `| `platform-control-plane` | T058 | TODO |`
 
 ## Risk Notes
 - Canonical conflict proposals still require domain-owner approval before final canonical reassignment in contested clusters.

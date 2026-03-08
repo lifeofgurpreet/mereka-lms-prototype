@@ -51,9 +51,9 @@ echo ""
 # ────────────────────────────────────────────────────────────────────────────
 echo "-- AC-DEP-001: Release template"
 
-RELEASE_TEMPLATE="${REPO_ROOT}/docs/operations/RELEASE_DEPLOYMENT_TEMPLATE.md"
+RELEASE_TEMPLATE="${REPO_ROOT}/docs/meta/templates/RELEASE_DEPLOYMENT_TEMPLATE.md"
 
-check "Release template exists (docs/operations/RELEASE_DEPLOYMENT_TEMPLATE.md)" \
+check "Release template exists (docs/meta/templates/RELEASE_DEPLOYMENT_TEMPLATE.md)" \
   "[[ -f '${RELEASE_TEMPLATE}' ]]"
 
 if [[ -f "${RELEASE_TEMPLATE}" ]]; then
@@ -225,7 +225,7 @@ else
 fi
 
 # Check merge-first deployment protocol documents no-cherry-pick
-MERGE_PROTOCOL="${REPO_ROOT}/docs/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md"
+MERGE_PROTOCOL="${REPO_ROOT}/docs/policies/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md"
 if [[ -f "${MERGE_PROTOCOL}" ]]; then
   check "Merge-first deployment protocol exists" \
     "[[ -f '${MERGE_PROTOCOL}' ]]"

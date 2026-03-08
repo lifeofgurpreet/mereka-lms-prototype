@@ -431,7 +431,7 @@ acceptance_criteria:
     section: Release Process Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
-    file: docs/operations/RELEASE_CHECKLIST.md
+    file: docs/runbooks/operations/RELEASE_CHECKLIST.md
 - id: AC-022
   description: Given the `public-health-check.yml` runs on schedule, when branding
     is correct on prod and dev, then no failures are reported and logs are uploaded

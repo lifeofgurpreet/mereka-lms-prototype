@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-DOMAIN_CHANGE_RUNBOOK="$REPO_ROOT/docs/operations/runbooks/DOMAIN_CHANGE_RUNBOOK.md"
+DOMAIN_CHANGE_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/DOMAIN_CHANGE_RUNBOOK.md"
 if [[ ! -f "$DOMAIN_CHANGE_RUNBOOK" && -f "$REPO_ROOT/docs/operations/DOMAIN_CHANGE_RUNBOOK.md" ]]; then
   DOMAIN_CHANGE_RUNBOOK="$REPO_ROOT/docs/operations/DOMAIN_CHANGE_RUNBOOK.md"
 fi
@@ -13,12 +13,12 @@ fi
 docs=(
   "$REPO_ROOT/AGENTS.md"
   "$REPO_ROOT/scripts/infra/README.md"
-  "$REPO_ROOT/docs/ops/ci-cd/CI_CD_SETUP.md"
-  "$REPO_ROOT/docs/operations/RELEASE_CHECKLIST.md"
-  "$REPO_ROOT/docs/operations/THEME_DEPLOYMENT.md"
+  "$REPO_ROOT/docs/reference/operations/CI_CD_SETUP.md"
+  "$REPO_ROOT/docs/runbooks/operations/RELEASE_CHECKLIST.md"
+  "$REPO_ROOT/docs/runbooks/operations/THEME_DEPLOYMENT.md"
   "$DOMAIN_CHANGE_RUNBOOK"
   "$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
-  "$REPO_ROOT/docs/status/NEXT10_TASKS.md"
+  "$REPO_ROOT/docs/status/active/NEXT10_TASKS.md"
 )
 
 patterns=(

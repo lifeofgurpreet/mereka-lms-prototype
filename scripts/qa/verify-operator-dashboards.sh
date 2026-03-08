@@ -83,21 +83,21 @@ grep_in_file() {
 
 section "1. Operator documentation files"
 
-file_exists "docs/ops/monitoring/OPERATOR_DASHBOARD_GUIDE.md"
-file_exists "docs/operations/TROUBLESHOOTING.md"
-file_exists "docs/ops/monitoring/MONITORING.md"
-file_exists "docs/ops/monitoring/OBSERVABILITY_QUICKSTART.md"
-file_exists "docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
-file_exists "docs/operations/ONCALL_ROTATION.md"
-file_exists "docs/operations/INCIDENT_RESPONSE.md"
-file_exists "docs/operations/INCIDENT_TEMPLATES.md"
-file_exists "docs/operations/ALERT_SEVERITY_MATRIX.md"
-file_exists "docs/operations/ALERT_TUNING_SOP.md"
-file_exists "docs/operations/SLO_POLICY.md"
-file_exists "docs/operations/SLO_DASHBOARDS_SETUP.md"
-file_exists "docs/operations/ADMIN_CONSOLE_SETUP.md"
+file_exists "docs/reference/operations/OPERATOR_DASHBOARD_GUIDE.md"
+file_exists "docs/runbooks/operations/TROUBLESHOOTING.md"
+file_exists "docs/reference/operations/MONITORING.md"
+file_exists "docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md"
+file_exists "docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+file_exists "docs/policies/operations/ONCALL_ROTATION.md"
+file_exists "docs/runbooks/operations/INCIDENT_RESPONSE.md"
+file_exists "docs/runbooks/operations/INCIDENT_TEMPLATES.md"
+file_exists "docs/reference/operations/ALERT_SEVERITY_MATRIX.md"
+file_exists "docs/runbooks/operations/ALERT_TUNING_SOP.md"
+file_exists "docs/policies/operations/SLO_POLICY.md"
+file_exists "docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md"
+file_exists "docs/reference/operations/ADMIN_CONSOLE_SETUP.md"
 file_exists "docs/ops/quickref/access-urls.md"
-file_exists "docs/operations/CAPACITY_PLANNING.md"
+file_exists "docs/reference/operations/CAPACITY_PLANNING.md"
 file_exists "docs/operations/runbooks/site-down.md"
 file_exists "docs/operations/runbooks/emergency-rollback.md"
 file_exists "docs/operations/runbooks/DISASTER_RECOVERY.md"
@@ -108,7 +108,7 @@ file_exists "docs/operations/quickref/common-troubleshooting.md"
 
 section "2. OPERATOR_DASHBOARD_GUIDE.md content"
 
-GUIDE="${REPO_ROOT}/docs/ops/monitoring/OPERATOR_DASHBOARD_GUIDE.md"
+GUIDE="${REPO_ROOT}/docs/reference/operations/OPERATOR_DASHBOARD_GUIDE.md"
 
 if [[ -f "$GUIDE" ]]; then
   content=$(<"$GUIDE")
@@ -267,7 +267,7 @@ fi
 
 section "7. SLO policy content"
 
-SLO="${REPO_ROOT}/docs/operations/SLO_POLICY.md"
+SLO="${REPO_ROOT}/docs/policies/operations/SLO_POLICY.md"
 if [[ -f "$SLO" ]]; then
   for keyword in \
     "99.95%" \
@@ -291,7 +291,7 @@ fi
 
 section "8. Escalation matrix in ONCALL_ROTATION.md"
 
-ONCALL="${REPO_ROOT}/docs/operations/ONCALL_ROTATION.md"
+ONCALL="${REPO_ROOT}/docs/policies/operations/ONCALL_ROTATION.md"
 if [[ -f "$ONCALL" ]]; then
   for keyword in "L1" "L2" "L3" "L4" "Incident Commander"; do
     if grep -qF "$keyword" "$ONCALL"; then

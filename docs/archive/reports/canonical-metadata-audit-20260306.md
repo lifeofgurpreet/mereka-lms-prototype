@@ -2,7 +2,7 @@
 _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified: 2026-03-06 • Status: supporting_
 
 ## Scope
-- Evaluated all canonical markdown records from `docs/catalog.json`.
+- Evaluated all canonical markdown records from `generated/catalogs/docs-catalog.json`.
 - Checked for required authority markers in header/frontmatter scope: `Audience`, `Owner`, `Last verified`, `Status: canonical`.
 
 ## Summary

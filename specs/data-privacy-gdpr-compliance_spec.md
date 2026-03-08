@@ -18,7 +18,7 @@ depends_on:
 links:
   related_docs:
     - "docs/runbooks/data-privacy-compliance-runbook.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/architecture/multi-tenancy-overview.md"
   related_specs:
     - "specs/analytics-pipeline_spec.md"

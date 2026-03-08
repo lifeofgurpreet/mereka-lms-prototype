@@ -111,10 +111,10 @@ Weekly review cadence:
 
 | Artifact | Purpose | Location |
 |----------|---------|----------|
-| **AC Verification Strategy Matrix** | Maps 883 ACs to verification methods | `docs/verification/AC_VERIFICATION_STRATEGY_MATRIX.yml` |
-| **Certification Scorecard** | Release gate definitions | `docs/verification/CERTIFICATION_SCORECARD.yml` |
-| **Assurance Case Ledger** | Claim-argument-evidence tracking | `docs/verification/ASSURANCE_CASE.md` |
-| **Flake Quarantine Registry** | Tracks unstable tests | `docs/verification/FLAKE_QUARANTINE.yml` |
+| **AC Verification Strategy Matrix** | Maps 883 ACs to verification methods | `verification/catalogs/AC_VERIFICATION_STRATEGY_MATRIX.yml` |
+| **Certification Scorecard** | Release gate definitions | `verification/scorecards/CERTIFICATION_SCORECARD.yml` |
+| **Assurance Case Ledger** | Claim-argument-evidence tracking | `verification/assurance/ASSURANCE_CASE.md` |
+| **Flake Quarantine Registry** | Tracks unstable tests | `verification/baselines/FLAKE_QUARANTINE.yml` |
 | **Testmap YAML Files** | AC→test mappings | `specs/testmaps/*.testmap.yml` |
 | **Spec Template** | Standardized spec structure | `specs/_TEMPLATE.md` |
 | **Spec Index** | Auto-generated spec inventory | `specs/INDEX.md` |

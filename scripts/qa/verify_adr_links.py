@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import re
+from pathlib import Path
 
 ADR_DIR = Path('docs/adr')
 link_re = re.compile(r'\[[^\]]+\]\(([^)]+)\)')

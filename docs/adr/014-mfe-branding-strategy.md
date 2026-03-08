@@ -514,7 +514,7 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
 | `learning_help_slot` | `org.openedx.frontend.layout.header_learning_help.v1` | `frontend-app-learning` | Help panel in courseware |
 | `login_component` | `org.openedx.frontend.authn.login_component.v1` | `frontend-app-authn` | Login page component |
 
-> **Complete inventory**: See [`docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md`](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md) for all 100+ slots across 14 MFEs.
+> **Complete inventory**: See [`docs/reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md`](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md) for all 100+ slots across 14 MFEs.
 
 ### Implementation Status
 

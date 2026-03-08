@@ -417,7 +417,7 @@ cookies can produce the same symptoms—test in a fresh browser profile first.
 	# If you introduce a new alias under `*.academyv2.mereka.io`, you must also:
 	# - add DNS + Ingress + TLS SAN coverage
 	# - ensure Authentik OIDC redirect_uri allowlist includes that host
-	# - update the hostname registry (`docs/ops/security/OPENEDX_HOSTNAMES.md`)
+	# - update the hostname registry (`docs/reference/operations/OPENEDX_HOSTNAMES.md`)
 	for domain in domains: \
 	    site = SiteConfiguration.objects.filter(site__domain=domain).first(); \
 	    values = dict(site.site_values); \
@@ -592,7 +592,7 @@ print('DOC_STORE_DB', cfg.get('db'));"
 3. Verify CMS logs after restart.
 
 **Fix (if `CourseOverview` is 0)**
-See `docs/operations/COURSE_DATA_RECOVERY.md` (this is usually import/restore work, not an auth issue).
+See `docs/runbooks/operations/COURSE_DATA_RECOVERY.md` (this is usually import/restore work, not an auth issue).
 
 **See Also**: [Database Issues Runbook](database-issues.md) - MongoDB Atlas connectivity and permissions
 
@@ -759,7 +759,7 @@ kubectl get pvc -n mereka-lms | rg '^mysql\\s'
 
 **Prevention:**
 - Keep selectors stable (see [Issue 1](#issue-1-service-has-no-endpoints-none) and `scripts/infra/fix-service-selectors.sh`).
-- Add PVC disk utilization alerting for `mysql` before it fills (see `docs/ops/monitoring/OBSERVABILITY_ENHANCEMENT_PLAN.md`).
+- Add PVC disk utilization alerting for `mysql` before it fills (see `docs/status/active/OBSERVABILITY_ENHANCEMENT_PLAN.md`).
 
 **See Also**: [Database Issues Runbook](database-issues.md) - MySQL troubleshooting and recovery
 
@@ -1584,7 +1584,7 @@ Verify Redis Streams consumers implement idempotent handling with deduplication 
 
 - [`docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
 - [`docs/ops/quickref/access-urls.md`](../../ops/quickref/access-urls.md) - Service URLs and access info
-- [`docs/concepts/architecture/DATABASE_ARCHITECTURE.md`](../../concepts/architecture/DATABASE_ARCHITECTURE.md) - Database connectivity guide
+- [`docs/architecture/overviews/DATABASE_ARCHITECTURE.md`](../../concepts/architecture/DATABASE_ARCHITECTURE.md) - Database connectivity guide
 
 ---
 

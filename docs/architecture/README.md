@@ -1,11 +1,20 @@
-# Architecture Documentation (Transitional)
+# Architecture System
+_Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-08 • Status: superseded_
 
-_Audience: Engineering and Docs contributors • Owner: Platform Team • Last verified: 2026-03-06 • Status: archived_
+superseded_by: docs/concepts/architecture/README.md
 
-This legacy path is retained as a compatibility shim.
+This root is transitional compatibility surface during Wave 2.
 
-The active architecture documentation now lives under:
+## Canonical replacement
 
-- `docs/concepts/architecture/`
+- Read [docs/concepts/architecture/README.md](../concepts/architecture/README.md) for the living architecture root.
+- Read [ARCHITECTURE_CHARTER.md](../concepts/architecture/ARCHITECTURE_CHARTER.md) for the authority model.
+- Read [DOCUMENTATION_AUTHORITY_RESOLVER.md](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md) before moving or linking docs.
 
-Use this directory during transition and clean-up windows only. Content here is intentionally minimal.
+## Scope of this directory now
+
+- compatibility for legacy links
+- transitional program material
+- generated or legacy files that have not yet been fully collapsed
+
+Do not add new canonical living-standard content under `docs/architecture/**`.

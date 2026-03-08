@@ -607,7 +607,7 @@ echo ""
 
 if [[ $FAIL -gt 0 ]]; then
   echo "Some checks FAILED. See above for details."
-  echo "Refer to docs/ops/security/ENTERPRISE_SSO_GUIDE.md for remediation steps."
+  echo "Refer to docs/runbooks/operations/ENTERPRISE_SSO_GUIDE.md for remediation steps."
   exit 1
 fi
 

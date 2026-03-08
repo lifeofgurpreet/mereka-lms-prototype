@@ -477,7 +477,7 @@ validity 10000`
   - Create Service Account for API access
   - Grant permissions in Play Console → API access
 
-- [ ] **[S]** Update main troubleshooting doc with mobile section (`docs/operations/TROUBLESHOOTING.md`) | Depends: All build tasks
+- [ ] **[S]** Update main troubleshooting doc with mobile section (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: All build tasks
   - Add mobile apps diagnostic commands
   - Check push notification delivery: query `mobile_device_tokens` table, check FCM logs
   - Check deep linking: verify AASA/assetlinks files, test Universal/App Links

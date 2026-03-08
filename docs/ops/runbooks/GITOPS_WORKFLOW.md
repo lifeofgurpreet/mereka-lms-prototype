@@ -449,10 +449,10 @@ gcloud artifacts docker tags list \
 
 ## Related Documentation
 
-- **CI/CD Pipeline**: `docs/ops/ci-cd/CI_CD_SETUP.md`
-- **ArgoCD Setup**: `docs/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md`
+- **CI/CD Pipeline**: `docs/reference/operations/CI_CD_SETUP.md`
+- **ArgoCD Setup**: `docs/runbooks/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md`
 - **K8s Deployment Guide**: `docs/guides/admin/K8S_OPERATIONS_GUIDE.md`
-- **Troubleshooting**: `docs/operations/TROUBLESHOOTING.md`
+- **Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`
 - **Spec**: `specs/ci-cd-pipeline_spec.md` (AC-014: GitOps image override verification)
 
 ## Future Improvements

@@ -138,9 +138,9 @@ check_glob_ability() {
     pass "Glob-ability: Verification scripts live in scripts/qa/"
   fi
 
-  # Check testmap files: must end in .testmap.yml and live in specs/testmaps/
+  # Check generated testmap files: must end in .testmap.yml and live in specs/_generated/testmaps/
   local testmap_violations=0
-  if [[ -d specs/testmaps ]]; then
+  if [[ -d specs/_generated/testmaps ]]; then
     while IFS= read -r -d '' file; do
       local basename
       basename="$(basename "$file")"
@@ -149,11 +149,15 @@ check_glob_ability() {
         fail "Glob-ability: Testmap file must end in .testmap.yml: $file"
         testmap_violations=$((testmap_violations + 1))
       fi
-    done < <(find specs/testmaps -maxdepth 1 -type f -name '*.yml' -o -name '*.yaml' -print0 2>/dev/null)
+    done < <(find specs/_generated/testmaps -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -print0 2>/dev/null)
   fi
 
-  if [[ $testmap_violations -eq 0 ]] && [[ -d specs/testmaps ]]; then
-    pass "Glob-ability: All testmap files follow *.testmap.yml naming"
+  if [[ $testmap_violations -eq 0 ]] && [[ -d specs/_generated/testmaps ]]; then
+    pass "Glob-ability: All generated testmap files follow *.testmap.yml naming"
+  fi
+
+  if [[ -d specs/testmaps ]]; then
+    warn "Glob-ability: specs/testmaps is a legacy compatibility root; generated testmaps belong in specs/_generated/testmaps"
   fi
 }
 

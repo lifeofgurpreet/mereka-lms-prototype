@@ -12,11 +12,11 @@ depends_on:
 links:
   related_docs:
     - "docs/operations/AUTH_HARDENING_SPEC.md"
-    - "docs/operations/AUTH_AND_PERMISSIONS.md"
+    - "docs/reference/operations/AUTH_AND_PERMISSIONS.md"
     - "docs/operations/IN_CLUSTER_AUTH_VERIFICATION.md"
     - "docs/operations/RFC_CLAIM_BASED_ROLE_SYNC.md"
     - "docs/integrations/GOOGLE_OAUTH_SETUP.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
     - "docs/runbooks/auth-sso-enterprise-runbook.md"
   related_specs:
     - "specs/multi-tenancy-architecture_spec.md"

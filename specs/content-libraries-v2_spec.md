@@ -14,7 +14,7 @@ links:
   related_docs:
     - "docs/architecture/content-libraries-overview.md"
     - "docs/runbooks/content-libraries-runbook.md"
-    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/runbooks/operations/TROUBLESHOOTING.md"
   related_specs:
     - "specs/multi-tenancy-architecture_spec.md"
     - "specs/enterprise-microservices_spec.md"

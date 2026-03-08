@@ -1,3 +1,10 @@
-> Production auth configuration for this service is managed in the `infrastructure` repo.
-> This repo provides service/chart capability only.
-> Do not treat local values files as production source of truth unless explicitly documented.
+# README Warning Snippet (Superseded)
+_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+
+superseded_by: `../../meta/templates/README_WARNING_SNIPPET.md`
+
+This document has moved to:
+- `../../meta/templates/README_WARNING_SNIPPET.md`
+
+Reason:
+- Reusable warning snippets now live under `docs/meta/templates/`.

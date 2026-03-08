@@ -429,10 +429,10 @@ Must pass all 3 checks:
 **Spec**: `specs/multi-site-domains_spec.md` (9 ACs, 100% complete)
 
 **Operations Docs**:
-- `docs/ops/security/OPENEDX_HOSTNAMES.md` - Complete hostname registry
-- `docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md` - Domain change procedures
-- `docs/operations/DOMAIN_MANAGEMENT.md` - DNS management
-- `docs/ops/security/AUTH_AND_PERMISSIONS.md` - OIDC and auth config
+- `docs/reference/operations/OPENEDX_HOSTNAMES.md` - Complete hostname registry
+- `docs/runbooks/operations/DOMAIN_CHANGE_RUNBOOK.md` - Domain change procedures
+- `docs/runbooks/operations/DOMAIN_MANAGEMENT.md` - DNS management
+- `docs/reference/operations/AUTH_AND_PERMISSIONS.md` - OIDC and auth config
 
 **Scripts**:
 - `scripts/qa/verify-csrf-multisite.sh` - CSRF validation

@@ -208,7 +208,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- Data retention policy coverage ---"
 
-RETENTION_POLICY="${REPO_ROOT}/docs/operations/DATA_RETENTION_POLICY.md"
+RETENTION_POLICY="${REPO_ROOT}/docs/policies/operations/DATA_RETENTION_POLICY.md"
 
 if [[ ! -f "${RETENTION_POLICY}" ]]; then
   fail "DATA_RETENTION_POLICY.md not found"

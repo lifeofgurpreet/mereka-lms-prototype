@@ -1,10 +1,10 @@
-# Auth and Permissions (Open edX + Authentik) (Superseded)
-_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: superseded_
+# Auth and Permissions (Superseded)
+_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
 
-superseded_by: `../ops/security/AUTH_AND_PERMISSIONS.md`
+superseded_by: `../reference/operations/AUTH_AND_PERMISSIONS.md`
 
 This document has moved to:
-- `../ops/security/AUTH_AND_PERMISSIONS.md`
+- `../reference/operations/AUTH_AND_PERMISSIONS.md`
 
 Reason:
-- Consolidated under canonical docs structure during remediation to reduce transitional-path drift.
+- Operational reference material now lives under docs/reference/operations/.
