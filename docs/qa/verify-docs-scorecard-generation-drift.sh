@@ -113,20 +113,18 @@ quality_match="false"
 normalize_report() {
   local src="$1"
   local dst="$2"
-  # Ignore volatile lines to avoid false-positive drift:
-  # - timestamps change every regeneration
-  # - command ref counts, policy range, and link counts depend on the
-  #   PR diff scope (origin/main...HEAD) which changes with every push
-  # These appear in both bullet format (program) and table format (quality)
+  # Strip genuinely volatile metadata that changes every run or per-environment.
+  # All semantic content — command refs, link integrity, policy rows —
+  # must match. Drift in those rows signals a real regression.
   sed \
     -e '/Last verified (UTC):/d' \
     -e '/^- Last updated: `/d' \
     -e '/^- Sync status: `/d' \
-    -e '/^- Command reference checks:/d' \
-    -e '/^- Command reference source breakdown:/d' \
+    -e '/^- Branch: `/d' \
     -e '/^- foundation_policy_range=/d' \
-    -e '/verify-doc-command-refs\.sh/d' \
-    -e '/verify-doc-link-integrity\.sh/d' \
+    -e '/^- foundation_policy_content_status=/d' \
+    -e '/^- base_ref=/d' \
+    -e '/verify-docs-foundation-gates\.sh/d' \
     -e '/verify-docs-policy\.sh/d' \
     "$src" > "$dst"
 }

@@ -1031,11 +1031,32 @@ jobs:
             --gitops-commit "${GITOPS_COMMIT}"
           ./scripts/qa/verify-promotion-record.sh var/ci/promotion-record.json
 
+      - name: Emit app release-gate proof envelope via lms-ops
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          case "$TARGET_ENV" in
+            production) LANE="prod" ;;
+            staging)    LANE="staging" ;;
+            dev)        LANE="dev" ;;
+            *)
+              echo "Unsupported target environment for lms-ops proof lane mapping: $TARGET_ENV" >&2
+              exit 1
+              ;;
+          esac
+          ./bin/lms-ops proof \
+            --concern release-gate \
+            --lane "$LANE" \
+            --skip-cluster
+          cp var/proof/release-gate.json var/ci/release-gate-envelope.json
+
       - name: Upload promotion record
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: promotion-record
-          path: var/ci/promotion-record.json
+          path: |
+            var/ci/promotion-record.json
+            var/ci/release-gate-envelope.json
           retention-days: 90
 
       - name: Summary

@@ -9,7 +9,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-BUILD_WF="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$REPO_ROOT}"
+BUILD_WF="${BUILD_WF_OVERRIDE:-$REPO_ROOT/.github/workflows/build-tutor-images.yml}"
 
 PASS=0 FAIL=0
 
@@ -44,6 +45,20 @@ if grep -q "permissions:" "$BUILD_WF"; then
   pass "permissions block present"
 else
   fail "permissions block missing"
+fi
+
+# App-owned proof must route through lms-ops in build workflow
+if grep -qE '\./bin/lms-ops[[:space:]]+proof' "$BUILD_WF"; then
+  pass "build workflow emits app proof via bin/lms-ops"
+else
+  fail "build workflow missing bin/lms-ops proof emission"
+fi
+
+# Promotion artifact upload must include release-gate envelope
+if grep -q "var/ci/release-gate-envelope.json" "$BUILD_WF"; then
+  pass "build workflow uploads release-gate envelope artifact"
+else
+  fail "build workflow missing release-gate envelope artifact upload"
 fi
 
 echo ""

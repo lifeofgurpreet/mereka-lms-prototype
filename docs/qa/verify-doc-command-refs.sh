@@ -121,7 +121,7 @@ import json
 import os
 import fnmatch
 
-repo_root = Path(sys.argv[1])
+repo_root = Path(sys.argv[1]).resolve()
 summary_path = os.environ.get("DOCS_CMDREF_SUMMARY_PATH", "")
 baseline_enabled = os.environ.get("DOCS_CMDREF_BASELINE_ENABLED", "0") == "1"
 baseline_entries = int(os.environ.get("DOCS_CMDREF_BASELINE_ENTRIES", "0"))

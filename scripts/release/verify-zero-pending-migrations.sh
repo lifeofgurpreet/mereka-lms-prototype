@@ -6,7 +6,7 @@ set -euo pipefail
 # Run this AFTER migration Jobs complete to confirm the schema is clean.
 #
 # Usage:
-#   scripts/release/verify-zero-pending-migrations.sh [--namespace NS] [--json]
+#   scripts/release/verify-zero-pending-migrations.sh [--namespace NS] [--service NAME] [--json]
 #
 # Reads:   deploy/k8s/migrations/registry.yaml (source of truth for services + check commands)
 # Requires: kubectl, python3 (stdlib yaml + json)
@@ -16,23 +16,31 @@ set -euo pipefail
 #   1  One or more services still have pending migrations (or check failed)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 cd "$REPO_ROOT"
 
 NAMESPACE="${NAMESPACE:-mereka-lms}"
 JSON_OUTPUT=false
+SERVICE_FILTER=""
 REGISTRY="deploy/k8s/migrations/registry.yaml"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --namespace) NAMESPACE="${2:?--namespace requires a value}"; shift 2 ;;
+    --service)
+      if [[ -n "$SERVICE_FILTER" ]]; then
+        SERVICE_FILTER="${SERVICE_FILTER},${2:?--service requires a value}"
+      else
+        SERVICE_FILTER="${2:?--service requires a value}"
+      fi
+      shift 2 ;;
     --json)      JSON_OUTPUT=true; shift ;;
     -h|--help)
-      echo "Usage: $0 [--namespace NS] [--json]" >&2
+      echo "Usage: $0 [--namespace NS] [--service NAME] [--json]" >&2
       exit 0 ;;
     *)
       echo "Unknown flag: $1" >&2
-      echo "Usage: $0 [--namespace NS] [--json]" >&2
+      echo "Usage: $0 [--namespace NS] [--service NAME] [--json]" >&2
       exit 1 ;;
   esac
 done
@@ -50,10 +58,20 @@ PASS=0; FAIL=0; SKIP=0
 
 # Accumulate JSON result objects in a bash array
 RESULT_OBJECTS=()
+REQUESTED_SERVICES=()
 
-pass() { echo -e "${GREEN}[PASS]${NC} $*"; PASS=$((PASS + 1)); }
-fail() { echo -e "${RED}[FAIL]${NC} $*"; FAIL=$((FAIL + 1)); }
-skip() { echo -e "${YELLOW}[SKIP]${NC} $*"; SKIP=$((SKIP + 1)); }
+pass() {
+  [[ "$JSON_OUTPUT" == "false" ]] && echo -e "${GREEN}[PASS]${NC} $*"
+  PASS=$((PASS + 1))
+}
+fail() {
+  [[ "$JSON_OUTPUT" == "false" ]] && echo -e "${RED}[FAIL]${NC} $*"
+  FAIL=$((FAIL + 1))
+}
+skip() {
+  [[ "$JSON_OUTPUT" == "false" ]] && echo -e "${YELLOW}[SKIP]${NC} $*"
+  SKIP=$((SKIP + 1))
+}
 
 [[ "$JSON_OUTPUT" == "false" ]] && {
   echo -e "${BOLD}=== Zero-Pending Migration Verification ===${NC}"
@@ -67,6 +85,36 @@ if [[ ! -f "$REGISTRY" ]]; then
   exit 1
 fi
 
+if [[ -n "$SERVICE_FILTER" ]]; then
+  IFS=',' read -r -a raw_requested <<< "$SERVICE_FILTER"
+  for svc in "${raw_requested[@]}"; do
+    svc_trimmed="$(echo "$svc" | xargs)"
+    [[ -n "$svc_trimmed" ]] && REQUESTED_SERVICES+=("$svc_trimmed")
+  done
+fi
+
+# Validate requested services against registry before any kubectl calls.
+if [[ ${#REQUESTED_SERVICES[@]} -gt 0 ]]; then
+  REGISTRY_SERVICES="$(
+    python3 - <<PYEOF 2>/dev/null
+import yaml
+with open("$REGISTRY") as f:
+    reg = yaml.safe_load(f) or {}
+for svc in reg.get("services", []):
+    name = svc.get("name")
+    if name:
+        print(name)
+PYEOF
+  )"
+
+  for req in "${REQUESTED_SERVICES[@]}"; do
+    if ! grep -Fxq "$req" <<<"$REGISTRY_SERVICES"; then
+      fail "$req — unknown service selector (not found in migration registry)"
+      RESULT_OBJECTS+=("{\"name\":\"$req\",\"status\":\"fail\",\"reason\":\"unknown_service\"}")
+    fi
+  done
+fi
+
 # ── Parse registry and verify each service ────────────────────────────────────
 while IFS= read -r svc_json; do
   NAME=$(python3 -c "import json,sys; print(json.load(sys.stdin)['name'])" <<< "$svc_json")
@@ -74,6 +122,17 @@ while IFS= read -r svc_json; do
   PENDING_CMD=$(python3 -c "import json,sys; print(json.load(sys.stdin)['pending_check'])" <<< "$svc_json")
   DB=$(python3 -c "import json,sys; print(json.load(sys.stdin)['database'])" <<< "$svc_json")
   CRITICAL=$(python3 -c "import json,sys; print(json.load(sys.stdin).get('release_critical', False))" <<< "$svc_json")
+
+  if [[ ${#REQUESTED_SERVICES[@]} -gt 0 ]]; then
+    requested=false
+    for req in "${REQUESTED_SERVICES[@]}"; do
+      if [[ "$req" == "$NAME" ]]; then
+        requested=true
+        break
+      fi
+    done
+    [[ "$requested" == "false" ]] && continue
+  fi
 
   if [[ "$DISABLED" == "True" ]]; then
     skip "$NAME (disabled in registry)"

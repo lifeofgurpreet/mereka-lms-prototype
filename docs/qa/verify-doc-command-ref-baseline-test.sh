@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ROOT_DIR=${1:-$(mktemp -d)}
 KEEP_ROOT=0
 
@@ -36,7 +38,7 @@ printf '%s\n' "$PASS_DIR/docs/good-b.md" >> "$PASS_DIR/baseline.txt"
 PASS_SUMMARY="$ROOT_DIR/pass-summary.json"
 (
   cd "$PASS_DIR"
-  /home/gurpreet/projects/k8s/mereka-lms-wt-docs-remediation/docs/qa/verify-doc-command-ref-baseline.sh \
+  "$REPO_ROOT/docs/qa/verify-doc-command-ref-baseline.sh" \
     --baseline-file "$PASS_DIR/baseline.txt" \
     --summary-json "$PASS_SUMMARY" >/tmp/docs_cmdref_baseline_pass.out 2>&1
 )
@@ -62,7 +64,7 @@ printf '%s\n' "$FAIL_DIR/docs/not-markdown.txt" >> "$FAIL_DIR/baseline.txt"
 
 if (
   cd "$FAIL_DIR" && \
-  /home/gurpreet/projects/k8s/mereka-lms-wt-docs-remediation/docs/qa/verify-doc-command-ref-baseline.sh \
+  "$REPO_ROOT/docs/qa/verify-doc-command-ref-baseline.sh" \
     --baseline-file "$FAIL_DIR/baseline.txt" >/tmp/docs_cmdref_baseline_fail.out 2>&1
 ); then
   echo "expected baseline verifier to fail"

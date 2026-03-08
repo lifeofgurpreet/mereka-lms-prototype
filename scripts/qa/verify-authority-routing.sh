@@ -9,7 +9,8 @@
 #    for concerns that should go through lms-ops
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
 
 PASS=0
 FAIL=0
@@ -18,6 +19,33 @@ WARN=0
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1" >&2; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
+
+collect_workflow_invocations() {
+  local script_path="$1"
+  (
+    rg -n -g '*.yml' -g '*.yaml' -F "./${script_path}" "$WORKFLOWS_DIR" 2>/dev/null || true
+    rg -n -g '*.yml' -g '*.yaml' -F "bash ${script_path}" "$WORKFLOWS_DIR" 2>/dev/null || true
+  ) | sort -u
+}
+
+in_allowlist() {
+  local value="$1"
+  shift
+  local item
+  for item in "$@"; do
+    [[ "$item" == "$value" ]] && return 0
+  done
+  return 1
+}
+
+normalize_repo_relative_path() {
+  local path="$1"
+  if [[ "$path" == "$REPO_ROOT/"* ]]; then
+    echo "${path#"$REPO_ROOT"/}"
+  else
+    echo "$path"
+  fi
+}
 
 echo "Authority Routing Verification"
 echo "=============================="
@@ -88,6 +116,88 @@ if grep -q "^front_door:" "$ENTRYPOINTS" 2>/dev/null; then
   fi
 else
   fail "front_door section missing from canonical-entrypoints.yaml"
+fi
+
+# 7. CI workflows must not bypass lms-ops for app-owned concerns.
+if [[ ! -d "$WORKFLOWS_DIR" ]]; then
+  warn "workflow directory missing: $WORKFLOWS_DIR (skipping CI routing checks)"
+else
+  APP_OWNED_LEAF_SCRIPTS=(
+    "scripts/release/migration-preflight.sh"
+    "scripts/release/release-gate.sh"
+    "scripts/release/smoke-after-migrate.sh"
+    "scripts/release/smoke-by-service-wave.sh"
+    "scripts/release/emit-proof-envelope.sh"
+    "scripts/release/verify-zero-pending-migrations.sh"
+    "scripts/qa/verify-topology-selectors.sh"
+  )
+
+  direct_calls=0
+  for script_path in "${APP_OWNED_LEAF_SCRIPTS[@]}"; do
+    hits="$(collect_workflow_invocations "$script_path")"
+    if [[ -n "$hits" ]]; then
+      direct_calls=$((direct_calls + 1))
+      fail "workflow directly invokes app-owned leaf script: $script_path"
+      while IFS= read -r hit_line; do
+        [[ -n "$hit_line" ]] && echo "      $hit_line" >&2
+      done <<<"$hits"
+    fi
+  done
+
+  if [[ "$direct_calls" -eq 0 ]]; then
+    pass "no workflow bypasses bin/lms-ops for app-owned concerns"
+  fi
+
+  # Transitional boundary debt: release-openedx-gitops.sh is env-owned and
+  # should be retired from LMS workflows over time. While still present, lock
+  # callers to a strict allowlist to prevent spread.
+  ALLOWED_RELEASE_OPENEDX_GITOPS_CALLERS=(
+    ".github/workflows/build-tutor-images.yml"
+    ".github/workflows/release.yml"
+    ".github/workflows/release-evidence.yml"
+  )
+
+  release_hits="$(collect_workflow_invocations "scripts/infra/release-openedx-gitops.sh")"
+  if [[ -n "$release_hits" ]]; then
+    release_files="$(printf '%s\n' "$release_hits" | awk -F: '{print $1}' | sort -u)"
+    while IFS= read -r workflow_file; do
+      [[ -z "$workflow_file" ]] && continue
+      workflow_file_rel="$(normalize_repo_relative_path "$workflow_file")"
+      if in_allowlist "$workflow_file_rel" "${ALLOWED_RELEASE_OPENEDX_GITOPS_CALLERS[@]}"; then
+        pass "transitional env-owned caller allowlisted: $workflow_file_rel"
+      else
+        fail "unallowlisted workflow calls scripts/infra/release-openedx-gitops.sh: $workflow_file_rel"
+      fi
+    done <<<"$release_files"
+    warn "release-openedx-gitops.sh remains in LMS workflow callers (boundary debt still active)"
+  else
+    pass "no workflow invokes scripts/infra/release-openedx-gitops.sh"
+  fi
+
+  lms_ops_hits="$(collect_workflow_invocations "bin/lms-ops")"
+  if [[ -z "$lms_ops_hits" ]]; then
+    fail "no workflow currently calls bin/lms-ops (front door not cut over in CI)"
+  else
+    pass "at least one workflow uses bin/lms-ops"
+    lms_ops_files_raw="$(printf '%s\n' "$lms_ops_hits" | awk -F: '{print $1}' | sort -u)"
+    lms_ops_files=""
+    while IFS= read -r wf; do
+      [[ -z "$wf" ]] && continue
+      lms_ops_files+="${lms_ops_files:+$'\n'}$(normalize_repo_relative_path "$wf")"
+    done <<<"$lms_ops_files_raw"
+
+    REQUIRED_LMS_OPS_WORKFLOWS=(
+      ".github/workflows/release-evidence.yml"
+      ".github/workflows/build-tutor-images.yml"
+    )
+    for required_wf in "${REQUIRED_LMS_OPS_WORKFLOWS[@]}"; do
+      if grep -Fxq "$required_wf" <<<"$lms_ops_files"; then
+        pass "required workflow routes app proof via bin/lms-ops: $required_wf"
+      else
+        fail "required workflow missing bin/lms-ops call: $required_wf"
+      fi
+    done
+  fi
 fi
 
 echo ""

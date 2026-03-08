@@ -21,6 +21,7 @@
 # Global options:
 #   --lane <lane>    Canonical lane: dev|staging|prod
 #   --namespace <ns> Override Kubernetes namespace
+#   --service <id>   Service id from deploy/k8s/migrations/registry.yaml (for migrate concerns)
 #   --format json    JSON output (where supported)
 #   --dry-run        Dry-run mode (where supported)
 #   -h, --help       Show this help
@@ -37,6 +38,7 @@ LANE=""
 NAMESPACE=""
 FORMAT="text"
 DRY_RUN=false
+SERVICE_FILTER=""
 CONCERN=""
 SUBCONCERN=""
 PASSTHROUGH_ARGS=()
@@ -54,6 +56,13 @@ parse_args() {
         shift 2 ;;
       --namespace)
         NAMESPACE="${2:?--namespace requires a value}"
+        shift 2 ;;
+      --service)
+        if [[ -n "$SERVICE_FILTER" ]]; then
+          SERVICE_FILTER="${SERVICE_FILTER},${2:?--service requires a value}"
+        else
+          SERVICE_FILTER="${2:?--service requires a value}"
+        fi
         shift 2 ;;
       --format)
         FORMAT="${2:?--format requires a value}"
@@ -109,18 +118,31 @@ do_migrate() {
       echo "=================================================="
       echo ""
       # Show pending migrations by exec into each service pod
-      python3 - "$REPO_ROOT" "$NAMESPACE" <<'PYEOF'
-import yaml, subprocess, sys, json
+      python3 - "$REPO_ROOT" "$NAMESPACE" "$SERVICE_FILTER" <<'PYEOF'
+import yaml, subprocess, sys
 
 repo_root = sys.argv[1]
 namespace = sys.argv[2]
+service_filter_raw = sys.argv[3]
 registry_path = f"{repo_root}/deploy/k8s/migrations/registry.yaml"
 
 with open(registry_path) as f:
     registry = yaml.safe_load(f)
 
+requested = {s.strip() for s in service_filter_raw.split(",") if s.strip()}
+known = {svc.get("name") for svc in registry.get("services", [])}
+
+unknown = sorted(requested - known)
+for svc_name in unknown:
+    print(f"  ERR   {svc_name} — not found in migration registry")
+if unknown:
+    sys.exit(1)
+
 for svc in registry.get("services", []):
     name = svc["name"]
+    if requested and name not in requested:
+        continue
+
     disabled = svc.get("disabled", False)
     if disabled:
         print(f"  SKIP  {name} (disabled)")
@@ -172,27 +194,112 @@ PYEOF
         echo ""
       fi
 
-      # Find migration Job manifests
-      local job_dir="$REPO_ROOT/deploy/k8s/base/jobs"
-      local applied=0
-      for job_file in "$job_dir"/*-migrate.yaml; do
-        [[ -f "$job_file" ]] || continue
-        local job_name
-        job_name="$(basename "$job_file" .yaml)"
+      # Build apply plan from migration registry.
+      local registry="$REPO_ROOT/deploy/k8s/migrations/registry.yaml"
+      if [[ ! -f "$registry" ]]; then
+        echo "Migration registry not found: $registry" >&2
+        exit 1
+      fi
 
-        if [[ "$DRY_RUN" == "true" ]]; then
-          echo "  [DRY RUN] kubectl apply -f $job_file -n $NAMESPACE"
-        else
-          echo "  Applying: $job_name"
-          kubectl apply -f "$job_file" -n "$NAMESPACE" "${PASSTHROUGH_ARGS[@]}" || {
-            echo "  FAIL: $job_name failed to apply" >&2
-          }
-        fi
-        applied=$((applied + 1))
-      done
+      local apply_plan
+      apply_plan="$(python3 - "$registry" "$SERVICE_FILTER" <<'PYEOF'
+import sys
+import yaml
+
+registry_path, service_filter_raw = sys.argv[1], sys.argv[2]
+with open(registry_path) as f:
+    registry = yaml.safe_load(f) or {}
+
+services = registry.get("services", [])
+requested = [s.strip() for s in service_filter_raw.split(",") if s.strip()]
+requested_set = set(requested)
+known = {svc.get("name") for svc in services}
+
+for svc_name in sorted(requested_set - known):
+    print(f"ERR_UNKNOWN\t{svc_name}\t")
+
+for svc in services:
+    name = str(svc.get("name", "")).strip()
+    if not name:
+        continue
+    if requested_set and name not in requested_set:
+        continue
+    if bool(svc.get("disabled", False)):
+        print(f"SKIP_DISABLED\t{name}\t")
+        continue
+    manifest = str(svc.get("job_manifest", "")).strip()
+    if not manifest:
+        print(f"MISSING_JOB\t{name}\t")
+        continue
+    print(f"APPLY\t{name}\t{manifest}")
+PYEOF
+)"
+
+      if [[ -z "$apply_plan" ]]; then
+        echo "No migration services selected from registry." >&2
+        exit 1
+      fi
+
+      local selected_service_mode="false"
+      [[ -n "$SERVICE_FILTER" ]] && selected_service_mode="true"
+
+      local applied=0
+      local missing=0
+      local skipped=0
+      local errored=0
+      while IFS=$'\t' read -r status service_name manifest_path; do
+        [[ -z "${status:-}" ]] && continue
+        case "$status" in
+          ERR_UNKNOWN)
+            echo "  FAIL: unknown service '$service_name' (not found in migration registry)" >&2
+            errored=$((errored + 1))
+            ;;
+          SKIP_DISABLED)
+            echo "  SKIP: $service_name (disabled in migration registry)"
+            skipped=$((skipped + 1))
+            ;;
+          MISSING_JOB)
+            if [[ "$selected_service_mode" == "true" ]]; then
+              echo "  FAIL: $service_name has no job_manifest in migration registry" >&2
+              errored=$((errored + 1))
+            else
+              echo "  WARN: $service_name has no job_manifest in migration registry (skipping)"
+              missing=$((missing + 1))
+            fi
+            ;;
+          APPLY)
+            local job_file="$REPO_ROOT/$manifest_path"
+            if [[ ! -f "$job_file" ]]; then
+              echo "  FAIL: $service_name job manifest not found: $manifest_path" >&2
+              errored=$((errored + 1))
+              continue
+            fi
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "  [DRY RUN] $service_name: kubectl apply -f $manifest_path -n $NAMESPACE"
+            else
+              echo "  Applying: $service_name ($manifest_path)"
+              if ! kubectl apply -f "$job_file" -n "$NAMESPACE" "${PASSTHROUGH_ARGS[@]}"; then
+                echo "  FAIL: $service_name failed to apply" >&2
+                errored=$((errored + 1))
+                continue
+              fi
+            fi
+            applied=$((applied + 1))
+            ;;
+          *)
+            echo "  FAIL: unknown apply-plan status '$status' for service '$service_name'" >&2
+            errored=$((errored + 1))
+            ;;
+        esac
+      done <<< "$apply_plan"
 
       echo ""
       echo "Applied $applied migration Job(s) to namespace $NAMESPACE"
+      echo "Skipped $skipped disabled service(s), $missing service(s) missing job_manifest"
+      if [[ "$errored" -gt 0 ]]; then
+        echo "Encountered $errored migration apply error(s)" >&2
+        exit 1
+      fi
       if [[ "$DRY_RUN" != "true" ]]; then
         echo ""
         echo "Monitor with: kubectl get jobs -n $NAMESPACE -w"
@@ -201,10 +308,14 @@ PYEOF
       ;;
 
     verify)
-      echo "Migration verify (lane: $LANE, namespace: $NAMESPACE)"
-      echo "======================================================"
+      if [[ "$FORMAT" != "json" ]]; then
+        echo "Migration verify (lane: $LANE, namespace: $NAMESPACE)"
+        echo "======================================================"
+      fi
       local args=("--namespace" "$NAMESPACE")
+      [[ -n "$SERVICE_FILTER" ]] && args+=("--service" "$SERVICE_FILTER")
       [[ "$FORMAT" == "json" ]] && args+=("--json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
       exec "$REPO_ROOT/scripts/release/verify-zero-pending-migrations.sh" "${args[@]}"
       ;;
 
@@ -245,7 +356,7 @@ do_smoke() {
       exec "$REPO_ROOT/scripts/release/smoke-after-migrate.sh" "${args[@]}"
       ;;
     wave)
-      local args=("--lane" "$CANONICAL_LANE")
+      local args=("--lane" "$LANE")
       [[ "$FORMAT" == "json" ]] && args+=("--json")
       args+=("${PASSTHROUGH_ARGS[@]}")
       exec "$REPO_ROOT/scripts/release/smoke-by-service-wave.sh" "${args[@]}"

@@ -72,12 +72,14 @@ scripts/qa/test-verify-kustomize-no-deprecated-keys.sh
 scripts/qa/test-verify-secret-inventory.sh
 scripts/qa/test-verify-script-portability.sh
 scripts/qa/test-verify-qa-readonly-contract.sh
+scripts/qa/test-verify-lms-ops-migrate-contract.sh
 scripts/qa/test-verify-secrets-isolation.sh
 scripts/qa/test-verify-infisical-env-validation-coverage.sh
 scripts/qa/test-verify-secrets-management.sh
 scripts/qa/test-verify-security-hardening.sh
 scripts/qa/test-verify-csp-headers.sh
 scripts/qa/test-verify-evidence-redaction.sh
+scripts/qa/test-verify-authority-routing.sh
 scripts/qa/test-verify-post-deploy-health-gate-wiring.sh
 scripts/qa/test-verify-release-invocation-guardrail-wiring.sh
 scripts/qa/test-verify-release-gitops-guardrails.sh
@@ -85,11 +87,14 @@ scripts/qa/test-verify-release-promotion-wiring.sh
 scripts/qa/test-verify-release-workflow-invocation.sh
 scripts/qa/test-verify-release-bundle.sh
 scripts/qa/test-verify-promotion-record.sh
+scripts/qa/test-verify-build-workflow-contract.sh
 scripts/qa/test-verify-rollback-dry-run.sh
 scripts/qa/test-verify-post-deploy-gate.sh
 scripts/qa/test-verify-wif-readiness.sh
 scripts/qa/test-verify-slsa-provenance.sh
 scripts/qa/test-verify-migration-rollback.sh
+scripts/qa/test-verify-zero-pending-migrations-service-filter.sh
+scripts/qa/test-lms-ops-migrate-unknown-service-guardrails.sh
 
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh

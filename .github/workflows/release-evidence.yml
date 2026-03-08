@@ -165,6 +165,18 @@ jobs:
         run: |
           mkdir -p var/release-evidence
 
+      - name: Emit app proof envelopes via lms-ops front door
+        run: |
+          set -euo pipefail
+          ./bin/lms-ops proof \
+            --concern aggregate \
+            --lane "${{ inputs.target_environment }}" \
+            --skip-cluster
+          cp var/proof/release-gate.json var/release-evidence/release-gate-envelope.json
+          cp var/proof/migration-proof.json var/release-evidence/migration-proof-envelope.json
+          cp var/proof/runtime-smoke.json var/release-evidence/runtime-smoke-envelope.json
+          cp var/proof/aggregate.json var/release-evidence/aggregate-proof-envelope.json
+
       - name: Resolve image digests from registry tags
         id: digests
         run: |
