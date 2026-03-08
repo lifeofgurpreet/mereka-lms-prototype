@@ -59,7 +59,7 @@ jobs:
       - name: Validate Tutor config
         run: |
           # Check for syntax errors in YAML configs
-          pip install --quiet pyyaml
+          python3 -m pip install --quiet pyyaml
           python3 -c "import yaml; yaml.safe_load(open('infrastructure/tutor/config.example.yml'))"
           echo "✅ Config YAML is valid"
 
