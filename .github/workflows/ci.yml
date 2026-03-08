@@ -5,6 +5,20 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'tools/docs/**'
+      - 'generated/catalogs/**'
+      - 'docs/catalog.json'
+      - '.github/workflows/docs-compliance.yml'
+      - '.github/workflows/docs-policy.yml'
+      - '.github/workflows/codeql.yml'
+      - '*.md'
+      - 'CLAUDE.md'
+      - 'AGENTS.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'LICENSE'
   merge_group:
   push:
     branches: [main]
@@ -17,6 +31,53 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  change-scope:
+    name: Detect docs-only control-plane scope
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs_only: ${{ steps.scope.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect docs-only control-plane diff
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          mapfile -t CHANGED < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")
+
+          if [[ "${#CHANGED[@]}" -eq 0 ]]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          docs_only=true
+          for path in "${CHANGED[@]}"; do
+            case "$path" in
+              docs/*|tools/docs/*|generated/catalogs/*|.github/workflows/docs-compliance.yml|.github/workflows/docs-policy.yml|.github/workflows/ci.yml|.github/workflows/codeql.yml|*.md|CLAUDE.md|AGENTS.md|CONTRIBUTING.md|SECURITY.md|LICENSE)
+                ;;
+              *)
+                docs_only=false
+                break
+                ;;
+            esac
+          done
+
+          echo "docs_only=${docs_only}" >> "$GITHUB_OUTPUT"
+
   # ============================================================================
   # Job 1: static-validation
   # Runs on every PR and push. Replaces 65+ micro-jobs:
@@ -46,6 +107,8 @@ jobs:
   # ============================================================================
   static-validation:
     name: Static Validation
+    needs: change-scope
+    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
@@ -466,6 +529,8 @@ jobs:
   # ============================================================================
   tutor-config-tests:
     name: Tutor Configuration Tests
+    needs: change-scope
+    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
@@ -535,6 +600,8 @@ jobs:
   # ============================================================================
   security-scans:
     name: Security Scans
+    needs: change-scope
+    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
@@ -647,6 +714,8 @@ jobs:
   # ============================================================================
   test-coverage:
     name: Python test coverage
+    needs: change-scope
+    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read

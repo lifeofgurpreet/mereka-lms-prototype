@@ -44,6 +44,8 @@ Apply these rules in order:
 - lightweight tooling summaries
 
 If catalog output disagrees with in-document metadata, the document metadata wins and the catalog MUST be regenerated.
+Use `python3 tools/docs/verify/build-doc-catalog.py` as the compiler entrypoint for
+`generated/catalogs/docs-catalog.json` and `docs/catalog.json`.
 
 ## Testmap rule
 
