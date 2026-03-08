@@ -31,10 +31,10 @@ This PR advances the docs remediation and compliance program from cleanup into a
 - `tools/docs/verify/verify-docs-policy.sh`
 - `./scripts/qa/verify-repo-structure.sh`
 - `tools/docs/verify/verify-doc-catalog-health-test.sh`
-- `docs/qa/verify-doc-command-refs-test.sh`
+- `tools/docs/verify/verify-doc-command-refs-test.sh`
 - `tools/docs/scorecards/build-docs-scorecard-test.sh`
 - `tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh`
-- `docs/qa/build-docs-compliance-summary-test.sh`
+- `tools/docs/scorecards/build-docs-compliance-summary-test.sh`
 - `tools/docs/verify/run-docs-world-class-gates.sh --sync`
 
 ### Merge criteria

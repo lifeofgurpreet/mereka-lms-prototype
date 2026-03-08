@@ -5726,6 +5726,24 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-08",
+    "owner": "Platform Team",
+    "path": "guides/standards/EVIDENCE_PACK_STANDARD.md",
+    "status": "canonical",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-08",
+    "owner": "Platform Team",
+    "path": "guides/standards/STATUS_REPORTING_STANDARD.md",
+    "status": "canonical",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2025-11-09",
     "owner": "Infra Team",
     "path": "guides/standards/STYLE_GUIDE.md",
