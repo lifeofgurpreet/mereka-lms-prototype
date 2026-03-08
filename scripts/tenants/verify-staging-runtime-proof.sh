@@ -591,8 +591,16 @@ for tenant in "${TENANTS[@]}"; do
     continue
   fi
 
-  # Check: Domain attribute should match expected per-tenant scope
-  DOMAIN_IN_COOKIE=$(printf '%s' "$SET_COOKIE_LINES" \
+  # Check: Domain attribute on the csrftoken cookie (set by MerekaCookieDomainMiddleware).
+  # sessionid intentionally has no Domain= (Django host-only default) — do NOT use it.
+  CSRFTOKEN_LINE=$(printf '%s' "$SET_COOKIE_LINES" | grep -i 'csrftoken' || true)
+
+  if [[ -z "$CSRFTOKEN_LINE" ]]; then
+    skip_ "Cookie[$slug]: no csrftoken Set-Cookie header from https://$lms/login (may be cached response)"
+    continue
+  fi
+
+  DOMAIN_IN_COOKIE=$(printf '%s' "$CSRFTOKEN_LINE" \
     | grep -oi "domain=[^;,[:space:]]*" \
     | head -1 \
     | sed 's/domain=//i' || true)
@@ -601,7 +609,13 @@ for tenant in "${TENANTS[@]}"; do
 import json
 expected='$expected_cookie_domain'
 actual='$DOMAIN_IN_COOKIE'
-ok = (actual == expected) or (actual == '') or ('-' in actual and expected.lstrip('.') in actual)
+
+# Empty domain is NOT a match when a non-empty domain is expected.
+# Only accept an exact match (or subdomain containment for edge cases).
+if actual == '':
+    ok = False
+else:
+    ok = (actual == expected)
 
 # Detect contamination: cookie domain pointing to Mereka primary when not Mereka
 slug='$slug'
