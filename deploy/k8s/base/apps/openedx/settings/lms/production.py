@@ -977,16 +977,25 @@ if _module_available("lms.envs.tutor.mereka_forwarded_headers"):
 else:
     logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _forwarded_headers_middleware)
 
-# OIDC hardening: the cookie-domain middleware must run after SessionMiddleware
-# has set session/csrf cookies on the response, otherwise OIDC state cookies
-# can remain host-only and fail on callback ("Session value state missing").
+# Cookie-domain middleware ordering: must be BEFORE both SessionMiddleware and
+# CsrfViewMiddleware in the MIDDLEWARE list so that in the response phase
+# (which processes in reverse order) our middleware runs AFTER they have set
+# sessionid/csrftoken cookies. Without this, our middleware sees the response
+# before csrftoken is set and can't rewrite its Domain attribute.
 _cookie_middleware = "lms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware"
+_csrf_middleware = "django.middleware.csrf.CsrfViewMiddleware"
 _session_middleware = "django.contrib.sessions.middleware.SessionMiddleware"
-if _cookie_middleware in MIDDLEWARE and _session_middleware in MIDDLEWARE:
-    cookie_index = MIDDLEWARE.index(_cookie_middleware)
-    session_index = MIDDLEWARE.index(_session_middleware)
-    if cookie_index > session_index:
-        MIDDLEWARE.insert(session_index, MIDDLEWARE.pop(cookie_index))
+if _cookie_middleware in MIDDLEWARE:
+    # Find the earliest of SessionMiddleware and CsrfViewMiddleware
+    _targets = []
+    for _mw in (_session_middleware, _csrf_middleware):
+        if _mw in MIDDLEWARE:
+            _targets.append(MIDDLEWARE.index(_mw))
+    if _targets:
+        _earliest = min(_targets)
+        _cookie_idx = MIDDLEWARE.index(_cookie_middleware)
+        if _cookie_idx > _earliest:
+            MIDDLEWARE.insert(_earliest, MIDDLEWARE.pop(_cookie_idx))
 
 # Enterprise Integrated Channels (Degreed, CSOD, etc.)
 try:

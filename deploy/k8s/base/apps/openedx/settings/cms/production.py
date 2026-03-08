@@ -559,16 +559,24 @@ if _module_available("cms.envs.tutor.mereka_forwarded_headers"):
 else:
     logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _forwarded_headers_middleware)
 
-# Keep cookie-domain rewriting ahead of session middleware in request order so
-# it runs after session middleware in response order and can rewrite cookie
-# domains reliably on multisite Studio responses.
+# Cookie-domain middleware ordering: must be BEFORE both SessionMiddleware and
+# CsrfViewMiddleware in the MIDDLEWARE list so that in the response phase
+# (which processes in reverse order) our middleware runs AFTER they have set
+# sessionid/csrftoken cookies. Without this, our middleware sees the response
+# before csrftoken is set and can't rewrite its Domain attribute.
 _cookie_middleware = "cms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware"
+_csrf_middleware = "django.middleware.csrf.CsrfViewMiddleware"
 _session_middleware = "django.contrib.sessions.middleware.SessionMiddleware"
-if _cookie_middleware in MIDDLEWARE and _session_middleware in MIDDLEWARE:
-    cookie_index = MIDDLEWARE.index(_cookie_middleware)
-    session_index = MIDDLEWARE.index(_session_middleware)
-    if cookie_index > session_index:
-        MIDDLEWARE.insert(session_index, MIDDLEWARE.pop(cookie_index))
+if _cookie_middleware in MIDDLEWARE:
+    _targets = []
+    for _mw in (_session_middleware, _csrf_middleware):
+        if _mw in MIDDLEWARE:
+            _targets.append(MIDDLEWARE.index(_mw))
+    if _targets:
+        _earliest = min(_targets)
+        _cookie_idx = MIDDLEWARE.index(_cookie_middleware)
+        if _cookie_idx > _earliest:
+            MIDDLEWARE.insert(_earliest, MIDDLEWARE.pop(_cookie_idx))
 
 # Ensure social-auth callback failures (missing/invalid state, etc.) do not surface as 500s.
 # This is critical for Studio's LMS OAuth2 roundtrip (/login/edx-oauth2 -> /complete/edx-oauth2).

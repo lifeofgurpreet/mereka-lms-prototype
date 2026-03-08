@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# seed-staging-sites.sh — Idempotent seed/repair for Django Site + SiteConfiguration
-#                         rows across all staging tenants.
+# seed-dev-sites.sh — Idempotent seed/repair for Django Site + SiteConfiguration
+#                     rows in the dev namespace.
 #
-# Creates or updates Site and SiteConfiguration for each staging tenant.
+# Creates or updates Site and SiteConfiguration for each dev tenant.
 # Safe to re-run: uses get_or_create / update_or_create throughout.
 #
 # Usage:
-#   scripts/tenants/seed-staging-sites.sh [--namespace NS] [--dry-run]
+#   scripts/tenants/seed-dev-sites.sh [--namespace NS] [--dry-run]
 #
 # Requires: kubectl, python3
 set -euo pipefail
@@ -14,7 +14,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-NAMESPACE="stg-mereka-lms"
+NAMESPACE="mereka-lms-dev"
 DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
@@ -36,16 +36,14 @@ _POD_LIST=$(kubectl get pods -n "$NAMESPACE" \
 LMS_POD=$(echo "$_POD_LIST" | awk '$2 == "true" { print $1; exit }')
 [[ -z "$LMS_POD" ]] && { echo "ERROR: no ready LMS pod in namespace $NAMESPACE" >&2; exit 1; }
 
-echo "=== seed-staging-sites: namespace=$NAMESPACE lms=$LMS_POD ==="
+echo "=== seed-dev-sites: namespace=$NAMESPACE lms=$LMS_POD ==="
 [[ "$DRY_RUN" == "true" ]] && echo "=== DRY RUN — no writes will be made ==="
 echo ""
 
 # ── Tenant definitions ────────────────────────────────────────────────────────
 # Format: SLUG|DOMAIN|NAME|LMS_ROOT_URL|MFE_BASE_URL|COURSE_ORG_FILTER_JSON|THEME_NAME
 declare -a TENANT_DEFS=(
-  'mereka|staging.academyv2.mereka.io|Mereka Academy Staging|https://staging.academyv2.mereka.io|https://staging.apps.academyv2.mereka.io|["BBI","Mereka"]|mereka'
-  'biji-biji|staging.academy.biji-biji.com|Biji-Biji Academy Staging|https://staging.academy.biji-biji.com|https://apps.staging.academy.biji-biji.com|["BijiBiji"]|'
-  'skillourfuture|staging.skillourfuture.academy.mereka.io|Skill Our Future Staging|https://staging.skillourfuture.academy.mereka.io|https://apps.staging.skillourfuture.academy.mereka.io|["SoF"]|'
+  'mereka|academyv2.mereka.dev|Mereka Academy Dev|https://academyv2.mereka.dev|https://apps.academyv2.mereka.dev|["BBI","Mereka"]|mereka'
 )
 
 PASS=0
@@ -53,16 +51,7 @@ FAIL=0
 
 for TENANT_LINE in "${TENANT_DEFS[@]}"; do
   IFS='|' read -r SLUG DOMAIN NAME LMS_ROOT_URL MFE_BASE_URL COURSE_ORG_FILTER_JSON THEME_NAME <<< "$TENANT_LINE"
-  CMS_ROOT_URL="${LMS_ROOT_URL/staging./staging.studio.}"
-  # Derive studio URL by inserting studio. after the staging. prefix
-  # e.g. https://staging.academyv2.mereka.io → https://staging.studio.academyv2.mereka.io
-  # For biji-biji: https://staging.academy.biji-biji.com → https://studio.staging.academy.biji-biji.com
-  case "$SLUG" in
-    mereka)        CMS_ROOT_URL="https://staging.studio.academyv2.mereka.io" ;;
-    biji-biji)     CMS_ROOT_URL="https://studio.staging.academy.biji-biji.com" ;;
-    skillourfuture) CMS_ROOT_URL="https://studio.staging.skillourfuture.academy.mereka.io" ;;
-  esac
-
+  CMS_ROOT_URL="https://studio.academyv2.mereka.dev"
   AUTHN_MFE_URL="${MFE_BASE_URL}/authn"
 
   echo "--- tenant: $SLUG ---"
@@ -81,8 +70,7 @@ for TENANT_LINE in "${TENANT_DEFS[@]}"; do
     continue
   fi
 
-  # Write Python script to a tempfile to avoid shell quoting hazards
-  PY_SCRIPT=$(mktemp /tmp/seed_staging_XXXXXX.py)
+  PY_SCRIPT=$(mktemp /tmp/seed_dev_XXXXXX.py)
   cat > "$PY_SCRIPT" <<PYEOF
 from django.contrib.sites.models import Site
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
@@ -156,7 +144,6 @@ sc, sc_created = SiteConfiguration.objects.update_or_create(
 )
 sc_action = "CREATED" if sc_created else "UPDATED"
 
-# Detect truly unchanged (heuristic: LMS_ROOT_URL matches)
 if not sc_created and sc.site_values.get("LMS_ROOT_URL") == lms_url and site_action == "UNCHANGED":
     sc_action = "UNCHANGED"
 
@@ -190,5 +177,5 @@ PYEOF
   fi
 done
 
-echo "=== seed-staging-sites: ${#TENANT_DEFS[@]} tenants, $PASS OK, $FAIL FAIL ==="
+echo "=== seed-dev-sites: ${#TENANT_DEFS[@]} tenants, $PASS OK, $FAIL FAIL ==="
 [[ $FAIL -eq 0 ]]
