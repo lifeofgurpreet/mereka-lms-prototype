@@ -31,24 +31,24 @@ Converge the repository toward this top-level knowledge model:
 
 | From | To |
 |---|---|
-| `docs/runbooks/README.md` | `docs/meta/adr-process/README.md` |
-| `docs/runbooks/adr-authoring.md` | `docs/meta/adr-process/adr-authoring.md` |
-| `docs/runbooks/adr-review.md` | `docs/meta/adr-process/adr-review.md` |
-| `docs/runbooks/adr-rollout.md` | `docs/meta/adr-process/adr-rollout.md` |
-| `docs/adr/_generated/bundles/*` | `generated/adr-bundles/*` |
-| `docs/adr/_generated/graph.json` | `generated/graphs/adr-graph.json` |
-| `docs/adr/_generated/decision-map.md` | `generated/decision-maps/adr-decision-map.md` |
-| `docs/adr/_generated/README.md` | `generated/adr-bundles/README.md` |
+| legacy ADR process readme | `docs/meta/adr-process/README.md` |
+| legacy ADR authoring guide | `docs/meta/adr-process/adr-authoring.md` |
+| legacy ADR review guide | `docs/meta/adr-process/adr-review.md` |
+| legacy ADR rollout guide | `docs/meta/adr-process/adr-rollout.md` |
+| legacy generated ADR bundles | `generated/adr-bundles/*` |
+| legacy generated ADR graph | `generated/graphs/adr-graph.json` |
+| legacy generated ADR decision map | `generated/decision-maps/adr-decision-map.md` |
+| legacy generated ADR readme | `generated/adr-bundles/README.md` |
 
 ## Next move candidates
 
 ### Low-risk next
 
-- `docs/evidence/README.md` -> `evidence/README.md`
-- `docs/evidence/index.yaml` -> `evidence/index.yaml`
-- `docs/verification/runtime_local_fast_baseline.json` -> `verification/baselines/runtime_local_fast_baseline.json`
-- `docs/verification/QA_SCRIPT_CATALOG.yml` -> `verification/catalogs/QA_SCRIPT_CATALOG.yml`
-- `docs/verification/AC_VERIFICATION_STRATEGY_MATRIX.yml` -> `verification/catalogs/AC_VERIFICATION_STRATEGY_MATRIX.yml`
+- legacy evidence index -> `docs/evidence/INDEX.md`
+- legacy evidence manifest -> `docs/evidence/index.yaml`
+- legacy verification runtime baseline -> `verification/baselines/runtime_local_fast_baseline.json`
+- legacy QA script catalog -> `verification/catalogs/QA_SCRIPT_CATALOG.yml`
+- legacy AC verification strategy matrix -> `verification/catalogs/AC_VERIFICATION_STRATEGY_MATRIX.yml`
 
 ### Requires path-repair first
 
@@ -56,7 +56,7 @@ Converge the repository toward this top-level knowledge model:
 - `generated/catalogs/docs-catalog.json`
 - `docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md`
 - `docs/status/active/NEXT10_TASKS.md`
-- `docs/sprints/*`
+- `reports/2026/sprints/*`
 - `docs/evidence/observability`
 - broad `docs/verification/*` moves referenced by scripts
 
@@ -64,9 +64,9 @@ Converge the repository toward this top-level knowledge model:
 
 Until Wave 2 is complete:
 
-- New authored docs go only into `docs/adr/`, `docs/architecture/`, `docs/guides/`, `docs/runbooks/`, `docs/reference/`, `docs/policies/`, `docs/standards/`, or `docs/meta/`
+- New authored docs go only into `docs/adr/`, `docs/concepts/architecture/`, `docs/guides/`, `docs/ops/`, `docs/reference/`, `docs/policies/`, `docs/evidence/`, `docs/status/`, or `docs/meta/`
 - New generated outputs go only into `generated/`
-- New proof goes only into `evidence/`
+- New proof goes only into `docs/evidence/`
 - New verification artifacts go only into `verification/`
 - New dated audits, status snapshots, and closures go only into `reports/YYYY/`
-- Do not add new files to `docs/ops/`, `docs/operations/`, `docs/branding/`, `docs/ci-cd/`, `docs/concepts/`, `docs/onboarding/`, or `docs/migrations/`
+- Do not add new files to `docs/operations/`, `docs/branding/`, `docs/onboarding/`, `docs/runbooks/`, `docs/architecture/`, `docs/ci-cd/`, or `docs/migrations/`
