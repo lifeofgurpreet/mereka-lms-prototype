@@ -178,7 +178,7 @@ Use this deterministic mapping unless explicitly overridden by owner approval.
 | `evidence/**` | `archive/evidence/**` (tiered) | evidence lifecycle policy applies |
 | `docs/operations/evidence/**` | `docs/archive/evidence/**` (tiered) | evidence lifecycle policy applies |
 | `docs/ci-cd/**` | `docs/ops/ci-cd/**` | operational pipeline docs |
-| `docs/status/**` | `docs/archive/reports/**` or `docs/qa/reports/**` | depends on active operational relevance |
+| `docs/status/**` | `docs/status/**` | active reporting/status root; archive only after cold-storage transition |
 
 ---
 
@@ -263,10 +263,10 @@ Use this decision matrix to prevent logs from becoming reference docs.
 
 | Content Kind | Default Home | Lifecycle |
 |---|---|---|
-| Time-bound status updates (`*_STATUS`, `*_TRACKER`, dated handoffs) | `docs/archive/reports/` | archive-first, never canonical |
+| Time-bound status updates (`*_STATUS`, `*_TRACKER`, dated handoffs) | `docs/status/**` while active, then `docs/archive/reports/**` | active status belongs in the winning status root; archive only when cold |
 | Permanent how-to | `docs/guides/**` or `docs/ops/runbooks/**` | canonical candidate |
 | Architecture rationale | `docs/adr/**` or `docs/concepts/**` | long-lived, reviewed periodically |
-| Raw evidence/log outputs | `docs/archive/evidence/**` | retention policy governed |
+| Raw evidence/log outputs | `docs/evidence/**` while active, then `docs/archive/evidence/**` | active evidence belongs in the winning evidence root |
 
 Extraction rule:
 - If transient docs contain durable guidance, extract that guidance into canonical guide/runbook first, then supersede/archive transient source.
@@ -433,7 +433,7 @@ No cluster can be marked `DONE` until contradictions are resolved or explicitly 
 
 ## 11) KPIs, SLOs, and Success Criteria
 
-Track weekly in `docs/archive/reports/docs-program-scorecard-YYYYMMDD.md`.
+Track weekly in `docs/guides/admin/DOCS_PROGRAM_SCORECARD_YYYYMMDD.md`.
 
 | KPI | Target |
 |---|---|
