@@ -35,7 +35,7 @@ echo "" >> "$FAIL_DIR/DOCS_QUALITY_SCORECARD_${DATE}.md"
 echo "- forced drift line" >> "$FAIL_DIR/DOCS_QUALITY_SCORECARD_${DATE}.md"
 
 PASS_SUMMARY="$ROOT_DIR/pass-summary.json"
-docs/qa/verify-docs-scorecard-generation-drift.sh \
+tools/docs/verify/verify-docs-scorecard-generation-drift.sh \
   --program-glob "$PASS_DIR/DOCS_PROGRAM_SCORECARD_*.md" \
   --quality-glob "$PASS_DIR/DOCS_QUALITY_SCORECARD_*.md" \
   --summary-json "$PASS_SUMMARY" >/tmp/docs_scorecard_drift_pass.out 2>&1
@@ -53,7 +53,7 @@ if payload.get("quality_match") is not True:
     raise SystemExit("expected quality_match=true")
 PY
 
-if docs/qa/verify-docs-scorecard-generation-drift.sh \
+if tools/docs/verify/verify-docs-scorecard-generation-drift.sh \
   --program-glob "$FAIL_DIR/DOCS_PROGRAM_SCORECARD_*.md" \
   --quality-glob "$FAIL_DIR/DOCS_QUALITY_SCORECARD_*.md" >/tmp/docs_scorecard_drift_fail.out 2>&1; then
   echo "expected generation drift failure, got success"

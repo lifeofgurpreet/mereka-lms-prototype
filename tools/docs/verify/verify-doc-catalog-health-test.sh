@@ -25,6 +25,8 @@ test_case() {
   local expect_fail=$3
   local args=("--max-stale-days" "30" "--root" "$ROOT_DIR" "$ROOT_DIR/$catalog_json")
 
+  cp "$ROOT_DIR/$catalog_json" "$ROOT_DIR/docs/catalog.json"
+
   if [ "$expect_fail" -eq 1 ]; then
     if python3 tools/docs/verify/verify-doc-catalog-health.py "${args[@]}" >/tmp/catalog_test_${name}.out 2>&1; then
       echo "[$name] expected failure, got success"

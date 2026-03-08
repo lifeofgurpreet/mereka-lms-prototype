@@ -7,7 +7,7 @@ on:
       - ".github/workflows/docs-compliance.yml"
       - "tools/docs/verify/verify-doc-command-refs.sh"
       - "tools/docs/verify/verify-doc-command-ref-baseline.sh"
-      - "docs/qa/verify-doc-command-ref-baseline-test.sh"
+      - "tools/docs/verify/verify-doc-command-ref-baseline-test.sh"
       - "tools/docs/verify/verify-doc-link-integrity.sh"
       - "tools/docs/verify/verify-doc-link-integrity.py"
       - "tools/docs/verify/build-doc-catalog.py"
@@ -28,27 +28,27 @@ on:
       - "tools/docs/scorecards/build-docs-scorecard.py"
       - "tools/docs/scorecards/build-docs-scorecard-test.sh"
       - "tools/docs/scorecards/build-docs-compliance-summary.py"
-      - "docs/qa/build-docs-compliance-summary-test.sh"
+      - "tools/docs/scorecards/build-docs-compliance-summary-test.sh"
       - "tools/docs/verify/verify-docs-foundation-gates.sh"
-      - "docs/qa/verify-docs-foundation-gates-test.sh"
+      - "tools/docs/verify/verify-docs-foundation-gates-test.sh"
       - "tools/docs/verify/run-docs-world-class-gates.sh"
       - "tools/docs/verify/run-docs-world-class-gates-test.sh"
-      - "docs/qa/verify-docs-compliance-workflow-contract-test.sh"
+      - "tools/docs/verify/verify-docs-compliance-workflow-contract-test.sh"
       - "tools/docs/scorecards/generate-docs-scorecard-report.sh"
       - "tools/docs/scorecards/generate-docs-scorecard-report-test.sh"
       - "tools/docs/verify/verify-docs-scorecard-recency.sh"
-      - "docs/qa/verify-docs-scorecard-recency-test.sh"
+      - "tools/docs/verify/verify-docs-scorecard-recency-test.sh"
       - "tools/docs/verify/verify-docs-scorecard-report-consistency.sh"
-      - "docs/qa/verify-docs-scorecard-report-consistency-test.sh"
+      - "tools/docs/verify/verify-docs-scorecard-report-consistency-test.sh"
       - "tools/docs/verify/verify-docs-scorecard-head-freshness.sh"
-      - "docs/qa/verify-docs-scorecard-head-freshness-test.sh"
+      - "tools/docs/verify/verify-docs-scorecard-head-freshness-test.sh"
       - "tools/docs/verify/verify-docs-scorecard-report-timestamp.sh"
-      - "docs/qa/verify-docs-scorecard-report-timestamp-test.sh"
+      - "tools/docs/verify/verify-docs-scorecard-report-timestamp-test.sh"
       - "tools/docs/verify/verify-docs-scorecard-delta-artifact.sh"
-      - "docs/qa/verify-docs-scorecard-delta-artifact-test.sh"
-      - "docs/qa/verify-docs-scorecard-generation-drift.sh"
-      - "docs/qa/verify-docs-scorecard-generation-drift-test.sh"
-      - "docs/qa/verify-doc-command-refs-test.sh"
+      - "tools/docs/verify/verify-docs-scorecard-delta-artifact-test.sh"
+      - "tools/docs/verify/verify-docs-scorecard-generation-drift.sh"
+      - "tools/docs/verify/verify-docs-scorecard-generation-drift-test.sh"
+      - "tools/docs/verify/verify-doc-command-refs-test.sh"
       - "tools/docs/scorecards/compare-docs-scorecard-to-base.sh"
       - "tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh"
       - "generated/catalogs/docs-catalog.json"
@@ -83,6 +83,18 @@ jobs:
             echo "DOCS_BASE_REF=HEAD~1" >> "$GITHUB_ENV"
           fi
 
+      - name: Detect docs scorecard scope
+        run: |
+          set -euo pipefail
+          if git diff --name-only "$DOCS_POLICY_RANGE" -- \
+            'docs/guides/admin/DOCS_PROGRAM_SCORECARD_*.md' \
+            'docs/guides/admin/DOCS_QUALITY_SCORECARD_*.md' \
+            | grep -q .; then
+            echo "DOCS_SCORECARD_RELEVANT=true" >> "$GITHUB_ENV"
+          else
+            echo "DOCS_SCORECARD_RELEVANT=false" >> "$GITHUB_ENV"
+          fi
+
       - name: Verify docs policy
         run: |
           set -euo pipefail
@@ -103,13 +115,13 @@ jobs:
           chmod +x tools/docs/verify/verify-doc-command-refs.sh
           chmod +x tools/docs/verify/verify-doc-command-ref-baseline.sh
           if [ ! -f tools/docs/verify/.doc-command-ref-baseline ]; then
-            cat > tools/docs/verify/.doc-command-ref-baseline <<'EOF'
-# Baseline high-risk docs that must always be command-reference validated.
-docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md
-docs/ops/quickref/QUICK_REFERENCE.md
-docs/guides/branding/BRANDING_OPERATOR_GUIDE.md
-docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md
-EOF
+            printf '%s\n' \
+              '# Baseline high-risk docs that must always be command-reference validated.' \
+              'docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md' \
+              'docs/ops/quickref/QUICK_REFERENCE.md' \
+              'docs/guides/branding/BRANDING_OPERATOR_GUIDE.md' \
+              'docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md' \
+              > tools/docs/verify/.doc-command-ref-baseline
           fi
           DOCS_CMDREF_SUMMARY="${RUNNER_TEMP}/docs-command-refs-summary.json"
           DOCS_CMDREF_BASELINE_SUMMARY="${RUNNER_TEMP}/docs-cmdref-baseline-summary.json"
@@ -148,6 +160,7 @@ EOF
           python3 docs/qa/helpers/summarize-link-integrity.py "$DOCS_LINK_INTEGRITY_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard recency
+        if: env.DOCS_SCORECARD_RELEVANT == 'true'
         run: |
           set -euo pipefail
           chmod +x tools/docs/verify/verify-docs-scorecard-recency.sh
@@ -158,6 +171,7 @@ EOF
           python3 docs/qa/helpers/summarize-scorecard-recency.py "$DOCS_SCORECARD_RECENCY_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard report consistency
+        if: env.DOCS_SCORECARD_RELEVANT == 'true'
         run: |
           set -euo pipefail
           chmod +x tools/docs/verify/verify-docs-scorecard-report-consistency.sh
@@ -167,6 +181,7 @@ EOF
           python3 docs/qa/helpers/summarize-scorecard-consistency.py "$DOCS_SCORECARD_CONSISTENCY_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard head freshness
+        if: env.DOCS_SCORECARD_RELEVANT == 'true'
         run: |
           set -euo pipefail
           chmod +x tools/docs/verify/verify-docs-scorecard-head-freshness.sh
@@ -176,6 +191,7 @@ EOF
           python3 docs/qa/helpers/summarize-scorecard-head-freshness.py "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard timestamp format
+        if: env.DOCS_SCORECARD_RELEVANT == 'true'
         run: |
           set -euo pipefail
           chmod +x tools/docs/verify/verify-docs-scorecard-report-timestamp.sh
@@ -185,6 +201,7 @@ EOF
           python3 docs/qa/helpers/summarize-scorecard-timestamp.py "$DOCS_SCORECARD_TIMESTAMP_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard delta artifact
+        if: env.DOCS_SCORECARD_RELEVANT == 'true'
         run: |
           set -euo pipefail
           chmod +x tools/docs/verify/verify-docs-scorecard-delta-artifact.sh
@@ -194,6 +211,7 @@ EOF
           python3 docs/qa/helpers/summarize-scorecard-delta.py "$DOCS_SCORECARD_DELTA_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs scorecard generation drift
+        if: env.DOCS_SCORECARD_RELEVANT == 'true'
         env:
           # Drift checks tree truth only — unset diff-scoped variables
           # so sub-scripts don't inherit PR-range context.
@@ -201,9 +219,9 @@ EOF
           GITHUB_EVENT_BEFORE: ""
         run: |
           set -euo pipefail
-          chmod +x docs/qa/verify-docs-scorecard-generation-drift.sh
+          chmod +x tools/docs/verify/verify-docs-scorecard-generation-drift.sh
           DOCS_SCORECARD_DRIFT_SUMMARY="${RUNNER_TEMP}/docs-scorecard-drift-summary.json"
-          docs/qa/verify-docs-scorecard-generation-drift.sh \
+          tools/docs/verify/verify-docs-scorecard-generation-drift.sh \
             --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY"
           python3 docs/qa/helpers/summarize-scorecard-drift.py "$DOCS_SCORECARD_DRIFT_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
@@ -282,6 +300,12 @@ EOF
               fp.write(f"- duplicate_groups={len(payload.get('duplicate_canonical_groups', {}))}\n")
               fp.write(f"- uncovered_changed_docs={len(payload.get('uncovered_changed_docs', []))}\n")
           PY
+
+
+      - name: Verify generated docs banners
+        run: |
+          set -euo pipefail
+          python3 tools/docs/verify/verify-generated-doc-banners.py
 
       - name: Verify docs catalog health
         run: |
@@ -435,33 +459,33 @@ EOF
             tools/docs/verify/verify-stub-only-transitional-dirs-test.sh \
             tools/docs/verify/verify-archive-write-protection-test.sh \
             tools/docs/verify/verify-evidence-status-root-policy-test.sh \
-            docs/qa/verify-docs-policy-test.sh \
+            tools/docs/verify/verify-docs-policy-test.sh \
             tools/docs/verify/verify-docs-foundation-gates.sh \
-            docs/qa/verify-docs-foundation-gates-test.sh \
+            tools/docs/verify/verify-docs-foundation-gates-test.sh \
             tools/docs/verify/run-docs-world-class-gates.sh \
             tools/docs/verify/run-docs-world-class-gates-test.sh \
-            docs/qa/verify-docs-compliance-workflow-contract-test.sh \
+            tools/docs/verify/verify-docs-compliance-workflow-contract-test.sh \
             tools/docs/verify/verify-doc-command-ref-baseline.sh \
-            docs/qa/verify-doc-command-ref-baseline-test.sh \
-            docs/qa/verify-doc-command-refs-test.sh \
-            docs/qa/verify-doc-link-integrity-test.sh \
+            tools/docs/verify/verify-doc-command-ref-baseline-test.sh \
+            tools/docs/verify/verify-doc-command-refs-test.sh \
+            tools/docs/verify/verify-doc-link-integrity-test.sh \
             tools/docs/verify/verify-docs-scorecard-recency.sh \
-            docs/qa/verify-docs-scorecard-recency-test.sh \
+            tools/docs/verify/verify-docs-scorecard-recency-test.sh \
             tools/docs/verify/verify-docs-scorecard-report-consistency.sh \
-            docs/qa/verify-docs-scorecard-report-consistency-test.sh \
+            tools/docs/verify/verify-docs-scorecard-report-consistency-test.sh \
             tools/docs/verify/verify-docs-scorecard-head-freshness.sh \
-            docs/qa/verify-docs-scorecard-head-freshness-test.sh \
+            tools/docs/verify/verify-docs-scorecard-head-freshness-test.sh \
             tools/docs/verify/verify-docs-scorecard-report-timestamp.sh \
-            docs/qa/verify-docs-scorecard-report-timestamp-test.sh \
+            tools/docs/verify/verify-docs-scorecard-report-timestamp-test.sh \
             tools/docs/verify/verify-docs-scorecard-delta-artifact.sh \
-            docs/qa/verify-docs-scorecard-delta-artifact-test.sh \
-            docs/qa/verify-docs-scorecard-generation-drift.sh \
-            docs/qa/verify-docs-scorecard-generation-drift-test.sh \
+            tools/docs/verify/verify-docs-scorecard-delta-artifact-test.sh \
+            tools/docs/verify/verify-docs-scorecard-generation-drift.sh \
+            tools/docs/verify/verify-docs-scorecard-generation-drift-test.sh \
             tools/docs/scorecards/generate-docs-scorecard-report.sh \
             tools/docs/scorecards/generate-docs-scorecard-report-test.sh \
             tools/docs/scorecards/build-docs-scorecard-test.sh \
             tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh \
-            docs/qa/build-docs-compliance-summary-test.sh
+            tools/docs/scorecards/build-docs-compliance-summary-test.sh
           tools/docs/verify/build-doc-catalog-test.sh
           tools/docs/verify/verify-doc-catalog-health-test.sh
           tools/docs/verify/verify-doc-catalog-governance-test.sh
@@ -469,20 +493,20 @@ EOF
           tools/docs/verify/verify-stub-only-transitional-dirs-test.sh
           tools/docs/verify/verify-archive-write-protection-test.sh
           tools/docs/verify/verify-evidence-status-root-policy-test.sh
-          docs/qa/verify-docs-policy-test.sh
-          docs/qa/verify-docs-foundation-gates-test.sh
+          tools/docs/verify/verify-docs-policy-test.sh
+          tools/docs/verify/verify-docs-foundation-gates-test.sh
           tools/docs/verify/run-docs-world-class-gates-test.sh
-          docs/qa/verify-docs-compliance-workflow-contract-test.sh
-          docs/qa/verify-doc-command-ref-baseline-test.sh
-          docs/qa/verify-doc-command-refs-test.sh
-          docs/qa/verify-doc-link-integrity-test.sh
-          docs/qa/verify-docs-scorecard-recency-test.sh
-          docs/qa/verify-docs-scorecard-report-consistency-test.sh
-          docs/qa/verify-docs-scorecard-head-freshness-test.sh
-          docs/qa/verify-docs-scorecard-report-timestamp-test.sh
-          docs/qa/verify-docs-scorecard-delta-artifact-test.sh
-          docs/qa/verify-docs-scorecard-generation-drift-test.sh
+          tools/docs/verify/verify-docs-compliance-workflow-contract-test.sh
+          tools/docs/verify/verify-doc-command-ref-baseline-test.sh
+          tools/docs/verify/verify-doc-command-refs-test.sh
+          tools/docs/verify/verify-doc-link-integrity-test.sh
+          tools/docs/verify/verify-docs-scorecard-recency-test.sh
+          tools/docs/verify/verify-docs-scorecard-report-consistency-test.sh
+          tools/docs/verify/verify-docs-scorecard-head-freshness-test.sh
+          tools/docs/verify/verify-docs-scorecard-report-timestamp-test.sh
+          tools/docs/verify/verify-docs-scorecard-delta-artifact-test.sh
+          tools/docs/verify/verify-docs-scorecard-generation-drift-test.sh
           tools/docs/scorecards/generate-docs-scorecard-report-test.sh
           tools/docs/scorecards/build-docs-scorecard-test.sh
           tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh
-          docs/qa/build-docs-compliance-summary-test.sh
+          tools/docs/scorecards/build-docs-compliance-summary-test.sh

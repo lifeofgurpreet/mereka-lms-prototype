@@ -1,5 +1,7 @@
 # Decision Map
 
+> Generated file. Do not hand-edit. Regenerate from the ADR source inputs.
+
 ```mermaid
 graph LR
   ADR-013 -->|depends_on| ADR-029

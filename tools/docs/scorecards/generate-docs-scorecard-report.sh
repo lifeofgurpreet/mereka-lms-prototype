@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-REPO_ROOT=$(cd "${SCRIPT_DIR}/../.." && pwd)
+REPO_ROOT=$(cd "${SCRIPT_DIR}/../../.." && pwd)
 cd "$REPO_ROOT"
 
 DATE="$(date -u +%Y%m%d)"
@@ -308,7 +308,7 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 - Missing canonical files: ${dict[canonical_missing_file]:-0}
 - Canonical high-risk entries: ${dict[canonical_high_risk]:-0}
 - Catalog score: ${dict[score]:-0} / threshold ${dict[min_score]:-0} (${dict[score_status]:-unknown})
-- Scorecard trend: base=${dict[base_score]:-0}, current=${dict[current_score]:-0}, drop=${dict[score_drop]:-0}, threshold=${dict[max_allowed_drop]:-0}, status=${dict[trend_status]}
+- Scorecard trend: base=${dict[base_score]:-0}, current=${dict[current_score]:-0}, drop=${dict[score_drop]:-0}, threshold=${dict[max_allowed_drop]:-0}, status=${dict[trend_status]:-unknown}
 - Command reference checks: ${dict[cmdref_status]:-unknown} (${dict[files_checked]:-0} files, ${dict[missing_references]:-0} missing)
 - Command reference baseline coverage: enabled=${dict[cmdref_baseline_enabled]:-false}, entries=${dict[cmdref_baseline_entries]:-0}
 - Command reference source breakdown: inline=${dict[candidates_inline_code]:-0}, shell=${dict[candidates_shell_block]:-0}, md_link=${dict[candidates_markdown_link]:-0}, md_autolink=${dict[candidates_markdown_autolink]:-0}, md_refdef=${dict[candidates_markdown_refdef]:-0}

@@ -6,6 +6,7 @@ import yaml
 
 manifest = yaml.safe_load(Path('docs/adr/manifest.yaml').read_text(encoding='utf-8'))
 bundle_rules = yaml.safe_load(Path('docs/architecture/bundle-rules.yaml').read_text(encoding='utf-8'))
+BANNER = '> Generated file. Do not hand-edit. Regenerate from the ADR source inputs.'
 adrs = manifest.get('adrs', [])
 accepted_adrs = [a for a in adrs if (a.get('decision_status') or '').lower() != 'proposed']
 nodes = []
@@ -22,7 +23,7 @@ out_json = Path('generated/graphs/adr-graph.json')
 out_json.parent.mkdir(parents=True, exist_ok=True)
 out_json.write_text(json.dumps({'nodes': nodes, 'links': links}, indent=2) + '\n', encoding='utf-8')
 
-lines = ['# Decision Map', '', '```mermaid', 'graph LR']
+lines = ['# Decision Map', '', BANNER, '', '```mermaid', 'graph LR']
 for link in links:
     lines.append(f"  {link['source']} -->|{link['kind']}| {link['target']}")
 if not links:
@@ -44,7 +45,7 @@ for bundle in bundle_rules.get('bundles', []):
         or bool(set(a.get('governs') or []) & include_tokens)
     ]
     ordered = sorted(selected, key=lambda x: x['id'])
-    lines = [f'# {title}', '', 'This file is generated from `docs/adr/manifest.yaml`.', '']
+    lines = [f'# {title}', '', BANNER, '', 'This file is generated from `docs/adr/manifest.yaml`.', '']
     if not ordered:
         lines.extend(['No ADRs currently matched this bundle rule.', ''])
     else:

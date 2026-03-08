@@ -222,11 +222,12 @@ run_step "verify-docs-scorecard-report-consistency" ./tools/docs/verify/verify-d
 run_step "verify-docs-scorecard-head-freshness" ./tools/docs/verify/verify-docs-scorecard-head-freshness.sh --summary-json "$DOCS_SCORECARD_HEAD_FRESHNESS_SUMMARY"
 run_step "verify-docs-scorecard-report-timestamp" ./tools/docs/verify/verify-docs-scorecard-report-timestamp.sh --summary-json "$DOCS_SCORECARD_TIMESTAMP_SUMMARY"
 run_step "verify-docs-scorecard-delta-artifact" ./tools/docs/verify/verify-docs-scorecard-delta-artifact.sh --summary-json "$DOCS_SCORECARD_DELTA_SUMMARY"
-run_step "verify-docs-scorecard-generation-drift" ./docs/qa/verify-docs-scorecard-generation-drift.sh --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY" --policy-range "${BASE_REF}...HEAD"
+run_step "verify-docs-scorecard-generation-drift" ./tools/docs/verify/verify-docs-scorecard-generation-drift.sh --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY" --policy-range "${BASE_REF}...HEAD"
 run_step "verify-stub-only-transitional-dirs" python3 tools/docs/verify/verify-stub-only-transitional-dirs.py --range "${BASE_REF}...HEAD" --summary-file "$TRANSITIONAL_STUB_SUMMARY"
 run_step "verify-archive-write-protection" python3 tools/docs/verify/verify-archive-write-protection.py --range "${BASE_REF}...HEAD" --summary-file "$ARCHIVE_WRITE_SUMMARY"
 run_step "verify-evidence-status-root-policy" python3 tools/docs/verify/verify-evidence-status-root-policy.py --range "${BASE_REF}...HEAD" --summary-file "$EVIDENCE_STATUS_ROOT_SUMMARY"
 run_step "verify-doc-link-integrity" ./tools/docs/verify/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY"
+run_step "verify-generated-doc-banners" python3 tools/docs/verify/verify-generated-doc-banners.py
 run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
 run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-catalog-governance.py --range "${BASE_REF}...HEAD" --summary-file "$CATALOG_GOVERNANCE_SUMMARY"
 run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
@@ -260,28 +261,28 @@ run_step "build-docs-compliance-summary" python3 tools/docs/scorecards/build-doc
   --link-integrity-summary "$DOCS_LINK_INTEGRITY_SUMMARY" \
   --out "$DOCS_COMPLIANCE_SUMMARY_PATH"
 run_step "verify-doc-catalog-health-test" ./tools/docs/verify/verify-doc-catalog-health-test.sh
-run_step "verify-docs-policy-test" ./docs/qa/verify-docs-policy-test.sh
-run_step "verify-docs-foundation-gates-test" ./docs/qa/verify-docs-foundation-gates-test.sh
-run_step "verify-doc-command-ref-baseline-test" ./docs/qa/verify-doc-command-ref-baseline-test.sh
-run_step "verify-doc-link-integrity-test" ./docs/qa/verify-doc-link-integrity-test.sh
+run_step "verify-docs-policy-test" ./tools/docs/verify/verify-docs-policy-test.sh
+run_step "verify-docs-foundation-gates-test" ./tools/docs/verify/verify-docs-foundation-gates-test.sh
+run_step "verify-doc-command-ref-baseline-test" ./tools/docs/verify/verify-doc-command-ref-baseline-test.sh
+run_step "verify-doc-link-integrity-test" ./tools/docs/verify/verify-doc-link-integrity-test.sh
 run_step "build-doc-catalog-test" ./tools/docs/verify/build-doc-catalog-test.sh
-run_step "verify-doc-command-refs-test" ./docs/qa/verify-doc-command-refs-test.sh
-run_step "verify-docs-scorecard-recency-test" ./docs/qa/verify-docs-scorecard-recency-test.sh
-run_step "verify-docs-scorecard-report-consistency-test" ./docs/qa/verify-docs-scorecard-report-consistency-test.sh
-run_step "verify-docs-scorecard-head-freshness-test" ./docs/qa/verify-docs-scorecard-head-freshness-test.sh
-run_step "verify-docs-scorecard-report-timestamp-test" ./docs/qa/verify-docs-scorecard-report-timestamp-test.sh
-run_step "verify-docs-scorecard-delta-artifact-test" ./docs/qa/verify-docs-scorecard-delta-artifact-test.sh
-run_step "verify-docs-scorecard-generation-drift-test" ./docs/qa/verify-docs-scorecard-generation-drift-test.sh
+run_step "verify-doc-command-refs-test" ./tools/docs/verify/verify-doc-command-refs-test.sh
+run_step "verify-docs-scorecard-recency-test" ./tools/docs/verify/verify-docs-scorecard-recency-test.sh
+run_step "verify-docs-scorecard-report-consistency-test" ./tools/docs/verify/verify-docs-scorecard-report-consistency-test.sh
+run_step "verify-docs-scorecard-head-freshness-test" ./tools/docs/verify/verify-docs-scorecard-head-freshness-test.sh
+run_step "verify-docs-scorecard-report-timestamp-test" ./tools/docs/verify/verify-docs-scorecard-report-timestamp-test.sh
+run_step "verify-docs-scorecard-delta-artifact-test" ./tools/docs/verify/verify-docs-scorecard-delta-artifact-test.sh
+run_step "verify-docs-scorecard-generation-drift-test" ./tools/docs/verify/verify-docs-scorecard-generation-drift-test.sh
 run_step "verify-stub-only-transitional-dirs-test" ./tools/docs/verify/verify-stub-only-transitional-dirs-test.sh
 run_step "verify-archive-write-protection-test" ./tools/docs/verify/verify-archive-write-protection-test.sh
 run_step "verify-doc-catalog-governance-test" ./tools/docs/verify/verify-doc-catalog-governance-test.sh
 run_step "verify-evidence-status-root-policy-test" ./tools/docs/verify/verify-evidence-status-root-policy-test.sh
 run_step "run-docs-world-class-gates-test" ./tools/docs/verify/run-docs-world-class-gates-test.sh
-run_step "verify-docs-compliance-workflow-contract-test" ./docs/qa/verify-docs-compliance-workflow-contract-test.sh
+run_step "verify-docs-compliance-workflow-contract-test" ./tools/docs/verify/verify-docs-compliance-workflow-contract-test.sh
 run_step "generate-docs-scorecard-report-test" ./tools/docs/scorecards/generate-docs-scorecard-report-test.sh
 run_step "build-docs-scorecard-test" ./tools/docs/scorecards/build-docs-scorecard-test.sh
 run_step "compare-docs-scorecard-to-base-test" ./tools/docs/scorecards/compare-docs-scorecard-to-base-test.sh
-run_step "build-docs-compliance-summary-test" ./docs/qa/build-docs-compliance-summary-test.sh
+run_step "build-docs-compliance-summary-test" ./tools/docs/scorecards/build-docs-compliance-summary-test.sh
 
 if [ "$DO_SYNC" -eq 1 ]; then
   log "Final sync status (${BASE_REF}...HEAD): $(git rev-list --left-right --count "${BASE_REF}"...HEAD | tr '\t' ' ')"
