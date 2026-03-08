@@ -1,20 +1,17 @@
 # Evidence Index
 _Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-08 • Status: canonical_
 
-This is the active evidence root for Wave 2.
+This is the active evidence root.
 
 ## Scope
 
 Use `docs/evidence/**` for proof packs, validation bundles, screenshots, exported traces, and other material that demonstrates a claim or gate outcome.
 
-## Transition note
+## Authority rule
 
-Some evidence still exists outside this root from the earlier topology cleanup. During Wave 2:
-
-- new active evidence must converge here
+- new active evidence belongs under `docs/evidence/**`
 - top-level `evidence/**` is superseded compatibility only
-- archive evidence remains cold-only under `docs/archive/evidence/**`
-- compatibility pointers may still reference older locations until migration completes
+- `docs/archive/evidence/**` is cold-only historical context
 
 ## Expected pack shape
 

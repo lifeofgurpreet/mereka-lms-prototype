@@ -7,7 +7,7 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 
 ## Authority quickstart
 
-Use these winners first:
+Use these winners first. If a different path says something else, the resolver wins:
 
 - [`concepts/architecture/ARCHITECTURE_CHARTER.md`](concepts/architecture/ARCHITECTURE_CHARTER.md) - living architecture control model
 - [`concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md) - canonical vs transitional vs archive routing
@@ -49,9 +49,21 @@ Transitional compatibility roots that MUST NOT be treated as the winning authori
 
 ---
 
+## Canonical reading path
+
+Start here before reading anything more specific:
+
+1. `docs/concepts/architecture/ARCHITECTURE_CHARTER.md`
+2. `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`
+3. `docs/guides/standards/DOCS_SPECS_CONTRACT.md`
+4. `docs/ops/**` for operator procedures
+5. `docs/evidence/**` for proof
+6. `docs/status/**` for active status
+7. `docs/adr/**` for decision history
+
 ## 📂 Documentation Structure
 
-Winning roots for Wave 2:
+Canonical roots:
 
 - `docs/concepts/architecture/**` - living architecture standards and narrative
 - `docs/ops/**` - operator docs
@@ -166,11 +178,10 @@ Fast lookup references for common tasks:
 | [`ops/monitoring/OBSERVABILITY_QUICKSTART.md`](ops/monitoring/OBSERVABILITY_QUICKSTART.md) | Fast health checks and observability commands | 2026-03-06 |
 | [`ops/quickref/discovery-quickstart.md`](ops/quickref/discovery-quickstart.md) | Course catalog operations quick reference | 2026-03-06 |
 
-### Additional Operations Documentation
+### Historical and legacy references
 
-Legacy note:
-- Some links below intentionally point to archived historical docs that are kept for audit/compliance references.
-- Prefer canonical `docs/ops/**` and `docs/guides/**` links when both exist.
+Use this section only when you need audit or migration history.
+Do not treat these paths as current operational authority.
 
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |
