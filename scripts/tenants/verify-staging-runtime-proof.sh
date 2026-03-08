@@ -86,7 +86,7 @@ skip_() {
 #
 # Format: "SLUG:LMS_HOST:STUDIO_HOST:MFE_HOST:EXPECTED_COOKIE_DOMAIN"
 declare -a TENANTS=(
-  "mereka:staging.academyv2.mereka.io:studio.staging.academyv2.mereka.io:apps.staging.academyv2.mereka.io:.staging.academyv2.mereka.io"
+  "mereka:staging.academyv2.mereka.io:staging.studio.academyv2.mereka.io:staging.apps.academyv2.mereka.io:.staging.academyv2.mereka.io"
   "biji-biji:staging.academy.biji-biji.com:studio.staging.academy.biji-biji.com:apps.staging.academy.biji-biji.com:.staging.academy.biji-biji.com"
   "skillourfuture:staging.skillourfuture.academy.mereka.io:studio.staging.skillourfuture.academy.mereka.io:apps.staging.skillourfuture.academy.mereka.io:.staging.skillourfuture.academy.mereka.io"
 )
@@ -192,15 +192,15 @@ echo ""
 echo "--- [2] Module presence ---"
 
 MODULE_CHECK=$(kubectl exec "$LMS_POD" -n "$NAMESPACE" -- \
-  python -c "
+  python manage.py lms shell -c "
 import sys
 try:
-    from lms.mereka_multisite import MerekaLoginRedirectMiddleware, MerekaCookieDomainMiddleware
+    from lms.envs.tutor.production import MerekaLoginRedirectMiddleware, MerekaCookieDomainMiddleware
     print('PRESENT MerekaLoginRedirectMiddleware MerekaCookieDomainMiddleware')
 except ImportError as e:
-    print(f'ABSENT {e}')
+    print('ABSENT ' + str(e))
     sys.exit(1)
-" 2>/dev/null || echo "EXEC_FAILED")
+" 2>&1 | grep -E '^(PRESENT|ABSENT)' || echo "EXEC_FAILED")
 
 if echo "$MODULE_CHECK" | grep -q "^PRESENT"; then
   pass_ "Module: MerekaLoginRedirectMiddleware importable in running LMS pod"
@@ -214,12 +214,12 @@ fi
 
 # Also verify MerekaLoginRedirectMiddleware is in MIDDLEWARE at runtime
 MW_CHECK=$(kubectl exec "$LMS_POD" -n "$NAMESPACE" -- \
-  python -c "
+  python manage.py lms shell -c "
 from django.conf import settings
 mw = settings.MIDDLEWARE
 found = any('MerekaLoginRedirectMiddleware' in m for m in mw)
 print('PRESENT' if found else 'ABSENT')
-" 2>/dev/null || echo "EXEC_FAILED")
+" 2>&1 | grep -E '^(PRESENT|ABSENT)' || echo "EXEC_FAILED")
 
 case "$MW_CHECK" in
   PRESENT) pass_ "Module: MerekaLoginRedirectMiddleware in Django MIDDLEWARE list" ;;
@@ -256,7 +256,6 @@ _check_host() {
   local http_code
   http_code=$(curl -s -o /dev/null -w "%{http_code}" \
     --max-time "$CURL_TIMEOUT" \
-    --location \
     "https://${host}/" 2>/dev/null || echo "000")
 
   local accepted="false"
@@ -325,7 +324,7 @@ for tenant in "${TENANTS[@]}"; do
 done
 DOMAINS_CSV="${DOMAINS_CSV%,}"  # strip trailing comma
 
-SC_RAW=$(kubectl exec "$LMS_POD" -n "$NAMESPACE" -- python -c "
+SC_RAW=$(kubectl exec "$LMS_POD" -n "$NAMESPACE" -- python manage.py lms shell -c "
 from django.contrib.sites.models import Site
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 import json
