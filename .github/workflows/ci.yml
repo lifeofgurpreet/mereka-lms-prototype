@@ -5,6 +5,20 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'tools/docs/**'
+      - 'generated/catalogs/**'
+      - 'docs/catalog.json'
+      - '.github/workflows/docs-compliance.yml'
+      - '.github/workflows/docs-policy.yml'
+      - '.github/workflows/codeql.yml'
+      - '*.md'
+      - 'CLAUDE.md'
+      - 'AGENTS.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'LICENSE'
   merge_group:
   push:
     branches: [main]
