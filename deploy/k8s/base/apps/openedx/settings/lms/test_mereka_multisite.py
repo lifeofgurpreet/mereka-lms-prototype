@@ -256,6 +256,151 @@ class TestCookieDomainMiddleware(unittest.TestCase):
         self.assertNotIn("domain", resp.cookies["csrftoken"])
 
 
+class TestLoginRedirectMiddleware(unittest.TestCase):
+    """Test MerekaLoginRedirectMiddleware — per-tenant /login redirect."""
+
+    def _make_request(self, host, path="/login"):
+        req = MagicMock()
+        req.get_host.return_value = host
+        req.path = path
+        return req
+
+    def _make_redirect_response(self, location, status=302):
+        resp = MagicMock()
+        resp.status_code = status
+        resp.get.return_value = location
+        resp.__getitem__ = MagicMock(return_value=location)
+        resp.__setitem__ = MagicMock()
+        return resp
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_rewrites_to_tenant_mfe(self, mock_mfe, mock_patch):
+        """biji-biji /login should redirect to biji-biji MFE, not mereka MFE."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        original_location = "https://staging.apps.academyv2.mereka.io/authn/login"
+
+        def get_response(request):
+            return self._make_redirect_response(original_location)
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com")
+        resp = mw(req)
+
+        # Should have rewritten Location to biji-biji's MFE
+        resp.__setitem__.assert_called_with(
+            "Location",
+            "https://apps.staging.academy.biji-biji.com/authn/login"
+        )
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_no_rewrite_on_non_login_path(self, mock_mfe, mock_patch):
+        """Only /login triggers redirect rewriting."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        def get_response(request):
+            return self._make_redirect_response("https://somewhere.com/dashboard")
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com", path="/dashboard")
+        resp = mw(req)
+
+        # Should NOT rewrite — path is /dashboard not /login
+        resp.__setitem__.assert_not_called()
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_no_rewrite_on_non_redirect(self, mock_mfe, mock_patch):
+        """200 responses should not be rewritten."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        def get_response(request):
+            resp = MagicMock()
+            resp.status_code = 200
+            return resp
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com")
+        resp = mw(req)
+
+        # Should NOT rewrite — not a redirect
+        resp.__setitem__.assert_not_called()
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_no_rewrite_when_no_mfe_base(self, mock_mfe, mock_patch):
+        """If SiteConfiguration has no MFE_BASE_URL, don't rewrite."""
+        mock_mfe.return_value = None
+
+        def get_response(request):
+            return self._make_redirect_response("https://apps.mereka.io/authn/login")
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("unknown-tenant.example.com")
+        resp = mw(req)
+
+        # Should NOT rewrite — no MFE base found
+        resp.__setitem__.assert_not_called()
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_preserves_query_string(self, mock_mfe, mock_patch):
+        """Query parameters in the redirect should be preserved."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        original = "https://staging.apps.academyv2.mereka.io/authn/login?next=%2Fdashboard"
+
+        def get_response(request):
+            return self._make_redirect_response(original)
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com")
+        resp = mw(req)
+
+        resp.__setitem__.assert_called_with(
+            "Location",
+            "https://apps.staging.academy.biji-biji.com/authn/login?next=%2Fdashboard"
+        )
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_skillourfuture_redirect(self, mock_mfe, mock_patch):
+        """skillourfuture tenant gets its own MFE redirect."""
+        mock_mfe.return_value = "https://apps.staging.skillourfuture.academy.mereka.io"
+
+        original = "https://staging.apps.academyv2.mereka.io/authn/login"
+
+        def get_response(request):
+            return self._make_redirect_response(original)
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.skillourfuture.academy.mereka.io")
+        resp = mw(req)
+
+        resp.__setitem__.assert_called_with(
+            "Location",
+            "https://apps.staging.skillourfuture.academy.mereka.io/authn/login"
+        )
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_no_rewrite_when_redirect_not_to_authn(self, mock_mfe, mock_patch):
+        """Redirects from /login that don't go to /authn should not be rewritten."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        # e.g. redirect to dashboard after already-logged-in
+        def get_response(request):
+            return self._make_redirect_response("https://staging.academy.biji-biji.com/dashboard")
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com")
+        resp = mw(req)
+
+        resp.__setitem__.assert_not_called()
+
+
 class TestDomainFromEnvValue(unittest.TestCase):
     def test_plain_domain(self):
         self.assertEqual(ms._domain_from_env_value("academyv2.mereka.io"),
