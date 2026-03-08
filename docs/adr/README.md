@@ -2,6 +2,8 @@
 
 _Generated from `docs/adr/manifest.yaml`. Do not hand-edit._
 
+## Accepted, historical, and exception ADRs
+
 | ADR | Title | Status | Type | Path |
 |---|---|---|---|---|
 | ADR-001 | ADR-001: MongoDB Atlas vs Local MongoDB | accepted | domain | [001-mongodb-atlas.md](001-mongodb-atlas.md) |
@@ -30,18 +32,25 @@ _Generated from `docs/adr/manifest.yaml`. Do not hand-edit._
 | ADR-024 | --- | accepted | foundation | [024-multi-tenancy-true-tenants.md](024-multi-tenancy-true-tenants.md) |
 | ADR-025 | --- | accepted | domain | [025-csp-nonce-migration.md](025-csp-nonce-migration.md) |
 | ADR-026 | --- | accepted | domain | [026-cicd-build-pipeline-lessons.md](026-cicd-build-pipeline-lessons.md) |
-| ADR-027 | --- | proposed | foundation | [027-deployment-contract-ownership-lanes.md](027-deployment-contract-ownership-lanes.md) |
 | ADR-028 | Platform Sources of Truth and Control Planes | accepted | foundation | [028-platform-sources-of-truth-and-control-planes.md](028-platform-sources-of-truth-and-control-planes.md) |
 | ADR-029 | Identity, Session, and Domain-Boundary Strategy | accepted | foundation | [029-identity-session-and-domain-boundary-strategy.md](029-identity-session-and-domain-boundary-strategy.md) |
 | ADR-030 | Feature Flag and Rollout Lifecycle | accepted | foundation | [030-feature-flag-and-rollout-lifecycle.md](030-feature-flag-and-rollout-lifecycle.md) |
 | ADR-031 | Deprecation and Removal Policy | accepted | foundation | [031-deprecation-and-removal-policy.md](031-deprecation-and-removal-policy.md) |
 | ADR-032 | Data Governance, PII, Retention, and Deletion | accepted | foundation | [032-data-governance-pii-retention-and-deletion.md](032-data-governance-pii-retention-and-deletion.md) |
 | ADR-033 | Tenant Lifecycle Contract | accepted | foundation | [033-tenant-lifecycle-contract.md](033-tenant-lifecycle-contract.md) |
-| ADR-034 | Event Contract and Transport Independence | proposed | domain | [034-event-contract-and-transport-independence.md](034-event-contract-and-transport-independence.md) |
-| ADR-035 | Frontend Runtime Composition and Dependency Alignment | proposed | domain | [035-frontend-runtime-composition-and-dependency-alignment.md](035-frontend-runtime-composition-and-dependency-alignment.md) |
-| ADR-036 | Cache Topology and Invalidation Strategy | proposed | domain | [036-cache-topology-and-invalidation-strategy.md](036-cache-topology-and-invalidation-strategy.md) |
-| ADR-037 | Async Task User-Facing Contract | proposed | domain | [037-async-task-user-facing-contract.md](037-async-task-user-facing-contract.md) |
-| ADR-038 | Commerce System of Record and Reconciliation | proposed | domain | [038-commerce-system-of-record-and-reconciliation.md](038-commerce-system-of-record-and-reconciliation.md) |
-| ADR-039 | Translations and Internationalization Strategy | proposed | domain | [039-translations-and-internationalization-strategy.md](039-translations-and-internationalization-strategy.md) |
-| ADR-040 | Internal Packages, Plugins, and Versioning Policy | proposed | domain | [040-internal-packages-plugins-and-versioning-policy.md](040-internal-packages-plugins-and-versioning-policy.md) |
-| ADR-041 | Authorization and Role-Boundary Model | proposed | domain | [041-authorization-and-role-boundary-model.md](041-authorization-and-role-boundary-model.md) |
+
+## RFC queue
+
+Proposed decisions are kept out of the accepted ADR hot path and tracked here until accepted.
+
+| RFC | Title | Status | Type | Path |
+|---|---|---|---|---|
+| ADR-027 | --- | proposed | foundation | [027-deployment-contract-ownership-lanes.md](027-deployment-contract-ownership-lanes.md) |
+| ADR-034 | Event Contract and Transport Independence | proposed | domain | [rfc/034-event-contract-and-transport-independence.md](rfc/034-event-contract-and-transport-independence.md) |
+| ADR-035 | Frontend Runtime Composition and Dependency Alignment | proposed | domain | [rfc/035-frontend-runtime-composition-and-dependency-alignment.md](rfc/035-frontend-runtime-composition-and-dependency-alignment.md) |
+| ADR-036 | Cache Topology and Invalidation Strategy | proposed | domain | [rfc/036-cache-topology-and-invalidation-strategy.md](rfc/036-cache-topology-and-invalidation-strategy.md) |
+| ADR-037 | Async Task User-Facing Contract | proposed | domain | [rfc/037-async-task-user-facing-contract.md](rfc/037-async-task-user-facing-contract.md) |
+| ADR-038 | Commerce System of Record and Reconciliation | proposed | domain | [rfc/038-commerce-system-of-record-and-reconciliation.md](rfc/038-commerce-system-of-record-and-reconciliation.md) |
+| ADR-039 | Translations and Internationalization Strategy | proposed | domain | [rfc/039-translations-and-internationalization-strategy.md](rfc/039-translations-and-internationalization-strategy.md) |
+| ADR-040 | Internal Packages, Plugins, and Versioning Policy | proposed | domain | [rfc/040-internal-packages-plugins-and-versioning-policy.md](rfc/040-internal-packages-plugins-and-versioning-policy.md) |
+| ADR-041 | Authorization and Role-Boundary Model | proposed | domain | [rfc/041-authorization-and-role-boundary-model.md](rfc/041-authorization-and-role-boundary-model.md) |

@@ -32,7 +32,7 @@ Apply these rules in order:
 ## Metadata rule
 
 - In-document metadata is the source of truth.
-- `docs/catalog.json` is derived output. It MUST be generated or mechanically checked against document metadata.
+- `docs/catalog.json` is derived output. It MUST be generated from `generated/catalogs/docs-catalog.json` or mechanically checked against document metadata.
 - A document with missing required metadata MUST NOT be treated as canonical.
 
 ## Catalog rule
@@ -46,6 +46,13 @@ Apply these rules in order:
 If catalog output disagrees with in-document metadata, the document metadata wins and the catalog MUST be regenerated.
 Use `python3 tools/docs/verify/build-doc-catalog.py` as the compiler entrypoint for
 `generated/catalogs/docs-catalog.json` and `docs/catalog.json`.
+
+Operationally, the catalog now has two enforced layers:
+
+- `generated/catalogs/docs-catalog.json` is the maintained source catalog for winning roots.
+- `docs/catalog.json` is the derived mirror and MUST match the generated source exactly.
+
+If a change touches a winning-root doc and does not also update `generated/catalogs/docs-catalog.json`, the change is invalid.
 
 ## Testmap rule
 
@@ -92,11 +99,14 @@ These are locked for this wave:
 - `docs/status/**` is the single active status root
 - `docs/concepts/architecture/**` is the canonical architecture narrative and living standards root
 - `docs/architecture/**` is transitional if retained
-- proposed `ADR-034` to `ADR-041` must leave the accepted ADR hot path
+- proposed `ADR-034` to `ADR-041` must leave the accepted ADR hot path and live in `docs/adr/rfc/`
 
 ## Local validation entrypoints
 
 ```bash
 tools/docs/verify/verify-docs-policy.sh
+python3 tools/docs/verify/verify-doc-catalog-governance.py --range HEAD~1...HEAD
+python3 tools/docs/verify/verify-doc-catalog-health.py --max-stale-days 45
+python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue
 python3 scripts/qa/spec-tools/spec_verify.py specs/ --scan-dirs tests/ scripts/ --repo-root .
 ```

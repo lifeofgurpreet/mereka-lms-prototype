@@ -20,6 +20,11 @@ DOCS_SCORECARD_TIMESTAMP_SUMMARY="$WORK_DIR/docs-scorecard-timestamp-summary.jso
 DOCS_SCORECARD_DELTA_SUMMARY="$WORK_DIR/docs-scorecard-delta-summary.json"
 DOCS_SCORECARD_DRIFT_SUMMARY="$WORK_DIR/docs-scorecard-drift-summary.json"
 DOCS_LINK_INTEGRITY_SUMMARY="$WORK_DIR/docs-link-integrity-summary.json"
+TRANSITIONAL_STUB_SUMMARY="$WORK_DIR/transitional-stub-summary.json"
+ARCHIVE_WRITE_SUMMARY="$WORK_DIR/archive-write-summary.json"
+CATALOG_GOVERNANCE_SUMMARY="$WORK_DIR/docs-catalog-governance-summary.json"
+EVIDENCE_STATUS_ROOT_SUMMARY="$WORK_DIR/evidence-status-root-summary.json"
+CATALOG_RESIDUE_SUMMARY="$WORK_DIR/docs-catalog-residue-summary.json"
 DOCS_COMPLIANCE_SUMMARY_PATH="$WORK_DIR/docs-compliance-summary.json"
 
 MAX_AGE_SECONDS=1200
@@ -218,8 +223,15 @@ run_step "verify-docs-scorecard-head-freshness" ./tools/docs/verify/verify-docs-
 run_step "verify-docs-scorecard-report-timestamp" ./tools/docs/verify/verify-docs-scorecard-report-timestamp.sh --summary-json "$DOCS_SCORECARD_TIMESTAMP_SUMMARY"
 run_step "verify-docs-scorecard-delta-artifact" ./tools/docs/verify/verify-docs-scorecard-delta-artifact.sh --summary-json "$DOCS_SCORECARD_DELTA_SUMMARY"
 run_step "verify-docs-scorecard-generation-drift" ./docs/qa/verify-docs-scorecard-generation-drift.sh --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY" --policy-range "${BASE_REF}...HEAD"
+run_step "verify-stub-only-transitional-dirs" python3 tools/docs/verify/verify-stub-only-transitional-dirs.py --range "${BASE_REF}...HEAD" --summary-file "$TRANSITIONAL_STUB_SUMMARY"
+run_step "verify-archive-write-protection" python3 tools/docs/verify/verify-archive-write-protection.py --range "${BASE_REF}...HEAD" --summary-file "$ARCHIVE_WRITE_SUMMARY"
+run_step "verify-evidence-status-root-policy" python3 tools/docs/verify/verify-evidence-status-root-policy.py --range "${BASE_REF}...HEAD" --summary-file "$EVIDENCE_STATUS_ROOT_SUMMARY"
 run_step "verify-doc-link-integrity" ./tools/docs/verify/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY"
 run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
+run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-catalog-governance.py --range "${BASE_REF}...HEAD" --summary-file "$CATALOG_GOVERNANCE_SUMMARY"
+run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
+run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-catalog-governance.py --range "${BASE_REF}...HEAD" --summary-file "$CATALOG_GOVERNANCE_SUMMARY"
+run_step "scan-doc-catalog-residue" python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue --summary-file "$CATALOG_RESIDUE_SUMMARY"
 run_step "verify-doc-catalog-health" python3 tools/docs/verify/verify-doc-catalog-health.py \
   --max-stale-days 45 \
   --summary-file "$CATALOG_HEALTH_SUMMARY"
@@ -260,6 +272,10 @@ run_step "verify-docs-scorecard-head-freshness-test" ./docs/qa/verify-docs-score
 run_step "verify-docs-scorecard-report-timestamp-test" ./docs/qa/verify-docs-scorecard-report-timestamp-test.sh
 run_step "verify-docs-scorecard-delta-artifact-test" ./docs/qa/verify-docs-scorecard-delta-artifact-test.sh
 run_step "verify-docs-scorecard-generation-drift-test" ./docs/qa/verify-docs-scorecard-generation-drift-test.sh
+run_step "verify-stub-only-transitional-dirs-test" ./tools/docs/verify/verify-stub-only-transitional-dirs-test.sh
+run_step "verify-archive-write-protection-test" ./tools/docs/verify/verify-archive-write-protection-test.sh
+run_step "verify-doc-catalog-governance-test" ./tools/docs/verify/verify-doc-catalog-governance-test.sh
+run_step "verify-evidence-status-root-policy-test" ./tools/docs/verify/verify-evidence-status-root-policy-test.sh
 run_step "run-docs-world-class-gates-test" ./tools/docs/verify/run-docs-world-class-gates-test.sh
 run_step "verify-docs-compliance-workflow-contract-test" ./docs/qa/verify-docs-compliance-workflow-contract-test.sh
 run_step "generate-docs-scorecard-report-test" ./tools/docs/scorecards/generate-docs-scorecard-report-test.sh

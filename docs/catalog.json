@@ -329,7 +329,7 @@
     "last_verified_or_updated": null,
     "owner": "platform-events",
     "path": "adr/034-event-contract-and-transport-independence.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -338,7 +338,7 @@
     "last_verified_or_updated": null,
     "owner": "frontend-platform",
     "path": "adr/035-frontend-runtime-composition-and-dependency-alignment.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -347,7 +347,7 @@
     "last_verified_or_updated": null,
     "owner": "platform-runtime",
     "path": "adr/036-cache-topology-and-invalidation-strategy.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -356,7 +356,7 @@
     "last_verified_or_updated": null,
     "owner": "platform-runtime",
     "path": "adr/037-async-task-user-facing-contract.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -365,7 +365,7 @@
     "last_verified_or_updated": null,
     "owner": "commerce-platform",
     "path": "adr/038-commerce-system-of-record-and-reconciliation.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -374,7 +374,7 @@
     "last_verified_or_updated": null,
     "owner": "frontend-platform",
     "path": "adr/039-translations-and-internationalization-strategy.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -383,7 +383,7 @@
     "last_verified_or_updated": null,
     "owner": "platform-team",
     "path": "adr/040-internal-packages-plugins-and-versioning-policy.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -392,7 +392,7 @@
     "last_verified_or_updated": null,
     "owner": "auth-platform",
     "path": "adr/041-authorization-and-role-boundary-model.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -428,6 +428,78 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "adr/manifest.yaml",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-events",
+    "path": "adr/rfc/034-event-contract-and-transport-independence.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "frontend-platform",
+    "path": "adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-runtime",
+    "path": "adr/rfc/036-cache-topology-and-invalidation-strategy.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-runtime",
+    "path": "adr/rfc/037-async-task-user-facing-contract.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "commerce-platform",
+    "path": "adr/rfc/038-commerce-system-of-record-and-reconciliation.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "frontend-platform",
+    "path": "adr/rfc/039-translations-and-internationalization-strategy.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-team",
+    "path": "adr/rfc/040-internal-packages-plugins-and-versioning-policy.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "auth-platform",
+    "path": "adr/rfc/041-authorization-and-role-boundary-model.md",
     "status": "supporting",
     "type": "concept"
   },
@@ -11147,6 +11219,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/CI_OPTIMIZATION_TRACKER.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-08",
+    "owner": "Platform Team",
+    "path": "status/active/DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md",
     "status": "supporting",
     "type": "status"
   },

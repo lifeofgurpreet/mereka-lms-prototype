@@ -18,6 +18,7 @@ This directory is the canonical architecture narrative and living-standards root
 2. [DOCUMENTATION_AUTHORITY_RESOLVER.md](DOCUMENTATION_AUTHORITY_RESOLVER.md)
 3. [DOCS_SPECS_CONTRACT.md](../../guides/standards/DOCS_SPECS_CONTRACT.md)
 4. the domain-specific standard, overview, or RFC you actually need
+5. proposal queue: [../../adr/rfc/](../../adr/rfc/)
 
 ## Infrastructure Architecture
 

@@ -10,7 +10,7 @@ This guide covers contribution rules for files under `docs/**`.
 - `README.md`
 - `CONTRIBUTING.md`
 - `DOCS_REMEDIATION_PLAN_AND_TRACKER.md`
-- `catalog.json` (optional)
+- `catalog.json` (generated derived mirror)
 3. Use metadata on canonical/supporting docs:
 - `Audience`
 - `Owner`
@@ -42,8 +42,9 @@ This guide covers contribution rules for files under `docs/**`.
 - `specs/**` is the normative intended-behavior system.
 - `docs/**` is explanation, operation, decision history, evidence, and status.
 - Generated testmaps are not a second manual truth plane.
-- `docs/catalog.json` must be generated or mechanically checked against document metadata.
-- Regenerate both docs catalogs with `python3 tools/docs/verify/build-doc-catalog.py`.
+- `docs/catalog.json` must be generated from `generated/catalogs/docs-catalog.json` or mechanically checked against document metadata.
+- Regenerate it with `python3 tools/docs/verify/build-doc-catalog.py`.
+- If a winning-root doc changes under `docs/ops/**`, `docs/guides/**`, `docs/reference/**`, `docs/policies/**`, `docs/evidence/**`, `docs/status/**`, `docs/concepts/architecture/**`, or `docs/adr/**`, the same diff MUST also update `generated/catalogs/docs-catalog.json`.
 - See [DOCS_SPECS_CONTRACT.md](guides/standards/DOCS_SPECS_CONTRACT.md).
 
 ## Naming
@@ -57,6 +58,18 @@ This guide covers contribution rules for files under `docs/**`.
 3. Confirm superseded stubs include replacement link.
 4. Confirm canonical docs do not route readers into transitional roots unless explicitly marked legacy.
 5. Update `docs/README.md` when discoverability changes.
+6. Regenerate `docs/catalog.json` after any source catalog change.
+7. If you touched winning roots, confirm catalog governance still passes.
+
+## Required local checks for docs control-plane changes
+
+```bash
+bash tools/docs/verify/verify-docs-policy.sh --range HEAD~1...HEAD
+python3 tools/docs/verify/verify-doc-catalog-governance.py --range HEAD~1...HEAD
+python3 tools/docs/verify/verify-doc-catalog-health.py --max-stale-days 45
+python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue
+python3 tools/docs/verify/build-doc-catalog.py
+```
 
 ## Governance
 - Canonical policy and tracker: `docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md`

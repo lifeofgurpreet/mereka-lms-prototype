@@ -67,7 +67,7 @@ jobs:
           docs_only=true
           for path in "${CHANGED[@]}"; do
             case "$path" in
-              docs/*|tools/docs/*|generated/catalogs/*|.github/workflows/docs-compliance.yml|.github/workflows/docs-policy.yml|.github/workflows/ci.yml|.github/workflows/codeql.yml|*.md|CLAUDE.md|AGENTS.md|CONTRIBUTING.md|SECURITY.md|LICENSE)
+              docs/*|tools/docs/*|generated/catalogs/*|generated/adr-bundles/*|generated/decision-maps/*|generated/graphs/*|scripts/qa/build_decision_graph.py|scripts/qa/generate_adr_readme.py|.github/workflows/docs-compliance.yml|.github/workflows/docs-policy.yml|.github/workflows/ci.yml|.github/workflows/codeql.yml|*.md|CLAUDE.md|AGENTS.md|CONTRIBUTING.md|SECURITY.md|LICENSE)
                 ;;
               *)
                 docs_only=false

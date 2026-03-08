@@ -1008,7 +1008,7 @@ adrs:
   removal_condition: null
   frontmatter_required: true
 - id: ADR-034
-  path: docs/adr/034-event-contract-and-transport-independence.md
+  path: docs/adr/rfc/034-event-contract-and-transport-independence.md
   title: Event Contract and Transport Independence
   decision_status: proposed
   decision_type: domain
@@ -1042,7 +1042,7 @@ adrs:
   removal_condition: null
   frontmatter_required: true
 - id: ADR-035
-  path: docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md
+  path: docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md
   title: Frontend Runtime Composition and Dependency Alignment
   decision_status: proposed
   decision_type: domain
@@ -1079,7 +1079,7 @@ adrs:
   removal_condition: null
   frontmatter_required: true
 - id: ADR-036
-  path: docs/adr/036-cache-topology-and-invalidation-strategy.md
+  path: docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md
   title: Cache Topology and Invalidation Strategy
   decision_status: proposed
   decision_type: domain
@@ -1112,7 +1112,7 @@ adrs:
   removal_condition: null
   frontmatter_required: true
 - id: ADR-037
-  path: docs/adr/037-async-task-user-facing-contract.md
+  path: docs/adr/rfc/037-async-task-user-facing-contract.md
   title: Async Task User-Facing Contract
   decision_status: proposed
   decision_type: domain
@@ -1143,7 +1143,7 @@ adrs:
   removal_condition: null
   frontmatter_required: true
 - id: ADR-038
-  path: docs/adr/038-commerce-system-of-record-and-reconciliation.md
+  path: docs/adr/rfc/038-commerce-system-of-record-and-reconciliation.md
   title: Commerce System of Record and Reconciliation
   decision_status: proposed
   decision_type: domain
@@ -1179,7 +1179,7 @@ adrs:
   removal_condition: null
   frontmatter_required: true
 - id: ADR-039
-  path: docs/adr/039-translations-and-internationalization-strategy.md
+  path: docs/adr/rfc/039-translations-and-internationalization-strategy.md
   title: Translations and Internationalization Strategy
   decision_status: proposed
   decision_type: domain
@@ -1210,7 +1210,7 @@ adrs:
   removal_condition: null
   frontmatter_required: true
 - id: ADR-040
-  path: docs/adr/040-internal-packages-plugins-and-versioning-policy.md
+  path: docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md
   title: Internal Packages, Plugins, and Versioning Policy
   decision_status: proposed
   decision_type: domain
@@ -1246,7 +1246,7 @@ adrs:
   removal_condition: null
   frontmatter_required: true
 - id: ADR-041
-  path: docs/adr/041-authorization-and-role-boundary-model.md
+  path: docs/adr/rfc/041-authorization-and-role-boundary-model.md
   title: Authorization and Role-Boundary Model
   decision_status: proposed
   decision_type: domain

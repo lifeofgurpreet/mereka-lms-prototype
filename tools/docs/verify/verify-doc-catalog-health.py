@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify generated/catalogs/docs-catalog.json quality and freshness contracts."""
+"""Verify generated/catalogs/docs-catalog.json quality and derived mirror contracts."""
 
 from __future__ import annotations
 
@@ -25,6 +25,11 @@ class Counter:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("catalog", nargs="?", default="generated/catalogs/docs-catalog.json")
+    p.add_argument(
+        "--derived-catalog",
+        default="docs/catalog.json",
+        help="Derived docs catalog path that must mirror the generated source",
+    )
     p.add_argument("--root", default=".", help="Repo root")
     p.add_argument(
         "--max-stale-days",
@@ -54,13 +59,28 @@ def main() -> int:
 
     repo_root = Path(args.root)
     catalog_path = repo_root / args.catalog
+    derived_catalog_path = repo_root / args.derived_catalog
     if not catalog_path.exists():
         print(f"DOCS_CATALOG_ERROR: catalog missing: {catalog_path}")
         return 1
+    if not derived_catalog_path.exists():
+        print(f"DOCS_CATALOG_ERROR: derived catalog missing: {derived_catalog_path}")
+        return 1
 
-    raw_payload = json.loads(catalog_path.read_text())
+    generated_catalog_text = catalog_path.read_text(encoding="utf-8")
+    derived_catalog_text = derived_catalog_path.read_text(encoding="utf-8")
+    raw_payload = json.loads(generated_catalog_text)
     if not isinstance(raw_payload, list):
         print(f"DOCS_CATALOG_ERROR: catalog payload is not a list: {catalog_path}")
+        return 1
+    raw_derived_payload = json.loads(derived_catalog_text)
+    if not isinstance(raw_derived_payload, list):
+        print(f"DOCS_CATALOG_ERROR: derived catalog payload is not a list: {derived_catalog_path}")
+        return 1
+    if raw_derived_payload != raw_payload:
+        print(
+            "DOCS_CATALOG_ERROR: derived docs/catalog.json drifted from generated/catalogs/docs-catalog.json"
+        )
         return 1
     payload: List[Dict[str, Any]] = raw_payload
     canonical = Counter()
@@ -146,6 +166,8 @@ def main() -> int:
         + canonical.high_risk
     )
     summary_payload = {
+        "catalog_path": str(catalog_path),
+        "derived_catalog_path": str(derived_catalog_path),
         "canonical_total": canonical.total,
         "canonical_missing_file": canonical.missing_file,
         "canonical_missing_owner": canonical.missing_owner,
@@ -170,6 +192,7 @@ def main() -> int:
         Path(args.summary_file).write_text(json.dumps(summary_payload, indent=2) + "\n")
 
     print(f"Docs catalog scope: total={all_entries.total}, canonical={canonical.total}")
+    print(f"Derived catalog mirror: {derived_catalog_path}")
     print(
         "Canonical freshness gate: "
         f"owner={canonical.missing_owner}, verified={canonical.missing_verified}, "

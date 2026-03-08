@@ -16,6 +16,7 @@
 - [ ] I did not introduce new canonical content under transitional roots.
 - [ ] I updated or added superseded stubs where paths moved.
 - [ ] I regenerated derived artifacts instead of hand-editing them.
+- [ ] If I changed winning-root docs, I updated `generated/catalogs/docs-catalog.json` in the same diff.
 - [ ] I reviewed `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`.
 - [ ] I reviewed `docs/guides/standards/DOCS_SPECS_CONTRACT.md` if specs or testmaps changed.
 

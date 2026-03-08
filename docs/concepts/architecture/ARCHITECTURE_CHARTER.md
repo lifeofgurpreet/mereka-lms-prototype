@@ -35,6 +35,8 @@ The repository MUST have one winner per artifact kind. Transitional surfaces MAY
 - Archive material MUST NOT be treated as active guidance or current status.
 - In-document metadata is the source of truth for document identity and ownership.
 - Generated artifacts MUST be derived from source docs and MUST NOT become a second independent truth plane.
+- Winning-root docs MUST remain cataloged in `generated/catalogs/docs-catalog.json`.
+- A change to a winning-root doc MUST ship with the matching source-catalog update in the same diff.
 - Testmaps are generated verification artifacts, not hand-authored policy.
 - Proposed decisions MUST live outside the accepted ADR hot path.
 - Open edX and Tutor process guidance MUST default to official sources first:
@@ -72,3 +74,13 @@ The following roots are transitional in Wave 2 and must converge toward stub-onl
 - `docs/architecture/**`
 
 They MAY preserve compatibility notes and replacement pointers during migration. They MUST NOT continue to grow as competing active roots.
+
+## Enforcement posture
+
+Wave 2 is not advisory only anymore. The repository now blocks:
+
+- canonical docs that link into transitional/archive paths without explicit legacy context
+- changed transitional docs that are not superseded stubs
+- archive writes without explicit override
+- winning-root catalog residue
+- winning-root doc changes that do not update the source catalog

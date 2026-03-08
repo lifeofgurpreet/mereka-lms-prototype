@@ -17,6 +17,23 @@ Use these winners first. If a different path says something else, the resolver w
 - [`status/INDEX.md`](status/INDEX.md) - active reporting and status root
 - [`adr/`](adr/) - decision ledger
 
+## Hot path reading set
+
+Read this set first before expanding outward:
+
+1. [`concepts/architecture/ARCHITECTURE_CHARTER.md`](concepts/architecture/ARCHITECTURE_CHARTER.md)
+2. [`concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+3. [`guides/standards/DOCS_SPECS_CONTRACT.md`](guides/standards/DOCS_SPECS_CONTRACT.md)
+4. [`concepts/architecture/CONTROL_PLANES.md`](concepts/architecture/CONTROL_PLANES.md)
+5. [`concepts/architecture/IDENTITY_DOMAIN_BOUNDARIES.md`](concepts/architecture/IDENTITY_DOMAIN_BOUNDARIES.md)
+6. [`concepts/architecture/TENANT_LIFECYCLE.md`](concepts/architecture/TENANT_LIFECYCLE.md)
+7. [`concepts/architecture/RELEASE_ROLLOUT_AND_REMOVAL.md`](concepts/architecture/RELEASE_ROLLOUT_AND_REMOVAL.md)
+8. [`concepts/architecture/DATA_GOVERNANCE.md`](concepts/architecture/DATA_GOVERNANCE.md)
+9. [`concepts/architecture/AUTHORIZATION_MODEL.md`](concepts/architecture/AUTHORIZATION_MODEL.md)
+10. [`ops/quickref/QUICK_REFERENCE.md`](ops/quickref/QUICK_REFERENCE.md)
+11. [`evidence/INDEX.md`](evidence/INDEX.md)
+12. [`status/INDEX.md`](status/INDEX.md)
+
 Transitional compatibility roots that MUST NOT be treated as the winning authority:
 
 - `docs/operations/**`

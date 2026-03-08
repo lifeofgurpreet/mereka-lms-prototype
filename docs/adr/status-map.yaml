@@ -134,34 +134,34 @@ entries:
     decision_status: accepted
     rollout_state: active
   ADR-034:
-    path: docs/adr/034-event-contract-and-transport-independence.md
+    path: docs/adr/rfc/034-event-contract-and-transport-independence.md
     decision_status: proposed
     rollout_state: planned
   ADR-035:
-    path: docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md
+    path: docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md
     decision_status: proposed
     rollout_state: planned
   ADR-036:
-    path: docs/adr/036-cache-topology-and-invalidation-strategy.md
+    path: docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md
     decision_status: proposed
     rollout_state: planned
   ADR-037:
-    path: docs/adr/037-async-task-user-facing-contract.md
+    path: docs/adr/rfc/037-async-task-user-facing-contract.md
     decision_status: proposed
     rollout_state: planned
   ADR-038:
-    path: docs/adr/038-commerce-system-of-record-and-reconciliation.md
+    path: docs/adr/rfc/038-commerce-system-of-record-and-reconciliation.md
     decision_status: proposed
     rollout_state: planned
   ADR-039:
-    path: docs/adr/039-translations-and-internationalization-strategy.md
+    path: docs/adr/rfc/039-translations-and-internationalization-strategy.md
     decision_status: proposed
     rollout_state: planned
   ADR-040:
-    path: docs/adr/040-internal-packages-plugins-and-versioning-policy.md
+    path: docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md
     decision_status: proposed
     rollout_state: planned
   ADR-041:
-    path: docs/adr/041-authorization-and-role-boundary-model.md
+    path: docs/adr/rfc/041-authorization-and-role-boundary-model.md
     decision_status: proposed
     rollout_state: planned

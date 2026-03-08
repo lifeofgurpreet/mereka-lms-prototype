@@ -8,7 +8,12 @@ on:
       - 'docs/**'
       - 'tools/docs/**'
       - 'generated/catalogs/**'
+      - 'generated/adr-bundles/**'
+      - 'generated/decision-maps/**'
+      - 'generated/graphs/**'
       - 'docs/catalog.json'
+      - 'scripts/qa/build_decision_graph.py'
+      - 'scripts/qa/generate_adr_readme.py'
       - '.github/workflows/docs-compliance.yml'
       - '.github/workflows/docs-policy.yml'
       - '.github/workflows/ci.yml'
@@ -44,6 +49,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Node.js
+        if: matrix.language == 'javascript-typescript'
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8  # v4.0.4
+        with:
+          node-version: '20'
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@c4a7bc332abaec03596ff2803dd7f3ca3a238975  # v3

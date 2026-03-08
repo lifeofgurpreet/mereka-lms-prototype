@@ -7,6 +7,7 @@ import yaml
 manifest = yaml.safe_load(Path('docs/adr/manifest.yaml').read_text(encoding='utf-8'))
 bundle_rules = yaml.safe_load(Path('docs/architecture/bundle-rules.yaml').read_text(encoding='utf-8'))
 adrs = manifest.get('adrs', [])
+accepted_adrs = [a for a in adrs if (a.get('decision_status') or '').lower() != 'proposed']
 nodes = []
 links = []
 adr_by_id = {}
@@ -38,7 +39,7 @@ for bundle in bundle_rules.get('bundles', []):
     title = f"{bundle.get('title', bundle_id)} Bundle"
     include_tokens = set(bundle.get('include_tokens') or [])
     selected = [
-        a for a in adrs
+        a for a in accepted_adrs
         if a.get('decision_type') == 'foundation' and bundle_id == '00-foundations'
         or bool(set(a.get('governs') or []) & include_tokens)
     ]

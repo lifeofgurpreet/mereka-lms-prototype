@@ -15,6 +15,16 @@ on:
       - "tools/docs/verify/verify-doc-catalog-health-test.sh"
       - "tools/docs/verify/verify-docs-policy.sh"
       - "tools/docs/verify/verify-doc-catalog-health.py"
+      - "tools/docs/verify/verify-doc-catalog-governance.py"
+      - "tools/docs/verify/verify-doc-catalog-governance-test.sh"
+      - "tools/docs/verify/scan-doc-catalog-residue.py"
+      - "tools/docs/verify/scan-doc-catalog-residue-test.sh"
+      - "tools/docs/verify/verify-stub-only-transitional-dirs.py"
+      - "tools/docs/verify/verify-stub-only-transitional-dirs-test.sh"
+      - "tools/docs/verify/verify-archive-write-protection.py"
+      - "tools/docs/verify/verify-archive-write-protection-test.sh"
+      - "tools/docs/verify/verify-evidence-status-root-policy.py"
+      - "tools/docs/verify/verify-evidence-status-root-policy-test.sh"
       - "tools/docs/scorecards/build-docs-scorecard.py"
       - "tools/docs/scorecards/build-docs-scorecard-test.sh"
       - "tools/docs/scorecards/build-docs-compliance-summary.py"
@@ -197,6 +207,82 @@ EOF
             --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY"
           python3 docs/qa/helpers/summarize-scorecard-drift.py "$DOCS_SCORECARD_DRIFT_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
+      - name: Verify transitional roots stay stub-only
+        run: |
+          set -euo pipefail
+          TRANSITIONAL_STUB_SUMMARY="${RUNNER_TEMP}/transitional-stub-summary.json"
+          python3 tools/docs/verify/verify-stub-only-transitional-dirs.py \
+            --range "$DOCS_POLICY_RANGE" \
+            --summary-file "$TRANSITIONAL_STUB_SUMMARY"
+          python3 - "$TRANSITIONAL_STUB_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          with open(sys.argv[1], "r", encoding="utf-8") as fp:
+              payload = json.load(fp)
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+              fp.write("### Transitional Root Stub Policy\n")
+              fp.write(f"- status={payload.get('status', 'unknown')}\n")
+              fp.write(f"- range={payload.get('range', 'n/a')}\n")
+              fp.write(f"- files_checked={payload.get('files_checked', 'n/a')}\n")
+              fp.write(f"- errors={len(payload.get('errors', []))}\n")
+          PY
+
+      - name: Verify archive write protection
+        run: |
+          set -euo pipefail
+          ARCHIVE_WRITE_SUMMARY="${RUNNER_TEMP}/archive-write-summary.json"
+          python3 tools/docs/verify/verify-archive-write-protection.py \
+            --range "$DOCS_POLICY_RANGE" \
+            --summary-file "$ARCHIVE_WRITE_SUMMARY"
+          python3 - "$ARCHIVE_WRITE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          with open(sys.argv[1], "r", encoding="utf-8") as fp:
+              payload = json.load(fp)
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+              fp.write("### Archive Write Protection\n")
+              fp.write(f"- status={payload.get('status', 'unknown')}\n")
+              fp.write(f"- authorized={str(payload.get('authorized', False)).lower()}\n")
+              fp.write(f"- archive_changes={len(payload.get('archive_changes', []))}\n")
+          PY
+
+      - name: Verify evidence and status winning roots
+        run: |
+          set -euo pipefail
+          EVIDENCE_STATUS_ROOT_SUMMARY="${RUNNER_TEMP}/evidence-status-root-summary.json"
+          python3 tools/docs/verify/verify-evidence-status-root-policy.py \
+            --range "$DOCS_POLICY_RANGE" \
+            --summary-file "$EVIDENCE_STATUS_ROOT_SUMMARY"
+          python3 - "$EVIDENCE_STATUS_ROOT_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          with open(sys.argv[1], "r", encoding="utf-8") as fp:
+              payload = json.load(fp)
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+              fp.write("### Evidence and Status Root Policy\n")
+              fp.write(f"- status={payload.get('status', 'unknown')}\n")
+              fp.write(f"- evidence_checked={payload.get('evidence_checked', 'n/a')}\n")
+              fp.write(f"- status_checked={payload.get('status_checked', 'n/a')}\n")
+              fp.write(f"- losing_checked={payload.get('losing_checked', 'n/a')}\n")
+              fp.write(f"- errors={len(payload.get('errors', []))}\n")
+          PY
+
+      - name: Verify docs catalog governance
+        run: |
+          set -euo pipefail
+          DOCS_CATALOG_GOVERNANCE_SUMMARY="${RUNNER_TEMP}/docs-catalog-governance-summary.json"
+          python3 tools/docs/verify/verify-doc-catalog-governance.py \
+            --range "$DOCS_POLICY_RANGE" \
+            --summary-file "$DOCS_CATALOG_GOVERNANCE_SUMMARY"
+          python3 - "$DOCS_CATALOG_GOVERNANCE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          with open(sys.argv[1], "r", encoding="utf-8") as fp:
+              payload = json.load(fp)
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+              fp.write("### Docs Catalog Governance\n")
+              fp.write(f"- status={payload.get('status', 'unknown')}\n")
+              fp.write(f"- changed_docs_checked={payload.get('changed_docs_checked', 'n/a')}\n")
+              fp.write(f"- duplicate_groups={len(payload.get('duplicate_canonical_groups', {}))}\n")
+              fp.write(f"- uncovered_changed_docs={len(payload.get('uncovered_changed_docs', []))}\n")
+          PY
+
       - name: Verify docs catalog health
         run: |
           set -euo pipefail
@@ -273,6 +359,24 @@ EOF
           python3 docs/qa/helpers/summarize-scorecard-trend.py "$DOCS_SCORECARD_COMPARISON_PATH" "$GITHUB_STEP_SUMMARY"
           python3 docs/qa/helpers/summarize-compliance-summary.py "$DOCS_COMPLIANCE_SUMMARY_PATH" "$GITHUB_STEP_SUMMARY"
 
+      - name: Scan docs catalog residue
+        run: |
+          set -euo pipefail
+          DOCS_CATALOG_RESIDUE_SUMMARY="${RUNNER_TEMP}/docs-catalog-residue-summary.json"
+          python3 tools/docs/verify/scan-doc-catalog-residue.py \
+            --fail-on-residue \
+            --summary-file "$DOCS_CATALOG_RESIDUE_SUMMARY"
+          python3 - "$DOCS_CATALOG_RESIDUE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          with open(sys.argv[1], "r", encoding="utf-8") as fp:
+              payload = json.load(fp)
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+              fp.write("### Docs Catalog Residue (Advisory)\n")
+              fp.write(f"- uncataloged_winning_docs={payload.get('uncataloged_winning_docs_count', 'n/a')}\n")
+              fp.write(f"- stale_catalog_entries={payload.get('stale_catalog_entries_count', 'n/a')}\n")
+              fp.write(f"- duplicate_canonical_groups={payload.get('duplicate_canonical_groups_count', 'n/a')}\n")
+          PY
+
       - name: Upload docs catalog health scorecard
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
@@ -293,6 +397,7 @@ EOF
             ${{ runner.temp }}/docs-scorecard-delta-summary.json
             ${{ runner.temp }}/docs-scorecard-drift-summary.json
             ${{ runner.temp }}/docs-compliance-summary.json
+            ${{ runner.temp }}/docs-catalog-residue-summary.json
 
       - name: Generate docs scorecard report markdown
         run: |
@@ -325,6 +430,11 @@ EOF
           chmod +x \
             tools/docs/verify/build-doc-catalog-test.sh \
             tools/docs/verify/verify-doc-catalog-health-test.sh \
+            tools/docs/verify/verify-doc-catalog-governance-test.sh \
+            tools/docs/verify/scan-doc-catalog-residue-test.sh \
+            tools/docs/verify/verify-stub-only-transitional-dirs-test.sh \
+            tools/docs/verify/verify-archive-write-protection-test.sh \
+            tools/docs/verify/verify-evidence-status-root-policy-test.sh \
             docs/qa/verify-docs-policy-test.sh \
             tools/docs/verify/verify-docs-foundation-gates.sh \
             docs/qa/verify-docs-foundation-gates-test.sh \
@@ -354,6 +464,11 @@ EOF
             docs/qa/build-docs-compliance-summary-test.sh
           tools/docs/verify/build-doc-catalog-test.sh
           tools/docs/verify/verify-doc-catalog-health-test.sh
+          tools/docs/verify/verify-doc-catalog-governance-test.sh
+          tools/docs/verify/scan-doc-catalog-residue-test.sh
+          tools/docs/verify/verify-stub-only-transitional-dirs-test.sh
+          tools/docs/verify/verify-archive-write-protection-test.sh
+          tools/docs/verify/verify-evidence-status-root-policy-test.sh
           docs/qa/verify-docs-policy-test.sh
           docs/qa/verify-docs-foundation-gates-test.sh
           tools/docs/verify/run-docs-world-class-gates-test.sh
