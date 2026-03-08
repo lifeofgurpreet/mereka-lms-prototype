@@ -11378,6 +11378,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/incidents/README.md",
+    "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2025-09-30",
     "owner": "Migration Squad",
     "path": "status/migrations/KAJABI_MIGRATION_STATUS.md",
@@ -11535,6 +11544,15 @@
     "owner": null,
     "path": "status/readiness/tenant-hosting-readiness.md",
     "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/weekly/README.md",
+    "status": "canonical",
     "type": "status"
   },
   {
