@@ -21,6 +21,8 @@ grep -q "Worktree has local changes; using merge fallback without rebase attempt
 grep -q "Rebase failed; falling back to merge strategy." "$SCRIPT_PATH"
 grep -q "FAIL: rebase strategy requested but worktree has local changes." "$SCRIPT_PATH"
 grep -q "verify-docs-policy.sh --range \"\${BASE_REF}...HEAD\"" "$SCRIPT_PATH"
+grep -q "build-doc-catalog.py --check" "$SCRIPT_PATH"
+grep -q "build-doc-catalog-test.sh" "$SCRIPT_PATH"
 
 HELP_OUT=$(mktemp)
 INVALID_SYNC_OUT=$(mktemp)

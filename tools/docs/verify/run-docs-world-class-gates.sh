@@ -219,6 +219,7 @@ run_step "verify-docs-scorecard-report-timestamp" ./tools/docs/verify/verify-doc
 run_step "verify-docs-scorecard-delta-artifact" ./tools/docs/verify/verify-docs-scorecard-delta-artifact.sh --summary-json "$DOCS_SCORECARD_DELTA_SUMMARY"
 run_step "verify-docs-scorecard-generation-drift" ./docs/qa/verify-docs-scorecard-generation-drift.sh --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY" --policy-range "${BASE_REF}...HEAD"
 run_step "verify-doc-link-integrity" ./tools/docs/verify/verify-doc-link-integrity.sh --summary-json "$DOCS_LINK_INTEGRITY_SUMMARY"
+run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
 run_step "verify-doc-catalog-health" python3 tools/docs/verify/verify-doc-catalog-health.py \
   --max-stale-days 45 \
   --summary-file "$CATALOG_HEALTH_SUMMARY"
@@ -251,6 +252,7 @@ run_step "verify-docs-policy-test" ./docs/qa/verify-docs-policy-test.sh
 run_step "verify-docs-foundation-gates-test" ./docs/qa/verify-docs-foundation-gates-test.sh
 run_step "verify-doc-command-ref-baseline-test" ./docs/qa/verify-doc-command-ref-baseline-test.sh
 run_step "verify-doc-link-integrity-test" ./docs/qa/verify-doc-link-integrity-test.sh
+run_step "build-doc-catalog-test" ./tools/docs/verify/build-doc-catalog-test.sh
 run_step "verify-doc-command-refs-test" ./docs/qa/verify-doc-command-refs-test.sh
 run_step "verify-docs-scorecard-recency-test" ./docs/qa/verify-docs-scorecard-recency-test.sh
 run_step "verify-docs-scorecard-report-consistency-test" ./docs/qa/verify-docs-scorecard-report-consistency-test.sh

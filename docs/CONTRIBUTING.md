@@ -43,6 +43,7 @@ This guide covers contribution rules for files under `docs/**`.
 - `docs/**` is explanation, operation, decision history, evidence, and status.
 - Generated testmaps are not a second manual truth plane.
 - `docs/catalog.json` must be generated or mechanically checked against document metadata.
+- Regenerate both docs catalogs with `python3 tools/docs/verify/build-doc-catalog.py`.
 - See [DOCS_SPECS_CONTRACT.md](guides/standards/DOCS_SPECS_CONTRACT.md).
 
 ## Naming
