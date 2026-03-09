@@ -3,7 +3,7 @@
 ## Current branch
 - docs/wave5-change-intelligence-runtime
 
-## Latest branch head
+## Latest substantive packet head
 - 39911e35dcfcd7d4d0ddd5f50fa884cfbbde97e1
 
 ## Last completed batch
@@ -27,6 +27,7 @@
 - docs/ and specs/ remain separate filesystem roots
 - no new truth lanes are introduced in Wave 5
 - wrappers must never appear as normative truth again
+- tracker records the latest substantive packet head, not every follow-up sync commit
 
 ## Open residue
 - none
