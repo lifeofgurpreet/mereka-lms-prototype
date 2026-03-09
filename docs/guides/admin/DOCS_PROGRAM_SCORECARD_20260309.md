@@ -1,5 +1,5 @@
 # Docs Program Scorecard 20260309
-_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified (UTC): 2026-03-09T05:43:15Z • Status: supporting_
+_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified (UTC): 2026-03-09T05:56:43Z • Status: supporting_
 
 ## KPI Snapshot
 - Total docs scope: 1431
@@ -11,7 +11,7 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 - Canonical high-risk entries: 0
 - Catalog score: 100 / threshold 80 (pass)
 - Scorecard trend: base=100, current=100, drop=0, threshold=10, status=pass
-- Command reference checks: pass (6 files, 0 missing)
+- Command reference checks: pass (4 files, 0 missing)
 - Command reference baseline coverage: enabled=true, entries=4
 - Command reference source breakdown: inline=44, shell=33, md_link=0, md_autolink=0, md_refdef=0
 - Link integrity checks: pass (0 files, 0 broken)
