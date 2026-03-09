@@ -1,7 +1,9 @@
 ---
-title: "Badges & Credentials Enterprise Integration Test Plan"
-spec: "badges-credentials-enterprise_spec.md"
-last_updated: "2026-02-13"
+title: Badges & Credentials Enterprise Integration Test Plan
+spec: badges-credentials-enterprise_spec.md
+last_updated: '2026-02-13'
+plan: badges-credentials-enterprise_plan.md
+status: draft
 ---
 
 # Badges & Credentials Enterprise Integration Test Plan

@@ -1,6 +1,8 @@
 ---
 spec: repository-structure_spec.md
 plan: repository-structure_plan.md
+status: draft
+last_updated: '2026-03-09'
 ---
 
 # Test Plan: Repository Structure

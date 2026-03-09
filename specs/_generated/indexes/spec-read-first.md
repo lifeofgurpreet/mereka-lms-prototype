@@ -16,6 +16,8 @@ Use this generated index when you need the shortest path into the spec system.
 - `specs/catalog.json`
 - `specs/_generated/graph.json`
 - `specs/_generated/testmaps/README.md`
+- `specs/proposals/README.md`
+- `specs/plans/README.md`
 
 ## Use these next
 

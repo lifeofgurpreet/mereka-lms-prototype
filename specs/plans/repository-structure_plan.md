@@ -3,6 +3,7 @@ spec: repository-structure_spec.md
 tier: 0
 status: draft
 estimated_effort: M
+last_updated: '2026-03-09'
 ---
 
 # Implementation Plan: Repository Structure

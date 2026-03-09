@@ -1,8 +1,10 @@
 ---
-title: "Email & Notifications Pipeline - Test Plan"
-source_spec: "specs/email-notifications-pipeline_spec.md"
-created: "2026-02-10"
-status: "draft"
+title: Email & Notifications Pipeline - Test Plan
+source_spec: specs/email-notifications-pipeline_spec.md
+created: '2026-02-10'
+status: draft
+plan: email-notifications-pipeline_plan.md
+last_updated: '2026-02-10'
 ---
 
 # Test Plan: Email & Notifications Pipeline

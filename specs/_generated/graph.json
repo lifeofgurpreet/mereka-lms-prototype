@@ -1,6 +1,6 @@
 {
   "catalog": "specs/catalog.json",
-  "edge_count": 144,
+  "edge_count": 235,
   "edges": [
     {
       "edge_type": "generated_testmap",
@@ -508,6 +508,461 @@
       "target": "specs/testmaps/paragon-design-tokens-migration_spec.testmap.yml"
     },
     {
+      "edge_type": "source_spec",
+      "source": "specs/plans/advanced-assessment-xqueue_plan.md",
+      "target": "specs/advanced-assessment-xqueue_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/advanced-assessment-xqueue_testplan.md",
+      "target": "specs/plans/advanced-assessment-xqueue_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/advanced-assessment-xqueue_testplan.md",
+      "target": "specs/advanced-assessment-xqueue_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/analytics-pipeline_plan.md",
+      "target": "specs/analytics-pipeline_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/analytics-pipeline_testplan.md",
+      "target": "specs/plans/analytics-pipeline_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/analytics-pipeline_testplan.md",
+      "target": "specs/analytics-pipeline_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/auth-sso-enterprise_plan.md",
+      "target": "specs/auth-sso-enterprise_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/auth-sso-enterprise_testplan.md",
+      "target": "specs/plans/auth-sso-enterprise_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/auth-sso-enterprise_testplan.md",
+      "target": "specs/auth-sso-enterprise_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/badges-credentials-enterprise_testplan.md",
+      "target": "specs/plans/badges-credentials-enterprise_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/badges-credentials-enterprise_testplan.md",
+      "target": "specs/badges-credentials-enterprise_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/branding-system_plan.md",
+      "target": "specs/branding-system_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/branding-system_testplan.md",
+      "target": "specs/plans/branding-system_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/branding-system_testplan.md",
+      "target": "specs/branding-system_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/ci-cd-pipeline_plan.md",
+      "target": "specs/ci-cd-pipeline_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/ci-cd-pipeline_testplan.md",
+      "target": "specs/plans/ci-cd-pipeline_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/ci-cd-pipeline_testplan.md",
+      "target": "specs/ci-cd-pipeline_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/content-libraries-v2_plan.md",
+      "target": "specs/content-libraries-v2_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/content-libraries-v2_testplan.md",
+      "target": "specs/plans/content-libraries-v2_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/content-libraries-v2_testplan.md",
+      "target": "specs/content-libraries-v2_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/cross-cutting-requirements_testplan.md",
+      "target": "specs/plans/cross-cutting-requirements_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/cross-cutting-requirements_testplan.md",
+      "target": "specs/cross-cutting-requirements_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/data-migrations-kajabi-mct_plan.md",
+      "target": "specs/data-migrations-kajabi-mct_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/data-migrations-kajabi-mct_testplan.md",
+      "target": "specs/plans/data-migrations-kajabi-mct_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/data-migrations-kajabi-mct_testplan.md",
+      "target": "specs/data-migrations-kajabi-mct_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/data-privacy-gdpr-compliance_plan.md",
+      "target": "specs/data-privacy-gdpr-compliance_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/data-privacy-gdpr-compliance_testplan.md",
+      "target": "specs/plans/data-privacy-gdpr-compliance_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/data-privacy-gdpr-compliance_testplan.md",
+      "target": "specs/data-privacy-gdpr-compliance_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/design-tokens-system_plan.md",
+      "target": "specs/design-tokens-system_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/design-tokens-system_testplan.md",
+      "target": "specs/plans/design-tokens-system_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/design-tokens-system_testplan.md",
+      "target": "specs/design-tokens-system_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/disaster-recovery-business-continuity_plan.md",
+      "target": "specs/disaster-recovery-business-continuity_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/disaster-recovery-business-continuity_testplan.md",
+      "target": "specs/plans/disaster-recovery-business-continuity_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/disaster-recovery-business-continuity_testplan.md",
+      "target": "specs/disaster-recovery-business-continuity_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/ecommerce-purchase-gateway_plan.md",
+      "target": "specs/ecommerce-purchase-gateway_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/ecommerce-purchase-gateway_testplan.md",
+      "target": "specs/plans/ecommerce-purchase-gateway_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/ecommerce-purchase-gateway_testplan.md",
+      "target": "specs/ecommerce-purchase-gateway_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/email-notifications-pipeline_plan.md",
+      "target": "specs/email-notifications-pipeline_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/email-notifications-pipeline_testplan.md",
+      "target": "specs/plans/email-notifications-pipeline_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/email-notifications-pipeline_testplan.md",
+      "target": "specs/email-notifications-pipeline_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/enterprise-microservices_plan.md",
+      "target": "specs/enterprise-microservices_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/enterprise-microservices_testplan.md",
+      "target": "specs/plans/enterprise-microservices_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/enterprise-microservices_testplan.md",
+      "target": "specs/enterprise-microservices_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/external-registration-hubspot_plan.md",
+      "target": "specs/external-registration-hubspot_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/external-registration-hubspot_testplan.md",
+      "target": "specs/plans/external-registration-hubspot_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/external-registration-hubspot_testplan.md",
+      "target": "specs/external-registration-hubspot_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/forum-service-migration_plan.md",
+      "target": "specs/forum-service-migration_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/forum-service-migration_testplan.md",
+      "target": "specs/plans/forum-service-migration_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/forum-service-migration_testplan.md",
+      "target": "specs/forum-service-migration_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/k8s-deployment_plan.md",
+      "target": "specs/k8s-deployment_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/k8s-deployment_testplan.md",
+      "target": "specs/plans/k8s-deployment_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/k8s-deployment_testplan.md",
+      "target": "specs/k8s-deployment_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/mobile-apps-enterprise_plan.md",
+      "target": "specs/mobile-apps-enterprise_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/mobile-apps-enterprise_testplan.md",
+      "target": "specs/plans/mobile-apps-enterprise_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/mobile-apps-enterprise_testplan.md",
+      "target": "specs/mobile-apps-enterprise_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/mongodb-atlas-integration_plan.md",
+      "target": "specs/mongodb-atlas-integration_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/mongodb-atlas-integration_testplan.md",
+      "target": "specs/plans/mongodb-atlas-integration_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/mongodb-atlas-integration_testplan.md",
+      "target": "specs/mongodb-atlas-integration_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/multi-site-domains_plan.md",
+      "target": "specs/multi-site-domains_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/multi-site-domains_testplan.md",
+      "target": "specs/plans/multi-site-domains_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/multi-site-domains_testplan.md",
+      "target": "specs/multi-site-domains_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/multi-tenancy-architecture_plan.md",
+      "target": "specs/multi-tenancy-architecture_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/multi-tenancy-architecture_testplan.md",
+      "target": "specs/plans/multi-tenancy-architecture_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/multi-tenancy-architecture_testplan.md",
+      "target": "specs/multi-tenancy-architecture_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/observability-stack_plan.md",
+      "target": "specs/observability-stack_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/observability-stack_testplan.md",
+      "target": "specs/plans/observability-stack_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/observability-stack_testplan.md",
+      "target": "specs/observability-stack_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/platform-middleware-custom-apps_plan.md",
+      "target": "specs/platform-middleware-custom-apps_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/platform-middleware-custom-apps_testplan.md",
+      "target": "specs/plans/platform-middleware-custom-apps_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/platform-middleware-custom-apps_testplan.md",
+      "target": "specs/platform-middleware-custom-apps_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/proctoring-integration_plan.md",
+      "target": "specs/proctoring-integration_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/proctoring-integration_testplan.md",
+      "target": "specs/plans/proctoring-integration_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/proctoring-integration_testplan.md",
+      "target": "specs/proctoring-integration_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/repository-structure_plan.md",
+      "target": "specs/repository-structure_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/repository-structure_testplan.md",
+      "target": "specs/plans/repository-structure_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/repository-structure_testplan.md",
+      "target": "specs/repository-structure_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/secrets-management_plan.md",
+      "target": "specs/secrets-management_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/secrets-management_testplan.md",
+      "target": "specs/plans/secrets-management_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/secrets-management_testplan.md",
+      "target": "specs/secrets-management_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/slo-sla-service-level-management_plan.md",
+      "target": "specs/slo-sla-service-level-management_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/slo-sla-service-level-management_testplan.md",
+      "target": "specs/plans/slo-sla-service-level-management_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/slo-sla-service-level-management_testplan.md",
+      "target": "specs/slo-sla-service-level-management_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/tutor-configuration-resilience_plan.md",
+      "target": "specs/tutor-configuration-resilience_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/tutor-configuration-resilience_testplan.md",
+      "target": "specs/plans/tutor-configuration-resilience_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/tutor-configuration-resilience_testplan.md",
+      "target": "specs/tutor-configuration-resilience_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/tutor-configuration_plan.md",
+      "target": "specs/tutor-configuration_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/tutor-configuration_testplan.md",
+      "target": "specs/plans/tutor-configuration_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/tutor-configuration_testplan.md",
+      "target": "specs/tutor-configuration_spec.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/video-pipeline-delivery_plan.md",
+      "target": "specs/video-pipeline-delivery_spec.md"
+    },
+    {
+      "edge_type": "source_plan",
+      "source": "specs/plans/video-pipeline-delivery_testplan.md",
+      "target": "specs/plans/video-pipeline-delivery_plan.md"
+    },
+    {
+      "edge_type": "source_spec",
+      "source": "specs/plans/video-pipeline-delivery_testplan.md",
+      "target": "specs/video-pipeline-delivery_spec.md"
+    },
+    {
       "edge_type": "generated_testmap",
       "source": "specs/platform-middleware-custom-apps_spec.md",
       "target": "specs/_generated/testmaps/platform-middleware-custom-apps_spec.testmap.yml"
@@ -724,7 +1179,7 @@
     }
   ],
   "generated_by": "tools/specs/build_spec_graph.py",
-  "node_count": 192,
+  "node_count": 196,
   "nodes": [
     {
       "id": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
@@ -993,301 +1448,227 @@
     {
       "id": "specs/advanced-assessment-xqueue_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/advanced-assessment-xqueue_spec.md",
-      "spec_class": "feature_spec",
-      "status": "draft",
-      "title": "Advanced Assessment & XQueue Integration (Non-Proctored)"
+      "title": "advanced-assessment-xqueue_spec.md"
     },
     {
       "id": "specs/analytics-pipeline_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/analytics-pipeline_spec.md",
-      "spec_class": "data_pipeline_spec",
-      "status": "approved",
-      "title": "Analytics Pipeline (Aspects/Panorama)"
+      "title": "analytics-pipeline_spec.md"
     },
     {
       "id": "specs/auth-sso-enterprise_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/auth-sso-enterprise_spec.md",
-      "spec_class": "feature_spec",
-      "status": "in_progress",
-      "title": "Authentication & SSO Enterprise Integration"
+      "title": "auth-sso-enterprise_spec.md"
+    },
+    {
+      "id": "specs/badges-credentials-enterprise_spec.md",
+      "node_type": "spec",
+      "path": "specs/badges-credentials-enterprise_spec.md",
+      "title": "badges-credentials-enterprise_spec.md"
     },
     {
       "id": "specs/branding-system_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/branding-system_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Branding System"
+      "title": "branding-system_spec.md"
     },
     {
       "id": "specs/ci-cd-pipeline_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/ci-cd-pipeline_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "CI/CD Pipeline Specification"
+      "title": "ci-cd-pipeline_spec.md"
     },
     {
       "id": "specs/content-libraries-v2_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/content-libraries-v2_spec.md",
-      "spec_class": "feature_spec",
-      "status": "draft",
-      "title": "Content Libraries v2 Management & Enterprise Usage"
+      "title": "content-libraries-v2_spec.md"
     },
     {
       "id": "specs/cross-cutting-requirements_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/cross-cutting-requirements_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Cross-Cutting Requirements"
+      "title": "cross-cutting-requirements_spec.md"
     },
     {
       "id": "specs/data-migrations-kajabi-mct_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "migration-squad",
       "path": "specs/data-migrations-kajabi-mct_spec.md",
-      "spec_class": "migration_spec",
-      "status": "in_progress",
-      "title": "Data Migrations: Kajabi & MCT Legacy Systems"
+      "title": "data-migrations-kajabi-mct_spec.md"
     },
     {
       "id": "specs/data-privacy-gdpr-compliance_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/data-privacy-gdpr-compliance_spec.md",
-      "spec_class": "feature_spec",
-      "status": "draft",
-      "title": "Data Privacy & GDPR Compliance"
+      "title": "data-privacy-gdpr-compliance_spec.md"
     },
     {
       "id": "specs/design-tokens-system_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/design-tokens-system_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Design Tokens System"
+      "title": "design-tokens-system_spec.md"
     },
     {
       "id": "specs/disaster-recovery-business-continuity_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/disaster-recovery-business-continuity_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Disaster Recovery & Business Continuity"
+      "title": "disaster-recovery-business-continuity_spec.md"
     },
     {
       "id": "specs/ecommerce-purchase-gateway_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/ecommerce-purchase-gateway_spec.md",
-      "spec_class": "feature_spec",
-      "status": "in_progress",
-      "title": "Ecommerce Purchase Gateway (Stripe -> Open edX Integration)"
+      "title": "ecommerce-purchase-gateway_spec.md"
     },
     {
       "id": "specs/email-notifications-pipeline_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/email-notifications-pipeline_spec.md",
-      "spec_class": "feature_spec",
-      "status": "draft",
-      "title": "Email & Notifications Pipeline"
+      "title": "email-notifications-pipeline_spec.md"
     },
     {
       "id": "specs/enterprise-microservices_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/enterprise-microservices_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Enterprise Microservices Deployment"
+      "title": "enterprise-microservices_spec.md"
     },
     {
       "id": "specs/external-registration-hubspot_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/external-registration-hubspot_spec.md",
-      "spec_class": "feature_spec",
-      "status": "deferred",
-      "title": "External Registration via HubSpot"
+      "title": "external-registration-hubspot_spec.md"
     },
     {
       "id": "specs/forum-service-migration_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/forum-service-migration_spec.md",
-      "spec_class": "migration_spec",
-      "status": "completed",
-      "title": "Forum Service Migration: Ruby cs_comments_service to Python openedx-forum"
+      "title": "forum-service-migration_spec.md"
     },
     {
       "id": "specs/frontend-accessibility_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/frontend-accessibility_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "draft",
       "title": "Frontend Accessibility: WCAG 2.1 AA Compliance for Mereka Branding Overlays"
     },
     {
       "id": "specs/frontend-performance-budgets_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
+      "normativity": "normative",
+      "owner": "platform",
       "path": "specs/frontend-performance-budgets_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "domain",
       "status": "draft",
       "title": "Frontend Performance Budgets: Core Web Vitals, Bundle Sizes, and Caching for SEA Users"
     },
     {
       "id": "specs/github-actions-cost-monitoring_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "Platform Team",
+      "normativity": "normative",
+      "owner": "platform-team",
       "path": "specs/github-actions-cost-monitoring_spec.md",
-      "spec_class": "feature_spec",
-      "status": "approved",
+      "spec_class": "integration",
+      "status": "active",
       "title": "GitHub Actions Cost Monitoring"
     },
     {
       "id": "specs/k8s-deployment_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/k8s-deployment_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Kubernetes Deployment Specification"
+      "title": "k8s-deployment_spec.md"
     },
     {
       "id": "specs/mfe-plugin-slots_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/mfe-plugin-slots_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "draft",
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
     },
     {
       "id": "specs/mobile-apps-enterprise_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
-      "spec_class": "feature_spec",
-      "status": "draft",
-      "title": "Mobile Apps (iOS + Android) Enterprise Deployment"
+      "title": "mobile-apps-enterprise_spec.md"
     },
     {
       "id": "specs/mobile-apps-secrets-management_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "proposed",
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "security",
       "status": "draft",
       "title": "Mobile Apps API Keys & Secrets Management"
     },
     {
       "id": "specs/mongodb-atlas-integration_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/mongodb-atlas-integration_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "MongoDB Atlas Integration"
+      "title": "mongodb-atlas-integration_spec.md"
     },
     {
       "id": "specs/multi-site-domains_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/multi-site-domains_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Multi-Site Domain Configuration"
+      "title": "multi-site-domains_spec.md"
     },
     {
       "id": "specs/multi-tenancy-architecture_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/multi-tenancy-architecture_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Multi-Tenancy Architecture"
+      "title": "multi-tenancy-architecture_spec.md"
     },
     {
       "id": "specs/observability-stack_spec.md",
       "node_type": "spec",
-      "normativity": null,
-      "owner": "engineering",
       "path": "specs/observability-stack_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "title": "Observability Stack (Prometheus/Tempo/Loki)"
+      "title": "observability-stack_spec.md"
     },
     {
       "id": "specs/observability-validation-requirements_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/observability-validation-requirements_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "draft",
       "title": "Observability Validation & SLI/SLO Compliance Requirements"
     },
     {
       "id": "specs/oep48-brand-package_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/oep48-brand-package_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "domain",
       "status": "draft",
       "title": "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
     },
     {
       "id": "specs/paragon-design-tokens-migration_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "planning",
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
-      "spec_class": "migration_spec",
-      "status": "draft",
+      "spec_class": "plan",
+      "status": "superseded",
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
@@ -1298,9 +1679,14 @@
     },
     {
       "id": "specs/plans/advanced-assessment-xqueue_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/advanced-assessment-xqueue_testplan.md",
-      "title": "advanced-assessment-xqueue_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: Advanced Assessment & XQueue Integration (Non-Proctored)"
     },
     {
       "id": "specs/plans/analytics-pipeline_plan.md",
@@ -1310,9 +1696,14 @@
     },
     {
       "id": "specs/plans/analytics-pipeline_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/analytics-pipeline_testplan.md",
-      "title": "analytics-pipeline_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Analytics Pipeline (Aspects/Panorama) -- Test Plan"
     },
     {
       "id": "specs/plans/auth-sso-enterprise_plan.md",
@@ -1322,9 +1713,31 @@
     },
     {
       "id": "specs/plans/auth-sso-enterprise_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/auth-sso-enterprise_testplan.md",
-      "title": "auth-sso-enterprise_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Authentication & SSO Enterprise Integration Test Plan"
+    },
+    {
+      "id": "specs/plans/badges-credentials-enterprise_plan.md",
+      "node_type": "plan",
+      "path": "specs/plans/badges-credentials-enterprise_plan.md",
+      "title": "badges-credentials-enterprise_plan.md"
+    },
+    {
+      "id": "specs/plans/badges-credentials-enterprise_testplan.md",
+      "lane": "testplan",
+      "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
+      "path": "specs/plans/badges-credentials-enterprise_testplan.md",
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Badges & Credentials Enterprise Integration Test Plan"
     },
     {
       "id": "specs/plans/branding-system_plan.md",
@@ -1334,9 +1747,14 @@
     },
     {
       "id": "specs/plans/branding-system_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/branding-system_testplan.md",
-      "title": "branding-system_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: Branding System"
     },
     {
       "id": "specs/plans/ci-cd-pipeline_plan.md",
@@ -1346,9 +1764,14 @@
     },
     {
       "id": "specs/plans/ci-cd-pipeline_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/ci-cd-pipeline_testplan.md",
-      "title": "ci-cd-pipeline_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "CI/CD Pipeline - Test Plan"
     },
     {
       "id": "specs/plans/content-libraries-v2_plan.md",
@@ -1358,15 +1781,31 @@
     },
     {
       "id": "specs/plans/content-libraries-v2_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/content-libraries-v2_testplan.md",
-      "title": "content-libraries-v2_testplan.md"
+      "spec_class": "plan",
+      "status": "ready",
+      "title": "Content Libraries v2 Management & Enterprise Usage - Test Plan"
+    },
+    {
+      "id": "specs/plans/cross-cutting-requirements_plan.md",
+      "node_type": "plan",
+      "path": "specs/plans/cross-cutting-requirements_plan.md",
+      "title": "cross-cutting-requirements_plan.md"
     },
     {
       "id": "specs/plans/cross-cutting-requirements_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/cross-cutting-requirements_testplan.md",
-      "title": "cross-cutting-requirements_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Cross-Cutting Requirements Test Plan"
     },
     {
       "id": "specs/plans/data-migrations-kajabi-mct_plan.md",
@@ -1376,9 +1815,14 @@
     },
     {
       "id": "specs/plans/data-migrations-kajabi-mct_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/data-migrations-kajabi-mct_testplan.md",
-      "title": "data-migrations-kajabi-mct_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: Data Migrations -- Kajabi & MCT"
     },
     {
       "id": "specs/plans/data-privacy-gdpr-compliance_plan.md",
@@ -1388,9 +1832,14 @@
     },
     {
       "id": "specs/plans/data-privacy-gdpr-compliance_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/data-privacy-gdpr-compliance_testplan.md",
-      "title": "data-privacy-gdpr-compliance_testplan.md"
+      "spec_class": "plan",
+      "status": "ready",
+      "title": "Data Privacy & GDPR Compliance - Test Plan"
     },
     {
       "id": "specs/plans/design-tokens-system_plan.md",
@@ -1400,9 +1849,14 @@
     },
     {
       "id": "specs/plans/design-tokens-system_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/design-tokens-system_testplan.md",
-      "title": "design-tokens-system_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: Design Tokens System"
     },
     {
       "id": "specs/plans/disaster-recovery-business-continuity_plan.md",
@@ -1412,9 +1866,14 @@
     },
     {
       "id": "specs/plans/disaster-recovery-business-continuity_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/disaster-recovery-business-continuity_testplan.md",
-      "title": "disaster-recovery-business-continuity_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: Disaster Recovery & Business Continuity"
     },
     {
       "id": "specs/plans/ecommerce-purchase-gateway_plan.md",
@@ -1424,9 +1883,14 @@
     },
     {
       "id": "specs/plans/ecommerce-purchase-gateway_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/ecommerce-purchase-gateway_testplan.md",
-      "title": "ecommerce-purchase-gateway_testplan.md"
+      "spec_class": "plan",
+      "status": "ready",
+      "title": "Ecommerce Purchase Gateway - Test Plan"
     },
     {
       "id": "specs/plans/email-notifications-pipeline_plan.md",
@@ -1436,9 +1900,14 @@
     },
     {
       "id": "specs/plans/email-notifications-pipeline_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/email-notifications-pipeline_testplan.md",
-      "title": "email-notifications-pipeline_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Email & Notifications Pipeline - Test Plan"
     },
     {
       "id": "specs/plans/enterprise-microservices_plan.md",
@@ -1448,9 +1917,14 @@
     },
     {
       "id": "specs/plans/enterprise-microservices_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/enterprise-microservices_testplan.md",
-      "title": "enterprise-microservices_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Enterprise Microservices Deployment Test Plan"
     },
     {
       "id": "specs/plans/external-registration-hubspot_plan.md",
@@ -1460,9 +1934,14 @@
     },
     {
       "id": "specs/plans/external-registration-hubspot_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/external-registration-hubspot_testplan.md",
-      "title": "external-registration-hubspot_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: External Registration via HubSpot"
     },
     {
       "id": "specs/plans/forum-service-migration_plan.md",
@@ -1472,9 +1951,14 @@
     },
     {
       "id": "specs/plans/forum-service-migration_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/forum-service-migration_testplan.md",
-      "title": "forum-service-migration_testplan.md"
+      "spec_class": "plan",
+      "status": "completed",
+      "title": "Forum Service Migration - Test Plan"
     },
     {
       "id": "specs/plans/k8s-deployment_plan.md",
@@ -1484,9 +1968,14 @@
     },
     {
       "id": "specs/plans/k8s-deployment_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/k8s-deployment_testplan.md",
-      "title": "k8s-deployment_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: Kubernetes Deployment Specification"
     },
     {
       "id": "specs/plans/mobile-apps-enterprise_plan.md",
@@ -1496,9 +1985,14 @@
     },
     {
       "id": "specs/plans/mobile-apps-enterprise_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/mobile-apps-enterprise_testplan.md",
-      "title": "mobile-apps-enterprise_testplan.md"
+      "spec_class": "plan",
+      "status": "ready",
+      "title": "Mobile Apps (iOS + Android) Enterprise Deployment - Test Plan"
     },
     {
       "id": "specs/plans/mongodb-atlas-integration_plan.md",
@@ -1508,9 +2002,14 @@
     },
     {
       "id": "specs/plans/mongodb-atlas-integration_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/mongodb-atlas-integration_testplan.md",
-      "title": "mongodb-atlas-integration_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: MongoDB Atlas Integration"
     },
     {
       "id": "specs/plans/multi-site-domains_plan.md",
@@ -1520,9 +2019,14 @@
     },
     {
       "id": "specs/plans/multi-site-domains_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/multi-site-domains_testplan.md",
-      "title": "multi-site-domains_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: Multi-Site Domain Configuration"
     },
     {
       "id": "specs/plans/multi-tenancy-architecture_plan.md",
@@ -1532,9 +2036,14 @@
     },
     {
       "id": "specs/plans/multi-tenancy-architecture_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": null,
       "path": "specs/plans/multi-tenancy-architecture_testplan.md",
-      "title": "multi-tenancy-architecture_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Multi-Tenancy Architecture -- Test Plan"
     },
     {
       "id": "specs/plans/observability-stack_plan.md",
@@ -1544,9 +2053,14 @@
     },
     {
       "id": "specs/plans/observability-stack_testplan.md",
+      "lane": "testplan",
       "node_type": "testplan",
+      "normativity": "planning",
+      "owner": "engineering",
       "path": "specs/plans/observability-stack_testplan.md",
-      "title": "observability-stack_testplan.md"
+      "spec_class": "plan",
+      "status": "draft",
+      "title": "Test Plan: Observability Stack (Prometheus/Tempo/Loki)"
     },
     {
       "id": "specs/plans/platform-middleware-custom-apps_plan.md",
@@ -1646,51 +2160,56 @@
     },
     {
       "id": "specs/platform-middleware-custom-apps_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/platform-middleware-custom-apps_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "completed",
       "title": "Platform Middleware and Custom Apps"
     },
     {
       "id": "specs/proctoring-integration_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "proposed",
       "owner": "engineering",
       "path": "specs/proctoring-integration_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "proposal",
       "status": "deferred",
       "title": "Proctoring Integration for Enterprise Open edX"
     },
     {
       "id": "specs/repository-structure_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/repository-structure_spec.md",
-      "spec_class": "feature_spec",
-      "status": "completed",
+      "spec_class": "system",
+      "status": "approved",
       "title": "Repository Structure Specification"
     },
     {
       "id": "specs/secrets-management_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/secrets-management_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "security",
       "status": "completed",
       "title": "Secrets Management Specification"
     },
     {
       "id": "specs/slo-sla-service-level-management_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/slo-sla-service-level-management_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "completed",
       "title": "SLO/SLA Definitions & Service Level Management"
     },
@@ -1720,11 +2239,12 @@
     },
     {
       "id": "specs/studio-customization_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/studio-customization_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "draft",
       "title": "Studio Customization: Mereka Academy Course Authoring Experience"
     },
@@ -1976,82 +2496,90 @@
     },
     {
       "id": "specs/tutor-configuration-resilience_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/tutor-configuration-resilience_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "system",
       "status": "completed",
       "title": "Tutor Configuration Resilience and Patch Automation"
     },
     {
       "id": "specs/tutor-configuration_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/tutor-configuration_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "system",
       "status": "completed",
       "title": "Tutor Configuration Lifecycle"
     },
     {
       "id": "specs/verifiable-credentials-issuance_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/verifiable-credentials-issuance_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "approved",
       "title": "CRED-030: Issuance Flows"
     },
     {
       "id": "specs/verifiable-credentials-issuer_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/verifiable-credentials-issuer_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "approved",
       "title": "CRED-020: Issuer Identity, Keys, and Rotation"
     },
     {
       "id": "specs/verifiable-credentials-ops_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/verifiable-credentials-ops_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "integration",
       "status": "approved",
       "title": "CRED-050: Ops & Reliability"
     },
     {
       "id": "specs/verifiable-credentials-types_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/verifiable-credentials-types_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "domain",
       "status": "approved",
       "title": "CRED-010: Credential Types & Mapping"
     },
     {
       "id": "specs/verifiable-credentials-verification_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/verifiable-credentials-verification_spec.md",
-      "spec_class": "feature_spec",
+      "spec_class": "security",
       "status": "approved",
       "title": "CRED-040: Verification"
     },
     {
       "id": "specs/video-pipeline-delivery_spec.md",
+      "lane": "normative",
       "node_type": "spec",
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/video-pipeline-delivery_spec.md",
-      "spec_class": "feature_spec",
-      "status": "in_progress",
+      "spec_class": "integration",
+      "status": "active",
       "title": "Video Pipeline & Delivery System"
     }
   ],

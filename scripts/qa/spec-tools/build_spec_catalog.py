@@ -1,91 +1,131 @@
 #!/usr/bin/env python3
-"""Generate a machine-readable catalog for top-level specs."""
+"""Generate a machine-readable catalog for normative, proposal, and plan lanes."""
 
 from __future__ import annotations
 
 import argparse
 import json
-import re
+import sys
+from datetime import date, datetime
 from pathlib import Path
 
-import yaml
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
-AC_RE = re.compile(r"- \[ \] AC-")
+from tools.specs.spec_tooling import (
+    classify_lane,
+    inferred_normativity,
+    inferred_spec_class,
+    iter_lane_files,
+    parse_frontmatter,
+    pick,
+    read_title,
+    relative_path,
+)
 
-
-def pick(frontmatter: dict, *keys: str) -> object:
-    for key in keys:
-        value = frontmatter.get(key)
-        if value not in (None, "", []):
-            return value
-    return None
-
-
-def parse_frontmatter(path: Path) -> dict:
-    text = path.read_text()
-    match = FRONTMATTER_RE.match(text)
-    if not match:
-        return {}
-    data = yaml.safe_load(match.group(1)) or {}
-    return data if isinstance(data, dict) else {}
+AC_TOKEN = "- [ ] AC-"
 
 
 def count_acceptance_criteria(path: Path) -> int:
-    return len(AC_RE.findall(path.read_text()))
+    return path.read_text().count(AC_TOKEN)
 
 
 def rel(path: Path, repo_root: Path) -> str:
-    return path.relative_to(repo_root).as_posix()
+    return relative_path(path, repo_root)
+
+
+def to_json_value(value: object) -> object:
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, list):
+        return [to_json_value(item) for item in value]
+    if isinstance(value, dict):
+        return {str(key): to_json_value(item) for key, item in value.items()}
+    return value
+
+
+def normalize_related_path(value: object, default_prefix: str) -> str | None:
+    if not value:
+        return None
+    text = str(value)
+    if text.startswith("specs/"):
+        return text
+    if text.startswith("plans/"):
+        return f"specs/{text}"
+    if text.startswith("proposals/"):
+        return f"specs/{text}"
+    return f"{default_prefix}/{text}"
+
+
+def related_links(path: Path, lane: str, frontmatter: dict, repo_root: Path) -> dict[str, str | None]:
+    specs_root = repo_root / "specs"
+    plans_root = specs_root / "plans"
+    stem = path.stem
+
+    if lane in {"normative", "proposal"}:
+        base_name = stem.replace("_spec", "")
+        plan_path = plans_root / f"{base_name}_plan.md"
+        testplan_path = plans_root / f"{base_name}_testplan.md"
+        generated_testmap_path = (
+            specs_root / "_generated" / "testmaps" / f"{base_name}_spec.testmap.yml"
+        )
+        legacy_testmap_path = specs_root / "testmaps" / f"{base_name}_spec.testmap.yml"
+        return {
+            "source_spec": None,
+            "source_plan": None,
+            "plan": rel(plan_path, repo_root) if plan_path.exists() else None,
+            "testplan": rel(testplan_path, repo_root) if testplan_path.exists() else None,
+            "generated_testmap": (
+                rel(generated_testmap_path, repo_root)
+                if generated_testmap_path.exists()
+                else None
+            ),
+            "legacy_testmap": (
+                rel(legacy_testmap_path, repo_root)
+                if legacy_testmap_path.exists()
+                else None
+            ),
+        }
+
+    source_spec = pick(frontmatter, "spec", "source_spec")
+    source_plan = pick(frontmatter, "plan", "source_plan")
+    return {
+        "source_spec": normalize_related_path(source_spec, "specs"),
+        "source_plan": normalize_related_path(source_plan, "specs/plans"),
+        "plan": None,
+        "testplan": None,
+        "generated_testmap": None,
+        "legacy_testmap": None,
+    }
 
 
 def build_catalog(repo_root: Path) -> dict:
-    specs_root = repo_root / "specs"
     entries = []
 
-    for spec_path in sorted(specs_root.glob("*_spec.md")):
-        frontmatter = parse_frontmatter(spec_path)
-        stem = spec_path.stem.replace("_spec", "")
-        plan_path = specs_root / "plans" / f"{stem}_plan.md"
-        testplan_path = specs_root / "plans" / f"{stem}_testplan.md"
-        generated_testmap_path = (
-            specs_root / "_generated" / "testmaps" / f"{stem}_spec.testmap.yml"
-        )
-        legacy_testmap_path = specs_root / "testmaps" / f"{stem}_spec.testmap.yml"
-
+    for lane, path in iter_lane_files(repo_root):
+        frontmatter = parse_frontmatter(path)
+        links = related_links(path, lane, frontmatter, repo_root)
         entries.append(
             {
-                "path": rel(spec_path, repo_root),
-                "id": pick(frontmatter, "id"),
-                "title": pick(frontmatter, "title") or spec_path.stem,
-                "status": pick(frontmatter, "status"),
-                "spec_class": pick(frontmatter, "spec_class", "type"),
-                "owner": pick(frontmatter, "owner"),
-                "domain": pick(frontmatter, "domain"),
-                "normativity": pick(frontmatter, "normativity"),
-                "created": pick(frontmatter, "created"),
-                "last_reviewed": pick(frontmatter, "last_reviewed", "last_updated"),
-                "review_due": pick(frontmatter, "review_due"),
-                "summary": pick(frontmatter, "summary"),
-                "tags": pick(frontmatter, "tags") or [],
-                "version": pick(frontmatter, "version"),
-                "acceptance_criteria_count": count_acceptance_criteria(spec_path),
-                "links": {
-                    "plan": rel(plan_path, repo_root) if plan_path.exists() else None,
-                    "testplan": (
-                        rel(testplan_path, repo_root) if testplan_path.exists() else None
-                    ),
-                    "generated_testmap": (
-                        rel(generated_testmap_path, repo_root)
-                        if generated_testmap_path.exists()
-                        else None
-                    ),
-                    "legacy_testmap": (
-                        rel(legacy_testmap_path, repo_root)
-                        if legacy_testmap_path.exists()
-                        else None
-                    ),
-                },
+                "path": rel(path, repo_root),
+                "lane": lane,
+                "doc_type": lane if lane in {"plan", "testplan"} else "spec",
+                "id": to_json_value(pick(frontmatter, "id")),
+                "title": to_json_value(pick(frontmatter, "title") or read_title(path)),
+                "status": to_json_value(pick(frontmatter, "status")),
+                "spec_class": to_json_value(inferred_spec_class(lane, frontmatter)),
+                "owner": to_json_value(pick(frontmatter, "owner")),
+                "domain": to_json_value(pick(frontmatter, "domain")),
+                "normativity": to_json_value(inferred_normativity(lane, frontmatter)),
+                "created": to_json_value(pick(frontmatter, "created")),
+                "last_reviewed": to_json_value(pick(frontmatter, "last_reviewed", "last_updated", "updated")),
+                "review_due": to_json_value(pick(frontmatter, "review_due")),
+                "summary": to_json_value(pick(frontmatter, "summary")),
+                "tags": to_json_value(pick(frontmatter, "tags") or []),
+                "version": to_json_value(pick(frontmatter, "version")),
+                "acceptance_criteria_count": count_acceptance_criteria(path),
+                "links": to_json_value(links),
             }
         )
 
@@ -94,7 +134,7 @@ def build_catalog(repo_root: Path) -> dict:
         "root": "specs",
         "taxonomy": "specs/standards/spec-taxonomy.yaml",
         "entry_count": len(entries),
-        "entries": entries,
+        "entries": sorted(entries, key=lambda item: item["path"]),
     }
 
 

@@ -25,7 +25,8 @@ def build_graph(repo_root: Path) -> dict[str, object]:
                 "id": spec_path,
                 "path": spec_path,
                 "title": entry.get("title"),
-                "node_type": "spec",
+                "node_type": entry.get("doc_type", "spec"),
+                "lane": entry.get("lane"),
                 "status": entry.get("status"),
                 "spec_class": entry.get("spec_class"),
                 "normativity": entry.get("normativity"),
@@ -35,6 +36,8 @@ def build_graph(repo_root: Path) -> dict[str, object]:
 
         links = entry.get("links") or {}
         for edge_type, node_type in (
+            ("source_spec", "spec"),
+            ("source_plan", "plan"),
             ("plan", "plan"),
             ("testplan", "testplan"),
             ("generated_testmap", "generated_testmap"),

@@ -15,4 +15,5 @@ Read this bundle when you need the minimum cross-root truth for platform work.
 
 - `docs/catalog.json`
 - `specs/catalog.json`
+- `specs/_generated/graph.json`
 - `specs/_generated/testmaps/README.md`

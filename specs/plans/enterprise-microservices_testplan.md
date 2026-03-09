@@ -1,7 +1,9 @@
 ---
-title: "Enterprise Microservices Deployment Test Plan"
-spec: "enterprise-microservices_spec.md"
-last_updated: "2026-02-13"
+title: Enterprise Microservices Deployment Test Plan
+spec: enterprise-microservices_spec.md
+last_updated: '2026-02-13'
+plan: enterprise-microservices_plan.md
+status: draft
 ---
 
 # Enterprise Microservices Deployment Test Plan

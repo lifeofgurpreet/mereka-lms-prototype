@@ -74,8 +74,14 @@ def main() -> int:
 
     for entry in entries:
         path = str(entry.get("path", ""))
+        lane = entry.get("lane")
+        doc_type = entry.get("doc_type")
         spec_class = entry.get("spec_class")
         normativity = entry.get("normativity")
+        if path.startswith("specs/plans/") and path.endswith("_plan.md") and lane != "plan":
+            errors.append(f"{path} must use lane=plan (got {lane!r})")
+        if path.startswith("specs/plans/") and path.endswith("_testplan.md") and lane != "testplan":
+            errors.append(f"{path} must use lane=testplan (got {lane!r})")
         if path.startswith("specs/plans/") and spec_class != "plan":
             errors.append(
                 f"{path} must use spec_class=plan (got {spec_class!r})"
@@ -84,6 +90,16 @@ def main() -> int:
             errors.append(
                 f"{path} must use normativity=planning (got {normativity!r})"
             )
+        if path.startswith("specs/plans/") and not path.endswith(("_plan.md", "_testplan.md")):
+            errors.append(f"{path} must end with _plan.md or _testplan.md")
+        if path.startswith("specs/plans/") and path.endswith("_testplan.md") and doc_type != "testplan":
+            errors.append(f"{path} must use doc_type=testplan (got {doc_type!r})")
+        if path.startswith("specs/plans/") and path.endswith("_plan.md") and doc_type != "plan":
+            errors.append(f"{path} must use doc_type=plan (got {doc_type!r})")
+        if path.startswith("specs/proposals/") and lane != "proposal":
+            errors.append(f"{path} must use lane=proposal (got {lane!r})")
+        if path.startswith("specs/proposals/") and not path.endswith("_spec.md"):
+            errors.append(f"{path} must end with _spec.md")
         if path.startswith("specs/proposals/") and spec_class != "proposal":
             errors.append(
                 f"{path} must use spec_class=proposal (got {spec_class!r})"
@@ -92,6 +108,8 @@ def main() -> int:
             errors.append(
                 f"{path} must use normativity=proposed (got {normativity!r})"
             )
+        if path.startswith("specs/proposals/") and doc_type != "spec":
+            errors.append(f"{path} must use doc_type=spec (got {doc_type!r})")
 
     if errors:
         print("DOCS_SPECS_BOUNDARY_FAIL")

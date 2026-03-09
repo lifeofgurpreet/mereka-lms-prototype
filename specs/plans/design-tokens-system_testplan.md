@@ -1,7 +1,8 @@
 ---
 spec: design-tokens-system_spec.md
 plan: design-tokens-system_plan.md
-last_updated: "2026-02-10"
+last_updated: '2026-02-10'
+status: draft
 ---
 
 # Test Plan: Design Tokens System

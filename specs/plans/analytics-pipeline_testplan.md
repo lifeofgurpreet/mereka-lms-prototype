@@ -2,8 +2,9 @@
 spec: analytics-pipeline_spec.md
 tier: 2
 status: draft
-last_updated: "2026-02-10"
+last_updated: '2026-02-10'
 test_framework: shell_verification + kubectl_check + smoke_test + manual_verification
+plan: analytics-pipeline_plan.md
 ---
 
 # Analytics Pipeline (Aspects/Panorama) -- Test Plan

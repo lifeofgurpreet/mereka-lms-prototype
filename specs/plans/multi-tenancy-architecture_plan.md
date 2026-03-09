@@ -1,8 +1,10 @@
 ---
-title: "Multi-Tenancy Architecture - Implementation Plan"
-source_spec: "specs/multi-tenancy-architecture_spec.md"
-created: "2026-02-10"
-status: "draft"
+title: Multi-Tenancy Architecture - Implementation Plan
+source_spec: specs/multi-tenancy-architecture_spec.md
+created: '2026-02-10'
+status: draft
+spec: multi-tenancy-architecture_spec.md
+last_updated: '2026-02-10'
 ---
 
 # Implementation Tasks: Multi-Tenancy Architecture
