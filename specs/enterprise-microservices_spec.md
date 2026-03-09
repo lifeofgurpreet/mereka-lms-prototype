@@ -2,7 +2,7 @@
 title: "Enterprise Microservices Deployment"
 type: "feature_spec"
 id: "SPEC-ENTERPRISE-MICROSERVICES"
-status: "completed"
+status: "active"
 owner: "engineering"
 vehicle: "talent_platform"
 spec_class: "integration"

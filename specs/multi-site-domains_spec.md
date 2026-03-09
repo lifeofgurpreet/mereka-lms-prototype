@@ -2,7 +2,7 @@
 title: "Multi-Site Domain Configuration"
 type: "feature_spec"
 id: "SPEC-MULTI-SITE-DOMAINS"
-status: "completed"
+status: "active"
 owner: "engineering"
 vehicle: "talent_platform"
 spec_class: "system"

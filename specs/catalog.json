@@ -326,7 +326,7 @@
       "path": "specs/disaster-recovery-business-continuity_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines recovery objectives, backup coverage, restore validation, and continuity expectations for the platform.",
       "tags": [
         "runtime.recovery",
@@ -417,7 +417,7 @@
       "path": "specs/enterprise-microservices_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines the deployed enterprise microservices boundary, required platform integrations, and runtime expectations for catalog, access, subsidy, and integrated-channel services.",
       "tags": [
         "tenant.isolation",
@@ -755,7 +755,7 @@
       "path": "specs/multi-site-domains_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines the required domain, host-routing, site-configuration, and environment contract for multi-site Open edX deployments.",
       "tags": [
         "tenant.lifecycle",
