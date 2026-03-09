@@ -6,6 +6,8 @@ Use this root for normative system behavior, interface contracts, and generated 
 
 - Read [INDEX.md](INDEX.md) for the human-facing spec inventory.
 - Read [catalog.json](catalog.json) for the machine-readable spec catalog.
+- Read [_generated/indexes/spec-read-first.md](_generated/indexes/spec-read-first.md) for the shortest generated reading path.
+- Read [_generated/graph.json](_generated/graph.json) for the machine-readable dependency graph.
 - Read [standards/SPEC_SYSTEM_CHARTER.md](standards/SPEC_SYSTEM_CHARTER.md) for what belongs in `specs/`.
 - Read [standards/DOCS_SPECS_BOUNDARY.md](standards/DOCS_SPECS_BOUNDARY.md) for the docs/specs sibling-root contract.
 - Read [plans/README.md](plans/README.md) for execution and rollout plans.
