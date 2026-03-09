@@ -1,21 +1,39 @@
 ---
+id: "SPEC-PLT-002"
 title: "Tutor Configuration Resilience and Patch Automation"
 type: "feature_spec"
 status: "completed"
+spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
 last_updated: "2026-02-10"
 version: "1.0.0"
+domain: "platform"
+normativity: "normative"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/tutor-configuration_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+interfaces:
+  - "Tutor"
+  - "Patch automation"
+tags:
+  - "platform.control-plane"
+  - "build.version-pin"
+summary: "Defines resilience requirements for Tutor configuration regeneration, patch application, and operational recovery from drift."
 links:
   related_docs:
     - "docs/adr/006-tutor-plugin-based-configuration.md"
-    - "docs/onboarding/QUICK_START_LOCAL.md"
-    - "docs/onboarding/DEVELOPER_ONBOARDING.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
+    - "docs/guides/onboarding/QUICK_START_LOCAL.md"
+    - "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
   related_specs:
     - "specs/tutor-configuration_spec.md"
     - "specs/ci-cd-pipeline_spec.md"

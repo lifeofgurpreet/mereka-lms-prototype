@@ -1,19 +1,37 @@
 ---
+id: "SPEC-DAT-001"
 title: "Analytics Pipeline (Aspects/Panorama)"
 type: "data_pipeline_spec"
 status: "approved"
+spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-25"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
 last_updated: "2026-02-25"
 version: "1.0.0"
+domain: "data"
+normativity: "normative"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
   - "specs/mongodb-atlas-integration_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+interfaces:
+  - "Aspects"
+  - "Panorama"
+tags:
+  - "data.retention"
+  - "docs.evidence"
+summary: "Defines the expected analytics pipeline behavior, operational boundaries, and verification surfaces for Aspects and Panorama."
 links:
   related_docs:
-    - "docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md"
-    - "docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md"
+    - "docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md"
+    - "docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md"
     - "docs/reference/operations/MONITORING.md"
   related_specs:
     - "specs/observability-stack_spec.md"
