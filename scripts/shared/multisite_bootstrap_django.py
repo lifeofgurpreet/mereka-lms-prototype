@@ -330,7 +330,8 @@ def upsert_sites(
 
         # Prepare site values
         rendered_values = dict(definition.site_values)
-        rendered_values["course_org_filter"] = definition.orgs
+        if "course_org_filter" not in rendered_values:
+            rendered_values["course_org_filter"] = definition.orgs
         existing_site_config = SiteConfiguration.objects.filter(site=site).order_by("-id").first()
         existing_values = dict(existing_site_config.site_values or {}) if existing_site_config else {}
         enterprise_uuid = str(existing_values.get("ENTERPRISE_CUSTOMER_UUID") or "").strip()
