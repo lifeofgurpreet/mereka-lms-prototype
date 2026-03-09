@@ -70,7 +70,7 @@
       "task_type": "evidence_or_status_change"
     },
     {
-      "matched_files": 154,
+      "matched_files": 173,
       "task_type": "review_handoff_or_generated_surface_refresh"
     }
   ],
@@ -524,6 +524,57 @@
       "review_handoff_or_generated_surface_refresh"
     ],
     "generated/knowledge/review-bundle.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/skill-index.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/architecture_or_adr_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/architecture_or_adr_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/cross_repo_contract_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/cross_repo_contract_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/evidence_or_status_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/evidence_or_status_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/normative_spec_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/normative_spec_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/release_or_runtime_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/release_or_runtime_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md": [
       "review_handoff_or_generated_surface_refresh"
     ],
     "generated/knowledge/truth-impact-report.json": [
@@ -1053,6 +1104,12 @@
       "review_handoff_or_generated_surface_refresh"
     ],
     "tools/knowledge/build_review_bundle.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_skill_index.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_task_bundle.py": [
       "review_handoff_or_generated_surface_refresh"
     ],
     "tools/knowledge/build_truth_impact_report.py": [

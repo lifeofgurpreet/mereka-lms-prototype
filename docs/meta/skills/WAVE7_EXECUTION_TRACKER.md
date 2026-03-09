@@ -4,14 +4,14 @@
 - docs/wave7-agent-skill-runtime
 
 ## Latest substantive packet head
-- Packet C commit on docs/wave7-agent-skill-runtime
+- Packet D commit on docs/wave7-agent-skill-runtime
 
 ## Last completed batch
-- commit: Packet C commit on docs/wave7-agent-skill-runtime
-- scope: Packet C task bundle generation
+- commit: Packet D commit on docs/wave7-agent-skill-runtime
+- scope: Packet D task runtime verification and gate wiring
 - validators run:
-  - python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD
-  - python3 tools/knowledge/build_skill_index.py --check --repo-root .
+  - bash scripts/qa/run-task-runtime-gates.sh
+  - bash scripts/qa/run-cross-repo-contract-gates.sh
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
@@ -20,16 +20,16 @@
 - Packet A: skill taxonomy and charter
 - Packet B: task context resolver
 - Packet C: task bundle generation
+- Packet D: task runtime verification and gate wiring
 
 ## Current target batch
 - files:
-  - tools/knowledge/verify_task_runtime.py
-  - scripts/qa/run-task-runtime-gates.sh
-  - .github/workflows/docs-policy.yml
+  - docs/meta/skills/WAVE7_CLOSEOUT.md
+  - docs/meta/skills/REVIEW_HANDOFF_MODEL.md
 - goal:
-  - verify task runtime coherence and wire it into the existing gate path
+  - close Wave 7 with explicit reviewer and agent operating guidance
 - stop condition:
-  - Packet D validators pass
+  - Packet E validators pass
 
 ## Locked decisions
 - Wave 4 canonical roots remain unchanged
@@ -42,7 +42,7 @@
 - none yet
 
 ## Next queued batch
-- Packet D: task runtime verification and gate wiring
+- Packet E: closeout and reviewer operating model
 
 ## Wave posture
 - repo-local and cross-repo truth are consumed, not redesigned

@@ -38,7 +38,6 @@
     "specs/plans/ci-cd-pipeline_testplan.md",
     "specs/plans/content-libraries-v2_plan.md",
     "specs/plans/content-libraries-v2_testplan.md",
-    "specs/plans/cross-cutting-requirements_plan.md",
     "specs/plans/cross-cutting-requirements_testplan.md",
     "specs/plans/data-migrations-kajabi-mct_plan.md",
     "specs/plans/data-migrations-kajabi-mct_testplan.md",
@@ -56,16 +55,8 @@
     "specs/plans/enterprise-microservices_testplan.md",
     "specs/plans/forum-service-migration_plan.md",
     "specs/plans/forum-service-migration_testplan.md",
-    "specs/plans/frontend-accessibility_plan.md",
-    "specs/plans/frontend-accessibility_testplan.md",
-    "specs/plans/frontend-performance-budgets_plan.md",
-    "specs/plans/frontend-performance-budgets_testplan.md",
-    "specs/plans/github-actions-cost-monitoring_plan.md",
-    "specs/plans/github-actions-cost-monitoring_testplan.md",
     "specs/plans/k8s-deployment_plan.md",
     "specs/plans/k8s-deployment_testplan.md",
-    "specs/plans/mfe-plugin-slots_plan.md",
-    "specs/plans/mfe-plugin-slots_testplan.md",
     "specs/plans/mongodb-atlas-integration_plan.md",
     "specs/plans/mongodb-atlas-integration_testplan.md",
     "specs/plans/multi-site-domains_plan.md",
@@ -74,10 +65,6 @@
     "specs/plans/multi-tenancy-architecture_testplan.md",
     "specs/plans/observability-stack_plan.md",
     "specs/plans/observability-stack_testplan.md",
-    "specs/plans/observability-validation-requirements_plan.md",
-    "specs/plans/observability-validation-requirements_testplan.md",
-    "specs/plans/oep48-brand-package_plan.md",
-    "specs/plans/oep48-brand-package_testplan.md",
     "specs/plans/platform-middleware-custom-apps_plan.md",
     "specs/plans/platform-middleware-custom-apps_testplan.md",
     "specs/plans/repository-structure_plan.md",
@@ -86,22 +73,10 @@
     "specs/plans/secrets-management_testplan.md",
     "specs/plans/slo-sla-service-level-management_plan.md",
     "specs/plans/slo-sla-service-level-management_testplan.md",
-    "specs/plans/studio-customization_plan.md",
-    "specs/plans/studio-customization_testplan.md",
     "specs/plans/tutor-configuration-resilience_plan.md",
     "specs/plans/tutor-configuration-resilience_testplan.md",
     "specs/plans/tutor-configuration_plan.md",
     "specs/plans/tutor-configuration_testplan.md",
-    "specs/plans/verifiable-credentials-issuance_plan.md",
-    "specs/plans/verifiable-credentials-issuance_testplan.md",
-    "specs/plans/verifiable-credentials-issuer_plan.md",
-    "specs/plans/verifiable-credentials-issuer_testplan.md",
-    "specs/plans/verifiable-credentials-ops_plan.md",
-    "specs/plans/verifiable-credentials-ops_testplan.md",
-    "specs/plans/verifiable-credentials-types_plan.md",
-    "specs/plans/verifiable-credentials-types_testplan.md",
-    "specs/plans/verifiable-credentials-verification_plan.md",
-    "specs/plans/verifiable-credentials-verification_testplan.md",
     "specs/plans/video-pipeline-delivery_plan.md",
     "specs/plans/video-pipeline-delivery_testplan.md",
     "specs/platform-middleware-custom-apps_spec.md",
@@ -153,7 +128,7 @@
       "task_type": "evidence_or_status_change"
     },
     {
-      "matched_files": 154,
+      "matched_files": 173,
       "task_type": "review_handoff_or_generated_surface_refresh"
     }
   ],
@@ -659,6 +634,57 @@
       "review_handoff_or_generated_surface_refresh"
     ],
     "generated/knowledge/review-bundle.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/skill-index.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/architecture_or_adr_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/architecture_or_adr_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/cross_repo_contract_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/cross_repo_contract_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/evidence_or_status_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/evidence_or_status_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/normative_spec_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/normative_spec_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/release_or_runtime_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/release_or_runtime_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md": [
       "review_handoff_or_generated_surface_refresh"
     ],
     "generated/knowledge/truth-impact-report.json": [
@@ -1188,6 +1214,12 @@
       "review_handoff_or_generated_surface_refresh"
     ],
     "tools/knowledge/build_review_bundle.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_skill_index.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_task_bundle.py": [
       "review_handoff_or_generated_surface_refresh"
     ],
     "tools/knowledge/build_truth_impact_report.py": [

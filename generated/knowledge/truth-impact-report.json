@@ -169,6 +169,23 @@
       "generated/graphs/knowledge-graph.json",
       "generated/knowledge/change-manifest.json",
       "generated/knowledge/review-bundle.md",
+      "generated/knowledge/skill-index.json",
+      "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+      "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+      "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+      "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+      "generated/knowledge/task-bundles/evidence_or_status_change.json",
+      "generated/knowledge/task-bundles/evidence_or_status_change.md",
+      "generated/knowledge/task-bundles/normative_spec_change.json",
+      "generated/knowledge/task-bundles/normative_spec_change.md",
+      "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+      "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+      "generated/knowledge/task-bundles/release_or_runtime_change.json",
+      "generated/knowledge/task-bundles/release_or_runtime_change.md",
+      "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json",
+      "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md",
+      "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+      "generated/knowledge/task-bundles/runbook_or_ops_change.md",
       "generated/knowledge/truth-impact-report.json",
       "generated/knowledge/wrapper-retirement-report.json",
       "infrastructure/tutor/themes/mereka/README.md",
@@ -287,6 +304,8 @@
       "tools/knowledge/build_knowledge_catalog.py",
       "tools/knowledge/build_knowledge_graph.py",
       "tools/knowledge/build_review_bundle.py",
+      "tools/knowledge/build_skill_index.py",
+      "tools/knowledge/build_task_bundle.py",
       "tools/knowledge/build_truth_impact_report.py",
       "tools/knowledge/build_wrapper_retirement_ledger.py",
       "tools/knowledge/build_wrapper_retirement_report.py",
@@ -397,7 +416,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 314,
+  "change_count": 333,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -3960,6 +3979,346 @@
         "wrappers": []
       },
       "path": "generated/knowledge/review-bundle.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/skill-index.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/skill-index.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/architecture_or_adr_change.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/architecture_or_adr_change.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/cross_repo_contract_change.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/cross_repo_contract_change.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/evidence_or_status_change.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/evidence_or_status_change.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/evidence_or_status_change.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/evidence_or_status_change.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/normative_spec_change.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/normative_spec_change.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/normative_spec_change.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/normative_spec_change.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/proposal_or_rfc_change.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/proposal_or_rfc_change.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/release_or_runtime_change.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/release_or_runtime_change.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/release_or_runtime_change.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/release_or_runtime_change.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/runbook_or_ops_change.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/task-bundles/runbook_or_ops_change.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/task-bundles/runbook_or_ops_change.md",
       "required_evidence": {},
       "required_reviewers": []
     },
@@ -9074,6 +9433,70 @@
         "wrappers": []
       },
       "path": "tools/knowledge/build_review_bundle.py",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json",
+          "generated/knowledge/change-manifest.json",
+          "generated/knowledge/review-bundle.md",
+          "generated/knowledge/truth-impact-report.json",
+          "generated/knowledge/wrapper-retirement-report.json",
+          "tools/knowledge/build_skill_index.py"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "tools/knowledge/build_skill_index.py",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json",
+          "generated/knowledge/change-manifest.json",
+          "generated/knowledge/review-bundle.md",
+          "generated/knowledge/truth-impact-report.json",
+          "generated/knowledge/wrapper-retirement-report.json",
+          "tools/knowledge/build_task_bundle.py"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "tools/knowledge/build_task_bundle.py",
       "required_evidence": {
         "require_adr_update": "conditional",
         "require_runbook_update": "conditional",

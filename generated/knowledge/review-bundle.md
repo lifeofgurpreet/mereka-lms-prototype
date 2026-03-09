@@ -1,7 +1,7 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `314`
+- Changes classified: `333`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
@@ -9,9 +9,9 @@
 
 ### Change Classes
 - `archival_only_change`: 7
-- `docs_support_change`: 104
+- `docs_support_change`: 106
 - `evidence_only_change`: 3
-- `generated_surface_refresh`: 116
+- `generated_surface_refresh`: 133
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -25,7 +25,7 @@
 - `generated`: 8
 - `index`: 1
 - `normative`: 39
-- `other`: 135
+- `other`: 154
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -62,10 +62,10 @@
 - `docs/archive/FRONTEND_PHASE_C_PROMPT.md` [archival_only_change]
 
 ## Required Evidence And Follow-Up
-- status update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +183 more
+- status update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +185 more
 - evidence pack: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +75 more
-- runbook update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +176 more
-- ADR update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +144 more
+- runbook update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +178 more
+- ADR update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +146 more
 - plan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +76 more
 - testplan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +72 more
 
@@ -219,7 +219,7 @@
 - `docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md`
 - `docs/meta/knowledge/CHANGE_CLASSES.yaml`
 - `docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md`
-- `... 115 more`
+- `... 134 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`

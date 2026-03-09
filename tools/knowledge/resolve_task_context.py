@@ -23,6 +23,11 @@ from tools.knowledge.task_runtime import (
     service_review_groups,
 )
 
+def is_canonical_surface(repo_root: Path, surface: str) -> bool:
+    if not (repo_root / surface).exists():
+        return False
+    return not (surface.startswith("docs/archive/") or surface.startswith("specs/archive/"))
+
 
 def required_commands(task_type: str, rules: dict) -> list[str]:
     commands = list(rules["required_command_sets"]["baseline"])
@@ -61,7 +66,7 @@ def resolve_context(repo_root: Path, range_spec: str, explicit_task_type: str | 
         resolved = next((task for task in ordered if candidate_counts.get(task)), ordered[-1])
 
     matched_paths = [path for path, tasks in file_candidates.items() if resolved in tasks]
-    if not matched_paths:
+    if not matched_paths and explicit_task_type is None:
         matched_paths = changed
 
     matched_entries = [entry_index[path] for path in matched_paths if path in entry_index]
@@ -70,6 +75,7 @@ def resolve_context(repo_root: Path, range_spec: str, explicit_task_type: str | 
             surface
             for entry in matched_entries
             for surface in entry.get("impacted_truth_surfaces", [])
+            if is_canonical_surface(repo_root, surface)
         }
     )
 
@@ -145,9 +151,19 @@ def resolve_context(repo_root: Path, range_spec: str, explicit_task_type: str | 
             if candidate_counts.get(task_type)
         ],
         "matched_paths": matched_paths,
-        "read_first": bundle_rules["canonical_read_first_defaults"][resolved],
-        "generated_surfaces_to_refresh": bundle_rules["required_generated_surfaces"]
-        + bundle_rules.get("conditional_generated_surfaces", {}).get(resolved, []),
+        "read_first": [
+            surface
+            for surface in bundle_rules["canonical_read_first_defaults"][resolved]
+            if is_canonical_surface(repo_root, surface)
+        ],
+        "generated_surfaces_to_refresh": [
+            surface
+            for surface in (
+                bundle_rules["required_generated_surfaces"]
+                + bundle_rules.get("conditional_generated_surfaces", {}).get(resolved, [])
+            )
+            if is_canonical_surface(repo_root, surface)
+        ],
         "affected_truth_surfaces": impacted_surfaces,
         "required_reviewers": reviewers,
         "required_evidence": evidence,

@@ -23,7 +23,6 @@
 - `generated/graphs/knowledge-graph.json`
 
 ## Affected Truth Surfaces
-- `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md`
 - `docs/catalog.json`
 - `docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md`
 - `docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md`

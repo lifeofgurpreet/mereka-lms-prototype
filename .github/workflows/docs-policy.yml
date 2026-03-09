@@ -6,6 +6,7 @@ on:
       - "docs/**"
       - "docs/meta/knowledge/**"
       - "docs/meta/contracts/**"
+      - "docs/meta/skills/**"
       - "deploy/contracts/**"
       - "specs/**"
       - "tools/knowledge/**"
@@ -14,6 +15,7 @@ on:
       - "generated/catalogs/knowledge-catalog.json"
       - "generated/knowledge/**"
       - "generated/contracts/**"
+      - "scripts/qa/run-task-runtime-gates.sh"
       - "scripts/qa/run-knowledge-integrity-gates.sh"
       - "scripts/qa/run-knowledge-runtime-gates.sh"
       - "scripts/qa/run-cross-repo-contract-gates.sh"
@@ -27,6 +29,7 @@ on:
       - "docs/**"
       - "docs/meta/knowledge/**"
       - "docs/meta/contracts/**"
+      - "docs/meta/skills/**"
       - "deploy/contracts/**"
       - "specs/**"
       - "tools/knowledge/**"
@@ -35,6 +38,7 @@ on:
       - "generated/catalogs/knowledge-catalog.json"
       - "generated/knowledge/**"
       - "generated/contracts/**"
+      - "scripts/qa/run-task-runtime-gates.sh"
       - "scripts/qa/run-knowledge-integrity-gates.sh"
       - "scripts/qa/run-knowledge-runtime-gates.sh"
       - "scripts/qa/run-cross-repo-contract-gates.sh"
@@ -82,6 +86,16 @@ jobs:
           fi
           chmod +x scripts/qa/run-knowledge-runtime-gates.sh
           ./scripts/qa/run-knowledge-runtime-gates.sh
+
+      - name: Verify task runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export TASK_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export TASK_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-task-runtime-gates.sh
+          ./scripts/qa/run-task-runtime-gates.sh
 
       - name: Verify cross-repo contract runtime
         run: |

@@ -4,12 +4,6 @@
     ".github/workflows/docs-policy.yml",
     "Makefile",
     "docs/_generated/bundles/60-docs-specs-contract.md",
-    "docs/archive/FRONTEND_PHASE_B_PROMPT.md",
-    "docs/archive/FRONTEND_PHASE_C_PROMPT.md",
-    "docs/archive/FRONTEND_PHASE_D_PROMPT.md",
-    "docs/archive/superseded/ROADMAP.md",
-    "docs/archive/superseded/runbooks/external-registration-runbook.md",
-    "docs/archive/superseded/runbooks/proctoring-operations-runbook.md",
     "docs/catalog.json",
     "docs/guides/admin/DOCS_CMDREF_BACKLOG_20260313.md",
     "docs/guides/branding/BRANDING_PLAN.md",
@@ -47,6 +41,23 @@
     "generated/graphs/knowledge-graph.json",
     "generated/knowledge/change-manifest.json",
     "generated/knowledge/review-bundle.md",
+    "generated/knowledge/skill-index.json",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+    "generated/knowledge/task-bundles/evidence_or_status_change.json",
+    "generated/knowledge/task-bundles/evidence_or_status_change.md",
+    "generated/knowledge/task-bundles/normative_spec_change.json",
+    "generated/knowledge/task-bundles/normative_spec_change.md",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+    "generated/knowledge/task-bundles/release_or_runtime_change.json",
+    "generated/knowledge/task-bundles/release_or_runtime_change.md",
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json",
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md",
     "generated/knowledge/truth-impact-report.json",
     "generated/knowledge/wrapper-retirement-report.json",
     "infrastructure/tutor/themes/mereka/README.md",
@@ -74,9 +85,7 @@
     "specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
     "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
     "specs/analytics-pipeline_spec.md",
-    "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED",
     "specs/auth-sso-enterprise_spec.md",
-    "specs/badges-credentials-enterprise_spec.md",
     "specs/brand-pack-schema.json",
     "specs/branding-system_spec.md",
     "specs/catalog.json",
@@ -90,11 +99,9 @@
     "specs/ecommerce-purchase-gateway_spec.md",
     "specs/email-notifications-pipeline_spec.md",
     "specs/enterprise-microservices_spec.md",
-    "specs/external-registration-hubspot_spec.md",
     "specs/forum-service-migration_spec.md",
     "specs/k8s-deployment_spec.md",
     "specs/manual_verifications.yaml",
-    "specs/mobile-apps-enterprise_spec.md",
     "specs/mongodb-atlas-integration_spec.md",
     "specs/multi-site-domains_spec.md",
     "specs/multi-tenancy-architecture_spec.md",
@@ -124,8 +131,6 @@
     "specs/plans/manual_verifications.yaml",
     "specs/plans/mobile-apps-enterprise_plan.md",
     "specs/plans/mobile-apps-enterprise_testplan.md",
-    "specs/plans/mobile-apps-secrets-management_plan.md",
-    "specs/plans/mobile-apps-secrets-management_testplan.md",
     "specs/plans/mongodb-atlas-integration_testplan.md",
     "specs/plans/multi-site-domains_testplan.md",
     "specs/plans/multi-tenancy-architecture_plan.md",
@@ -141,7 +146,6 @@
     "specs/plans/slo-sla-service-level-management_testplan.md",
     "specs/plans/video-pipeline-delivery_testplan.md",
     "specs/platform-middleware-custom-apps_spec.md",
-    "specs/proctoring-integration_spec.md",
     "specs/proposals/README.md",
     "specs/proposals/external-registration-hubspot_spec.md",
     "specs/proposals/mobile-apps-enterprise_spec.md",
@@ -164,6 +168,8 @@
     "tools/knowledge/build_knowledge_catalog.py",
     "tools/knowledge/build_knowledge_graph.py",
     "tools/knowledge/build_review_bundle.py",
+    "tools/knowledge/build_skill_index.py",
+    "tools/knowledge/build_task_bundle.py",
     "tools/knowledge/build_truth_impact_report.py",
     "tools/knowledge/build_wrapper_retirement_ledger.py",
     "tools/knowledge/build_wrapper_retirement_report.py",
@@ -219,7 +225,7 @@
       "task_type": "evidence_or_status_change"
     },
     {
-      "matched_files": 154,
+      "matched_files": 173,
       "task_type": "review_handoff_or_generated_surface_refresh"
     }
   ],
@@ -302,6 +308,23 @@
     "generated/graphs/knowledge-graph.json",
     "generated/knowledge/change-manifest.json",
     "generated/knowledge/review-bundle.md",
+    "generated/knowledge/skill-index.json",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+    "generated/knowledge/task-bundles/evidence_or_status_change.json",
+    "generated/knowledge/task-bundles/evidence_or_status_change.md",
+    "generated/knowledge/task-bundles/normative_spec_change.json",
+    "generated/knowledge/task-bundles/normative_spec_change.md",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+    "generated/knowledge/task-bundles/release_or_runtime_change.json",
+    "generated/knowledge/task-bundles/release_or_runtime_change.md",
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json",
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md",
     "generated/knowledge/truth-impact-report.json",
     "generated/knowledge/wrapper-retirement-report.json",
     "infrastructure/tutor/themes/mereka/README.md",
@@ -390,6 +413,8 @@
     "tools/knowledge/build_knowledge_catalog.py",
     "tools/knowledge/build_knowledge_graph.py",
     "tools/knowledge/build_review_bundle.py",
+    "tools/knowledge/build_skill_index.py",
+    "tools/knowledge/build_task_bundle.py",
     "tools/knowledge/build_truth_impact_report.py",
     "tools/knowledge/build_wrapper_retirement_ledger.py",
     "tools/knowledge/build_wrapper_retirement_report.py",
@@ -801,6 +826,57 @@
       "review_handoff_or_generated_surface_refresh"
     ],
     "generated/knowledge/review-bundle.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/skill-index.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/architecture_or_adr_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/architecture_or_adr_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/cross_repo_contract_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/cross_repo_contract_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/evidence_or_status_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/evidence_or_status_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/normative_spec_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/normative_spec_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/release_or_runtime_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/release_or_runtime_change.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md": [
       "review_handoff_or_generated_surface_refresh"
     ],
     "generated/knowledge/truth-impact-report.json": [
@@ -1330,6 +1406,12 @@
       "review_handoff_or_generated_surface_refresh"
     ],
     "tools/knowledge/build_review_bundle.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_skill_index.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_task_bundle.py": [
       "review_handoff_or_generated_surface_refresh"
     ],
     "tools/knowledge/build_truth_impact_report.py": [
