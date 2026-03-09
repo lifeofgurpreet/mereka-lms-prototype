@@ -108,9 +108,9 @@
     },
     {
       "acceptance_criteria_count": 43,
-      "created": null,
-      "domain": null,
-      "id": null,
+      "created": "2026-02-12",
+      "domain": "platform",
+      "id": "SPEC-CICD-PIPELINE",
       "last_reviewed": "2026-02-12",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/ci-cd-pipeline_spec.testmap.yml",
@@ -118,14 +118,18 @@
         "plan": "specs/plans/ci-cd-pipeline_plan.md",
         "testplan": "specs/plans/ci-cd-pipeline_testplan.md"
       },
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/ci-cd-pipeline_spec.md",
-      "review_due": null,
-      "spec_class": "feature_spec",
-      "status": "completed",
-      "summary": null,
-      "tags": [],
+      "review_due": "2026-06-12",
+      "spec_class": "system",
+      "status": "active",
+      "summary": "Defines the CI/CD contract for building, validating, and promoting platform artifacts through the canonical GitOps release flow.",
+      "tags": [
+        "build.gitops-promotion",
+        "build.image.registry",
+        "platform.control-plane"
+      ],
       "title": "CI/CD Pipeline Specification",
       "version": "1.0.0"
     },
@@ -456,9 +460,9 @@
     },
     {
       "acceptance_criteria_count": 14,
-      "created": null,
-      "domain": null,
-      "id": null,
+      "created": "2026-02-12",
+      "domain": "platform",
+      "id": "SPEC-GHA-COST-MONITORING",
       "last_reviewed": "2026-02-12",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/github-actions-cost-monitoring_spec.testmap.yml",
@@ -466,14 +470,18 @@
         "plan": null,
         "testplan": null
       },
-      "normativity": null,
-      "owner": "Platform Team",
+      "normativity": "normative",
+      "owner": "platform-team",
       "path": "specs/github-actions-cost-monitoring_spec.md",
-      "review_due": null,
-      "spec_class": "feature_spec",
-      "status": "approved",
-      "summary": null,
-      "tags": [],
+      "review_due": "2026-06-12",
+      "spec_class": "integration",
+      "status": "active",
+      "summary": "Defines how GitHub Actions cost telemetry is measured, reported, and reviewed as part of the platform CI/CD contract.",
+      "tags": [
+        "build.gitops-promotion",
+        "build.image.registry",
+        "docs.status"
+      ],
       "title": "GitHub Actions Cost Monitoring",
       "version": "1.0.0"
     },

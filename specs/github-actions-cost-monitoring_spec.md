@@ -1,21 +1,40 @@
 ---
 title: "GitHub Actions Cost Monitoring"
 type: "feature_spec"
-status: "approved"
-owner: "Platform Team"
+id: "SPEC-GHA-COST-MONITORING"
+status: "active"
+spec_class: "integration"
+owner: "platform-team"
 vehicle: "talent_platform"
-last_updated: "2026-02-12"
+created: "2026-02-12"
+last_reviewed: "2026-02-12"
+review_due: "2026-06-12"
 version: "1.0.0"
 priority: "high"
 tier: 2
+domain: "platform"
+normativity: "normative"
 depends_on:
   - "specs/ci-cd-pipeline_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+  - ".github/workflows/ci.yml"
+interfaces:
+  - ".github/workflows/ci.yml"
+tags:
+  - "build.gitops-promotion"
+  - "build.image.registry"
+  - "docs.status"
+summary: "Defines how GitHub Actions cost telemetry is measured, reported, and reviewed as part of the platform CI/CD contract."
 links:
   related_specs:
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/ci-cd-pipeline_spec.md"
   related_docs:
-    - "docs/operations/runbooks/CI_CD_RUNBOOK.md"
+    - "docs/ops/runbooks/CI_CD_RUNBOOK.md"
+    - "docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md"
     - ".github/workflows/ci.yml"
 ---
 
