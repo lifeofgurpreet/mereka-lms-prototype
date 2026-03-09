@@ -3,6 +3,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
+RANGE_SPEC="${KNOWLEDGE_RUNTIME_RANGE:-${DOCS_POLICY_RANGE:-origin/main...HEAD}}"
 
 echo "=== Wave 5 Knowledge Runtime Gates ==="
 
@@ -12,10 +13,10 @@ run() {
 }
 
 run bash scripts/qa/run-knowledge-integrity-gates.sh
-run python3 tools/knowledge/build_change_manifest.py --check --range origin/main...HEAD --repo-root .
-run python3 tools/knowledge/build_review_bundle.py --check --range origin/main...HEAD --repo-root .
-run python3 tools/knowledge/build_truth_impact_report.py --check --range origin/main...HEAD --repo-root .
+run python3 tools/knowledge/build_change_manifest.py --check --range "$RANGE_SPEC" --repo-root .
+run python3 tools/knowledge/build_review_bundle.py --check --range "$RANGE_SPEC" --repo-root .
+run python3 tools/knowledge/build_truth_impact_report.py --check --range "$RANGE_SPEC" --repo-root .
 run python3 tools/knowledge/build_wrapper_retirement_report.py --check --repo-root .
-run python3 tools/knowledge/verify_knowledge_runtime.py --range origin/main...HEAD --repo-root .
+run python3 tools/knowledge/verify_knowledge_runtime.py --range "$RANGE_SPEC" --repo-root .
 
 echo "KNOWLEDGE_RUNTIME_GATES_OK"

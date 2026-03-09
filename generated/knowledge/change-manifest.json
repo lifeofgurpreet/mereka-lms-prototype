@@ -10,7 +10,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 281,
+  "change_count": 283,
   "changed_roots": [
     "docs",
     "specs"
@@ -2721,6 +2721,42 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Change Runtime Closeout"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
       ],
       "lane": "other",
@@ -2778,6 +2814,42 @@
       "root": "docs",
       "status": "",
       "title": "OWNERSHIP_MAP"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Review Handoff Model"
     },
     {
       "change_class": "docs_support_change",
@@ -10426,8 +10498,10 @@
     "docs/meta/docs-program/metadata/frontmatter-schema.json",
     "docs/meta/docs-program/metadata/governs-taxonomy.yaml",
     "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+    "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
     "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
     "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+    "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
     "docs/meta/knowledge/REVIEW_RULES.yaml",
     "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
     "docs/ops/quickref/verification-scripts.md",

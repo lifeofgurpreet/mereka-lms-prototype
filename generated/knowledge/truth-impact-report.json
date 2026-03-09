@@ -68,8 +68,10 @@
       "docs/meta/docs-program/metadata/frontmatter-schema.json",
       "docs/meta/docs-program/metadata/governs-taxonomy.yaml",
       "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+      "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
       "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
       "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
       "docs/meta/knowledge/REVIEW_RULES.yaml",
       "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
       "docs/reference/architecture/API_CONTRACTS.md",
@@ -365,7 +367,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 281,
+  "change_count": 283,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -373,7 +375,7 @@
     "docs:concept": 26,
     "docs:generated": 1,
     "docs:index": 1,
-    "docs:other": 6,
+    "docs:other": 8,
     "docs:review": 17,
     "docs:runbook": 8,
     "specs:evidence": 3,
@@ -2487,6 +2489,38 @@
         "adrs": [],
         "docs_support": [
           "docs/catalog.json",
+          "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs",
+        "architecture"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
           "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
         ],
         "generated_surfaces": [],
@@ -2534,6 +2568,38 @@
         "wrappers": []
       },
       "path": "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs",
+        "architecture"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
+          "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
       "required_evidence": {
         "require_adr_update": "conditional",
         "require_runbook_update": "conditional",

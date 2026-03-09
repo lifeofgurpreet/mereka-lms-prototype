@@ -3,6 +3,9 @@
 ## Current branch
 - docs/wave5-change-intelligence-runtime
 
+## Latest branch head
+- f48ca8296a5a4ea76c8c0094910f8e6c7fc80ddd
+
 ## Last completed batch
 - commit: 68c6a0320bb08dc1a0087c09ead951d48f06c81b
 - scope: Wave 5 Packet G
@@ -21,11 +24,14 @@
 
 ## Current target batch
 - files:
-  - none
+  - docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md
+  - scripts/qa/run-knowledge-runtime-gates.sh
+  - .github/workflows/docs-policy.yml
 - goal:
-  - Wave 5 is complete and awaiting PR review
+  - align the runtime gate with the actual CI diff range
+  - keep the execution tracker truthful about the live branch head
 - stop condition:
-  - reviewer handoff starts
+  - review hardening patch is merged into the branch
 
 ## Decisions already locked
 - Wave 4 topology stays intact
@@ -37,4 +43,4 @@
 - none
 
 ## Next queued batch
-- none after closeout
+- none after review hardening
