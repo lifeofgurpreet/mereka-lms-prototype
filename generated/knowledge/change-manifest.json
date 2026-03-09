@@ -10,7 +10,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 283,
+  "change_count": 282,
   "changed_roots": [
     "docs",
     "specs"
@@ -6333,10 +6333,10 @@
       "title": "Enterprise Microservices Deployment"
     },
     {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
-      "classification": "compatibility",
-      "description": "Changes compatibility-only wrappers or their retirement state.",
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
       "evidence": {
         "require_adr_update": false,
         "require_evidence_pack": false,
@@ -6346,32 +6346,24 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "specs/external-registration-hubspot_spec.md",
-        "specs/plans/external-registration-hubspot_plan.md",
-        "specs/plans/external-registration-hubspot_testplan.md",
-        "generated/catalogs/knowledge-catalog.json",
-        "generated/graphs/knowledge-graph.json"
+        "specs/external-registration-hubspot_spec.md"
       ],
-      "lane": "normative",
-      "owner": "engineering",
+      "lane": "other",
+      "owner": "",
       "path": "specs/external-registration-hubspot_spec.md",
       "review": {
-        "block_merge_without_all_required": true,
-        "lane_reviewer_roles": [
-          "architecture",
-          "platform"
-        ],
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs"
-        ],
-        "owner_team": "architecture",
-        "required_reviewers": [
+          "docs",
           "architecture"
-        ]
+        ],
+        "owner_team": "",
+        "required_reviewers": []
       },
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: External Registration via HubSpot"
+      "root": "other",
+      "status": "",
+      "title": "external-registration-hubspot_spec.md"
     },
     {
       "change_class": "normative_contract_change",
@@ -6649,10 +6641,10 @@
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
     },
     {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
-      "classification": "compatibility",
-      "description": "Changes compatibility-only wrappers or their retirement state.",
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
       "evidence": {
         "require_adr_update": false,
         "require_evidence_pack": false,
@@ -6662,73 +6654,24 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "specs/mobile-apps-enterprise_spec.md",
-        "specs/plans/mobile-apps-enterprise_plan.md",
-        "specs/plans/mobile-apps-enterprise_testplan.md",
-        "generated/catalogs/knowledge-catalog.json",
-        "generated/graphs/knowledge-graph.json"
+        "specs/mobile-apps-enterprise_spec.md"
       ],
-      "lane": "normative",
-      "owner": "engineering",
+      "lane": "other",
+      "owner": "",
       "path": "specs/mobile-apps-enterprise_spec.md",
       "review": {
-        "block_merge_without_all_required": true,
-        "lane_reviewer_roles": [
-          "architecture",
-          "platform"
-        ],
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs"
-        ],
-        "owner_team": "architecture",
-        "required_reviewers": [
+          "docs",
           "architecture"
-        ]
-      },
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
-    },
-    {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
-      "classification": "compatibility",
-      "description": "Changes compatibility-only wrappers or their retirement state.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/mobile-apps-secrets-management_spec.md",
-        "specs/plans/mobile-apps-secrets-management_plan.md",
-        "specs/plans/mobile-apps-secrets-management_testplan.md",
-        "generated/catalogs/knowledge-catalog.json",
-        "generated/graphs/knowledge-graph.json"
-      ],
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-secrets-management_spec.md",
-      "review": {
-        "block_merge_without_all_required": true,
-        "lane_reviewer_roles": [
-          "architecture",
-          "platform"
         ],
-        "optional_reviewers": [
-          "docs"
-        ],
-        "owner_team": "architecture",
-        "required_reviewers": [
-          "architecture"
-        ]
+        "owner_team": "",
+        "required_reviewers": []
       },
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
+      "root": "other",
+      "status": "",
+      "title": "mobile-apps-enterprise_spec.md"
     },
     {
       "change_class": "normative_contract_change",
@@ -8524,10 +8467,10 @@
       "title": "Platform Middleware and Custom Apps"
     },
     {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
-      "classification": "compatibility",
-      "description": "Changes compatibility-only wrappers or their retirement state.",
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
       "evidence": {
         "require_adr_update": false,
         "require_evidence_pack": false,
@@ -8537,32 +8480,24 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "specs/proctoring-integration_spec.md",
-        "specs/plans/proctoring-integration_plan.md",
-        "specs/plans/proctoring-integration_testplan.md",
-        "generated/catalogs/knowledge-catalog.json",
-        "generated/graphs/knowledge-graph.json"
+        "specs/proctoring-integration_spec.md"
       ],
-      "lane": "normative",
-      "owner": "engineering",
+      "lane": "other",
+      "owner": "",
       "path": "specs/proctoring-integration_spec.md",
       "review": {
-        "block_merge_without_all_required": true,
-        "lane_reviewer_roles": [
-          "architecture",
-          "platform"
-        ],
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs"
-        ],
-        "owner_team": "architecture",
-        "required_reviewers": [
+          "docs",
           "architecture"
-        ]
+        ],
+        "owner_team": "",
+        "required_reviewers": []
       },
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
+      "root": "other",
+      "status": "",
+      "title": "proctoring-integration_spec.md"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -10722,7 +10657,6 @@
     "specs/manual_verifications.yaml",
     "specs/mfe-plugin-slots_spec.md",
     "specs/mobile-apps-enterprise_spec.md",
-    "specs/mobile-apps-secrets-management_spec.md",
     "specs/mongodb-atlas-integration_spec.md",
     "specs/multi-site-domains_spec.md",
     "specs/multi-tenancy-architecture_spec.md",

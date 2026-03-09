@@ -1,7 +1,7 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `283`
+- Changes classified: `282`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
@@ -9,10 +9,10 @@
 
 ### Change Classes
 - `archival_only_change`: 2
-- `compatibility_wrapper_update`: 5
+- `compatibility_wrapper_update`: 1
 - `docs_support_change`: 90
 - `evidence_only_change`: 3
-- `generated_surface_refresh`: 99
+- `generated_surface_refresh`: 102
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -25,8 +25,8 @@
 - `evidence`: 3
 - `generated`: 8
 - `index`: 1
-- `normative`: 44
-- `other`: 104
+- `normative`: 40
+- `other`: 107
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -187,13 +187,13 @@
 - `specs/ecommerce-purchase-gateway_spec.md`
 - `specs/email-notifications-pipeline_spec.md`
 - `specs/enterprise-microservices_spec.md`
-- `specs/external-registration-hubspot_spec.md`
 - `specs/forum-service-migration_spec.md`
 - `specs/frontend-accessibility_spec.md`
 - `specs/frontend-performance-budgets_spec.md`
 - `specs/github-actions-cost-monitoring_spec.md`
 - `specs/k8s-deployment_spec.md`
-- `... 24 more`
+- `specs/mfe-plugin-slots_spec.md`
+- `... 20 more`
 
 ### other
 - `.github/workflows/ci.yml`
@@ -216,7 +216,7 @@
 - `generated/knowledge/change-manifest.json`
 - `generated/knowledge/review-bundle.md`
 - `generated/knowledge/truth-impact-report.json`
-- `... 84 more`
+- `... 87 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`

@@ -2,29 +2,6 @@
   "entries": [
     {
       "canonical_exists": true,
-      "canonical_target": "specs/proposals/external-registration-hubspot_spec.md",
-      "live_reference_count": 2,
-      "sample_live_references": [
-        "docs/archive/superseded/runbooks/external-registration-runbook.md:209:- **Spec**: `specs/external-registration-hubspot_spec.md`",
-        "docs/archive/superseded/runbooks/external-registration-runbook.md:7:> **Spec**: `specs/external-registration-hubspot_spec.md`"
-      ],
-      "status": "active_but_suspicious",
-      "wrapper_lane": "normative",
-      "wrapper_path": "specs/external-registration-hubspot_spec.md"
-    },
-    {
-      "canonical_exists": true,
-      "canonical_target": "specs/proposals/mobile-apps-enterprise_spec.md",
-      "live_reference_count": 1,
-      "sample_live_references": [
-        "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED:88:  - Mobile app badge display (covered by `specs/mobile-apps-enterprise_spec.md`)"
-      ],
-      "status": "active_but_suspicious",
-      "wrapper_lane": "normative",
-      "wrapper_path": "specs/mobile-apps-enterprise_spec.md"
-    },
-    {
-      "canonical_exists": true,
       "canonical_target": "specs/plans/paragon-design-tokens-migration_spec.md",
       "live_reference_count": 5,
       "sample_live_references": [
@@ -37,25 +14,14 @@
       "status": "active_and_justified",
       "wrapper_lane": "normative",
       "wrapper_path": "specs/paragon-design-tokens-migration_spec.md"
-    },
-    {
-      "canonical_exists": true,
-      "canonical_target": "specs/proposals/proctoring-integration_spec.md",
-      "live_reference_count": 1,
-      "sample_live_references": [
-        "docs/archive/superseded/runbooks/proctoring-operations-runbook.md:7:> **Spec**: `specs/proctoring-integration_spec.md`"
-      ],
-      "status": "active_but_suspicious",
-      "wrapper_lane": "normative",
-      "wrapper_path": "specs/proctoring-integration_spec.md"
     }
   ],
   "generated_by": "tools/knowledge/build_wrapper_retirement_report.py",
   "status_counts": {
     "active_and_justified": 1,
-    "active_but_suspicious": 3,
+    "active_but_suspicious": 0,
     "safe_to_retire": 0,
     "suspicious": 0
   },
-  "wrapper_count": 4
+  "wrapper_count": 1
 }

@@ -429,36 +429,6 @@
       "version": "1.0.0"
     },
     {
-      "acceptance_criteria_count": 0,
-      "created": "2026-03-09",
-      "doc_type": "generated",
-      "domain": "commerce",
-      "id": "SPEC-COMPAT-EXTERNAL-REGISTRATION-HUBSPOT",
-      "lane": "normative",
-      "last_reviewed": "2026-03-09",
-      "links": {
-        "generated_testmap": "specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml",
-        "legacy_testmap": "specs/testmaps/external-registration-hubspot_spec.testmap.yml",
-        "plan": "specs/plans/external-registration-hubspot_plan.md",
-        "source_plan": null,
-        "source_spec": null,
-        "testplan": "specs/plans/external-registration-hubspot_testplan.md"
-      },
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/external-registration-hubspot_spec.md",
-      "review_due": "2026-06-09",
-      "spec_class": "generated",
-      "status": "superseded",
-      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
-      "tags": [
-        "compatibility",
-        "proposal-lane"
-      ],
-      "title": "Compatibility Wrapper: External Registration via HubSpot",
-      "version": null
-    },
-    {
       "acceptance_criteria_count": 25,
       "created": "2026-02-10",
       "doc_type": "spec",
@@ -643,36 +613,6 @@
       ],
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap",
       "version": "1.0.0"
-    },
-    {
-      "acceptance_criteria_count": 0,
-      "created": "2026-03-09",
-      "doc_type": "generated",
-      "domain": "frontend",
-      "id": "SPEC-COMPAT-MOBILE-APPS-ENTERPRISE",
-      "lane": "normative",
-      "last_reviewed": "2026-03-09",
-      "links": {
-        "generated_testmap": "specs/_generated/testmaps/mobile-apps-enterprise_spec.testmap.yml",
-        "legacy_testmap": "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml",
-        "plan": "specs/plans/mobile-apps-enterprise_plan.md",
-        "source_plan": null,
-        "source_spec": null,
-        "testplan": "specs/plans/mobile-apps-enterprise_testplan.md"
-      },
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-enterprise_spec.md",
-      "review_due": "2026-06-09",
-      "spec_class": "generated",
-      "status": "superseded",
-      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
-      "tags": [
-        "compatibility",
-        "proposal-lane"
-      ],
-      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment",
-      "version": null
     },
     {
       "acceptance_criteria_count": 9,
@@ -2531,36 +2471,6 @@
       "version": "1.0.0"
     },
     {
-      "acceptance_criteria_count": 0,
-      "created": "2026-03-09",
-      "doc_type": "generated",
-      "domain": "platform",
-      "id": "SPEC-COMPAT-PROCTORING-INTEGRATION",
-      "lane": "normative",
-      "last_reviewed": "2026-03-09",
-      "links": {
-        "generated_testmap": "specs/_generated/testmaps/proctoring-integration_spec.testmap.yml",
-        "legacy_testmap": "specs/testmaps/proctoring-integration_spec.testmap.yml",
-        "plan": "specs/plans/proctoring-integration_plan.md",
-        "source_plan": null,
-        "source_spec": null,
-        "testplan": "specs/plans/proctoring-integration_testplan.md"
-      },
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
-      "review_due": "2026-06-09",
-      "spec_class": "generated",
-      "status": "superseded",
-      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
-      "tags": [
-        "compatibility",
-        "proposal-lane"
-      ],
-      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX",
-      "version": null
-    },
-    {
       "acceptance_criteria_count": 26,
       "created": "2026-02-12",
       "doc_type": "spec",
@@ -3042,7 +2952,7 @@
       "version": "1.0.0"
     }
   ],
-  "entry_count": 107,
+  "entry_count": 104,
   "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
   "root": "specs",
   "taxonomy": "specs/standards/spec-taxonomy.yaml"

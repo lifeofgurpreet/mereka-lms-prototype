@@ -198,7 +198,9 @@
       "specs/badges-credentials-enterprise_spec.md",
       "specs/brand-pack-schema.json",
       "specs/catalog.json",
+      "specs/external-registration-hubspot_spec.md",
       "specs/manual_verifications.yaml",
+      "specs/mobile-apps-enterprise_spec.md",
       "specs/plans/IMPLEMENTATION_ORDER.md",
       "specs/plans/README.md",
       "specs/plans/cross-cutting-requirements_plan.md",
@@ -232,6 +234,7 @@
       "specs/plans/verifiable-credentials-types_testplan.md",
       "specs/plans/verifiable-credentials-verification_plan.md",
       "specs/plans/verifiable-credentials-verification_testplan.md",
+      "specs/proctoring-integration_spec.md",
       "specs/proposals/README.md",
       "specs/standards/DOCS_SPECS_BOUNDARY.md",
       "specs/standards/SPEC_AUTHORING_STANDARD.md",
@@ -349,11 +352,7 @@
       "docs/ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md"
     ],
     "wrappers": [
-      "specs/external-registration-hubspot_spec.md",
-      "specs/mobile-apps-enterprise_spec.md",
-      "specs/mobile-apps-secrets-management_spec.md",
-      "specs/paragon-design-tokens-migration_spec.md",
-      "specs/proctoring-integration_spec.md"
+      "specs/paragon-design-tokens-migration_spec.md"
     ]
   },
   "change_classes": [
@@ -367,7 +366,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 283,
+  "change_count": 282,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -380,7 +379,7 @@
     "docs:runbook": 8,
     "specs:evidence": 3,
     "specs:generated": 7,
-    "specs:normative": 44,
+    "specs:normative": 40,
     "specs:other": 12,
     "specs:plan": 10,
     "specs:proposal": 4,
@@ -5112,39 +5111,24 @@
       ]
     },
     {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
       "impacts": {
         "adrs": [],
         "docs_support": [],
-        "generated_surfaces": [
-          "specs/_generated/bundles/00-spec-hot-path.md",
-          "specs/_generated/graph.json",
-          "specs/_generated/indexes/spec-read-first.md"
-        ],
+        "generated_surfaces": [],
         "normative_specs": [],
         "other": [
-          "generated/catalogs/knowledge-catalog.json",
-          "generated/graphs/knowledge-graph.json",
-          "specs/catalog.json"
-        ],
-        "plans_testplans": [
-          "specs/plans/external-registration-hubspot_plan.md",
-          "specs/plans/external-registration-hubspot_testplan.md"
-        ],
-        "proposal_specs": [
-          "specs/proposals/external-registration-hubspot_spec.md"
-        ],
-        "runbooks": [],
-        "wrappers": [
           "specs/external-registration-hubspot_spec.md"
-        ]
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
       },
       "path": "specs/external-registration-hubspot_spec.md",
       "required_evidence": {},
-      "required_reviewers": [
-        "architecture"
-      ]
+      "required_reviewers": []
     },
     {
       "change_class": "normative_contract_change",
@@ -5402,73 +5386,24 @@
       ]
     },
     {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
       "impacts": {
         "adrs": [],
         "docs_support": [],
-        "generated_surfaces": [
-          "specs/_generated/bundles/00-spec-hot-path.md",
-          "specs/_generated/graph.json",
-          "specs/_generated/indexes/spec-read-first.md"
-        ],
+        "generated_surfaces": [],
         "normative_specs": [],
         "other": [
-          "generated/catalogs/knowledge-catalog.json",
-          "generated/graphs/knowledge-graph.json",
-          "specs/catalog.json"
-        ],
-        "plans_testplans": [
-          "specs/plans/mobile-apps-enterprise_plan.md",
-          "specs/plans/mobile-apps-enterprise_testplan.md"
-        ],
-        "proposal_specs": [
-          "specs/proposals/mobile-apps-enterprise_spec.md"
-        ],
-        "runbooks": [],
-        "wrappers": [
           "specs/mobile-apps-enterprise_spec.md"
-        ]
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
       },
       "path": "specs/mobile-apps-enterprise_spec.md",
       "required_evidence": {},
-      "required_reviewers": [
-        "architecture"
-      ]
-    },
-    {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
-      "impacts": {
-        "adrs": [],
-        "docs_support": [],
-        "generated_surfaces": [
-          "specs/_generated/bundles/00-spec-hot-path.md",
-          "specs/_generated/graph.json",
-          "specs/_generated/indexes/spec-read-first.md"
-        ],
-        "normative_specs": [],
-        "other": [
-          "generated/catalogs/knowledge-catalog.json",
-          "generated/graphs/knowledge-graph.json",
-          "specs/catalog.json",
-          "specs/plans/mobile-apps-secrets-management_plan.md",
-          "specs/plans/mobile-apps-secrets-management_testplan.md"
-        ],
-        "plans_testplans": [],
-        "proposal_specs": [
-          "specs/proposals/mobile-apps-secrets-management_spec.md"
-        ],
-        "runbooks": [],
-        "wrappers": [
-          "specs/mobile-apps-secrets-management_spec.md"
-        ]
-      },
-      "path": "specs/mobile-apps-secrets-management_spec.md",
-      "required_evidence": {},
-      "required_reviewers": [
-        "architecture"
-      ]
+      "required_reviewers": []
     },
     {
       "change_class": "normative_contract_change",
@@ -6386,7 +6321,8 @@
         ],
         "normative_specs": [],
         "other": [
-          "specs/catalog.json"
+          "specs/catalog.json",
+          "specs/external-registration-hubspot_spec.md"
         ],
         "plans_testplans": [
           "specs/plans/external-registration-hubspot_plan.md",
@@ -6396,9 +6332,7 @@
           "specs/proposals/external-registration-hubspot_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/external-registration-hubspot_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/plans/external-registration-hubspot_plan.md",
       "required_evidence": {
@@ -6425,7 +6359,8 @@
         ],
         "normative_specs": [],
         "other": [
-          "specs/catalog.json"
+          "specs/catalog.json",
+          "specs/external-registration-hubspot_spec.md"
         ],
         "plans_testplans": [
           "specs/plans/external-registration-hubspot_plan.md",
@@ -6435,9 +6370,7 @@
           "specs/proposals/external-registration-hubspot_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/external-registration-hubspot_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/plans/external-registration-hubspot_testplan.md",
       "required_evidence": {
@@ -6600,7 +6533,8 @@
         ],
         "normative_specs": [],
         "other": [
-          "specs/catalog.json"
+          "specs/catalog.json",
+          "specs/mobile-apps-enterprise_spec.md"
         ],
         "plans_testplans": [
           "specs/plans/mobile-apps-enterprise_plan.md",
@@ -6610,9 +6544,7 @@
           "specs/proposals/mobile-apps-enterprise_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/mobile-apps-enterprise_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/plans/mobile-apps-enterprise_plan.md",
       "required_evidence": {
@@ -6639,7 +6571,8 @@
         ],
         "normative_specs": [],
         "other": [
-          "specs/catalog.json"
+          "specs/catalog.json",
+          "specs/mobile-apps-enterprise_spec.md"
         ],
         "plans_testplans": [
           "specs/plans/mobile-apps-enterprise_plan.md",
@@ -6649,9 +6582,7 @@
           "specs/proposals/mobile-apps-enterprise_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/mobile-apps-enterprise_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/plans/mobile-apps-enterprise_testplan.md",
       "required_evidence": {
@@ -6890,7 +6821,8 @@
         ],
         "normative_specs": [],
         "other": [
-          "specs/catalog.json"
+          "specs/catalog.json",
+          "specs/proctoring-integration_spec.md"
         ],
         "plans_testplans": [
           "specs/plans/proctoring-integration_plan.md",
@@ -6900,9 +6832,7 @@
           "specs/proposals/proctoring-integration_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/proctoring-integration_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/plans/proctoring-integration_plan.md",
       "required_evidence": {
@@ -6929,7 +6859,8 @@
         ],
         "normative_specs": [],
         "other": [
-          "specs/catalog.json"
+          "specs/catalog.json",
+          "specs/proctoring-integration_spec.md"
         ],
         "plans_testplans": [
           "specs/plans/proctoring-integration_plan.md",
@@ -6939,9 +6870,7 @@
           "specs/proposals/proctoring-integration_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/proctoring-integration_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/plans/proctoring-integration_testplan.md",
       "required_evidence": {
@@ -7217,39 +7146,24 @@
       ]
     },
     {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
       "impacts": {
         "adrs": [],
         "docs_support": [],
-        "generated_surfaces": [
-          "specs/_generated/bundles/00-spec-hot-path.md",
-          "specs/_generated/graph.json",
-          "specs/_generated/indexes/spec-read-first.md"
-        ],
+        "generated_surfaces": [],
         "normative_specs": [],
         "other": [
-          "generated/catalogs/knowledge-catalog.json",
-          "generated/graphs/knowledge-graph.json",
-          "specs/catalog.json"
-        ],
-        "plans_testplans": [
-          "specs/plans/proctoring-integration_plan.md",
-          "specs/plans/proctoring-integration_testplan.md"
-        ],
-        "proposal_specs": [
-          "specs/proposals/proctoring-integration_spec.md"
-        ],
-        "runbooks": [],
-        "wrappers": [
           "specs/proctoring-integration_spec.md"
-        ]
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
       },
       "path": "specs/proctoring-integration_spec.md",
       "required_evidence": {},
-      "required_reviewers": [
-        "architecture"
-      ]
+      "required_reviewers": []
     },
     {
       "change_class": "generated_surface_refresh",
@@ -7299,9 +7213,7 @@
           "specs/proposals/external-registration-hubspot_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/external-registration-hubspot_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/proposals/external-registration-hubspot_spec.md",
       "required_evidence": {
@@ -7336,9 +7248,7 @@
           "specs/proposals/mobile-apps-enterprise_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/mobile-apps-enterprise_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/proposals/mobile-apps-enterprise_spec.md",
       "required_evidence": {
@@ -7372,9 +7282,7 @@
           "specs/proposals/mobile-apps-secrets-management_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/mobile-apps-secrets-management_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/proposals/mobile-apps-secrets-management_spec.md",
       "required_evidence": {
@@ -7409,9 +7317,7 @@
           "specs/proposals/proctoring-integration_spec.md"
         ],
         "runbooks": [],
-        "wrappers": [
-          "specs/proctoring-integration_spec.md"
-        ]
+        "wrappers": []
       },
       "path": "specs/proposals/proctoring-integration_spec.md",
       "required_evidence": {

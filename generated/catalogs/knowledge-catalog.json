@@ -2,7 +2,7 @@
   "classifications": {
     "archival": 292,
     "canonical": 44,
-    "compatibility": 4,
+    "compatibility": 1,
     "generated": 49,
     "supporting": 1210
   },
@@ -13040,15 +13040,6 @@
       "title": "Enterprise Microservices Deployment"
     },
     {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/external-registration-hubspot_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: External Registration via HubSpot"
-    },
-    {
       "classification": "canonical",
       "lane": "normative",
       "owner": "engineering",
@@ -13110,15 +13101,6 @@
       "root": "specs",
       "status": "draft",
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
-    },
-    {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-enterprise_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
     },
     {
       "classification": "canonical",
@@ -13769,15 +13751,6 @@
       "title": "Platform Middleware and Custom Apps"
     },
     {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
-    },
-    {
       "classification": "supporting",
       "lane": "other",
       "owner": "",
@@ -14399,7 +14372,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1599,
+  "entry_count": 1596,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14413,7 +14386,7 @@
     "docs:runbook": 482,
     "specs:evidence": 43,
     "specs:generated": 48,
-    "specs:normative": 43,
+    "specs:normative": 40,
     "specs:other": 15,
     "specs:plan": 29,
     "specs:proposal": 4,
@@ -14422,6 +14395,6 @@
   },
   "roots": {
     "docs": 1377,
-    "specs": 222
+    "specs": 219
   }
 }

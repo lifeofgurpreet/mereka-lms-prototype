@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4797,
+  "edge_count": 4788,
   "edges": [
     {
       "edge_type": "classifies",
@@ -1685,22 +1685,7 @@
     {
       "edge_type": "classifies",
       "source": "classification:compatibility",
-      "target": "specs/external-registration-hubspot_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
-      "target": "specs/mobile-apps-enterprise_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
       "target": "specs/paragon-design-tokens-migration_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
-      "target": "specs/proctoring-integration_spec.md"
     },
     {
       "edge_type": "classifies",
@@ -22295,11 +22280,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:specs:normative",
-      "target": "specs/external-registration-hubspot_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
       "target": "specs/forum-service-migration_spec.md"
     },
     {
@@ -22326,11 +22306,6 @@
       "edge_type": "classifies",
       "source": "lane:specs:normative",
       "target": "specs/mfe-plugin-slots_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
-      "target": "specs/mobile-apps-enterprise_spec.md"
     },
     {
       "edge_type": "classifies",
@@ -22371,11 +22346,6 @@
       "edge_type": "classifies",
       "source": "lane:specs:normative",
       "target": "specs/platform-middleware-custom-apps_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
-      "target": "specs/proctoring-integration_spec.md"
     },
     {
       "edge_type": "classifies",
@@ -23235,11 +23205,6 @@
     {
       "edge_type": "contains",
       "source": "specs",
-      "target": "specs/external-registration-hubspot_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
       "target": "specs/forum-service-migration_spec.md"
     },
     {
@@ -23271,11 +23236,6 @@
       "edge_type": "contains",
       "source": "specs",
       "target": "specs/mfe-plugin-slots_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
-      "target": "specs/mobile-apps-enterprise_spec.md"
     },
     {
       "edge_type": "contains",
@@ -23640,11 +23600,6 @@
     {
       "edge_type": "contains",
       "source": "specs",
-      "target": "specs/proctoring-integration_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
       "target": "specs/proposals/README.md"
     },
     {
@@ -23989,7 +23944,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1623,
+  "node_count": 1620,
   "nodes": [
     {
       "id": "classification:archival",
@@ -40064,17 +40019,6 @@
       "title": "Enterprise Microservices Deployment"
     },
     {
-      "classification": "compatibility",
-      "id": "specs/external-registration-hubspot_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/external-registration-hubspot_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: External Registration via HubSpot"
-    },
-    {
       "classification": "canonical",
       "id": "specs/forum-service-migration_spec.md",
       "lane": "normative",
@@ -40150,17 +40094,6 @@
       "root": "specs",
       "status": "draft",
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
-    },
-    {
-      "classification": "compatibility",
-      "id": "specs/mobile-apps-enterprise_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-enterprise_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
     },
     {
       "classification": "canonical",
@@ -40953,17 +40886,6 @@
       "root": "specs",
       "status": "active",
       "title": "Platform Middleware and Custom Apps"
-    },
-    {
-      "classification": "compatibility",
-      "id": "specs/proctoring-integration_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
     },
     {
       "classification": "supporting",
