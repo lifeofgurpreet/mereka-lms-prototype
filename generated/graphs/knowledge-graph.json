@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4788,
+  "edge_count": 4785,
   "edges": [
     {
       "edge_type": "classifies",
@@ -1681,11 +1681,6 @@
       "edge_type": "classifies",
       "source": "classification:canonical",
       "target": "specs/video-pipeline-delivery_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
-      "target": "specs/paragon-design-tokens-migration_spec.md"
     },
     {
       "edge_type": "classifies",
@@ -22340,11 +22335,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:specs:normative",
-      "target": "specs/paragon-design-tokens-migration_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
       "target": "specs/platform-middleware-custom-apps_spec.md"
     },
     {
@@ -23270,11 +23260,6 @@
     {
       "edge_type": "contains",
       "source": "specs",
-      "target": "specs/paragon-design-tokens-migration_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
       "target": "specs/plans/IMPLEMENTATION_ORDER.md"
     },
     {
@@ -23944,7 +23929,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1620,
+  "node_count": 1618,
   "nodes": [
     {
       "id": "classification:archival",
@@ -23957,12 +23942,6 @@
       "node_type": "classification",
       "path": "classification:canonical",
       "title": "canonical"
-    },
-    {
-      "id": "classification:compatibility",
-      "node_type": "classification",
-      "path": "classification:compatibility",
-      "title": "compatibility"
     },
     {
       "id": "classification:generated",
@@ -40160,17 +40139,6 @@
       "root": "specs",
       "status": "draft",
       "title": "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
-    },
-    {
-      "classification": "compatibility",
-      "id": "specs/paragon-design-tokens-migration_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
       "classification": "supporting",

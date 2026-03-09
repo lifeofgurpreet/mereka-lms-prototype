@@ -2,7 +2,7 @@
 
 **Date**: 2026-02-28 (revised)
 **Prerequisite**: Phase B complete + **Phase B deep audit fixes** (see below)
-**Specs**: `specs/paragon-design-tokens-migration_spec.md`, `specs/mfe-plugin-slots_spec.md`
+**Specs**: `specs/plans/paragon-design-tokens-migration_spec.md`, `specs/mfe-plugin-slots_spec.md`
 
 ---
 
@@ -393,7 +393,7 @@ Add to `.github/ci-scripts-static.txt`.
 | `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css` | **THE** source of truth for what Paragon v22 consumes (2,310 tokens) |
 | `infrastructure/tutor/themes/mereka/mfe/mereka.scss` | All BEM overrides to evaluate |
 | `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | Current token bridge |
-| `specs/paragon-design-tokens-migration_spec.md` | Spec acceptance criteria |
+| `specs/plans/paragon-design-tokens-migration_spec.md` | Spec acceptance criteria |
 | `specs/mfe-plugin-slots_spec.md` | FPF slots for Phase D header branding |
 | `docs/architecture/MFE_RUNTIME_CONFIG.md` | MFE config API mechanics |
 

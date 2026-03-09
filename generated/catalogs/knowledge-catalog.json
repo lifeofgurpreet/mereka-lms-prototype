@@ -2,7 +2,6 @@
   "classifications": {
     "archival": 292,
     "canonical": 44,
-    "compatibility": 1,
     "generated": 49,
     "supporting": 1210
   },
@@ -13157,15 +13156,6 @@
       "title": "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
     },
     {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
-    },
-    {
       "classification": "supporting",
       "lane": "other",
       "owner": "",
@@ -14372,7 +14362,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1596,
+  "entry_count": 1595,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14386,7 +14376,7 @@
     "docs:runbook": 482,
     "specs:evidence": 43,
     "specs:generated": 48,
-    "specs:normative": 40,
+    "specs:normative": 39,
     "specs:other": 15,
     "specs:plan": 29,
     "specs:proposal": 4,
@@ -14395,6 +14385,6 @@
   },
   "roots": {
     "docs": 1377,
-    "specs": 219
+    "specs": 218
   }
 }

@@ -2,7 +2,7 @@
 
 **Date**: 2026-02-28
 **Prerequisite**: Phase C complete (FE-010, FE-011, FE-012, FE-015 prepared)
-**Specs**: `specs/mfe-plugin-slots_spec.md`, `specs/paragon-design-tokens-migration_spec.md`
+**Specs**: `specs/mfe-plugin-slots_spec.md`, `specs/plans/paragon-design-tokens-migration_spec.md`
 
 ---
 

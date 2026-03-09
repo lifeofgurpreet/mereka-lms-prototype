@@ -8,11 +8,10 @@
 ## What Changed
 
 ### Change Classes
-- `archival_only_change`: 2
-- `compatibility_wrapper_update`: 1
+- `archival_only_change`: 4
 - `docs_support_change`: 90
 - `evidence_only_change`: 3
-- `generated_surface_refresh`: 102
+- `generated_surface_refresh`: 101
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -20,13 +19,13 @@
 
 ### Lanes
 - `adr`: 21
-- `archive`: 2
+- `archive`: 4
 - `concept`: 26
 - `evidence`: 3
 - `generated`: 8
 - `index`: 1
-- `normative`: 40
-- `other`: 107
+- `normative`: 39
+- `other`: 106
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -54,13 +53,13 @@
 - `docs/_generated/bundles/60-docs-specs-contract.md` [generated_surface_refresh]
 - `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md` [archival_only_change]
 - `docs/archive/superseded/ROADMAP.md` [archival_only_change]
+- `docs/archive/superseded/runbooks/external-registration-runbook.md` [archival_only_change]
+- `docs/archive/superseded/runbooks/proctoring-operations-runbook.md` [archival_only_change]
 - `docs/meta/docs-program/WAVE3_CLOSEOUT.md` [reviewer_handoff_only]
 - `docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md` [reviewer_handoff_only]
 - `docs/meta/docs-program/WAVE4_CLOSEOUT.md` [reviewer_handoff_only]
 - `docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md` [reviewer_handoff_only]
 - `docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md` [reviewer_handoff_only]
-- `generated/adr-bundles/00-foundations.md` [generated_surface_refresh]
-- `generated/adr-bundles/10-auth-and-tenancy.md` [generated_surface_refresh]
 
 ## Required Evidence And Follow-Up
 - status update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +169 more
@@ -96,7 +95,6 @@
 - `normative_contract_change` -> `architecture`
 - `proposal_only` -> `architecture`
 - `plan_only` -> `delivery`, `qa`
-- `compatibility_wrapper_update` -> `architecture`
 - `docs_support_change` -> `architecture`, `docs-program`, `platform-operations`
 - `evidence_only_change` -> `qa`
 - `generated_surface_refresh` -> `architecture`, `docs-program`
@@ -130,6 +128,8 @@
 ### archive
 - `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md`
 - `docs/archive/superseded/ROADMAP.md`
+- `docs/archive/superseded/runbooks/external-registration-runbook.md`
+- `docs/archive/superseded/runbooks/proctoring-operations-runbook.md`
 
 ### concept
 - `docs/concepts/architecture/ARCHITECTURE_CHARTER.md`
@@ -193,7 +193,7 @@
 - `specs/github-actions-cost-monitoring_spec.md`
 - `specs/k8s-deployment_spec.md`
 - `specs/mfe-plugin-slots_spec.md`
-- `... 20 more`
+- `... 19 more`
 
 ### other
 - `.github/workflows/ci.yml`
@@ -216,7 +216,7 @@
 - `generated/knowledge/change-manifest.json`
 - `generated/knowledge/review-bundle.md`
 - `generated/knowledge/truth-impact-report.json`
-- `... 87 more`
+- `... 86 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`

@@ -1,27 +1,11 @@
 {
-  "entries": [
-    {
-      "canonical_exists": true,
-      "canonical_target": "specs/plans/paragon-design-tokens-migration_spec.md",
-      "live_reference_count": 5,
-      "sample_live_references": [
-        "docs/archive/FRONTEND_PHASE_B_PROMPT.md:338:| `specs/paragon-design-tokens-migration_spec.md` | Token format and migration phases |",
-        "docs/archive/FRONTEND_PHASE_B_PROMPT.md:5:**Specs**: `specs/oep48-brand-package_spec.md`, `specs/paragon-design-tokens-migration_spec.md`",
-        "docs/archive/FRONTEND_PHASE_C_PROMPT.md:396:| `specs/paragon-design-tokens-migration_spec.md` | Spec acceptance criteria |",
-        "docs/archive/FRONTEND_PHASE_C_PROMPT.md:5:**Specs**: `specs/paragon-design-tokens-migration_spec.md`, `specs/mfe-plugin-slots_spec.md`",
-        "docs/archive/FRONTEND_PHASE_D_PROMPT.md:5:**Specs**: `specs/mfe-plugin-slots_spec.md`, `specs/paragon-design-tokens-migration_spec.md`"
-      ],
-      "status": "active_and_justified",
-      "wrapper_lane": "normative",
-      "wrapper_path": "specs/paragon-design-tokens-migration_spec.md"
-    }
-  ],
+  "entries": [],
   "generated_by": "tools/knowledge/build_wrapper_retirement_report.py",
   "status_counts": {
-    "active_and_justified": 1,
+    "active_and_justified": 0,
     "active_but_suspicious": 0,
     "safe_to_retire": 0,
     "suspicious": 0
   },
-  "wrapper_count": 1
+  "wrapper_count": 0
 }

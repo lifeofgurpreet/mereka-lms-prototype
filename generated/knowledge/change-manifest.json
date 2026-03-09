@@ -1,7 +1,6 @@
 {
   "change_classes": [
     "archival_only_change",
-    "compatibility_wrapper_update",
     "docs_support_change",
     "evidence_only_change",
     "generated_surface_refresh",
@@ -1046,6 +1045,74 @@
       "root": "docs",
       "status": "",
       "title": "Mereka Academy \u2014 Platform Roadmap"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/superseded/runbooks/external-registration-runbook.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/superseded/runbooks/external-registration-runbook.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "External Registration via HubSpot Runbook"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/superseded/runbooks/proctoring-operations-runbook.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/superseded/runbooks/proctoring-operations-runbook.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Proctoring Operations Runbook"
     },
     {
       "change_class": "docs_support_change",
@@ -5783,6 +5850,41 @@
       "title": "Analytics Pipeline (Aspects/Panorama)"
     },
     {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "architecture"
+        ],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "architecture",
+        "required_reviewers": []
+      },
+      "root": "specs",
+      "status": "",
+      "title": "Human Summary"
+    },
+    {
       "change_class": "normative_contract_change",
       "change_risk": "high",
       "classification": "canonical",
@@ -6333,39 +6435,6 @@
       "title": "Enterprise Microservices Deployment"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/external-registration-hubspot_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/external-registration-hubspot_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "external-registration-hubspot_spec.md"
-    },
-    {
       "change_class": "normative_contract_change",
       "change_risk": "high",
       "classification": "canonical",
@@ -6641,39 +6710,6 @@
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/mobile-apps-enterprise_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/mobile-apps-enterprise_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "mobile-apps-enterprise_spec.md"
-    },
-    {
       "change_class": "normative_contract_change",
       "change_risk": "high",
       "classification": "canonical",
@@ -6914,10 +6950,10 @@
       "title": "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
     },
     {
-      "change_class": "compatibility_wrapper_update",
-      "change_risk": "medium",
-      "classification": "compatibility",
-      "description": "Changes compatibility-only wrappers or their retirement state.",
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
       "evidence": {
         "require_adr_update": false,
         "require_evidence_pack": false,
@@ -6927,32 +6963,24 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "specs/paragon-design-tokens-migration_spec.md",
-        "specs/plans/paragon-design-tokens-migration_plan.md",
-        "specs/plans/paragon-design-tokens-migration_testplan.md",
-        "generated/catalogs/knowledge-catalog.json",
-        "generated/graphs/knowledge-graph.json"
+        "specs/paragon-design-tokens-migration_spec.md"
       ],
-      "lane": "normative",
-      "owner": "engineering",
+      "lane": "other",
+      "owner": "",
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "review": {
-        "block_merge_without_all_required": true,
-        "lane_reviewer_roles": [
-          "architecture",
-          "platform"
-        ],
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs"
-        ],
-        "owner_team": "architecture",
-        "required_reviewers": [
+          "docs",
           "architecture"
-        ]
+        ],
+        "owner_team": "",
+        "required_reviewers": []
       },
-      "root": "specs",
-      "status": "superseded",
-      "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
+      "root": "other",
+      "status": "",
+      "title": "paragon-design-tokens-migration_spec.md"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -8465,39 +8493,6 @@
       "root": "specs",
       "status": "active",
       "title": "Platform Middleware and Custom Apps"
-    },
-    {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/proctoring-integration_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/proctoring-integration_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "proctoring-integration_spec.md"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -10503,6 +10498,8 @@
     "docs/adr/rfc/041-authorization-and-role-boundary-model.md",
     "docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md",
     "docs/archive/superseded/ROADMAP.md",
+    "docs/archive/superseded/runbooks/external-registration-runbook.md",
+    "docs/archive/superseded/runbooks/proctoring-operations-runbook.md",
     "docs/catalog.json",
     "docs/concepts/architecture/ARCHITECTURE_CHARTER.md",
     "docs/concepts/architecture/AUTHORIZATION_MODEL.md",
@@ -10633,6 +10630,7 @@
     "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
     "specs/advanced-assessment-xqueue_spec.md",
     "specs/analytics-pipeline_spec.md",
+    "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED",
     "specs/auth-sso-enterprise_spec.md",
     "specs/badges-credentials-enterprise_spec.md",
     "specs/brand-pack-schema.json",
@@ -10726,9 +10724,7 @@
     "specs/plans/observability-validation-requirements_testplan.md",
     "specs/plans/oep48-brand-package_plan.md",
     "specs/plans/oep48-brand-package_testplan.md",
-    "specs/plans/paragon-design-tokens-migration_plan.md",
     "specs/plans/paragon-design-tokens-migration_spec.md",
-    "specs/plans/paragon-design-tokens-migration_testplan.md",
     "specs/plans/platform-middleware-custom-apps_plan.md",
     "specs/plans/platform-middleware-custom-apps_testplan.md",
     "specs/plans/proctoring-integration_plan.md",

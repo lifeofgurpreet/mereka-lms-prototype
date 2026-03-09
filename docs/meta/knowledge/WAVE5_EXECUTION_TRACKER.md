@@ -4,11 +4,11 @@
 - docs/wave5-change-intelligence-runtime
 
 ## Latest substantive packet head
-- 39911e35dcfcd7d4d0ddd5f50fa884cfbbde97e1
+- 874329a9378f640665b12c2bab6e7c550d774fbb
 
 ## Last completed batch
-- commit: 39911e35dcfcd7d4d0ddd5f50fa884cfbbde97e1
-- scope: Wave 5 runtime hardening
+- commit: 874329a9378f640665b12c2bab6e7c550d774fbb
+- scope: Final compatibility wrapper retirement
 - validators run:
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
@@ -30,7 +30,9 @@
 - tracker records the latest substantive packet head, not every follow-up sync commit
 
 ## Open residue
-- none
+- compatibility wrappers: 0
+- suspicious wrappers: 0
+- safe-to-retire wrappers: 0
 
 ## Next queued batch
 - none

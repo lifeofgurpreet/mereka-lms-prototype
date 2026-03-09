@@ -798,33 +798,6 @@
     },
     {
       "acceptance_criteria_count": 0,
-      "created": "2026-03-09",
-      "doc_type": "generated",
-      "domain": "frontend",
-      "id": "SPEC-PARAGON-DESIGN-TOKENS-MIGRATION",
-      "lane": "normative",
-      "last_reviewed": "2026-03-09",
-      "links": {
-        "generated_testmap": "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
-        "legacy_testmap": "specs/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
-        "plan": null,
-        "source_plan": null,
-        "source_spec": null,
-        "testplan": null
-      },
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "review_due": "2026-06-09",
-      "spec_class": "generated",
-      "status": "superseded",
-      "summary": "Compatibility wrapper retained at the legacy root spec path; the live planning artifact now lives under specs/plans.",
-      "tags": [],
-      "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline",
-      "version": null
-    },
-    {
-      "acceptance_criteria_count": 0,
       "created": null,
       "doc_type": "plan",
       "domain": null,
@@ -2952,7 +2925,7 @@
       "version": "1.0.0"
     }
   ],
-  "entry_count": 104,
+  "entry_count": 103,
   "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
   "root": "specs",
   "taxonomy": "specs/standards/spec-taxonomy.yaml"
