@@ -218,6 +218,10 @@ def render_bundle_markdown(bundle: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def expected_bundle_files() -> set[str]:
+    return set(FILE_NAME_MAP.values())
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=".")
@@ -230,6 +234,15 @@ def main() -> None:
     output_dir = repo_root / args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     taxonomy = load_yaml(repo_root / "docs" / "meta" / "knowledge" / "AGENT_TASK_TAXONOMY.yaml")["task_types"]
+
+    expected_files = expected_bundle_files()
+    existing_files = {path.name for path in output_dir.glob("*.md")}
+
+    if args.check and existing_files != expected_files:
+        raise SystemExit("AGENT_TASK_BUNDLE_SET_MISMATCH")
+    if not args.check:
+        for stale in sorted(existing_files - expected_files):
+            (output_dir / stale).unlink()
 
     for task_type in taxonomy:
         bundle = build_bundle(repo_root, task_type)

@@ -4,23 +4,26 @@
 - docs/wave8-agent-consumption-runtime
 
 ## Latest substantive packet head
-- 1d6588ddfd3a6f32988ce30414f84f149494b1a8
+- ccbe9013160ed7d1814ba4258f2e8b988fd6d3fd
 
 ## Last completed batch
-- commit: pending Packet C commit
-- scope: Wave 8 Packet C
+- commit: pending Packet D commit
+- scope: Wave 8 Packet D
 - validators run:
   - python3 tools/knowledge/build_agent_task_bundles.py --repo-root . --range origin/main...HEAD
   - python3 tools/knowledge/build_agent_task_bundles.py --check --repo-root . --range origin/main...HEAD
+  - python3 tools/knowledge/build_agent_readiness_report.py --repo-root . --range origin/main...HEAD
+  - python3 tools/knowledge/build_agent_readiness_report.py --check --repo-root . --range origin/main...HEAD
+  - python3 tools/knowledge/verify_agent_consumption_runtime.py --repo-root . --range origin/main...HEAD
 - result: complete
 
 ## Current target batch
 - files:
   - none
 - goal:
-  - Packet C is complete and awaiting Packet D
+  - Packet D is complete and awaiting Packet E
 - stop condition:
-  - Packet D starts
+  - Packet E starts
 
 ## Locked decisions
 - docs/ and specs/ remain separate canonical roots
@@ -33,4 +36,4 @@
 - none yet
 
 ## Next queued batch
-- Packet D: agent readiness runtime
+- Packet E: CI wiring and closeout
