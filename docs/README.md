@@ -147,6 +147,7 @@ These are derived outputs, not hand-authored authority:
 
 - [docs/catalog.json](catalog.json)
 - [generated/catalogs/docs-catalog.json](../generated/catalogs/docs-catalog.json)
+- [generated/catalogs/README.md](../generated/catalogs/README.md)
 - ADR generated surfaces under `generated/adr-bundles/`, `generated/decision-maps/`, and `generated/graphs/`
 
 If a generated file conflicts with a canonical source doc, fix the source and regenerate.
