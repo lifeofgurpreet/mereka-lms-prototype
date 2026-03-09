@@ -21,8 +21,8 @@ _Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-
 
 ## Fitness Functions
 
-- `scripts/qa/verify-tutor-version-governance.sh`
-- `scripts/qa/verify-openedx-settings-modularity.sh`
+- `scripts/qa/verify-tutor-version-pin.sh`
+- `scripts/qa/verify-tutor-config-safety.sh`
 
 ## Source ADRs
 
