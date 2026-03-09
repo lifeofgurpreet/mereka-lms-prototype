@@ -94,21 +94,29 @@ echo "=== Spec Integrity Gates ==="
 echo "Artifacts: $ARTIFACT_DIR"
 echo ""
 
-# 1. Spec lint (Mereka-specific rules)
+# 1. Spec frontmatter validation
+run_check "spec-frontmatter" \
+  python3 tools/specs/verify_spec_frontmatter.py --repo-root .
+
+# 2. Spec taxonomy validation
+run_check "spec-taxonomy" \
+  python3 tools/specs/verify_spec_taxonomy.py --repo-root .
+
+# 3. Spec lint (Mereka-specific rules)
 run_check "spec-lint" \
   python3 "${TOOL_DIR}/mereka_spec_lint.py" specs/ --severity-filter error
 
-# 2. Testmap format validation
+# 4. Testmap format validation
 run_check "testmap-validate" \
   python3 "${TOOL_DIR}/validate_testmap_format.py" specs/_generated/testmaps/
 
-# 3. Spec verification via @covers annotations (informational — coverage may not be 100%)
+# 5. Spec verification via @covers annotations (informational — coverage may not be 100%)
 run_check_info "spec-verify" \
   python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . \
     --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
     --manual-file specs/manual_verifications.yaml
 
-# 4. Coverage report with threshold
+# 6. Coverage report with threshold
 run_check "spec-coverage" \
   python3 "${TOOL_DIR}/spec_coverage_report.py" \
     --specs-dir specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
