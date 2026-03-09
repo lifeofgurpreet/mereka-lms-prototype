@@ -10,7 +10,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 279,
+  "change_count": 281,
   "changed_roots": [
     "docs",
     "specs"
@@ -3820,6 +3820,39 @@
       "root": "other",
       "status": "",
       "title": "run-knowledge-integrity-gates"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "scripts/qa/run-knowledge-runtime-gates.sh"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "scripts/qa/run-knowledge-runtime-gates.sh",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "run-knowledge-runtime-gates"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -9972,6 +10005,39 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/knowledge/verify_knowledge_runtime.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/verify_knowledge_runtime.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "verify_knowledge_runtime"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/specs/build_spec_bundles.py"
       ],
       "lane": "other",
@@ -10391,6 +10457,7 @@
     "scripts/branding/sync-tokens-to-json.sh",
     "scripts/mobile/validate-mobile-secrets.sh",
     "scripts/qa/run-knowledge-integrity-gates.sh",
+    "scripts/qa/run-knowledge-runtime-gates.sh",
     "scripts/qa/run-spec-integrity-gates.sh",
     "scripts/qa/scan-hubspot-credentials.sh",
     "scripts/qa/spec-tools/build_spec_catalog.py",
@@ -10614,6 +10681,7 @@
     "tools/knowledge/change_runtime.py",
     "tools/knowledge/knowledge_model.py",
     "tools/knowledge/report_knowledge_control_plane.py",
+    "tools/knowledge/verify_knowledge_runtime.py",
     "tools/specs/build_spec_bundles.py",
     "tools/specs/build_spec_graph.py",
     "tools/specs/report_spec_metadata_coverage.py",

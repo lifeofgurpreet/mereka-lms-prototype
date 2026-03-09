@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4794,
+  "edge_count": 4800,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3765,12 +3765,22 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
     },
     {
       "edge_type": "classifies",
@@ -11290,12 +11300,22 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
     },
     {
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
     },
     {
       "edge_type": "contains",
@@ -18415,12 +18435,22 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
       "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
     },
     {
       "edge_type": "classifies",
@@ -23974,7 +24004,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1622,
+  "node_count": 1624,
   "nodes": [
     {
       "id": "classification:archival",
@@ -31263,6 +31293,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Change Runtime Closeout"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
       "lane": "other",
       "node_type": "docs:other",
@@ -31282,6 +31323,17 @@
       "root": "docs",
       "status": "",
       "title": "OWNERSHIP_MAP"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Review Handoff Model"
     },
     {
       "classification": "supporting",

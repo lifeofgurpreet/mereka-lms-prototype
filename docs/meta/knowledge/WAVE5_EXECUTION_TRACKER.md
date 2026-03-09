@@ -4,24 +4,28 @@
 - docs/wave5-change-intelligence-runtime
 
 ## Last completed batch
-- commit: e292969630b54f71a3655fbc7e7b56296a4940dd
-- scope: Wave 5 Packet F
+- commit: a12df74877684ab4eede9e1db89955b1d9634e1a
+- scope: Wave 5 Packet G
 - validators run:
-  - python3 -c "yaml.safe_load(open('.github/workflows/docs-policy.yml').read())"
+  - python3 tools/docs/verify/build-doc-catalog.py --root .
+  - python3 tools/knowledge/build_knowledge_catalog.py --repo-root .
+  - python3 tools/knowledge/build_knowledge_graph.py --repo-root .
+  - python3 tools/knowledge/build_wrapper_retirement_ledger.py --repo-root .
+  - python3 tools/knowledge/build_change_manifest.py --repo-root . --range origin/main...HEAD
+  - python3 tools/knowledge/build_review_bundle.py --repo-root . --range origin/main...HEAD
+  - python3 tools/knowledge/build_truth_impact_report.py --repo-root . --range origin/main...HEAD
+  - python3 tools/knowledge/build_wrapper_retirement_report.py --repo-root .
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
 
 ## Current target batch
 - files:
-  - docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md
-  - docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
-  - docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md
+  - none
 - goal:
-  - capture the human operating model for the change-intelligence runtime
-  - leave Wave 5 in a reviewer-ready closeout state
+  - Wave 5 is complete and awaiting PR review
 - stop condition:
-  - closeout docs land and one commit is created
+  - reviewer handoff starts
 
 ## Decisions already locked
 - Wave 4 topology stays intact
@@ -30,7 +34,7 @@
 - wrappers must never appear as normative truth again
 
 ## Open residue
-- none once Packet G lands
+- none
 
 ## Next queued batch
-- Packet G: closeout and reviewer operating model
+- none after closeout

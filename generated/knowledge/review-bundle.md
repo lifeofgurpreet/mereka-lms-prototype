@@ -1,7 +1,7 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `279`
+- Changes classified: `281`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
@@ -12,7 +12,7 @@
 - `compatibility_wrapper_update`: 5
 - `docs_support_change`: 74
 - `evidence_only_change`: 3
-- `generated_surface_refresh`: 111
+- `generated_surface_refresh`: 113
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -26,7 +26,7 @@
 - `generated`: 8
 - `index`: 1
 - `normative`: 44
-- `other`: 100
+- `other`: 102
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -216,7 +216,7 @@
 - `generated/knowledge/truth-impact-report.json`
 - `generated/knowledge/wrapper-retirement-report.json`
 - `infrastructure/tutor/themes/mereka/README.md`
-- `... 80 more`
+- `... 82 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`
