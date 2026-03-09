@@ -6,19 +6,35 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
 version: "1.0.0"
+id: "SPEC-SLO-001"
+spec_class: "integration"
+created: "2026-02-10"
+last_reviewed: "2026-02-10"
+review_due: "2026-05-11"
+domain: "platform"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces: []
+tags:
+  - "observability.slo"
+  - "observability.sla"
+  - "runtime.reliability"
+summary: "Defines service-level indicators, objectives, agreements, and operational management expectations for the platform."
 depends_on:
   - "specs/observability-stack_spec.md"
 links:
   related_docs:
-    - "docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md"
+    - "docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md"
     - "docs/reference/operations/MONITORING.md"
-    - "docs/operations/ALERT_SEVERITY_MATRIX.md"
-    - "docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+    - "docs/reference/operations/ALERT_SEVERITY_MATRIX.md"
+    - "docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
     - "docs/policies/operations/OBSERVABILITY_OWNERSHIP.md"
-    - "docs/operations/OBSERVABILITY_ENHANCEMENT_PLAN.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/operations/DISASTER_RECOVERY.md"
+    - "docs/status/active/OBSERVABILITY_ENHANCEMENT_PLAN.md"
+    - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/DISASTER_RECOVERY.md"
   related_specs:
     - "specs/observability-stack_spec.md"
     - "specs/disaster-recovery-business-continuity_spec.md"

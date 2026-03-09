@@ -6,6 +6,22 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-13"
 version: "1.0.0"
+id: "SPEC-OBS-001"
+spec_class: "integration"
+created: "2026-02-13"
+last_reviewed: "2026-02-13"
+review_due: "2026-05-14"
+domain: "platform"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces: []
+tags:
+  - "observability.validation"
+  - "observability.sli"
+  - "observability.slo"
+summary: "Defines the deployable validation contract for service monitors, alerts, recording rules, and observability compliance outputs."
 depends_on:
   - "specs/observability-stack_spec.md"
   - "specs/slo-sla-service-level-management_spec.md"
@@ -13,13 +29,13 @@ depends_on:
   - "specs/k8s-deployment_spec.md"
 links:
   related_docs:
-    - "docs/operations/OBSERVABILITY_GUIDE.md"
+    - "docs/guides/admin/OBSERVABILITY_GUIDE.md"
     - "docs/reference/operations/MONITORING.md"
-    - "docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md"
-    - "docs/operations/ALERT_SEVERITY_MATRIX.md"
-    - "docs/runbooks/operations/ALERT_TUNING_SOP.md"
-    - "docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md"
+    - "docs/reference/operations/ALERT_SEVERITY_MATRIX.md"
+    - "docs/ops/runbooks/ALERT_TUNING_SOP.md"
+    - "docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
   related_specs:
     - "specs/observability-stack_spec.md"
     - "specs/slo-sla-service-level-management_spec.md"
