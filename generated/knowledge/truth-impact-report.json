@@ -159,6 +159,7 @@
       "generated/catalogs/knowledge-catalog.json",
       "generated/contracts/cross-repo-manifest.json",
       "generated/contracts/deployment-impact-report.json",
+      "generated/contracts/release-obligations.md",
       "generated/graphs/knowledge-graph.json",
       "generated/knowledge/change-manifest.json",
       "generated/knowledge/review-bundle.md",
@@ -269,6 +270,7 @@
       "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
       "tools/contracts/build_cross_repo_manifest.py",
       "tools/contracts/build_deployment_impact_report.py",
+      "tools/contracts/build_release_obligations.py",
       "tools/contracts/contract_runtime.py",
       "tools/docs/verify/report-hotpath-doc-metadata.py",
       "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh",
@@ -385,7 +387,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 302,
+  "change_count": 304,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -3682,6 +3684,26 @@
         "wrappers": []
       },
       "path": "generated/contracts/deployment-impact-report.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/contracts/release-obligations.md"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/contracts/release-obligations.md",
       "required_evidence": {},
       "required_reviewers": []
     },
@@ -8594,6 +8616,26 @@
         "wrappers": []
       },
       "path": "tools/contracts/build_deployment_impact_report.py",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "tools/contracts/build_release_obligations.py"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "tools/contracts/build_release_obligations.py",
       "required_evidence": {},
       "required_reviewers": []
     },

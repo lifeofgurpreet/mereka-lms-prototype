@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 302,
+  "change_count": 304,
   "changed_roots": [
     "docs",
     "specs"
@@ -4246,6 +4246,39 @@
       "root": "other",
       "status": "",
       "title": "deployment-impact-report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/contracts/release-obligations.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/contracts/release-obligations.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Wave 6 Release Obligations"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -10244,6 +10277,39 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/contracts/build_release_obligations.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/build_release_obligations.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_release_obligations"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/contracts/contract_runtime.py"
       ],
       "lane": "other",
@@ -11258,6 +11324,7 @@
     "generated/catalogs/knowledge-catalog.json",
     "generated/contracts/cross-repo-manifest.json",
     "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md",
     "generated/graphs/knowledge-graph.json",
     "generated/knowledge/change-manifest.json",
     "generated/knowledge/review-bundle.md",
@@ -11478,6 +11545,7 @@
     "specs/video-pipeline-delivery_spec.md",
     "tools/contracts/build_cross_repo_manifest.py",
     "tools/contracts/build_deployment_impact_report.py",
+    "tools/contracts/build_release_obligations.py",
     "tools/contracts/contract_runtime.py",
     "tools/docs/verify/report-hotpath-doc-metadata.py",
     "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh",
