@@ -1,8 +1,27 @@
 ---
+id: "SPEC-DESIGN-TOKENS-SYSTEM"
 title: "Design Tokens System"
 type: "feature_spec"
-status: "completed"
-owner: "engineering"
+status: "approved"
+spec_class: "system"
+owner: "platform"
+created: "2026-02-27"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "frontend"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/branding/verify-token-drift.sh"
+  - "scripts/branding/update-token-provenance.sh"
+interfaces:
+  - "assets/branding/tokens.css"
+  - "assets/branding/tokens.provenance.json"
+tags:
+  - "frontend.brand.tokens"
+  - "docs.catalog"
+summary: "Defines the canonical design token system, provenance tracking, and drift verification for Mereka Academy branding values."
 vehicle: "talent_platform"
 last_updated: "2026-02-27"
 version: "1.1.0"
