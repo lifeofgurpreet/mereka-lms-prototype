@@ -6,7 +6,7 @@
 
 - Generated on: 2026-03-09
 - Total findings: 10
-- Status counts: {"INVALIDATED": 3, "OPEN": 5, "PARTIAL": 2}
+- Status counts: {"FIXED": 2, "INVALIDATED": 3, "OPEN": 3, "PARTIAL": 2}
 
 ## Audit Breakdown
 
@@ -17,17 +17,17 @@
 - INVALIDATED: 2
 
 ### repo_truth_audit
-- OPEN: 4
+- OPEN: 2
 - PARTIAL: 1
-- FIXED: 0
+- FIXED: 2
 - INVALIDATED: 1
 
 ## Findings
 
 | ID | Audit | Status | Severity | Risk | Files | Recommended action |
 |---|---|---|---|---|---|---|
-| RTA-01 | repo_truth_audit | OPEN | blocker | high | docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md | Demote unverifiable future completion claims or update verification semantics mechanically. |
-| RTA-02 | repo_truth_audit | OPEN | blocker | high | docs/archive/reports/docs-program-scorecard-20260313.md | Classify as template/plan or update timestamp semantics so evidence-like docs cannot claim future verification. |
+| RTA-01 | repo_truth_audit | FIXED | blocker | high | docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md | Demote unverifiable future completion claims or update verification semantics mechanically. |
+| RTA-02 | repo_truth_audit | FIXED | blocker | high | docs/archive/reports/docs-program-scorecard-20260313.md | Keep the dated artifact absent until it can be generated with a real verification date. |
 | RTA-03 | repo_truth_audit | OPEN | major | high | generated/adr-bundles/*.md<br>scripts/qa/build_decision_graph.py | Fix the ADR bundle generator so generated links resolve into canonical docs/adr paths. |
 | RTA-04 | repo_truth_audit | OPEN | major | high | specs/catalog.json<br>specs/_generated/graph.json<br>specs/_generated/indexes/spec-read-first.md | Land deterministic spec catalog, graph, and read-first surfaces with CI checks. |
 | RTA-05 | repo_truth_audit | PARTIAL | medium | medium | docs/catalog.json<br>generated/catalogs/docs-catalog.json | Keep generated catalog primary and verify docs/catalog.json stays a mirror-only projection. |
@@ -40,31 +40,32 @@
 ### RTA-01 — Tracker claims canonical proof while embedding later completion dates
 
 - Audit: `repo_truth_audit`
-- Status: `OPEN`
+- Status: `FIXED`
 - Severity: `blocker`
 - Owner: `platform-team`
 - Files: `docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md`
 - Proof command: `python3 - <<'PY'
 from pathlib import Path; import re
-text=Path('docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md').read_text()
-print(re.findall(r'20\\d{2}-\\d{2}-\\d{2}', text)[:5], '...', len(re.findall(r'20\\d{2}-\\d{2}-\\d{2}', text)))
-print(text.splitlines()[1])
+text=Path('docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md').read_text().splitlines()
+for i,line in enumerate(text, start=1):
+  low=line.lower()
+  if any(k in low for k in ('done','published','generated','verified','closure','scorecard')) and 'no earlier than' not in low and 'template' not in low:
+    dates=re.findall(r'20\\d{2}-\\d{2}-\\d{2}', line)
+    if dates: print(i, dates, line)
 PY`
 - Risk: `high`
-- Notes: last_verified=2026-03-06, max_mentioned_date=2026-03-13
+- Notes: last_verified=2026-03-06, proof_like_later_dates=none
 
 ### RTA-02 — Archived scorecard presents future-dated proof with stale verification metadata
 
 - Audit: `repo_truth_audit`
-- Status: `OPEN`
+- Status: `FIXED`
 - Severity: `blocker`
 - Owner: `platform-team`
 - Files: `docs/archive/reports/docs-program-scorecard-20260313.md`
-- Proof command: `python3 - <<'PY'
-from pathlib import Path; print('\n'.join(Path('docs/archive/reports/docs-program-scorecard-20260313.md').read_text().splitlines()[:20]))
-PY`
+- Proof command: `test -f docs/archive/reports/docs-program-scorecard-20260313.md`
 - Risk: `high`
-- Notes: last_verified=2026-03-06, max_mentioned_date=2026-03-13
+- Notes: future-dated scorecard artifact removed from active tree
 
 ### RTA-03 — Generated ADR bundles contain broken relative navigation
 

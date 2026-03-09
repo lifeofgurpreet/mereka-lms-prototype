@@ -9,6 +9,7 @@ on:
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/docs/verify/verify_temporal_integrity.py"
       - "scripts/qa/spec-tools/**"
   push:
     paths:
@@ -18,6 +19,7 @@ on:
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/docs/verify/verify_temporal_integrity.py"
       - "scripts/qa/spec-tools/**"
 
 permissions: {}
@@ -43,3 +45,6 @@ jobs:
           fi
           chmod +x tools/docs/verify/verify-docs-policy.sh
           ./tools/docs/verify/verify-docs-policy.sh
+
+      - name: Verify temporal integrity
+        run: python3 tools/docs/verify/verify_temporal_integrity.py

@@ -1,5 +1,7 @@
-# Docs Program Scorecard 2026-03-13
-_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified: 2026-03-13 • Status: supporting_
+# Docs Program Scorecard Template for 2026-03-13
+_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last updated: 2026-03-06 • Status: supporting_
+
+**Document class**: template
 
 ## KPI Snapshot
 - Classification coverage: TBD
@@ -20,3 +22,4 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified:
 ## Notes
 - Previous cycle reference: `docs/archive/reports/docs-program-scorecard-20260306.md`
 - Closure checklist: `docs/archive/reports/program-closure-readiness-20260306.md`
+- Publish only when the actual verification date is 2026-03-13 or later.

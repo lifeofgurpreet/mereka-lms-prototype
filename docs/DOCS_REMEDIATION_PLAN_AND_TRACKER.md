@@ -1,6 +1,8 @@
 # Documentation Remediation Operating System (Self-Contained)
 _Audience: Documentation owners, coding agents, and reviewers • Owner: Platform Team • Last verified: 2026-03-06 • Status: canonical_
 
+**Document class**: tracker
+
 This document is the **single source of truth** for fixing and preventing documentation entropy in this repository. It is written so any agent or contributor can execute the program end-to-end without prior chat context.
 
 ---
@@ -752,7 +754,7 @@ Status values: `TODO`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 |---|---|---|---|---|---|---|---|---|
 | GOV-01 | 0 | Approve governance, owner map, root allowlist | Docs Lead | BLOCKED | This playbook | Governance approval note | Approved by docs lead + domain owners | 2026-03-06: governance packet published at `docs/archive/reports/governance-approval-note-20260306.md`; blocked pending docs lead + domain owner signatures |
 | GOV-02 | 0 | Publish escalation path and decision rights | Docs Lead | BLOCKED | This playbook | Escalation appendix | Team can route blockers deterministically | 2026-03-06: escalation routing appendix published at `docs/archive/reports/escalation-appendix-20260306.md`; blocked pending docs lead acknowledgment |
-| INV-01 | 1 | Build complete catalog | Agent Operator | DONE | `docs/**` | `generated/catalogs/docs-catalog.json` | 100% files classified | 2026-03-13: `generated/catalogs/docs-catalog.json` regenerated with 991 records and validated against filesystem |
+| INV-01 | 1 | Build complete catalog | Agent Operator | DONE | `docs/**` | `generated/catalogs/docs-catalog.json` | 100% files classified | 2026-03-06: `generated/catalogs/docs-catalog.json` regenerated with 953 records and validated against filesystem |
 | INV-02 | 1 | Generate overlap matrix | Agent Operator | DONE | catalog + docs | `overlap-matrix-YYYYMMDD.md` | All major clusters mapped | 2026-03-06: `docs/archive/reports/overlap-matrix-20260306.md` generated |
 | INV-03 | 1 | Canonical conflict report | Agent Operator | DONE | overlap matrix | `canonical-resolution-map-YYYYMMDD.md` | One canonical proposed per cluster | 2026-03-06: `docs/archive/reports/canonical-resolution-map-20260306.md` generated with canonical proposals; major-cluster approval matrix published at `docs/archive/reports/canonical-authority-approval-matrix-20260306.md` (owner approvals pending) |
 | STR-01 | 2 | Runbook tree authority consolidation | Agent Operator | DONE | approved map | move ledger + stubs | No dual canonical runbook trees | 2026-03-06: legacy runbook duplicates in `docs/operations/**` converted to superseded stubs with canonical pointers to `docs/ops/runbooks/**`; latest overlap (`VISUAL_REGRESSION.md`) retired in move-ledger; runbook contradiction audit published at `docs/archive/reports/runbooks-contradiction-audit-20260306.md` |
@@ -765,7 +767,7 @@ Status values: `TODO`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | LNK-01 | 4 | Link repair in changed scope | Agent Operator | DONE | moved file list | link update patch | 0 broken links in changed scope | 2026-03-06: changed-scope link validation completed with 0 missing links; repo-wide markdown link audit now reports 0 hard failures and 0 warnings in `docs/**` |
 | QLT-01 | 4 | TODO/DRAFT audit | Agent Operator | DONE | canonical docs | closeout report | unresolved queue created | 2026-03-06: `docs/archive/reports/consolidation-closeout-20260306.md` generated with unresolved queue entries |
 | QLT-02 | 4 | CI docs policy checks | Agent Operator | DONE | CI workflows | policy checks in CI | metadata/root/link policies enforced | 2026-03-06: `.github/workflows/docs-policy.yml` + `tools/docs/verify/verify-docs-policy.sh` enforce root allowlist, canonical metadata, superseded pointer, and changed-scope link checks |
-| CLS-01 | 4 | Weekly KPI scorecard | Docs Lead | DONE | tracker + reports | scorecard report | KPI targets on track | 2026-03-13: first and second cycle scorecards published (`docs/archive/reports/docs-program-scorecard-20260306.md`, `docs/archive/reports/docs-program-scorecard-20260313.md`); KPI metrics captured on schedule; still pending governance sign-off for closure handoff (`docs/archive/reports/canonical-authority-approval-matrix-20260306.md`) |
+| CLS-01 | 4 | Weekly KPI scorecard | Docs Lead | IN_PROGRESS | tracker + reports | scorecard report | KPI targets on track | 2026-03-06: first cycle scorecard published (`docs/archive/reports/docs-program-scorecard-20260306.md`); second-cycle template staged at `docs/archive/reports/docs-program-scorecard-20260313-template.md`; do not publish before 2026-03-13; governance sign-off still pending via `docs/archive/reports/canonical-authority-approval-matrix-20260306.md` |
 | CLS-02 | 4 | Program closure decision | Docs Lead | BLOCKED | all artifacts | closure memo | DoD met for 2 consecutive weeks | 2026-03-06: closure-readiness memo published at `docs/archive/reports/program-closure-readiness-20260306.md`; blocked pending GOV approvals and second KPI cycle (next check no earlier than 2026-03-13) |
 
 ---

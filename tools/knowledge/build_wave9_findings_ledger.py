@@ -15,6 +15,8 @@ from typing import Any
 
 DATE_RE = re.compile(r"\b(20\d{2}-\d{2}-\d{2})\b")
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+ALLOWED_FUTURE_HINTS = ("template", "no earlier than", "do not publish before", "planned", "next check")
+PROOF_HINTS = ("done", "published", "generated", "verified", "closure", "scorecard")
 
 
 @dataclass(frozen=True)
@@ -69,10 +71,20 @@ def subtitle_verified_date(path: Path) -> date | None:
 def tracker_temporal_finding(repo_root: Path) -> Finding:
     path = repo_root / "docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md"
     verified = subtitle_verified_date(path)
-    mentioned_dates = extract_dates(path)
-    max_date = max(mentioned_dates) if mentioned_dates else None
-    status = "OPEN" if verified and max_date and max_date > verified else "FIXED"
-    notes = f"last_verified={verified}, max_mentioned_date={max_date}"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    leaks: list[str] = []
+    for idx, line in enumerate(lines, start=1):
+        lowered = line.lower()
+        if any(hint in lowered for hint in ALLOWED_FUTURE_HINTS):
+            continue
+        if not any(hint in lowered for hint in PROOF_HINTS):
+            continue
+        for token in DATE_RE.findall(line):
+            found = date.fromisoformat(token)
+            if verified and found > verified:
+                leaks.append(f"{idx}:{found}")
+    status = "OPEN" if leaks else "FIXED"
+    notes = f"last_verified={verified}, proof_like_later_dates={leaks or 'none'}"
     return Finding(
         finding_id="RTA-01",
         source_audit="repo_truth_audit",
@@ -83,9 +95,12 @@ def tracker_temporal_finding(repo_root: Path) -> Finding:
         proof_command=(
             "python3 - <<'PY'\n"
             "from pathlib import Path; import re\n"
-            "text=Path('docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md').read_text()\n"
-            "print(re.findall(r'20\\\\d{2}-\\\\d{2}-\\\\d{2}', text)[:5], '...', len(re.findall(r'20\\\\d{2}-\\\\d{2}-\\\\d{2}', text)))\n"
-            "print(text.splitlines()[1])\nPY"
+            "text=Path('docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md').read_text().splitlines()\n"
+            "for i,line in enumerate(text, start=1):\n"
+            "  low=line.lower()\n"
+            "  if any(k in low for k in ('done','published','generated','verified','closure','scorecard')) and 'no earlier than' not in low and 'template' not in low:\n"
+            "    dates=re.findall(r'20\\\\d{2}-\\\\d{2}-\\\\d{2}', line)\n"
+            "    if dates: print(i, dates, line)\nPY"
         ),
         recommended_action="Demote unverifiable future completion claims or update verification semantics mechanically.",
         status=status,
@@ -96,6 +111,20 @@ def tracker_temporal_finding(repo_root: Path) -> Finding:
 
 def scorecard_temporal_finding(repo_root: Path) -> Finding:
     path = repo_root / "docs/archive/reports/docs-program-scorecard-20260313.md"
+    if not path.exists():
+        return Finding(
+            finding_id="RTA-02",
+            source_audit="repo_truth_audit",
+            title="Archived scorecard presents future-dated proof with stale verification metadata",
+            severity="blocker",
+            owner="platform-team",
+            files_affected=["docs/archive/reports/docs-program-scorecard-20260313.md"],
+            proof_command="test -f docs/archive/reports/docs-program-scorecard-20260313.md",
+            recommended_action="Keep the dated artifact absent until it can be generated with a real verification date.",
+            status="FIXED",
+            risk="high",
+            notes="future-dated scorecard artifact removed from active tree",
+        )
     verified = subtitle_verified_date(path)
     mentioned_dates = extract_dates(path)
     max_date = max(mentioned_dates) if mentioned_dates else None

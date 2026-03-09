@@ -2837,18 +2837,9 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-13",
-    "owner": "Platform Team",
-    "path": "archive/reports/docs-program-scorecard-20260313-template.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "Platform Team",
-    "path": "archive/reports/docs-program-scorecard-20260313.md",
+    "path": "archive/reports/docs-program-scorecard-20260313-template.md",
     "status": "supporting",
     "type": "status"
   },
@@ -6152,6 +6143,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/UI_UX_HARDENING_BUNDLE.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
     "status": "supporting",
     "type": "other"
   },
