@@ -4,7 +4,7 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending PR refresh / review handoff HEAD
+- commit: 4668744efcc53a9cdb9d5465b72367d4b5374bfe
 - scope: PR refresh / review handoff
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
@@ -41,7 +41,7 @@
   - Packet G (run closeout)
   - PR refresh / review handoff
 - latest commit SHA:
-  - bc22409c3316a7cdf017518c34ba1c257d09380a
+  - 4668744efcc53a9cdb9d5465b72367d4b5374bfe
 - open residue:
   - no root non-normative residue remains
   - no missing required metadata remains
@@ -80,9 +80,9 @@
 ## Current target batch
 - files: []
 - goal:
-  - review handoff completed
+  - none
 - stop condition:
-  - validator set passes and packet commit is created
+  - review handoff packet already completed and pushed
 
 ## Next queued batch
 - branch review / PR creation
