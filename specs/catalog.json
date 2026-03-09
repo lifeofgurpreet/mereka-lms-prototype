@@ -1871,7 +1871,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": "specs/plans/mobile-apps-enterprise_plan.md",
-        "source_spec": "specs/proposals/proposals/mobile-apps-enterprise_spec.md",
+        "source_spec": "specs/proposals/mobile-apps-enterprise_spec.md",
         "testplan": null
       },
       "normativity": "planning",

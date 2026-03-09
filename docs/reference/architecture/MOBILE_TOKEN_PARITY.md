@@ -256,4 +256,4 @@ branding records.
 | `infrastructure/tutor/custom-apps/openedx_push_notifications/models.py` | Push notification device model |
 | `docs/reference/architecture/TOKEN_GENERATION_PIPELINE.md` | Token pipeline architecture (T107) |
 | `docs/runbooks/operations/MOBILE_DEPLOYMENT.md` | Mobile deployment ops (T032) |
-| `specs/proposals/proposals/mobile-apps-enterprise_spec.md` | Full mobile spec (37 ACs) |
+| `specs/proposals/mobile-apps-enterprise_spec.md` | Full mobile spec (37 ACs) |

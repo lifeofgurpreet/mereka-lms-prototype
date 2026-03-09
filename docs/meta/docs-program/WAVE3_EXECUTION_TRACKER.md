@@ -4,8 +4,8 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending Packet C paragon residue HEAD
-- scope: Packet C
+- commit: pending Packet F proposal-path drift fix HEAD
+- scope: Packet F
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
@@ -30,12 +30,13 @@
   - Packet B2
   - Packet C (mobile proposal residue)
   - Packet C (paragon residue normalization)
+  - Packet F (mobile proposal-path drift normalization)
 - latest commit SHA:
   - pending current packet HEAD
 - open residue:
   - none
 - next packet:
-  - Packet D (metadata backfill cluster)
+  - Packet D (legacy status reduction cluster)
 - stop conditions encountered:
   - none
 - decisions already locked:

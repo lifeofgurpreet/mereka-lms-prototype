@@ -100,7 +100,7 @@ This spec establishes the contracts for how libraries are created, governed, ver
   - Individual course content creation (covered by standard Studio workflows)
   - Video transcoding and delivery pipelines (covered by `specs/video-pipeline-delivery_spec.md`)
   - Payment and licensing for library access (covered by `specs/ecommerce-purchase-gateway_spec.md`)
-  - Mobile app library browsing (covered by `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`)
+  - Mobile app library browsing (covered by `specs/proposals/mobile-apps-enterprise_spec.md`)
   - Custom XBlock development (authoring new XBlock types is outside this spec; this spec covers integrating existing XBlocks into libraries)
   - Blockstore infrastructure changes (storage backend selection is an infrastructure decision)
 

@@ -780,7 +780,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/mobile-apps-enterprise_testplan.md",
-      "target": "specs/proposals/proposals/mobile-apps-enterprise_spec.md"
+      "target": "specs/proposals/mobile-apps-enterprise_spec.md"
     },
     {
       "edge_type": "source_spec",
@@ -1249,7 +1249,7 @@
     }
   ],
   "generated_by": "tools/specs/build_spec_graph.py",
-  "node_count": 201,
+  "node_count": 200,
   "nodes": [
     {
       "id": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
@@ -2293,12 +2293,6 @@
       "spec_class": "proposal",
       "status": "deferred",
       "title": "Proctoring Integration for Enterprise Open edX"
-    },
-    {
-      "id": "specs/proposals/proposals/mobile-apps-enterprise_spec.md",
-      "node_type": "spec",
-      "path": "specs/proposals/proposals/mobile-apps-enterprise_spec.md",
-      "title": "mobile-apps-enterprise_spec.md"
     },
     {
       "id": "specs/repository-structure_spec.md",

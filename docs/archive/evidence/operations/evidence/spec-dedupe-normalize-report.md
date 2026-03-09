@@ -47,8 +47,8 @@ Scanned each spec for lines matching `- [ ] AC-*` and extracted the AC ID using 
 | forum-service-migration_spec.md | 25 | 0 |
 | github-actions-cost-monitoring_spec.md | 14 | 0 |
 | k8s-deployment_spec.md | 37 | 0 |
-| mobile-apps-enterprise_spec.md | 37 | 0 |
-| mobile-apps-secrets-management_spec.md | 25 | 0 |
+| proposals/mobile-apps-enterprise_spec.md | 37 | 0 |
+| proposals/mobile-apps-secrets-management_spec.md | 25 | 0 |
 | mongodb-atlas-integration_spec.md | 9 | 0 |
 | multi-site-domains_spec.md | 9 | 0 |
 | multi-tenancy-architecture_spec.md | 33 | 0 |

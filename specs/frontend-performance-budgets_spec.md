@@ -104,7 +104,7 @@ Mereka Academy's target users are in Southeast Asia where network conditions ran
 - Backend API response time optimization (covered by cross-cutting NFRs)
 - PARAGON_THEME_URLS runtime theming (covered by `specs/plans/paragon-design-tokens-migration_spec.md`)
 - MFE code splitting implementation details (this spec defines the budget, not the technique)
-- Mobile native app performance (covered by `proposals/proposals/mobile-apps-enterprise_spec.md`)
+- Mobile native app performance (covered by `proposals/mobile-apps-enterprise_spec.md`)
 
 ## Non-goals
 

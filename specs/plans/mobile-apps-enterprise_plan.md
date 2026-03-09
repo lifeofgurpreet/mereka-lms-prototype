@@ -1,5 +1,5 @@
 ---
-source_spec: specs/proposals/proposals/mobile-apps-enterprise_spec.md
+source_spec: specs/proposals/mobile-apps-enterprise_spec.md
 status: ready
 created: 2026-02-10
 updated: 2026-02-10
@@ -9,7 +9,7 @@ last_updated: '2026-02-10'
 
 # Mobile Apps (iOS + Android) Enterprise Deployment - Implementation Plan
 
-**Source Spec**: `specs/proposals/proposals/mobile-apps-enterprise_spec.md`
+**Source Spec**: `specs/proposals/mobile-apps-enterprise_spec.md`
 
 **Spec Summary**: 37 Acceptance Criteria spanning mobile APIcontract, OAuth 2.0 authentication with PKCE, push notifications via FCM/APNs, deep linking, offline mode, multi-tenant branding, security hardening, and CI/CD pipelines for both iOSand Android.
 

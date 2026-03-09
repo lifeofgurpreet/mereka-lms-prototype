@@ -126,7 +126,7 @@ Without this spec:
   - PCI DSS compliance (Stripe handles all card data per `specs/ecommerce-purchase-gateway_spec.md`)
   - HIPAA compliance (no health data is processed)
   - Children's data protection (COPPA, Age Appropriate Design Code) unless an enterprise tenant specifically requires it
-  - Mobile app privacy controls (covered by `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`)
+  - Mobile app privacy controls (covered by `specs/proposals/mobile-apps-enterprise_spec.md`)
 
 ## Non-goals
 

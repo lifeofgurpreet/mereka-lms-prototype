@@ -15,7 +15,7 @@ last_updated: "2026-02-13"
 version: "1.0.0"
 depends_on:
   - "specs/secrets-management_spec.md"
-  - "specs/proposals/proposals/mobile-apps-enterprise_spec.md"
+  - "specs/proposals/mobile-apps-enterprise_spec.md"
   - "specs/ci-cd-pipeline_spec.md"
 supersedes: []
 superseded_by: null
@@ -38,7 +38,7 @@ links:
     - "docs/reference/operations/MOBILE_SECRETS_MANAGEMENT.md"
   related_specs:
     - "specs/secrets-management_spec.md"
-    - "specs/proposals/proposals/mobile-apps-enterprise_spec.md"
+    - "specs/proposals/mobile-apps-enterprise_spec.md"
     - "specs/ci-cd-pipeline_spec.md"
     - "specs/k8s-deployment_spec.md"
     - "specs/cross-cutting-requirements_spec.md"
@@ -87,7 +87,7 @@ Mobile secrets are uniquely fragile. An expired Apple Distribution certificate b
   - Dev/prod separation for mobile secrets (test vs production Firebase projects, sandbox vs production signing)
 
 - Out of scope:
-  - Mobile app feature implementation (covered by `specs/proposals/proposals/mobile-apps-enterprise_spec.md`)
+  - Mobile app feature implementation (covered by `specs/proposals/mobile-apps-enterprise_spec.md`)
   - General secrets pipeline architecture (covered by `specs/secrets-management_spec.md`)
   - Apple/Google developer account creation and administration
   - Firebase project creation and initial setup
@@ -448,7 +448,7 @@ Mobile secrets are uniquely fragile. An expired Apple Distribution certificate b
 
 ### Feature Flags
 
-- No feature flags needed for secrets management itself. Push notification delivery is gated by `mobile_push_notifications_enabled` (defined in `specs/proposals/proposals/mobile-apps-enterprise_spec.md`), which effectively gates whether the Firebase/APNs secrets are exercised at runtime.
+- No feature flags needed for secrets management itself. Push notification delivery is gated by `mobile_push_notifications_enabled` (defined in `specs/proposals/mobile-apps-enterprise_spec.md`), which effectively gates whether the Firebase/APNs secrets are exercised at runtime.
 
 ### Backward Compatibility
 
