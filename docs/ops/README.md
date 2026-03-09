@@ -20,6 +20,15 @@ Do not use these losing roots as live operator authority:
 - [`ci-cd/`](ci-cd/) for delivery and build operations
 - [`security/`](security/) for operator-facing security procedures and policies
 
+## Key starting points
+
+- [`EXECUTION_DOCTRINE.md`](EXECUTION_DOCTRINE.md) for the operational execution model behind this root
+- [`quickref/README.md`](quickref/README.md) for fast command and environment references
+- [`runbooks/README.md`](runbooks/README.md) for recovery and rollout procedures
+- [`monitoring/README.md`](monitoring/README.md) for observability ownership and runtime telemetry
+- [`ci-cd/README.md`](ci-cd/README.md) for build and delivery operations
+- [`security/README.md`](security/README.md) for auth, secret, and operator security posture
+
 ## Resolver
 
 For the authority contract behind this root, read:
