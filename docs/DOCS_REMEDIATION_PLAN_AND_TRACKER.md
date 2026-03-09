@@ -433,7 +433,7 @@ No cluster can be marked `DONE` until contradictions are resolved or explicitly 
 
 ## 11) KPIs, SLOs, and Success Criteria
 
-Track weekly in `docs/guides/admin/DOCS_PROGRAM_SCORECARD_YYYYMMDD.md`.
+Track weekly from the scorecard index in `docs/guides/admin/README.md`.
 
 | KPI | Target |
 |---|---|

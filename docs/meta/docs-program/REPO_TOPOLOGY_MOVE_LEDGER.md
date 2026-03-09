@@ -45,7 +45,7 @@ Converge the repository toward this top-level knowledge model:
 ### Low-risk next
 
 - legacy evidence index -> `docs/evidence/INDEX.md`
-- legacy evidence manifest -> `docs/evidence/index.yaml`
+- legacy evidence manifest -> `docs/evidence/INDEX.md`
 - legacy verification runtime baseline -> `verification/baselines/runtime_local_fast_baseline.json`
 - legacy QA script catalog -> `verification/catalogs/QA_SCRIPT_CATALOG.yml`
 - legacy AC verification strategy matrix -> `verification/catalogs/AC_VERIFICATION_STRATEGY_MATRIX.yml`

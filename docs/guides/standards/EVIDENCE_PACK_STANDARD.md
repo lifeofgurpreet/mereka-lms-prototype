@@ -14,8 +14,8 @@ This standard defines the active evidence contract for `docs/evidence/**`.
 `docs/evidence/<domain>/<YYYY-MM-DD>-<slug>/README.md`
 
 Examples:
-- `docs/evidence/operations/2026-03-08-runtime-proof/README.md`
-- `docs/evidence/tenants/2026-03-08-branding-parity/README.md`
+- `docs/evidence/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md`
+- `docs/evidence/operations/TENANT_ISOLATION_EVIDENCE.md`
 
 ## Required README fields
 
@@ -41,9 +41,7 @@ Every active evidence pack README MUST include:
 Recommended active domains:
 
 - `docs/evidence/operations/`
-- `docs/evidence/observability/`
-- `docs/evidence/branding/`
-- `docs/evidence/tenants/`
+- add new domain subroots beneath `docs/evidence/` only when active packs exist
 
 ## Archive rule
 
