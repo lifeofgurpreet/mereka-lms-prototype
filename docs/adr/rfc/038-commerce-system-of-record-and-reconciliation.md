@@ -9,8 +9,7 @@ canonical_root: docs/adr/rfc
 doc_class: rfc
 summary: Proposes commerce ownership and reconciliation rules for financial state.
 tags:
-- commerce
-- reconciliation
+  - commerce.reconciliation
 decision_type: domain
 decision_status: proposed
 governs:
@@ -34,7 +33,7 @@ related_tutor_docs:
 related_specs:
 - specs/ecommerce-purchase-gateway_spec.md
 related_runbooks:
-- docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+  - docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
 related_evidence: []
 fitness_functions:
 - scripts/qa/verify-ecommerce-worker-health.sh

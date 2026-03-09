@@ -9,8 +9,7 @@ canonical_root: docs/adr/rfc
 doc_class: rfc
 summary: Proposes cache topology and invalidation rules for runtime surfaces.
 tags:
-- cache
-- runtime
+  - runtime.cache
 decision_type: domain
 decision_status: proposed
 governs:
@@ -31,7 +30,7 @@ related_tutor_docs:
 - https://docs.tutor.edly.io
 related_specs: []
 related_runbooks:
-- docs/runbooks/operations/TROUBLESHOOTING.md
+  - docs/ops/runbooks/TROUBLESHOOTING.md
 related_evidence: []
 fitness_functions:
 - scripts/qa/verify-mfe-config-contract.sh --env prod

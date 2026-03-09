@@ -9,9 +9,7 @@ canonical_root: docs/adr/rfc
 doc_class: rfc
 summary: Proposes translation and internationalization rules for frontend surfaces.
 tags:
-- frontend
-- i18n
-- translations
+  - frontend.i18n
 decision_type: domain
 decision_status: proposed
 governs:

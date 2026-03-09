@@ -9,9 +9,8 @@ canonical_root: docs/adr/rfc
 doc_class: rfc
 summary: Proposes internal package, plugin, and versioning rules for platform extensions.
 tags:
-- plugins
-- packages
-- versioning
+  - platform.extension-model
+  - build.version-pin
 decision_type: domain
 decision_status: proposed
 governs:

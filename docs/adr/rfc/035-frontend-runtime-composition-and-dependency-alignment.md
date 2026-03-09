@@ -10,9 +10,9 @@ doc_class: rfc
 summary: Proposes frontend runtime composition, branding-token, and dependency alignment
   rules.
 tags:
-- frontend
-- runtime
-- dependencies
+  - frontend.composition
+  - frontend.brand.tokens
+  - build.version-pin
 decision_type: domain
 decision_status: proposed
 governs:
@@ -37,7 +37,7 @@ related_tutor_docs:
 - https://docs.tutor.edly.io
 related_specs: []
 related_runbooks:
-- docs/guides/branding/BRANDING_OPERATING_MODEL.md
+  - docs/guides/branding/BRANDING_OPERATING_MODEL.md
 related_evidence: []
 fitness_functions:
 - scripts/qa/verify-mfe-image-branding.sh
