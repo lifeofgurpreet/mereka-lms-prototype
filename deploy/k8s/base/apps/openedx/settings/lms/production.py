@@ -1811,7 +1811,7 @@ CSP_FORM_ACTION = ("'self'",)
 CSP_FRAME_ANCESTORS = ("'self'",)
 
 # Nonce preparation — nonces coexist with 'unsafe-inline'; templates that adopt
-# {% csp_nonce %} will work before we remove 'unsafe-inline'.
+# csp_nonce template tag will work before we remove 'unsafe-inline'.
 CSP_INCLUDE_NONCE_IN = ["script-src"]
 
 # CSP report endpoint (Phase 1 — ADR-025):

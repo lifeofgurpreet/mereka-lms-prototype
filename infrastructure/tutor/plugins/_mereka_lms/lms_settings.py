@@ -138,7 +138,7 @@ CSP_FRAME_ANCESTORS = ("'self'",)
 
 # Nonce injection scaffold (Phase 0 — ADR-025):
 # Nonces coexist safely with 'unsafe-inline'.  Templates that adopt
-# {% csp_nonce %} will be nonce-trusted even before we remove 'unsafe-inline'.
+# csp_nonce template tag will be nonce-trusted even before we remove 'unsafe-inline'.
 # This is a zero-risk change: adding a nonce does not enforce anything new.
 CSP_INCLUDE_NONCE_IN = ["script-src"]
 
