@@ -45,6 +45,12 @@ The current RFC queue contains the proposed decisions that were moved out of the
 - not a replacement for living architecture standards
 - not the place to store implementation plans that are not architectural proposals
 
+## What this queue is not
+
+- not an accepted-decision surface
+- not a replacement for living architecture standards
+- not the place to store implementation plans that are not architectural proposals
+
 ## Related authority docs
 
 - [Architecture Charter](../../concepts/architecture/ARCHITECTURE_CHARTER.md)
