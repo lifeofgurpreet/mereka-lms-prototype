@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 335,
+  "change_count": 363,
   "changed_roots": [
     "docs",
     "specs"
@@ -3373,6 +3373,114 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Agent Consumption Model"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Agent Review Handoff"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "AGENT_TASK_TAXONOMY"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "docs/meta/knowledge/CHANGE_CLASSES.yaml"
       ],
       "lane": "other",
@@ -3625,6 +3733,42 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Execution Tracker"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "docs/meta/skills/AGENT_SKILL_CHARTER.md"
       ],
       "lane": "other",
@@ -3645,6 +3789,41 @@
       "root": "docs",
       "status": "",
       "title": "Wave 7 Agent Skill Charter"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/skills/REVIEW_HANDOFF_MODEL.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Review Handoff Model"
     },
     {
       "change_class": "docs_support_change",
@@ -3715,6 +3894,41 @@
       "root": "docs",
       "status": "",
       "title": "TASK_TYPE_TAXONOMY"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/skills/WAVE7_CLOSEOUT.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE7_CLOSEOUT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Closeout"
     },
     {
       "change_class": "docs_support_change",
@@ -4537,6 +4751,72 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "generated/knowledge/agent-entrypoints.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/agent-entrypoints.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "agent-entrypoints"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/agent-readiness-report.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/agent-readiness-report.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "agent-readiness-report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "generated/knowledge/change-manifest.json"
       ],
       "lane": "other",
@@ -4686,7 +4966,106 @@
       },
       "root": "other",
       "status": "",
-      "title": "Task Bundle: architecture_or_adr_change"
+      "title": "architecture_or_adr_change.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "compatibility_or_wrapper_cleanup"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "compatibility_or_wrapper_cleanup.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/cross-repo-contract-change.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/cross-repo-contract-change.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: cross repo contract change"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -4752,7 +5131,73 @@
       },
       "root": "other",
       "status": "",
-      "title": "Task Bundle: cross_repo_contract_change"
+      "title": "cross_repo_contract_change.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/docs-architecture-change.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/docs-architecture-change.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: docs architecture change"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/evidence-status-update.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/evidence-status-update.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: evidence status update"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -4818,7 +5263,172 @@
       },
       "root": "other",
       "status": "",
-      "title": "Task Bundle: evidence_or_status_change"
+      "title": "evidence_or_status_change.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/generated_surface_refresh.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/generated_surface_refresh.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "generated_surface_refresh"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/generated_surface_refresh.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/generated_surface_refresh.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "generated_surface_refresh.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/incident-debug.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/incident-debug.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: incident debug"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/migration-change.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/migration-change.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: migration change"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/normative-spec-change.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/normative-spec-change.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: normative spec change"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -4884,7 +5494,40 @@
       },
       "root": "other",
       "status": "",
-      "title": "Task Bundle: normative_spec_change"
+      "title": "normative_spec_change.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/proposal-change.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/proposal-change.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: proposal change"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -4950,7 +5593,40 @@
       },
       "root": "other",
       "status": "",
-      "title": "Task Bundle: proposal_or_rfc_change"
+      "title": "proposal_or_rfc_change.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/release-change.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/release-change.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: release change"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -5016,7 +5692,7 @@
       },
       "root": "other",
       "status": "",
-      "title": "Task Bundle: release_or_runtime_change"
+      "title": "release_or_runtime_change.md"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -5032,11 +5708,11 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json"
+        "generated/knowledge/task-bundles/reviewer-pass.md"
       ],
       "lane": "other",
       "owner": "",
-      "path": "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json",
+      "path": "generated/knowledge/task-bundles/reviewer-pass.md",
       "review": {
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
@@ -5049,7 +5725,7 @@
       },
       "root": "other",
       "status": "",
-      "title": "review_handoff_or_generated_surface_refresh.json"
+      "title": "Task Bundle: reviewer pass"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -5065,11 +5741,11 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md"
+        "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json"
       ],
       "lane": "other",
       "owner": "",
-      "path": "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md",
+      "path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json",
       "review": {
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
@@ -5082,7 +5758,40 @@
       },
       "root": "other",
       "status": "",
-      "title": "review_handoff_or_generated_surface_refresh.md"
+      "title": "reviewer_handoff_or_policy_change"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "reviewer_handoff_or_policy_change.md"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -5148,7 +5857,73 @@
       },
       "root": "other",
       "status": "",
-      "title": "Task Bundle: runbook_or_ops_change"
+      "title": "runbook_or_ops_change.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-bundles/wrapper-retirement.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-bundles/wrapper-retirement.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Task Bundle: wrapper retirement"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/task-context-report.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/task-context-report.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "task-context-report"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -11312,6 +12087,129 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/knowledge/build_agent_entrypoints.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_agent_entrypoints.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_agent_entrypoints"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/build_agent_readiness_report.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_agent_readiness_report.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_agent_readiness_report"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/build_agent_task_bundles.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_agent_task_bundles.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_agent_task_bundles"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/knowledge/build_change_manifest.py",
         "generated/knowledge/change-manifest.json",
         "generated/knowledge/review-bundle.md",
@@ -11845,6 +12743,47 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/knowledge/skill_runtime.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/skill_runtime.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "skill_runtime"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/knowledge/task_runtime.py",
         "generated/knowledge/change-manifest.json",
         "generated/knowledge/review-bundle.md",
@@ -11871,6 +12810,47 @@
       "root": "other",
       "status": "",
       "title": "task_runtime"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/verify_agent_consumption_runtime.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/verify_agent_consumption_runtime.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "verify_agent_consumption_runtime"
     },
     {
       "change_class": "docs_support_change",
@@ -12375,6 +13355,9 @@
     "docs/meta/docs-program/metadata/doc-class-schema-map.yaml",
     "docs/meta/docs-program/metadata/frontmatter-schema.json",
     "docs/meta/docs-program/metadata/governs-taxonomy.yaml",
+    "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md",
+    "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+    "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml",
     "docs/meta/knowledge/CHANGE_CLASSES.yaml",
     "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
     "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
@@ -12382,9 +13365,12 @@
     "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
     "docs/meta/knowledge/REVIEW_RULES.yaml",
     "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+    "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md",
     "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+    "docs/meta/skills/REVIEW_HANDOFF_MODEL.md",
     "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
     "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+    "docs/meta/skills/WAVE7_CLOSEOUT.md",
     "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
     "docs/ops/quickref/verification-scripts.md",
     "docs/ops/runbooks/BADGES_CREDENTIALS_RUNBOOK.md",
@@ -12407,25 +13393,42 @@
     "generated/contracts/deployment-impact-report.json",
     "generated/contracts/release-obligations.md",
     "generated/graphs/knowledge-graph.json",
+    "generated/knowledge/agent-entrypoints.json",
+    "generated/knowledge/agent-readiness-report.json",
     "generated/knowledge/change-manifest.json",
     "generated/knowledge/review-bundle.md",
     "generated/knowledge/skill-index.json",
     "generated/knowledge/task-bundles/architecture_or_adr_change.json",
     "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+    "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json",
+    "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md",
+    "generated/knowledge/task-bundles/cross-repo-contract-change.md",
     "generated/knowledge/task-bundles/cross_repo_contract_change.json",
     "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+    "generated/knowledge/task-bundles/docs-architecture-change.md",
+    "generated/knowledge/task-bundles/evidence-status-update.md",
     "generated/knowledge/task-bundles/evidence_or_status_change.json",
     "generated/knowledge/task-bundles/evidence_or_status_change.md",
+    "generated/knowledge/task-bundles/generated_surface_refresh.json",
+    "generated/knowledge/task-bundles/generated_surface_refresh.md",
+    "generated/knowledge/task-bundles/incident-debug.md",
+    "generated/knowledge/task-bundles/migration-change.md",
+    "generated/knowledge/task-bundles/normative-spec-change.md",
     "generated/knowledge/task-bundles/normative_spec_change.json",
     "generated/knowledge/task-bundles/normative_spec_change.md",
+    "generated/knowledge/task-bundles/proposal-change.md",
     "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
     "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+    "generated/knowledge/task-bundles/release-change.md",
     "generated/knowledge/task-bundles/release_or_runtime_change.json",
     "generated/knowledge/task-bundles/release_or_runtime_change.md",
-    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json",
-    "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md",
+    "generated/knowledge/task-bundles/reviewer-pass.md",
+    "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json",
+    "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
     "generated/knowledge/task-bundles/runbook_or_ops_change.json",
     "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+    "generated/knowledge/task-bundles/wrapper-retirement.md",
+    "generated/knowledge/task-context-report.json",
     "generated/knowledge/truth-impact-report.json",
     "generated/knowledge/wrapper-retirement-report.json",
     "infrastructure/tutor/themes/mereka/README.md",
@@ -12651,6 +13654,9 @@
     "tools/docs/verify/report-hotpath-doc-metadata.py",
     "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh",
     "tools/docs/verify/verify-legacy-testmaps-frozen.py",
+    "tools/knowledge/build_agent_entrypoints.py",
+    "tools/knowledge/build_agent_readiness_report.py",
+    "tools/knowledge/build_agent_task_bundles.py",
     "tools/knowledge/build_change_manifest.py",
     "tools/knowledge/build_knowledge_catalog.py",
     "tools/knowledge/build_knowledge_graph.py",
@@ -12664,7 +13670,9 @@
     "tools/knowledge/knowledge_model.py",
     "tools/knowledge/report_knowledge_control_plane.py",
     "tools/knowledge/resolve_task_context.py",
+    "tools/knowledge/skill_runtime.py",
     "tools/knowledge/task_runtime.py",
+    "tools/knowledge/verify_agent_consumption_runtime.py",
     "tools/knowledge/verify_knowledge_runtime.py",
     "tools/knowledge/verify_task_runtime.py",
     "tools/specs/build_spec_bundles.py",
