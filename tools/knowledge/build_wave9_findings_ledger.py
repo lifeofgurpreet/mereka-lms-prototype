@@ -282,16 +282,34 @@ def promotion_workflow_finding(repo_root: Path) -> Finding:
 
 
 def claude_summary_finding(repo_root: Path) -> Finding:
+    active_roots = (
+        repo_root / "docs/guides",
+        repo_root / "docs/ops",
+        repo_root / "docs/reference",
+        repo_root / "docs/policies",
+        repo_root / "docs/concepts",
+    )
     refs = sorted(
         [
         path
-        for path in (repo_root / "docs").rglob("*.md")
+        for root in active_roots
+        for path in root.rglob("*.md")
         if "CLAUDE.md" in path.read_text(encoding="utf-8", errors="ignore")
         ],
         key=lambda path: str(path),
     )
-    status = "OPEN" if refs and (repo_root / "CLAUDE.md").exists() else "INVALIDATED"
-    notes = f"active_docs_referencing_CLAUDE={len(refs)}"
+    claude = repo_root / "CLAUDE.md"
+    text = claude.read_text(encoding="utf-8", errors="ignore") if claude.exists() else ""
+    demoted = "Summary surface only." in text and "Do not use this file as the canonical starting point" in text
+    if refs:
+        status = "OPEN"
+    elif claude.exists() and demoted:
+        status = "FIXED"
+    elif claude.exists():
+        status = "PARTIAL"
+    else:
+        status = "INVALIDATED"
+    notes = f"active_docs_referencing_CLAUDE={len(refs)}, demoted={demoted}"
     return Finding(
         finding_id="ICA-02",
         source_audit="infra_alignment_audit",
@@ -309,16 +327,29 @@ def claude_summary_finding(repo_root: Path) -> Finding:
 
 def security_summary_finding(repo_root: Path) -> Finding:
     security = repo_root / "SECURITY.md"
+    active_roots = (
+        repo_root / "docs/reference",
+        repo_root / "docs/policies",
+        repo_root / ".github",
+    )
     refs = sorted(
         [
         path
-        for path in (repo_root / "docs").rglob("*.md")
+        for root in active_roots
+        for path in root.rglob("*.md")
         if "SECURITY.md" in path.read_text(encoding="utf-8", errors="ignore")
         ],
         key=lambda path: str(path),
     )
-    status = "PARTIAL" if security.exists() and refs else "INVALIDATED"
-    notes = f"active_docs_referencing_SECURITY={len(refs)}"
+    sec_text = security.read_text(encoding="utf-8", errors="ignore") if security.exists() else ""
+    demoted = "Summary surface only." in sec_text and "disclosure" in sec_text.lower()
+    if refs and not demoted:
+        status = "PARTIAL"
+    elif security.exists() and demoted:
+        status = "FIXED"
+    else:
+        status = "INVALIDATED"
+    notes = f"active_docs_referencing_SECURITY={len(refs)}, demoted={demoted}"
     return Finding(
         finding_id="ICA-03",
         source_audit="infra_alignment_audit",

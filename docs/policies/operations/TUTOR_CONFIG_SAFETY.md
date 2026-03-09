@@ -351,7 +351,8 @@ If `verify-tutor-config.sh` fails:
 
 ## Related Documentation
 
-- `CLAUDE.md` - Project overview and workflows
+- `docs/meta/standing-orders/README.md` - Canonical standing orders
+- `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` - Canonical doc roots
 - `infrastructure/tutor/apply-patches.sh` - Patch implementation
 - `docs/runbooks/operations/TROUBLESHOOTING.md` - General troubleshooting
 - `.githooks/pre-tutor-config` - Git hook source code

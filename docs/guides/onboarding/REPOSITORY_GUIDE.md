@@ -197,7 +197,7 @@ tutor local restart
 - Monitoring rule → `deploy/k8s/base/monitoring/`
 - Terraform resource → `infrastructure/terraform/`
 
-**Related docs**: `specs/tutor-configuration_spec.md`, `CLAUDE.md` (Tutor lifecycle section)
+**Related docs**: `specs/tutor-configuration_spec.md`, `docs/meta/standing-orders/README.md`, `docs/reference/operations/RELEASE_PROCESS.md`
 
 ---
 
@@ -372,7 +372,7 @@ git commit -m "chore: update authn MFE"
 | File | Purpose |
 |------|---------|
 | `README.md` | Project overview, badges, quick links |
-| `CLAUDE.md` | AI agent instructions for this repository |
+| `docs/meta/standing-orders/README.md` | Canonical standing orders for maintainers and agents |
 | `AGENTS.md` | Agent guidelines, data protection rules |
 | `CONTRIBUTING.md` | Contributor guide |
 | `MIGRATION_CHECKLIST.md` | Active migration tracking |
@@ -632,6 +632,7 @@ RESULT: PASS (all checks passed)
 ## Questions?
 
 - Check `docs/README.md` for documentation index
-- Check `CLAUDE.md` for agent instructions
+- Check `docs/meta/standing-orders/README.md` for active standing orders
+- Check `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` for canonical doc roots
 - Check `AGENTS.md` for repository guidelines
 - Run `./scripts/qa/verify-repo-structure.sh` to verify compliance

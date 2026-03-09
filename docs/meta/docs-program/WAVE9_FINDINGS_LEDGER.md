@@ -6,14 +6,14 @@
 
 - Generated on: 2026-03-09
 - Total findings: 10
-- Status counts: {"FIXED": 4, "INVALIDATED": 3, "OPEN": 1, "PARTIAL": 2}
+- Status counts: {"FIXED": 6, "INVALIDATED": 3, "PARTIAL": 1}
 
 ## Audit Breakdown
 
 ### infra_alignment_audit
-- OPEN: 1
-- PARTIAL: 1
-- FIXED: 0
+- OPEN: 0
+- PARTIAL: 0
+- FIXED: 2
 - INVALIDATED: 2
 
 ### repo_truth_audit
@@ -33,8 +33,8 @@
 | RTA-05 | repo_truth_audit | PARTIAL | medium | medium | docs/catalog.json<br>generated/catalogs/docs-catalog.json | Keep generated catalog primary and verify docs/catalog.json stays a mirror-only projection. |
 | RTA-06 | repo_truth_audit | INVALIDATED | medium | medium | docs/archive/reports/docs-program-scorecard-20260306.md | Introduce explicit program prefixes in read-first and handoff surfaces so wave terms do not collide. |
 | ICA-01 | infra_alignment_audit | INVALIDATED | major | medium | docs/guides/PROMOTION-WORKFLOW.md<br>docs/reference/operations/RELEASE_PROCESS.md<br>scripts/promote.sh<br>.github/workflows/promote-image.yml | Use the actual release process path and compare it against the real promote script/workflow contract. |
-| ICA-02 | infra_alignment_audit | OPEN | major | high | CLAUDE.md<br>docs/adr/027-deployment-contract-ownership-lanes.md<br>docs/archive/LOGO_FIX_SUMMARY.md<br>docs/archive/PRODUCTION_INFRASTRUCTURE_PLAN_LEGACY.md<br>docs/archive/SESSION_SUMMARY_2026-02-03_AWS_SECRETS.md<br>docs/archive/root-cleanup-20260120/COST_OPTIMIZATION_SUMMARY.md<br>docs/archive/root-cleanup-20260203/COST_OPTIMIZATION_SUMMARY.md<br>docs/archive/root-cleanup-20260203/SETUP_STATUS.md<br>docs/guides/onboarding/DEVCONTAINER_GUIDE.md | Either compile CLAUDE from authoritative contracts or demote it from active read-first surfaces. |
-| ICA-03 | infra_alignment_audit | PARTIAL | medium | medium | SECURITY.md<br>docs/archive/CLICKUP_TASK_LIST.md<br>docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md<br>docs/policies/operations/BRANCH_PROTECTION.md<br>docs/reference/operations/SECRET_SCANNING.md | Tie security summary claims to contract-backed sources or demote the summary surface. |
+| ICA-02 | infra_alignment_audit | FIXED | major | high | CLAUDE.md | Either compile CLAUDE from authoritative contracts or demote it from active read-first surfaces. |
+| ICA-03 | infra_alignment_audit | FIXED | medium | medium | SECURITY.md<br>docs/policies/operations/BRANCH_PROTECTION.md<br>docs/reference/operations/SECRET_SCANNING.md | Tie security summary claims to contract-backed sources or demote the summary surface. |
 | ICA-04 | infra_alignment_audit | INVALIDATED | medium | medium | config/domain-registry.yaml<br>config/bootstrap-lane-topology.yaml<br>contracts/release-contracts.yaml<br>contracts/service-identity-contract.yaml | Use actual in-repo contract surfaces for alignment work and mark cross-repo-only sources explicitly. |
 
 ### RTA-01 — Tracker claims canonical proof while embedding later completion dates
@@ -133,24 +133,24 @@ PY`
 ### ICA-02 — CLAUDE.md remains an active front-door summary instead of a compiled or demoted helper
 
 - Audit: `infra_alignment_audit`
-- Status: `OPEN`
+- Status: `FIXED`
 - Severity: `major`
 - Owner: `platform-team`
-- Files: `CLAUDE.md, docs/adr/027-deployment-contract-ownership-lanes.md, docs/archive/LOGO_FIX_SUMMARY.md, docs/archive/PRODUCTION_INFRASTRUCTURE_PLAN_LEGACY.md, docs/archive/SESSION_SUMMARY_2026-02-03_AWS_SECRETS.md, docs/archive/root-cleanup-20260120/COST_OPTIMIZATION_SUMMARY.md, docs/archive/root-cleanup-20260203/COST_OPTIMIZATION_SUMMARY.md, docs/archive/root-cleanup-20260203/SETUP_STATUS.md, docs/guides/onboarding/DEVCONTAINER_GUIDE.md`
+- Files: `CLAUDE.md`
 - Proof command: `rg -n "CLAUDE\.md" docs docs/ops docs/guides docs/reference`
 - Risk: `high`
-- Notes: active_docs_referencing_CLAUDE=18
+- Notes: active_docs_referencing_CLAUDE=0, demoted=True
 
 ### ICA-03 — SECURITY.md is still an active policy front door without contract-derived sync proof
 
 - Audit: `infra_alignment_audit`
-- Status: `PARTIAL`
+- Status: `FIXED`
 - Severity: `medium`
 - Owner: `platform-team`
-- Files: `SECURITY.md, docs/archive/CLICKUP_TASK_LIST.md, docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md, docs/policies/operations/BRANCH_PROTECTION.md, docs/reference/operations/SECRET_SCANNING.md`
+- Files: `SECURITY.md, docs/policies/operations/BRANCH_PROTECTION.md, docs/reference/operations/SECRET_SCANNING.md`
 - Proof command: `rg -n "SECURITY\.md" docs .github`
 - Risk: `medium`
-- Notes: active_docs_referencing_SECURITY=4
+- Notes: active_docs_referencing_SECURITY=2, demoted=True
 
 ### ICA-04 — Audit-referenced contract source files are not all present in this repo root
 

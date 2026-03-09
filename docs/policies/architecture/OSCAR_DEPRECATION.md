@@ -161,7 +161,7 @@ The decommission script to implement at `scripts/infra/decommission-legacy-ecomm
     - Replace archived references with current canonical manifests and runbooks once they are reintroduced into a cleanup PR
 
 11. **Update documentation**
-    - `CLAUDE.md`: remove ecommerce from plugin list
+    - `docs/meta/standing-orders/README.md` or other canonical standing orders: remove ecommerce from active operator summaries if still present
     - `infrastructure/tutor/README.md`: remove ecommerce from plugin list
     - `docs/reference/operations/AUTH_AND_PERMISSIONS.md`: remove ecommerce service references
     - `docs/ops/quickref/kubectl-cheatsheet.md`: remove ecommerce entries

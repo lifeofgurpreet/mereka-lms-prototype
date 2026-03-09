@@ -4,7 +4,9 @@
 # Checks:
 #   1. docs/reference/operations/RELEASE_PROCESS.md exists
 #   2. .github/workflows/release.yml exists and is triggered on tag push
-#   3. scripts/infra/create-release.sh exists and is executable
+#   3. scripts/infra/canonical-release.sh exists and is executable
+#   4. scripts/infra/release-openedx-gitops.sh exists and is executable
+#   5. scripts/infra/create-release.sh exists and is executable as the tag helper
 #   4. Recent commits follow conventional commit format (informational)
 #
 # @covers AC-020
@@ -16,6 +18,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 RELEASE_PROCESS_DOC="$REPO_ROOT/docs/reference/operations/RELEASE_PROCESS.md"
 RELEASE_WORKFLOW="$REPO_ROOT/.github/workflows/release.yml"
+CANONICAL_RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/canonical-release.sh"
+RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
 CREATE_RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
 
 RELEASE_INVOKE_CHECKER="$REPO_ROOT/scripts/qa/verify-release-workflow-invocation.sh"
@@ -139,7 +143,35 @@ echo ""
 # ---------------------------------------------------------------------------
 # 3. create-release.sh
 # ---------------------------------------------------------------------------
-echo "--- Release helper script ---"
+echo "--- Canonical release scripts ---"
+
+if [[ -f "${CANONICAL_RELEASE_SCRIPT}" ]]; then
+  pass "scripts/infra/canonical-release.sh exists"
+else
+  fail "scripts/infra/canonical-release.sh is MISSING"
+fi
+
+if [[ -x "${CANONICAL_RELEASE_SCRIPT}" ]]; then
+  pass "scripts/infra/canonical-release.sh is executable"
+else
+  fail "scripts/infra/canonical-release.sh is NOT executable"
+fi
+
+if [[ -f "${RELEASE_SCRIPT}" ]]; then
+  pass "scripts/infra/release-openedx-gitops.sh exists"
+else
+  fail "scripts/infra/release-openedx-gitops.sh is MISSING"
+fi
+
+if [[ -x "${RELEASE_SCRIPT}" ]]; then
+  pass "scripts/infra/release-openedx-gitops.sh is executable"
+else
+  fail "scripts/infra/release-openedx-gitops.sh is NOT executable"
+fi
+
+echo ""
+
+echo "--- Tag helper script ---"
 
 if [[ -f "${CREATE_RELEASE_SCRIPT}" ]]; then
   pass "scripts/infra/create-release.sh exists"

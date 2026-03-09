@@ -69,7 +69,7 @@ These Scorecard checks are addressed elsewhere in the repo:
 | Check | Where It Is Addressed |
 |-------|-----------------------|
 | `Token-Permissions` | All workflows use `permissions: {}` at top level and grant least-privilege per-job |
-| `Security-Policy` | `SECURITY.md` in repo root |
+| `Security-Policy` | `SECURITY.md` (disclosure) plus `docs/reference/operations/SECRET_SCANNING.md` (operational controls) |
 | `Maintained` | Active commit history |
 
 ---

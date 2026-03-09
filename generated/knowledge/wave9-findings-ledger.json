@@ -117,20 +117,12 @@
       "user_or_agent_risk": "medium"
     },
     {
-      "current_status": "OPEN",
+      "current_status": "FIXED",
       "files_affected": [
-        "CLAUDE.md",
-        "docs/adr/027-deployment-contract-ownership-lanes.md",
-        "docs/archive/LOGO_FIX_SUMMARY.md",
-        "docs/archive/PRODUCTION_INFRASTRUCTURE_PLAN_LEGACY.md",
-        "docs/archive/SESSION_SUMMARY_2026-02-03_AWS_SECRETS.md",
-        "docs/archive/root-cleanup-20260120/COST_OPTIMIZATION_SUMMARY.md",
-        "docs/archive/root-cleanup-20260203/COST_OPTIMIZATION_SUMMARY.md",
-        "docs/archive/root-cleanup-20260203/SETUP_STATUS.md",
-        "docs/guides/onboarding/DEVCONTAINER_GUIDE.md"
+        "CLAUDE.md"
       ],
       "finding_id": "ICA-02",
-      "notes": "active_docs_referencing_CLAUDE=18",
+      "notes": "active_docs_referencing_CLAUDE=0, demoted=True",
       "owner": "platform-team",
       "proof_command": "rg -n \"CLAUDE\\.md\" docs docs/ops docs/guides docs/reference",
       "recommended_action": "Either compile CLAUDE from authoritative contracts or demote it from active read-first surfaces.",
@@ -140,16 +132,14 @@
       "user_or_agent_risk": "high"
     },
     {
-      "current_status": "PARTIAL",
+      "current_status": "FIXED",
       "files_affected": [
         "SECURITY.md",
-        "docs/archive/CLICKUP_TASK_LIST.md",
-        "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
         "docs/policies/operations/BRANCH_PROTECTION.md",
         "docs/reference/operations/SECRET_SCANNING.md"
       ],
       "finding_id": "ICA-03",
-      "notes": "active_docs_referencing_SECURITY=4",
+      "notes": "active_docs_referencing_SECURITY=2, demoted=True",
       "owner": "platform-team",
       "proof_command": "rg -n \"SECURITY\\.md\" docs .github",
       "recommended_action": "Tie security summary claims to contract-backed sources or demote the summary surface.",
@@ -179,10 +169,9 @@
   ],
   "generated_on": "2026-03-09",
   "status_totals": {
-    "FIXED": 4,
+    "FIXED": 6,
     "INVALIDATED": 3,
-    "OPEN": 1,
-    "PARTIAL": 2
+    "PARTIAL": 1
   },
   "total_findings": 10
 }

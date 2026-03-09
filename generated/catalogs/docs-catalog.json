@@ -27,6 +27,15 @@
     "type": "index"
   },
   {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "_generated/bundles/60-docs-specs-contract.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
     "canonical_conflict_group": "mongodb-atlas",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-13",
@@ -11540,7 +11549,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-25",
+    "last_verified_or_updated": "2026-03-09",
     "owner": null,
     "path": "reference/operations/RELEASE_PROCESS.md",
     "status": "supporting",
