@@ -3,7 +3,7 @@
     "archival": 292,
     "canonical": 44,
     "generated": 49,
-    "supporting": 1218
+    "supporting": 1222
   },
   "entries": [
     {
@@ -6062,6 +6062,42 @@
       "root": "docs",
       "status": "",
       "title": "Wave 5 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Agent Skill Charter"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "SKILL_BUNDLE_RULES"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "TASK_TYPE_TAXONOMY"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Execution Tracker"
     },
     {
       "classification": "supporting",
@@ -14434,7 +14470,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1603,
+  "entry_count": 1607,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14443,7 +14479,7 @@
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 157,
+    "docs:other": 161,
     "docs:review": 48,
     "docs:runbook": 482,
     "specs:evidence": 43,
@@ -14456,7 +14492,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1385,
+    "docs": 1389,
     "specs": 218
   }
 }

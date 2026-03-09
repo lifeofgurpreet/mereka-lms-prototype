@@ -1,0 +1,143 @@
+version: 1
+authority_order:
+  - source_normative_truth
+  - runtime_policy_truth
+  - generated_read_models
+  - reviewer_handoff_surfaces
+required_bundle_fields:
+  - task_type
+  - one_line_intent
+  - authority_order
+  - read_first
+  - generated_surfaces_to_refresh
+  - affected_truth_surfaces
+  - required_reviewers
+  - required_evidence
+  - required_commands
+  - likely_cross_repo_dependencies
+  - out_of_scope
+  - escalation_conditions
+required_generated_surfaces:
+  - generated/knowledge/change-manifest.json
+  - generated/knowledge/review-bundle.md
+  - generated/knowledge/truth-impact-report.json
+  - generated/catalogs/knowledge-catalog.json
+  - generated/graphs/knowledge-graph.json
+conditional_generated_surfaces:
+  cross_repo_contract_change:
+    - generated/contracts/cross-repo-manifest.json
+    - generated/contracts/deployment-impact-report.json
+    - generated/contracts/release-obligations.md
+  release_or_runtime_change:
+    - generated/contracts/deployment-impact-report.json
+    - generated/contracts/release-obligations.md
+  review_handoff_or_generated_surface_refresh:
+    - docs/catalog.json
+    - generated/catalogs/docs-catalog.json
+source_priority:
+  source_normative_truth:
+    - specs/*_spec.md
+    - docs/meta/contracts/*.yaml
+    - deploy/contracts/service-contracts/*.yaml
+    - deploy/contracts/infra-crosswalk.yaml
+    - docs/meta/contracts/*.md
+    - docs/adr/**
+    - docs/ops/**
+  runtime_policy_truth:
+    - docs/meta/knowledge/OWNERSHIP_MAP.yaml
+    - docs/meta/knowledge/CHANGE_CLASSES.yaml
+    - docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml
+    - docs/meta/knowledge/REVIEW_RULES.yaml
+    - docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml
+    - docs/meta/contracts/RELEASE_OBLIGATIONS.yaml
+    - docs/meta/contracts/ENVIRONMENT_SURFACES.yaml
+  generated_read_models:
+    - generated/knowledge/change-manifest.json
+    - generated/knowledge/review-bundle.md
+    - generated/knowledge/truth-impact-report.json
+    - generated/contracts/cross-repo-manifest.json
+    - generated/contracts/deployment-impact-report.json
+    - generated/contracts/release-obligations.md
+    - generated/catalogs/knowledge-catalog.json
+    - generated/graphs/knowledge-graph.json
+  reviewer_handoff_surfaces:
+    - docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
+    - docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+    - docs/meta/contracts/REVIEW_HANDOFF_MODEL.md
+canonical_read_first_defaults:
+  normative_spec_change:
+    - specs/standards/SPEC_SYSTEM_CHARTER.md
+    - specs/standards/SPEC_METADATA_MODEL.md
+    - specs/standards/SPEC_AUTHORING_STANDARD.md
+    - generated/knowledge/change-manifest.json
+    - generated/knowledge/truth-impact-report.json
+    - generated/knowledge/review-bundle.md
+  proposal_or_rfc_change:
+    - specs/proposals/README.md
+    - docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md
+    - generated/knowledge/change-manifest.json
+    - generated/knowledge/review-bundle.md
+  architecture_or_adr_change:
+    - docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
+    - docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+    - generated/knowledge/change-manifest.json
+    - generated/knowledge/truth-impact-report.json
+  cross_repo_contract_change:
+    - docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md
+    - docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml
+    - docs/meta/contracts/RELEASE_OBLIGATIONS.yaml
+    - docs/meta/contracts/ENVIRONMENT_SURFACES.yaml
+    - docs/meta/contracts/INFRA_CROSSWALK.md
+    - generated/contracts/cross-repo-manifest.json
+    - generated/contracts/deployment-impact-report.json
+    - generated/contracts/release-obligations.md
+  release_or_runtime_change:
+    - docs/meta/contracts/RELEASE_OBLIGATIONS.yaml
+    - docs/meta/contracts/INFRA_CROSSWALK.md
+    - docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+    - generated/contracts/deployment-impact-report.json
+    - generated/contracts/release-obligations.md
+    - generated/knowledge/change-manifest.json
+    - generated/knowledge/truth-impact-report.json
+    - generated/knowledge/review-bundle.md
+  runbook_or_ops_change:
+    - docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+    - generated/knowledge/change-manifest.json
+    - generated/knowledge/review-bundle.md
+    - generated/knowledge/truth-impact-report.json
+  evidence_or_status_change:
+    - docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md
+    - docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md
+    - generated/knowledge/change-manifest.json
+    - generated/knowledge/review-bundle.md
+  review_handoff_or_generated_surface_refresh:
+    - docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
+    - docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+    - docs/meta/contracts/REVIEW_HANDOFF_MODEL.md
+    - generated/catalogs/knowledge-catalog.json
+    - generated/graphs/knowledge-graph.json
+required_command_sets:
+  baseline:
+    - bash scripts/qa/run-knowledge-runtime-gates.sh
+    - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
+  spec_truth:
+    - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
+    - python3 tools/specs/verify_spec_taxonomy.py --repo-root .
+    - python3 tools/specs/verify_spec_paths.py --repo-root .
+    - python3 tools/specs/verify_docs_specs_boundary.py --repo-root .
+  contract_truth:
+    - bash scripts/qa/run-cross-repo-contract-gates.sh
+  task_runtime:
+    - python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD
+    - python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD
+    - python3 tools/knowledge/build_skill_index.py --repo-root .
+    - python3 tools/knowledge/build_skill_index.py --check --repo-root .
+    - python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD
+    - bash scripts/qa/run-task-runtime-gates.sh
+human_judgment_task_types:
+  - architecture_or_adr_change
+  - cross_repo_contract_change
+  - release_or_runtime_change
+weak_rule_areas:
+  - exact reviewer routing for mixed architecture-plus-runtime diffs remains heuristic
+  - exact evidence expectations for pure reviewer-handoff packets remain soft

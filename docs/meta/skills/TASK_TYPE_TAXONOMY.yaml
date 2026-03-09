@@ -1,0 +1,183 @@
+version: 1
+generated_by_wave: wave7
+task_types:
+  normative_spec_change:
+    risk: high
+    one_line_intent: Change normative product or platform contract truth.
+    primary_roots:
+      - specs
+      - docs
+    governing_lanes:
+      - specs:normative
+      - docs:concept
+      - docs:runbook
+    trigger_patterns:
+      - "specs/*_spec.md"
+    excludes:
+      - "specs/proposals/**"
+      - "specs/plans/**"
+      - "specs/archive/**"
+    escalation_if_combined_with:
+      - cross_repo_contract_change
+      - release_or_runtime_change
+    authority_class: normative
+  proposal_or_rfc_change:
+    risk: medium
+    one_line_intent: Change non-normative proposal, RFC, or future-shape design truth.
+    primary_roots:
+      - specs
+      - docs
+    governing_lanes:
+      - specs:proposal
+      - docs:review
+      - docs:concept
+    trigger_patterns:
+      - "specs/proposals/**/*_spec.md"
+      - "docs/**/RFC*.md"
+    excludes:
+      - "specs/*_spec.md"
+      - "specs/plans/**"
+    escalation_if_combined_with:
+      - normative_spec_change
+      - cross_repo_contract_change
+    authority_class: proposal
+  architecture_or_adr_change:
+    risk: high
+    one_line_intent: Change architecture decisions, rationale, or decision-ledger truth.
+    primary_roots:
+      - docs
+      - specs
+    governing_lanes:
+      - docs:adr
+      - docs:concept
+      - specs:normative
+    trigger_patterns:
+      - "docs/adr/**"
+      - "docs/**/architecture/**"
+    excludes:
+      - "docs/archive/**"
+    escalation_if_combined_with:
+      - cross_repo_contract_change
+      - release_or_runtime_change
+    authority_class: architecture
+  cross_repo_contract_change:
+    risk: high
+    one_line_intent: Change service, deployment, environment, or release contract truth across repos.
+    primary_roots:
+      - docs
+      - deploy
+      - specs
+    governing_lanes:
+      - contracts:service
+      - contracts:crosswalk
+      - specs:normative
+      - docs:runbook
+    trigger_patterns:
+      - "deploy/contracts/**"
+      - "docs/meta/contracts/**"
+      - "tools/contracts/**"
+      - "generated/contracts/**"
+    excludes:
+      - "docs/archive/**"
+    escalation_if_combined_with:
+      - normative_spec_change
+      - release_or_runtime_change
+    authority_class: contract
+  release_or_runtime_change:
+    risk: high
+    one_line_intent: Change release, deployment, runtime, or evidence-convergence behavior.
+    primary_roots:
+      - docs
+      - scripts
+      - tools
+      - specs
+    governing_lanes:
+      - docs:runbook
+      - docs:evidence
+      - specs:normative
+      - contracts:service
+    trigger_patterns:
+      - "scripts/qa/**"
+      - "tools/docs/verify/**"
+      - "tools/contracts/**"
+      - "specs/*deployment*_spec.md"
+      - "specs/*runtime*_spec.md"
+    excludes:
+      - "docs/archive/**"
+    escalation_if_combined_with:
+      - architecture_or_adr_change
+      - cross_repo_contract_change
+    authority_class: runtime
+  runbook_or_ops_change:
+    risk: medium
+    one_line_intent: Change operational guidance, incident procedure, or maintenance instruction.
+    primary_roots:
+      - docs
+      - specs
+    governing_lanes:
+      - docs:runbook
+      - docs:concept
+      - specs:normative
+    trigger_patterns:
+      - "docs/**/runbook*.md"
+      - "docs/ops/**"
+      - "docs/runbooks/**"
+    excludes:
+      - "docs/archive/**"
+    escalation_if_combined_with:
+      - release_or_runtime_change
+      - cross_repo_contract_change
+    authority_class: operations
+  evidence_or_status_change:
+    risk: medium
+    one_line_intent: Change evidence, proof, status, or readiness surfaces without changing core contracts.
+    primary_roots:
+      - docs
+      - specs
+    governing_lanes:
+      - docs:evidence
+      - docs:review
+      - specs:evidence
+    trigger_patterns:
+      - "docs/**/evidence/**"
+      - "docs/meta/**"
+      - "specs/testmaps/**"
+      - "specs/_generated/testmaps/**"
+    excludes:
+      - "generated/**"
+    escalation_if_combined_with:
+      - normative_spec_change
+      - release_or_runtime_change
+    authority_class: evidence
+  review_handoff_or_generated_surface_refresh:
+    risk: low
+    one_line_intent: Refresh generated truth surfaces or reviewer handoff artifacts without altering governing policy.
+    primary_roots:
+      - generated
+      - docs
+      - specs
+    governing_lanes:
+      - docs:review
+      - docs:generated
+      - specs:generated
+    trigger_patterns:
+      - "generated/**"
+      - "docs/meta/**/REVIEW_HANDOFF*.md"
+      - "docs/meta/**/WAVE*_CLOSEOUT.md"
+      - "docs/meta/**/WAVE*_EXECUTION_TRACKER.md"
+      - "specs/_generated/**"
+    excludes:
+      - "tools/**"
+      - "deploy/contracts/**"
+    escalation_if_combined_with:
+      - none
+    authority_class: generated
+task_resolution_order:
+  - cross_repo_contract_change
+  - release_or_runtime_change
+  - normative_spec_change
+  - architecture_or_adr_change
+  - proposal_or_rfc_change
+  - runbook_or_ops_change
+  - evidence_or_status_change
+  - review_handoff_or_generated_surface_refresh

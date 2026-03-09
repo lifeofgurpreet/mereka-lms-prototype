@@ -55,11 +55,13 @@
       "docs/guides/standards/README.md",
       "docs/guides/standards/STATUS_REPORTING_STANDARD.md",
       "docs/guides/standards/STYLE_GUIDE.md",
+      "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
       "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
       "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
       "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
       "docs/meta/contracts/INFRA_CROSSWALK.md",
       "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
       "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
       "docs/meta/docs-program/IMPLEMENTATION_ROADMAP.md",
       "docs/meta/docs-program/README.md",
@@ -389,7 +391,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 306,
+  "change_count": 308,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -397,7 +399,7 @@
     "docs:concept": 26,
     "docs:generated": 1,
     "docs:index": 1,
-    "docs:other": 14,
+    "docs:other": 16,
     "docs:review": 17,
     "docs:runbook": 8,
     "specs:evidence": 3,
@@ -2259,6 +2261,37 @@
         "adrs": [],
         "docs_support": [
           "docs/catalog.json",
+          "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
           "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
         ],
         "generated_surfaces": [],
@@ -2398,6 +2431,37 @@
         "wrappers": []
       },
       "path": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
+          "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
       "required_evidence": {
         "require_adr_update": "conditional",
         "require_runbook_update": "conditional",

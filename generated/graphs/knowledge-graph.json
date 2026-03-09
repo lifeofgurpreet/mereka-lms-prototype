@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4809,
+  "edge_count": 4821,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3806,6 +3806,26 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/AGENT_SKILL_CHARTER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -11381,6 +11401,26 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/AGENT_SKILL_CHARTER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "contains",
@@ -18560,6 +18600,26 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/skills/AGENT_SKILL_CHARTER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/standing-orders/GITOPS_AGENT.md"
     },
     {
@@ -24049,7 +24109,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1626,
+  "node_count": 1630,
   "nodes": [
     {
       "id": "classification:archival",
@@ -31483,6 +31543,50 @@
       "root": "docs",
       "status": "",
       "title": "Wave 5 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Agent Skill Charter"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "SKILL_BUNDLE_RULES"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "TASK_TYPE_TAXONOMY"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Execution Tracker"
     },
     {
       "classification": "supporting",

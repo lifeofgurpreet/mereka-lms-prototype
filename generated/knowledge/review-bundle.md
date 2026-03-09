@@ -1,7 +1,7 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `306`
+- Changes classified: `308`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
@@ -9,7 +9,7 @@
 
 ### Change Classes
 - `archival_only_change`: 7
-- `docs_support_change`: 96
+- `docs_support_change`: 98
 - `evidence_only_change`: 3
 - `generated_surface_refresh`: 116
 - `normative_contract_change`: 39
@@ -25,7 +25,7 @@
 - `generated`: 8
 - `index`: 1
 - `normative`: 39
-- `other`: 127
+- `other`: 129
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -62,10 +62,10 @@
 - `docs/archive/FRONTEND_PHASE_C_PROMPT.md` [archival_only_change]
 
 ## Required Evidence And Follow-Up
-- status update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +175 more
+- status update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +177 more
 - evidence pack: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +75 more
-- runbook update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +168 more
-- ADR update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +136 more
+- runbook update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +170 more
+- ADR update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +138 more
 - plan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +76 more
 - testplan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +72 more
 
@@ -209,17 +209,17 @@
 - `deploy/contracts/service-contracts/openedx.yaml`
 - `deploy/contracts/service-contracts/purchase-gateway.yaml`
 - `deploy/contracts/service-contracts/runner-ci.yaml`
+- `docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md`
 - `docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md`
 - `docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml`
 - `docs/meta/contracts/ENVIRONMENT_SURFACES.yaml`
 - `docs/meta/contracts/INFRA_CROSSWALK.md`
 - `docs/meta/contracts/RELEASE_OBLIGATIONS.yaml`
+- `docs/meta/contracts/REVIEW_HANDOFF_MODEL.md`
 - `docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md`
 - `docs/meta/knowledge/CHANGE_CLASSES.yaml`
 - `docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md`
-- `docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml`
-- `docs/meta/knowledge/OWNERSHIP_MAP.yaml`
-- `... 107 more`
+- `... 109 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`
