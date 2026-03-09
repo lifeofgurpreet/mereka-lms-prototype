@@ -4,7 +4,7 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending Packet D data/integration status normalization HEAD
+- commit: pending Packet D legacy status tail normalization HEAD
 - scope: Packet D
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
@@ -34,25 +34,27 @@
   - Packet D (platform runtime status normalization)
   - Packet D (tenancy/runtime status normalization)
   - Packet D (data/integration status normalization)
+  - Packet D (legacy status tail normalization)
 - latest commit SHA:
   - pending current packet HEAD
 - open residue:
   - none
 - next packet:
-  - Packet D (remaining legacy status tail)
+  - Packet E (generated surfaces truth pass)
 - stop conditions encountered:
   - none
 - decisions already locked:
   - Kajabi/MCT remains normative by explicit decision
 - metrics delta:
-  - before: legacy status hits = 10
-  - after: legacy status hits = 5
+  - before: legacy status hits = 5
+  - after: legacy status hits = 2
 - files normalized in this packet:
-  - specs/forum-service-migration_spec.md
-  - specs/tutor-configuration_spec.md
-  - specs/tutor-configuration-resilience_spec.md
-  - specs/plans/forum-service-migration_plan.md
-  - specs/plans/forum-service-migration_testplan.md
+  - specs/data-migrations-kajabi-mct_spec.md
+  - specs/ecommerce-purchase-gateway_spec.md
+  - specs/slo-sla-service-level-management_spec.md
+- remaining legacy status hits:
+  - specs/proposals/external-registration-hubspot_spec.md
+  - specs/proposals/proctoring-integration_spec.md
 
 ## Current target batch
 - files: []

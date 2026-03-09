@@ -238,7 +238,7 @@
       "path": "specs/data-migrations-kajabi-mct_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "domain",
-      "status": "in_progress",
+      "status": "active",
       "summary": "Normative contract for migrating Kajabi and MCT legacy data into the Mereka LMS platform.",
       "tags": [],
       "title": "Data Migrations: Kajabi & MCT Legacy Systems",
@@ -357,7 +357,7 @@
       "path": "specs/ecommerce-purchase-gateway_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "integration",
-      "status": "in_progress",
+      "status": "active",
       "summary": "Defines the purchase gateway contract from Stripe checkout through fulfillment into Open edX commerce ownership.",
       "tags": [
         "commerce.reconciliation",
@@ -2785,7 +2785,7 @@
       "path": "specs/slo-sla-service-level-management_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines service-level indicators, objectives, agreements, and operational management expectations for the platform.",
       "tags": [
         "observability.slo",

@@ -2,7 +2,7 @@
 id: "SPEC-COM-001"
 title: "Ecommerce Purchase Gateway (Stripe -> Open edX Integration)"
 type: "feature_spec"
-status: "in_progress"
+status: "active"
 spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"
