@@ -50,7 +50,7 @@
 	}
 	handle @mfe_theme_css {
 		root * /openedx/dist
-		try_files /account{path} /authn{path} /communications{path} /course-authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
+		try_files /account{path} /authn{path} /communications{path} /authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
 		file_server
 	}
 
@@ -63,7 +63,7 @@
 		# Theme bundles are emitted per-MFE under /openedx/dist/<mfe>/theme/*.min.css.
 		# Runtime minified bundles are copied to /openedx/dist/theme/*.min.css.
 		# Check /theme first, then fall back to per-MFE paths for compatibility.
-		try_files /theme{path} /account{path} /authn{path} /communications{path} /course-authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
+		try_files /theme{path} /account{path} /authn{path} /communications{path} /authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
 		header Cache-Control "public, max-age=300"
 		file_server
 	}
@@ -125,14 +125,14 @@
 		file_server
 	}
 
-	# Course Authoring MFE: build output is "course-authoring" in the MFE image.
+	# Course Authoring MFE: build output is "authoring" in the MFE image.
 	# Both /authoring/ and /course-authoring/ paths must work (mereka-lms-18ik).
 	@mfe_course-authoring {
 		path /course-authoring /course-authoring/*
 	}
 	handle @mfe_course-authoring {
 		uri strip_prefix /course-authoring
-		root * /openedx/dist/course-authoring
+		root * /openedx/dist/authoring
 		try_files /{path} /index.html
 		file_server
 	}
@@ -142,7 +142,7 @@
 	}
 	handle @mfe_authoring {
 		uri strip_prefix /authoring
-		root * /openedx/dist/course-authoring
+		root * /openedx/dist/authoring
 		try_files /{path} /index.html
 		file_server
 	}
