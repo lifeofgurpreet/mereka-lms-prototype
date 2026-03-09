@@ -4,27 +4,31 @@
 - docs/wave7-agent-skill-runtime
 
 ## Latest substantive packet head
-- Packet A commit on docs/wave7-agent-skill-runtime
+- Packet B commit on docs/wave7-agent-skill-runtime
 
 ## Last completed batch
-- commit: Packet A commit on docs/wave7-agent-skill-runtime
-- scope: Packet A skill taxonomy and charter
+- commit: Packet B commit on docs/wave7-agent-skill-runtime
+- scope: Packet B task context resolver
 - validators run:
-  - python3 - <<'PY' ... yaml.safe_load(TASK_TYPE_TAXONOMY/SKILL_BUNDLE_RULES) ... PY
+  - python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
 
 ## Packets completed
 - Packet A: skill taxonomy and charter
+- Packet B: task context resolver
 
 ## Current target batch
 - files:
-  - none
+  - tools/knowledge/build_task_bundle.py
+  - tools/knowledge/build_skill_index.py
+  - generated/knowledge/skill-index.json
+  - generated/knowledge/task-bundles/
 - goal:
-  - Packet A is complete
+  - generate first-class task bundles and skill index
 - stop condition:
-  - Packet B starts
+  - Packet C validators pass
 
 ## Locked decisions
 - Wave 4 canonical roots remain unchanged
@@ -37,7 +41,7 @@
 - none yet
 
 ## Next queued batch
-- Packet B: task context resolver
+- Packet C: task bundle generation
 
 ## Wave posture
 - repo-local and cross-repo truth are consumed, not redesigned

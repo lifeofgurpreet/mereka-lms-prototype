@@ -87,6 +87,10 @@
       "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
       "docs/meta/knowledge/REVIEW_RULES.yaml",
       "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+      "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
+      "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+      "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
       "docs/reference/architecture/API_CONTRACTS.md",
       "docs/reference/architecture/MOBILE_TOKEN_PARITY.md",
       "docs/reference/operations/CAPABILITY_MATRIX.md",
@@ -391,7 +395,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 308,
+  "change_count": 312,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -399,7 +403,7 @@
     "docs:concept": 26,
     "docs:generated": 1,
     "docs:index": 1,
-    "docs:other": 16,
+    "docs:other": 20,
     "docs:review": 17,
     "docs:runbook": 8,
     "specs:evidence": 3,
@@ -3231,6 +3235,130 @@
       "required_reviewers": [
         "docs",
         "architecture"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
+          "docs/meta/skills/AGENT_SKILL_CHARTER.md"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
+          "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
+          "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
+          "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
       ]
     },
     {
