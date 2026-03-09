@@ -4,14 +4,34 @@ type: "feature_spec"
 status: "draft"
 version: "1.0.0"
 owner: "engineering"
+id: "SPEC-FE-PLUGIN-SLOTS"
+spec_class: "integration"
+created: "2026-02-27"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "frontend"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "tests"
+  - "manual-verification"
+interfaces:
+  - "frontend-plugin-framework"
+  - "openedx-mfe-runtime"
+tags:
+  - "frontend.composition"
+  - "frontend.brand.tokens"
+summary: "Defines which Open edX MFE plugin slots Mereka activates, how they are phased, and the supported extension model."
 vehicle: "talent_platform"
 last_updated: "2026-02-27"
 depends_on:
   - "specs/branding-system_spec.md"
 links:
   related_docs:
-    - "docs/BRANDING.md"
-    - "docs/branding/BRANDING_ROADMAP.md"
+    - "docs/guides/branding/BRANDING.md"
+    - "docs/guides/branding/BRANDING_OPERATING_MODEL.md"
+    - "docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md"
   related_specs:
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/branding-system_spec.md"
