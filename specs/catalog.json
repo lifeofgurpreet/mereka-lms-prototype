@@ -135,24 +135,28 @@
     },
     {
       "acceptance_criteria_count": 33,
-      "created": null,
-      "domain": null,
-      "id": null,
-      "last_reviewed": "2026-02-10",
+      "created": "2026-02-10",
+      "domain": "platform",
+      "id": "SPEC-CLIB-001",
+      "last_reviewed": "2026-03-09",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/content-libraries-v2_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/content-libraries-v2_spec.testmap.yml",
         "plan": "specs/plans/content-libraries-v2_plan.md",
         "testplan": "specs/plans/content-libraries-v2_testplan.md"
       },
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/content-libraries-v2_spec.md",
-      "review_due": null,
-      "spec_class": "feature_spec",
+      "review_due": "2026-06-09",
+      "spec_class": "domain",
       "status": "draft",
-      "summary": null,
-      "tags": [],
+      "summary": "Defines the normative contract for Content Libraries v2 authoring, versioning, tenant-aware access, reuse, and operational behavior on Mereka LMS.",
+      "tags": [
+        "platform.content-libraries",
+        "platform.blockstore",
+        "tenant.lifecycle"
+      ],
       "title": "Content Libraries v2 Management & Enterprise Usage",
       "version": "1.0.0"
     },
