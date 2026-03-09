@@ -1,5 +1,21 @@
+---
+title: Documentation Style Guide
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/guides/standards
+doc_class: guide
+audience:
+  - contributors
+  - reviewers
+  - operators
+summary: Defines practical writing, formatting, and cross-linking rules for canonical documentation in this repository.
+tags:
+  - docs.policy
+  - docs.catalog
+---
+
 # Documentation Style Guide
-_Audience: Everyone • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
 Use this checklist when writing or editing docs in this repository. This guide is for style, naming, and practical writing quality. Use the documentation authority resolver for root ownership.
 
