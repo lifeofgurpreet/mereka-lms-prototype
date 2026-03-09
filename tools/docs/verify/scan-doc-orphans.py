@@ -42,6 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--root", default=".")
     parser.add_argument("--summary-file", default="")
     parser.add_argument("--limit", type=int, default=50)
+    parser.add_argument("--fail-on-orphans", action="store_true")
     return parser.parse_args()
 
 
@@ -151,6 +152,8 @@ def main() -> int:
         f"candidates_checked={summary['candidates_checked']} "
         f"orphan_docs={summary['orphan_docs_count']}"
     )
+    if args.fail_on_orphans and orphan_docs:
+        return 1
     return 0
 
 
