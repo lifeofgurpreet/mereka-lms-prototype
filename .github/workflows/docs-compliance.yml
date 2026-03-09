@@ -19,6 +19,8 @@ on:
       - "tools/docs/verify/verify-doc-catalog-governance-test.sh"
       - "tools/docs/verify/scan-doc-catalog-residue.py"
       - "tools/docs/verify/scan-doc-catalog-residue-test.sh"
+      - "tools/docs/verify/scan-doc-orphans.py"
+      - "tools/docs/verify/scan-doc-orphans-test.sh"
       - "tools/docs/verify/verify-stub-only-transitional-dirs.py"
       - "tools/docs/verify/verify-stub-only-transitional-dirs-test.sh"
       - "tools/docs/verify/verify-archive-write-protection.py"
@@ -401,6 +403,22 @@ jobs:
               fp.write(f"- duplicate_canonical_groups={payload.get('duplicate_canonical_groups_count', 'n/a')}\n")
           PY
 
+      - name: Scan docs orphan candidates
+        run: |
+          set -euo pipefail
+          DOC_ORPHAN_SUMMARY="${RUNNER_TEMP}/docs-orphan-summary.json"
+          python3 tools/docs/verify/scan-doc-orphans.py \
+            --summary-file "$DOC_ORPHAN_SUMMARY"
+          python3 - "$DOC_ORPHAN_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          with open(sys.argv[1], "r", encoding="utf-8") as fp:
+              payload = json.load(fp)
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+              fp.write("### Docs Orphan Scan (Advisory)\n")
+              fp.write(f"- candidates_checked={payload.get('candidates_checked', 'n/a')}\n")
+              fp.write(f"- orphan_docs={payload.get('orphan_docs_count', 'n/a')}\n")
+          PY
+
       - name: Upload docs catalog health scorecard
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
@@ -456,6 +474,7 @@ jobs:
             tools/docs/verify/verify-doc-catalog-health-test.sh \
             tools/docs/verify/verify-doc-catalog-governance-test.sh \
             tools/docs/verify/scan-doc-catalog-residue-test.sh \
+            tools/docs/verify/scan-doc-orphans-test.sh \
             tools/docs/verify/verify-stub-only-transitional-dirs-test.sh \
             tools/docs/verify/verify-archive-write-protection-test.sh \
             tools/docs/verify/verify-evidence-status-root-policy-test.sh \
@@ -490,6 +509,7 @@ jobs:
           tools/docs/verify/verify-doc-catalog-health-test.sh
           tools/docs/verify/verify-doc-catalog-governance-test.sh
           tools/docs/verify/scan-doc-catalog-residue-test.sh
+          tools/docs/verify/scan-doc-orphans-test.sh
           tools/docs/verify/verify-stub-only-transitional-dirs-test.sh
           tools/docs/verify/verify-archive-write-protection-test.sh
           tools/docs/verify/verify-evidence-status-root-policy-test.sh

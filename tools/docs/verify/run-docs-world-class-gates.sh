@@ -25,6 +25,7 @@ ARCHIVE_WRITE_SUMMARY="$WORK_DIR/archive-write-summary.json"
 CATALOG_GOVERNANCE_SUMMARY="$WORK_DIR/docs-catalog-governance-summary.json"
 EVIDENCE_STATUS_ROOT_SUMMARY="$WORK_DIR/evidence-status-root-summary.json"
 CATALOG_RESIDUE_SUMMARY="$WORK_DIR/docs-catalog-residue-summary.json"
+DOC_ORPHAN_SUMMARY="$WORK_DIR/docs-orphan-summary.json"
 DOCS_COMPLIANCE_SUMMARY_PATH="$WORK_DIR/docs-compliance-summary.json"
 
 MAX_AGE_SECONDS=1200
@@ -233,6 +234,7 @@ run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-ca
 run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
 run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-catalog-governance.py --range "${BASE_REF}...HEAD" --summary-file "$CATALOG_GOVERNANCE_SUMMARY"
 run_step "scan-doc-catalog-residue" python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue --summary-file "$CATALOG_RESIDUE_SUMMARY"
+run_step "scan-doc-orphans" python3 tools/docs/verify/scan-doc-orphans.py --summary-file "$DOC_ORPHAN_SUMMARY"
 run_step "verify-doc-catalog-health" python3 tools/docs/verify/verify-doc-catalog-health.py \
   --max-stale-days 45 \
   --summary-file "$CATALOG_HEALTH_SUMMARY"
@@ -276,6 +278,7 @@ run_step "verify-docs-scorecard-generation-drift-test" ./tools/docs/verify/verif
 run_step "verify-stub-only-transitional-dirs-test" ./tools/docs/verify/verify-stub-only-transitional-dirs-test.sh
 run_step "verify-archive-write-protection-test" ./tools/docs/verify/verify-archive-write-protection-test.sh
 run_step "verify-doc-catalog-governance-test" ./tools/docs/verify/verify-doc-catalog-governance-test.sh
+run_step "scan-doc-orphans-test" ./tools/docs/verify/scan-doc-orphans-test.sh
 run_step "verify-evidence-status-root-policy-test" ./tools/docs/verify/verify-evidence-status-root-policy-test.sh
 run_step "run-docs-world-class-gates-test" ./tools/docs/verify/run-docs-world-class-gates-test.sh
 run_step "verify-docs-compliance-workflow-contract-test" ./tools/docs/verify/verify-docs-compliance-workflow-contract-test.sh
