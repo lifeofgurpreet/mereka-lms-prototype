@@ -24,19 +24,14 @@ Come here when you need:
 
 1. [ARCHITECTURE_CHARTER.md](ARCHITECTURE_CHARTER.md)
 2. [DOCUMENTATION_AUTHORITY_RESOLVER.md](DOCUMENTATION_AUTHORITY_RESOLVER.md)
-3. [CONTROL_PLANES.md](CONTROL_PLANES.md)
-4. [TUTOR_AND_EXTENSION_MODEL.md](TUTOR_AND_EXTENSION_MODEL.md)
-5. [IDENTITY_DOMAIN_BOUNDARIES.md](IDENTITY_DOMAIN_BOUNDARIES.md)
-6. [TENANT_LIFECYCLE.md](TENANT_LIFECYCLE.md)
-7. [DATA_GOVERNANCE.md](DATA_GOVERNANCE.md)
-8. [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
-9. [DOCS_SPECS_CONTRACT.md](../../guides/standards/DOCS_SPECS_CONTRACT.md)
-10. the proposal queue: [../../adr/rfc/README.md](../../adr/rfc/README.md)
+3. [DOCS_SPECS_CONTRACT.md](../../guides/standards/DOCS_SPECS_CONTRACT.md)
+4. the domain-specific standard, overview, or audit you actually need
+5. the proposal queue: [../../adr/rfc/README.md](../../adr/rfc/README.md)
 
 ## Fast routes by task
 
 - Want the governing rule set:
-  - start with the charter, resolver, and constitution standards
+  - start with the charter and resolver
 - Want frontend/runtime architecture:
   - go to `Frontend and runtime architecture`
 - Want data, analytics, assessment, or service architecture:
@@ -55,17 +50,9 @@ Come here when you need:
 - **[PRODUCTION_ARCHITECTURE_REALITY.md](PRODUCTION_ARCHITECTURE_REALITY.md)** - runtime reality and system-shape checkpoint
 - **[MONGODB_ATLAS_MIGRATION.md](MONGODB_ATLAS_MIGRATION.md)** - historical Atlas migration closeout still useful as architecture context
 - **[MULTISITE_ANALYSIS.md](../../../reports/2025/audits/MULTISITE_ANALYSIS.md)** - historical multi-site audit retained for comparison context
-- **[ADR-025-deployment-boundary.md](../../adr/rfc/ADR-025-deployment-boundary.md)** - RFC retained outside the accepted ADR hot path
+- **[ADR-025-deployment-boundary.md](../../adr/rfc/ADR-025-deployment-boundary.md)** - deployment-boundary proposal in the active RFC queue
 
 ## Core standards and contracts
-
-- **[CONTROL_PLANES.md](CONTROL_PLANES.md)** - governing rule for repository truth, GitOps truth, and render artifacts
-- **[TUTOR_AND_EXTENSION_MODEL.md](TUTOR_AND_EXTENSION_MODEL.md)** - Tutor and extension methodology
-- **[IDENTITY_DOMAIN_BOUNDARIES.md](IDENTITY_DOMAIN_BOUNDARIES.md)** - identity, federation, and root-domain boundary rules
-- **[TENANT_LIFECYCLE.md](TENANT_LIFECYCLE.md)** - tenant lifecycle and isolation contract
-- **[RELEASE_ROLLOUT_AND_REMOVAL.md](RELEASE_ROLLOUT_AND_REMOVAL.md)** - rollout, deprecation, and removal policy
-- **[DATA_GOVERNANCE.md](DATA_GOVERNANCE.md)** - privacy, retention, and deletion law
-- **[AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)** - role and tenant-boundary authorization model
 
 - **[COPY_TERMINOLOGY_CONTRACT.md](COPY_TERMINOLOGY_CONTRACT.md)** - copy and terminology rules that shape user-facing consistency
 - **[CSS_SCOPING_AUDIT.md](CSS_SCOPING_AUDIT.md)** - CSS scoping audit for branded and multisite surfaces
@@ -137,12 +124,12 @@ Come here when you need:
 ## Open edX Service Overviews
 
 - **[badges-credentials-overview.md](../../../specs/archive/badges-credentials-overview.md)** - Digital badges and credentials system
-- **[content-libraries-overview.md](content-libraries-overview.md)** - content library architecture overview
-- **[enterprise-services-overview.md](enterprise-services-overview.md)** - enterprise service architecture overview
-- **[multi-tenancy-overview.md](multi-tenancy-overview.md)** - multi-tenancy architecture overview
-- **[notification-pipeline-overview.md](notification-pipeline-overview.md)** - notification architecture overview
-- **[proctoring-architecture-overview.md](proctoring-architecture-overview.md)** - proctoring architecture overview
-- **[purchase-gateway-overview.md](purchase-gateway-overview.md)** - purchase gateway architecture overview
+- **[content-libraries-overview.md](../../architecture/overviews/content-libraries-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
+- **[enterprise-services-overview.md](../../architecture/overviews/enterprise-services-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
+- **[multi-tenancy-overview.md](../../architecture/overviews/multi-tenancy-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
+- **[notification-pipeline-overview.md](../../architecture/overviews/notification-pipeline-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
+- **[proctoring-architecture-overview.md](../../architecture/overviews/proctoring-architecture-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
+- **[purchase-gateway-overview.md](../../architecture/overviews/purchase-gateway-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
 
 ## What does not belong here
 

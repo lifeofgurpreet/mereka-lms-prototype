@@ -19,14 +19,6 @@ Use this root when you need the rules that constrain platform shape, UX consiste
 - UX, performance, and consistency policies
 - cross-cutting architecture exceptions and limits
 
-## Common reviewer routes
-
-| Question | Start here | Move elsewhere when... |
-|---|---|---|
-| "What rule constrains this design?" | The relevant policy in this root | You need the factual current shape, then use `docs/reference/architecture/**` |
-| "Is this a policy or a decision record?" | This root | If it is a dated choice rather than a standing rule, use `docs/adr/**` |
-| "Does this belong in architecture policy at all?" | This root and the resolver | If it is really an operator rule, move to `docs/policies/operations/**` |
-
 ## Core policy set
 
 - [`ACCESSIBILITY_CONFORMANCE_POLICY.md`](ACCESSIBILITY_CONFORMANCE_POLICY.md) for accessibility conformance rules
@@ -62,9 +54,3 @@ Use this root when you need the rules that constrain platform shape, UX consiste
 1. Start here when the question is about a design rule, boundary, or guardrail.
 2. If you need the current factual system shape rather than the rule, move to [`../../reference/architecture/README.md`](../../reference/architecture/README.md).
 3. If you need execution steps, move to [`../../ops/README.md`](../../ops/README.md).
-
-## Review standard
-
-- A file here should state a durable architecture rule or limit clearly enough to govern future changes.
-- If the content mainly describes the current system, move it to `docs/reference/architecture/**`.
-- If the content mainly explains how to carry out work, move it to `docs/ops/**` or `docs/guides/**`.
