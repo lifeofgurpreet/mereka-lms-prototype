@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 284,
+  "change_count": 289,
   "changed_roots": [
     "docs",
     "specs"
@@ -2172,6 +2172,181 @@
       "root": "docs",
       "status": "canonical",
       "title": "Documentation Style Guide"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Contract Runtime Model"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "CROSS_REPO_OWNERSHIP"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "ENVIRONMENT_SURFACES"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "RELEASE_OBLIGATIONS"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Execution Tracker"
     },
     {
       "change_class": "docs_support_change",
@@ -10596,6 +10771,11 @@
     "docs/guides/standards/README.md",
     "docs/guides/standards/STATUS_REPORTING_STANDARD.md",
     "docs/guides/standards/STYLE_GUIDE.md",
+    "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+    "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+    "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+    "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+    "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
     "docs/meta/docs-program/IMPLEMENTATION_ROADMAP.md",
     "docs/meta/docs-program/README.md",
     "docs/meta/docs-program/SPEC_COVERAGE.md",

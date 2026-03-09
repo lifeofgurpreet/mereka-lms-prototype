@@ -1,0 +1,42 @@
+version: 1
+service: openedx
+service_family: openedx
+service_type: application_runtime
+owning_repo: mereka-lms
+deployment_repo: bbi-infrastructure
+high_risk_surface: openedx_runtime
+deployment_surfaces:
+  - image_source
+  - gitops_overlay
+  - secret_source
+  - ingress_dns
+  - runbook_surface
+  - evidence_surface
+environment_surfaces:
+  - dev
+  - prod
+image_source:
+  repo_owner: mereka-lms
+  source_surfaces:
+    - .github/workflows/ci.yml
+    - docs/adr/021-openedx-tutor-methodology.md
+secret_surfaces:
+  - specs/secrets-management_spec.md
+  - docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md
+runbook_surfaces:
+  - docs/ops/runbooks/POSTDEPLOY_SMOKE_AND_INCIDENT.md
+  - docs/reference/operations/OPENEDX_HOSTNAMES.md
+evidence_surfaces:
+  - docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md
+review_groups:
+  - architecture
+  - platform
+  - release
+infra_counterpart_expectation: conditional
+change_classes:
+  - deployment_affecting_change
+  - image_or_artifact_change
+  - ingress_dns_edge_change
+unknowns:
+  - Exact ArgoCD application and overlay paths in bbi-infrastructure are not yet crosswalked in this repo.
+  - Secret manager path conventions and overlay-specific hostnames remain Wave 6 Packet C work.

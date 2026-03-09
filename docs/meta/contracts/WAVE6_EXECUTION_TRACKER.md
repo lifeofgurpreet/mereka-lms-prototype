@@ -4,35 +4,30 @@
 - docs/wave6-cross-repo-contract-runtime
 
 ## Latest substantive packet head
-- Packet A commit on docs/wave6-cross-repo-contract-runtime
+- Packet B commit on docs/wave6-cross-repo-contract-runtime
 
 ## Last completed batch
-- commit: Packet A commit on docs/wave6-cross-repo-contract-runtime
-- scope: Packet A contract schema
+- commit: Packet B commit on docs/wave6-cross-repo-contract-runtime
+- scope: Packet B service contract inventory
 - validators run:
-  - YAML parse docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml
-  - YAML parse docs/meta/contracts/RELEASE_OBLIGATIONS.yaml
-  - YAML parse docs/meta/contracts/ENVIRONMENT_SURFACES.yaml
+  - Packet B service-contract schema consistency check
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
 
 ## Packets completed
 - Packet A: contract schema
+- Packet B: service contract inventory
 
 ## Current target batch
 - files:
-  - deploy/contracts/service-contracts/openedx.yaml
-  - deploy/contracts/service-contracts/mfe.yaml
-  - deploy/contracts/service-contracts/purchase-gateway.yaml
-  - deploy/contracts/service-contracts/enterprise-services.yaml
-  - deploy/contracts/service-contracts/runner-ci.yaml
-  - deploy/contracts/service-contracts/observability-runtime.yaml
+  - docs/meta/contracts/INFRA_CROSSWALK.md
+  - deploy/contracts/infra-crosswalk.yaml
 - goal:
-  - build explicit service contract inventory for major deployable units
-  - make unknown deployment edges explicit instead of tribal
+  - map app-repo truth to infra-repo truth
+  - encode which deployment edges are explicit versus still unknown
 - stop condition:
-  - service contracts validate against Packet A schema
+  - every service contract has an infra crosswalk entry or explicit unknown state
   - Wave 5 runtime stays green
   - one commit is created
 
@@ -44,15 +39,15 @@
 - cross-repo unknowns are allowed only when explicit and reviewable
 
 ## Open unknown mappings
-- none yet
+- openedx: overlay, application, and secret-wiring paths in bbi-infrastructure are not yet mapped
+- mfe: ingress, appset, and edge-realization paths in bbi-infrastructure are not yet mapped
+- purchase-gateway: Stripe secret and ingress realization paths in bbi-infrastructure are not yet mapped
+- enterprise-services: per-service overlay ownership in bbi-infrastructure is not yet decomposed
+- runner-ci: runner-host realization and secret-distribution paths are not yet mapped
+- observability-runtime: monitoring app paths and dashboard ownership boundaries are not yet mapped
 
 ## Services with no contract inventory
-- openedx
-- mfe
-- purchase-gateway
-- enterprise-services
-- runner-ci
-- observability-runtime
+- none
 
 ## Next queued batch
-- Packet B: service contract inventory
+- Packet C: infra crosswalk

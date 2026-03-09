@@ -1,0 +1,43 @@
+version: 1
+service: purchase-gateway
+service_family: purchase_gateway
+service_type: commerce_runtime
+owning_repo: mereka-lms
+deployment_repo: bbi-infrastructure
+high_risk_surface: purchase_flows
+deployment_surfaces:
+  - image_source
+  - gitops_overlay
+  - secret_source
+  - ingress_dns
+  - runbook_surface
+  - evidence_surface
+environment_surfaces:
+  - dev
+  - prod
+image_source:
+  repo_owner: mereka-lms
+  source_surfaces:
+    - .github/workflows/build-purchase-gateway.yml
+    - specs/ecommerce-purchase-gateway_spec.md
+secret_surfaces:
+  - specs/secrets-management_spec.md
+  - docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md
+runbook_surfaces:
+  - docs/ops/runbooks/PURCHASE_GATEWAY_K8S.md
+  - docs/ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md
+evidence_surfaces:
+  - docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md
+  - docs/adr/038-commerce-system-of-record-and-reconciliation.md
+review_groups:
+  - architecture
+  - platform
+  - release
+  - security
+infra_counterpart_expectation: true
+change_classes:
+  - deployment_affecting_change
+  - secret_surface_change
+  - ingress_dns_edge_change
+unknowns:
+  - Stripe secret materialization and ingress realization paths in bbi-infrastructure are not yet mapped here.
