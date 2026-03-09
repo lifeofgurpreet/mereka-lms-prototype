@@ -1,7 +1,18 @@
 # Operations Policies
 _Audience: Operators and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
-This directory contains operator-facing policy documents for running the platform safely and consistently.
+Use this root when you need the rules that govern how operators are allowed to run the platform. Start here for safety boundaries, retention rules, readiness gates, and operator behavior constraints. Do not use this root for execution steps or live status.
+
+## Start Here
+
+| If you need to... | Read this first | Then go deeper in |
+|---|---|---|
+| Understand what operators may or may not do | [`ALLOWED_ACTIONS_POLICY.md`](ALLOWED_ACTIONS_POLICY.md) | [`../../ops/runbooks/README.md`](../../ops/runbooks/README.md) |
+| Check deployment and change-control rules | [`MERGE_FIRST_DEPLOYMENT_PROTOCOL.md`](MERGE_FIRST_DEPLOYMENT_PROTOCOL.md) | [`REPO_BOUNDARIES.md`](REPO_BOUNDARIES.md) |
+| Check Tutor or runtime safety boundaries | [`TUTOR_CONFIG_SAFETY.md`](TUTOR_CONFIG_SAFETY.md) | [`../../reference/operations/README.md`](../../reference/operations/README.md) |
+| Check auth, privacy, or retention policy | [`AUTH_HARDENING_SPEC.md`](AUTH_HARDENING_SPEC.md) | [`DATA_RETENTION_POLICY.md`](DATA_RETENTION_POLICY.md) |
+| Check observability or SLO policy | [`OBSERVABILITY_GA_READINESS_GATE.md`](OBSERVABILITY_GA_READINESS_GATE.md) | [`SLO_POLICY.md`](SLO_POLICY.md) |
+| Check exception handling | [`SECURITY_EXCEPTIONS.md`](SECURITY_EXCEPTIONS.md) | [`A11Y_EXCEPTIONS.md`](A11Y_EXCEPTIONS.md) |
 
 ## Use this directory for
 
@@ -49,3 +60,9 @@ This directory contains operator-facing policy documents for running the platfor
 - live status tracking, which belongs in `docs/status/**`
 - detailed runbooks, which belong in `docs/ops/runbooks/**`
 - historical reports, which belong in archive surfaces
+
+## How To Use This Root Well
+
+1. Start here when the question is “what is allowed?” or “what rule governs this operation?”
+2. If you already know the rule and need execution steps, leave this root and move to [`../../ops/runbooks/README.md`](../../ops/runbooks/README.md).
+3. If you need factual inventories or contracts rather than rules, leave this root and move to [`../../reference/operations/README.md`](../../reference/operations/README.md).

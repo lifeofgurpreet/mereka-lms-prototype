@@ -1,7 +1,15 @@
 # Operations Evidence Packs
 _Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
-This directory is the active evidence surface for operational proof packs.
+This directory is the active evidence surface for operational proof packs. Start here when the question is “what proof do we have?” about a deployment, recovery, runtime validation, or operator-facing gate.
+
+## Start here
+
+| If you need to... | Read this first | Then go deeper in |
+|---|---|---|
+| Verify a runtime or deployment claim | The relevant proof pack in this root | [`../../status/readiness/README.md`](../../status/readiness/README.md) if you need the corresponding readiness judgment |
+| Find the canonical evidence location rules | [`../INDEX.md`](../INDEX.md) | [`../../guides/standards/EVIDENCE_PACK_STANDARD.md`](../../guides/standards/EVIDENCE_PACK_STANDARD.md) |
+| Understand whether something belongs in evidence or status | [`../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md) | The relevant winning root |
 
 ## Use this directory for
 
@@ -32,9 +40,17 @@ Do not create new active proof under top-level `evidence/**` or archive paths.
 
 ## Active packs
 
-- [Analytics key elimination evidence](ANALYTICS_KEY_ELIMINATION_EVIDENCE.md)
-- [Assessment XQueue evidence](ASSESSMENT_XQUEUE_EVIDENCE.md)
-- [GKE workload triage evidence](GKE_WORKLOAD_TRIAGE_EVIDENCE.md)
-- [Kind cluster recovery evidence](KIND_CLUSTER_RECOVERY_EVIDENCE.md)
-- [Tenant isolation evidence](TENANT_ISOLATION_EVIDENCE.md)
-- [Token integrity routing evidence](TOKEN_INTEGRITY_ROUTING.md)
+| Pack | Use it when... |
+|---|---|
+| [Analytics key elimination evidence](ANALYTICS_KEY_ELIMINATION_EVIDENCE.md) | You need proof for analytics-key remediation and validation. |
+| [Assessment XQueue evidence](ASSESSMENT_XQUEUE_EVIDENCE.md) | You need proof for assessment/XQueue behavior or recovery. |
+| [GKE workload triage evidence](GKE_WORKLOAD_TRIAGE_EVIDENCE.md) | You need workload-level triage proof from the live cluster. |
+| [Kind cluster recovery evidence](KIND_CLUSTER_RECOVERY_EVIDENCE.md) | You need proof for local cluster recovery and validation. |
+| [Tenant isolation evidence](TENANT_ISOLATION_EVIDENCE.md) | You need evidence for tenant-boundary and isolation claims. |
+| [Token integrity routing evidence](TOKEN_INTEGRITY_ROUTING.md) | You need proof for token-integrity routing or frontend/runtime parity claims. |
+
+## What this root is not
+
+- Not the place for a judgment about whether something is ready. That belongs in `docs/status/readiness/**`.
+- Not the place for long-term retired proof. That belongs in `docs/archive/evidence/**`.
+- Not the place for rules about evidence writing. That belongs in `docs/guides/standards/EVIDENCE_PACK_STANDARD.md`.

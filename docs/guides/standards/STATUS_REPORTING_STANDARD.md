@@ -30,6 +30,15 @@ Every active status document SHOULD include:
 - explicit blockers or open risks
 - next decision or next action
 
+## What a good status document does
+
+A good status document tells a reader:
+1. what is true right now,
+2. what is blocked or at risk,
+3. what needs to happen next.
+
+If the document mostly explains history, it is probably a report, not active status.
+
 ## Content rules
 
 - Active status docs MUST describe current operational truth.
@@ -37,11 +46,36 @@ Every active status document SHOULD include:
 - Status docs MUST NOT become a second architecture standard or long-term runbook.
 - Status docs SHOULD link to current evidence packs when they make factual claims.
 
+## Recommended structure
+
+Use this structure unless the status type clearly needs a variation:
+
+1. Scope
+2. Current state
+3. Blockers and risks
+4. Evidence or proof links
+5. Next action or next decision
+
+## What gets rejected
+
+- Status docs that only summarize completed work with no live decision value.
+- Readiness docs that do not say who owns the go/no-go call.
+- Migration status docs that omit current blockers or rollback posture.
+- Incident/status docs that make factual claims without linking proof.
+- Files that should be archived but still sit in active status roots.
+
 ## Migration and readiness guidance
 
 - `docs/status/migrations/` is for active migration posture, not historical writeups.
 - `docs/status/readiness/` is for go/no-go, readiness, and release posture.
 - Once a status document stops representing live truth, it SHOULD be archived or superseded.
+
+## Writing standard
+
+- Put the current state in the first screenful.
+- Prefer explicit state words such as `blocked`, `at risk`, `ready`, `not ready`, or `in progress`.
+- Separate facts from planned actions.
+- Link proof instead of restating the full evidence bundle.
 
 ## Archive rule
 

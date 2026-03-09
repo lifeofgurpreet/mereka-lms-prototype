@@ -3,6 +3,16 @@ _Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-08 �
 
 This contract separates explanation from intention and closes the current split-brain around verification artifacts.
 
+## Start with the question
+
+Before creating or editing a file, ask:
+
+1. Am I defining what the system must do?
+2. Or am I explaining how the current system works, how to operate it, or what happened?
+
+If you are defining required behavior, you are probably changing `specs/**`.
+If you are explaining or operating the current system, you are probably changing `docs/**`.
+
 ## Artifact roles
 
 | Artifact | Root | Meaning |
@@ -21,6 +31,21 @@ This contract separates explanation from intention and closes the current split-
 - Specs MUST NOT be replaced by prose in `docs/**`.
 - Testmaps are generated artifacts and MUST NOT become a second manual truth plane.
 
+## Quick routing guide
+
+Use `specs/**` when the change answers:
+- what the platform must do,
+- what an API or workflow guarantees,
+- what acceptance criteria define completion,
+- what verification is required to call a behavior implemented.
+
+Use `docs/**` when the change answers:
+- how to operate the current system,
+- how contributors should work,
+- what architecture decisions and standards currently govern the repo,
+- what evidence proves a claim,
+- what the current status or readiness posture is.
+
 ## Verification truth
 
 The verification mapping source of truth is:
@@ -30,6 +55,17 @@ The verification mapping source of truth is:
 3. centralized manual verification metadata where automation is not possible
 
 Generated testmaps are compatibility outputs from that source of truth.
+
+## What signals that something belongs in specs
+
+Move the work into `specs/**` if the document contains:
+- normative requirements,
+- acceptance criteria,
+- testable feature scope,
+- rollout and rollback requirements for feature behavior,
+- edge cases that define expected product or system behavior.
+
+If the key sentence starts with “the system MUST”, that is often a specs signal.
 
 ## Transitional reality
 
@@ -61,6 +97,14 @@ Do not use `docs/**` as the primary home for:
 - a second independent metadata catalog
 - implementation plans masquerading as accepted architecture
 
+## What gets rejected
+
+- A docs change that silently changes required product behavior.
+- A spec change hidden inside a guide, runbook, or architecture narrative.
+- Manual edits to generated testmaps.
+- Docs that try to become a second verification authority instead of linking specs and proof.
+- Plans or proposals presented as accepted current law.
+
 ## Required contributor behavior
 
 Before adding or changing files:
@@ -69,6 +113,13 @@ Before adding or changing files:
 2. place the file under the winning root for that artifact kind
 3. regenerate generated artifacts instead of hand-editing them
 4. update or add compatibility stubs when moving legacy paths
+
+## Practical review test
+
+Reviewers should ask:
+1. If this file disappeared, would the required behavior of the system become ambiguous?
+2. If yes, it probably belongs in `specs/**`.
+3. If no, and it mainly helps readers understand or operate the current system, it probably belongs in `docs/**`.
 
 ## Related authority docs
 

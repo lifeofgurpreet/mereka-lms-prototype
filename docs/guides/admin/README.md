@@ -3,6 +3,19 @@ _Audience: Operators and administrators • Owner: Platform Team • Last verifi
 
 This directory contains canonical administrator guidance for operating and validating the platform through supported admin surfaces.
 
+## Start here
+
+- Need to get into the platform safely:
+  - start with [`ADMIN_LOGIN_GUIDE.md`](ADMIN_LOGIN_GUIDE.md)
+- Need tenant or multisite administration:
+  - start with [`MULTI_SITE_GUIDE.md`](MULTI_SITE_GUIDE.md)
+- Need cluster or secrets posture from an admin workflow:
+  - start with [`K8S_OPERATIONS_GUIDE.md`](K8S_OPERATIONS_GUIDE.md) or [`SECRETS_MANAGEMENT_GUIDE.md`](SECRETS_MANAGEMENT_GUIDE.md)
+- Need observability or data-store validation from the admin side:
+  - start with [`OBSERVABILITY_GUIDE.md`](OBSERVABILITY_GUIDE.md) or [`MONGODB_ATLAS_GUIDE.md`](MONGODB_ATLAS_GUIDE.md)
+- Need docs program tracking that is still active guidance:
+  - use the `Active docs program guidance` section below
+
 ## Use this directory for
 
 - admin-facing operational guides
@@ -39,3 +52,11 @@ This directory contains canonical administrator guidance for operating and valid
 - [`DOCS_QUALITY_SCORECARD_20260309.md`](DOCS_QUALITY_SCORECARD_20260309.md)
 - [`DOCS_REMEDIATION_CLOSURE_MEMO_20260307.md`](DOCS_REMEDIATION_CLOSURE_MEMO_20260307.md)
 - [`PR443_WORLD_CLASS_CLOSURE_NOTE_20260306.md`](PR443_WORLD_CLASS_CLOSURE_NOTE_20260306.md)
+
+## When not to use this directory
+
+If the reader needs:
+- a low-level runbook, send them to `docs/ops/**`
+- a living architecture rule, send them to `docs/concepts/architecture/**`
+- active proof, send them to `docs/evidence/**`
+- active status, send them to `docs/status/**`

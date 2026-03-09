@@ -4,11 +4,20 @@ _Audience: Developers + Agent Operators • Owner: Platform Team • Last verifi
 ## Scope
 This is the canonical onboarding index for local development and day-to-day workflows.
 
-## Quick Start Path
-1. Start with [`AGENT_SETUP_CHECKLIST.md`](AGENT_SETUP_CHECKLIST.md).
-2. Run the fast path in [`QUICK_START_LOCAL.md`](QUICK_START_LOCAL.md).
-3. Use [`LOCAL_SETUP.md`](LOCAL_SETUP.md) for full bootstrap detail.
-4. Use [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md) for daily commands.
+## Start here
+
+- New contributor or new agent session:
+  1. [`AGENT_SETUP_CHECKLIST.md`](AGENT_SETUP_CHECKLIST.md)
+  2. [`QUICK_START_LOCAL.md`](QUICK_START_LOCAL.md)
+  3. [`LOCAL_SETUP.md`](LOCAL_SETUP.md)
+- Already bootstrapped and just need daily workflow:
+  - [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md)
+- Working with multiple contributors or parallel agents:
+  - [`MULTI_DEVELOPER_WORKFLOW.md`](MULTI_DEVELOPER_WORKFLOW.md)
+- Using a dev container instead of a host setup:
+  - [`DEVCONTAINER_GUIDE.md`](DEVCONTAINER_GUIDE.md)
+- Need local access or environment reference:
+  - see `Supporting references` below
 
 ## Canonical Onboarding Guides
 - [`AGENT_SETUP_CHECKLIST.md`](AGENT_SETUP_CHECKLIST.md)
@@ -27,3 +36,10 @@ This is the canonical onboarding index for local development and day-to-day work
 - [`REPOSITORY_GUIDE.md`](REPOSITORY_GUIDE.md)
 - [`TEAM_SCALING_GUIDE.md`](TEAM_SCALING_GUIDE.md)
 - [`DOCUMENTATION_INDEX.md`](DOCUMENTATION_INDEX.md)
+
+## What this directory is not
+
+Do not use this directory for:
+- low-level operator procedures that belong in `docs/ops/**`
+- living architecture rules that belong in `docs/concepts/architecture/**`
+- active status or proof that belongs in `docs/status/**` or `docs/evidence/**`

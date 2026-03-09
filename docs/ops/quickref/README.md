@@ -2,29 +2,40 @@
 
 _Audience: Operators • Owner: SRE Team • Last verified: 2026-03-06 • Status: canonical_
 
-One-page quick reference guides for common Mereka LMS operations.
+Use this root when you need the shortest path to an operational answer. Quick references are for commands, checklists, and compact reminders. They are not the place for deep rationale, architectural policy, or long runbooks.
 
----
+## Start Here
 
-## Available Cards
+| If you need to... | Read this first | Then go deeper in |
+|---|---|---|
+| Check cluster state or debug pods quickly | [kubectl-cheatsheet.md](./kubectl-cheatsheet.md) | [`../runbooks/`](../runbooks/README.md) |
+| Change Tutor config or rebuild locally | [tutor-commands.md](./tutor-commands.md) | [`../../guides/onboarding/`](../../guides/onboarding/README.md) |
+| Run a verification or find the right checker | [verification-scripts.md](./verification-scripts.md) | [`../../guides/standards/DOCS_SPECS_CONTRACT.md`](../../guides/standards/DOCS_SPECS_CONTRACT.md) |
+| Triage an outage or common operator failure | [common-troubleshooting.md](./common-troubleshooting.md) | [`../runbooks/`](../runbooks/README.md) |
+| Find URLs, entrypoints, or local access details | [access-urls.md](./access-urls.md) | [`../../reference/operations/`](../../reference/operations/README.md) |
+
+## Cards in This Root
 
 | Card | Purpose | Use When |
-|------|---------|----------|
+|---|---|---|
 | [kubectl-cheatsheet.md](./kubectl-cheatsheet.md) | Kubernetes operations | Managing pods, services, deployments in GKE |
 | [tutor-commands.md](./tutor-commands.md) | Tutor operations | Building images, config changes, local development |
 | [verification-scripts.md](./verification-scripts.md) | Automated testing | Running verifications, checking spec coverage |
 | [common-troubleshooting.md](./common-troubleshooting.md) | Troubleshooting | Site down, performance issues, config problems |
+| [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) | General operator quick reference bundle | You need the broad operator command set in one place |
+| [access-urls.md](./access-urls.md) | Service URLs and local access points | You need hostnames, ports, or local URLs quickly |
+| [local-access-info.md](./local-access-info.md) | Local environment entrypoints | You are checking local login, services, or ports |
+| [local-production-parity.md](./local-production-parity.md) | Local vs production parity expectations | You need to know whether local can prove a production claim |
+| [local-work-remaining.md](./local-work-remaining.md) | Known local-environment gaps | You need to understand remaining local debt |
+| [discovery-quickstart.md](./discovery-quickstart.md) | Discovery service quickstart | You need to work on Discovery without reading the full guide |
+| [checklists/doc-delivery-checklist.md](./checklists/doc-delivery-checklist.md) | Docs delivery checklist | You are shipping doc changes and need a final pass |
+| [checklists/spec-delivery-checklist.md](./checklists/spec-delivery-checklist.md) | Spec delivery checklist | You are shipping spec-driven work and need a final pass |
 
-## Additional quick references
+## What This Root Is Not
 
-- [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) for the general operator quick reference bundle
-- [access-urls.md](./access-urls.md) for service URLs and local access points
-- [local-access-info.md](./local-access-info.md) for local environment entrypoints
-- [local-production-parity.md](./local-production-parity.md) for parity expectations between local and production
-- [local-work-remaining.md](./local-work-remaining.md) for local environment follow-up work
-- [discovery-quickstart.md](./discovery-quickstart.md) for Discovery service quickstart steps
-- [checklists/doc-delivery-checklist.md](./checklists/doc-delivery-checklist.md) for docs delivery verification
-- [checklists/spec-delivery-checklist.md](./checklists/spec-delivery-checklist.md) for spec delivery verification
+- Not the source of architecture policy. Use [`../../concepts/architecture/`](../../concepts/architecture/README.md) for living standards and authority rules.
+- Not the main operator procedure root. Use [`../runbooks/`](../runbooks/README.md) when you need a full operational workflow.
+- Not the system of record for reference material. Use [`../../reference/operations/`](../../reference/operations/README.md) for contracts, inventories, and factual reference.
 
 ---
 
@@ -200,9 +211,9 @@ When adding new cards:
 ### Other References
 
 - [access-urls.md](access-urls.md) - All service URLs and credentials
-- [DEPLOYMENT_VERIFICATION.md](../../operations/DEPLOYMENT_VERIFICATION.md) - Post-deploy checklist
-- [TUTOR_CONFIG_SAFETY.md](../../operations/TUTOR_CONFIG_SAFETY.md) - Config best practices
-- [VERIFICATION_REPORT.md](../../operations/VERIFICATION_REPORT.md) - Latest validation results
+- [DEPLOYMENT_VERIFICATION.md](../../ops/runbooks/DEPLOYMENT_VERIFICATION.md) - Post-deploy checklist
+- [TUTOR_CONFIG_SAFETY.md](../../policies/operations/TUTOR_CONFIG_SAFETY.md) - Config best practices
+- [VERIFICATION_REPORT.md](../../status/readiness/VERIFICATION_REPORT.md) - Latest validation results
 
 ### Project Documentation
 

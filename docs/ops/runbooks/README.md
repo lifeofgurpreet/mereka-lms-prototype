@@ -3,6 +3,17 @@ _Audience: Operators • Owner: Platform Team • Last verified: 2026-03-09 • 
 
 This directory contains canonical operator procedures for runtime incidents, deployments, recovery, tenant operations, and service-specific troubleshooting.
 
+## Start here
+
+- Site is down or degraded:
+  - start with [`site-down.md`](site-down.md) or `Incident and recovery references`
+- Need a release, deployment, or rollback procedure:
+  - start with `Core runtime and deployment`
+- Need service-specific troubleshooting:
+  - start with `Service and platform operations`
+- Need a narrower operational procedure:
+  - start with `Specialized procedures`
+
 ## Use this directory for
 
 - step-by-step operational procedures
@@ -78,3 +89,11 @@ This directory contains canonical operator procedures for runtime incidents, dep
 - [`production-verification-checklist.md`](production-verification-checklist.md)
 - [`scaling.md`](scaling.md)
 - [`task3-ses-smtp-guide.md`](task3-ses-smtp-guide.md)
+
+## What this directory is not
+
+Do not use this directory for:
+- policy rules that belong in `docs/policies/**`
+- factual inventories that belong in `docs/reference/**`
+- active proof that belongs in `docs/evidence/**`
+- active reporting that belongs in `docs/status/**`

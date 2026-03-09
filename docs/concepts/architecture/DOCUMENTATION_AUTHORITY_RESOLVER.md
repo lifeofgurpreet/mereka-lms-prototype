@@ -3,6 +3,21 @@ _Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-08 �
 
 This document resolves documentation split-brain. If two paths appear to answer the same question, use this resolver to determine the winner.
 
+## Fast routing
+
+Use this table before reading or writing:
+
+| If your question is about... | Start here |
+| --- | --- |
+| Intended behavior or acceptance criteria | `specs/**` |
+| Current architecture rules or standards | `docs/concepts/architecture/**` |
+| How to operate or recover the platform | `docs/ops/**` |
+| Why a technical decision was made | `docs/adr/**` |
+| How contributors or users should do something | `docs/guides/**` |
+| Reference detail or policy boundaries | `docs/reference/**`, `docs/policies/**` |
+| Proof that something is true | `docs/evidence/**` |
+| Current status, readiness, or migration posture | `docs/status/**` |
+
 ## Resolver order
 
 Apply these rules in order:
@@ -17,6 +32,15 @@ Apply these rules in order:
 8. If the question is about current reporting or open status, `docs/status/**` wins.
 9. If the path is under `docs/archive/**`, it is historical context only and MUST NOT override active roots.
 
+## What to do when two docs disagree
+
+1. Identify the artifact kind first.
+2. Use the winning root for that artifact kind.
+3. Treat the losing root as stale, transitional, or historical unless it clearly points back to the winner.
+4. Fix the losing path in the same change if you are already touching this area.
+
+If a transitional or archive path contradicts a winning root, the winning root governs.
+
 ## Root winners
 
 | Artifact kind | Canonical root | Transitional roots | Cold / historical root |
@@ -28,6 +52,15 @@ Apply these rules in order:
 | Evidence / proof | `docs/evidence/**` | `evidence/**` | `docs/archive/evidence/**` |
 | Active reporting / status | `docs/status/**` | `reports/2026/status/**`, `reports/2026/readiness/**` | `docs/archive/reports/**` |
 | Specs / intended behavior | `specs/**` | none | `specs/archive/**` |
+
+## Practical decision tests
+
+Use these tests when you are unsure:
+
+- If removing the file would make required system behavior ambiguous, it probably belongs in `specs/**`.
+- If the file mainly helps someone operate, navigate, or understand the current system, it belongs in `docs/**`.
+- If the file proves a runtime fact, it belongs in `docs/evidence/**`.
+- If the file reports current posture or blockers, it belongs in `docs/status/**`.
 
 ## Metadata rule
 
@@ -62,7 +95,7 @@ Testmaps are generated verification mapping artifacts.
 - `specs/testmaps/**` is a compatibility location until migration to `specs/_generated/testmaps/**` is complete.
 - Manual edits to generated testmaps are not authoritative and must be treated as drift.
 
-## Canonical / transitional / historical / archive definitions
+## Terms
 
 - `canonical`: active root that new readers and new links must target
 - `transitional`: compatibility root kept temporarily to avoid breakage; content should collapse to stubs
@@ -88,6 +121,10 @@ Examples:
 - `docs/ops/**` SHOULD link to `docs/reference/**`, `docs/policies/**`, `docs/evidence/**`, and `docs/status/**`
 - `docs/ops/**` MUST NOT use `docs/operations/**` as live procedure authority
 - `docs/concepts/architecture/**` MUST NOT depend on `docs/architecture/**` as current law
+
+## Review rule
+
+If a reviewer cannot tell which root wins without reading multiple documents, the docs are still split-brain and the change is incomplete.
 
 ## Wave 2 resolver decisions
 

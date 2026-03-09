@@ -3,6 +3,14 @@ _Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-
 
 This directory is the canonical architecture narrative and living-standards root for Mereka LMS.
 
+## Use this root for
+
+Come here when you need:
+- current architecture standards,
+- architecture-level contracts and audits,
+- system-shape overviews,
+- or architecture proposals that are still under evaluation.
+
 ## Authority boundary
 
 - Living architecture standards live here.
@@ -17,17 +25,32 @@ This directory is the canonical architecture narrative and living-standards root
 1. [ARCHITECTURE_CHARTER.md](ARCHITECTURE_CHARTER.md)
 2. [DOCUMENTATION_AUTHORITY_RESOLVER.md](DOCUMENTATION_AUTHORITY_RESOLVER.md)
 3. [DOCS_SPECS_CONTRACT.md](../../guides/standards/DOCS_SPECS_CONTRACT.md)
-4. the domain-specific standard, overview, or RFC you actually need
-5. proposal queue: [../../adr/rfc/](../../adr/rfc/)
+4. the domain-specific standard, overview, or audit you actually need
+5. the proposal queue: [../../adr/rfc/README.md](../../adr/rfc/README.md)
+
+## Fast routes by task
+
+- Want the governing rule set:
+  - start with the charter and resolver
+- Want frontend/runtime architecture:
+  - go to `Frontend and runtime architecture`
+- Want data, analytics, assessment, or service architecture:
+  - go to `Analytics, assessment, and service architecture`
+- Want repo cleanup or architecture program context:
+  - go to `Programs, proposals, and repo hygiene`
+- Want accepted decision history:
+  - go to [../../adr/README.md](../../adr/README.md)
+- Want unresolved design proposals:
+  - go to [../../adr/rfc/README.md](../../adr/rfc/README.md)
 
 ## Infrastructure Architecture
 
 - **[DATABASE_ARCHITECTURE.md](DATABASE_ARCHITECTURE.md)** - Database strategy (MySQL, MongoDB Atlas, Redis)
 - **[ARCHITECTURE_MONGODB.md](ARCHITECTURE_MONGODB.md)** - Atlas-specific MongoDB architecture notes
 - **[PRODUCTION_ARCHITECTURE_REALITY.md](PRODUCTION_ARCHITECTURE_REALITY.md)** - runtime reality and system-shape checkpoint
-- **[MONGODB_ATLAS_MIGRATION.md](MONGODB_ATLAS_MIGRATION.md)** - Historical MongoDB Atlas migration closeout retained in the architecture narrative surface
-- **[MULTISITE_ANALYSIS.md](../../../reports/2025/audits/MULTISITE_ANALYSIS.md)** - Historical multi-site audit
-- **[ADR-025-deployment-boundary.md](../../architecture/rfc/ADR-025-deployment-boundary.md)** - Transitional RFC location retained under the legacy architecture root during Wave 2
+- **[MONGODB_ATLAS_MIGRATION.md](MONGODB_ATLAS_MIGRATION.md)** - historical Atlas migration closeout still useful as architecture context
+- **[MULTISITE_ANALYSIS.md](../../../reports/2025/audits/MULTISITE_ANALYSIS.md)** - historical multi-site audit retained for comparison context
+- **[ADR-025-deployment-boundary.md](../../architecture/rfc/ADR-025-deployment-boundary.md)** - transitional RFC location retained during Wave 2
 
 ## Core standards and contracts
 
@@ -107,6 +130,14 @@ This directory is the canonical architecture narrative and living-standards root
 - **[notification-pipeline-overview.md](../../architecture/overviews/notification-pipeline-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
 - **[proctoring-architecture-overview.md](../../architecture/overviews/proctoring-architecture-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
 - **[purchase-gateway-overview.md](../../architecture/overviews/purchase-gateway-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
+
+## What does not belong here
+
+Do not use this root for:
+- operator procedures that belong in `docs/ops/**`,
+- active proof that belongs in `docs/evidence/**`,
+- active status that belongs in `docs/status/**`,
+- or accepted decision history that belongs in `docs/adr/**`.
 
 ## Related Documentation
 

@@ -7,6 +7,21 @@ Use this root when the question is operational:
 - how to execute a verified operator procedure
 - which quick reference to use during an incident or release
 
+## Start here
+
+Choose the smallest subroot that matches the task:
+
+- Need commands, URLs, or checklists quickly:
+  - start in [`quickref/README.md`](quickref/README.md)
+- Need a step-by-step production or recovery procedure:
+  - start in [`runbooks/README.md`](runbooks/README.md)
+- Need observability ownership or monitoring reference:
+  - start in [`monitoring/README.md`](monitoring/README.md)
+- Need build or release operations:
+  - start in [`ci-cd/README.md`](ci-cd/README.md)
+- Need operator-facing auth, secret, or security posture:
+  - start in [`security/README.md`](security/README.md)
+
 Do not use these losing roots as live operator authority:
 - `docs/operations/**`
 - `docs/runbooks/**`
@@ -28,6 +43,14 @@ Do not use these losing roots as live operator authority:
 - [`monitoring/README.md`](monitoring/README.md) for observability ownership and runtime telemetry
 - [`ci-cd/README.md`](ci-cd/README.md) for build and delivery operations
 - [`security/README.md`](security/README.md) for auth, secret, and operator security posture
+
+## What this root is not
+
+Do not use this root for:
+- living architecture rules that belong in `docs/concepts/architecture/**`,
+- active proof that belongs in `docs/evidence/**`,
+- active reporting that belongs in `docs/status/**`,
+- or contributor guidance that belongs in `docs/guides/**`.
 
 ## Resolver
 

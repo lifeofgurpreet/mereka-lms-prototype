@@ -1,7 +1,17 @@
 # Operations Reference
 _Audience: Operators and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
-This directory contains operator-facing reference material for the current runtime surface.
+Use this root for factual operator reference: inventories, matrices, contracts, setup reference, and environment facts. Start here when you need to answer “what is true?” about the current runtime surface. Do not use this root for step-by-step execution or policy decisions.
+
+## Start Here
+
+| If you need to... | Read this first | Then go deeper in |
+|---|---|---|
+| Understand the deployment contract or runtime lanes | [`CANONICAL_DEPLOY_CONTRACT.md`](CANONICAL_DEPLOY_CONTRACT.md) | [`../../ops/runbooks/README.md`](../../ops/runbooks/README.md) |
+| Find hostnames, domains, or route ownership | [`OPENEDX_HOSTNAMES.md`](OPENEDX_HOSTNAMES.md) | [`DOMAIN_MATRIX.md`](DOMAIN_MATRIX.md) |
+| Check auth, secrets, or operator access posture | [`AUTH_AND_PERMISSIONS.md`](AUTH_AND_PERMISSIONS.md) | [`../../policies/operations/README.md`](../../policies/operations/README.md) |
+| Look up monitoring, dashboards, or parity reference | [`MONITORING.md`](MONITORING.md) | [`../../ops/monitoring/README.md`](../../ops/monitoring/README.md) |
+| Find service-specific environment reference | [`CI_CD_SETUP.md`](CI_CD_SETUP.md) or [`ASPECTS_ANALYTICS_SETUP.md`](ASPECTS_ANALYTICS_SETUP.md) | The relevant runbook under [`../../ops/runbooks/`](../../ops/runbooks/README.md) |
 
 ## Use this directory for
 
@@ -81,3 +91,10 @@ This directory contains operator-facing reference material for the current runti
 - step-by-step procedures, which belong in `docs/ops/runbooks/**`
 - active status reporting, which belongs in `docs/status/**`
 - policy decisions, which belong in `docs/policies/**`
+- raw proof bundles, which belong in `docs/evidence/**`
+
+## How To Use This Root Well
+
+1. Start with the smallest reference that answers the question you have right now.
+2. If you need execution steps, leave this root and move to [`../../ops/runbooks/README.md`](../../ops/runbooks/README.md).
+3. If you find yourself asking what rule should govern the system, leave this root and move to [`../../policies/README.md`](../../policies/README.md) or [`../../concepts/architecture/README.md`](../../concepts/architecture/README.md).

@@ -10,11 +10,13 @@ Use it to answer two questions quickly:
 
 ## Start here
 
-Read these first before following any older path:
+Read these three docs before following any older path:
 
 1. [Architecture Charter](concepts/architecture/ARCHITECTURE_CHARTER.md)
 2. [Documentation Authority Resolver](concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
 3. [Docs/Specs Contract](guides/standards/DOCS_SPECS_CONTRACT.md)
+
+If those three do not answer your routing question, stop and resolve the route before reading more. Most documentation confusion in this repo has historically come from reading the wrong root, not from missing words.
 
 ## Root authority map
 
@@ -51,6 +53,22 @@ If you are starting a new task, use this reading order:
 10. [Operator Quick Reference](ops/quickref/README.md)
 11. [Evidence Index](evidence/INDEX.md)
 12. [Status Index](status/INDEX.md)
+
+Do not load the whole corpus by default. Read the hot path first, then add one domain root only if the task actually touches it.
+
+## Quick route by task
+
+| If you need to... | Start here | Then read |
+| --- | --- | --- |
+| understand active architecture rules | [concepts/architecture/README.md](concepts/architecture/README.md) | charter, resolver, the specific standard for that domain |
+| run or debug the platform | [ops/README.md](ops/README.md) | quickref, then the relevant runbook/monitoring/security subroot |
+| change contributor-facing guidance | [guides/README.md](guides/README.md) | onboarding, admin, integrations, or standards |
+| check a policy or operational boundary | [policies/README.md](policies/README.md) | architecture or operations policy subroot |
+| look up runtime/reference detail | [reference/README.md](reference/README.md) | architecture, operations, or migrations reference |
+| verify what was proven | [evidence/INDEX.md](evidence/INDEX.md) | the owning evidence subroot |
+| understand current rollout or readiness state | [status/INDEX.md](status/INDEX.md) | active, migrations, readiness, weekly, or incidents |
+| inspect decision history or open proposals | [adr/README.md](adr/README.md) | accepted ADRs, RFC queue, or templates |
+| change intended behavior | `specs/**` | then return to docs only for explanation/runbooks/evidence |
 
 ## Use the right root
 
@@ -114,6 +132,8 @@ Before adding or moving docs:
 4. Regenerate catalogs if canonical docs change.
 5. Run the docs gates before opening a PR.
 
+If a reader would need tribal knowledge to find the document after your change, the change is incomplete.
+
 Primary contributor references:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
@@ -129,3 +149,10 @@ These are derived outputs, not hand-authored authority:
 - ADR generated surfaces under `generated/adr-bundles/`, `generated/decision-maps/`, and `generated/graphs/`
 
 If a generated file conflicts with a canonical source doc, fix the source and regenerate.
+
+## What not to do
+
+- Do not treat `docs/operations/**`, `docs/runbooks/**`, `docs/onboarding/**`, `docs/branding/**`, or `docs/architecture/**` as living authority.
+- Do not put proof artifacts under random roots when `docs/evidence/**` owns them.
+- Do not put active reporting under archive or top-level `reports/**` when `docs/status/**` owns it.
+- Do not hand-edit generated catalog or testmap outputs and call that authoritative.
