@@ -6158,10 +6158,37 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE9_CLOSEOUT.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE9_EXECUTION_TRACKER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
     "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE9_REVIEW_HANDOFF.md",
+    "status": "canonical",
     "type": "other"
   },
   {

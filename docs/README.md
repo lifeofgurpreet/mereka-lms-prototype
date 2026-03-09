@@ -18,6 +18,11 @@ Read these three docs before following any older path:
 
 If those three do not answer your routing question, stop and resolve the route before reading more. Most documentation confusion in this repo has historically come from reading the wrong root, not from missing words.
 
+For the current decision-grade review and agent hot path, also read:
+
+4. [Wave 9 Closeout](meta/docs-program/WAVE9_CLOSEOUT.md)
+5. [Wave 9 Review Handoff](meta/docs-program/WAVE9_REVIEW_HANDOFF.md)
+
 ## Root authority map
 
 | Root | Role | Status |
