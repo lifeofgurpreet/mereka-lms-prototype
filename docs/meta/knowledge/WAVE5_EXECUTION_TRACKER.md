@@ -4,7 +4,7 @@
 - docs/wave5-change-intelligence-runtime
 
 ## Last completed batch
-- commit: a12df74877684ab4eede9e1db89955b1d9634e1a
+- commit: 68c6a0320bb08dc1a0087c09ead951d48f06c81b
 - scope: Wave 5 Packet G
 - validators run:
   - python3 tools/docs/verify/build-doc-catalog.py --root .
