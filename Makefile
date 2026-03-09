@@ -389,6 +389,8 @@ spec-fix: ## Bulk-add AC-IDs to spec checkboxes
 
 validate-deploy-contract: ## Validate deploy package contract (checks 4+5 are WARN)
 	@scripts/qa/validate-deploy-contract.sh
+	@scripts/qa/verify-runtime-authority-map.sh
 
 validate-deploy-contract-strict: ## Validate deploy package contract (all checks blocking)
 	@scripts/qa/validate-deploy-contract.sh --strict
+	@scripts/qa/verify-runtime-authority-map.sh
