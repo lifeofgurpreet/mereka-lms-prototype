@@ -6214,6 +6214,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "meta/docs-program/boundary-debt-manifest.md",
     "status": "supporting",
     "type": "other"

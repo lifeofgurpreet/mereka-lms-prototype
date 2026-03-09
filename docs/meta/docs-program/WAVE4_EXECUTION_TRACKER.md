@@ -5,11 +5,12 @@
 
 ## Last completed batch
 - commit: pending current packet HEAD
-- scope: Wave 4 Packet B
+- scope: Wave 4 Packet C
 - validators run:
   - python3 tools/knowledge/report_knowledge_control_plane.py --repo-root .
-  - python3 tools/knowledge/build_knowledge_catalog.py --repo-root .
   - python3 tools/knowledge/build_knowledge_catalog.py --check --repo-root .
+  - python3 tools/knowledge/build_knowledge_graph.py --repo-root .
+  - python3 tools/knowledge/build_knowledge_graph.py --check --repo-root .
   - python3 tools/specs/report_spec_metadata_coverage.py --repo-root .
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
   - python3 tools/specs/verify_spec_taxonomy.py --repo-root .
@@ -24,12 +25,12 @@
 ## Current target batch
 - files:
   - docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md
-  - tools/knowledge/knowledge_model.py
-  - tools/knowledge/build_knowledge_catalog.py
-  - generated/catalogs/knowledge-catalog.json
+  - tools/knowledge/build_knowledge_graph.py
+  - docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
+  - generated/graphs/knowledge-graph.json
 - goal:
-  - generate the first unified knowledge catalog from the shared model
-  - keep docs and specs separate while giving reviewers one machine-readable control plane
+  - generate the first unified knowledge graph from the shared catalog
+  - create a reviewer-facing front door for the combined knowledge system
 - stop condition:
   - validators pass and one commit is created
 
@@ -39,8 +40,8 @@
 - Kajabi/MCT remains normative until a new contradiction appears
 
 ## Open residue
-- unified graph and reviewer-facing front door not built yet
+- wrapper retirement ledger not started yet
 - wrapper retirement ledger not started yet
 
 ## Next queued batch
-- Packet C: unified graph and reviewer front door
+- Packet D: wrapper retirement ledger
