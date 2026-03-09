@@ -5,7 +5,7 @@
 
 ## Last completed batch
 - commit: pending current packet HEAD
-- scope: Wave 4 Packet F
+- scope: Wave 4 closeout / PR handoff
 - validators run:
   - python3 tools/knowledge/report_knowledge_control_plane.py --repo-root .
   - python3 tools/knowledge/build_knowledge_catalog.py --check --repo-root .
@@ -27,10 +27,11 @@
 ## Current target batch
 - files:
   - docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md
-  - .github/workflows/docs-policy.yml
+  - docs/meta/docs-program/WAVE4_CLOSEOUT.md
+  - docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md
 - goal:
-  - wire the Wave 4 knowledge gate into CI for docs/spec control-plane changes
-  - ensure knowledge tool and artifact edits trigger enforcement on PRs and pushes
+  - leave Wave 4 in PR-ready handoff state
+  - summarize what became unified and what remains intentionally deferred
 - stop condition:
   - validators pass and one commit is created
 
@@ -40,7 +41,25 @@
 - Kajabi/MCT remains normative until a new contradiction appears
 
 ## Open residue
-- no open Wave 4 packet residue
+- optional: promote the knowledge gate into broader CI surfaces beyond docs-policy if future scope justifies it
+
+## Completed packets
+- Packet A: shared knowledge model bootstrap
+- Packet B: unified knowledge catalog
+- Packet C: unified knowledge graph and review front door
+- Packet D: wrapper retirement ledger
+- Packet E: merge-time governance
+- Packet F: CI wiring for the knowledge gate
+
+## Final control-plane state
+- total tracked files: 1591
+- docs files: 1368
+- specs files: 223
+- compatibility surfaces: 5
+- generated surfaces: 49
+- archival surfaces: 292
+- Wave 3 normative holdout remains:
+  - specs/data-migrations-kajabi-mct_spec.md
 
 ## Next queued batch
-- Wave 4 closeout / PR handoff
+- PR creation / reviewer pass

@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4773,
+  "edge_count": 4779,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3595,6 +3595,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE4_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md"
     },
     {
@@ -3606,6 +3611,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md"
     },
     {
       "edge_type": "classifies",
@@ -11085,6 +11095,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/docs-program/WAVE4_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md"
     },
     {
@@ -11096,6 +11111,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md"
     },
     {
       "edge_type": "contains",
@@ -19075,6 +19095,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE4_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
       "target": "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md"
     },
     {
@@ -19086,6 +19111,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:review",
       "target": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md"
     },
     {
       "edge_type": "classifies",
@@ -23869,7 +23899,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1615,
+  "node_count": 1617,
   "nodes": [
     {
       "id": "classification:archival",
@@ -30784,6 +30814,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE4_CLOSEOUT.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE4_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 4 Closeout"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md",
       "lane": "review",
       "node_type": "docs:review",
@@ -30814,6 +30855,17 @@
       "root": "docs",
       "status": "",
       "title": "Wave 4 Review Front Door"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 4 Review Handoff"
     },
     {
       "classification": "supporting",
