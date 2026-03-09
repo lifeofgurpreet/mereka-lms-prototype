@@ -16,7 +16,7 @@ The generated files here are derived from:
 
 - specification acceptance criteria under `specs/**`
 - `@covers` annotations in tests and verification scripts
-- `specs/manual_verifications.yaml`
+- `specs/plans/manual_verifications.yaml`
 
 ## Hard rules
 

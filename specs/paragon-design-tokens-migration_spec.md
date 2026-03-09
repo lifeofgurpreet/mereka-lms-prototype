@@ -322,7 +322,7 @@ scripts/qa/spec-tools/ac-coverage-report.py
 2. **CDN cache invalidation (AC-TKN-018)**: Update a color token, rebuild CSS, verify MFEs reflect the change after cache clear without MFE image rebuild.
 3. **Backward compatibility (AC-TKN-022)**: Disable `PARAGON_THEME_URLS`, verify MFEs still render with Mereka branding via SCSS path.
 
-Add to `specs/manual_verifications.yaml`:
+Add to `specs/plans/manual_verifications.yaml`:
 ```yaml
 - id: "AC-TKN-032"
   spec: "paragon-design-tokens-migration_spec.md"

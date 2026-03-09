@@ -2,7 +2,7 @@
 """spec_coverage_report.py — Spec-to-test coverage report for Mereka LMS.
 
 Uses @covers annotations in source files as the source of truth.
-Manual/monitoring entries from specs/manual_verifications.yaml.
+Manual/monitoring entries from specs/plans/manual_verifications.yaml.
 
 Categories each AC into:
 - automated: has @covers annotation AND file exists on disk
@@ -331,7 +331,7 @@ def main() -> int:
     ap.add_argument(
         "--manual-file",
         type=str,
-        default="specs/manual_verifications.yaml",
+        default="specs/plans/manual_verifications.yaml",
         help="Path to manual_verifications.yaml",
     )
     ap.add_argument("--repo-root", type=str, default=".", help="Repo root")

@@ -114,13 +114,13 @@ run_check "testmap-validate" \
 run_check_info "spec-verify" \
   python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . \
     --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-    --manual-file specs/manual_verifications.yaml
+    --manual-file specs/plans/manual_verifications.yaml
 
 # 6. Coverage report with threshold
 run_check "spec-coverage" \
   python3 "${TOOL_DIR}/spec_coverage_report.py" \
     --specs-dir specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-    --manual-file specs/manual_verifications.yaml \
+    --manual-file specs/plans/manual_verifications.yaml \
     --repo-root . --format text --fail-under "$FAIL_UNDER"
 
 # Write summary artifacts

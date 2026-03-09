@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """extract_manual_entries.py — Extract manual/monitoring entries from testmaps.
 
-Creates specs/manual_verifications.yaml with all non-automated entries.
+Creates specs/plans/manual_verifications.yaml with all non-automated entries.
 
 Usage:
   python3 extract_manual_entries.py                    # Dry-run

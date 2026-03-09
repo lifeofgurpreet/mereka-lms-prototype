@@ -345,7 +345,7 @@ scripts/qa/spec-tools/ac-coverage-report.py
 
 ### Manual Verification
 
-The following require human verification with assistive technology. Add to `specs/manual_verifications.yaml`:
+The following require human verification with assistive technology. Add to `specs/plans/manual_verifications.yaml`:
 
 1. **NVDA + Chrome (Windows)**: Navigate LMS homepage, /login, /dashboard using NVDA screen reader. Verify all custom Mereka elements (footer, header logo, hero section, course cards) are announced correctly with meaningful labels.
 2. **VoiceOver + Safari (macOS)**: Navigate the same pages using VoiceOver. Verify rotor landmarks include the custom footer, and all links have descriptive text.

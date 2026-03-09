@@ -2,7 +2,7 @@
 """mereka_spec_verify.py — Project-specific spec verifier for Mereka LMS.
 
 Uses @covers annotations in source files as the source of truth.
-Manual/monitoring entries come from specs/manual_verifications.yaml.
+Manual/monitoring entries come from specs/plans/manual_verifications.yaml.
 
 Adapts the generic spec_verify.py for our directory layout.
 """
@@ -31,7 +31,7 @@ def main() -> int:
     ap.add_argument(
         "--manual-file",
         type=str,
-        default="specs/manual_verifications.yaml",
+        default="specs/plans/manual_verifications.yaml",
         help="Path to manual_verifications.yaml",
     )
     ap.add_argument("--run", action="store_true", help="Execute verification commands")

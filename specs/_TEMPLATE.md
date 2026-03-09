@@ -59,7 +59,7 @@ scripts/qa/spec-tools/ac-coverage-report.py
 
 <!--
 Steps that require human verification or monitoring.
-Add to specs/manual_verifications.yaml for tracking.
+Add to specs/plans/manual_verifications.yaml for tracking.
 -->
 
 1. {Manual test step 1}

@@ -180,7 +180,7 @@ python3 scripts/qa/spec-tools/spec_coverage_report.py \
 - **Dependency graph**: `specs/plans/IMPLEMENTATION_ORDER.md`
 - **Coverage reports**: `docs/archive/reports/`
 - **Sprint plans**: `reports/2026/sprints/`
-- **Manual verifications**: `specs/manual_verifications.yaml`
+- **Manual verifications**: `specs/plans/manual_verifications.yaml`
 - **ADR**: `docs/adr/011-convention-based-spec-verification.md`
 
 ---

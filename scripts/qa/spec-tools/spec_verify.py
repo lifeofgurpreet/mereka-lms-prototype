@@ -11,7 +11,7 @@ Checks:
 
 Usage:
   python3 spec_verify.py specs/ --scan-dirs tests/ scripts/ --repo-root .
-  python3 spec_verify.py specs/ --scan-dirs tests/ scripts/ --manual-file specs/manual_verifications.yaml
+  python3 spec_verify.py specs/ --scan-dirs tests/ scripts/ --manual-file specs/plans/manual_verifications.yaml
 """
 
 from __future__ import annotations
