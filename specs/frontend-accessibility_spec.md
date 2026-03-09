@@ -32,7 +32,7 @@ links:
   related_docs:
     - "docs/guides/branding/BRANDING.md"
     - "docs/guides/branding/BRANDING_GUARDRAILS.md"
-    - "docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
+    - "docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
   related_specs:
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/branding-system_spec.md"
