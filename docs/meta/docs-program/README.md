@@ -22,8 +22,23 @@ Use this root for the active documentation improvement program: remediation plan
 - architecture-governance program material that is no longer living architecture law
 - bounded docs program bundles that are still operationally relevant
 
+## Common contributor routes
+
+| Question | Start here | Why |
+|---|---|---|
+| "What is the current cleanup or remediation wave?" | [`../../DOCS_REMEDIATION_PLAN_AND_TRACKER.md`](../../DOCS_REMEDIATION_PLAN_AND_TRACKER.md) | That is the live top-level program tracker |
+| "Where did a root or file move?" | [`REPO_TOPOLOGY_MOVE_LEDGER.md`](REPO_TOPOLOGY_MOVE_LEDGER.md) | It is the reader-facing move ledger |
+| "How was a losing root collapsed?" | [`root-collapse/README.md`](root-collapse/README.md) | The collapse maps are the deterministic inventory |
+| "What still feels messy in the docs system?" | [`boundary-debt-manifest.md`](boundary-debt-manifest.md) | It tracks remaining structural debt directly |
+
 ## What This Root Is Not
 
 - Not the front door for general readers. Use [`../../README.md`](../../README.md) first.
 - Not the place for runtime procedures. Use [`../../ops/README.md`](../../ops/README.md).
 - Not the place for architecture law. Use [`../../concepts/architecture/README.md`](../../concepts/architecture/README.md).
+
+## Review standard
+
+- A file here should help maintain or review the docs system itself.
+- If it explains how to do real platform work, move it to `docs/ops/**` or `docs/guides/**`.
+- If it defines enduring technical law, move it to `docs/concepts/architecture/**`.
