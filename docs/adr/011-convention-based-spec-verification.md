@@ -3,7 +3,7 @@
 **Status**: Accepted
 **Date**: 2026-02-11
 **Deciders**: Platform Team
-**Related**: [specs/IMPLEMENTATION_ORDER.md](../../specs/IMPLEMENTATION_ORDER.md), [scripts/qa/spec-tools/](../../scripts/qa/spec-tools/)
+**Related**: [specs/plans/IMPLEMENTATION_ORDER.md](../../specs/plans/IMPLEMENTATION_ORDER.md), [scripts/qa/spec-tools/](../../scripts/qa/spec-tools/)
 
 <!-- Last verified: 2026-02-13 -->
 
@@ -105,7 +105,7 @@ manual_verifications:
 - **25 unmapped ACs honestly reported**: Previously hidden as "planned" phantom scripts
 - **Simplified tooling**: Deleted 4 testmap-specific tools (`validate_testmap_format.py`, `convert_testmap.py`, `add_ac_descriptions.py`, `check_test_coverage.py` fuzzy matching)
 - **Enforced by linting**: `TEST-MAP-001` rule ensures new test files include `@covers`
-- **Computed dependency graph**: `depends_on` frontmatter + `compute_dependency_graph.py` generates `specs/IMPLEMENTATION_ORDER.md`
+- **Computed dependency graph**: `depends_on` frontmatter + `compute_dependency_graph.py` generates `specs/plans/IMPLEMENTATION_ORDER.md`
 
 ### Negative
 
@@ -150,7 +150,7 @@ manual_verifications:
    - `spec_verify.py`: Query which scripts verify a given AC
    - `spec_coverage_report.py`: Generate HTML coverage report from annotations
    - `discover_testmap.py`: Compute testmap YAML from annotations into generated output
-   - `compute_dependency_graph.py`: Generate `specs/IMPLEMENTATION_ORDER.md` from `depends_on`
+   - `compute_dependency_graph.py`: Generate `specs/plans/IMPLEMENTATION_ORDER.md` from `depends_on`
    - `mereka_spec_verify.py`: Shell wrapper for CI/CD integration
 5. **Update spec integrity gates**: `run-spec-integrity-gates.sh` now runs annotation-based tools
 6. **Compatibility reality**: the repository retained `specs/testmaps/` longer than intended. Wave 2B freezes that path as legacy compatibility only, with generated testmaps canonical under `specs/_generated/testmaps/`.
@@ -213,7 +213,7 @@ depends_on:
 ---
 ```
 
-The `depends_on` field enables `compute_dependency_graph.py` to generate a tiered dependency graph in `specs/IMPLEMENTATION_ORDER.md`.
+The `depends_on` field enables `compute_dependency_graph.py` to generate a tiered dependency graph in `specs/plans/IMPLEMENTATION_ORDER.md`.
 
 ## Comparison to Industry Practices
 
@@ -254,7 +254,7 @@ Estimated effort: 1-2 weeks for tool setup and import
 - [Acceptance Criteria Best Practices](https://www.scruminc.com/acceptance-criteria/)
 - [Requirements Traceability in Agile](https://www.atlassian.com/agile/requirements/traceability)
 - [Spec Verification Tools](../../scripts/qa/spec-tools/)
-- [Implementation Order](../../specs/IMPLEMENTATION_ORDER.md)
+- [Implementation Order](../../specs/plans/IMPLEMENTATION_ORDER.md)
 - [Manual Verifications](../../specs/manual_verifications.yaml)
 
 ## Wave 2 alignment note
