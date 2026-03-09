@@ -1,0 +1,219 @@
+version: 1
+task_types:
+  normative_spec_change:
+    purpose: Update or review normative contract truth.
+    canonical_starting_surfaces:
+      - specs/standards/SPEC_SYSTEM_CHARTER.md
+      - specs/standards/SPEC_METADATA_MODEL.md
+      - specs/standards/SPEC_AUTHORING_STANDARD.md
+      - docs/meta/docs-program/WAVE4_CLOSEOUT.md
+    required_truth_lanes:
+      - specs:normative
+      - docs:concept
+      - generated:knowledge
+    required_reviewers:
+      - architecture
+      - docs
+    required_evidence:
+      - review_bundle
+      - truth_impact_report
+    required_validation_commands:
+      - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
+      - python3 tools/specs/verify_spec_taxonomy.py --repo-root .
+      - python3 tools/specs/verify_spec_paths.py --repo-root .
+      - python3 scripts/qa/spec-tools/build_spec_catalog.py --check --repo-root .
+    forbidden_low_signal_surfaces:
+      - docs/archive/**
+      - specs/archive/**
+      - compatibility wrappers as primary input
+  proposal_change:
+    purpose: Update proposal-only or RFC-style surfaces without presenting them as normative law.
+    canonical_starting_surfaces:
+      - docs/meta/skills/AGENT_SKILL_CHARTER.md
+      - specs/proposals/README.md
+      - generated/knowledge/review-bundle.md
+    required_truth_lanes:
+      - specs:proposal
+      - docs:review
+      - generated:knowledge
+    required_reviewers:
+      - docs
+    required_evidence:
+      - review_bundle
+    required_validation_commands:
+      - python3 tools/knowledge/build_change_manifest.py --check --range origin/main...HEAD --repo-root .
+      - python3 tools/knowledge/build_review_bundle.py --check --range origin/main...HEAD --repo-root .
+    forbidden_low_signal_surfaces:
+      - docs/archive/**
+      - specs/archive/**
+  docs_architecture_change:
+    purpose: Update architecture or governing documentation without changing spec topology.
+    canonical_starting_surfaces:
+      - docs/meta/docs-program/WAVE4_CLOSEOUT.md
+      - generated/knowledge/change-manifest.json
+      - generated/knowledge/truth-impact-report.json
+    required_truth_lanes:
+      - docs:concept
+      - docs:adr
+      - generated:knowledge
+    required_reviewers:
+      - architecture
+      - docs
+    required_evidence:
+      - review_bundle
+      - truth_impact_report
+    required_validation_commands:
+      - bash scripts/qa/run-knowledge-runtime-gates.sh
+      - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
+    forbidden_low_signal_surfaces:
+      - docs/archive/**
+      - generated catalogs as sole authority
+  incident_debug:
+    purpose: Debug runtime incidents using canonical runbooks and runtime impact surfaces.
+    canonical_starting_surfaces:
+      - generated/contracts/deployment-impact-report.json
+      - generated/contracts/release-obligations.md
+      - generated/knowledge/truth-impact-report.json
+    required_truth_lanes:
+      - docs:runbook
+      - docs:evidence
+      - contracts
+    required_reviewers:
+      - platform
+    required_evidence:
+      - runtime_evidence
+      - incident_notes
+    required_validation_commands:
+      - bash scripts/qa/run-cross-repo-contract-gates.sh
+      - bash scripts/qa/run-knowledge-runtime-gates.sh
+    forbidden_low_signal_surfaces:
+      - docs/archive/**
+      - stale status notes
+  release_change:
+    purpose: Prepare or review release-affecting changes and their obligations.
+    canonical_starting_surfaces:
+      - docs/meta/contracts/RELEASE_OBLIGATIONS.yaml
+      - generated/contracts/release-obligations.md
+      - generated/contracts/deployment-impact-report.json
+    required_truth_lanes:
+      - contracts
+      - docs:runbook
+      - generated:contracts
+    required_reviewers:
+      - platform
+      - docs
+    required_evidence:
+      - release_obligations
+      - review_bundle
+    required_validation_commands:
+      - bash scripts/qa/run-cross-repo-contract-gates.sh
+      - python3 tools/contracts/build_release_obligations.py --check --range origin/main...HEAD --repo-root .
+    forbidden_low_signal_surfaces:
+      - docs/archive/**
+      - historical prompts as release authority
+  migration_change:
+    purpose: Execute or review migration-affecting changes against migration truth and companion plans.
+    canonical_starting_surfaces:
+      - specs/data-migrations-kajabi-mct_spec.md
+      - specs/plans/data-migrations-kajabi-mct_plan.md
+      - docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md
+    required_truth_lanes:
+      - specs:normative
+      - specs:plan
+      - contracts
+    required_reviewers:
+      - architecture
+      - platform
+    required_evidence:
+      - migration_proof
+      - release_obligations
+    required_validation_commands:
+      - bash scripts/qa/run-cross-repo-contract-gates.sh
+      - bash scripts/qa/run-knowledge-runtime-gates.sh
+    forbidden_low_signal_surfaces:
+      - docs/archive/**
+      - deprecated migration prompts
+  cross_repo_contract_change:
+    purpose: Change or review repo-to-infra contract surfaces and downstream deployment fallout.
+    canonical_starting_surfaces:
+      - docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md
+      - docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml
+      - docs/meta/contracts/INFRA_CROSSWALK.md
+      - generated/contracts/cross-repo-manifest.json
+    required_truth_lanes:
+      - contracts
+      - generated:contracts
+      - docs:review
+    required_reviewers:
+      - platform
+      - architecture
+    required_evidence:
+      - cross_repo_manifest
+      - deployment_impact
+      - release_obligations
+    required_validation_commands:
+      - bash scripts/qa/run-cross-repo-contract-gates.sh
+      - python3 tools/contracts/build_cross_repo_manifest.py --check --range origin/main...HEAD --repo-root .
+      - python3 tools/contracts/build_deployment_impact_report.py --check --range origin/main...HEAD --repo-root .
+    forbidden_low_signal_surfaces:
+      - docs/archive/**
+      - guessed infra paths
+  wrapper_retirement:
+    purpose: Remove compatibility surfaces only when canonical replacements and live references are settled.
+    canonical_starting_surfaces:
+      - generated/knowledge/wrapper-retirement-report.json
+      - docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md
+    required_truth_lanes:
+      - generated:knowledge
+      - docs:review
+      - specs:reference
+    required_reviewers:
+      - docs
+    required_evidence:
+      - wrapper_retirement_report
+    required_validation_commands:
+      - python3 tools/knowledge/build_wrapper_retirement_report.py --check --repo-root .
+      - bash scripts/qa/run-knowledge-runtime-gates.sh
+    forbidden_low_signal_surfaces:
+      - compatibility wrappers as primary authority
+      - docs/archive/**
+  reviewer_pass:
+    purpose: Review an existing branch diff using the generated runtime surfaces first.
+    canonical_starting_surfaces:
+      - generated/knowledge/review-bundle.md
+      - generated/knowledge/change-manifest.json
+      - generated/knowledge/truth-impact-report.json
+    required_truth_lanes:
+      - generated:knowledge
+      - docs:review
+      - generated:contracts
+    required_reviewers:
+      - docs
+    required_evidence:
+      - review_bundle
+    required_validation_commands:
+      - bash scripts/qa/run-knowledge-runtime-gates.sh
+      - bash scripts/qa/run-cross-repo-contract-gates.sh
+    forbidden_low_signal_surfaces:
+      - archive as default review source
+      - raw repo grep as first pass
+  evidence_status_update:
+    purpose: Update evidence, status, or closeout surfaces without pretending they are normative law.
+    canonical_starting_surfaces:
+      - generated/contracts/release-obligations.md
+      - generated/knowledge/review-bundle.md
+      - docs/meta/docs-program/WAVE4_CLOSEOUT.md
+    required_truth_lanes:
+      - docs:evidence
+      - docs:review
+      - generated:knowledge
+    required_reviewers:
+      - docs
+    required_evidence:
+      - status_update
+    required_validation_commands:
+      - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
+      - bash scripts/qa/run-knowledge-runtime-gates.sh
+    forbidden_low_signal_surfaces:
+      - docs/archive/**
+      - generated outputs without upstream source
