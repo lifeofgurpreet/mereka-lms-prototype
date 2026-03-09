@@ -26,10 +26,24 @@ def _strip_port(host: str) -> str:
 def _candidate_site_domains(host: str) -> list[str]:
     host = _strip_port(host.lower())
     candidates = [host]
-    for prefix in ("apps.", "studio.", "preview.", "admin."):
+    _service_prefixes = ("apps.", "studio.", "preview.", "admin.")
+
+    # Direct service prefix (e.g. apps.academyv2.mereka.io → academyv2.mereka.io)
+    for prefix in _service_prefixes:
         if host.startswith(prefix):
-            candidates.append(host[len(prefix) :])
+            candidates.append(host[len(prefix):])
             break
+    else:
+        # Environment prefix + service (e.g. staging.apps.X → staging.X)
+        for env_prefix in ("staging.", "dev."):
+            if host.startswith(env_prefix):
+                remainder = host[len(env_prefix):]
+                for svc_prefix in _service_prefixes:
+                    if remainder.startswith(svc_prefix):
+                        candidates.append(env_prefix + remainder[len(svc_prefix):])
+                        break
+                break
+
     seen = set()
     out: list[str] = []
     for c in candidates:
@@ -123,8 +137,15 @@ def _cookie_policy_for_host(host: str) -> _CookiePolicy:
     tenant = _candidate_site_domains(host)[-1]
     if not tenant:
         return _CookiePolicy(domain=None)
-    # Scope to tenant root, not bare second-level domain,
-    # to prevent staging cookies leaking to production.
+
+    # Staging/dev: broaden cookie domain so MFE (staging.apps.X) can read
+    # cookies set by LMS (staging.X). These don't share a parent-child
+    # relationship in DNS, so we must use the base domain.
+    for env_prefix in ("staging.", "dev."):
+        if tenant.startswith(env_prefix):
+            base = tenant[len(env_prefix):]
+            return _CookiePolicy(domain=f".{base}")
+
     return _CookiePolicy(domain=f".{tenant}")
 
 

@@ -49,7 +49,7 @@ spec:
           - name: MEREKA_PLATFORM_ADMIN_EMAILS
             value: ""
           - name: UWSGI_WORKERS
-            value: "2"
+            value: "4"
           - name: MONGODB_HOST
             valueFrom:
               secretKeyRef:
@@ -119,16 +119,16 @@ spec:
             httpGet:
               path: /heartbeat
               port: 8000
-            periodSeconds: 15
+            periodSeconds: 30
             failureThreshold: 3
-            timeoutSeconds: 5
+            timeoutSeconds: 15
           readinessProbe:
             httpGet:
               path: /heartbeat
               port: 8000
             periodSeconds: 15
             failureThreshold: 3
-            timeoutSeconds: 5
+            timeoutSeconds: 10
           # collectstatic runs at image build time, not pod startup
           securityContext:
             allowPrivilegeEscalation: false

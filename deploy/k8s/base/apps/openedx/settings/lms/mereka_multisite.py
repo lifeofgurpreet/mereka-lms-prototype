@@ -44,13 +44,31 @@ def _candidate_site_domains(host: str) -> list[str]:
     We keep Sites keyed on the tenant's LMS domain (e.g. academyv2.mereka.io,
     academy.biji-biji.com, skillourfuture.academy.mereka.io). Subdomains that
     are part of the same tenant should map back to that tenant domain.
+
+    Handles environment-prefixed domains:
+      staging.apps.academyv2.mereka.io  → staging.academyv2.mereka.io
+      staging.studio.academy.biji-biji.com → staging.academy.biji-biji.com
     """
     host = _strip_port(host.lower())
     candidates = [host]
-    for prefix in ("apps.", "studio.", "preview.", "admin."):
+    _service_prefixes = ("apps.", "studio.", "preview.", "admin.")
+
+    # Direct service prefix (e.g. apps.academyv2.mereka.io → academyv2.mereka.io)
+    for prefix in _service_prefixes:
         if host.startswith(prefix):
-            candidates.append(host[len(prefix) :])
+            candidates.append(host[len(prefix):])
             break
+    else:
+        # Environment prefix + service (e.g. staging.apps.X → staging.X)
+        for env_prefix in ("staging.", "dev."):
+            if host.startswith(env_prefix):
+                remainder = host[len(env_prefix):]
+                for svc_prefix in _service_prefixes:
+                    if remainder.startswith(svc_prefix):
+                        candidates.append(env_prefix + remainder[len(svc_prefix):])
+                        break
+                break
+
     # De-dupe while preserving order.
     seen = set()
     out: list[str] = []
@@ -168,10 +186,22 @@ def _cookie_policy_for_host(host: str) -> _CookiePolicy:
     # Multi-root handling:
     # - academyv2.mereka.io (+ its subdomains) => .academyv2.mereka.io
     # - academy.biji-biji.com (+ its subdomains) => .academy.biji-biji.com
-    # - staging.academy.biji-biji.com => .staging.academy.biji-biji.com
     # - skillourfuture.academy.mereka.io => .skillourfuture.academy.mereka.io
-    # Note: we scope to the tenant root, not the bare second-level domain,
-    # to prevent staging cookies from leaking to production.
+    #
+    # Staging/dev domain hierarchy fix:
+    #   staging.academyv2.mereka.io (LMS) and staging.apps.academyv2.mereka.io (MFE)
+    #   do NOT share a parent-child relationship in DNS. The only common ancestor is
+    #   .academyv2.mereka.io. We must use the base domain (strip env prefix) as cookie
+    #   domain so MFE JS can read cookies set by LMS.
+    #
+    #   Risk: staging cookies sent to production. Acceptable because:
+    #   - Production cookies already leak to staging subdomains (by being scoped to
+    #     .academyv2.mereka.io). Session/JWT cookies are validated server-side and
+    #     foreign-environment cookies are simply rejected.
+    for env_prefix in ("staging.", "dev."):
+        if tenant.startswith(env_prefix):
+            base = tenant[len(env_prefix):]
+            return _CookiePolicy(domain=f".{base}")
 
     return _CookiePolicy(domain=f".{tenant}")
 

@@ -18,14 +18,13 @@ Requires: playwright (pip install playwright && playwright install chromium)
 """
 import argparse
 import json
-import os
 import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 
 try:
-    from playwright.sync_api import sync_playwright, TimeoutError as PwTimeout
+    from playwright.sync_api import TimeoutError as PwTimeout, sync_playwright
 except ImportError:
     print("ERROR: playwright not installed. Run: pip install playwright && playwright install chromium")
     sys.exit(1)
@@ -391,7 +390,7 @@ def check_secondary_surface(host, role):
             check["detail"] = f"HTTP {e.code} (redirect)"
         elif e.code == 400:
             check["status"] = "FAIL"
-            check["detail"] = f"HTTP 400 — likely ALLOWED_HOSTS"
+            check["detail"] = "HTTP 400 — likely ALLOWED_HOSTS"
         elif e.code in (502, 503):
             check["status"] = "FAIL"
             check["detail"] = f"HTTP {e.code} — service unreachable"

@@ -183,3 +183,27 @@ spec:
               value: admin.academyv2.mereka.dev
             - name: ENTERPRISE_LEARNER_HOST
               value: learner.academyv2.mereka.dev
+---
+# MFE Caddy domain env vars for CSP header template interpolation.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe
+  labels:
+    app.kubernetes.io/name: mfe
+spec:
+  template:
+    spec:
+      containers:
+        - name: mfe
+          env:
+            - name: LMS_HOST
+              value: academyv2.mereka.dev
+            - name: CMS_HOST
+              value: studio.academyv2.mereka.dev
+            - name: AUTH_HOST
+              value: auth0.mereka.dev
+            - name: TENANT_BIJIBIJI_HOST
+              value: academy.biji-biji.com
+            - name: TENANT_SOF_HOST
+              value: skillourfuture.academy.mereka.dev

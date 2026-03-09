@@ -69,9 +69,11 @@ class TestCandidateSiteDomains(unittest.TestCase):
 
     def test_staging_admin_prefix(self):
         result = ms._candidate_site_domains("staging.admin.academyv2.mereka.io")
-        # "staging.admin." is not stripped — only single-level prefixes are handled
-        # The host doesn't start with "admin." so no stripping occurs
-        self.assertEqual(result, ["staging.admin.academyv2.mereka.io"])
+        # "staging." env prefix + "admin." service prefix → stripped to staging.X
+        self.assertEqual(result, [
+            "staging.admin.academyv2.mereka.io",
+            "staging.academyv2.mereka.io",
+        ])
 
     def test_preview_prefix_stripped(self):
         result = ms._candidate_site_domains("preview.academyv2.mereka.io")
@@ -100,8 +102,11 @@ class TestCandidateSiteDomains(unittest.TestCase):
 
     def test_staging_apps_mereka(self):
         result = ms._candidate_site_domains("staging.apps.academyv2.mereka.io")
-        # "staging.apps." doesn't match any single prefix
-        self.assertEqual(result, ["staging.apps.academyv2.mereka.io"])
+        # "staging." env prefix + "apps." service prefix → stripped to staging.X
+        self.assertEqual(result, [
+            "staging.apps.academyv2.mereka.io",
+            "staging.academyv2.mereka.io",
+        ])
 
     def test_biji_biji_lms(self):
         result = ms._candidate_site_domains("staging.academy.biji-biji.com")
@@ -124,27 +129,30 @@ class TestCandidateSiteDomains(unittest.TestCase):
 class TestCookiePolicyForHost(unittest.TestCase):
     """Test _cookie_policy_for_host — cookie domain scoping logic."""
 
-    def test_lms_host_gets_scoped_domain(self):
+    def test_lms_host_gets_broadened_domain(self):
+        # Staging LMS: cookie domain broadened to base (strips staging. prefix)
+        # so that MFE (staging.apps.X) can read the cookies.
         policy = ms._cookie_policy_for_host("staging.academyv2.mereka.io")
-        self.assertEqual(policy.domain, ".staging.academyv2.mereka.io")
+        self.assertEqual(policy.domain, ".academyv2.mereka.io")
 
-    def test_biji_biji_gets_own_domain(self):
-        """biji-biji cookies must NOT leak to mereka domain."""
+    def test_biji_biji_gets_broadened_domain(self):
+        """biji-biji staging cookies broadened to base for MFE sharing."""
         policy = ms._cookie_policy_for_host("staging.academy.biji-biji.com")
-        self.assertEqual(policy.domain, ".staging.academy.biji-biji.com")
+        self.assertEqual(policy.domain, ".academy.biji-biji.com")
 
-    def test_skillourfuture_gets_own_domain(self):
+    def test_skillourfuture_gets_broadened_domain(self):
         policy = ms._cookie_policy_for_host("staging.skillourfuture.academy.mereka.io")
-        self.assertEqual(policy.domain, ".staging.skillourfuture.academy.mereka.io")
+        self.assertEqual(policy.domain, ".skillourfuture.academy.mereka.io")
 
-    def test_apps_prefix_maps_to_lms_domain(self):
-        """MFE host should resolve to LMS tenant's cookie domain."""
+    def test_apps_prefix_maps_to_broadened_domain(self):
+        """MFE host: apps.staging.X → strip apps. → staging.X → broaden → .X"""
         policy = ms._cookie_policy_for_host("apps.staging.academy.biji-biji.com")
-        self.assertEqual(policy.domain, ".staging.academy.biji-biji.com")
+        self.assertEqual(policy.domain, ".academy.biji-biji.com")
 
-    def test_studio_prefix_maps_to_lms_domain(self):
+    def test_studio_prefix_maps_to_broadened_domain(self):
+        """Studio host: studio.staging.X → strip studio. → staging.X → broaden → .X"""
         policy = ms._cookie_policy_for_host("studio.staging.academy.biji-biji.com")
-        self.assertEqual(policy.domain, ".staging.academy.biji-biji.com")
+        self.assertEqual(policy.domain, ".academy.biji-biji.com")
 
     def test_admin_prefix_maps_to_lms_domain(self):
         policy = ms._cookie_policy_for_host("admin.academyv2.mereka.io")
@@ -165,10 +173,11 @@ class TestCookiePolicyForHost(unittest.TestCase):
 
     def test_no_cross_tenant_contamination(self):
         """Each tenant must get its own cookie domain, never another tenant's."""
+        # Staging domains are broadened (strip staging. prefix) for MFE sharing
         tenants = {
-            "staging.academyv2.mereka.io": ".staging.academyv2.mereka.io",
-            "staging.academy.biji-biji.com": ".staging.academy.biji-biji.com",
-            "staging.skillourfuture.academy.mereka.io": ".staging.skillourfuture.academy.mereka.io",
+            "staging.academyv2.mereka.io": ".academyv2.mereka.io",
+            "staging.academy.biji-biji.com": ".academy.biji-biji.com",
+            "staging.skillourfuture.academy.mereka.io": ".skillourfuture.academy.mereka.io",
         }
         for host, expected_domain in tenants.items():
             with self.subTest(host=host):
@@ -182,7 +191,19 @@ class TestCookiePolicyForHost(unittest.TestCase):
 
     def test_port_stripped_before_resolution(self):
         policy = ms._cookie_policy_for_host("staging.academyv2.mereka.io:443")
-        self.assertEqual(policy.domain, ".staging.academyv2.mereka.io")
+        self.assertEqual(policy.domain, ".academyv2.mereka.io")
+
+    def test_production_host_not_broadened(self):
+        """Production hosts should NOT be broadened — no staging. prefix."""
+        policy = ms._cookie_policy_for_host("academyv2.mereka.io")
+        self.assertEqual(policy.domain, ".academyv2.mereka.io")
+
+    def test_staging_mfe_host_cookie_domain(self):
+        """staging.apps.X should get cookie domain that MFE and LMS share."""
+        policy = ms._cookie_policy_for_host("staging.apps.academyv2.mereka.io")
+        # Candidate stripping: staging.apps.X → staging.X
+        # Then staging broadening: staging.X → .X
+        self.assertEqual(policy.domain, ".academyv2.mereka.io")
 
 
 class TestCookieDomainMiddleware(unittest.TestCase):
@@ -211,8 +232,9 @@ class TestCookieDomainMiddleware(unittest.TestCase):
         mw = ms.MerekaCookieDomainMiddleware(get_response)
         req = self._make_request("staging.academyv2.mereka.io")
         resp = mw(req)
+        # Staging domain broadened for MFE cookie sharing
         self.assertEqual(resp.cookies["csrftoken"]["domain"],
-                        ".staging.academyv2.mereka.io")
+                        ".academyv2.mereka.io")
 
     @patch.object(ms, 'patch_sites_framework')
     def test_middleware_sets_domain_on_sessionid(self, mock_patch):
@@ -222,8 +244,9 @@ class TestCookieDomainMiddleware(unittest.TestCase):
         mw = ms.MerekaCookieDomainMiddleware(get_response)
         req = self._make_request("staging.academy.biji-biji.com")
         resp = mw(req)
+        # Staging domain broadened for MFE cookie sharing
         self.assertEqual(resp.cookies["sessionid"]["domain"],
-                        ".staging.academy.biji-biji.com")
+                        ".academy.biji-biji.com")
 
     @patch.object(ms, 'patch_sites_framework')
     def test_middleware_no_cross_contamination(self, mock_patch):
@@ -237,8 +260,9 @@ class TestCookieDomainMiddleware(unittest.TestCase):
         mw = ms.MerekaCookieDomainMiddleware(get_response)
         req = self._make_request("staging.academy.biji-biji.com")
         resp = mw(req)
+        # Broadened to .academy.biji-biji.com (not .mereka.io)
         self.assertEqual(resp.cookies["csrftoken"]["domain"],
-                        ".staging.academy.biji-biji.com")
+                        ".academy.biji-biji.com")
         self.assertNotIn("mereka", resp.cookies["csrftoken"]["domain"])
 
     @patch.object(ms, 'patch_sites_framework')

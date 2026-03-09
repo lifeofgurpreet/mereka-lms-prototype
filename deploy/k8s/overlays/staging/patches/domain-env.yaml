@@ -22,7 +22,7 @@ spec:
             - name: LMS_BASE_URL
               value: https://staging.academyv2.mereka.io
             - name: MFE_BASE_URL
-              value: https://apps.staging.academyv2.mereka.io
+              value: https://staging.apps.academyv2.mereka.io
             - name: MEREKA_AUTH_DOMAIN
               value: staging.auth0.mereka.io
             - name: MEREKA_CREDENTIALS_DOMAIN
@@ -47,7 +47,7 @@ spec:
             - name: LMS_BASE_URL
               value: https://staging.academyv2.mereka.io
             - name: MFE_BASE_URL
-              value: https://apps.staging.academyv2.mereka.io
+              value: https://staging.apps.academyv2.mereka.io
             - name: MEREKA_AUTH_DOMAIN
               value: staging.auth0.mereka.io
             - name: MEREKA_CREDENTIALS_DOMAIN
@@ -72,7 +72,7 @@ spec:
             - name: LMS_BASE_URL
               value: https://staging.academyv2.mereka.io
             - name: MFE_BASE_URL
-              value: https://apps.staging.academyv2.mereka.io
+              value: https://staging.apps.academyv2.mereka.io
             - name: MEREKA_AUTH_DOMAIN
               value: staging.auth0.mereka.io
             - name: MEREKA_CREDENTIALS_DOMAIN
@@ -97,7 +97,7 @@ spec:
             - name: LMS_BASE_URL
               value: https://staging.academyv2.mereka.io
             - name: MFE_BASE_URL
-              value: https://apps.staging.academyv2.mereka.io
+              value: https://staging.apps.academyv2.mereka.io
             - name: MEREKA_AUTH_DOMAIN
               value: staging.auth0.mereka.io
             - name: MEREKA_CREDENTIALS_DOMAIN
@@ -284,3 +284,27 @@ spec:
           env:
             - name: LMS_ROOT_URL
               value: https://staging.academyv2.mereka.io
+---
+# MFE Caddy domain env vars for CSP header template interpolation.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe
+  labels:
+    app.kubernetes.io/name: mfe
+spec:
+  template:
+    spec:
+      containers:
+        - name: mfe
+          env:
+            - name: LMS_HOST
+              value: staging.academyv2.mereka.io
+            - name: CMS_HOST
+              value: staging.studio.academyv2.mereka.io
+            - name: AUTH_HOST
+              value: staging.auth0.mereka.io
+            - name: TENANT_BIJIBIJI_HOST
+              value: staging.academy.biji-biji.com
+            - name: TENANT_SOF_HOST
+              value: staging.skillourfuture.academy.mereka.io

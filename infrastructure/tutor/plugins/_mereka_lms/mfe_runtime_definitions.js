@@ -40,17 +40,38 @@ const getMerekaVariant = (hostname, config) => {
   const normalizedHostname = normalizeHostname(hostname);
   const fallbackBrand = (typeof config !== 'undefined' && config.SITE_NAME) || 'Mereka Academy';
   const fallbackPlatform = (typeof config !== 'undefined' && config.PLATFORM_NAME) || 'MEREKA';
-  const knownVariant = MEREKA_SITE_VARIANTS[normalizedHostname];
 
-  if (knownVariant) {
-    return knownVariant;
+  // 1. Exact match (LMS homepage hostnames).
+  const exactVariant = MEREKA_SITE_VARIANTS[normalizedHostname];
+  if (exactVariant) {
+    return exactVariant;
   }
 
-  // Unknown host fallback: keep shell rendering deterministic for dev/staging/new tenants.
+  // 2. MFE prefix stripping — MFEs are served from apps.{domain} or
+  //    staging.apps.{domain} but branding is keyed by the LMS domain.
+  //    Also handle staging.{domain} and dev-suffixed domains (.mereka.dev → .mereka.io).
+  const MFE_PREFIX_RE = /^(?:staging\.)?apps\./;
+  const STAGING_PREFIX_RE = /^staging\./;
+  let candidate = normalizedHostname;
+  if (MFE_PREFIX_RE.test(candidate)) {
+    candidate = candidate.replace(MFE_PREFIX_RE, '');
+  } else if (STAGING_PREFIX_RE.test(candidate)) {
+    candidate = candidate.replace(STAGING_PREFIX_RE, '');
+  }
+  // Map dev TLD to production TLD for variant lookup (e.g., .mereka.dev → .mereka.io).
+  const devCandidate = candidate.replace(/\.mereka\.dev$/, '.mereka.io');
+  const strippedVariant = MEREKA_SITE_VARIANTS[candidate] || MEREKA_SITE_VARIANTS[devCandidate];
+  if (strippedVariant) {
+    return strippedVariant;
+  }
+
+  // 3. Unknown host fallback: keep shell rendering deterministic for new tenants.
+  //    Prefer hardcoded 'Mereka Academy' over SITE_NAME which may be the stock
+  //    Open edX default ('My Open edX').
   return {
     ...MEREKA_BASE_VARIANT,
-    brand: fallbackBrand,
-    copyrightHolder: fallbackPlatform,
+    brand: fallbackBrand === 'My Open edX' ? 'Mereka Academy' : fallbackBrand,
+    copyrightHolder: fallbackPlatform === 'My Open edX' ? 'MEREKA' : fallbackPlatform,
     supportEmail: 'support@mereka.io',
   };
 };

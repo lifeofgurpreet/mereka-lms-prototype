@@ -110,6 +110,7 @@ site_values = {
         "LOGOUT_URL": f"{lms_url}/logout",
         "MARKETING_SITE_BASE_URL": lms_url,
         "REFRESH_ACCESS_TOKEN_ENDPOINT": "/login_refresh",
+        "SITE_NAME": name,
         "FAVICON_URL": f"{lms_url}/theming/asset/{theme_name}/images/favicon.ico" if theme_name else "",
         "LOGO_URL": logo_img,
         "LOGO_WHITE_URL": f"{lms_url}/theming/asset/{theme_name}/images/logo-horizontal-white.png" if theme_name else "",
