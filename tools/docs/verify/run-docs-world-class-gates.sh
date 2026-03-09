@@ -231,8 +231,6 @@ run_step "verify-doc-link-integrity" ./tools/docs/verify/verify-doc-link-integri
 run_step "verify-generated-doc-banners" python3 tools/docs/verify/verify-generated-doc-banners.py
 run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
 run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-catalog-governance.py --range "${BASE_REF}...HEAD" --summary-file "$CATALOG_GOVERNANCE_SUMMARY"
-run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
-run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-catalog-governance.py --range "${BASE_REF}...HEAD" --summary-file "$CATALOG_GOVERNANCE_SUMMARY"
 run_step "scan-doc-catalog-residue" python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue --summary-file "$CATALOG_RESIDUE_SUMMARY"
 run_step "scan-doc-orphans" python3 tools/docs/verify/scan-doc-orphans.py --summary-file "$DOC_ORPHAN_SUMMARY"
 run_step "verify-doc-catalog-health" python3 tools/docs/verify/verify-doc-catalog-health.py \
