@@ -1,9 +1,16 @@
 ---
 title: "Data Privacy & GDPR Compliance"
 type: "feature_spec"
+id: "SPEC-DAT-002"
 status: "draft"
+spec_class: "security"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "data"
+normativity: "normative"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on:
@@ -15,11 +22,25 @@ depends_on:
   - "specs/content-libraries-v2_spec.md"
   - "specs/advanced-assessment-xqueue_spec.md"
   - "specs/external-registration-hubspot_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+interfaces:
+  - "Open edX"
+  - "Purchase Gateway"
+  - "Aspects"
+  - "MongoDB Atlas"
+tags:
+  - "data.pii"
+  - "data.retention"
+  - "docs.evidence"
+summary: "Defines the platform-wide privacy, consent, deletion, export, and compliance controls for personal data across the Mereka LMS stack."
 links:
   related_docs:
-    - "docs/runbooks/data-privacy-compliance-runbook.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/architecture/multi-tenancy-overview.md"
+    - "docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/concepts/architecture/multi-tenancy-overview.md"
   related_specs:
     - "specs/analytics-pipeline_spec.md"
     - "specs/secrets-management_spec.md"
