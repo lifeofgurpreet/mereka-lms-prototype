@@ -1,5 +1,19 @@
+---
+title: Docs / Specs Contract
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-08
+canonical_root: docs/guides
+doc_class: guide
+summary: Defines the boundary between specs, docs, and generated testmaps so verification truth stays unambiguous.
+tags:
+  - docs
+  - specs
+  - verification
+audience: Contributors
+---
+
 # Docs / Specs Contract
-_Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-08 • Status: canonical_
 
 This contract separates explanation from intention and closes the current split-brain around verification artifacts.
 
