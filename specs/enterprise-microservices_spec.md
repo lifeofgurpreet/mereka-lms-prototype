@@ -1,23 +1,47 @@
 ---
 title: "Enterprise Microservices Deployment"
 type: "feature_spec"
+id: "SPEC-ENTERPRISE-MICROSERVICES"
 status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
+spec_class: "integration"
+created: "2026-02-10"
 last_updated: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
 version: "1.0.0"
 deployment_date: "2026-02-10"
 deployment_status: "production"
+domain: "tenancy"
+normativity: "normative"
 depends_on:
   - "specs/multi-tenancy-architecture_spec.md"
   - "specs/auth-sso-enterprise_spec.md"
   - "specs/k8s-deployment_spec.md"
   - "specs/observability-stack_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+  - "scripts/qa/spec-tools/spec_coverage_report.py"
+interfaces:
+  - "enterprise-catalog"
+  - "license-manager"
+  - "enterprise-access"
+  - "enterprise-subsidy"
+  - "enterprise-integrated-channels"
+tags:
+  - "tenant.isolation"
+  - "auth.oidc"
+  - "platform.control-plane"
+  - "commerce.reconciliation"
+summary: "Defines the deployed enterprise microservices boundary, required platform integrations, and runtime expectations for catalog, access, subsidy, and integrated-channel services."
 links:
   related_docs:
-    - "docs/architecture/enterprise-services-overview.md"
-    - "docs/runbooks/enterprise-services-runbook.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/reference/architecture/ENTERPRISE_SERVICES_OVERVIEW.md"
+    - "docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
   related_specs:
     - "specs/k8s-deployment_spec.md"
     - "specs/secrets-management_spec.md"

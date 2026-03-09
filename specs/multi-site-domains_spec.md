@@ -1,22 +1,44 @@
 ---
 title: "Multi-Site Domain Configuration"
 type: "feature_spec"
+id: "SPEC-MULTI-SITE-DOMAINS"
 status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
+spec_class: "system"
+created: "2026-01-22"
 last_updated: "2026-02-18"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
 version: "1.0.0"
+domain: "tenancy"
+normativity: "normative"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/secrets-management_spec.md"
   - "specs/tutor-configuration_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+  - "scripts/qa/spec-tools/spec_coverage_report.py"
+interfaces:
+  - "django-sites"
+  - "caddy-host-routing"
+  - "mfe-config-surface"
+tags:
+  - "tenant.lifecycle"
+  - "tenant.isolation"
+  - "auth.cookie-boundary"
+  - "platform.control-plane"
+summary: "Defines the required domain, host-routing, site-configuration, and environment contract for multi-site Open edX deployments."
 links:
   related_docs:
     - "docs/reference/operations/OPENEDX_HOSTNAMES.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/reference/operations/AUTH_AND_PERMISSIONS.md"
-    - "docs/branding/BRANDING_OPERATING_MODEL.md"
-    - "docs/operations/K8S_OPERATIONS_GUIDE.md"
+    - "docs/guides/branding/BRANDING_OPERATING_MODEL.md"
+    - "docs/guides/admin/K8S_OPERATIONS_GUIDE.md"
   related_specs:
     - "specs/k8s-deployment_spec.md"
     - "specs/branding-system_spec.md"
