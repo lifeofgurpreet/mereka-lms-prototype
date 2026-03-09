@@ -1,0 +1,548 @@
+{
+  "domain_count": 11,
+  "domains": [
+    {
+      "authoritative_roots": [
+        "docs",
+        "generated"
+      ],
+      "cross_repo_overall_verdict": "not_applicable",
+      "cross_repo_repositories": [],
+      "cross_repo_surfaces": [],
+      "description": "Architecture decisions, governing docs, and system-level intent.",
+      "domain": "architecture",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "compatibility wrappers"
+      ],
+      "read_first": [
+        "docs/meta/docs-program/WAVE4_CLOSEOUT.md",
+        "docs/adr",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json"
+      ],
+      "required_evidence": [
+        "review_bundle",
+        "truth_impact_report"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "docs_architecture_change",
+        "reviewer_pass"
+      ],
+      "validation_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh"
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "generated",
+        "specs"
+      ],
+      "cross_repo_overall_verdict": "infra_counterpart_required",
+      "cross_repo_repositories": [
+        "bbi-infrastructure"
+      ],
+      "cross_repo_surfaces": [
+        "generated/contracts/deployment-impact-report.json"
+      ],
+      "description": "Authentication and identity surfaces, especially SSO and auth boundaries.",
+      "domain": "auth",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "status-only notes"
+      ],
+      "read_first": [
+        "specs/auth-sso-enterprise_spec.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/review-bundle.md"
+      ],
+      "required_evidence": [
+        "cross_repo_manifest",
+        "deployment_impact",
+        "incident_notes",
+        "release_obligations",
+        "review_bundle",
+        "runtime_evidence",
+        "truth_impact_report"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs",
+        "platform"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "normative_spec_change",
+        "incident_debug",
+        "cross_repo_contract_change"
+      ],
+      "validation_commands": [
+        "python3 tools/specs/verify_spec_frontmatter.py --repo-root .",
+        "python3 tools/specs/verify_spec_taxonomy.py --repo-root .",
+        "python3 tools/specs/verify_spec_paths.py --repo-root .",
+        "python3 scripts/qa/spec-tools/build_spec_catalog.py --check --repo-root .",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "python3 tools/contracts/build_cross_repo_manifest.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/contracts/build_deployment_impact_report.py --check --range origin/main...HEAD --repo-root ."
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "generated",
+        "specs"
+      ],
+      "cross_repo_overall_verdict": "infra_counterpart_required",
+      "cross_repo_repositories": [
+        "bbi-infrastructure"
+      ],
+      "cross_repo_surfaces": [
+        "generated/contracts/cross-repo-manifest.json",
+        "generated/contracts/deployment-impact-report.json",
+        "generated/contracts/release-obligations.md"
+      ],
+      "description": "Purchase gateway, payment-related contracts, and release fallout surfaces.",
+      "domain": "commerce",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "guessed infra paths"
+      ],
+      "read_first": [
+        "specs/ecommerce-purchase-gateway_spec.md",
+        "generated/contracts/cross-repo-manifest.json",
+        "generated/contracts/release-obligations.md"
+      ],
+      "required_evidence": [
+        "cross_repo_manifest",
+        "deployment_impact",
+        "release_obligations",
+        "review_bundle",
+        "truth_impact_report"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs",
+        "platform"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "normative_spec_change",
+        "release_change",
+        "cross_repo_contract_change"
+      ],
+      "validation_commands": [
+        "python3 tools/specs/verify_spec_frontmatter.py --repo-root .",
+        "python3 tools/specs/verify_spec_taxonomy.py --repo-root .",
+        "python3 tools/specs/verify_spec_paths.py --repo-root .",
+        "python3 scripts/qa/spec-tools/build_spec_catalog.py --check --repo-root .",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/contracts/build_release_obligations.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/contracts/build_cross_repo_manifest.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/contracts/build_deployment_impact_report.py --check --range origin/main...HEAD --repo-root ."
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "docs",
+        "generated"
+      ],
+      "cross_repo_overall_verdict": "infra_counterpart_required",
+      "cross_repo_repositories": [
+        "bbi-infrastructure"
+      ],
+      "cross_repo_surfaces": [
+        "generated/contracts/cross-repo-manifest.json",
+        "generated/contracts/deployment-impact-report.json",
+        "generated/contracts/release-obligations.md"
+      ],
+      "description": "Repo-to-infra contract, ownership, and deployment crosswalk surfaces.",
+      "domain": "cross-repo contracts",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "guessed infra file mappings"
+      ],
+      "read_first": [
+        "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+        "docs/meta/contracts/INFRA_CROSSWALK.md",
+        "generated/contracts/cross-repo-manifest.json"
+      ],
+      "required_evidence": [
+        "cross_repo_manifest",
+        "deployment_impact",
+        "release_obligations",
+        "review_bundle"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs",
+        "platform"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "cross_repo_contract_change",
+        "release_change",
+        "reviewer_pass"
+      ],
+      "validation_commands": [
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/contracts/build_cross_repo_manifest.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/contracts/build_deployment_impact_report.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/contracts/build_release_obligations.py --check --range origin/main...HEAD --repo-root .",
+        "bash scripts/qa/run-knowledge-runtime-gates.sh"
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "docs",
+        "generated",
+        "tools"
+      ],
+      "cross_repo_overall_verdict": "not_applicable",
+      "cross_repo_repositories": [],
+      "cross_repo_surfaces": [],
+      "description": "Canonical docs governance, catalogs, and docs/spec boundary policy.",
+      "domain": "docs-control-plane",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "generated docs catalog as sole authority"
+      ],
+      "read_first": [
+        "docs/meta/docs-program/WAVE4_CLOSEOUT.md",
+        "tools/docs/verify/build-doc-catalog.py",
+        "tools/docs/verify/verify-doc-catalog-governance.py",
+        "generated/catalogs/docs-catalog.json"
+      ],
+      "required_evidence": [
+        "review_bundle",
+        "status_update",
+        "truth_impact_report"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "docs_architecture_change",
+        "reviewer_pass",
+        "evidence_status_update"
+      ],
+      "validation_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh"
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "docs",
+        "generated",
+        "specs"
+      ],
+      "cross_repo_overall_verdict": "not_applicable",
+      "cross_repo_repositories": [],
+      "cross_repo_surfaces": [],
+      "description": "Frontend architecture, theming, and performance control-plane surfaces.",
+      "domain": "frontend",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "historical prompts as primary source"
+      ],
+      "read_first": [
+        "specs/frontend-performance-budgets_spec.md",
+        "docs/meta/docs-program/WAVE4_CLOSEOUT.md",
+        "generated/knowledge/review-bundle.md"
+      ],
+      "required_evidence": [
+        "review_bundle",
+        "truth_impact_report"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "normative_spec_change",
+        "proposal_change",
+        "docs_architecture_change"
+      ],
+      "validation_commands": [
+        "python3 tools/specs/verify_spec_frontmatter.py --repo-root .",
+        "python3 tools/specs/verify_spec_taxonomy.py --repo-root .",
+        "python3 tools/specs/verify_spec_paths.py --repo-root .",
+        "python3 scripts/qa/spec-tools/build_spec_catalog.py --check --repo-root .",
+        "python3 tools/knowledge/build_change_manifest.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/knowledge/build_review_bundle.py --check --range origin/main...HEAD --repo-root .",
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD"
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "docs",
+        "generated",
+        "specs"
+      ],
+      "cross_repo_overall_verdict": "infra_counterpart_required",
+      "cross_repo_repositories": [
+        "bbi-infrastructure"
+      ],
+      "cross_repo_surfaces": [
+        "generated/contracts/cross-repo-manifest.json",
+        "generated/contracts/release-obligations.md"
+      ],
+      "description": "Mobile plans, runtime parity, and related release/debug surfaces.",
+      "domain": "mobile",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "retired wrapper paths"
+      ],
+      "read_first": [
+        "specs/plans/mobile-apps-enterprise_plan.md",
+        "docs/reference/architecture/MOBILE_TOKEN_PARITY.md",
+        "generated/contracts/release-obligations.md"
+      ],
+      "required_evidence": [
+        "incident_notes",
+        "migration_proof",
+        "release_obligations",
+        "review_bundle",
+        "runtime_evidence"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs",
+        "platform"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "migration_change",
+        "release_change",
+        "incident_debug"
+      ],
+      "validation_commands": [
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "python3 tools/contracts/build_release_obligations.py --check --range origin/main...HEAD --repo-root ."
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "generated",
+        "specs"
+      ],
+      "cross_repo_overall_verdict": "infra_counterpart_required",
+      "cross_repo_repositories": [
+        "bbi-infrastructure"
+      ],
+      "cross_repo_surfaces": [
+        "generated/contracts/deployment-impact-report.json",
+        "generated/contracts/cross-repo-manifest.json"
+      ],
+      "description": "SLO/SLA, runtime observability, and operational response surfaces.",
+      "domain": "observability",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "status-only evidence without runbook context"
+      ],
+      "read_first": [
+        "specs/slo-sla-service-level-management_spec.md",
+        "generated/contracts/deployment-impact-report.json",
+        "generated/knowledge/truth-impact-report.json"
+      ],
+      "required_evidence": [
+        "cross_repo_manifest",
+        "deployment_impact",
+        "incident_notes",
+        "release_obligations",
+        "review_bundle",
+        "runtime_evidence"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs",
+        "platform"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "incident_debug",
+        "release_change",
+        "cross_repo_contract_change"
+      ],
+      "validation_commands": [
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "python3 tools/contracts/build_release_obligations.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/contracts/build_cross_repo_manifest.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/contracts/build_deployment_impact_report.py --check --range origin/main...HEAD --repo-root ."
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "docs",
+        "generated"
+      ],
+      "cross_repo_overall_verdict": "infra_counterpart_required",
+      "cross_repo_repositories": [
+        "bbi-infrastructure"
+      ],
+      "cross_repo_surfaces": [
+        "generated/contracts/cross-repo-manifest.json",
+        "generated/contracts/deployment-impact-report.json",
+        "generated/contracts/release-obligations.md"
+      ],
+      "description": "Release obligations, deployment impact, and runtime-affecting review surfaces.",
+      "domain": "runtime/release",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "historical release notes as authority"
+      ],
+      "read_first": [
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+        "generated/contracts/release-obligations.md",
+        "generated/contracts/deployment-impact-report.json"
+      ],
+      "required_evidence": [
+        "incident_notes",
+        "release_obligations",
+        "review_bundle",
+        "runtime_evidence"
+      ],
+      "required_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "release_change",
+        "incident_debug",
+        "reviewer_pass"
+      ],
+      "validation_commands": [
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/contracts/build_release_obligations.py --check --range origin/main...HEAD --repo-root .",
+        "bash scripts/qa/run-knowledge-runtime-gates.sh"
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "specs",
+        "tools"
+      ],
+      "cross_repo_overall_verdict": "not_applicable",
+      "cross_repo_repositories": [],
+      "cross_repo_surfaces": [],
+      "description": "Normative spec law, metadata model, and spec validation surfaces.",
+      "domain": "specs-control-plane",
+      "prohibited_starting_points": [
+        "specs/archive/**",
+        "compatibility wrappers"
+      ],
+      "read_first": [
+        "specs/standards/SPEC_SYSTEM_CHARTER.md",
+        "specs/standards/SPEC_METADATA_MODEL.md",
+        "specs/standards/SPEC_AUTHORING_STANDARD.md",
+        "tools/specs/verify_spec_frontmatter.py",
+        "tools/specs/verify_spec_taxonomy.py"
+      ],
+      "required_evidence": [
+        "review_bundle",
+        "truth_impact_report"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "normative_spec_change",
+        "reviewer_pass"
+      ],
+      "validation_commands": [
+        "python3 tools/specs/verify_spec_frontmatter.py --repo-root .",
+        "python3 tools/specs/verify_spec_taxonomy.py --repo-root .",
+        "python3 tools/specs/verify_spec_paths.py --repo-root .",
+        "python3 scripts/qa/spec-tools/build_spec_catalog.py --check --repo-root .",
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh"
+      ]
+    },
+    {
+      "authoritative_roots": [
+        "generated",
+        "specs"
+      ],
+      "cross_repo_overall_verdict": "infra_counterpart_required",
+      "cross_repo_repositories": [
+        "bbi-infrastructure"
+      ],
+      "cross_repo_surfaces": [
+        "generated/contracts/deployment-impact-report.json"
+      ],
+      "description": "Tenant isolation, tenancy contracts, and tenancy-auth review surfaces.",
+      "domain": "tenancy",
+      "prohibited_starting_points": [
+        "docs/archive/**",
+        "generated reports without canonical spec context"
+      ],
+      "read_first": [
+        "specs/multi-tenancy-architecture_spec.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/contracts/deployment-impact-report.json"
+      ],
+      "required_evidence": [
+        "cross_repo_manifest",
+        "deployment_impact",
+        "incident_notes",
+        "release_obligations",
+        "review_bundle",
+        "runtime_evidence",
+        "truth_impact_report"
+      ],
+      "required_reviewers": [
+        "architecture",
+        "docs",
+        "platform"
+      ],
+      "resolved": true,
+      "review_bundle_available": true,
+      "task_types": [
+        "normative_spec_change",
+        "cross_repo_contract_change",
+        "incident_debug"
+      ],
+      "validation_commands": [
+        "python3 tools/specs/verify_spec_frontmatter.py --repo-root .",
+        "python3 tools/specs/verify_spec_taxonomy.py --repo-root .",
+        "python3 tools/specs/verify_spec_paths.py --repo-root .",
+        "python3 scripts/qa/spec-tools/build_spec_catalog.py --check --repo-root .",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/contracts/build_cross_repo_manifest.py --check --range origin/main...HEAD --repo-root .",
+        "python3 tools/contracts/build_deployment_impact_report.py --check --range origin/main...HEAD --repo-root .",
+        "bash scripts/qa/run-knowledge-runtime-gates.sh"
+      ]
+    }
+  ],
+  "entrypoint_version": 1,
+  "generated_by": "tools/knowledge/build_agent_entrypoints.py",
+  "unresolved_domains": []
+}

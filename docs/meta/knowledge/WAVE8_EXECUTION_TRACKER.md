@@ -4,25 +4,24 @@
 - docs/wave8-agent-consumption-runtime
 
 ## Latest substantive packet head
-- none yet
+- 4442c0c1d157284f38599602a554f7ce00c73f78
 
 ## Last completed batch
-- commit: none yet
-- scope: Wave 8 Packet A
-- validators run: pending
-- result: in progress
+- commit: pending Packet B commit
+- scope: Wave 8 Packet B
+- validators run:
+  - python3 tools/knowledge/build_agent_entrypoints.py --repo-root .
+  - python3 tools/knowledge/build_agent_entrypoints.py --check --repo-root .
+  - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
+- result: complete
 
 ## Current target batch
 - files:
-  - docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md
-  - docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md
-  - docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml
+  - none
 - goal:
-  - define the agent-consumption model
-  - define the task taxonomy
-  - lock authoritative starting-surface rules before generator work
+  - Packet B is complete and awaiting Packet C
 - stop condition:
-  - Packet A validates and one commit is created
+  - Packet C starts
 
 ## Locked decisions
 - docs/ and specs/ remain separate canonical roots
@@ -35,4 +34,4 @@
 - none yet
 
 ## Next queued batch
-- Packet B: domain entrypoint generator
+- Packet C: task bundle generator
