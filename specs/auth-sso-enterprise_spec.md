@@ -106,7 +106,7 @@ This spec also addresses critical security gaps: there is no formal contract for
   - User self-registration flows for non-enterprise users (existing Open edX registration continues unchanged)
   - Social login providers (Google, Facebook, Apple) beyond what Open edX supports natively (already documented in `docs/integrations/GOOGLE_OAUTH_SETUP.md`)
   - Payment/billing integration for SSO-provisioned users (handled by ecommerce service)
-  - Mobile app SSO flows (covered by `specs/mobile-apps-enterprise_spec.md`)
+  - Mobile app SSO flows (covered by `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`)
   - Biometric authentication or hardware token-specific implementation details
 
 ## Non-goals

@@ -74,7 +74,7 @@ Generated from `depends_on` frontmatter in spec files.
 | content-libraries-v2_spec.md | 33 | Content Libraries v2 Management & Enterprise Usage |
 | ecommerce-purchase-gateway_spec.md | 33 | Ecommerce Purchase Gateway (Stripe -> Open edX Integration) |
 | email-notifications-pipeline_spec.md | 45 | Email & Notifications Pipeline |
-| mobile-apps-enterprise_spec.md | 37 | Mobile Apps (iOS + Android) Enterprise Deployment |
+| proposals/mobile-apps-enterprise_spec.md | 37 | Mobile Apps (iOS + Android) Enterprise Deployment |
 
 ## Tier 8
 

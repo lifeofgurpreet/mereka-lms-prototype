@@ -1,4 +1,4 @@
-spec: mobile-apps-enterprise_spec.md
+spec: proposals/mobile-apps-enterprise_spec.md
 acceptance_criteria:
 - id: AC-001
   description: Given a new user on iOS, when they tap "Sign In", then the system browser

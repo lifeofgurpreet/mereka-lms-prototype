@@ -70,7 +70,7 @@ Based on `specs/plans/IMPLEMENTATION_ORDER.md` (computed from `depends_on` front
 - `badges-credentials-enterprise_spec.md` - 32 ACs (9%) - 28 unmapped
 - `content-libraries-v2_spec.md` - 33 ACs (0%) - all unmapped
 - `email-notifications-pipeline_spec.md` - 45 ACs (4%) - 43 unmapped
-- `mobile-apps-enterprise_spec.md` - 37 ACs (8%) - 34 unmapped
+- `proposals/proposals/mobile-apps-enterprise_spec.md` - 37 ACs (8%) - 34 unmapped
 
 ### Tier 8: External Integrations (19-26%)
 - `proposals/external-registration-hubspot_spec.md` - 26 ACs (19%) - 21 unmapped

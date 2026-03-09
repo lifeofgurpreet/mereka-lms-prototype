@@ -4,8 +4,8 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: 618c77ff53cc27cb838531526e2efc72f653efcf
-- scope: Packet B2
+- commit: pending Packet C mobile proposal residue HEAD
+- scope: Packet C
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
@@ -18,20 +18,34 @@
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
 - moved files:
-  - specs/external-registration-hubspot_spec.md -> specs/proposals/external-registration-hubspot_spec.md
-  - specs/proctoring-integration_spec.md -> specs/proposals/proctoring-integration_spec.md
+  - specs/mobile-apps-enterprise_spec.md -> specs/proposals/mobile-apps-enterprise_spec.md
+  - specs/mobile-apps-secrets-management_spec.md -> specs/proposals/mobile-apps-secrets-management_spec.md
 - wrapper files created:
-  - specs/external-registration-hubspot_spec.md
-  - specs/proctoring-integration_spec.md
+  - specs/mobile-apps-enterprise_spec.md
+  - specs/mobile-apps-secrets-management_spec.md
 - Kajabi/MCT:
   - left normative by explicit decision
   - specs/data-migrations-kajabi-mct_spec.md remains the normative contract
   - specs/plans/data-migrations-kajabi-mct_plan.md remains the execution companion
+- packets completed:
+  - Packet A
+  - Packet B2
+  - Packet C (mobile proposal residue)
+- latest commit SHA:
+  - pending current packet HEAD
+- open residue:
+  - paragon-design-tokens-migration_spec.md remains root planning residue
+- next packet:
+  - Packet C (paragon-design-tokens-migration residue)
+- stop conditions encountered:
+  - none
+- decisions already locked:
+  - Kajabi/MCT remains normative by explicit decision
 
 ## Current target batch
 - files: []
 - goal:
-  - Packet B2 recorded
+  - Packet C mobile proposal residue completed
 - stop condition:
   - waiting for next handoff
 

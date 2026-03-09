@@ -67,7 +67,7 @@ branding-system_spec.md                                    13       13     100%
 ci-cd-pipeline_spec.md                                     43       40      93%
 data-privacy-gdpr-compliance_spec.md                       93       24      25% <FLOOR
 github-actions-cost-monitoring_spec.md                     14        0       0% <FLOOR
-mobile-apps-enterprise_spec.md                             37        3       8% <FLOOR
+proposals/proposals/mobile-apps-enterprise_spec.md                             37        3       8% <FLOOR
 ...
 
 -------------------------------------------------------------------------------

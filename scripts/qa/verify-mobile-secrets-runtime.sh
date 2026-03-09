@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @spec: mobile-apps-secrets-management_spec.md
+# @spec: proposals/mobile-apps-secrets-management_spec.md
 # @covers AC-MAS-003, AC-MAS-008, AC-MAS-009, AC-MAS-010, AC-MAS-011, AC-MAS-012, AC-MAS-016, AC-MAS-017, AC-MAS-018, AC-MAS-019, AC-MAS-020, AC-MAS-021, AC-MAS-022, AC-MAS-025
 #
 # Runtime verification for mobile secrets (CI/CD builds, K8s live secrets, certificate expiry)

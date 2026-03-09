@@ -1862,8 +1862,8 @@ coverage:
     - "content-libraries-v2_spec.md"
     - "data-privacy-gdpr-compliance_spec.md (1 script - audit-analytics-pii.sh)"
     - "email-notifications-pipeline_spec.md"
-    - "mobile-apps-enterprise_spec.md"
-    - "mobile-apps-secrets-management_spec.md"
+    - "proposals/mobile-apps-enterprise_spec.md"
+    - "proposals/mobile-apps-secrets-management_spec.md"
     - "proctoring-integration_spec.md"
     - "advanced-assessment-xqueue_spec.md"
 

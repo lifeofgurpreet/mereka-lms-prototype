@@ -1,6 +1,6 @@
 {
   "catalog": "specs/catalog.json",
-  "edge_count": 243,
+  "edge_count": 249,
   "edges": [
     {
       "edge_type": "generated_testmap",
@@ -770,7 +770,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/mobile-apps-enterprise_plan.md",
-      "target": "specs/mobile-apps-enterprise_spec.md"
+      "target": "specs/proposals/mobile-apps-enterprise_spec.md"
     },
     {
       "edge_type": "source_plan",
@@ -780,7 +780,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/mobile-apps-enterprise_testplan.md",
-      "target": "specs/mobile-apps-enterprise_spec.md"
+      "target": "specs/proposals/proposals/mobile-apps-enterprise_spec.md"
     },
     {
       "edge_type": "source_spec",
@@ -1024,6 +1024,36 @@
     },
     {
       "edge_type": "generated_testmap",
+      "source": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "target": "specs/_generated/testmaps/mobile-apps-enterprise_spec.testmap.yml"
+    },
+    {
+      "edge_type": "legacy_testmap",
+      "source": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "target": "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml"
+    },
+    {
+      "edge_type": "plan",
+      "source": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "target": "specs/plans/mobile-apps-enterprise_plan.md"
+    },
+    {
+      "edge_type": "testplan",
+      "source": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "target": "specs/plans/mobile-apps-enterprise_testplan.md"
+    },
+    {
+      "edge_type": "generated_testmap",
+      "source": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "target": "specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml"
+    },
+    {
+      "edge_type": "legacy_testmap",
+      "source": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "target": "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml"
+    },
+    {
+      "edge_type": "generated_testmap",
       "source": "specs/proposals/proctoring-integration_spec.md",
       "target": "specs/_generated/testmaps/proctoring-integration_spec.testmap.yml"
     },
@@ -1219,7 +1249,7 @@
     }
   ],
   "generated_by": "tools/specs/build_spec_graph.py",
-  "node_count": 198,
+  "node_count": 201,
   "nodes": [
     {
       "id": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
@@ -1644,20 +1674,25 @@
     },
     {
       "id": "specs/mobile-apps-enterprise_spec.md",
+      "lane": "normative",
       "node_type": "spec",
+      "normativity": "generated",
+      "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
-      "title": "mobile-apps-enterprise_spec.md"
+      "spec_class": "generated",
+      "status": "superseded",
+      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
     },
     {
       "id": "specs/mobile-apps-secrets-management_spec.md",
       "lane": "normative",
       "node_type": "spec",
-      "normativity": "proposed",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
-      "spec_class": "security",
-      "status": "draft",
-      "title": "Mobile Apps API Keys & Secrets Management"
+      "spec_class": "generated",
+      "status": "superseded",
+      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
     },
     {
       "id": "specs/mongodb-atlas-integration_spec.md",
@@ -2025,14 +2060,9 @@
     },
     {
       "id": "specs/plans/mobile-apps-enterprise_testplan.md",
-      "lane": "testplan",
       "node_type": "testplan",
-      "normativity": "planning",
-      "owner": null,
       "path": "specs/plans/mobile-apps-enterprise_testplan.md",
-      "spec_class": "plan",
-      "status": "ready",
-      "title": "Mobile Apps (iOS + Android) Enterprise Deployment - Test Plan"
+      "title": "mobile-apps-enterprise_testplan.md"
     },
     {
       "id": "specs/plans/mongodb-atlas-integration_plan.md",
@@ -2232,6 +2262,28 @@
       "title": "External Registration via HubSpot"
     },
     {
+      "id": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "lane": "proposal",
+      "node_type": "spec",
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "spec_class": "proposal",
+      "status": "draft",
+      "title": "Mobile Apps (iOS + Android) Enterprise Deployment"
+    },
+    {
+      "id": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "lane": "proposal",
+      "node_type": "spec",
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "spec_class": "proposal",
+      "status": "draft",
+      "title": "Mobile Apps API Keys & Secrets Management"
+    },
+    {
       "id": "specs/proposals/proctoring-integration_spec.md",
       "lane": "proposal",
       "node_type": "spec",
@@ -2241,6 +2293,12 @@
       "spec_class": "proposal",
       "status": "deferred",
       "title": "Proctoring Integration for Enterprise Open edX"
+    },
+    {
+      "id": "specs/proposals/proposals/mobile-apps-enterprise_spec.md",
+      "node_type": "spec",
+      "path": "specs/proposals/proposals/mobile-apps-enterprise_spec.md",
+      "title": "mobile-apps-enterprise_spec.md"
     },
     {
       "id": "specs/repository-structure_spec.md",

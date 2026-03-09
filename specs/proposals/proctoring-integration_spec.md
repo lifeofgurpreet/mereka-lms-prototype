@@ -20,7 +20,7 @@ links:
   - specs/secrets-management_spec.md
   - specs/multi-site-domains_spec.md
   - specs/observability-stack_spec.md
-  - specs/mobile-apps-enterprise_spec.md
+  - specs/proposals/proposals/mobile-apps-enterprise_spec.md
   - specs/cross-cutting-requirements_spec.md
 id: SPEC-PROCTORING-INTEGRATION
 spec_class: proposal
@@ -736,7 +736,7 @@ Enterprise clients purchasing learning platforms for high-stakes training (compl
 
 6. **Human reviewer staffing**: Who will perform human proctor reviews? Options: (a) Mereka Academy staff, (b) enterprise client staff, (c) the proctoring provider's review team, (d) a combination. This affects the review dashboard's access model and the SLA achievability. If using the provider's reviewers, the review dashboard may be redundant (providers have their own).
 
-7. **Mobile proctoring support**: Several proctoring providers (notably Proctorio and Respondus) do not support mobile browsers. Should the spec explicitly block proctored exams on mobile, or should it support providers that offer mobile SDKs (Examity has a mobile app)? This intersects with `specs/mobile-apps-enterprise_spec.md`.
+7. **Mobile proctoring support**: Several proctoring providers (notably Proctorio and Respondus) do not support mobile browsers. Should the spec explicitly block proctored exams on mobile, or should it support providers that offer mobile SDKs (Examity has a mobile app)? This intersects with `specs/proposals/proposals/mobile-apps-enterprise_spec.md`.
 
 8. **Accessibility compliance**: How do browser lockdown solutions interact with accessibility tools (screen readers, magnification, voice control)? Need to evaluate each provider's VPAT (Voluntary Product Accessibility Template) and determine what accommodations are technically feasible. Some lockdown solutions may conflict with WCAG 2.1 requirements.
 

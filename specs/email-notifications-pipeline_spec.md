@@ -37,7 +37,7 @@ links:
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/reference/operations/EMAIL_PIPELINE.md"
   related_specs:
-    - "specs/mobile-apps-enterprise_spec.md"
+    - "specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md"
     - "specs/enterprise-microservices_spec.md"
     - "specs/secrets-management_spec.md"
     - "specs/data-privacy-gdpr-compliance_spec.md"
@@ -63,7 +63,7 @@ Learner engagement is directly correlated with timely, relevant communications. 
 
 - Learners miss assignment deadlines because there are no reminder notifications (email-only, and email deliverability is unmonitored)
 - Enterprise clients cannot send targeted announcements to their learner cohorts without Django admin access
-- Mobile app users (iOS, already in TestFlight; Android, in development per `specs/mobile-apps-enterprise_spec.md`) have no push notification support
+- Mobile app users (iOS, already in TestFlight; Android, in development per `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`) have no push notification support
 - SES reputation is unmanaged: a single bounce spike from invalid Kajabi-migrated email addresses could land the sending domain on blocklists, affecting all transactional email including password resets and enrollment confirmations
 - There is no mechanism for learners to control notification frequency, leading to unsubscribes and spam complaints that compound deliverability problems
 - Enterprise clients in EU/Malaysia markets require GDPR/PDPA-compliant consent management for marketing communications, which does not exist
@@ -93,7 +93,7 @@ Learner engagement is directly correlated with timely, relevant communications. 
   - Exim relay pod hardening and monitoring (existing `smtp` deployment in `mereka-lms` namespace)
   - In-app notification tray backend (REST API) and MFE integration
   - Push notification integration with Firebase Cloud Messaging (FCM) and APNs (via FCM)
-  - Device token registration and lifecycle (coordinates with `specs/mobile-apps-enterprise_spec.md`)
+  - Device token registration and lifecycle (coordinates with `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`)
   - Notification preferences service: per-user, per-channel, per-type opt-in/opt-out with GDPR consent tracking
   - Email template system with multi-language support (EN, MS, ZH)
   - Bulk messaging engine with per-tenant rate limiting, scheduling, and segmentation
@@ -109,8 +109,8 @@ Learner engagement is directly correlated with timely, relevant communications. 
   - Marketing automation platform integration (HubSpot, Mailchimp)
   - Custom email editor UI for non-technical users (enterprise admins use existing bulk email tool in Studio)
   - Email archival or long-term message storage beyond 90-day delivery logs
-  - Mobile app UI implementation for notification tray (covered by `specs/mobile-apps-enterprise_spec.md`)
-  - Push notification payload format and deep linking (defined in `specs/mobile-apps-enterprise_spec.md`)
+  - Mobile app UI implementation for notification tray (covered by `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`)
+  - Push notification payload format and deep linking (defined in `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`)
   - Content moderation for user-generated notification content (forum replies)
   - A/B testing of notification content or timing
 
@@ -127,7 +127,7 @@ Learner engagement is directly correlated with timely, relevant communications. 
 - AWS SES is already partially configured: the `smtp` deployment in `mereka-lms` uses `devture/exim-relay:4.96-r1-0` relaying through `email-smtp.ap-southeast-1.amazonaws.com:587` with credentials from the `ses-smtp-credentials` K8s secret
 - The sending domain `academyv2.mereka.io` has a CNAME record `mail.academyv2.mereka.io` pointing to `academyv2.mereka.io` (confirmed in `infrastructure/cloudflare/records.json`)
 - ACE is enabled in production LMS settings with `ACE_ENABLED_CHANNELS = ["django_email"]`, `ACE_CHANNEL_DEFAULT_EMAIL = "django_email"`, `ACE_CHANNEL_TRANSACTIONAL_EMAIL = "django_email"`, and `BULK_EMAIL_SEND_USING_EDX_ACE = True`
-- The Firebase project `mereka-academy` exists per `specs/mobile-apps-enterprise_spec.md` assumptions, configured for both iOS and Android
+- The Firebase project `mereka-academy` exists per `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md` assumptions, configured for both iOS and Android
 - Celery workers are running with Redis as the broker (`CELERY_BROKER_TRANSPORT: "redis"`) and handle ACE message dispatch
 - Multi-tenancy uses `org_slug` as the tenant identifier (per `specs/multi-tenancy-architecture_spec.md`)
 - User language preference is stored in the Open edX user profile (`LANGUAGE_CODE` default is `en`)
@@ -201,7 +201,7 @@ Learner engagement is directly correlated with timely, relevant communications. 
 
 - The system MUST deliver push notifications via Firebase Cloud Messaging (FCM) for both iOS and Android devices
 - The system MUST maintain a device registration table in MySQL with: `id`, `user_id`, `device_token`, `platform` (ios/android), `app_version`, `org_slug`, `registered_at`, `last_seen_at`, `is_active` (boolean)
-- The device registration API MUST be as specified in `specs/mobile-apps-enterprise_spec.md`:
+- The device registration API MUST be as specified in `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`:
   - `POST /api/mobile/v1/notifications/register/` -- register or update a device token
   - `DELETE /api/mobile/v1/notifications/register/` -- unregister a device token
 - The system MUST deduplicate device tokens: if a token is re-registered, the existing record MUST be updated (not duplicated)
@@ -674,7 +674,7 @@ Learner engagement is directly correlated with timely, relevant communications. 
 
 1. **SES account status**: Is the AWS SES account for `email-smtp.ap-southeast-1.amazonaws.com` currently in sandbox mode or production mode? Sandbox mode limits sending to verified addresses only and caps at 200 messages/day. If in sandbox, production access must be requested before bulk email can be enabled.
 
-2. **Firebase project readiness**: The `specs/mobile-apps-enterprise_spec.md` assumes a Firebase project `mereka-academy` exists. Has the Firebase project been created? Is the FCM API enabled? Is there a service account key generated? This is a prerequisite for push notification dispatch.
+2. **Firebase project readiness**: The `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md` assumes a Firebase project `mereka-academy` exists. Has the Firebase project been created? Is the FCM API enabled? Is there a service account key generated? This is a prerequisite for push notification dispatch.
 
 3. **SES sending limits**: What is the current SES sending rate limit and daily sending quota for the account? This determines the global rate ceiling for bulk email. Default production SES accounts start at 50,000 messages/day and 14 emails/second; higher limits require a request.
 
@@ -682,7 +682,7 @@ Learner engagement is directly correlated with timely, relevant communications. 
 
 5. **ClickHouse availability**: The analytics pipeline spec (`specs/analytics-pipeline_spec.md`) references ClickHouse for event data. Is ClickHouse deployed and available for notification engagement data, or should engagement data be stored in partitioned MySQL tables as a fallback?
 
-6. **Push notification provider preference**: The spec aligns with `specs/mobile-apps-enterprise_spec.md` in using FCM for both platforms. Should the backend also integrate directly with APNs for iOS (bypassing FCM) for lower latency and higher reliability, or is FCM-only acceptable for v1?
+6. **Push notification provider preference**: The spec aligns with `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md` in using FCM for both platforms. Should the backend also integrate directly with APNs for iOS (bypassing FCM) for lower latency and higher reliability, or is FCM-only acceptable for v1?
 
 7. **Existing email list hygiene**: How many of the Kajabi-migrated and MCT-migrated user accounts have valid email addresses? A bulk email to unverified addresses could damage SES reputation. Should a one-time email verification campaign be run before enabling bulk messaging?
 

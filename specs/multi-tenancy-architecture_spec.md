@@ -104,7 +104,7 @@ Without this spec, the branding system has no framework for per-tenant themes, t
   - Custom code changes to Open edX platform core (we use upstream capabilities)
   - Individual tenant onboarding details (covered in runbook)
   - Payment/billing per tenant (handled by ecommerce service and commercial agreements)
-  - Mobile app per-tenant customization (covered by `specs/mobile-apps-enterprise_spec.md`)
+  - Mobile app per-tenant customization (covered by `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`)
 
 ## Non-goals
 

@@ -645,11 +645,11 @@
       "version": "1.0.0"
     },
     {
-      "acceptance_criteria_count": 37,
-      "created": "2026-02-10",
+      "acceptance_criteria_count": 0,
+      "created": "2026-03-09",
       "doc_type": "spec",
       "domain": "frontend",
-      "id": "SPEC-MOBILE-APPS-ENTERPRISE",
+      "id": "SPEC-COMPAT-MOBILE-APPS-ENTERPRISE",
       "lane": "normative",
       "last_reviewed": "2026-03-09",
       "links": {
@@ -660,27 +660,26 @@
         "source_spec": null,
         "testplan": "specs/plans/mobile-apps-enterprise_testplan.md"
       },
-      "normativity": "proposed",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
       "review_due": "2026-06-09",
-      "spec_class": "domain",
-      "status": "draft",
-      "summary": "Defines the proposed enterprise deployment contract for Mereka mobile applications, including identity, branding, release, and platform integration expectations.",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
       "tags": [
-        "frontend.composition",
-        "tenant.isolation",
-        "auth.oidc"
+        "compatibility",
+        "proposal-lane"
       ],
-      "title": "Mobile Apps (iOS + Android) Enterprise Deployment",
-      "version": "1.0.0"
+      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment",
+      "version": null
     },
     {
-      "acceptance_criteria_count": 25,
-      "created": "2026-02-13",
+      "acceptance_criteria_count": 0,
+      "created": "2026-03-09",
       "doc_type": "spec",
       "domain": "platform",
-      "id": "SPEC-MOBILE-SECRETS-MANAGEMENT",
+      "id": "SPEC-COMPAT-MOBILE-APPS-SECRETS-MANAGEMENT",
       "lane": "normative",
       "last_reviewed": "2026-03-09",
       "links": {
@@ -691,20 +690,19 @@
         "source_spec": null,
         "testplan": null
       },
-      "normativity": "proposed",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
       "review_due": "2026-06-09",
-      "spec_class": "security",
-      "status": "draft",
-      "summary": "Defines the proposed secret, credential, and API-key management contract for Mereka mobile application delivery pipelines.",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
       "tags": [
-        "platform.control-plane",
-        "auth.oidc",
-        "build.version-pin"
+        "compatibility",
+        "proposal-lane"
       ],
-      "title": "Mobile Apps API Keys & Secrets Management",
-      "version": "1.0.0"
+      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management",
+      "version": null
     },
     {
       "acceptance_criteria_count": 9,
@@ -1846,7 +1844,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": null,
-        "source_spec": "specs/mobile-apps-enterprise_spec.md",
+        "source_spec": "specs/proposals/mobile-apps-enterprise_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -1873,7 +1871,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": "specs/plans/mobile-apps-enterprise_plan.md",
-        "source_spec": "specs/mobile-apps-enterprise_spec.md",
+        "source_spec": "specs/proposals/proposals/mobile-apps-enterprise_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -2620,6 +2618,68 @@
       "version": "1.0.0"
     },
     {
+      "acceptance_criteria_count": 37,
+      "created": "2026-02-10",
+      "doc_type": "spec",
+      "domain": "frontend",
+      "id": "SPEC-MOBILE-APPS-ENTERPRISE",
+      "lane": "proposal",
+      "last_reviewed": "2026-03-09",
+      "links": {
+        "generated_testmap": "specs/_generated/testmaps/mobile-apps-enterprise_spec.testmap.yml",
+        "legacy_testmap": "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml",
+        "plan": "specs/plans/mobile-apps-enterprise_plan.md",
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": "specs/plans/mobile-apps-enterprise_testplan.md"
+      },
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "review_due": "2026-06-09",
+      "spec_class": "proposal",
+      "status": "draft",
+      "summary": "Defines the proposed enterprise deployment contract for Mereka mobile applications, including identity, branding, release, and platform integration expectations.",
+      "tags": [
+        "frontend.composition",
+        "tenant.isolation",
+        "auth.oidc"
+      ],
+      "title": "Mobile Apps (iOS + Android) Enterprise Deployment",
+      "version": "1.0.0"
+    },
+    {
+      "acceptance_criteria_count": 25,
+      "created": "2026-02-13",
+      "doc_type": "spec",
+      "domain": "platform",
+      "id": "SPEC-MOBILE-SECRETS-MANAGEMENT",
+      "lane": "proposal",
+      "last_reviewed": "2026-03-09",
+      "links": {
+        "generated_testmap": "specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
+        "legacy_testmap": "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
+        "plan": null,
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": null
+      },
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "review_due": "2026-06-09",
+      "spec_class": "proposal",
+      "status": "draft",
+      "summary": "Defines the proposed secret, credential, and API-key management contract for Mereka mobile application delivery pipelines.",
+      "tags": [
+        "platform.control-plane",
+        "auth.oidc",
+        "build.version-pin"
+      ],
+      "title": "Mobile Apps API Keys & Secrets Management",
+      "version": "1.0.0"
+    },
+    {
       "acceptance_criteria_count": 38,
       "created": "2026-02-10",
       "doc_type": "spec",
@@ -3012,7 +3072,7 @@
       "version": "1.0.0"
     }
   ],
-  "entry_count": 106,
+  "entry_count": 108,
   "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
   "root": "specs",
   "taxonomy": "specs/standards/spec-taxonomy.yaml"

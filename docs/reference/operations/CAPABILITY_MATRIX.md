@@ -89,10 +89,10 @@
 
 | Capability | Status | Environment | Verification | Notes |
 |-----------|--------|-------------|--------------|-------|
-| **iOS App** | DRAFT | — | Spec exists, runtime status UNVERIFIED | Spec: mobile-apps-enterprise_spec.md (draft, 37 ACs). Setup docs exist but not verified in production |
+| **iOS App** | DRAFT | — | Spec exists, runtime status UNVERIFIED | Spec: proposals/mobile-apps-enterprise_spec.md (draft, 37 ACs). Setup docs exist but not verified in production |
 | **Android App** | DEFERRED | — | No infrastructure exists | ADR-016: Deferred until iOS app verified operational and user demand demonstrated |
 | **Mobile API Endpoints** | DEPLOYED | prod+dev | Standard Open edX API | LMS provides mobile API |
-| **Mobile Secrets Management** | DRAFT | — | Spec exists | Spec: mobile-apps-secrets-management_spec.md (draft, 25 ACs) |
+| **Mobile Secrets Management** | DRAFT | — | Spec exists | Spec: proposals/mobile-apps-secrets-management_spec.md (draft, 25 ACs) |
 
 ## Infrastructure & Operations
 

@@ -8,7 +8,7 @@
 
 ## Context
 
-The mobile apps specification (`specs/mobile-apps-enterprise_spec.md`) outlines support for both iOS and Android mobile applications. Currently:
+The mobile apps specification (`specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`) outlines support for both iOS and Android mobile applications. Currently:
 
 1. **iOS app status**:
 - Setup documentation exists (`docs/archive/ios/MOBILE_IOS_APP_SETUP.md`)
@@ -24,7 +24,7 @@ The mobile apps specification (`specs/mobile-apps-enterprise_spec.md`) outlines 
    - No build pipeline exists (unlike iOS which has `.github/workflows/build-ios-app.yml`)
 
 3. **Mobile spec status**:
-   - `specs/mobile-apps-enterprise_spec.md`: status = "draft"
+   - `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md`: status = "draft"
    - Not even marked as "in_progress"
    - 37 acceptance criteria defined but none verified
 
@@ -69,7 +69,7 @@ We are **deferring** Android app development indefinitely.
 
 ### Immediate Actions
 1. **Remove misleading references**: Update `docs/reference/operations/CAPABILITY_MATRIX.md` to clearly mark Android app as "DEFERRED" (currently shows "DRAFT" which implies it may be built)
-2. **Update mobile spec**: Add deferral notice to `specs/mobile-apps-enterprise_spec.md` indicating Android is not in scope for v1
+2. **Update mobile spec**: Add deferral notice to `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md` indicating Android is not in scope for v1
 3. **Keep mobile API enabled**: The backend mobile API should remain enabled to support potential future Android deployment and current iOS work
 
 ## Alternatives Considered
@@ -91,7 +91,7 @@ We are **deferring** Android app development indefinitely.
 
 ### Documentation Updates Required
 - [ ] Update `docs/reference/operations/CAPABILITY_MATRIX.md`: Change Android app status from "DRAFT" to "DEFERRED"
-- [ ] Add deferral notice to `specs/mobile-apps-enterprise_spec.md` (Android section)
+- [ ] Add deferral notice to `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md` (Android section)
 - [ ] Update `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` to remove references suggesting Android is coming soon
 
 ### iOS Verification Checklist (prerequisite for reconsidering Android)
@@ -114,6 +114,6 @@ If/when Android development is approved:
 
 ## Related
 - ADR-017: Analytics target decision (similar deferral pattern)
-- `specs/mobile-apps-enterprise_spec.md` (mobile strategy)
+- `specs/proposals/proposals/proposals/mobile-apps-enterprise_spec.md` (mobile strategy)
 - `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` (iOS setup)
 - `docs/reference/operations/CAPABILITY_MATRIX.md` (capability tracking)

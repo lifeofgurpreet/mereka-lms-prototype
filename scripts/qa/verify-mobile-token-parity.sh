@@ -2,7 +2,7 @@
 # Verify mobile token parity: design token alignment, API endpoint inventory,
 # and critical theming gaps identified in docs/architecture/MOBILE_TOKEN_PARITY.md
 #
-# @spec: mobile-apps-enterprise_spec.md
+# @spec: proposals/mobile-apps-enterprise_spec.md
 # @covers: AC-MOB-001, AC-MOB-023
 #
 # Usage:
