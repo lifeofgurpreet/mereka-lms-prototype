@@ -1,35 +1,28 @@
 # Task Bundle: cross_repo_contract_change
 
-- Intent: Change service, deployment, environment, or release contract truth across repos.
-- Range: `origin/main...HEAD`
-
-## Authority Order
-- `source_normative_truth`
-- `runtime_policy_truth`
-- `generated_read_models`
-- `reviewer_handoff_surfaces`
+- Intent: Change service, environment, release, or cross-repo deployment contract truth.
 
 ## Read First
-- `docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md`
-- `docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml`
-- `docs/meta/contracts/RELEASE_OBLIGATIONS.yaml`
-- `docs/meta/contracts/ENVIRONMENT_SURFACES.yaml`
-- `docs/meta/contracts/INFRA_CROSSWALK.md`
-- `generated/contracts/cross-repo-manifest.json`
-- `generated/contracts/deployment-impact-report.json`
-- `generated/contracts/release-obligations.md`
+- `docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md` priority `1`: Wave 6 defines the cross-repo contract runtime law.
+- `docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml` priority `2`: Defines repo ownership and mandatory review groups.
+- `docs/meta/contracts/RELEASE_OBLIGATIONS.yaml` priority `3`: Defines release and evidence obligations.
+- `docs/meta/contracts/ENVIRONMENT_SURFACES.yaml` priority `4`: Defines environment and deployment surfaces.
+- `docs/meta/contracts/INFRA_CROSSWALK.md` priority `5`: Defines the app-to-infra crosswalk boundary.
 
-## Generated Surfaces To Refresh
-- `generated/knowledge/change-manifest.json`
-- `generated/knowledge/review-bundle.md`
-- `generated/knowledge/truth-impact-report.json`
-- `generated/catalogs/knowledge-catalog.json`
-- `generated/graphs/knowledge-graph.json`
-- `generated/contracts/cross-repo-manifest.json`
-- `generated/contracts/deployment-impact-report.json`
-- `generated/contracts/release-obligations.md`
+## Commands
+- `bash scripts/qa/run-knowledge-runtime-gates.sh`
+- `bash scripts/qa/run-cross-repo-contract-gates.sh`
+- `python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD`
+- `python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json`
+- `python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json`
+- `python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles`
+- `python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles`
+- `python3 tools/knowledge/build_skill_index.py --repo-root .`
+- `python3 tools/knowledge/build_skill_index.py --check --repo-root .`
+- `python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD`
+- `bash scripts/qa/run-task-runtime-gates.sh`
 
-## Affected Truth Surfaces
+## Related Contracts
 - `deploy/contracts/infra-crosswalk.yaml`
 - `deploy/contracts/service-contracts/enterprise-services.yaml`
 - `deploy/contracts/service-contracts/mfe.yaml`
@@ -45,57 +38,447 @@
 - `docs/meta/contracts/RELEASE_OBLIGATIONS.yaml`
 - `docs/meta/contracts/REVIEW_HANDOFF_MODEL.md`
 - `docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md`
-- `generated/contracts/cross-repo-manifest.json`
-- `generated/contracts/deployment-impact-report.json`
-- `generated/contracts/release-obligations.md`
-- `tools/contracts/build_cross_repo_manifest.py`
-- `tools/contracts/build_deployment_impact_report.py`
-- `tools/contracts/build_release_obligations.py`
-- `tools/contracts/contract_runtime.py`
-- `tools/contracts/verify_cross_repo_contracts.py`
 
-## Required Reviewers
-- `architecture`
-- `docs`
-- `platform`
-- `release`
-- `security`
-- `tenancy_auth`
+## Related Specs
+- `specs/advanced-assessment-xqueue_spec.md`
+- `specs/analytics-pipeline_spec.md`
+- `specs/auth-sso-enterprise_spec.md`
+- `specs/branding-system_spec.md`
+- `specs/ci-cd-pipeline_spec.md`
+- `specs/content-libraries-v2_spec.md`
+- `specs/cross-cutting-requirements_spec.md`
+- `specs/data-migrations-kajabi-mct_spec.md`
+- `specs/data-privacy-gdpr-compliance_spec.md`
+- `specs/design-tokens-system_spec.md`
+- `specs/disaster-recovery-business-continuity_spec.md`
+- `specs/ecommerce-purchase-gateway_spec.md`
+- `specs/email-notifications-pipeline_spec.md`
+- `specs/enterprise-microservices_spec.md`
+- `specs/forum-service-migration_spec.md`
+- `specs/frontend-accessibility_spec.md`
+- `specs/frontend-performance-budgets_spec.md`
+- `specs/github-actions-cost-monitoring_spec.md`
+- `specs/k8s-deployment_spec.md`
+- `specs/mfe-plugin-slots_spec.md`
+- `specs/mongodb-atlas-integration_spec.md`
+- `specs/multi-site-domains_spec.md`
+- `specs/multi-tenancy-architecture_spec.md`
+- `specs/observability-stack_spec.md`
+- `specs/observability-validation-requirements_spec.md`
+- `specs/oep48-brand-package_spec.md`
+- `specs/plans/advanced-assessment-xqueue_plan.md`
+- `specs/plans/advanced-assessment-xqueue_testplan.md`
+- `specs/plans/analytics-pipeline_plan.md`
+- `specs/plans/analytics-pipeline_testplan.md`
+- `specs/plans/auth-sso-enterprise_plan.md`
+- `specs/plans/auth-sso-enterprise_testplan.md`
+- `specs/plans/branding-system_plan.md`
+- `specs/plans/branding-system_testplan.md`
+- `specs/plans/ci-cd-pipeline_plan.md`
+- `specs/plans/ci-cd-pipeline_testplan.md`
+- `specs/plans/content-libraries-v2_plan.md`
+- `specs/plans/content-libraries-v2_testplan.md`
+- `specs/plans/cross-cutting-requirements_testplan.md`
+- `specs/plans/data-migrations-kajabi-mct_plan.md`
+- `specs/plans/data-migrations-kajabi-mct_testplan.md`
+- `specs/plans/data-privacy-gdpr-compliance_plan.md`
+- `specs/plans/data-privacy-gdpr-compliance_testplan.md`
+- `specs/plans/design-tokens-system_plan.md`
+- `specs/plans/design-tokens-system_testplan.md`
+- `specs/plans/disaster-recovery-business-continuity_plan.md`
+- `specs/plans/disaster-recovery-business-continuity_testplan.md`
+- `specs/plans/ecommerce-purchase-gateway_plan.md`
+- `specs/plans/ecommerce-purchase-gateway_testplan.md`
+- `specs/plans/email-notifications-pipeline_plan.md`
+- `specs/plans/email-notifications-pipeline_testplan.md`
+- `specs/plans/enterprise-microservices_plan.md`
+- `specs/plans/enterprise-microservices_testplan.md`
+- `specs/plans/forum-service-migration_plan.md`
+- `specs/plans/forum-service-migration_testplan.md`
+- `specs/plans/k8s-deployment_plan.md`
+- `specs/plans/k8s-deployment_testplan.md`
+- `specs/plans/mongodb-atlas-integration_plan.md`
+- `specs/plans/mongodb-atlas-integration_testplan.md`
+- `specs/plans/multi-site-domains_plan.md`
+- `specs/plans/multi-site-domains_testplan.md`
+- `specs/plans/multi-tenancy-architecture_plan.md`
+- `specs/plans/multi-tenancy-architecture_testplan.md`
+- `specs/plans/observability-stack_plan.md`
+- `specs/plans/observability-stack_testplan.md`
+- `specs/plans/platform-middleware-custom-apps_plan.md`
+- `specs/plans/platform-middleware-custom-apps_testplan.md`
+- `specs/plans/repository-structure_plan.md`
+- `specs/plans/repository-structure_testplan.md`
+- `specs/plans/secrets-management_plan.md`
+- `specs/plans/secrets-management_testplan.md`
+- `specs/plans/slo-sla-service-level-management_plan.md`
+- `specs/plans/slo-sla-service-level-management_testplan.md`
+- `specs/plans/tutor-configuration-resilience_plan.md`
+- `specs/plans/tutor-configuration-resilience_testplan.md`
+- `specs/plans/tutor-configuration_plan.md`
+- `specs/plans/tutor-configuration_testplan.md`
+- `specs/plans/video-pipeline-delivery_plan.md`
+- `specs/plans/video-pipeline-delivery_testplan.md`
+- `specs/platform-middleware-custom-apps_spec.md`
+- `specs/repository-structure_spec.md`
+- `specs/secrets-management_spec.md`
+- `specs/slo-sla-service-level-management_spec.md`
+- `specs/studio-customization_spec.md`
+- `specs/tutor-configuration-resilience_spec.md`
+- `specs/tutor-configuration_spec.md`
+- `specs/verifiable-credentials-issuance_spec.md`
+- `specs/verifiable-credentials-issuer_spec.md`
+- `specs/verifiable-credentials-ops_spec.md`
+- `specs/verifiable-credentials-types_spec.md`
+- `specs/verifiable-credentials-verification_spec.md`
+- `specs/video-pipeline-delivery_spec.md`
 
-## Required Evidence
-- `release_obligations`
-- `require_adr_update`
-- `require_runbook_update`
-- `require_status_update`
-- `reviewer_bundle`
-- `runbook_reference`
-- `security_review_note`
-- `truth_impact_report`
+## Related Runbooks
+- `docs/ops/quickref/verification-scripts.md`
+- `docs/ops/runbooks/BADGES_CREDENTIALS_RUNBOOK.md`
+- `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`
+- `docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md`
+- `docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md`
+- `docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md`
+- `docs/ops/runbooks/TENANT_PROVISIONING.md`
+- `docs/ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md`
 
-## Required Commands
-- `bash scripts/qa/run-knowledge-runtime-gates.sh`
-- `python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD`
-- `bash scripts/qa/run-cross-repo-contract-gates.sh`
-- `python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD`
-- `python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD`
-- `python3 tools/knowledge/build_skill_index.py --repo-root .`
-- `python3 tools/knowledge/build_skill_index.py --check --repo-root .`
-- `python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD`
-- `bash scripts/qa/run-task-runtime-gates.sh`
+## Reviewers And Evidence
+-
+ 
+r
+e
+v
+i
+e
+w
+e
+r
+s
+:
+ 
+a
+r
+c
+h
+i
+t
+e
+c
+t
+u
+r
+e
+,
+ 
+d
+o
+c
+s
+,
+ 
+p
+l
+a
+t
+f
+o
+r
+m
+,
+ 
+r
+e
+l
+e
+a
+s
+e
+,
+ 
+s
+e
+c
+u
+r
+i
+t
+y
+,
+ 
+t
+e
+n
+a
+n
+c
+y
+_
+a
+u
+t
+h
+-
+ 
+e
+v
+i
+d
+e
+n
+c
+e
+:
+ 
+r
+e
+l
+e
+a
+s
+e
+_
+o
+b
+l
+i
+g
+a
+t
+i
+o
+n
+s
+,
+ 
+r
+e
+q
+u
+i
+r
+e
+_
+a
+d
+r
+_
+u
+p
+d
+a
+t
+e
+,
+ 
+r
+e
+q
+u
+i
+r
+e
+_
+e
+v
+i
+d
+e
+n
+c
+e
+_
+p
+a
+c
+k
+,
+ 
+r
+e
+q
+u
+i
+r
+e
+_
+p
+l
+a
+n
+_
+r
+e
+f
+r
+e
+s
+h
+,
+ 
+r
+e
+q
+u
+i
+r
+e
+_
+r
+u
+n
+b
+o
+o
+k
+_
+u
+p
+d
+a
+t
+e
+,
+ 
+r
+e
+q
+u
+i
+r
+e
+_
+s
+t
+a
+t
+u
+s
+_
+u
+p
+d
+a
+t
+e
+,
+ 
+r
+e
+q
+u
+i
+r
+e
+_
+t
+e
+s
+t
+p
+l
+a
+n
+_
+r
+e
+f
+r
+e
+s
+h
+,
+ 
+r
+e
+v
+i
+e
+w
+e
+r
+_
+b
+u
+n
+d
+l
+e
+,
+ 
+r
+u
+n
+b
+o
+o
+k
+_
+r
+e
+f
+e
+r
+e
+n
+c
+e
+,
+ 
+s
+e
+c
+u
+r
+i
+t
+y
+_
+r
+e
+v
+i
+e
+w
+_
+n
+o
+t
+e
+,
+ 
+t
+r
+u
+t
+h
+_
+i
+m
+p
+a
+c
+t
+_
+r
+e
+p
+o
+r
+t
 
-## Likely Cross-Repo Dependencies
-- `enterprise-services` -> verdict `manual_review_required`; reviewers: architecture, platform, release, tenancy_auth
-- `mfe` -> verdict `manual_review_required`; reviewers: architecture, platform, release
-- `observability-runtime` -> verdict `infra_counterpart_required`; reviewers: platform, release
-- `openedx` -> verdict `manual_review_required`; reviewers: architecture, platform, release
-- `purchase-gateway` -> verdict `infra_counterpart_required`; reviewers: architecture, platform, release, security
-- `runner-ci` -> verdict `infra_counterpart_required`; reviewers: platform, release, security
+## Cross-Repo Dependencies
+- `enterprise-services` -> `manual_review_required`; reviewers: architecture, platform, release, tenancy_auth
+- `mfe` -> `manual_review_required`; reviewers: architecture, platform, release
+- `observability-runtime` -> `infra_counterpart_required`; reviewers: platform, release
+- `openedx` -> `manual_review_required`; reviewers: architecture, platform, release
+- `purchase-gateway` -> `infra_counterpart_required`; reviewers: architecture, platform, release, security
+- `runner-ci` -> `infra_counterpart_required`; reviewers: platform, release, security
 
 ## Out Of Scope
-- live-cluster reconciliation
-- direct edits to bbi-infrastructure from this repo
-- repo-local wording-only cleanup
+- `docs/archive/**`
+- `specs/archive/**`
 
 ## Escalation Conditions
-- mixed task overlaps with normative_spec_change
-- mixed task overlaps with release_or_runtime_change
+- Wave 6 verdict is manual_review_required
+- Wave 6 verdict is unknown_mapping

@@ -4,12 +4,19 @@
 - docs/wave7-agent-skill-runtime
 
 ## Latest substantive packet head
-- Packet D commit on docs/wave7-agent-skill-runtime
+- Packet E commit on docs/wave7-agent-skill-runtime
 
 ## Last completed batch
-- commit: Packet D commit on docs/wave7-agent-skill-runtime
-- scope: Packet D task runtime verification and gate wiring
+- commit: Packet E commit on docs/wave7-agent-skill-runtime
+- scope: Packet E closeout and reviewer operating model
 - validators run:
+  - python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json
+  - python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json
+  - python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles
+  - python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles
+  - python3 tools/knowledge/build_skill_index.py --repo-root . --range origin/main...HEAD
+  - python3 tools/knowledge/build_skill_index.py --check --repo-root . --range origin/main...HEAD
+  - python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD
   - bash scripts/qa/run-task-runtime-gates.sh
   - bash scripts/qa/run-cross-repo-contract-gates.sh
   - bash scripts/qa/run-knowledge-runtime-gates.sh
@@ -21,15 +28,15 @@
 - Packet B: task context resolver
 - Packet C: task bundle generation
 - Packet D: task runtime verification and gate wiring
+- Packet E: closeout and reviewer operating model
 
 ## Current target batch
 - files:
-  - docs/meta/skills/WAVE7_CLOSEOUT.md
-  - docs/meta/skills/REVIEW_HANDOFF_MODEL.md
+  - none
 - goal:
-  - close Wave 7 with explicit reviewer and agent operating guidance
+  - Wave 7 is complete and awaiting review
 - stop condition:
-  - Packet E validators pass
+  - reviewer handoff starts
 
 ## Locked decisions
 - Wave 4 canonical roots remain unchanged
@@ -39,10 +46,10 @@
 - Wave 7 is an agent-consumption layer, not a new truth plane
 
 ## Open ambiguities
-- none yet
+- mixed high-risk diffs still need human judgment even when the resolver reports high confidence
 
 ## Next queued batch
-- Packet E: closeout and reviewer operating model
+- none
 
 ## Wave posture
 - repo-local and cross-repo truth are consumed, not redesigned

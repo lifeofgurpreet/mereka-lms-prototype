@@ -57,10 +57,15 @@
     "docs/meta/docs-program/IMPLEMENTATION_ROADMAP.md",
     "docs/meta/docs-program/README.md",
     "docs/meta/docs-program/SPEC_COVERAGE.md",
+    "docs/meta/docs-program/WAVE3_CLOSEOUT.md",
     "docs/meta/docs-program/WAVE3_EXECUTION_TRACKER.md",
+    "docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md",
     "docs/meta/docs-program/WAVE4_CHARTER.md",
+    "docs/meta/docs-program/WAVE4_CLOSEOUT.md",
     "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md",
+    "docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md",
     "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md",
+    "docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md",
     "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md",
     "docs/meta/docs-program/metadata/METADATA_MODEL.md",
     "docs/meta/docs-program/metadata/doc-class-schema-map.yaml",
@@ -121,14 +126,14 @@
     "status/evidence surfaces",
     "archive only when explicitly named as historical context"
   ],
-  "bundle_json_path": "generated/knowledge/task-bundles/runbook_or_ops_change.json",
-  "bundle_markdown_path": "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+  "bundle_json_path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json",
+  "bundle_markdown_path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
   "bundle_version": 1,
   "escalation_conditions": [
-    "ops guidance diverges from normative or contract surfaces"
+    "review policy diverges from Wave 5 or Wave 6 source rules"
   ],
   "generated_by": "tools/knowledge/build_task_bundle.py",
-  "intent": "Change operational guidance, incident response, or maintenance instructions.",
+  "intent": "Change reviewer handoff, skill policy, or runtime-facing control-plane docs.",
   "likely_cross_repo_dependencies": [
     {
       "reviewers": [
@@ -159,17 +164,22 @@
     }
   ],
   "out_of_scope": [
-    "docs/archive/**"
+    "specs/archive/**"
   ],
   "primary_roots": [
     "docs",
-    "specs"
+    "tools"
   ],
   "read_first": [
     {
       "path": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
       "priority": 1,
-      "reason": "Existing review runtime still governs ops-facing updates."
+      "reason": "Existing reviewer handoff runtime is primary."
+    },
+    {
+      "path": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
+      "priority": 2,
+      "reason": "Cross-repo reviewer path remains authoritative."
     }
   ],
   "related_contracts": [
@@ -229,5 +239,5 @@
     "generated/contracts/deployment-impact-report.json",
     "generated/contracts/release-obligations.md"
   ],
-  "task_type": "runbook_or_ops_change"
+  "task_type": "reviewer_handoff_or_policy_change"
 }

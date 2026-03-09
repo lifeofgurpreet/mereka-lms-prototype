@@ -1,21 +1,14 @@
-# Task Bundle: normative_spec_change
+# Task Bundle: compatibility_or_wrapper_cleanup
 
-- Intent: Change normative product, platform, or policy contract truth.
+- Intent: Retire or adjust compatibility-only surfaces without restoring them as primary truth.
 
 ## Read First
-- `docs/meta/docs-program/WAVE4_CLOSEOUT.md` priority `1`: Wave 4 remains the topology and authority baseline.
-- `specs/standards/SPEC_SYSTEM_CHARTER.md` priority `2`: Governs normative spec intent and contract scope.
-- `specs/standards/SPEC_METADATA_MODEL.md` priority `3`: Governs normative spec metadata obligations.
-- `specs/standards/SPEC_AUTHORING_STANDARD.md` priority `4`: Governs normative authoring and boundary rules.
+- `docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md` priority `1`: Governs compatibility retirement policy and holdouts.
 
 ## Commands
 - `bash scripts/qa/run-knowledge-runtime-gates.sh`
 - `bash scripts/qa/run-cross-repo-contract-gates.sh`
 - `python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD`
-- `python3 tools/specs/verify_spec_frontmatter.py --repo-root .`
-- `python3 tools/specs/verify_spec_taxonomy.py --repo-root .`
-- `python3 tools/specs/verify_spec_paths.py --repo-root .`
-- `python3 tools/specs/verify_docs_specs_boundary.py --repo-root .`
 - `python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json`
 - `python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json`
 - `python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles`
@@ -82,10 +75,14 @@
 - `specs/plans/email-notifications-pipeline_testplan.md`
 - `specs/plans/enterprise-microservices_plan.md`
 - `specs/plans/enterprise-microservices_testplan.md`
+- `specs/plans/external-registration-hubspot_plan.md`
+- `specs/plans/external-registration-hubspot_testplan.md`
 - `specs/plans/forum-service-migration_plan.md`
 - `specs/plans/forum-service-migration_testplan.md`
 - `specs/plans/k8s-deployment_plan.md`
 - `specs/plans/k8s-deployment_testplan.md`
+- `specs/plans/mobile-apps-enterprise_plan.md`
+- `specs/plans/mobile-apps-enterprise_testplan.md`
 - `specs/plans/mongodb-atlas-integration_plan.md`
 - `specs/plans/mongodb-atlas-integration_testplan.md`
 - `specs/plans/multi-site-domains_plan.md`
@@ -94,8 +91,11 @@
 - `specs/plans/multi-tenancy-architecture_testplan.md`
 - `specs/plans/observability-stack_plan.md`
 - `specs/plans/observability-stack_testplan.md`
+- `specs/plans/paragon-design-tokens-migration_spec.md`
 - `specs/plans/platform-middleware-custom-apps_plan.md`
 - `specs/plans/platform-middleware-custom-apps_testplan.md`
+- `specs/plans/proctoring-integration_plan.md`
+- `specs/plans/proctoring-integration_testplan.md`
 - `specs/plans/repository-structure_plan.md`
 - `specs/plans/repository-structure_testplan.md`
 - `specs/plans/secrets-management_plan.md`
@@ -109,10 +109,23 @@
 - `specs/plans/video-pipeline-delivery_plan.md`
 - `specs/plans/video-pipeline-delivery_testplan.md`
 - `specs/platform-middleware-custom-apps_spec.md`
+- `specs/proposals/external-registration-hubspot_spec.md`
+- `specs/proposals/mobile-apps-enterprise_spec.md`
+- `specs/proposals/mobile-apps-secrets-management_spec.md`
+- `specs/proposals/proctoring-integration_spec.md`
 - `specs/repository-structure_spec.md`
 - `specs/secrets-management_spec.md`
 - `specs/slo-sla-service-level-management_spec.md`
+- `specs/standards/DOCS_SPECS_BOUNDARY.md`
+- `specs/standards/SPEC_AUTHORING_STANDARD.md`
+- `specs/standards/SPEC_METADATA_MODEL.md`
+- `specs/standards/SPEC_SYSTEM_CHARTER.md`
+- `specs/standards/brand-pack-schema.json`
+- `specs/standards/spec-taxonomy.yaml`
 - `specs/studio-customization_spec.md`
+- `specs/templates/plan-template.md`
+- `specs/templates/proposal-template.md`
+- `specs/templates/spec-template.md`
 - `specs/tutor-configuration-resilience_spec.md`
 - `specs/tutor-configuration_spec.md`
 - `specs/verifiable-credentials-issuance_spec.md`
@@ -123,14 +136,7 @@
 - `specs/video-pipeline-delivery_spec.md`
 
 ## Related Runbooks
-- `docs/ops/quickref/verification-scripts.md`
-- `docs/ops/runbooks/BADGES_CREDENTIALS_RUNBOOK.md`
-- `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`
-- `docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md`
-- `docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md`
-- `docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md`
-- `docs/ops/runbooks/TENANT_PROVISIONING.md`
-- `docs/ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md`
+- `none`
 
 ## Reviewers And Evidence
 -
@@ -332,10 +338,7 @@ h
 - `runner-ci` -> `infra_counterpart_required`; reviewers: platform, release, security
 
 ## Out Of Scope
-- `docs/archive/**`
 - `specs/archive/**`
-- `specs/proposals/**`
 
 ## Escalation Conditions
-- cross-repo contract surfaces are also touched
-- release/runtime validators change in the same packet
+- wrapper retirement would remove the last live path

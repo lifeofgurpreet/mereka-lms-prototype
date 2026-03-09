@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4821,
+  "edge_count": 4827,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3815,12 +3815,22 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/WAVE7_CLOSEOUT.md"
     },
     {
       "edge_type": "classifies",
@@ -11410,12 +11420,22 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
     },
     {
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/WAVE7_CLOSEOUT.md"
     },
     {
       "edge_type": "contains",
@@ -18605,12 +18625,22 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
       "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/WAVE7_CLOSEOUT.md"
     },
     {
       "edge_type": "classifies",
@@ -24109,7 +24139,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1630,
+  "node_count": 1632,
   "nodes": [
     {
       "id": "classification:archival",
@@ -31557,6 +31587,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Review Handoff Model"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
       "lane": "other",
       "node_type": "docs:other",
@@ -31576,6 +31617,17 @@
       "root": "docs",
       "status": "",
       "title": "TASK_TYPE_TAXONOMY"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/WAVE7_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE7_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Closeout"
     },
     {
       "classification": "supporting",

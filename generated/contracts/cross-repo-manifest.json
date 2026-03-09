@@ -1,5 +1,5 @@
 {
-  "change_count": 333,
+  "change_count": 335,
   "classification_counts": {
     "infra_counterpart_required": 3,
     "manual_review_required": 3
@@ -915,6 +915,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "scripts/qa/run-spec-integrity-gates.sh",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/qa/run-task-runtime-gates.sh",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -1974,6 +1980,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "tools/knowledge/verify_knowledge_runtime.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/verify_task_runtime.py",
       "path_class": "repo_support_change",
       "touched_services": []
     },

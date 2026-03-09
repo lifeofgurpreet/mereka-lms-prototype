@@ -1,151 +1,450 @@
 {
   "generated_by": "tools/knowledge/build_skill_index.py",
   "range": "origin/main...HEAD",
-  "task_type_count": 8,
+  "task_type_count": 10,
   "task_types": [
     {
-      "authority_order": [
-        "source_normative_truth",
-        "runtime_policy_truth",
-        "generated_read_models",
-        "reviewer_handoff_surfaces"
+      "cross_repo_enabled": true,
+      "description": "Change service, environment, release, or cross-repo deployment contract truth.",
+      "escalation_summary": [
+        "Wave 6 verdict is manual_review_required",
+        "Wave 6 verdict is unknown_mapping"
       ],
-      "bundle_json_path": "generated/knowledge/task-bundles/cross_repo_contract_change.json",
-      "bundle_markdown_path": "generated/knowledge/task-bundles/cross_repo_contract_change.md",
-      "command_count": 9,
-      "cross_repo_dependency_count": 6,
-      "intent": "Change service, deployment, environment, or release contract truth across repos.",
-      "read_first_count": 8,
-      "required_evidence_count": 8,
-      "required_reviewer_count": 6,
-      "risk": "high",
-      "task_type": "cross_repo_contract_change"
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "cross_repo_contract_change",
+      "trigger_change_classes": [
+        "docs_support_change"
+      ],
+      "trigger_lanes": [
+        "deploy:service_contract",
+        "deploy:infra_crosswalk",
+        "specs:normative",
+        "docs:runbook"
+      ],
+      "trigger_roots": [
+        "docs",
+        "deploy",
+        "specs"
+      ]
     },
     {
-      "authority_order": [
-        "source_normative_truth",
-        "runtime_policy_truth",
-        "generated_read_models",
-        "reviewer_handoff_surfaces"
+      "cross_repo_enabled": true,
+      "description": "Change release, deployment, runtime, or validator behavior affecting shipped reality.",
+      "escalation_summary": [
+        "deployment-affecting services span multiple review groups",
+        "security review is implicated"
       ],
-      "bundle_json_path": "generated/knowledge/task-bundles/release_or_runtime_change.json",
-      "bundle_markdown_path": "generated/knowledge/task-bundles/release_or_runtime_change.md",
-      "command_count": 9,
-      "cross_repo_dependency_count": 1,
-      "intent": "Change release, deployment, runtime, or evidence-convergence behavior.",
-      "read_first_count": 8,
-      "required_evidence_count": 10,
-      "required_reviewer_count": 6,
-      "risk": "high",
-      "task_type": "release_or_runtime_change"
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/release_or_runtime_change.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/release_or_runtime_change.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "release_or_runtime_change",
+      "trigger_change_classes": [
+        "docs_support_change",
+        "evidence_only_change"
+      ],
+      "trigger_lanes": [
+        "docs:runbook",
+        "docs:evidence",
+        "specs:normative"
+      ],
+      "trigger_roots": [
+        "docs",
+        "scripts",
+        "tools",
+        "specs"
+      ]
     },
     {
-      "authority_order": [
-        "source_normative_truth",
-        "runtime_policy_truth",
-        "generated_read_models",
-        "reviewer_handoff_surfaces"
+      "cross_repo_enabled": false,
+      "description": "Change normative product, platform, or policy contract truth.",
+      "escalation_summary": [
+        "cross-repo contract surfaces are also touched",
+        "release/runtime validators change in the same packet"
       ],
-      "bundle_json_path": "generated/knowledge/task-bundles/normative_spec_change.json",
-      "bundle_markdown_path": "generated/knowledge/task-bundles/normative_spec_change.md",
-      "command_count": 12,
-      "cross_repo_dependency_count": 6,
-      "intent": "Change normative product or platform contract truth.",
-      "read_first_count": 6,
-      "required_evidence_count": 6,
-      "required_reviewer_count": 2,
-      "risk": "high",
-      "task_type": "normative_spec_change"
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/normative_spec_change.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/normative_spec_change.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/specs/verify_spec_frontmatter.py --repo-root .",
+        "python3 tools/specs/verify_spec_taxonomy.py --repo-root .",
+        "python3 tools/specs/verify_spec_paths.py --repo-root .",
+        "python3 tools/specs/verify_docs_specs_boundary.py --repo-root .",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "normative_spec_change",
+      "trigger_change_classes": [
+        "normative_contract_change"
+      ],
+      "trigger_lanes": [
+        "specs:normative",
+        "docs:concept",
+        "docs:runbook"
+      ],
+      "trigger_roots": [
+        "specs",
+        "docs"
+      ]
     },
     {
-      "authority_order": [
-        "source_normative_truth",
-        "runtime_policy_truth",
-        "generated_read_models",
-        "reviewer_handoff_surfaces"
+      "cross_repo_enabled": false,
+      "description": "Change architecture rationale, decision-ledger truth, or system model docs.",
+      "escalation_summary": [
+        "runtime or deployment obligations shift without corresponding contract review"
       ],
-      "bundle_json_path": "generated/knowledge/task-bundles/architecture_or_adr_change.json",
-      "bundle_markdown_path": "generated/knowledge/task-bundles/architecture_or_adr_change.md",
-      "command_count": 8,
-      "cross_repo_dependency_count": 1,
-      "intent": "Change architecture decisions, rationale, or decision-ledger truth.",
-      "read_first_count": 4,
-      "required_evidence_count": 3,
-      "required_reviewer_count": 2,
-      "risk": "high",
-      "task_type": "architecture_or_adr_change"
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "architecture_or_adr_change",
+      "trigger_change_classes": [
+        "docs_support_change"
+      ],
+      "trigger_lanes": [
+        "docs:adr",
+        "docs:concept",
+        "specs:normative"
+      ],
+      "trigger_roots": [
+        "docs",
+        "specs"
+      ]
     },
     {
-      "authority_order": [
-        "source_normative_truth",
-        "runtime_policy_truth",
-        "generated_read_models",
-        "reviewer_handoff_surfaces"
+      "cross_repo_enabled": false,
+      "description": "Change proposal-lane, RFC, or future-shape design material.",
+      "escalation_summary": [
+        "root normative specs are touched in the same packet"
       ],
-      "bundle_json_path": "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
-      "bundle_markdown_path": "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
-      "command_count": 12,
-      "cross_repo_dependency_count": 0,
-      "intent": "Change non-normative proposal, RFC, or future-shape design truth.",
-      "read_first_count": 4,
-      "required_evidence_count": 0,
-      "required_reviewer_count": 0,
-      "risk": "medium",
-      "task_type": "proposal_or_rfc_change"
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/specs/verify_spec_frontmatter.py --repo-root .",
+        "python3 tools/specs/verify_spec_taxonomy.py --repo-root .",
+        "python3 tools/specs/verify_spec_paths.py --repo-root .",
+        "python3 tools/specs/verify_docs_specs_boundary.py --repo-root .",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "proposal_or_rfc_change",
+      "trigger_change_classes": [
+        "proposal_only"
+      ],
+      "trigger_lanes": [
+        "specs:proposal",
+        "docs:review",
+        "docs:concept"
+      ],
+      "trigger_roots": [
+        "specs",
+        "docs"
+      ]
     },
     {
-      "authority_order": [
-        "source_normative_truth",
-        "runtime_policy_truth",
-        "generated_read_models",
-        "reviewer_handoff_surfaces"
+      "cross_repo_enabled": false,
+      "description": "Change operational guidance, incident response, or maintenance instructions.",
+      "escalation_summary": [
+        "ops guidance diverges from normative or contract surfaces"
       ],
-      "bundle_json_path": "generated/knowledge/task-bundles/runbook_or_ops_change.json",
-      "bundle_markdown_path": "generated/knowledge/task-bundles/runbook_or_ops_change.md",
-      "command_count": 8,
-      "cross_repo_dependency_count": 0,
-      "intent": "Change operational guidance, incident procedure, or maintenance instruction.",
-      "read_first_count": 4,
-      "required_evidence_count": 3,
-      "required_reviewer_count": 1,
-      "risk": "medium",
-      "task_type": "runbook_or_ops_change"
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "runbook_or_ops_change",
+      "trigger_change_classes": [
+        "docs_support_change"
+      ],
+      "trigger_lanes": [
+        "docs:runbook",
+        "docs:concept"
+      ],
+      "trigger_roots": [
+        "docs",
+        "specs"
+      ]
     },
     {
-      "authority_order": [
-        "source_normative_truth",
-        "runtime_policy_truth",
-        "generated_read_models",
-        "reviewer_handoff_surfaces"
+      "cross_repo_enabled": false,
+      "description": "Change evidence, status, readiness, or proof surfaces without altering the governing contract.",
+      "escalation_summary": [
+        "evidence claims move without corresponding runtime or contract updates"
       ],
-      "bundle_json_path": "generated/knowledge/task-bundles/evidence_or_status_change.json",
-      "bundle_markdown_path": "generated/knowledge/task-bundles/evidence_or_status_change.md",
-      "command_count": 8,
-      "cross_repo_dependency_count": 1,
-      "intent": "Change evidence, proof, status, or readiness surfaces without changing core contracts.",
-      "read_first_count": 4,
-      "required_evidence_count": 4,
-      "required_reviewer_count": 3,
-      "risk": "medium",
-      "task_type": "evidence_or_status_change"
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/evidence_or_status_change.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/evidence_or_status_change.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "evidence_or_status_change",
+      "trigger_change_classes": [
+        "evidence_only_change"
+      ],
+      "trigger_lanes": [
+        "docs:evidence",
+        "docs:review",
+        "specs:evidence"
+      ],
+      "trigger_roots": [
+        "docs",
+        "specs"
+      ]
     },
     {
-      "authority_order": [
-        "source_normative_truth",
-        "runtime_policy_truth",
-        "generated_read_models",
-        "reviewer_handoff_surfaces"
+      "cross_repo_enabled": false,
+      "description": "Retire or adjust compatibility-only surfaces without restoring them as primary truth.",
+      "escalation_summary": [
+        "wrapper retirement would remove the last live path"
       ],
-      "bundle_json_path": "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json",
-      "bundle_markdown_path": "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md",
-      "command_count": 8,
-      "cross_repo_dependency_count": 2,
-      "intent": "Refresh generated truth surfaces or reviewer handoff artifacts without altering governing policy.",
-      "read_first_count": 5,
-      "required_evidence_count": 6,
-      "required_reviewer_count": 3,
-      "risk": "low",
-      "task_type": "review_handoff_or_generated_surface_refresh"
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "compatibility_or_wrapper_cleanup",
+      "trigger_change_classes": [
+        "compatibility_wrapper_update"
+      ],
+      "trigger_lanes": [
+        "specs:reference",
+        "docs:review"
+      ],
+      "trigger_roots": [
+        "specs",
+        "docs"
+      ]
+    },
+    {
+      "cross_repo_enabled": false,
+      "description": "Change reviewer handoff, skill policy, or runtime-facing control-plane docs.",
+      "escalation_summary": [
+        "review policy diverges from Wave 5 or Wave 6 source rules"
+      ],
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "reviewer_handoff_or_policy_change",
+      "trigger_change_classes": [
+        "reviewer_handoff_only",
+        "docs_support_change"
+      ],
+      "trigger_lanes": [
+        "docs:review"
+      ],
+      "trigger_roots": [
+        "docs",
+        "tools"
+      ]
+    },
+    {
+      "cross_repo_enabled": false,
+      "description": "Refresh generated catalogs, graphs, manifests, bundles, and indexes without changing governing policy.",
+      "escalation_summary": [
+        "generated output drifts after source updates"
+      ],
+      "evidence_policy_sources": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "primary_bundle_json": "generated/knowledge/task-bundles/generated_surface_refresh.json",
+      "primary_bundle_md": "generated/knowledge/task-bundles/generated_surface_refresh.md",
+      "primary_commands": [
+        "bash scripts/qa/run-knowledge-runtime-gates.sh",
+        "bash scripts/qa/run-cross-repo-contract-gates.sh",
+        "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+        "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+        "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+        "python3 tools/knowledge/build_skill_index.py --repo-root .",
+        "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+        "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+        "bash scripts/qa/run-task-runtime-gates.sh"
+      ],
+      "reviewer_policy_sources": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml",
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "task_type": "generated_surface_refresh",
+      "trigger_change_classes": [
+        "generated_surface_refresh"
+      ],
+      "trigger_lanes": [
+        "docs:generated",
+        "specs:generated"
+      ],
+      "trigger_roots": [
+        "generated",
+        "docs",
+        "specs"
+      ]
     }
   ]
 }
