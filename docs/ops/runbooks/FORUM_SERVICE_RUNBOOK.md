@@ -4,7 +4,7 @@ _Audience: Platform Eng + SRE • Owner: Engineering Lead • Last updated: 2026
 This runbook covers operational procedures for the Python-based forum service (openedx-forum v0.3.8), integrated into the LMS process. The forum uses MongoDB Atlas for storage and Meilisearch for search indexing.
 
 > **Spec**: `specs/forum-service-migration_spec.md`
-> **Testmap**: `specs/testmaps/forum-service-migration_spec.testmap.yml`
+> **Testmap**: `specs/_generated/testmaps/forum-service-migration_spec.testmap.yml`
 > **ADR**: `docs/adr/007-forum-migration-ruby-to-python.md`
 
 ## Architecture

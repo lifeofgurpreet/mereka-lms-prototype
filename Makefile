@@ -345,7 +345,7 @@ verify-specs: ## Verify @covers annotations match spec ACs
 		--manual-file specs/plans/manual_verifications.yaml
 
 validate-testmaps: ## Validate testmap YAML format
-	python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/
+	python3 scripts/qa/spec-tools/validate_testmap_format.py specs/_generated/testmaps/
 
 generate-testmaps: ## Generate per-spec testmaps from @covers annotations
 	@for spec in specs/*_spec.md; do \
@@ -354,7 +354,7 @@ generate-testmaps: ## Generate per-spec testmaps from @covers annotations
 			--spec "$$spec" \
 			--scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
 			--manual-file specs/plans/manual_verifications.yaml --repo-root . \
-			--format yaml --output "specs/testmaps/$${name}.testmap.yml"; \
+			--format yaml --output "specs/_generated/testmaps/$${name}.testmap.yml"; \
 	done
 
 lint-conventions: ## Check repo file/naming conventions (glob-ability, grep-ability, boundaries)
@@ -365,7 +365,7 @@ check-fast: lint-specs validate-testmaps lint-conventions ## Fast quality gates 
 
 spec-dashboard: ## Show per-spec coverage dashboard
 	python3 scripts/qa/spec-tools/spec_coverage_dashboard.py \
-		--specs-dir specs/ --testmaps-dir specs/testmaps/
+		--specs-dir specs/ --testmaps-dir specs/_generated/testmaps/
 
 check: lint-specs validate-testmaps lint-conventions verify-specs spec-coverage ## Full spec quality suite
 	@echo "All spec checks passed."
