@@ -27,6 +27,11 @@ EXCLUDE_GLOBS = [
     "docs/_generated",
 ]
 
+NON_CONSUMER_REFERENCE_PATHS = {
+    "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md",
+    "generated/knowledge/wrapper-retirement-report.json",
+}
+
 
 def load_catalog(repo_root: Path) -> list[dict]:
     catalog = json.loads((repo_root / "generated" / "catalogs" / "knowledge-catalog.json").read_text())
@@ -68,6 +73,10 @@ def live_references(repo_root: Path, wrapper_rel: str, canonical_rel: str) -> li
         if rel_path == wrapper_rel:
             continue
         if rel_path == canonical_rel:
+            continue
+        if rel_path in NON_CONSUMER_REFERENCE_PATHS:
+            continue
+        if rel_path.endswith("catalog.json"):
             continue
         hits.append(line.replace(str(repo_root) + "/", ""))
     return sorted(set(hits))
