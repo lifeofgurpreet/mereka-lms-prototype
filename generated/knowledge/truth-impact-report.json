@@ -140,6 +140,8 @@
       "generated/graphs/knowledge-graph.json",
       "generated/knowledge/change-manifest.json",
       "generated/knowledge/review-bundle.md",
+      "generated/knowledge/truth-impact-report.json",
+      "generated/knowledge/wrapper-retirement-report.json",
       "infrastructure/tutor/themes/mereka/README.md",
       "infrastructure/tutor/themes/mereka/tenants/_template/README.md",
       "scripts/branding/sync-tokens-to-json.sh",
@@ -247,7 +249,9 @@
       "tools/knowledge/build_knowledge_catalog.py",
       "tools/knowledge/build_knowledge_graph.py",
       "tools/knowledge/build_review_bundle.py",
+      "tools/knowledge/build_truth_impact_report.py",
       "tools/knowledge/build_wrapper_retirement_ledger.py",
+      "tools/knowledge/build_wrapper_retirement_report.py",
       "tools/knowledge/change_runtime.py",
       "tools/knowledge/knowledge_model.py",
       "tools/knowledge/report_knowledge_control_plane.py",
@@ -359,7 +363,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 275,
+  "change_count": 279,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -3139,6 +3143,46 @@
         "wrappers": []
       },
       "path": "generated/knowledge/review-bundle.md",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/truth-impact-report.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/truth-impact-report.json",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/knowledge/wrapper-retirement-report.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "generated/knowledge/wrapper-retirement-report.json",
       "required_evidence": {},
       "required_reviewers": []
     },
@@ -8181,6 +8225,26 @@
         "generated_surfaces": [],
         "normative_specs": [],
         "other": [
+          "tools/knowledge/build_truth_impact_report.py"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "tools/knowledge/build_truth_impact_report.py",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
           "tools/knowledge/build_wrapper_retirement_ledger.py"
         ],
         "plans_testplans": [],
@@ -8189,6 +8253,26 @@
         "wrappers": []
       },
       "path": "tools/knowledge/build_wrapper_retirement_ledger.py",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "tools/knowledge/build_wrapper_retirement_report.py"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "tools/knowledge/build_wrapper_retirement_report.py",
       "required_evidence": {},
       "required_reviewers": []
     },

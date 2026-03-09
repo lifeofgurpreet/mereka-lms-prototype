@@ -10,7 +10,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 270,
+  "change_count": 279,
   "changed_roots": [
     "docs",
     "specs"
@@ -3523,6 +3523,138 @@
       "root": "other",
       "status": "",
       "title": "knowledge-graph"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/change-manifest.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/change-manifest.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "change-manifest"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/review-bundle.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/review-bundle.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Wave 5 Review Bundle"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/truth-impact-report.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/truth-impact-report.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "truth-impact-report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/wrapper-retirement-report.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/wrapper-retirement-report.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "wrapper-retirement-report"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -9510,6 +9642,39 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/knowledge/build_change_manifest.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_change_manifest.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_change_manifest"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/knowledge/build_knowledge_catalog.py"
       ],
       "lane": "other",
@@ -9576,6 +9741,72 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/knowledge/build_review_bundle.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_review_bundle.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_review_bundle"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/build_truth_impact_report.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_truth_impact_report.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_truth_impact_report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/knowledge/build_wrapper_retirement_ledger.py"
       ],
       "lane": "other",
@@ -9594,6 +9825,72 @@
       "root": "other",
       "status": "",
       "title": "build_wrapper_retirement_ledger"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/build_wrapper_retirement_report.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_wrapper_retirement_report.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_wrapper_retirement_report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/change_runtime.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/change_runtime.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "change_runtime"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -10085,6 +10382,10 @@
     "generated/catalogs/docs-catalog.json",
     "generated/catalogs/knowledge-catalog.json",
     "generated/graphs/knowledge-graph.json",
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wrapper-retirement-report.json",
     "infrastructure/tutor/themes/mereka/README.md",
     "infrastructure/tutor/themes/mereka/tenants/_template/README.md",
     "scripts/branding/sync-tokens-to-json.sh",
@@ -10303,9 +10604,14 @@
     "tools/docs/verify/report-hotpath-doc-metadata.py",
     "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh",
     "tools/docs/verify/verify-legacy-testmaps-frozen.py",
+    "tools/knowledge/build_change_manifest.py",
     "tools/knowledge/build_knowledge_catalog.py",
     "tools/knowledge/build_knowledge_graph.py",
+    "tools/knowledge/build_review_bundle.py",
+    "tools/knowledge/build_truth_impact_report.py",
     "tools/knowledge/build_wrapper_retirement_ledger.py",
+    "tools/knowledge/build_wrapper_retirement_report.py",
+    "tools/knowledge/change_runtime.py",
     "tools/knowledge/knowledge_model.py",
     "tools/knowledge/report_knowledge_control_plane.py",
     "tools/specs/build_spec_bundles.py",

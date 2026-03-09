@@ -4,11 +4,14 @@ on:
   pull_request:
     paths:
       - "docs/**"
+      - "docs/meta/knowledge/**"
       - "specs/**"
       - "tools/knowledge/**"
       - "generated/graphs/**"
       - "generated/catalogs/knowledge-catalog.json"
+      - "generated/knowledge/**"
       - "scripts/qa/run-knowledge-integrity-gates.sh"
+      - "scripts/qa/run-knowledge-runtime-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -17,11 +20,14 @@ on:
   push:
     paths:
       - "docs/**"
+      - "docs/meta/knowledge/**"
       - "specs/**"
       - "tools/knowledge/**"
       - "generated/graphs/**"
       - "generated/catalogs/knowledge-catalog.json"
+      - "generated/knowledge/**"
       - "scripts/qa/run-knowledge-integrity-gates.sh"
+      - "scripts/qa/run-knowledge-runtime-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -56,3 +62,8 @@ jobs:
         run: |
           chmod +x scripts/qa/run-knowledge-integrity-gates.sh
           ./scripts/qa/run-knowledge-integrity-gates.sh
+
+      - name: Verify change intelligence runtime
+        run: |
+          chmod +x scripts/qa/run-knowledge-runtime-gates.sh
+          ./scripts/qa/run-knowledge-runtime-gates.sh
