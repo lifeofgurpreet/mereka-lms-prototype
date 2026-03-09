@@ -58,6 +58,7 @@
       "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
       "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
       "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "docs/meta/contracts/INFRA_CROSSWALK.md",
       "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
       "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
       "docs/meta/docs-program/IMPLEMENTATION_ROADMAP.md",
@@ -144,6 +145,7 @@
       ".github/workflows/ci.yml",
       ".github/workflows/docs-policy.yml",
       "Makefile",
+      "deploy/contracts/infra-crosswalk.yaml",
       "deploy/contracts/service-contracts/enterprise-services.yaml",
       "deploy/contracts/service-contracts/mfe.yaml",
       "deploy/contracts/service-contracts/observability-runtime.yaml",
@@ -378,7 +380,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 295,
+  "change_count": 297,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -386,7 +388,7 @@
     "docs:concept": 26,
     "docs:generated": 1,
     "docs:index": 1,
-    "docs:other": 13,
+    "docs:other": 14,
     "docs:review": 17,
     "docs:runbook": 8,
     "specs:evidence": 3,
@@ -468,6 +470,26 @@
         "wrappers": []
       },
       "path": "Makefile",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "deploy/contracts/infra-crosswalk.yaml"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "deploy/contracts/infra-crosswalk.yaml",
       "required_evidence": {},
       "required_reviewers": []
     },
@@ -2305,6 +2327,37 @@
         "wrappers": []
       },
       "path": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/catalog.json",
+          "docs/meta/contracts/INFRA_CROSSWALK.md"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/meta/contracts/INFRA_CROSSWALK.md",
       "required_evidence": {
         "require_adr_update": "conditional",
         "require_runbook_update": "conditional",
