@@ -1,22 +1,41 @@
 ---
 title: "CI/CD Pipeline Specification"
 type: "feature_spec"
-status: "completed"
+id: "SPEC-CICD-PIPELINE"
+status: "active"
+spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-12"
+created: "2026-02-12"
+last_reviewed: "2026-02-12"
+review_due: "2026-06-12"
 version: "1.0.0"
-implementation_note: "GitOps image tag sync improvements ongoing - see docs/operations/runbooks/GITOPS_WORKFLOW.md"
+domain: "platform"
+normativity: "normative"
+implementation_note: "GitOps image tag sync improvements ongoing - see docs/ops/runbooks/GITOPS_WORKFLOW.md"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
   - "specs/secrets-management_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+  - ".github/workflows/ci.yml"
+interfaces:
+  - ".github/workflows/ci.yml"
+  - "deploy/k8s/"
+tags:
+  - "build.gitops-promotion"
+  - "build.image.registry"
+  - "platform.control-plane"
+summary: "Defines the CI/CD contract for building, validating, and promoting platform artifacts through the canonical GitOps release flow."
 links:
   related_docs:
     - "docs/reference/operations/CI_CD_SETUP.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
-    - "docs/runbooks/operations/RELEASE_CHECKLIST.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md"
+    - "docs/ops/runbooks/GITOPS_WORKFLOW.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
   related_specs:
     - "specs/k8s-deployment_spec.md"
     - "specs/secrets-management_spec.md"
