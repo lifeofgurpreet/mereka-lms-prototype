@@ -1,0 +1,235 @@
+{
+  "commands": [
+    {
+      "canonical_command": "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+      "command_id": "docs-catalog-governance",
+      "execution_kind": "command",
+      "forbidden_contexts": [
+        "none"
+      ],
+      "owner": "docs",
+      "purpose": "Check docs catalog governance on changed docs.",
+      "referenced_by_skills": [
+        "docs-truth-review"
+      ],
+      "registry_status": "active",
+      "replacement_if_deprecated": null,
+      "repo": "mereka-lms",
+      "required_flags": [
+        "--range origin/main...HEAD"
+      ],
+      "safe_contexts": [
+        "docs truth review",
+        "catalog validation"
+      ],
+      "source_of_truth": "tools/docs/verify/verify-doc-catalog-governance.py",
+      "validator": "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD"
+    },
+    {
+      "canonical_command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+      "command_id": "docs-policy-gate",
+      "execution_kind": "command",
+      "forbidden_contexts": [
+        "none"
+      ],
+      "owner": "docs",
+      "purpose": "Validate canonical docs policy on the current diff range.",
+      "referenced_by_skills": [
+        "change-impact-triage",
+        "docs-truth-review",
+        "runbook-evidence-triage"
+      ],
+      "registry_status": "active",
+      "replacement_if_deprecated": null,
+      "repo": "mereka-lms",
+      "required_flags": [
+        "--range origin/main...HEAD"
+      ],
+      "safe_contexts": [
+        "docs truth review",
+        "reviewer pass"
+      ],
+      "source_of_truth": "tools/docs/verify/verify-docs-policy.sh",
+      "validator": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD"
+    },
+    {
+      "canonical_command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+      "command_id": "docs-world-class-gates",
+      "execution_kind": "command",
+      "forbidden_contexts": [
+        "partial file-only edits without docs impact"
+      ],
+      "owner": "docs",
+      "purpose": "Run the full local docs verification entrypoint.",
+      "referenced_by_skills": [
+        "control-plane-validation",
+        "cross-repo-release-contract-review"
+      ],
+      "registry_status": "active",
+      "replacement_if_deprecated": null,
+      "repo": "mereka-lms",
+      "required_flags": [],
+      "safe_contexts": [
+        "control-plane validation"
+      ],
+      "source_of_truth": "tools/docs/verify/run-docs-world-class-gates.sh",
+      "validator": "bash tools/docs/verify/run-docs-world-class-gates.sh"
+    },
+    {
+      "canonical_command": "./scripts/plan-all.sh --validate-only",
+      "command_id": "platform-plan-validate",
+      "execution_kind": "command",
+      "forbidden_contexts": [
+        "none"
+      ],
+      "owner": "platform",
+      "purpose": "Validate platform control-plane release and contract conformance.",
+      "referenced_by_skills": [
+        "change-impact-triage",
+        "control-plane-validation",
+        "cross-repo-release-contract-review",
+        "release-obligations-review",
+        "service-identity-lookup"
+      ],
+      "registry_status": "active",
+      "replacement_if_deprecated": null,
+      "repo": "platform-control-plane",
+      "required_flags": [
+        "--validate-only"
+      ],
+      "safe_contexts": [
+        "control-plane validation",
+        "contract review"
+      ],
+      "source_of_truth": "scripts/plan-all.sh",
+      "validator": "./scripts/plan-all.sh --validate-only"
+    },
+    {
+      "canonical_command": "bash scripts/promote.sh --dry-run",
+      "command_id": "promote-dry-run",
+      "execution_kind": "command",
+      "forbidden_contexts": [
+        "without app/from-env context in real use"
+      ],
+      "owner": "platform",
+      "purpose": "Preview promotion behavior without mutating overlays.",
+      "referenced_by_skills": [
+        "promotion-workflow-review"
+      ],
+      "registry_status": "active",
+      "replacement_if_deprecated": null,
+      "repo": "bbi-infrastructure",
+      "required_flags": [
+        "--dry-run"
+      ],
+      "safe_contexts": [
+        "promotion workflow review"
+      ],
+      "source_of_truth": "scripts/promote.sh",
+      "validator": "bash scripts/promote.sh --help"
+    },
+    {
+      "canonical_command": "bash scripts/promote.sh --help",
+      "command_id": "promote-help",
+      "execution_kind": "command",
+      "forbidden_contexts": [
+        "imperative production mutation"
+      ],
+      "owner": "platform",
+      "purpose": "Resolve canonical promotion flags and help text.",
+      "referenced_by_skills": [
+        "promotion-workflow-review",
+        "topology-lookup"
+      ],
+      "registry_status": "active",
+      "replacement_if_deprecated": null,
+      "repo": "bbi-infrastructure",
+      "required_flags": [
+        "--help"
+      ],
+      "safe_contexts": [
+        "promotion workflow review",
+        "topology lookup"
+      ],
+      "source_of_truth": "scripts/promote.sh",
+      "validator": "bash scripts/promote.sh --help"
+    },
+    {
+      "canonical_command": "workflow_dispatch:.github/workflows/promote-image.yml",
+      "command_id": "promote-image-workflow",
+      "execution_kind": "workflow_dispatch",
+      "forbidden_contexts": [
+        "manual summary drift"
+      ],
+      "owner": "platform",
+      "purpose": "Canonical GitHub Actions promotion workflow entrypoint.",
+      "referenced_by_skills": [],
+      "registry_status": "supporting",
+      "replacement_if_deprecated": null,
+      "repo": "bbi-infrastructure",
+      "required_flags": [
+        "app",
+        "from_env",
+        "target_environment",
+        "release_bundle_id"
+      ],
+      "safe_contexts": [
+        "release review",
+        "workflow input lookup"
+      ],
+      "source_of_truth": ".github/workflows/promote-image.yml",
+      "validator": "python3 -c \"import yaml, pathlib; yaml.safe_load(pathlib.Path('.github/workflows/promote-image.yml').read_text())\""
+    },
+    {
+      "canonical_command": "python3 scripts/qa/spec-tools/spec_verify.py specs/ --scan-dirs tests/ scripts/ --repo-root .",
+      "command_id": "spec-verify",
+      "execution_kind": "command",
+      "forbidden_contexts": [
+        "none"
+      ],
+      "owner": "specs",
+      "purpose": "Verify the spec plane against local tests and scripts.",
+      "referenced_by_skills": [],
+      "registry_status": "supporting",
+      "replacement_if_deprecated": null,
+      "repo": "mereka-lms",
+      "required_flags": [
+        "specs/",
+        "--scan-dirs tests/ scripts/",
+        "--repo-root ."
+      ],
+      "safe_contexts": [
+        "spec parity",
+        "spec review"
+      ],
+      "source_of_truth": "scripts/qa/spec-tools/spec_verify.py",
+      "validator": "python3 scripts/qa/spec-tools/spec_verify.py specs/ --scan-dirs tests/ scripts/ --repo-root ."
+    },
+    {
+      "canonical_command": "python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue",
+      "command_id": "wrapper-residue-scan",
+      "execution_kind": "command",
+      "forbidden_contexts": [
+        "none"
+      ],
+      "owner": "docs",
+      "purpose": "Detect transitional residue and wrapper retirement opportunities.",
+      "referenced_by_skills": [
+        "wrapper-retirement-assessment"
+      ],
+      "registry_status": "active",
+      "replacement_if_deprecated": null,
+      "repo": "mereka-lms",
+      "required_flags": [
+        "--fail-on-residue"
+      ],
+      "safe_contexts": [
+        "wrapper retirement assessment"
+      ],
+      "source_of_truth": "tools/docs/verify/scan-doc-catalog-residue.py",
+      "validator": "python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue"
+    }
+  ],
+  "schema_version": 1,
+  "source_skill_registry": "generated/skills/skill-registry.json"
+}
