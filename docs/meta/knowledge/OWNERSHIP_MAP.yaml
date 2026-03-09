@@ -1,0 +1,106 @@
+version: 1
+
+reviewer_roles:
+  architecture:
+    description: Reviews architecture, boundary, and control-plane truth changes.
+  docs:
+    description: Reviews human-facing documentation and reviewer handoff quality.
+  platform:
+    description: Reviews platform/runtime/infrastructure contract changes.
+  security:
+    description: Reviews security, auth, privacy, and compliance-sensitive changes.
+  tenancy_auth:
+    description: Reviews tenancy, identity, and access-isolation changes.
+
+roots:
+  docs:
+    owner_team: docs-program
+    reviewer_roles:
+      - docs
+    purpose: Human-facing operational, conceptual, evidence, and review material.
+  specs:
+    owner_team: architecture
+    reviewer_roles:
+      - architecture
+      - platform
+    purpose: Normative contracts, proposals, plans, and testplans.
+
+lanes:
+  docs:index:
+    owner_team: docs-program
+    reviewer_roles: [docs]
+  docs:concept:
+    owner_team: docs-program
+    reviewer_roles: [docs, architecture]
+  docs:runbook:
+    owner_team: platform-operations
+    reviewer_roles: [docs, platform]
+  docs:evidence:
+    owner_team: release-proof
+    reviewer_roles: [docs, platform]
+  docs:review:
+    owner_team: docs-program
+    reviewer_roles: [docs, architecture]
+  docs:archive:
+    owner_team: docs-program
+    reviewer_roles: [docs]
+  docs:generated:
+    owner_team: docs-program
+    reviewer_roles: [docs]
+  docs:adr:
+    owner_team: architecture
+    reviewer_roles: [architecture]
+  specs:normative:
+    owner_team: architecture
+    reviewer_roles: [architecture, platform]
+  specs:proposal:
+    owner_team: architecture
+    reviewer_roles: [architecture, platform]
+  specs:plan:
+    owner_team: delivery
+    reviewer_roles: [platform]
+  specs:testplan:
+    owner_team: qa
+    reviewer_roles: [platform]
+  specs:generated:
+    owner_team: architecture
+    reviewer_roles: [architecture]
+  specs:reference:
+    owner_team: architecture
+    reviewer_roles: [architecture]
+  specs:evidence:
+    owner_team: qa
+    reviewer_roles: [platform]
+  specs:other:
+    owner_team: architecture
+    reviewer_roles: [architecture]
+
+high_risk_surfaces:
+  - path_prefix: specs/
+    match_lanes: [specs:normative]
+    mandatory_signoff: [architecture, platform]
+  - path_prefix: specs/proposals/
+    match_lanes: [specs:proposal]
+    mandatory_signoff: [architecture]
+  - path_prefix: specs/plans/
+    match_lanes: [specs:plan, specs:testplan]
+    mandatory_signoff: [platform]
+  - path_prefix: docs/adr/
+    match_lanes: [docs:adr]
+    mandatory_signoff: [architecture]
+  - path_prefix: docs/ops/
+    match_lanes: [docs:runbook]
+    mandatory_signoff: [platform, docs]
+  - path_prefix: docs/meta/docs-program/
+    match_lanes: [docs:review]
+    mandatory_signoff: [docs, architecture]
+
+surface_overrides:
+  - path: specs/data-migrations-kajabi-mct_spec.md
+    owner_team: architecture
+    reviewer_roles: [architecture, platform]
+    note: Normative holdout explicitly preserved from Wave 3/Wave 4.
+  - path: docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md
+    owner_team: docs-program
+    reviewer_roles: [docs, architecture]
+    note: Governs wrapper retirement decisions.

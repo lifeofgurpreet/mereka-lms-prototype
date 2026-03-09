@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4779,
+  "edge_count": 4794,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3756,6 +3756,31 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/docs-program/root-collapse/docs-top-level-evidence-collapse-map.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/REVIEW_RULES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -11256,6 +11281,31 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/docs-program/root-collapse/docs-top-level-evidence-collapse-map.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/REVIEW_RULES.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "contains",
@@ -18360,6 +18410,31 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/REVIEW_RULES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/standing-orders/GITOPS_AGENT.md"
     },
     {
@@ -23899,7 +23974,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1617,
+  "node_count": 1622,
   "nodes": [
     {
       "id": "classification:archival",
@@ -31174,6 +31249,61 @@
       "root": "docs",
       "status": "",
       "title": "docs-top-level-evidence-collapse-map"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "CHANGE_CLASSES"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "EVIDENCE_OBLIGATIONS"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "OWNERSHIP_MAP"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/REVIEW_RULES.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_RULES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "REVIEW_RULES"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Execution Tracker"
     },
     {
       "classification": "supporting",

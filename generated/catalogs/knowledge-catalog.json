@@ -4,7 +4,7 @@
     "canonical": 44,
     "compatibility": 5,
     "generated": 49,
-    "supporting": 1203
+    "supporting": 1208
   },
   "entries": [
     {
@@ -5928,6 +5928,51 @@
       "root": "docs",
       "status": "",
       "title": "docs-top-level-evidence-collapse-map"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "CHANGE_CLASSES"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "EVIDENCE_OBLIGATIONS"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "OWNERSHIP_MAP"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_RULES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "REVIEW_RULES"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Execution Tracker"
     },
     {
       "classification": "supporting",
@@ -14345,7 +14390,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1593,
+  "entry_count": 1598,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14354,7 +14399,7 @@
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 142,
+    "docs:other": 147,
     "docs:review": 48,
     "docs:runbook": 482,
     "specs:evidence": 43,
@@ -14367,7 +14412,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1370,
+    "docs": 1375,
     "specs": 223
   }
 }

@@ -1,0 +1,66 @@
+version: 1
+
+obligations:
+  normative_contract_change:
+    require_status_update: true
+    require_evidence_pack: true
+    require_runbook_update: conditional
+    require_adr_update: conditional
+    require_plan_refresh: true
+    require_testplan_refresh: true
+  proposal_only:
+    require_status_update: true
+    require_evidence_pack: false
+    require_runbook_update: false
+    require_adr_update: conditional
+    require_plan_refresh: conditional
+    require_testplan_refresh: false
+  plan_only:
+    require_status_update: true
+    require_evidence_pack: conditional
+    require_runbook_update: conditional
+    require_adr_update: false
+    require_plan_refresh: true
+    require_testplan_refresh: conditional
+  compatibility_wrapper_update:
+    require_status_update: false
+    require_evidence_pack: false
+    require_runbook_update: false
+    require_adr_update: false
+    require_plan_refresh: false
+    require_testplan_refresh: false
+  generated_surface_refresh:
+    require_status_update: false
+    require_evidence_pack: false
+    require_runbook_update: false
+    require_adr_update: false
+    require_plan_refresh: false
+    require_testplan_refresh: false
+  evidence_only_change:
+    require_status_update: conditional
+    require_evidence_pack: true
+    require_runbook_update: false
+    require_adr_update: false
+    require_plan_refresh: false
+    require_testplan_refresh: false
+  docs_support_change:
+    require_status_update: conditional
+    require_evidence_pack: false
+    require_runbook_update: conditional
+    require_adr_update: conditional
+    require_plan_refresh: false
+    require_testplan_refresh: false
+  archival_only_change:
+    require_status_update: false
+    require_evidence_pack: false
+    require_runbook_update: false
+    require_adr_update: false
+    require_plan_refresh: false
+    require_testplan_refresh: false
+  reviewer_handoff_only:
+    require_status_update: false
+    require_evidence_pack: false
+    require_runbook_update: false
+    require_adr_update: false
+    require_plan_refresh: false
+    require_testplan_refresh: false

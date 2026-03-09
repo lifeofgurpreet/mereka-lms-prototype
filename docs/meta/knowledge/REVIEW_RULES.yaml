@@ -1,0 +1,50 @@
+version: 1
+
+review_rules:
+  normative_contract_change:
+    required_reviewers: [architecture, platform]
+    optional_reviewers: [docs]
+    block_merge_without_all_required: true
+  proposal_only:
+    required_reviewers: [architecture]
+    optional_reviewers: [platform]
+    block_merge_without_all_required: true
+  plan_only:
+    required_reviewers: [platform]
+    optional_reviewers: [docs]
+    block_merge_without_all_required: true
+  compatibility_wrapper_update:
+    required_reviewers: [architecture]
+    optional_reviewers: [docs]
+    block_merge_without_all_required: true
+  generated_surface_refresh:
+    required_reviewers: []
+    optional_reviewers: [docs, architecture]
+    block_merge_without_all_required: false
+  evidence_only_change:
+    required_reviewers: [platform]
+    optional_reviewers: [docs]
+    block_merge_without_all_required: false
+  docs_support_change:
+    required_reviewers: [docs]
+    optional_reviewers: [architecture, platform]
+    block_merge_without_all_required: false
+  archival_only_change:
+    required_reviewers: [docs]
+    optional_reviewers: []
+    block_merge_without_all_required: false
+  reviewer_handoff_only:
+    required_reviewers: [docs]
+    optional_reviewers: [architecture]
+    block_merge_without_all_required: false
+
+surface_specific_rules:
+  - path_prefix: specs/data-migrations-kajabi-mct_spec.md
+    required_reviewers: [architecture, platform]
+    note: Explicit Wave 3/Wave 4 normative holdout.
+  - path_prefix: docs/adr/
+    required_reviewers: [architecture]
+    note: ADR changes always need architecture review.
+  - path_prefix: docs/meta/knowledge/
+    required_reviewers: [docs, architecture]
+    note: Change intelligence runtime control plane.
