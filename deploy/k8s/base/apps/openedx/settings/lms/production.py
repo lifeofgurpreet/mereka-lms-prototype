@@ -914,6 +914,11 @@ EDXNOTES_INTERNAL_API = "http://notes:8000/api/v1"
 
 LMS_BASE = MEREKA_LMS_DOMAIN
 LMS_ROOT_URL = MEREKA_LMS_BASE_URL
+# LMS_INTERNAL_ROOT_URL: used by enterprise API calls within the pod.
+# In K8s, localhost:80 doesn't serve LMS — use the external URL so requests
+# route through the ingress (same as dev does).
+LMS_INTERNAL_ROOT_URL = LMS_ROOT_URL
+ENTERPRISE_API_URL = f"{LMS_ROOT_URL}/enterprise/api/v1/"
 CMS_BASE = MEREKA_STUDIO_DOMAIN
 CMS_ROOT_URL = MEREKA_STUDIO_BASE_URL
 
