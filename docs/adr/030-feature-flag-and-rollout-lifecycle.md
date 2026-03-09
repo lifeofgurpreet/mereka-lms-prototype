@@ -6,11 +6,10 @@ last_reviewed: 2026-03-07
 review_due: 2026-06-30
 canonical_root: docs/adr
 doc_class: adr
-summary: Defines feature-flag lifecycle and rollout/change-management rules.
+summary: Lifecycle contract for runtime feature flags, including ownership, rollout evidence, rollback posture, and removal expectations.
 tags:
-- rollout
-- flags
-- governance
+- docs.policy
+- runtime.async-task
 decision_type: foundation
 decision_status: accepted
 governs:

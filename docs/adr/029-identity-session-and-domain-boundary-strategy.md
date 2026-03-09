@@ -6,11 +6,11 @@ last_reviewed: 2026-03-07
 review_due: 2026-06-30
 canonical_root: docs/adr
 doc_class: adr
-summary: Defines OIDC, cookie, and tenant/domain boundary rules for session handling.
+summary: Identity and session contract for root-domain boundaries, federation-first sign-in, and explicit cross-domain authentication flows.
 tags:
-- auth
-- tenant
-- boundary
+- auth.oidc
+- auth.cookie-boundary
+- tenant.isolation
 decision_type: foundation
 decision_status: accepted
 governs:
@@ -38,6 +38,7 @@ related_tutor_docs:
 - https://docs.tutor.edly.io
 related_specs: []
 related_runbooks:
+- docs/ops/security/ENTERPRISE_SSO_GUIDE.md
 - docs/reference/operations/OPENEDX_HOSTNAMES.md
 - docs/reference/operations/DOMAIN_MATRIX.md
 related_evidence: []

@@ -6,11 +6,11 @@ last_reviewed: 2026-03-07
 review_due: 2026-06-30
 canonical_root: docs/adr
 doc_class: adr
-summary: Defines tenant lifecycle, isolation, and domain-boundary obligations.
+summary: Tenant lifecycle contract covering onboarding, runtime validation, isolation, branding handoff, and offboarding outcomes.
 tags:
-- tenant
-- lifecycle
-- branding
+- tenant.lifecycle
+- tenant.isolation
+- frontend.brand.tokens
 decision_type: foundation
 decision_status: accepted
 governs:
@@ -37,7 +37,7 @@ related_tutor_docs:
 related_specs:
 - specs/multi-tenancy-architecture_spec.md
 related_runbooks:
-- docs/runbooks/operations/TENANT_PROVISIONING.md
+- docs/ops/runbooks/TENANT_PROVISIONING.md
 - docs/guides/branding/TENANT_CONFIG_HANDOFF.md
 related_evidence: []
 fitness_functions:
