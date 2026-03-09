@@ -71,6 +71,7 @@ This directory contains canonical operator procedures for runtime incidents, dep
 - [`credential-key-rotation-runbook.md`](credential-key-rotation-runbook.md)
 - [`credential-verification-failure-runbook.md`](credential-verification-failure-runbook.md)
 - [`database-issues.md`](database-issues.md)
+- [`DEV_DB_REBUILD_CANONICAL.md`](DEV_DB_REBUILD_CANONICAL.md)
 - [`django-raw-sql-bypass.md`](django-raw-sql-bypass.md)
 - [`performance-degradation.md`](performance-degradation.md)
 - [`prod-park-mode.md`](prod-park-mode.md)

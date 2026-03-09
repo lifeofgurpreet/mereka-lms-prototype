@@ -135,10 +135,10 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
 
 ## Documentation Files
 
-- `V1_COMPLETE.md` - 189 endpoints across 33 sections
-- `V2_COMPLETE.md` - 55 endpoints across 9 sections  
-- `V3_COMPLETE.md` - 18 endpoints across 3 sections
-- `V4_COMPLETE.md` - 12 endpoints across 1 section
+- [V1_COMPLETE.md](V1_COMPLETE.md) - 189 endpoints across 33 sections
+- [V2_COMPLETE.md](V2_COMPLETE.md) - 55 endpoints across 9 sections
+- [V3_COMPLETE.md](V3_COMPLETE.md) - 18 endpoints across 3 sections
+- [V4_COMPLETE.md](V4_COMPLETE.md) - 12 endpoints across 1 section
 
 ---
 

@@ -12,6 +12,7 @@ This directory contains operator-facing reference material for the current runti
 
 ## Runtime and deployment reference
 
+- [`BACKUP_COVERAGE_MATRIX.md`](BACKUP_COVERAGE_MATRIX.md) for backup coverage reference
 - [`CANONICAL_DEPLOY_CONTRACT.md`](CANONICAL_DEPLOY_CONTRACT.md) for deployment contract reference
 - [`DEPLOYMENT_LANES.md`](DEPLOYMENT_LANES.md) for lane ownership across deployments
 - [`CAPABILITY_MATRIX.md`](CAPABILITY_MATRIX.md) for current platform capability reference

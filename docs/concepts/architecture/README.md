@@ -25,13 +25,14 @@ This directory is the canonical architecture narrative and living-standards root
 - **[DATABASE_ARCHITECTURE.md](DATABASE_ARCHITECTURE.md)** - Database strategy (MySQL, MongoDB Atlas, Redis)
 - **[ARCHITECTURE_MONGODB.md](ARCHITECTURE_MONGODB.md)** - Atlas-specific MongoDB architecture notes
 - **[PRODUCTION_ARCHITECTURE_REALITY.md](PRODUCTION_ARCHITECTURE_REALITY.md)** - runtime reality and system-shape checkpoint
-- **[MONGODB_ATLAS_MIGRATION.md](../../../reports/2025/closures/MONGODB_ATLAS_MIGRATION.md)** - Historical MongoDB Atlas migration closeout
+- **[MONGODB_ATLAS_MIGRATION.md](MONGODB_ATLAS_MIGRATION.md)** - Historical MongoDB Atlas migration closeout retained in the architecture narrative surface
 - **[MULTISITE_ANALYSIS.md](../../../reports/2025/audits/MULTISITE_ANALYSIS.md)** - Historical multi-site audit
 - **[ADR-025-deployment-boundary.md](../../architecture/rfc/ADR-025-deployment-boundary.md)** - Transitional RFC location retained under the legacy architecture root during Wave 2
 
 ## Core standards and contracts
 
 - **[COPY_TERMINOLOGY_CONTRACT.md](COPY_TERMINOLOGY_CONTRACT.md)** - copy and terminology rules that shape user-facing consistency
+- **[CSS_SCOPING_AUDIT.md](CSS_SCOPING_AUDIT.md)** - CSS scoping audit for branded and multisite surfaces
 - **[INTERACTION_STATE_CONTRACT.md](INTERACTION_STATE_CONTRACT.md)** - interaction-state rules for UI behavior
 - **[PERFORMANCE_BUDGETS.md](PERFORMANCE_BUDGETS.md)** - architecture-level performance budget contract
 - **[GDPR_COMPLIANCE.md](GDPR_COMPLIANCE.md)** - architecture-level privacy and compliance framing
@@ -71,10 +72,12 @@ This directory is the canonical architecture narrative and living-standards root
 - **[AUDIT_LOGGING_ASSESSMENT.md](AUDIT_LOGGING_ASSESSMENT.md)** - audit-logging assessment
 - **[CATALOG_DISCOVERY_AUDIT.md](CATALOG_DISCOVERY_AUDIT.md)** - discovery/catalog audit
 - **[LEGACY_COURSEWARE_AUDIT.md](LEGACY_COURSEWARE_AUDIT.md)** - legacy courseware audit
+- **[MULTI_BRAND_MULTI_SITE.md](MULTI_BRAND_MULTI_SITE.md)** - architecture framing for multi-brand multi-site operation
 - **[OSCAR_DEPRECATION.md](OSCAR_DEPRECATION.md)** - legacy Oscar deprecation notes
 - **[PROCTORING_INTEGRATION.md](PROCTORING_INTEGRATION.md)** - proctoring architecture and integration boundary
 - **[PURCHASE_GATEWAY.md](PURCHASE_GATEWAY.md)** - purchase gateway architecture overview
 - **[VIDEO_PIPELINE.md](VIDEO_PIPELINE.md)** - video pipeline architecture
+- **[VIDEO_HOSTING_COST_COMPARISON.md](VIDEO_HOSTING_COST_COMPARISON.md)** - video hosting cost comparison retained as active architecture reference
 - **[PRODUCT_KPI_FRAMEWORK.md](PRODUCT_KPI_FRAMEWORK.md)** - KPI architecture framing for product analytics
 
 ## Programs, proposals, and repo hygiene
@@ -85,7 +88,14 @@ This directory is the canonical architecture narrative and living-standards root
 - **[OPENEDX_REPO_AUDIT_IMPLEMENTOR_KICKOFF.md](OPENEDX_REPO_AUDIT_IMPLEMENTOR_KICKOFF.md)** - implementor kickoff packet
 - **[OPENEDX_REPO_AUDIT_IMPLEMENTOR_PR_TEMPLATE.md](OPENEDX_REPO_AUDIT_IMPLEMENTOR_PR_TEMPLATE.md)** - PR template for audit slices
 - **[OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md](OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md)** - detailed audit implementor specs
-- **[OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md)** through **[OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md)** - issue-level audit work packets
+- **[OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md)** - issue-level audit work packet
+- **[OPENEDX_REPO_AUDIT_ISSUE_216_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_216_PACKET.md)** - issue-level audit work packet
+- **[OPENEDX_REPO_AUDIT_ISSUE_217_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_217_PACKET.md)** - issue-level audit work packet
+- **[OPENEDX_REPO_AUDIT_ISSUE_218_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_218_PACKET.md)** - issue-level audit work packet
+- **[OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md)** - issue-level audit work packet
+- **[OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md)** - issue-level audit work packet
+- **[OPENEDX_REPO_AUDIT_ISSUE_221_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_221_PACKET.md)** - issue-level audit work packet
+- **[OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md)** - issue-level audit work packet
 - **[LEARNING_SLOT_EXPANSION_PROPOSAL.md](LEARNING_SLOT_EXPANSION_PROPOSAL.md)** - architecture proposal still in evaluation
 
 ## Open edX Service Overviews

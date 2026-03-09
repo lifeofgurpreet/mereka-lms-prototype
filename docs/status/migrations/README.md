@@ -21,3 +21,12 @@ This directory is the active migration-reporting surface for in-flight migration
 Files here are part of the active reporting root under `docs/status/**`.
 
 Do not create new active migration status docs under legacy `reports/**` paths.
+
+## Current migration reports
+
+- [drive-airtable-STATUS.md](drive-airtable-STATUS.md)
+- [MIGRATION_STATUS_AND_ROLLBACK.md](MIGRATION_STATUS_AND_ROLLBACK.md)
+- [RKE2_MIGRATION_PLAN.md](RKE2_MIGRATION_PLAN.md)
+- [RKE2_NONPROD_THEME_AND_CONVERGENCE_FIX.md](RKE2_NONPROD_THEME_AND_CONVERGENCE_FIX.md)
+- [RKE2_ROLLOUT_MATRIX.md](RKE2_ROLLOUT_MATRIX.md)
+- [STAGING_PROMOTION_PLAYBOOK_110.md](STAGING_PROMOTION_PLAYBOOK_110.md)
