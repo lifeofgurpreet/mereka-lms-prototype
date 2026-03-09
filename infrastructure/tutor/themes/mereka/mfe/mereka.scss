@@ -9,11 +9,11 @@ $mereka-font-path: "../fonts";
 :root {
   --mereka-mfe-branding-rev: "2026-02-25-t102";
   --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
-  --mereka-mfe-card-shadow: 0 25px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
   --mereka-mfe-surface: var(--pgn-color-white);
-  --mereka-mfe-surface-muted: rgb(var(--mereka-color-ink-deep-rgb) / 0.04);
-  --mereka-mfe-border: rgb(var(--mereka-color-ink-deep-rgb) / 0.10);
-  --mereka-mfe-focus: rgb(var(--mereka-color-teal-rgb) / 0.18);
+  --mereka-mfe-surface-muted: rgba(26, 22, 35, 0.04);
+  --mereka-mfe-border: rgba(26, 22, 35, 0.10);
+  --mereka-mfe-focus: rgba(35, 112, 114, 0.18);
 }
 
 /* RISK: LOW — html element selector, cannot be renamed */
@@ -22,8 +22,8 @@ body {
   font-family: var(--mereka-font-body, "Poppins", var(--pgn-font-family-base, sans-serif));
   background-color: var(--mereka-color-surface-primary);
   background-image:
-    radial-gradient(circle at top right, rgb(var(--mereka-color-blue-rgb) / 0.08), transparent 45%),
-    radial-gradient(circle at 10% 20%, rgb(var(--mereka-color-magenta-rgb) / 0.06), transparent 35%);
+    radial-gradient(circle at top right, rgba(41, 92, 173, 0.08), transparent 45%),
+    radial-gradient(circle at 10% 20%, rgba(171, 59, 120, 0.06), transparent 35%);
 }
 
 h1,
@@ -45,7 +45,7 @@ h6,
 // BRITTLE: .navbar shell selector remains until header shell is fully slot-scoped across MFEs (target: 2026-Q3).
 .navbar {
   background: var(--pgn-color-white);
-  border-bottom: 1px solid var(--mereka-mfe-navbar-divider, rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
+  border-bottom: 1px solid var(--mereka-mfe-navbar-divider, rgba(26, 22, 35, 0.08));
   box-shadow: var(--mereka-mfe-navbar-shadow);
   padding: var(--mereka-mfe-navbar-padding);
 }
@@ -105,7 +105,7 @@ h6,
 /* RISK: LOW — .btn-outline-primary; color-only override */
 .btn-outline-primary {
   color: var(--mereka-color-ink-900);
-  border-color: var(--mereka-mfe-btn-outline-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.25));
+  border-color: var(--mereka-mfe-btn-outline-border, rgba(26, 22, 35, 0.25));
 }
 
 /* RISK: LOW — hover/focus color only; graceful degradation */
@@ -186,26 +186,26 @@ label {
 
 /* RISK: LOW — alert variant colors; background/border color only */
 .alert-info {
-  background: var(--mereka-mfe-alert-info-bg, rgb(var(--mereka-color-sky-rgb) / 0.22));
-  border-color: var(--mereka-mfe-alert-info-border, rgb(var(--mereka-color-sky-rgb) / 0.55));
+  background: var(--mereka-mfe-alert-info-bg, rgba(148, 209, 228, 0.22));
+  border-color: var(--mereka-mfe-alert-info-border, rgba(148, 209, 228, 0.55));
 }
 
 /* RISK: LOW — alert variant colors; background/border color only */
 .alert-success {
-  background: var(--mereka-mfe-alert-success-bg, rgb(var(--mereka-color-forest-rgb) / 0.12));
-  border-color: var(--mereka-mfe-alert-success-border, rgb(var(--mereka-color-forest-rgb) / 0.35));
+  background: var(--mereka-mfe-alert-success-bg, rgba(44, 110, 73, 0.12));
+  border-color: var(--mereka-mfe-alert-success-border, rgba(44, 110, 73, 0.35));
 }
 
 /* RISK: LOW — alert variant colors; background/border color only */
 .alert-warning {
-  background: var(--mereka-mfe-alert-warning-bg, rgb(var(--mereka-color-gold-rgb) / 0.14));
-  border-color: var(--mereka-mfe-alert-warning-border, rgb(var(--mereka-color-gold-rgb) / 0.55));
+  background: var(--mereka-mfe-alert-warning-bg, rgba(158, 112, 0, 0.14));
+  border-color: var(--mereka-mfe-alert-warning-border, rgba(158, 112, 0, 0.55));
 }
 
 /* RISK: LOW — alert variant colors; background/border color only */
 .alert-danger {
-  background: var(--mereka-mfe-alert-danger-bg, rgb(var(--mereka-color-burgundy-rgb) / 0.08));
-  border-color: var(--mereka-mfe-alert-danger-border, rgb(var(--mereka-color-burgundy-rgb) / 0.22));
+  background: var(--mereka-mfe-alert-danger-bg, rgba(140, 0, 47, 0.08));
+  border-color: var(--mereka-mfe-alert-danger-border, rgba(140, 0, 47, 0.22));
 }
 
 /* RISK: MEDIUM — modal content shell; border-radius degrade visually on rename */
@@ -225,7 +225,7 @@ label {
 /* RISK: LOW — dropdown toggle shape/border color only */
 .dropdown-toggle {
   border-radius: var(--mereka-mfe-pill-radius);
-  border-color: var(--mereka-mfe-dropdown-toggle-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.2));
+  border-color: var(--mereka-mfe-dropdown-toggle-border, rgba(26, 22, 35, 0.2));
 }
 
 /* RISK: LOW — Bootstrap/Paragon tabs; border-radius shape only */
@@ -247,7 +247,7 @@ label {
   display: inline-flex;
   align-items: center;
   gap: var(--mereka-mfe-badge-gap);
-  background-color: var(--mereka-mfe-badge-bg, rgb(var(--mereka-color-teal-rgb) / 0.12));
+  background-color: var(--mereka-mfe-badge-bg, rgba(35, 112, 114, 0.12));
   color: var(--mereka-color-teal);
   padding: var(--mereka-mfe-badge-padding);
   border-radius: var(--mereka-mfe-pill-radius);
@@ -340,7 +340,7 @@ label {
 .profile-page .certificate {
   border-radius: var(--mereka-mfe-card-radius);
   border: 1px solid var(--mereka-mfe-border);
-  background: linear-gradient(180deg, rgb(var(--mereka-color-teal-rgb) / 0.06) 0%, var(--mereka-mfe-surface) 42%);
+  background: linear-gradient(180deg, rgba(35, 112, 114, 0.06) 0%, var(--mereka-mfe-surface) 42%);
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
@@ -364,7 +364,7 @@ label {
 .mereka-learning-course-tabs-hint {
   padding: 0.5rem 0.75rem;
   border-left: 3px solid var(--mereka-color-teal);
-  background: rgb(var(--mereka-color-teal-rgb) / 0.08);
+  background: rgba(35, 112, 114, 0.08);
   color: var(--mereka-color-ink-700);
   font-size: var(--pgn-typography-font-size-sm);
 }

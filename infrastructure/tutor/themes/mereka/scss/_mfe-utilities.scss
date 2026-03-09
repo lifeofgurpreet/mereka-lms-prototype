@@ -4,7 +4,7 @@
 }
 
 .badge-mereka {
-  background: rgb(var(--mereka-color-teal-rgb) / 0.12);
+  background: rgba(35, 112, 114, 0.12);
   color: var(--mereka-color-teal);
   border-radius: 999px;
   padding: 0.35rem 1rem;
@@ -16,12 +16,12 @@
 .shadow-mereka-card {
   box-shadow: var(--mereka-shadow-card);
   border-radius: var(--mereka-radius-xl);
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  border: 1px solid rgba(26, 22, 35, 0.08);
 }
 
 .textbox-mereka {
   border-radius: 16px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.1);
+  border: 1px solid rgba(26, 22, 35, 0.1);
   padding: 1rem 1.25rem;
   background-color: var(--pgn-color-white);
 }

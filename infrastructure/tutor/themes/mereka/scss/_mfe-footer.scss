@@ -1,13 +1,13 @@
 /* Footer v2: dark background, 5-zone layout */
 .mereka-footer--v2 {
-  background: rgb(var(--mereka-color-ink-deep-rgb));
+  background: rgb(26, 22, 35);
   color: var(--pgn-color-white);
   margin-top: 4rem;
   font-family: var(--mereka-font-body, "Poppins", "Lato", sans-serif);
 }
 
 .mereka-footer--v2 a {
-  color: rgb(var(--mereka-color-white-rgb) / 0.8);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   transition: color 0.15s;
 }
@@ -25,7 +25,7 @@
 
 /* Zone 1: Social Row */
 .footer-social {
-  border-bottom: 1px solid rgb(var(--mereka-color-white-rgb) / 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.5rem 0;
 }
 
@@ -71,7 +71,7 @@
 
 /* Zone 2: Nav Strip */
 .footer-nav {
-  border-bottom: 1px solid rgb(var(--mereka-color-white-rgb) / 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1rem 0;
 }
 
@@ -105,12 +105,12 @@
 }
 
 .footer-whatsapp-btn:hover {
-  background: rgb(var(--mereka-color-white-rgb) / 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Zone 3: 4-column body */
 .footer-body {
-  border-bottom: 1px solid rgb(var(--mereka-color-white-rgb) / 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 3rem 0;
 }
 
@@ -148,7 +148,7 @@
 
 .footer-sub-heading {
   font-size: 0.75rem;
-  color: rgb(var(--mereka-color-white-rgb) / 0.5);
+  color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 1rem;
@@ -156,7 +156,7 @@
 
 .footer-app-label {
   font-size: 0.875rem;
-  color: rgb(var(--mereka-color-white-rgb) / 0.8);
+  color: rgba(255, 255, 255, 0.8);
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
 }
@@ -169,7 +169,7 @@
 .footer-badge {
   display: inline-block;
   padding: 0.5rem 1rem;
-  border: 1px solid rgb(var(--mereka-color-white-rgb) / 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0.5rem;
   font-size: 0.75rem;
   color: var(--pgn-color-white);
@@ -195,7 +195,7 @@
 }
 
 .footer-cta-btn:hover {
-  background: rgb(var(--mereka-color-white-rgb) / 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Zone 4: Legal Bottom */
@@ -212,11 +212,11 @@
 }
 
 .footer-copyright {
-  color: rgb(var(--mereka-color-white-rgb) / 0.6);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .footer-legal a {
-  color: rgb(var(--mereka-color-white-rgb) / 0.6);
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.75rem;
@@ -229,7 +229,7 @@
 /* Legacy .mereka-footer without --v2 modifier */
 .mereka-footer:not(.mereka-footer--v2) {
   background: var(--pgn-color-white);
-  border-top: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
   padding: 3rem 0 2rem;
   margin-top: 4rem;
 }
@@ -266,7 +266,7 @@
 .mereka-footer:not(.mereka-footer--v2) .footer-tags span {
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
-  background: rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  background: rgba(26, 22, 35, 0.08);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -307,7 +307,7 @@
   color: var(--mereka-color-ink-500);
   padding-top: 1.5rem;
   margin-top: 1.5rem;
-  border-top: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.06);
+  border-top: 1px solid rgba(26, 22, 35, 0.06);
 }
 
 @media (max-width: 992px) {
