@@ -6,7 +6,7 @@
 
 - Generated on: 2026-03-09
 - Total findings: 10
-- Status counts: {"FIXED": 2, "INVALIDATED": 3, "OPEN": 3, "PARTIAL": 2}
+- Status counts: {"FIXED": 3, "INVALIDATED": 3, "OPEN": 2, "PARTIAL": 2}
 
 ## Audit Breakdown
 
@@ -17,9 +17,9 @@
 - INVALIDATED: 2
 
 ### repo_truth_audit
-- OPEN: 2
+- OPEN: 1
 - PARTIAL: 1
-- FIXED: 2
+- FIXED: 3
 - INVALIDATED: 1
 
 ## Findings
@@ -28,7 +28,7 @@
 |---|---|---|---|---|---|---|
 | RTA-01 | repo_truth_audit | FIXED | blocker | high | docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md | Demote unverifiable future completion claims or update verification semantics mechanically. |
 | RTA-02 | repo_truth_audit | FIXED | blocker | high | docs/archive/reports/docs-program-scorecard-20260313.md | Keep the dated artifact absent until it can be generated with a real verification date. |
-| RTA-03 | repo_truth_audit | OPEN | major | high | generated/adr-bundles/*.md<br>scripts/qa/build_decision_graph.py | Fix the ADR bundle generator so generated links resolve into canonical docs/adr paths. |
+| RTA-03 | repo_truth_audit | FIXED | major | high | generated/adr-bundles/*.md<br>scripts/qa/build_decision_graph.py | Fix the ADR bundle generator so generated links resolve into canonical docs/adr paths. |
 | RTA-04 | repo_truth_audit | OPEN | major | high | specs/catalog.json<br>specs/_generated/graph.json<br>specs/_generated/indexes/spec-read-first.md | Land deterministic spec catalog, graph, and read-first surfaces with CI checks. |
 | RTA-05 | repo_truth_audit | PARTIAL | medium | medium | docs/catalog.json<br>generated/catalogs/docs-catalog.json | Keep generated catalog primary and verify docs/catalog.json stays a mirror-only projection. |
 | RTA-06 | repo_truth_audit | INVALIDATED | medium | medium | docs/archive/reports/docs-program-scorecard-20260306.md | Introduce explicit program prefixes in read-first and handoff surfaces so wave terms do not collide. |
@@ -70,7 +70,7 @@ PY`
 ### RTA-03 — Generated ADR bundles contain broken relative navigation
 
 - Audit: `repo_truth_audit`
-- Status: `OPEN`
+- Status: `FIXED`
 - Severity: `major`
 - Owner: `platform-team`
 - Files: `generated/adr-bundles/*.md, scripts/qa/build_decision_graph.py`
@@ -84,7 +84,7 @@ for bundle in Path('generated/adr-bundles').glob('*.md'):
       print(f'{bundle}:{target}')
 PY`
 - Risk: `high`
-- Notes: broken_links=14
+- Notes: broken_links=0
 
 ### RTA-04 — Spec plane still lacks full machine-readable parity surfaces
 

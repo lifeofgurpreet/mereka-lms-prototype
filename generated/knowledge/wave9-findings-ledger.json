@@ -35,13 +35,13 @@
       "user_or_agent_risk": "high"
     },
     {
-      "current_status": "OPEN",
+      "current_status": "FIXED",
       "files_affected": [
         "generated/adr-bundles/*.md",
         "scripts/qa/build_decision_graph.py"
       ],
       "finding_id": "RTA-03",
-      "notes": "broken_links=14",
+      "notes": "broken_links=0",
       "owner": "platform-team",
       "proof_command": "python3 - <<'PY'\nfrom pathlib import Path; import re\nlink_re=re.compile(r'\\[[^\\]]+\\]\\(([^)]+)\\)')\nfor bundle in Path('generated/adr-bundles').glob('*.md'):\n  for target in link_re.findall(bundle.read_text()):\n    p=(bundle.parent/target).resolve()\n    if target and not target.startswith(('http://','https://','#','mailto:')) and not p.exists():\n      print(f'{bundle}:{target}')\nPY",
       "recommended_action": "Fix the ADR bundle generator so generated links resolve into canonical docs/adr paths.",
@@ -179,9 +179,9 @@
   ],
   "generated_on": "2026-03-09",
   "status_totals": {
-    "FIXED": 2,
+    "FIXED": 3,
     "INVALIDATED": 3,
-    "OPEN": 3,
+    "OPEN": 2,
     "PARTIAL": 2
   },
   "total_findings": 10
