@@ -9,9 +9,8 @@ canonical_root: docs/adr/rfc
 doc_class: rfc
 summary: Proposes the authorization and role-boundary model for tenant-aware access.
 tags:
-- auth
-- roles
-- tenant
+  - auth.authorization.roles
+  - tenant.isolation
 decision_type: domain
 decision_status: proposed
 governs:

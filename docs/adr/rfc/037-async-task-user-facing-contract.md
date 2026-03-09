@@ -9,9 +9,7 @@ canonical_root: docs/adr/rfc
 doc_class: rfc
 summary: Proposes the user-facing contract for async task status, retry, and recovery.
 tags:
-- async
-- tasks
-- runtime
+  - runtime.async-task
 decision_type: domain
 decision_status: proposed
 governs:
