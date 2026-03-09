@@ -51,14 +51,14 @@
       "user_or_agent_risk": "high"
     },
     {
-      "current_status": "OPEN",
+      "current_status": "FIXED",
       "files_affected": [
         "specs/catalog.json",
         "specs/_generated/graph.json",
         "specs/_generated/indexes/spec-read-first.md"
       ],
       "finding_id": "RTA-04",
-      "notes": "missing=specs/catalog.json, specs/_generated/graph.json, specs/_generated/indexes/spec-read-first.md",
+      "notes": "missing=none",
       "owner": "platform-team",
       "proof_command": "test -f specs/catalog.json; test -f specs/_generated/graph.json; test -f specs/_generated/indexes/spec-read-first.md",
       "recommended_action": "Land deterministic spec catalog, graph, and read-first surfaces with CI checks.",
@@ -179,9 +179,9 @@
   ],
   "generated_on": "2026-03-09",
   "status_totals": {
-    "FIXED": 3,
+    "FIXED": 4,
     "INVALIDATED": 3,
-    "OPEN": 2,
+    "OPEN": 1,
     "PARTIAL": 2
   },
   "total_findings": 10

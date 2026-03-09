@@ -6,7 +6,7 @@
 
 - Generated on: 2026-03-09
 - Total findings: 10
-- Status counts: {"FIXED": 3, "INVALIDATED": 3, "OPEN": 2, "PARTIAL": 2}
+- Status counts: {"FIXED": 4, "INVALIDATED": 3, "OPEN": 1, "PARTIAL": 2}
 
 ## Audit Breakdown
 
@@ -17,9 +17,9 @@
 - INVALIDATED: 2
 
 ### repo_truth_audit
-- OPEN: 1
+- OPEN: 0
 - PARTIAL: 1
-- FIXED: 3
+- FIXED: 4
 - INVALIDATED: 1
 
 ## Findings
@@ -29,7 +29,7 @@
 | RTA-01 | repo_truth_audit | FIXED | blocker | high | docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md | Demote unverifiable future completion claims or update verification semantics mechanically. |
 | RTA-02 | repo_truth_audit | FIXED | blocker | high | docs/archive/reports/docs-program-scorecard-20260313.md | Keep the dated artifact absent until it can be generated with a real verification date. |
 | RTA-03 | repo_truth_audit | FIXED | major | high | generated/adr-bundles/*.md<br>scripts/qa/build_decision_graph.py | Fix the ADR bundle generator so generated links resolve into canonical docs/adr paths. |
-| RTA-04 | repo_truth_audit | OPEN | major | high | specs/catalog.json<br>specs/_generated/graph.json<br>specs/_generated/indexes/spec-read-first.md | Land deterministic spec catalog, graph, and read-first surfaces with CI checks. |
+| RTA-04 | repo_truth_audit | FIXED | major | high | specs/catalog.json<br>specs/_generated/graph.json<br>specs/_generated/indexes/spec-read-first.md | Land deterministic spec catalog, graph, and read-first surfaces with CI checks. |
 | RTA-05 | repo_truth_audit | PARTIAL | medium | medium | docs/catalog.json<br>generated/catalogs/docs-catalog.json | Keep generated catalog primary and verify docs/catalog.json stays a mirror-only projection. |
 | RTA-06 | repo_truth_audit | INVALIDATED | medium | medium | docs/archive/reports/docs-program-scorecard-20260306.md | Introduce explicit program prefixes in read-first and handoff surfaces so wave terms do not collide. |
 | ICA-01 | infra_alignment_audit | INVALIDATED | major | medium | docs/guides/PROMOTION-WORKFLOW.md<br>docs/reference/operations/RELEASE_PROCESS.md<br>scripts/promote.sh<br>.github/workflows/promote-image.yml | Use the actual release process path and compare it against the real promote script/workflow contract. |
@@ -89,13 +89,13 @@ PY`
 ### RTA-04 — Spec plane still lacks full machine-readable parity surfaces
 
 - Audit: `repo_truth_audit`
-- Status: `OPEN`
+- Status: `FIXED`
 - Severity: `major`
 - Owner: `platform-team`
 - Files: `specs/catalog.json, specs/_generated/graph.json, specs/_generated/indexes/spec-read-first.md`
 - Proof command: `test -f specs/catalog.json; test -f specs/_generated/graph.json; test -f specs/_generated/indexes/spec-read-first.md`
 - Risk: `high`
-- Notes: missing=specs/catalog.json, specs/_generated/graph.json, specs/_generated/indexes/spec-read-first.md
+- Notes: missing=none
 
 ### RTA-05 — Two docs catalog surfaces still present an authority duplication risk
 
