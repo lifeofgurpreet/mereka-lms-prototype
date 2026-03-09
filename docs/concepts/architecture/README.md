@@ -124,12 +124,12 @@ Come here when you need:
 ## Open edX Service Overviews
 
 - **[badges-credentials-overview.md](../../../specs/archive/badges-credentials-overview.md)** - Digital badges and credentials system
-- **[content-libraries-overview.md](../../architecture/overviews/content-libraries-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
-- **[enterprise-services-overview.md](../../architecture/overviews/enterprise-services-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
-- **[multi-tenancy-overview.md](../../architecture/overviews/multi-tenancy-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
-- **[notification-pipeline-overview.md](../../architecture/overviews/notification-pipeline-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
-- **[proctoring-architecture-overview.md](../../architecture/overviews/proctoring-architecture-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
-- **[purchase-gateway-overview.md](../../architecture/overviews/purchase-gateway-overview.md)** - Transitional overview retained under the legacy architecture root during Wave 2
+- **[content-libraries-overview.md](content-libraries-overview.md)** - Architecture overview for libraries and their integration boundaries
+- **[enterprise-services-overview.md](enterprise-services-overview.md)** - Architecture overview for enterprise service integration
+- **[multi-tenancy-overview.md](multi-tenancy-overview.md)** - Architecture overview for tenant shape and separation
+- **[notification-pipeline-overview.md](notification-pipeline-overview.md)** - Architecture overview for notification flow and ownership
+- **[proctoring-architecture-overview.md](proctoring-architecture-overview.md)** - Architecture overview for proctoring boundaries and dependencies
+- **[purchase-gateway-overview.md](purchase-gateway-overview.md)** - Architecture overview for purchase gateway responsibilities
 
 ## What does not belong here
 
