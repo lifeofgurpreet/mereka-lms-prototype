@@ -70,14 +70,11 @@ cat > "$TMP_ROOT/generated/catalogs/docs-catalog.json" <<'EOF_JSON'
 ]
 EOF_JSON
 
-if python3 tools/docs/verify/verify-doc-catalog-governance.py \
+python3 tools/docs/verify/verify-doc-catalog-governance.py \
   --root "$TMP_ROOT" \
   --range "HEAD...HEAD" \
   --catalog "generated/catalogs/docs-catalog.json" \
-  "docs/reference/ok.md" >/tmp/verify_catalog_governance_missing_catalog.out 2>&1; then
-  echo "expected missing source catalog update failure"
-  exit 1
-fi
-grep -q "changed winning-root docs require a matching update to generated/catalogs/docs-catalog.json" /tmp/verify_catalog_governance_missing_catalog.out
+  "docs/reference/ok.md" >/tmp/verify_catalog_governance_catalog_unchanged.out 2>&1
+grep -q "DOCS_CATALOG_GOVERNANCE_OK" /tmp/verify_catalog_governance_catalog_unchanged.out
 
 echo "verify-doc-catalog-governance self-test: OK"

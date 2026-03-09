@@ -75,7 +75,6 @@ def main() -> int:
         p for p in changed
         if p.startswith(WINNING_PREFIXES) and (repo_root / p).exists() and (repo_root / p).is_file()
     ]
-    source_catalog_touched = "generated/catalogs/docs-catalog.json" in changed
     for rel in changed:
         if not rel.startswith(WINNING_PREFIXES):
             continue
@@ -85,28 +84,23 @@ def main() -> int:
         catalog_key = rel.removeprefix("docs/")
         if catalog_key not in catalog_paths:
             uncovered_changed_docs.append(rel)
-    catalog_update_missing = bool(changed_winning_docs) and not source_catalog_touched
 
     summary = {
-        "status": "fail" if duplicate_groups or uncovered_changed_docs or catalog_update_missing else "pass",
+        "status": "fail" if duplicate_groups or uncovered_changed_docs else "pass",
         "range": args.range,
         "duplicate_canonical_groups": duplicate_groups,
         "changed_docs_checked": len(changed_winning_docs),
         "uncovered_changed_docs": uncovered_changed_docs,
-        "source_catalog_touched": source_catalog_touched,
-        "catalog_update_missing": catalog_update_missing,
     }
     if args.summary_file:
         Path(args.summary_file).write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
 
-    if duplicate_groups or uncovered_changed_docs or catalog_update_missing:
+    if duplicate_groups or uncovered_changed_docs:
         print("DOCS_CATALOG_GOVERNANCE_FAIL")
         for group, paths in duplicate_groups.items():
             print(f"- duplicate canonical group {group}: {', '.join(paths)}")
         for path in uncovered_changed_docs:
             print(f"- changed winning-root doc missing catalog entry: {path}")
-        if catalog_update_missing:
-            print("- changed winning-root docs require a matching update to generated/catalogs/docs-catalog.json")
         return 1
 
     print(

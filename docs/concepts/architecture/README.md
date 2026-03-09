@@ -23,9 +23,70 @@ This directory is the canonical architecture narrative and living-standards root
 ## Infrastructure Architecture
 
 - **[DATABASE_ARCHITECTURE.md](DATABASE_ARCHITECTURE.md)** - Database strategy (MySQL, MongoDB Atlas, Redis)
+- **[ARCHITECTURE_MONGODB.md](ARCHITECTURE_MONGODB.md)** - Atlas-specific MongoDB architecture notes
+- **[PRODUCTION_ARCHITECTURE_REALITY.md](PRODUCTION_ARCHITECTURE_REALITY.md)** - runtime reality and system-shape checkpoint
 - **[MONGODB_ATLAS_MIGRATION.md](../../../reports/2025/closures/MONGODB_ATLAS_MIGRATION.md)** - Historical MongoDB Atlas migration closeout
 - **[MULTISITE_ANALYSIS.md](../../../reports/2025/audits/MULTISITE_ANALYSIS.md)** - Historical multi-site audit
 - **[ADR-025-deployment-boundary.md](../../architecture/rfc/ADR-025-deployment-boundary.md)** - Transitional RFC location retained under the legacy architecture root during Wave 2
+
+## Core standards and contracts
+
+- **[COPY_TERMINOLOGY_CONTRACT.md](COPY_TERMINOLOGY_CONTRACT.md)** - copy and terminology rules that shape user-facing consistency
+- **[INTERACTION_STATE_CONTRACT.md](INTERACTION_STATE_CONTRACT.md)** - interaction-state rules for UI behavior
+- **[PERFORMANCE_BUDGETS.md](PERFORMANCE_BUDGETS.md)** - architecture-level performance budget contract
+- **[GDPR_COMPLIANCE.md](GDPR_COMPLIANCE.md)** - architecture-level privacy and compliance framing
+- **[MULTISITE_UX_CONSISTENCY.md](MULTISITE_UX_CONSISTENCY.md)** - multisite experience consistency rules
+
+## Frontend and runtime architecture
+
+- **[BRAND_PARITY.md](BRAND_PARITY.md)** - parity target for branded surfaces
+- **[DESIGN_TOKENS_MIGRATION.md](DESIGN_TOKENS_MIGRATION.md)** - token migration architecture and rollout shape
+- **[FOOTER_PARITY.md](FOOTER_PARITY.md)** - footer experience parity contract
+- **[FOOTER_SLOT_MIGRATION.md](FOOTER_SLOT_MIGRATION.md)** - migration path for footer-slot architecture
+- **[MFE_RUNTIME_CONFIG.md](MFE_RUNTIME_CONFIG.md)** - runtime MFE configuration contract
+- **[MFE_ROUTE_TO_DIST_CONTRACT.md](MFE_ROUTE_TO_DIST_CONTRACT.md)** - route-to-dist ownership mapping
+- **[MFE_SELECTOR_DECISION_LOG.md](MFE_SELECTOR_DECISION_LOG.md)** - selector strategy decisions and rationale
+- **[MFE_SELECTOR_AUDIT.md](MFE_SELECTOR_AUDIT.md)** - selector audit output for current surface coverage
+- **[MFE_SELECTOR_OVERRIDE_INVENTORY.md](MFE_SELECTOR_OVERRIDE_INVENTORY.md)** - known selector override inventory
+- **[MFE_PLUGIN_SLOT_INVENTORY.md](MFE_PLUGIN_SLOT_INVENTORY.md)** - plugin-slot inventory for runtime composition
+- **[MFE_COMPLETE_LIST.md](MFE_COMPLETE_LIST.md)** - canonical MFE surface inventory
+- **[MFE_VERSIONS.md](MFE_VERSIONS.md)** - MFE version inventory
+- **[FPF_PLUGIN_SLOT_REGISTRY.md](FPF_PLUGIN_SLOT_REGISTRY.md)** - frontend plugin framework slot registry
+- **[OEP48_BRAND_PACKAGE.md](OEP48_BRAND_PACKAGE.md)** - brand package contract for OEP-48 alignment
+- **[OEP65_MODULE_READINESS.md](OEP65_MODULE_READINESS.md)** - module readiness against OEP-65 style runtime composition
+- **[TUTOR_PATCHES_INVENTORY.md](TUTOR_PATCHES_INVENTORY.md)** - Tutor patch inventory that should shrink over time
+- **[PARAGON_V22_TOKEN_AUDIT.md](PARAGON_V22_TOKEN_AUDIT.md)** - Paragon/token audit reference
+- **[TOKEN_GENERATION_PIPELINE.md](TOKEN_GENERATION_PIPELINE.md)** - token-generation source pipeline
+- **[TOKEN_REFERENCE_INTEGRITY.md](TOKEN_REFERENCE_INTEGRITY.md)** - token reference integrity rules
+- **[MOBILE_TOKEN_PARITY.md](MOBILE_TOKEN_PARITY.md)** - parity expectations for mobile token consumption
+
+## Analytics, assessment, and service architecture
+
+- **[ANALYTICS_DECISION_GATE.md](ANALYTICS_DECISION_GATE.md)** - decision gate for analytics direction
+- **[ANALYTICS_DRIFT_GUARDRAILS.md](ANALYTICS_DRIFT_GUARDRAILS.md)** - guardrails against analytics architecture drift
+- **[ASPECTS_DEPLOYMENT_READINESS.md](ASPECTS_DEPLOYMENT_READINESS.md)** - readiness posture for Aspects deployment
+- **[ASSESSMENT_AUDIT.md](ASSESSMENT_AUDIT.md)** - assessment surface audit
+- **[ASSESSMENT_EPIC_CLOSURE.md](ASSESSMENT_EPIC_CLOSURE.md)** - assessment closure record
+- **[ASSESSMENT_XQUEUE_EVIDENCE.md](ASSESSMENT_XQUEUE_EVIDENCE.md)** - xqueue evidence and architecture notes
+- **[AUDIT_LOGGING_ASSESSMENT.md](AUDIT_LOGGING_ASSESSMENT.md)** - audit-logging assessment
+- **[CATALOG_DISCOVERY_AUDIT.md](CATALOG_DISCOVERY_AUDIT.md)** - discovery/catalog audit
+- **[LEGACY_COURSEWARE_AUDIT.md](LEGACY_COURSEWARE_AUDIT.md)** - legacy courseware audit
+- **[OSCAR_DEPRECATION.md](OSCAR_DEPRECATION.md)** - legacy Oscar deprecation notes
+- **[PROCTORING_INTEGRATION.md](PROCTORING_INTEGRATION.md)** - proctoring architecture and integration boundary
+- **[PURCHASE_GATEWAY.md](PURCHASE_GATEWAY.md)** - purchase gateway architecture overview
+- **[VIDEO_PIPELINE.md](VIDEO_PIPELINE.md)** - video pipeline architecture
+- **[PRODUCT_KPI_FRAMEWORK.md](PRODUCT_KPI_FRAMEWORK.md)** - KPI architecture framing for product analytics
+
+## Programs, proposals, and repo hygiene
+
+- **[BUILD_OPTIMIZATIONS_REFACTOR.md](BUILD_OPTIMIZATIONS_REFACTOR.md)** - build optimization program context
+- **[OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md](OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md)** - repo hygiene audit tracker
+- **[OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md](OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md)** - execution board for repo audit work
+- **[OPENEDX_REPO_AUDIT_IMPLEMENTOR_KICKOFF.md](OPENEDX_REPO_AUDIT_IMPLEMENTOR_KICKOFF.md)** - implementor kickoff packet
+- **[OPENEDX_REPO_AUDIT_IMPLEMENTOR_PR_TEMPLATE.md](OPENEDX_REPO_AUDIT_IMPLEMENTOR_PR_TEMPLATE.md)** - PR template for audit slices
+- **[OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md](OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md)** - detailed audit implementor specs
+- **[OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md)** through **[OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md](OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md)** - issue-level audit work packets
+- **[LEARNING_SLOT_EXPANSION_PROPOSAL.md](LEARNING_SLOT_EXPANSION_PROPOSAL.md)** - architecture proposal still in evaluation
 
 ## Open edX Service Overviews
 
