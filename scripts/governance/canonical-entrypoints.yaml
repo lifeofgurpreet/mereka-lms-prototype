@@ -114,8 +114,8 @@ entrypoints:
     proof_output: |
       - deploy/k8s/overlays/production/kustomization.yaml: updated image tags
       - stdout: ArgoCD sync status
-      - Promotion record written to var/ci/promotion-record.json (when called
-        from build-tutor-images.yml via generate-promotion-record.sh)
+      - Build provenance written to var/ci/build-provenance.json (when called
+        from build-tutor-images.yml via generate-build-provenance.sh)
     alternatives:
       - path: scripts/infra/sync-gitops-prod-image-tags.sh
         reason: >
@@ -125,7 +125,7 @@ entrypoints:
       - path: scripts/infra/bump-image-tags.sh
         reason: >
           Queries registry for latest tags and optionally writes them, but
-          lacks the promotion record, ArgoCD sync, and digest pinning logic
+          lacks the build provenance, ArgoCD sync, and digest pinning logic
           that release-openedx-gitops.sh provides.
     status: canonical
 

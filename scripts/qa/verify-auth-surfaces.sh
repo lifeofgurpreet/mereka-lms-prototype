@@ -183,8 +183,10 @@ expected_cookie_domain_for_host() {
   done
 
   # Cookie domain scopes to the tenant root, not the bare second-level domain.
-  # e.g. staging.academy.biji-biji.com → .staging.academy.biji-biji.com
-  #      academy.biji-biji.com          → .academy.biji-biji.com
+  # Prefixes (apps., studio., preview., admin.) are stripped first.
+  # e.g. admin.academyv2.mereka.io       → .academyv2.mereka.io
+  #      staging.academy.biji-biji.com   → .staging.academy.biji-biji.com
+  #      academy.biji-biji.com           → .academy.biji-biji.com
   printf ".%s\n" "$tenant"
 }
 

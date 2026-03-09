@@ -85,11 +85,11 @@ test_cookie_domain_check() {
   fi
 }
 
-# Test 3: Independent session for biji-biji.com
+# Test 3: Multi-root tenant cookie domain isolation
 test_independent_session() {
-  echo -n "Checking separate cookie domain for biji-biji.com... "
-  # academy.biji-biji.com should NOT inherit .mereka.io cookies
-  # Middleware should handle per-request cookie domain rewriting
+  echo -n "Checking multi-root tenant cookie domain isolation... "
+  # Each tenant root maintains separate cookies (mereka.io, biji-biji.com, etc.)
+  # Middleware strips service prefixes (apps., studio., preview., admin.) then scopes to tenant root
   if grep -q 'MerekaCookieDomainMiddleware' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
     echo "  Middleware present for dynamic cookie domain handling"

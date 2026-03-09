@@ -29,9 +29,9 @@ jobs:
       - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
       - uses: actions/upload-artifact@v4
         with:
-          name: promotion-record
+          name: build-provenance
           path: |
-            var/ci/promotion-record.json
+            var/ci/build-provenance.json
             var/ci/release-gate-envelope.json
 EOF
 }
@@ -77,8 +77,8 @@ jobs:
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - uses: actions/upload-artifact@v4
         with:
-          name: promotion-record
-          path: var/ci/promotion-record.json
+          name: build-provenance
+          path: var/ci/build-provenance.json
 EOF
 run_expect_fail "missing lms-ops proof emission is rejected"
 

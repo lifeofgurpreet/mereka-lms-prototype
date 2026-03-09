@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: generate-promotion-record.sh \
+Usage: generate-build-provenance.sh \
   --output <path> \
   --repository <owner/repo> \
   --commit-sha <40-hex> \
@@ -99,4 +99,4 @@ with open(os.environ["OUTPUT"], "w", encoding="utf-8") as fh:
     fh.write("\n")
 PY
 
-echo "Generated promotion record: ${OUTPUT}"
+echo "Generated build provenance: ${OUTPUT}"

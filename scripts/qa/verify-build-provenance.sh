@@ -2,10 +2,10 @@
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
-RECORD_PATH="${1:-${REPO_ROOT}/var/ci/promotion-record.json}"
+RECORD_PATH="${1:-${REPO_ROOT}/var/ci/build-provenance.json}"
 
 if [[ ! -f "${RECORD_PATH}" ]]; then
-  echo "FAIL: promotion record not found at ${RECORD_PATH}" >&2
+  echo "FAIL: build provenance record not found at ${RECORD_PATH}" >&2
   exit 1
 fi
 
@@ -44,11 +44,11 @@ if not str(gitops.get("repository", "")).strip():
 check_rx(gitops.get("commit_sha"), r"[0-9a-f]{40}", "gitops.commit_sha")
 
 if errors:
-    print("FAIL: promotion record validation errors:", file=sys.stderr)
+    print("FAIL: build provenance validation errors:", file=sys.stderr)
     for err in errors:
         print(f" - {err}", file=sys.stderr)
     sys.exit(1)
 
-print("PASS: promotion record contract valid")
+print("PASS: build provenance contract valid")
 PY
 

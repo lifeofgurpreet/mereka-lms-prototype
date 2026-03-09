@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Seeded-defect self-test for verify-promotion-record.sh.
+# Seeded-defect self-test for verify-build-provenance.sh.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-VERIFY="$ROOT_DIR/scripts/qa/verify-promotion-record.sh"
+VERIFY="$ROOT_DIR/scripts/qa/verify-build-provenance.sh"
 
-tmpdir="$(mktemp -d -t verify-promotion-record.XXXXXX)"
+tmpdir="$(mktemp -d -t verify-build-provenance.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p "$tmpdir/var/ci"
 
 write_valid_record() {
-  cat >"$tmpdir/var/ci/promotion-record.json" <<'EOF'
+  cat >"$tmpdir/var/ci/build-provenance.json" <<'EOF'
 {
   "schema_version": "1.0.0",
   "repository": "Biji-Biji-Initiative/mereka-lms",
@@ -32,28 +32,28 @@ EOF
 
 run_expect_pass() {
   local label="$1"
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" "$tmpdir/var/ci/promotion-record.json" >/tmp/verify-promotion-record.out 2>&1
+  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" "$tmpdir/var/ci/build-provenance.json" >/tmp/verify-build-provenance.out 2>&1
   echo "PASS ${label}"
 }
 
 run_expect_fail() {
   local label="$1"
   set +e
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" "$tmpdir/var/ci/promotion-record.json" >/tmp/verify-promotion-record.out 2>&1
+  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" "$tmpdir/var/ci/build-provenance.json" >/tmp/verify-build-provenance.out 2>&1
   local rc=$?
   set -e
   if [[ "$rc" -eq 0 ]]; then
     echo "FAIL ${label}: expected failure but command succeeded" >&2
-    cat /tmp/verify-promotion-record.out >&2 || true
+    cat /tmp/verify-build-provenance.out >&2 || true
     exit 1
   fi
   echo "PASS ${label}"
 }
 
 write_valid_record
-run_expect_pass "valid promotion record passes contract"
+run_expect_pass "valid build provenance passes contract"
 
-cat >"$tmpdir/var/ci/promotion-record.json" <<'EOF'
+cat >"$tmpdir/var/ci/build-provenance.json" <<'EOF'
 {
   "schema_version": "1.0.0",
   "repository": "Biji-Biji-Initiative/mereka-lms",

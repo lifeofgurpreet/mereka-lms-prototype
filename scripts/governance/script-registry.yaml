@@ -191,10 +191,10 @@ scripts:
     proof_command: "bash scripts/infra/generate-release-bundle.sh --help"
     criticality: release-supporting
 
-  - path: scripts/infra/generate-promotion-record.sh
+  - path: scripts/infra/generate-build-provenance.sh
     owner: platform-team
     purpose: >
-      Generates a structured JSON promotion record linking a release bundle to
+      Generates a structured JSON build provenance record linking a release bundle to
       a gitops commit. Used to create an auditable promotion chain.
     inputs:
       - --output PATH
@@ -211,7 +211,7 @@ scripts:
     side_effects: none
     dry_run: true  # generates a file only
     lanes: [dev, staging, prod]
-    proof_command: "bash scripts/infra/generate-promotion-record.sh --help"
+    proof_command: "bash scripts/infra/generate-build-provenance.sh --help"
     criticality: release-supporting
 
   - path: scripts/infra/assemble-release-evidence.sh

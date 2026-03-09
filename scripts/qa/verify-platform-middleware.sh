@@ -308,7 +308,7 @@ else
   skip_ "AC-004 (live): Endpoint not reachable"
 fi
 
-# Live check: Cookie domain for biji-biji.com
+# Live check: Cookie domain for biji-biji.com (multi-root tenant isolation)
 if $LIVE; then
   BIJI_COOKIE=$(curl -s -I --max-time 10 -H "Host: academy.biji-biji.com" "https://${DOMAIN}/login" 2>/dev/null | grep -i '^set-cookie:' || true)
   if [ -n "$BIJI_COOKIE" ] && echo "$BIJI_COOKIE" | grep -qi "domain=\.biji-biji\.com"; then
@@ -317,6 +317,20 @@ if $LIVE; then
     skip_ "AC-005 (live): Cookies returned but domain may not match (TLS SNI mismatch expected)"
   else
     skip_ "AC-005 (live): No Set-Cookie headers for biji-biji.com host"
+  fi
+else
+  skip_ "AC-005 (live): Endpoint not reachable"
+fi
+
+# Live check: Cookie domain for admin. prefix stripping (PR-733)
+if $LIVE; then
+  ADMIN_COOKIE=$(curl -s -I --max-time 10 -H "Host: admin.${DOMAIN}" "https://${DOMAIN}/login" 2>/dev/null | grep -i '^set-cookie:.*domain=' || true)
+  if [ -n "$ADMIN_COOKIE" ] && echo "$ADMIN_COOKIE" | grep -qi "domain=\.${DOMAIN}"; then
+    pass_ "AC-005 (live): admin. prefix correctly stripped — cookie domain is .${DOMAIN}"
+  elif [ -n "$ADMIN_COOKIE" ]; then
+    fail_ "AC-005 (live): admin.${DOMAIN} cookie has wrong domain: $(echo "$ADMIN_COOKIE" | head -1)"
+  else
+    skip_ "AC-005 (live): No Set-Cookie with Domain attribute for admin. prefix"
   fi
 else
   skip_ "AC-005 (live): Endpoint not reachable"

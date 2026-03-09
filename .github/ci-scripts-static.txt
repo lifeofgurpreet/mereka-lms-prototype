@@ -86,7 +86,7 @@ scripts/qa/test-verify-release-gitops-guardrails.sh
 scripts/qa/test-verify-release-promotion-wiring.sh
 scripts/qa/test-verify-release-workflow-invocation.sh
 scripts/qa/test-verify-release-bundle.sh
-scripts/qa/test-verify-promotion-record.sh
+scripts/qa/test-verify-build-provenance.sh
 scripts/qa/test-verify-build-workflow-contract.sh
 scripts/qa/test-verify-rollback-dry-run.sh
 scripts/qa/test-verify-post-deploy-gate.sh
@@ -442,7 +442,7 @@ scripts/infra/check-worktree-freshness.sh
 scripts/qa/verify-migration-rollback.sh
 scripts/qa/verify-mobile-release.sh
 scripts/qa/verify-post-deploy-gate.sh
-scripts/qa/verify-promotion-record.sh
+scripts/qa/verify-build-provenance.sh
 scripts/qa/verify-release-bundle.sh
 scripts/qa/verify-release-promotion-wiring.sh
 scripts/qa/verify-release-workflow-invocation.sh

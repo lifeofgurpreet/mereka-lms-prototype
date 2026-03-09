@@ -4,8 +4,8 @@
 - `var/ci/release-bundle.json`
 - `var/ci/release-bundle.sig`
 - `var/ci/release-bundle.pem`
-for deterministic promotion records.
-The same workflow also emits `promotion-record` (`var/ci/promotion-record.json`) after GitOps update with the resulting infra commit SHA.
+for deterministic build provenance records.
+The same workflow also emits `build-provenance` (`var/ci/build-provenance.json`) after GitOps update with the resulting infra commit SHA.
 `update-gitops` now hard-fails if downloaded `release-bundle` artifact does not match workflow commit SHA, target environment, bundle ID, and both image digests.
 
 ## Contract
@@ -13,7 +13,7 @@ The same workflow also emits `promotion-record` (`var/ci/promotion-record.json`)
 - Schema: `infrastructure/ci/release-bundle.schema.json`
 - Generator: `scripts/infra/generate-release-bundle.sh`
 - Validator: `scripts/qa/verify-release-bundle.sh`
-- Promotion record validator: `scripts/qa/verify-promotion-record.sh`
+- Build provenance validator: `scripts/qa/verify-build-provenance.sh`
 
 The bundle captures:
 

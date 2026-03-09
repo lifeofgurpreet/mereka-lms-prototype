@@ -11473,7 +11473,7 @@
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
-      "path": "scripts/qa/verify-promotion-record.sh",
+      "path": "scripts/qa/verify-build-provenance.sh",
       "reference_count": 21,
       "replaced_by": "",
       "runtime_dependencies": [

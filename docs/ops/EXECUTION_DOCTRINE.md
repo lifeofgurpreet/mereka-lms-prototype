@@ -76,7 +76,7 @@ We are moving from many helpful scripts to a few canonical control surfaces.
 | Repo | Owns | Publishes |
 |------|------|-----------|
 | **mereka-lms** (app) | Runtime code, config, tests, base manifests, migration registry, release gate | `deploy/k8s/contract.json`, `deploy/k8s/VERSION` |
-| **bbi-infrastructure** (GitOps) | Environment overlays, cluster realization, image pins, ingress/TLS, secret-store wiring | Topology catalog, promotion records |
+| **bbi-infrastructure** (GitOps) | Environment overlays, cluster realization, image pins, ingress/TLS, secret-store wiring | Topology catalog, build provenance |
 | **platform-control-plane** | Cluster infra, global policies, shared operators | Safety contracts, policy enforcement |
 
 ## Priority Layers

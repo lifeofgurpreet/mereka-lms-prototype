@@ -86,7 +86,7 @@ fi
 # (proof artifacts should use canonical names: dev, staging, prod)
 proof_scripts=(
   "scripts/infra/generate-release-bundle.sh"
-  "scripts/infra/generate-promotion-record.sh"
+  "scripts/infra/generate-build-provenance.sh"
 )
 for script in "${proof_scripts[@]}"; do
   script_path="$REPO_ROOT/$script"

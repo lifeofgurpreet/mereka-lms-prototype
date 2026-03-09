@@ -1034,7 +1034,10 @@ jobs:
             --apply --commit --push \
             "${EXTRA_ARGS[@]}"
 
-      - name: Generate promotion record
+      - name: Generate build provenance
+        # NOTE: This is an app-scoped build provenance record, NOT a canonical
+        # promotion_record. The canonical promotion authority lives in
+        # bbi-infrastructure (gitops-ops promote workflow).
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
           TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
@@ -1042,8 +1045,8 @@ jobs:
           MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
           RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
           GITOPS_COMMIT="$(git -C "$GITHUB_WORKSPACE/bbi-infrastructure" rev-parse HEAD)"
-          ./scripts/infra/generate-promotion-record.sh \
-            --output var/ci/promotion-record.json \
+          ./scripts/infra/generate-build-provenance.sh \
+            --output var/ci/build-provenance.json \
             --repository "${{ github.repository }}" \
             --commit-sha "${{ github.sha }}" \
             --target-environment "${TARGET_ENV}" \
@@ -1052,7 +1055,7 @@ jobs:
             --release-bundle-id "${RELEASE_BUNDLE_ID}" \
             --gitops-repo "Biji-Biji-Initiative/bbi-infrastructure" \
             --gitops-commit "${GITOPS_COMMIT}"
-          ./scripts/qa/verify-promotion-record.sh var/ci/promotion-record.json
+          ./scripts/qa/verify-build-provenance.sh var/ci/build-provenance.json
 
       - name: Emit app release-gate proof envelope via lms-ops
         run: |
@@ -1073,12 +1076,12 @@ jobs:
             --skip-cluster
           cp var/proof/release-gate.json var/ci/release-gate-envelope.json
 
-      - name: Upload promotion record
+      - name: Upload build provenance
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
-          name: promotion-record
+          name: build-provenance
           path: |
-            var/ci/promotion-record.json
+            var/ci/build-provenance.json
             var/ci/release-gate-envelope.json
           retention-days: 90
 
