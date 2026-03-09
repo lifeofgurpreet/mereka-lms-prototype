@@ -954,7 +954,7 @@ except Exception:
 else:
     if "django_prometheus" not in INSTALLED_APPS:
         INSTALLED_APPS.insert(0, "django_prometheus")
-    if "openedx_prometheus" not in INSTALLED_APPS:
+    if _module_available("openedx_prometheus") and "openedx_prometheus" not in INSTALLED_APPS:
         INSTALLED_APPS.append("openedx_prometheus")
     if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
