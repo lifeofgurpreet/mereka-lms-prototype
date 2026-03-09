@@ -11,10 +11,10 @@ This directory contains the canonical templates for drafting new ADR records in 
 
 ## Available templates
 
-- `foundation-adr-template.md`
-- `domain-adr-template.md`
-- `migration-adr-template.md`
-- `exception-adr-template.md`
+- [`foundation-adr-template.md`](foundation-adr-template.md)
+- [`domain-adr-template.md`](domain-adr-template.md)
+- [`migration-adr-template.md`](migration-adr-template.md)
+- [`exception-adr-template.md`](exception-adr-template.md)
 
 ## Do not use this directory for
 
