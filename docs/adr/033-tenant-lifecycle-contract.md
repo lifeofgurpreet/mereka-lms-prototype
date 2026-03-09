@@ -1,25 +1,48 @@
 ---
-id: ADR-033
 title: Tenant Lifecycle Contract
-decision_status: accepted
-decision_type: foundation
-rollout_state: active
 owner: multisite-platform
 created: 2026-03-07
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr
+doc_class: adr
+summary: Defines tenant lifecycle, isolation, and domain-boundary obligations.
+tags:
+- tenant
+- lifecycle
+- branding
+decision_type: foundation
+decision_status: accepted
+governs:
+- tenant.lifecycle
+- tenant.isolation
+- tenant.domain-boundary
+- frontend.brand.tokens
+id: ADR-033
+rollout_state: active
 supersedes: []
-amends: ["ADR-024"]
-depends_on: ["ADR-028", "ADR-029", "ADR-032"]
+amends:
+- ADR-024
+depends_on:
+- ADR-028
+- ADR-029
+- ADR-032
 read_next: []
-governs: ["tenant-create-update-disable-offboard", "tenant-isolation-contract", "tenant-branding-governance"]
-does_not_govern: ["tenant commercial terms"]
+does_not_govern:
+- tenant commercial terms
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
-related_specs: ["specs/multi-tenancy-architecture_spec.md"]
-related_runbooks: ["docs/runbooks/operations/TENANT_PROVISIONING.md", "docs/guides/branding/TENANT_CONFIG_HANDOFF.md"]
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs:
+- specs/multi-tenancy-architecture_spec.md
+related_runbooks:
+- docs/runbooks/operations/TENANT_PROVISIONING.md
+- docs/guides/branding/TENANT_CONFIG_HANDOFF.md
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-tenant-isolation.sh", "scripts/qa/verify-multisite-config.sh prod"]
+fitness_functions:
+- scripts/qa/verify-tenant-isolation.sh
+- scripts/qa/verify-multisite-config.sh prod
 expiry_date: null
 removal_condition: null
 ---

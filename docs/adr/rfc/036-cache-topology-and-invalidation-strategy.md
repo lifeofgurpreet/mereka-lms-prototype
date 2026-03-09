@@ -1,25 +1,40 @@
 ---
-id: ADR-036
 title: Cache Topology and Invalidation Strategy
-decision_status: proposed
-decision_type: domain
-rollout_state: planned
+proposal_state: proposed
 owner: platform-runtime
 created: 2026-03-07
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr/rfc
+doc_class: rfc
+summary: Proposes cache topology and invalidation rules for runtime surfaces.
+tags:
+- cache
+- runtime
+decision_type: domain
+decision_status: proposed
+governs:
+- runtime.cache
+id: ADR-036
+rollout_state: planned
 supersedes: []
 amends: []
-depends_on: ["ADR-028", "ADR-033"]
+depends_on:
+- ADR-028
+- ADR-033
 read_next: []
-governs: ["cache-boundaries", "invalidation-rules", "staleness-budget"]
-does_not_govern: ["business-feature-priorities"]
+does_not_govern:
+- business-feature-priorities
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
 related_specs: []
-related_runbooks: ["docs/runbooks/operations/TROUBLESHOOTING.md"]
+related_runbooks:
+- docs/runbooks/operations/TROUBLESHOOTING.md
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-mfe-config-contract.sh --env prod"]
+fitness_functions:
+- scripts/qa/verify-mfe-config-contract.sh --env prod
 expiry_date: null
 removal_condition: null
 ---

@@ -1,25 +1,44 @@
 ---
-id: ADR-032
 title: Data Governance, PII, Retention, and Deletion
-decision_status: accepted
-decision_type: foundation
-rollout_state: active
 owner: platform-security
 created: 2026-03-07
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr
+doc_class: adr
+summary: Defines PII handling, retention, deletion, and evidence-hygiene requirements.
+tags:
+- data
+- privacy
+- retention
+decision_type: foundation
+decision_status: accepted
+governs:
+- data.pii
+- data.retention
+- data.deletion
+- docs.evidence
+id: ADR-032
+rollout_state: active
 supersedes: []
 amends: []
-depends_on: ["ADR-028", "ADR-031"]
-read_next: ["ADR-033"]
-governs: ["pii-handling", "retention-policy", "deletion-workflows", "evidence-hygiene"]
-does_not_govern: ["business analytics questions"]
+depends_on:
+- ADR-028
+- ADR-031
+read_next:
+- ADR-033
+does_not_govern:
+- business analytics questions
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org"]
+related_tutor_docs:
+- https://docs.openedx.org
 related_specs: []
-related_runbooks: ["docs/policies/operations/DATA_RETENTION_POLICY.md"]
+related_runbooks:
+- docs/policies/operations/DATA_RETENTION_POLICY.md
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-evidence-redaction.sh", "scripts/qa/scan-secrets-fast.sh"]
+fitness_functions:
+- scripts/qa/verify-evidence-redaction.sh
+- scripts/qa/scan-secrets-fast.sh
 expiry_date: null
 removal_condition: null
 ---
