@@ -23,7 +23,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 
 SPECS_DIR="${REPO_ROOT}/specs"
 TESTS_DIR="${REPO_ROOT}/tests"
-TESTMAPS_DIR="${REPO_ROOT}/specs/testmaps"
+TESTMAPS_DIR="${REPO_ROOT}/specs/_generated/testmaps"
 
 # ---------------------------------------------------------------------------
 # Colour helpers (degrade gracefully when not a tty)
@@ -207,7 +207,7 @@ main() {
     echo -e "${RED}${BOLD}FAIL${RESET}  Overall coverage ${overall_pct}% is below floor ${FLOOR}%"
     echo ""
     echo "To raise coverage:"
-    echo "  1. Add testmap entries in specs/testmaps/<spec>.testmap.yml"
+    echo "  1. Add generated testmap entries in specs/_generated/testmaps/<spec>.testmap.yml"
     echo "  2. Wire test files under tests/ that reference the spec"
     echo "  3. Once coverage improves, ratchet the floor:"
     echo "     SPEC_COVERAGE_FLOOR=50 → SPEC_COVERAGE_FLOOR=60 etc."

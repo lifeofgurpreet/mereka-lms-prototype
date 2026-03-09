@@ -1,10 +1,10 @@
-# Operations Documentation (Superseded)
-_Audience: Operators • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+# Operations Documentation
 
-superseded_by: `../ops/quickref/README.md`
+_Status: superseded_  
+_Superseded by: ../ops/quickref/README.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/quickref/README.md`
 
-Reason:
-- Consolidated into canonical docs/ops location during remediation.
+Do not add new substantive content here.

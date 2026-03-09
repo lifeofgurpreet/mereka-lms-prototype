@@ -1,9 +1,10 @@
-# Multi-site LMS Playbook (Superseded)
-_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: superseded • superseded_by: ../concepts/architecture/MULTISITE.md_
-superseded_by: ../concepts/architecture/MULTISITE.md
+# Multi-site LMS Playbook
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: ../concepts/architecture/MULTISITE.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `../concepts/architecture/MULTISITE.md`
 
-Reason:
-- Consolidated under canonical docs structure during remediation to reduce transitional-path drift.
+Do not add new substantive content here.

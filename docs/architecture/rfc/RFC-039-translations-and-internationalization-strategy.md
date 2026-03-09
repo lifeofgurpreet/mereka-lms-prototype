@@ -1,18 +1,10 @@
 # RFC-039 Translations And Internationalization Strategy
 
-Status: proposed
-Source record: `docs/adr/039-translations-and-internationalization-strategy.md`
+_Status: superseded_  
+_Superseded by: docs/adr/rfc/039-translations-and-internationalization-strategy.md_
 
-## Intent
+This path is transitional only. The live document is now maintained at:
 
-Treat translations and i18n as architecture rather than a best-effort content activity.
+- `docs/adr/rfc/039-translations-and-internationalization-strategy.md`
 
-## Why This Is Still An RFC
-
-The team has direction and checks, but not yet an accepted steady-state multilingual contract.
-
-## Candidate Invariants
-
-- Message keys are stable.
-- Locale fallback is explicit.
-- Translation release validation is required.
+Do not add new substantive content here.

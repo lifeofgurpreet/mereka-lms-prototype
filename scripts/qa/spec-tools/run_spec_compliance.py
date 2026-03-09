@@ -215,7 +215,7 @@ def format_json_output(results: list[VerifyResult]) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run automated testmap commands and report compliance.")
-    ap.add_argument("--testmaps-dir", default="specs/testmaps/", help="Testmaps directory")
+    ap.add_argument("--testmaps-dir", default="specs/_generated/testmaps/", help="Testmaps directory")
     ap.add_argument("--repo-root", default=".", help="Repo root")
     ap.add_argument("--mode", choices=["local", "infra", "all"], default="local",
                     help="Which commands to run: local (repo-only), infra (cluster-only), all")

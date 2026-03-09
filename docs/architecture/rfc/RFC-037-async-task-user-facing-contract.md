@@ -1,18 +1,10 @@
 # RFC-037 Async Task User-Facing Contract
 
-Status: proposed
-Source record: `docs/adr/037-async-task-user-facing-contract.md`
+_Status: superseded_  
+_Superseded by: docs/adr/rfc/037-async-task-user-facing-contract.md_
 
-## Intent
+This path is transitional only. The live document is now maintained at:
 
-Create one user-visible state model for long-running operations.
+- `docs/adr/rfc/037-async-task-user-facing-contract.md`
 
-## Why This Is Still An RFC
-
-This is still design work for consistency across services, not yet settled historical policy.
-
-## Candidate Invariants
-
-- Async APIs return correlation IDs.
-- User-visible states are deterministic.
-- Retry and terminal failure semantics are documented.
+Do not add new substantive content here.

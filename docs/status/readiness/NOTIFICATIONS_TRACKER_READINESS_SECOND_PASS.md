@@ -6,7 +6,7 @@ _Target: Release readiness review for local/dev + non-prod + production parity_
 ## 0) Scope and evidence used
 
 - AC source: `specs/email-notifications-pipeline_spec.md`
-- AC test coverage source: `specs/testmaps/email-notifications-pipeline_spec.testmap.yml`
+- AC test coverage source: `specs/_generated/testmaps/email-notifications-pipeline_spec.testmap.yml`
 - Prior parity matrix: `verification/catalogs/DEPLOYMENT_TRACKER_AC_MATRIX.md`
 - Tracker source used for ownership: `.beads/beads.db`
 - Runtime/runtime-like checks reviewed via existing scripts and manifest inventory in repo (no live cluster probing was executed by the reviewer)

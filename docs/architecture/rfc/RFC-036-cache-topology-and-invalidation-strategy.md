@@ -1,18 +1,10 @@
 # RFC-036 Cache Topology And Invalidation Strategy
 
-Status: proposed
-Source record: `docs/adr/036-cache-topology-and-invalidation-strategy.md`
+_Status: superseded_  
+_Superseded by: docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md_
 
-## Intent
+This path is transitional only. The live document is now maintained at:
 
-Define ownership, invalidation, and stale-read behavior for cache layers.
+- `docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md`
 
-## Why This Is Still An RFC
-
-The repo has incidents and partial checks, but not yet a single accepted cache constitution.
-
-## Candidate Invariants
-
-- Each cache has an owner and namespace.
-- Each cache has invalidation semantics.
-- Staleness tolerance is explicit.
+Do not add new substantive content here.

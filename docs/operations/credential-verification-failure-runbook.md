@@ -1,9 +1,10 @@
-# credential-verification-failure-runbook (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+# credential-verification-failure-runbook
 
-superseded_by: `../ops/runbooks/credential-verification-failure-runbook.md`
-This document has moved to:
+_Status: superseded_  
+_Superseded by: ../ops/runbooks/credential-verification-failure-runbook.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/runbooks/credential-verification-failure-runbook.md`
 
-Reason:
-- Canonicalized to the docs/ops run location to keep operations documentation single-source-of-truth.
+Do not add new substantive content here.

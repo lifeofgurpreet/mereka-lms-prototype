@@ -1,18 +1,10 @@
 # RFC-035 Frontend Runtime Composition And Dependency Alignment
 
-Status: proposed
-Source record: `docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md`
+_Status: superseded_  
+_Superseded by: docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md_
 
-## Intent
+This path is transitional only. The live document is now maintained at:
 
-Make runtime composition, plugin slots, and dependency alignment the default frontend extension model.
+- `docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md`
 
-## Why This Is Still An RFC
-
-The policy direction is clear, but this remains active architecture work that should graduate only after the migration path is stable.
-
-## Candidate Invariants
-
-- Supported slots and hooks win over source patching.
-- Runtime configuration is deterministic.
-- Dependency compatibility ranges are declared.
+Do not add new substantive content here.

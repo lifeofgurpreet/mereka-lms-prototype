@@ -15,6 +15,7 @@ Use this table before reading or writing:
 | Why a technical decision was made | `docs/adr/**` |
 | How contributors or users should do something | `docs/guides/**` |
 | Reference detail or policy boundaries | `docs/reference/**`, `docs/policies/**` |
+| Documentation-system internals, templates, or transition ledgers | `docs/meta/**` |
 | Proof that something is true | `docs/evidence/**` |
 | Current status, readiness, or migration posture | `docs/status/**` |
 
@@ -28,9 +29,10 @@ Apply these rules in order:
 4. If the question is about accepted or superseded technical decisions, `docs/adr/**` wins.
 5. If the question is about user or contributor guidance, `docs/guides/**` wins.
 6. If the question is about supporting reference or policy, `docs/reference/**` and `docs/policies/**` win.
-7. If the question is about proof, `docs/evidence/**` wins.
-8. If the question is about current reporting or open status, `docs/status/**` wins.
-9. If the path is under `docs/archive/**`, it is historical context only and MUST NOT override active roots.
+7. If the question is about docs-program internals, templates, or transition records, `docs/meta/**` wins.
+8. If the question is about proof, `docs/evidence/**` wins.
+9. If the question is about current reporting or open status, `docs/status/**` wins.
+10. If the path is under `docs/archive/**`, it is historical context only and MUST NOT override active roots.
 
 ## What to do when two docs disagree
 
@@ -48,6 +50,9 @@ If a transitional or archive path contradicts a winning root, the winning root g
 | Living architecture / standards | `docs/concepts/architecture/**` | `docs/architecture/**` | `docs/archive/**` |
 | Operator procedures | `docs/ops/**` | `docs/operations/**`, `docs/runbooks/**` | `docs/archive/**` |
 | Human guidance / onboarding | `docs/guides/**` | `docs/onboarding/**`, `docs/branding/**` | `docs/archive/**` |
+| Reference material | `docs/reference/**` | `docs/operations/**` when used as lookup-only legacy surface | `docs/archive/**` |
+| Durable rules / governance | `docs/policies/**` | `docs/operations/**` when used as policy legacy surface | `docs/archive/**` |
+| Docs-program internals / templates | `docs/meta/**` | `docs/architecture/**`, `docs/runbooks/**` when used as program/process legacy surfaces | `docs/archive/**` |
 | Decision history | `docs/adr/**` | none | `docs/adr/historical/**`, `docs/archive/**` |
 | Evidence / proof | `docs/evidence/**` | `evidence/**` | `docs/archive/evidence/**` |
 | Active reporting / status | `docs/status/**` | `reports/2026/status/**`, `reports/2026/readiness/**` | `docs/archive/reports/**` |
@@ -61,6 +66,7 @@ Use these tests when you are unsure:
 - If the file mainly helps someone operate, navigate, or understand the current system, it belongs in `docs/**`.
 - If the file proves a runtime fact, it belongs in `docs/evidence/**`.
 - If the file reports current posture or blockers, it belongs in `docs/status/**`.
+- If the file is about how the documentation system itself is run or migrated, it belongs in `docs/meta/**`.
 
 ## Metadata rule
 
@@ -92,7 +98,8 @@ If a change touches a winning-root doc and does not also update `generated/catal
 Testmaps are generated verification mapping artifacts.
 
 - `@covers` annotations and spec metadata are the true source.
-- `specs/testmaps/**` is a compatibility location until migration to `specs/_generated/testmaps/**` is complete.
+- `specs/testmaps/**` is a frozen legacy compatibility location.
+- `specs/_generated/testmaps/**` is the active generated testmap output root.
 - Manual edits to generated testmaps are not authoritative and must be treated as drift.
 
 ## Terms
@@ -121,6 +128,7 @@ Examples:
 - `docs/ops/**` SHOULD link to `docs/reference/**`, `docs/policies/**`, `docs/evidence/**`, and `docs/status/**`
 - `docs/ops/**` MUST NOT use `docs/operations/**` as live procedure authority
 - `docs/concepts/architecture/**` MUST NOT depend on `docs/architecture/**` as current law
+- `docs/meta/**` MUST NOT behave as a second architecture or operator root
 
 ## Review rule
 
@@ -131,6 +139,7 @@ If a reviewer cannot tell which root wins without reading multiple documents, th
 These are locked for this wave:
 
 - `docs/ops/**` is the canonical operator-doc root
+- `docs/reference/**`, `docs/policies/**`, and `docs/meta/**` are canonical supporting roots and MUST NOT be treated as optional sidecars
 - `docs/operations/**` is stub-only transitional
 - `docs/evidence/**` is the single active evidence root
 - `docs/status/**` is the single active status root

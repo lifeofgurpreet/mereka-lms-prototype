@@ -1,10 +1,10 @@
-# CI Optimization Tracker (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# CI Optimization Tracker
 
-superseded_by: `docs/status/active/CI_OPTIMIZATION_TRACKER.md`
+_Status: superseded_  
+_Superseded by: docs/status/active/CI_OPTIMIZATION_TRACKER.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `docs/status/active/CI_OPTIMIZATION_TRACKER.md`
 
-Reason:
-- Dated execution trackers now live under `docs/status/active/`.
+Do not add new substantive content here.

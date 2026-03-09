@@ -1,9 +1,10 @@
-# SECURITY EXCEPTIONS (Superseded)
-_Audience: Operations Team • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+# SECURITY EXCEPTIONS
 
-superseded_by: `../ops/security/SECURITY_EXCEPTIONS.md`
-This document has moved to:
+_Status: superseded_  
+_Superseded by: ../ops/security/SECURITY_EXCEPTIONS.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/security/SECURITY_EXCEPTIONS.md`
 
-Reason:
-- Canonicalized to the docs/ops run location to keep operations documentation single-source-of-truth.
+Do not add new substantive content here.

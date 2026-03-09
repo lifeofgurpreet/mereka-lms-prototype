@@ -1,5 +1,10 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md`
+_Status: superseded_  
+_Superseded by: docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md_
 
-This compatibility stub remains only to preserve legacy links from older remediation artifacts.
+This path is transitional only. The live document is now maintained at:
+
+- `docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md`
+
+Do not add new substantive content here.

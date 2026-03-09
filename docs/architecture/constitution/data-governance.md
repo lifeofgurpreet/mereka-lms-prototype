@@ -1,30 +1,7 @@
 # Data Governance
 
-Owner: Platform Security
-Review cadence: quarterly
+Status: superseded
+superseded_by: ../../concepts/architecture/DATA_GOVERNANCE.md
 
-## Governs
-
-- data.pii
-- data.retention
-- data.deletion
-
-## Non-goals
-
-- analytics product questions
-- content strategy
-
-## Standard
-
-- PII-bearing flows must define retention, redaction, and deletion boundaries.
-- Evidence must not carry live secret, token, or cookie material.
-- Deletion promises must map to actual operational procedures.
-
-## Fitness Functions
-
-- `scripts/qa/verify-evidence-redaction.sh`
-- `scripts/qa/scan-secrets-fast.sh`
-
-## Source ADRs
-
-- `ADR-032`
+Canonical document:
+[docs/concepts/architecture/DATA_GOVERNANCE.md](../../concepts/architecture/DATA_GOVERNANCE.md)

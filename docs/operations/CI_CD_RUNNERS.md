@@ -1,10 +1,10 @@
-# CI/CD Runners (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+# CI/CD Runners
 
-superseded_by: `../ops/ci-cd/CI_CD_RUNNERS.md`
+_Status: superseded_  
+_Superseded by: ../ops/ci-cd/CI_CD_RUNNERS.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/ci-cd/CI_CD_RUNNERS.md`
 
-Reason:
-- Canonicalized to `docs/ops/ci-cd/CI_CD_RUNNERS.md` per docs remediation.
+Do not add new substantive content here.

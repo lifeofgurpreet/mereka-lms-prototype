@@ -1,15 +1,16 @@
 # Constitution
 
-These documents define what MUST be true now.
+Status: superseded
+superseded_by: ../../concepts/architecture/README.md
 
-They are the living standards for platform architecture and are reviewed on a schedule. They are not substitutes for ADR history; they are the current law that active implementation work must follow.
+This transitional path is no longer the canonical living-architecture root.
 
-## Current Standards
+Use the canonical constitution standards in `docs/concepts/architecture/**`:
 
-- `control-planes.md`
-- `tutor-and-extension-model.md`
-- `identity-and-domain-boundaries.md`
-- `tenant-lifecycle.md`
-- `release-and-change-policy.md`
-- `data-governance.md`
-- `authorization-model.md`
+- [CONTROL_PLANES.md](../../concepts/architecture/CONTROL_PLANES.md)
+- [TUTOR_AND_EXTENSION_MODEL.md](../../concepts/architecture/TUTOR_AND_EXTENSION_MODEL.md)
+- [IDENTITY_DOMAIN_BOUNDARIES.md](../../concepts/architecture/IDENTITY_DOMAIN_BOUNDARIES.md)
+- [TENANT_LIFECYCLE.md](../../concepts/architecture/TENANT_LIFECYCLE.md)
+- [RELEASE_ROLLOUT_AND_REMOVAL.md](../../concepts/architecture/RELEASE_ROLLOUT_AND_REMOVAL.md)
+- [DATA_GOVERNANCE.md](../../concepts/architecture/DATA_GOVERNANCE.md)
+- [AUTHORIZATION_MODEL.md](../../concepts/architecture/AUTHORIZATION_MODEL.md)

@@ -1,6 +1,10 @@
-# SLO_DASHBOARDS_SETUP.md (Superseded)
+# SLO_DASHBOARDS_SETUP.md
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md`
 
-Use the canonical path above.
+Do not add new substantive content here.

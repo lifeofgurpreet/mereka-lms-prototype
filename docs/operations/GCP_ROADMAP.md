@@ -1,9 +1,10 @@
-# GCP Deployment Roadmap (Superseded)
-_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: superseded • superseded_by: ../archive/reports/GCP_ROADMAP.md_
-superseded_by: ../archive/reports/GCP_ROADMAP.md
+# GCP Deployment Roadmap
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: ../archive/reports/GCP_ROADMAP.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `../archive/reports/GCP_ROADMAP.md`
 
-Reason:
-- Consolidated under canonical docs structure during remediation to reduce transitional-path drift.
+Do not add new substantive content here.

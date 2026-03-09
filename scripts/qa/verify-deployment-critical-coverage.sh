@@ -73,7 +73,7 @@ done
 echo ""
 echo "--- AC-SPEC-301: Coverage ≥ ${COVERAGE_THRESHOLD}% ---"
 
-DASHBOARD_OUT="$(python3 scripts/qa/spec-tools/spec_coverage_dashboard.py --testmaps-dir specs/testmaps/ --format json 2>&1 || true)"
+DASHBOARD_OUT="$(python3 scripts/qa/spec-tools/spec_coverage_dashboard.py --testmaps-dir specs/_generated/testmaps/ --format json 2>&1 || true)"
 
 if [[ -z "$DASHBOARD_OUT" ]]; then
   fail_check "Coverage dashboard produced no output"

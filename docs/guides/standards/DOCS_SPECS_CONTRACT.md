@@ -69,11 +69,11 @@ If the key sentence starts with “the system MUST”, that is often a specs sig
 
 ## Transitional reality
 
-The repository still contains `specs/testmaps/**`. During Wave 2:
+The repository still contains `specs/testmaps/**` as a frozen legacy path. During Wave 2B:
 
-- treat those files as generated compatibility artifacts
-- do not manually curate them as the primary source
-- move tooling toward `specs/_generated/testmaps/**`
+- treat those files as frozen compatibility artifacts
+- do not edit them
+- generate active outputs only under `specs/_generated/testmaps/**`
 - update ADR-011 and supporting tooling so the filesystem matches the contract
 
 ## What belongs in docs

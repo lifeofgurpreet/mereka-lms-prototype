@@ -1,3 +1,9 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/TRANSLATION_WORKFLOW.md`
+_Status: superseded_  
+_Superseded by: docs/ops/runbooks/TRANSLATION_WORKFLOW.md_
+
+This path is transitional only. The live document is now maintained at:
+- docs/ops/runbooks/TRANSLATION_WORKFLOW.md
+
+Do not add new substantive content here.

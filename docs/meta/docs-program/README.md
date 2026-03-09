@@ -10,6 +10,7 @@ Use this root for the active documentation improvement program: remediation plan
 | Understand the current docs remediation direction | [`../../DOCS_REMEDIATION_PLAN_AND_TRACKER.md`](../../DOCS_REMEDIATION_PLAN_AND_TRACKER.md) | [`IMPLEMENTATION_ROADMAP.md`](IMPLEMENTATION_ROADMAP.md) |
 | Understand where docs were moved and why | [`REPO_TOPOLOGY_MOVE_LEDGER.md`](REPO_TOPOLOGY_MOVE_LEDGER.md) | [`boundary-debt-manifest.md`](boundary-debt-manifest.md) |
 | Check the current execution roadmap | [`IMPLEMENTATION_ROADMAP.md`](IMPLEMENTATION_ROADMAP.md) | [`SPEC_COVERAGE.md`](SPEC_COVERAGE.md) |
+| Understand the architecture-governance rework as a docs program | [`ARCHITECTURE_GOVERNANCE_OVERLAY.md`](ARCHITECTURE_GOVERNANCE_OVERLAY.md) | [`FOUNDATIONS_PROGRAM.md`](FOUNDATIONS_PROGRAM.md) and [`PROGRAM_UPDATE_V2_BRIEF.md`](PROGRAM_UPDATE_V2_BRIEF.md) |
 | Review active docs program bundles | The relevant bundle in this root | [`../README.md`](../README.md) for broader meta surfaces |
 
 ## Use this directory for
@@ -17,6 +18,7 @@ Use this root for the active documentation improvement program: remediation plan
 - active docs program plans
 - move ledgers and topology debt tracking
 - implementation roadmaps for documentation work
+- architecture-governance program material that is no longer living architecture law
 - bounded docs program bundles that are still operationally relevant
 
 ## What This Root Is Not

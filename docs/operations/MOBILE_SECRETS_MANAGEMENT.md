@@ -1,10 +1,10 @@
-# Mobile App Secrets Management (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Mobile App Secrets Management
 
-superseded_by: `../reference/operations/MOBILE_SECRETS_MANAGEMENT.md`
+_Status: superseded_  
+_Superseded by: ../reference/operations/MOBILE_SECRETS_MANAGEMENT.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../reference/operations/MOBILE_SECRETS_MANAGEMENT.md`
 
-Reason:
-- Mobile secrets reference material now lives under docs/reference/operations/.
+Do not add new substantive content here.

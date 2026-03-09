@@ -1,10 +1,10 @@
-# Auth and Permissions (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Auth and Permissions
 
-superseded_by: `../reference/operations/AUTH_AND_PERMISSIONS.md`
+_Status: superseded_  
+_Superseded by: ../reference/operations/AUTH_AND_PERMISSIONS.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../reference/operations/AUTH_AND_PERMISSIONS.md`
 
-Reason:
-- Operational reference material now lives under docs/reference/operations/.
+Do not add new substantive content here.

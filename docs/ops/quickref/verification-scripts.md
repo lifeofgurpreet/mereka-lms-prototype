@@ -101,7 +101,7 @@ As of 2026-02-11:
 cd scripts/qa/spec-tools
 
 # Compact dashboard (text format)
-python spec_coverage_dashboard.py --testmaps-dir ../../specs/testmaps/ --specs-dir ../../specs/
+python spec_coverage_dashboard.py --testmaps-dir ../../specs/_generated/testmaps/ --specs-dir ../../specs/
 
 # Output:
 # - Overall coverage rate
@@ -109,10 +109,10 @@ python spec_coverage_dashboard.py --testmaps-dir ../../specs/testmaps/ --specs-d
 # - Color-coded tiers (GREEN ≥80%, YELLOW 50-79%, RED <50%)
 
 # JSON format (for CI/tooling)
-python spec_coverage_dashboard.py --testmaps-dir ../../specs/testmaps/ --format json
+python spec_coverage_dashboard.py --testmaps-dir ../../specs/_generated/testmaps/ --format json
 
 # Markdown format (for GitHub issues/PRs)
-python spec_coverage_dashboard.py --testmaps-dir ../../specs/testmaps/ --format markdown
+python spec_coverage_dashboard.py --testmaps-dir ../../specs/_generated/testmaps/ --format markdown
 ```
 
 ### Generate Coverage Report (Detailed)

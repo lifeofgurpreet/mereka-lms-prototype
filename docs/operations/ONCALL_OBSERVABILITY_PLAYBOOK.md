@@ -1,6 +1,10 @@
 # ONCALL_OBSERVABILITY_PLAYBOOK.md (Superseded)
 
-This document has moved to:
-- `docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md`
+_Status: superseded_  
+_Superseded by: docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md_
 
-Use the canonical path above.
+This path is transitional only. The live document is now maintained at:
+
+- `docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md`
+
+Do not add new substantive content here.

@@ -508,7 +508,34 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "adr/rfc/ADR-025-deployment-boundary.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "adr/rfc/README.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-06",
+    "owner": "Platform",
+    "path": "adr/rfc/RFC-claim-based-role-sync.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-28",
+    "owner": null,
+    "path": "adr/rfc/RFC-learning-slot-expansion-proposal.md",
     "status": "supporting",
     "type": "concept"
   },
@@ -572,7 +599,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/ADR_LANGUAGE_STYLE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -581,7 +608,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/ADR_NUMBERING_AND_NAMING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -590,7 +617,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/AGENT_WORKPACKETS.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -599,7 +626,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/ARCHITECTURE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -608,7 +635,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/FOUNDATIONS_PROGRAM.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -617,7 +644,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/PROGRAM_UPDATE_V2_BRIEF.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -644,7 +671,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/charter.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -653,7 +680,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/constitution/README.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -662,7 +689,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/constitution/authorization-model.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -671,7 +698,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/constitution/control-planes.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -680,7 +707,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/constitution/data-governance.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -689,7 +716,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/constitution/identity-and-domain-boundaries.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -698,7 +725,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/constitution/release-and-change-policy.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -707,7 +734,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/constitution/tenant-lifecycle.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -716,7 +743,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/constitution/tutor-and-extension-model.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -725,7 +752,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/decision-map.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -770,7 +797,7 @@
     "last_verified_or_updated": "2026-02-07",
     "owner": "Docs Team",
     "path": "architecture/overviews/ARCHITECTURE_MONGODB.md",
-    "status": "canonical",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -779,7 +806,7 @@
     "last_verified_or_updated": "2026-02-27",
     "owner": null,
     "path": "architecture/overviews/BRAND_PARITY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -788,7 +815,7 @@
     "last_verified_or_updated": "2025-11-11",
     "owner": "Infra Team",
     "path": "architecture/overviews/DATABASE_ARCHITECTURE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -797,7 +824,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/overviews/DESIGN_TOKENS_MIGRATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -806,7 +833,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/overviews/FOOTER_PARITY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -815,7 +842,7 @@
     "last_verified_or_updated": "2026-03-05",
     "owner": "Infra Team",
     "path": "architecture/overviews/MULTISITE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -824,7 +851,7 @@
     "last_verified_or_updated": "2026-02-27",
     "owner": null,
     "path": "architecture/overviews/MULTI_BRAND_MULTI_SITE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -833,7 +860,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": "Platform Team",
     "path": "architecture/overviews/PROCTORING_INTEGRATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -842,7 +869,7 @@
     "last_verified_or_updated": "2026-02-05",
     "owner": null,
     "path": "architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -851,7 +878,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": "Platform Team",
     "path": "architecture/overviews/PURCHASE_GATEWAY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -860,7 +887,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "architecture/overviews/VIDEO_PIPELINE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -869,7 +896,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "architecture/overviews/content-libraries-overview.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -878,7 +905,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "architecture/overviews/enterprise-services-overview.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -887,7 +914,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "architecture/overviews/multi-tenancy-overview.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -896,7 +923,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "architecture/overviews/notification-pipeline-overview.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -905,7 +932,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "architecture/overviews/proctoring-architecture-overview.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -914,7 +941,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "architecture/overviews/purchase-gateway-overview.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -923,7 +950,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/ADR-025-deployment-boundary.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -932,7 +959,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/README.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -941,7 +968,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/RFC-034-event-contract-and-transport-independence.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -950,7 +977,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -959,7 +986,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -968,7 +995,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/RFC-037-async-task-user-facing-contract.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -977,7 +1004,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -986,7 +1013,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/RFC-039-translations-and-internationalization-strategy.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -995,7 +1022,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -1004,7 +1031,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "architecture/rfc/RFC-041-authorization-and-role-boundary-model.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -1013,7 +1040,7 @@
     "last_verified_or_updated": "2026-02-06",
     "owner": "Platform",
     "path": "architecture/rfc/RFC-claim-based-role-sync.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -1022,7 +1049,7 @@
     "last_verified_or_updated": "2026-02-28",
     "owner": null,
     "path": "architecture/rfc/RFC-learning-slot-expansion-proposal.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "concept"
   },
   {
@@ -4235,7 +4262,7 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Platform Team",
     "path": "branding/README.md",
-    "status": "archive-candidate",
+    "status": "superseded",
     "type": "guide"
   },
   {
@@ -4511,6 +4538,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Auth Platform",
+    "path": "concepts/architecture/AUTHORIZATION_MODEL.md",
+    "status": "canonical",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-27",
     "owner": null,
     "path": "concepts/architecture/BRAND_PARITY.md",
@@ -4538,6 +4574,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "concepts/architecture/CONTROL_PLANES.md",
+    "status": "canonical",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "concepts/architecture/COPY_TERMINOLOGY_CONTRACT.md",
@@ -4560,6 +4605,15 @@
     "owner": "Infra Team",
     "path": "concepts/architecture/DATABASE_ARCHITECTURE.md",
     "status": "superseded",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Security",
+    "path": "concepts/architecture/DATA_GOVERNANCE.md",
+    "status": "canonical",
     "type": "concept"
   },
   {
@@ -4623,6 +4677,15 @@
     "owner": null,
     "path": "concepts/architecture/GDPR_COMPLIANCE.md",
     "status": "superseded",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Auth Platform",
+    "path": "concepts/architecture/IDENTITY_DOMAIN_BOUNDARIES.md",
+    "status": "canonical",
     "type": "concept"
   },
   {
@@ -5015,10 +5078,28 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "concepts/architecture/RELEASE_ROLLOUT_AND_REMOVAL.md",
+    "status": "canonical",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-06",
     "owner": "Platform",
     "path": "concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md",
     "status": "superseded",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Multisite Platform",
+    "path": "concepts/architecture/TENANT_LIFECYCLE.md",
+    "status": "canonical",
     "type": "concept"
   },
   {
@@ -5037,6 +5118,15 @@
     "owner": null,
     "path": "concepts/architecture/TOKEN_REFERENCE_INTEGRITY.md",
     "status": "superseded",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "concepts/architecture/TUTOR_AND_EXTENSION_MODEL.md",
+    "status": "canonical",
     "type": "concept"
   },
   {
@@ -5064,6 +5154,60 @@
     "owner": null,
     "path": "concepts/architecture/VIDEO_PIPELINE.md",
     "status": "superseded",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": null,
+    "path": "concepts/architecture/content-libraries-overview.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": null,
+    "path": "concepts/architecture/enterprise-services-overview.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": null,
+    "path": "concepts/architecture/multi-tenancy-overview.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": null,
+    "path": "concepts/architecture/notification-pipeline-overview.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": null,
+    "path": "concepts/architecture/proctoring-architecture-overview.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": null,
+    "path": "concepts/architecture/purchase-gateway-overview.md",
+    "status": "supporting",
     "type": "concept"
   },
   {
@@ -5771,6 +5915,24 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "guides/standards/ADR_LANGUAGE_STYLE.md",
+    "status": "canonical",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "guides/standards/ADR_NUMBERING_AND_NAMING.md",
+    "status": "canonical",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
     "owner": "Platform Team",
     "path": "guides/standards/DOCS_SPECS_CONTRACT.md",
@@ -5888,10 +6050,37 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/AGENT_WORKPACKETS.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/ARCHITECTURE_GOVERNANCE_OVERLAY.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/DEPLOY_TENANCY_EPIC.md",
     "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/FOUNDATIONS_PROGRAM.md",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -5910,6 +6099,15 @@
     "owner": null,
     "path": "meta/docs-program/MOBILE_OAUTH_PREPARATION.md",
     "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/PROGRAM_UPDATE_V2_BRIEF.md",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -6080,6 +6278,69 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/root-collapse/docs-architecture-collapse-map.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/root-collapse/docs-branding-collapse-map.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/root-collapse/docs-legacy-testmaps-collapse-map.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/root-collapse/docs-onboarding-collapse-map.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/root-collapse/docs-operations-collapse-map.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/root-collapse/docs-runbooks-collapse-map.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/root-collapse/docs-top-level-evidence-collapse-map.yaml",
     "status": "supporting",
     "type": "other"
   },
@@ -6449,7 +6710,7 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Platform Team",
     "path": "onboarding/README.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "guide"
   },
   {
@@ -6494,7 +6755,7 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Platform Team",
     "path": "operations/ACCESS_URLS.md",
-    "status": "archive-candidate",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6548,7 +6809,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/ANALYTICS_UNDEFINED_REGRESSION_FIX.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6575,7 +6836,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/ASPECTS_ANALYTICS_SETUP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6584,7 +6845,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/ASPECTS_WIRING_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6611,7 +6872,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/AUTHENTICATED_SMOKE_CREDENTIALS.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6764,7 +7025,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "operations/COMMIT_SIGNING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6773,7 +7034,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/CONTENT_LIBRARIES_V2_MIGRATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6800,7 +7061,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": "Platform Eng",
     "path": "operations/COURSE_CERTIFICATES_UI.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6809,7 +7070,7 @@
     "last_verified_or_updated": "2026-02-07",
     "owner": "Platform Ops",
     "path": "operations/COURSE_DATA_RECOVERY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6836,7 +7097,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/DEPLOY_EVIDENCE_GATES.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6845,7 +7106,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/DEPLOY_TENANCY_EPIC.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6899,7 +7160,7 @@
     "last_verified_or_updated": "2026-02-17",
     "owner": null,
     "path": "operations/ECOMMERCE_DEPRECATION_INVENTORY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6908,7 +7169,7 @@
     "last_verified_or_updated": "2026-02-04",
     "owner": null,
     "path": "operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6917,7 +7178,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "operations/ECOMMERCE_THEMING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6926,7 +7187,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6944,7 +7205,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/EMAIL_PIPELINE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -6953,7 +7214,7 @@
     "last_verified_or_updated": "2026-02-27",
     "owner": null,
     "path": "operations/ENTERPRISE_MFE_MAINTENANCE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7034,7 +7295,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": "Engineering Lead | Last updated: 2026-02-24",
     "path": "operations/FORUM_MEILISEARCH.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7043,7 +7304,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "operations/FORUM_UI_THEMING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7079,7 +7340,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/GDPR_COMPLIANCE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7115,7 +7376,7 @@
     "last_verified_or_updated": "2026-02-12",
     "owner": "Platform Team",
     "path": "operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7178,7 +7439,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7187,7 +7448,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/LEGACY_FOOTER_REMOVAL.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7196,7 +7457,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/LIBRARIES_GCS_SETUP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7205,7 +7466,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/LIGHTHOUSE_BUDGETS.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7259,7 +7520,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "operations/LOGO-404-EMERGENCY-FIX.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7268,7 +7529,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "operations/LOGO_404_FIX.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7304,7 +7565,7 @@
     "last_verified_or_updated": "2026-02-18",
     "owner": "Mereka Frontend",
     "path": "operations/MFE_FOOTER_SLOT_MIGRATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7313,7 +7574,7 @@
     "last_verified_or_updated": "2026-02-27",
     "owner": null,
     "path": "operations/MFE_OAUTH_FIX_DEPLOYMENT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7331,7 +7592,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7340,7 +7601,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/MFE_ROUTING_PARITY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7349,7 +7610,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/MFE_SELECTOR_EXCEPTIONS.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7358,7 +7619,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/MFE_SELECTOR_HARDENING_AUDIT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7367,7 +7628,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/MFE_ULMO_MIGRATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7376,7 +7637,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "operations/MOBILE_DEPLOYMENT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7385,7 +7646,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/MOBILE_OAUTH_PREPARATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7394,7 +7655,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "operations/MOBILE_OAUTH_PROVISIONING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7412,7 +7673,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/MONGODB_DEV_SEED.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7448,7 +7709,7 @@
     "last_verified_or_updated": "2026-02-07",
     "owner": null,
     "path": "operations/MULTISITE_GOVERNANCE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7592,7 +7853,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/PATCH_IDEMPOTENCY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7601,7 +7862,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/PII_DATA_INVENTORY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7673,7 +7934,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7682,7 +7943,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": "SRE | Status: Active",
     "path": "operations/PURCHASE_GATEWAY_K8S.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7772,7 +8033,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/RKE2_DEV_READINESS.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7781,7 +8042,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/RKE2_MIGRATION_PLAN.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7790,7 +8051,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/RKE2_NONPROD_THEME_AND_CONVERGENCE_FIX.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7799,7 +8060,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/RKE2_ROLLOUT_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7808,7 +8069,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/RKE2_ROLLOUT_MATRIX.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7817,7 +8078,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "operations/RKE2_TENANT_ROUTES.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7898,7 +8159,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/SLSA_PROVENANCE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7925,7 +8186,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/STAGING_ACTIVATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -7943,7 +8204,7 @@
     "last_verified_or_updated": "2026-02-17",
     "owner": null,
     "path": "operations/STRIPE_WEBHOOKS_SETUP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8033,7 +8294,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/TOKEN_DRIFT_REMEDIATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8042,7 +8303,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/TOKEN_INTEGRITY_REMEDIATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8051,7 +8312,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/TOKEN_INTEGRITY_ROUTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8060,7 +8321,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/TRANSLATION_WORKFLOW.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8069,7 +8330,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "operations/TROUBLESHOOTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8078,7 +8339,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/TTFS_ONBOARDING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8096,7 +8357,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/UI_UX_HARDENING_BUNDLE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8141,7 +8402,7 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Docs Team",
     "path": "operations/VISUAL_REGRESSION.md",
-    "status": "archive-candidate",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8159,7 +8420,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/WINDOWS_SSH_SETUP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8231,7 +8492,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/footer-slot-exceptions.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8240,7 +8501,7 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Docs Team",
     "path": "operations/ops-evidence/2026-02-19.md",
-    "status": "archive-candidate",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8249,7 +8510,7 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Operations Team",
     "path": "operations/postmortems/README.md",
-    "status": "canonical",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8258,7 +8519,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/tenant-hosting-readiness.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -8568,12 +8829,57 @@
     "type": "runbook"
   },
   {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/A11Y_REGRESSION_LANE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/A11Y_TENANT_BRANDING_GATE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
     "canonical_conflict_group": "accessibility-conformance-runbook",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
     "owner": "Docs Team",
     "path": "ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md",
     "status": "superseded",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-06",
+    "owner": null,
+    "path": "ops/runbooks/ALERT_TUNING_SOP.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md",
+    "status": "supporting",
     "type": "runbook"
   },
   {
@@ -8588,9 +8894,63 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/ARGOCD_DRIFT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/ASPECTS_WIRING_CHECKLIST.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/ATLAS_HEALTH.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-09",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/AUTH_ALERT_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/AUTH_CHANGE_CHECKLIST.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8651,9 +9011,36 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-19",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/COST_MONITORING_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-07",
+    "owner": "Platform Ops",
+    "path": "ops/runbooks/COURSE_DATA_RECOVERY.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8681,6 +9068,24 @@
     "last_verified_or_updated": "2026-02-07",
     "owner": "Infra Team",
     "path": "ops/runbooks/DEPLOYMENT_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/DEPLOYMENT_VERIFICATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/DEPLOY_EVIDENCE_GATES.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8721,6 +9126,42 @@
     "type": "runbook"
   },
   {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": "Engineering Lead",
+    "path": "ops/runbooks/DOMAIN_MANAGEMENT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-24",
+    "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
+    "path": "ops/runbooks/DR_DRILL_SCHEDULE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-04",
+    "owner": null,
+    "path": "ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-24",
+    "owner": null,
+    "path": "ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
     "canonical_conflict_group": "email-notifications-runbook",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-10",
@@ -8736,6 +9177,33 @@
     "owner": "Docs Team",
     "path": "ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md",
     "status": "superseded",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/ENTERPRISE_SSO_GUIDE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/ESO_ALERTING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/FORUM_AUTH_E2E.md",
+    "status": "supporting",
     "type": "runbook"
   },
   {
@@ -8759,6 +9227,24 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/FRONTEND_REGRESSION_CHECKLIST.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/GDPR_COMPLIANCE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/GITOPS_WORKFLOW.md",
@@ -8768,9 +9254,81 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/GKE_LOKI_FORWARDING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-12",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-24",
+    "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
+    "path": "ops/runbooks/INCIDENT_RESPONSE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": "Engineering Lead",
+    "path": "ops/runbooks/INCIDENT_TEMPLATES.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-06",
+    "owner": "Security Domain Owner",
+    "path": "ops/runbooks/IN_CLUSTER_AUTH_VERIFICATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-18",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-24",
+    "owner": null,
+    "path": "ops/runbooks/LMS_RKE2_VALIDATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8789,6 +9347,24 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/MOBILE_APPS_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-24",
+    "owner": null,
+    "path": "ops/runbooks/MOBILE_DEPLOYMENT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/MOBILE_OAUTH_PROVISIONING.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8813,6 +9389,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/MONGODB_DEV_SEED.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md",
@@ -8825,6 +9410,78 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/MULTI_TENANCY_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-07",
+    "owner": null,
+    "path": "ops/runbooks/OBSERVABILITY_QUICKSTART.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-07",
+    "owner": null,
+    "path": "ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/ON_CALL.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/PATCH_IDEMPOTENCY.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/POSTDEPLOY_SMOKE_AND_INCIDENT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-24",
+    "owner": null,
+    "path": "ops/runbooks/POST_DEPLOY_GATE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/PREVIEW_REDIRECT.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8849,10 +9506,46 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-24",
+    "owner": "SRE | Status: Active",
+    "path": "ops/runbooks/PURCHASE_GATEWAY_K8S.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "ops/runbooks/README.md",
     "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/RELEASE_CHECKLIST.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-03",
+    "owner": "Infra Team",
+    "path": "ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md",
+    "status": "supporting",
     "type": "runbook"
   },
   {
@@ -8874,12 +9567,165 @@
     "type": "runbook"
   },
   {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/RKE2_DEV_READINESS.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-24",
+    "owner": null,
+    "path": "ops/runbooks/RKE2_TENANT_ROUTES.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": null,
+    "path": "ops/runbooks/SECRET_ROTATION_CHECKLIST.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/SLO_DASHBOARDS_SETUP.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/STAGING_ACTIVATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-17",
+    "owner": null,
+    "path": "ops/runbooks/STRIPE_WEBHOOKS_SETUP.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
     "canonical_conflict_group": "tenant-branding-qa-runbook",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
     "owner": "Docs Team",
     "path": "ops/runbooks/TENANT_BRANDING_QA_RUNBOOK.md",
     "status": "superseded",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-17",
+    "owner": null,
+    "path": "ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/TENANT_BRAND_ONBOARDING_GUIDE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/TENANT_DRIFT_INVESTIGATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/TENANT_FOOTER_VARIANT_LANE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/TENANT_PROVISIONING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/THEME_DEPLOYMENT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/TRANSLATION_WORKFLOW.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "ops/runbooks/TROUBLESHOOTING.md",
+    "status": "supporting",
     "type": "runbook"
   },
   {
@@ -8901,6 +9747,24 @@
     "type": "runbook"
   },
   {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/UI_UX_POSTDEPLOY_SMOKE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-07",
+    "owner": "Infra",
+    "path": "ops/runbooks/VELERO_BACKUP_AUDIT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
     "canonical_conflict_group": "visual-regression-runbook",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
@@ -8912,9 +9776,126 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/VISUAL_SMOKE_BASELINE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/WINDOWS_SSH_SETUP.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-18",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-27",
+    "owner": null,
+    "path": "ops/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/architecture/FOOTER_SLOT_MIGRATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-18",
+    "owner": null,
+    "path": "ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-18",
+    "owner": "Mereka Frontend",
+    "path": "ops/runbooks/architecture/MFE_FOOTER_SLOT_MIGRATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-27",
+    "owner": null,
+    "path": "ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/architecture/MFE_ROUTING_PARITY.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/architecture/README.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8978,6 +9959,69 @@
     "last_verified_or_updated": "2026-02-12",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/emergency-rollback.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/migrations/README.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-10",
+    "owner": "Engineering Lead",
+    "path": "ops/runbooks/migrations/VERIFICATION_CHECKLIST.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-11-09",
+    "owner": "Migration Squad",
+    "path": "ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "Migration Squad",
+    "path": "ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/migrations/kajabi/README.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-09-15",
+    "owner": "Migration Squad",
+    "path": "ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-11-09",
+    "owner": "Migration Squad",
+    "path": "ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -10571,7 +11615,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10580,7 +11624,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/README.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10589,7 +11633,7 @@
     "last_verified_or_updated": "2026-02-27",
     "owner": null,
     "path": "runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10598,7 +11642,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/architecture/FOOTER_SLOT_MIGRATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10607,7 +11651,7 @@
     "last_verified_or_updated": "2026-02-18",
     "owner": null,
     "path": "runbooks/architecture/LEGACY_FOOTER_REMOVAL.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10616,7 +11660,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/architecture/MFE_FOOTER_SLOT_MIGRATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10625,7 +11669,7 @@
     "last_verified_or_updated": "2026-02-27",
     "owner": null,
     "path": "runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10634,7 +11678,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/architecture/MFE_ROUTING_PARITY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10643,7 +11687,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10652,7 +11696,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10661,7 +11705,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10670,7 +11714,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": "Engineering Lead",
     "path": "runbooks/migrations/VERIFICATION_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10679,7 +11723,7 @@
     "last_verified_or_updated": "2025-11-09",
     "owner": "Migration Squad",
     "path": "runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10688,7 +11732,7 @@
     "last_verified_or_updated": null,
     "owner": "Migration Squad",
     "path": "runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10697,7 +11741,7 @@
     "last_verified_or_updated": "2025-09-15",
     "owner": "Migration Squad",
     "path": "runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10706,7 +11750,7 @@
     "last_verified_or_updated": "2025-11-09",
     "owner": "Migration Squad",
     "path": "runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10715,7 +11759,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10724,7 +11768,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/A11Y_REGRESSION_LANE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10733,7 +11777,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/A11Y_TENANT_BRANDING_GATE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10742,7 +11786,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10751,7 +11795,7 @@
     "last_verified_or_updated": "2026-02-06",
     "owner": null,
     "path": "runbooks/operations/ALERT_TUNING_SOP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10760,7 +11804,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10769,7 +11813,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/ARGOCD_DRIFT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10778,7 +11822,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10787,7 +11831,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/ASPECTS_WIRING_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10796,7 +11840,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/ATLAS_HEALTH.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10805,7 +11849,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10814,7 +11858,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/AUTH_CHANGE_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10823,7 +11867,7 @@
     "last_verified_or_updated": "2026-02-27",
     "owner": null,
     "path": "runbooks/operations/BRANDING_RELEASE_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10832,7 +11876,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/BUILD_PIPELINE_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10841,7 +11885,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/CLOUD_SQL_RESTORE_DRILL.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10850,7 +11894,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/CONTENT_LIBRARIES_V2_MIGRATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10859,7 +11903,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/COURSE_DATA_RECOVERY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10868,7 +11912,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/CSP_REPORTING_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10877,7 +11921,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/DATA_ERASURE_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10886,7 +11930,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "runbooks/operations/DEPLOYMENT_VERIFICATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10895,7 +11939,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/DEPLOY_EVIDENCE_GATES.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10904,7 +11948,7 @@
     "last_verified_or_updated": "2026-02-05",
     "owner": "Platform",
     "path": "runbooks/operations/DOMAIN_CHANGE_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10913,7 +11957,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": "Engineering Lead",
     "path": "runbooks/operations/DOMAIN_MANAGEMENT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10922,7 +11966,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/DR_DRILL_SCHEDULE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10931,7 +11975,7 @@
     "last_verified_or_updated": "2026-02-04",
     "owner": null,
     "path": "runbooks/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10940,7 +11984,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10949,7 +11993,7 @@
     "last_verified_or_updated": "2026-02-14",
     "owner": "SRE",
     "path": "runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10958,7 +12002,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/ENTERPRISE_SSO_GUIDE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10967,7 +12011,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/ESO_ALERTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10976,7 +12020,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "runbooks/operations/FORUM_AUTH_E2E.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10985,7 +12029,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/FRONTEND_REGRESSION_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -10994,7 +12038,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/GDPR_COMPLIANCE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11003,7 +12047,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "runbooks/operations/GKE_LOKI_FORWARDING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11012,7 +12056,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11021,7 +12065,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/INCIDENT_RESPONSE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11030,7 +12074,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": "Engineering Lead",
     "path": "runbooks/operations/INCIDENT_TEMPLATES.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11039,7 +12083,7 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Security Domain Owner",
     "path": "runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11048,7 +12092,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11057,7 +12101,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "runbooks/operations/LMS_RKE2_VALIDATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11066,7 +12110,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/MOBILE_DEPLOYMENT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11075,7 +12119,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/MOBILE_OAUTH_PROVISIONING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11084,7 +12128,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/MODULE_SURFACE_VALIDATION_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11093,7 +12137,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/MONGODB_DEV_SEED.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11102,7 +12146,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11111,7 +12155,7 @@
     "last_verified_or_updated": "2026-02-07",
     "owner": null,
     "path": "runbooks/operations/OBSERVABILITY_QUICKSTART.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11120,7 +12164,7 @@
     "last_verified_or_updated": "2026-02-07",
     "owner": null,
     "path": "runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11129,7 +12173,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/ON_CALL.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11138,7 +12182,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/PATCH_IDEMPOTENCY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11147,7 +12191,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/POSTDEPLOY_SMOKE_AND_INCIDENT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11156,7 +12200,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "runbooks/operations/POST_DEPLOY_GATE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11165,7 +12209,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/PREVIEW_REDIRECT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11174,7 +12218,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/PRIVACY_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11183,7 +12227,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11192,7 +12236,7 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": null,
     "path": "runbooks/operations/PURCHASE_GATEWAY_K8S.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11201,7 +12245,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "runbooks/operations/RELEASE_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11210,7 +12254,7 @@
     "last_verified_or_updated": "2026-02-03",
     "owner": "Infra Team",
     "path": "runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11219,7 +12263,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/RELEASE_EXECUTE_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11228,7 +12272,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/RKE2_DEV_READINESS.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11237,7 +12281,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11246,7 +12290,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/RKE2_TENANT_ROUTES.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11255,7 +12299,7 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "runbooks/operations/SECRET_ROTATION_CHECKLIST.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11264,7 +12308,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/SECURITY_INCIDENT_SUPPLY_CHAIN.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11273,7 +12317,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "runbooks/operations/SLO_DASHBOARDS_SETUP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11282,7 +12326,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/STAGING_ACTIVATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11291,7 +12335,7 @@
     "last_verified_or_updated": "2026-02-17",
     "owner": null,
     "path": "runbooks/operations/STRIPE_WEBHOOKS_SETUP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11300,7 +12344,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/TENANT_BRANDING_QA_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11309,7 +12353,7 @@
     "last_verified_or_updated": "2026-02-17",
     "owner": null,
     "path": "runbooks/operations/TENANT_BRANDING_TROUBLESHOOTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11318,7 +12362,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/TENANT_BRAND_ONBOARDING_GUIDE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11327,7 +12371,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/TENANT_DRIFT_INVESTIGATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11336,7 +12380,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/TENANT_FOOTER_VARIANT_LANE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11345,7 +12389,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/TENANT_ONBOARDING_PLAYBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11354,7 +12398,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/TENANT_PROVISIONING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11363,7 +12407,7 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "runbooks/operations/THEME_DEPLOYMENT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11372,7 +12416,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/TRANSLATION_WORKFLOW.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11381,7 +12425,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/TROUBLESHOOTING.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11390,7 +12434,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/UI_UX_POSTDEPLOY_SMOKE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11399,7 +12443,7 @@
     "last_verified_or_updated": "2026-02-07",
     "owner": "Infra",
     "path": "runbooks/operations/VELERO_BACKUP_AUDIT.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11408,7 +12452,7 @@
     "last_verified_or_updated": "2026-02-17",
     "owner": null,
     "path": "runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11417,7 +12461,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/VISUAL_SMOKE_BASELINE.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11426,7 +12470,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/WINDOWS_SSH_SETUP.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -11435,7 +12479,7 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md",
-    "status": "supporting",
+    "status": "superseded",
     "type": "runbook"
   },
   {

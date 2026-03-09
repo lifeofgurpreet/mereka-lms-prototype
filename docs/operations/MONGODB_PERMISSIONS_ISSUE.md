@@ -1,10 +1,10 @@
-# MongoDB Atlas Permissions Issue (Superseded)
-_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: superseded_
+# MongoDB Atlas Permissions Issue
 
-superseded_by: `../ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md`
+_Status: superseded_  
+_Superseded by: ../ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md`
 
-Reason:
-- Consolidated into canonical docs/ops location during remediation.
+Do not add new substantive content here.

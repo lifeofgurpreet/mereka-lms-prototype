@@ -1,10 +1,10 @@
-# SSO Canary (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# SSO Canary
 
-superseded_by: `../reference/operations/SSO_CANARY.md`
+_Status: superseded_  
+_Superseded by: ../reference/operations/SSO_CANARY.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../reference/operations/SSO_CANARY.md`
 
-Reason:
-- Operational reference material now lives under docs/reference/operations/.
+Do not add new substantive content here.

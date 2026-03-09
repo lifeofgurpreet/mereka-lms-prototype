@@ -1,10 +1,10 @@
-# Access URLs and User Management (Superseded)
-_Audience: Everyone • Owner: Platform Team • Last verified: 2026-03-06 • Status: archive-candidate_
+# Access URLs and User Management
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: ../ops/quickref/access-urls.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/quickref/access-urls.md`
 
-superseded_by: `docs/ops/quickref/access-urls.md`
-
-Reason:
-- Canonical access URL reference was consolidated under `docs/ops/quickref`.
+Do not add new substantive content here.

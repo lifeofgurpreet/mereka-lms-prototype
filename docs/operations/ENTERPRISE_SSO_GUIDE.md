@@ -1,10 +1,10 @@
-# Enterprise SSO Guide (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Enterprise SSO Guide
 
-superseded_by: `../runbooks/operations/ENTERPRISE_SSO_GUIDE.md`
+_Status: superseded_  
+_Superseded by: ../runbooks/operations/ENTERPRISE_SSO_GUIDE.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../runbooks/operations/ENTERPRISE_SSO_GUIDE.md`
 
-Reason:
-- Enterprise onboarding and operator guides now live under docs/runbooks/operations/.
+Do not add new substantive content here.

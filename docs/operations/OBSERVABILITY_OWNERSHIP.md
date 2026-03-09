@@ -1,10 +1,10 @@
-# Observability Ownership (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Observability Ownership
 
-superseded_by: `../policies/operations/OBSERVABILITY_OWNERSHIP.md`
+_Status: superseded_  
+_Superseded by: ../policies/operations/OBSERVABILITY_OWNERSHIP.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../policies/operations/OBSERVABILITY_OWNERSHIP.md`
 
-Reason:
-- Ownership and source-of-truth policy now lives under docs/policies/operations/.
+Do not add new substantive content here.

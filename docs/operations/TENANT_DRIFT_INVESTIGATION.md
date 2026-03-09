@@ -1,6 +1,10 @@
-# TENANT_DRIFT_INVESTIGATION.md (Superseded)
+# TENANT_DRIFT_INVESTIGATION.md
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: docs/runbooks/operations/TENANT_DRIFT_INVESTIGATION.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `docs/runbooks/operations/TENANT_DRIFT_INVESTIGATION.md`
 
-Use the canonical path above.
+Do not add new substantive content here.

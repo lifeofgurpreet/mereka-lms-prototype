@@ -1,10 +1,10 @@
-# Cost Optimization for Development Environment (Superseded)
-_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: superseded_
+# Cost Optimization for Development Environment
 
-superseded_by: `../ops/ci-cd/COST_OPTIMIZATION.md`
+_Status: superseded_  
+_Superseded by: ../ops/ci-cd/COST_OPTIMIZATION.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/ci-cd/COST_OPTIMIZATION.md`
 
-Reason:
-- Consolidated into canonical docs/ops location during remediation.
+Do not add new substantive content here.

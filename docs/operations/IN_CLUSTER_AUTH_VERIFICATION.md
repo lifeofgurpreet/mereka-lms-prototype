@@ -1,10 +1,10 @@
-# In-Cluster Auth Verification (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# In-Cluster Auth Verification
 
-superseded_by: `../runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md`
+_Status: superseded_  
+_Superseded by: ../runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md`
 
-Reason:
-- Runtime verification procedures now live under `docs/runbooks/operations/`.
+Do not add new substantive content here.

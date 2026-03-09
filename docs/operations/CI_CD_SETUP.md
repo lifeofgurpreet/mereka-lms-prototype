@@ -1,10 +1,10 @@
-# CI/CD Setup (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# CI/CD Setup
 
-superseded_by: `../reference/operations/CI_CD_SETUP.md`
+_Status: superseded_  
+_Superseded by: ../reference/operations/CI_CD_SETUP.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../reference/operations/CI_CD_SETUP.md`
 
-Reason:
-- CI/CD reference material now lives under docs/reference/operations/.
+Do not add new substantive content here.

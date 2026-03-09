@@ -1,10 +1,10 @@
-# Task 3: SES SMTP Deliverability - Troubleshooting Guide (Superseded)
-_Audience: Platform Operators • Owner: Ops Domain Owner • Last verified: 2026-03-06 • Status: superseded_
+# Task 3: SES SMTP Deliverability - Troubleshooting Guide
 
-superseded_by: `../ops/runbooks/task3-ses-smtp-guide.md`
+_Status: superseded_  
+_Superseded by: ../ops/runbooks/task3-ses-smtp-guide.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/runbooks/task3-ses-smtp-guide.md`
 
-Reason:
-- Consolidated under canonical runbooks to reduce transitional `docs/operations/**` drift.
+Do not add new substantive content here.

@@ -100,7 +100,7 @@ run_check "spec-lint" \
 
 # 2. Testmap format validation
 run_check "testmap-validate" \
-  python3 "${TOOL_DIR}/validate_testmap_format.py" specs/testmaps/
+  python3 "${TOOL_DIR}/validate_testmap_format.py" specs/_generated/testmaps/
 
 # 3. Spec verification via @covers annotations (informational — coverage may not be 100%)
 run_check_info "spec-verify" \

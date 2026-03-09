@@ -1,3 +1,7 @@
 # Architecture Decision Map
 
-See `generated/decision-maps/adr-decision-map.md`.
+Status: superseded
+superseded_by: ../adr/_generated/decision-map.md
+
+Canonical generated document:
+[docs/adr/_generated/decision-map.md](../adr/_generated/decision-map.md)

@@ -1,10 +1,10 @@
-# Auth Hardening Spec (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Auth Hardening Spec
 
-superseded_by: `../policies/operations/AUTH_HARDENING_SPEC.md`
+_Status: superseded_  
+_Superseded by: ../policies/operations/AUTH_HARDENING_SPEC.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../policies/operations/AUTH_HARDENING_SPEC.md`
 
-Reason:
-- Authentication standards and governance now live under `docs/policies/operations/`.
+Do not add new substantive content here.

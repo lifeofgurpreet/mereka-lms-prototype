@@ -1,10 +1,10 @@
-# Open edX Hostnames Registry (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Open edX Hostnames Registry
 
-superseded_by: `../reference/operations/OPENEDX_HOSTNAMES.md`
+_Status: superseded_  
+_Superseded by: ../reference/operations/OPENEDX_HOSTNAMES.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../reference/operations/OPENEDX_HOSTNAMES.md`
 
-Reason:
-- Operational reference material now lives under docs/reference/operations/.
+Do not add new substantive content here.

@@ -16,7 +16,7 @@ The Mereka Academy platform has 31 specifications defining 769 acceptance criter
 Prior approaches used manually-authored YAML testmap files:
 
 ```yaml
-# specs/testmaps/k8s-deployment_spec.testmap.yml
+# specs/_generated/testmaps/k8s-deployment_spec.testmap.yml
 coverage:
   - ac_id: AC-001
     test_file: scripts/qa/verify-k8s-namespace.sh
@@ -153,7 +153,7 @@ manual_verifications:
    - `compute_dependency_graph.py`: Generate `specs/IMPLEMENTATION_ORDER.md` from `depends_on`
    - `mereka_spec_verify.py`: Shell wrapper for CI/CD integration
 5. **Update spec integrity gates**: `run-spec-integrity-gates.sh` now runs annotation-based tools
-6. **Compatibility reality**: the repository retained `specs/testmaps/` longer than intended. Wave 2 declares generated testmaps canonical under `specs/_generated/testmaps/`, with `specs/testmaps/` treated as legacy compatibility output until migration completes.
+6. **Compatibility reality**: the repository retained `specs/testmaps/` longer than intended. Wave 2B freezes that path as legacy compatibility only, with generated testmaps canonical under `specs/_generated/testmaps/`.
 
 ### Coverage Improvement
 
@@ -254,5 +254,5 @@ Estimated effort: 1-2 weeks for tool setup and import
 ADR-011 remains accepted, but the repository briefly diverged from its own contract by keeping `specs/testmaps/` as an active-looking surface. Wave 2 closes that split by:
 
 - treating `@covers` annotations and manual verification metadata as the source of truth
-- generating compatibility testmaps into `specs/_generated/testmaps/`
-- keeping `specs/testmaps/` as legacy fallback only until consumers are migrated
+- generating active testmaps into `specs/_generated/testmaps/`
+- freezing `specs/testmaps/` as legacy fallback only

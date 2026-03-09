@@ -1,10 +1,10 @@
-# Branch Protection Requirements (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Branch Protection Requirements
 
-superseded_by: `../policies/operations/BRANCH_PROTECTION.md`
+_Status: superseded_  
+_Superseded by: ../policies/operations/BRANCH_PROTECTION.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../policies/operations/BRANCH_PROTECTION.md`
 
-Reason:
-- Operational policy material now lives under docs/policies/operations/.
+Do not add new substantive content here.
