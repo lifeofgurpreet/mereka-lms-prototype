@@ -2,6 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mereka.io/schemas/tenant-brand-pack-compat.json",
   "title": "Tenant Brand Pack Configuration (Compatibility Wrapper)",
-  "description": "Compatibility wrapper. The canonical schema lives at specs/standards/brand-pack-schema.json.",
+  "description": "Status: superseded. Transitional only compatibility wrapper. The live schema now lives at specs/standards/brand-pack-schema.json.",
   "$ref": "./standards/brand-pack-schema.json"
 }
