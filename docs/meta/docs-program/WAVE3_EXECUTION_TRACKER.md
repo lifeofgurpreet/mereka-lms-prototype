@@ -4,7 +4,7 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: 4668744efcc53a9cdb9d5465b72367d4b5374bfe
+- commit: f04c525a8b28a5dff728c383b5d2d881271fb73b
 - scope: PR refresh / review handoff
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
@@ -41,7 +41,7 @@
   - Packet G (run closeout)
   - PR refresh / review handoff
 - latest commit SHA:
-  - 4668744efcc53a9cdb9d5465b72367d4b5374bfe
+  - f04c525a8b28a5dff728c383b5d2d881271fb73b
 - open residue:
   - no root non-normative residue remains
   - no missing required metadata remains
