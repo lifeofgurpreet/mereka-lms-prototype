@@ -12,6 +12,8 @@ on:
       - 'generated/decision-maps/**'
       - 'generated/graphs/**'
       - 'docs/catalog.json'
+      - 'specs/testmaps/README.md'
+      - 'specs/_generated/testmaps/README.md'
       - 'scripts/qa/build_decision_graph.py'
       - 'scripts/qa/generate_adr_readme.py'
       - '.github/workflows/docs-compliance.yml'
