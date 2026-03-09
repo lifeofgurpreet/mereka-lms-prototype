@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 297,
+  "change_count": 302,
   "changed_roots": [
     "docs",
     "specs"
@@ -4180,6 +4180,72 @@
       "root": "other",
       "status": "",
       "title": "knowledge-catalog"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/contracts/cross-repo-manifest.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/contracts/cross-repo-manifest.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "cross-repo-manifest"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/contracts/deployment-impact-report.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/contracts/deployment-impact-report.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "deployment-impact-report"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -10112,6 +10178,105 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/contracts/build_cross_repo_manifest.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/build_cross_repo_manifest.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_cross_repo_manifest"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/contracts/build_deployment_impact_report.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/build_deployment_impact_report.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_deployment_impact_report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/contracts/contract_runtime.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/contract_runtime.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "contract_runtime"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/docs/verify/report-hotpath-doc-metadata.py"
       ],
       "lane": "other",
@@ -11091,6 +11256,8 @@
     "generated/adr-bundles/50-commerce.md",
     "generated/catalogs/docs-catalog.json",
     "generated/catalogs/knowledge-catalog.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
     "generated/graphs/knowledge-graph.json",
     "generated/knowledge/change-manifest.json",
     "generated/knowledge/review-bundle.md",
@@ -11309,6 +11476,9 @@
     "specs/verifiable-credentials-types_spec.md",
     "specs/verifiable-credentials-verification_spec.md",
     "specs/video-pipeline-delivery_spec.md",
+    "tools/contracts/build_cross_repo_manifest.py",
+    "tools/contracts/build_deployment_impact_report.py",
+    "tools/contracts/contract_runtime.py",
     "tools/docs/verify/report-hotpath-doc-metadata.py",
     "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh",
     "tools/docs/verify/verify-legacy-testmaps-frozen.py",

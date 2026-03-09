@@ -4,14 +4,15 @@
 - docs/wave6-cross-repo-contract-runtime
 
 ## Latest substantive packet head
-- Packet D commit on docs/wave6-cross-repo-contract-runtime
+- Packet E commit on docs/wave6-cross-repo-contract-runtime
 
 ## Last completed batch
-- commit: Packet D commit on docs/wave6-cross-repo-contract-runtime
-- scope: Packet D cross-repo impact engine
+- commit: Packet E commit on docs/wave6-cross-repo-contract-runtime
+- scope: Packet E release obligations engine
 - validators run:
-  - Packet D cross-repo manifest write/check
-  - Packet D deployment impact report write/check
+  - Packet E release obligations write/check
+  - Packet D cross-repo manifest check
+  - Packet D deployment impact report check
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
@@ -21,16 +22,18 @@
 - Packet B: service contract inventory
 - Packet C: infra crosswalk
 - Packet D: cross-repo impact engine
+- Packet E: release obligations engine
 
 ## Current target batch
 - files:
-  - tools/contracts/build_release_obligations.py
-  - generated/contracts/release-obligations.md
+  - tools/contracts/verify_cross_repo_contracts.py
+  - scripts/qa/run-cross-repo-contract-gates.sh
+  - .github/workflows/docs-policy.yml
 - goal:
-  - generate the human-facing release packet for deployment-affecting changes
-  - make required infra follow-up and evidence obligations reviewer-readable
+  - enforce cross-repo contract drift in CI
+  - fail when contract inventory, impact, or release obligations are stale or missing
 - stop condition:
-  - one generated release packet can explain deployment obligations for the branch diff
+  - local and CI-facing contract gates exist and pass
   - Wave 5 runtime stays green
   - one commit is created
 
@@ -55,3 +58,4 @@
 ## Next queued batch
 - Packet D: cross-repo impact engine
 - Packet E: release obligations engine
+- Packet F: contract gates

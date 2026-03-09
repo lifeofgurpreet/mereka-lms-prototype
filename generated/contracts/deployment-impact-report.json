@@ -57,9 +57,7 @@
       "cross_repo_verdict": "infra_counterpart_required",
       "deployment_repo": "bbi-infrastructure",
       "notes": [
-        {
-          "observability is a mixed ownership surface": "app repo owns contracts and runbooks, infra repo owns realization"
-        }
+        "observability is a mixed ownership surface: app repo owns contracts and runbooks, infra repo owns realization"
       ],
       "overlay_roots": {
         "dev": "apps/mereka-lms/overlays/dev/",

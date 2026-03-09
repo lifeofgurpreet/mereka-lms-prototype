@@ -1,5 +1,5 @@
 {
-  "change_count": 297,
+  "change_count": 302,
   "classification_counts": {
     "infra_counterpart_required": 3,
     "manual_review_required": 3
@@ -681,6 +681,18 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "generated/catalogs/knowledge-catalog.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/contracts/cross-repo-manifest.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/contracts/deployment-impact-report.json",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1675,6 +1687,24 @@
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "specs/video-pipeline-delivery_spec.md",
       "path_class": "spec_or_plan_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/build_cross_repo_manifest.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/build_deployment_impact_report.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/contract_runtime.py",
+      "path_class": "repo_support_change",
       "touched_services": []
     },
     {

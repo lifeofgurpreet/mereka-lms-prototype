@@ -116,7 +116,7 @@ crosswalk:
         - apps/mereka-lms/
         - platform monitoring applications
       notes:
-        - observability is a mixed ownership surface: app repo owns contracts and runbooks, infra repo owns realization
+        - "observability is a mixed ownership surface: app repo owns contracts and runbooks, infra repo owns realization"
       unknowns:
         - exact monitoring and alerting application paths in bbi-infrastructure are not declared in this repo
 
