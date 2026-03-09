@@ -51,6 +51,7 @@ jobs:
   lint:
     name: Lint & Validate
     runs-on: mereka-k8s-runners
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
@@ -658,6 +659,7 @@ jobs:
   slsa-provenance:
     name: SLSA Provenance & Attestation
     runs-on: mereka-k8s-runners
+    timeout-minutes: 15
     needs: [build-openedx, build-mfe]
     if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-mfe.result == 'success') }}
     permissions:
@@ -806,6 +808,7 @@ jobs:
   release-bundle:
     name: Generate Release Bundle
     runs-on: mereka-k8s-runners
+    timeout-minutes: 15
     needs: [build-openedx, build-mfe, slsa-provenance]
     if: ${{ needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' }}
     permissions:
