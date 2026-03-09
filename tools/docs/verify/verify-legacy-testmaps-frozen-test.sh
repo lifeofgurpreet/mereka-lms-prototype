@@ -19,5 +19,6 @@ python3 "$SCRIPT_PATH" --range HEAD~0...HEAD --summary-file "$SUMMARY_OK" >/tmp/
 grep -q 'LEGACY_TESTMAP_FREEZE_OK' /tmp/legacy-testmaps-ok.$$
 grep -q '"status": "pass"' "$SUMMARY_OK"
 grep -q 'specs/testmaps/README.md' "$SUMMARY_OK"
+grep -q 'specs/testmaps/RETIREMENT_PLAN.md' "$SUMMARY_OK"
 
 echo "verify-legacy-testmaps-frozen self-test: OK"
