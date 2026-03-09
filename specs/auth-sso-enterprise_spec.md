@@ -239,7 +239,7 @@ This spec also addresses critical security gaps: there is no formal contract for
 #### Identity Verification Workflows
 
 - The system MUST support email verification for JIT-provisioned accounts: if the IdP assertion does not include a verified email attribute (`email_verified=true` or equivalent), the system MUST send a verification email before granting full access
-- The system SHOULD support identity proofing integration for high-stakes assessments (proctored exams) via the Open edX identity verification framework (per `specs/proctoring-integration_spec.md`)
+- The system SHOULD support identity proofing integration for high-stakes assessments (proctored exams) via the Open edX identity verification framework (per `specs/proposals/proctoring-integration_spec.md`)
 - The system MUST support administrator-initiated identity verification: a platform operator MUST be able to manually verify a user's identity in Django admin and record the verification method and date
 - The system MUST NOT allow unverified accounts to access enterprise-subsidized content (content gated behind subscription/license access policies)
 

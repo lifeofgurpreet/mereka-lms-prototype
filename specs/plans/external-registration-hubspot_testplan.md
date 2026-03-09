@@ -1,5 +1,5 @@
 ---
-spec: external-registration-hubspot_spec.md
+spec: proposals/external-registration-hubspot_spec.md
 plan: external-registration-hubspot_plan.md
 last_updated: '2026-02-10'
 status: draft
@@ -7,7 +7,7 @@ status: draft
 
 # Test Plan: External Registration via HubSpot
 
-**Source Spec**: `specs/external-registration-hubspot_spec.md`
+**Source Spec**: `specs/proposals/external-registration-hubspot_spec.md`
 **Source Plan**: `specs/plans/external-registration-hubspot_plan.md`
 
 ## Test Framework

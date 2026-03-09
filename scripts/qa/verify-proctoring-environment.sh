@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @spec: proctoring-integration_spec.md
+# @spec: proposals/proctoring-integration_spec.md
 # @covers AC-003, AC-014, AC-015, AC-017, AC-018, AC-019, AC-023
 #
 # Proctoring environment and browser security verification:

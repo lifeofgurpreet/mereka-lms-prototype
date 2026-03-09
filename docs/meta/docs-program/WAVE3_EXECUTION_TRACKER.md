@@ -4,8 +4,8 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending Packet A HEAD
-- scope: Packet A
+- commit: pending Packet B HEAD
+- scope: Packet B
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
@@ -21,9 +21,9 @@
 ## Current target batch
 - files: []
 - goal:
-  - Packet A completed
+  - Packet B completed
 - stop condition:
-  - waiting for Packet B handoff
+  - waiting for next handoff
 
 ## Next queued batch
-- Packet B: proposal-lane residue moves
+- none queued

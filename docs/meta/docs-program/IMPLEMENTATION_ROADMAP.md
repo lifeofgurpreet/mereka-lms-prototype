@@ -73,8 +73,8 @@ Based on `specs/plans/IMPLEMENTATION_ORDER.md` (computed from `depends_on` front
 - `mobile-apps-enterprise_spec.md` - 37 ACs (8%) - 34 unmapped
 
 ### Tier 8: External Integrations (19-26%)
-- `external-registration-hubspot_spec.md` - 26 ACs (19%) - 21 unmapped
-- `proctoring-integration_spec.md` - 38 ACs (26%) - 28 unmapped
+- `proposals/external-registration-hubspot_spec.md` - 26 ACs (19%) - 21 unmapped
+- `proposals/proctoring-integration_spec.md` - 38 ACs (26%) - 28 unmapped
 
 ### Tier 9: Compliance (0%)
 - `data-privacy-gdpr-compliance_spec.md` - 30 ACs (0%) - all unmapped

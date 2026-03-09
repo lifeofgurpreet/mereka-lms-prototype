@@ -429,13 +429,13 @@
       "version": "1.0.0"
     },
     {
-      "acceptance_criteria_count": 26,
-      "created": "2026-02-12",
+      "acceptance_criteria_count": 0,
+      "created": "2026-03-09",
       "doc_type": "spec",
       "domain": "commerce",
-      "id": "SPEC-EXTERNAL-REGISTRATION-HUBSPOT",
+      "id": "SPEC-COMPAT-EXTERNAL-REGISTRATION-HUBSPOT",
       "lane": "normative",
-      "last_reviewed": "2026-02-12",
+      "last_reviewed": "2026-03-09",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/external-registration-hubspot_spec.testmap.yml",
@@ -444,16 +444,19 @@
         "source_spec": null,
         "testplan": "specs/plans/external-registration-hubspot_testplan.md"
       },
-      "normativity": "proposed",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/external-registration-hubspot_spec.md",
-      "review_due": "2026-05-13",
-      "spec_class": "proposal",
-      "status": "deferred",
-      "summary": "Proposal-stage contract for integrating HubSpot-driven external registration with Mereka LMS enrollment flows.",
-      "tags": [],
-      "title": "External Registration via HubSpot",
-      "version": "1.0.0"
+      "review_due": "2026-06-09",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
+      "tags": [
+        "compatibility",
+        "proposal-lane"
+      ],
+      "title": "Compatibility Wrapper: External Registration via HubSpot",
+      "version": null
     },
     {
       "acceptance_criteria_count": 25,
@@ -1681,7 +1684,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": null,
-        "source_spec": "specs/external-registration-hubspot_spec.md",
+        "source_spec": "specs/proposals/external-registration-hubspot_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -1708,7 +1711,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": "specs/plans/external-registration-hubspot_plan.md",
-        "source_spec": "specs/external-registration-hubspot_spec.md",
+        "source_spec": "specs/proposals/external-registration-hubspot_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -2167,7 +2170,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": null,
-        "source_spec": "specs/proctoring-integration_spec.md",
+        "source_spec": "specs/proposals/proctoring-integration_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -2194,7 +2197,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": "specs/plans/proctoring-integration_plan.md",
-        "source_spec": "specs/proctoring-integration_spec.md",
+        "source_spec": "specs/proposals/proctoring-integration_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -2560,12 +2563,69 @@
       "version": "1.0.0"
     },
     {
+      "acceptance_criteria_count": 0,
+      "created": "2026-03-09",
+      "doc_type": "spec",
+      "domain": "platform",
+      "id": "SPEC-COMPAT-PROCTORING-INTEGRATION",
+      "lane": "normative",
+      "last_reviewed": "2026-03-09",
+      "links": {
+        "generated_testmap": "specs/_generated/testmaps/proctoring-integration_spec.testmap.yml",
+        "legacy_testmap": "specs/testmaps/proctoring-integration_spec.testmap.yml",
+        "plan": "specs/plans/proctoring-integration_plan.md",
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": "specs/plans/proctoring-integration_testplan.md"
+      },
+      "normativity": "generated",
+      "owner": "engineering",
+      "path": "specs/proctoring-integration_spec.md",
+      "review_due": "2026-06-09",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
+      "tags": [
+        "compatibility",
+        "proposal-lane"
+      ],
+      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX",
+      "version": null
+    },
+    {
+      "acceptance_criteria_count": 26,
+      "created": "2026-02-12",
+      "doc_type": "spec",
+      "domain": "commerce",
+      "id": "SPEC-EXTERNAL-REGISTRATION-HUBSPOT",
+      "lane": "proposal",
+      "last_reviewed": "2026-02-12",
+      "links": {
+        "generated_testmap": "specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml",
+        "legacy_testmap": "specs/testmaps/external-registration-hubspot_spec.testmap.yml",
+        "plan": "specs/plans/external-registration-hubspot_plan.md",
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": "specs/plans/external-registration-hubspot_testplan.md"
+      },
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/external-registration-hubspot_spec.md",
+      "review_due": "2026-05-13",
+      "spec_class": "proposal",
+      "status": "deferred",
+      "summary": "Proposal-stage contract for integrating HubSpot-driven external registration with Mereka LMS enrollment flows.",
+      "tags": [],
+      "title": "External Registration via HubSpot",
+      "version": "1.0.0"
+    },
+    {
       "acceptance_criteria_count": 38,
       "created": "2026-02-10",
       "doc_type": "spec",
       "domain": "platform",
       "id": "SPEC-PROCTORING-INTEGRATION",
-      "lane": "normative",
+      "lane": "proposal",
       "last_reviewed": "2026-02-10",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/proctoring-integration_spec.testmap.yml",
@@ -2577,7 +2637,7 @@
       },
       "normativity": "proposed",
       "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
+      "path": "specs/proposals/proctoring-integration_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "proposal",
       "status": "deferred",
@@ -2952,7 +3012,7 @@
       "version": "1.0.0"
     }
   ],
-  "entry_count": 104,
+  "entry_count": 106,
   "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
   "root": "specs",
   "taxonomy": "specs/standards/spec-taxonomy.yaml"

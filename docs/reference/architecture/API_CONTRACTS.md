@@ -49,7 +49,7 @@ Custom API surfaces for Mereka Academy. Standard Open edX REST APIs are not docu
 ## 2. HubSpot Webhook (Firebase Cloud Function)
 
 **Status**: Legacy. Runs on Firebase (not K8s). Migration to K8s-native is deferred until MCT goes live.
-**Spec**: `specs/external-registration-hubspot_spec.md`
+**Spec**: `specs/proposals/external-registration-hubspot_spec.md`
 **Source**: `services/hubspot-webhook/functions/index.js`
 
 **Base URL**: Firebase function URL (configured in Firebase Console / Infisical)

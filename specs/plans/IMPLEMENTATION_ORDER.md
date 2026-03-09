@@ -80,8 +80,8 @@ Generated from `depends_on` frontmatter in spec files.
 
 | Spec | ACs | Title |
 |------|-----|-------|
-| external-registration-hubspot_spec.md | 26 | External Registration via HubSpot |
-| proctoring-integration_spec.md | 38 | Proctoring Integration for Enterprise Open edX |
+| proposals/external-registration-hubspot_spec.md | 26 | External Registration via HubSpot |
+| proposals/proctoring-integration_spec.md | 38 | Proctoring Integration for Enterprise Open edX |
 
 ## Tier 9
 

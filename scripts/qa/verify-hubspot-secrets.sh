@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-HUB-005
-# @spec: external-registration-hubspot_spec.md
+# @spec: proposals/external-registration-hubspot_spec.md
 # Verify HubSpot service secrets in ExternalSecrets and K8s
 # AC-HUB-005: HubSpot OAuth credentials in Infisical/ExternalSecrets
 #
@@ -155,7 +155,7 @@ main() {
     info "HubSpot secrets configuration verified"
   else
     error "HubSpot secrets configuration incomplete"
-    error "  See specs/external-registration-hubspot_spec.md for required secrets"
+    error "  See specs/proposals/external-registration-hubspot_spec.md for required secrets"
   fi
 
   return "${exit_code}"

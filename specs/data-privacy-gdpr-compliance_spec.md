@@ -21,7 +21,7 @@ depends_on:
   - "specs/badges-credentials-enterprise_spec.md"
   - "specs/content-libraries-v2_spec.md"
   - "specs/advanced-assessment-xqueue_spec.md"
-  - "specs/external-registration-hubspot_spec.md"
+  - "specs/proposals/external-registration-hubspot_spec.md"
 supersedes: []
 superseded_by: null
 verification_sources:
