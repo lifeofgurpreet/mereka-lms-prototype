@@ -11,7 +11,7 @@ paths:
   specs_root: "specs/"
   docs_root: "docs/"
   adr_root: "docs/adr/"
-  runbooks_root: "docs/operations/"
+  runbooks_root: "docs/ops/"
 
 defaults:
   require_runbook_for_production: true
@@ -77,14 +77,14 @@ verification:
     - "infrastructure/"
     - "services/"
   manual_file: "specs/manual_verifications.yaml"
-  testmaps_dir: "specs/testmaps/"
+  testmaps_dir: "specs/_generated/testmaps/"
   annotation_format:
     covers: "# @covers AC-001, AC-002"
     spec: "# @spec: feature_spec.md"
   fail_under_coverage: 50  # percent
 
 templates:
-  spec: "specs/_TEMPLATE.md"
+  spec: "specs/templates/spec-template.md"
   types:
     - feature_spec
     - migration_spec

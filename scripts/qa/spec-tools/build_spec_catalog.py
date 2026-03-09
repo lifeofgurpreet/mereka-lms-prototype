@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a machine-readable catalog for top-level specs.
-
-This is the spec-side companion to the docs catalog. It catalogs the normative
-spec corpus under `specs/` without folding specs into the docs truth plane.
-"""
+"""Generate a machine-readable catalog for top-level specs."""
 
 from __future__ import annotations
 
@@ -16,6 +12,14 @@ import yaml
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
 AC_RE = re.compile(r"- \[ \] AC-")
+
+
+def pick(frontmatter: dict, *keys: str) -> object:
+    for key in keys:
+        value = frontmatter.get(key)
+        if value not in (None, "", []):
+            return value
+    return None
 
 
 def parse_frontmatter(path: Path) -> dict:
@@ -52,13 +56,19 @@ def build_catalog(repo_root: Path) -> dict:
         entries.append(
             {
                 "path": rel(spec_path, repo_root),
-                "title": frontmatter.get("title", spec_path.stem),
-                "type": frontmatter.get("type"),
-                "status": frontmatter.get("status"),
-                "owner": frontmatter.get("owner"),
-                "vehicle": frontmatter.get("vehicle"),
-                "last_updated": frontmatter.get("last_updated"),
-                "version": frontmatter.get("version"),
+                "id": pick(frontmatter, "id"),
+                "title": pick(frontmatter, "title") or spec_path.stem,
+                "status": pick(frontmatter, "status"),
+                "spec_class": pick(frontmatter, "spec_class", "type"),
+                "owner": pick(frontmatter, "owner"),
+                "domain": pick(frontmatter, "domain"),
+                "normativity": pick(frontmatter, "normativity"),
+                "created": pick(frontmatter, "created"),
+                "last_reviewed": pick(frontmatter, "last_reviewed", "last_updated"),
+                "review_due": pick(frontmatter, "review_due"),
+                "summary": pick(frontmatter, "summary"),
+                "tags": pick(frontmatter, "tags") or [],
+                "version": pick(frontmatter, "version"),
                 "acceptance_criteria_count": count_acceptance_criteria(spec_path),
                 "links": {
                     "plan": rel(plan_path, repo_root) if plan_path.exists() else None,
@@ -82,6 +92,7 @@ def build_catalog(repo_root: Path) -> dict:
     return {
         "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
         "root": "specs",
+        "taxonomy": "specs/standards/spec-taxonomy.yaml",
         "entry_count": len(entries),
         "entries": entries,
     }

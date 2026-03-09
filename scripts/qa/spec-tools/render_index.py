@@ -2,7 +2,7 @@
 """Generate specs/INDEX.md from spec frontmatter.
 
 Reads all specs/*_spec.md files, extracts YAML frontmatter, and generates
-a sortable Markdown table with title, type, status, version, AC count, and last_updated.
+a sortable Markdown table with title, class, status, version, AC count, and last_reviewed.
 
 Usage:
     python3 scripts/qa/spec-tools/render_index.py
@@ -74,12 +74,12 @@ def render_index(specs_dir: Path) -> str:
         rows.append({
             "file": spec.name,
             "title": fm.get("title", spec.stem),
-            "type": fm.get("type", "—"),
+            "spec_class": fm.get("spec_class", fm.get("type", "—")),
             "status": fm.get("status", "—"),
             "version": fm.get("version", "—"),
             "tier": tier,
             "acs": ac_count,
-            "updated": fm.get("last_updated", "—"),
+            "reviewed": fm.get("last_reviewed", fm.get("last_updated", "—")),
         })
 
     # Count by status
@@ -105,15 +105,15 @@ def render_index(specs_dir: Path) -> str:
     lines.extend([
         "## Specs",
         "",
-        "| # | Title | Type | Status | Version | Tier | ACs | Updated |",
-        "|---|-------|------|--------|---------|------|-----|---------|",
+        "| # | Title | Class | Status | Version | Tier | ACs | Reviewed |",
+        "|---|-------|-------|--------|---------|------|-----|----------|",
     ])
 
     for i, r in enumerate(rows, 1):
         link = f"[{r['title']}]({r['file']})"
         lines.append(
-            f"| {i} | {link} | {r['type']} | {r['status']} | {r['version']} "
-            f"| {r['tier']} | {r['acs']} | {r['updated']} |"
+            f"| {i} | {link} | {r['spec_class']} | {r['status']} | {r['version']} "
+            f"| {r['tier']} | {r['acs']} | {r['reviewed']} |"
         )
 
     lines.extend([

@@ -26,17 +26,19 @@ from lint_core import (
 
 NORMATIVE = ["MUST", "MUST NOT", "SHOULD", "SHOULD NOT", "MAY"]
 
-REQUIRED_FRONTMATTER = ["title", "type", "status", "owner", "vehicle", "last_updated"]
 
-# Mapping: frontmatter key -> (rule_id, severity)
-FRONTMATTER_RULES = {
-    "title": ("SPEC-FM-002", "error"),
-    "type": ("SPEC-FM-003", "error"),
-    "status": ("SPEC-FM-004", "error"),
-    "owner": ("SPEC-FM-005", "error"),
-    "vehicle": ("SPEC-FM-006", "error"),
-    "last_updated": ("SPEC-FM-007", "error"),
-}
+def metadata_present(frontmatter: dict, *keys: str) -> bool:
+    return any(frontmatter.get(key) not in (None, "", []) for key in keys)
+
+
+REQUIRED_FRONTMATTER = [
+    (("title",), "SPEC-FM-002", "error", "title"),
+    (("spec_class", "type"), "SPEC-FM-003", "error", "spec_class/type"),
+    (("status",), "SPEC-FM-004", "error", "status"),
+    (("owner",), "SPEC-FM-005", "error", "owner"),
+    (("normativity", "vehicle"), "SPEC-FM-006", "error", "normativity/vehicle"),
+    (("last_reviewed", "last_updated"), "SPEC-FM-007", "error", "last_reviewed/last_updated"),
+]
 
 # Mapping: section name -> (rule_id, severity)
 SECTION_RULES = {
@@ -68,15 +70,14 @@ def lint_file(path: Path) -> LintResult:
         )
     else:
         # Check required frontmatter keys
-        for k in REQUIRED_FRONTMATTER:
-            if k not in fm or fm.get(k) in (None, "", []):
-                rule_id, severity = FRONTMATTER_RULES[k]
+        for keys, rule_id, severity, label in REQUIRED_FRONTMATTER:
+            if not metadata_present(fm, *keys):
                 violations.append(
                     Violation(
                         rule_id=rule_id,
                         severity=severity,
                         file=str(path),
-                        message=f"Frontmatter missing required key: {k}",
+                        message=f"Frontmatter missing required key(s): {label}",
                     )
                 )
 
