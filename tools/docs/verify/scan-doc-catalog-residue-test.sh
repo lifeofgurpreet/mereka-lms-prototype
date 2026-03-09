@@ -18,6 +18,10 @@ cat > "$TMP_ROOT/docs/status/UNCATALOGED.md" <<'EOF_DOC'
 # Missing from catalog
 EOF_DOC
 
+cat > "$TMP_ROOT/docs/status/runtime.log" <<'EOF_LOG'
+not a document
+EOF_LOG
+
 cat > "$TMP_ROOT/generated/catalogs/docs-catalog.json" <<'EOF_JSON'
 [
   {

@@ -34,6 +34,10 @@ def in_winning_root(path: str) -> bool:
     return path.startswith(WINNING_ROOTS)
 
 
+def is_catalogable_doc(path: Path) -> bool:
+    return path.is_file() and path.suffix.lower() == ".md"
+
+
 def main() -> int:
     args = parse_args()
     repo_root = Path(args.root).resolve()
@@ -61,7 +65,7 @@ def main() -> int:
         if not full_root.exists():
             continue
         for p in full_root.rglob("*"):
-            if p.is_file():
+            if is_catalogable_doc(p):
                 filesystem_paths.add(p.relative_to(docs_root).as_posix())
 
     uncataloged_winning_docs = sorted(filesystem_paths - catalog_paths)
