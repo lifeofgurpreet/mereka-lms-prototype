@@ -1,7 +1,7 @@
 ---
 title: External Registration via HubSpot
 type: feature_spec
-status: deferred
+status: draft
 owner: engineering
 vehicle: talent_platform
 version: 1.0.0

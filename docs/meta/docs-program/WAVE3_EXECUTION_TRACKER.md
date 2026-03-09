@@ -4,8 +4,8 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending Packet E generated surfaces truth pass HEAD
-- scope: Packet E
+- commit: pending Packet D proposal legacy status tail HEAD
+- scope: Packet D
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
@@ -36,38 +36,33 @@
   - Packet D (data/integration status normalization)
   - Packet D (legacy status tail normalization)
   - Packet E (generated surfaces truth pass)
+  - Packet D (proposal legacy status tail)
 - latest commit SHA:
   - pending current packet HEAD
 - open residue:
-  - proposal specs still carrying legacy status values
+  - none
 - next packet:
-  - Packet D (proposal legacy status tail)
+  - Packet F (enforcement hardening)
 - stop conditions encountered:
   - none
 - decisions already locked:
   - Kajabi/MCT remains normative by explicit decision
 - metrics delta:
   - before: legacy status hits = 2
-  - after: legacy status hits = 2
+  - after: legacy status hits = 0
 - files normalized in this packet:
-  - scripts/qa/spec-tools/build_spec_catalog.py
-  - scripts/qa/spec-tools/render_index.py
-  - specs/catalog.json
-  - specs/INDEX.md
-  - specs/_generated/graph.json
-  - specs/_generated/bundles/00-spec-hot-path.md
-  - specs/_generated/indexes/spec-read-first.md
-  - docs/_generated/bundles/60-docs-specs-contract.md
-- remaining legacy status hits:
   - specs/proposals/external-registration-hubspot_spec.md
   - specs/proposals/proctoring-integration_spec.md
+  - specs/catalog.json
+- remaining legacy status hits:
+  - none
 
 ## Current target batch
 - files: []
 - goal:
-  - Packet E completed
+  - Packet D completed
 - stop condition:
   - validator set passes and packet commit is created
 
 ## Next queued batch
-- Packet D: proposal legacy status tail
+- Packet F: enforcement hardening
