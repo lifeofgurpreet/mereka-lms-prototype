@@ -32,7 +32,7 @@ links:
   related_docs:
     - "docs/guides/branding/BRANDING.md"
     - "docs/guides/branding/BRANDING_OPERATING_MODEL.md"
-    - "docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md"
+    - "docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md"
   related_specs:
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/branding-system_spec.md"
