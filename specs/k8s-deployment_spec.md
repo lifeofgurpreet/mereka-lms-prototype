@@ -1,23 +1,46 @@
 ---
 title: "Kubernetes Deployment Specification"
 type: "feature_spec"
-status: "completed"
+id: "SPEC-K8S-DEPLOYMENT"
+status: "approved"
+spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "platform"
+normativity: "normative"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/secrets-management_spec.md"
   - "specs/tutor-configuration_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+  - "scripts/qa/verify-repo-structure.sh"
+  - "scripts/qa/spec-tools/spec_verify.py"
+interfaces:
+  - "deploy/k8s/base"
+  - "deploy/k8s/overlays/local"
+  - "deploy/k8s/overlays/production"
+tags:
+  - "platform.control-plane"
+  - "build.gitops-promotion"
+  - "tenant.isolation"
+  - "auth.oidc"
+summary: "Normative deployment contract for Kubernetes-managed Open edX workloads, overlays, secrets, ingress, and operational health expectations."
 links:
   related_docs:
-    - "docs/operations/K8S_OPERATIONS_GUIDE.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/guides/admin/K8S_OPERATIONS_GUIDE.md"
+    - "docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/reference/operations/MONITORING.md"
-    - "docs/operations/DISASTER_RECOVERY.md"
-    - "docs/runbooks/operations/RELEASE_CHECKLIST.md"
+    - "docs/ops/runbooks/DISASTER_RECOVERY.md"
+    - "docs/ops/runbooks/RELEASE_CHECKLIST.md"
   related_specs:
     - "specs/secrets-management_spec.md"
     - "specs/observability-stack_spec.md"
@@ -29,7 +52,7 @@ links:
 
 > **Deployment boundary (ADR-025)**: For the authoritative classification of which files in
 > `deploy/k8s/` stay in this repo vs migrate to `bbi-infrastructure`, see
-> `docs/architecture/DEPLOYMENT_BOUNDARY.md` and `docs/architecture/DEPLOYMENT_CONTRACT.md`.
+> `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md` and `docs/reference/architecture/DEPLOYMENT_CONTRACT.md`.
 > The active development environment is now `rke2-nonprod` (not GKE). The production GKE overlay
 > is frozen at zero replicas pending the infrastructure repo migration.
 
