@@ -146,6 +146,18 @@ jobs:
           export TUTOR_ROOT=$(pwd)/tutor_env
           mkdir -p $TUTOR_ROOT
 
+          # Sync plugin package to Tutor plugins directory.
+          # Cannot source tutor-env.sh directly (requires .venv which CI lacks).
+          PLUGIN_SRC_DIR="$(pwd)/infrastructure/tutor/plugins"
+          PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
+          mkdir -p "$PLUGIN_DIR"
+          cp "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py"
+          cp "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py"
+          cp -R "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms"
+
+          # Enable the Mereka LMS plugin so hooks fire during image build
+          tutor plugins enable mereka_lms
+
           # Initialize Tutor config
           tutor config save \
             --set LMS_HOST=academyv2.mereka.io \
@@ -430,6 +442,17 @@ jobs:
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
           mkdir -p $TUTOR_ROOT
+
+          # Sync plugin package to Tutor plugins directory.
+          PLUGIN_SRC_DIR="$(pwd)/infrastructure/tutor/plugins"
+          PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
+          mkdir -p "$PLUGIN_DIR"
+          cp "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py"
+          cp "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py"
+          cp -R "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms"
+
+          # Enable the Mereka LMS plugin so hooks fire during image build
+          tutor plugins enable mereka_lms
 
           # Initialize Tutor config
           tutor config save \

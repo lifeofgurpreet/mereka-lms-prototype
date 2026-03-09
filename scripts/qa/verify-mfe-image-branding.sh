@@ -110,4 +110,20 @@ docker run --rm \
     fi
 
     echo "OK: authn index candidate CSS bundles are branded ($candidate_refs)"
+
+    # Verify PARAGON_THEME brand URLs are non-empty in index.html.
+    # The mereka_lms plugin mfe-dockerfile-post-npm-build hook patches this.
+    # If the plugin was not loaded during build, brand URLs are empty objects.
+    paragon_block="$(grep -o "var PARAGON_THEME = {[^;]*}" index.html || true)"
+    if [ -z "$paragon_block" ]; then
+      echo "WARN: No PARAGON_THEME variable found in authn/index.html"
+    else
+      if echo "$paragon_block" | grep -qE "\"brand\".*\"themeUrls\".*\"core\".*\\.css"; then
+        echo "OK: PARAGON_THEME brand URLs contain CSS references"
+      else
+        echo "ERROR: PARAGON_THEME brand URLs are empty (plugin hook did not fire during build)" >&2
+        echo "  Ensure mereka_lms plugin is enabled before tutor images build mfe" >&2
+        exit 1
+      fi
+    fi
   '
