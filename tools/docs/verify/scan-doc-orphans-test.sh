@@ -55,4 +55,15 @@ assert payload["orphan_docs_count"] == 2, payload
 assert payload["orphan_docs_sample"] == ["guides/admin/guide.md", "reference/test/orphan.md"], payload
 PY
 
+if python3 tools/docs/verify/scan-doc-orphans.py \
+  --root "$ROOT_DIR" \
+  --summary-file "$SUMMARY" \
+  --fail-on-orphans >/tmp/doc_orphan_scan_fail.out 2>&1; then
+  echo "expected --fail-on-orphans to fail"
+  cat /tmp/doc_orphan_scan_fail.out
+  exit 1
+fi
+
+grep -q 'DOC_ORPHAN_SCAN_ADVISORY' /tmp/doc_orphan_scan_fail.out
+
 echo "scan-doc-orphans self-test: OK"

@@ -234,7 +234,7 @@ run_step "verify-generated-doc-banners" python3 tools/docs/verify/verify-generat
 run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --check
 run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-catalog-governance.py --range "${BASE_REF}...HEAD" --summary-file "$CATALOG_GOVERNANCE_SUMMARY"
 run_step "scan-doc-catalog-residue" python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue --summary-file "$CATALOG_RESIDUE_SUMMARY"
-run_step "scan-doc-orphans" python3 tools/docs/verify/scan-doc-orphans.py --summary-file "$DOC_ORPHAN_SUMMARY"
+run_step "scan-doc-orphans" python3 tools/docs/verify/scan-doc-orphans.py --fail-on-orphans --summary-file "$DOC_ORPHAN_SUMMARY"
 run_step "report-nonstub-transitional-files" python3 tools/docs/verify/report-nonstub-transitional-files.py --summary-file "$NONSTUB_TRANSITIONAL_SUMMARY"
 run_step "verify-legacy-testmaps-frozen" python3 tools/docs/verify/verify-legacy-testmaps-frozen.py --range "${BASE_REF}...HEAD" --summary-file "$LEGACY_TESTMAP_FREEZE_SUMMARY"
 run_step "verify-doc-catalog-health" python3 tools/docs/verify/verify-doc-catalog-health.py \

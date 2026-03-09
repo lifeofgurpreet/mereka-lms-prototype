@@ -408,13 +408,14 @@ jobs:
           set -euo pipefail
           DOC_ORPHAN_SUMMARY="${RUNNER_TEMP}/docs-orphan-summary.json"
           python3 tools/docs/verify/scan-doc-orphans.py \
+            --fail-on-orphans \
             --summary-file "$DOC_ORPHAN_SUMMARY"
           python3 - "$DOC_ORPHAN_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
           import json, sys
           with open(sys.argv[1], "r", encoding="utf-8") as fp:
               payload = json.load(fp)
           with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Docs Orphan Scan (Advisory)\n")
+              fp.write("### Docs Orphan Scan\n")
               fp.write(f"- candidates_checked={payload.get('candidates_checked', 'n/a')}\n")
               fp.write(f"- orphan_docs={payload.get('orphan_docs_count', 'n/a')}\n")
           PY
