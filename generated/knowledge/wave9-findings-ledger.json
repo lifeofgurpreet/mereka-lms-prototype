@@ -1,0 +1,187 @@
+{
+  "audit_totals": {
+    "infra_alignment_audit": 4,
+    "repo_truth_audit": 6
+  },
+  "findings": [
+    {
+      "current_status": "OPEN",
+      "files_affected": [
+        "docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md"
+      ],
+      "finding_id": "RTA-01",
+      "notes": "last_verified=2026-03-06, max_mentioned_date=2026-03-13",
+      "owner": "platform-team",
+      "proof_command": "python3 - <<'PY'\nfrom pathlib import Path; import re\ntext=Path('docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md').read_text()\nprint(re.findall(r'20\\\\d{2}-\\\\d{2}-\\\\d{2}', text)[:5], '...', len(re.findall(r'20\\\\d{2}-\\\\d{2}-\\\\d{2}', text)))\nprint(text.splitlines()[1])\nPY",
+      "recommended_action": "Demote unverifiable future completion claims or update verification semantics mechanically.",
+      "severity": "blocker",
+      "source_audit": "repo_truth_audit",
+      "title": "Tracker claims canonical proof while embedding later completion dates",
+      "user_or_agent_risk": "high"
+    },
+    {
+      "current_status": "OPEN",
+      "files_affected": [
+        "docs/archive/reports/docs-program-scorecard-20260313.md"
+      ],
+      "finding_id": "RTA-02",
+      "notes": "last_verified=2026-03-06, max_mentioned_date=2026-03-13",
+      "owner": "platform-team",
+      "proof_command": "python3 - <<'PY'\nfrom pathlib import Path; print('\\n'.join(Path('docs/archive/reports/docs-program-scorecard-20260313.md').read_text().splitlines()[:20]))\nPY",
+      "recommended_action": "Classify as template/plan or update timestamp semantics so evidence-like docs cannot claim future verification.",
+      "severity": "blocker",
+      "source_audit": "repo_truth_audit",
+      "title": "Archived scorecard presents future-dated proof with stale verification metadata",
+      "user_or_agent_risk": "high"
+    },
+    {
+      "current_status": "OPEN",
+      "files_affected": [
+        "generated/adr-bundles/*.md",
+        "scripts/qa/build_decision_graph.py"
+      ],
+      "finding_id": "RTA-03",
+      "notes": "broken_links=14",
+      "owner": "platform-team",
+      "proof_command": "python3 - <<'PY'\nfrom pathlib import Path; import re\nlink_re=re.compile(r'\\[[^\\]]+\\]\\(([^)]+)\\)')\nfor bundle in Path('generated/adr-bundles').glob('*.md'):\n  for target in link_re.findall(bundle.read_text()):\n    p=(bundle.parent/target).resolve()\n    if target and not target.startswith(('http://','https://','#','mailto:')) and not p.exists():\n      print(f'{bundle}:{target}')\nPY",
+      "recommended_action": "Fix the ADR bundle generator so generated links resolve into canonical docs/adr paths.",
+      "severity": "major",
+      "source_audit": "repo_truth_audit",
+      "title": "Generated ADR bundles contain broken relative navigation",
+      "user_or_agent_risk": "high"
+    },
+    {
+      "current_status": "OPEN",
+      "files_affected": [
+        "specs/catalog.json",
+        "specs/_generated/graph.json",
+        "specs/_generated/indexes/spec-read-first.md"
+      ],
+      "finding_id": "RTA-04",
+      "notes": "missing=specs/catalog.json, specs/_generated/graph.json, specs/_generated/indexes/spec-read-first.md",
+      "owner": "platform-team",
+      "proof_command": "test -f specs/catalog.json; test -f specs/_generated/graph.json; test -f specs/_generated/indexes/spec-read-first.md",
+      "recommended_action": "Land deterministic spec catalog, graph, and read-first surfaces with CI checks.",
+      "severity": "major",
+      "source_audit": "repo_truth_audit",
+      "title": "Spec plane still lacks full machine-readable parity surfaces",
+      "user_or_agent_risk": "high"
+    },
+    {
+      "current_status": "PARTIAL",
+      "files_affected": [
+        "docs/catalog.json",
+        "generated/catalogs/docs-catalog.json"
+      ],
+      "finding_id": "RTA-05",
+      "notes": "mirror_and_generated_catalogs_present",
+      "owner": "platform-team",
+      "proof_command": "test -f docs/catalog.json && test -f generated/catalogs/docs-catalog.json",
+      "recommended_action": "Keep generated catalog primary and verify docs/catalog.json stays a mirror-only projection.",
+      "severity": "medium",
+      "source_audit": "repo_truth_audit",
+      "title": "Two docs catalog surfaces still present an authority duplication risk",
+      "user_or_agent_risk": "medium"
+    },
+    {
+      "current_status": "INVALIDATED",
+      "files_affected": [
+        "docs/archive/reports/docs-program-scorecard-20260306.md"
+      ],
+      "finding_id": "RTA-06",
+      "notes": "overlapping_wave_vocab=docs/archive/reports/docs-program-scorecard-20260306.md",
+      "owner": "platform-team",
+      "proof_command": "rg -n \"Wave 2B|Wave 5|Wave 6\" docs/meta docs/archive/reports",
+      "recommended_action": "Introduce explicit program prefixes in read-first and handoff surfaces so wave terms do not collide.",
+      "severity": "medium",
+      "source_audit": "repo_truth_audit",
+      "title": "Wave numbering is overloaded across docs program and runtime programs",
+      "user_or_agent_risk": "medium"
+    },
+    {
+      "current_status": "INVALIDATED",
+      "files_affected": [
+        "docs/guides/PROMOTION-WORKFLOW.md",
+        "docs/reference/operations/RELEASE_PROCESS.md",
+        "scripts/promote.sh",
+        ".github/workflows/promote-image.yml"
+      ],
+      "finding_id": "ICA-01",
+      "notes": "audit_target_missing_but_release_process_exists_at_docs/reference/operations/RELEASE_PROCESS.md",
+      "owner": "platform-team",
+      "proof_command": "test -f docs/guides/PROMOTION-WORKFLOW.md || test -f docs/reference/operations/RELEASE_PROCESS.md",
+      "recommended_action": "Use the actual release process path and compare it against the real promote script/workflow contract.",
+      "severity": "major",
+      "source_audit": "infra_alignment_audit",
+      "title": "Promotion workflow drift must be checked against real script and workflow semantics",
+      "user_or_agent_risk": "medium"
+    },
+    {
+      "current_status": "OPEN",
+      "files_affected": [
+        "CLAUDE.md",
+        "docs/adr/027-deployment-contract-ownership-lanes.md",
+        "docs/archive/LOGO_FIX_SUMMARY.md",
+        "docs/archive/PRODUCTION_INFRASTRUCTURE_PLAN_LEGACY.md",
+        "docs/archive/SESSION_SUMMARY_2026-02-03_AWS_SECRETS.md",
+        "docs/archive/root-cleanup-20260120/COST_OPTIMIZATION_SUMMARY.md",
+        "docs/archive/root-cleanup-20260203/COST_OPTIMIZATION_SUMMARY.md",
+        "docs/archive/root-cleanup-20260203/SETUP_STATUS.md",
+        "docs/guides/onboarding/DEVCONTAINER_GUIDE.md"
+      ],
+      "finding_id": "ICA-02",
+      "notes": "active_docs_referencing_CLAUDE=18",
+      "owner": "platform-team",
+      "proof_command": "rg -n \"CLAUDE\\.md\" docs docs/ops docs/guides docs/reference",
+      "recommended_action": "Either compile CLAUDE from authoritative contracts or demote it from active read-first surfaces.",
+      "severity": "major",
+      "source_audit": "infra_alignment_audit",
+      "title": "CLAUDE.md remains an active front-door summary instead of a compiled or demoted helper",
+      "user_or_agent_risk": "high"
+    },
+    {
+      "current_status": "PARTIAL",
+      "files_affected": [
+        "SECURITY.md",
+        "docs/archive/CLICKUP_TASK_LIST.md",
+        "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
+        "docs/policies/operations/BRANCH_PROTECTION.md",
+        "docs/reference/operations/SECRET_SCANNING.md"
+      ],
+      "finding_id": "ICA-03",
+      "notes": "active_docs_referencing_SECURITY=4",
+      "owner": "platform-team",
+      "proof_command": "rg -n \"SECURITY\\.md\" docs .github",
+      "recommended_action": "Tie security summary claims to contract-backed sources or demote the summary surface.",
+      "severity": "medium",
+      "source_audit": "infra_alignment_audit",
+      "title": "SECURITY.md is still an active policy front door without contract-derived sync proof",
+      "user_or_agent_risk": "medium"
+    },
+    {
+      "current_status": "INVALIDATED",
+      "files_affected": [
+        "config/domain-registry.yaml",
+        "config/bootstrap-lane-topology.yaml",
+        "contracts/release-contracts.yaml",
+        "contracts/service-identity-contract.yaml"
+      ],
+      "finding_id": "ICA-04",
+      "notes": "present=none_in_this_repo",
+      "owner": "platform-team",
+      "proof_command": "rg --files | rg 'domain-registry|bootstrap-lane-topology|release-contracts|service-identity-contract'",
+      "recommended_action": "Use actual in-repo contract surfaces for alignment work and mark cross-repo-only sources explicitly.",
+      "severity": "medium",
+      "source_audit": "infra_alignment_audit",
+      "title": "Audit-referenced contract source files are not all present in this repo root",
+      "user_or_agent_risk": "medium"
+    }
+  ],
+  "generated_on": "2026-03-09",
+  "status_totals": {
+    "INVALIDATED": 3,
+    "OPEN": 5,
+    "PARTIAL": 2
+  },
+  "total_findings": 10
+}
