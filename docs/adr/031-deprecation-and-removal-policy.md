@@ -6,11 +6,10 @@ last_reviewed: 2026-03-07
 review_due: 2026-06-30
 canonical_root: docs/adr
 doc_class: adr
-summary: Defines deprecation, sunset, and removal policy for platform changes.
+summary: Deprecation contract for temporary paths, exception expiry, and evidence-backed removal of superseded implementation paths.
 tags:
-- deprecation
-- lifecycle
-- governance
+- docs.policy
+- platform.repo-boundary
 decision_type: foundation
 decision_status: accepted
 governs:

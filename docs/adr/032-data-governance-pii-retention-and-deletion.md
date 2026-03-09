@@ -6,11 +6,11 @@ last_reviewed: 2026-03-07
 review_due: 2026-06-30
 canonical_root: docs/adr
 doc_class: adr
-summary: Defines PII handling, retention, deletion, and evidence-hygiene requirements.
+summary: Data governance contract for PII handling, retention, deletion workflows, and evidence hygiene across the platform.
 tags:
-- data
-- privacy
-- retention
+- data.pii
+- data.retention
+- docs.evidence
 decision_type: foundation
 decision_status: accepted
 governs:
