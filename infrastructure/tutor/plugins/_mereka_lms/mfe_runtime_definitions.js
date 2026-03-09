@@ -314,7 +314,7 @@ const withMerekaStudioHeaderSearchButton = (widget) => {
 // Wired into org.openedx.frontend.layout.header_logo.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaHeaderLogo = () => {
   const config = getConfig();
-  const baseUrl = (typeof config !== 'undefined' && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\\/$/, '');
+  const baseUrl = (typeof config !== 'undefined' && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\/$/, '');
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
   const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false;
@@ -364,7 +364,7 @@ const MerekaAuthnLoginBranding = () => {
 
 const MerekaStudioFooter = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const siteName = config.SITE_NAME || 'Mereka Studio';
 
   return (
@@ -547,7 +547,7 @@ const MerekaAuthoringVideoTranscriptTranslationsHint = () => {
 // Registered via org.openedx.frontend.learner_dashboard.widget_sidebar.v1.
 const MerekaLearnerSidebarWidget = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
   const coursesPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
@@ -567,7 +567,7 @@ const MerekaLearnerSidebarWidget = () => {
 // Wired into org.openedx.frontend.learner_dashboard.no_courses_view.v1.
 const MerekaNoCoursesView = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
   const discoverPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
 
@@ -998,7 +998,7 @@ const MerekaAdditionalProfileFields = () => {
 // Wired into org.openedx.frontend.layout.footer.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaFooter = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const currentYear = new Date().getFullYear();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
