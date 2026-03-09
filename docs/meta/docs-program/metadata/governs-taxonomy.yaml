@@ -21,8 +21,6 @@ tokens:
 - token: build.version-pin
   domain: build
   description: Version pinning, upgrade floors, and reproducibility rules.
-- token: commerce-system-of-record
-  description: Legacy commerce system-of-record token retained during vocabulary migration.
 - token: commerce.reconciliation
   domain: commerce
   description: Commerce system-of-record and reconciliation rules.
@@ -62,8 +60,6 @@ tokens:
   description: Frontend composition, runtime wiring, and dependency alignment.
 - token: frontend.i18n
   description: Frontend translation, locale, and message delivery rules.
-- token: legacy-oscar-retirement
-  description: Legacy Oscar retirement contract token retained during vocabulary migration.
 - token: platform.change-policy
   description: Platform-level rollout, deprecation, and change lifecycle rules.
 - token: platform.control-plane
@@ -74,22 +70,12 @@ tokens:
 - token: platform.repo-boundary
   domain: platform
   description: Cross-repo or contract ownership boundaries.
-- token: purchase-flow-contract
-  description: Purchase flow and gateway fulfillment contract token retained during
-    vocabulary migration.
 - token: runtime.async-task
   domain: runtime
   description: User-facing async task or background processing contracts.
 - token: runtime.cache
   domain: runtime
   description: Cache topology, invalidation, and consistency rules.
-- token: session-cookie-samesite-exception
-  description: Legacy SameSite exception token retained during vocabulary migration.
-- token: stale-cookie-dedup-workaround
-  description: Legacy stale-cookie de-dup workaround token retained during vocabulary
-    migration.
-- token: studio-sso-oauth-next-preservation-workaround
-  description: Studio SSO callback preservation workaround during OAuth flows.
 - token: tenant.domain-boundary
   description: Tenant/domain boundary contract and cross-domain scoping.
 - token: tenant.isolation
