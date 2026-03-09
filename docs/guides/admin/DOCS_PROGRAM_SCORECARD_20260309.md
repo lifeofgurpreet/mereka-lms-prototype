@@ -1,5 +1,5 @@
 # Docs Program Scorecard 20260309
-_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified (UTC): 2026-03-09T05:56:43Z • Status: supporting_
+_Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified (UTC): 2026-03-09T05:58:23Z • Status: supporting_
 
 ## KPI Snapshot
 - Total docs scope: 1431
@@ -11,7 +11,7 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 - Canonical high-risk entries: 0
 - Catalog score: 100 / threshold 80 (pass)
 - Scorecard trend: base=100, current=100, drop=0, threshold=10, status=pass
-- Command reference checks: pass (4 files, 0 missing)
+- Command reference checks: pass (6 files, 0 missing)
 - Command reference baseline coverage: enabled=true, entries=4
 - Command reference source breakdown: inline=44, shell=33, md_link=0, md_autolink=0, md_refdef=0
 - Link integrity checks: pass (0 files, 0 broken)
@@ -20,7 +20,7 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified 
 - Overall compliance status: pass
 - catalog=pass, cmdref_baseline=pass, cmdref=pass, scorecard=pass, trend=pass
 - recency=pass, consistency=pass, head_freshness=pass, timestamp=pass, delta=pass, drift=pass
-- foundation_policy_range=origin/main...HEAD, root_allowlist_violations=0, changed_markdown_files=0
+- foundation_policy_range=ecb9ea89fb21213368bfa06883d6dd1c8587b46a...c6728515a407c9ad3ec2e991a2e7f40244c00ed6, root_allowlist_violations=0, changed_markdown_files=0
 - foundation_policy_content_status=pass, foundation_policy_content_consistency=pass, foundation_policy_content_alignment=pass, foundation_policy_content_consistency_detail=unknown, foundation_policy_content_consistency_aligned=true, foundation_policy_content_consistent=true, foundation_policy_content_errors=0
 
 ## Evidence Inputs
