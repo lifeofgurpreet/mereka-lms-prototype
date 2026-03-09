@@ -17,6 +17,25 @@ Operate one documentation control plane per artifact kind:
 
 The repository MUST have one winner per artifact kind. Transitional surfaces MAY remain for compatibility, but they MUST NOT compete with canonical roots.
 
+## What this charter is for
+
+Use this charter when you need to answer:
+- which root governs a kind of document,
+- what counts as active truth,
+- what must be treated as compatibility-only,
+- and what the repository will reject even if the prose is technically correct.
+
+## What this charter is not
+
+This charter does not replace:
+- `specs/**` for intended behavior,
+- `docs/adr/**` for decision history,
+- `docs/ops/**` for operating procedures,
+- `docs/evidence/**` for proof,
+- or `docs/status/**` for current posture.
+
+It defines the control plane that tells you which of those artifacts wins.
+
 ## Authority model
 
 1. `specs/**` is the normative intended-behavior system.
@@ -27,6 +46,10 @@ The repository MUST have one winner per artifact kind. Transitional surfaces MAY
 6. `docs/evidence/**` is the only active evidence root.
 7. `docs/status/**` is the only active reporting and status root.
 8. `docs/archive/**` is cold storage only.
+
+## Operating rule
+
+If two documents appear to answer the same question, the one in the winning root governs and the other one is stale, transitional, or historical unless it explicitly points back to the winner.
 
 ## Non-negotiables
 
@@ -54,6 +77,24 @@ Start here before broad repo exploration:
 4. the relevant ops quickref or runbook under `docs/ops/**`
 5. accepted ADRs or active exceptions only if the work changes an already-decided area
 
+## Fast reading paths
+
+Use the smallest path that matches the task:
+
+- Change architecture or governance:
+  1. this charter
+  2. authority resolver
+  3. docs/specs contract
+  4. relevant architecture standard
+- Change operational behavior:
+  1. authority resolver
+  2. relevant `docs/ops/**` index
+  3. relevant policy or reference doc
+- Review whether a claim is true:
+  1. status doc
+  2. linked evidence pack
+  3. supporting policy or spec if needed
+
 ## Operational meaning
 
 - If you are deciding what MUST be true now, read `docs/concepts/architecture/**`.
@@ -74,6 +115,10 @@ The following roots are transitional in Wave 2 and must converge toward stub-onl
 - `docs/architecture/**`
 
 They MAY preserve compatibility notes and replacement pointers during migration. They MUST NOT continue to grow as competing active roots.
+
+## Review test
+
+The docs system is healthy only if a new contributor can answer “where should this go?” and “which document wins?” without reading multiple conflicting roots.
 
 ## Enforcement posture
 
