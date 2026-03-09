@@ -1,0 +1,1305 @@
+{
+  "affected_truth_surfaces": [
+    "specs/advanced-assessment-xqueue_spec.md",
+    "specs/analytics-pipeline_spec.md",
+    "specs/auth-sso-enterprise_spec.md",
+    "specs/branding-system_spec.md",
+    "specs/ci-cd-pipeline_spec.md",
+    "specs/content-libraries-v2_spec.md",
+    "specs/cross-cutting-requirements_spec.md",
+    "specs/data-migrations-kajabi-mct_spec.md",
+    "specs/data-privacy-gdpr-compliance_spec.md",
+    "specs/design-tokens-system_spec.md",
+    "specs/disaster-recovery-business-continuity_spec.md",
+    "specs/ecommerce-purchase-gateway_spec.md",
+    "specs/email-notifications-pipeline_spec.md",
+    "specs/enterprise-microservices_spec.md",
+    "specs/forum-service-migration_spec.md",
+    "specs/frontend-accessibility_spec.md",
+    "specs/frontend-performance-budgets_spec.md",
+    "specs/github-actions-cost-monitoring_spec.md",
+    "specs/k8s-deployment_spec.md",
+    "specs/mfe-plugin-slots_spec.md",
+    "specs/mongodb-atlas-integration_spec.md",
+    "specs/multi-site-domains_spec.md",
+    "specs/multi-tenancy-architecture_spec.md",
+    "specs/observability-stack_spec.md",
+    "specs/observability-validation-requirements_spec.md",
+    "specs/oep48-brand-package_spec.md",
+    "specs/plans/advanced-assessment-xqueue_plan.md",
+    "specs/plans/advanced-assessment-xqueue_testplan.md",
+    "specs/plans/analytics-pipeline_plan.md",
+    "specs/plans/analytics-pipeline_testplan.md",
+    "specs/plans/auth-sso-enterprise_plan.md",
+    "specs/plans/auth-sso-enterprise_testplan.md",
+    "specs/plans/branding-system_plan.md",
+    "specs/plans/branding-system_testplan.md",
+    "specs/plans/ci-cd-pipeline_plan.md",
+    "specs/plans/ci-cd-pipeline_testplan.md",
+    "specs/plans/content-libraries-v2_plan.md",
+    "specs/plans/content-libraries-v2_testplan.md",
+    "specs/plans/cross-cutting-requirements_plan.md",
+    "specs/plans/cross-cutting-requirements_testplan.md",
+    "specs/plans/data-migrations-kajabi-mct_plan.md",
+    "specs/plans/data-migrations-kajabi-mct_testplan.md",
+    "specs/plans/data-privacy-gdpr-compliance_plan.md",
+    "specs/plans/data-privacy-gdpr-compliance_testplan.md",
+    "specs/plans/design-tokens-system_plan.md",
+    "specs/plans/design-tokens-system_testplan.md",
+    "specs/plans/disaster-recovery-business-continuity_plan.md",
+    "specs/plans/disaster-recovery-business-continuity_testplan.md",
+    "specs/plans/ecommerce-purchase-gateway_plan.md",
+    "specs/plans/ecommerce-purchase-gateway_testplan.md",
+    "specs/plans/email-notifications-pipeline_plan.md",
+    "specs/plans/email-notifications-pipeline_testplan.md",
+    "specs/plans/enterprise-microservices_plan.md",
+    "specs/plans/enterprise-microservices_testplan.md",
+    "specs/plans/forum-service-migration_plan.md",
+    "specs/plans/forum-service-migration_testplan.md",
+    "specs/plans/frontend-accessibility_plan.md",
+    "specs/plans/frontend-accessibility_testplan.md",
+    "specs/plans/frontend-performance-budgets_plan.md",
+    "specs/plans/frontend-performance-budgets_testplan.md",
+    "specs/plans/github-actions-cost-monitoring_plan.md",
+    "specs/plans/github-actions-cost-monitoring_testplan.md",
+    "specs/plans/k8s-deployment_plan.md",
+    "specs/plans/k8s-deployment_testplan.md",
+    "specs/plans/mfe-plugin-slots_plan.md",
+    "specs/plans/mfe-plugin-slots_testplan.md",
+    "specs/plans/mongodb-atlas-integration_plan.md",
+    "specs/plans/mongodb-atlas-integration_testplan.md",
+    "specs/plans/multi-site-domains_plan.md",
+    "specs/plans/multi-site-domains_testplan.md",
+    "specs/plans/multi-tenancy-architecture_plan.md",
+    "specs/plans/multi-tenancy-architecture_testplan.md",
+    "specs/plans/observability-stack_plan.md",
+    "specs/plans/observability-stack_testplan.md",
+    "specs/plans/observability-validation-requirements_plan.md",
+    "specs/plans/observability-validation-requirements_testplan.md",
+    "specs/plans/oep48-brand-package_plan.md",
+    "specs/plans/oep48-brand-package_testplan.md",
+    "specs/plans/platform-middleware-custom-apps_plan.md",
+    "specs/plans/platform-middleware-custom-apps_testplan.md",
+    "specs/plans/repository-structure_plan.md",
+    "specs/plans/repository-structure_testplan.md",
+    "specs/plans/secrets-management_plan.md",
+    "specs/plans/secrets-management_testplan.md",
+    "specs/plans/slo-sla-service-level-management_plan.md",
+    "specs/plans/slo-sla-service-level-management_testplan.md",
+    "specs/plans/studio-customization_plan.md",
+    "specs/plans/studio-customization_testplan.md",
+    "specs/plans/tutor-configuration-resilience_plan.md",
+    "specs/plans/tutor-configuration-resilience_testplan.md",
+    "specs/plans/tutor-configuration_plan.md",
+    "specs/plans/tutor-configuration_testplan.md",
+    "specs/plans/verifiable-credentials-issuance_plan.md",
+    "specs/plans/verifiable-credentials-issuance_testplan.md",
+    "specs/plans/verifiable-credentials-issuer_plan.md",
+    "specs/plans/verifiable-credentials-issuer_testplan.md",
+    "specs/plans/verifiable-credentials-ops_plan.md",
+    "specs/plans/verifiable-credentials-ops_testplan.md",
+    "specs/plans/verifiable-credentials-types_plan.md",
+    "specs/plans/verifiable-credentials-types_testplan.md",
+    "specs/plans/verifiable-credentials-verification_plan.md",
+    "specs/plans/verifiable-credentials-verification_testplan.md",
+    "specs/plans/video-pipeline-delivery_plan.md",
+    "specs/plans/video-pipeline-delivery_testplan.md",
+    "specs/platform-middleware-custom-apps_spec.md",
+    "specs/repository-structure_spec.md",
+    "specs/secrets-management_spec.md",
+    "specs/slo-sla-service-level-management_spec.md",
+    "specs/studio-customization_spec.md",
+    "specs/tutor-configuration-resilience_spec.md",
+    "specs/tutor-configuration_spec.md",
+    "specs/verifiable-credentials-issuance_spec.md",
+    "specs/verifiable-credentials-issuer_spec.md",
+    "specs/verifiable-credentials-ops_spec.md",
+    "specs/verifiable-credentials-types_spec.md",
+    "specs/verifiable-credentials-verification_spec.md",
+    "specs/video-pipeline-delivery_spec.md"
+  ],
+  "authority_order": [
+    "source_normative_truth",
+    "runtime_policy_truth",
+    "generated_read_models",
+    "reviewer_handoff_surfaces"
+  ],
+  "bundle_json_path": "generated/knowledge/task-bundles/normative_spec_change.json",
+  "bundle_markdown_path": "generated/knowledge/task-bundles/normative_spec_change.md",
+  "bundle_version": 1,
+  "candidate_task_types": [
+    {
+      "matched_files": 23,
+      "task_type": "cross_repo_contract_change"
+    },
+    {
+      "matched_files": 44,
+      "task_type": "release_or_runtime_change"
+    },
+    {
+      "matched_files": 39,
+      "task_type": "normative_spec_change"
+    },
+    {
+      "matched_files": 32,
+      "task_type": "architecture_or_adr_change"
+    },
+    {
+      "matched_files": 8,
+      "task_type": "runbook_or_ops_change"
+    },
+    {
+      "matched_files": 44,
+      "task_type": "evidence_or_status_change"
+    },
+    {
+      "matched_files": 154,
+      "task_type": "review_handoff_or_generated_surface_refresh"
+    }
+  ],
+  "escalation_conditions": [
+    "mixed task overlaps with cross_repo_contract_change",
+    "mixed task overlaps with release_or_runtime_change",
+    "human review required if architecture and runtime truth move together"
+  ],
+  "generated_by": "tools/knowledge/resolve_task_context.py",
+  "generated_surfaces_to_refresh": [
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/catalogs/knowledge-catalog.json",
+    "generated/graphs/knowledge-graph.json"
+  ],
+  "likely_cross_repo_dependencies": [
+    {
+      "overall_verdict": "manual_review_required",
+      "review_groups": [
+        "architecture",
+        "platform",
+        "release",
+        "tenancy_auth"
+      ],
+      "service": "enterprise-services"
+    },
+    {
+      "overall_verdict": "manual_review_required",
+      "review_groups": [
+        "architecture",
+        "platform",
+        "release"
+      ],
+      "service": "mfe"
+    },
+    {
+      "overall_verdict": "infra_counterpart_required",
+      "review_groups": [
+        "platform",
+        "release"
+      ],
+      "service": "observability-runtime"
+    },
+    {
+      "overall_verdict": "manual_review_required",
+      "review_groups": [
+        "architecture",
+        "platform",
+        "release"
+      ],
+      "service": "openedx"
+    },
+    {
+      "overall_verdict": "infra_counterpart_required",
+      "review_groups": [
+        "architecture",
+        "platform",
+        "release",
+        "security"
+      ],
+      "service": "purchase-gateway"
+    },
+    {
+      "overall_verdict": "infra_counterpart_required",
+      "review_groups": [
+        "platform",
+        "release",
+        "security"
+      ],
+      "service": "runner-ci"
+    }
+  ],
+  "matched_paths": [
+    "specs/advanced-assessment-xqueue_spec.md",
+    "specs/analytics-pipeline_spec.md",
+    "specs/auth-sso-enterprise_spec.md",
+    "specs/branding-system_spec.md",
+    "specs/ci-cd-pipeline_spec.md",
+    "specs/content-libraries-v2_spec.md",
+    "specs/cross-cutting-requirements_spec.md",
+    "specs/data-migrations-kajabi-mct_spec.md",
+    "specs/data-privacy-gdpr-compliance_spec.md",
+    "specs/design-tokens-system_spec.md",
+    "specs/disaster-recovery-business-continuity_spec.md",
+    "specs/ecommerce-purchase-gateway_spec.md",
+    "specs/email-notifications-pipeline_spec.md",
+    "specs/enterprise-microservices_spec.md",
+    "specs/forum-service-migration_spec.md",
+    "specs/frontend-accessibility_spec.md",
+    "specs/frontend-performance-budgets_spec.md",
+    "specs/github-actions-cost-monitoring_spec.md",
+    "specs/k8s-deployment_spec.md",
+    "specs/mfe-plugin-slots_spec.md",
+    "specs/mongodb-atlas-integration_spec.md",
+    "specs/multi-site-domains_spec.md",
+    "specs/multi-tenancy-architecture_spec.md",
+    "specs/observability-stack_spec.md",
+    "specs/observability-validation-requirements_spec.md",
+    "specs/oep48-brand-package_spec.md",
+    "specs/platform-middleware-custom-apps_spec.md",
+    "specs/repository-structure_spec.md",
+    "specs/secrets-management_spec.md",
+    "specs/slo-sla-service-level-management_spec.md",
+    "specs/studio-customization_spec.md",
+    "specs/tutor-configuration-resilience_spec.md",
+    "specs/tutor-configuration_spec.md",
+    "specs/verifiable-credentials-issuance_spec.md",
+    "specs/verifiable-credentials-issuer_spec.md",
+    "specs/verifiable-credentials-ops_spec.md",
+    "specs/verifiable-credentials-types_spec.md",
+    "specs/verifiable-credentials-verification_spec.md",
+    "specs/video-pipeline-delivery_spec.md"
+  ],
+  "one_line_intent": "Change normative product or platform contract truth.",
+  "out_of_scope": [
+    "proposal-lane reshaping without contract change",
+    "cross-repo deployment realization unless the task also changes contracts",
+    "generated-surface-only cleanup"
+  ],
+  "per_path_candidates": {
+    ".github/workflows/ci.yml": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    ".github/workflows/docs-policy.yml": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "Makefile": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "deploy/contracts/infra-crosswalk.yaml": [
+      "cross_repo_contract_change"
+    ],
+    "deploy/contracts/service-contracts/enterprise-services.yaml": [
+      "cross_repo_contract_change"
+    ],
+    "deploy/contracts/service-contracts/mfe.yaml": [
+      "cross_repo_contract_change"
+    ],
+    "deploy/contracts/service-contracts/observability-runtime.yaml": [
+      "cross_repo_contract_change"
+    ],
+    "deploy/contracts/service-contracts/openedx.yaml": [
+      "cross_repo_contract_change"
+    ],
+    "deploy/contracts/service-contracts/purchase-gateway.yaml": [
+      "cross_repo_contract_change"
+    ],
+    "deploy/contracts/service-contracts/runner-ci.yaml": [
+      "cross_repo_contract_change"
+    ],
+    "docs/_generated/bundles/60-docs-specs-contract.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/adr/011-convention-based-spec-verification.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/013-studio-sso-bypass-middleware.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/015-mobile-push-notification-provider.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/016-android-app-support-decision.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/022-session-cookie-samesite-policy.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/028-platform-sources-of-truth-and-control-planes.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/029-identity-session-and-domain-boundary-strategy.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/030-feature-flag-and-rollout-lifecycle.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/031-deprecation-and-removal-policy.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/032-data-governance-pii-retention-and-deletion.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/033-tenant-lifecycle-contract.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/manifest.yaml": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/rfc/034-event-contract-and-transport-independence.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/rfc/037-async-task-user-facing-contract.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/rfc/038-commerce-system-of-record-and-reconciliation.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/rfc/039-translations-and-internationalization-strategy.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/adr/rfc/041-authorization-and-role-boundary-model.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/archive/FRONTEND_PHASE_B_PROMPT.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/archive/FRONTEND_PHASE_C_PROMPT.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/archive/FRONTEND_PHASE_D_PROMPT.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/archive/superseded/ROADMAP.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/archive/superseded/runbooks/external-registration-runbook.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/archive/superseded/runbooks/proctoring-operations-runbook.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/catalog.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/concepts/architecture/ARCHITECTURE_CHARTER.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/concepts/architecture/AUTHORIZATION_MODEL.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/concepts/architecture/CONTROL_PLANES.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/concepts/architecture/DATA_GOVERNANCE.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/concepts/architecture/README.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/concepts/architecture/TENANT_LIFECYCLE.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/concepts/architecture/TUTOR_AND_EXTENSION_MODEL.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/concepts/architecture/notification-pipeline-overview.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/concepts/architecture/proctoring-architecture-overview.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/guides/admin/DOCS_CMDREF_BACKLOG_20260313.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/branding/BRANDING_PLAN.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/branding/TENANT_BRANDING_CONTRACT.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/onboarding/REPOSITORY_GUIDE.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/onboarding/TEAM_SCALING_GUIDE.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/standards/ADR_LANGUAGE_STYLE.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/standards/ADR_NUMBERING_AND_NAMING.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/standards/DOCS_SPECS_CONTRACT.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/standards/DOCUMENTATION_STANDARDS.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/standards/EVIDENCE_PACK_STANDARD.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/standards/README.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/standards/STATUS_REPORTING_STANDARD.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/guides/standards/STYLE_GUIDE.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md": [
+      "cross_repo_contract_change",
+      "evidence_or_status_change"
+    ],
+    "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md": [
+      "cross_repo_contract_change",
+      "evidence_or_status_change"
+    ],
+    "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml": [
+      "cross_repo_contract_change",
+      "evidence_or_status_change"
+    ],
+    "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml": [
+      "cross_repo_contract_change",
+      "evidence_or_status_change"
+    ],
+    "docs/meta/contracts/INFRA_CROSSWALK.md": [
+      "cross_repo_contract_change",
+      "evidence_or_status_change"
+    ],
+    "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml": [
+      "cross_repo_contract_change",
+      "evidence_or_status_change"
+    ],
+    "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md": [
+      "cross_repo_contract_change",
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md": [
+      "cross_repo_contract_change",
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/docs-program/IMPLEMENTATION_ROADMAP.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/README.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/SPEC_COVERAGE.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/WAVE3_CLOSEOUT.md": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/docs-program/WAVE3_EXECUTION_TRACKER.md": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/WAVE4_CHARTER.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/WAVE4_CLOSEOUT.md": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/metadata/METADATA_MODEL.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/metadata/doc-class-schema-map.yaml": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/metadata/frontmatter-schema.json": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/docs-program/metadata/governs-taxonomy.yaml": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/knowledge/CHANGE_CLASSES.yaml": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/knowledge/OWNERSHIP_MAP.yaml": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/knowledge/REVIEW_RULES.yaml": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/meta/skills/AGENT_SKILL_CHARTER.md": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/skills/SKILL_BUNDLE_RULES.yaml": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml": [
+      "evidence_or_status_change"
+    ],
+    "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/ops/quickref/verification-scripts.md": [
+      "runbook_or_ops_change"
+    ],
+    "docs/ops/runbooks/BADGES_CREDENTIALS_RUNBOOK.md": [
+      "runbook_or_ops_change"
+    ],
+    "docs/ops/runbooks/DOMAIN_MANAGEMENT.md": [
+      "runbook_or_ops_change"
+    ],
+    "docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md": [
+      "runbook_or_ops_change"
+    ],
+    "docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md": [
+      "runbook_or_ops_change"
+    ],
+    "docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md": [
+      "runbook_or_ops_change"
+    ],
+    "docs/ops/runbooks/TENANT_PROVISIONING.md": [
+      "runbook_or_ops_change"
+    ],
+    "docs/ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md": [
+      "runbook_or_ops_change"
+    ],
+    "docs/reference/architecture/API_CONTRACTS.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/reference/architecture/MOBILE_TOKEN_PARITY.md": [
+      "architecture_or_adr_change"
+    ],
+    "docs/reference/operations/CAPABILITY_MATRIX.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "docs/status/readiness/PROCTORING_IMPLEMENTATION_READINESS.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/adr-bundles/00-foundations.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/adr-bundles/10-auth-and-tenancy.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/adr-bundles/50-commerce.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/catalogs/docs-catalog.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/catalogs/knowledge-catalog.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/contracts/cross-repo-manifest.json": [
+      "cross_repo_contract_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/contracts/deployment-impact-report.json": [
+      "cross_repo_contract_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/contracts/release-obligations.md": [
+      "cross_repo_contract_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/graphs/knowledge-graph.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/change-manifest.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/review-bundle.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/truth-impact-report.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "generated/knowledge/wrapper-retirement-report.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "infrastructure/tutor/themes/mereka/README.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "infrastructure/tutor/themes/mereka/tenants/_template/README.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "scripts/branding/sync-tokens-to-json.sh": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "scripts/mobile/validate-mobile-secrets.sh": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "scripts/qa/run-cross-repo-contract-gates.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/run-knowledge-integrity-gates.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/run-knowledge-runtime-gates.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/run-spec-integrity-gates.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/scan-hubspot-credentials.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/spec-tools/build_spec_catalog.py": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/spec-tools/extract_manual_entries.py": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/spec-tools/mereka_spec_verify.py": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/spec-tools/render_index.py": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/spec-tools/spec_coverage_report.py": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/spec-tools/spec_lint.py": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/spec-tools/spec_verify.py": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-brand-pack-schema.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-hubspot-alerts.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-hubspot-k8s-security.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-hubspot-registration.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-hubspot-secrets.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-mfe-css-architecture.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-mobile-deployment.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-mobile-secrets-inventory.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-mobile-secrets-runtime.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-mobile-token-parity.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-paragon-json-token-hierarchy.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-paragon-runtime.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-paragon-theme-urls.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-paragon-token-coverage.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-paragon-tokens.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-proctoring-advanced.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-proctoring-environment.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-proctoring-integration.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-proctoring.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-spec-coverage.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify-theming-generated-artifacts.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify_adr_governs_vocabulary.py": [
+      "release_or_runtime_change"
+    ],
+    "scripts/qa/verify_adr_suite.sh": [
+      "release_or_runtime_change"
+    ],
+    "scripts/tenants/validate-tenant-brand-pack.sh": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specdocs.config.yml": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specdocs/CERTIFICATION_SCORECARD.yml": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specdocs/agents/SYSTEM.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specdocs/agents/WORKFLOW.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specdocs/agents/prompts/00_router.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specdocs/agents/prompts/10_generate_spec.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specdocs/agents/prompts/50_spec_to_tests.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specdocs/templates/README.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/IMPLEMENTATION_ORDER.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/INDEX.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/README.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/_TEMPLATE.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/_generated/bundles/00-spec-hot-path.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/_generated/graph.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/_generated/indexes/spec-read-first.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/_generated/testmaps/README.md": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/_generated/testmaps/mobile-apps-enterprise_spec.testmap.yml": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml": [
+      "evidence_or_status_change",
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/advanced-assessment-xqueue_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/analytics-pipeline_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/auth-sso-enterprise_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/brand-pack-schema.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/branding-system_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/catalog.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/ci-cd-pipeline_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/content-libraries-v2_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/cross-cutting-requirements_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/data-migrations-kajabi-mct_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/data-privacy-gdpr-compliance_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/design-tokens-system_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/disaster-recovery-business-continuity_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/ecommerce-purchase-gateway_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/email-notifications-pipeline_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/enterprise-microservices_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/forum-service-migration_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/frontend-accessibility_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/frontend-performance-budgets_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/github-actions-cost-monitoring_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/k8s-deployment_spec.md": [
+      "release_or_runtime_change",
+      "normative_spec_change"
+    ],
+    "specs/manual_verifications.yaml": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/mfe-plugin-slots_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/mongodb-atlas-integration_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/multi-site-domains_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/multi-tenancy-architecture_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/observability-stack_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/observability-validation-requirements_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/oep48-brand-package_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/plans/IMPLEMENTATION_ORDER.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/README.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/analytics-pipeline_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/auth-sso-enterprise_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/badges-credentials-enterprise_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/branding-system_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/ci-cd-pipeline_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/ci-cd-pipeline_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/content-libraries-v2_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/content-libraries-v2_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/cross-cutting-requirements_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/data-migrations-kajabi-mct_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/data-privacy-gdpr-compliance_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/design-tokens-system_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/disaster-recovery-business-continuity_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/ecommerce-purchase-gateway_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/email-notifications-pipeline_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/enterprise-microservices_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/external-registration-hubspot_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/external-registration-hubspot_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/forum-service-migration_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/forum-service-migration_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/k8s-deployment_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/manual_verifications.yaml": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/mobile-apps-enterprise_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/mobile-apps-enterprise_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/mongodb-atlas-integration_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/multi-site-domains_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/multi-tenancy-architecture_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/paragon-design-tokens-migration_spec.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/platform-middleware-custom-apps_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/platform-middleware-custom-apps_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/proctoring-integration_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/proctoring-integration_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/repository-structure_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/repository-structure_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/secrets-management_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/slo-sla-service-level-management_plan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/slo-sla-service-level-management_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/plans/video-pipeline-delivery_testplan.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/platform-middleware-custom-apps_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/proposals/README.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/proposals/external-registration-hubspot_spec.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/proposals/mobile-apps-enterprise_spec.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/proposals/mobile-apps-secrets-management_spec.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/proposals/proctoring-integration_spec.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/repository-structure_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/secrets-management_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/slo-sla-service-level-management_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/standards/DOCS_SPECS_BOUNDARY.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/standards/SPEC_AUTHORING_STANDARD.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/standards/SPEC_METADATA_MODEL.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/standards/SPEC_SYSTEM_CHARTER.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/standards/brand-pack-schema.json": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/standards/spec-taxonomy.yaml": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/studio-customization_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/templates/plan-template.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/templates/proposal-template.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/templates/spec-template.md": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "specs/testmaps/RETIREMENT_PLAN.md": [
+      "evidence_or_status_change"
+    ],
+    "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml": [
+      "evidence_or_status_change"
+    ],
+    "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml": [
+      "evidence_or_status_change"
+    ],
+    "specs/tutor-configuration-resilience_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/tutor-configuration_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/verifiable-credentials-issuance_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/verifiable-credentials-issuer_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/verifiable-credentials-ops_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/verifiable-credentials-types_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/verifiable-credentials-verification_spec.md": [
+      "normative_spec_change"
+    ],
+    "specs/video-pipeline-delivery_spec.md": [
+      "normative_spec_change"
+    ],
+    "tools/contracts/build_cross_repo_manifest.py": [
+      "cross_repo_contract_change",
+      "release_or_runtime_change"
+    ],
+    "tools/contracts/build_deployment_impact_report.py": [
+      "cross_repo_contract_change",
+      "release_or_runtime_change"
+    ],
+    "tools/contracts/build_release_obligations.py": [
+      "cross_repo_contract_change",
+      "release_or_runtime_change"
+    ],
+    "tools/contracts/contract_runtime.py": [
+      "cross_repo_contract_change",
+      "release_or_runtime_change"
+    ],
+    "tools/contracts/verify_cross_repo_contracts.py": [
+      "cross_repo_contract_change",
+      "release_or_runtime_change"
+    ],
+    "tools/docs/verify/report-hotpath-doc-metadata.py": [
+      "release_or_runtime_change"
+    ],
+    "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh": [
+      "release_or_runtime_change"
+    ],
+    "tools/docs/verify/verify-legacy-testmaps-frozen.py": [
+      "release_or_runtime_change"
+    ],
+    "tools/knowledge/build_change_manifest.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_knowledge_catalog.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_knowledge_graph.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_review_bundle.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_truth_impact_report.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_wrapper_retirement_ledger.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/build_wrapper_retirement_report.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/change_runtime.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/knowledge_model.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/report_knowledge_control_plane.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/resolve_task_context.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/task_runtime.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/knowledge/verify_knowledge_runtime.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/build_spec_bundles.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/build_spec_graph.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/report_spec_metadata_coverage.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/spec_tooling.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/verify_docs_specs_boundary.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/verify_docs_specs_boundary_test.sh": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/verify_spec_frontmatter.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/verify_spec_paths.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "tools/specs/verify_spec_taxonomy.py": [
+      "review_handoff_or_generated_surface_refresh"
+    ],
+    "verification/catalogs/QA_SCRIPT_CATALOG.yml": [
+      "review_handoff_or_generated_surface_refresh"
+    ]
+  },
+  "range": "origin/main...HEAD",
+  "read_first": [
+    "specs/standards/SPEC_SYSTEM_CHARTER.md",
+    "specs/standards/SPEC_METADATA_MODEL.md",
+    "specs/standards/SPEC_AUTHORING_STANDARD.md",
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/review-bundle.md"
+  ],
+  "required_commands": [
+    "bash scripts/qa/run-knowledge-runtime-gates.sh",
+    "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+    "python3 tools/specs/verify_spec_frontmatter.py --repo-root .",
+    "python3 tools/specs/verify_spec_taxonomy.py --repo-root .",
+    "python3 tools/specs/verify_spec_paths.py --repo-root .",
+    "python3 tools/specs/verify_docs_specs_boundary.py --repo-root .",
+    "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD",
+    "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD",
+    "python3 tools/knowledge/build_skill_index.py --repo-root .",
+    "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+    "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+    "bash scripts/qa/run-task-runtime-gates.sh"
+  ],
+  "required_evidence": [
+    "require_adr_update",
+    "require_evidence_pack",
+    "require_plan_refresh",
+    "require_runbook_update",
+    "require_status_update",
+    "require_testplan_refresh"
+  ],
+  "required_reviewers": [
+    "architecture",
+    "platform"
+  ],
+  "task_type": "normative_spec_change",
+  "truth_impact_lane_counts": {
+    "docs:adr": 21,
+    "docs:archive": 7,
+    "docs:concept": 26,
+    "docs:generated": 1,
+    "docs:index": 1,
+    "docs:other": 20,
+    "docs:review": 17,
+    "docs:runbook": 8,
+    "specs:evidence": 3,
+    "specs:generated": 7,
+    "specs:normative": 39,
+    "specs:other": 13,
+    "specs:plan": 10,
+    "specs:proposal": 4,
+    "specs:reference": 9,
+    "specs:testplan": 26
+  }
+}

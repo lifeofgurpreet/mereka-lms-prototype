@@ -293,6 +293,8 @@
       "tools/knowledge/change_runtime.py",
       "tools/knowledge/knowledge_model.py",
       "tools/knowledge/report_knowledge_control_plane.py",
+      "tools/knowledge/resolve_task_context.py",
+      "tools/knowledge/task_runtime.py",
       "tools/knowledge/verify_knowledge_runtime.py",
       "tools/specs/build_spec_bundles.py",
       "tools/specs/build_spec_graph.py",
@@ -395,7 +397,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 312,
+  "change_count": 314,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -9264,6 +9266,70 @@
         "wrappers": []
       },
       "path": "tools/knowledge/report_knowledge_control_plane.py",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json",
+          "generated/knowledge/change-manifest.json",
+          "generated/knowledge/review-bundle.md",
+          "generated/knowledge/truth-impact-report.json",
+          "generated/knowledge/wrapper-retirement-report.json",
+          "tools/knowledge/resolve_task_context.py"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "tools/knowledge/resolve_task_context.py",
+      "required_evidence": {
+        "require_adr_update": "conditional",
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional"
+      },
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json",
+          "generated/knowledge/change-manifest.json",
+          "generated/knowledge/review-bundle.md",
+          "generated/knowledge/truth-impact-report.json",
+          "generated/knowledge/wrapper-retirement-report.json",
+          "tools/knowledge/task_runtime.py"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "tools/knowledge/task_runtime.py",
       "required_evidence": {
         "require_adr_update": "conditional",
         "require_runbook_update": "conditional",

@@ -1,0 +1,151 @@
+{
+  "generated_by": "tools/knowledge/build_skill_index.py",
+  "range": "origin/main...HEAD",
+  "task_type_count": 8,
+  "task_types": [
+    {
+      "authority_order": [
+        "source_normative_truth",
+        "runtime_policy_truth",
+        "generated_read_models",
+        "reviewer_handoff_surfaces"
+      ],
+      "bundle_json_path": "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+      "bundle_markdown_path": "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+      "command_count": 9,
+      "cross_repo_dependency_count": 6,
+      "intent": "Change service, deployment, environment, or release contract truth across repos.",
+      "read_first_count": 8,
+      "required_evidence_count": 8,
+      "required_reviewer_count": 6,
+      "risk": "high",
+      "task_type": "cross_repo_contract_change"
+    },
+    {
+      "authority_order": [
+        "source_normative_truth",
+        "runtime_policy_truth",
+        "generated_read_models",
+        "reviewer_handoff_surfaces"
+      ],
+      "bundle_json_path": "generated/knowledge/task-bundles/release_or_runtime_change.json",
+      "bundle_markdown_path": "generated/knowledge/task-bundles/release_or_runtime_change.md",
+      "command_count": 9,
+      "cross_repo_dependency_count": 1,
+      "intent": "Change release, deployment, runtime, or evidence-convergence behavior.",
+      "read_first_count": 8,
+      "required_evidence_count": 10,
+      "required_reviewer_count": 6,
+      "risk": "high",
+      "task_type": "release_or_runtime_change"
+    },
+    {
+      "authority_order": [
+        "source_normative_truth",
+        "runtime_policy_truth",
+        "generated_read_models",
+        "reviewer_handoff_surfaces"
+      ],
+      "bundle_json_path": "generated/knowledge/task-bundles/normative_spec_change.json",
+      "bundle_markdown_path": "generated/knowledge/task-bundles/normative_spec_change.md",
+      "command_count": 12,
+      "cross_repo_dependency_count": 6,
+      "intent": "Change normative product or platform contract truth.",
+      "read_first_count": 6,
+      "required_evidence_count": 6,
+      "required_reviewer_count": 2,
+      "risk": "high",
+      "task_type": "normative_spec_change"
+    },
+    {
+      "authority_order": [
+        "source_normative_truth",
+        "runtime_policy_truth",
+        "generated_read_models",
+        "reviewer_handoff_surfaces"
+      ],
+      "bundle_json_path": "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+      "bundle_markdown_path": "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+      "command_count": 8,
+      "cross_repo_dependency_count": 1,
+      "intent": "Change architecture decisions, rationale, or decision-ledger truth.",
+      "read_first_count": 4,
+      "required_evidence_count": 3,
+      "required_reviewer_count": 2,
+      "risk": "high",
+      "task_type": "architecture_or_adr_change"
+    },
+    {
+      "authority_order": [
+        "source_normative_truth",
+        "runtime_policy_truth",
+        "generated_read_models",
+        "reviewer_handoff_surfaces"
+      ],
+      "bundle_json_path": "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+      "bundle_markdown_path": "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+      "command_count": 12,
+      "cross_repo_dependency_count": 0,
+      "intent": "Change non-normative proposal, RFC, or future-shape design truth.",
+      "read_first_count": 4,
+      "required_evidence_count": 0,
+      "required_reviewer_count": 0,
+      "risk": "medium",
+      "task_type": "proposal_or_rfc_change"
+    },
+    {
+      "authority_order": [
+        "source_normative_truth",
+        "runtime_policy_truth",
+        "generated_read_models",
+        "reviewer_handoff_surfaces"
+      ],
+      "bundle_json_path": "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+      "bundle_markdown_path": "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+      "command_count": 8,
+      "cross_repo_dependency_count": 0,
+      "intent": "Change operational guidance, incident procedure, or maintenance instruction.",
+      "read_first_count": 4,
+      "required_evidence_count": 3,
+      "required_reviewer_count": 1,
+      "risk": "medium",
+      "task_type": "runbook_or_ops_change"
+    },
+    {
+      "authority_order": [
+        "source_normative_truth",
+        "runtime_policy_truth",
+        "generated_read_models",
+        "reviewer_handoff_surfaces"
+      ],
+      "bundle_json_path": "generated/knowledge/task-bundles/evidence_or_status_change.json",
+      "bundle_markdown_path": "generated/knowledge/task-bundles/evidence_or_status_change.md",
+      "command_count": 8,
+      "cross_repo_dependency_count": 1,
+      "intent": "Change evidence, proof, status, or readiness surfaces without changing core contracts.",
+      "read_first_count": 4,
+      "required_evidence_count": 4,
+      "required_reviewer_count": 3,
+      "risk": "medium",
+      "task_type": "evidence_or_status_change"
+    },
+    {
+      "authority_order": [
+        "source_normative_truth",
+        "runtime_policy_truth",
+        "generated_read_models",
+        "reviewer_handoff_surfaces"
+      ],
+      "bundle_json_path": "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.json",
+      "bundle_markdown_path": "generated/knowledge/task-bundles/review_handoff_or_generated_surface_refresh.md",
+      "command_count": 8,
+      "cross_repo_dependency_count": 2,
+      "intent": "Refresh generated truth surfaces or reviewer handoff artifacts without altering governing policy.",
+      "read_first_count": 5,
+      "required_evidence_count": 6,
+      "required_reviewer_count": 3,
+      "risk": "low",
+      "task_type": "review_handoff_or_generated_surface_refresh"
+    }
+  ]
+}
