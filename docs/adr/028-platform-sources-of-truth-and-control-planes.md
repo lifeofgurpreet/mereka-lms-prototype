@@ -1,6 +1,16 @@
 ---
 id: ADR-028
+adr_id: ADR-028
 title: Platform Sources of Truth and Control Planes
+status: canonical
+canonical_root: docs/adr
+doc_class: adr
+summary: Defines the platform control planes and ownership boundaries for code, GitOps, and runtime state.
+tags:
+  - adr
+  - platform
+  - gitops
+  - governance
 decision_status: accepted
 decision_type: foundation
 rollout_state: active
@@ -12,7 +22,12 @@ supersedes: []
 amends: ["ADR-003", "ADR-019", "ADR-021", "ADR-026", "ADR-027"]
 depends_on: []
 read_next: ["ADR-029", "ADR-030", "ADR-031", "ADR-032", "ADR-033"]
-governs: ["repo-boundary", "gitops-contract", "image-source-of-truth", "runtime-control-plane"]
+governs:
+  - platform.control-plane
+  - platform.repo-boundary
+  - build.image.registry
+  - build.gitops-promotion
+  - docs.policy
 does_not_govern: ["feature-level business logic", "tenant-specific UX copy"]
 related_oep: []
 related_tutor_docs: ["https://docs.tutor.edly.io"]
