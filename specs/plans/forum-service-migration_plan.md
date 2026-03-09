@@ -1,6 +1,6 @@
 ---
 source_spec: specs/forum-service-migration_spec.md
-status: completed
+status: active
 created: 2026-02-10
 updated: 2026-02-10
 completion_notes: "Migration completed via Tutor v18\u2192v21 (Ulmo) upgrade on 2026-02-10.\n\
@@ -15,7 +15,7 @@ last_updated: '2026-02-10'
 
 **Source Spec**: `specs/forum-service-migration_spec.md`
 
-**Migration Status**: COMPLETED (2026-02-10)
+**Migration Status**: ACTIVE (migration completed on 2026-02-10; verification evidence remains canonical)
 
 **Completion Summary**:
 - Migrated from Ruby cs_comments_service to Python openedx-forum v0.3.8

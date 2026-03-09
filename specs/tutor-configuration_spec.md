@@ -2,7 +2,7 @@
 id: "SPEC-PLT-001"
 title: "Tutor Configuration Lifecycle"
 type: "feature_spec"
-status: "completed"
+status: "active"
 spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
