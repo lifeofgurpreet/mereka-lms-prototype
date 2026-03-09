@@ -1,5 +1,5 @@
 {
-  "change_count": 306,
+  "change_count": 308,
   "classification_counts": {
     "infra_counterpart_required": 3,
     "manual_review_required": 3
@@ -402,6 +402,12 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
       "path_class": "contract_runtime_source",
       "touched_services": []
@@ -427,6 +433,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
       "path_class": "contract_runtime_source",
       "touched_services": []
     },
