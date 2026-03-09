@@ -31,7 +31,7 @@ depends_on:
   - "specs/k8s-deployment_spec.md"
 depends_on_optional:
   - "specs/oep48-brand-package_spec.md"
-  - "specs/paragon-design-tokens-migration_spec.md"
+  - "specs/plans/paragon-design-tokens-migration_spec.md"
 links:
   related_docs:
     - "docs/policies/architecture/PERFORMANCE_BUDGETS.md"
@@ -41,7 +41,7 @@ links:
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/branding-system_spec.md"
     - "specs/oep48-brand-package_spec.md"
-    - "specs/paragon-design-tokens-migration_spec.md"
+    - "specs/plans/paragon-design-tokens-migration_spec.md"
     - "specs/multi-site-domains_spec.md"
     - "specs/ci-cd-pipeline_spec.md"
 ---

@@ -105,7 +105,7 @@ For development, run `./scripts/branding/setup-mfe-branding.sh` to set up local 
 
 The current approach (SCSS overrides + build-time injection) will be superseded by an OEP-48 compliant `@edx/brand` package at `infrastructure/tutor/brand-mereka/`. See:
 - [oep48-brand-package_spec.md](../../../../specs/oep48-brand-package_spec.md)
-- [paragon-design-tokens-migration_spec.md](../../../../specs/paragon-design-tokens-migration_spec.md)
+- [paragon-design-tokens-migration_spec.md](../../../../specs/plans/paragon-design-tokens-migration_spec.md)
 
 ## Keeping Assets In Sync
 

@@ -743,11 +743,11 @@
       "version": "1.0.0"
     },
     {
-      "acceptance_criteria_count": 41,
+      "acceptance_criteria_count": 0,
       "created": null,
       "domain": null,
       "id": null,
-      "last_reviewed": "2026-02-27",
+      "last_reviewed": "2026-03-09",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
@@ -758,12 +758,12 @@
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "review_due": null,
-      "spec_class": "migration_spec",
-      "status": "draft",
+      "spec_class": "plan",
+      "status": "superseded",
       "summary": null,
       "tags": [],
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline",
-      "version": "1.0.0"
+      "version": null
     },
     {
       "acceptance_criteria_count": 20,
