@@ -4,34 +4,24 @@
 - docs/wave5-change-intelligence-runtime
 
 ## Latest branch head
-- f48ca8296a5a4ea76c8c0094910f8e6c7fc80ddd
+- a39d035fbe50538079a2531d84cf460e130cc9b5
 
 ## Last completed batch
-- commit: 68c6a0320bb08dc1a0087c09ead951d48f06c81b
-- scope: Wave 5 Packet G
+- commit: a39d035fbe50538079a2531d84cf460e130cc9b5
+- scope: Wave 5 review hardening
 - validators run:
-  - python3 tools/docs/verify/build-doc-catalog.py --root .
-  - python3 tools/knowledge/build_knowledge_catalog.py --repo-root .
-  - python3 tools/knowledge/build_knowledge_graph.py --repo-root .
-  - python3 tools/knowledge/build_wrapper_retirement_ledger.py --repo-root .
-  - python3 tools/knowledge/build_change_manifest.py --repo-root . --range origin/main...HEAD
-  - python3 tools/knowledge/build_review_bundle.py --repo-root . --range origin/main...HEAD
-  - python3 tools/knowledge/build_truth_impact_report.py --repo-root . --range origin/main...HEAD
-  - python3 tools/knowledge/build_wrapper_retirement_report.py --repo-root .
+  - python3 -c "yaml.safe_load(open('.github/workflows/docs-policy.yml').read())"
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
 
 ## Current target batch
 - files:
-  - docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md
-  - scripts/qa/run-knowledge-runtime-gates.sh
-  - .github/workflows/docs-policy.yml
+  - none
 - goal:
-  - align the runtime gate with the actual CI diff range
-  - keep the execution tracker truthful about the live branch head
+  - Wave 5 is complete and awaiting PR review
 - stop condition:
-  - review hardening patch is merged into the branch
+  - reviewer handoff starts
 
 ## Decisions already locked
 - Wave 4 topology stays intact
@@ -43,4 +33,4 @@
 - none
 
 ## Next queued batch
-- none after review hardening
+- none
