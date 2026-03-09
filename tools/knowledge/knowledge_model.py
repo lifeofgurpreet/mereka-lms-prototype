@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import re
+from datetime import date, datetime
 from pathlib import Path
 
 import yaml
@@ -15,6 +16,16 @@ HEADING_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
 
 def relative_path(path: Path, repo_root: Path) -> str:
     return path.relative_to(repo_root).as_posix()
+
+
+def to_json_value(value: object) -> object:
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, list):
+        return [to_json_value(item) for item in value]
+    if isinstance(value, dict):
+        return {str(key): to_json_value(item) for key, item in value.items()}
+    return value
 
 
 def parse_frontmatter(path: Path) -> dict:
@@ -106,3 +117,13 @@ def classify_path(path: Path, repo_root: Path) -> dict[str, str]:
         "title": title,
         "path": rel,
     }
+
+
+def iter_knowledge_files(repo_root: Path) -> list[Path]:
+    paths: list[Path] = []
+    for root_name in ("docs", "specs"):
+        root = repo_root / root_name
+        for path in sorted(root.rglob("*")):
+            if path.is_file() and path.suffix in {".md", ".json", ".yml", ".yaml"}:
+                paths.append(path)
+    return paths

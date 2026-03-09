@@ -5,9 +5,11 @@
 
 ## Last completed batch
 - commit: pending current packet HEAD
-- scope: Wave 4 Packet A
+- scope: Wave 4 Packet B
 - validators run:
   - python3 tools/knowledge/report_knowledge_control_plane.py --repo-root .
+  - python3 tools/knowledge/build_knowledge_catalog.py --repo-root .
+  - python3 tools/knowledge/build_knowledge_catalog.py --check --repo-root .
   - python3 tools/specs/report_spec_metadata_coverage.py --repo-root .
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
   - python3 tools/specs/verify_spec_taxonomy.py --repo-root .
@@ -22,13 +24,12 @@
 ## Current target batch
 - files:
   - docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md
-  - docs/meta/docs-program/WAVE4_CHARTER.md
   - tools/knowledge/knowledge_model.py
-  - tools/knowledge/report_knowledge_control_plane.py
+  - tools/knowledge/build_knowledge_catalog.py
+  - generated/catalogs/knowledge-catalog.json
 - goal:
-  - establish a shared docs/specs knowledge model
-  - define a common lane vocabulary without changing filesystem topology
-  - prove docs and specs can be classified through one control-plane report
+  - generate the first unified knowledge catalog from the shared model
+  - keep docs and specs separate while giving reviewers one machine-readable control plane
 - stop condition:
   - validators pass and one commit is created
 
@@ -38,8 +39,8 @@
 - Kajabi/MCT remains normative until a new contradiction appears
 
 ## Open residue
-- unified generated catalog and graph surfaces not built yet
+- unified graph and reviewer-facing front door not built yet
 - wrapper retirement ledger not started yet
 
 ## Next queued batch
-- Packet B: unified catalog generator
+- Packet C: unified graph and reviewer front door
