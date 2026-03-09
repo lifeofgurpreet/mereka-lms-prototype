@@ -1,16 +1,36 @@
 ---
 title: "Cross-Cutting Requirements"
 type: "feature_spec"
-status: "completed"
+id: "SPEC-CROSS-CUTTING-REQUIREMENTS"
+status: "approved"
+spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "platform"
+normativity: "normative"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on: []
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/spec-tools/spec_lint.py"
+  - "scripts/qa/spec-tools/spec_verify.py"
+interfaces: []
+tags:
+  - "platform.control-plane"
+  - "tenant.isolation"
+  - "data.pii"
+  - "data.retention"
+  - "docs.policy"
+summary: "Platform-wide normative requirements for tenant isolation, observability, secrets, resilience, and shared non-functional expectations."
 links:
   related_docs:
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/architecture/multi-tenancy-overview.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/concepts/architecture/MULTISITE.md"
   related_specs:
     - "specs/multi-tenancy-architecture_spec.md"
     - "specs/secrets-management_spec.md"

@@ -1,15 +1,33 @@
 ---
 title: "Repository Structure Specification"
 type: "feature_spec"
-status: "completed"
+id: "SPEC-REPOSITORY-STRUCTURE"
+status: "approved"
+spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "platform"
+normativity: "normative"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on: []
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/lint-repo-conventions.sh"
+  - "scripts/qa/spec-tools/spec_lint.py"
+interfaces: []
+tags:
+  - "platform.repo-boundary"
+  - "docs.policy"
+  - "docs.catalog"
+summary: "Normative repository layout contract defining canonical roots, deprecated paths, and structural verification expectations."
 links:
   related_docs:
-    - "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
+    - "docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md"
     - "docs/guides/onboarding/QUICK_START_LOCAL.md"
     - "CLAUDE.md"
     - "AGENTS.md"
