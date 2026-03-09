@@ -10354,6 +10354,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "runbooks/README.md",
     "status": "supporting",
     "type": "runbook"
@@ -11216,6 +11225,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "runtime-proof/LMS_RUNTIME_PROOF_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
     "owner": "Platform Team",
     "path": "status/INDEX.md",
@@ -11378,8 +11396,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Program Mgmt",
     "path": "status/incidents/README.md",
     "status": "canonical",
     "type": "status"
@@ -11549,8 +11567,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Program Mgmt",
     "path": "status/weekly/README.md",
     "status": "canonical",
     "type": "status"

@@ -1,3 +1,10 @@
+---
+title: "Weekly Status"
+status: canonical
+owner: Program Mgmt
+last_verified: 2026-03-09
+---
+
 # Weekly Status
 _Status: canonical_
 

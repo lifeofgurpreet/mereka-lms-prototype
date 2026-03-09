@@ -13,8 +13,10 @@ WINNING_EVIDENCE_ROOT = "docs/evidence/"
 WINNING_STATUS_ROOT = "docs/status/"
 ALLOWED_STATUS_PREFIXES = (
     "docs/status/active/",
+    "docs/status/incidents/",
     "docs/status/migrations/",
     "docs/status/readiness/",
+    "docs/status/weekly/",
 )
 LOSING_EVIDENCE_PREFIXES = (
     "evidence/",
@@ -105,7 +107,7 @@ def main() -> int:
                 errors.append(f"{rel}: active status docs must be markdown")
             elif not normalized.startswith(ALLOWED_STATUS_PREFIXES):
                 errors.append(
-                    f"{rel}: active status docs must live under docs/status/active, docs/status/migrations, or docs/status/readiness"
+                    f"{rel}: active status docs must live under docs/status/active, docs/status/incidents, docs/status/migrations, docs/status/readiness, or docs/status/weekly"
                 )
             continue
 

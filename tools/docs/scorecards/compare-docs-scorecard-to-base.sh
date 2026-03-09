@@ -86,10 +86,36 @@ if [ -z "$BASE_SUMMARY" ]; then
   trap cleanup EXIT
 
   git worktree add --detach "${BASE_REPO}" "${BASE_REF}"
-  python3 tools/docs/verify/verify-doc-catalog-health.py \
+  if ! python3 tools/docs/verify/verify-doc-catalog-health.py \
     --max-stale-days "${MAX_STALE_DAYS}" \
     --root "${BASE_REPO}" \
-    --summary-file "${BASE_SUMMARY_PATH}"
+    --summary-file "${BASE_SUMMARY_PATH}"; then
+    python3 - "${BASE_REF}" "${OUT_PATH}" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+base_ref = sys.argv[1]
+out_path = sys.argv[2]
+result = {
+    "base_ref": base_ref,
+    "base_score": 0,
+    "current_score": 0,
+    "score_drop": 0,
+    "max_allowed_drop": 0,
+    "status": "warn",
+    "reason": "base_catalog_unhealthy",
+}
+
+if out_path:
+    Path(out_path).write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+print(
+    "DOCS_SCORECARD_TREND status=warn "
+    f"base_ref={base_ref} reason=base_catalog_unhealthy"
+)
+PY
+    exit 0
+  fi
 else
   BASE_SUMMARY_PATH="$BASE_SUMMARY"
   WORKDIR="$(mktemp -d)"
