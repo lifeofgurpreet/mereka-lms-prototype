@@ -76,7 +76,7 @@ verification:
     - "deploy/"
     - "infrastructure/"
     - "services/"
-  manual_file: "specs/manual_verifications.yaml"
+  manual_file: "specs/plans/manual_verifications.yaml"
   testmaps_dir: "specs/_generated/testmaps/"
   annotation_format:
     covers: "# @covers AC-001, AC-002"
