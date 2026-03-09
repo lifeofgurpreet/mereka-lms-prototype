@@ -90,7 +90,7 @@ def build_catalog(repo_root: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate specs/_generated/spec-catalog.json")
     parser.add_argument("--repo-root", default=".")
-    parser.add_argument("--output", default="specs/_generated/spec-catalog.json")
+    parser.add_argument("--output", default="specs/catalog.json")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
