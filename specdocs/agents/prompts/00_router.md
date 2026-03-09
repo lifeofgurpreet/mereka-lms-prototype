@@ -19,7 +19,7 @@
 
 1. **If the artifact defines WHAT MUST BE TRUE** → SPEC
    - Goes in `specs/<name>_spec.md`
-   - Uses `_TEMPLATE.md` structure
+   - Uses `specs/templates/spec-template.md`
    - Contains AC-PREFIX-NNN acceptance criteria
    - References `cross-cutting-requirements_spec.md`
 
