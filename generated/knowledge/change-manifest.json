@@ -50,20 +50,26 @@
       "title": "@covers AC-RS-001, AC-RS-002, AC-RS-003, AC-RS-004"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        ".github/workflows/docs-policy.yml"
+        ".github/workflows/docs-policy.yml",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -72,11 +78,13 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
@@ -3861,20 +3869,26 @@
       "title": "@spec: proposals/mobile-apps-secrets-management_spec.md"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "scripts/qa/run-knowledge-integrity-gates.sh"
+        "scripts/qa/run-knowledge-integrity-gates.sh",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -3883,31 +3897,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "run-knowledge-integrity-gates"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "scripts/qa/run-knowledge-runtime-gates.sh"
+        "scripts/qa/run-knowledge-runtime-gates.sh",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -3916,11 +3938,13 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
@@ -9734,20 +9758,26 @@
       "title": "verify-legacy-testmaps-frozen"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/build_change_manifest.py"
+        "tools/knowledge/build_change_manifest.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -9756,31 +9786,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "build_change_manifest"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/build_knowledge_catalog.py"
+        "tools/knowledge/build_knowledge_catalog.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -9789,31 +9827,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "build_knowledge_catalog"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/build_knowledge_graph.py"
+        "tools/knowledge/build_knowledge_graph.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -9822,31 +9868,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "build_knowledge_graph"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/build_review_bundle.py"
+        "tools/knowledge/build_review_bundle.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -9855,31 +9909,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "build_review_bundle"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/build_truth_impact_report.py"
+        "tools/knowledge/build_truth_impact_report.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -9888,31 +9950,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "build_truth_impact_report"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/build_wrapper_retirement_ledger.py"
+        "tools/knowledge/build_wrapper_retirement_ledger.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -9921,31 +9991,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "build_wrapper_retirement_ledger"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/build_wrapper_retirement_report.py"
+        "tools/knowledge/build_wrapper_retirement_report.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -9954,31 +10032,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "build_wrapper_retirement_report"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/change_runtime.py"
+        "tools/knowledge/change_runtime.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -9987,31 +10073,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "change_runtime"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/knowledge_model.py"
+        "tools/knowledge/knowledge_model.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -10020,31 +10114,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "knowledge_model"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/report_knowledge_control_plane.py"
+        "tools/knowledge/report_knowledge_control_plane.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -10053,31 +10155,39 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",
       "title": "report_knowledge_control_plane"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
       "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
       "evidence": {
-        "require_adr_update": false,
+        "require_adr_update": "conditional",
         "require_evidence_pack": false,
         "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "tools/knowledge/verify_knowledge_runtime.py"
+        "tools/knowledge/verify_knowledge_runtime.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
       "owner": "",
@@ -10086,11 +10196,13 @@
         "block_merge_without_all_required": false,
         "lane_reviewer_roles": [],
         "optional_reviewers": [
-          "docs",
-          "architecture"
+          "architecture",
+          "platform"
         ],
         "owner_team": "",
-        "required_reviewers": []
+        "required_reviewers": [
+          "docs"
+        ]
       },
       "root": "other",
       "status": "",

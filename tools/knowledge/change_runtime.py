@@ -46,6 +46,15 @@ def classify_change_class(entry: dict) -> str:
         return "compatibility_wrapper_update"
     if classification == "generated":
         return "generated_surface_refresh"
+    if path == ".github/workflows/docs-policy.yml":
+        return "docs_support_change"
+    if path in {
+        "scripts/qa/run-knowledge-runtime-gates.sh",
+        "scripts/qa/run-knowledge-integrity-gates.sh",
+    }:
+        return "docs_support_change"
+    if path.startswith("tools/knowledge/"):
+        return "docs_support_change"
     if lane == "evidence":
         return "evidence_only_change"
     if lane == "archive":
@@ -115,6 +124,19 @@ def impacted_truth_surfaces(entry: dict) -> list[str]:
             touched.append(f"specs/{base}_spec.md")
     if root == "docs" and lane in {"adr", "runbook", "concept", "review"}:
         touched.extend(["docs/catalog.json", "generated/catalogs/knowledge-catalog.json"])
+    if path == ".github/workflows/docs-policy.yml" or path.startswith("scripts/qa/run-knowledge-") or path.startswith(
+        "tools/knowledge/"
+    ):
+        touched.extend(
+            [
+                "generated/knowledge/change-manifest.json",
+                "generated/knowledge/review-bundle.md",
+                "generated/knowledge/truth-impact-report.json",
+                "generated/knowledge/wrapper-retirement-report.json",
+                "generated/catalogs/knowledge-catalog.json",
+                "generated/graphs/knowledge-graph.json",
+            ]
+        )
     if entry.get("classification") in {"compatibility", "generated"}:
         touched.extend(["generated/catalogs/knowledge-catalog.json", "generated/graphs/knowledge-graph.json"])
 

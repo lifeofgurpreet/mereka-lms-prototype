@@ -17,6 +17,15 @@ from tools.knowledge.build_review_bundle import build_bundle
 from tools.knowledge.build_truth_impact_report import build_report as build_truth_impact_report
 from tools.knowledge.build_wrapper_retirement_report import build_report as build_wrapper_report
 
+REQUIRED_EVIDENCE_KEYS = {
+    "require_status_update",
+    "require_evidence_pack",
+    "require_runbook_update",
+    "require_adr_update",
+    "require_plan_refresh",
+    "require_testplan_refresh",
+}
+
 
 def assert_json_matches(path: Path, payload: dict, drift_name: str) -> None:
     rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
@@ -31,6 +40,22 @@ def assert_text_matches(path: Path, rendered: str, drift_name: str) -> None:
         raise SystemExit(f"Missing generated file: {path}")
     if path.read_text() != rendered:
         raise SystemExit(drift_name)
+
+
+def assert_runtime_policy(manifest: dict) -> None:
+    for entry in manifest.get("entries", []):
+        if entry.get("root") not in {"docs", "specs"}:
+            continue
+        if entry.get("change_risk") not in {"high", "medium"}:
+            continue
+
+        required_reviewers = entry.get("review", {}).get("required_reviewers", [])
+        if not required_reviewers:
+            raise SystemExit(f"MISSING_REQUIRED_REVIEWERS:{entry['path']}")
+
+        evidence = entry.get("evidence", {})
+        if not REQUIRED_EVIDENCE_KEYS.issubset(set(evidence.keys())):
+            raise SystemExit(f"INCOMPLETE_EVIDENCE_CLASSIFICATION:{entry['path']}")
 
 
 def main() -> None:
@@ -65,6 +90,7 @@ def main() -> None:
         wrapper_report,
         "WRAPPER_RETIREMENT_REPORT_DRIFT",
     )
+    assert_runtime_policy(manifest)
 
     required_reviewers = manifest.get("required_reviewers", [])
     wrapper_status_counts = wrapper_report.get("status_counts", {})

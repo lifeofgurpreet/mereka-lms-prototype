@@ -17,11 +17,14 @@
 
 ## Current target batch
 - files:
-  - none
+  - docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md
+  - tools/knowledge/change_runtime.py
+  - tools/knowledge/verify_knowledge_runtime.py
 - goal:
-  - Wave 5 is complete and awaiting PR review
+  - classify Wave 5 control-plane code changes as support-truth changes instead of generated refreshes
+  - fail runtime verification when high or medium truth changes lack reviewer or evidence classification
 - stop condition:
-  - reviewer handoff starts
+  - runtime hardening patch is merged into the branch
 
 ## Decisions already locked
 - Wave 4 topology stays intact
@@ -33,4 +36,4 @@
 - none
 
 ## Next queued batch
-- none
+- none after runtime hardening

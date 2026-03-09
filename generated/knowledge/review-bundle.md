@@ -10,9 +10,9 @@
 ### Change Classes
 - `archival_only_change`: 2
 - `compatibility_wrapper_update`: 5
-- `docs_support_change`: 76
+- `docs_support_change`: 90
 - `evidence_only_change`: 3
-- `generated_surface_refresh`: 113
+- `generated_surface_refresh`: 99
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -50,7 +50,6 @@
 
 ## Safe To Triage Later
 - `.github/workflows/ci.yml` [generated_surface_refresh]
-- `.github/workflows/docs-policy.yml` [generated_surface_refresh]
 - `Makefile` [generated_surface_refresh]
 - `docs/_generated/bundles/60-docs-specs-contract.md` [generated_surface_refresh]
 - `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md` [archival_only_change]
@@ -61,12 +60,13 @@
 - `docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md` [reviewer_handoff_only]
 - `docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md` [reviewer_handoff_only]
 - `generated/adr-bundles/00-foundations.md` [generated_surface_refresh]
+- `generated/adr-bundles/10-auth-and-tenancy.md` [generated_surface_refresh]
 
 ## Required Evidence And Follow-Up
-- status update: `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, `docs/adr/015-mobile-push-notification-provider.md`, +155 more
+- status update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +169 more
 - evidence pack: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +75 more
-- runbook update: `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, `docs/adr/015-mobile-push-notification-provider.md`, +148 more
-- ADR update: `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, `docs/adr/015-mobile-push-notification-provider.md`, +116 more
+- runbook update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +162 more
+- ADR update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +130 more
 - plan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +76 more
 - testplan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +72 more
 
