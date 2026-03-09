@@ -1,5 +1,21 @@
+---
+title: Architecture Documentation
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-08
+canonical_root: docs/concepts/architecture
+doc_class: architecture-standard
+summary: Canonical front door for living architecture standards, overviews, and architecture-level contracts.
+tags:
+  - architecture
+  - standards
+  - navigation
+governs:
+  - platform.control-plane
+  - docs.policy
+---
+
 # Architecture Documentation
-_Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-08 • Status: canonical_
 
 This directory is the canonical architecture narrative and living-standards root for Mereka LMS.
 

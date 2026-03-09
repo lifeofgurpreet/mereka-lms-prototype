@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-"""Report metadata coverage for canonical hot-path docs."""
+"""Audit metadata coverage for canonical hot-path docs."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import re
-from dataclasses import dataclass
+import sys
 from pathlib import Path
-from typing import Dict, Iterable, List
+
+try:
+    import yaml
+except ImportError as exc:  # pragma: no cover
+    print(f"FAILED_TO_IMPORT_YAML: {exc}", file=sys.stderr)
+    sys.exit(1)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -21,7 +26,6 @@ HOTPATH_ROOTS = [
     "docs/status",
     "docs/evidence",
     "docs/adr",
-    "docs/adr/rfc",
 ]
 REQUIRED_FIELDS = [
     "title",
@@ -33,131 +37,137 @@ REQUIRED_FIELDS = [
     "summary",
     "tags",
 ]
-
-METADATA_LINE_RE = re.compile(
-    r"^_Audience:\s*(?P<audience>.+?)\s*•\s*Owner:\s*(?P<owner>.+?)\s*•\s*Last verified:\s*(?P<last_reviewed>\d{4}-\d{2}-\d{2})\s*•\s*Status:\s*(?P<status>.+?)_$",
-    re.MULTILINE,
-)
-H1_RE = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
-FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
-
-
-@dataclass
-class DocReport:
-    path: str
-    fields_present: Dict[str, bool]
+INLINE_PATTERNS = {
+    "owner": re.compile(r"^_Owner:\s*(.+?)_\s*$", re.IGNORECASE),
+    "status": re.compile(r"^_Status:\s*(.+?)_\s*$", re.IGNORECASE),
+    "last_reviewed": re.compile(r"^_Last reviewed:\s*(.+?)_\s*$", re.IGNORECASE),
+}
+FRONTMATTER_DELIM = "---"
 
 
-def iter_hotpath_docs() -> Iterable[Path]:
-    seen: set[Path] = set()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--summary-file", type=Path, default=None)
+    return parser.parse_args()
+
+
+def iter_docs() -> list[Path]:
+    docs: dict[str, Path] = {}
     for rel_root in HOTPATH_ROOTS:
         root = REPO_ROOT / rel_root
         if not root.exists():
             continue
         for path in root.rglob("*.md"):
-            if path in seen:
-                continue
-            seen.add(path)
-            yield path
+            if path.is_file():
+                docs[str(path.relative_to(REPO_ROOT))] = path
+    return [docs[key] for key in sorted(docs)]
 
 
-def parse_frontmatter(text: str) -> Dict[str, str]:
-    match = FRONTMATTER_RE.match(text)
-    if not match:
-        return {}
+def parse_frontmatter(text: str) -> tuple[dict, str]:
+    if not text.startswith(f"{FRONTMATTER_DELIM}\n"):
+        return {}, text
 
-    data: Dict[str, str] = {}
-    for line in match.group(1).splitlines():
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        data[key.strip()] = value.strip().strip('"')
-    return data
+    end = text.find(f"\n{FRONTMATTER_DELIM}\n", len(FRONTMATTER_DELIM) + 1)
+    if end == -1:
+        return {}, text
 
-
-def classify(path: Path, text: str, frontmatter: Dict[str, str]) -> Dict[str, bool]:
-    fields = {field: False for field in REQUIRED_FIELDS}
-
-    h1 = H1_RE.search(text)
-    if h1 and h1.group(1).strip():
-        fields["title"] = True
-
-    metadata_line = METADATA_LINE_RE.search(text)
-    if metadata_line:
-        fields["owner"] = bool(metadata_line.group("owner").strip())
-        fields["status"] = bool(metadata_line.group("status").strip())
-        fields["last_reviewed"] = bool(metadata_line.group("last_reviewed").strip())
-
-    if frontmatter.get("canonical_root"):
-        fields["canonical_root"] = True
-    if frontmatter.get("doc_class"):
-        fields["doc_class"] = True
-    if frontmatter.get("summary"):
-        fields["summary"] = True
-    if frontmatter.get("tags"):
-        fields["tags"] = True
-
-    return fields
+    raw = text[len(FRONTMATTER_DELIM) + 1 : end]
+    body = text[end + len(f"\n{FRONTMATTER_DELIM}\n") :]
+    parsed = yaml.safe_load(raw) or {}
+    if not isinstance(parsed, dict):
+        return {}, body
+    return parsed, body
 
 
-def build_report() -> Dict[str, object]:
-    reports: List[DocReport] = []
-    field_counts = {field: 0 for field in REQUIRED_FIELDS}
+def first_heading(body: str) -> str | None:
+    for line in body.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("# "):
+            return stripped[2:].strip()
+    return None
 
-    for path in iter_hotpath_docs():
-        text = path.read_text(encoding="utf-8")
-        frontmatter = parse_frontmatter(text)
-        fields = classify(path, text, frontmatter)
-        for field, present in fields.items():
-            if present:
-                field_counts[field] += 1
-        reports.append(DocReport(path=str(path.relative_to(REPO_ROOT)), fields_present=fields))
 
-    total = len(reports)
-    summary = {
-        "total_docs": total,
-        "field_coverage": {
-            field: {
-                "present": count,
-                "percent": round((count / total) * 100, 2) if total else 0.0,
-            }
-            for field, count in field_counts.items()
-        },
-        "docs_missing_any_required_field": [
-            report.path
-            for report in reports
-            if not all(report.fields_present.values())
-        ],
-        "doc_reports": [
-            {
-                "path": report.path,
-                "fields_present": report.fields_present,
-            }
-            for report in reports
-        ],
+def inline_metadata(body: str) -> dict[str, str]:
+    found: dict[str, str] = {}
+    for line in body.splitlines():
+        for field, pattern in INLINE_PATTERNS.items():
+            match = pattern.match(line.strip())
+            if match:
+                found[field] = match.group(1).strip()
+    return found
+
+
+def has_value(value) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, (list, tuple, set, dict)):
+        return bool(value)
+    return True
+
+
+def classify(path: Path) -> dict[str, bool]:
+    text = path.read_text(encoding="utf-8")
+    frontmatter, body = parse_frontmatter(text)
+    inline = inline_metadata(body)
+
+    tags_value = frontmatter.get("tags")
+    if isinstance(tags_value, str):
+        tags_value = [item.strip() for item in tags_value.split(",") if item.strip()]
+
+    title_value = frontmatter.get("title") or first_heading(body)
+
+    values = {
+        "title": title_value,
+        "owner": frontmatter.get("owner") or inline.get("owner"),
+        "status": frontmatter.get("status") or inline.get("status"),
+        "last_reviewed": frontmatter.get("last_reviewed") or inline.get("last_reviewed"),
+        "canonical_root": frontmatter.get("canonical_root"),
+        "doc_class": frontmatter.get("doc_class"),
+        "summary": frontmatter.get("summary"),
+        "tags": tags_value,
     }
-    return summary
+    return {field: has_value(values[field]) for field in REQUIRED_FIELDS}
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--summary-file", help="Optional path to write JSON summary to.")
-    args = parser.parse_args()
+    args = parse_args()
+    docs = iter_docs()
+    totals = {field: 0 for field in REQUIRED_FIELDS}
+    docs_missing_any_required_field = 0
 
-    summary = build_report()
-    if args.summary_file:
-        Path(args.summary_file).write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    for path in docs:
+        fields = classify(path)
+        missing_any = False
+        for field, present in fields.items():
+            if present:
+                totals[field] += 1
+            else:
+                missing_any = True
+        if missing_any:
+            docs_missing_any_required_field += 1
 
-    total = summary["total_docs"]
-    missing = len(summary["docs_missing_any_required_field"])
+    total_docs = len(docs)
     print(
         "HOTPATH_METADATA_COVERAGE "
-        f"total_docs={total} docs_missing_any_required_field={missing}"
+        f"total_docs={total_docs} "
+        f"docs_missing_any_required_field={docs_missing_any_required_field}"
     )
-    for field, stats in summary["field_coverage"].items():
-        print(
-            f"{field}: present={stats['present']} percent={stats['percent']}"
-        )
+    summary = {
+        "total_docs": total_docs,
+        "docs_missing_any_required_field": docs_missing_any_required_field,
+        "fields": {},
+    }
+    for field in REQUIRED_FIELDS:
+        present = totals[field]
+        percent = round((present / total_docs) * 100, 2) if total_docs else 0.0
+        print(f"{field}: present={present} percent={percent}")
+        summary["fields"][field] = {"present": present, "percent": percent}
+
+    if args.summary_file:
+        args.summary_file.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+
     return 0
 
 
