@@ -52,7 +52,7 @@
 | 27 | [Observability Stack (Prometheus/Tempo/Loki)](observability-stack_spec.md) | normative | integration | approved | 1.0.0 | 16 | 2026-03-09 |
 | 28 | [Observability Validation & SLI/SLO Compliance Requirements](observability-validation-requirements_spec.md) | normative | integration | draft | 1.0.0 | 31 | 2026-02-13 |
 | 29 | [OEP-48 Brand Package (@edx/brand for Mereka Academy)](oep48-brand-package_spec.md) | normative | domain | draft | 1.0.0 | 37 | 2026-02-27 |
-| 30 | [Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline](paragon-design-tokens-migration_spec.md) | normative | plan | superseded | None | 0 | 2026-03-09 |
+| 30 | [Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline](paragon-design-tokens-migration_spec.md) | normative | generated | superseded | None | 0 | 2026-03-09 |
 | 31 | [Platform Middleware and Custom Apps](platform-middleware-custom-apps_spec.md) | normative | integration | completed | 1.0.0 | 20 | 2026-02-10 |
 | 32 | [Compatibility Wrapper: Proctoring Integration for Enterprise Open edX](proctoring-integration_spec.md) | normative | generated | superseded | None | 0 | 2026-03-09 |
 | 33 | [Repository Structure Specification](repository-structure_spec.md) | normative | system | approved | 1.0.0 | 12 | 2026-03-09 |

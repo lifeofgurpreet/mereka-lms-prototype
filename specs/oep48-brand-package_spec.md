@@ -80,7 +80,7 @@ The forcing function is Ulmo (Tutor v21 / Open edX Dec 2025 release), which depr
 ### Out of Scope
 
 - Multi-tenant brand switching (per-tenant brand packages) -- covered by `specs/multi-tenancy-architecture_spec.md`
-- Full JSON design token pipeline (`tokens.json` populated with all Paragon tokens) -- covered by a future `paragon-design-tokens-migration_spec.md`
+- Full JSON design token pipeline (`tokens.json` populated with all Paragon tokens) -- covered by `specs/plans/paragon-design-tokens-migration_spec.md`
 - Custom React components (footers, headers) -- covered by `specs/branding-system_spec.md`
 - Publishing to npm registry (package is local/monorepo only)
 - Dark mode token variants
@@ -280,7 +280,7 @@ Only domain-specific NFRs are listed above.
 
 ### Downstream
 
-- **Future: paragon-design-tokens-migration_spec.md**: Will fully populate `paragon/tokens.json` with all Paragon token overrides. Currently a placeholder.
+- **Planned: specs/plans/paragon-design-tokens-migration_spec.md**: Will fully populate `paragon/tokens.json` with all Paragon token overrides. Currently a placeholder.
 - **specs/multi-tenancy-architecture_spec.md**: Multi-tenant brand switching will need to extend this package structure to support per-tenant brand directories.
 
 ## Edge Cases

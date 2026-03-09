@@ -902,13 +902,13 @@
         "source_spec": null,
         "testplan": null
       },
-      "normativity": "planning",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "review_due": "2026-06-09",
-      "spec_class": "plan",
+      "spec_class": "generated",
       "status": "superseded",
-      "summary": "Planning artifact for the Paragon design tokens migration retained at the spec root as compatibility residue.",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live planning artifact now lives under specs/plans.",
       "tags": [],
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline",
       "version": null

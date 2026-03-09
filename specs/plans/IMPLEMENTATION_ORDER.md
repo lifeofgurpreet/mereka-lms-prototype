@@ -57,7 +57,7 @@ Generated from `depends_on` frontmatter in spec files.
 | Spec | ACs | Title |
 |------|-----|-------|
 | auth-sso-enterprise_spec.md | 45 | Authentication & SSO Enterprise Integration |
-| paragon-design-tokens-migration_spec.md | 41 | Paragon Design Tokens Migration *(depends on: oep48-brand-package, design-tokens-system)* |
+| plans/paragon-design-tokens-migration_spec.md | 41 | Paragon Design Tokens Migration *(depends on: oep48-brand-package, design-tokens-system)* |
 
 ## Tier 6
 

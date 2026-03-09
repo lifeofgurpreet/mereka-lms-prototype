@@ -1744,10 +1744,10 @@
       "id": "specs/paragon-design-tokens-migration_spec.md",
       "lane": "normative",
       "node_type": "spec",
-      "normativity": "planning",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
-      "spec_class": "plan",
+      "spec_class": "generated",
       "status": "superseded",
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },

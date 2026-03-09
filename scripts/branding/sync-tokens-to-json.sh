@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @spec: paragon-design-tokens-migration_spec.md
+# @spec: plans/paragon-design-tokens-migration_spec.md
 # Sync canonical CSS tokens into tokens/src/core/global.json.
 #
 # Default mode is dry-run; use --apply to persist or --check for CI drift gates.

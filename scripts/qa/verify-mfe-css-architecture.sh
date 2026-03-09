@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @spec: paragon-design-tokens-migration_spec.md
+# @spec: plans/paragon-design-tokens-migration_spec.md
 #
 # Verify Phase C architecture invariants:
 # 1) MFE stylesheet does not import monolithic theme.scss
