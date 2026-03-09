@@ -1,12 +1,19 @@
 ---
 title: "Forum Service Migration: Ruby cs_comments_service to Python openedx-forum"
 type: "migration_spec"
+id: "SPEC-FORUM-SERVICE-MIGRATION"
 status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
+spec_class: "integration"
+created: "2026-02-10"
 last_updated: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
 version: "1.0.0"
 completed_date: "2026-02-10"
+domain: "platform"
+normativity: "normative"
 implementation_notes: |
   Migration completed via Tutor v18→v21 upgrade.
   Python forum (openedx-forum v0.3.8) integrated into LMS process.
@@ -17,14 +24,30 @@ depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/mongodb-atlas-integration_spec.md"
   - "specs/tutor-configuration_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+  - "scripts/qa/spec-tools/spec_coverage_report.py"
+interfaces:
+  - "forum-service"
+  - "mongodb-atlas"
+  - "caddy-forum-routing"
+  - "meilisearch"
+tags:
+  - "platform.control-plane"
+  - "tenant.isolation"
+  - "runtime.cache"
+  - "data.retention"
+summary: "Defines the production migration contract from the legacy Ruby forum service to the integrated Python forum service, including storage, search, and routing dependencies."
 links:
   related_docs:
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
-    - "docs/operations/K8S_OPERATIONS_GUIDE.md"
-    - "docs/architecture/DATABASE_ARCHITECTURE.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md"
+    - "docs/guides/admin/K8S_OPERATIONS_GUIDE.md"
+    - "docs/concepts/architecture/DATABASE_ARCHITECTURE.md"
     - "docs/adr/001-mongodb-atlas.md"
-    - "docs/MFE_COMPLETE_LIST.md"
+    - "docs/reference/architecture/MFE_COMPLETE_LIST.md"
   related_specs:
     - "specs/mongodb-atlas-integration_spec.md"
     - "specs/k8s-deployment_spec.md"
