@@ -1,17 +1,17 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `282`
+- Changes classified: `284`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
 ## What Changed
 
 ### Change Classes
-- `archival_only_change`: 4
+- `archival_only_change`: 7
 - `docs_support_change`: 90
 - `evidence_only_change`: 3
-- `generated_surface_refresh`: 101
+- `generated_surface_refresh`: 100
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -19,13 +19,13 @@
 
 ### Lanes
 - `adr`: 21
-- `archive`: 4
+- `archive`: 7
 - `concept`: 26
 - `evidence`: 3
 - `generated`: 8
 - `index`: 1
 - `normative`: 39
-- `other`: 106
+- `other`: 105
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -51,15 +51,15 @@
 - `.github/workflows/ci.yml` [generated_surface_refresh]
 - `Makefile` [generated_surface_refresh]
 - `docs/_generated/bundles/60-docs-specs-contract.md` [generated_surface_refresh]
+- `docs/archive/FRONTEND_PHASE_B_PROMPT.md` [archival_only_change]
+- `docs/archive/FRONTEND_PHASE_C_PROMPT.md` [archival_only_change]
+- `docs/archive/FRONTEND_PHASE_D_PROMPT.md` [archival_only_change]
 - `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md` [archival_only_change]
 - `docs/archive/superseded/ROADMAP.md` [archival_only_change]
 - `docs/archive/superseded/runbooks/external-registration-runbook.md` [archival_only_change]
 - `docs/archive/superseded/runbooks/proctoring-operations-runbook.md` [archival_only_change]
 - `docs/meta/docs-program/WAVE3_CLOSEOUT.md` [reviewer_handoff_only]
 - `docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md` [reviewer_handoff_only]
-- `docs/meta/docs-program/WAVE4_CLOSEOUT.md` [reviewer_handoff_only]
-- `docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md` [reviewer_handoff_only]
-- `docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md` [reviewer_handoff_only]
 
 ## Required Evidence And Follow-Up
 - status update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +169 more
@@ -126,6 +126,9 @@
 - `... 1 more`
 
 ### archive
+- `docs/archive/FRONTEND_PHASE_B_PROMPT.md`
+- `docs/archive/FRONTEND_PHASE_C_PROMPT.md`
+- `docs/archive/FRONTEND_PHASE_D_PROMPT.md`
 - `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md`
 - `docs/archive/superseded/ROADMAP.md`
 - `docs/archive/superseded/runbooks/external-registration-runbook.md`
@@ -216,7 +219,7 @@
 - `generated/knowledge/change-manifest.json`
 - `generated/knowledge/review-bundle.md`
 - `generated/knowledge/truth-impact-report.json`
-- `... 86 more`
+- `... 85 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`

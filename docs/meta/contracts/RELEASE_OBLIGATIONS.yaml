@@ -1,0 +1,89 @@
+version: 1
+obligation_classes:
+  app_only_change:
+    description: Repo-local truth change with no required infra counterpart
+    requires:
+      infra_counterpart: false
+      release_note: conditional
+      runbook_update: conditional
+      evidence_refresh: conditional
+      adr_review: conditional
+  deployment_affecting_change:
+    description: Change that alters deployment shape, runtime behavior, or environment realization
+    requires:
+      infra_counterpart: conditional
+      release_note: true
+      runbook_update: true
+      evidence_refresh: true
+      adr_review: conditional
+  secret_surface_change:
+    description: Change to secret source, wiring, naming, or trust-boundary expectations
+    requires:
+      infra_counterpart: true
+      release_note: true
+      runbook_update: true
+      evidence_refresh: true
+      adr_review: true
+  image_or_artifact_change:
+    description: Change to image source, artifact promotion, or deployment artifact contract
+    requires:
+      infra_counterpart: conditional
+      release_note: true
+      runbook_update: conditional
+      evidence_refresh: true
+      adr_review: false
+  ingress_dns_edge_change:
+    description: Change to edge routing, DNS, ingress, or external exposure assumptions
+    requires:
+      infra_counterpart: true
+      release_note: true
+      runbook_update: true
+      evidence_refresh: true
+      adr_review: conditional
+  generated_refresh_only:
+    description: Generated output refresh with no source-policy change
+    requires:
+      infra_counterpart: false
+      release_note: false
+      runbook_update: false
+      evidence_refresh: false
+      adr_review: false
+
+required_evidence:
+  deployment_affecting_change:
+    - release_obligations
+    - reviewer_bundle
+    - truth_impact_report
+  secret_surface_change:
+    - release_obligations
+    - reviewer_bundle
+    - truth_impact_report
+    - security_review_note
+  image_or_artifact_change:
+    - release_obligations
+    - reviewer_bundle
+  ingress_dns_edge_change:
+    - release_obligations
+    - reviewer_bundle
+    - truth_impact_report
+    - runbook_reference
+
+required_reviewers:
+  app_only_change:
+    - docs
+  deployment_affecting_change:
+    - architecture
+    - platform
+    - release
+  secret_surface_change:
+    - security
+    - platform
+    - tenancy_auth
+    - release
+  image_or_artifact_change:
+    - platform
+    - release
+  ingress_dns_edge_change:
+    - architecture
+    - platform
+    - release

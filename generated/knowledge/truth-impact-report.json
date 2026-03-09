@@ -24,6 +24,9 @@
       "docs/adr/rfc/041-authorization-and-role-boundary-model.md"
     ],
     "docs_support": [
+      "docs/archive/FRONTEND_PHASE_B_PROMPT.md",
+      "docs/archive/FRONTEND_PHASE_C_PROMPT.md",
+      "docs/archive/FRONTEND_PHASE_D_PROMPT.md",
       "docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md",
       "docs/archive/superseded/ROADMAP.md",
       "docs/archive/superseded/runbooks/external-registration-runbook.md",
@@ -204,7 +207,6 @@
       "specs/external-registration-hubspot_spec.md",
       "specs/manual_verifications.yaml",
       "specs/mobile-apps-enterprise_spec.md",
-      "specs/paragon-design-tokens-migration_spec.md",
       "specs/plans/IMPLEMENTATION_ORDER.md",
       "specs/plans/README.md",
       "specs/plans/cross-cutting-requirements_plan.md",
@@ -365,11 +367,11 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 282,
+  "change_count": 284,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
-    "docs:archive": 4,
+    "docs:archive": 7,
     "docs:concept": 26,
     "docs:generated": 1,
     "docs:index": 1,
@@ -1154,6 +1156,87 @@
       },
       "required_reviewers": [
         "architecture"
+      ]
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/archive/FRONTEND_PHASE_B_PROMPT.md",
+          "docs/catalog.json"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/archive/FRONTEND_PHASE_B_PROMPT.md",
+      "required_evidence": {},
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/archive/FRONTEND_PHASE_C_PROMPT.md",
+          "docs/catalog.json"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/archive/FRONTEND_PHASE_C_PROMPT.md",
+      "required_evidence": {},
+      "required_reviewers": [
+        "docs"
+      ]
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [
+          "docs/archive/FRONTEND_PHASE_D_PROMPT.md",
+          "docs/catalog.json"
+        ],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "generated/catalogs/docs-catalog.json",
+          "generated/catalogs/knowledge-catalog.json",
+          "generated/graphs/knowledge-graph.json"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "docs/archive/FRONTEND_PHASE_D_PROMPT.md",
+      "required_evidence": {},
+      "required_reviewers": [
+        "docs"
       ]
     },
     {
@@ -5674,26 +5757,6 @@
         "architecture",
         "platform"
       ]
-    },
-    {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "impacts": {
-        "adrs": [],
-        "docs_support": [],
-        "generated_surfaces": [],
-        "normative_specs": [],
-        "other": [
-          "specs/paragon-design-tokens-migration_spec.md"
-        ],
-        "plans_testplans": [],
-        "proposal_specs": [],
-        "runbooks": [],
-        "wrappers": []
-      },
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "required_evidence": {},
-      "required_reviewers": []
     },
     {
       "change_class": "generated_surface_refresh",

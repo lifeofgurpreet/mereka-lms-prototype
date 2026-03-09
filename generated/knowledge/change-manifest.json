@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 282,
+  "change_count": 284,
   "changed_roots": [
     "docs",
     "specs"
@@ -977,6 +977,108 @@
       "root": "docs",
       "status": "",
       "title": "Authorization and Role-Boundary Model"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/FRONTEND_PHASE_B_PROMPT.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/FRONTEND_PHASE_B_PROMPT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Frontend Phase B: Brand Foundation \u2014 Implementor Prompt"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/FRONTEND_PHASE_C_PROMPT.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/FRONTEND_PHASE_C_PROMPT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Frontend Phase C: Token Grounding + BEM Hardening \u2014 Implementor Prompt"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/FRONTEND_PHASE_D_PROMPT.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/FRONTEND_PHASE_D_PROMPT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Frontend Phase D: MFE Slot Branding Stabilization"
     },
     {
       "change_class": "archival_only_change",
@@ -6963,39 +7065,6 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "specs/paragon-design-tokens-migration_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "paragon-design-tokens-migration_spec.md"
-    },
-    {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
         "specs/plans/IMPLEMENTATION_ORDER.md"
       ],
       "lane": "other",
@@ -10496,6 +10565,9 @@
     "docs/adr/rfc/039-translations-and-internationalization-strategy.md",
     "docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md",
     "docs/adr/rfc/041-authorization-and-role-boundary-model.md",
+    "docs/archive/FRONTEND_PHASE_B_PROMPT.md",
+    "docs/archive/FRONTEND_PHASE_C_PROMPT.md",
+    "docs/archive/FRONTEND_PHASE_D_PROMPT.md",
     "docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md",
     "docs/archive/superseded/ROADMAP.md",
     "docs/archive/superseded/runbooks/external-registration-runbook.md",
@@ -10661,7 +10733,6 @@
     "specs/observability-stack_spec.md",
     "specs/observability-validation-requirements_spec.md",
     "specs/oep48-brand-package_spec.md",
-    "specs/paragon-design-tokens-migration_spec.md",
     "specs/plans/IMPLEMENTATION_ORDER.md",
     "specs/plans/README.md",
     "specs/plans/advanced-assessment-xqueue_plan.md",

@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4785,
+  "edge_count": 4800,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3491,6 +3491,31 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/adr-process/adr-rollout.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -11026,6 +11051,31 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/adr-process/adr-rollout.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "contains",
@@ -18405,6 +18455,31 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
     },
     {
@@ -23929,7 +24004,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1618,
+  "node_count": 1623,
   "nodes": [
     {
       "id": "classification:archival",
@@ -30670,6 +30745,61 @@
       "root": "docs",
       "status": "",
       "title": "ADR Rollout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Contract Runtime Model"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "CROSS_REPO_OWNERSHIP"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "ENVIRONMENT_SURFACES"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "RELEASE_OBLIGATIONS"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Execution Tracker"
     },
     {
       "classification": "supporting",

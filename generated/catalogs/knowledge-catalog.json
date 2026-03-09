@@ -3,7 +3,7 @@
     "archival": 292,
     "canonical": 44,
     "generated": 49,
-    "supporting": 1210
+    "supporting": 1215
   },
   "entries": [
     {
@@ -5495,6 +5495,51 @@
       "root": "docs",
       "status": "",
       "title": "ADR Rollout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Contract Runtime Model"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "CROSS_REPO_OWNERSHIP"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "ENVIRONMENT_SURFACES"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "RELEASE_OBLIGATIONS"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Execution Tracker"
     },
     {
       "classification": "supporting",
@@ -14362,7 +14407,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1595,
+  "entry_count": 1600,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14371,7 +14416,7 @@
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 149,
+    "docs:other": 154,
     "docs:review": 48,
     "docs:runbook": 482,
     "specs:evidence": 43,
@@ -14384,7 +14429,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1377,
+    "docs": 1382,
     "specs": 218
   }
 }
