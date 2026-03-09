@@ -25,6 +25,16 @@ Use `docs/status/**` for:
 - Need incident-specific current status:
   - start with `docs/status/incidents/`
 
+## Common routes
+
+| If your question is... | Start here | Move elsewhere when... |
+|---|---|---|
+| "What is happening right now?" | `docs/status/active/` | You need durable proof, then use `docs/evidence/**` |
+| "Are we ready to proceed?" | `docs/status/readiness/` | You need a hard gate proof pack, then use `docs/evidence/**` |
+| "What is the migration posture?" | `docs/status/migrations/` | You need source-system facts, then use `docs/reference/migrations/**` |
+| "What is the current weekly cadence?" | `docs/status/weekly/` | You need cold history, then move to `docs/archive/**` |
+| "What is the current incident state?" | `docs/status/incidents/` | The incident is over and should be archived |
+
 ## Authority rule
 
 - new active status belongs under `docs/status/**`
@@ -57,3 +67,9 @@ Use `docs/status/**` for:
 
 - [Status Reporting Standard](../guides/standards/STATUS_REPORTING_STANDARD.md)
 - [Documentation Authority Resolver](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+
+## Review standard
+
+- A status document here should answer “what is the current state?” clearly and quickly.
+- If the document mainly proves a claim, it belongs in `docs/evidence/**`.
+- If the document is no longer active, move it to `docs/archive/**` instead of leaving it in the hot path.

@@ -16,6 +16,14 @@ Use `docs/evidence/**` for proof packs, validation bundles, screenshots, exporte
 - Need to know whether evidence is the right artifact type:
   - read the [Documentation Authority Resolver](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
 
+## Common routes
+
+| If your question is... | Start here | Move elsewhere when... |
+|---|---|---|
+| "Where is the proof that this claim is true?" | The relevant domain subroot under `docs/evidence/**` | You actually need live rollout state, not proof, then use `docs/status/**` |
+| "How should I structure this pack?" | [Evidence Pack Standard](../guides/standards/EVIDENCE_PACK_STANDARD.md) | You are writing a reusable template, then use `docs/meta/templates/**` |
+| "Does this belong in evidence at all?" | [Documentation Authority Resolver](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md) | The artifact is really a procedure or status note |
+
 ## Authority rule
 
 - new active evidence belongs under `docs/evidence/**`
@@ -57,3 +65,9 @@ Each pack should include:
 
 - [Evidence Pack Standard](../guides/standards/EVIDENCE_PACK_STANDARD.md)
 - [Documentation Authority Resolver](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+
+## Review standard
+
+- A file here should prove a concrete claim, gate, or runtime condition.
+- If a document cannot answer “what claim does this prove?” it probably belongs in `docs/status/**`, `docs/ops/**`, or `docs/meta/**` instead.
+- Evidence should stay tightly scoped, linkable, and reusable by reviewers.
