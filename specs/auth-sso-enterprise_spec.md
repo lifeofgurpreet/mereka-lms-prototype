@@ -1,23 +1,44 @@
 ---
 title: "Authentication & SSO Enterprise Integration"
 type: "feature_spec"
-status: "in_progress"
+id: "SPEC-AUTH-SSO-ENTERPRISE"
+status: "active"
+spec_class: "domain"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "auth"
+normativity: "normative"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on:
   - "specs/multi-tenancy-architecture_spec.md"
   - "specs/secrets-management_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/verify-auth-hardening.sh"
+  - "scripts/qa/verify-auth-surfaces.sh"
+  - "scripts/qa/verify-authenticated-sso-canary.sh"
+interfaces:
+  - "saml"
+  - "oidc"
+tags:
+  - "auth.oidc"
+  - "auth.authorization.roles"
+  - "tenant.isolation"
+summary: "Normative contract for enterprise SSO, tenant-scoped identity federation, session behavior, and privileged-auth hardening across Mereka LMS."
 links:
   related_docs:
-    - "docs/operations/AUTH_HARDENING_SPEC.md"
+    - "docs/ops/security/AUTH_HARDENING_SPEC.md"
     - "docs/reference/operations/AUTH_AND_PERMISSIONS.md"
-    - "docs/operations/IN_CLUSTER_AUTH_VERIFICATION.md"
-    - "docs/operations/RFC_CLAIM_BASED_ROLE_SYNC.md"
-    - "docs/integrations/GOOGLE_OAUTH_SETUP.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/runbooks/auth-sso-enterprise-runbook.md"
+    - "docs/ops/security/in-cluster-auth-verification.md"
+    - "docs/adr/rfc/RFC_CLAIM_BASED_ROLE_SYNC.md"
+    - "docs/guides/integrations/GOOGLE_OAUTH_SETUP.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/ops/security/ENTERPRISE_SSO_GUIDE.md"
   related_specs:
     - "specs/multi-tenancy-architecture_spec.md"
     - "specs/enterprise-microservices_spec.md"
