@@ -25,6 +25,8 @@ Do not create new active migration status docs under legacy `reports/**` paths.
 ## Current migration reports
 
 - [drive-airtable-STATUS.md](drive-airtable-STATUS.md)
+- [KAJABI_MIGRATION_STATUS.md](KAJABI_MIGRATION_STATUS.md)
+- [MCT_MIGRATION_STATUS.md](MCT_MIGRATION_STATUS.md)
 - [MIGRATION_STATUS_AND_ROLLBACK.md](MIGRATION_STATUS_AND_ROLLBACK.md)
 - [RKE2_MIGRATION_PLAN.md](RKE2_MIGRATION_PLAN.md)
 - [RKE2_NONPROD_THEME_AND_CONVERGENCE_FIX.md](RKE2_NONPROD_THEME_AND_CONVERGENCE_FIX.md)
