@@ -1,5 +1,22 @@
+---
+title: Control Planes
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/concepts/architecture
+doc_class: architecture-standard
+audience:
+  - Engineering Team
+summary: Defines the control planes that own configuration, deployment, and platform behavior across the system.
+tags:
+  - architecture
+  - platform.control-plane
+governs:
+  - platform.control-plane
+  - platform.repo-boundary
+  - build.gitops-promotion
+---
 # Control Planes
-_Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
 ## Governs
 
