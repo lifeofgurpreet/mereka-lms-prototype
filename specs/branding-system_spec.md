@@ -1,8 +1,28 @@
 ---
+id: "SPEC-BRANDING-SYSTEM"
 title: "Branding System"
 type: "feature_spec"
-status: "completed"
-owner: "engineering"
+status: "approved"
+spec_class: "domain"
+owner: "platform"
+created: "2026-02-27"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "frontend"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/branding/verify-branding-health.sh"
+  - "scripts/branding/run-branding-gates.sh"
+interfaces:
+  - "infrastructure/tutor/themes/mereka/"
+  - "assets/branding/"
+tags:
+  - "frontend.brand.tokens"
+  - "frontend.composition"
+  - "docs.policy"
+summary: "Defines the canonical branding system for Mereka Academy across LMS, Studio, and MFEs, including assets, theme structure, and verification gates."
 vehicle: "talent_platform"
 last_updated: "2026-02-27"
 version: "1.1.0"
@@ -12,13 +32,10 @@ depends_on:
   - "specs/tutor-configuration_spec.md"
 links:
   related_docs:
-    - "docs/BRANDING.md"
-    - "docs/BRANDING_PLAN.md"
-    - "docs/BRANDING_VERIFICATION_CHECKLIST.md"
-    - "docs/branding/BRANDING_OPERATING_MODEL.md"
-    - "docs/branding/BRANDING_GUARDRAILS.md"
-    - "docs/branding/BRANDING_ROADMAP.md"
-    - "docs/branding/BRANDING_INCIDENT_TEMPLATE.md"
+    - "docs/guides/branding/BRANDING.md"
+    - "docs/guides/branding/BRANDING_OPERATING_MODEL.md"
+    - "docs/guides/branding/BRANDING_GUARDRAILS.md"
+    - "docs/guides/branding/BRANDING_INCIDENT_TEMPLATE.md"
   related_specs:
     - "specs/tutor-configuration_spec.md"
     - "specs/multi-site-domains_spec.md"
