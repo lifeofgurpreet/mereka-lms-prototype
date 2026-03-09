@@ -6,13 +6,13 @@
 
 - Feature description from the user
 - Router decision: SPEC (from `00_router.md`)
-- Template: `specs/_TEMPLATE.md`
+- Template: `specs/templates/spec-template.md`
 
 ## Process
 
 1. **Determine spec type**: `feature_spec` | `migration_spec` | `infrastructure_spec` | `service_spec`
 2. **Choose AC prefix**: Use domain-specific prefix from cross-cutting-requirements_spec.md Section 7
-3. **Copy template**: Start from `specs/_TEMPLATE.md`
+3. **Copy template**: Start from `specs/templates/spec-template.md`
 4. **Fill frontmatter**: title, type, status=draft, owner, vehicle, last_updated, depends_on, links
 5. **Write Human Summary**: What/Why/Success in plain language for stakeholders
 6. **Write Agent Contract**: Scope, Non-goals, ACs in Given-When-Then
