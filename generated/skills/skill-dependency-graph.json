@@ -1,0 +1,697 @@
+{
+  "edges": [
+    {
+      "from": "scenario:canonical-recovery-runbook",
+      "kind": "runs",
+      "to": "command:docs-catalog-governance"
+    },
+    {
+      "from": "scenario:canonical-recovery-runbook",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "scenario:canonical-recovery-runbook",
+      "kind": "requires",
+      "to": "skill:docs-truth-review"
+    },
+    {
+      "from": "scenario:canonical-recovery-runbook",
+      "kind": "requires",
+      "to": "skill:runbook-evidence-triage"
+    },
+    {
+      "from": "scenario:canonical-topology-lookup",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "scenario:canonical-topology-lookup",
+      "kind": "runs",
+      "to": "command:promote-help"
+    },
+    {
+      "from": "scenario:canonical-topology-lookup",
+      "kind": "requires",
+      "to": "skill:service-identity-lookup"
+    },
+    {
+      "from": "scenario:canonical-topology-lookup",
+      "kind": "requires",
+      "to": "skill:topology-lookup"
+    },
+    {
+      "from": "scenario:cross-repo-diff-impact",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "scenario:cross-repo-diff-impact",
+      "kind": "runs",
+      "to": "command:docs-world-class-gates"
+    },
+    {
+      "from": "scenario:cross-repo-diff-impact",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "scenario:cross-repo-diff-impact",
+      "kind": "requires",
+      "to": "skill:change-impact-triage"
+    },
+    {
+      "from": "scenario:cross-repo-diff-impact",
+      "kind": "requires",
+      "to": "skill:control-plane-validation"
+    },
+    {
+      "from": "scenario:promote-app-safely",
+      "kind": "runs",
+      "to": "command:docs-world-class-gates"
+    },
+    {
+      "from": "scenario:promote-app-safely",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "scenario:promote-app-safely",
+      "kind": "runs",
+      "to": "command:promote-dry-run"
+    },
+    {
+      "from": "scenario:promote-app-safely",
+      "kind": "runs",
+      "to": "command:promote-help"
+    },
+    {
+      "from": "scenario:promote-app-safely",
+      "kind": "requires",
+      "to": "skill:cross-repo-release-contract-review"
+    },
+    {
+      "from": "scenario:promote-app-safely",
+      "kind": "requires",
+      "to": "skill:promotion-workflow-review"
+    },
+    {
+      "from": "scenario:promote-app-safely",
+      "kind": "requires",
+      "to": "skill:release-obligations-review"
+    },
+    {
+      "from": "scenario:repo-ownership-of-truth",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "scenario:repo-ownership-of-truth",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "scenario:repo-ownership-of-truth",
+      "kind": "runs",
+      "to": "command:promote-help"
+    },
+    {
+      "from": "scenario:repo-ownership-of-truth",
+      "kind": "requires",
+      "to": "skill:change-impact-triage"
+    },
+    {
+      "from": "scenario:repo-ownership-of-truth",
+      "kind": "requires",
+      "to": "skill:service-identity-lookup"
+    },
+    {
+      "from": "scenario:repo-ownership-of-truth",
+      "kind": "requires",
+      "to": "skill:topology-lookup"
+    },
+    {
+      "from": "scenario:required-reviewers-for-diff",
+      "kind": "runs",
+      "to": "command:docs-catalog-governance"
+    },
+    {
+      "from": "scenario:required-reviewers-for-diff",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "scenario:required-reviewers-for-diff",
+      "kind": "runs",
+      "to": "command:docs-world-class-gates"
+    },
+    {
+      "from": "scenario:required-reviewers-for-diff",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "scenario:required-reviewers-for-diff",
+      "kind": "requires",
+      "to": "skill:change-impact-triage"
+    },
+    {
+      "from": "scenario:required-reviewers-for-diff",
+      "kind": "requires",
+      "to": "skill:control-plane-validation"
+    },
+    {
+      "from": "scenario:required-reviewers-for-diff",
+      "kind": "requires",
+      "to": "skill:docs-truth-review"
+    },
+    {
+      "from": "scenario:service-alias-change-impact",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "scenario:service-alias-change-impact",
+      "kind": "runs",
+      "to": "command:docs-world-class-gates"
+    },
+    {
+      "from": "scenario:service-alias-change-impact",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "scenario:service-alias-change-impact",
+      "kind": "requires",
+      "to": "skill:change-impact-triage"
+    },
+    {
+      "from": "scenario:service-alias-change-impact",
+      "kind": "requires",
+      "to": "skill:cross-repo-release-contract-review"
+    },
+    {
+      "from": "scenario:service-alias-change-impact",
+      "kind": "requires",
+      "to": "skill:service-identity-lookup"
+    },
+    {
+      "from": "scenario:wrapper-retirement",
+      "kind": "runs",
+      "to": "command:docs-catalog-governance"
+    },
+    {
+      "from": "scenario:wrapper-retirement",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "scenario:wrapper-retirement",
+      "kind": "runs",
+      "to": "command:wrapper-residue-scan"
+    },
+    {
+      "from": "scenario:wrapper-retirement",
+      "kind": "requires",
+      "to": "skill:docs-truth-review"
+    },
+    {
+      "from": "scenario:wrapper-retirement",
+      "kind": "requires",
+      "to": "skill:wrapper-retirement-assessment"
+    },
+    {
+      "from": "skill:change-impact-triage",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "skill:change-impact-triage",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "skill:change-impact-triage",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:config/bootstrap-lane-topology.yaml"
+    },
+    {
+      "from": "skill:change-impact-triage",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md"
+    },
+    {
+      "from": "skill:change-impact-triage",
+      "kind": "reads",
+      "to": "source:platform-control-plane:contracts/release-contracts.yaml"
+    },
+    {
+      "from": "skill:control-plane-validation",
+      "kind": "runs",
+      "to": "command:docs-world-class-gates"
+    },
+    {
+      "from": "skill:control-plane-validation",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "skill:control-plane-validation",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:scripts/promote.sh"
+    },
+    {
+      "from": "skill:control-plane-validation",
+      "kind": "reads",
+      "to": "source:mereka-lms:tools/docs/verify/run-docs-world-class-gates.sh"
+    },
+    {
+      "from": "skill:control-plane-validation",
+      "kind": "reads",
+      "to": "source:platform-control-plane:scripts/plan-all.sh"
+    },
+    {
+      "from": "skill:cross-repo-release-contract-review",
+      "kind": "runs",
+      "to": "command:docs-world-class-gates"
+    },
+    {
+      "from": "skill:cross-repo-release-contract-review",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "skill:cross-repo-release-contract-review",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:.github/workflows/promote-image.yml"
+    },
+    {
+      "from": "skill:cross-repo-release-contract-review",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/meta/standing-orders/GOVERNANCE_AGENT.md"
+    },
+    {
+      "from": "skill:cross-repo-release-contract-review",
+      "kind": "reads",
+      "to": "source:platform-control-plane:contracts/release-contracts.yaml"
+    },
+    {
+      "from": "skill:cross-repo-release-contract-review",
+      "kind": "reads",
+      "to": "source:platform-control-plane:contracts/service-identity-contract.yaml"
+    },
+    {
+      "from": "skill:docs-truth-review",
+      "kind": "runs",
+      "to": "command:docs-catalog-governance"
+    },
+    {
+      "from": "skill:docs-truth-review",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "skill:docs-truth-review",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md"
+    },
+    {
+      "from": "skill:docs-truth-review",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/meta/standing-orders/README.md"
+    },
+    {
+      "from": "skill:docs-truth-review",
+      "kind": "reads",
+      "to": "source:mereka-lms:tools/docs/verify/verify-doc-catalog-governance.py"
+    },
+    {
+      "from": "skill:docs-truth-review",
+      "kind": "reads",
+      "to": "source:mereka-lms:tools/docs/verify/verify-docs-policy.sh"
+    },
+    {
+      "from": "skill:promotion-workflow-review",
+      "kind": "runs",
+      "to": "command:promote-dry-run"
+    },
+    {
+      "from": "skill:promotion-workflow-review",
+      "kind": "runs",
+      "to": "command:promote-help"
+    },
+    {
+      "from": "skill:promotion-workflow-review",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:.github/workflows/promote-image.yml"
+    },
+    {
+      "from": "skill:promotion-workflow-review",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:config/domain-registry.yaml"
+    },
+    {
+      "from": "skill:promotion-workflow-review",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:scripts/promote.sh"
+    },
+    {
+      "from": "skill:promotion-workflow-review",
+      "kind": "reads",
+      "to": "source:platform-control-plane:contracts/release-contracts.yaml"
+    },
+    {
+      "from": "skill:release-obligations-review",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "skill:release-obligations-review",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:scripts/promote.sh"
+    },
+    {
+      "from": "skill:release-obligations-review",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/meta/standing-orders/GOVERNANCE_AGENT.md"
+    },
+    {
+      "from": "skill:release-obligations-review",
+      "kind": "reads",
+      "to": "source:platform-control-plane:contracts/release-contracts.yaml"
+    },
+    {
+      "from": "skill:runbook-evidence-triage",
+      "kind": "runs",
+      "to": "command:docs-policy-gate"
+    },
+    {
+      "from": "skill:runbook-evidence-triage",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:scripts/promote.sh"
+    },
+    {
+      "from": "skill:runbook-evidence-triage",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/meta/standing-orders/README.md"
+    },
+    {
+      "from": "skill:runbook-evidence-triage",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/meta/templates/EVIDENCE_SCHEMA.md"
+    },
+    {
+      "from": "skill:runbook-evidence-triage",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/ops/quickref/README.md"
+    },
+    {
+      "from": "skill:service-identity-lookup",
+      "kind": "runs",
+      "to": "command:platform-plan-validate"
+    },
+    {
+      "from": "skill:service-identity-lookup",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:config/domain-registry.yaml"
+    },
+    {
+      "from": "skill:service-identity-lookup",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:config/domain-registry.yaml"
+    },
+    {
+      "from": "skill:service-identity-lookup",
+      "kind": "reads",
+      "to": "source:platform-control-plane:contracts/service-identity-contract.yaml"
+    },
+    {
+      "from": "skill:topology-lookup",
+      "kind": "runs",
+      "to": "command:promote-help"
+    },
+    {
+      "from": "skill:topology-lookup",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:config/bootstrap-lane-topology.yaml"
+    },
+    {
+      "from": "skill:topology-lookup",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:config/domain-registry.yaml"
+    },
+    {
+      "from": "skill:topology-lookup",
+      "kind": "reads",
+      "to": "source:bbi-infrastructure:scripts/promote.sh"
+    },
+    {
+      "from": "skill:topology-lookup",
+      "kind": "reads",
+      "to": "source:platform-control-plane:contracts/service-identity-contract.yaml"
+    },
+    {
+      "from": "skill:wrapper-retirement-assessment",
+      "kind": "runs",
+      "to": "command:wrapper-residue-scan"
+    },
+    {
+      "from": "skill:wrapper-retirement-assessment",
+      "kind": "reads",
+      "to": "source:mereka-lms:docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md"
+    },
+    {
+      "from": "skill:wrapper-retirement-assessment",
+      "kind": "reads",
+      "to": "source:mereka-lms:tools/docs/verify/report-nonstub-transitional-files.py"
+    },
+    {
+      "from": "skill:wrapper-retirement-assessment",
+      "kind": "reads",
+      "to": "source:mereka-lms:tools/docs/verify/scan-doc-catalog-residue.py"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "command:docs-catalog-governance",
+      "label": "docs-catalog-governance",
+      "type": "command"
+    },
+    {
+      "id": "command:docs-policy-gate",
+      "label": "docs-policy-gate",
+      "type": "command"
+    },
+    {
+      "id": "command:docs-world-class-gates",
+      "label": "docs-world-class-gates",
+      "type": "command"
+    },
+    {
+      "id": "command:platform-plan-validate",
+      "label": "platform-plan-validate",
+      "type": "command"
+    },
+    {
+      "id": "command:promote-dry-run",
+      "label": "promote-dry-run",
+      "type": "command"
+    },
+    {
+      "id": "command:promote-help",
+      "label": "promote-help",
+      "type": "command"
+    },
+    {
+      "id": "command:promote-image-workflow",
+      "label": "promote-image-workflow",
+      "type": "command"
+    },
+    {
+      "id": "command:spec-verify",
+      "label": "spec-verify",
+      "type": "command"
+    },
+    {
+      "id": "command:wrapper-residue-scan",
+      "label": "wrapper-residue-scan",
+      "type": "command"
+    },
+    {
+      "id": "scenario:canonical-recovery-runbook",
+      "label": "What is the canonical recovery or runbook path?",
+      "type": "scenario"
+    },
+    {
+      "id": "scenario:canonical-topology-lookup",
+      "label": "What is the correct topology, hostname, or lane?",
+      "type": "scenario"
+    },
+    {
+      "id": "scenario:cross-repo-diff-impact",
+      "label": "What does this diff impact across repos?",
+      "type": "scenario"
+    },
+    {
+      "id": "scenario:promote-app-safely",
+      "label": "Can I promote this app safely?",
+      "type": "scenario"
+    },
+    {
+      "id": "scenario:repo-ownership-of-truth",
+      "label": "Which repo owns this truth?",
+      "type": "scenario"
+    },
+    {
+      "id": "scenario:required-reviewers-for-diff",
+      "label": "What reviewers are required for this diff?",
+      "type": "scenario"
+    },
+    {
+      "id": "scenario:service-alias-change-impact",
+      "label": "What changes if a service alias changes?",
+      "type": "scenario"
+    },
+    {
+      "id": "scenario:wrapper-retirement",
+      "label": "Can this wrapper be retired?",
+      "type": "scenario"
+    },
+    {
+      "id": "skill:change-impact-triage",
+      "label": "Change Impact Triage",
+      "type": "skill"
+    },
+    {
+      "id": "skill:control-plane-validation",
+      "label": "Control Plane Validation",
+      "type": "skill"
+    },
+    {
+      "id": "skill:cross-repo-release-contract-review",
+      "label": "Cross-Repo Release Contract Review",
+      "type": "skill"
+    },
+    {
+      "id": "skill:docs-truth-review",
+      "label": "Docs Truth Review",
+      "type": "skill"
+    },
+    {
+      "id": "skill:promotion-workflow-review",
+      "label": "Promotion Workflow Review",
+      "type": "skill"
+    },
+    {
+      "id": "skill:release-obligations-review",
+      "label": "Release Obligations Review",
+      "type": "skill"
+    },
+    {
+      "id": "skill:runbook-evidence-triage",
+      "label": "Runbook Evidence Triage",
+      "type": "skill"
+    },
+    {
+      "id": "skill:service-identity-lookup",
+      "label": "Service Identity Lookup",
+      "type": "skill"
+    },
+    {
+      "id": "skill:topology-lookup",
+      "label": "Topology Lookup",
+      "type": "skill"
+    },
+    {
+      "id": "skill:wrapper-retirement-assessment",
+      "label": "Wrapper Retirement Assessment",
+      "type": "skill"
+    },
+    {
+      "id": "source:bbi-infrastructure:.github/workflows/promote-image.yml",
+      "label": "bbi-infrastructure:.github/workflows/promote-image.yml",
+      "type": "source"
+    },
+    {
+      "id": "source:bbi-infrastructure:config/bootstrap-lane-topology.yaml",
+      "label": "bbi-infrastructure:config/bootstrap-lane-topology.yaml",
+      "type": "source"
+    },
+    {
+      "id": "source:bbi-infrastructure:config/domain-registry.yaml",
+      "label": "bbi-infrastructure:config/domain-registry.yaml",
+      "type": "source"
+    },
+    {
+      "id": "source:bbi-infrastructure:scripts/promote.sh",
+      "label": "bbi-infrastructure:scripts/promote.sh",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+      "label": "mereka-lms:docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+      "label": "mereka-lms:docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:docs/meta/standing-orders/README.md",
+      "label": "mereka-lms:docs/meta/standing-orders/README.md",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:docs/meta/templates/EVIDENCE_SCHEMA.md",
+      "label": "mereka-lms:docs/meta/templates/EVIDENCE_SCHEMA.md",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:docs/ops/quickref/README.md",
+      "label": "mereka-lms:docs/ops/quickref/README.md",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:tools/docs/verify/report-nonstub-transitional-files.py",
+      "label": "mereka-lms:tools/docs/verify/report-nonstub-transitional-files.py",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:tools/docs/verify/run-docs-world-class-gates.sh",
+      "label": "mereka-lms:tools/docs/verify/run-docs-world-class-gates.sh",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:tools/docs/verify/scan-doc-catalog-residue.py",
+      "label": "mereka-lms:tools/docs/verify/scan-doc-catalog-residue.py",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:tools/docs/verify/verify-doc-catalog-governance.py",
+      "label": "mereka-lms:tools/docs/verify/verify-doc-catalog-governance.py",
+      "type": "source"
+    },
+    {
+      "id": "source:mereka-lms:tools/docs/verify/verify-docs-policy.sh",
+      "label": "mereka-lms:tools/docs/verify/verify-docs-policy.sh",
+      "type": "source"
+    },
+    {
+      "id": "source:platform-control-plane:contracts/release-contracts.yaml",
+      "label": "platform-control-plane:contracts/release-contracts.yaml",
+      "type": "source"
+    },
+    {
+      "id": "source:platform-control-plane:contracts/service-identity-contract.yaml",
+      "label": "platform-control-plane:contracts/service-identity-contract.yaml",
+      "type": "source"
+    },
+    {
+      "id": "source:platform-control-plane:scripts/plan-all.sh",
+      "label": "platform-control-plane:scripts/plan-all.sh",
+      "type": "source"
+    }
+  ],
+  "schema_version": 1
+}

@@ -1,29 +1,30 @@
 # Wave 11 Execution Tracker
 
 ## Latest substantive packet head
-- 3143f9299498f42b71f894503f5e923dd7c21ee7
+- eba95f6505b1d4fbc65bb0d59cac152cb8f64ad5
 
 ## Last completed batch
-- commit: 3143f9299498f42b71f894503f5e923dd7c21ee7
-- scope: Wave 11 Packet B
-- validators run: command registry write/check, docs catalog governance
+- commit: eba95f6505b1d4fbc65bb0d59cac152cb8f64ad5
+- scope: Wave 11 Packet C
+- validators run: scenario packs write/check, docs catalog governance
 - result: passed
 
 ## Current target batch
 - files:
   - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
-  - tools/skills/build_scenario_packs.py
-  - generated/skills/scenario-packs.json
+  - tools/skills/build_skill_dependency_graph.py
+  - generated/skills/skill-dependency-graph.json
+  - generated/skills/read-first.md
 - goal:
-  - encode recurring cross-repo review and ops tasks as deterministic scenario packs
-  - compile scenarios from the skill registry and command registry rather than tribal memory
-  - prove every scenario references live skills, sources, and commands
+  - generate a minimal read-first pack for humans and agents
+  - compile a deterministic dependency graph across skills, commands, scenarios, and source surfaces
+  - prove the default hot path avoids archive and transitional roots
 - stop condition:
-  - scenario packs validate and one commit is created
+  - read-first pack and dependency graph validate and one commit is created
 
 ## Open residue
 - knowledge-runtime outputs from later branch-local waves are not assumed on this branch
 - cross-repo runtime convergence remains out of scope for Wave 11
 
 ## Next queued batch
-- Packet D: read-first pack and dependency graph
+- Packet E: runtime verifier and CI adoption
