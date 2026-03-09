@@ -1,21 +1,38 @@
 ---
-id: ADR-040
 title: Internal Packages, Plugins, and Versioning Policy
-decision_status: proposed
-decision_type: domain
-rollout_state: planned
+proposal_state: proposed
 owner: platform-team
 created: 2026-03-07
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr/rfc
+doc_class: rfc
+summary: Proposes internal package, plugin, and versioning rules for platform extensions.
+tags:
+- plugins
+- packages
+- versioning
+decision_type: domain
+decision_status: proposed
+governs:
+- platform.extension-model
+- build.version-pin
+id: ADR-040
+rollout_state: planned
 supersedes: []
-amends: ["ADR-006", "ADR-021"]
-depends_on: ["ADR-028", "ADR-030"]
+amends:
+- ADR-006
+- ADR-021
+depends_on:
+- ADR-028
+- ADR-030
 read_next: []
-governs: ["internal-package-versioning", "plugin-contract-stability", "semver-policy"]
-does_not_govern: ["external-upstream-release-timelines"]
+does_not_govern:
+- external-upstream-release-timelines
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
 related_specs: []
 related_runbooks: []
 related_evidence: []

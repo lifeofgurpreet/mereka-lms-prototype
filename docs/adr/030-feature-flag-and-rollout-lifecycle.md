@@ -1,25 +1,39 @@
 ---
-id: ADR-030
 title: Feature Flag and Rollout Lifecycle
-decision_status: accepted
-decision_type: foundation
-rollout_state: active
 owner: platform-team
 created: 2026-03-07
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr
+doc_class: adr
+summary: Defines feature-flag lifecycle and rollout/change-management rules.
+tags:
+- rollout
+- flags
+- governance
+decision_type: foundation
+decision_status: accepted
+governs:
+- platform.change-policy
+id: ADR-030
+rollout_state: active
 supersedes: []
 amends: []
-depends_on: ["ADR-028"]
-read_next: ["ADR-031"]
-governs: ["feature-flag-lifecycle", "rollout-safety", "flag-removal"]
-does_not_govern: ["product-prioritization"]
+depends_on:
+- ADR-028
+read_next:
+- ADR-031
+does_not_govern:
+- product-prioritization
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org"]
+related_tutor_docs:
+- https://docs.openedx.org
 related_specs: []
-related_runbooks: ["docs/reference/operations/RELEASE_EVIDENCE.md"]
+related_runbooks:
+- docs/reference/operations/RELEASE_EVIDENCE.md
 related_evidence: []
-fitness_functions: ["tools/docs/verify/verify-docs-policy.sh"]
+fitness_functions:
+- tools/docs/verify/verify-docs-policy.sh
 expiry_date: null
 removal_condition: null
 ---
