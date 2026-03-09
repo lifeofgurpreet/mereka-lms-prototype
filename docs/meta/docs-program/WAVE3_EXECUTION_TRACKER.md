@@ -4,8 +4,8 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending Packet G closeout HEAD
-- scope: Packet G
+- commit: pending PR refresh / review handoff HEAD
+- scope: PR refresh / review handoff
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
@@ -39,14 +39,15 @@
   - Packet D (proposal legacy status tail)
   - Packet F (taxonomy enforcement hardening)
   - Packet G (run closeout)
+  - PR refresh / review handoff
 - latest commit SHA:
-  - pending current packet HEAD
+  - bc22409c3316a7cdf017518c34ba1c257d09380a
 - open residue:
   - no root non-normative residue remains
   - no missing required metadata remains
   - no legacy status hits remain
 - next packet:
-  - PR refresh / review handoff
+  - branch review / PR creation
 - stop conditions encountered:
   - none
 - decisions already locked:
@@ -56,7 +57,7 @@
   - after: legacy status hits = 0
 - files normalized in this packet:
   - docs/meta/docs-program/WAVE3_EXECUTION_TRACKER.md
-  - docs/meta/docs-program/WAVE3_CLOSEOUT.md
+  - docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md
 - remaining legacy status hits:
   - none
 - remaining missing metadata counts:
@@ -70,13 +71,18 @@
 - intentionally deferred to next wave:
   - review whether any compatibility wrappers can be retired after downstream references age out
   - optional tighter generator/reporting polish beyond current truthful state
+- packet commit chain:
+  - Packet E: f327c083720798860def9c06fb3c1ae91d8e3bb9
+  - Packet D proposal status tail: 532e74f2691e63d15ea2350059ce2ade9cc34185
+  - Packet F: e86c64ff5805614f59b389f582e7fc5c67a6c797
+  - Packet G: bc22409c3316a7cdf017518c34ba1c257d09380a
 
 ## Current target batch
 - files: []
 - goal:
-  - Packet G completed
+  - review handoff completed
 - stop condition:
   - validator set passes and packet commit is created
 
 ## Next queued batch
-- PR refresh / review handoff
+- branch review / PR creation
