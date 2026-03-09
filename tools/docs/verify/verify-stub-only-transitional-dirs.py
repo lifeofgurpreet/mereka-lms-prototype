@@ -64,7 +64,9 @@ def check_stub(path: Path) -> list[str]:
     errors: list[str] = []
     if not re.search(r"status:\s*\"?superseded\"?|Status:\s*superseded", head, flags=re.IGNORECASE):
         errors.append(f"{path}: transitional doc must be marked superseded")
-    if not re.search(r"(?im)^\s*superseded_by:\s*.+$", text):
+    if not re.search(r"(?im)^\s*superseded_by:\s*.+$", text) and not re.search(
+        r"(?im)^\s*_?superseded by:\s*.+_?\s*$", text
+    ):
         errors.append(f"{path}: transitional doc missing superseded_by pointer")
     return errors
 
