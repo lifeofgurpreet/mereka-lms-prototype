@@ -1,23 +1,43 @@
 ---
 title: "MongoDB Atlas Integration"
 type: "feature_spec"
+id: "SPEC-PLT-003"
 status: "completed"
+spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "platform"
+normativity: "normative"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/secrets-management_spec.md"
   - "specs/tutor-configuration_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+interfaces:
+  - "MongoDB Atlas"
+  - "Tutor"
+  - "Open edX"
+  - "Forum"
+tags:
+  - "platform.control-plane"
+  - "tenant.isolation"
+summary: "Defines the managed MongoDB Atlas contract for modulestore and forum data, replacing in-cluster MongoDB across supported environments."
 links:
   related_docs:
     - "docs/adr/001-mongodb-atlas.md"
-    - "docs/architecture/MONGODB_ATLAS_MIGRATION.md"
-    - "docs/architecture/DATABASE_ARCHITECTURE.md"
-    - "docs/operations/MONGODB_PERMISSIONS_ISSUE.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
+    - "docs/concepts/architecture/MONGODB_ATLAS_MIGRATION.md"
+    - "docs/concepts/architecture/DATABASE_ARCHITECTURE.md"
+    - "docs/ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
   related_specs:
     - "specs/secrets-management_spec.md"
     - "specs/k8s-deployment_spec.md"
