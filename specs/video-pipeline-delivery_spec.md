@@ -1,9 +1,16 @@
 ---
+id: "SPEC-VIDEO-PIPELINE-DELIVERY"
 title: "Video Pipeline & Delivery System"
 type: "feature_spec"
-status: "in_progress"
+status: "active"
+spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-12"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "data"
+normativity: "normative"
 last_updated: "2026-02-12"
 version: "1.0.0"
 implementation_note: "Mux integration being handled by separate agent"
@@ -11,10 +18,23 @@ depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
   - "specs/secrets-management_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces:
+  - "mux"
+  - "hls"
+  - "dash"
+tags:
+  - "data.retention"
+  - "runtime.async-task"
+  - "frontend.composition"
+summary: "Defines the normative delivery contract for Mereka video ingestion, processing, storage, and playback across the platform."
 links:
   related_docs:
-    - "docs/VIDEO_HOSTING_COST_COMPARISON.md"
-    - "docs/migrations/mct/MCT_MIGRATION_STATUS.md"
+    - "docs/reference/migrations/mct/README.md"
+    - "docs/reference/migrations/mct/PROGRAMS_QUICK_REFERENCE.md"
+    - "docs/status/migrations/MCT_MIGRATION_STATUS.md"
   related_specs:
     - "specs/k8s-deployment_spec.md"
     - "specs/observability-stack_spec.md"
@@ -598,4 +618,3 @@ curl -H "Authorization: Bearer $MUX_TOKEN" \
 8. **Multi-language video variants vs. subtitles**: For courses with entirely separate video recordings per language (not just subtitle tracks), should we use Open edX's built-in language selection, separate course runs, or a custom language-switcher XBlock?
 9. **Offline download for mobile**: The mobile-apps-enterprise spec mentions offline access. Does this require Mux MP4 download support (not available on Basic tier) or a separate download mechanism?
 10. **Video content backup**: Should Mux assets be backed up to GCS for disaster recovery? Mux does not guarantee perpetual storage if the account is closed. What is the backup cadence and cost?
-

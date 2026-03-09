@@ -1,21 +1,40 @@
 ---
+id: "SPEC-MOBILE-APPS-ENTERPRISE"
 title: "Mobile Apps (iOS + Android) Enterprise Deployment"
 type: "feature_spec"
 status: "draft"
+spec_class: "domain"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "frontend"
+normativity: "proposed"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on:
   - "specs/enterprise-microservices_spec.md"
   - "specs/multi-tenancy-architecture_spec.md"
   - "specs/ci-cd-pipeline_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces:
+  - "ios"
+  - "android"
+  - "oidc"
+tags:
+  - "frontend.composition"
+  - "tenant.isolation"
+  - "auth.oidc"
+summary: "Defines the proposed enterprise deployment contract for Mereka mobile applications, including identity, branding, release, and platform integration expectations."
 links:
   related_docs:
-    - "docs/ios-cicd-spec.md"
-    - "docs/IOS_DEPLOYMENT_LEARNINGS.md"
-    - "docs/IOS_APP_SETUP_NOW.md"
-    - "docs/IOS_APP_CI_SETUP.md"
+    - "docs/archive/ios/IOS_DEPLOYMENT_LEARNINGS.md"
+    - "docs/archive/ios/IOS_APP_SETUP_NOW.md"
+    - "docs/archive/ios/IOS_APP_CI_SETUP.md"
+    - "docs/runbooks/operations/MOBILE_DEPLOYMENT.md"
   related_specs:
     - "specs/secrets-management_spec.md"
     - "specs/branding-system_spec.md"
