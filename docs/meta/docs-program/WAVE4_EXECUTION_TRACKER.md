@@ -5,12 +5,13 @@
 
 ## Last completed batch
 - commit: pending current packet HEAD
-- scope: Wave 4 Packet C
+- scope: Wave 4 Packet D
 - validators run:
   - python3 tools/knowledge/report_knowledge_control_plane.py --repo-root .
   - python3 tools/knowledge/build_knowledge_catalog.py --check --repo-root .
-  - python3 tools/knowledge/build_knowledge_graph.py --repo-root .
   - python3 tools/knowledge/build_knowledge_graph.py --check --repo-root .
+  - python3 tools/knowledge/build_wrapper_retirement_ledger.py --repo-root .
+  - python3 tools/knowledge/build_wrapper_retirement_ledger.py --check --repo-root .
   - python3 tools/specs/report_spec_metadata_coverage.py --repo-root .
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
   - python3 tools/specs/verify_spec_taxonomy.py --repo-root .
@@ -25,12 +26,12 @@
 ## Current target batch
 - files:
   - docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md
-  - tools/knowledge/build_knowledge_graph.py
-  - docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
-  - generated/graphs/knowledge-graph.json
+  - tools/knowledge/build_wrapper_retirement_ledger.py
+  - docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md
 - goal:
-  - generate the first unified knowledge graph from the shared catalog
-  - create a reviewer-facing front door for the combined knowledge system
+  - inventory all compatibility wrappers
+  - record canonical targets and non-generated live references
+  - distinguish retain vs retire-candidate wrappers
 - stop condition:
   - validators pass and one commit is created
 
@@ -41,7 +42,7 @@
 
 ## Open residue
 - wrapper retirement ledger not started yet
-- wrapper retirement ledger not started yet
+- merge-time governance is not started yet
 
 ## Next queued batch
-- Packet D: wrapper retirement ledger
+- Packet E: merge-time governance

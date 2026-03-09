@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4764,
+  "edge_count": 4770,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3596,6 +3596,16 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md"
     },
     {
       "edge_type": "classifies",
@@ -11071,6 +11081,16 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md"
     },
     {
       "edge_type": "contains",
@@ -19050,6 +19070,16 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
       "target": "docs/meta/docs-program/boundary-debt-manifest.md"
     },
     {
@@ -23824,7 +23854,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1612,
+  "node_count": 1614,
   "nodes": [
     {
       "id": "classification:archival",
@@ -30747,6 +30777,28 @@
       "root": "docs",
       "status": "",
       "title": "Wave 4 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 4 Review Front Door"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 4 Wrapper Retirement Ledger"
     },
     {
       "classification": "supporting",
