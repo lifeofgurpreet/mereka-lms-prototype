@@ -9,7 +9,7 @@ An approved spec file from `specs/<name>_spec.md` with acceptance criteria.
 ## Output
 
 1. **Test plan document** (`specs/plans/<name>_testplan.md`)
-2. **Testmap YAML** (`specs/testmaps/<name>.testmap.yml`)
+2. **Testmap YAML** (`specs/_generated/testmaps/<name>.testmap.yml`)
 
 ## Test Method Selection
 
@@ -29,7 +29,7 @@ An approved spec file from `specs/<name>_spec.md` with acceptance criteria.
 ## Testmap YAML Format
 
 ```yaml
-# specs/testmaps/<name>.testmap.yml
+# specs/_generated/testmaps/<name>.testmap.yml
 spec: "<name>_spec.md"
 version: "1.0.0"
 last_updated: "YYYY-MM-DD"

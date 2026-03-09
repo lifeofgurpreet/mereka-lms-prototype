@@ -264,7 +264,7 @@ specs/
 ├── auth-sso-enterprise_spec.md       # Enterprise SSO integration
 ├── cross-cutting-requirements_spec.md  # Platform-wide shared requirements
 ├── IMPLEMENTATION_ORDER.md           # Dependency graph (computed)
-└── manual_verifications.yaml         # Non-automated verification entries
+└── plans/manual_verifications.yaml   # Non-automated verification entries
 ```
 
 **Spec vs Doc**:
