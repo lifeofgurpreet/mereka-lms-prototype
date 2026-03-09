@@ -16,6 +16,7 @@ on:
       - 'specs/_generated/testmaps/README.md'
       - 'scripts/qa/build_decision_graph.py'
       - 'scripts/qa/generate_adr_readme.py'
+      - 'scripts/qa/sync-openedx-audit-pr-status.sh'
       - '.github/workflows/docs-compliance.yml'
       - '.github/workflows/docs-policy.yml'
       - '.github/workflows/ci.yml'

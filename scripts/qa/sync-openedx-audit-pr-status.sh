@@ -41,14 +41,37 @@ for cmd in git gh python3; do
   fi
 done
 
+if [[ -z "${REPO_ROOT_OVERRIDE:-}" ]] && ! command -v git >/dev/null 2>&1; then
+  echo "ERROR: git is required" >&2
+  exit 2
+fi
+
 if ! gh auth status -h github.com >/dev/null 2>&1; then
   echo "ERROR: gh is not authenticated for github.com" >&2
   exit 2
 fi
 
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-TRACKER="$REPO_ROOT/docs/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md"
-BOARD="$REPO_ROOT/docs/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+
+resolve_doc_path() {
+  local canonical="$1"
+  local legacy="$2"
+
+  if [[ -f "$canonical" ]]; then
+    printf '%s\n' "$canonical"
+  elif [[ -f "$legacy" ]]; then
+    printf '%s\n' "$legacy"
+  else
+    printf '%s\n' "$canonical"
+  fi
+}
+
+TRACKER="$(resolve_doc_path \
+  "$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md" \
+  "$REPO_ROOT/docs/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md")"
+BOARD="$(resolve_doc_path \
+  "$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md" \
+  "$REPO_ROOT/docs/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md")"
 
 origin_url="$(git config --get remote.origin.url || true)"
 repo_slug=""
