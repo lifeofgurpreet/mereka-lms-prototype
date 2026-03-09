@@ -1,6 +1,6 @@
 # Spec Templates
 
-The canonical template lives at `specs/_TEMPLATE.md`. Type-specific guidance below.
+The canonical template lives at `specs/templates/spec-template.md`. Type-specific guidance below.
 
 ## Template Types
 
@@ -14,7 +14,7 @@ The canonical template lives at `specs/_TEMPLATE.md`. Type-specific guidance bel
 ## Usage
 
 ```bash
-cp specs/_TEMPLATE.md specs/{name}_spec.md
+cp specs/templates/spec-template.md specs/{name}_spec.md
 # Edit frontmatter: set type, title, etc.
 # Follow 10_generate_spec.md prompt for section guidance
 ```

@@ -16,7 +16,7 @@ Each spec produces three artifacts:
 
 ### Implementation Tiers
 
-Plans reference the implementation ordering from `specs/IMPLEMENTATION_ORDER.md`:
+Plans reference the implementation ordering from `specs/plans/IMPLEMENTATION_ORDER.md`:
 
 | Tier | Description |
 |------|-------------|
@@ -65,6 +65,6 @@ python3 scripts/qa/spec-tools/build_spec_catalog.py
 ## Current truth surfaces
 
 - `specs/INDEX.md` is the human-facing generated index for the top-level spec corpus.
-- `specs/_generated/spec-catalog.json` is the machine-readable generated catalog for the same corpus.
+- `specs/catalog.json` is the machine-readable generated catalog for the same corpus.
 - `specs/_generated/testmaps/**` is the active generated verification mapping surface.
 - `specs/testmaps/**` is frozen legacy compatibility and must not receive new edits.
