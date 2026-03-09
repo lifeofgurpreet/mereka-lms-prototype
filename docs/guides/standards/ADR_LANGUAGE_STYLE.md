@@ -1,5 +1,20 @@
+---
+title: ADR Language Style Contract
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/guides/standards
+doc_class: guide
+audience:
+  - contributors
+  - reviewers
+summary: Defines the required section structure, normative language, and sentence-quality rules for ADR authoring.
+tags:
+  - docs.policy
+  - docs.catalog
+---
+
 # ADR Language Style Contract
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
 ## Required Sections
 

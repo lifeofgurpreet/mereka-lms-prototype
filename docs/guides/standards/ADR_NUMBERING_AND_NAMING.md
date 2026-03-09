@@ -1,5 +1,20 @@
+---
+title: ADR Numbering And Naming
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/guides/standards
+doc_class: guide
+audience:
+  - contributors
+  - reviewers
+summary: Defines the canonical ADR filename, numbering, and naming rules used by the repository.
+tags:
+  - docs.policy
+  - docs.catalog
+---
+
 # ADR Numbering And Naming
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
 ## Naming Rule
 

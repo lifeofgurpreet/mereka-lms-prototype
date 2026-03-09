@@ -1,5 +1,19 @@
+---
+title: Status Reporting Standard
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-08
+canonical_root: docs/guides/standards
+doc_class: guide
+audience:
+  - contributors
+summary: Defines the active reporting contract, status buckets, and rejection criteria for docs/status.
+tags:
+  - docs.status
+  - docs.policy
+---
+
 # Status Reporting Standard
-_Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-08 • Status: canonical_
 
 This standard defines the active reporting contract for `docs/status/**`.
 

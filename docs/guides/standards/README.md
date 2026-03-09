@@ -1,5 +1,20 @@
+---
+title: Documentation Standards
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/guides/standards
+doc_class: guide
+audience:
+  - contributors
+  - reviewers
+summary: Indexes the repository's canonical documentation standards and routes readers to the correct standard first.
+tags:
+  - docs.policy
+  - docs.catalog
+---
+
 # Documentation Standards
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
 This directory contains canonical standards for how documentation is authored, classified, governed, and verified in this repository.
 
