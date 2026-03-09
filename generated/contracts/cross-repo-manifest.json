@@ -1,5 +1,5 @@
 {
-  "change_count": 304,
+  "change_count": 306,
   "classification_counts": {
     "infra_counterpart_required": 3,
     "manual_review_required": 3
@@ -753,6 +753,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "scripts/mobile/validate-mobile-secrets.sh",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/qa/run-cross-repo-contract-gates.sh",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -1716,6 +1722,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "tools/contracts/contract_runtime.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/verify_cross_repo_contracts.py",
       "path_class": "repo_support_change",
       "touched_services": []
     },

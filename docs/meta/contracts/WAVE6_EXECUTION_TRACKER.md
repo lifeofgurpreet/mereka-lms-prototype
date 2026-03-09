@@ -4,11 +4,11 @@
 - docs/wave6-cross-repo-contract-runtime
 
 ## Latest substantive packet head
-- Packet F commit on docs/wave6-cross-repo-contract-runtime
+- Packet G commit on docs/wave6-cross-repo-contract-runtime
 
 ## Last completed batch
-- commit: Packet F commit on docs/wave6-cross-repo-contract-runtime
-- scope: Packet F contract gates
+- commit: Packet G commit on docs/wave6-cross-repo-contract-runtime
+- scope: Packet G closeout and operating model
 - validators run:
   - bash scripts/qa/run-cross-repo-contract-gates.sh
   - bash scripts/qa/run-knowledge-runtime-gates.sh
@@ -22,18 +22,15 @@
 - Packet D: cross-repo impact engine
 - Packet E: release obligations engine
 - Packet F: contract gates
+- Packet G: closeout and operating model
 
 ## Current target batch
 - files:
-  - docs/meta/contracts/REVIEW_HANDOFF_MODEL.md
-  - docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md
+  - none
 - goal:
-  - close out Wave 6 and document the operating model
-  - leave the branch reviewable and usable by humans and agents
+  - Wave 6 is complete and awaiting PR review
 - stop condition:
-  - closeout docs exist and the branch is PR-ready
-  - Wave 5 runtime stays green
-  - one commit is created
+  - reviewer handoff starts
 
 ## Locked decisions
 - Wave 4 topology stays intact
@@ -54,7 +51,4 @@
 - none
 
 ## Next queued batch
-- Packet D: cross-repo impact engine
-- Packet E: release obligations engine
-- Packet F: contract gates
-- Packet G: closeout and operating model
+- none

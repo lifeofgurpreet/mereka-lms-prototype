@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 304,
+  "change_count": 306,
   "changed_roots": [
     "docs",
     "specs"
@@ -4576,6 +4576,39 @@
       "root": "other",
       "status": "",
       "title": "@spec: proposals/mobile-apps-secrets-management_spec.md"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "scripts/qa/run-cross-repo-contract-gates.sh"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "scripts/qa/run-cross-repo-contract-gates.sh",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "run-cross-repo-contract-gates"
     },
     {
       "change_class": "docs_support_change",
@@ -10343,6 +10376,39 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/contracts/verify_cross_repo_contracts.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/verify_cross_repo_contracts.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "verify_cross_repo_contracts"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/docs/verify/report-hotpath-doc-metadata.py"
       ],
       "lane": "other",
@@ -11334,6 +11400,7 @@
     "infrastructure/tutor/themes/mereka/tenants/_template/README.md",
     "scripts/branding/sync-tokens-to-json.sh",
     "scripts/mobile/validate-mobile-secrets.sh",
+    "scripts/qa/run-cross-repo-contract-gates.sh",
     "scripts/qa/run-knowledge-integrity-gates.sh",
     "scripts/qa/run-knowledge-runtime-gates.sh",
     "scripts/qa/run-spec-integrity-gates.sh",
@@ -11547,6 +11614,7 @@
     "tools/contracts/build_deployment_impact_report.py",
     "tools/contracts/build_release_obligations.py",
     "tools/contracts/contract_runtime.py",
+    "tools/contracts/verify_cross_repo_contracts.py",
     "tools/docs/verify/report-hotpath-doc-metadata.py",
     "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh",
     "tools/docs/verify/verify-legacy-testmaps-frozen.py",

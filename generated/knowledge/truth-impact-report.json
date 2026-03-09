@@ -169,6 +169,7 @@
       "infrastructure/tutor/themes/mereka/tenants/_template/README.md",
       "scripts/branding/sync-tokens-to-json.sh",
       "scripts/mobile/validate-mobile-secrets.sh",
+      "scripts/qa/run-cross-repo-contract-gates.sh",
       "scripts/qa/run-knowledge-integrity-gates.sh",
       "scripts/qa/run-knowledge-runtime-gates.sh",
       "scripts/qa/run-spec-integrity-gates.sh",
@@ -272,6 +273,7 @@
       "tools/contracts/build_deployment_impact_report.py",
       "tools/contracts/build_release_obligations.py",
       "tools/contracts/contract_runtime.py",
+      "tools/contracts/verify_cross_repo_contracts.py",
       "tools/docs/verify/report-hotpath-doc-metadata.py",
       "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh",
       "tools/docs/verify/verify-legacy-testmaps-frozen.py",
@@ -387,7 +389,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 304,
+  "change_count": 306,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -3884,6 +3886,26 @@
         "wrappers": []
       },
       "path": "scripts/mobile/validate-mobile-secrets.sh",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "scripts/qa/run-cross-repo-contract-gates.sh"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "scripts/qa/run-cross-repo-contract-gates.sh",
       "required_evidence": {},
       "required_reviewers": []
     },
@@ -8656,6 +8678,26 @@
         "wrappers": []
       },
       "path": "tools/contracts/contract_runtime.py",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "tools/contracts/verify_cross_repo_contracts.py"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "tools/contracts/verify_cross_repo_contracts.py",
       "required_evidence": {},
       "required_reviewers": []
     },

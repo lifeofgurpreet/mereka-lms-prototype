@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4803,
+  "edge_count": 4809,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3495,6 +3495,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
     },
     {
@@ -3516,6 +3521,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md"
     },
     {
       "edge_type": "classifies",
@@ -11060,6 +11070,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
     },
     {
@@ -11081,6 +11096,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md"
     },
     {
       "edge_type": "contains",
@@ -18465,6 +18485,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
     },
     {
@@ -18486,6 +18511,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:other",
       "target": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md"
     },
     {
       "edge_type": "classifies",
@@ -24019,7 +24049,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1624,
+  "node_count": 1626,
   "nodes": [
     {
       "id": "classification:archival",
@@ -30763,6 +30793,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Cross-Repo Contract Runtime Closeout"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
       "lane": "other",
       "node_type": "docs:other",
@@ -30815,6 +30856,17 @@
       "root": "docs",
       "status": "",
       "title": "RELEASE_OBLIGATIONS"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Review Handoff Model"
     },
     {
       "classification": "supporting",

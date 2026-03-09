@@ -6070,6 +6070,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "meta/contracts/CONTRACT_RUNTIME_MODEL.md",
     "status": "supporting",
     "type": "other"
@@ -6107,6 +6116,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/contracts/RELEASE_OBLIGATIONS.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/contracts/REVIEW_HANDOFF_MODEL.md",
     "status": "supporting",
     "type": "other"
   },

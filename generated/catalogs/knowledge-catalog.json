@@ -3,7 +3,7 @@
     "archival": 292,
     "canonical": 44,
     "generated": 49,
-    "supporting": 1216
+    "supporting": 1218
   },
   "entries": [
     {
@@ -5500,6 +5500,15 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Cross-Repo Contract Runtime Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
       "root": "docs",
       "status": "",
@@ -5540,6 +5549,15 @@
       "root": "docs",
       "status": "",
       "title": "RELEASE_OBLIGATIONS"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Review Handoff Model"
     },
     {
       "classification": "supporting",
@@ -14416,7 +14434,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1601,
+  "entry_count": 1603,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14425,7 +14443,7 @@
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 155,
+    "docs:other": 157,
     "docs:review": 48,
     "docs:runbook": 482,
     "specs:evidence": 43,
@@ -14438,7 +14456,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1383,
+    "docs": 1385,
     "specs": 218
   }
 }

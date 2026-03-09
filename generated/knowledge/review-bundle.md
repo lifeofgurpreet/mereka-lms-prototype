@@ -1,7 +1,7 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `304`
+- Changes classified: `306`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
@@ -11,7 +11,7 @@
 - `archival_only_change`: 7
 - `docs_support_change`: 96
 - `evidence_only_change`: 3
-- `generated_surface_refresh`: 114
+- `generated_surface_refresh`: 116
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -25,7 +25,7 @@
 - `generated`: 8
 - `index`: 1
 - `normative`: 39
-- `other`: 125
+- `other`: 127
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -219,7 +219,7 @@
 - `docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md`
 - `docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml`
 - `docs/meta/knowledge/OWNERSHIP_MAP.yaml`
-- `... 105 more`
+- `... 107 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`
