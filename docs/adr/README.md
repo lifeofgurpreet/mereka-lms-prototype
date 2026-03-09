@@ -11,7 +11,7 @@ _Generated from `docs/adr/manifest.yaml`. Do not hand-edit._
 | ADR-003 | ADR-003: Image Build Pipeline | accepted | domain | [003-image-build-pipeline.md](003-image-build-pipeline.md) |
 | ADR-004 | ADR-004: Secrets Management | accepted | domain | [004-secrets-management.md](004-secrets-management.md) |
 | ADR-005 | ADR-005: Domain Migration (legacy environment → academyV2) | accepted | migration | [005-domain-migration.md](005-domain-migration.md) |
-| ADR-006 | --- | accepted | domain | [006-tutor-plugin-based-configuration.md](006-tutor-plugin-based-configuration.md) |
+| ADR-006 | ADR-006: Tutor Plugin-Based Configuration with Three-Layer Defense | accepted | domain | [006-tutor-plugin-based-configuration.md](006-tutor-plugin-based-configuration.md) |
 | ADR-007 | ADR-007: Forum Service Migration from Ruby to Python | accepted | migration | [007-forum-migration-ruby-to-python.md](007-forum-migration-ruby-to-python.md) |
 | ADR-008 | ADR-008: Redis Streams as Event Bus | accepted | domain | [008-redis-streams-event-bus.md](008-redis-streams-event-bus.md) |
 | ADR-009 | ADR-009: In-Cluster MySQL/Redis vs Cloud SQL/Memorystore | accepted | domain | [009-in-cluster-storage.md](009-in-cluster-storage.md) |
@@ -26,12 +26,12 @@ _Generated from `docs/adr/manifest.yaml`. Do not hand-edit._
 | ADR-018 | Purchase Gateway Replaces Legacy Oscar Ecommerce | accepted | migration | [018-purchase-gateway-replaces-oscar-ecommerce.md](018-purchase-gateway-replaces-oscar-ecommerce.md) |
 | ADR-019 | ADR-019: Tutor Upgrade Cadence and EOL Policy | accepted | foundation | [019-tutor-upgrade-policy.md](019-tutor-upgrade-policy.md) |
 | ADR-020 | ADR-020: Tracing Scope and Pilot Decision for Mereka LMS | accepted | domain | [020-tracing-scope-and-pilot-decision.md](020-tracing-scope-and-pilot-decision.md) |
-| ADR-021 | --- | accepted | foundation | [021-openedx-tutor-methodology.md](021-openedx-tutor-methodology.md) |
+| ADR-021 | ADR-021: Open edX / Tutor Deployment Methodology | accepted | foundation | [021-openedx-tutor-methodology.md](021-openedx-tutor-methodology.md) |
 | ADR-022 | Session Cookie SameSite Policy and Stale Cookie Mitigation | accepted | exception | [022-session-cookie-samesite-policy.md](022-session-cookie-samesite-policy.md) |
-| ADR-023 | --- | accepted | domain | [023-enterprise-images-ghcr-migration.md](023-enterprise-images-ghcr-migration.md) |
-| ADR-024 | --- | accepted | foundation | [024-multi-tenancy-true-tenants.md](024-multi-tenancy-true-tenants.md) |
-| ADR-025 | --- | accepted | domain | [025-csp-nonce-migration.md](025-csp-nonce-migration.md) |
-| ADR-026 | --- | accepted | domain | [026-cicd-build-pipeline-lessons.md](026-cicd-build-pipeline-lessons.md) |
+| ADR-023 | ADR-023: Enterprise Images GHCR Migration | accepted | domain | [023-enterprise-images-ghcr-migration.md](023-enterprise-images-ghcr-migration.md) |
+| ADR-024 | ADR-024: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture) | accepted | foundation | [024-multi-tenancy-true-tenants.md](024-multi-tenancy-true-tenants.md) |
+| ADR-025 | ADR-025: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline | accepted | domain | [025-csp-nonce-migration.md](025-csp-nonce-migration.md) |
+| ADR-026 | ADR-026: CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026) | accepted | domain | [026-cicd-build-pipeline-lessons.md](026-cicd-build-pipeline-lessons.md) |
 | ADR-028 | Platform Sources of Truth and Control Planes | accepted | foundation | [028-platform-sources-of-truth-and-control-planes.md](028-platform-sources-of-truth-and-control-planes.md) |
 | ADR-029 | Identity, Session, and Domain-Boundary Strategy | accepted | foundation | [029-identity-session-and-domain-boundary-strategy.md](029-identity-session-and-domain-boundary-strategy.md) |
 | ADR-030 | Feature Flag and Rollout Lifecycle | accepted | foundation | [030-feature-flag-and-rollout-lifecycle.md](030-feature-flag-and-rollout-lifecycle.md) |
@@ -45,7 +45,7 @@ Proposed decisions are kept out of the accepted ADR hot path and tracked here un
 
 | RFC | Title | Status | Type | Path |
 |---|---|---|---|---|
-| ADR-027 | --- | proposed | foundation | [027-deployment-contract-ownership-lanes.md](027-deployment-contract-ownership-lanes.md) |
+| ADR-027 | ADR-027: Deployment Contract — Ownership Lanes Between App and GitOps Repos | proposed | foundation | [027-deployment-contract-ownership-lanes.md](027-deployment-contract-ownership-lanes.md) |
 | ADR-034 | Event Contract and Transport Independence | proposed | domain | [rfc/034-event-contract-and-transport-independence.md](rfc/034-event-contract-and-transport-independence.md) |
 | ADR-035 | Frontend Runtime Composition and Dependency Alignment | proposed | domain | [rfc/035-frontend-runtime-composition-and-dependency-alignment.md](rfc/035-frontend-runtime-composition-and-dependency-alignment.md) |
 | ADR-036 | Cache Topology and Invalidation Strategy | proposed | domain | [rfc/036-cache-topology-and-invalidation-strategy.md](rfc/036-cache-topology-and-invalidation-strategy.md) |

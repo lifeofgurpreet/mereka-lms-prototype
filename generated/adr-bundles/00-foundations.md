@@ -8,9 +8,9 @@ This file is generated from `docs/adr/manifest.yaml`.
 
 - `ADR-019` [ADR-019: Tutor Upgrade Cadence and EOL Policy](../../019-tutor-upgrade-policy.md)
   - Governs: `n/a`
-- `ADR-021` [---](../../021-openedx-tutor-methodology.md)
+- `ADR-021` [ADR-021: Open edX / Tutor Deployment Methodology](../../021-openedx-tutor-methodology.md)
   - Governs: `n/a`
-- `ADR-024` [---](../../024-multi-tenancy-true-tenants.md)
+- `ADR-024` [ADR-024: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)](../../024-multi-tenancy-true-tenants.md)
   - Governs: `n/a`
 - `ADR-028` [Platform Sources of Truth and Control Planes](../../028-platform-sources-of-truth-and-control-planes.md)
   - Governs: `platform.control-plane, platform.repo-boundary, build.gitops-promotion`

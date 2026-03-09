@@ -147,7 +147,7 @@ adrs:
   frontmatter_required: false
 - id: ADR-006
   path: docs/adr/006-tutor-plugin-based-configuration.md
-  title: '---'
+  title: 'ADR-006: Tutor Plugin-Based Configuration with Three-Layer Defense'
   decision_status: accepted
   decision_type: domain
   rollout_state: active
@@ -574,7 +574,7 @@ adrs:
   frontmatter_required: false
 - id: ADR-021
   path: docs/adr/021-openedx-tutor-methodology.md
-  title: '---'
+  title: 'ADR-021: Open edX / Tutor Deployment Methodology'
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
@@ -641,7 +641,7 @@ adrs:
   frontmatter_required: true
 - id: ADR-023
   path: docs/adr/023-enterprise-images-ghcr-migration.md
-  title: '---'
+  title: 'ADR-023: Enterprise Images GHCR Migration'
   decision_status: accepted
   decision_type: domain
   rollout_state: active
@@ -668,7 +668,7 @@ adrs:
   frontmatter_required: false
 - id: ADR-024
   path: docs/adr/024-multi-tenancy-true-tenants.md
-  title: '---'
+  title: 'ADR-024: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)'
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
@@ -697,7 +697,7 @@ adrs:
   frontmatter_required: false
 - id: ADR-025
   path: docs/adr/025-csp-nonce-migration.md
-  title: '---'
+  title: 'ADR-025: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline'
   decision_status: accepted
   decision_type: domain
   rollout_state: active
@@ -724,7 +724,7 @@ adrs:
   frontmatter_required: false
 - id: ADR-026
   path: docs/adr/026-cicd-build-pipeline-lessons.md
-  title: '---'
+  title: 'ADR-026: CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)'
   decision_status: accepted
   decision_type: domain
   rollout_state: active
@@ -751,7 +751,7 @@ adrs:
   frontmatter_required: false
 - id: ADR-027
   path: docs/adr/027-deployment-contract-ownership-lanes.md
-  title: '---'
+  title: 'ADR-027: Deployment Contract — Ownership Lanes Between App and GitOps Repos'
   decision_status: proposed
   decision_type: foundation
   rollout_state: planned
