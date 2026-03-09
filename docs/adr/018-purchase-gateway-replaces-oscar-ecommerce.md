@@ -1,25 +1,47 @@
 ---
-id: ADR-018
 title: Purchase Gateway Replaces Legacy Oscar Ecommerce
-decision_status: accepted
-decision_type: migration
-rollout_state: active
 owner: commerce-platform
 created: 2026-02-16
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr
+doc_class: adr
+summary: Defines purchase-gateway ownership, reconciliation, and Oscar retirement
+  rules.
+tags:
+- commerce
+- gateway
+- reconciliation
+decision_type: migration
+decision_status: accepted
+governs:
+- commerce.system-of-record
+- commerce.reconciliation
+- platform.change-policy
+id: ADR-018
+rollout_state: active
 supersedes: []
 amends: []
-depends_on: ["ADR-028", "ADR-033"]
+depends_on:
+- ADR-028
+- ADR-033
 read_next: []
-governs: ["commerce-system-of-record", "purchase-flow-contract", "legacy-oscar-retirement"]
-does_not_govern: ["pricing-strategy", "catalog-content-authoring"]
+does_not_govern:
+- pricing-strategy
+- catalog-content-authoring
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
-related_specs: ["specs/ecommerce-purchase-gateway_spec.md"]
-related_runbooks: ["docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md", "docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md"]
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs:
+- specs/ecommerce-purchase-gateway_spec.md
+related_runbooks:
+- docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+- docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-ecommerce-worker-health.sh", "scripts/qa/verify-repo-structure.sh"]
+fitness_functions:
+- scripts/qa/verify-ecommerce-worker-health.sh
+- scripts/qa/verify-repo-structure.sh
 expiry_date: null
 removal_condition: null
 ---

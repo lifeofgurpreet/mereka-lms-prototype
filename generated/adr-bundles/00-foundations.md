@@ -6,6 +6,8 @@ This file is generated from `docs/adr/manifest.yaml`.
 
 ## ADRs
 
+- `ADR-018` [Purchase Gateway Replaces Legacy Oscar Ecommerce](../../018-purchase-gateway-replaces-oscar-ecommerce.md)
+  - Governs: `commerce.system-of-record, commerce.reconciliation, platform.change-policy`
 - `ADR-019` [ADR-019: Tutor Upgrade Cadence and EOL Policy](../../019-tutor-upgrade-policy.md)
   - Governs: `n/a`
 - `ADR-021` [ADR-021: Open edX / Tutor Deployment Methodology](../../021-openedx-tutor-methodology.md)

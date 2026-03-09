@@ -352,7 +352,7 @@ adrs:
   read_next:
   - ADR-022
   governs:
-  - studio-sso-oauth-next-preservation-workaround
+  - auth.oidc
   does_not_govern:
   - long-term authn frontend architecture
   related_oep: []
@@ -494,9 +494,9 @@ adrs:
   - ADR-033
   read_next: []
   governs:
-  - commerce-system-of-record
-  - purchase-flow-contract
-  - legacy-oscar-retirement
+  - commerce.system-of-record
+  - commerce.reconciliation
+  - platform.change-policy
   does_not_govern:
   - pricing-strategy
   - catalog-content-authoring
@@ -620,8 +620,7 @@ adrs:
   - ADR-031
   read_next: []
   governs:
-  - session-cookie-samesite-exception
-  - stale-cookie-dedup-workaround
+  - auth.cookie-boundary
   does_not_govern:
   - final steady-state cross-domain identity architecture
   related_oep: []
@@ -697,7 +696,7 @@ adrs:
   frontmatter_required: false
 - id: ADR-025
   path: docs/adr/025-csp-nonce-migration.md
-  title: 'ADR-025: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline'
+  title: "ADR-025: CSP Nonce Migration \u2014 Removing unsafe-eval / unsafe-inline"
   decision_status: accepted
   decision_type: domain
   rollout_state: active
@@ -751,7 +750,8 @@ adrs:
   frontmatter_required: false
 - id: ADR-027
   path: docs/adr/027-deployment-contract-ownership-lanes.md
-  title: 'ADR-027: Deployment Contract — Ownership Lanes Between App and GitOps Repos'
+  title: "ADR-027: Deployment Contract \u2014 Ownership Lanes Between App and GitOps\
+    \ Repos"
   decision_status: proposed
   decision_type: foundation
   rollout_state: planned

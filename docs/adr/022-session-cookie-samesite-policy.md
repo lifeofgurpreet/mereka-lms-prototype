@@ -1,27 +1,46 @@
 ---
-id: ADR-022
 title: Session Cookie SameSite Policy and Stale Cookie Mitigation
-decision_status: accepted
-decision_type: exception
-rollout_state: temporary
 owner: auth-platform
 created: 2026-03-04
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr
+doc_class: adr
+summary: Defines the session-cookie SameSite policy and related cookie boundary rules.
+tags:
+- auth
+- cookies
+- sessions
+decision_type: exception
+decision_status: accepted
+governs:
+- auth.cookie-boundary
+id: ADR-022
+rollout_state: temporary
 supersedes: []
-amends: ["ADR-002", "ADR-013"]
-depends_on: ["ADR-029", "ADR-031"]
+amends:
+- ADR-002
+- ADR-013
+depends_on:
+- ADR-029
+- ADR-031
 read_next: []
-governs: ["session-cookie-samesite-exception", "stale-cookie-dedup-workaround"]
-does_not_govern: ["final steady-state cross-domain identity architecture"]
+does_not_govern:
+- final steady-state cross-domain identity architecture
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
 related_specs: []
-related_runbooks: ["docs/runbooks/operations/FORUM_AUTH_E2E.md"]
+related_runbooks:
+- docs/runbooks/operations/FORUM_AUTH_E2E.md
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-auth-surfaces.sh prod", "scripts/qa/verify-mfe-config-contract.sh --env prod"]
+fitness_functions:
+- scripts/qa/verify-auth-surfaces.sh prod
+- scripts/qa/verify-mfe-config-contract.sh --env prod
 expiry_date: 2026-09-30
-removal_condition: SameSite and dedup exception removed after stable federated auth flow without stale-cookie reliance.
+removal_condition: SameSite and dedup exception removed after stable federated auth
+  flow without stale-cookie reliance.
 ---
 
 # ADR-022: Session Cookie SameSite Policy and Stale Cookie Mitigation
