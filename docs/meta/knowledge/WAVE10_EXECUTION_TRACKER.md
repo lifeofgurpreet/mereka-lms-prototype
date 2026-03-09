@@ -1,33 +1,31 @@
 # Wave 10 Execution Tracker
 
 ## Latest substantive packet head
-- `b6ab4bad4957460fc7113f00b20ea00f82a4e599`
+- `3ac84e7f7eaab474554ef375f7945d74cc3ce8cf`
 
 ## Last completed batch
-- commit: `b6ab4bad4957460fc7113f00b20ea00f82a4e599`
-- scope: `Packet E — agent pack generation`
+- commit: `3ac84e7f7eaab474554ef375f7945d74cc3ce8cf`
+- scope: `Packet F — review/runtime adoption`
 - validators run:
-  - `python3 tools/knowledge/build_cross_repo_agent_packs.py`
-  - `python3 tools/knowledge/build_cross_repo_agent_packs.py --check`
-  - `python3 tools/knowledge/build_wave10_source_map.py --check`
-  - `python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD`
+  - `bash scripts/qa/run-cross-repo-agent-gates.sh`
+  - `python3 -c "import yaml, pathlib; yaml.safe_load(pathlib.Path('.github/workflows/docs-policy.yml').read_text()); print('DOCS_POLICY_YAML_OK')"`
 - result: `passed`
 
 ## Current target batch
 - files:
   - docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md
-  - .github/workflows/docs-policy.yml
-  - scripts/qa/run-cross-repo-agent-gates.sh
+  - docs/meta/knowledge/WAVE10_CLOSEOUT.md
+  - docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md
 - goal:
-  - adopt the Wave 10 source map and agent packs into normal PR review flow
-  - validate the external compiled references together with local agent packs
-  - keep docs-policy event-aware for the local repo checks
+  - leave one deterministic reviewer and agent handoff path
+  - document what is authoritative vs compiled vs advisory
+  - close the wave without creating a new truth plane
 - stop condition:
-  - the cross-repo agent gate passes locally and docs-policy wires it into CI
+  - closeout docs exist, tracker is truthful, and the final Wave 10 validations pass
 
 ## Open residue
 - cross-repo contract projection still relies on repo-local path resolution
 - exact external runtime convergence remains out of scope for this wave
 
 ## Next queued batch
-- `Packet G — closeout and reviewer handoff`
+- `wave-closeout`
