@@ -114,21 +114,29 @@ run_check "spec-lint" \
 run_check "testmap-validate" \
   python3 "${TOOL_DIR}/validate_testmap_format.py" specs/_generated/testmaps/
 
-# 6. Generated spec graph freshness
+# 6. Generated spec catalog freshness
+run_check "spec-catalog" \
+  python3 "${TOOL_DIR}/build_spec_catalog.py" --check
+
+# 7. Generated spec index freshness
+run_check "spec-index" \
+  python3 "${TOOL_DIR}/render_index.py" --check
+
+# 8. Generated spec graph freshness
 run_check "spec-graph" \
   python3 tools/specs/build_spec_graph.py --check
 
-# 7. Generated spec bundle freshness
+# 9. Generated spec bundle freshness
 run_check "spec-bundles" \
   python3 tools/specs/build_spec_bundles.py --check
 
-# 8. Spec verification via @covers annotations (informational — coverage may not be 100%)
+# 10. Spec verification via @covers annotations (informational — coverage may not be 100%)
 run_check_info "spec-verify" \
   python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . \
     --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
     --manual-file specs/plans/manual_verifications.yaml
 
-# 9. Coverage report with threshold
+# 11. Coverage report with threshold
 run_check "spec-coverage" \
   python3 "${TOOL_DIR}/spec_coverage_report.py" \
     --specs-dir specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
