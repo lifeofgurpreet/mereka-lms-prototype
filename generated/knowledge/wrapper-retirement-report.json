@@ -1,0 +1,81 @@
+{
+  "entries": [
+    {
+      "canonical_exists": true,
+      "canonical_target": "specs/proposals/external-registration-hubspot_spec.md",
+      "live_reference_count": 4,
+      "sample_live_references": [
+        "docs/archive/superseded/runbooks/external-registration-runbook.md:209:- **Spec**: `specs/external-registration-hubspot_spec.md`",
+        "docs/archive/superseded/runbooks/external-registration-runbook.md:7:> **Spec**: `specs/external-registration-hubspot_spec.md`",
+        "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md:7:| `specs/external-registration-hubspot_spec.md` | `specs/proposals/external-registration-hubspot_spec.md` | 37 | retain | Active downstream references still exist |",
+        "specs/catalog.json:449:      \"path\": \"specs/external-registration-hubspot_spec.md\","
+      ],
+      "status": "active_and_justified",
+      "wrapper_lane": "normative",
+      "wrapper_path": "specs/external-registration-hubspot_spec.md"
+    },
+    {
+      "canonical_exists": true,
+      "canonical_target": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "live_reference_count": 3,
+      "sample_live_references": [
+        "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md:8:| `specs/mobile-apps-enterprise_spec.md` | `specs/proposals/mobile-apps-enterprise_spec.md` | 89 | retain | Active downstream references still exist |",
+        "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED:88:  - Mobile app badge display (covered by `specs/mobile-apps-enterprise_spec.md`)",
+        "specs/catalog.json:665:      \"path\": \"specs/mobile-apps-enterprise_spec.md\","
+      ],
+      "status": "active_but_suspicious",
+      "wrapper_lane": "normative",
+      "wrapper_path": "specs/mobile-apps-enterprise_spec.md"
+    },
+    {
+      "canonical_exists": true,
+      "canonical_target": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "live_reference_count": 2,
+      "sample_live_references": [
+        "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md:9:| `specs/mobile-apps-secrets-management_spec.md` | `specs/proposals/mobile-apps-secrets-management_spec.md` | 13 | retain | Active downstream references still exist |",
+        "specs/catalog.json:695:      \"path\": \"specs/mobile-apps-secrets-management_spec.md\","
+      ],
+      "status": "active_but_suspicious",
+      "wrapper_lane": "normative",
+      "wrapper_path": "specs/mobile-apps-secrets-management_spec.md"
+    },
+    {
+      "canonical_exists": false,
+      "canonical_target": "specs/plans/paragon-design-tokens-migration_spec.md_",
+      "live_reference_count": 7,
+      "sample_live_references": [
+        "docs/archive/FRONTEND_PHASE_B_PROMPT.md:338:| `specs/paragon-design-tokens-migration_spec.md` | Token format and migration phases |",
+        "docs/archive/FRONTEND_PHASE_B_PROMPT.md:5:**Specs**: `specs/oep48-brand-package_spec.md`, `specs/paragon-design-tokens-migration_spec.md`",
+        "docs/archive/FRONTEND_PHASE_C_PROMPT.md:396:| `specs/paragon-design-tokens-migration_spec.md` | Spec acceptance criteria |",
+        "docs/archive/FRONTEND_PHASE_C_PROMPT.md:5:**Specs**: `specs/paragon-design-tokens-migration_spec.md`, `specs/mfe-plugin-slots_spec.md`",
+        "docs/archive/FRONTEND_PHASE_D_PROMPT.md:5:**Specs**: `specs/mfe-plugin-slots_spec.md`, `specs/paragon-design-tokens-migration_spec.md`",
+        "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md:10:| `specs/paragon-design-tokens-migration_spec.md` | `specs/plans/paragon-design-tokens-migration_spec.md_` | 45 | retain | Active downstream references still exist |",
+        "specs/catalog.json:907:      \"path\": \"specs/paragon-design-tokens-migration_spec.md\","
+      ],
+      "status": "suspicious",
+      "wrapper_lane": "normative",
+      "wrapper_path": "specs/paragon-design-tokens-migration_spec.md"
+    },
+    {
+      "canonical_exists": true,
+      "canonical_target": "specs/proposals/proctoring-integration_spec.md",
+      "live_reference_count": 3,
+      "sample_live_references": [
+        "docs/archive/superseded/runbooks/proctoring-operations-runbook.md:7:> **Spec**: `specs/proctoring-integration_spec.md`",
+        "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md:11:| `specs/proctoring-integration_spec.md` | `specs/proposals/proctoring-integration_spec.md` | 74 | retain | Active downstream references still exist |",
+        "specs/catalog.json:2581:      \"path\": \"specs/proctoring-integration_spec.md\","
+      ],
+      "status": "active_but_suspicious",
+      "wrapper_lane": "normative",
+      "wrapper_path": "specs/proctoring-integration_spec.md"
+    }
+  ],
+  "generated_by": "tools/knowledge/build_wrapper_retirement_report.py",
+  "status_counts": {
+    "active_and_justified": 1,
+    "active_but_suspicious": 3,
+    "safe_to_retire": 0,
+    "suspicious": 1
+  },
+  "wrapper_count": 5
+}

@@ -4,11 +4,11 @@
 - docs/wave5-change-intelligence-runtime
 
 ## Last completed batch
-- commit: 8da0c87953b7bcadd69c8ca44e64a1946d15deff
-- scope: Wave 5 Packet D
+- commit: 001055304519e906890cb4d9981d85f67aa8bd05
+- scope: Wave 5 Packet E
 - validators run:
-  - python3 tools/knowledge/build_truth_impact_report.py --range origin/main...HEAD --repo-root .
-  - python3 tools/knowledge/build_truth_impact_report.py --check --range origin/main...HEAD --repo-root .
+  - python3 tools/knowledge/build_wrapper_retirement_report.py --repo-root .
+  - python3 tools/knowledge/build_wrapper_retirement_report.py --check --repo-root .
   - bash scripts/qa/run-knowledge-integrity-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
@@ -16,13 +16,13 @@
 ## Current target batch
 - files:
   - docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md
-  - tools/knowledge/build_wrapper_retirement_report.py
-  - generated/knowledge/wrapper-retirement-report.json
+  - tools/knowledge/verify_knowledge_runtime.py
+  - scripts/qa/run-knowledge-runtime-gates.sh
 - goal:
-  - classify every compatibility wrapper as retain, suspicious, or safe_to_retire
-  - turn wrapper cleanup into a branch-native runtime report instead of ad hoc review
+  - verify Wave 5 runtime artifacts and reviewer obligations in one gate
+  - make the change-intelligence runtime enforceable in local and CI workflows
 - stop condition:
-  - wrapper retirement report validates and one commit is created
+  - runtime verifier validates and one commit is created
 
 ## Decisions already locked
 - Wave 4 topology stays intact
@@ -31,7 +31,7 @@
 - wrappers must never appear as normative truth again
 
 ## Open residue
-- CI runtime classifier not started yet
+- closeout and reviewer operating model not started yet
 
 ## Next queued batch
-- Packet E: wrapper retirement runtime
+- Packet F: runtime verification and CI wiring
