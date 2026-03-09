@@ -41,8 +41,6 @@ This directory contains canonical standards for how documentation is authored, c
 ## Contributor workflow references
 
 - [`bead-v2-format.md`](bead-v2-format.md)
-- [`ADR_LANGUAGE_STYLE.md`](ADR_LANGUAGE_STYLE.md)
-- [`ADR_NUMBERING_AND_NAMING.md`](ADR_NUMBERING_AND_NAMING.md)
 
 ## What this directory is not
 

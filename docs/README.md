@@ -28,7 +28,7 @@ If those three do not answer your routing question, stop and resolve the route b
 | [docs/guides/](guides/README.md) | Human guidance, onboarding, admin, standards | Canonical |
 | [docs/reference/](reference/README.md) | Reference material for architecture, operations, and migrations | Canonical |
 | [docs/policies/](policies/README.md) | Current policy surfaces for architecture and operations | Canonical |
-| [docs/meta/](meta/README.md) | Documentation-program internals, templates, standing orders, transition ledgers | Canonical |
+| [docs/meta/](meta/README.md) | Docs-program internals, templates, standing orders, and transition ledgers | Canonical |
 | [docs/evidence/](evidence/INDEX.md) | Active proof bundles | Canonical |
 | [docs/status/](status/INDEX.md) | Active reporting and status tracking | Canonical |
 | `docs/operations/**` | Legacy compatibility surface | Transitional |
@@ -66,7 +66,6 @@ Do not load the whole corpus by default. Read the hot path first, then add one d
 | change contributor-facing guidance | [guides/README.md](guides/README.md) | onboarding, admin, integrations, or standards |
 | check a policy or operational boundary | [policies/README.md](policies/README.md) | architecture or operations policy subroot |
 | look up runtime/reference detail | [reference/README.md](reference/README.md) | architecture, operations, or migrations reference |
-| work on the docs system itself | [meta/README.md](meta/README.md) | docs-program, templates, ADR process, or standing orders |
 | verify what was proven | [evidence/INDEX.md](evidence/INDEX.md) | the owning evidence subroot |
 | understand current rollout or readiness state | [status/INDEX.md](status/INDEX.md) | active, migrations, readiness, weekly, or incidents |
 | inspect decision history or open proposals | [adr/README.md](adr/README.md) | accepted ADRs, RFC queue, or templates |

@@ -33,9 +33,6 @@ Do not place new canonical docs in transitional roots such as:
 - `docs/runbooks/**`
 - `docs/architecture/**`
 
-If you are writing about the documentation system itself, do not hide that material under
-`docs/concepts/architecture/**` or `docs/ops/**`. Route it to `docs/meta/**` instead.
-
 ## Required metadata
 
 Canonical and supporting docs must include:

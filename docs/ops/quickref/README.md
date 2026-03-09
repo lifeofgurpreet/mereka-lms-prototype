@@ -14,15 +14,6 @@ Use this root when you need the shortest path to an operational answer. Quick re
 | Triage an outage or common operator failure | [common-troubleshooting.md](./common-troubleshooting.md) | [`../runbooks/`](../runbooks/README.md) |
 | Find URLs, entrypoints, or local access details | [access-urls.md](./access-urls.md) | [`../../reference/operations/`](../../reference/operations/README.md) |
 
-## Common operator routes
-
-| Situation | Use this card | Escalate to |
-|---|---|---|
-| You need a command now and can fill in details from memory | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) | [`../runbooks/README.md`](../runbooks/README.md) |
-| You need to verify whether local proves a production claim | [local-production-parity.md](./local-production-parity.md) | [`../../status/readiness/README.md`](../../status/readiness/README.md) |
-| You need to understand local environment gaps before debugging | [local-work-remaining.md](./local-work-remaining.md) | [`../../guides/onboarding/README.md`](../../guides/onboarding/README.md) |
-| You need the shortest route to URLs or operator entrypoints | [access-urls.md](./access-urls.md) or [local-access-info.md](./local-access-info.md) | [`../../reference/operations/README.md`](../../reference/operations/README.md) |
-
 ## Cards in This Root
 
 | Card | Purpose | Use When |
@@ -205,12 +196,6 @@ When adding new cards:
 3. **Include context**: Brief description of what/when/why
 4. **Cross-reference**: Link to full guides for deep dives
 5. **Test commands**: Verify all commands work as written
-
-## Review standard
-
-- A quick reference should shorten an operator’s path, not narrate the whole system.
-- If a file needs multi-step branching logic or long explanations, it belongs under `docs/ops/runbooks/**`.
-- If a file mainly records factual inventories or matrices, move it to `docs/reference/**`.
 
 ---
 
