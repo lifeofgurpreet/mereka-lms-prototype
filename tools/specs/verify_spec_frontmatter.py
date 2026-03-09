@@ -1,35 +1,17 @@
 #!/usr/bin/env python3
-"""Verify required frontmatter fields for top-level specs."""
+"""Verify required frontmatter fields across normative, proposal, and plan lanes."""
 
 from __future__ import annotations
 
 import argparse
-import re
+import sys
 from pathlib import Path
 
-import yaml
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
-REQUIRED = {
-    "title": ("title",),
-    "status": ("status",),
-    "owner": ("owner",),
-    "spec_class_or_type": ("spec_class", "type"),
-    "normativity_or_vehicle": ("normativity", "vehicle"),
-    "last_reviewed_or_last_updated": ("last_reviewed", "last_updated"),
-}
-
-
-def parse_frontmatter(path: Path) -> dict:
-    match = FRONTMATTER_RE.match(path.read_text())
-    if not match:
-        return {}
-    data = yaml.safe_load(match.group(1)) or {}
-    return data if isinstance(data, dict) else {}
-
-
-def has_any(data: dict, keys: tuple[str, ...]) -> bool:
-    return any(data.get(key) not in (None, "", []) for key in keys)
+from tools.specs.spec_tooling import iter_lane_files, missing_required_fields, parse_frontmatter
 
 
 def main() -> None:
@@ -38,22 +20,24 @@ def main() -> None:
     args = parser.parse_args()
 
     repo_root = Path(args.repo_root).resolve()
-    specs = sorted((repo_root / "specs").glob("*_spec.md"))
     missing = []
-    for spec in specs:
-        frontmatter = parse_frontmatter(spec)
-        missing_fields = [
-            label for label, keys in REQUIRED.items() if not has_any(frontmatter, keys)
-        ]
+    checked = 0
+
+    for lane, path in iter_lane_files(repo_root):
+        frontmatter = parse_frontmatter(path)
+        missing_fields = missing_required_fields(frontmatter, lane)
         if missing_fields:
-            missing.append((spec.relative_to(repo_root).as_posix(), missing_fields))
+            missing.append((path.relative_to(repo_root).as_posix(), lane, missing_fields))
+        checked += 1
 
     if missing:
-        for path, fields in missing:
-            print(f"SPEC_FRONTMATTER_FAIL {path} missing={','.join(fields)}")
+        for path, lane, fields in missing:
+            print(
+                f"SPEC_FRONTMATTER_FAIL {path} lane={lane} missing={','.join(fields)}"
+            )
         raise SystemExit(1)
 
-    print(f"SPEC_FRONTMATTER_OK files_checked={len(specs)}")
+    print(f"SPEC_FRONTMATTER_OK files_checked={checked}")
 
 
 if __name__ == "__main__":

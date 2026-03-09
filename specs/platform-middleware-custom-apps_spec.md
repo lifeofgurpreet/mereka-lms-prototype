@@ -1,28 +1,36 @@
 ---
-title: "Platform Middleware and Custom Apps"
-type: "feature_spec"
-status: "completed"
-owner: "engineering"
-vehicle: "talent_platform"
-last_updated: "2026-02-10"
-version: "1.0.0"
+title: Platform Middleware and Custom Apps
+type: feature_spec
+status: completed
+owner: engineering
+vehicle: talent_platform
+version: 1.0.0
 depends_on:
-  - "specs/repository-structure_spec.md"
-  - "specs/k8s-deployment_spec.md"
-  - "specs/tutor-configuration_spec.md"
+- specs/repository-structure_spec.md
+- specs/k8s-deployment_spec.md
+- specs/tutor-configuration_spec.md
 links:
   related_docs:
-    - "deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py"
-    - "deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py"
-    - "deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py"
-    - "infrastructure/tutor/custom-apps/mfe_oauth_fix/README.md"
-    - "infrastructure/tutor/custom-apps/openedx_prometheus/README.md"
+  - deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+  - deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+  - deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+  - infrastructure/tutor/custom-apps/mfe_oauth_fix/README.md
+  - infrastructure/tutor/custom-apps/openedx_prometheus/README.md
   related_specs:
-    - "specs/multi-site-domains_spec.md"
-    - "specs/k8s-deployment_spec.md"
-    - "specs/observability-stack_spec.md"
-    - "specs/secrets-management_spec.md"
-    - "specs/cross-cutting-requirements_spec.md"
+  - specs/multi-site-domains_spec.md
+  - specs/k8s-deployment_spec.md
+  - specs/observability-stack_spec.md
+  - specs/secrets-management_spec.md
+  - specs/cross-cutting-requirements_spec.md
+id: SPEC-PLATFORM-MIDDLEWARE-CUSTOM-APPS
+spec_class: integration
+created: '2026-02-10'
+last_reviewed: '2026-02-10'
+review_due: '2026-05-11'
+domain: platform
+normativity: normative
+summary: Normative contract for platform middleware behavior and custom app integration
+  points.
 ---
 
 # Human Summary

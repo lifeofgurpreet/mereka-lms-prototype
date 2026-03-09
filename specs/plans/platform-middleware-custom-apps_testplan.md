@@ -2,8 +2,9 @@
 spec: platform-middleware-custom-apps_spec.md
 tier: 2
 status: draft
-last_updated: "2026-02-10"
+last_updated: '2026-02-10'
 test_framework: shell_verification (bash + Django shell + HTTP requests)
+plan: platform-middleware-custom-apps_plan.md
 ---
 
 # Test Plan: Platform Middleware and Custom Apps

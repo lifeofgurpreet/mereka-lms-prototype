@@ -3,6 +3,8 @@ source_spec: specs/ecommerce-purchase-gateway_spec.md
 status: ready
 created: 2026-02-10
 updated: 2026-02-10
+plan: ecommerce-purchase-gateway_plan.md
+last_updated: '2026-02-10'
 ---
 
 # Ecommerce Purchase Gateway - Test Plan

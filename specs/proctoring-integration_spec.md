@@ -1,28 +1,36 @@
 ---
-title: "Proctoring Integration for Enterprise Open edX"
-type: "feature_spec"
-status: "deferred"
-owner: "engineering"
-vehicle: "talent_platform"
-last_updated: "2026-02-10"
-version: "1.0.0"
+title: Proctoring Integration for Enterprise Open edX
+type: feature_spec
+status: deferred
+owner: engineering
+vehicle: talent_platform
+version: 1.0.0
 depends_on:
-  - "specs/enterprise-microservices_spec.md"
-  - "specs/multi-tenancy-architecture_spec.md"
-  - "specs/advanced-assessment-xqueue_spec.md"
+- specs/enterprise-microservices_spec.md
+- specs/multi-tenancy-architecture_spec.md
+- specs/advanced-assessment-xqueue_spec.md
 links:
   related_docs:
-    - "docs/architecture/proctoring-architecture-overview.md"
-    - "docs/runbooks/proctoring-operations-runbook.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+  - docs/architecture/proctoring-architecture-overview.md
+  - docs/runbooks/proctoring-operations-runbook.md
+  - docs/runbooks/operations/TROUBLESHOOTING.md
   related_specs:
-    - "specs/enterprise-microservices_spec.md"
-    - "specs/k8s-deployment_spec.md"
-    - "specs/secrets-management_spec.md"
-    - "specs/multi-site-domains_spec.md"
-    - "specs/observability-stack_spec.md"
-    - "specs/mobile-apps-enterprise_spec.md"
-    - "specs/cross-cutting-requirements_spec.md"
+  - specs/enterprise-microservices_spec.md
+  - specs/k8s-deployment_spec.md
+  - specs/secrets-management_spec.md
+  - specs/multi-site-domains_spec.md
+  - specs/observability-stack_spec.md
+  - specs/mobile-apps-enterprise_spec.md
+  - specs/cross-cutting-requirements_spec.md
+id: SPEC-PROCTORING-INTEGRATION
+spec_class: proposal
+created: '2026-02-10'
+last_reviewed: '2026-02-10'
+review_due: '2026-05-11'
+domain: platform
+normativity: proposed
+summary: Proposal-stage contract for enterprise proctoring integration work that remains
+  outside the normative root lane.
 ---
 
 # Human Summary

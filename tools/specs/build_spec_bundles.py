@@ -24,6 +24,7 @@ Read this bundle when you need the minimum cross-root truth for platform work.
 
 - `docs/catalog.json`
 - `specs/catalog.json`
+- `specs/_generated/graph.json`
 - `specs/_generated/testmaps/README.md`
 """
 
@@ -40,6 +41,8 @@ Read this bundle when you need the minimum normative spec reading set.
 - `specs/standards/SPEC_METADATA_MODEL.md`
 - `specs/standards/SPEC_AUTHORING_STANDARD.md`
 - `specs/catalog.json`
+- `specs/proposals/README.md`
+- `specs/plans/README.md`
 - `specs/_generated/testmaps/README.md`
 """
 
@@ -62,6 +65,8 @@ Use this generated index when you need the shortest path into the spec system.
 - `specs/catalog.json`
 - `specs/_generated/graph.json`
 - `specs/_generated/testmaps/README.md`
+- `specs/proposals/README.md`
+- `specs/plans/README.md`
 
 ## Use these next
 

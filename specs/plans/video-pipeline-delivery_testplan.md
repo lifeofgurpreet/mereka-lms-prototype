@@ -2,7 +2,8 @@
 spec: video-pipeline-delivery_spec.md
 tier: 3
 status: draft
-last_updated: "2026-02-10"
+last_updated: '2026-02-10'
+plan: video-pipeline-delivery_plan.md
 ---
 
 # Test Plan: Video Pipeline & Delivery System

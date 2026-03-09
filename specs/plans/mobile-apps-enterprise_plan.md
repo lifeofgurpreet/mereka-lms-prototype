@@ -3,6 +3,8 @@ source_spec: specs/mobile-apps-enterprise_spec.md
 status: ready
 created: 2026-02-10
 updated: 2026-02-10
+spec: mobile-apps-enterprise_spec.md
+last_updated: '2026-02-10'
 ---
 
 # Mobile Apps (iOS + Android) Enterprise Deployment - Implementation Plan

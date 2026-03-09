@@ -1,24 +1,31 @@
 ---
-title: "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
-type: "feature_spec"
-status: "draft"
-version: "1.0.0"
-owner: "engineering"
-vehicle: "talent_platform"
-last_updated: "2026-02-27"
+title: OEP-48 Brand Package (@edx/brand for Mereka Academy)
+type: feature_spec
+status: draft
+version: 1.0.0
+owner: engineering
+vehicle: talent_platform
 depends_on:
-  - "specs/branding-system_spec.md"
-  - "specs/design-tokens-system_spec.md"
+- specs/branding-system_spec.md
+- specs/design-tokens-system_spec.md
 links:
   related_docs:
-    - "docs/BRANDING.md"
-    - "docs/branding/BRANDING_OPERATING_MODEL.md"
+  - docs/BRANDING.md
+  - docs/branding/BRANDING_OPERATING_MODEL.md
   related_specs:
-    - "specs/cross-cutting-requirements_spec.md"
-    - "specs/branding-system_spec.md"
-    - "specs/design-tokens-system_spec.md"
-    - "specs/multi-tenancy-architecture_spec.md"
-    - "specs/tutor-configuration_spec.md"
+  - specs/cross-cutting-requirements_spec.md
+  - specs/branding-system_spec.md
+  - specs/design-tokens-system_spec.md
+  - specs/multi-tenancy-architecture_spec.md
+  - specs/tutor-configuration_spec.md
+id: SPEC-OEP48-BRAND-PACKAGE
+spec_class: domain
+created: '2026-02-27'
+last_reviewed: '2026-02-27'
+review_due: '2026-05-28'
+domain: frontend
+normativity: normative
+summary: Normative contract for the OEP-48 brand package used by Mereka Academy frontends.
 ---
 
 # Human Summary

@@ -2,8 +2,10 @@
 spec: disaster-recovery-business-continuity_spec.md
 tier: 3
 status: draft
-generated: "2026-02-10"
+generated: '2026-02-10'
 test_framework: shell_verification + kubectl_check + manual_verification
+plan: disaster-recovery-business-continuity_plan.md
+last_updated: '2026-03-09'
 ---
 
 # Test Plan: Disaster Recovery & Business Continuity

@@ -2,7 +2,8 @@
 spec: multi-site-domains_spec.md
 tier: 1
 status: draft
-last_updated: "2026-02-10"
+last_updated: '2026-02-10'
+plan: multi-site-domains_plan.md
 ---
 
 # Test Plan: Multi-Site Domain Configuration

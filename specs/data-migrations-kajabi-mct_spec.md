@@ -1,37 +1,45 @@
 ---
-title: "Data Migrations: Kajabi & MCT Legacy Systems"
-type: "migration_spec"
-status: "in_progress"
-owner: "migration-squad"
-vehicle: "talent_platform"
-last_updated: "2026-02-10"
-version: "1.0.0"
+title: 'Data Migrations: Kajabi & MCT Legacy Systems'
+type: migration_spec
+status: in_progress
+owner: migration-squad
+vehicle: talent_platform
+version: 1.0.0
 depends_on:
-  - "specs/repository-structure_spec.md"
-  - "specs/k8s-deployment_spec.md"
-  - "specs/secrets-management_spec.md"
+- specs/repository-structure_spec.md
+- specs/k8s-deployment_spec.md
+- specs/secrets-management_spec.md
 links:
   related_docs:
-    - "docs/migrations/kajabi/KAJABI_MIGRATION_HANDOVER.md"
-    - "docs/migrations/kajabi/KAJABI_MIGRATION_STATUS.md"
-    - "docs/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md"
-    - "docs/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md"
-    - "docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md"
-    - "docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md"
-    - "docs/migrations/mct/MIGRATION_PLAN.md"
-    - "docs/migrations/mct/MCT_MIGRATION_STATUS.md"
-    - "docs/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md"
-    - "docs/migrations/mct/MCT_TO_OPENEDX_MAPPING.md"
-    - "docs/migrations/mct/VIDEO_MIGRATION.md"
-    - "docs/migrations/mct/EXPORT_GUIDE.md"
-    - "docs/migrations/BBI-K8-MIGRATION.md"
+  - docs/migrations/kajabi/KAJABI_MIGRATION_HANDOVER.md
+  - docs/migrations/kajabi/KAJABI_MIGRATION_STATUS.md
+  - docs/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md
+  - docs/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md
+  - docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md
+  - docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md
+  - docs/migrations/mct/MIGRATION_PLAN.md
+  - docs/migrations/mct/MCT_MIGRATION_STATUS.md
+  - docs/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md
+  - docs/migrations/mct/MCT_TO_OPENEDX_MAPPING.md
+  - docs/migrations/mct/VIDEO_MIGRATION.md
+  - docs/migrations/mct/EXPORT_GUIDE.md
+  - docs/migrations/BBI-K8-MIGRATION.md
   related_specs:
-    - "specs/secrets-management_spec.md"
-    - "specs/k8s-deployment_spec.md"
-    - "specs/mongodb-atlas-integration_spec.md"
-    - "specs/video-pipeline-delivery_spec.md"
-    - "specs/observability-stack_spec.md"
-    - "specs/cross-cutting-requirements_spec.md"
+  - specs/secrets-management_spec.md
+  - specs/k8s-deployment_spec.md
+  - specs/mongodb-atlas-integration_spec.md
+  - specs/video-pipeline-delivery_spec.md
+  - specs/observability-stack_spec.md
+  - specs/cross-cutting-requirements_spec.md
+id: SPEC-DATA-MIGRATIONS-KAJABI-MCT
+spec_class: domain
+created: '2026-02-10'
+last_reviewed: '2026-02-10'
+review_due: '2026-05-11'
+domain: data
+normativity: normative
+summary: Normative contract for migrating Kajabi and MCT legacy data into the Mereka
+  LMS platform.
 ---
 
 # Human Summary

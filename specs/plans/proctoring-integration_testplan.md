@@ -3,6 +3,8 @@ source_spec: specs/proctoring-integration_spec.md
 status: deferred_until_2027
 created: 2026-02-10
 updated: 2026-02-10
+plan: proctoring-integration_plan.md
+last_updated: '2026-02-10'
 ---
 
 # Proctoring Integration - Test Plan
