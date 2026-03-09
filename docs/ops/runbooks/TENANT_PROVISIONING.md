@@ -193,7 +193,7 @@ cp scripts/tenants/acme-branding.json /tmp/acme-branding.example.json
 ```
 
 **Reference**:
-- **Schema**: `specs/brand-pack-schema.json`
+- **Schema**: `specs/standards/brand-pack-schema.json`
 - **Docs**: `docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md`
 - **Template**: `infrastructure/tutor/themes/mereka/tenants/_template/`
 

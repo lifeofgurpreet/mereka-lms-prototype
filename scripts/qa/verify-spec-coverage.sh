@@ -97,7 +97,7 @@ PYEOF
   # 2) No testmap: fall back to grep for the spec basename in tests/ and
   #    scripts/qa/verify-*.sh files.
   local refs
-  refs=$(grep -rl "${spec_basename}" "${TESTS_DIR}" "${SPECS_DIR}/manual_verifications.yaml" \
+  refs=$(grep -rl "${spec_basename}" "${TESTS_DIR}" "${SPECS_DIR}/plans/manual_verifications.yaml" \
     2>/dev/null | wc -l || true)
   if [ "${refs}" -gt 0 ]; then
     # At least referenced — count total ACs as covered (coarse approximation)
