@@ -2,7 +2,7 @@
   "classifications": {
     "archival": 292,
     "canonical": 44,
-    "compatibility": 5,
+    "compatibility": 4,
     "generated": 49,
     "supporting": 1210
   },
@@ -13121,15 +13121,6 @@
       "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
     },
     {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-secrets-management_spec.md",
-      "root": "specs",
-      "status": "superseded",
-      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
-    },
-    {
       "classification": "canonical",
       "lane": "normative",
       "owner": "engineering",
@@ -14408,7 +14399,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1600,
+  "entry_count": 1599,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14422,7 +14413,7 @@
     "docs:runbook": 482,
     "specs:evidence": 43,
     "specs:generated": 48,
-    "specs:normative": 44,
+    "specs:normative": 43,
     "specs:other": 15,
     "specs:plan": 29,
     "specs:proposal": 4,
@@ -14431,6 +14422,6 @@
   },
   "roots": {
     "docs": 1377,
-    "specs": 223
+    "specs": 222
   }
 }

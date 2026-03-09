@@ -25,15 +25,6 @@
     },
     {
       "canonical_exists": true,
-      "canonical_target": "specs/proposals/mobile-apps-secrets-management_spec.md",
-      "live_reference_count": 0,
-      "sample_live_references": [],
-      "status": "safe_to_retire",
-      "wrapper_lane": "normative",
-      "wrapper_path": "specs/mobile-apps-secrets-management_spec.md"
-    },
-    {
-      "canonical_exists": true,
       "canonical_target": "specs/plans/paragon-design-tokens-migration_spec.md",
       "live_reference_count": 5,
       "sample_live_references": [
@@ -63,8 +54,8 @@
   "status_counts": {
     "active_and_justified": 1,
     "active_but_suspicious": 3,
-    "safe_to_retire": 1,
+    "safe_to_retire": 0,
     "suspicious": 0
   },
-  "wrapper_count": 5
+  "wrapper_count": 4
 }

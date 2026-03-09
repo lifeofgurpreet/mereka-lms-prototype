@@ -675,36 +675,6 @@
       "version": null
     },
     {
-      "acceptance_criteria_count": 0,
-      "created": "2026-03-09",
-      "doc_type": "generated",
-      "domain": "platform",
-      "id": "SPEC-COMPAT-MOBILE-APPS-SECRETS-MANAGEMENT",
-      "lane": "normative",
-      "last_reviewed": "2026-03-09",
-      "links": {
-        "generated_testmap": "specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
-        "legacy_testmap": "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
-        "plan": null,
-        "source_plan": null,
-        "source_spec": null,
-        "testplan": null
-      },
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-secrets-management_spec.md",
-      "review_due": "2026-06-09",
-      "spec_class": "generated",
-      "status": "superseded",
-      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
-      "tags": [
-        "compatibility",
-        "proposal-lane"
-      ],
-      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management",
-      "version": null
-    },
-    {
       "acceptance_criteria_count": 9,
       "created": "2026-02-10",
       "doc_type": "spec",
@@ -3072,7 +3042,7 @@
       "version": "1.0.0"
     }
   ],
-  "entry_count": 108,
+  "entry_count": 107,
   "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
   "root": "specs",
   "taxonomy": "specs/standards/spec-taxonomy.yaml"
