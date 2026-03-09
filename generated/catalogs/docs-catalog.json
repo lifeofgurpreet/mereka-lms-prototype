@@ -5249,6 +5249,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "evidence/operations/2026-03-wave-2b-final-closeout/README.md",
+    "status": "canonical",
+    "type": "evidence"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "evidence/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md",
@@ -12686,6 +12695,15 @@
     "last_verified_or_updated": "2026-03-09",
     "owner": "Program Mgmt",
     "path": "status/incidents/README.md",
+    "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "status/migrations/2026-03-wave-2b-final-closeout.md",
     "status": "canonical",
     "type": "status"
   },

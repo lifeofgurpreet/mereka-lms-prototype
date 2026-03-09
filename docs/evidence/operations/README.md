@@ -44,6 +44,7 @@ Do not create new active proof under top-level `evidence/**` or archive paths.
 |---|---|
 | [Analytics key elimination evidence](ANALYTICS_KEY_ELIMINATION_EVIDENCE.md) | You need proof for analytics-key remediation and validation. |
 | [Assessment XQueue evidence](ASSESSMENT_XQUEUE_EVIDENCE.md) | You need proof for assessment/XQueue behavior or recovery. |
+| [Wave 2B-Final closeout evidence pack](2026-03-wave-2b-final-closeout/README.md) | You need the durable proof bundle for the completed documentation convergence wave. |
 | [GKE workload triage evidence](GKE_WORKLOAD_TRIAGE_EVIDENCE.md) | You need workload-level triage proof from the live cluster. |
 | [Kind cluster recovery evidence](KIND_CLUSTER_RECOVERY_EVIDENCE.md) | You need proof for local cluster recovery and validation. |
 | [Tenant isolation evidence](TENANT_ISOLATION_EVIDENCE.md) | You need evidence for tenant-boundary and isolation claims. |

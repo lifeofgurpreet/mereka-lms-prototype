@@ -37,6 +37,7 @@ Do not create new active migration status docs under legacy `reports/**` paths.
 | Report | Use it when... |
 |---|---|
 | [drive-airtable-STATUS.md](drive-airtable-STATUS.md) | You need the current Drive/Airtable migration state. |
+| [2026-03-wave-2b-final-closeout.md](2026-03-wave-2b-final-closeout.md) | You need the canonical closeout record for the completed Wave 2B-Final convergence wave. |
 | [KAJABI_MIGRATION_STATUS.md](KAJABI_MIGRATION_STATUS.md) | You need the current Kajabi migration state. |
 | [MCT_MIGRATION_STATUS.md](MCT_MIGRATION_STATUS.md) | You need the current MCT migration state. |
 | [MIGRATION_STATUS_AND_ROLLBACK.md](MIGRATION_STATUS_AND_ROLLBACK.md) | You need migration rollback and active rollout posture. |
