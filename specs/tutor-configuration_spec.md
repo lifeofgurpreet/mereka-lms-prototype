@@ -1,20 +1,38 @@
 ---
+id: "SPEC-PLT-001"
 title: "Tutor Configuration Lifecycle"
 type: "feature_spec"
 status: "completed"
+spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
 last_updated: "2026-02-10"
 version: "1.0.0"
+domain: "platform"
+normativity: "normative"
 depends_on:
   - "specs/repository-structure_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+interfaces:
+  - "Tutor"
+  - "Open edX"
+tags:
+  - "platform.control-plane"
+  - "build.version-pin"
+summary: "Defines the expected lifecycle, control points, and verification contract for Tutor configuration in local and managed environments."
 links:
   related_docs:
-    - "docs/onboarding/QUICK_START_LOCAL.md"
-    - "docs/onboarding/DEVELOPER_ONBOARDING.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/runbooks/operations/THEME_DEPLOYMENT.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
+    - "docs/guides/onboarding/QUICK_START_LOCAL.md"
+    - "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/THEME_DEPLOYMENT.md"
+    - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
   related_specs:
     - "specs/branding-system_spec.md"
     - "specs/k8s-deployment_spec.md"
