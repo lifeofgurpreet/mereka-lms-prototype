@@ -2,24 +2,27 @@
   "entries": [
     {
       "acceptance_criteria_count": 44,
-      "created": null,
-      "domain": null,
-      "id": null,
-      "last_reviewed": "2026-02-10",
+      "created": "2026-02-10",
+      "domain": "platform",
+      "id": "SPEC-PLT-006",
+      "last_reviewed": "2026-03-09",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
         "plan": "specs/plans/advanced-assessment-xqueue_plan.md",
         "testplan": "specs/plans/advanced-assessment-xqueue_testplan.md"
       },
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/advanced-assessment-xqueue_spec.md",
-      "review_due": null,
-      "spec_class": "feature_spec",
+      "review_due": "2026-06-09",
+      "spec_class": "integration",
       "status": "draft",
-      "summary": null,
-      "tags": [],
+      "summary": "Defines the contract for non-proctored advanced assessment flows, including ORA2 and XQueue-backed grading, across the Mereka Open edX platform.",
+      "tags": [
+        "runtime.async-task",
+        "platform.control-plane"
+      ],
       "title": "Advanced Assessment & XQueue Integration (Non-Proctored)",
       "version": "1.0.0"
     },
@@ -298,24 +301,27 @@
     },
     {
       "acceptance_criteria_count": 45,
-      "created": null,
-      "domain": null,
-      "id": null,
-      "last_reviewed": "2026-02-10",
+      "created": "2026-02-10",
+      "domain": "platform",
+      "id": "SPEC-PLT-007",
+      "last_reviewed": "2026-03-09",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/email-notifications-pipeline_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/email-notifications-pipeline_spec.testmap.yml",
         "plan": "specs/plans/email-notifications-pipeline_plan.md",
         "testplan": "specs/plans/email-notifications-pipeline_testplan.md"
       },
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/email-notifications-pipeline_spec.md",
-      "review_due": null,
-      "spec_class": "feature_spec",
+      "review_due": "2026-06-09",
+      "spec_class": "integration",
       "status": "draft",
-      "summary": null,
-      "tags": [],
+      "summary": "Defines the platform-wide contract for transactional email, bulk notifications, and mobile push delivery across the Mereka Open edX stack.",
+      "tags": [
+        "platform.control-plane",
+        "runtime.async-task"
+      ],
       "title": "Email & Notifications Pipeline",
       "version": "1.0.0"
     },

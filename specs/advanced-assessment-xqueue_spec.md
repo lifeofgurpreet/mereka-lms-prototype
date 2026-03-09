@@ -1,20 +1,39 @@
 ---
 title: "Advanced Assessment & XQueue Integration (Non-Proctored)"
 type: "feature_spec"
+id: "SPEC-PLT-006"
 status: "draft"
+spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "platform"
+normativity: "normative"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on:
   - "specs/enterprise-microservices_spec.md"
   - "specs/multi-tenancy-architecture_spec.md"
   - "specs/k8s-deployment_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+interfaces:
+  - "ORA2"
+  - "XQueue"
+  - "Open edX"
+tags:
+  - "runtime.async-task"
+  - "platform.control-plane"
+summary: "Defines the contract for non-proctored advanced assessment flows, including ORA2 and XQueue-backed grading, across the Mereka Open edX platform."
 links:
   related_docs:
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
-    - "docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
+    - "docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md"
   related_specs:
     - "specs/proctoring-integration_spec.md"
     - "specs/enterprise-microservices_spec.md"
