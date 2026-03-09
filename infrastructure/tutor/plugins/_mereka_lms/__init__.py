@@ -5,6 +5,7 @@ The top-level mereka_lms.py imports all submodules to trigger registration.
 """
 
 from pathlib import Path
+
 from tutor import hooks
 
 __version__ = "1.0.0"

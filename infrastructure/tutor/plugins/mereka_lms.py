@@ -40,21 +40,29 @@ Usage:
 
 from __future__ import annotations
 
-from tutor import hooks
+import os
+import sys
 
-from mereka_lms_mfe_slots import register_mfe_plugin_slots
+# Ensure the plugin directory is on sys.path so sibling modules
+# (_mereka_lms package, mereka_lms_mfe_slots) can be imported.
+# Tutor loads plugins via importlib but doesn't add the plugins
+# directory to sys.path.
+_plugin_dir = os.path.dirname(os.path.abspath(__file__))
+if _plugin_dir not in sys.path:
+    sys.path.insert(0, _plugin_dir)
 
-# Import all submodules — each registers its own ENV_PATCHES on import.
-# Order does not matter for Tutor hook collection; listed by domain for clarity.
-from _mereka_lms import __version__
-from _mereka_lms import config_defaults  # noqa: F401  CONFIG_DEFAULTS
-from _mereka_lms import lms_settings  # noqa: F401  LMS production settings
-from _mereka_lms import cms_settings  # noqa: F401  CMS settings + credentials
-from _mereka_lms import asset_settings  # noqa: F401  LMS/CMS asset build
-from _mereka_lms import openedx_dockerfile  # noqa: F401  OpenEdX Dockerfile
-from _mereka_lms import mfe_dockerfile  # noqa: F401  MFE Dockerfile
-from _mereka_lms import mfe_runtime  # noqa: F401  MFE JSX components
-from _mereka_lms import infrastructure  # noqa: F401  MySQL, Caddy, Nginx
+from tutor import hooks  # noqa: E402, I001
+
+from _mereka_lms import __version__  # noqa: E402
+from _mereka_lms import asset_settings  # noqa: E402, F401  LMS/CMS asset build
+from _mereka_lms import cms_settings  # noqa: E402, F401  CMS settings + credentials
+from _mereka_lms import config_defaults  # noqa: E402, F401  CONFIG_DEFAULTS
+from _mereka_lms import infrastructure  # noqa: E402, F401  MySQL, Caddy, Nginx
+from _mereka_lms import lms_settings  # noqa: E402, F401  LMS production settings
+from _mereka_lms import mfe_dockerfile  # noqa: E402, F401  MFE Dockerfile
+from _mereka_lms import mfe_runtime  # noqa: E402, F401  MFE JSX components
+from _mereka_lms import openedx_dockerfile  # noqa: E402, F401  OpenEdX Dockerfile
+from mereka_lms_mfe_slots import register_mfe_plugin_slots  # noqa: E402
 
 ###############################################################################
 # MFE Plugin Slot Configuration
