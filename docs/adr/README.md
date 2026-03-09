@@ -2,6 +2,13 @@
 
 _Generated from `docs/adr/manifest.yaml`. Do not hand-edit._
 
+## Navigation
+
+- [RFC queue](rfc/README.md)
+- [ADR templates](templates/README.md)
+- [Contradictions register](contradictions-register.md)
+- [Manifest](manifest.yaml)
+
 ## Accepted, historical, and exception ADRs
 
 | ADR | Title | Status | Type | Path |
