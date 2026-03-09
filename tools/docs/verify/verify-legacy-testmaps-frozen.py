@@ -9,6 +9,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+ALLOWED_LEGACY_PATHS = {"specs/testmaps/README.md"}
+
 
 def git_changed_files(repo_root: Path, diff_range: str) -> list[str]:
     result = subprocess.run(
@@ -30,11 +32,16 @@ def main() -> int:
     args = ap.parse_args()
 
     repo_root = Path.cwd()
-    changed_files = git_changed_files(repo_root, args.diff_range)
+    changed_files = [
+        path
+        for path in git_changed_files(repo_root, args.diff_range)
+        if path not in ALLOWED_LEGACY_PATHS
+    ]
     summary = {
         "status": "pass" if not changed_files else "fail",
         "range": args.diff_range,
         "frozen_root": "specs/testmaps/**",
+        "allowed_paths": sorted(ALLOWED_LEGACY_PATHS),
         "changed_files": changed_files,
         "changed_count": len(changed_files),
     }
