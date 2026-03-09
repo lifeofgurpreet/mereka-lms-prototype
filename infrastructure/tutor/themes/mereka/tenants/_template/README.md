@@ -66,7 +66,7 @@ _template/
 
 ## branding.json Schema
 
-See `specs/brand-pack-schema.json` for the complete JSON Schema.
+See `specs/standards/brand-pack-schema.json` for the complete JSON Schema.
 
 **Required fields**:
 - `slug`: Tenant identifier (lowercase, alphanumeric + hyphens, 2-63 chars)
@@ -101,10 +101,10 @@ See `specs/brand-pack-schema.json` for the complete JSON Schema.
 
 ## Documentation
 
-- **Schema Docs**: `docs/branding/TENANT_BRAND_PACK_SCHEMA.md`
-- **Contract**: `docs/branding/TENANT_BRANDING_CONTRACT.md`
+- **Schema Docs**: `docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md`
+- **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - **Provisioning**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
-- **JSON Schema**: `specs/brand-pack-schema.json`
+- **JSON Schema**: `specs/standards/brand-pack-schema.json`
 
 ## Example
 
