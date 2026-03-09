@@ -30,8 +30,8 @@ The architecture system is split into five layers:
 - ADR manifest: `docs/adr/manifest.yaml`
 - ADR generated outputs: `generated/`
 - Contradictions register: `docs/adr/contradictions-register.md`
-- Classification map: `docs/adr/classification-map.yaml`
-- Status map: `docs/adr/status-map.yaml`
+- Classification map (generated from the ADR manifest): `docs/adr/classification-map.yaml`
+- Status map (generated from the ADR manifest): `docs/adr/status-map.yaml`
 
 ## Progressive Disclosure Model
 

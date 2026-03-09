@@ -8,6 +8,14 @@ _Generated from `docs/adr/manifest.yaml`. Do not hand-edit._
 - [ADR templates](templates/README.md)
 - [Contradictions register](contradictions-register.md)
 - [Manifest](manifest.yaml)
+- [Classification map](classification-map.yaml)
+- [Status map](status-map.yaml)
+
+## Metadata surfaces
+
+- `manifest.yaml` is the authoritative ADR ledger for paths, titles, types, statuses, and rollout state.
+- `classification-map.yaml` is a generated auxiliary view derived from `manifest.yaml` for type-based consumers.
+- `status-map.yaml` is a generated auxiliary view derived from `manifest.yaml` for status-based consumers.
 
 ## Accepted, historical, and exception ADRs
 

@@ -1,5 +1,7 @@
+# Generated from docs/adr/manifest.yaml. Do not hand-edit.
 version: 1
 generated_on: '2026-03-07'
+generated_from: docs/adr/manifest.yaml
 entries:
   ADR-001:
     path: docs/adr/001-mongodb-atlas.md

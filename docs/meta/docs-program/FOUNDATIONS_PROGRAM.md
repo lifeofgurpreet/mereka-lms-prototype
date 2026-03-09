@@ -27,7 +27,7 @@ Refactor architecture knowledge into a durable, machine-checkable governance lay
 - Classify each ADR as `foundation | domain | migration | exception`.
 
 Exit gate:
-- `manifest.yaml`, `classification-map.yaml`, `status-map.yaml`, and contradiction register exist and cover all ADRs.
+- `manifest.yaml` is the source ADR ledger; `classification-map.yaml` and `status-map.yaml` are generated companion maps, and the contradiction register tracks open conflicts.
 
 ### Phase 1 — Install Overlay OS
 

@@ -6,6 +6,8 @@ cd "$ROOT"
 
 python3 scripts/qa/verify_adr_manifest.py
 python3 scripts/qa/verify_adr_frontmatter.py
+python3 scripts/qa/generate_adr_aux_maps.py
+python3 scripts/qa/verify_adr_aux_maps.py
 python3 scripts/qa/verify_adr_readme.py
 python3 scripts/qa/verify_exception_expiry.py
 python3 scripts/qa/verify_adr_links.py

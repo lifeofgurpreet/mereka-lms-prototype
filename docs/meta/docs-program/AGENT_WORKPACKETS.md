@@ -7,8 +7,8 @@ Owner: Corpus Cartographer
 
 Deliverables:
 - `docs/adr/contradictions-register.md`
-- `docs/adr/status-map.yaml`
-- `docs/adr/classification-map.yaml`
+- `docs/adr/status-map.yaml` (generated from `docs/adr/manifest.yaml`)
+- `docs/adr/classification-map.yaml` (generated from `docs/adr/manifest.yaml`)
 - coverage of all ADRs in `docs/adr/manifest.yaml`
 
 ## Packet 01 — Overlay Scaffolding
