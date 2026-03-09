@@ -13,7 +13,11 @@
     "target_environment",
     "build",
     "images",
-    "artifacts"
+    "artifacts",
+    "service_id",
+    "contract_family",
+    "contract_version",
+    "contract_ref"
   ],
   "properties": {
     "schema_version": {
@@ -38,7 +42,23 @@
     },
     "target_environment": {
       "type": "string",
-      "enum": ["dev", "nonprod", "staging", "production"]
+      "enum": ["dev", "nonprod", "staging", "production", "prod"]
+    },
+    "service_id": {
+      "type": "string",
+      "const": "mereka-lms"
+    },
+    "contract_family": {
+      "type": "string",
+      "const": "release-bundle"
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "contract_ref": {
+      "type": "string",
+      "pattern": "^.+@[0-9a-f]{7,40}$"
     },
     "build": {
       "type": "object",

@@ -42,7 +42,11 @@ write_valid_bundle() {
   "build": {
     "run_id": "12345",
     "run_attempt": "1"
-  }
+  },
+  "service_id": "mereka-lms",
+  "contract_family": "release-bundle",
+  "contract_version": "1.0",
+  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@5fffde1a"
 }
 EOF
 }
@@ -87,7 +91,11 @@ cat >"$tmpdir/var/ci/release-bundle.json" <<'EOF'
   "build": {
     "run_id": "12345",
     "run_attempt": "1"
-  }
+  },
+  "service_id": "mereka-lms",
+  "contract_family": "release-bundle",
+  "contract_version": "1.0",
+  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@5fffde1a"
 }
 EOF
 run_expect_fail "invalid image digest is rejected"

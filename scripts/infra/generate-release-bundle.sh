@@ -99,6 +99,7 @@ export OPENEDX_IMAGE
 export OPENEDX_DIGEST
 export MFE_IMAGE
 export MFE_DIGEST
+export CONTRACT_REF="${CONTRACT_REF:-Biji-Biji-Initiative/platform-control-plane@5fffde1a}"
 
 python3 - "$OUTPUT" <<'PY'
 import json
@@ -113,6 +114,10 @@ payload = {
     "repository": os.environ["REPO"],
     "commit_sha": os.environ["COMMIT_SHA"],
     "target_environment": os.environ["TARGET_ENV"],
+    "service_id": "mereka-lms",
+    "contract_family": "release-bundle",
+    "contract_version": "1.0",
+    "contract_ref": os.environ.get("CONTRACT_REF", "Biji-Biji-Initiative/platform-control-plane@5fffde1a"),
     "build": {
         "workflow": os.environ["WORKFLOW"],
         "run_id": os.environ["RUN_ID"],

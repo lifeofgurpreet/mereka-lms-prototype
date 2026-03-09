@@ -94,6 +94,17 @@ if not re.fullmatch(r"[0-9]+", str(build.get("run_id", ""))):
 if not re.fullmatch(r"[0-9]+", str(build.get("run_attempt", ""))):
     errors.append("build.run_attempt must be numeric string")
 
+# Identity / handshake fields
+for id_key in ("service_id", "contract_family", "contract_version", "contract_ref"):
+    if id_key not in bundle:
+        errors.append(f"missing identity field: {id_key}")
+
+if bundle.get("service_id") != "mereka-lms":
+    errors.append(f"service_id must be 'mereka-lms', got: {bundle.get('service_id')}")
+
+if bundle.get("contract_ref") and not re.fullmatch(r".+@[0-9a-f]{7,40}", bundle["contract_ref"]):
+    errors.append(f"contract_ref format invalid: {bundle.get('contract_ref')}")
+
 if errors:
     print("FAIL: release bundle validation errors:", file=sys.stderr)
     for err in errors:
