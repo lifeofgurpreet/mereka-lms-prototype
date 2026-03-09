@@ -11,6 +11,9 @@ on:
       - "tools/docs/verify/verify-docs-policy.sh"
       - "tools/docs/verify/verify_temporal_integrity.py"
       - "tools/docs/verify/verify_generated_navigation.py"
+      - "tools/knowledge/verify_review_runtime.py"
+      - "tools/knowledge/build_wave9_findings_ledger.py"
+      - "scripts/qa/run-review-runtime-gates.sh"
       - "scripts/qa/build_decision_graph.py"
       - "scripts/qa/spec-tools/**"
   push:
@@ -23,6 +26,9 @@ on:
       - "tools/docs/verify/verify-docs-policy.sh"
       - "tools/docs/verify/verify_temporal_integrity.py"
       - "tools/docs/verify/verify_generated_navigation.py"
+      - "tools/knowledge/verify_review_runtime.py"
+      - "tools/knowledge/build_wave9_findings_ledger.py"
+      - "scripts/qa/run-review-runtime-gates.sh"
       - "scripts/qa/build_decision_graph.py"
       - "scripts/qa/spec-tools/**"
 
@@ -55,3 +61,9 @@ jobs:
 
       - name: Verify generated navigation
         run: python3 tools/docs/verify/verify_generated_navigation.py
+
+      - name: Verify review/runtime semantics
+        run: |
+          export REVIEW_RUNTIME_RANGE="${DOCS_POLICY_RANGE}"
+          chmod +x scripts/qa/run-review-runtime-gates.sh
+          ./scripts/qa/run-review-runtime-gates.sh
