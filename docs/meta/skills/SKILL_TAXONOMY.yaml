@@ -1,0 +1,192 @@
+schema_version: 1
+categories:
+  review:
+    description: Review and truth-verification workflows.
+  release:
+    description: Release, promotion, and obligations workflows.
+  topology:
+    description: Domain, lane, hostname, and environment lookup workflows.
+  contracts:
+    description: Cross-repo contract and service identity workflows.
+  operations:
+    description: Operator procedure and runbook evidence workflows.
+  debugging:
+    description: Change triage and runtime-impact investigation workflows.
+  documentation-truth:
+    description: Canonical docs/spec truth and authority workflows.
+  wrapper-retirement:
+    description: Transitional path and compatibility retirement workflows.
+  cross-repo-impact:
+    description: Cross-repo impact and dependency workflows.
+skills:
+  docs-truth-review:
+    category: documentation-truth
+    title: Docs Truth Review
+    purpose: Determine canonical documentation truth and validate docs-policy compliance.
+    scope: canonical docs roots and generated doc governance surfaces
+    primary_repo: mereka-lms
+    secondary_repos: []
+    source_paths:
+      - { repo: mereka-lms, path: docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md }
+      - { repo: mereka-lms, path: docs/meta/standing-orders/README.md }
+      - { repo: mereka-lms, path: tools/docs/verify/verify-docs-policy.sh }
+      - { repo: mereka-lms, path: tools/docs/verify/verify-doc-catalog-governance.py }
+    command_refs:
+      - { repo: mereka-lms, command: bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD }
+      - { repo: mereka-lms, command: python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD }
+    required_reviewers: [docs, governance]
+    required_evidence_classes: [docs_policy, catalog_governance]
+    stability_level: stable
+  promotion-workflow-review:
+    category: release
+    title: Promotion Workflow Review
+    purpose: Review release/promotion semantics against canonical scripts and workflow inputs.
+    scope: promotion workflow docs, promote.sh semantics, workflow dispatch inputs
+    primary_repo: bbi-infrastructure
+    secondary_repos: [platform-control-plane]
+    source_paths:
+      - { repo: bbi-infrastructure, path: scripts/promote.sh }
+      - { repo: bbi-infrastructure, path: .github/workflows/promote-image.yml }
+      - { repo: bbi-infrastructure, path: config/domain-registry.yaml }
+      - { repo: platform-control-plane, path: contracts/release-contracts.yaml }
+    command_refs:
+      - { repo: bbi-infrastructure, command: bash scripts/promote.sh --help }
+      - { repo: bbi-infrastructure, command: bash scripts/promote.sh --dry-run }
+    required_reviewers: [platform, release]
+    required_evidence_classes: [release_contract, workflow_dispatch]
+    stability_level: stable
+  cross-repo-release-contract-review:
+    category: contracts
+    title: Cross-Repo Release Contract Review
+    purpose: Validate release-lane obligations across platform-control-plane and GitOps consumption.
+    scope: release contract registry and compiled promotion references
+    primary_repo: platform-control-plane
+    secondary_repos: [bbi-infrastructure, mereka-lms]
+    source_paths:
+      - { repo: platform-control-plane, path: contracts/release-contracts.yaml }
+      - { repo: platform-control-plane, path: contracts/service-identity-contract.yaml }
+      - { repo: bbi-infrastructure, path: .github/workflows/promote-image.yml }
+      - { repo: mereka-lms, path: docs/meta/standing-orders/GOVERNANCE_AGENT.md }
+    command_refs:
+      - { repo: platform-control-plane, command: ./scripts/plan-all.sh --validate-only }
+      - { repo: mereka-lms, command: bash tools/docs/verify/run-docs-world-class-gates.sh }
+    required_reviewers: [platform, docs]
+    required_evidence_classes: [release_obligations, cross_repo_alignment]
+    stability_level: evolving
+  service-identity-lookup:
+    category: contracts
+    title: Service Identity Lookup
+    purpose: Resolve canonical service ids, aliases, and owning repos.
+    scope: service identity and alias mapping
+    primary_repo: platform-control-plane
+    secondary_repos: [bbi-infrastructure, mereka-lms]
+    source_paths:
+      - { repo: platform-control-plane, path: contracts/service-identity-contract.yaml }
+      - { repo: bbi-infrastructure, path: config/domain-registry.yaml }
+      - { repo: bbi-infrastructure, path: config/domain-registry.yaml }
+    command_refs:
+      - { repo: platform-control-plane, command: ./scripts/plan-all.sh --validate-only }
+    required_reviewers: [platform]
+    required_evidence_classes: [service_identity]
+    stability_level: stable
+  topology-lookup:
+    category: topology
+    title: Topology Lookup
+    purpose: Resolve canonical lane, hostname, and bootstrap topology.
+    scope: domain registry, bootstrap lane topology, compiled topology references
+    primary_repo: bbi-infrastructure
+    secondary_repos: [mereka-lms]
+    source_paths:
+      - { repo: bbi-infrastructure, path: config/domain-registry.yaml }
+      - { repo: bbi-infrastructure, path: config/bootstrap-lane-topology.yaml }
+      - { repo: bbi-infrastructure, path: scripts/promote.sh }
+      - { repo: platform-control-plane, path: contracts/service-identity-contract.yaml }
+    command_refs:
+      - { repo: bbi-infrastructure, command: bash scripts/promote.sh --help }
+    required_reviewers: [platform]
+    required_evidence_classes: [topology_contract]
+    stability_level: stable
+  change-impact-triage:
+    category: cross-repo-impact
+    title: Change Impact Triage
+    purpose: Determine which repos and truth surfaces a change affects.
+    scope: cross-repo source map and agent aggregation packs
+    primary_repo: mereka-lms
+    secondary_repos: [bbi-infrastructure, platform-control-plane]
+    source_paths:
+      - { repo: mereka-lms, path: docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md }
+      - { repo: bbi-infrastructure, path: config/bootstrap-lane-topology.yaml }
+      - { repo: platform-control-plane, path: contracts/release-contracts.yaml }
+    command_refs:
+      - { repo: mereka-lms, command: bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD }
+      - { repo: platform-control-plane, command: ./scripts/plan-all.sh --validate-only }
+    required_reviewers: [docs, platform]
+    required_evidence_classes: [source_of_truth_map]
+    stability_level: evolving
+  wrapper-retirement-assessment:
+    category: wrapper-retirement
+    title: Wrapper Retirement Assessment
+    purpose: Assess whether transitional docs paths can be retired safely.
+    scope: transitional root stubs and residue scans
+    primary_repo: mereka-lms
+    secondary_repos: []
+    source_paths:
+      - { repo: mereka-lms, path: docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md }
+      - { repo: mereka-lms, path: tools/docs/verify/scan-doc-catalog-residue.py }
+      - { repo: mereka-lms, path: tools/docs/verify/report-nonstub-transitional-files.py }
+    command_refs:
+      - { repo: mereka-lms, command: python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue }
+      - { repo: mereka-lms, command: python3 tools/docs/verify/report-nonstub-transitional-files.py }
+    required_reviewers: [docs]
+    required_evidence_classes: [transitional_residue]
+    stability_level: evolving
+  release-obligations-review:
+    category: release
+    title: Release Obligations Review
+    purpose: Review required evidence and rollback expectations before promotion.
+    scope: release obligations and compiled promotion references
+    primary_repo: mereka-lms
+    secondary_repos: [bbi-infrastructure, platform-control-plane]
+    source_paths:
+      - { repo: mereka-lms, path: docs/meta/standing-orders/GOVERNANCE_AGENT.md }
+      - { repo: bbi-infrastructure, path: scripts/promote.sh }
+      - { repo: platform-control-plane, path: contracts/release-contracts.yaml }
+    command_refs:
+      - { repo: platform-control-plane, command: ./scripts/plan-all.sh --validate-only }
+    required_reviewers: [release, platform]
+    required_evidence_classes: [release_notes_diff, smoke_test_result, rollback_target_reference]
+    stability_level: stable
+  control-plane-validation:
+    category: review
+    title: Control Plane Validation
+    purpose: Run the canonical docs and cross-repo validation entrypoints.
+    scope: repo governance, contract front doors, and platform validation
+    primary_repo: mereka-lms
+    secondary_repos: [bbi-infrastructure, platform-control-plane]
+    source_paths:
+      - { repo: mereka-lms, path: tools/docs/verify/run-docs-world-class-gates.sh }
+      - { repo: bbi-infrastructure, path: scripts/promote.sh }
+      - { repo: platform-control-plane, path: scripts/plan-all.sh }
+    command_refs:
+      - { repo: mereka-lms, command: bash tools/docs/verify/run-docs-world-class-gates.sh }
+      - { repo: platform-control-plane, command: ./scripts/plan-all.sh --validate-only }
+    required_reviewers: [docs, platform]
+    required_evidence_classes: [validation_run]
+    stability_level: stable
+  runbook-evidence-triage:
+    category: operations
+    title: Runbook Evidence Triage
+    purpose: Determine the canonical runbook and evidence path for operator work.
+    scope: runbooks, standing orders, and release/runtime evidence entrypoints
+    primary_repo: mereka-lms
+    secondary_repos: [bbi-infrastructure]
+    source_paths:
+      - { repo: mereka-lms, path: docs/meta/standing-orders/README.md }
+      - { repo: mereka-lms, path: docs/ops/quickref/README.md }
+      - { repo: bbi-infrastructure, path: scripts/promote.sh }
+      - { repo: mereka-lms, path: docs/meta/templates/EVIDENCE_SCHEMA.md }
+    command_refs:
+      - { repo: mereka-lms, command: bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD }
+    required_reviewers: [ops, docs]
+    required_evidence_classes: [runbook_reference]
+    stability_level: evolving
