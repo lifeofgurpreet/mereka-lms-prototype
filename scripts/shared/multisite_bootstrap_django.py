@@ -120,7 +120,9 @@ def _load_shared_host_allowlist() -> set[str]:
         with open(allowlist_file, encoding="utf-8") as f:
             for line in f:
                 token = line.split("#", 1)[0].strip()
-                host = _extract_host(token)
+                if not token:
+                    continue
+                host = _extract_host(token.split()[0])
                 if host:
                     allowed.add(host)
     return allowed

@@ -9,8 +9,8 @@ source "${SCRIPT_DIR}/../shared/config.sh"
 
 ENVIRONMENT="${1:-prod}"
 shift || true
-if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "Usage: $0 [prod|dev] [--context CONTEXT] [--namespace NS]" >&2
+if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "staging" ]]; then
+  echo "Usage: $0 [prod|dev|staging] [--context CONTEXT] [--namespace NS]" >&2
   exit 1
 fi
 
@@ -50,10 +50,14 @@ done
 # Default contexts per environment (avoid accidentally checking dev values in prod DB).
 DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
 DEFAULT_DEV_CTX="kind-dev"
+DEFAULT_STAGING_CTX="rke2-nonprod"
 K8S_CONTEXT_EFFECTIVE="${CTX_OVERRIDE:-}"
 if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
   if [[ "$ENVIRONMENT" == "prod" ]]; then
     K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
+  elif [[ "$ENVIRONMENT" == "staging" ]]; then
+    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT_STAGING:-${K8S_CONTEXT:-$DEFAULT_STAGING_CTX}}"
+    NAMESPACE="${K8S_NAMESPACE_STAGING:-stg-mereka-lms}"
   else
     K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-$DEFAULT_DEV_CTX}}"
   fi
@@ -70,6 +74,10 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
     "${BIJI_DOMAIN}"
     "${SKILLOURFUTURE_DOMAIN}"
   )
+elif [[ "$ENVIRONMENT" == "staging" ]]; then
+  DOMAINS=(
+    "${STAGING_LMS_DOMAIN}"
+  )
 else
   DOMAINS=(
     "${DEV_LMS_DOMAIN}"
@@ -78,6 +86,8 @@ fi
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING:-1}"
+elif [[ "$ENVIRONMENT" == "staging" ]]; then
+  REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING:-0}"
 else
   REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING:-0}"
 fi
@@ -103,6 +113,9 @@ skill_mfe = os.environ.get("SKILLOURFUTURE_MFE_DOMAIN", f"apps.{skill}")
 dev = os.environ.get("DEV_LMS_DOMAIN", "academyv2.mereka.dev")
 dev_studio = os.environ.get("DEV_STUDIO_DOMAIN", f"studio.{dev}")
 dev_mfe = os.environ.get("DEV_MFE_DOMAIN", f"apps.{dev}")
+staging = os.environ.get("STAGING_LMS_DOMAIN", "staging.academyv2.mereka.io")
+staging_studio = os.environ.get("STAGING_STUDIO_DOMAIN", f"studio.{staging}")
+staging_mfe = os.environ.get("STAGING_MFE_DOMAIN", f"apps.{staging}")
 
 base = {"THEME_NAME": "mereka"}
 
@@ -134,6 +147,13 @@ expected = {
     "CMS_ROOT_URL": f"https://{dev_studio}",
     "MFE_BASE_URL": f"https://{dev_mfe}",
     "COURSE_ORG_FILTER": ["MEREKA"],
+  },
+  staging: {
+    **base,
+    "LMS_ROOT_URL": f"https://{staging}",
+    "CMS_ROOT_URL": f"https://{staging_studio}",
+    "MFE_BASE_URL": f"https://{staging_mfe}",
+    "COURSE_ORG_FILTER": ["BBI", "Mereka"],
   },
 }
 

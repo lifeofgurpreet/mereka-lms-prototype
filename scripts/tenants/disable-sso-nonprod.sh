@@ -1,24 +1,40 @@
 #!/usr/bin/env bash
-# disable-sso-nonprod.sh — Disable OAuth2/OIDC SSO providers on dev/staging sites.
+# disable-sso-nonprod.sh — Disable OAuth2/OIDC SSO providers on non-prod sites.
 #
-# Per closure-truths.json: dev and staging do NOT use Authentik SSO.
-# This script ensures no broken "Sign in with Mereka" button is visible.
+# Current contract:
+# - dev may disable Authentik SSO for local/nonprod recovery work
+# - staging is expected to keep Authentik OIDC enabled and requires an explicit override
 #
 # Usage:
-#   ./scripts/tenants/disable-sso-nonprod.sh [--env dev|staging|both]
+#   ./scripts/tenants/disable-sso-nonprod.sh [--env dev|staging]
+#
+# Safety:
+#   ALLOW_STAGING_SSO_DISABLE=1 is required before targeting staging.
 #
 # Repeatable: safe to run multiple times (idempotent).
 set -euo pipefail
 
+ALLOW_STAGING_SSO_DISABLE="${ALLOW_STAGING_SSO_DISABLE:-0}"
 ENV="${1:---env}"
-ENV_VAL="${2:-both}"
+ENV_VAL="${2:-dev}"
 
 if [[ "$ENV" == "--env" ]]; then
   ENV_VAL="${ENV_VAL}"
-elif [[ "$ENV" =~ ^(dev|staging|both)$ ]]; then
+elif [[ "$ENV" =~ ^(dev|staging)$ ]]; then
   ENV_VAL="$ENV"
 else
-  echo "Usage: $0 [--env dev|staging|both]"
+  echo "Usage: $0 [--env dev|staging]"
+  exit 1
+fi
+
+if [[ "$ALLOW_STAGING_SSO_DISABLE" != "0" && "$ALLOW_STAGING_SSO_DISABLE" != "1" ]]; then
+  echo "ALLOW_STAGING_SSO_DISABLE must be 0 or 1" >&2
+  exit 1
+fi
+
+if [[ "$ENV_VAL" == "staging" && "$ALLOW_STAGING_SSO_DISABLE" != "1" ]]; then
+  echo "Refusing to disable staging SSO without ALLOW_STAGING_SSO_DISABLE=1" >&2
+  echo "Staging is expected to keep Authentik OIDC enabled." >&2
   exit 1
 fi
 
@@ -47,14 +63,18 @@ run_in_namespace() {
     | grep -E "^(DISABLED|NO_CHANGE):" || echo "ERROR: command failed"
 }
 
-if [[ "$ENV_VAL" == "dev" || "$ENV_VAL" == "both" ]]; then
+if [[ "$ENV_VAL" == "dev" ]]; then
   run_in_namespace "mereka-lms-dev" "dev"
 fi
 
-if [[ "$ENV_VAL" == "staging" || "$ENV_VAL" == "both" ]]; then
+if [[ "$ENV_VAL" == "staging" ]]; then
   run_in_namespace "stg-mereka-lms" "staging"
 fi
 
 echo ""
 echo "Done. SSO providers disabled for ${ENV_VAL} environment(s)."
-echo "Record: SSO intentionally disabled on dev/staging per closure-truths.json"
+if [[ "$ENV_VAL" == "staging" ]]; then
+  echo "Record: staging override used with ALLOW_STAGING_SSO_DISABLE=1"
+else
+  echo "Record: dev SSO intentionally disabled for nonprod recovery work"
+fi

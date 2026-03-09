@@ -13,6 +13,7 @@
 #   ./scripts/qa/verify-org-role-ownership.sh
 #   ./scripts/qa/verify-org-role-ownership.sh prod
 #   ./scripts/qa/verify-org-role-ownership.sh dev --context kind-dev
+#   ./scripts/qa/verify-org-role-ownership.sh staging --context rke2-nonprod --namespace stg-mereka-lms
 #   STRICT=0 ./scripts/qa/verify-org-role-ownership.sh both
 set -euo pipefail
 
@@ -24,8 +25,8 @@ if [[ "$#" -gt 0 ]]; then
   shift
 fi
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
-  echo "Usage: $0 [prod|dev|both] [--context CONTEXT] [--namespace NS]" >&2
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" ]]; then
+  echo "Usage: $0 [prod|dev|staging|both] [--context CONTEXT] [--namespace NS]" >&2
   exit 1
 fi
 
@@ -68,6 +69,7 @@ done
 
 DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
 DEFAULT_DEV_CTX="kind-dev"
+DEFAULT_STAGING_CTX="rke2-nonprod"
 CLUSTER_CHECK_TIMEOUT="${CLUSTER_CHECK_TIMEOUT:-20}"
 require_bool_01 "STRICT" "$STRICT"
 
@@ -86,9 +88,13 @@ _cluster_reachable() {
 run_target() {
   local env_name="$1"
   local ctx="${CTX_OVERRIDE:-}"
+  local namespace="$NAMESPACE"
   if [[ -z "$ctx" ]]; then
     if [[ "$env_name" == "prod" ]]; then
       ctx="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
+    elif [[ "$env_name" == "staging" ]]; then
+      ctx="${K8S_CONTEXT_STAGING:-${K8S_CONTEXT:-$DEFAULT_STAGING_CTX}}"
+      namespace="${K8S_NAMESPACE_STAGING:-stg-mereka-lms}"
     else
       ctx="${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-$DEFAULT_DEV_CTX}}"
     fi
@@ -102,7 +108,7 @@ run_target() {
     return 0
   fi
 
-  kubectl --context "$ctx" -n "$NAMESPACE" exec -i deploy/lms -- \
+  kubectl --context "$ctx" -n "$namespace" exec -i deploy/lms -- \
     env STRICT="$STRICT" ADMINS_CSV="$ADMINS_CSV" ORGS_CSV="$ORGS_CSV" python - <<'PY'
 import os
 import sys
@@ -202,4 +208,7 @@ if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
 fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
   run_target "dev"
+fi
+if [[ "$ENV_SCOPE" == "staging" ]]; then
+  run_target "staging"
 fi

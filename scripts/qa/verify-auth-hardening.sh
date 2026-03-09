@@ -10,6 +10,7 @@
 # Usage:
 #   ./scripts/qa/verify-auth-hardening.sh
 #   ./scripts/qa/verify-auth-hardening.sh --env prod --mode all
+#   ./scripts/qa/verify-auth-hardening.sh --env staging --mode all
 #   CHECK_TIMEOUT_SECONDS=180 ./scripts/qa/verify-auth-hardening.sh --env dev --mode internal
 #
 set -euo pipefail
@@ -17,19 +18,21 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-ENV_SCOPE="both" # prod|dev|both
+ENV_SCOPE="both" # prod|dev|staging|both
 MODE="all"       # public|internal|all
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-300}"
 RUN_AUTHENTICATED_SSO_CANARY="${RUN_AUTHENTICATED_SSO_CANARY:-0}"
 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS="${AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS:-1}"
 CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
 CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-${K8S_NAMESPACE:-mereka-lms}}}"
+NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
 
 usage() {
   cat <<EOF
-Usage: $0 [--env prod|dev|both] [--mode public|internal|all]
+Usage: $0 [--env prod|dev|staging|both] [--mode public|internal|all]
 
 Env:
   CHECK_TIMEOUT_SECONDS=300  Per-check timeout in seconds (default: 300)
@@ -54,7 +57,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" ]]; then
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
@@ -132,8 +135,8 @@ esac
 
 log "verify-auth-hardening: env=$ENV_SCOPE mode=$MODE timeout=${CHECK_TIMEOUT_SECONDS}s"
 log "verify-auth-hardening: run_authenticated_sso_canary=$RUN_AUTHENTICATED_SSO_CANARY require_secrets=$AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS"
-log "verify-auth-hardening: context_prod=$CONTEXT_PROD context_dev=$CONTEXT_DEV"
-log "verify-auth-hardening: namespace_prod=$NAMESPACE_PROD namespace_dev=$NAMESPACE_DEV"
+log "verify-auth-hardening: context_prod=$CONTEXT_PROD context_dev=$CONTEXT_DEV context_staging=$CONTEXT_STAGING"
+log "verify-auth-hardening: namespace_prod=$NAMESPACE_PROD namespace_dev=$NAMESPACE_DEV namespace_staging=$NAMESPACE_STAGING"
 
 if [[ "$run_public" -eq 1 ]]; then
   run_check "repo: OIDC cookie middleware order guard" "$REPO_ROOT/scripts/qa/verify-oidc-cookie-middleware-order.sh"
@@ -142,6 +145,9 @@ if [[ "$run_public" -eq 1 ]]; then
   fi
   if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
     run_check "public auth surfaces (dev)" env STRICT_ADMIN_LOGIN_REDIRECT=1 "$REPO_ROOT/scripts/qa/verify-auth-surfaces.sh" dev
+  fi
+  if [[ "$ENV_SCOPE" == "staging" ]]; then
+    run_check "public auth surfaces (staging)" env STRICT_ADMIN_LOGIN_REDIRECT=1 "$REPO_ROOT/scripts/qa/verify-auth-surfaces.sh" staging
   fi
   if [[ "$RUN_AUTHENTICATED_SSO_CANARY" == "1" ]]; then
     run_check "authenticated SSO canary ($ENV_SCOPE)" \
@@ -168,6 +174,14 @@ if [[ "$run_internal" -eq 1 ]]; then
     run_check "OIDC provider configs (dev)" "$REPO_ROOT/scripts/qa/verify-oidc-provider-configs.sh" --env dev --context "$CONTEXT_DEV"
     run_check "CMS oauth secret present (dev)" "$REPO_ROOT/scripts/qa/verify-cms-oauth2-secret-present.sh" --context "$CONTEXT_DEV"
     run_check "OIDC user password state (dev)" "$REPO_ROOT/scripts/qa/verify-oidc-user-password-state.sh" --env dev
+  fi
+  if [[ "$ENV_SCOPE" == "staging" ]]; then
+    run_check "multisite config (staging)" env STRICT=1 "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" staging --context "$CONTEXT_STAGING" --namespace "$NAMESPACE_STAGING"
+    run_check "org role ownership (staging)" env STRICT=1 "$REPO_ROOT/scripts/qa/verify-org-role-ownership.sh" staging --context "$CONTEXT_STAGING" --namespace "$NAMESPACE_STAGING"
+    run_check "platform admin perms (staging)" "$REPO_ROOT/scripts/infra/ensure-platform-admins.sh" --context "$CONTEXT_STAGING" --namespace "$NAMESPACE_STAGING" --verify
+    run_check "OIDC provider configs (staging)" "$REPO_ROOT/scripts/qa/verify-oidc-provider-configs.sh" --env staging --context "$CONTEXT_STAGING" --namespace "$NAMESPACE_STAGING"
+    run_check "CMS oauth secret present (staging)" "$REPO_ROOT/scripts/qa/verify-cms-oauth2-secret-present.sh" --context "$CONTEXT_STAGING" --namespace "$NAMESPACE_STAGING"
+    run_check "OIDC user password state (staging)" "$REPO_ROOT/scripts/qa/verify-oidc-user-password-state.sh" --env staging
   fi
   if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
     run_check "hostname registry vs ingresses (prod)" \

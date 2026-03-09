@@ -10,6 +10,7 @@
 # Usage:
 #   ./scripts/qa/verify-oidc-user-password-state.sh --env prod
 #   ./scripts/qa/verify-oidc-user-password-state.sh --env both
+#   ./scripts/qa/verify-oidc-user-password-state.sh --env staging
 #   ./scripts/qa/verify-oidc-user-password-state.sh --env prod --fix
 set -euo pipefail
 
@@ -18,28 +19,32 @@ source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
 require_kubectl || exit 0
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-ENV_SCOPE="prod" # prod|dev|both
+ENV_SCOPE="prod" # prod|dev|staging|both
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
 NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
 NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
 CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
 CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 APPLY_FIX="${APPLY_FIX:-0}"
 
 usage() {
   cat <<'EOF' >&2
-Usage: ./scripts/qa/verify-oidc-user-password-state.sh [--env prod|dev|both] [--fix]
+Usage: ./scripts/qa/verify-oidc-user-password-state.sh [--env prod|dev|staging|both] [--fix]
 
 Options:
-  --env ENV      Target environment scope (prod|dev|both). Default: prod
+  --env ENV      Target environment scope (prod|dev|staging|both). Default: prod
   --fix          Remediate affected users by setting strong random passwords
 
 Env overrides:
   NAMESPACE      Kubernetes namespace (default: mereka-lms)
   NAMESPACE_PROD Kubernetes namespace for prod (default: NAMESPACE)
   NAMESPACE_DEV  Kubernetes namespace for dev (default: NAMESPACE)
+  NAMESPACE_STAGING Kubernetes namespace for staging (default: stg-mereka-lms)
   CONTEXT_PROD   Kubernetes context for prod
   CONTEXT_DEV    Kubernetes context for dev
+  CONTEXT_STAGING Kubernetes context for staging
   APPLY_FIX      0|1, equivalent to --fix
 EOF
 }
@@ -59,7 +64,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" ]]; then
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
@@ -159,6 +164,9 @@ if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
 fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
   run_env "dev" "$CONTEXT_DEV" "$NAMESPACE_DEV" || rc=1
+fi
+if [[ "$ENV_SCOPE" == "staging" ]]; then
+  run_env "staging" "$CONTEXT_STAGING" "$NAMESPACE_STAGING" || rc=1
 fi
 
 exit "$rc"

@@ -122,10 +122,10 @@ ALL_HOSTS=(
   "staging.academyv2.mereka.io"
   "staging.academy.biji-biji.com"
   "staging.skillourfuture.academy.mereka.io"
-  "studio.staging.academyv2.mereka.io"
+  "staging.studio.academyv2.mereka.io"
   "studio.staging.academy.biji-biji.com"
   "studio.staging.skillourfuture.academy.mereka.io"
-  "apps.staging.academyv2.mereka.io"
+  "staging.apps.academyv2.mereka.io"
   "apps.staging.academy.biji-biji.com"
   "apps.staging.skillourfuture.academy.mereka.io"
 )

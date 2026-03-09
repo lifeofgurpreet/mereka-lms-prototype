@@ -20,7 +20,7 @@ studio.academyv2.mereka.dev owner=infra-team expires=2026-09-30
 apps.academyv2.mereka.dev owner=infra-team expires=2026-09-30
 
 # --- staging lane ---
-# preview.staging.academyv2.mereka.io mirrors the dev pattern above for staging.
+# staging.preview.academyv2.mereka.io mirrors the dev pattern above for staging.
 # Same rationale: preview is read-only, no separate Studio/MFE needed.
-studio.staging.academyv2.mereka.io owner=infra-team expires=2026-09-30
-apps.staging.academyv2.mereka.io owner=infra-team expires=2026-09-30
+staging.studio.academyv2.mereka.io owner=infra-team expires=2026-09-30
+staging.apps.academyv2.mereka.io owner=infra-team expires=2026-09-30
