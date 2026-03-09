@@ -40,8 +40,8 @@
       "wrapper_path": "specs/mobile-apps-secrets-management_spec.md"
     },
     {
-      "canonical_exists": false,
-      "canonical_target": "specs/plans/paragon-design-tokens-migration_spec.md_",
+      "canonical_exists": true,
+      "canonical_target": "specs/plans/paragon-design-tokens-migration_spec.md",
       "live_reference_count": 7,
       "sample_live_references": [
         "docs/archive/FRONTEND_PHASE_B_PROMPT.md:338:| `specs/paragon-design-tokens-migration_spec.md` | Token format and migration phases |",
@@ -49,10 +49,10 @@
         "docs/archive/FRONTEND_PHASE_C_PROMPT.md:396:| `specs/paragon-design-tokens-migration_spec.md` | Spec acceptance criteria |",
         "docs/archive/FRONTEND_PHASE_C_PROMPT.md:5:**Specs**: `specs/paragon-design-tokens-migration_spec.md`, `specs/mfe-plugin-slots_spec.md`",
         "docs/archive/FRONTEND_PHASE_D_PROMPT.md:5:**Specs**: `specs/mfe-plugin-slots_spec.md`, `specs/paragon-design-tokens-migration_spec.md`",
-        "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md:10:| `specs/paragon-design-tokens-migration_spec.md` | `specs/plans/paragon-design-tokens-migration_spec.md_` | 45 | retain | Active downstream references still exist |",
+        "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md:10:| `specs/paragon-design-tokens-migration_spec.md` | `specs/plans/paragon-design-tokens-migration_spec.md` | 45 | retain | Active downstream references still exist |",
         "specs/catalog.json:907:      \"path\": \"specs/paragon-design-tokens-migration_spec.md\","
       ],
-      "status": "suspicious",
+      "status": "active_and_justified",
       "wrapper_lane": "normative",
       "wrapper_path": "specs/paragon-design-tokens-migration_spec.md"
     },
@@ -72,10 +72,10 @@
   ],
   "generated_by": "tools/knowledge/build_wrapper_retirement_report.py",
   "status_counts": {
-    "active_and_justified": 1,
+    "active_and_justified": 2,
     "active_but_suspicious": 3,
     "safe_to_retire": 0,
-    "suspicious": 1
+    "suspicious": 0
   },
   "wrapper_count": 5
 }

@@ -11,6 +11,7 @@ review_due: '2026-06-09'
 domain: frontend
 normativity: generated
 summary: Compatibility wrapper retained at the legacy root spec path; the live planning artifact now lives under specs/plans.
+superseded_by: specs/plans/paragon-design-tokens-migration_spec.md
 ---
 
 # Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline
