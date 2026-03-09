@@ -5,13 +5,14 @@
 
 ## Last completed batch
 - commit: pending current packet HEAD
-- scope: Wave 4 Packet E
+- scope: Wave 4 Packet F
 - validators run:
   - python3 tools/knowledge/report_knowledge_control_plane.py --repo-root .
   - python3 tools/knowledge/build_knowledge_catalog.py --check --repo-root .
   - python3 tools/knowledge/build_knowledge_graph.py --check --repo-root .
   - python3 tools/knowledge/build_wrapper_retirement_ledger.py --check --repo-root .
   - bash scripts/qa/run-knowledge-integrity-gates.sh
+  - github workflow contract check via docs-policy.yml
   - python3 tools/specs/report_spec_metadata_coverage.py --repo-root .
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
   - python3 tools/specs/verify_spec_taxonomy.py --repo-root .
@@ -26,12 +27,10 @@
 ## Current target batch
 - files:
   - docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md
-  - scripts/qa/run-knowledge-integrity-gates.sh
-  - docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md
+  - .github/workflows/docs-policy.yml
 - goal:
-  - add one merge-time knowledge integrity gate
-  - add one reviewer checklist for knowledge changes
-  - make the unified control plane self-defending at review time
+  - wire the Wave 4 knowledge gate into CI for docs/spec control-plane changes
+  - ensure knowledge tool and artifact edits trigger enforcement on PRs and pushes
 - stop condition:
   - validators pass and one commit is created
 
@@ -41,7 +40,7 @@
 - Kajabi/MCT remains normative until a new contradiction appears
 
 ## Open residue
-- optional CI wiring for the new knowledge gate is not started yet
+- no open Wave 4 packet residue
 
 ## Next queued batch
-- Packet F: optional CI integration
+- Wave 4 closeout / PR handoff

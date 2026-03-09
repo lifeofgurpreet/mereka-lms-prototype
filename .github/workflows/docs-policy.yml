@@ -5,6 +5,10 @@ on:
     paths:
       - "docs/**"
       - "specs/**"
+      - "tools/knowledge/**"
+      - "generated/graphs/**"
+      - "generated/catalogs/knowledge-catalog.json"
+      - "scripts/qa/run-knowledge-integrity-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -14,6 +18,10 @@ on:
     paths:
       - "docs/**"
       - "specs/**"
+      - "tools/knowledge/**"
+      - "generated/graphs/**"
+      - "generated/catalogs/knowledge-catalog.json"
+      - "scripts/qa/run-knowledge-integrity-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -43,3 +51,8 @@ jobs:
           fi
           chmod +x tools/docs/verify/verify-docs-policy.sh
           ./tools/docs/verify/verify-docs-policy.sh
+
+      - name: Verify unified knowledge control plane
+        run: |
+          chmod +x scripts/qa/run-knowledge-integrity-gates.sh
+          ./scripts/qa/run-knowledge-integrity-gates.sh
