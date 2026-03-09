@@ -100,6 +100,16 @@ def related_links(path: Path, lane: str, frontmatter: dict, repo_root: Path) -> 
     }
 
 
+def inferred_doc_type(lane: str, frontmatter: dict) -> str:
+    spec_class = str(inferred_spec_class(lane, frontmatter) or "")
+    normativity = str(inferred_normativity(lane, frontmatter) or "")
+    if spec_class == "generated" or normativity == "generated":
+        return "generated"
+    if lane in {"plan", "testplan"}:
+        return lane
+    return "spec"
+
+
 def build_catalog(repo_root: Path) -> dict:
     entries = []
 
@@ -110,7 +120,7 @@ def build_catalog(repo_root: Path) -> dict:
             {
                 "path": rel(path, repo_root),
                 "lane": lane,
-                "doc_type": lane if lane in {"plan", "testplan"} else "spec",
+                "doc_type": inferred_doc_type(lane, frontmatter),
                 "id": to_json_value(pick(frontmatter, "id")),
                 "title": to_json_value(pick(frontmatter, "title") or read_title(path)),
                 "status": to_json_value(pick(frontmatter, "status")),

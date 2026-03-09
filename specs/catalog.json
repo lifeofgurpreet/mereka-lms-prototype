@@ -431,7 +431,7 @@
     {
       "acceptance_criteria_count": 0,
       "created": "2026-03-09",
-      "doc_type": "spec",
+      "doc_type": "generated",
       "domain": "commerce",
       "id": "SPEC-COMPAT-EXTERNAL-REGISTRATION-HUBSPOT",
       "lane": "normative",
@@ -647,7 +647,7 @@
     {
       "acceptance_criteria_count": 0,
       "created": "2026-03-09",
-      "doc_type": "spec",
+      "doc_type": "generated",
       "domain": "frontend",
       "id": "SPEC-COMPAT-MOBILE-APPS-ENTERPRISE",
       "lane": "normative",
@@ -677,7 +677,7 @@
     {
       "acceptance_criteria_count": 0,
       "created": "2026-03-09",
-      "doc_type": "spec",
+      "doc_type": "generated",
       "domain": "platform",
       "id": "SPEC-COMPAT-MOBILE-APPS-SECRETS-MANAGEMENT",
       "lane": "normative",
@@ -889,7 +889,7 @@
     {
       "acceptance_criteria_count": 0,
       "created": "2026-03-09",
-      "doc_type": "spec",
+      "doc_type": "generated",
       "domain": "frontend",
       "id": "SPEC-PARAGON-DESIGN-TOKENS-MIGRATION",
       "lane": "normative",
@@ -2563,7 +2563,7 @@
     {
       "acceptance_criteria_count": 0,
       "created": "2026-03-09",
-      "doc_type": "spec",
+      "doc_type": "generated",
       "domain": "platform",
       "id": "SPEC-COMPAT-PROCTORING-INTEGRATION",
       "lane": "normative",

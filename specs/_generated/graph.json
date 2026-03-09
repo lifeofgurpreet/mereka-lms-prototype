@@ -2032,7 +2032,7 @@
       "owner": null,
       "path": "specs/plans/forum-service-migration_testplan.md",
       "spec_class": "plan",
-      "status": "completed",
+      "status": "active",
       "title": "Forum Service Migration - Test Plan"
     },
     {
@@ -2236,7 +2236,7 @@
       "owner": "engineering",
       "path": "specs/platform-middleware-custom-apps_spec.md",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "title": "Platform Middleware and Custom Apps"
     },
     {
@@ -2313,7 +2313,7 @@
       "owner": "engineering",
       "path": "specs/secrets-management_spec.md",
       "spec_class": "security",
-      "status": "completed",
+      "status": "active",
       "title": "Secrets Management Specification"
     },
     {
@@ -2324,7 +2324,7 @@
       "owner": "engineering",
       "path": "specs/slo-sla-service-level-management_spec.md",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "title": "SLO/SLA Definitions & Service Level Management"
     },
     {
@@ -2616,7 +2616,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration-resilience_spec.md",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "title": "Tutor Configuration Resilience and Patch Automation"
     },
     {
@@ -2627,7 +2627,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration_spec.md",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "title": "Tutor Configuration Lifecycle"
     },
     {

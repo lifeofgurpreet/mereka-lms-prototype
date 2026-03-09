@@ -4,8 +4,8 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending Packet D legacy status tail normalization HEAD
-- scope: Packet D
+- commit: pending Packet E generated surfaces truth pass HEAD
+- scope: Packet E
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
@@ -20,7 +20,7 @@
 - moved files:
   - none
 - wrapper files created:
-  - specs/paragon-design-tokens-migration_spec.md (compatibility wrapper kept generated-only)
+  - none
 - Kajabi/MCT:
   - left normative by explicit decision
   - specs/data-migrations-kajabi-mct_spec.md remains the normative contract
@@ -35,23 +35,29 @@
   - Packet D (tenancy/runtime status normalization)
   - Packet D (data/integration status normalization)
   - Packet D (legacy status tail normalization)
+  - Packet E (generated surfaces truth pass)
 - latest commit SHA:
   - pending current packet HEAD
 - open residue:
-  - none
+  - proposal specs still carrying legacy status values
 - next packet:
-  - Packet E (generated surfaces truth pass)
+  - Packet D (proposal legacy status tail)
 - stop conditions encountered:
   - none
 - decisions already locked:
   - Kajabi/MCT remains normative by explicit decision
 - metrics delta:
-  - before: legacy status hits = 5
+  - before: legacy status hits = 2
   - after: legacy status hits = 2
 - files normalized in this packet:
-  - specs/data-migrations-kajabi-mct_spec.md
-  - specs/ecommerce-purchase-gateway_spec.md
-  - specs/slo-sla-service-level-management_spec.md
+  - scripts/qa/spec-tools/build_spec_catalog.py
+  - scripts/qa/spec-tools/render_index.py
+  - specs/catalog.json
+  - specs/INDEX.md
+  - specs/_generated/graph.json
+  - specs/_generated/bundles/00-spec-hot-path.md
+  - specs/_generated/indexes/spec-read-first.md
+  - docs/_generated/bundles/60-docs-specs-contract.md
 - remaining legacy status hits:
   - specs/proposals/external-registration-hubspot_spec.md
   - specs/proposals/proctoring-integration_spec.md
@@ -59,9 +65,9 @@
 ## Current target batch
 - files: []
 - goal:
-  - Packet C mobile proposal residue completed
+  - Packet E completed
 - stop condition:
-  - waiting for next handoff
+  - validator set passes and packet commit is created
 
 ## Next queued batch
-- none queued
+- Packet D: proposal legacy status tail
