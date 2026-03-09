@@ -1608,7 +1608,7 @@
     {
       "id": "specs/external-registration-hubspot_spec.md",
       "lane": "normative",
-      "node_type": "spec",
+      "node_type": "generated",
       "normativity": "generated",
       "owner": "engineering",
       "path": "specs/external-registration-hubspot_spec.md",
@@ -1675,7 +1675,7 @@
     {
       "id": "specs/mobile-apps-enterprise_spec.md",
       "lane": "normative",
-      "node_type": "spec",
+      "node_type": "generated",
       "normativity": "generated",
       "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
@@ -1686,7 +1686,7 @@
     {
       "id": "specs/mobile-apps-secrets-management_spec.md",
       "lane": "normative",
-      "node_type": "spec",
+      "node_type": "generated",
       "normativity": "generated",
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
@@ -1743,7 +1743,7 @@
     {
       "id": "specs/paragon-design-tokens-migration_spec.md",
       "lane": "normative",
-      "node_type": "spec",
+      "node_type": "generated",
       "normativity": "generated",
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
@@ -2242,7 +2242,7 @@
     {
       "id": "specs/proctoring-integration_spec.md",
       "lane": "normative",
-      "node_type": "spec",
+      "node_type": "generated",
       "normativity": "generated",
       "owner": "engineering",
       "path": "specs/proctoring-integration_spec.md",
@@ -2258,7 +2258,7 @@
       "owner": "engineering",
       "path": "specs/proposals/external-registration-hubspot_spec.md",
       "spec_class": "proposal",
-      "status": "deferred",
+      "status": "draft",
       "title": "External Registration via HubSpot"
     },
     {
@@ -2291,7 +2291,7 @@
       "owner": "engineering",
       "path": "specs/proposals/proctoring-integration_spec.md",
       "spec_class": "proposal",
-      "status": "deferred",
+      "status": "draft",
       "title": "Proctoring Integration for Enterprise Open edX"
     },
     {
