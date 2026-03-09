@@ -275,7 +275,7 @@
     "last_verified_or_updated": null,
     "owner": "platform-team",
     "path": "adr/028-platform-sources-of-truth-and-control-planes.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "concept"
   },
   {
@@ -437,7 +437,7 @@
     "last_verified_or_updated": null,
     "owner": "platform-events",
     "path": "adr/rfc/034-event-contract-and-transport-independence.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "concept"
   },
   {

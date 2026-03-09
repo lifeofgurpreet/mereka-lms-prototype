@@ -34,7 +34,8 @@ If you are explaining or operating the current system, you are probably changing
 | Specs | `specs/**` | Normative intended behavior |
 | Plans | `specs/plans/**` or explicit planning docs | Implementation sequencing and execution planning |
 | Test plans | `specs/**` or plan-attached validation sections | Validation strategy |
-| Testmaps | generated output | Verification mapping derived from source annotations and spec metadata |
+| Spec catalog | `specs/_generated/spec-catalog.json` | Machine-readable index of the normative spec corpus |
+| Testmaps | generated output under `specs/_generated/testmaps/**` | Verification mapping derived from source annotations and spec metadata |
 | Docs | `docs/**` | Explanation, operation, history, evidence, and status |
 
 ## Hard rules
