@@ -297,7 +297,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/guides/onboarding/DEVELOPER_ONBOARDING.md | 163 | docs/LOCAL_DEVELOPMENT_GUIDE.md |
 | docs/guides/onboarding/DEVELOPER_ONBOARDING.md | 169 | docs/OPERATIONAL_STATUS.md |
 | docs/guides/onboarding/LOCAL_SETUP.md | 120 | scripts/migrations/kajabi/output/ |
-| docs/guides/onboarding/TEAM_SCALING_GUIDE.md | 584 | specs/_TEMPLATE.md |
+| docs/guides/onboarding/TEAM_SCALING_GUIDE.md | 584 | specs/templates/spec-template.md |
 | docs/guides/standards/DOCUMENTATION_STANDARDS.md | 501 | docs/archive/superseded/ |
 | docs/guides/standards/DOCUMENTATION_STANDARDS.md | 842 | docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md |
 | docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 127 | infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json |

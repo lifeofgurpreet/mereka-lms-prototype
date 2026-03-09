@@ -17,7 +17,7 @@ Determine if the work requires a spec, doc, or both:
 
 ## Step 2: Write
 
-1. Copy `specs/_TEMPLATE.md` to `specs/{feature-name}_spec.md`
+1. Copy `specs/templates/spec-template.md` to `specs/{feature-name}_spec.md`
 2. Fill in frontmatter (use `specdocs.config.yml` for valid values)
 3. Write Human Summary first (for humans)
 4. Write Agent Contract (for machines)
