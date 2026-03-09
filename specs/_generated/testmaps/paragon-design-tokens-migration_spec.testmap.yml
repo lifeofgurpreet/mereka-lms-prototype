@@ -372,7 +372,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: specs/paragon-design-tokens-migration_spec.md
+    runbook: specs/plans/paragon-design-tokens-migration_spec.md
     section: Cross-Spec Integration
     justification: Non-prefixed AC token is inherited from cross-spec text reference;
       tracked here to satisfy spec verifier ID parsing.

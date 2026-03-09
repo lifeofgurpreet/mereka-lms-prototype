@@ -16,7 +16,7 @@ ALLOWED_ROOT_FILES = {
     "_TEMPLATE.md",
     "brand-pack-schema.json",
 }
-ALLOWED_PLAN_FILES = {"README.md", "IMPLEMENTATION_ORDER.md", "manual_verifications.yaml"}
+ALLOWED_PLAN_FILES = {"README.md", "IMPLEMENTATION_ORDER.md", "manual_verifications.yaml", "paragon-design-tokens-migration_spec.md"}
 ALLOWED_PROPOSAL_FILES = {"README.md"}
 COMPATIBILITY_ROOT_FILES = {"IMPLEMENTATION_ORDER.md", "manual_verifications.yaml", "_TEMPLATE.md"}
 COMPATIBILITY_ROOT_FILES.add("brand-pack-schema.json")

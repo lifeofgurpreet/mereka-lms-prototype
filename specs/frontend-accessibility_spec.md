@@ -38,7 +38,7 @@ links:
     - "specs/branding-system_spec.md"
     - "specs/mfe-plugin-slots_spec.md"
     - "specs/design-tokens-system_spec.md"
-    - "specs/paragon-design-tokens-migration_spec.md"
+    - "specs/plans/paragon-design-tokens-migration_spec.md"
 ---
 
 # Human Summary

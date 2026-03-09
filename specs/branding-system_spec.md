@@ -42,7 +42,7 @@ links:
     - "specs/k8s-deployment_spec.md"
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/oep48-brand-package_spec.md"
-    - "specs/paragon-design-tokens-migration_spec.md"
+    - "specs/plans/paragon-design-tokens-migration_spec.md"
     - "specs/mfe-plugin-slots_spec.md"
 ---
 
@@ -79,7 +79,7 @@ Both are required and complementary.
 - Brand asset CDN optimization (assets served from static files)
 - Migration to OEP-48 brand package in current release (deferred per ADR-014) — **NOW PLANNED**: see `specs/oep48-brand-package_spec.md`
 - Full FPF slot migration in this release cycle (opportunistic per ADR-014, plugin-first section) — **NOW PLANNED**: see `specs/mfe-plugin-slots_spec.md`
-- JSON design token pipeline and PARAGON_THEME_URLS runtime theming — see `specs/paragon-design-tokens-migration_spec.md`
+- JSON design token pipeline and PARAGON_THEME_URLS runtime theming — see `specs/plans/paragon-design-tokens-migration_spec.md`
 
 ## Requirements
 

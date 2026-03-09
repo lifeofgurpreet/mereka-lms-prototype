@@ -334,7 +334,7 @@ entries:
   description: Compatibility placeholder for cross-spec AC-008 reference in AC-TKN-INT-002.
   verify:
   - type: manual
-    runbook: specs/paragon-design-tokens-migration_spec.md
+    runbook: specs/plans/paragon-design-tokens-migration_spec.md
     section: Cross-Spec Integration
     justification: Non-prefixed AC token is inherited from cross-spec text reference; tracked here to satisfy spec verifier ID parsing.
 - id: AC-025
