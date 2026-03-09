@@ -4,8 +4,8 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending Packet F proposal-path drift fix HEAD
-- scope: Packet F
+- commit: pending Packet D platform runtime status normalization HEAD
+- scope: Packet D
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
@@ -31,16 +31,25 @@
   - Packet C (mobile proposal residue)
   - Packet C (paragon residue normalization)
   - Packet F (mobile proposal-path drift normalization)
+  - Packet D (platform runtime status normalization)
 - latest commit SHA:
   - pending current packet HEAD
 - open residue:
   - none
 - next packet:
-  - Packet D (legacy status reduction cluster)
+  - Packet D (tenancy/runtime legacy status cluster)
 - stop conditions encountered:
   - none
 - decisions already locked:
   - Kajabi/MCT remains normative by explicit decision
+- metrics delta:
+  - before: legacy status hits = 17
+  - after: legacy status hits = 13
+- files normalized in this packet:
+  - specs/mongodb-atlas-integration_spec.md
+  - specs/platform-middleware-custom-apps_spec.md
+  - specs/secrets-management_spec.md
+  - specs/plans/platform-middleware-custom-apps_plan.md
 
 ## Current target batch
 - files: []

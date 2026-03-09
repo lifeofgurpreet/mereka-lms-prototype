@@ -1,7 +1,7 @@
 ---
 title: Secrets Management Specification
 type: feature_spec
-status: completed
+status: active
 owner: engineering
 vehicle: talent_platform
 version: 1.0.0

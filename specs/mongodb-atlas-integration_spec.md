@@ -2,7 +2,7 @@
 title: "MongoDB Atlas Integration"
 type: "feature_spec"
 id: "SPEC-PLT-003"
-status: "completed"
+status: "active"
 spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"
