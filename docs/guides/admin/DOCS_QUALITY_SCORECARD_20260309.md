@@ -1,8 +1,8 @@
 # Docs Quality Scorecard — 2026-03-09
 
-- Branch: `docs/docs-wave2b-final-scorecard-refresh`
-- Last updated: `2026-03-09T05:33:42Z`
-- Sync status: `origin/main` delta `0 1`
+- Branch: `docs/docs-wave2b-final-scorecard-refresh-2`
+- Last updated: `2026-03-09T05:41:43Z`
+- Sync status: `origin/main` delta `0 0`
 
 ## One-Week Scorecard Delta (Docs Compliance Gates)
 
@@ -11,7 +11,7 @@
 | `tools/docs/verify/verify-docs-foundation-gates.sh` | pass | foundation summary | policy=pass, repo_structure=pass, policy_content_consistency=pass, policy_content_alignment=pass |
 | `tools/docs/verify/verify-docs-policy.sh` | pass | foundation policy metrics | consistency_status=pass, consistency_detail=unknown, consistency_aligned=true, range=origin/main...HEAD, root_allowlist_violations=0, consistent=true, content_errors=0 |
 | `tools/docs/verify/verify-doc-command-ref-baseline.sh` | pass | baseline summary | baseline file integrity contract, baseline_enabled=true, baseline_entries=4 |
-| `tools/docs/verify/verify-doc-command-refs.sh` | pass | command refs summary | docs command/path references, files=6, candidates=77, inline=44, shell=33, md_link=0, md_autolink=0, md_refdef=0, missing_refs=0 |
+| `tools/docs/verify/verify-doc-command-refs.sh` | pass | command refs summary | docs command/path references, files=4, candidates=77, inline=44, shell=33, md_link=0, md_autolink=0, md_refdef=0, missing_refs=0 |
 | `tools/docs/verify/verify-doc-link-integrity.sh` | unknown | link integrity summary | files=0, broken_links=0 |
 | `tools/docs/verify/verify-docs-scorecard-recency.sh` | pass | scorecard recency summary | max-age-days contract |
 | `tools/docs/verify/verify-docs-scorecard-report-consistency.sh` | pass | consistency summary | filename/title date contract |
