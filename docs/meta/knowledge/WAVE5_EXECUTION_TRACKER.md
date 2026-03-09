@@ -4,27 +4,23 @@
 - docs/wave5-change-intelligence-runtime
 
 ## Latest branch head
-- a39d035fbe50538079a2531d84cf460e130cc9b5
+- 39911e35dcfcd7d4d0ddd5f50fa884cfbbde97e1
 
 ## Last completed batch
-- commit: a39d035fbe50538079a2531d84cf460e130cc9b5
-- scope: Wave 5 review hardening
+- commit: 39911e35dcfcd7d4d0ddd5f50fa884cfbbde97e1
+- scope: Wave 5 runtime hardening
 - validators run:
-  - python3 -c "yaml.safe_load(open('.github/workflows/docs-policy.yml').read())"
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
 
 ## Current target batch
 - files:
-  - docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md
-  - tools/knowledge/change_runtime.py
-  - tools/knowledge/verify_knowledge_runtime.py
+  - none
 - goal:
-  - classify Wave 5 control-plane code changes as support-truth changes instead of generated refreshes
-  - fail runtime verification when high or medium truth changes lack reviewer or evidence classification
+  - Wave 5 is complete and awaiting PR review
 - stop condition:
-  - runtime hardening patch is merged into the branch
+  - reviewer handoff starts
 
 ## Decisions already locked
 - Wave 4 topology stays intact
@@ -36,4 +32,4 @@
 - none
 
 ## Next queued batch
-- none after runtime hardening
+- none
