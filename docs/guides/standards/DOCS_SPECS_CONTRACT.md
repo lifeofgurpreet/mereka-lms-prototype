@@ -76,6 +76,11 @@ The repository still contains `specs/testmaps/**` as a frozen legacy path. Durin
 - generate active outputs only under `specs/_generated/testmaps/**`
 - update ADR-011 and supporting tooling so the filesystem matches the contract
 
+The practical reading rule is:
+
+- if you want the current generated verification map, read `specs/_generated/testmaps/**`
+- if you encounter `specs/testmaps/**`, treat it as legacy compatibility and do not extend it
+
 ## What belongs in docs
 
 Use `docs/**` for:

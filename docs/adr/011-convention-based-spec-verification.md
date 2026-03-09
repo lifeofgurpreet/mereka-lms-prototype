@@ -155,6 +155,14 @@ manual_verifications:
 5. **Update spec integrity gates**: `run-spec-integrity-gates.sh` now runs annotation-based tools
 6. **Compatibility reality**: the repository retained `specs/testmaps/` longer than intended. Wave 2B freezes that path as legacy compatibility only, with generated testmaps canonical under `specs/_generated/testmaps/`.
 
+### Current Path Contract
+
+After the Wave 2B convergence changes:
+
+- `specs/_generated/testmaps/**` is the active generated testmap surface
+- `specs/testmaps/**` is frozen legacy compatibility only
+- CI blocks new edits in the legacy path except the explanatory README
+
 ### Coverage Improvement
 
 | Metric | V2 (Testmap) | V3 (Annotation) | Change |
