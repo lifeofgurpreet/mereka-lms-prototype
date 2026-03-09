@@ -267,9 +267,9 @@
     },
     {
       "acceptance_criteria_count": 26,
-      "created": null,
-      "domain": null,
-      "id": null,
+      "created": "2026-02-10",
+      "domain": "platform",
+      "id": "SPEC-DR-001",
       "last_reviewed": "2026-02-10",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/disaster-recovery-business-continuity_spec.testmap.yml",
@@ -277,14 +277,18 @@
         "plan": "specs/plans/disaster-recovery-business-continuity_plan.md",
         "testplan": "specs/plans/disaster-recovery-business-continuity_testplan.md"
       },
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/disaster-recovery-business-continuity_spec.md",
-      "review_due": null,
-      "spec_class": "feature_spec",
+      "review_due": "2026-05-11",
+      "spec_class": "system",
       "status": "completed",
-      "summary": null,
-      "tags": [],
+      "summary": "Defines recovery objectives, backup coverage, restore validation, and continuity expectations for the platform.",
+      "tags": [
+        "runtime.recovery",
+        "runtime.backup",
+        "runtime.continuity"
+      ],
       "title": "Disaster Recovery & Business Continuity",
       "version": "1.0.0"
     },
@@ -717,9 +721,9 @@
     },
     {
       "acceptance_criteria_count": 31,
-      "created": null,
-      "domain": null,
-      "id": null,
+      "created": "2026-02-13",
+      "domain": "platform",
+      "id": "SPEC-OBS-001",
       "last_reviewed": "2026-02-13",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/observability-validation-requirements_spec.testmap.yml",
@@ -727,14 +731,18 @@
         "plan": null,
         "testplan": null
       },
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/observability-validation-requirements_spec.md",
-      "review_due": null,
-      "spec_class": "feature_spec",
+      "review_due": "2026-05-14",
+      "spec_class": "integration",
       "status": "draft",
-      "summary": null,
-      "tags": [],
+      "summary": "Defines the deployable validation contract for service monitors, alerts, recording rules, and observability compliance outputs.",
+      "tags": [
+        "observability.validation",
+        "observability.sli",
+        "observability.slo"
+      ],
       "title": "Observability Validation & SLI/SLO Compliance Requirements",
       "version": "1.0.0"
     },
@@ -882,9 +890,9 @@
     },
     {
       "acceptance_criteria_count": 53,
-      "created": null,
-      "domain": null,
-      "id": null,
+      "created": "2026-02-10",
+      "domain": "platform",
+      "id": "SPEC-SLO-001",
       "last_reviewed": "2026-02-10",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/slo-sla-service-level-management_spec.testmap.yml",
@@ -892,14 +900,18 @@
         "plan": "specs/plans/slo-sla-service-level-management_plan.md",
         "testplan": "specs/plans/slo-sla-service-level-management_testplan.md"
       },
-      "normativity": null,
+      "normativity": "normative",
       "owner": "engineering",
       "path": "specs/slo-sla-service-level-management_spec.md",
-      "review_due": null,
-      "spec_class": "feature_spec",
+      "review_due": "2026-05-11",
+      "spec_class": "integration",
       "status": "completed",
-      "summary": null,
-      "tags": [],
+      "summary": "Defines service-level indicators, objectives, agreements, and operational management expectations for the platform.",
+      "tags": [
+        "observability.slo",
+        "observability.sla",
+        "runtime.reliability"
+      ],
       "title": "SLO/SLA Definitions & Service Level Management",
       "version": "1.0.0"
     },

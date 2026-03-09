@@ -6,19 +6,35 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
 version: "1.0.0"
+id: "SPEC-DR-001"
+spec_class: "system"
+created: "2026-02-10"
+last_reviewed: "2026-02-10"
+review_due: "2026-05-11"
+domain: "platform"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces: []
+tags:
+  - "runtime.recovery"
+  - "runtime.backup"
+  - "runtime.continuity"
+summary: "Defines recovery objectives, backup coverage, restore validation, and continuity expectations for the platform."
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
   - "specs/secrets-management_spec.md"
 links:
   related_docs:
-    - "docs/operations/DISASTER_RECOVERY.md"
-    - "docs/runbooks/operations/VELERO_BACKUP_AUDIT.md"
+    - "docs/ops/runbooks/DISASTER_RECOVERY.md"
+    - "docs/ops/runbooks/VELERO_BACKUP_AUDIT.md"
     - "docs/reference/operations/BACKUP_COVERAGE_MATRIX.md"
-    - "docs/operations/DR_TEST_RESULTS.md"
-    - "docs/runbooks/operations/COURSE_DATA_RECOVERY.md"
-    - "docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
-    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
+    - "docs/status/readiness/DR_TEST_RESULTS.md"
+    - "docs/ops/runbooks/COURSE_DATA_RECOVERY.md"
+    - "docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+    - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
   related_specs:
     - "specs/k8s-deployment_spec.md"
     - "specs/secrets-management_spec.md"
