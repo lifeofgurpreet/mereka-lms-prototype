@@ -1,23 +1,41 @@
 ---
-title: "CRED-010: Credential Types & Mapping"
-type: "feature_spec"
-status: "approved"
-owner: "engineering"
-vehicle: "talent_platform"
-last_updated: "2026-02-14"
-version: "1.0.0"
+title: 'CRED-010: Credential Types & Mapping'
+type: feature_spec
+status: approved
+owner: engineering
+vehicle: talent_platform
+last_updated: '2026-02-14'
+version: 1.0.0
 depends_on:
-  - "specs/enterprise-microservices_spec.md"
-  - "specs/multi-tenancy-architecture_spec.md"
+- specs/enterprise-microservices_spec.md
+- specs/multi-tenancy-architecture_spec.md
 links:
   supersedes:
-    - "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED"
+  - specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED
   related_specs:
-    - "specs/cross-cutting-requirements_spec.md"
-    - "specs/verifiable-credentials-issuer_spec.md"
-    - "specs/verifiable-credentials-issuance_spec.md"
-    - "specs/verifiable-credentials-verification_spec.md"
-    - "specs/verifiable-credentials-ops_spec.md"
+  - specs/cross-cutting-requirements_spec.md
+  - specs/verifiable-credentials-issuer_spec.md
+  - specs/verifiable-credentials-issuance_spec.md
+  - specs/verifiable-credentials-verification_spec.md
+  - specs/verifiable-credentials-ops_spec.md
+id: SPEC-VC-TYPES-001
+spec_class: domain
+created: '2026-02-10'
+last_reviewed: '2026-03-09'
+review_due: '2026-06-09'
+domain: auth
+normativity: normative
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces:
+- schema:credential-types
+tags:
+- auth.verifiable-credentials
+- auth.types
+- platform.credentials
+summary: Defines the normative credential type system for Mereka LMS verifiable credentials,
+  including supported claim shapes, identifiers, and compatibility expectations.
 ---
 
 # CRED-010: Credential Types & Mapping
