@@ -4,7 +4,7 @@
     "canonical": 44,
     "compatibility": 5,
     "generated": 49,
-    "supporting": 1200
+    "supporting": 1201
   },
   "entries": [
     {
@@ -5640,6 +5640,15 @@
       "root": "docs",
       "status": "",
       "title": "Wave 4 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 4 Reviewer Checklist"
     },
     {
       "classification": "supporting",
@@ -14318,7 +14327,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1590,
+  "entry_count": 1591,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14328,7 +14337,7 @@
     "docs:generated": 1,
     "docs:index": 5,
     "docs:other": 142,
-    "docs:review": 45,
+    "docs:review": 46,
     "docs:runbook": 482,
     "specs:evidence": 43,
     "specs:generated": 48,
@@ -14340,7 +14349,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1367,
+    "docs": 1368,
     "specs": 223
   }
 }

@@ -5,13 +5,13 @@
 
 ## Last completed batch
 - commit: pending current packet HEAD
-- scope: Wave 4 Packet D
+- scope: Wave 4 Packet E
 - validators run:
   - python3 tools/knowledge/report_knowledge_control_plane.py --repo-root .
   - python3 tools/knowledge/build_knowledge_catalog.py --check --repo-root .
   - python3 tools/knowledge/build_knowledge_graph.py --check --repo-root .
-  - python3 tools/knowledge/build_wrapper_retirement_ledger.py --repo-root .
   - python3 tools/knowledge/build_wrapper_retirement_ledger.py --check --repo-root .
+  - bash scripts/qa/run-knowledge-integrity-gates.sh
   - python3 tools/specs/report_spec_metadata_coverage.py --repo-root .
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
   - python3 tools/specs/verify_spec_taxonomy.py --repo-root .
@@ -26,12 +26,12 @@
 ## Current target batch
 - files:
   - docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md
-  - tools/knowledge/build_wrapper_retirement_ledger.py
-  - docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md
+  - scripts/qa/run-knowledge-integrity-gates.sh
+  - docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md
 - goal:
-  - inventory all compatibility wrappers
-  - record canonical targets and non-generated live references
-  - distinguish retain vs retire-candidate wrappers
+  - add one merge-time knowledge integrity gate
+  - add one reviewer checklist for knowledge changes
+  - make the unified control plane self-defending at review time
 - stop condition:
   - validators pass and one commit is created
 
@@ -41,8 +41,7 @@
 - Kajabi/MCT remains normative until a new contradiction appears
 
 ## Open residue
-- wrapper retirement ledger not started yet
-- merge-time governance is not started yet
+- optional CI wiring for the new knowledge gate is not started yet
 
 ## Next queued batch
-- Packet E: merge-time governance
+- Packet F: optional CI integration

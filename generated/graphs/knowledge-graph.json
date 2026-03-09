@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4770,
+  "edge_count": 4773,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3596,6 +3596,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md"
     },
     {
       "edge_type": "classifies",
@@ -11081,6 +11086,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md"
     },
     {
       "edge_type": "contains",
@@ -19070,6 +19080,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
       "target": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md"
     },
     {
@@ -23854,7 +23869,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1614,
+  "node_count": 1615,
   "nodes": [
     {
       "id": "classification:archival",
@@ -30777,6 +30792,17 @@
       "root": "docs",
       "status": "",
       "title": "Wave 4 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 4 Reviewer Checklist"
     },
     {
       "classification": "supporting",
