@@ -214,16 +214,12 @@ jobs:
 
       - name: Verify docs scorecard generation drift
         if: env.DOCS_SCORECARD_RELEVANT == 'true'
-        env:
-          # Drift checks tree truth only — unset diff-scoped variables
-          # so sub-scripts don't inherit PR-range context.
-          DOCS_POLICY_RANGE: ""
-          GITHUB_EVENT_BEFORE: ""
         run: |
           set -euo pipefail
           chmod +x tools/docs/verify/verify-docs-scorecard-generation-drift.sh
           DOCS_SCORECARD_DRIFT_SUMMARY="${RUNNER_TEMP}/docs-scorecard-drift-summary.json"
           tools/docs/verify/verify-docs-scorecard-generation-drift.sh \
+            --policy-range "$DOCS_POLICY_RANGE" \
             --summary-json "$DOCS_SCORECARD_DRIFT_SUMMARY"
           python3 docs/qa/helpers/summarize-scorecard-drift.py "$DOCS_SCORECARD_DRIFT_SUMMARY" "$GITHUB_STEP_SUMMARY"
 
