@@ -20,6 +20,19 @@ Use this directory for the machine-readable collapse inventories that drive tran
 - reviewer traceability during root-collapse changes
 - proof that transitional roots were collapsed intentionally rather than ad hoc
 
+## How to use the maps
+
+1. Pick the losing root you are reviewing.
+2. Read the matching collapse map before moving or stubbing anything.
+3. Confirm the entry for the file names the destination root, destination path, and action.
+4. Only then touch the canonical file and leave the transitional stub behind.
+
+## Review standard
+
+- A collapse map should be complete enough that a reviewer can explain every move without re-deriving the routing logic.
+- If a live file in a losing root is not represented here, the convergence work is incomplete.
+- If a map entry still points to a losing root, fix the inventory before moving files.
+
 ## What this directory is not
 
 - Not the authority resolver. Use [`../../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](../../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md).

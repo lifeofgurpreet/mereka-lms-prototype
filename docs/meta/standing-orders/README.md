@@ -11,6 +11,15 @@ This directory contains active standing orders for recurring contributor and age
 | Check governance-review expectations | `GOVERNANCE_AGENT.md` |
 | Check LMS/platform lane expectations | `LMS_AGENT.md` |
 
+## Use this root when
+
+| Situation | Use this root? | Why |
+|---|---|---|
+| You need recurring instructions for a lane or role | Yes | Standing orders are stable operating expectations for repeat work |
+| You need a one-off migration or handoff note | No | That belongs in `docs/meta/docs-program/**` or `docs/status/**` |
+| You need runtime operator steps | No | Use `docs/ops/**` for runbooks and procedures |
+| You need architecture law or source-of-truth routing | No | Use `docs/concepts/architecture/**` |
+
 ## Use this directory for
 
 - lane-specific standing orders
@@ -22,3 +31,9 @@ This directory contains active standing orders for recurring contributor and age
 - Not a substitute for the architecture resolver or charter.
 - Not the place for active docs program tracking. Use `docs/meta/docs-program/**`.
 - Not the place for runtime operational runbooks. Use `docs/ops/**`.
+
+## Review standard
+
+- A standing order here should stay durable across multiple sessions, not narrate a single delivery wave.
+- It should assign expectations, ownership, and boundaries clearly enough that an agent can act without guessing.
+- If the content starts to read like a checklist for one incident or one PR, it belongs elsewhere.

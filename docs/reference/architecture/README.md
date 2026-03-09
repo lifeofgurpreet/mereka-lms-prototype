@@ -21,6 +21,14 @@ Use this root when you need factual architecture reference: contracts, inventori
 - component, plugin, token, and module reference material
 - architecture audits that are still used as current reference
 
+## Common contributor routes
+
+| Question | Start here | If that is not enough |
+|---|---|---|
+| "What does the runtime or integration contract look like?" | [`API_CONTRACTS.md`](API_CONTRACTS.md) or [`DEPLOYMENT_CONTRACT.md`](DEPLOYMENT_CONTRACT.md) | Move to `docs/concepts/architecture/**` for governing standards |
+| "Which frontend surface or module owns this behavior?" | [`MFE_COMPLETE_LIST.md`](MFE_COMPLETE_LIST.md) or [`MFE_RUNTIME_CONFIG.md`](MFE_RUNTIME_CONFIG.md) | Move to `docs/ops/**` if you need execution steps |
+| "Is this still just an audit, or is it the current status?" | The relevant audit here | Move to `docs/status/**` if you need current rollout posture |
+
 ## Platform and runtime contracts
 
 - [`API_CONTRACTS.md`](API_CONTRACTS.md) for service and API contract reference
@@ -66,3 +74,9 @@ Use this root when you need factual architecture reference: contracts, inventori
 1. Use this root to answer factual questions about structure, contracts, or inventories.
 2. If you need to know what rule governs the system, leave this root and go to [`../../concepts/architecture/README.md`](../../concepts/architecture/README.md) or [`../../policies/README.md`](../../policies/README.md).
 3. If you need execution steps, leave this root and go to [`../../ops/README.md`](../../ops/README.md).
+
+## Review standard
+
+- A file here should help answer “what exists?” or “what is the current contract?” quickly.
+- If a document starts prescribing enduring technical law, move that rule to `docs/concepts/architecture/**` or `docs/policies/**`.
+- If a document starts reading like a playbook, move it to `docs/ops/**`.

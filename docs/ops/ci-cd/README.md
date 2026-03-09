@@ -13,6 +13,15 @@ This directory contains the canonical operator-facing CI/CD surface for build, r
 | Check CI cost or throughput posture | [`GITHUB_ACTIONS_COST_MONITORING.md`](GITHUB_ACTIONS_COST_MONITORING.md) | [`COST_OPTIMIZATION.md`](COST_OPTIMIZATION.md) |
 | Check whether a CI/CD item is active status rather than enduring guidance | [`../../status/active/README.md`](../../status/active/README.md) | The relevant active status document |
 
+## Common operator routes
+
+| Question | Start here | Escalate to |
+|---|---|---|
+| "Why did the build or release system fail?" | [`CI_CD_RUNNERS.md`](CI_CD_RUNNERS.md) or [`TUTOR_CONFIG_CI.md`](TUTOR_CONFIG_CI.md) | [`../runbooks/README.md`](../runbooks/README.md) |
+| "Which rule governs this pipeline change?" | [`../../policies/operations/README.md`](../../policies/operations/README.md) | The specific policy doc under `docs/policies/operations/**` |
+| "Where is the current release/problem status?" | [`../../status/active/README.md`](../../status/active/README.md) | The specific active status note |
+| "Where is the evidence that a pipeline or release claim is true?" | [`../../evidence/INDEX.md`](../../evidence/INDEX.md) | The specific evidence pack |
+
 ## Use this directory for
 
 - build and runner operating references
@@ -47,3 +56,9 @@ This directory contains the canonical operator-facing CI/CD surface for build, r
 - Not the source of CI/CD policy rules. Use `docs/policies/operations/**` for rules and constraints.
 - Not the place for active release/status reporting. Use `docs/status/**`.
 - Not the place for factual runtime inventories. Use `docs/reference/operations/**`.
+
+## Review standard
+
+- A CI/CD doc here should help an operator act, verify, or troubleshoot.
+- If the file mainly defines a durable rule, move or rewrite it under `docs/policies/**`.
+- If the file mainly reports the current state of a rollout or initiative, move it to `docs/status/**`.

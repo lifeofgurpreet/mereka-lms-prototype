@@ -21,6 +21,14 @@ Use this root when you need the rules that govern how operators are allowed to r
 - ownership and operational boundary rules
 - readiness and exception policy that governs operator behavior
 
+## Common reviewer routes
+
+| Question | Start here | Move elsewhere when... |
+|---|---|---|
+| "What is allowed or forbidden operationally?" | The relevant policy in this root | You need the actual procedure, then use `docs/ops/**` |
+| "Is this a policy or a reference inventory?" | This root | If it is mostly lookup data, move to `docs/reference/operations/**` |
+| "Is this still active status rather than durable rule?" | This root | If it is current posture, use `docs/status/**` |
+
 ## Deployment and platform safety
 
 - [`ALLOWED_ACTIONS_POLICY.md`](ALLOWED_ACTIONS_POLICY.md) for operator action boundaries
@@ -66,3 +74,9 @@ Use this root when you need the rules that govern how operators are allowed to r
 1. Start here when the question is “what is allowed?” or “what rule governs this operation?”
 2. If you already know the rule and need execution steps, leave this root and move to [`../../ops/runbooks/README.md`](../../ops/runbooks/README.md).
 3. If you need factual inventories or contracts rather than rules, leave this root and move to [`../../reference/operations/README.md`](../../reference/operations/README.md).
+
+## Review standard
+
+- A file here should constrain operator behavior, not narrate the current state of the platform.
+- If the document is mostly a checklist or sequence of steps, move it to `docs/ops/**`.
+- If the document mainly reports current blockers or readiness, move it to `docs/status/**`.
