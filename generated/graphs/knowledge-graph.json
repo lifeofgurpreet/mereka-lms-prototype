@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4800,
+  "edge_count": 4803,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3506,6 +3506,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/contracts/INFRA_CROSSWALK.md"
     },
     {
       "edge_type": "classifies",
@@ -11066,6 +11071,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/contracts/INFRA_CROSSWALK.md"
     },
     {
       "edge_type": "contains",
@@ -18470,6 +18480,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/contracts/INFRA_CROSSWALK.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
     },
     {
@@ -24004,7 +24019,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1623,
+  "node_count": 1624,
   "nodes": [
     {
       "id": "classification:archival",
@@ -30778,6 +30793,17 @@
       "root": "docs",
       "status": "",
       "title": "ENVIRONMENT_SURFACES"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/contracts/INFRA_CROSSWALK.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/contracts/INFRA_CROSSWALK.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Infra Crosswalk"
     },
     {
       "classification": "supporting",

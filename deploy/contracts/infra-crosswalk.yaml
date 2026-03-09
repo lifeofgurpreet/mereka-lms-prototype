@@ -1,0 +1,134 @@
+version: 1
+crosswalk:
+  openedx:
+    source_contract: deploy/contracts/service-contracts/openedx.yaml
+    deployment_repo: bbi-infrastructure
+    app_repo_surfaces:
+      - .github/workflows/ci.yml
+      - docs/adr/021-openedx-tutor-methodology.md
+      - specs/k8s-deployment_spec.md
+      - specs/secrets-management_spec.md
+    infra_counterpart:
+      status: partial
+      overlays:
+        dev: apps/mereka-lms/overlays/dev/
+        staging: apps/mereka-lms/overlays/staging/
+        prod: apps/mereka-lms/overlays/prod/
+      argocd_surfaces:
+        - apps/mereka-lms/
+      notes:
+        - deploy/k8s/overlays/rke2-nonprod in this repo is deprecated in favor of bbi-infrastructure dev overlays
+        - deploy/k8s/overlays/production in this repo is deprecated in favor of bbi-infrastructure prod overlays
+      unknowns:
+        - exact ArgoCD application or ApplicationSet filenames are not declared in this repo
+        - exact secret store resource paths are not declared in this repo
+  mfe:
+    source_contract: deploy/contracts/service-contracts/mfe.yaml
+    deployment_repo: bbi-infrastructure
+    app_repo_surfaces:
+      - .github/workflows/build-enterprise-mfe.yml
+      - .github/workflows/smoke-authn-mfe.yml
+      - docs/reference/architecture/MFE_RUNTIME_CONFIG.md
+      - docs/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
+    infra_counterpart:
+      status: partial
+      overlays:
+        dev: apps/mereka-lms/overlays/dev/
+        staging: apps/mereka-lms/overlays/staging/
+        prod: apps/mereka-lms/overlays/prod/
+      argocd_surfaces:
+        - apps/mereka-lms/
+      notes:
+        - MFE image pin and ingress host updates are expected to land in GitOps overlays, not in app-repo production overlays
+      unknowns:
+        - exact ingress object, edge route, or CDN-related files are not declared in this repo
+  purchase-gateway:
+    source_contract: deploy/contracts/service-contracts/purchase-gateway.yaml
+    deployment_repo: bbi-infrastructure
+    app_repo_surfaces:
+      - .github/workflows/build-purchase-gateway.yml
+      - specs/ecommerce-purchase-gateway_spec.md
+      - docs/ops/runbooks/PURCHASE_GATEWAY_K8S.md
+      - docs/ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md
+    infra_counterpart:
+      status: partial
+      overlays:
+        dev: apps/mereka-lms/overlays/dev/
+        prod: apps/mereka-lms/overlays/prod/
+      argocd_surfaces:
+        - apps/mereka-lms/
+      notes:
+        - production rollout requires GitOps overlay image pinning and ingress realization
+      unknowns:
+        - Stripe secret materialization path is not declared in this repo
+        - exact purchase-gateway ingress and service object files are not declared in this repo
+  enterprise-services:
+    source_contract: deploy/contracts/service-contracts/enterprise-services.yaml
+    deployment_repo: bbi-infrastructure
+    app_repo_surfaces:
+      - specs/enterprise-microservices_spec.md
+      - docs/concepts/architecture/enterprise-services-overview.md
+      - docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
+    infra_counterpart:
+      status: partial
+      overlays:
+        dev: apps/mereka-lms/overlays/dev/
+        prod: apps/mereka-lms/overlays/prod/
+      argocd_surfaces:
+        - apps/mereka-lms/
+      notes:
+        - Enterprise service rollout remains coupled to shared Open edX deployment surfaces unless explicitly split in GitOps
+      unknowns:
+        - service-specific overlay decomposition for enterprise-catalog, enterprise-access, and related services is not declared in this repo
+  runner-ci:
+    source_contract: deploy/contracts/service-contracts/runner-ci.yaml
+    deployment_repo: bbi-infrastructure
+    app_repo_surfaces:
+      - .github/workflows/ci.yml
+      - docs/operations/CI_RUNNER_POLICY.md
+      - docs/ops/runbooks/CI_CD_RUNBOOK.md
+      - scripts/infra/release-openedx-gitops.sh
+      - scripts/infra/sync-gitops-prod-image-tags.sh
+    infra_counterpart:
+      status: partial
+      overlays:
+        prod: apps/mereka-lms/overlays/prod/
+      argocd_surfaces:
+        - none
+      notes:
+        - runner and release automation are cross-repo because release scripts write into bbi-infrastructure
+      unknowns:
+        - exact self-hosted runner host configuration and secret provisioning files are not declared in this repo
+  observability-runtime:
+    source_contract: deploy/contracts/service-contracts/observability-runtime.yaml
+    deployment_repo: bbi-infrastructure
+    app_repo_surfaces:
+      - specs/observability-stack_spec.md
+      - docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md
+      - docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
+      - docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md
+    infra_counterpart:
+      status: partial
+      overlays:
+        dev: apps/mereka-lms/overlays/dev/
+        prod: apps/mereka-lms/overlays/prod/
+      argocd_surfaces:
+        - apps/mereka-lms/
+        - platform monitoring applications
+      notes:
+        - observability is a mixed ownership surface: app repo owns contracts and runbooks, infra repo owns realization
+      unknowns:
+        - exact monitoring and alerting application paths in bbi-infrastructure are not declared in this repo
+
+repo_boundary_truth:
+  deprecated_app_repo_overlays:
+    - deploy/k8s/overlays/rke2-nonprod/
+    - deploy/k8s/overlays/staging/
+    - deploy/k8s/overlays/production/
+  live_gitops_overlay_roots:
+    dev: bbi-infrastructure/apps/mereka-lms/overlays/dev/
+    staging: bbi-infrastructure/apps/mereka-lms/overlays/staging/
+    prod: bbi-infrastructure/apps/mereka-lms/overlays/prod/
+  boundary_rules:
+    - GitOps may own env-specific values, image pins, ingress/TLS, secret store wiring, resource sizing, and ArgoCD applications
+    - GitOps must not redefine runtime Python logic or application behavior

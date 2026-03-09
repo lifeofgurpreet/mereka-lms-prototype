@@ -1,7 +1,7 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `289`
+- Changes classified: `295`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
@@ -11,7 +11,7 @@
 - `archival_only_change`: 7
 - `docs_support_change`: 95
 - `evidence_only_change`: 3
-- `generated_surface_refresh`: 100
+- `generated_surface_refresh`: 106
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -25,7 +25,7 @@
 - `generated`: 8
 - `index`: 1
 - `normative`: 39
-- `other`: 110
+- `other`: 116
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -50,16 +50,16 @@
 ## Safe To Triage Later
 - `.github/workflows/ci.yml` [generated_surface_refresh]
 - `Makefile` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/enterprise-services.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/mfe.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/observability-runtime.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/openedx.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/purchase-gateway.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/runner-ci.yaml` [generated_surface_refresh]
 - `docs/_generated/bundles/60-docs-specs-contract.md` [generated_surface_refresh]
 - `docs/archive/FRONTEND_PHASE_B_PROMPT.md` [archival_only_change]
 - `docs/archive/FRONTEND_PHASE_C_PROMPT.md` [archival_only_change]
 - `docs/archive/FRONTEND_PHASE_D_PROMPT.md` [archival_only_change]
-- `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md` [archival_only_change]
-- `docs/archive/superseded/ROADMAP.md` [archival_only_change]
-- `docs/archive/superseded/runbooks/external-registration-runbook.md` [archival_only_change]
-- `docs/archive/superseded/runbooks/proctoring-operations-runbook.md` [archival_only_change]
-- `docs/meta/docs-program/WAVE3_CLOSEOUT.md` [reviewer_handoff_only]
-- `docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md` [reviewer_handoff_only]
 
 ## Required Evidence And Follow-Up
 - status update: `.github/workflows/docs-policy.yml`, `docs/adr/011-convention-based-spec-verification.md`, `docs/adr/013-studio-sso-bypass-middleware.md`, +174 more
@@ -73,6 +73,12 @@
 - `.github/workflows/ci.yml`
 - `.github/workflows/docs-policy.yml`
 - `Makefile`
+- `deploy/contracts/service-contracts/enterprise-services.yaml`
+- `deploy/contracts/service-contracts/mfe.yaml`
+- `deploy/contracts/service-contracts/observability-runtime.yaml`
+- `deploy/contracts/service-contracts/openedx.yaml`
+- `deploy/contracts/service-contracts/purchase-gateway.yaml`
+- `deploy/contracts/service-contracts/runner-ci.yaml`
 - `docs/_generated/bundles/60-docs-specs-contract.md`
 - `docs/adr/011-convention-based-spec-verification.md`
 - `docs/adr/013-studio-sso-bypass-middleware.md`
@@ -84,12 +90,6 @@
 - `docs/adr/029-identity-session-and-domain-boundary-strategy.md`
 - `docs/adr/030-feature-flag-and-rollout-lifecycle.md`
 - `docs/adr/031-deprecation-and-removal-policy.md`
-- `docs/adr/032-data-governance-pii-retention-and-deletion.md`
-- `docs/adr/033-tenant-lifecycle-contract.md`
-- `docs/adr/manifest.yaml`
-- `docs/adr/rfc/034-event-contract-and-transport-independence.md`
-- `docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md`
-- `docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md`
 
 ## Owner Teams By Change Class
 - `normative_contract_change` -> `architecture`
@@ -202,6 +202,12 @@
 - `.github/workflows/ci.yml`
 - `.github/workflows/docs-policy.yml`
 - `Makefile`
+- `deploy/contracts/service-contracts/enterprise-services.yaml`
+- `deploy/contracts/service-contracts/mfe.yaml`
+- `deploy/contracts/service-contracts/observability-runtime.yaml`
+- `deploy/contracts/service-contracts/openedx.yaml`
+- `deploy/contracts/service-contracts/purchase-gateway.yaml`
+- `deploy/contracts/service-contracts/runner-ci.yaml`
 - `docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md`
 - `docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml`
 - `docs/meta/contracts/ENVIRONMENT_SURFACES.yaml`
@@ -213,13 +219,7 @@
 - `docs/meta/knowledge/OWNERSHIP_MAP.yaml`
 - `docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md`
 - `docs/meta/knowledge/REVIEW_RULES.yaml`
-- `docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md`
-- `docs/status/readiness/PROCTORING_IMPLEMENTATION_READINESS.md`
-- `generated/adr-bundles/00-foundations.md`
-- `generated/adr-bundles/10-auth-and-tenancy.md`
-- `generated/adr-bundles/50-commerce.md`
-- `generated/catalogs/docs-catalog.json`
-- `... 90 more`
+- `... 96 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`

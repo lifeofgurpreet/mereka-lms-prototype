@@ -3,7 +3,7 @@
     "archival": 292,
     "canonical": 44,
     "generated": 49,
-    "supporting": 1215
+    "supporting": 1216
   },
   "entries": [
     {
@@ -5522,6 +5522,15 @@
       "root": "docs",
       "status": "",
       "title": "ENVIRONMENT_SURFACES"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/INFRA_CROSSWALK.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Infra Crosswalk"
     },
     {
       "classification": "supporting",
@@ -14407,7 +14416,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1600,
+  "entry_count": 1601,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14416,7 +14425,7 @@
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 154,
+    "docs:other": 155,
     "docs:review": 48,
     "docs:runbook": 482,
     "specs:evidence": 43,
@@ -14429,7 +14438,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1382,
+    "docs": 1383,
     "specs": 218
   }
 }

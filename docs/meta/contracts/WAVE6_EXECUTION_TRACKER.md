@@ -4,13 +4,13 @@
 - docs/wave6-cross-repo-contract-runtime
 
 ## Latest substantive packet head
-- Packet B commit on docs/wave6-cross-repo-contract-runtime
+- Packet C commit on docs/wave6-cross-repo-contract-runtime
 
 ## Last completed batch
-- commit: Packet B commit on docs/wave6-cross-repo-contract-runtime
-- scope: Packet B service contract inventory
+- commit: Packet C commit on docs/wave6-cross-repo-contract-runtime
+- scope: Packet C infra crosswalk
 - validators run:
-  - Packet B service-contract schema consistency check
+  - Packet C service-to-crosswalk coverage check
   - bash scripts/qa/run-knowledge-runtime-gates.sh
   - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
 - result: complete
@@ -18,16 +18,19 @@
 ## Packets completed
 - Packet A: contract schema
 - Packet B: service contract inventory
+- Packet C: infra crosswalk
 
 ## Current target batch
 - files:
-  - docs/meta/contracts/INFRA_CROSSWALK.md
-  - deploy/contracts/infra-crosswalk.yaml
+  - tools/contracts/build_cross_repo_manifest.py
+  - tools/contracts/build_deployment_impact_report.py
+  - generated/contracts/cross-repo-manifest.json
+  - generated/contracts/deployment-impact-report.json
 - goal:
-  - map app-repo truth to infra-repo truth
-  - encode which deployment edges are explicit versus still unknown
+  - project app-repo changes onto infra counterpart obligations
+  - classify cross-repo impact as required, not required, manual review, or unknown
 - stop condition:
-  - every service contract has an infra crosswalk entry or explicit unknown state
+  - branch diff can be classified into app-only, infra-coupled, or unknown-impact
   - Wave 5 runtime stays green
   - one commit is created
 
@@ -39,15 +42,15 @@
 - cross-repo unknowns are allowed only when explicit and reviewable
 
 ## Open unknown mappings
-- openedx: overlay, application, and secret-wiring paths in bbi-infrastructure are not yet mapped
-- mfe: ingress, appset, and edge-realization paths in bbi-infrastructure are not yet mapped
-- purchase-gateway: Stripe secret and ingress realization paths in bbi-infrastructure are not yet mapped
-- enterprise-services: per-service overlay ownership in bbi-infrastructure is not yet decomposed
-- runner-ci: runner-host realization and secret-distribution paths are not yet mapped
-- observability-runtime: monitoring app paths and dashboard ownership boundaries are not yet mapped
+- openedx: exact ArgoCD application and secret-store file paths remain unknown, but overlay roots are mapped
+- mfe: exact ingress, appset, and edge file paths remain unknown, but overlay roots are mapped
+- purchase-gateway: exact Stripe secret and ingress file paths remain unknown, but overlay roots are mapped
+- enterprise-services: per-service overlay decomposition remains unknown
+- runner-ci: exact self-hosted runner host and secret provisioning file paths remain unknown
+- observability-runtime: exact monitoring and alerting app file paths remain unknown
 
 ## Services with no contract inventory
 - none
 
 ## Next queued batch
-- Packet C: infra crosswalk
+- Packet D: cross-repo impact engine

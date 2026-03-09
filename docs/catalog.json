@@ -6097,6 +6097,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "meta/contracts/INFRA_CROSSWALK.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "meta/contracts/RELEASE_OBLIGATIONS.yaml",
     "status": "supporting",
     "type": "other"

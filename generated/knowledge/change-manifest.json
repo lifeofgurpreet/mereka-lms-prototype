@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 289,
+  "change_count": 295,
   "changed_roots": [
     "docs",
     "specs"
@@ -121,6 +121,204 @@
       "root": "other",
       "status": "",
       "title": "Makefile"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/enterprise-services.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/enterprise-services.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "enterprise-services"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/mfe.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/mfe.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "mfe"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/observability-runtime.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/observability-runtime.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "observability-runtime"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/openedx.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/openedx.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "openedx"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/purchase-gateway.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/purchase-gateway.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "purchase-gateway"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/runner-ci.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/runner-ci.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "runner-ci"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -10718,6 +10916,12 @@
     ".github/workflows/ci.yml",
     ".github/workflows/docs-policy.yml",
     "Makefile",
+    "deploy/contracts/service-contracts/enterprise-services.yaml",
+    "deploy/contracts/service-contracts/mfe.yaml",
+    "deploy/contracts/service-contracts/observability-runtime.yaml",
+    "deploy/contracts/service-contracts/openedx.yaml",
+    "deploy/contracts/service-contracts/purchase-gateway.yaml",
+    "deploy/contracts/service-contracts/runner-ci.yaml",
     "docs/_generated/bundles/60-docs-specs-contract.md",
     "docs/adr/011-convention-based-spec-verification.md",
     "docs/adr/013-studio-sso-bypass-middleware.md",

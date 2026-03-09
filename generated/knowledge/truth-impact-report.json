@@ -144,6 +144,12 @@
       ".github/workflows/ci.yml",
       ".github/workflows/docs-policy.yml",
       "Makefile",
+      "deploy/contracts/service-contracts/enterprise-services.yaml",
+      "deploy/contracts/service-contracts/mfe.yaml",
+      "deploy/contracts/service-contracts/observability-runtime.yaml",
+      "deploy/contracts/service-contracts/openedx.yaml",
+      "deploy/contracts/service-contracts/purchase-gateway.yaml",
+      "deploy/contracts/service-contracts/runner-ci.yaml",
       "generated/adr-bundles/00-foundations.md",
       "generated/adr-bundles/10-auth-and-tenancy.md",
       "generated/adr-bundles/50-commerce.md",
@@ -372,7 +378,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 289,
+  "change_count": 295,
   "generated_by": "tools/knowledge/build_truth_impact_report.py",
   "impacted_lane_counts": {
     "docs:adr": 21,
@@ -462,6 +468,126 @@
         "wrappers": []
       },
       "path": "Makefile",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "deploy/contracts/service-contracts/enterprise-services.yaml"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "deploy/contracts/service-contracts/enterprise-services.yaml",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "deploy/contracts/service-contracts/mfe.yaml"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "deploy/contracts/service-contracts/mfe.yaml",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "deploy/contracts/service-contracts/observability-runtime.yaml"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "deploy/contracts/service-contracts/observability-runtime.yaml",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "deploy/contracts/service-contracts/openedx.yaml"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "deploy/contracts/service-contracts/openedx.yaml",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "deploy/contracts/service-contracts/purchase-gateway.yaml"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "deploy/contracts/service-contracts/purchase-gateway.yaml",
+      "required_evidence": {},
+      "required_reviewers": []
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "impacts": {
+        "adrs": [],
+        "docs_support": [],
+        "generated_surfaces": [],
+        "normative_specs": [],
+        "other": [
+          "deploy/contracts/service-contracts/runner-ci.yaml"
+        ],
+        "plans_testplans": [],
+        "proposal_specs": [],
+        "runbooks": [],
+        "wrappers": []
+      },
+      "path": "deploy/contracts/service-contracts/runner-ci.yaml",
       "required_evidence": {},
       "required_reviewers": []
     },
