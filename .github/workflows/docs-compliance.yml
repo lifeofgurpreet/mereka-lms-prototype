@@ -425,13 +425,14 @@ jobs:
           set -euo pipefail
           NONSTUB_TRANSITIONAL_SUMMARY="${RUNNER_TEMP}/nonstub-transitional-summary.json"
           python3 tools/docs/verify/report-nonstub-transitional-files.py \
+            --fail-on-nonstub \
             --summary-file "$NONSTUB_TRANSITIONAL_SUMMARY"
           python3 - "$NONSTUB_TRANSITIONAL_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
           import json, sys
           with open(sys.argv[1], "r", encoding="utf-8") as fp:
               payload = json.load(fp)
           with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Transitional Roots Non-Stub Inventory (Advisory)\n")
+              fp.write("### Transitional Roots Non-Stub Inventory\n")
               fp.write(f"- total_nonstub_files={payload.get('total_nonstub_files_count', 'n/a')}\n")
               for root in payload.get('transitional_roots', []):
                   fp.write(
