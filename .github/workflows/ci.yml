@@ -204,24 +204,8 @@ jobs:
             xargs kubeconform -strict -ignore-missing-schemas
 
       # ── Phase B (continued): Spec linting ─────────────────────────────────
-      - name: Lint specs
-        run: python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/ --severity-filter error
-
-      - name: Verify spec-testmap mapping (informational)
-        run: python3 scripts/qa/spec-tools/mereka_spec_verify.py specs/ --repo-root . || true
-
-      - name: Generate compatibility testmaps
-        run: |
-          mkdir -p specs/_generated/testmaps
-          python3 scripts/qa/spec-tools/discover_testmap.py \
-            --all-specs specs/ \
-            --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-            --manual-file specs/manual_verifications.yaml \
-            --repo-root . \
-            --output-dir specs/_generated/testmaps
-
-      - name: Validate generated testmap format
-        run: python3 scripts/qa/spec-tools/validate_testmap_format.py specs/_generated/testmaps/
+      - name: Run spec integrity gates
+        run: bash scripts/qa/run-spec-integrity-gates.sh
 
       - name: Spec coverage report
         run: |
