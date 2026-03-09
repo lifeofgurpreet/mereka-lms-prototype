@@ -15,3 +15,18 @@ This directory contains canonical standards for how documentation is authored, c
 - ADR decision records, which belong in `docs/adr/**`
 - living architecture law, which belongs in `docs/concepts/architecture/**`
 - runtime operator procedures, which belong in `docs/ops/**`
+
+## Core standards
+
+- [`DOCUMENTATION_STANDARDS.md`](DOCUMENTATION_STANDARDS.md)
+- [`STYLE_GUIDE.md`](STYLE_GUIDE.md)
+- [`DOCS_SPECS_CONTRACT.md`](DOCS_SPECS_CONTRACT.md)
+
+## Reporting and evidence standards
+
+- [`EVIDENCE_PACK_STANDARD.md`](EVIDENCE_PACK_STANDARD.md)
+- [`STATUS_REPORTING_STANDARD.md`](STATUS_REPORTING_STANDARD.md)
+
+## Contributor workflow references
+
+- [`bead-v2-format.md`](bead-v2-format.md)

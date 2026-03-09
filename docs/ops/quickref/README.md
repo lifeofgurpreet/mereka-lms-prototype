@@ -15,6 +15,17 @@ One-page quick reference guides for common Mereka LMS operations.
 | [verification-scripts.md](./verification-scripts.md) | Automated testing | Running verifications, checking spec coverage |
 | [common-troubleshooting.md](./common-troubleshooting.md) | Troubleshooting | Site down, performance issues, config problems |
 
+## Additional quick references
+
+- [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) for the general operator quick reference bundle
+- [access-urls.md](./access-urls.md) for service URLs and local access points
+- [local-access-info.md](./local-access-info.md) for local environment entrypoints
+- [local-production-parity.md](./local-production-parity.md) for parity expectations between local and production
+- [local-work-remaining.md](./local-work-remaining.md) for local environment follow-up work
+- [discovery-quickstart.md](./discovery-quickstart.md) for Discovery service quickstart steps
+- [checklists/doc-delivery-checklist.md](./checklists/doc-delivery-checklist.md) for docs delivery verification
+- [checklists/spec-delivery-checklist.md](./checklists/spec-delivery-checklist.md) for spec delivery verification
+
 ---
 
 ## Quick Start
