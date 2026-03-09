@@ -4,7 +4,7 @@ _Audience: Platform Engineering + Design + Tenant Operations • Last updated: 2
 
 **Purpose**: Document the tenant brand pack schema, asset requirements, naming conventions, and fallback rules for multi-tenant branding.
 
-**Machine-Checkable Spec**: `specs/brand-pack-schema.json`
+**Machine-Checkable Spec**: `specs/standards/brand-pack-schema.json`
 **Template**: `scripts/tenants/brand-pack-template.json`
 **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 **Validation**: `scripts/tenants/validate-tenant-brand-pack.sh`
@@ -35,7 +35,7 @@ The **Tenant Brand Pack Schema** defines the structure and validation rules for 
 - **Logos**: Horizontal logo, square logo, white logo, favicon
 - **Footer**: Text, links, contact email
 
-The schema is defined in `specs/brand-pack-schema.json` and enforced by:
+The schema is defined in `specs/standards/brand-pack-schema.json` and enforced by:
 - **JSON Schema validation** (draft 2020-12)
 - **Brand pack validator** (`scripts/tenants/validate-tenant-brand-pack.sh`)
 - **CI gates** (GitHub Actions)
@@ -438,7 +438,7 @@ footer.contact_email:
 
 ### JSON Schema Validation
 
-The schema is defined in `specs/brand-pack-schema.json` (JSON Schema draft 2020-12).
+The schema is defined in `specs/standards/brand-pack-schema.json` (JSON Schema draft 2020-12).
 
 **Validate with `jq`**:
 ```bash
@@ -446,7 +446,7 @@ The schema is defined in `specs/brand-pack-schema.json` (JSON Schema draft 2020-
 which jq ajv
 
 # Validate branding JSON against schema
-ajv validate -s specs/brand-pack-schema.json -d scripts/tenants/brand-pack-template.json
+ajv validate -s specs/standards/brand-pack-schema.json -d scripts/tenants/brand-pack-template.json
 ```
 
 ### Automated Validation
@@ -667,7 +667,7 @@ vim scripts/tenants/acme-branding.json
 
 ## Related Documents
 
-- **Schema Definition**: `specs/brand-pack-schema.json`
+- **Schema Definition**: `specs/standards/brand-pack-schema.json`
 - **Template**: `scripts/tenants/brand-pack-template.json`
 - **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - **Provisioning**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
