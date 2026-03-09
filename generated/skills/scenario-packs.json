@@ -1,0 +1,658 @@
+{
+  "scenarios": [
+    {
+      "applicable_repos": [
+        "mereka-lms",
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "commands_to_run": [
+        {
+          "command": "bash scripts/promote.sh --help",
+          "command_id": "promote-help",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "command": "bash scripts/promote.sh --dry-run",
+          "command_id": "promote-dry-run",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "command_id": "platform-plan-validate",
+          "repo": "platform-control-plane"
+        },
+        {
+          "command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+          "command_id": "docs-world-class-gates",
+          "repo": "mereka-lms"
+        }
+      ],
+      "escalation_points": [
+        "canonical source missing or contradictory",
+        "cross-repo disagreement not resolved by contracts",
+        "required validator fails"
+      ],
+      "evidence_to_collect": [
+        "release_contract",
+        "workflow_dispatch",
+        "release_obligations",
+        "cross_repo_alignment",
+        "release_notes_diff",
+        "smoke_test_result",
+        "rollback_target_reference"
+      ],
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "explicit reviewer and evidence path"
+      ],
+      "goal": "Resolve promotion semantics, obligations, and validation entrypoints before promotion.",
+      "read_first": [
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": ".github/workflows/promote-image.yml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+          "repo": "mereka-lms"
+        }
+      ],
+      "required_skills": [
+        "promotion-workflow-review",
+        "cross-repo-release-contract-review",
+        "release-obligations-review"
+      ],
+      "reviewer_signoff_rules": [
+        "release",
+        "platform"
+      ],
+      "scenario_id": "promote-app-safely",
+      "stop_conditions": [
+        "required command missing",
+        "required reviewer class unresolved",
+        "archive or transitional path appears as canonical source"
+      ],
+      "title": "Can I promote this app safely?"
+    },
+    {
+      "applicable_repos": [
+        "mereka-lms",
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "commands_to_run": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "command_id": "docs-policy-gate",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+          "command_id": "docs-catalog-governance",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "command_id": "platform-plan-validate",
+          "repo": "platform-control-plane"
+        },
+        {
+          "command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+          "command_id": "docs-world-class-gates",
+          "repo": "mereka-lms"
+        }
+      ],
+      "escalation_points": [
+        "canonical source missing or contradictory",
+        "cross-repo disagreement not resolved by contracts",
+        "required validator fails"
+      ],
+      "evidence_to_collect": [
+        "docs_policy",
+        "catalog_governance",
+        "source_of_truth_map",
+        "validation_run"
+      ],
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "explicit reviewer and evidence path"
+      ],
+      "goal": "Resolve the review path and truth owners for the current change set.",
+      "read_first": [
+        {
+          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-docs-policy.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-doc-catalog-governance.py",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/plan-all.sh",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "required_skills": [
+        "docs-truth-review",
+        "change-impact-triage",
+        "control-plane-validation"
+      ],
+      "reviewer_signoff_rules": [
+        "docs",
+        "platform"
+      ],
+      "scenario_id": "required-reviewers-for-diff",
+      "stop_conditions": [
+        "required command missing",
+        "required reviewer class unresolved",
+        "archive or transitional path appears as canonical source"
+      ],
+      "title": "What reviewers are required for this diff?"
+    },
+    {
+      "applicable_repos": [
+        "mereka-lms",
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "commands_to_run": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "command_id": "docs-policy-gate",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "command_id": "platform-plan-validate",
+          "repo": "platform-control-plane"
+        },
+        {
+          "command": "bash scripts/promote.sh --help",
+          "command_id": "promote-help",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "escalation_points": [
+        "canonical source missing or contradictory",
+        "cross-repo disagreement not resolved by contracts",
+        "required validator fails"
+      ],
+      "evidence_to_collect": [
+        "source_of_truth_map",
+        "service_identity",
+        "topology_contract"
+      ],
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "explicit reviewer and evidence path"
+      ],
+      "goal": "Determine the authoritative repo and canonical source for a truth surface.",
+      "read_first": [
+        {
+          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "required_skills": [
+        "change-impact-triage",
+        "service-identity-lookup",
+        "topology-lookup"
+      ],
+      "reviewer_signoff_rules": [
+        "platform"
+      ],
+      "scenario_id": "repo-ownership-of-truth",
+      "stop_conditions": [
+        "required command missing",
+        "required reviewer class unresolved",
+        "archive or transitional path appears as canonical source"
+      ],
+      "title": "Which repo owns this truth?"
+    },
+    {
+      "applicable_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane",
+        "mereka-lms"
+      ],
+      "commands_to_run": [
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "command_id": "platform-plan-validate",
+          "repo": "platform-control-plane"
+        },
+        {
+          "command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+          "command_id": "docs-world-class-gates",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "command_id": "docs-policy-gate",
+          "repo": "mereka-lms"
+        }
+      ],
+      "escalation_points": [
+        "canonical source missing or contradictory",
+        "cross-repo disagreement not resolved by contracts",
+        "required validator fails"
+      ],
+      "evidence_to_collect": [
+        "service_identity",
+        "release_obligations",
+        "cross_repo_alignment",
+        "source_of_truth_map"
+      ],
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "explicit reviewer and evidence path"
+      ],
+      "goal": "Trace service identity fallout across release contracts, topology, and promotion workflow surfaces.",
+      "read_first": [
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": ".github/workflows/promote-image.yml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "required_skills": [
+        "service-identity-lookup",
+        "cross-repo-release-contract-review",
+        "change-impact-triage"
+      ],
+      "reviewer_signoff_rules": [
+        "platform",
+        "docs"
+      ],
+      "scenario_id": "service-alias-change-impact",
+      "stop_conditions": [
+        "required command missing",
+        "required reviewer class unresolved",
+        "archive or transitional path appears as canonical source"
+      ],
+      "title": "What changes if a service alias changes?"
+    },
+    {
+      "applicable_repos": [
+        "mereka-lms"
+      ],
+      "commands_to_run": [
+        {
+          "command": "python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue",
+          "command_id": "wrapper-residue-scan",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "command_id": "docs-policy-gate",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+          "command_id": "docs-catalog-governance",
+          "repo": "mereka-lms"
+        }
+      ],
+      "escalation_points": [
+        "canonical source missing or contradictory",
+        "cross-repo disagreement not resolved by contracts",
+        "required validator fails"
+      ],
+      "evidence_to_collect": [
+        "transitional_residue",
+        "docs_policy",
+        "catalog_governance"
+      ],
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "explicit reviewer and evidence path"
+      ],
+      "goal": "Assess whether transitional documentation residue can be safely removed or must stay stubbed.",
+      "read_first": [
+        {
+          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/scan-doc-catalog-residue.py",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/report-nonstub-transitional-files.py",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-docs-policy.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-doc-catalog-governance.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "required_skills": [
+        "wrapper-retirement-assessment",
+        "docs-truth-review"
+      ],
+      "reviewer_signoff_rules": [
+        "docs"
+      ],
+      "scenario_id": "wrapper-retirement",
+      "stop_conditions": [
+        "required command missing",
+        "required reviewer class unresolved",
+        "archive or transitional path appears as canonical source"
+      ],
+      "title": "Can this wrapper be retired?"
+    },
+    {
+      "applicable_repos": [
+        "mereka-lms",
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "commands_to_run": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "command_id": "docs-policy-gate",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "command_id": "platform-plan-validate",
+          "repo": "platform-control-plane"
+        },
+        {
+          "command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+          "command_id": "docs-world-class-gates",
+          "repo": "mereka-lms"
+        }
+      ],
+      "escalation_points": [
+        "canonical source missing or contradictory",
+        "cross-repo disagreement not resolved by contracts",
+        "required validator fails"
+      ],
+      "evidence_to_collect": [
+        "source_of_truth_map",
+        "validation_run"
+      ],
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "explicit reviewer and evidence path"
+      ],
+      "goal": "Map a change to affected repos, truth surfaces, and validation steps.",
+      "read_first": [
+        {
+          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/plan-all.sh",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "required_skills": [
+        "change-impact-triage",
+        "control-plane-validation"
+      ],
+      "reviewer_signoff_rules": [
+        "docs",
+        "platform"
+      ],
+      "scenario_id": "cross-repo-diff-impact",
+      "stop_conditions": [
+        "required command missing",
+        "required reviewer class unresolved",
+        "archive or transitional path appears as canonical source"
+      ],
+      "title": "What does this diff impact across repos?"
+    },
+    {
+      "applicable_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "commands_to_run": [
+        {
+          "command": "bash scripts/promote.sh --help",
+          "command_id": "promote-help",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "command_id": "platform-plan-validate",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "escalation_points": [
+        "canonical source missing or contradictory",
+        "cross-repo disagreement not resolved by contracts",
+        "required validator fails"
+      ],
+      "evidence_to_collect": [
+        "topology_contract",
+        "service_identity"
+      ],
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "explicit reviewer and evidence path"
+      ],
+      "goal": "Resolve topology from registries and release-control contracts instead of prose memory.",
+      "read_first": [
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "required_skills": [
+        "topology-lookup",
+        "service-identity-lookup"
+      ],
+      "reviewer_signoff_rules": [
+        "platform"
+      ],
+      "scenario_id": "canonical-topology-lookup",
+      "stop_conditions": [
+        "required command missing",
+        "required reviewer class unresolved",
+        "archive or transitional path appears as canonical source"
+      ],
+      "title": "What is the correct topology, hostname, or lane?"
+    },
+    {
+      "applicable_repos": [
+        "mereka-lms",
+        "bbi-infrastructure"
+      ],
+      "commands_to_run": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "command_id": "docs-policy-gate",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+          "command_id": "docs-catalog-governance",
+          "repo": "mereka-lms"
+        }
+      ],
+      "escalation_points": [
+        "canonical source missing or contradictory",
+        "cross-repo disagreement not resolved by contracts",
+        "required validator fails"
+      ],
+      "evidence_to_collect": [
+        "runbook_reference",
+        "docs_policy",
+        "catalog_governance"
+      ],
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "explicit reviewer and evidence path"
+      ],
+      "goal": "Find the live runbook and evidence path without relying on archive or transitional roots.",
+      "read_first": [
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/ops/quickref/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "docs/meta/templates/EVIDENCE_SCHEMA.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-docs-policy.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-doc-catalog-governance.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "required_skills": [
+        "runbook-evidence-triage",
+        "docs-truth-review"
+      ],
+      "reviewer_signoff_rules": [
+        "ops",
+        "docs"
+      ],
+      "scenario_id": "canonical-recovery-runbook",
+      "stop_conditions": [
+        "required command missing",
+        "required reviewer class unresolved",
+        "archive or transitional path appears as canonical source"
+      ],
+      "title": "What is the canonical recovery or runbook path?"
+    }
+  ],
+  "schema_version": 1
+}
