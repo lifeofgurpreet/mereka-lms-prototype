@@ -5,19 +5,29 @@ on:
     paths:
       - "docs/**"
       - "specs/**"
+      - "generated/agent/**"
+      - "generated/knowledge/wave10-source-map.json"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/knowledge/build_wave10_source_map.py"
+      - "tools/knowledge/build_cross_repo_agent_packs.py"
+      - "scripts/qa/run-cross-repo-agent-gates.sh"
       - "scripts/qa/spec-tools/**"
   push:
     paths:
       - "docs/**"
       - "specs/**"
+      - "generated/agent/**"
+      - "generated/knowledge/wave10-source-map.json"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/knowledge/build_wave10_source_map.py"
+      - "tools/knowledge/build_cross_repo_agent_packs.py"
+      - "scripts/qa/run-cross-repo-agent-gates.sh"
       - "scripts/qa/spec-tools/**"
 
 permissions: {}
@@ -43,3 +53,13 @@ jobs:
           fi
           chmod +x tools/docs/verify/verify-docs-policy.sh
           ./tools/docs/verify/verify-docs-policy.sh
+
+      - name: Verify cross-repo agent packs
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-cross-repo-agent-gates.sh
+          ./scripts/qa/run-cross-repo-agent-gates.sh
