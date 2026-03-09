@@ -1,19 +1,38 @@
 ---
-title: "CRED-040: Verification"
-type: "feature_spec"
-status: "approved"
-owner: "engineering"
-vehicle: "talent_platform"
-last_updated: "2026-02-14"
-version: "1.0.0"
+title: 'CRED-040: Verification'
+type: feature_spec
+status: approved
+owner: engineering
+vehicle: talent_platform
+last_updated: '2026-02-14'
+version: 1.0.0
 depends_on:
-  - "specs/verifiable-credentials-types_spec.md"
-  - "specs/verifiable-credentials-issuer_spec.md"
-  - "specs/verifiable-credentials-issuance_spec.md"
+- specs/verifiable-credentials-types_spec.md
+- specs/verifiable-credentials-issuer_spec.md
+- specs/verifiable-credentials-issuance_spec.md
 links:
   related_specs:
-    - "specs/cross-cutting-requirements_spec.md"
-    - "specs/verifiable-credentials-ops_spec.md"
+  - specs/cross-cutting-requirements_spec.md
+  - specs/verifiable-credentials-ops_spec.md
+id: SPEC-VC-VERIFICATION-001
+spec_class: security
+created: '2026-02-10'
+last_reviewed: '2026-03-09'
+review_due: '2026-06-09'
+domain: auth
+normativity: normative
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces:
+- api:credential-verification
+- service:verification
+tags:
+- auth.verifiable-credentials
+- auth.verification
+- platform.credentials
+summary: Defines the normative verification contract for verifiable credentials, including
+  trust checks, revocation handling, proof verification, and security outcomes.
 ---
 
 # CRED-040: Verification
