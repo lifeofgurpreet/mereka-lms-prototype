@@ -10,6 +10,7 @@ Use this root for the active documentation improvement program: remediation plan
 | Understand the current docs remediation direction | [`../../DOCS_REMEDIATION_PLAN_AND_TRACKER.md`](../../DOCS_REMEDIATION_PLAN_AND_TRACKER.md) | [`IMPLEMENTATION_ROADMAP.md`](IMPLEMENTATION_ROADMAP.md) |
 | Understand where docs were moved and why | [`REPO_TOPOLOGY_MOVE_LEDGER.md`](REPO_TOPOLOGY_MOVE_LEDGER.md) | [`boundary-debt-manifest.md`](boundary-debt-manifest.md) |
 | Review the deterministic collapse inventories for losing roots | [`root-collapse/README.md`](root-collapse/README.md) | The specific collapse map for that root |
+| Understand the metadata model for canonical docs and generated surfaces | [`metadata/METADATA_MODEL.md`](metadata/METADATA_MODEL.md) | The schema, taxonomy, and class map in `metadata/` |
 | Check the current execution roadmap | [`IMPLEMENTATION_ROADMAP.md`](IMPLEMENTATION_ROADMAP.md) | [`SPEC_COVERAGE.md`](SPEC_COVERAGE.md) |
 | Review active docs program bundles | The relevant bundle in this root | [`../README.md`](../README.md) for broader meta surfaces |
 
