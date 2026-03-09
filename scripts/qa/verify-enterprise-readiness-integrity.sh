@@ -44,9 +44,9 @@ assert_not_contains() {
 }
 
 SPEC_FILE="specs/enterprise-microservices_spec.md"
-TESTMAP_FILE="specs/testmaps/enterprise-microservices_spec.testmap.yml"
-DOMAIN_TESTMAP="specs/testmaps/multi-site-domains_spec.testmap.yml"
-MIGRATION_TESTMAP="specs/testmaps/data-migrations-kajabi-mct_spec.testmap.yml"
+TESTMAP_FILE="specs/_generated/testmaps/enterprise-microservices_spec.testmap.yml"
+DOMAIN_TESTMAP="specs/_generated/testmaps/multi-site-domains_spec.testmap.yml"
+MIGRATION_TESTMAP="specs/_generated/testmaps/data-migrations-kajabi-mct_spec.testmap.yml"
 PIPELINE="scripts/migrations/run-verification-pipeline.sh"
 SERVICE_DEPLOY="scripts/qa/verify-enterprise-service-deployment.sh"
 LICENSE_MGMT="scripts/qa/verify-enterprise-license-management.sh"
@@ -115,9 +115,9 @@ assert_not_contains 'scripts/qa/verify-cross-system-identity.sh' 'sort\s*\|\s*he
   "Cross-system identity verifier avoids pipefail-prone sort|head pattern"
 
 # 6) Runbooks keep canonical testmap references
-assert_contains "$RUNBOOK_TENANT" 'specs/testmaps/multi-tenancy-architecture_spec.testmap.yml' \
+assert_contains "$RUNBOOK_TENANT" 'specs/_generated/testmaps/multi-tenancy-architecture_spec.testmap.yml' \
   "tenant provisioning runbook references canonical .testmap.yml path"
-assert_contains "$RUNBOOK_ENTERPRISE" 'specs/testmaps/enterprise-microservices_spec.testmap.yml' \
+assert_contains "$RUNBOOK_ENTERPRISE" 'specs/_generated/testmaps/enterprise-microservices_spec.testmap.yml' \
   "enterprise services runbook references canonical .testmap.yml path"
 assert_not_contains "$RUNBOOK_TENANT" '_testmap\.ya?ml' \
   "tenant provisioning runbook has no legacy _testmap.yaml reference"

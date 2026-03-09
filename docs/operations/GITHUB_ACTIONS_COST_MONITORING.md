@@ -1,10 +1,10 @@
-# GitHub Actions Cost Monitoring (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# GitHub Actions Cost Monitoring
 
-superseded_by: `../reference/operations/GITHUB_ACTIONS_COST_MONITORING.md`
+_Status: superseded_  
+_Superseded by: ../reference/operations/GITHUB_ACTIONS_COST_MONITORING.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../reference/operations/GITHUB_ACTIONS_COST_MONITORING.md`
 
-Reason:
-- CI/CD reference material now lives under docs/reference/operations/.
+Do not add new substantive content here.

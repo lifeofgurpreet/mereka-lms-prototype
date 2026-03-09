@@ -1,10 +1,10 @@
-# Discovery Service Demo Course Setup (Superseded)
-_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: superseded_
+# Discovery Service Demo Course Setup
 
-superseded_by: `../ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md`
+_Status: superseded_  
+_Superseded by: ../ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md`
 
-Reason:
-- Consolidated into canonical docs/ops location during remediation.
+Do not add new substantive content here.

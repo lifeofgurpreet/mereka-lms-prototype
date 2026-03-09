@@ -1,0 +1,10 @@
+version: 1
+root: docs/onboarding
+entries:
+- old_path: docs/onboarding/README.md
+  destination_path: docs/guides/onboarding/README.md
+  destination_root: docs/guides
+  classification: guides.onboarding.index
+  action: stub_to_existing
+  owner: agent-transitional-collapse
+  notes: legacy onboarding root should redirect to canonical guides onboarding root

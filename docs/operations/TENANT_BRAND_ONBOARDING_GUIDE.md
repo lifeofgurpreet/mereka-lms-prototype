@@ -1,6 +1,10 @@
-# TENANT_BRAND_ONBOARDING_GUIDE.md (Superseded)
+# TENANT_BRAND_ONBOARDING_GUIDE.md
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: docs/runbooks/operations/TENANT_BRAND_ONBOARDING_GUIDE.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `docs/runbooks/operations/TENANT_BRAND_ONBOARDING_GUIDE.md`
 
-Use the canonical path above.
+Do not add new substantive content here.

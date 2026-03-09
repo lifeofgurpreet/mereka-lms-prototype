@@ -25,7 +25,7 @@ adrs:
   related_runbooks: []
   related_evidence: []
   fitness_functions:
-  - scripts/qa/verify-tutor-version-governance.sh
+  - scripts/qa/verify-tutor-version-pin.sh
   - scripts/qa/verify-repo-structure.sh
   expiry_date: null
   removal_condition: null
@@ -55,7 +55,7 @@ adrs:
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-repo-structure.sh
-  - scripts/qa/verify-openedx-settings-modularity.sh
+  - scripts/qa/verify-tutor-config-safety.sh
   expiry_date: null
   removal_condition: null
   frontmatter_required: false
@@ -140,7 +140,7 @@ adrs:
   related_runbooks: []
   related_evidence: []
   fitness_functions:
-  - scripts/qa/verify-tutor-version-governance.sh
+  - scripts/qa/verify-tutor-version-pin.sh
   - scripts/qa/verify-repo-structure.sh
   expiry_date: null
   removal_condition: null
@@ -597,7 +597,7 @@ adrs:
   related_evidence: []
   fitness_functions:
   - scripts/qa/verify-repo-structure.sh
-  - scripts/qa/verify-openedx-settings-modularity.sh
+  - scripts/qa/verify-tutor-config-safety.sh
   expiry_date: null
   removal_condition: null
   frontmatter_required: false
@@ -1240,7 +1240,7 @@ adrs:
   related_runbooks: []
   related_evidence: []
   fitness_functions:
-  - scripts/qa/verify-tutor-version-governance.sh
+  - scripts/qa/verify-tutor-version-pin.sh
   - scripts/qa/verify-repo-structure.sh
   expiry_date: null
   removal_condition: null

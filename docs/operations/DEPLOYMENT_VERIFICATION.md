@@ -1,6 +1,10 @@
-# DEPLOYMENT_VERIFICATION.md (Superseded)
+# DEPLOYMENT_VERIFICATION.md
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: docs/runbooks/operations/DEPLOYMENT_VERIFICATION.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `docs/runbooks/operations/DEPLOYMENT_VERIFICATION.md`
 
-Use the canonical path above.
+Do not add new substantive content here.

@@ -1,10 +1,10 @@
-# Release Checklist Domain Secrets (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Release Checklist Domain Secrets
 
-superseded_by: `../runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
+_Status: superseded_  
+_Superseded by: ../runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
 
-Reason:
-- Operational execution guides now live under docs/runbooks/operations/.
+Do not add new substantive content here.

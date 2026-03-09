@@ -1,0 +1,206 @@
+version: 1
+root: docs/architecture
+entries:
+  - old_path: docs/architecture/overviews/ARCHITECTURE_MONGODB.md
+    destination_path: docs/concepts/architecture/ARCHITECTURE_MONGODB.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/BRAND_PARITY.md
+    destination_path: docs/concepts/architecture/BRAND_PARITY.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/DATABASE_ARCHITECTURE.md
+    destination_path: docs/concepts/architecture/DATABASE_ARCHITECTURE.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md
+    destination_path: docs/concepts/architecture/DESIGN_TOKENS_MIGRATION.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/FOOTER_PARITY.md
+    destination_path: docs/concepts/architecture/FOOTER_PARITY.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/MULTISITE.md
+    destination_path: docs/concepts/architecture/MULTISITE.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/MULTI_BRAND_MULTI_SITE.md
+    destination_path: docs/concepts/architecture/MULTI_BRAND_MULTI_SITE.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/PROCTORING_INTEGRATION.md
+    destination_path: docs/concepts/architecture/PROCTORING_INTEGRATION.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md
+    destination_path: docs/concepts/architecture/PRODUCTION_ARCHITECTURE_REALITY.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/PURCHASE_GATEWAY.md
+    destination_path: docs/concepts/architecture/PURCHASE_GATEWAY.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/VIDEO_PIPELINE.md
+    destination_path: docs/concepts/architecture/VIDEO_PIPELINE.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/content-libraries-overview.md
+    destination_path: docs/concepts/architecture/content-libraries-overview.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/enterprise-services-overview.md
+    destination_path: docs/concepts/architecture/enterprise-services-overview.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/multi-tenancy-overview.md
+    destination_path: docs/concepts/architecture/multi-tenancy-overview.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/notification-pipeline-overview.md
+    destination_path: docs/concepts/architecture/notification-pipeline-overview.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/proctoring-architecture-overview.md
+    destination_path: docs/concepts/architecture/proctoring-architecture-overview.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/overviews/purchase-gateway-overview.md
+    destination_path: docs/concepts/architecture/purchase-gateway-overview.md
+    destination_root: docs/concepts
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/ADR-025-deployment-boundary.md
+    destination_path: docs/adr/rfc/ADR-025-deployment-boundary.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/README.md
+    destination_path: docs/ops/README.md
+    destination_root: docs/ops
+    classification: architecture.standard
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-034-event-contract-and-transport-independence.md
+    destination_path: docs/adr/rfc/034-event-contract-and-transport-independence.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md
+    destination_path: docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md
+    destination_path: docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-037-async-task-user-facing-contract.md
+    destination_path: docs/adr/rfc/037-async-task-user-facing-contract.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md
+    destination_path: docs/adr/rfc/038-commerce-system-of-record-and-reconciliation.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-039-translations-and-internationalization-strategy.md
+    destination_path: docs/adr/rfc/039-translations-and-internationalization-strategy.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md
+    destination_path: docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-041-authorization-and-role-boundary-model.md
+    destination_path: docs/adr/rfc/041-authorization-and-role-boundary-model.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-claim-based-role-sync.md
+    destination_path: docs/adr/rfc/RFC-claim-based-role-sync.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping
+  - old_path: docs/architecture/rfc/RFC-learning-slot-expansion-proposal.md
+    destination_path: docs/adr/rfc/RFC-learning-slot-expansion-proposal.md
+    destination_root: docs/adr
+    classification: adr.rfc
+    action: move_and_stub
+    owner: agent-architecture-collapse
+    notes: manual or basename-based architecture mapping

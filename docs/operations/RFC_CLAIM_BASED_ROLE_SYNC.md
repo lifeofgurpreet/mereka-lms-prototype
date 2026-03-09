@@ -1,9 +1,10 @@
-# RFC: Claim-Based Role Sync (Authentik -> Open edX) (Superseded)
-_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: superseded • superseded_by: ../concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md_
-superseded_by: ../concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md
+# RFC: Claim-Based Role Sync (Authentik -> Open edX)
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: ../concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `../concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md`
 
-Reason:
-- Consolidated under canonical docs structure during remediation to reduce transitional-path drift.
+Do not add new substantive content here.

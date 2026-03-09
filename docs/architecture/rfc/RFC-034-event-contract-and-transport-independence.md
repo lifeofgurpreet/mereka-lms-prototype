@@ -1,18 +1,10 @@
 # RFC-034 Event Contract And Transport Independence
 
-Status: proposed
-Source record: `docs/adr/034-event-contract-and-transport-independence.md`
+_Status: superseded_  
+_Superseded by: docs/adr/rfc/034-event-contract-and-transport-independence.md_
 
-## Intent
+This path is transitional only. The live document is now maintained at:
 
-Define events by schema and semantics first, with transport treated as replaceable infrastructure.
+- `docs/adr/rfc/034-event-contract-and-transport-independence.md`
 
-## Why This Is Still An RFC
-
-The decision is valuable, but it is still future-facing domain architecture rather than settled platform history.
-
-## Candidate Invariants
-
-- Event schemas are versioned.
-- Producers emit schema-versioned payloads.
-- Consumers tolerate additive compatible changes.
+Do not add new substantive content here.

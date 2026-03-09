@@ -1,6 +1,10 @@
-# WORKLOAD_IDENTITY_FEDERATION.md (Superseded)
+# WORKLOAD_IDENTITY_FEDERATION.md
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: docs/runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `docs/runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md`
 
-Use the canonical path above.
+Do not add new substantive content here.

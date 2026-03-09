@@ -1,0 +1,290 @@
+version: 1
+root: specs/testmaps
+entries:
+  - old_path: specs/testmaps/advanced-assessment-xqueue_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/analytics-pipeline_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/analytics-pipeline_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/auth-sso-enterprise_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/auth-sso-enterprise_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/branding-system_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/branding-system_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/ci-cd-pipeline_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/ci-cd-pipeline_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/content-libraries-v2_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/content-libraries-v2_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/cross-cutting-requirements_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/cross-cutting-requirements_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/data-migrations-kajabi-mct_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/data-migrations-kajabi-mct_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/data-privacy-gdpr-compliance_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/data-privacy-gdpr-compliance_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/design-tokens-system_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/design-tokens-system_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/disaster-recovery-business-continuity_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/disaster-recovery-business-continuity_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/ecommerce-purchase-gateway_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/ecommerce-purchase-gateway_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/email-notifications-pipeline_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/email-notifications-pipeline_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/enterprise-microservices_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/enterprise-microservices_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/external-registration-hubspot_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/forum-service-migration_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/forum-service-migration_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/github-actions-cost-monitoring_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/github-actions-cost-monitoring_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/k8s-deployment_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/k8s-deployment_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/mfe-plugin-slots_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/mfe-plugin-slots_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/mobile-apps-enterprise_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/mobile-apps-enterprise_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/mongodb-atlas-integration_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/mongodb-atlas-integration_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/multi-site-domains_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/multi-site-domains_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/multi-tenancy-architecture_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/multi-tenancy-architecture_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/observability-stack_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/observability-stack_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/observability-validation-requirements_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/observability-validation-requirements_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/oep48-brand-package_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/oep48-brand-package_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/paragon-design-tokens-migration_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/platform-middleware-custom-apps_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/platform-middleware-custom-apps_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/proctoring-integration_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/proctoring-integration_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/repository-structure_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/repository-structure_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/secrets-management_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/secrets-management_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/slo-sla-service-level-management_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/slo-sla-service-level-management_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/tutor-configuration-resilience_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/tutor-configuration-resilience_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/tutor-configuration_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/tutor-configuration_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/verifiable-credentials-issuance_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/verifiable-credentials-issuance_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/verifiable-credentials-issuer_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/verifiable-credentials-issuer_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/verifiable-credentials-ops_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/verifiable-credentials-ops_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/verifiable-credentials-types_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/verifiable-credentials-types_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/verifiable-credentials-verification_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/verifiable-credentials-verification_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps
+  - old_path: specs/testmaps/video-pipeline-delivery_spec.testmap.yml
+    destination_path: specs/_generated/testmaps/video-pipeline-delivery_spec.testmap.yml
+    destination_root: specs/_generated
+    classification: verification.testmap.legacy
+    action: freeze_legacy
+    owner: agent-testmap-freeze
+    notes: legacy compatibility path; active generated output lives under specs/_generated/testmaps

@@ -1,9 +1,10 @@
-# Cloudflare DNS Checklist (Superseded)
-_Audience: Platform Team • Owner: Platform Team • Last verified: 2026-03-06 • Status: superseded • superseded_by: ../archive/reports/CLOUDFLARE_DNS.md_
-superseded_by: ../archive/reports/CLOUDFLARE_DNS.md
+# Cloudflare DNS Checklist
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: ../archive/reports/CLOUDFLARE_DNS.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `../archive/reports/CLOUDFLARE_DNS.md`
 
-Reason:
-- Consolidated under canonical docs structure during remediation to reduce transitional-path drift.
+Do not add new substantive content here.

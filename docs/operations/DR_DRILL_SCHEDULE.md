@@ -1,6 +1,10 @@
 # DR_DRILL_SCHEDULE.md (Superseded)
 
-This document has moved to:
-- `docs/runbooks/operations/DR_DRILL_SCHEDULE.md`
+_Status: superseded_  
+_Superseded by: docs/ops/runbooks/DR_DRILL_SCHEDULE.md_
 
-Use the canonical path above.
+This path is transitional only. The live document is now maintained at:
+
+- `docs/ops/runbooks/DR_DRILL_SCHEDULE.md`
+
+Do not add new substantive content here.

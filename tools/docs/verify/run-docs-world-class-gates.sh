@@ -26,6 +26,8 @@ CATALOG_GOVERNANCE_SUMMARY="$WORK_DIR/docs-catalog-governance-summary.json"
 EVIDENCE_STATUS_ROOT_SUMMARY="$WORK_DIR/evidence-status-root-summary.json"
 CATALOG_RESIDUE_SUMMARY="$WORK_DIR/docs-catalog-residue-summary.json"
 DOC_ORPHAN_SUMMARY="$WORK_DIR/docs-orphan-summary.json"
+NONSTUB_TRANSITIONAL_SUMMARY="$WORK_DIR/nonstub-transitional-summary.json"
+LEGACY_TESTMAP_FREEZE_SUMMARY="$WORK_DIR/legacy-testmaps-freeze-summary.json"
 DOCS_COMPLIANCE_SUMMARY_PATH="$WORK_DIR/docs-compliance-summary.json"
 
 MAX_AGE_SECONDS=1200
@@ -233,6 +235,8 @@ run_step "build-doc-catalog" python3 tools/docs/verify/build-doc-catalog.py --ch
 run_step "verify-doc-catalog-governance" python3 tools/docs/verify/verify-doc-catalog-governance.py --range "${BASE_REF}...HEAD" --summary-file "$CATALOG_GOVERNANCE_SUMMARY"
 run_step "scan-doc-catalog-residue" python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue --summary-file "$CATALOG_RESIDUE_SUMMARY"
 run_step "scan-doc-orphans" python3 tools/docs/verify/scan-doc-orphans.py --summary-file "$DOC_ORPHAN_SUMMARY"
+run_step "report-nonstub-transitional-files" python3 tools/docs/verify/report-nonstub-transitional-files.py --summary-file "$NONSTUB_TRANSITIONAL_SUMMARY"
+run_step "verify-legacy-testmaps-frozen" python3 tools/docs/verify/verify-legacy-testmaps-frozen.py --range "${BASE_REF}...HEAD" --summary-file "$LEGACY_TESTMAP_FREEZE_SUMMARY"
 run_step "verify-doc-catalog-health" python3 tools/docs/verify/verify-doc-catalog-health.py \
   --max-stale-days 45 \
   --summary-file "$CATALOG_HEALTH_SUMMARY"

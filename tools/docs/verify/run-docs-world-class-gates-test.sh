@@ -26,6 +26,8 @@ grep -q "build-doc-catalog-test.sh" "$SCRIPT_PATH"
 grep -q "verify-evidence-status-root-policy" "$SCRIPT_PATH"
 grep -q "scan-doc-catalog-residue" "$SCRIPT_PATH"
 grep -q "scan-doc-orphans" "$SCRIPT_PATH"
+grep -q "report-nonstub-transitional-files" "$SCRIPT_PATH"
+grep -q "verify-legacy-testmaps-frozen" "$SCRIPT_PATH"
 
 HELP_OUT=$(mktemp)
 INVALID_SYNC_OUT=$(mktemp)

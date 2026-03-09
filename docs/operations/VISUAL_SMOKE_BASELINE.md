@@ -1,10 +1,10 @@
-# Visual Smoke Baseline (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Visual Smoke Baseline
 
-superseded_by: `../runbooks/operations/VISUAL_SMOKE_BASELINE.md`
+_Status: superseded_  
+_Superseded by: ../runbooks/operations/VISUAL_SMOKE_BASELINE.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../runbooks/operations/VISUAL_SMOKE_BASELINE.md`
 
-Reason:
-- Visual smoke runbooks now live under docs/runbooks/operations/.
+Do not add new substantive content here.

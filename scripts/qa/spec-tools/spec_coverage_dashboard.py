@@ -8,9 +8,9 @@ Reads testmap YAML files and generates a coverage dashboard showing:
 - Color-coded tiers (GREEN ≥80%, YELLOW 50-79%, RED <50%)
 
 Usage:
-  python3 spec_coverage_dashboard.py --specs-dir specs/ --testmaps-dir specs/testmaps/
-  python3 spec_coverage_dashboard.py --testmaps-dir specs/testmaps/ --format json
-  python3 spec_coverage_dashboard.py --testmaps-dir specs/testmaps/ --format markdown
+  python3 spec_coverage_dashboard.py --specs-dir specs/ --testmaps-dir specs/_generated/testmaps/
+  python3 spec_coverage_dashboard.py --testmaps-dir specs/_generated/testmaps/ --format json
+  python3 spec_coverage_dashboard.py --testmaps-dir specs/_generated/testmaps/ --format markdown
 """
 # @covers AC-002
 # @spec: ci-cd-pipeline_spec.md

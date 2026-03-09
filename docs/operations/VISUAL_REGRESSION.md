@@ -1,9 +1,10 @@
-# Visual Regression Baseline Governance (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-06 • Status: archive-candidate_
-superseded_by: `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md`
+# Visual Regression Baseline Governance
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md`
 
-Reason:
-- Consolidated to canonical ops runbook location during docs remediation.
+Do not add new substantive content here.

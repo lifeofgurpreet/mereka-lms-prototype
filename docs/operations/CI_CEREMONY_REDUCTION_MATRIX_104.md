@@ -1,10 +1,10 @@
-# CI Ceremony Reduction Matrix 104 (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+# CI Ceremony Reduction Matrix 104
 
-superseded_by: `../ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md`
+_Status: superseded_  
+_Superseded by: ../ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md`
 
-Reason:
-- Canonicalized to `docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md` per docs remediation.
+Do not add new substantive content here.

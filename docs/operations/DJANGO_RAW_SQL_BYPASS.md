@@ -1,10 +1,10 @@
-# Django Raw SQL Bypass (Superseded)
-_Audience: Platform Engineers • Owner: Ops Domain Owner • Last verified: 2026-03-06 • Status: superseded_
+# Django Raw SQL Bypass
 
-superseded_by: `../ops/runbooks/django-raw-sql-bypass.md`
+_Status: superseded_  
+_Superseded by: ../ops/runbooks/django-raw-sql-bypass.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/runbooks/django-raw-sql-bypass.md`
 
-Reason:
-- Consolidated under canonical runbooks to reduce transitional `docs/operations/**` drift.
+Do not add new substantive content here.

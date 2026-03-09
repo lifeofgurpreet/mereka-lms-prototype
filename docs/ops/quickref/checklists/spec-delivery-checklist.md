@@ -18,7 +18,7 @@ Use this before marking a spec as "approved" or "completed".
 - [ ] AC IDs follow naming standard from cross-cutting Section 7
 - [ ] Version field present (semantic versioning)
 - [ ] No duplicate AC IDs
-- [ ] Testmap file exists in specs/testmaps/
+- [ ] Generated testmap output exists in `specs/_generated/testmaps/`
 
 ## Dependencies
 - [ ] depends_on field lists prerequisite specs

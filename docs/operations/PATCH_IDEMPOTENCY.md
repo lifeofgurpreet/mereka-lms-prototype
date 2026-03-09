@@ -1,3 +1,10 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/PATCH_IDEMPOTENCY.md`
+_Status: superseded_  
+_Superseded by: docs/ops/runbooks/PATCH_IDEMPOTENCY.md_
+
+This path is transitional only. The live document is now maintained at:
+
+- `docs/ops/runbooks/PATCH_IDEMPOTENCY.md`
+
+Do not add new substantive content here.

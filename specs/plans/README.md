@@ -58,5 +58,5 @@ use spec-planner to generate implementation tasks from specs/<name>_spec.md
 # Verify all plans exist
 ls specs/plans/*_plan.md | wc -l       # expect: 25
 ls specs/plans/*_testplan.md | wc -l   # expect: 25
-ls specs/testmaps/*_spec.testmap.yml | wc -l  # expect: 25
+ls specs/_generated/testmaps/*_spec.testmap.yml | wc -l  # expect generated coverage set
 ```

@@ -5,10 +5,10 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 TESTMAPS=(
-  "specs/testmaps/multi-site-domains_spec.testmap.yml"
-  "specs/testmaps/multi-tenancy-architecture_spec.testmap.yml"
-  "specs/testmaps/enterprise-microservices_spec.testmap.yml"
-  "specs/testmaps/data-migrations-kajabi-mct_spec.testmap.yml"
+  "specs/_generated/testmaps/multi-site-domains_spec.testmap.yml"
+  "specs/_generated/testmaps/multi-tenancy-architecture_spec.testmap.yml"
+  "specs/_generated/testmaps/enterprise-microservices_spec.testmap.yml"
+  "specs/_generated/testmaps/data-migrations-kajabi-mct_spec.testmap.yml"
 )
 
 DISALLOWED_PATTERN='services/purchase-gateway|verify-purchase-gateway|test_checkout_route|test_fulfillment|test_webhook_handler'

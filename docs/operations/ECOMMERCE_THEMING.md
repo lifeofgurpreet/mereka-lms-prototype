@@ -1,5 +1,10 @@
 # Superseded Path Notice
 
-Canonical document: `docs/reference/operations/ECOMMERCE_THEMING.md`
+_Status: superseded_  
+_Superseded by: docs/reference/operations/ECOMMERCE_THEMING.md_
 
-This compatibility stub remains only to preserve legacy links from older remediation artifacts.
+This path is transitional only. The live document is now maintained at:
+
+- `docs/reference/operations/ECOMMERCE_THEMING.md`
+
+Do not add new substantive content here.

@@ -21,6 +21,10 @@ on:
       - "tools/docs/verify/scan-doc-catalog-residue-test.sh"
       - "tools/docs/verify/scan-doc-orphans.py"
       - "tools/docs/verify/scan-doc-orphans-test.sh"
+      - "tools/docs/verify/report-nonstub-transitional-files.py"
+      - "tools/docs/verify/report-nonstub-transitional-files-test.sh"
+      - "tools/docs/verify/verify-legacy-testmaps-frozen.py"
+      - "tools/docs/verify/verify-legacy-testmaps-frozen-test.sh"
       - "tools/docs/verify/verify-stub-only-transitional-dirs.py"
       - "tools/docs/verify/verify-stub-only-transitional-dirs-test.sh"
       - "tools/docs/verify/verify-archive-write-protection.py"
@@ -415,6 +419,44 @@ jobs:
               fp.write(f"- orphan_docs={payload.get('orphan_docs_count', 'n/a')}\n")
           PY
 
+      - name: Report non-stub transitional files
+        run: |
+          set -euo pipefail
+          NONSTUB_TRANSITIONAL_SUMMARY="${RUNNER_TEMP}/nonstub-transitional-summary.json"
+          python3 tools/docs/verify/report-nonstub-transitional-files.py \
+            --summary-file "$NONSTUB_TRANSITIONAL_SUMMARY"
+          python3 - "$NONSTUB_TRANSITIONAL_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          with open(sys.argv[1], "r", encoding="utf-8") as fp:
+              payload = json.load(fp)
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+              fp.write("### Transitional Roots Non-Stub Inventory (Advisory)\n")
+              fp.write(f"- total_nonstub_files={payload.get('total_nonstub_files_count', 'n/a')}\n")
+              for root in payload.get('transitional_roots', []):
+                  fp.write(
+                      f"- {root.get('root')}: nonstub_files={root.get('nonstub_files_count', 'n/a')} "
+                      f"stub_files={root.get('stub_files_count', 'n/a')}\n"
+                  )
+          PY
+
+      - name: Verify legacy testmaps stay frozen
+        run: |
+          set -euo pipefail
+          LEGACY_TESTMAP_FREEZE_SUMMARY="${RUNNER_TEMP}/legacy-testmaps-freeze-summary.json"
+          python3 tools/docs/verify/verify-legacy-testmaps-frozen.py \
+            --range "$DOCS_POLICY_RANGE" \
+            --summary-file "$LEGACY_TESTMAP_FREEZE_SUMMARY"
+          python3 - "$LEGACY_TESTMAP_FREEZE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          with open(sys.argv[1], "r", encoding="utf-8") as fp:
+              payload = json.load(fp)
+          with open(sys.argv[2], "a", encoding="utf-8") as fp:
+              fp.write("### Legacy Testmap Freeze\n")
+              fp.write(f"- status={payload.get('status', 'unknown')}\n")
+              fp.write(f"- changed_count={payload.get('changed_count', 'n/a')}\n")
+              fp.write(f"- frozen_root={payload.get('frozen_root', 'n/a')}\n")
+          PY
+
       - name: Upload docs catalog health scorecard
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
@@ -436,6 +478,9 @@ jobs:
             ${{ runner.temp }}/docs-scorecard-drift-summary.json
             ${{ runner.temp }}/docs-compliance-summary.json
             ${{ runner.temp }}/docs-catalog-residue-summary.json
+            ${{ runner.temp }}/docs-orphan-summary.json
+            ${{ runner.temp }}/nonstub-transitional-summary.json
+            ${{ runner.temp }}/legacy-testmaps-freeze-summary.json
 
       - name: Generate docs scorecard report markdown
         run: |
@@ -474,6 +519,7 @@ jobs:
             tools/docs/verify/verify-stub-only-transitional-dirs-test.sh \
             tools/docs/verify/verify-archive-write-protection-test.sh \
             tools/docs/verify/verify-evidence-status-root-policy-test.sh \
+            tools/docs/verify/verify-legacy-testmaps-frozen-test.sh \
             tools/docs/verify/verify-docs-policy-test.sh \
             tools/docs/verify/verify-docs-foundation-gates.sh \
             tools/docs/verify/verify-docs-foundation-gates-test.sh \
@@ -509,6 +555,7 @@ jobs:
           tools/docs/verify/verify-stub-only-transitional-dirs-test.sh
           tools/docs/verify/verify-archive-write-protection-test.sh
           tools/docs/verify/verify-evidence-status-root-policy-test.sh
+          tools/docs/verify/verify-legacy-testmaps-frozen-test.sh
           tools/docs/verify/verify-docs-policy-test.sh
           tools/docs/verify/verify-docs-foundation-gates-test.sh
           tools/docs/verify/run-docs-world-class-gates-test.sh

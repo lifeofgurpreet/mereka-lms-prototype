@@ -1,10 +1,10 @@
-# Authenticated Smoke & Accessibility Gates (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Authenticated Smoke & Accessibility Gates
 
-superseded_by: `../runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md`
+_Status: superseded_  
+_Superseded by: ../runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md`
 
-Reason:
-- Accessibility smoke runbooks now live under docs/runbooks/operations/.
+Do not add new substantive content here.

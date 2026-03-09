@@ -1,10 +1,10 @@
-# Secret Rotation Checklist (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Secret Rotation Checklist
 
-superseded_by: `../runbooks/operations/SECRET_ROTATION_CHECKLIST.md`
+_Status: superseded_  
+_Superseded by: ../runbooks/operations/SECRET_ROTATION_CHECKLIST.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../runbooks/operations/SECRET_ROTATION_CHECKLIST.md`
 
-Reason:
-- Operational execution guides now live under docs/runbooks/operations/.
+Do not add new substantive content here.

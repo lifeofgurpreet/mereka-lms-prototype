@@ -20,6 +20,7 @@ Before writing, decide what kind of thing you are producing.
 - Use `docs/ops/**` for operator procedures and quick references.
 - Use `docs/reference/**` for factual reference material.
 - Use `docs/policies/**` for rules, boundaries, and operational policy.
+- Use `docs/meta/**` for docs-program internals, templates, standing orders, and transition ledgers.
 - Use `docs/evidence/**` for active proof.
 - Use `docs/status/**` for active reporting.
 - Use `docs/adr/**` for decision history and open proposals.
@@ -31,6 +32,9 @@ Do not place new canonical docs in transitional roots such as:
 - `docs/branding/**`
 - `docs/runbooks/**`
 - `docs/architecture/**`
+
+If you are writing about the documentation system itself, do not hide that material under
+`docs/concepts/architecture/**` or `docs/ops/**`. Route it to `docs/meta/**` instead.
 
 ## Required metadata
 

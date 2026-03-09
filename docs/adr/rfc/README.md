@@ -21,14 +21,17 @@ Use this surface when you need to review open architectural proposals without tr
 
 The current RFC queue contains the proposed decisions that were moved out of the accepted ADR path:
 
-- `ADR-034` Event Contract and Transport Independence
-- `ADR-035` Frontend Runtime Composition and Dependency Alignment
-- `ADR-036` Cache Topology and Invalidation Strategy
-- `ADR-037` Async Task User-Facing Contract
-- `ADR-038` Commerce System of Record and Reconciliation
-- `ADR-039` Translations and Internationalization Strategy
-- `ADR-040` Internal Packages, Plugins, and Versioning Policy
-- `ADR-041` Authorization and Role-Boundary Model
+- [`ADR-025` Deployment Boundary](ADR-025-deployment-boundary.md)
+- [`RFC-claim-based-role-sync`](RFC-claim-based-role-sync.md)
+- [`RFC-learning-slot-expansion-proposal`](RFC-learning-slot-expansion-proposal.md)
+- [`ADR-034` Event Contract and Transport Independence](034-event-contract-and-transport-independence.md)
+- [`ADR-035` Frontend Runtime Composition and Dependency Alignment](035-frontend-runtime-composition-and-dependency-alignment.md)
+- [`ADR-036` Cache Topology and Invalidation Strategy](036-cache-topology-and-invalidation-strategy.md)
+- [`ADR-037` Async Task User-Facing Contract](037-async-task-user-facing-contract.md)
+- [`ADR-038` Commerce System of Record and Reconciliation](038-commerce-system-of-record-and-reconciliation.md)
+- [`ADR-039` Translations and Internationalization Strategy](039-translations-and-internationalization-strategy.md)
+- [`ADR-040` Internal Packages, Plugins, and Versioning Policy](040-internal-packages-plugins-and-versioning-policy.md)
+- [`ADR-041` Authorization and Role-Boundary Model](041-authorization-and-role-boundary-model.md)
 
 ## What this queue is not
 

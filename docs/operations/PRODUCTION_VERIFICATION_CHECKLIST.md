@@ -1,10 +1,10 @@
-# Production Verification Checklist (Superseded)
-_Audience: SRE + Platform Ops • Owner: Docs Team • Last verified: 2026-03-06 • Status: superseded_
+# Production Verification Checklist
 
-superseded_by: `../ops/runbooks/production-verification-checklist.md`
+_Status: superseded_  
+_Superseded by: ../ops/runbooks/production-verification-checklist.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/runbooks/production-verification-checklist.md`
 
-Reason:
-- Consolidated under canonical runbooks to reduce transitional `docs/operations/**` drift.
+Do not add new substantive content here.

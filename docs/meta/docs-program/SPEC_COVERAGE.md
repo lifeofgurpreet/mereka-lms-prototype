@@ -7,7 +7,7 @@ An AC is considered **covered** when at least one of the following is true:
 
 | Evidence type | Where stored |
 |---|---|
-| A `testmap.yml` entry with a `file:` path or `type: automated` | `specs/testmaps/<spec>.testmap.yml` |
+| A generated `testmap.yml` entry with a `file:` path or `type: automated` | `specs/_generated/testmaps/<spec>.testmap.yml` |
 | A reference to the spec basename in `tests/` | `tests/` |
 | An entry in `specs/manual_verifications.yaml` | `specs/manual_verifications.yaml` |
 
@@ -29,7 +29,7 @@ unverified intent — it may already be broken in production and nobody would kn
    - Lines containing `MUST` or `SHALL` as whole words — fallback for prose-style specs.
 
 3. **Count covered ACs per spec**:
-   - If `specs/testmaps/<spec>.testmap.yml` exists, a Python snippet counts AC
+   - If `specs/_generated/testmaps/<spec>.testmap.yml` exists, a Python snippet counts AC
      blocks that contain either `type: automated` or a `file:` reference.
    - Otherwise, a grep over `tests/` and `specs/manual_verifications.yaml`
      checks whether the spec is referenced at all.
@@ -103,7 +103,7 @@ Lowering the floor to make CI green is a process violation — fix the coverage 
 
 ## Adding coverage for an uncovered AC
 
-1. Open the relevant `specs/testmaps/<spec>.testmap.yml`.
+1. Open the relevant `specs/_generated/testmaps/<spec>.testmap.yml`.
 2. Find the AC entry (e.g. `- id: AC-042`).
 3. Add a `verify` block referencing a real test file:
 

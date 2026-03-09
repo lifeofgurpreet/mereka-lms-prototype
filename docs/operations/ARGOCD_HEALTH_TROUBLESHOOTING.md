@@ -1,6 +1,10 @@
 # ARGOCD_HEALTH_TROUBLESHOOTING.md (Superseded)
 
-This document has moved to:
-- `docs/runbooks/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md`
+_Status: superseded_  
+_Superseded by: docs/ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md_
 
-Use the canonical path above.
+This path is transitional only. The live document is now maintained at:
+
+- `docs/ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md`
+
+Do not add new substantive content here.

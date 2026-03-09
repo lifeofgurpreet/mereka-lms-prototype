@@ -1,6 +1,10 @@
 # INCIDENT_TEMPLATES.md (Superseded)
 
-This document has moved to:
-- `docs/runbooks/operations/INCIDENT_TEMPLATES.md`
+_Status: superseded_  
+_Superseded by: docs/ops/runbooks/INCIDENT_TEMPLATES.md_
 
-Use the canonical path above.
+This path is transitional only. The live document is now maintained at:
+
+- `docs/ops/runbooks/INCIDENT_TEMPLATES.md`
+
+Do not add new substantive content here.

@@ -1,10 +1,10 @@
-# Discovery Service Quick Start (Superseded)
-_Audience: Platform Operators • Owner: Ops Domain Owner • Last verified: 2026-03-06 • Status: superseded_
+# Discovery Service Quick Start
 
-superseded_by: `../ops/quickref/discovery-quickstart.md`
+_Status: superseded_  
+_Superseded by: ../ops/quickref/discovery-quickstart.md_
 
-This document has moved to:
+This path is transitional only. The live document is now maintained at:
+
 - `../ops/quickref/discovery-quickstart.md`
 
-Reason:
-- Consolidated under canonical quick references to reduce transitional `docs/operations/**` drift.
+Do not add new substantive content here.

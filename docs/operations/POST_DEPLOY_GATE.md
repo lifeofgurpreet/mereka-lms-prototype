@@ -1,6 +1,10 @@
-# POST_DEPLOY_GATE.md (Superseded)
+# POST_DEPLOY_GATE.md
 
-This document has moved to:
+_Status: superseded_  
+_Superseded by: docs/runbooks/operations/POST_DEPLOY_GATE.md_
+
+This path is transitional only. The live document is now maintained at:
+
 - `docs/runbooks/operations/POST_DEPLOY_GATE.md`
 
-Use the canonical path above.
+Do not add new substantive content here.
