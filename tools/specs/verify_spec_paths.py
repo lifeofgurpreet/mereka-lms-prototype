@@ -19,6 +19,7 @@ ALLOWED_ROOT_FILES = {
 ALLOWED_PLAN_FILES = {"README.md", "IMPLEMENTATION_ORDER.md", "manual_verifications.yaml"}
 ALLOWED_PROPOSAL_FILES = {"README.md"}
 COMPATIBILITY_ROOT_FILES = {"IMPLEMENTATION_ORDER.md", "manual_verifications.yaml", "_TEMPLATE.md"}
+COMPATIBILITY_ROOT_FILES.add("brand-pack-schema.json")
 COMPATIBILITY_TOKENS = ("superseded", "specs/", "transitional only")
 
 

@@ -20,3 +20,4 @@ Use this root for normative system behavior, interface contracts, and generated 
 - `docs/` explains, governs, and routes humans.
 - Generated spec artifacts stay under `specs/_generated/**`.
 - Frozen legacy verification artifacts stay under `specs/testmaps/**` until retirement.
+- Root-level compatibility wrappers may remain only when they redirect to canonical content under `specs/standards/**`, `specs/plans/**`, `specs/proposals/**`, or `specs/templates/**`.

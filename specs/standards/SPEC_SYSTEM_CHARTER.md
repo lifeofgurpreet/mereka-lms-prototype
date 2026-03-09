@@ -22,3 +22,4 @@
 - specs define expected behavior
 - tests and QA verify against specs
 - generated spec surfaces must not become an independent truth plane
+- root-level compatibility wrappers are allowed only as stub-like redirects to canonical spec lanes
