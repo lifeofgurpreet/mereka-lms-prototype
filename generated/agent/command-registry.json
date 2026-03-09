@@ -1,0 +1,78 @@
+{
+  "commands": [
+    {
+      "command": "python3 tools/docs/build_assistant_surfaces.py --check",
+      "domain": "assistant_surfaces",
+      "owner_repo": "bbi-infrastructure",
+      "when_to_use": "Check generated assistant front doors"
+    },
+    {
+      "command": "make verify",
+      "domain": "bootstrap_lane_topology",
+      "owner_repo": "bbi-infrastructure",
+      "when_to_use": "Validate bootstrap_lane_topology truth or drift risk"
+    },
+    {
+      "command": "python3 tools/docs/build_contract_reference_surfaces.py --check",
+      "domain": "compiled_front_doors",
+      "owner_repo": "bbi-infrastructure",
+      "when_to_use": "Check compiled topology/promotion/service/security references"
+    },
+    {
+      "command": "make verify",
+      "domain": "domain_registry_hostnames",
+      "owner_repo": "bbi-infrastructure",
+      "when_to_use": "Validate domain_registry_hostnames truth or drift risk"
+    },
+    {
+      "command": "bash scripts/qa/verify-release-workflow-invocation.sh",
+      "domain": "promotion_workflow_semantics",
+      "owner_repo": "bbi-infrastructure",
+      "when_to_use": "Validate promotion_workflow_semantics truth or drift risk"
+    },
+    {
+      "command": "python3 tools/knowledge/build_cross_repo_agent_packs.py --check",
+      "domain": "agent_pack_generation",
+      "owner_repo": "mereka-lms",
+      "when_to_use": "Check cross-repo agent packs"
+    },
+    {
+      "command": "python3 tools/knowledge/verify_review_runtime.py --repo-root . --range origin/main...HEAD",
+      "domain": "app_deployment_contracts",
+      "owner_repo": "mereka-lms",
+      "when_to_use": "Validate app_deployment_contracts truth or drift risk"
+    },
+    {
+      "command": "bash scripts/qa/verify-authority-routing.sh",
+      "domain": "canonical_entrypoints",
+      "owner_repo": "mereka-lms",
+      "when_to_use": "Validate canonical_entrypoints truth or drift risk"
+    },
+    {
+      "command": "bash scripts/qa/run-review-runtime-gates.sh",
+      "domain": "runtime_review_evidence_rules",
+      "owner_repo": "mereka-lms",
+      "when_to_use": "Validate runtime_review_evidence_rules truth or drift risk"
+    },
+    {
+      "command": "/home/gurpreet/projects/platform-control-plane/scripts/plan-all.sh --validate-only",
+      "domain": "opentofu_backend_workspace_rules",
+      "owner_repo": "platform-control-plane",
+      "when_to_use": "Validate opentofu_backend_workspace_rules truth or drift risk"
+    },
+    {
+      "command": "bash scripts/qa/verify-release-automation.sh",
+      "domain": "release_lanes",
+      "owner_repo": "platform-control-plane",
+      "when_to_use": "Validate release_lanes truth or drift risk"
+    },
+    {
+      "command": "/home/gurpreet/projects/platform-control-plane/scripts/plan-all.sh --validate-only",
+      "domain": "service_identity_aliases",
+      "owner_repo": "platform-control-plane",
+      "when_to_use": "Validate service_identity_aliases truth or drift risk"
+    }
+  ],
+  "generated_by": "tools/knowledge/build_cross_repo_agent_packs.py",
+  "version": 1
+}
