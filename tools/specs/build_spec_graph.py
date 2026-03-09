@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -11,11 +12,8 @@ def rel(path: Path, repo_root: Path) -> str:
     return path.relative_to(repo_root).as_posix()
 
 
-def main() -> None:
-    repo_root = Path(__file__).resolve().parents[2]
+def build_graph(repo_root: Path) -> dict[str, object]:
     catalog_path = repo_root / "specs" / "catalog.json"
-    output_path = repo_root / "specs" / "_generated" / "graph.json"
-
     catalog = json.loads(catalog_path.read_text())
     nodes: list[dict[str, object]] = []
     edges: list[dict[str, str]] = []
@@ -82,7 +80,7 @@ def main() -> None:
     for node in nodes:
         dedup_nodes[node["id"]] = node
 
-    graph = {
+    return {
         "generated_by": "tools/specs/build_spec_graph.py",
         "root": "specs",
         "catalog": "specs/catalog.json",
@@ -92,9 +90,26 @@ def main() -> None:
         "edges": sorted(edges, key=lambda item: (item["source"], item["edge_type"], item["target"])),
     }
 
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="Fail if graph output would change")
+    args = parser.parse_args()
+
+    repo_root = Path(__file__).resolve().parents[2]
+    output_path = repo_root / "specs" / "_generated" / "graph.json"
+    graph = build_graph(repo_root)
+    rendered = json.dumps(graph, indent=2, sort_keys=True) + "\n"
+
+    if args.check:
+        current = output_path.read_text() if output_path.exists() else ""
+        if current != rendered:
+            raise SystemExit("SPEC_GRAPH_DRIFT: specs/_generated/graph.json is out of date")
+        print(f"SPEC_GRAPH_OK nodes={graph['node_count']} edges={graph['edge_count']} mode=check")
+        return
+
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(graph, indent=2, sort_keys=True) + "\n")
-    print(f"SPEC_GRAPH_OK nodes={graph['node_count']} edges={graph['edge_count']}")
+    output_path.write_text(rendered)
+    print(f"SPEC_GRAPH_OK nodes={graph['node_count']} edges={graph['edge_count']} mode=write")
 
 
 if __name__ == "__main__":

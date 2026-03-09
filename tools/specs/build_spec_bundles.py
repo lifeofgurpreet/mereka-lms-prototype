@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 
@@ -75,15 +76,36 @@ def write(path: Path, content: str) -> None:
     path.write_text(content.rstrip() + "\n")
 
 
-def main() -> None:
-    repo_root = Path(__file__).resolve().parents[2]
+def render_outputs(repo_root: Path) -> dict[Path, str]:
     docs_bundle = repo_root / "docs" / "_generated" / "bundles" / "60-docs-specs-contract.md"
     spec_bundle = repo_root / "specs" / "_generated" / "bundles" / "00-spec-hot-path.md"
     spec_index = repo_root / "specs" / "_generated" / "indexes" / "spec-read-first.md"
-    write(docs_bundle, DOCS_SPEC_BUNDLE)
-    write(spec_bundle, SPEC_HOT_PATH_BUNDLE)
-    write(spec_index, SPEC_READ_FIRST_INDEX)
-    print("SPEC_BUNDLES_OK bundles=3")
+    return {
+        docs_bundle: DOCS_SPEC_BUNDLE.rstrip() + "\n",
+        spec_bundle: SPEC_HOT_PATH_BUNDLE.rstrip() + "\n",
+        spec_index: SPEC_READ_FIRST_INDEX.rstrip() + "\n",
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="Fail if generated bundles would change")
+    args = parser.parse_args()
+
+    repo_root = Path(__file__).resolve().parents[2]
+    outputs = render_outputs(repo_root)
+
+    if args.check:
+        for path, content in outputs.items():
+            current = path.read_text() if path.exists() else ""
+            if current != content:
+                raise SystemExit(f"SPEC_BUNDLES_DRIFT: {path.relative_to(repo_root)} is out of date")
+        print("SPEC_BUNDLES_OK bundles=3 mode=check")
+        return
+
+    for path, content in outputs.items():
+        write(path, content)
+    print("SPEC_BUNDLES_OK bundles=3 mode=write")
 
 
 if __name__ == "__main__":
