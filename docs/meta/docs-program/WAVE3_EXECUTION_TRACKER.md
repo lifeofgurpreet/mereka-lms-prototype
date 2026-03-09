@@ -4,8 +4,8 @@
 - docs/wave3-metadata-compiler
 
 ## Last completed batch
-- commit: pending Packet D proposal legacy status tail HEAD
-- scope: Packet D
+- commit: pending Packet F enforcement hardening HEAD
+- scope: Packet F
 - validators run:
   - python3 tools/specs/report_spec_metadata_coverage.py
   - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
@@ -37,32 +37,32 @@
   - Packet D (legacy status tail normalization)
   - Packet E (generated surfaces truth pass)
   - Packet D (proposal legacy status tail)
+  - Packet F (taxonomy enforcement hardening)
 - latest commit SHA:
   - pending current packet HEAD
 - open residue:
   - none
 - next packet:
-  - Packet F (enforcement hardening)
+  - Packet G (closeout of the run)
 - stop conditions encountered:
   - none
 - decisions already locked:
   - Kajabi/MCT remains normative by explicit decision
 - metrics delta:
-  - before: legacy status hits = 2
+  - before: legacy status hits = 0
   - after: legacy status hits = 0
 - files normalized in this packet:
-  - specs/proposals/external-registration-hubspot_spec.md
-  - specs/proposals/proctoring-integration_spec.md
-  - specs/catalog.json
+  - specs/standards/spec-taxonomy.yaml
+  - tools/specs/verify_spec_taxonomy.py
 - remaining legacy status hits:
   - none
 
 ## Current target batch
 - files: []
 - goal:
-  - Packet D completed
+  - Packet F completed
 - stop condition:
   - validator set passes and packet commit is created
 
 ## Next queued batch
-- Packet F: enforcement hardening
+- Packet G: closeout of the run

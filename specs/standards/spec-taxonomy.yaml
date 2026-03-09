@@ -4,11 +4,10 @@ status:
   - draft
   - active
   - approved
+  - ready
   - deprecated
   - superseded
-  - completed
-  - in_progress
-  - deferred
+  - deferred_until_2027
 
 spec_class:
   - system
