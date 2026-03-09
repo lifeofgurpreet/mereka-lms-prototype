@@ -13,8 +13,8 @@
 
 ## Specs
 
-| # | Title | Type | Status | Version | Tier | ACs | Updated |
-|---|-------|------|--------|---------|------|-----|---------|
+| # | Title | Class | Status | Version | Tier | ACs | Reviewed |
+|---|-------|-------|--------|---------|------|-----|----------|
 | 1 | [Advanced Assessment & XQueue Integration (Non-Proctored)](advanced-assessment-xqueue_spec.md) | feature_spec | draft | 1.0.0 | — | 44 | 2026-02-10 |
 | 2 | [Analytics Pipeline (Aspects/Panorama)](analytics-pipeline_spec.md) | data_pipeline_spec | approved | 1.0.0 | — | 8 | 2026-02-25 |
 | 3 | [Authentication & SSO Enterprise Integration](auth-sso-enterprise_spec.md) | feature_spec | in_progress | 1.0.0 | — | 45 | 2026-02-10 |
