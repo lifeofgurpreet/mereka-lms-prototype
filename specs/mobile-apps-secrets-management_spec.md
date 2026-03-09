@@ -1,23 +1,41 @@
 ---
+id: "SPEC-MOBILE-SECRETS-MANAGEMENT"
 title: "Mobile Apps API Keys & Secrets Management"
 type: "feature_spec"
 status: "draft"
+spec_class: "security"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-13"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "platform"
+normativity: "proposed"
 last_updated: "2026-02-13"
 version: "1.0.0"
 depends_on:
   - "specs/secrets-management_spec.md"
   - "specs/mobile-apps-enterprise_spec.md"
   - "specs/ci-cd-pipeline_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces:
+  - "github-actions"
+  - "app-store-connect"
+  - "google-play"
+tags:
+  - "platform.control-plane"
+  - "auth.oidc"
+  - "build.version-pin"
+summary: "Defines the proposed secret, credential, and API-key management contract for Mereka mobile application delivery pipelines."
 links:
   related_docs:
-    - "docs/APPLE_SETUP_STATUS.md"
-    - "docs/GITHUB_SECRETS_READY.md"
-    - "docs/ios-cicd-spec.md"
-    - "docs/IOS_APP_CI_SETUP.md"
-    - "docs/IOS_DEPLOYMENT_LEARNINGS.md"
+    - "docs/archive/reports/APPLE_SETUP_STATUS.md"
+    - "docs/archive/ios/IOS_APP_CI_SETUP.md"
+    - "docs/archive/ios/IOS_DEPLOYMENT_LEARNINGS.md"
     - "docs/runbooks/operations/MOBILE_DEPLOYMENT.md"
+    - "docs/reference/operations/MOBILE_SECRETS_MANAGEMENT.md"
   related_specs:
     - "specs/secrets-management_spec.md"
     - "specs/mobile-apps-enterprise_spec.md"
