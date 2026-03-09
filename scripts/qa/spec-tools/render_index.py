@@ -139,6 +139,7 @@ def main():
     parser.add_argument("--output", "-o", default="specs/INDEX.md", help="Output file path")
     parser.add_argument("--specs-dir", default="specs", help="Specs directory")
     parser.add_argument("--dry-run", action="store_true", help="Print to stdout instead of writing")
+    parser.add_argument("--check", action="store_true", help="Fail if output differs from generated content")
     args = parser.parse_args()
 
     specs_dir = Path(args.specs_dir)
@@ -148,10 +149,18 @@ def main():
 
     content = render_index(specs_dir)
 
-    if args.dry_run:
+    output_path = Path(args.output)
+
+    if args.check:
+        current = output_path.read_text() if output_path.exists() else None
+        if current != content:
+            print(f"SPEC_INDEX_DRIFT_FAIL output={args.output}", file=sys.stderr)
+            sys.exit(1)
+        print(f"SPEC_INDEX_OK output={args.output} mode=check")
+    elif args.dry_run:
         print(content)
     else:
-        Path(args.output).write_text(content)
+        output_path.write_text(content)
         print(f"Generated {args.output} ({len(content)} bytes)")
 
 
