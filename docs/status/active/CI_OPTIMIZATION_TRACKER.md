@@ -4,7 +4,7 @@
 
 **Objective**: Migrate heavy CI/CD workloads to self-hosted Kubernetes runners (ARC), eliminate compute waste, consolidate micro-jobs, and optimize caching — driving GitHub Actions costs from ~$56/month to near-zero without compromising any quality gates.
 
-**Parent doc**: [CI_PIPELINE_COST_OPTIMIZATION.md](../learnings/CI_PIPELINE_COST_OPTIMIZATION.md) (analysis & rationale)
+**Parent doc**: [CI_PIPELINE_COST_OPTIMIZATION.md](../../ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md) (analysis & rationale)
 **TRACKER.md IDs**: T150–T156 (Sprint 12)
 
 **Execution rule**: Proceed phase by phase. Do not skip to Phase 4 before Phase 3 is completed — the composite actions built in Phase 3 are required to cleanly flatten the jobs in Phase 4. Update this tracker's checkboxes and add file path notes as you commit changes.

@@ -146,7 +146,7 @@ This document does not replace broader platform standards, runbooks, or implemen
 ## References
 
 - [ADR-013: Studio SSO Bypass Middleware](013-studio-sso-bypass-middleware.md)
-- [ADR-002: Multisite Architecture](002-multisite-architecture.md)
+- [ADR-002: Multisite Architecture](historical/002-multisite-architecture.md)
 - [RFC 6265 §5.4 — The Cookie Header](https://datatracker.ietf.org/doc/html/rfc6265#section-5.4)
 - [Django SafeSessionMiddleware](https://github.com/openedx/edx-django-utils/blob/master/edx_django_utils/sessions/middleware.py)
 - [upstream `DCS_SESSION_COOKIE_SAMESITE` default in lms/envs/common.py](https://github.com/openedx/edx-platform/blob/open-release/ulmo.1/lms/envs/common.py)

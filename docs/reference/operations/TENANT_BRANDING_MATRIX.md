@@ -178,10 +178,10 @@ The script checks:
 
 ## References
 
-- [`infrastructure/tutor/plugins/mereka_lms.py`](../../infrastructure/tutor/plugins/mereka_lms.py) — `SITE_VARIANTS` map, `MerekaFooter` component
+- [`infrastructure/tutor/plugins/mereka_lms.py`](../../../infrastructure/tutor/plugins/mereka_lms.py) — `SITE_VARIANTS` map, `MerekaFooter` component
 - [`docs/reference/operations/FOOTER_VARIANT_MATRIX.md`](FOOTER_VARIANT_MATRIX.md) — per-domain footer skin (companion document)
-- [`assets/branding/tokens.css`](../../assets/branding/tokens.css) — global design tokens (CSS custom properties)
-- [`infrastructure/tutor/plugins/multi-tenancy/`](../../infrastructure/tutor/plugins/multi-tenancy/) — TenantConfig model + TenantResolutionMiddleware
-- [`scripts/tenants/provision-tenant.sh`](../../scripts/tenants/provision-tenant.sh) — tenant provisioning
-- [`scripts/qa/verify-tenant-branding-matrix.sh`](../../scripts/qa/verify-tenant-branding-matrix.sh) — verification script
-- [`scripts/qa/verify-footer-variant-matrix.sh`](../../scripts/qa/verify-footer-variant-matrix.sh) — footer variant verification
+- [`assets/branding/tokens.css`](../../../assets/branding/tokens.css) — global design tokens (CSS custom properties)
+- [`infrastructure/tutor/plugins/multi-tenancy/`](../../../infrastructure/tutor/plugins/multi-tenancy/) — TenantConfig model + TenantResolutionMiddleware
+- [`scripts/tenants/provision-tenant.sh`](../../../scripts/tenants/provision-tenant.sh) — tenant provisioning
+- [`scripts/qa/verify-tenant-branding-matrix.sh`](../../../scripts/qa/verify-tenant-branding-matrix.sh) — verification script
+- [`scripts/qa/verify-footer-variant-matrix.sh`](../../../scripts/qa/verify-footer-variant-matrix.sh) — footer variant verification

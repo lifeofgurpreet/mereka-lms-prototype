@@ -41,7 +41,7 @@ flowchart TD
 **Related Runbooks**:
 - [Performance Degradation](performance-degradation.md) - Slow responses, high latency
 - [Database Issues](database-issues.md) - MySQL/MongoDB connection failures
-- Certificate Issues (no dedicated runbook; see [INCIDENT_RESPONSE.md](../../operations/INCIDENT_RESPONSE.md) TLS section) - TLS/SSL problems
+- Certificate Issues (no dedicated runbook; see [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) TLS section) - TLS/SSL problems
 
 ---
 

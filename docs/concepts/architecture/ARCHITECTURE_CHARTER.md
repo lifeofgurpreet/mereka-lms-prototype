@@ -3,6 +3,7 @@ title: Architecture Charter
 owner: Platform Team
 status: canonical
 last_reviewed: 2026-03-08
+last_updated: 2026-03-10
 canonical_root: docs/concepts/architecture
 doc_class: architecture-standard
 summary: Defines the documentation and architecture control plane, winning roots, and non-negotiable authority rules.

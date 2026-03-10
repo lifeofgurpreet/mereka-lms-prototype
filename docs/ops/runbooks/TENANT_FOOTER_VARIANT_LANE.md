@@ -90,7 +90,7 @@ on component mount using the browser's own hostname.
 
 **Offline (source check)**:
 ```bash
-grep -A5 "const SITE_VARIANTS" infrastructure/tutor/plugins/mereka_lms.py
+grep -A5 "const SITE_VARIANTS" ../../../infrastructure/tutor/plugins/mereka_lms.py
 ```
 
 **Live MFE config endpoint** (shows what the fallback reads):
@@ -113,7 +113,7 @@ curl -s "https://skillourfuture.academy.mereka.io/api/mfe_config/v1" | python3 -
 
 ### Multi-Tenancy Middleware Traceability
 
-The `TenantResolutionMiddleware` in `infrastructure/tutor/plugins/multi-tenancy/` resolves
+The `TenantResolutionMiddleware` in `../../../infrastructure/tutor/plugins/multi-tenancy/` resolves
 the domain to a `TenantConfig` record and injects `SITE_NAME` into the Django request.
 This value then flows into the MFE via `/api/mfe_config/v1`. The footer's **fallback**
 variant reads `config.SITE_NAME` from this endpoint — so even for unknown hostnames,
@@ -341,13 +341,13 @@ brand — which is acceptable for staging but must not occur in production for a
 
 ## Section 7: References
 
-- [`infrastructure/tutor/plugins/mereka_lms.py`](../../infrastructure/tutor/plugins/mereka_lms.py) — `SITE_VARIANTS` map, `MerekaFooter` component
-- [`infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json`](../../infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json) — footer.variant enum schema
-- [`docs/reference/operations/FOOTER_VARIANT_MATRIX.md`](FOOTER_VARIANT_MATRIX.md) — per-domain matrix table (existing)
-- [`docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md`](MULTITENANT_BRAND_PLATFORM.md) — brand platform governance
-- [`docs/reference/operations/TENANT_BRANDING_SURFACE_MATRIX.md`](TENANT_BRANDING_SURFACE_MATRIX.md) — all branding surfaces
-- [`scripts/qa/verify-tenant-footer-variant-lane.sh`](../../scripts/qa/verify-tenant-footer-variant-lane.sh) — this bead's verification script
-- [`scripts/qa/verify-footer-variant-matrix.sh`](../../scripts/qa/verify-footer-variant-matrix.sh) — SITE_VARIANTS DRY + completeness check
-- [`scripts/qa/verify-tenant-branding-runtime.sh`](../../scripts/qa/verify-tenant-branding-runtime.sh) — live domain routing check
-- [`scripts/tenants/provision-tenant.sh`](../../scripts/tenants/provision-tenant.sh) — tenant provisioning
-- [`infrastructure/tutor/apply-patches.sh`](../../infrastructure/tutor/apply-patches.sh) — must run after `tutor config save`
+- [`infrastructure/tutor/plugins/mereka_lms.py`](../../../infrastructure/tutor/plugins/mereka_lms.py) — `SITE_VARIANTS` map, `MerekaFooter` component
+- [`infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json`](../../../infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json) — footer.variant enum schema
+- [`docs/reference/operations/FOOTER_VARIANT_MATRIX.md`](../../reference/operations/FOOTER_VARIANT_MATRIX.md) — per-domain matrix table
+- [`docs/guides/branding/BRANDING_OPERATING_MODEL.md`](../../guides/branding/BRANDING_OPERATING_MODEL.md) — brand platform governance
+- [`docs/reference/operations/TENANT_BRANDING_MATRIX.md`](../../reference/operations/TENANT_BRANDING_MATRIX.md) — all branding surfaces
+- [`scripts/qa/verify-tenant-footer-variant-lane.sh`](../../../scripts/qa/verify-tenant-footer-variant-lane.sh) — this bead's verification script
+- [`scripts/qa/verify-footer-variant-matrix.sh`](../../../scripts/qa/verify-footer-variant-matrix.sh) — SITE_VARIANTS DRY + completeness check
+- [`scripts/qa/verify-tenant-branding-runtime.sh`](../../../scripts/qa/verify-tenant-branding-runtime.sh) — live domain routing check
+- [`scripts/tenants/provision-tenant.sh`](../../../scripts/tenants/provision-tenant.sh) — tenant provisioning
+- [`infrastructure/tutor/apply-patches.sh`](../../../infrastructure/tutor/apply-patches.sh) — must run after `tutor config save`
