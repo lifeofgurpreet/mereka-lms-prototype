@@ -719,7 +719,7 @@ Each MCT category becomes 1 Open edX course. MCT "courses" (modules) become sect
 | `validate_course_content.py` | 157 | **Active** | Post-import validation |
 | `cleanup_duplicate_courses.py` | 269 | Done | No longer needed (instance empty) |
 | `migrate_mct22_enrollments.py` | 207 | Done | No longer needed |
-| `download_thumbnails.py` | 157 | **Broken** | Wrong path (/home/dev/ not /home/gurpreet/) |
+| `download_thumbnails.py` | 157 | **Broken** | Script still assumes a workstation-specific local path and needs path normalization |
 | `create_programs*.py` (5 files) | ~1000 | Superseded | Multiple program creation iterations |
 | `fix_mux_titles.py` | 100 | Done | One-time Mux title fix |
 
@@ -744,8 +744,8 @@ Queried via `kubectl exec` into the LMS pod in `mereka-lms` namespace.
 | oidc-test-* (x2) | oidc-test-*@mereka.io | No | No |
 | authentik_test | authentik_test@mereka.io | Yes | No |
 | admin | admin@mereka.io | Yes | Yes |
-| gurpreet@biji-biji.com | gurpreet@biji-biji.com | Yes | Yes |
-| malasari@mereka.my | malasari@mereka.my | Yes | Yes |
+| platform-admin-1 | `<platform-admin-email>` | Yes | Yes |
+| platform-admin-2 | `<platform-admin-email>` | Yes | Yes |
 
 ### Infrastructure (running)
 
