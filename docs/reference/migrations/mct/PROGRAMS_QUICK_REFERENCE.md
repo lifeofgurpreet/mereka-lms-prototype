@@ -2,7 +2,7 @@
 
 **Status:** Planning Phase
 **Date:** 2025-12-18
-**Full Documentation:** [PROGRAMS_SETUP_PLAN.md](./PROGRAMS_SETUP_PLAN.md)
+**Full Documentation:** [PROGRAMS_SETUP_PLAN.md](../../../migrations/mct/PROGRAMS_SETUP_PLAN.md)
 
 ---
 
@@ -186,7 +186,7 @@ kubectl exec -it -n mereka-lms <credentials-pod> -- bash
 
 ### Get JWT Token
 ```python
-# See PROGRAMS_SETUP_PLAN.md for complete authentication code
+# See ../../../migrations/mct/PROGRAMS_SETUP_PLAN.md for complete authentication code
 token = get_jwt_token(
     "https://academyv2.mereka.io",
     "admin@example.com",
@@ -215,7 +215,7 @@ curl https://discovery.academyv2.mereka.io/api/v1/programs/ \
 
 ## Next Steps
 
-1. Review full setup plan: `PROGRAMS_SETUP_PLAN.md`
+1. Review full setup plan: `docs/migrations/mct/PROGRAMS_SETUP_PLAN.md`
 2. Verify Discovery and Credentials services are running
 3. Update course mapping JSON with actual Open edX course keys
 4. Begin implementation with Priority 1 program
@@ -224,4 +224,4 @@ curl https://discovery.academyv2.mereka.io/api/v1/programs/ \
 
 ---
 
-**For Questions:** See full documentation in `PROGRAMS_SETUP_PLAN.md`
+**For Questions:** See full documentation in `docs/migrations/mct/PROGRAMS_SETUP_PLAN.md`

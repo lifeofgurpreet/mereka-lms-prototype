@@ -6786,15 +6786,6 @@
     "type": "index"
   },
   {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-09-20",
-    "owner": "Migration Squad",
-    "path": "migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
     "canonical_conflict_group": "kajabi-lesson-content-fix",
     "freshness_risk": "low",
     "last_verified_or_updated": "2025-08-18",
@@ -6845,24 +6836,6 @@
     "last_verified_or_updated": "2025-11-09",
     "owner": "Migration Squad",
     "path": "migrations/kajabi/ROLLBACK_AND_SAFETY.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-15",
-    "owner": "Migration Squad",
-    "path": "migrations/mct/API_EXPLORATION.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-20",
-    "owner": "Migration Squad",
-    "path": "migrations/mct/DATA_MODEL_COMPLETE.md",
     "status": "supporting",
     "type": "other"
   },
@@ -6932,33 +6905,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-08 | Owner: Platform Eng",
-    "owner": "Platform Eng",
-    "path": "migrations/mct/MCT_PLATFORM_RESEARCH.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-12-17",
-    "owner": "Migration Squad",
-    "path": "migrations/mct/MCT_TO_OPENEDX_MAPPING.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "migrations/mct/MCT_USER_IMPORT_COMPLETE.md",
@@ -6971,15 +6917,6 @@
     "last_verified_or_updated": "2025-08-31",
     "owner": "Migration Squad",
     "path": "migrations/mct/MIGRATION_PLAN.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "migrations/mct/OPENEDX_PROGRAMS_SETUP.md",
     "status": "supporting",
     "type": "other"
   },
@@ -9596,6 +9533,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2025-09-20",
+    "owner": "Migration Squad",
+    "path": "reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reference/migrations/kajabi/OPS_KAJABI_README.md",
@@ -9632,9 +9578,63 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2025-08-15",
+    "owner": "Migration Squad",
+    "path": "reference/migrations/mct/API_EXPLORATION.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-08-20",
+    "owner": "Migration Squad",
+    "path": "reference/migrations/mct/DATA_MODEL_COMPLETE.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2025-08-31",
     "owner": "Migration Squad",
     "path": "reference/migrations/mct/DOCUMENTATION_INDEX.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-08 | Owner: Platform Eng",
+    "owner": null,
+    "path": "reference/migrations/mct/MCT_PLATFORM_RESEARCH.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-12-17",
+    "owner": "Migration Squad",
+    "path": "reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/migrations/mct/OPENEDX_PROGRAMS_SETUP.md",
     "status": "supporting",
     "type": "other"
   },
