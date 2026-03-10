@@ -104,7 +104,7 @@ crosswalk:
     deployment_repo: bbi-infrastructure
     app_repo_surfaces:
       - specs/observability-stack_spec.md
-      - docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md
+      - docs/policies/operations/OBSERVABILITY_OWNERSHIP.md
       - docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
       - docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md
     infra_counterpart:

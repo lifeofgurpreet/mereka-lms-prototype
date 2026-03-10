@@ -1,42 +1,36 @@
 # Monitoring and Observability
 _Audience: Operators • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
-Use this root when you need the operator-facing monitoring and observability surface. This is where operators should start for dashboards, alerting, telemetry posture, and logging/Sentry reference. It is not the place for live incident status or architecture decisions.
+Use this root as a small operator portal into the canonical monitoring surfaces. It does not own local monitoring content; it routes operators directly to the live runbook, reference, policy, and status docs.
 
 ## Start Here
 
 | If you need to... | Read this first | Then go deeper in |
 |---|---|---|
 | Get oriented quickly on the monitoring surface | [`../runbooks/OBSERVABILITY_QUICKSTART.md`](../runbooks/OBSERVABILITY_QUICKSTART.md) | [`../../reference/operations/README.md`](../../reference/operations/README.md) |
-| Check logging and Sentry behavior | [`LOGGING_AND_SENTRY.md`](LOGGING_AND_SENTRY.md) | [`../../reference/operations/MONITORING.md`](../../reference/operations/MONITORING.md) |
-| Understand who owns what in observability | [`OBSERVABILITY_OWNERSHIP.md`](OBSERVABILITY_OWNERSHIP.md) | [`../../policies/operations/README.md`](../../policies/operations/README.md) |
-| Compare expected versus actual monitoring coverage | [`OBSERVABILITY_PARITY_MATRIX.md`](OBSERVABILITY_PARITY_MATRIX.md) | [`../../status/readiness/README.md`](../../status/readiness/README.md) |
-| Check retention or artifact handling | [`OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`](OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md) | [`../../evidence/operations/README.md`](../../evidence/operations/README.md) |
+| Check logging and Sentry behavior | [`../../reference/operations/LOGGING_AND_SENTRY.md`](../../reference/operations/LOGGING_AND_SENTRY.md) | [`../../reference/operations/MONITORING.md`](../../reference/operations/MONITORING.md) |
+| Understand who owns what in observability | [`../../policies/operations/OBSERVABILITY_OWNERSHIP.md`](../../policies/operations/OBSERVABILITY_OWNERSHIP.md) | [`../../policies/operations/README.md`](../../policies/operations/README.md) |
+| Compare expected versus actual monitoring coverage | [`../../reference/operations/OBSERVABILITY_PARITY_MATRIX.md`](../../reference/operations/OBSERVABILITY_PARITY_MATRIX.md) | [`../../status/readiness/README.md`](../../status/readiness/README.md) |
+| Check retention or artifact handling | [`../../policies/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`](../../policies/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md) | [`../../evidence/operations/README.md`](../../evidence/operations/README.md) |
+| Review active observability work | [`../../status/active/OBSERVABILITY_ENHANCEMENT_PLAN.md`](../../status/active/OBSERVABILITY_ENHANCEMENT_PLAN.md) | [`../../status/active/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`](../../status/active/OBSERVABILITY_ROADMAP_MEREKA_LMS.md) |
 
-## Use this directory for
+## This portal points to
 
-- monitoring reference material
-- observability operating guidance
-- alerting ownership and retention policy references
-- dashboards, telemetry, and logging guidance for operators
+- [`../runbooks/OBSERVABILITY_QUICKSTART.md`](../runbooks/OBSERVABILITY_QUICKSTART.md) for the fastest operator route
+- [`../../reference/operations/MONITORING.md`](../../reference/operations/MONITORING.md) for monitoring reference
+- [`../../reference/operations/LOGGING_AND_SENTRY.md`](../../reference/operations/LOGGING_AND_SENTRY.md) for logs and Sentry
+- [`../../reference/operations/OBSERVABILITY_PARITY_MATRIX.md`](../../reference/operations/OBSERVABILITY_PARITY_MATRIX.md) for expected-vs-actual parity
+- [`../../policies/operations/OBSERVABILITY_OWNERSHIP.md`](../../policies/operations/OBSERVABILITY_OWNERSHIP.md) for ownership and change control
+- [`../../policies/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`](../../policies/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md) for retention rules
+- [`../../status/active/OBSERVABILITY_ENHANCEMENT_PLAN.md`](../../status/active/OBSERVABILITY_ENHANCEMENT_PLAN.md) for active execution work
+- [`../../status/active/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`](../../status/active/OBSERVABILITY_ROADMAP_MEREKA_LMS.md) for roadmap context
 
-## Do not use this directory for
+## This portal does not contain
 
-- active incident or readiness status, which belongs in `docs/status/**`
-- cold historical evidence, which belongs in `docs/archive/evidence/**`
-- general architecture policy, which belongs in `docs/concepts/architecture/**` or `docs/policies/**`
-
-## Monitoring and telemetry docs
-
-| Doc | Use it when... |
-|---|---|
-| [`../runbooks/OBSERVABILITY_QUICKSTART.md`](../runbooks/OBSERVABILITY_QUICKSTART.md) | You need the fastest route into the observability surface. |
-| [`LOGGING_AND_SENTRY.md`](LOGGING_AND_SENTRY.md) | You are checking application logs, Sentry wiring, or error tracking posture. |
-| [`OBSERVABILITY_OWNERSHIP.md`](OBSERVABILITY_OWNERSHIP.md) | You need to know who owns an alerting or telemetry concern. |
-| [`OBSERVABILITY_PARITY_MATRIX.md`](OBSERVABILITY_PARITY_MATRIX.md) | You are checking whether expected telemetry is actually present. |
-| [`OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`](OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md) | You need artifact retention expectations for observability outputs. |
-| [`OBSERVABILITY_ENHANCEMENT_PLAN.md`](OBSERVABILITY_ENHANCEMENT_PLAN.md) | You need the current improvement direction for the observability surface. |
-| [`OBSERVABILITY_ROADMAP_MEREKA_LMS.md`](OBSERVABILITY_ROADMAP_MEREKA_LMS.md) | You need the broader observability roadmap and sequencing context. |
+- local monitoring leaf docs
+- active incident or readiness status
+- cold historical evidence
+- architecture authority
 
 ## What This Root Is Not
 

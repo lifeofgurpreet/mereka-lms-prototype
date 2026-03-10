@@ -36,7 +36,7 @@ summary: "Normative integration contract for metrics, logs, traces, alerting, an
 links:
   related_docs:
     - "docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md"
-    - "docs/ops/monitoring/OBSERVABILITY_ENHANCEMENT_PLAN.md"
+    - "docs/status/active/OBSERVABILITY_ENHANCEMENT_PLAN.md"
     - "docs/policies/operations/OBSERVABILITY_OWNERSHIP.md"
     - "docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
     - "docs/reference/operations/MONITORING.md"

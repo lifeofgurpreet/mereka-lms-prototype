@@ -12,8 +12,8 @@ superseded_by: docs/ops/ci-cd/README.md
 Use these canonical entrypoints instead:
 
 - `docs/ops/ci-cd/README.md`
-- `docs/ops/ci-cd/TUTOR_CONFIG_CI.md`
 - `docs/ops/ci-cd/FASTLANE_AUTOMATION.md`
-- `docs/ops/ci-cd/ios-cicd-spec.md`
+- `docs/reference/operations/TUTOR_CONFIG_CI.md`
+- `docs/reference/operations/IOS_CI_CD_REFERENCE.md`
 
 Do not add new substantive content under `docs/ci-cd/**`.

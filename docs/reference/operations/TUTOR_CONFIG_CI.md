@@ -1,4 +1,5 @@
-# Tutor Configuration CI/CD
+# Tutor Configuration CI/CD Reference
+_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
 This document describes the automated Tutor configuration verification workflows that run on every code change.
 

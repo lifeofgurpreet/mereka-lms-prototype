@@ -31,7 +31,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 |---|---:|---|---|
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 34 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/status/active/CI_OPTIMIZATION_TRACKER.md | 28 | Ops Platform Owner | fix inline path references and missing commands |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 19 | Ops Platform Owner | fix inline path references and missing commands |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 19 | Ops Platform Owner | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md | 15 | Platform Architecture | fix inline path references and missing commands |
 | docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 13 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 11 | Unassigned (determine domain owner) | fix inline path references and missing commands |
@@ -511,25 +511,25 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/status/active/blocked-epics.md | 70 | docs/archive/evidence/operations/1bdm1-mux-creds-mapping-cleanup.md |
 | docs/status/active/blocked-epics.md | 95 | docs/archive/evidence/operations/1bdm1-mux-creds-mapping-cleanup.md |
 | docs/reference/operations/CI_CD_SETUP.md | 152 | .github/workflows/docs-policy.yml |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 33 | .github/workflows/docs-policy.yml |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 70 | scripts/qa/verify-a11y-tenant-branding-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 71 | scripts/qa/verify-accessibility-audit-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 72 | scripts/qa/verify-certificate-branding-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 73 | scripts/qa/verify-cicd-tutor-config-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 74 | scripts/qa/verify-cross-browser-branding-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 75 | scripts/qa/verify-email-template-branding-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 76 | scripts/qa/verify-frontend-before-after-visuals-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 77 | scripts/qa/verify-frontend-branding-closure-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 78 | scripts/qa/verify-frontend-performance-spotcheck-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 79 | scripts/qa/verify-frontend-runtime-qa-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 80 | scripts/qa/verify-mfe-live-dom-audit-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 81 | scripts/qa/verify-mfe-selector-hardening-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 82 | scripts/qa/verify-npm-start-smoke-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 83 | scripts/qa/verify-paragon-runtime-contract-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 84 | scripts/qa/verify-paragon-theme-budget-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 85 | scripts/qa/verify-phase2-smoke-evidence-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 86 | scripts/qa/verify-release-evidence-workflow.sh |
-| docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 87 | scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 33 | .github/workflows/docs-policy.yml |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 70 | scripts/qa/verify-a11y-tenant-branding-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 71 | scripts/qa/verify-accessibility-audit-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 72 | scripts/qa/verify-certificate-branding-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 73 | scripts/qa/verify-cicd-tutor-config-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 74 | scripts/qa/verify-cross-browser-branding-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 75 | scripts/qa/verify-email-template-branding-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 76 | scripts/qa/verify-frontend-before-after-visuals-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 77 | scripts/qa/verify-frontend-branding-closure-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 78 | scripts/qa/verify-frontend-performance-spotcheck-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 79 | scripts/qa/verify-frontend-runtime-qa-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 80 | scripts/qa/verify-mfe-live-dom-audit-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 81 | scripts/qa/verify-mfe-selector-hardening-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 82 | scripts/qa/verify-npm-start-smoke-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 83 | scripts/qa/verify-paragon-runtime-contract-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 84 | scripts/qa/verify-paragon-theme-budget-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 85 | scripts/qa/verify-phase2-smoke-evidence-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 86 | scripts/qa/verify-release-evidence-workflow.sh |
+| docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 87 | scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh |
 | docs/status/active/CI_OPTIMIZATION_TRACKER.md | 131 | .github/workflows/verify-specs.yml |
 | docs/status/active/CI_OPTIMIZATION_TRACKER.md | 133 | .github/workflows/tutor-config-verify.yml |
 | docs/status/active/CI_OPTIMIZATION_TRACKER.md | 148 | .github/workflows/alert-routing-audit.yml |
@@ -559,7 +559,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/status/active/CI_OPTIMIZATION_TRACKER.md | 491 | .github/workflows/alert-routing-audit.yml |
 | docs/status/active/CI_OPTIMIZATION_TRACKER.md | 492 | .github/workflows/observability-parity-runtime.yml |
 | reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md | 282 | .github/actions/gcp-gke-auth/action.yml |
-| docs/ops/ci-cd/TUTOR_CONFIG_CI.md | 9 | .github/workflows/tutor-config-verify.yml |
+| docs/reference/operations/TUTOR_CONFIG_CI.md | 9 | .github/workflows/tutor-config-verify.yml |
 | docs/ops/quickref/verification-scripts.md | 310 | scripts/qa/verify-lms-health.sh |
 | docs/ops/quickref/verification-scripts.md | 311 | scripts/qa/verify-cms-health.sh |
 | docs/ops/quickref/verification-scripts.md | 312 | scripts/qa/verify-mfe-health.sh |
@@ -593,7 +593,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 
 ## Suggested execution sequence
 
-1. Ops/operations cluster: repair paths in docs/ops/** and `docs/operations/README.md` historical mentions (fastest operational impact).
+1. Ops/operator cluster: repair paths in docs/ops/** and `docs/operations/README.md` historical mentions (fastest operational impact).
 2. ADR/architecture cluster: repair docs/adr/** and docs/concepts/architecture/** paths.
 3. Guide/onboarding cluster: repair docs/guides/** and `docs/onboarding/README.md` historical mentions.
 4. Re-run the non-archive command-reference audit and confirm missing references trend down.

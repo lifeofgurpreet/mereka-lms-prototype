@@ -1,7 +1,7 @@
 # CI/CD Self-Hosted Runners — Actions Runner Controller (ARC)
 
-**Parent docs**: [CI_PIPELINE_COST_OPTIMIZATION.md](CI_PIPELINE_COST_OPTIMIZATION.md) | [CI_OPTIMIZATION_TRACKER.md](CI_OPTIMIZATION_TRACKER.md)
-**Runner policy**: [CI_RUNNER_POLICY.md](CI_RUNNER_POLICY.md) — which job type uses which runner class
+**Parent docs**: [CI optimization tracker](../../status/active/CI_OPTIMIZATION_TRACKER.md) | [CI pipeline cost analysis](../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md)
+**Runner policy**: [../../policies/operations/CI_RUNNER_POLICY.md](../../policies/operations/CI_RUNNER_POLICY.md) — which job type uses which runner class
 **Tracker tasks**: Phase 1, T150 (Tasks 1.1–1.5)
 **Cluster**: rke2-nonprod (Contabo VPS, `154.26.132.35`)
 
@@ -14,7 +14,8 @@ Kubernetes cluster. Each workflow job that targets a self-hosted runner label sp
 runs to completion, then terminates. No runner sits idle between jobs (minRunners: 0).
 
 This eliminates GitHub-hosted runner minutes for all workloads that can reach the cluster,
-driving costs from ~$81/month to near-zero (see cost projection in CI_OPTIMIZATION_TRACKER.md).
+driving costs from ~$81/month to near-zero (see cost projection in
+[../../status/active/CI_OPTIMIZATION_TRACKER.md](../../status/active/CI_OPTIMIZATION_TRACKER.md)).
 
 ---
 
@@ -322,10 +323,10 @@ kubectl get pods -n arc-runners   # Should show runner pods during active CI run
 
 ## Related Documentation
 
-- [CI_RUNNER_POLICY.md](CI_RUNNER_POLICY.md) — runner class definitions, job-type routing rules, full workflow audit table, migration checklist
-- [CI_PIPELINE_COST_OPTIMIZATION.md](CI_PIPELINE_COST_OPTIMIZATION.md) — cost analysis and rationale
-- [CI_OPTIMIZATION_TRACKER.md](CI_OPTIMIZATION_TRACKER.md) — phase-by-phase implementation tracker
-- [CI_CD_SETUP.md](CI_CD_SETUP.md) — overall CI/CD setup guide
+- [../../policies/operations/CI_RUNNER_POLICY.md](../../policies/operations/CI_RUNNER_POLICY.md) — runner class definitions, job-type routing rules, full workflow audit table, migration checklist
+- [../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md](../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md) — cost analysis and rationale
+- [../../status/active/CI_OPTIMIZATION_TRACKER.md](../../status/active/CI_OPTIMIZATION_TRACKER.md) — phase-by-phase implementation tracker
+- [../../reference/operations/TUTOR_CONFIG_CI.md](../../reference/operations/TUTOR_CONFIG_CI.md) — Tutor configuration CI reference
 - [ALLOWED_ACTIONS_POLICY.md](../security/ALLOWED_ACTIONS_POLICY.md) — GitHub Actions security policy
 - ARC upstream docs: https://github.com/actions/actions-runner-controller
 - ARC scale set docs: https://github.com/actions/actions-runner-controller/blob/main/docs/scale-set-runner.md

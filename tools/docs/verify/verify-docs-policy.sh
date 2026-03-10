@@ -96,6 +96,9 @@ while IFS=$'\t' read -r status path1 path2; do
   fi
 done < <(git diff --name-status "$RANGE" -- docs/)
 
+echo "Check operator surface hygiene"
+python3 tools/docs/verify/verify_operator_surface_hygiene.py --repo-root .
+
 changed_md=()
 while IFS= read -r f; do
   [[ -n "$f" ]] && changed_md+=("$f")

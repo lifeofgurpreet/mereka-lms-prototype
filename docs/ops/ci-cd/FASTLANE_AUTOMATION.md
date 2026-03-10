@@ -1,56 +1,52 @@
-# Fastlane Automation Setup ✅
-
-**Status**: Automated certificate and provisioning profile creation via Fastlane
-
----
-
-## What Changed
-
-Instead of manually creating certificates and provisioning profiles on Mac, **Fastlane automatically creates them** using the App Store Connect API during the GitHub Actions build.
-
-### How It Works
-
-1. **Fastlane `cert`** - Automatically creates/downloads the distribution certificate
-2. **Fastlane `sigh`** - Automatically creates/downloads the provisioning profile
-3. Both use your App Store Connect API key (already configured)
-4. No manual Mac steps needed!
+# Fastlane Automation
+_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
 ---
 
-## What You Still Need to Do
+This guide covers the durable operator procedure for iOS delivery automation. Use it when you need to understand the Fastlane-driven signing flow, the one-time Apple-side prerequisites, and the safe trigger path for CI builds.
+
+## How It Works
+
+1. `fastlane cert` creates or downloads the distribution certificate.
+2. `fastlane sigh` creates or downloads the provisioning profile.
+3. GitHub Actions injects the required secrets at runtime.
+4. Operators do not need a persistent workstation-specific signing setup.
+
+---
+
+## One-Time Apple-Side Prerequisites
 
 ### 1. Create Bundle ID (One-time)
 
-Go to: https://developer.apple.com/account → **Identifiers** → **+**
+Create the bundle identifier in Apple Developer:
 
 - Description: `Mereka Academy Mobile`
-- Bundle ID: `com.mereka.academy.mobile` (Explicit)
+- Bundle ID: explicit production bundle identifier for the app
 - Enable: Sign In with Apple
-- Click **Register**
 
 ### 2. Create App in App Store Connect (One-time)
 
-Go to: https://appstoreconnect.apple.com → **My Apps** → **+** → **New App**
+Create the app record in App Store Connect:
 
 - Platform: iOS
 - Name: `Mereka Academy`
-- Bundle ID: `com.mereka.academy.mobile`
+- Bundle ID: the same explicit production bundle identifier
 - SKU: `mereka-academy-ios-001`
 
 ---
 
-## GitHub Secrets (Already Set ✅)
+## Required GitHub Secrets
 
-All required secrets are configured:
+The build requires these secrets to exist in GitHub Actions or the approved secret manager flow:
 
-- ✅ `APPLE_TEAM_ID`: `44F7G2D7U6`
-- ✅ `APP_STORE_CONNECT_API_KEY_ID`: `9MUD3HJQH5`
-- ✅ `APP_STORE_CONNECT_ISSUER_ID`: `47ae8cb8-bfa9-49bd-816f-bde34e76d882`
-- ✅ `APP_STORE_CONNECT_API_KEY_BASE64`: (set)
-- ✅ `KEYCHAIN_PASSWORD`: `temp-keychain-password-123`
-- ✅ `PROVISIONING_PROFILE_NAME`: `Mereka Academy Distribution`
+- `APPLE_TEAM_ID`
+- `APP_STORE_CONNECT_API_KEY_ID`
+- `APP_STORE_CONNECT_ISSUER_ID`
+- `APP_STORE_CONNECT_API_KEY_BASE64`
+- `KEYCHAIN_PASSWORD`
+- `PROVISIONING_PROFILE_NAME`
 
-**No more secrets needed!** Fastlane creates certificates automatically.
+Do not record actual values in docs. Retrieve and rotate them through the approved secret-management path.
 
 ---
 
@@ -63,10 +59,9 @@ Once Bundle ID and App are created:
 # Go to: https://github.com/Biji-Biji-Initiative/mereka-lms/actions
 # Click "Build iOS App" → "Run workflow"
 
-# Option 2: Push trigger
-cd /home/gurpreet/bbi-meta/mereka-lms
+# Option 2: repository-driven trigger
 git add .github/workflows/build-ios-app.yml
-git commit -m "feat: enable Fastlane auto-certificate creation"
+git commit -m "docs: update iOS delivery automation"
 git push
 ```
 
@@ -89,7 +84,7 @@ git push
 ## Troubleshooting
 
 ### "Bundle ID not found"
-- Make sure you created `com.mereka.academy.mobile` in Apple Developer Portal
+- Make sure the production bundle identifier exists in Apple Developer Portal
 
 ### "App not found in App Store Connect"
 - Create the app in App Store Connect first (Step 2 above)
@@ -105,4 +100,9 @@ git push
 ✅ **No Mac needed** - Everything runs in GitHub Actions  
 ✅ **No manual certificate management** - Fastlane handles it  
 ✅ **Automatic renewal** - Fastlane checks and updates certificates  
-✅ **Team-friendly** - Certificates stored securely in GitHub Actions  
+✅ **Team-friendly** - Certificates stored securely through the approved GitHub Actions secret flow  
+
+## Read next
+
+- [`../../reference/operations/IOS_CI_CD_REFERENCE.md`](../../reference/operations/IOS_CI_CD_REFERENCE.md)
+- [`../../reference/operations/CI_CD_SETUP.md`](../../reference/operations/CI_CD_SETUP.md)

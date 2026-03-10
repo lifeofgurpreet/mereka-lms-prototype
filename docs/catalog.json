@@ -6012,57 +6012,12 @@
     "type": "runbook"
   },
   {
-    "canonical_conflict_group": "ci-ceremony-reduction-matrix",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "ci-optimization-tracker",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/ci-cd/CI_OPTIMIZATION_TRACKER.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "ci-pipeline-cost-optimization",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-12",
-    "owner": null,
-    "path": "ops/ci-cd/COST_OPTIMIZATION.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
     "canonical_conflict_group": "fastlane-automation",
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "ops/ci-cd/FASTLANE_AUTOMATION.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "github-actions-cost-monitoring",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/ci-cd/GITHUB_ACTIONS_COST_MONITORING.md",
-    "status": "superseded",
+    "status": "canonical",
     "type": "runbook"
   },
   {
@@ -6072,87 +6027,6 @@
     "owner": "Platform Team",
     "path": "ops/ci-cd/README.md",
     "status": "canonical",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "tutor-config-ci",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "ops/ci-cd/TUTOR_CONFIG_CI.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Ops Domain Owner",
-    "path": "ops/ci-cd/cost-estimate.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "ios-cicd-spec",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "ops/ci-cd/ios-cicd-spec.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "logging-and-sentry",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/monitoring/LOGGING_AND_SENTRY.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "observability-artifact-retention-matrix",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "observability-enhancement-plan",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/monitoring/OBSERVABILITY_ENHANCEMENT_PLAN.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "observability-ownership",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/monitoring/OBSERVABILITY_OWNERSHIP.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "observability-parity-matrix",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "observability-roadmap-mereka-lms",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md",
-    "status": "superseded",
     "type": "runbook"
   },
   {
@@ -9137,10 +9011,28 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-06",
+    "owner": "Ops Domain Owner",
+    "path": "reference/operations/GKE_AUTOPILOT_COST_ESTIMATE.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "reference/operations/INFISICAL_MEREKA_LMS_KEYS.md",
     "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
+    "path": "reference/operations/IOS_CI_CD_REFERENCE.md",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -9374,6 +9266,15 @@
     "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "reference/operations/TTFS_ONBOARDING.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
+    "path": "reference/operations/TUTOR_CONFIG_CI.md",
     "status": "canonical",
     "type": "other"
   },

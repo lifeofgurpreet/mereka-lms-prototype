@@ -16,7 +16,7 @@ environment_surfaces:
 image_source:
   repo_owner: bbi-infrastructure
   source_surfaces:
-    - docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md
+    - docs/policies/operations/OBSERVABILITY_OWNERSHIP.md
     - specs/observability-stack_spec.md
 secret_surfaces:
   - specs/secrets-management_spec.md

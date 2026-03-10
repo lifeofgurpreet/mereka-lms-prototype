@@ -1,10 +1,5 @@
-# iOS CI/CD Specification - Mereka Academy
-
-> **Status**: COMPLETE (Successfully deployed to TestFlight)  
-> **Last Updated**: 2026-01-23  
-> **App**: Mereka Academy (OpenEdX iOS fork)  
-> **Bundle ID**: `com.mereka.academy.mobile`  
-> **First Successful Build**: Run #21274409453
+# iOS CI/CD Reference
+_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
 ---
 
@@ -31,7 +26,7 @@
 
 ---
 
-## Root Cause Analysis (Why Previous Builds Failed)
+## Failure Modes and Why They Happened
 
 ### 1. Swift Toolchain Mismatch
 
@@ -72,7 +67,7 @@ EOF
 **Problem**: If the app's entitlements include Push Notifications / Associated Domains / Sign in with Apple, but the App ID doesn't have those capabilities enabled, signing fails.
 
 **Symptoms**:
-- `Provisioning profile "match AppStore com.mereka.academy.mobile" doesn't support the Associated Domains and Push Notifications capability`
+- Provisioning profile does not support the required app capabilities
 
 **CRITICAL**: `fastlane produce` CANNOT enable capabilities via API Key - it requires username/password which is not CI-compatible.
 
@@ -123,7 +118,7 @@ done
 
 | Property | Value |
 |----------|-------|
-| **Location** | `git@github.com:Biji-Biji-Initiative/ios-certificates.git` |
+| **Location** | dedicated certificates repository |
 | **Purpose** | Store encrypted certificates and provisioning profiles |
 | **Access** | SSH deploy key in `MATCH_DEPLOY_KEY` secret |
 
@@ -137,6 +132,8 @@ done
 | `APP_STORE_CONNECT_API_KEY_ID` | App Store Connect API Key ID |
 | `APP_STORE_CONNECT_ISSUER_ID` | App Store Connect Issuer ID |
 | `APP_STORE_CONNECT_API_KEY_BASE64` | Base64-encoded .p8 key content |
+
+Do not record actual secret values in docs.
 
 ### CI Environment
 
