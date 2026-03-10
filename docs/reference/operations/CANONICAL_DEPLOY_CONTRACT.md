@@ -2,16 +2,16 @@
 
 > **Beads**: mereka-lms-36va.5, mereka-lms-36va.2, mereka-lms-36va.1
 > **Date**: 2026-02-18
-> **Canonical path**: `/home/gurpreet/projects/k8s/mereka-lms` on `main`
+> **Canonical source**: this repository on `main`
 
 ## 1. Canonical Command Chain (AC-OPS-111, AC-OPS-061)
 
 ### Single Source of Truth
 
 All builds and releases MUST originate from:
-- **Path**: `/home/gurpreet/projects/k8s/mereka-lms`
+- **Repository**: `mereka-lms`
 - **Branch**: `main`
-- **Worktree**: Single (no parallel worktrees)
+- **Worktree**: a clean worktree rooted at this repository
 - **Validation**: `./scripts/infra/canonical-release.sh --check-only`
 
 ### Build → Tag → Push → GitOps Flow
