@@ -6779,29 +6779,11 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
-    "path": "migrations/KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "Migration Squad",
     "path": "migrations/README.md",
     "status": "canonical",
     "type": "index"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-18",
-    "owner": null,
-    "path": "migrations/SKILLOURFUTURE_BRAND_MIGRATION.md",
-    "status": "supporting",
-    "type": "other"
   },
   {
     "canonical_conflict_group": null,
@@ -8502,6 +8484,15 @@
     "owner": "Platform Team",
     "path": "ops/runbooks/migrations/README.md",
     "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md",
+    "status": "supporting",
     "type": "runbook"
   },
   {
@@ -10419,6 +10410,15 @@
     "owner": "Platform Team",
     "path": "status/migrations/2026-03-wave-2b-final-closeout.md",
     "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-02-13",
+    "owner": null,
+    "path": "status/migrations/KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md",
+    "status": "supporting",
     "type": "status"
   },
   {
