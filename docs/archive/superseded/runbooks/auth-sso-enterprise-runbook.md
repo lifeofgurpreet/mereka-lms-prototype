@@ -446,7 +446,7 @@ kubectl exec -n mereka-lms deploy/redis -- redis-cli --scan --pattern 'django.co
 ## Related Documentation
 
 - `docs/reference/operations/AUTH_AND_PERMISSIONS.md` — Authentication and permissions overview
-- `docs/operations/AUTH_HARDENING_SPEC.md` — Auth hardening operational details
+- `docs/policies/operations/AUTH_HARDENING_SPEC.md` — Auth hardening operational details
 - `docs/ops/AUTH_ALERT_RUNBOOK.md` — Authentication alert response
 - `docs/runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md` — In-cluster auth verification
 - `docs/operations/RFC_CLAIM_BASED_ROLE_SYNC.md` — Claim-based role sync RFC

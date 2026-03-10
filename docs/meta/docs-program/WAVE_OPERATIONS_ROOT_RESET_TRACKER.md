@@ -139,3 +139,22 @@ Packet C rule:
 - delete the wrapper when no live active refs remain
 - keep collapse-map metadata untouched as migration history
 - continue leaving evidence/postmortem trees alone
+
+## Packet D Scope
+
+Third duplicate-collapse packet for superseded wrappers whose canonical destinations are already live and whose remaining active references can be rewritten directly:
+
+- `docs/operations/ASPECTS_ANALYTICS_SETUP.md` -> `docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md`
+- `docs/operations/ASPECTS_WIRING_CHECKLIST.md` -> `docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md`
+- `docs/operations/ATLAS_HEALTH.md` -> `docs/ops/runbooks/ATLAS_HEALTH.md`
+- `docs/operations/AUTHENTICATED_SMOKE_A11Y.md` -> `docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md`
+- `docs/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md` -> `docs/reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md`
+- `docs/operations/AUTH_AND_PERMISSIONS.md` -> `docs/reference/operations/AUTH_AND_PERMISSIONS.md`
+- `docs/operations/AUTH_HARDENING_SPEC.md` -> `docs/policies/operations/AUTH_HARDENING_SPEC.md`
+- `docs/operations/BACKUP_COVERAGE_MATRIX.md` -> `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md`
+
+Packet D rule:
+
+- rewrite live active references first
+- then delete the wrapper
+- leave archival migration metadata in place

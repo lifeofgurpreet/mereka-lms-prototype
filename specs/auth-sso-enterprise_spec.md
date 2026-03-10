@@ -64,7 +64,7 @@ The system builds on Open edX's native `third_party_auth` Django app and `Enterp
 
 Enterprise client onboarding cannot scale without SSO integration. Corporate IT departments require that their employees authenticate through their organization's identity infrastructure -- they will not accept individual username/password accounts managed by a third-party LMS. Without formal SAML/OIDC federation, every enterprise deal requires manual account creation, password distribution, and ongoing credential lifecycle management -- all of which are operationally expensive, error-prone, and non-compliant with enterprise security policies.
 
-This spec also addresses critical security gaps: there is no formal contract for session timeout behavior, no specification for MFA enforcement beyond Authentik admins, no defined account deprovisioning workflow when an employee leaves a client organization, and no formalized role mapping from IdP claims to Open edX authorization. The existing auth hardening work (`docs/operations/AUTH_HARDENING_SPEC.md`) is operational documentation describing what was built; this spec defines what must be true, with testable acceptance criteria.
+This spec also addresses critical security gaps: there is no formal contract for session timeout behavior, no specification for MFA enforcement beyond Authentik admins, no defined account deprovisioning workflow when an employee leaves a client organization, and no formalized role mapping from IdP claims to Open edX authorization. The existing auth hardening work (`docs/policies/operations/AUTH_HARDENING_SPEC.md`) is operational documentation describing what was built; this spec defines what must be true, with testable acceptance criteria.
 
 ## Success looks like
 
