@@ -1,28 +1,28 @@
 # Wave 14 Execution Tracker
 
 ## Latest substantive packet head
-- c0ac67a289fe6c3f0cf0885c038d4741f3d5f836
+- b872dd40c51cdcfb6def3e05c32e698236379436
 
 ## Last completed batch
-- commit: c0ac67a289fe6c3f0cf0885c038d4741f3d5f836
-- scope: Wave 14 Packet A rebased onto the reconciled Wave 10-13 runtime base
-- validators run: docs catalog rebuild, docs catalog governance, source path existence checks
-- result: handbook topology is locked on the reconciled base and catalog-visible
+- commit: b872dd40c51cdcfb6def3e05c32e698236379436
+- scope: Wave 14 Packet B domain and access reference generator
+- validators run: domain access generator write/check, docs catalog rebuild, docs catalog governance
+- result: canonical access JSON exists and explicit SkillOurFuture URL conflicts are machine-visible
 
 ## Current target packet
 - files:
-  - tools/docs/build_domain_access_reference.py
-  - generated/platform/domain-access-reference.json
-  - docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md
+  - tools/docs/build_team_topology_reference.py
+  - generated/platform/team-topology-reference.json
+  - docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md
   - docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md
 - goal:
-  - generate the domain and access reference from canonical inputs
-  - keep registry-backed main tenant domains machine-derived
-  - make cross-reference conflicts explicit instead of guessing tenant URLs
+  - generate a machine-backed topology reference from lane, domain, and contract inputs
+  - explain shared-versus-tenant-specific topology without inventing new truth
+  - carry forward Packet B conflicts without silently normalizing them
 - stop condition:
-  - canonical JSON output exists and passes `--check`
+  - canonical topology JSON output exists and passes `--check`
   - markdown projection exists and is clearly generated
-  - unresolved tenant URL conflicts are explicit rather than silently normalized
+  - shared and tenant-specific topology rules are machine-backed
   - docs governance passes with the new reference surface
 
 ## Locked handbook topology
@@ -48,4 +48,4 @@
 - live approval state, live runtime evidence attachment, and vendor bot integrations remain intentionally unresolved outside the scope of this handbook wave
 
 ## Next queued packet
-- Packet C: generate `generated/platform/team-topology-reference.json` and project it to `docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md`
+- Packet D: write the thin human handbook pages on top of the generated references
