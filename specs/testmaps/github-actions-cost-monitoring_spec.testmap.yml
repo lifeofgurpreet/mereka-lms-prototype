@@ -6,7 +6,7 @@ acceptance_criteria:
     on runner type (Linux $0.008/min, macOS $0.08/min, Windows $0.016/min).
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Cost Tracking
     justification: GitHub Actions cost monitoring pipeline not yet deployed; requires
       GitHub API integration
@@ -16,7 +16,7 @@ acceptance_criteria:
     day cost, month-to-date, projected month-end, and comparison to budget.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Cost Tracking
     justification: Daily cost report CronJob not yet implemented
 - id: AC-GAC-003
@@ -25,7 +25,7 @@ acceptance_criteria:
     are sent.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Alerting
     justification: Cost threshold alerting not yet implemented
 - id: AC-GAC-004
@@ -34,7 +34,7 @@ acceptance_criteria:
     min for builds) and jobs exceeding limits fail with a cost warning.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Cost Controls
     justification: Workflow timeout enforcement via actions-budget.yml not yet implemented
 - id: AC-GAC-005
@@ -42,7 +42,7 @@ acceptance_criteria:
     automated recommendations identify high-cost workflows and suggest optimizations.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Cost Optimization
     justification: Weekly cost analysis and recommendation engine not yet implemented
 - id: AC-GAC-006
@@ -50,7 +50,7 @@ acceptance_criteria:
     consumed, then non-critical workflows are paused and the platform team is notified.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Cost Controls
     justification: Automated workflow pausing at budget threshold not yet implemented
 - id: AC-GAC-007
@@ -59,7 +59,7 @@ acceptance_criteria:
     and `github_actions_monthly_budget_consumed_percent` metrics are exported.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Observability
     justification: GitHub Actions Prometheus exporter not yet deployed
 - id: AC-GAC-008
@@ -68,7 +68,7 @@ acceptance_criteria:
     workflows, projected month-end cost, and month-over-month comparison.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Observability
     justification: Grafana dashboard for GitHub Actions cost not yet created
 - id: AC-GAC-009
@@ -77,7 +77,7 @@ acceptance_criteria:
     alerts are sent to the platform team.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Alerting
     justification: Cost anomaly detection not yet implemented
 - id: AC-GAC-010
@@ -86,7 +86,7 @@ acceptance_criteria:
     are applied correctly.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Cost Controls
     justification: actions-budget.yml configuration enforcement not yet implemented
 - id: AC-GAC-011
@@ -95,7 +95,7 @@ acceptance_criteria:
     runner options are applied.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Cost Optimization
     justification: Automated optimization settings application not yet implemented
 - id: AC-GAC-012
@@ -103,7 +103,7 @@ acceptance_criteria:
     cost matches GitHub's billing within ±5%.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Cost Tracking
     justification: Cost calculation accuracy validation requires live GitHub billing
       data comparison
@@ -113,7 +113,7 @@ acceptance_criteria:
     recommended actions, and dashboard link.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Alerting
     justification: Alert delivery SLA requires live triggering to measure; not yet
       implemented
@@ -123,8 +123,7 @@ acceptance_criteria:
     render without errors.
   verify:
   - type: manual
-    runbook: docs/ops/runbooks/COST_MONITORING_RUNBOOK.md
+    runbook: docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md
     section: Observability
     justification: Grafana dashboard provisioning for GitHub Actions cost not yet
       deployed
-

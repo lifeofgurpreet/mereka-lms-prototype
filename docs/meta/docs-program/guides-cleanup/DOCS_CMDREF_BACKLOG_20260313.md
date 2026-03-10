@@ -563,7 +563,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/quickref/verification-scripts.md | 310 | scripts/qa/verify-lms-health.sh |
 | docs/ops/quickref/verification-scripts.md | 311 | scripts/qa/verify-cms-health.sh |
 | docs/ops/quickref/verification-scripts.md | 312 | scripts/qa/verify-mfe-health.sh |
-| docs/ops/runbooks/COST_MONITORING_RUNBOOK.md | 59 | .github/workflows/scorecard.yml |
+| docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md | 59 | .github/workflows/scorecard.yml |
 | docs/ops/runbooks/database-issues.md | 485 | scripts/qa/verify-mysql-health.sh |
 | docs/ops/runbooks/database-issues.md | 488 | scripts/qa/verify-mongodb-health.sh |
 | docs/ops/runbooks/database-issues.md | 491 | scripts/qa/verify-redis-health.sh |

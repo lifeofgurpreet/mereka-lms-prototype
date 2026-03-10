@@ -42,6 +42,7 @@ Use this root for factual operator reference: inventories, matrices, contracts, 
   [`ADMIN_CONSOLE_SETUP.md`](ADMIN_CONSOLE_SETUP.md),
   [`ASPECTS_ANALYTICS_SETUP.md`](ASPECTS_ANALYTICS_SETUP.md),
   [`CI_CD_SETUP.md`](CI_CD_SETUP.md),
+  [`GITHUB_ACTIONS_COST_MONITORING.md`](GITHUB_ACTIONS_COST_MONITORING.md),
   [`EMAIL_PIPELINE.md`](EMAIL_PIPELINE.md),
   [`LIBRARIES_GCS_SETUP.md`](LIBRARIES_GCS_SETUP.md)
 

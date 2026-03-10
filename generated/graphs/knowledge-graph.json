@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 3765,
+  "edge_count": 3684,
   "edges": [
     {
       "edge_type": "classifies",
@@ -2395,6 +2395,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/evidence/operations/branding-audit-2026-02-05/README.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/guides/INDEX_BY_AUDIENCE.md"
     },
     {
@@ -2406,56 +2411,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/guides/admin/ADMIN_LOGIN_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/COURSE_CERTIFICATES_UI.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_CMDREF_BACKLOG_20260313.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260309.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260306.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260307.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260309.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/DOCS_REMEDIATION_CLOSURE_MEMO_20260307.md"
     },
     {
       "edge_type": "classifies",
@@ -2481,11 +2436,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/guides/admin/OBSERVABILITY_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/admin/PR443_WORLD_CLASS_CLOSURE_NOTE_20260306.md"
     },
     {
       "edge_type": "classifies",
@@ -2520,42 +2470,12 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/guides/branding/BRANDING_OPERATOR_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/branding/BRANDING_PLAN.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/branding/BRANDING_ROADMAP.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/guides/branding/BRANDING_VERIFICATION_CHECKLIST.md"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/branding/PARAGON_TOKEN_ALIGNMENT.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md"
     },
     {
       "edge_type": "classifies",
@@ -2570,32 +2490,12 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/guides/branding/TENANT_CONFIG_HANDOFF.md"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/guides/branding/TENANT_ONBOARDING_PLAYBOOK.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/branding/audit-2026-02-05/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/integrations/GOOGLE_OAUTH_QUICK_START.md"
     },
     {
       "edge_type": "classifies",
@@ -2635,26 +2535,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/onboarding/DOCUMENTATION_INDEX.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/onboarding/LOCAL_ACCESS_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/guides/onboarding/LOCAL_SETUP.md"
     },
     {
@@ -2675,17 +2555,7 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/guides/onboarding/README_LOCAL.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/guides/onboarding/REPOSITORY_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/onboarding/TEAM_SCALING_GUIDE.md"
     },
     {
       "edge_type": "classifies",
@@ -2771,11 +2641,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/guides/standards/STYLE_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/standards/bead-v2-format.md"
     },
     {
       "edge_type": "classifies",
@@ -2866,6 +2731,16 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md"
     },
     {
       "edge_type": "classifies",
@@ -3085,7 +2960,17 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/docs-program/bead-v2-format.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/docs-program/boundary-debt-manifest.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/guides-cleanup/DOCS_CMDREF_BACKLOG_20260313.md"
     },
     {
       "edge_type": "classifies",
@@ -3610,87 +3495,12 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/ci-cd/CI_OPTIMIZATION_TRACKER.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/ci-cd/COST_OPTIMIZATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/ops/ci-cd/FASTLANE_AUTOMATION.md"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/ops/ci-cd/GITHUB_ACTIONS_COST_MONITORING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/ops/ci-cd/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/ci-cd/TUTOR_CONFIG_CI.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/ci-cd/cost-estimate.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/ci-cd/ios-cicd-spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/monitoring/LOGGING_AND_SENTRY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ENHANCEMENT_PLAN.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/monitoring/OBSERVABILITY_QUICKSTART.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md"
     },
     {
       "edge_type": "classifies",
@@ -3871,11 +3681,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/runbooks/COST_MONITORING_RUNBOOK.md"
     },
     {
       "edge_type": "classifies",
@@ -4285,6 +4090,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
     },
     {
@@ -4530,22 +4340,12 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/ops/security/AUTH_CHANGE_CHECKLIST.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/ops/security/AUTH_HARDENING_SPEC.md"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/ops/security/AUTH_PR_SECTION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/security/ENTERPRISE_SSO_GUIDE.md"
     },
     {
       "edge_type": "classifies",
@@ -4571,11 +4371,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/ops/security/SECRET_SCANNING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/security/in-cluster-auth-verification.md"
     },
     {
       "edge_type": "classifies",
@@ -4895,6 +4690,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/reference/architecture/FOOTER_V2_TO_LMS_MAPPING.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/reference/architecture/FORUM_UI_THEMING.md"
     },
     {
@@ -4965,7 +4765,17 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/reference/architecture/PARAGON_TOKEN_ALIGNMENT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md"
     },
     {
       "edge_type": "classifies",
@@ -5260,7 +5070,17 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/reference/operations/GKE_AUTOPILOT_COST_ESTIMATE.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/operations/IOS_CI_CD_REFERENCE.md"
     },
     {
       "edge_type": "classifies",
@@ -5385,7 +5205,17 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/reference/operations/TENANT_BRAND_PACK_SCHEMA.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/reference/operations/TTFS_ONBOARDING.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/operations/TUTOR_CONFIG_CI.md"
     },
     {
       "edge_type": "classifies",
@@ -5416,6 +5246,16 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/status/active/BACKUP_TOOLING_STATUS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/status/active/BRANDING_PLAN_2026-03-03.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/status/active/BRANDING_ROADMAP_2026-02-08.md"
     },
     {
       "edge_type": "classifies",
@@ -5616,6 +5456,31 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/status/readiness/tenant-hosting-readiness.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260307.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260309.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260306.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260307.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260309.md"
     },
     {
       "edge_type": "classifies",
@@ -8230,6 +8095,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/evidence/operations/branding-audit-2026-02-05/README.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/guides/INDEX_BY_AUDIENCE.md"
     },
     {
@@ -8241,56 +8111,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/guides/admin/ADMIN_LOGIN_GUIDE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/COURSE_CERTIFICATES_UI.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_CMDREF_BACKLOG_20260313.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260309.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260306.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260307.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260309.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/DOCS_REMEDIATION_CLOSURE_MEMO_20260307.md"
     },
     {
       "edge_type": "contains",
@@ -8316,11 +8136,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/guides/admin/OBSERVABILITY_GUIDE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/admin/PR443_WORLD_CLASS_CLOSURE_NOTE_20260306.md"
     },
     {
       "edge_type": "contains",
@@ -8355,42 +8170,12 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/guides/branding/BRANDING_OPERATOR_GUIDE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/branding/BRANDING_PLAN.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/branding/BRANDING_ROADMAP.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/guides/branding/BRANDING_VERIFICATION_CHECKLIST.md"
     },
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/branding/PARAGON_TOKEN_ALIGNMENT.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md"
     },
     {
       "edge_type": "contains",
@@ -8405,32 +8190,12 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/guides/branding/TENANT_CONFIG_HANDOFF.md"
     },
     {
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/guides/branding/TENANT_ONBOARDING_PLAYBOOK.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/branding/audit-2026-02-05/README.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/integrations/GOOGLE_OAUTH_QUICK_START.md"
     },
     {
       "edge_type": "contains",
@@ -8470,26 +8235,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/onboarding/DOCUMENTATION_INDEX.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/onboarding/LOCAL_ACCESS_GUIDE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/guides/onboarding/LOCAL_SETUP.md"
     },
     {
@@ -8510,17 +8255,7 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/guides/onboarding/README_LOCAL.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/guides/onboarding/REPOSITORY_GUIDE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/onboarding/TEAM_SCALING_GUIDE.md"
     },
     {
       "edge_type": "contains",
@@ -8606,11 +8341,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/guides/standards/STYLE_GUIDE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/standards/bead-v2-format.md"
     },
     {
       "edge_type": "contains",
@@ -8701,6 +8431,16 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md"
     },
     {
       "edge_type": "contains",
@@ -8920,7 +8660,17 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/docs-program/bead-v2-format.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/docs-program/boundary-debt-manifest.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/guides-cleanup/DOCS_CMDREF_BACKLOG_20260313.md"
     },
     {
       "edge_type": "contains",
@@ -9445,87 +9195,12 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/ci-cd/CI_OPTIMIZATION_TRACKER.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/ci-cd/COST_OPTIMIZATION.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/ops/ci-cd/FASTLANE_AUTOMATION.md"
     },
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/ops/ci-cd/GITHUB_ACTIONS_COST_MONITORING.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/ops/ci-cd/README.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/ci-cd/TUTOR_CONFIG_CI.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/ci-cd/cost-estimate.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/ci-cd/ios-cicd-spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/monitoring/LOGGING_AND_SENTRY.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ENHANCEMENT_PLAN.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/monitoring/OBSERVABILITY_QUICKSTART.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md"
     },
     {
       "edge_type": "contains",
@@ -9706,11 +9381,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/runbooks/COST_MONITORING_RUNBOOK.md"
     },
     {
       "edge_type": "contains",
@@ -10120,6 +9790,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
     },
     {
@@ -10365,22 +10040,12 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/ops/security/AUTH_CHANGE_CHECKLIST.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/ops/security/AUTH_HARDENING_SPEC.md"
     },
     {
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/ops/security/AUTH_PR_SECTION.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/security/ENTERPRISE_SSO_GUIDE.md"
     },
     {
       "edge_type": "contains",
@@ -10406,11 +10071,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/ops/security/SECRET_SCANNING.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/security/in-cluster-auth-verification.md"
     },
     {
       "edge_type": "contains",
@@ -10730,6 +10390,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/reference/architecture/FOOTER_V2_TO_LMS_MAPPING.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/reference/architecture/FORUM_UI_THEMING.md"
     },
     {
@@ -10800,7 +10465,17 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/reference/architecture/PARAGON_TOKEN_ALIGNMENT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md"
     },
     {
       "edge_type": "contains",
@@ -11095,7 +10770,17 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/reference/operations/GKE_AUTOPILOT_COST_ESTIMATE.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/operations/IOS_CI_CD_REFERENCE.md"
     },
     {
       "edge_type": "contains",
@@ -11220,7 +10905,17 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/reference/operations/TENANT_BRAND_PACK_SCHEMA.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/reference/operations/TTFS_ONBOARDING.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/operations/TUTOR_CONFIG_CI.md"
     },
     {
       "edge_type": "contains",
@@ -11256,6 +10951,16 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/status/active/BACKUP_TOOLING_STATUS.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/status/active/BRANDING_PLAN_2026-03-03.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/status/active/BRANDING_ROADMAP_2026-02-08.md"
     },
     {
       "edge_type": "contains",
@@ -11456,6 +11161,31 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/status/readiness/tenant-hosting-readiness.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260307.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260309.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260306.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260307.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260309.md"
     },
     {
       "edge_type": "contains",
@@ -13355,56 +13085,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/guides/admin/COURSE_CERTIFICATES_UI.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_CMDREF_BACKLOG_20260313.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260309.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260306.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260307.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260309.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/DOCS_REMEDIATION_CLOSURE_MEMO_20260307.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md"
     },
     {
@@ -13426,11 +13106,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/guides/admin/OBSERVABILITY_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/admin/PR443_WORLD_CLASS_CLOSURE_NOTE_20260306.md"
     },
     {
       "edge_type": "classifies",
@@ -13465,42 +13140,12 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/guides/branding/BRANDING_OPERATOR_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/branding/BRANDING_PLAN.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/branding/BRANDING_ROADMAP.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/guides/branding/BRANDING_VERIFICATION_CHECKLIST.md"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/branding/PARAGON_TOKEN_ALIGNMENT.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md"
     },
     {
       "edge_type": "classifies",
@@ -13515,32 +13160,12 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/guides/branding/TENANT_CONFIG_HANDOFF.md"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/guides/branding/TENANT_ONBOARDING_PLAYBOOK.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/branding/audit-2026-02-05/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/integrations/GOOGLE_OAUTH_QUICK_START.md"
     },
     {
       "edge_type": "classifies",
@@ -13580,26 +13205,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/onboarding/DOCUMENTATION_INDEX.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/onboarding/LOCAL_ACCESS_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/guides/onboarding/LOCAL_SETUP.md"
     },
     {
@@ -13620,17 +13225,7 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/guides/onboarding/README_LOCAL.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/guides/onboarding/REPOSITORY_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/onboarding/TEAM_SCALING_GUIDE.md"
     },
     {
       "edge_type": "classifies",
@@ -13720,11 +13315,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/guides/standards/bead-v2-format.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/onboarding/README.md"
     },
     {
@@ -13766,6 +13356,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/reference/architecture/DEPLOYMENT_CONTRACT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/architecture/FOOTER_V2_TO_LMS_MAPPING.md"
     },
     {
       "edge_type": "classifies",
@@ -13840,7 +13435,17 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/reference/architecture/PARAGON_TOKEN_ALIGNMENT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md"
     },
     {
       "edge_type": "classifies",
@@ -14135,7 +13740,17 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/reference/operations/GKE_AUTOPILOT_COST_ESTIMATE.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/operations/IOS_CI_CD_REFERENCE.md"
     },
     {
       "edge_type": "classifies",
@@ -14260,7 +13875,17 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/reference/operations/TENANT_BRAND_PACK_SCHEMA.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/reference/operations/TTFS_ONBOARDING.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/operations/TUTOR_CONFIG_CI.md"
     },
     {
       "edge_type": "classifies",
@@ -14316,6 +13941,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:evidence",
       "target": "docs/evidence/operations/TOKEN_INTEGRITY_ROUTING.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:evidence",
+      "target": "docs/evidence/operations/branding-audit-2026-02-05/README.md"
     },
     {
       "edge_type": "classifies",
@@ -15075,6 +14705,16 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/status/active/BRANDING_PLAN_2026-03-03.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/status/active/BRANDING_ROADMAP_2026-02-08.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/status/active/CI_OPTIMIZATION_TRACKER.md"
     },
     {
@@ -15275,6 +14915,31 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260307.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260309.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260306.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260307.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260309.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/status/weekly/README.md"
     },
     {
@@ -15296,6 +14961,16 @@
       "edge_type": "classifies",
       "source": "lane:docs:review",
       "target": "docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md"
     },
     {
       "edge_type": "classifies",
@@ -15515,7 +15190,17 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/bead-v2-format.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
       "target": "docs/meta/docs-program/boundary-debt-manifest.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/guides-cleanup/DOCS_CMDREF_BACKLOG_20260313.md"
     },
     {
       "edge_type": "classifies",
@@ -15675,87 +15360,12 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
-      "target": "docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/ci-cd/CI_OPTIMIZATION_TRACKER.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/ci-cd/COST_OPTIMIZATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
       "target": "docs/ops/ci-cd/FASTLANE_AUTOMATION.md"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
-      "target": "docs/ops/ci-cd/GITHUB_ACTIONS_COST_MONITORING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
       "target": "docs/ops/ci-cd/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/ci-cd/TUTOR_CONFIG_CI.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/ci-cd/cost-estimate.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/ci-cd/ios-cicd-spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/monitoring/LOGGING_AND_SENTRY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ENHANCEMENT_PLAN.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/monitoring/OBSERVABILITY_QUICKSTART.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md"
     },
     {
       "edge_type": "classifies",
@@ -15936,11 +15546,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
       "target": "docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/runbooks/COST_MONITORING_RUNBOOK.md"
     },
     {
       "edge_type": "classifies",
@@ -16350,6 +15955,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
+      "target": "docs/ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:runbook",
       "target": "docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
     },
     {
@@ -16595,22 +16205,12 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
-      "target": "docs/ops/security/AUTH_CHANGE_CHECKLIST.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
       "target": "docs/ops/security/AUTH_HARDENING_SPEC.md"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
       "target": "docs/ops/security/AUTH_PR_SECTION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/security/ENTERPRISE_SSO_GUIDE.md"
     },
     {
       "edge_type": "classifies",
@@ -16636,11 +16236,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
       "target": "docs/ops/security/SECRET_SCANNING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/security/in-cluster-auth-verification.md"
     },
     {
       "edge_type": "classifies",
@@ -18829,7 +18424,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1278,
+  "node_count": 1251,
   "nodes": [
     {
       "id": "classification:archival",
@@ -23153,6 +22748,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/evidence/operations/branding-audit-2026-02-05/README.md",
+      "lane": "evidence",
+      "node_type": "docs:evidence",
+      "owner": "",
+      "path": "docs/evidence/operations/branding-audit-2026-02-05/README.md",
+      "root": "docs",
+      "status": "",
+      "title": "Branding Coverage Audit (2026-02-05)"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/guides/INDEX_BY_AUDIENCE.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -23183,116 +22789,6 @@
       "root": "docs",
       "status": "",
       "title": "Admin Login Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/COURSE_CERTIFICATES_UI.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/COURSE_CERTIFICATES_UI.md",
-      "root": "docs",
-      "status": "",
-      "title": "Superseded Path Notice"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_CMDREF_BACKLOG_20260313.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_CMDREF_BACKLOG_20260313.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Command-Reference Backlog (Full Non-Archive Sweep)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md",
-      "root": "docs",
-      "status": "",
-      "title": "One-Week First-Class Docs Execution Plan"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Governance Sign-Off Checklist (2026-03-07)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260307.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Program Scorecard 20260307"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260309.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_PROGRAM_SCORECARD_20260309.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Program Scorecard 20260309"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260306.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260306.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Quality Scorecard \u2014 2026-03-06"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260307.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260307.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Quality Scorecard \u2014 2026-03-07"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260309.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_QUALITY_SCORECARD_20260309.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Quality Scorecard \u2014 2026-03-09"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/DOCS_REMEDIATION_CLOSURE_MEMO_20260307.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/DOCS_REMEDIATION_CLOSURE_MEMO_20260307.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Remediation Closure Memo (2026-03-07)"
     },
     {
       "classification": "supporting",
@@ -23348,17 +22844,6 @@
       "root": "docs",
       "status": "",
       "title": "Observability Operations Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/admin/PR443_WORLD_CLASS_CLOSURE_NOTE_20260306.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/PR443_WORLD_CLASS_CLOSURE_NOTE_20260306.md",
-      "root": "docs",
-      "status": "",
-      "title": "PR-443 Closure Note (World-Class Docs)"
     },
     {
       "classification": "supporting",
@@ -23428,39 +22913,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/guides/branding/BRANDING_OPERATOR_GUIDE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/BRANDING_OPERATOR_GUIDE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Branding Operator Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/branding/BRANDING_PLAN.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/BRANDING_PLAN.md",
-      "root": "docs",
-      "status": "",
-      "title": "Mereka.io Branding Rollout Tracker"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/branding/BRANDING_ROADMAP.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/BRANDING_ROADMAP.md",
-      "root": "docs",
-      "status": "",
-      "title": "Branding Roadmap (Beads-Driven)"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/guides/branding/BRANDING_VERIFICATION_CHECKLIST.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -23472,17 +22924,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md",
-      "root": "docs",
-      "status": "",
-      "title": "Footer v2 \u2192 LMS Mapping"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -23491,28 +22932,6 @@
       "root": "docs",
       "status": "",
       "title": "Multi-Tenant Branding Operations Model"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/branding/PARAGON_TOKEN_ALIGNMENT.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/PARAGON_TOKEN_ALIGNMENT.md",
-      "root": "docs",
-      "status": "",
-      "title": "Paragon Token Alignment"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Plugin Migration Survey"
     },
     {
       "classification": "supporting",
@@ -23538,17 +22957,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md",
-      "root": "docs",
-      "status": "",
-      "title": "Tenant Brand Pack Schema"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/guides/branding/TENANT_CONFIG_HANDOFF.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -23568,39 +22976,6 @@
       "root": "docs",
       "status": "",
       "title": "Tenant Onboarding Playbook"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md",
-      "root": "docs",
-      "status": "",
-      "title": "Visual Parity Checkpoints"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/branding/audit-2026-02-05/README.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/branding/audit-2026-02-05/README.md",
-      "root": "docs",
-      "status": "",
-      "title": "Branding Coverage Audit (2026-02-05)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/integrations/GOOGLE_OAUTH_QUICK_START.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/integrations/GOOGLE_OAUTH_QUICK_START.md",
-      "root": "docs",
-      "status": "",
-      "title": "Google OAuth Quick Start - Manual Steps"
     },
     {
       "classification": "supporting",
@@ -23681,50 +23056,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/guides/onboarding/DEVELOPER_ONBOARDING.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/onboarding/DEVELOPER_ONBOARDING.md",
-      "root": "docs",
-      "status": "",
-      "title": "Developer Onboarding Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/onboarding/DOCUMENTATION_INDEX.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/onboarding/DOCUMENTATION_INDEX.md",
-      "root": "docs",
-      "status": "",
-      "title": "Documentation Index for Local Development (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/onboarding/LOCAL_ACCESS_GUIDE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/onboarding/LOCAL_ACCESS_GUIDE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Local Access Guide - Everything You Need"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Complete Local Development Guide"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/guides/onboarding/LOCAL_SETUP.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -23769,17 +23100,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/guides/onboarding/README_LOCAL.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/onboarding/README_LOCAL.md",
-      "root": "docs",
-      "status": "",
-      "title": "Local Development Documentation Index (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/guides/onboarding/REPOSITORY_GUIDE.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -23788,17 +23108,6 @@
       "root": "docs",
       "status": "",
       "title": "Repository Structure Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/onboarding/TEAM_SCALING_GUIDE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/onboarding/TEAM_SCALING_GUIDE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Team Scaling Guide"
     },
     {
       "classification": "supporting",
@@ -23986,17 +23295,6 @@
       "root": "docs",
       "status": "canonical",
       "title": "Documentation Style Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/standards/bead-v2-format.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/standards/bead-v2-format.md",
-      "root": "docs",
-      "status": "",
-      "title": "Bead v2 Format Standard"
     },
     {
       "classification": "supporting",
@@ -24195,6 +23493,28 @@
       "root": "docs",
       "status": "",
       "title": "Tenancy Epic Deployment Runbook"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md",
+      "root": "docs",
+      "status": "",
+      "title": "One-Week First-Class Docs Execution Plan"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Governance Sign-Off Checklist (2026-03-07)"
     },
     {
       "classification": "supporting",
@@ -24671,6 +23991,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/docs-program/bead-v2-format.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/bead-v2-format.md",
+      "root": "docs",
+      "status": "",
+      "title": "Bead v2 Format Standard"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/docs-program/boundary-debt-manifest.md",
       "lane": "review",
       "node_type": "docs:review",
@@ -24679,6 +24010,17 @@
       "root": "docs",
       "status": "",
       "title": "Boundary Debt Manifest"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/guides-cleanup/DOCS_CMDREF_BACKLOG_20260313.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/guides-cleanup/DOCS_CMDREF_BACKLOG_20260313.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Command-Reference Backlog (Full Non-Archive Sweep)"
     },
     {
       "classification": "supporting",
@@ -25826,50 +25168,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md",
-      "root": "docs",
-      "status": "",
-      "title": "CI Ceremony Reduction Matrix (#104 Follow-on)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/ci-cd/CI_OPTIMIZATION_TRACKER.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/ci-cd/CI_OPTIMIZATION_TRACKER.md",
-      "root": "docs",
-      "status": "",
-      "title": "CI/CD Optimization Tracker (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/ci-cd/CI_PIPELINE_COST_OPTIMIZATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "CI Pipeline Cost Optimization (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/ci-cd/COST_OPTIMIZATION.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/ci-cd/COST_OPTIMIZATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Cost Optimization for Development Environment"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/ops/ci-cd/FASTLANE_AUTOMATION.md",
       "lane": "runbook",
       "node_type": "docs:runbook",
@@ -25877,18 +25175,7 @@
       "path": "docs/ops/ci-cd/FASTLANE_AUTOMATION.md",
       "root": "docs",
       "status": "",
-      "title": "Fastlane Automation Setup \u2705"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/ci-cd/GITHUB_ACTIONS_COST_MONITORING.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/ci-cd/GITHUB_ACTIONS_COST_MONITORING.md",
-      "root": "docs",
-      "status": "",
-      "title": "GitHub Actions Cost Monitoring (Superseded)"
+      "title": "Fastlane Automation"
     },
     {
       "classification": "supporting",
@@ -25900,116 +25187,6 @@
       "root": "docs",
       "status": "",
       "title": "CI/CD Operator Surface"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/ci-cd/TUTOR_CONFIG_CI.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/ci-cd/TUTOR_CONFIG_CI.md",
-      "root": "docs",
-      "status": "",
-      "title": "Tutor Configuration CI/CD"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/ci-cd/cost-estimate.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/ci-cd/cost-estimate.md",
-      "root": "docs",
-      "status": "",
-      "title": "GKE Autopilot Cost Estimate"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/ci-cd/ios-cicd-spec.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/ci-cd/ios-cicd-spec.md",
-      "root": "docs",
-      "status": "",
-      "title": "iOS CI/CD Specification - Mereka Academy"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/monitoring/LOGGING_AND_SENTRY.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/monitoring/LOGGING_AND_SENTRY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Logging and Sentry (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/monitoring/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md",
-      "root": "docs",
-      "status": "",
-      "title": "Observability Artifact Retention Matrix (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/monitoring/OBSERVABILITY_ENHANCEMENT_PLAN.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/monitoring/OBSERVABILITY_ENHANCEMENT_PLAN.md",
-      "root": "docs",
-      "status": "",
-      "title": "Observability Enhancement Plan (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/monitoring/OBSERVABILITY_OWNERSHIP.md",
-      "root": "docs",
-      "status": "",
-      "title": "Observability Ownership and Sync Model (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/monitoring/OBSERVABILITY_PARITY_MATRIX.md",
-      "root": "docs",
-      "status": "",
-      "title": "OBSERVABILITY_PARITY_MATRIX (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/monitoring/OBSERVABILITY_QUICKSTART.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/monitoring/OBSERVABILITY_QUICKSTART.md",
-      "root": "docs",
-      "status": "",
-      "title": "Observability Quickstart (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md",
-      "root": "docs",
-      "status": "",
-      "title": "Mereka LMS Observability Roadmap (Superseded)"
     },
     {
       "classification": "supporting",
@@ -26207,7 +25384,7 @@
       "path": "docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "ACCESSIBILITY_CONFORMANCE_RUNBOOK (Superseded)"
+      "title": "Accessibility Conformance Runbook"
     },
     {
       "classification": "supporting",
@@ -26273,7 +25450,7 @@
       "path": "docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Aspects Wiring Checklist"
     },
     {
       "classification": "supporting",
@@ -26350,7 +25527,7 @@
       "path": "docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "BRANDING_RELEASE_RUNBOOK (Superseded)"
+      "title": "Branding Release Runbook"
     },
     {
       "classification": "supporting",
@@ -26372,7 +25549,7 @@
       "path": "docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "BUILD_PIPELINE_RUNBOOK (Superseded)"
+      "title": "Build Pipeline Runbook"
     },
     {
       "classification": "supporting",
@@ -26405,18 +25582,7 @@
       "path": "docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/runbooks/COST_MONITORING_RUNBOOK.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/runbooks/COST_MONITORING_RUNBOOK.md",
-      "root": "docs",
-      "status": "",
-      "title": "GitHub Actions Cost Monitoring Runbook"
+      "title": "Content Libraries V2 Migration Runbook"
     },
     {
       "classification": "supporting",
@@ -26427,7 +25593,7 @@
       "path": "docs/ops/runbooks/COURSE_DATA_RECOVERY.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Course Data Recovery Runbook"
     },
     {
       "classification": "supporting",
@@ -26438,7 +25604,7 @@
       "path": "docs/ops/runbooks/CSP_REPORTING_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "CSP_REPORTING_RUNBOOK (Superseded)"
+      "title": "CSP Reporting Runbook"
     },
     {
       "classification": "supporting",
@@ -26449,7 +25615,7 @@
       "path": "docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "DATA_ERASURE_RUNBOOK (Superseded)"
+      "title": "Data Erasure Runbook"
     },
     {
       "classification": "supporting",
@@ -26526,7 +25692,7 @@
       "path": "docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "DOMAIN_CHANGE_RUNBOOK (Superseded)"
+      "title": "Domain Change Runbook"
     },
     {
       "classification": "supporting",
@@ -26592,7 +25758,7 @@
       "path": "docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "ENTERPRISE_SERVICES_RUNBOOK (Superseded)"
+      "title": "Enterprise Services Runbook"
     },
     {
       "classification": "supporting",
@@ -26702,7 +25868,7 @@
       "path": "docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "HubSpot and Mux Deployment Guide"
     },
     {
       "classification": "supporting",
@@ -26812,7 +25978,7 @@
       "path": "docs/ops/runbooks/MOBILE_DEPLOYMENT.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Mobile Deployment Runbook"
     },
     {
       "classification": "supporting",
@@ -26823,7 +25989,7 @@
       "path": "docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Mobile OAuth Provisioning"
     },
     {
       "classification": "supporting",
@@ -26834,7 +26000,7 @@
       "path": "docs/ops/runbooks/MODULE_SURFACE_VALIDATION_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "MODULE_SURFACE_VALIDATION_RUNBOOK (Superseded)"
+      "title": "Module Surface Validation Runbook"
     },
     {
       "classification": "supporting",
@@ -26856,7 +26022,7 @@
       "path": "docs/ops/runbooks/MONGODB_DEV_SEED.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "MongoDB Dev Seed Runbook"
     },
     {
       "classification": "supporting",
@@ -26933,7 +26099,7 @@
       "path": "docs/ops/runbooks/PATCH_IDEMPOTENCY.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Patch Idempotency Runbook"
     },
     {
       "classification": "supporting",
@@ -26977,7 +26143,7 @@
       "path": "docs/ops/runbooks/PRIVACY_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "PRIVACY_RUNBOOK (Superseded)"
+      "title": "Privacy Runbook"
     },
     {
       "classification": "supporting",
@@ -27054,7 +26220,7 @@
       "path": "docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "RELEASE_EXECUTE_RUNBOOK (Superseded)"
+      "title": "Release Execute Runbook"
     },
     {
       "classification": "supporting",
@@ -27164,7 +26330,7 @@
       "path": "docs/ops/runbooks/TENANT_BRANDING_QA_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "TENANT_BRANDING_QA_RUNBOOK (Superseded)"
+      "title": "Tenant Branding QA Runbook"
     },
     {
       "classification": "supporting",
@@ -27252,7 +26418,7 @@
       "path": "docs/ops/runbooks/TRANSLATION_WORKFLOW.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Translation Workflow"
     },
     {
       "classification": "supporting",
@@ -27263,7 +26429,7 @@
       "path": "docs/ops/runbooks/TROUBLESHOOTING.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Troubleshooting Router"
     },
     {
       "classification": "supporting",
@@ -27311,6 +26477,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md",
+      "lane": "runbook",
+      "node_type": "docs:runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Visual Parity Checkpoints"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md",
       "lane": "runbook",
       "node_type": "docs:runbook",
@@ -27318,7 +26495,7 @@
       "path": "docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "VISUAL_REGRESSION_RUNBOOK (Superseded)"
+      "title": "Visual Regression Runbook"
     },
     {
       "classification": "supporting",
@@ -27340,7 +26517,7 @@
       "path": "docs/ops/runbooks/WINDOWS_SSH_SETUP.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Windows SSH Setup"
     },
     {
       "classification": "supporting",
@@ -27850,17 +27027,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/ops/security/AUTH_CHANGE_CHECKLIST.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/security/AUTH_CHANGE_CHECKLIST.md",
-      "root": "docs",
-      "status": "",
-      "title": "Auth Change Checklist (Superseded)"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/ops/security/AUTH_HARDENING_SPEC.md",
       "lane": "runbook",
       "node_type": "docs:runbook",
@@ -27880,17 +27046,6 @@
       "root": "docs",
       "status": "",
       "title": "Auth PR Section (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/security/ENTERPRISE_SSO_GUIDE.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/security/ENTERPRISE_SSO_GUIDE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Enterprise SSO Guide (Superseded)"
     },
     {
       "classification": "supporting",
@@ -27946,17 +27101,6 @@
       "root": "docs",
       "status": "",
       "title": "Secret Scanning (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/security/in-cluster-auth-verification.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/security/in-cluster-auth-verification.md",
-      "root": "docs",
-      "status": "",
-      "title": "In-Cluster Auth Verification (Superseded)"
     },
     {
       "classification": "supporting",
@@ -28653,6 +27797,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/reference/architecture/FOOTER_V2_TO_LMS_MAPPING.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/architecture/FOOTER_V2_TO_LMS_MAPPING.md",
+      "root": "docs",
+      "status": "",
+      "title": "Footer v2 \u2192 LMS Mapping"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/reference/architecture/FORUM_UI_THEMING.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -28660,7 +27815,7 @@
       "path": "docs/reference/architecture/FORUM_UI_THEMING.md",
       "root": "docs",
       "status": "",
-      "title": "Forum UI Theming Guide"
+      "title": "Forum UI Theming Reference"
     },
     {
       "classification": "supporting",
@@ -28807,6 +27962,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/reference/architecture/PARAGON_TOKEN_ALIGNMENT.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/architecture/PARAGON_TOKEN_ALIGNMENT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Paragon Token Alignment"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -28815,6 +27981,17 @@
       "root": "docs",
       "status": "",
       "title": "Paragon v22 Token Audit"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Plugin Migration Survey"
     },
     {
       "classification": "supporting",
@@ -29210,7 +28387,7 @@
       "path": "docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Aspects Analytics Setup Reference"
     },
     {
       "classification": "supporting",
@@ -29221,7 +28398,7 @@
       "path": "docs/reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Authenticated Smoke Credentials Reference"
     },
     {
       "classification": "supporting",
@@ -29309,7 +28486,7 @@
       "path": "docs/reference/operations/CI_CD_SETUP.md",
       "root": "docs",
       "status": "",
-      "title": "CI/CD Setup Guide"
+      "title": "CI/CD Setup Reference"
     },
     {
       "classification": "supporting",
@@ -29320,7 +28497,7 @@
       "path": "docs/reference/operations/COMMIT_SIGNING.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Commit Signing Reference"
     },
     {
       "classification": "supporting",
@@ -29364,7 +28541,7 @@
       "path": "docs/reference/operations/ECOMMERCE_THEMING.md",
       "root": "docs",
       "status": "",
-      "title": "Ecommerce Template Theming Guide"
+      "title": "Ecommerce Template Theming Reference"
     },
     {
       "classification": "supporting",
@@ -29386,7 +28563,7 @@
       "path": "docs/reference/operations/EMAIL_PIPELINE.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Email Pipeline Reference"
     },
     {
       "classification": "supporting",
@@ -29419,7 +28596,7 @@
       "path": "docs/reference/operations/FORUM_MEILISEARCH.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Forum Meilisearch Reference"
     },
     {
       "classification": "supporting",
@@ -29456,6 +28633,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/reference/operations/GKE_AUTOPILOT_COST_ESTIMATE.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/operations/GKE_AUTOPILOT_COST_ESTIMATE.md",
+      "root": "docs",
+      "status": "",
+      "title": "GKE Autopilot Cost Estimate"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -29467,6 +28655,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/reference/operations/IOS_CI_CD_REFERENCE.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/operations/IOS_CI_CD_REFERENCE.md",
+      "root": "docs",
+      "status": "",
+      "title": "iOS CI/CD Reference"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/reference/operations/LIBRARIES_GCS_SETUP.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -29474,7 +28673,7 @@
       "path": "docs/reference/operations/LIBRARIES_GCS_SETUP.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "Libraries GCS Setup Reference"
     },
     {
       "classification": "supporting",
@@ -29584,7 +28783,7 @@
       "path": "docs/reference/operations/OPERATOR_DASHBOARD_GUIDE.md",
       "root": "docs",
       "status": "",
-      "title": "Operator Dashboard Guide \u2014 Mereka Academy"
+      "title": "Operator Dashboard Reference \u2014 Mereka Academy"
     },
     {
       "classification": "supporting",
@@ -29694,7 +28893,7 @@
       "path": "docs/reference/operations/SLSA_PROVENANCE.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "SLSA Provenance Reference"
     },
     {
       "classification": "supporting",
@@ -29731,6 +28930,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/reference/operations/TENANT_BRAND_PACK_SCHEMA.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/operations/TENANT_BRAND_PACK_SCHEMA.md",
+      "root": "docs",
+      "status": "",
+      "title": "Tenant Brand Pack Schema"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/reference/operations/TTFS_ONBOARDING.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -29738,7 +28948,18 @@
       "path": "docs/reference/operations/TTFS_ONBOARDING.md",
       "root": "docs",
       "status": "",
-      "title": "Superseded Path Notice"
+      "title": "TTFS Onboarding Reference"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/reference/operations/TUTOR_CONFIG_CI.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/operations/TUTOR_CONFIG_CI.md",
+      "root": "docs",
+      "status": "",
+      "title": "Tutor Configuration CI/CD Reference"
     },
     {
       "classification": "supporting",
@@ -29816,6 +29037,28 @@
       "root": "docs",
       "status": "",
       "title": "Backup Coverage Matrix & PVC Inventory Tooling - Status"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/status/active/BRANDING_PLAN_2026-03-03.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/status/active/BRANDING_PLAN_2026-03-03.md",
+      "root": "docs",
+      "status": "",
+      "title": "Mereka.io Branding Rollout Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/status/active/BRANDING_ROADMAP_2026-02-08.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/status/active/BRANDING_ROADMAP_2026-02-08.md",
+      "root": "docs",
+      "status": "",
+      "title": "Branding Roadmap (Beads-Driven)"
     },
     {
       "classification": "supporting",
@@ -30256,6 +29499,61 @@
       "root": "docs",
       "status": "",
       "title": "Tenant Hosting Readiness"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260307.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260307.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Program Scorecard 20260307"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260309.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/status/weekly/DOCS_PROGRAM_SCORECARD_20260309.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Program Scorecard 20260309"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260306.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260306.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Quality Scorecard \u2014 2026-03-06"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260307.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260307.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Quality Scorecard \u2014 2026-03-07"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260309.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/status/weekly/DOCS_QUALITY_SCORECARD_20260309.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Quality Scorecard \u2014 2026-03-09"
     },
     {
       "classification": "supporting",
