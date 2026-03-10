@@ -109,7 +109,7 @@ kubectl get endpoints
 kubectl get endpoints lms -o yaml
 
 # Fix selector mismatches (most common issue)
-/home/gurpreet/projects/k8s/mereka-lms/scripts/infra/fix-service-selectors.sh
+./scripts/infra/fix-service-selectors.sh
 ```
 
 ### Service Connectivity Tests
@@ -269,7 +269,7 @@ kubectl run curl-test --rm -i --image=curlimages/curl --restart=Never -- curl -I
 
 ```bash
 # Fix service selector mismatches (most common)
-/home/gurpreet/projects/k8s/mereka-lms/scripts/infra/fix-service-selectors.sh
+./scripts/infra/fix-service-selectors.sh
 
 # Clear crash loop (force restart)
 kubectl delete pod <pod-name>
