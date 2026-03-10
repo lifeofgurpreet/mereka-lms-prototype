@@ -29,7 +29,7 @@ After evaluating three options for log forwarding from GKE to VPS Loki:
 
 ### Components Deployed
 
-Located in `/home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/logging/`:
+Located in `deploy/k8s/base/logging/`:
 
 1. **promtail-daemonset.yaml** - Runs one Promtail pod per GKE node
 2. **promtail-configmap.yaml** - Scrape config with JSON parsing and label extraction
@@ -87,7 +87,7 @@ Promtail automatically:
 ### Initial Deployment
 
 ```bash
-cd /home/gurpreet/projects/k8s/mereka-lms
+cd <repo-root>
 kubectl apply -k deploy/k8s/base/logging
 ```
 
@@ -296,7 +296,7 @@ If logs are missing expected labels:
 
 Retention is configured on VPS Loki (currently 14 days).
 
-Edit `/home/gurpreet/projects/vps/infrastructure/loki/loki-config.yaml`:
+Edit the Loki config in the VPS infrastructure repo (for example `<vps-infra-repo>/loki/loki-config.yaml`):
 
 ```yaml
 limits_config:
@@ -305,7 +305,7 @@ limits_config:
 
 Then restart Loki:
 ```bash
-cd /home/gurpreet/projects/vps/infrastructure
+cd <vps-infra-repo>
 docker compose restart loki
 ```
 
@@ -350,11 +350,10 @@ Estimated incremental cost: **$0/month** (within existing VPS plan)
 - **Loki API**: https://grafana.com/docs/loki/latest/reference/api/
 - **LogQL query language**: https://grafana.com/docs/loki/latest/query/
 - **Kubernetes service discovery**: https://grafana.com/docs/loki/latest/send-data/promtail/configuration/#kubernetes_sd_config
-- **Deployment manifests**: `/home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/logging/`
+- **Deployment manifests**: `deploy/k8s/base/logging/`
 - **Testing guide**: [deploy/k8s/base/logging/TESTING.md](../../deploy/k8s/base/logging/TESTING.md)
 
 ---
 
-**Last Updated**: 2026-02-04
-**Deployed By**: Claude Sonnet 4.5 (Agent implementor)
-**Status**: Production (mereka-lms namespace)
+**Last verified**: 2026-03-10
+**Status**: canonical
