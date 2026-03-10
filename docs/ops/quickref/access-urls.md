@@ -194,11 +194,9 @@ Platform admins are enforced separately (see `docs/guides/admin/ADMIN_LOGIN_GUID
 - **Purpose:** Single Studio instance manages courses for all GKE LMS sites
 - **Note:** Courses are organized by Organization (e.g., "SKILLOURFUTURE" org)
 
-**Stats (as of 2025-12-29):**
-- Users: 68,565+ imported from MCT
-- Enrollments: 449,615+ MCT enrollments
-- Courses: 30 MCT courses
-- Programs: 13 learning pathways
+**Migration note:** This tenant is the MCT migration target. For current
+migration status and counts, use `docs/status/migrations/**` and
+`docs/reference/migrations/mct/**` rather than this quickref.
 
 ---
 
@@ -232,9 +230,9 @@ Platform admins are enforced separately (see `docs/guides/admin/ADMIN_LOGIN_GUID
 
 ### Platform Admins (Required)
 
-The following humans must have full admin permissions across the Open edX ecosystem:
-- `gurpreet@biji-biji.com`
-- `malasari@mereka.my`
+Use the canonical platform-admin flow in `docs/guides/admin/ADMIN_LOGIN_GUIDE.md`
+and the enforcement script in `scripts/infra/ensure-platform-admins.sh`. Do not
+treat this quickref as the source of truth for named operator accounts.
 
 **What “full permissions” means (practical):**
 - **LMS/CMS (Open edX):** `is_active=True`, `is_staff=True`, `is_superuser=True`
