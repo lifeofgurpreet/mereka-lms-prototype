@@ -16,35 +16,23 @@ Use this root when the question is factual rather than procedural:
 | Check migration source reference or API maps | `docs/reference/migrations/**` | `docs/status/migrations/**` if you need live migration status |
 | Decide whether something belongs in reference at all | `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` | `docs/guides/standards/DOCS_SPECS_CONTRACT.md` if the question is docs vs specs |
 
-Do not use these roots as the winning reference surface:
-- `docs/operations/README.md` tombstone only
-- `docs/concepts/**` for factual inventories
-- `docs/archive/**`
+## Live subroots
 
-## Typical contents
+- [`architecture/**`](architecture/README.md) for contracts, inventories, and architecture-facing reference
+- [`operations/**`](operations/README.md) for runtime matrices, hostnames, access posture, and deploy reference
+- [`analytics/**`](analytics/README.md) for analytics-related factual and migration reference
+- [`migrations/**`](migrations/README.md) for source-system and migration reference
 
-- architecture reference and inventories
-- operations reference and matrices
-- migration and integration reference material
+## Do not use this root for
 
-## What this root is not
-
-Do not use this root for:
 - step-by-step procedures,
 - active status updates,
 - proof bundles,
-- or policy rules that belong in `docs/policies/**`.
+- policy rules that belong in `docs/policies/**`,
+- or historical/archive material.
 
-Reference docs answer:
-- what exists,
-- what is configured,
-- what contracts or inventories are current.
-
-## How to use this root well
+## Read pattern
 
 1. Start here when the question is “what is true right now?”
-2. If you need rules or constraints, leave this root and move to `docs/policies/**` or `docs/concepts/architecture/**`.
-3. If you need steps to execute, leave this root and move to `docs/ops/**`.
-
-For the full authority contract, read:
-- [`../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+2. If you need rules or constraints, move to [`../concepts/architecture/README.md`](../concepts/architecture/README.md) or `docs/policies/**`.
+3. If you need steps to execute, move to `docs/ops/**`.
