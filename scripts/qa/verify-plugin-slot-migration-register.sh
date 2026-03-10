@@ -89,7 +89,7 @@ if grep -q '^### Backlog' "$REGISTER_DOC"; then pass_check "Roadmap has 'Backlog
 if grep -q '^### Keep as CSS' "$REGISTER_DOC"; then pass_check "Roadmap has 'Keep as CSS' section"; else fail_check "Roadmap has 'Keep as CSS' section"; fi
 
 # AC-8JAO9-001: Cross-references to source docs
-if grep -q 'MFE_SELECTOR_HARDENING_AUDIT.md' "$REGISTER_DOC"; then pass_check "References MFE_SELECTOR_HARDENING_AUDIT.md"; else fail_check "References MFE_SELECTOR_HARDENING_AUDIT.md"; fi
+if grep -q 'MFE_SELECTOR_AUDIT.md' "$REGISTER_DOC"; then pass_check "References MFE_SELECTOR_AUDIT.md"; else fail_check "References MFE_SELECTOR_AUDIT.md"; fi
 if grep -q 'MFE_PLUGIN_SLOT_MATRIX.md' "$REGISTER_DOC"; then pass_check "References MFE_PLUGIN_SLOT_MATRIX.md"; else fail_check "References MFE_PLUGIN_SLOT_MATRIX.md"; fi
 
 # Check bead reference

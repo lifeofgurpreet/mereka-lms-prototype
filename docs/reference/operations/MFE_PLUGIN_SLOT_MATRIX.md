@@ -2,7 +2,7 @@
 
 **Purpose**: Operational compatibility matrix view of plugin-slot wiring, mapping Mereka Academy's MFE customization strategy to FPF (Frontend Plugin Framework) extension points.
 
-**Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md) — This document is a derived view focused on operational planning and migration tracking.
+**Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md) — This document is a derived view focused on operational planning and migration tracking.
 
 **Last updated**: 2026-02-28
 **Covers**: Bead 1aj1 AC-UISLOT-001 through AC-UISLOT-005
@@ -59,7 +59,7 @@ This section maps current hardcoded customizations in `env.config.jsx` to their 
 
 When migrating a hardcoded customization to plugin-slot wiring:
 
-1. Identify the target slot from [MFE_PLUGIN_SLOT_INVENTORY.md](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
+1. Identify the target slot from [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
 2. Choose operation type: `Insert` (add before/after), `Replace` (full override), or `Hide` (remove default)
 3. Implement React component in `infrastructure/tutor/plugins/mereka_lms.py` mfe-env-config patch
 4. Wire slot via `config['pluginSlots'][SLOT_ID] = { op: PLUGIN_OPERATIONS.X, widget: ComponentName }`
@@ -180,7 +180,7 @@ Open edX uses two naming conventions. Always use the **namespaced ID** in `env.c
 ## Selector Hardening Status (Bead 8jao.3)
 
 **Last updated**: 2026-02-18
-**Related**: [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
+**Related**: [MFE_SELECTOR_AUDIT.md](../architecture/MFE_SELECTOR_AUDIT.md)
 
 The MFE override layer (`infrastructure/tutor/themes/mereka/mfe/mereka.scss`) has been hardened to reduce brittle selector dependencies:
 
@@ -219,9 +219,9 @@ For the complete override-to-slot migration plan, see [MFE_PLUGIN_SLOT_MIGRATION
 
 ## References
 
-- **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
+- **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
 - **Migration Register**: [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md)
-- **Selector Hardening Audit**: [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
+- **Selector Hardening Audit**: [MFE_SELECTOR_AUDIT.md](../architecture/MFE_SELECTOR_AUDIT.md)
 - **ADR-014**: [MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
 - **Verification Script**: [verify-plugin-slot-wiring.sh](../../scripts/qa/verify-plugin-slot-wiring.sh)
 - **Selector Hardening Verification**: [verify-mfe-selector-hardening.sh](../../scripts/qa/verify-mfe-selector-hardening.sh)

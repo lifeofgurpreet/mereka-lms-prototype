@@ -361,7 +361,7 @@ git commit -m "chore: update authn MFE"
 
 **Where to add**: Temporary vendor checkouts → `tmp/<name>/`
 
-**Related docs**: `../concepts/architecture/MFE_COMPLETE_LIST.md`
+**Related docs**: `../../reference/architecture/MFE_COMPLETE_LIST.md`
 
 ---
 

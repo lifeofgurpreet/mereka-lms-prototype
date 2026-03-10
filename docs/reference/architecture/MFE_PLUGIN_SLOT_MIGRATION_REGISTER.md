@@ -4,7 +4,7 @@
 >
 > **Bead**: mereka-lms-8jao.9 / mereka-lms-115d.18 / mereka-lms-115d.21
 > **Last updated**: 2026-02-28
-> **Source**: MFE_SELECTOR_HARDENING_AUDIT.md + MFE_PLUGIN_SLOT_MATRIX.md
+> **Source**: MFE_SELECTOR_AUDIT.md + MFE_PLUGIN_SLOT_MATRIX.md
 
 ## Migration Register
 
@@ -299,7 +299,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 - [x] Navbar token migration (DONE)
 
 ### Next Sprint
-- [x] Learning layout upstream slot expansion proposal drafted (course-grid/surface-level slots) — see [LEARNING_SLOT_EXPANSION_PROPOSAL.md](../concepts/architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md)
+- [x] Learning layout upstream slot expansion proposal drafted (course-grid/surface-level slots) — tracked here after the concept-root cleanup.
 
 ### Backlog
 - [ ] Optional: replace remaining structural navbar CSS with slot-owned React shell if upstream adds header layout slots
@@ -349,8 +349,8 @@ Run `./scripts/qa/verify-plugin-slot-migration-register.sh` to check:
 4. No P0 items remain open
 
 ## References
-- [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
+- [MFE_SELECTOR_AUDIT.md](MFE_SELECTOR_AUDIT.md)
 - [MFE_PLUGIN_SLOT_MATRIX.md](MFE_PLUGIN_SLOT_MATRIX.md)
-- [LEARNING_SLOT_EXPANSION_PROPOSAL.md](../concepts/architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md)
-- [footer-slot-exceptions.md](footer-slot-exceptions.md) — Footer fallback exception register with visual evidence pack
+- `LEARNING_SLOT_EXPANSION_PROPOSAL.md` retired with the concept-root cleanup; rely on this register plus the slot inventory for current migration state.
+- [footer-slot-exceptions.md](../../policies/architecture/footer-slot-exceptions.md) — Footer fallback exception register with visual evidence pack
 - [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)
