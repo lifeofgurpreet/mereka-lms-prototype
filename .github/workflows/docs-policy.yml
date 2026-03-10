@@ -23,6 +23,7 @@ on:
       - "scripts/qa/run-knowledge-integrity-gates.sh"
       - "scripts/qa/run-knowledge-runtime-gates.sh"
       - "scripts/qa/run-cross-repo-contract-gates.sh"
+      - "scripts/qa/run-agent-readiness-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -61,6 +62,7 @@ on:
       - "scripts/qa/run-knowledge-integrity-gates.sh"
       - "scripts/qa/run-knowledge-runtime-gates.sh"
       - "scripts/qa/run-cross-repo-contract-gates.sh"
+      - "scripts/qa/run-agent-readiness-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -201,3 +203,13 @@ jobs:
           fi
           chmod +x scripts/qa/run-cross-repo-contract-gates.sh
           ./scripts/qa/run-cross-repo-contract-gates.sh
+
+      - name: Verify agent consumption runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export AGENT_READINESS_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export AGENT_READINESS_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-agent-readiness-gates.sh
+          ./scripts/qa/run-agent-readiness-gates.sh

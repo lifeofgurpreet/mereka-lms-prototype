@@ -3,7 +3,7 @@
     "archival": 292,
     "canonical": 44,
     "generated": 49,
-    "supporting": 1277
+    "supporting": 1281
   },
   "entries": [
     {
@@ -6067,6 +6067,33 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Agent Consumption Model"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Agent Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "AGENT_TASK_TAXONOMY"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
       "root": "docs",
       "status": "",
@@ -6269,6 +6296,15 @@
       "root": "docs",
       "status": "",
       "title": "Wave 5 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Execution Tracker"
     },
     {
       "classification": "supporting",
@@ -14965,7 +15001,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1662,
+  "entry_count": 1666,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14974,7 +15010,7 @@
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 207,
+    "docs:other": 211,
     "docs:review": 48,
     "docs:runbook": 482,
     "specs:evidence": 43,
@@ -14987,7 +15023,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1444,
+    "docs": 1448,
     "specs": 218
   }
 }

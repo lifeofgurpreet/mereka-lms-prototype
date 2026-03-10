@@ -1,0 +1,19 @@
+{
+  "domain_count": 11,
+  "expected_task_bundle_count": 10,
+  "forbidden_surface_leaks": [],
+  "generated_by": "tools/knowledge/build_agent_readiness_report.py",
+  "range": "origin/main...HEAD",
+  "scores": {
+    "canonicality": 100,
+    "cross_repo_awareness": 100,
+    "determinism": 100,
+    "domain_entrypoint_coverage": 100,
+    "evidence_clarity": 100,
+    "review_clarity": 100,
+    "task_bundle_coverage": 100
+  },
+  "task_bundle_count": 10,
+  "unresolved_domains": [],
+  "unresolved_tasks": []
+}

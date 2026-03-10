@@ -1,7 +1,7 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `430`
+- Changes classified: `465`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
@@ -9,9 +9,9 @@
 
 ### Change Classes
 - `archival_only_change`: 7
-- `docs_support_change`: 168
+- `docs_support_change`: 180
 - `evidence_only_change`: 1
-- `generated_surface_refresh`: 170
+- `generated_surface_refresh`: 193
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -25,7 +25,7 @@
 - `generated`: 8
 - `index`: 2
 - `normative`: 39
-- `other`: 242
+- `other`: 277
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -62,10 +62,10 @@
 - `docs/archive/FRONTEND_PHASE_C_PROMPT.md` [archival_only_change]
 
 ## Required Evidence And Follow-Up
-- status update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +245 more
+- status update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +257 more
 - evidence pack: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +73 more
-- runbook update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +240 more
-- ADR update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +208 more
+- runbook update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +252 more
+- ADR update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +220 more
 - plan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +76 more
 - testplan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +72 more
 
@@ -218,7 +218,7 @@
 - `docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md`
 - `docs/meta/knowledge/CHANGE_CLASSES.yaml`
 - `docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md`
-- `... 222 more`
+- `... 257 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`

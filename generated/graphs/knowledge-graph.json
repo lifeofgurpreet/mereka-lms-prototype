@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4986,
+  "edge_count": 4998,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3810,6 +3810,21 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
     },
     {
@@ -3921,6 +3936,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -11680,6 +11700,21 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
     },
     {
@@ -11791,6 +11826,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "contains",
@@ -19160,6 +19200,21 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
     },
     {
@@ -19271,6 +19326,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:other",
       "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -24934,7 +24994,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1685,
+  "node_count": 1689,
   "nodes": [
     {
       "id": "classification:archival",
@@ -32371,6 +32431,39 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Agent Consumption Model"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Agent Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "AGENT_TASK_TAXONOMY"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
       "lane": "other",
       "node_type": "docs:other",
@@ -32621,6 +32714,17 @@
       "root": "docs",
       "status": "",
       "title": "Wave 5 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 8 Execution Tracker"
     },
     {
       "classification": "supporting",
