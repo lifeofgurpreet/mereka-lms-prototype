@@ -1,6 +1,7 @@
 {
   "canonical_inputs": [
     "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+    "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
     "generated/skills/skill-registry.json"
   ],
   "commands": [
@@ -236,7 +237,7 @@
   ],
   "generated_by": "tools/skills/build_command_registry.py",
   "pack_id": "command-registry",
-  "repo_discovery_model": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+  "repo_discovery_model": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
   "schema_version": 1,
   "source_range": null,
   "source_skill_registry": "generated/skills/skill-registry.json"

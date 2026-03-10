@@ -1,31 +1,33 @@
 # Wave 11 Execution Tracker
 
 ## Latest substantive packet head
-- cdadfee7de46464de2c17f33f822b38df777993c
+- b0547b1aff17f482e9a23399513b6c412224b97c
 
 ## Last completed batch
-- commit: cdadfee7de46464de2c17f33f822b38df777993c
-- scope: Wave 11 Packet 0
-- validators run: skill registry write/check, command registry write/check, skill runtime gate, docs catalog governance
+- commit: b0547b1aff17f482e9a23399513b6c412224b97c
+- scope: Wave 11 Packet B
+- validators run: pack registry write/check, schema verifier, docs catalog governance
 - result: passed
 
 ## Current target batch
 - files:
   - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
-  - docs/meta/skills/schemas/pack-registry.schema.json
-  - tools/skills/build_pack_registry.py
-  - tools/skills/verify_agent_pack_schemas.py
-  - generated/skills/pack-registry.json
+  - docs/meta/skills/REPO_DISCOVERY_MODEL.yaml
+  - tools/skills/repo_discovery.py
+  - tools/skills/build_skill_registry.py
+  - tools/skills/build_command_registry.py
+  - tools/skills/verify_skill_runtime.py
+  - scripts/qa/run-skill-runtime-gates.sh
 - goal:
-  - make pack discovery explicit instead of filename-driven
-  - register every canonical Wave 11 pack with schema and generator metadata
-  - fail fast if a registered pack or projection is missing
+  - centralize portable sibling-repo discovery in one runtime helper
+  - ensure the active pack runtime emits no machine-local absolute paths
+  - make the runtime gates enforce portability on the generated skill surfaces
 - stop condition:
-  - pack registry validates and one commit is created
+  - portability checks pass and one commit is created
 
 ## Open residue
 - generated Wave 10 pack surfaces are not present on this branch and must be treated as external canonical inputs, not assumed local artifacts
 - runtime convergence, evidence sufficiency, and mixed-diff arbitration remain to be added in later packets
 
 ## Next queued batch
-- Packet C: Repo discovery and portability
+- Packet D: Runtime convergence proof

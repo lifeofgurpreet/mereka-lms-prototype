@@ -40,6 +40,8 @@ def main() -> None:
     command_registry = load_json(repo_root / "generated/skills/command-registry.json")
     scenario_packs = load_json(repo_root / "generated/skills/scenario-packs.json")
     dep_graph = load_json(repo_root / "generated/skills/skill-dependency-graph.json")
+    pack_registry = load_json(repo_root / "generated/skills/pack-registry.json")
+    read_first_json = load_json(repo_root / "generated/skills/read-first.json")
     read_first = (repo_root / "generated/skills/read-first.md").read_text().splitlines()
 
     skills = skill_registry["skills"]
@@ -52,6 +54,10 @@ def main() -> None:
     ensure(len(skill_ids) >= 8, "Expected at least 8 skills in registry")
     ensure(len(scenarios) >= 8, "Expected at least 8 scenarios")
     ensure(len(command_ids) >= 8, "Expected at least 8 commands in registry")
+    ensure(pack_registry["pack_id"] == "pack-registry", "Unexpected pack registry payload")
+    ensure("docs/meta/skills/REPO_DISCOVERY_MODEL.yaml" in skill_registry["canonical_inputs"], "Skill registry missing repo discovery model")
+    ensure("docs/meta/skills/REPO_DISCOVERY_MODEL.yaml" in command_registry["canonical_inputs"], "Command registry missing repo discovery model")
+    ensure(read_first_json["pack_id"] == "read-first", "Unexpected read-first payload")
 
     for skill in skills:
         ensure(skill["authoritative_sources"], f"Skill missing authoritative_sources: {skill['id']}")
@@ -63,6 +69,9 @@ def main() -> None:
                 not source["path"].startswith(FORBIDDEN_PREFIXES),
                 f"Forbidden canonical path in skill {skill['id']}: {source['path']}",
             )
+        for key in ("authoritative_sources", "read_first_paths"):
+            for source in skill[key]:
+                ensure("/home/gurpreet" not in source["path"], f"Absolute path leaked in skill {skill['id']}: {source['path']}")
         if skill["category"] in HIGH_RISK_CATEGORIES:
             ensure(
                 len(skill["required_reviewers"]) > 0,
@@ -87,6 +96,7 @@ def main() -> None:
                 not source["path"].startswith(FORBIDDEN_PREFIXES),
                 f"Forbidden read-first path in scenario {scenario['scenario_id']}: {source['path']}",
             )
+            ensure("/home/gurpreet" not in source["path"], f"Absolute path leaked in scenario {scenario['scenario_id']}: {source['path']}")
 
     read_first_entries = [
         line for line in read_first if line[:2].strip().isdigit() and ". " in line
@@ -97,6 +107,18 @@ def main() -> None:
             not any(prefix in line for prefix in FORBIDDEN_PREFIXES),
             f"Forbidden read-first entry: {line}",
         )
+        ensure("/home/gurpreet" not in line, f"Absolute path leaked in read-first markdown: {line}")
+
+    for entry in read_first_json["entries"]:
+        ensure("/home/gurpreet" not in entry["path"], f"Absolute path leaked in read-first JSON: {entry['path']}")
+
+    for pack in pack_registry["packs"]:
+        ensure("/home/gurpreet" not in pack["canonical_path"], f"Absolute path leaked in pack registry canonical_path: {pack['pack_id']}")
+        ensure("/home/gurpreet" not in pack["schema_path"], f"Absolute path leaked in pack registry schema_path: {pack['pack_id']}")
+        for projection in pack["projection_paths"]:
+            ensure("/home/gurpreet" not in projection, f"Absolute path leaked in pack registry projection: {pack['pack_id']}")
+        for dependency in pack["canonical_inputs"]:
+            ensure("/home/gurpreet" not in dependency, f"Absolute path leaked in pack registry canonical input: {pack['pack_id']}")
 
     node_ids = {node["id"] for node in dep_graph["nodes"]}
     for skill_id in skill_ids:
