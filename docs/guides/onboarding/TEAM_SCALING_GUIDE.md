@@ -159,8 +159,8 @@ _Role: Incident response, performance troubleshooting, disaster recovery_
 
 #### Day 1: Critical Runbooks
 - [ ] **Read**: [Site Down Runbook](../../ops/runbooks/site-down.md) - **CRITICAL**
-- [ ] **Read**: [On-Call Observability Playbook](../../operations/ONCALL_OBSERVABILITY_PLAYBOOK.md)
-- [ ] **Read**: [Alert Severity Matrix](../../operations/ALERT_SEVERITY_MATRIX.md)
+- [ ] **Read**: [On-Call Observability Playbook](../../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md)
+- [ ] **Read**: [Alert Severity Matrix](../../reference/operations/ALERT_SEVERITY_MATRIX.md)
 - [ ] **Bookmark**: [Quick Reference](../../ops/quickref/QUICK_REFERENCE.md)
 - [ ] **Access**: All production systems (GCP, GKE, Grafana, Atlas, Infisical)
 - [ ] **Test**: Verify you can access production cluster read-only
@@ -181,8 +181,8 @@ _Role: Incident response, performance troubleshooting, disaster recovery_
 
 #### Week 2: Auth and Alerting
 - [ ] **Read**: [Auth Alert Runbook](../../ops/runbooks/AUTH_ALERT_RUNBOOK.md)
-- [ ] **Read**: [Velero Backup Audit](../../operations/VELERO_BACKUP_AUDIT.md)
-- [ ] **Read**: [Alert Tuning SOP](../../operations/ALERT_TUNING_SOP.md)
+- [ ] **Read**: [Velero Backup Audit](../../ops/runbooks/VELERO_BACKUP_AUDIT.md)
+- [ ] **Read**: [Alert Tuning SOP](../../ops/runbooks/ALERT_TUNING_SOP.md)
 - [ ] **Shadow**: Senior SRE during incident
 - [ ] **Practice**: Simulate incident response on dev
 
@@ -434,7 +434,7 @@ _Role: Tenant management, SSO configuration, user provisioning, domain managemen
 
 #### Configuration Basics
 - [ ] **Read**: [Multi-Site Guide](../admin/MULTI_SITE_GUIDE.md)
-- [ ] **Read**: [Auth and Permissions](../../ops/security/AUTH_AND_PERMISSIONS.md)
+- [ ] **Read**: [Auth and Permissions](../../reference/operations/AUTH_AND_PERMISSIONS.md)
 - [ ] **Understand**: Multi-domain setup (academyv2.mereka.io, academy.biji-biji.com, etc.)
 
 ### First Week Plan
@@ -562,7 +562,7 @@ kubectl exec -n mereka-lms deploy/lms -- /bin/bash -c \
 4. **Resolution**: Post postmortem action items
 5. **Follow-up**: Complete postmortem within 48 hours
 
-**Postmortem Template**: See [Incident Templates](../../operations/INCIDENT_TEMPLATES.md)
+**Postmortem Template**: See [Incident Templates](../../ops/runbooks/INCIDENT_TEMPLATES.md)
 
 ### Code Review
 
@@ -773,8 +773,8 @@ See [adr/README.md](../../adr/README.md) for full process.
 
 **SREs**:
 - [Site Down Runbook](../../ops/runbooks/site-down.md) - CRITICAL
-- [On-Call Observability Playbook](../../operations/ONCALL_OBSERVABILITY_PLAYBOOK.md)
-- [Incident Templates](../../operations/INCIDENT_TEMPLATES.md)
+- [On-Call Observability Playbook](../../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md)
+- [Incident Templates](../../ops/runbooks/INCIDENT_TEMPLATES.md)
 
 **Developers**:
 - [Developer Onboarding](DEVELOPER_ONBOARDING.md)

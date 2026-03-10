@@ -2,7 +2,7 @@
 title: Documentation Standards
 owner: Platform Team
 status: canonical
-last_reviewed: 2026-03-09
+last_verified: 2026-03-09
 canonical_root: docs/guides
 doc_class: guide
 summary: Baseline writing, placement, and review standards for canonical documentation in this repository.

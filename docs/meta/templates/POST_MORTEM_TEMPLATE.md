@@ -3,8 +3,8 @@
 
 _Copy this file to `docs/status/incidents/YYYY-MM-DD-<slug>.md` and fill it in._
 
-**Requirements**: See [postmortems/README.md](postmortems/README.md) for publishing guidelines.
-**Full communication templates**: [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md)
+**Requirements**: See [../../status/incidents/README.md](../../status/incidents/README.md) for publishing guidelines.
+**Full communication templates**: [../../runbooks/operations/INCIDENT_TEMPLATES.md](../../runbooks/operations/INCIDENT_TEMPLATES.md)
 
 ---
 

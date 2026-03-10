@@ -2,6 +2,7 @@
 
 _Status: superseded_  
 _Superseded by: ../ops/README.md_
+superseded_by: ../ops/README.md
 
 `docs/operations/**` is retired as an active documentation root.
 

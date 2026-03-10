@@ -2,7 +2,7 @@
 title: Documentation Style Guide
 owner: Platform Team
 status: canonical
-last_reviewed: 2026-03-09
+last_verified: 2026-03-09
 canonical_root: docs/guides/standards
 doc_class: guide
 audience:

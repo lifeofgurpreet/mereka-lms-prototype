@@ -58,7 +58,7 @@ mereka-lms/
 
 > **Boundary reference**: For the authoritative classification of what belongs here vs in
 > `infrastructure` (historical name: `infrastructure`), see [DEPLOYMENT_BOUNDARY.md](../../concepts/architecture/DEPLOYMENT_BOUNDARY.md)
-> and [DEPLOYMENT_CONTRACT.md](../../concepts/architecture/DEPLOYMENT_CONTRACT.md).
+> and [DEPLOYMENT_CONTRACT.md](../../reference/architecture/DEPLOYMENT_CONTRACT.md).
 
 **Structure**:
 ```

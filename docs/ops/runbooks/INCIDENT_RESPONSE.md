@@ -5,7 +5,7 @@ _Audience: All Engineers · Owner: Engineering Lead · Last updated: 2026-02-24_
 
 Use this runbook during an active incident. Keep it open alongside the terminal.
 
-**Related docs**: [ONCALL_ROTATION.md](ONCALL_ROTATION.md) · [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md) · [../ops/runbooks/site-down.md](../ops/runbooks/site-down.md) · [../ops/runbooks/emergency-rollback.md](../ops/runbooks/emergency-rollback.md)
+**Related docs**: [../../policies/operations/ONCALL_ROTATION.md](../../policies/operations/ONCALL_ROTATION.md) · [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md) · [site-down.md](site-down.md) · [emergency-rollback.md](emergency-rollback.md)
 
 ---
 
@@ -94,7 +94,9 @@ kubectl exec -n mereka-lms deploy/lms -- python -c \
 - ExternalSecret not synced — `kubectl get externalsecret -n mereka-lms`
 - Wrong password in Infisical — rotate via `gcloud secrets versions add`
 
-**Runbook**: [../ops/runbooks/MONGODB_ATLAS_RUNBOOK.md](../ops/runbooks/MONGODB_ATLAS_RUNBOOK.md)
+**Runbook**: [MONGODB_ATLAS_RUNBOOK.md](MONGODB_ATLAS_RUNBOOK.md)
+
+**Postmortem guidance**: [../../status/incidents/README.md](../../status/incidents/README.md)
 
 ---
 
@@ -195,7 +197,7 @@ Before declaring the incident resolved:
 | P3 | Optional (if instructive) | 1 week |
 | P4 | No | — |
 
-**Postmortem template**: [postmortems/README.md](postmortems/README.md) → full template in [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md).
+**Postmortem template**: [../../status/incidents/README.md](../../status/incidents/README.md) → full template in [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md).
 
 File as: `docs/status/incidents/YYYY-MM-DD-<slug>.md`
 

@@ -3,7 +3,7 @@
 **Status**: Accepted
 **Date**: 2026-02-11
 **Deciders**: Platform Team
-**Related**: [specs/plans/IMPLEMENTATION_ORDER.md](../../specs/plans/IMPLEMENTATION_ORDER.md), [scripts/qa/spec-tools/](../../scripts/qa/spec-tools/)
+**Related**: [specs/plans/IMPLEMENTATION_ORDER.md](../../../specs/plans/IMPLEMENTATION_ORDER.md), [scripts/qa/spec-tools/](../../../scripts/qa/spec-tools/)
 
 <!-- Last verified: 2026-02-13 -->
 
@@ -105,13 +105,13 @@ manual_verifications:
 - **25 unmapped ACs honestly reported**: Previously hidden as "planned" phantom scripts
 - **Simplified tooling**: Deleted 4 testmap-specific tools (`validate_testmap_format.py`, `convert_testmap.py`, `add_ac_descriptions.py`, `check_test_coverage.py` fuzzy matching)
 - **Enforced by linting**: `TEST-MAP-001` rule ensures new test files include `@covers`
-- **Computed dependency graph**: `depends_on` frontmatter + `compute_dependency_graph.py` generates `specs/plans/IMPLEMENTATION_ORDER.md`
+- **Computed dependency graph**: `depends_on` frontmatter + `compute_dependency_graph.py` generates [`specs/plans/IMPLEMENTATION_ORDER.md`](../../../specs/plans/IMPLEMENTATION_ORDER.md)
 
 ### Negative
 
 - **Scripts need annotation migration**: One-time effort to add `@covers` to 119 verification scripts (completed via `annotate_scripts.py`)
 - **New test files must include `@covers`**: Enforced by spec integrity gates, but requires discipline
-- **Manual verifications in separate file**: `specs/plans/manual_verifications.yaml` must be maintained alongside specs (but consolidated from 31 testmaps)
+- **Manual verifications in separate file**: [`specs/plans/manual_verifications.yaml`](../../../specs/plans/manual_verifications.yaml) must be maintained alongside specs (but consolidated from 31 testmaps)
 
 ## Alternatives Considered
 
@@ -253,9 +253,9 @@ Estimated effort: 1-2 weeks for tool setup and import
 
 - [Acceptance Criteria Best Practices](https://www.scruminc.com/acceptance-criteria/)
 - [Requirements Traceability in Agile](https://www.atlassian.com/agile/requirements/traceability)
-- [Spec Verification Tools](../../scripts/qa/spec-tools/)
-- [Implementation Order](../../specs/plans/IMPLEMENTATION_ORDER.md)
-- [Manual Verifications](../../specs/plans/manual_verifications.yaml)
+- [Spec Verification Tools](../../../scripts/qa/spec-tools/)
+- [Implementation Order](../../../specs/plans/IMPLEMENTATION_ORDER.md)
+- [Manual Verifications](../../../specs/plans/manual_verifications.yaml)
 
 ## Wave 2 alignment note
 
