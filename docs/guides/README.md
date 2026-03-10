@@ -12,6 +12,7 @@ Use this root when the question is instructional:
 | If you need to... | Start here | Then go deeper in |
 |---|---|---|
 | Get oriented by role | [`INDEX_BY_AUDIENCE.md`](INDEX_BY_AUDIENCE.md) | The specific guide root below |
+| Use the platform handbook to find URLs, tenant rules, or escalation paths | [`platform/PLATFORM_START_HERE.md`](platform/PLATFORM_START_HERE.md) | [`../reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md`](../reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md) and [`../reference/platform/TEAM_TOPOLOGY_REFERENCE.md`](../reference/platform/TEAM_TOPOLOGY_REFERENCE.md) |
 | Set up locally or learn the daily dev workflow | `onboarding/` | `../ops/quickref/README.md` for fast operator commands |
 | Operate or administer the platform | `admin/` | `../ops/README.md` for runtime procedures |
 | Work on branding execution | `branding/` | `../reference/architecture/README.md` for frontend/runtime reference |
@@ -26,6 +27,7 @@ Do not use these roots as the winning guidance surface:
 ## Main guide surfaces
 
 - [`INDEX_BY_AUDIENCE.md`](INDEX_BY_AUDIENCE.md) for audience-first navigation
+- `platform/` for the handbook front door, generated platform references, and escalation routing
 - `onboarding/` for setup and local workflow guidance
 - `admin/` for platform/operator guidance
 - `branding/` for brand execution guidance

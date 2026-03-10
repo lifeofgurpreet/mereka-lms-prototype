@@ -1,27 +1,29 @@
 # Wave 14 Execution Tracker
 
 ## Latest substantive packet head
-- b56825ee5731b95b0c72d89486ec149cbefec74d
+- 53b1e9f35e78d58ced4dc9a55cb061aca9f98c6f
 
 ## Last completed batch
-- commit: b56825ee5731b95b0c72d89486ec149cbefec74d
-- scope: Wave 14 Packet D human handbook pages
-- validators run: docs catalog rebuild, docs catalog governance, local link integrity for handbook pages
-- result: thin handbook pages exist and route readers back to the generated references
+- commit: 53b1e9f35e78d58ced4dc9a55cb061aca9f98c6f
+- scope: Wave 14 Packet E handbook verifier and CI adoption
+- validators run: handbook verifier, handbook gate, docs catalog governance, docs-policy YAML parse
+- result: handbook integrity is locally enforceable and wired into docs-policy CI
 
 ## Current target packet
 - files:
-  - tools/docs/verify/verify_team_handbook.py
-  - scripts/qa/run-team-handbook-gates.sh
+  - docs/README.md
+  - docs/guides/README.md
+  - docs/meta/knowledge/WAVE14_CLOSEOUT.md
+  - docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md
   - docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md
 - goal:
-  - enforce handbook structure and no-drift rules locally
-  - make generated references and footer requirements machine-checkable
-  - prepare the wave for minimal CI adoption
+  - make the handbook discoverable from canonical docs front doors
+  - leave closeout and review handoff documents for reviewers and future agents
+  - finish the wave without creating a new parallel truth plane
 - stop condition:
-  - handbook verifier passes
-  - dedicated handbook gate passes
-  - docs governance still passes on the full Wave 14 diff
+  - handbook is reachable from canonical docs front doors
+  - closeout and review handoff exist
+  - tracker reflects the final wave state
 
 ## Locked handbook topology
 - human-authored handbook root: `docs/guides/platform/`
@@ -46,4 +48,4 @@
 - live approval state, live runtime evidence attachment, and vendor bot integrations remain intentionally unresolved outside the scope of this handbook wave
 
 ## Next queued packet
-- Packet F: link the handbook from canonical front doors and write closeout/handoff
+- none

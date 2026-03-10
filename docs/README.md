@@ -61,6 +61,7 @@ Do not load the whole corpus by default. Read the hot path first, then add one d
 
 | If you need to... | Start here | Then read |
 | --- | --- | --- |
+| get the right platform URL or handbook path by role | [guides/platform/PLATFORM_START_HERE.md](guides/platform/PLATFORM_START_HERE.md) | [reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md](reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md) and [reference/platform/TEAM_TOPOLOGY_REFERENCE.md](reference/platform/TEAM_TOPOLOGY_REFERENCE.md) |
 | understand active architecture rules | [concepts/architecture/README.md](concepts/architecture/README.md) | charter, resolver, the specific standard for that domain |
 | run or debug the platform | [ops/README.md](ops/README.md) | quickref, then the relevant runbook/monitoring/security subroot |
 | change contributor-facing guidance | [guides/README.md](guides/README.md) | onboarding, admin, integrations, or standards |
@@ -87,6 +88,7 @@ Start in [docs/ops/](ops/README.md):
 
 Start in [docs/guides/](guides/README.md):
 
+- [Platform Handbook](guides/platform/PLATFORM_START_HERE.md)
 - [Onboarding](guides/onboarding/README.md)
 - [Admin Guides](guides/admin/README.md)
 - [Integrations](guides/integrations/README.md)
