@@ -1,29 +1,28 @@
 # Wave 13 Execution Tracker
 
 ## Latest substantive packet head
-- bf7697a65ec53f3153fd7ea686e0de464ff196f2
+- 38e167af1b7a6acc0f610372a99e1a9590d86537
 
 ## Last completed batch
-- commit: bf7697a65ec53f3153fd7ea686e0de464ff196f2
-- scope: Wave 13 Packet B
-- validators run: execution receipt write/check, approval receipt write/check, docs catalog governance
+- commit: 38e167af1b7a6acc0f610372a99e1a9590d86537
+- scope: Wave 13 Packet C
+- validators run: evidence receipt write/check, release decision receipt write/check, docs catalog governance
 - result: passed
 
 ## Current target packet
 - files:
   - docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md
-  - docs/meta/knowledge/schemas/evidence-receipt.schema.json
-  - docs/meta/knowledge/schemas/release-decision-receipt.schema.json
-  - tools/knowledge/build_evidence_receipt.py
-  - tools/knowledge/build_release_decision_receipt.py
-  - generated/knowledge/evidence-receipt.json
-  - generated/knowledge/release-decision-receipt.json
+  - docs/meta/knowledge/schemas/runtime-proof-receipt.schema.json
+  - docs/meta/knowledge/schemas/proof-bundle-manifest.schema.json
+  - tools/knowledge/build_runtime_proof_receipt.py
+  - generated/knowledge/runtime-proof-receipt.json
+  - generated/knowledge/proof-bundle-manifest.json
 - goal:
-  - bind evidence obligations into a canonical receipt surface
-  - bind release-readiness to the exact dependent receipts and decision inputs used
-  - close the core proof chain before runtime-proof attachment work begins
+  - attach runtime proof references to the proof chain without fabricating live convergence
+  - publish one proof bundle manifest that enumerates the current receipt set
+  - keep unresolved runtime inputs explicit and non-hidden
 - stop condition:
-  - evidence and release decision receipts are generated deterministically and one substantive commit is created
+  - runtime proof receipt and proof bundle manifest are generated deterministically and one substantive commit is created
 
 ## Open residue
 - live approval state is still an unresolved input outside repo truth
@@ -31,4 +30,4 @@
 - external Wave 11 assistant/front-door exports remain branch-local
 
 ## Next queued packet
-- Packet D: runtime proof receipt and proof bundle manifest
+- Packet E: receipt runtime verifier and CI adoption

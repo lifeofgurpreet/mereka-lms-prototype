@@ -1,0 +1,91 @@
+{
+  "canonical_inputs": [
+    "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+    "generated/knowledge/release-readiness.json",
+    "generated/skills/runtime-convergence-report.json"
+  ],
+  "convergence_summary": {
+    "fail": 0,
+    "pass": 5,
+    "warning": 1
+  },
+  "generated_by": "tools/knowledge/build_runtime_proof_receipt.py",
+  "proof_references": [
+    {
+      "canonical_sources": [
+        "bbi-infrastructure/.github/workflows/promote-image.yml",
+        "platform-control-plane/contracts/release-contracts.yaml"
+      ],
+      "check_id": "promotion-contract-alignment",
+      "evidence": [
+        "generated/skills/command-registry.json",
+        "generated/skills/skill-registry.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "canonical_sources": [
+        "platform-control-plane/contracts/service-identity-contract.yaml"
+      ],
+      "check_id": "service-identity-normalization",
+      "evidence": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/scenario-packs.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "canonical_sources": [
+        "bbi-infrastructure/config/bootstrap-lane-topology.yaml",
+        "bbi-infrastructure/config/domain-registry.yaml"
+      ],
+      "check_id": "topology-alignment",
+      "evidence": [
+        "generated/skills/read-first.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "canonical_sources": [
+        "platform-control-plane/contracts/release-contracts.yaml",
+        "bbi-infrastructure/.github/workflows/promote-image.yml"
+      ],
+      "check_id": "release-obligations-alignment",
+      "evidence": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/command-registry.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "canonical_sources": [
+        "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+        "platform-control-plane/contracts/release-contracts.yaml",
+        "platform-control-plane/contracts/service-identity-contract.yaml"
+      ],
+      "check_id": "assistant-front-door-subordination",
+      "evidence": [
+        "generated/skills/pack-registry.json",
+        "generated/skills/read-first.json"
+      ],
+      "status": "warning"
+    },
+    {
+      "canonical_sources": [
+        "docs/meta/skills/AGENT_PACK_ABI.yaml"
+      ],
+      "check_id": "pack-runtime-alignment",
+      "evidence": [
+        "generated/skills/pack-registry.json"
+      ],
+      "status": "pass"
+    }
+  ],
+  "receipt_id": "runtime-proof-receipt",
+  "schema_version": 1,
+  "source_range": "origin/main...HEAD",
+  "unresolved_runtime_inputs": [
+    "Assistant/runtime front doors remain subordinate to canonical contract surfaces",
+    "live runtime convergence remains out of scope for this repo-truth receipt"
+  ]
+}
