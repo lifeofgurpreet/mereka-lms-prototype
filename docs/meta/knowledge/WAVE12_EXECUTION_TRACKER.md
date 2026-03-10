@@ -1,26 +1,25 @@
 # Wave 12 Execution Tracker
 
 ## Latest substantive packet head
-- 7fea40321d4210f8844f4cb34da65023c682ac1f
+- 85833bf1d51f389dc7b1e5096ae5d9ae8b37e7f7
 
 ## Last completed batch
-- commit: 7fea40321d4210f8844f4cb34da65023c682ac1f
-- scope: Wave 12 Packet F
-- validators run: runtime evaluation generator write/check, docs catalog governance
+- commit: 85833bf1d51f389dc7b1e5096ae5d9ae8b37e7f7
+- scope: Wave 12 Packet G
+- validators run: decision runtime verifier, decision runtime gates, docs-policy YAML validation
 - result: passed
 
 ## Current target packet
 - files:
-  - tools/knowledge/verify_decision_runtime.py
-  - scripts/qa/run-decision-runtime-gates.sh
-  - .github/workflows/docs-policy.yml
+  - docs/meta/knowledge/WAVE12_CLOSEOUT.md
+  - docs/meta/knowledge/WAVE12_REVIEW_HANDOFF.md
   - docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md
 - goal:
-  - enforce the decision runtime outputs through one verifier and one gate
-  - wire the decision runtime into CI artifact generation and verification flow
-  - fail when decision outputs drift, lose schema validity, or stop being explainable from canonical inputs
+  - close Wave 12 in reviewer-ready state
+  - document the canonical decision outputs, guarantees, and unresolved inputs
+  - leave one deterministic review path for humans and future agent integrations
 - stop condition:
-  - decision runtime verifier and gate pass locally and one substantive commit is created
+  - closeout docs exist, tracker is truthful, and one substantive commit is created
 
 ## Open residue
 - assistant surface exports are not yet rebuilt on the fresh Wave 11 external branches
@@ -28,4 +27,4 @@
 - runtime convergence warning still requires manual follow-up and must remain non-hidden in Wave 12 outputs
 
 ## Next queued packet
-- Packet H: Closeout and reviewer handoff
+- wave-closeout
