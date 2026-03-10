@@ -47,7 +47,7 @@ kubectl get backup -n velero | grep hourly-critical | tail -3
 ### Option A: Automated (recommended)
 
 ```bash
-cd /home/gurpreet/projects/k8s/mereka-lms
+cd <repo-root>
 ./scripts/ops/park-prod.sh --dry-run  # Preview first
 ./scripts/ops/park-prod.sh
 ```
@@ -67,7 +67,7 @@ cd /home/gurpreet/projects/k8s/mereka-lms
 
 3. Commit and push to GitOps repo (`infrastructure`):
    ```bash
-   cd /home/gurpreet/projects/k8s/infrastructure
+   cd <path-to-bbi-infrastructure>
    git add apps/mereka-lms/overlays/prod/
    git commit -m "ops(mereka-lms): warm-park prod for cost savings"
    git push origin main
@@ -98,7 +98,7 @@ curl -Isk https://academyv2.mereka.io/ | head -1
 ### Option A: Automated (recommended)
 
 ```bash
-cd /home/gurpreet/projects/k8s/mereka-lms
+cd <repo-root>
 ./scripts/ops/unpark-prod.sh --dry-run  # Preview first
 ./scripts/ops/unpark-prod.sh
 ```
