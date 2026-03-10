@@ -3,7 +3,7 @@
     "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 831
+    "supporting": 830
   },
   "entries": [
     {
@@ -6796,15 +6796,6 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
-      "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Migration Verification Report"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
       "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md",
       "root": "docs",
       "status": "",
@@ -11005,7 +10996,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1222,
+  "entry_count": 1221,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
@@ -11016,7 +11007,7 @@
     "docs:index": 5,
     "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 170,
+    "docs:runbook": 169,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,
@@ -11027,7 +11018,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1004,
+    "docs": 1003,
     "specs": 218
   }
 }

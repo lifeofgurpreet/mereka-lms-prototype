@@ -36,7 +36,7 @@ python scripts/migrations/kajabi/build_course_packages.py \
   --org MEREKA --course-prefix MEKA- --run-prefix RUN- --language en
 ```
 
-Result: `scripts/migrations/kajabi/output/course_packages/<slug>/<slug>.tar.gz` plus a manifest with generated course keys. See [`KAJABI_MIGRATION_VERIFICATION.md`](KAJABI_MIGRATION_VERIFICATION.md) for QA steps.
+Result: `scripts/migrations/kajabi/output/course_packages/<slug>/<slug>.tar.gz` plus a manifest with generated course keys. See [`../../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md`](../../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md) for the historical verification snapshot.
 
 ## 4. Produce Open edX-Friendly CSVs
 
@@ -83,7 +83,7 @@ The script uploads `openedx_bulk_import.py`, runs it inside the LMS pod, and tra
 
 ## 6. Verification & Sign-off
 
-1. Follow [`KAJABI_MIGRATION_VERIFICATION.md`](KAJABI_MIGRATION_VERIFICATION.md) to spot-check users, enrollments, and course content.
+1. Use [`EXECUTION_PLAN_VERIFICATION.md`](EXECUTION_PLAN_VERIFICATION.md) and [`VERIFY_AND_SYNC_KAJABI.md`](VERIFY_AND_SYNC_KAJABI.md) for current verification steps. The completed historical verification snapshot lives in [`../../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md`](../../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md).
 2. Record progress in `docs/status/migrations/KAJABI_MIGRATION_STATUS.md`.
 3. Update `reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md` once Ops validates prod and QA signs off.
 

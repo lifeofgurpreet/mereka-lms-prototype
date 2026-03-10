@@ -13,7 +13,7 @@ links:
   related_docs:
   - reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md
   - docs/status/migrations/KAJABI_MIGRATION_STATUS.md
-  - docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md
+  - reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md
   - docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md
   - docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md
   - docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md

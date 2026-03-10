@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 3666,
+  "edge_count": 3663,
   "edges": [
     {
       "edge_type": "classifies",
@@ -4211,11 +4211,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md"
     },
     {
       "edge_type": "classifies",
@@ -9881,11 +9876,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md"
     },
     {
       "edge_type": "contains",
@@ -16035,11 +16025,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
-      "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
       "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md"
     },
     {
@@ -18334,7 +18319,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1245,
+  "node_count": 1244,
   "nodes": [
     {
       "id": "classification:archival",
@@ -26659,17 +26644,6 @@
       "root": "docs",
       "status": "",
       "title": "Kajabi \u2192 Open\u202fedX Migration Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Migration Verification Report"
     },
     {
       "classification": "supporting",
