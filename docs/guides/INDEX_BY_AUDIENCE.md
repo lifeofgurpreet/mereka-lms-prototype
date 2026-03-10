@@ -40,14 +40,14 @@ _Deploy, scale, monitor, and maintain the platform day-to-day_
 - [OBSERVABILITY_QUICKSTART.md](../ops/monitoring/OBSERVABILITY_QUICKSTART.md) - Fast health checks
 
 **Configuration**:
-- [TUTOR_CONFIG_SAFETY.md](../operations/TUTOR_CONFIG_SAFETY.md) - Safe config changes
-- [OPENEDX_HOSTNAMES.md](../ops/security/OPENEDX_HOSTNAMES.md) - Hostname registry
+- [TUTOR_CONFIG_SAFETY.md](../policies/operations/TUTOR_CONFIG_SAFETY.md) - Safe config changes
+- [OPENEDX_HOSTNAMES.md](../reference/operations/OPENEDX_HOSTNAMES.md) - Hostname registry
 - [CLOUDFLARE_DNS.md](../archive/reports/CLOUDFLARE_DNS.md) - DNS management
 
 **Monitoring**:
-- [MONITORING.md](../ops/monitoring/MONITORING.md) - Monitoring strategy
-- [SLO_DASHBOARDS_SETUP.md](../operations/SLO_DASHBOARDS_SETUP.md) - Dashboard setup
-- [ALERT_SEVERITY_MATRIX.md](../operations/ALERT_SEVERITY_MATRIX.md) - Alert severity levels
+- [MONITORING.md](../reference/operations/MONITORING.md) - Monitoring strategy
+- [SLO_DASHBOARDS_SETUP.md](../ops/runbooks/SLO_DASHBOARDS_SETUP.md) - Dashboard setup
+- [ALERT_SEVERITY_MATRIX.md](../reference/operations/ALERT_SEVERITY_MATRIX.md) - Alert severity levels
 
 ### Relevant Runbooks
 
@@ -65,8 +65,8 @@ _Deploy, scale, monitor, and maintain the platform day-to-day_
 
 ### Contact/Escalation
 - **Daily Questions**: Engineering team Slack channel
-- **Incidents**: Follow [ONCALL_OBSERVABILITY_PLAYBOOK.md](../operations/ONCALL_OBSERVABILITY_PLAYBOOK.md)
-- **Change Requests**: Submit via [RELEASE_CHECKLIST.md](../operations/RELEASE_CHECKLIST.md)
+- **Incidents**: Follow [ONCALL_OBSERVABILITY_PLAYBOOK.md](../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md)
+- **Change Requests**: Submit via [RELEASE_CHECKLIST.md](../ops/runbooks/RELEASE_CHECKLIST.md)
 
 ---
 
@@ -77,8 +77,8 @@ _Incident response, performance troubleshooting, disaster recovery_
 
 #### Start Here (On-Call Prep)
 1. [Site Down Runbook](../ops/runbooks/site-down.md) - **CRITICAL**: Site outage diagnostic tree
-2. [On-Call Observability Playbook](../operations/ONCALL_OBSERVABILITY_PLAYBOOK.md) - Incident triage sequence
-3. [Alert Severity Matrix](../operations/ALERT_SEVERITY_MATRIX.md) - Severity levels and routing
+2. [On-Call Observability Playbook](../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md) - Incident triage sequence
+3. [Alert Severity Matrix](../reference/operations/ALERT_SEVERITY_MATRIX.md) - Severity levels and routing
 4. [Quick Reference](../ops/quickref/QUICK_REFERENCE.md) - Emergency commands
 
 #### Foundational (First Week On-Call)
@@ -90,10 +90,10 @@ _Incident response, performance troubleshooting, disaster recovery_
 
 #### Advanced Topics
 10. [Auth Alert Runbook](../ops/runbooks/AUTH_ALERT_RUNBOOK.md) - Authentication incident response
-11. [Velero Backup Audit](../operations/VELERO_BACKUP_AUDIT.md) - Backup verification
+11. [Velero Backup Audit](../ops/runbooks/VELERO_BACKUP_AUDIT.md) - Backup verification
 12. [DR Test Results](../status/readiness/DR_TEST_RESULTS.md) - Recovery test outcomes
-13. [Incident Templates](../operations/INCIDENT_TEMPLATES.md) - Postmortem structure
-14. [Alert Tuning SOP](../operations/ALERT_TUNING_SOP.md) - Noise reduction process
+13. [Incident Templates](../ops/runbooks/INCIDENT_TEMPLATES.md) - Postmortem structure
+14. [Alert Tuning SOP](../ops/runbooks/ALERT_TUNING_SOP.md) - Noise reduction process
 
 ### Quick References
 
@@ -106,12 +106,12 @@ _Incident response, performance troubleshooting, disaster recovery_
 **Diagnostics**:
 - [TROUBLESHOOTING.md](../ops/runbooks/site-down.md) - Common issues checklist
 - [OBSERVABILITY_QUICKSTART.md](../ops/monitoring/OBSERVABILITY_QUICKSTART.md) - Fast health audit
-- [DEPLOYMENT_VERIFICATION.md](../operations/DEPLOYMENT_VERIFICATION.md) - Post-deploy checks
+- [DEPLOYMENT_VERIFICATION.md](../ops/runbooks/DEPLOYMENT_VERIFICATION.md) - Post-deploy checks
 
 **Recovery**:
 - [DISASTER_RECOVERY.md](../ops/runbooks/DISASTER_RECOVERY.md) - Restore procedures
-- [VELERO_BACKUP_AUDIT.md](../operations/VELERO_BACKUP_AUDIT.md) - Backup status
-- [COURSE_DATA_RECOVERY.md](../operations/COURSE_DATA_RECOVERY.md) - Course data restore
+- [VELERO_BACKUP_AUDIT.md](../ops/runbooks/VELERO_BACKUP_AUDIT.md) - Backup status
+- [COURSE_DATA_RECOVERY.md](../ops/runbooks/COURSE_DATA_RECOVERY.md) - Course data restore
 
 ### Relevant Runbooks
 
@@ -126,8 +126,8 @@ _Incident response, performance troubleshooting, disaster recovery_
 - [DEPLOYMENT_RUNBOOK.md](../ops/runbooks/DEPLOYMENT_RUNBOOK.md) - Safe deployments
 
 **Observability**:
-- [ONCALL_OBSERVABILITY_PLAYBOOK.md](../operations/ONCALL_OBSERVABILITY_PLAYBOOK.md) - Triage workflow
-- [ALERT_TUNING_SOP.md](../operations/ALERT_TUNING_SOP.md) - Weekly alert review
+- [ONCALL_OBSERVABILITY_PLAYBOOK.md](../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md) - Triage workflow
+- [ALERT_TUNING_SOP.md](../ops/runbooks/ALERT_TUNING_SOP.md) - Weekly alert review
 - [OBSERVABILITY_OWNERSHIP.md](../ops/monitoring/OBSERVABILITY_OWNERSHIP.md) - Source of truth model
 
 ### Architecture Understanding
@@ -143,10 +143,10 @@ _Incident response, performance troubleshooting, disaster recovery_
 - [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Tenant isolation
 
 ### Contact/Escalation
-- **P0/P1 Incidents**: On-call rotation ([ONCALL_ROTATION.md](../operations/ONCALL_ROTATION.md))
+- **P0/P1 Incidents**: On-call rotation ([ONCALL_ROTATION.md](../policies/operations/ONCALL_ROTATION.md))
 - **Escalation**: Platform Engineering lead
-- **Postmortems**: Template in [INCIDENT_TEMPLATES.md](../operations/INCIDENT_TEMPLATES.md)
-- **SLA Reports**: [SLA_REPORTING.md](../operations/SLA_REPORTING.md)
+- **Postmortems**: Template in [INCIDENT_TEMPLATES.md](../ops/runbooks/INCIDENT_TEMPLATES.md)
+- **SLA Reports**: [SLA_REPORTING.md](../policies/operations/SLA_REPORTING.md)
 
 ---
 
@@ -251,7 +251,7 @@ _Tenant management, SSO configuration, user provisioning_
 1. [Admin Login Guide](./admin/ADMIN_LOGIN_GUIDE.md) - Access and permissions
 2. [Access URLs](../ops/quickref/access-urls.md) - All admin interfaces
 3. [Multi-Site Guide](./admin/MULTI_SITE_GUIDE.md) - Multi-domain setup
-4. [Auth and Permissions](../ops/security/AUTH_AND_PERMISSIONS.md) - SSO integration
+4. [Auth and Permissions](../reference/operations/AUTH_AND_PERMISSIONS.md) - SSO integration
 
 #### Foundational (First Week)
 5. [Enterprise Services Guide](./admin/ENTERPRISE_SERVICES_GUIDE.md) - B2B services overview
@@ -270,17 +270,17 @@ _Tenant management, SSO configuration, user provisioning_
 **Admin Access**:
 - [ACCESS_URLS.md](../ops/quickref/access-urls.md) - All admin URLs
 - [ADMIN_LOGIN_GUIDE.md](./admin/ADMIN_LOGIN_GUIDE.md) - Login procedures
-- [OPENEDX_HOSTNAMES.md](../ops/security/OPENEDX_HOSTNAMES.md) - Hostname registry
+- [OPENEDX_HOSTNAMES.md](../reference/operations/OPENEDX_HOSTNAMES.md) - Hostname registry
 
 **Configuration**:
-- [AUTH_AND_PERMISSIONS.md](../ops/security/AUTH_AND_PERMISSIONS.md) - Permission model
+- [AUTH_AND_PERMISSIONS.md](../reference/operations/AUTH_AND_PERMISSIONS.md) - Permission model
 - [MULTISITE.md](../concepts/architecture/MULTISITE.md) - Multi-site config
 - [MULTI_SITE_GUIDE.md](./admin/MULTI_SITE_GUIDE.md) - Domain setup
 
 **User Management**:
 - [COURSE_IMPORT_GUIDE.md](./onboarding/COURSE_IMPORT_GUIDE.md) - Import courses
 - [discovery-quickstart.md](../ops/quickref/discovery-quickstart.md) - Course catalog
-- [COURSE_CERTIFICATES_UI.md](../operations/COURSE_CERTIFICATES_UI.md) - Certificate management
+- [COURSE_CERTIFICATES_UI.md](./admin/COURSE_CERTIFICATES_UI.md) - Certificate management
 
 ### Relevant Runbooks
 
@@ -296,14 +296,14 @@ _Tenant management, SSO configuration, user provisioning_
 **Enterprise Features**:
 - [enterprise-services-runbook.md](../archive/superseded/runbooks/enterprise-services-runbook.md) - B2B services
 - [purchase-gateway-runbook.md](../archive/superseded/runbooks/purchase-gateway-runbook.md) - Payment gateway
-- [STRIPE_WEBHOOKS_SETUP.md](../operations/STRIPE_WEBHOOKS_SETUP.md) - Payment webhooks
+- [STRIPE_WEBHOOKS_SETUP.md](../ops/runbooks/STRIPE_WEBHOOKS_SETUP.md) - Payment webhooks
 
 ### Architecture Understanding
 
 **Multi-Tenancy**:
 - [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Tenant architecture
 - [MULTISITE_ANALYSIS.md](../concepts/architecture/MULTISITE_ANALYSIS.md) - Multi-site design
-- [MULTISITE_GOVERNANCE.md](../operations/MULTISITE_GOVERNANCE.md) - Governance model
+- [MULTISITE_GOVERNANCE.md](../policies/operations/MULTISITE_GOVERNANCE.md) - Governance model
 
 **Enterprise Services**:
 - [enterprise-services-overview.md](../concepts/architecture/enterprise-services-overview.md) - Service architecture
@@ -331,45 +331,45 @@ _Security configs, compliance, audit logs, secrets management_
 
 #### Foundational (First Week)
 5. [Data Privacy Compliance Runbook](../archive/superseded/runbooks/data-privacy-compliance-runbook.md) - GDPR/PDPA compliance
-6. [Auth and Permissions](../ops/security/AUTH_AND_PERMISSIONS.md) - Auth model
+6. [Auth and Permissions](../reference/operations/AUTH_AND_PERMISSIONS.md) - Auth model
 7. [In-Cluster Auth Verification](../ops/security/in-cluster-auth-verification.md) - Auth surface checks
-8. [Secret Rotation Checklist](../ops/security/SECRET_ROTATION_CHECKLIST.md) - Secret rotation
+8. [Secret Rotation Checklist](../ops/runbooks/SECRET_ROTATION_CHECKLIST.md) - Secret rotation
 
 #### Advanced Topics
 9. [Auth Alert Runbook](../ops/runbooks/AUTH_ALERT_RUNBOOK.md) - Auth incident response
 10. [Disaster Recovery](../ops/runbooks/DISASTER_RECOVERY.md) - Backup security
-11. [Velero Backup Audit](../operations/VELERO_BACKUP_AUDIT.md) - Backup verification
-12. [Backup Coverage Matrix](../operations/BACKUP_COVERAGE_MATRIX.md) - Backup scope
+11. [Velero Backup Audit](../ops/runbooks/VELERO_BACKUP_AUDIT.md) - Backup verification
+12. [Backup Coverage Matrix](../reference/operations/BACKUP_COVERAGE_MATRIX.md) - Backup scope
 
 ### Quick References
 
 **Security Config**:
 - [SECRETS_MANAGEMENT_GUIDE.md](./admin/SECRETS_MANAGEMENT_GUIDE.md) - Secrets pipeline
 - [SECRETS_SNAPSHOT.md](../ops/security/SECRETS_SNAPSHOT.md) - Secret inventory
-- [SECRET_ROTATION_CHECKLIST.md](../ops/security/SECRET_ROTATION_CHECKLIST.md) - Rotation procedures
-- [INFISICAL_MEREKA_LMS_KEYS.md](../ops/security/INFISICAL_MEREKA_LMS_KEYS.md) - Key registry
+- [SECRET_ROTATION_CHECKLIST.md](../ops/runbooks/SECRET_ROTATION_CHECKLIST.md) - Rotation procedures
+- [INFISICAL_MEREKA_LMS_KEYS.md](../reference/operations/INFISICAL_MEREKA_LMS_KEYS.md) - Key registry
 
 **Authentication**:
 - [AUTH_HARDENING_SPEC.md](../ops/security/AUTH_HARDENING_SPEC.md) - Hardening spec
-- [AUTH_AND_PERMISSIONS.md](../ops/security/AUTH_AND_PERMISSIONS.md) - Permission model
+- [AUTH_AND_PERMISSIONS.md](../reference/operations/AUTH_AND_PERMISSIONS.md) - Permission model
 - [in-cluster-auth-verification.md](../ops/security/in-cluster-auth-verification.md) - Verification
 - [RFC_CLAIM_BASED_ROLE_SYNC.md](../concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md) - Role sync
 
 **Compliance**:
 - [data-privacy-compliance-runbook.md](../archive/superseded/runbooks/data-privacy-compliance-runbook.md) - GDPR/PDPA
-- [BACKUP_COVERAGE_MATRIX.md](../operations/BACKUP_COVERAGE_MATRIX.md) - Backup coverage
-- [VELERO_BACKUP_AUDIT.md](../operations/VELERO_BACKUP_AUDIT.md) - Backup verification
+- [BACKUP_COVERAGE_MATRIX.md](../reference/operations/BACKUP_COVERAGE_MATRIX.md) - Backup coverage
+- [VELERO_BACKUP_AUDIT.md](../ops/runbooks/VELERO_BACKUP_AUDIT.md) - Backup verification
 
 ### Relevant Runbooks
 
 **Security Operations**:
 - [AUTH_ALERT_RUNBOOK.md](../ops/runbooks/AUTH_ALERT_RUNBOOK.md) - Auth incidents
-- [SECRET_ROTATION_CHECKLIST.md](../ops/security/SECRET_ROTATION_CHECKLIST.md) - Secret rotation
+- [SECRET_ROTATION_CHECKLIST.md](../ops/runbooks/SECRET_ROTATION_CHECKLIST.md) - Secret rotation
 - [data-privacy-compliance-runbook.md](../archive/superseded/runbooks/data-privacy-compliance-runbook.md) - Privacy compliance
 
 **Audit & Compliance**:
 - [DISASTER_RECOVERY.md](../ops/runbooks/DISASTER_RECOVERY.md) - DR procedures
-- [VELERO_BACKUP_AUDIT.md](../operations/VELERO_BACKUP_AUDIT.md) - Backup audits
+- [VELERO_BACKUP_AUDIT.md](../ops/runbooks/VELERO_BACKUP_AUDIT.md) - Backup audits
 - [DR_TEST_RESULTS.md](../status/readiness/DR_TEST_RESULTS.md) - Recovery test results
 
 ### Architecture Understanding
@@ -380,7 +380,7 @@ _Security configs, compliance, audit logs, secrets management_
 - [DATABASE_ARCHITECTURE.md](../concepts/architecture/DATABASE_ARCHITECTURE.md) - Data layer security
 
 **Authentication Flow**:
-- [AUTH_AND_PERMISSIONS.md](../ops/security/AUTH_AND_PERMISSIONS.md) - Auth integration
+- [AUTH_AND_PERMISSIONS.md](../reference/operations/AUTH_AND_PERMISSIONS.md) - Auth integration
 - [auth-sso-enterprise-runbook.md](../archive/superseded/runbooks/auth-sso-enterprise-runbook.md) - SSO architecture
 
 ### Audit Artifacts
@@ -400,7 +400,7 @@ _Security configs, compliance, audit logs, secrets management_
 - **Security Incidents**: Contact security team immediately
 - **Compliance Questions**: Compliance officer
 - **Audit Requests**: Submit via security team
-- **[Secret Rotation**: Follow SECRET_ROTATION_CHECKLIST.md](../ops/security/SECRET_ROTATION_CHECKLIST.md)
+- **[Secret Rotation**: Follow SECRET_ROTATION_CHECKLIST.md](../ops/runbooks/SECRET_ROTATION_CHECKLIST.md)
 
 ---
 
@@ -409,7 +409,7 @@ _Security configs, compliance, audit logs, secrets management_
 ### Migrations & Data
 - **[Kajabi Migration**: migrations/kajabi/](../migrations/kajabi/) - Kajabi → Open edX migration
 - **[MCT Migration**: migrations/mct/](../migrations/mct/) - MCT → Open edX migration
-- **[Drive + Airtable Video Inventory**: migrations/drive-airtable/README.md](../migrations/drive-airtable/README.md), [migrations/drive-airtable/STATUS.md](../migrations/drive-airtable/STATUS.md) - Course-first pipeline for nested Drive video mapping with migration-readiness gates, blocker queues, subtitle review, and Open edX contract tracking.
+- **[Drive + Airtable Video Inventory**: migrations/drive-airtable/README.md](../reference/migrations/drive-airtable/README.md), [migrations/drive-airtable/STATUS.md](../status/migrations/drive-airtable-STATUS.md) - Course-first pipeline for nested Drive video mapping with migration-readiness gates, blocker queues, subtitle review, and Open edX contract tracking.
 - **[BBI K8s Migration**: BBI-K8-MIGRATION.md](../archive/reports/migrations/BBI-K8-MIGRATION.md) - Historical infrastructure migration
 
 ### Analytics & Reporting
@@ -424,7 +424,7 @@ _Security configs, compliance, audit logs, secrets management_
 
 ### Integrations
 - **Google OAuth**: [GOOGLE_OAUTH_SETUP.md](./integrations/GOOGLE_OAUTH_SETUP.md)
-- **[Stripe Webhooks**: operations/STRIPE_WEBHOOKS_SETUP.md](../operations/STRIPE_WEBHOOKS_SETUP.md)
+- **[Stripe Webhooks**: operations/STRIPE_WEBHOOKS_SETUP.md](../ops/runbooks/STRIPE_WEBHOOKS_SETUP.md)
 
 ### Status & Planning
 - **[Next 10 Tasks**: archive/reports/status/NEXT10_TASKS.md](../archive/reports/status/NEXT10_TASKS.md)
@@ -432,8 +432,8 @@ _Security configs, compliance, audit logs, secrets management_
 - **[Implementation Roadmap**: IMPLEMENTATION_ROADMAP.md](../meta/docs-program/IMPLEMENTATION_ROADMAP.md)
 
 ### Postmortems
-- **[Postmortem Directory**: operations/postmortems/](../operations/postmortems/)
-- **[Incident Templates**: operations/INCIDENT_TEMPLATES.md](../operations/INCIDENT_TEMPLATES.md)
+- **[Postmortem Directory**: archive/reports/reviews/](../archive/reports/reviews/)
+- **[Incident Templates**: operations/INCIDENT_TEMPLATES.md](../ops/runbooks/INCIDENT_TEMPLATES.md)
 
 ---
 

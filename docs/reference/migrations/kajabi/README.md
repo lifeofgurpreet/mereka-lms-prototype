@@ -1,7 +1,7 @@
 # Kajabi Migration Docs
 _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2026-03-06 • Status: canonical_
 
-All Kajabi-related content lives in this folder. Start with [`KAJABI_MIGRATION.md`](KAJABI_MIGRATION.md) for the canonical pipeline, then dive into the supporting references below.
+All Kajabi-related content lives in this folder. Start with [`KAJABI_MIGRATION.md`](../../../ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md) for the canonical pipeline, then dive into the supporting references below.
 
 | Doc | Purpose |
 | --- | --- |
