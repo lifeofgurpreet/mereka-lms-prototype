@@ -121,8 +121,10 @@ git add . && git commit -m "fix: <issue>" && git push
 **Option B: Revert** (unknown issue):
 ```bash
 # Revert last release commit in both repos
-git -C /home/gurpreet/projects/k8s/mereka-lms revert HEAD && git push
-git -C /home/gurpreet/projects/k8s/infrastructure revert HEAD && git push
+APP_REPO="${APP_REPO:-<repo-root>}"
+INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
+git -C "${APP_REPO}" revert HEAD && git -C "${APP_REPO}" push
+git -C "${INFRA_REPO}" revert HEAD && git -C "${INFRA_REPO}" push
 # ArgoCD auto-syncs to previous state in ~2 min
 ```
 
