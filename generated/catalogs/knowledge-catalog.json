@@ -6877,15 +6877,6 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
-      "path": "docs/ops/runbooks/migrations/mct/PROGRAMS_SETUP_PLAN.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Learning Pathways to Open edX Programs - Setup Plan"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
       "path": "docs/ops/runbooks/migrations/mct/README.md",
       "root": "docs",
       "status": "",
@@ -7979,6 +7970,15 @@
       "root": "docs",
       "status": "",
       "title": "Open edX Programs Quick Reference"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/PROGRAMS_SETUP_PLAN.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Learning Pathways to Open edX Programs - Setup Plan"
     },
     {
       "classification": "supporting",
@@ -11010,13 +11010,13 @@
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 193,
+    "docs:concept": 194,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
     "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 175,
+    "docs:runbook": 174,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,
