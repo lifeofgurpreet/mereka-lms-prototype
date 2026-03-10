@@ -209,7 +209,7 @@ EXAMPLES:
   $0 count
 
 SEE ALSO:
-  docs/operations/DISCOVERY_DEMO_COURSE_SETUP.md
+  docs/ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md
 
 EOF
 }

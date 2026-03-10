@@ -7222,43 +7222,7 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
-    "path": "operations/DEPLOYMENT_LANES.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
-    "path": "operations/DEPLOYMENT_VERIFICATION.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/DEPLOY_EVIDENCE_GATES.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
     "path": "operations/DEPLOY_TENANCY_EPIC.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Platform Team",
-    "path": "operations/DISCOVERY_DEMO_COURSE_SETUP.md",
     "status": "superseded",
     "type": "runbook"
   },
@@ -7277,42 +7241,6 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Ops Domain Owner",
     "path": "operations/DJANGO_RAW_SQL_BYPASS.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
-    "path": "operations/DR_DRILL_SCHEDULE.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-17",
-    "owner": null,
-    "path": "operations/ECOMMERCE_DEPRECATION_INVENTORY.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-04",
-    "owner": null,
-    "path": "operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
-    "path": "operations/ECOMMERCE_THEMING.md",
     "status": "superseded",
     "type": "runbook"
   },

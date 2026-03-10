@@ -265,7 +265,7 @@ EXAMPLES:
   $0 --manual
 
 SEE ALSO:
-  docs/operations/DISCOVERY_DEMO_COURSE_SETUP.md
+  docs/ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md
   docs/operations/MONGODB_PERMISSIONS_ISSUE.md
 
 EOF

@@ -171,3 +171,16 @@ Fourth duplicate-collapse packet for pure wrapper files with canonical replaceme
 - `docs/operations/CLOUD_SQL_RESTORE_DRILL.md` -> `docs/ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md`
 - `docs/operations/COMMIT_SIGNING.md` -> `docs/reference/operations/COMMIT_SIGNING.md`
 - `docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md` -> `docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md`
+
+## Packet F Scope
+
+Fifth duplicate-collapse packet for additional wrapper-only files whose canonical replacements already exist, with the only active dependency rewritten from script guidance to the canonical runbook:
+
+- `docs/operations/DEPLOYMENT_LANES.md` -> `docs/reference/operations/DEPLOYMENT_LANES.md`
+- `docs/operations/DEPLOYMENT_VERIFICATION.md` -> `docs/ops/runbooks/DEPLOYMENT_VERIFICATION.md`
+- `docs/operations/DEPLOY_EVIDENCE_GATES.md` -> `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md`
+- `docs/operations/DISCOVERY_DEMO_COURSE_SETUP.md` -> `docs/ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md`
+- `docs/operations/DR_DRILL_SCHEDULE.md` -> `docs/ops/runbooks/DR_DRILL_SCHEDULE.md`
+- `docs/operations/ECOMMERCE_DEPRECATION_INVENTORY.md` -> `docs/reference/operations/ECOMMERCE_DEPRECATION_INVENTORY.md`
+- `docs/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` -> `docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md`
+- `docs/operations/ECOMMERCE_THEMING.md` -> `docs/reference/operations/ECOMMERCE_THEMING.md`
