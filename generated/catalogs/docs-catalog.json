@@ -7337,15 +7337,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-09",
-    "owner": "Migration Squad",
-    "path": "ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Migration Squad",
     "path": "ops/runbooks/migrations/mct/EXPORT_GUIDE.md",

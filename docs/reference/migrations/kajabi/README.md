@@ -13,7 +13,7 @@ All Kajabi-related content lives in this folder. Start with [`KAJABI_MIGRATION.m
 | [`../../../ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md`](../../../ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md) | Step-by-step plan for comparing Kajabi vs Open edX counts. |
 | [`../../../status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md`](../../../status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md) | Snapshot of migration state plus rollback options. |
 | [`../../../ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md`](../../../ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md) | Safety checklist and rollback guidance before re-running imports. |
-| [`../../../ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md`](../../../ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md) | Instructions for re-running verification after downtime. |
+| [`../../../../reports/2025/recovery/KAJABI_VERIFY_AFTER_SITE_RECOVERY_2025-11-09.md`](../../../../reports/2025/recovery/KAJABI_VERIFY_AFTER_SITE_RECOVERY_2025-11-09.md) | Historical recovery note for the 2025 site-down verification pass. |
 | [`../../../ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md`](../../../ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md) | How to re-sync deltas after the initial import. |
 | [`KAJABI_CERTIFICATE_MIGRATION.md`](KAJABI_CERTIFICATE_MIGRATION.md) | Certificate-specific migration steps. |
 | [`KAJABI_LESSON_CONTENT_FIX.md`](KAJABI_LESSON_CONTENT_FIX.md) | Script notes for repairing malformed lessons. |

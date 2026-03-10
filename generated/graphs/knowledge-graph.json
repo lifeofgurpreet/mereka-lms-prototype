@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 3663,
+  "edge_count": 3660,
   "edges": [
     {
       "edge_type": "classifies",
@@ -4226,11 +4226,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md"
     },
     {
       "edge_type": "classifies",
@@ -9891,11 +9886,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md"
     },
     {
       "edge_type": "contains",
@@ -16045,11 +16035,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
-      "target": "docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
       "target": "docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md"
     },
     {
@@ -18319,7 +18304,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1244,
+  "node_count": 1243,
   "nodes": [
     {
       "id": "classification:archival",
@@ -26677,17 +26662,6 @@
       "root": "docs",
       "status": "",
       "title": "Verify and Sync Kajabi \u2192 Open edX"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md",
-      "root": "docs",
-      "status": "",
-      "title": "How to Verify When Open edX Site is Back Up"
     },
     {
       "classification": "supporting",
