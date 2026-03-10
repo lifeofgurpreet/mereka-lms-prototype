@@ -7114,34 +7114,7 @@
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
     "owner": "Docs Team",
-    "path": "operations/A11Y_CONTRAST_FOCUS_GATE.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
     "path": "operations/A11Y_EXCEPTIONS.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "operations/A11Y_REGRESSION_LANE.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "operations/A11Y_TENANT_BRANDING_GATE.md",
     "status": "superseded",
     "type": "runbook"
   },
@@ -7159,34 +7132,7 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
-    "path": "operations/ADMIN_CONSOLE_SETUP.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
     "path": "operations/ALERT_NOISE_CLASSIFICATION_FEED.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-06",
-    "owner": null,
-    "path": "operations/ALERT_TUNING_SOP.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
-    "path": "operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md",
     "status": "superseded",
     "type": "runbook"
   },
@@ -7205,24 +7151,6 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/ANALYTICS_UNDEFINED_REGRESSION_FIX.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/ARGOCD_DRIFT.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/ARGOCD_HEALTH_TROUBLESHOOTING.md",
     "status": "superseded",
     "type": "runbook"
   },

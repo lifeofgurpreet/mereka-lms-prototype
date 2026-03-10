@@ -120,3 +120,22 @@ Residue intentionally left for later packets:
 - `docs/operations/**` still contains substantial non-wrapper operational material
 - evidence and postmortem trees are untouched
 - root-collapse maps may still mention deleted legacy paths as migration history
+
+## Packet C Scope
+
+Second duplicate-collapse packet limited to additional superseded wrappers with no active repo consumers outside migration metadata:
+
+- `docs/operations/A11Y_CONTRAST_FOCUS_GATE.md` -> `docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md`
+- `docs/operations/A11Y_REGRESSION_LANE.md` -> `docs/ops/runbooks/A11Y_REGRESSION_LANE.md`
+- `docs/operations/A11Y_TENANT_BRANDING_GATE.md` -> `docs/ops/runbooks/A11Y_TENANT_BRANDING_GATE.md`
+- `docs/operations/ADMIN_CONSOLE_SETUP.md` -> `docs/reference/operations/ADMIN_CONSOLE_SETUP.md`
+- `docs/operations/ALERT_TUNING_SOP.md` -> `docs/ops/runbooks/ALERT_TUNING_SOP.md`
+- `docs/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md` -> `docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md`
+- `docs/operations/ARGOCD_DRIFT.md` -> `docs/ops/runbooks/ARGOCD_DRIFT.md`
+- `docs/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md` -> `docs/ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md`
+
+Packet C rule:
+
+- delete the wrapper when no live active refs remain
+- keep collapse-map metadata untouched as migration history
+- continue leaving evidence/postmortem trees alone
