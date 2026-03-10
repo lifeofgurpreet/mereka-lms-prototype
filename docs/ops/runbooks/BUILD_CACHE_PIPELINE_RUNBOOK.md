@@ -366,8 +366,8 @@ kubectl get pod -n mereka-lms -l app.kubernetes.io/name=lms \
 Before committing a new tag to any kustomization file:
 
 ```bash
-APP_REPO="${APP_REPO:-/home/gurpreet/projects/k8s/mereka-lms}"
-INFRA_REPO="${INFRA_REPO:-/home/gurpreet/projects/k8s/infrastructure}"
+APP_REPO="${APP_REPO:-$(pwd)}"
+INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
 ```
 
 ```bash
