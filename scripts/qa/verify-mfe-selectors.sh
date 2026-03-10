@@ -244,13 +244,13 @@ if [[ "$FAIL" -eq 0 ]]; then
     echo ""
     echo "Notes:"
     echo "  - WARN items are non-blocking. Review before Q3 2026 expiry sweep."
-    echo "  - See docs/architecture/SELECTOR_HARDENING_POLICY.md for exception process."
+    echo "  - See docs/concepts/architecture/SELECTOR_HARDENING_POLICY.md for exception process."
   fi
   exit 0
 else
   echo -e "${RED}MFE selector brittleness gate FAILED${NC}"
   echo ""
   echo "Fix FAIL items before merging."
-  echo "See docs/architecture/SELECTOR_HARDENING_POLICY.md for guidance."
+  echo "See docs/concepts/architecture/SELECTOR_HARDENING_POLICY.md for guidance."
   exit 1
 fi

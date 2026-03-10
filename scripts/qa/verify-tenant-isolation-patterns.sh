@@ -74,7 +74,7 @@ else
 fi
 
 # Check 8: Architecture overview documents isolation strategy
-ARCH_FILE="$REPO_ROOT/docs/architecture/multi-tenancy-overview.md"
+ARCH_FILE="$REPO_ROOT/docs/concepts/architecture/multi-tenancy-overview.md"
 if [ -f "$ARCH_FILE" ] && grep -q "Tenant Isolation" "$ARCH_FILE"; then
   log_pass "Architecture doc documents tenant isolation strategy"
 else

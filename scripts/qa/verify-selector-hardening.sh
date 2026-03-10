@@ -202,7 +202,7 @@ fi
 echo ""
 echo "--- Checking for policy documentation ---"
 
-POLICY_DOC="docs/architecture/SELECTOR_HARDENING_POLICY.md"
+POLICY_DOC="docs/concepts/architecture/SELECTOR_HARDENING_POLICY.md"
 if [[ -f "$POLICY_DOC" ]]; then
   pass "Selector hardening policy documented at $POLICY_DOC"
 else

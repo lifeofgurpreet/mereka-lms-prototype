@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4998,
+  "edge_count": 4872,
   "edges": [
     {
       "edge_type": "classifies",
@@ -811,11 +811,6 @@
       "edge_type": "classifies",
       "source": "classification:archival",
       "target": "docs/archive/reports/docs-program-scorecard-20260313-template.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:archival",
-      "target": "docs/archive/reports/docs-program-scorecard-20260313.md"
     },
     {
       "edge_type": "classifies",
@@ -1935,87 +1930,12 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/adr/001-mongodb-atlas.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/002-multisite-architecture.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/003-image-build-pipeline.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/004-secrets-management.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/005-domain-migration.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/adr/006-tutor-plugin-based-configuration.md"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/adr/007-forum-migration-ruby-to-python.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/008-redis-streams-event-bus.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/009-in-cluster-storage.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/010-monorepo-architecture.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/011-convention-based-spec-verification.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/012-no-runtime-css-overlay.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/adr/013-studio-sso-bypass-middleware.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/014-mfe-branding-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/015-mobile-push-notification-provider.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/016-android-app-support-decision.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/017-analytics-target-decision.md"
     },
     {
       "edge_type": "classifies",
@@ -2030,11 +1950,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/adr/020-tracing-scope-and-pilot-decision.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/adr/021-openedx-tutor-methodology.md"
     },
     {
@@ -2045,27 +1960,12 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/adr/023-enterprise-images-ghcr-migration.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/adr/024-multi-tenancy-true-tenants.md"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/adr/025-csp-nonce-migration.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/026-cicd-build-pipeline-lessons.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/027-deployment-contract-ownership-lanes.md"
     },
     {
       "edge_type": "classifies",
@@ -2100,47 +2000,22 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/adr/034-event-contract-and-transport-independence.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/036-cache-topology-and-invalidation-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/037-async-task-user-facing-contract.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/038-commerce-system-of-record-and-reconciliation.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/039-translations-and-internationalization-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/040-internal-packages-plugins-and-versioning-policy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/adr/README.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/_generated/decision-index.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/_generated/history-map.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/_generated/hot-path.md"
     },
     {
       "edge_type": "classifies",
@@ -2150,12 +2025,72 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/adr/contradictions-register.md"
+      "target": "docs/adr/historical/001-mongodb-atlas.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/002-multisite-architecture.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/003-image-build-pipeline.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/004-secrets-management.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/005-domain-migration.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/007-forum-migration-ruby-to-python.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/008-redis-streams-event-bus.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/009-in-cluster-storage.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/010-monorepo-architecture.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/012-no-runtime-css-overlay.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/023-enterprise-images-ghcr-migration.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/historical/026-cicd-build-pipeline-lessons.md"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/adr/manifest.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/adr/rfc/027-deployment-contract-ownership-lanes.md"
     },
     {
       "edge_type": "classifies",
@@ -2196,11 +2131,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/adr/rfc/041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/adr/rfc/ADR-025-deployment-boundary.md"
     },
     {
       "edge_type": "classifies",
@@ -2250,242 +2180,7 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/architecture/ADR_LANGUAGE_STYLE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/ADR_NUMBERING_AND_NAMING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/AGENT_WORKPACKETS.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/ARCHITECTURE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/FOUNDATIONS_PROGRAM.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/PROGRAM_UPDATE_V2_BRIEF.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/architecture/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/bundle-rules.yaml"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/charter.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/constitution/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/constitution/authorization-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/constitution/control-planes.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/constitution/data-governance.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/constitution/identity-and-domain-boundaries.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/constitution/release-and-change-policy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/constitution/tenant-lifecycle.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/constitution/tutor-and-extension-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/decision-map.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/glossary.yaml"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/ARCHITECTURE_MONGODB.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/BRAND_PARITY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/DATABASE_ARCHITECTURE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/FOOTER_PARITY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/MULTISITE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/MULTI_BRAND_MULTI_SITE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/PROCTORING_INTEGRATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/PURCHASE_GATEWAY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/VIDEO_PIPELINE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/content-libraries-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/enterprise-services-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/multi-tenancy-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/notification-pipeline-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/proctoring-architecture-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/overviews/purchase-gateway-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/ADR-025-deployment-boundary.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-034-event-contract-and-transport-independence.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-037-async-task-user-facing-contract.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-039-translations-and-internationalization-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-claim-based-role-sync.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/rfc/RFC-learning-slot-expansion-proposal.md"
     },
     {
       "edge_type": "classifies",
@@ -3035,12 +2730,22 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/concepts/architecture/bundle-rules.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/concepts/architecture/content-libraries-overview.md"
     },
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/concepts/architecture/enterprise-services-overview.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/concepts/architecture/glossary.yaml"
     },
     {
       "edge_type": "classifies",
@@ -3485,6 +3190,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/guides/standards/SPEC_VERIFICATION_METHOD.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/guides/standards/STATUS_REPORTING_STANDARD.md"
     },
     {
@@ -3566,6 +3276,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md"
     },
     {
       "edge_type": "classifies",
@@ -3671,6 +3386,56 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE9_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -6456,6 +6221,31 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/policies/operations/TUTOR_CONFIG_SAFETY.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/programs/mobile/ANDROID_SUPPORT_DECISION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/programs/mobile/PUSH_NOTIFICATION_PROVIDER_DECISION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/programs/observability/TRACING_PILOT_DECISION.md"
     },
     {
       "edge_type": "classifies",
@@ -8355,87 +8145,12 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/adr/001-mongodb-atlas.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/002-multisite-architecture.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/003-image-build-pipeline.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/004-secrets-management.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/005-domain-migration.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/adr/006-tutor-plugin-based-configuration.md"
     },
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/adr/007-forum-migration-ruby-to-python.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/008-redis-streams-event-bus.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/009-in-cluster-storage.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/010-monorepo-architecture.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/011-convention-based-spec-verification.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/012-no-runtime-css-overlay.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/adr/013-studio-sso-bypass-middleware.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/014-mfe-branding-strategy.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/015-mobile-push-notification-provider.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/016-android-app-support-decision.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/017-analytics-target-decision.md"
     },
     {
       "edge_type": "contains",
@@ -8450,11 +8165,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/adr/020-tracing-scope-and-pilot-decision.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/adr/021-openedx-tutor-methodology.md"
     },
     {
@@ -8465,27 +8175,12 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/adr/023-enterprise-images-ghcr-migration.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/adr/024-multi-tenancy-true-tenants.md"
     },
     {
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/adr/025-csp-nonce-migration.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/026-cicd-build-pipeline-lessons.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/027-deployment-contract-ownership-lanes.md"
     },
     {
       "edge_type": "contains",
@@ -8520,47 +8215,22 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/adr/034-event-contract-and-transport-independence.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/036-cache-topology-and-invalidation-strategy.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/037-async-task-user-facing-contract.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/038-commerce-system-of-record-and-reconciliation.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/039-translations-and-internationalization-strategy.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/040-internal-packages-plugins-and-versioning-policy.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/adr/README.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/_generated/decision-index.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/_generated/history-map.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/_generated/hot-path.md"
     },
     {
       "edge_type": "contains",
@@ -8570,12 +8240,72 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/adr/contradictions-register.md"
+      "target": "docs/adr/historical/001-mongodb-atlas.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/002-multisite-architecture.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/003-image-build-pipeline.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/004-secrets-management.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/005-domain-migration.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/007-forum-migration-ruby-to-python.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/008-redis-streams-event-bus.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/009-in-cluster-storage.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/010-monorepo-architecture.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/012-no-runtime-css-overlay.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/023-enterprise-images-ghcr-migration.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/historical/026-cicd-build-pipeline-lessons.md"
     },
     {
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/adr/manifest.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/adr/rfc/027-deployment-contract-ownership-lanes.md"
     },
     {
       "edge_type": "contains",
@@ -8616,11 +8346,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/adr/rfc/041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/adr/rfc/ADR-025-deployment-boundary.md"
     },
     {
       "edge_type": "contains",
@@ -8670,242 +8395,7 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/architecture/ADR_LANGUAGE_STYLE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/ADR_NUMBERING_AND_NAMING.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/AGENT_WORKPACKETS.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/ARCHITECTURE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/FOUNDATIONS_PROGRAM.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/PROGRAM_UPDATE_V2_BRIEF.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/architecture/README.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/bundle-rules.yaml"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/charter.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/constitution/README.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/constitution/authorization-model.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/constitution/control-planes.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/constitution/data-governance.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/constitution/identity-and-domain-boundaries.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/constitution/release-and-change-policy.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/constitution/tenant-lifecycle.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/constitution/tutor-and-extension-model.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/decision-map.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/glossary.yaml"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/ARCHITECTURE_MONGODB.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/BRAND_PARITY.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/DATABASE_ARCHITECTURE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/FOOTER_PARITY.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/MULTISITE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/MULTI_BRAND_MULTI_SITE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/PROCTORING_INTEGRATION.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/PURCHASE_GATEWAY.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/VIDEO_PIPELINE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/content-libraries-overview.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/enterprise-services-overview.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/multi-tenancy-overview.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/notification-pipeline-overview.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/proctoring-architecture-overview.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/overviews/purchase-gateway-overview.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/ADR-025-deployment-boundary.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/README.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-034-event-contract-and-transport-independence.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-037-async-task-user-facing-contract.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-039-translations-and-internationalization-strategy.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-claim-based-role-sync.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/rfc/RFC-learning-slot-expansion-proposal.md"
     },
     {
       "edge_type": "contains",
@@ -9716,11 +9206,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/archive/reports/docs-program-scorecard-20260313-template.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/archive/reports/docs-program-scorecard-20260313.md"
     },
     {
       "edge_type": "contains",
@@ -10920,12 +10405,22 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/concepts/architecture/bundle-rules.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/concepts/architecture/content-libraries-overview.md"
     },
     {
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/concepts/architecture/enterprise-services-overview.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/concepts/architecture/glossary.yaml"
     },
     {
       "edge_type": "contains",
@@ -11375,6 +10870,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/guides/standards/SPEC_VERIFICATION_METHOD.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/guides/standards/STATUS_REPORTING_STANDARD.md"
     },
     {
@@ -11456,6 +10956,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md"
     },
     {
       "edge_type": "contains",
@@ -11561,6 +11066,56 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE9_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md"
     },
     {
       "edge_type": "contains",
@@ -14350,6 +13905,31 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/programs/mobile/ANDROID_SUPPORT_DECISION.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/programs/mobile/PUSH_NOTIFICATION_PROVIDER_DECISION.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/programs/observability/TRACING_PILOT_DECISION.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/qa/OBS-PILOT-TRACING-01.md"
     },
     {
@@ -15575,87 +15155,12 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:adr",
-      "target": "docs/adr/001-mongodb-atlas.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/002-multisite-architecture.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/003-image-build-pipeline.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/004-secrets-management.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/005-domain-migration.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
       "target": "docs/adr/006-tutor-plugin-based-configuration.md"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:adr",
-      "target": "docs/adr/007-forum-migration-ruby-to-python.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/008-redis-streams-event-bus.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/009-in-cluster-storage.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/010-monorepo-architecture.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/011-convention-based-spec-verification.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/012-no-runtime-css-overlay.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
       "target": "docs/adr/013-studio-sso-bypass-middleware.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/014-mfe-branding-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/015-mobile-push-notification-provider.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/016-android-app-support-decision.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/017-analytics-target-decision.md"
     },
     {
       "edge_type": "classifies",
@@ -15670,11 +15175,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:adr",
-      "target": "docs/adr/020-tracing-scope-and-pilot-decision.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
       "target": "docs/adr/021-openedx-tutor-methodology.md"
     },
     {
@@ -15685,27 +15185,12 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:adr",
-      "target": "docs/adr/023-enterprise-images-ghcr-migration.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
       "target": "docs/adr/024-multi-tenancy-true-tenants.md"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:adr",
       "target": "docs/adr/025-csp-nonce-migration.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/026-cicd-build-pipeline-lessons.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/027-deployment-contract-ownership-lanes.md"
     },
     {
       "edge_type": "classifies",
@@ -15740,47 +15225,22 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:adr",
-      "target": "docs/adr/034-event-contract-and-transport-independence.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/036-cache-topology-and-invalidation-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/037-async-task-user-facing-contract.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/038-commerce-system-of-record-and-reconciliation.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/039-translations-and-internationalization-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/040-internal-packages-plugins-and-versioning-policy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
       "target": "docs/adr/README.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/_generated/decision-index.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/_generated/history-map.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/_generated/hot-path.md"
     },
     {
       "edge_type": "classifies",
@@ -15790,12 +15250,72 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:adr",
-      "target": "docs/adr/contradictions-register.md"
+      "target": "docs/adr/historical/001-mongodb-atlas.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/002-multisite-architecture.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/003-image-build-pipeline.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/004-secrets-management.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/005-domain-migration.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/007-forum-migration-ruby-to-python.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/008-redis-streams-event-bus.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/009-in-cluster-storage.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/010-monorepo-architecture.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/012-no-runtime-css-overlay.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/023-enterprise-images-ghcr-migration.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/historical/026-cicd-build-pipeline-lessons.md"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:adr",
       "target": "docs/adr/manifest.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:adr",
+      "target": "docs/adr/rfc/027-deployment-contract-ownership-lanes.md"
     },
     {
       "edge_type": "classifies",
@@ -15836,11 +15356,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:adr",
       "target": "docs/adr/rfc/041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:adr",
-      "target": "docs/adr/rfc/ADR-025-deployment-boundary.md"
     },
     {
       "edge_type": "classifies",
@@ -16700,11 +16215,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:archive",
-      "target": "docs/archive/reports/docs-program-scorecard-20260313.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:archive",
       "target": "docs/archive/reports/escalation-appendix-20260306.md"
     },
     {
@@ -17350,242 +16860,7 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/architecture/ADR_LANGUAGE_STYLE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/ADR_NUMBERING_AND_NAMING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/AGENT_WORKPACKETS.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/ARCHITECTURE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/FOUNDATIONS_PROGRAM.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/PROGRAM_UPDATE_V2_BRIEF.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/architecture/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/bundle-rules.yaml"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/charter.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/constitution/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/constitution/authorization-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/constitution/control-planes.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/constitution/data-governance.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/constitution/identity-and-domain-boundaries.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/constitution/release-and-change-policy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/constitution/tenant-lifecycle.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/constitution/tutor-and-extension-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/decision-map.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/glossary.yaml"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/ARCHITECTURE_MONGODB.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/BRAND_PARITY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/DATABASE_ARCHITECTURE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/FOOTER_PARITY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/MULTISITE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/MULTI_BRAND_MULTI_SITE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/PROCTORING_INTEGRATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/PURCHASE_GATEWAY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/VIDEO_PIPELINE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/content-libraries-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/enterprise-services-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/multi-tenancy-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/notification-pipeline-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/proctoring-architecture-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/overviews/purchase-gateway-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/ADR-025-deployment-boundary.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-034-event-contract-and-transport-independence.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-037-async-task-user-facing-contract.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-039-translations-and-internationalization-strategy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-041-authorization-and-role-boundary-model.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-claim-based-role-sync.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/rfc/RFC-learning-slot-expansion-proposal.md"
     },
     {
       "edge_type": "classifies",
@@ -18120,12 +17395,22 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/concepts/architecture/bundle-rules.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/concepts/architecture/content-libraries-overview.md"
     },
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/concepts/architecture/enterprise-services-overview.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/concepts/architecture/glossary.yaml"
     },
     {
       "edge_type": "classifies",
@@ -18526,6 +17811,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/guides/standards/README.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/guides/standards/SPEC_VERIFICATION_METHOD.md"
     },
     {
       "edge_type": "classifies",
@@ -19920,6 +19210,31 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/programs/mobile/ANDROID_SUPPORT_DECISION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/programs/mobile/PUSH_NOTIFICATION_PROVIDER_DECISION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/programs/observability/TRACING_PILOT_DECISION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/qa/OBS-PILOT-TRACING-01.md"
     },
     {
@@ -20165,6 +19480,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
       "target": "docs/meta/docs-program/AGENT_WORKPACKETS.md"
     },
     {
@@ -20266,6 +19586,56 @@
       "edge_type": "classifies",
       "source": "lane:docs:review",
       "target": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE9_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE_ADR_RESET_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -24994,7 +24364,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1689,
+  "node_count": 1647,
   "nodes": [
     {
       "id": "classification:archival",
@@ -25072,135 +24442,14 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/adr/001-mongodb-atlas.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/001-mongodb-atlas.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-001: MongoDB Atlas vs Local MongoDB"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/002-multisite-architecture.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/002-multisite-architecture.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-002: Multisite Architecture"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/003-image-build-pipeline.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/003-image-build-pipeline.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-003: Image Build Pipeline"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/004-secrets-management.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/004-secrets-management.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-004: Secrets Management"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/005-domain-migration.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/005-domain-migration.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-005: Domain Migration (legacy environment \u2192 academyV2)"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/adr/006-tutor-plugin-based-configuration.md",
       "lane": "adr",
       "node_type": "docs:adr",
       "owner": "engineering",
       "path": "docs/adr/006-tutor-plugin-based-configuration.md",
       "root": "docs",
-      "status": "accepted",
+      "status": "",
       "title": "Tutor Plugin-Based Configuration Resilience"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/007-forum-migration-ruby-to-python.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/007-forum-migration-ruby-to-python.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-007: Forum Service Migration from Ruby to Python"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/008-redis-streams-event-bus.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/008-redis-streams-event-bus.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-008: Redis Streams as Event Bus"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/009-in-cluster-storage.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/009-in-cluster-storage.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-009: In-Cluster MySQL/Redis vs Cloud SQL/Memorystore"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/010-monorepo-architecture.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/010-monorepo-architecture.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-010: Monorepo Architecture"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/011-convention-based-spec-verification.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/011-convention-based-spec-verification.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-011: Convention-Based Spec Verification (V3)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/012-no-runtime-css-overlay.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/012-no-runtime-css-overlay.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-012: Eliminate Runtime CSS ConfigMap Overlay"
     },
     {
       "classification": "supporting",
@@ -25212,50 +24461,6 @@
       "root": "docs",
       "status": "",
       "title": "Studio SSO Bypass Middleware"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/014-mfe-branding-strategy.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/014-mfe-branding-strategy.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-014: MFE Branding Strategy - Migration Path Analysis"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/015-mobile-push-notification-provider.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/015-mobile-push-notification-provider.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-015: Mobile Push Notification Provider Selection"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/016-android-app-support-decision.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/016-android-app-support-decision.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-016: Android App Support Decision"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/017-analytics-target-decision.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/017-analytics-target-decision.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-017: Analytics Target Decision (Aspects/Superset Deployment)"
     },
     {
       "classification": "supporting",
@@ -25273,22 +24478,11 @@
       "id": "docs/adr/019-tutor-upgrade-policy.md",
       "lane": "adr",
       "node_type": "docs:adr",
-      "owner": "",
+      "owner": "platform-team",
       "path": "docs/adr/019-tutor-upgrade-policy.md",
       "root": "docs",
       "status": "",
-      "title": "ADR-019: Tutor Upgrade Cadence and EOL Policy"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/020-tracing-scope-and-pilot-decision.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/020-tracing-scope-and-pilot-decision.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-020: Tracing Scope and Pilot Decision for Mereka LMS"
+      "title": "Tutor Upgrade Cadence and EOL Policy"
     },
     {
       "classification": "supporting",
@@ -25298,7 +24492,7 @@
       "owner": "engineering",
       "path": "docs/adr/021-openedx-tutor-methodology.md",
       "root": "docs",
-      "status": "accepted",
+      "status": "",
       "title": "Open edX / Tutor Deployment Methodology"
     },
     {
@@ -25314,24 +24508,13 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/adr/023-enterprise-images-ghcr-migration.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "engineering",
-      "path": "docs/adr/023-enterprise-images-ghcr-migration.md",
-      "root": "docs",
-      "status": "accepted",
-      "title": "Enterprise Images GHCR Migration"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/adr/024-multi-tenancy-true-tenants.md",
       "lane": "adr",
       "node_type": "docs:adr",
       "owner": "engineering",
       "path": "docs/adr/024-multi-tenancy-true-tenants.md",
       "root": "docs",
-      "status": "accepted",
+      "status": "",
       "title": "True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)"
     },
     {
@@ -25342,30 +24525,8 @@
       "owner": "engineering",
       "path": "docs/adr/025-csp-nonce-migration.md",
       "root": "docs",
-      "status": "accepted",
+      "status": "",
       "title": "CSP Nonce Migration \u2014 Removing unsafe-eval / unsafe-inline"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/026-cicd-build-pipeline-lessons.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "engineering",
-      "path": "docs/adr/026-cicd-build-pipeline-lessons.md",
-      "root": "docs",
-      "status": "accepted",
-      "title": "CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/027-deployment-contract-ownership-lanes.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "engineering",
-      "path": "docs/adr/027-deployment-contract-ownership-lanes.md",
-      "root": "docs",
-      "status": "proposed",
-      "title": "Deployment Contract \u2014 Ownership Lanes Between App and GitOps Repos"
     },
     {
       "classification": "supporting",
@@ -25375,7 +24536,7 @@
       "owner": "platform-team",
       "path": "docs/adr/028-platform-sources-of-truth-and-control-planes.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "",
       "title": "Platform Sources of Truth and Control Planes"
     },
     {
@@ -25435,94 +24596,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/adr/034-event-contract-and-transport-independence.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/034-event-contract-and-transport-independence.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/036-cache-topology-and-invalidation-strategy.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/036-cache-topology-and-invalidation-strategy.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/037-async-task-user-facing-contract.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/037-async-task-user-facing-contract.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/038-commerce-system-of-record-and-reconciliation.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/038-commerce-system-of-record-and-reconciliation.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/039-translations-and-internationalization-strategy.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/039-translations-and-internationalization-strategy.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/040-internal-packages-plugins-and-versioning-policy.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/040-internal-packages-plugins-and-versioning-policy.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/adr/041-authorization-and-role-boundary-model.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/041-authorization-and-role-boundary-model.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/adr/README.md",
       "lane": "adr",
       "node_type": "docs:adr",
@@ -25530,7 +24603,40 @@
       "path": "docs/adr/README.md",
       "root": "docs",
       "status": "",
-      "title": "Architecture Decision Records"
+      "title": "Architecture Decision Ledger"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/_generated/decision-index.json",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "",
+      "path": "docs/adr/_generated/decision-index.json",
+      "root": "docs",
+      "status": "",
+      "title": "decision-index"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/_generated/history-map.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "",
+      "path": "docs/adr/_generated/history-map.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR History Map"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/_generated/hot-path.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "",
+      "path": "docs/adr/_generated/hot-path.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR Hot Path"
     },
     {
       "classification": "supporting",
@@ -25541,18 +24647,139 @@
       "path": "docs/adr/classification-map.yaml",
       "root": "docs",
       "status": "",
-      "title": "Generated from docs/adr/manifest.yaml. Do not hand-edit."
+      "title": "classification-map"
     },
     {
       "classification": "supporting",
-      "id": "docs/adr/contradictions-register.md",
+      "id": "docs/adr/historical/001-mongodb-atlas.md",
       "lane": "adr",
       "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/contradictions-register.md",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/001-mongodb-atlas.md",
       "root": "docs",
       "status": "",
-      "title": "ADR Contradictions Register (v2 Overlay)"
+      "title": "MongoDB Atlas vs Local MongoDB"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/002-multisite-architecture.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/002-multisite-architecture.md",
+      "root": "docs",
+      "status": "",
+      "title": "Multisite Architecture"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/003-image-build-pipeline.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/003-image-build-pipeline.md",
+      "root": "docs",
+      "status": "",
+      "title": "Image Build Pipeline"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/004-secrets-management.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/004-secrets-management.md",
+      "root": "docs",
+      "status": "",
+      "title": "Secrets Management"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/005-domain-migration.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/005-domain-migration.md",
+      "root": "docs",
+      "status": "",
+      "title": "Domain Migration (legacy environment \u2192 academyV2)"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/007-forum-migration-ruby-to-python.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/007-forum-migration-ruby-to-python.md",
+      "root": "docs",
+      "status": "",
+      "title": "Forum Service Migration from Ruby to Python"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/008-redis-streams-event-bus.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/008-redis-streams-event-bus.md",
+      "root": "docs",
+      "status": "",
+      "title": "Redis Streams as Event Bus"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/009-in-cluster-storage.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/009-in-cluster-storage.md",
+      "root": "docs",
+      "status": "",
+      "title": "In-Cluster MySQL/Redis vs Cloud SQL/Memorystore"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/010-monorepo-architecture.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/010-monorepo-architecture.md",
+      "root": "docs",
+      "status": "",
+      "title": "Monorepo Architecture"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/012-no-runtime-css-overlay.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/012-no-runtime-css-overlay.md",
+      "root": "docs",
+      "status": "",
+      "title": "Eliminate Runtime CSS ConfigMap Overlay"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/023-enterprise-images-ghcr-migration.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "engineering",
+      "path": "docs/adr/historical/023-enterprise-images-ghcr-migration.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Images GHCR Migration"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/adr/historical/026-cicd-build-pipeline-lessons.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "engineering",
+      "path": "docs/adr/historical/026-cicd-build-pipeline-lessons.md",
+      "root": "docs",
+      "status": "",
+      "title": "CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)"
     },
     {
       "classification": "supporting",
@@ -25567,13 +24794,24 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/adr/rfc/027-deployment-contract-ownership-lanes.md",
+      "lane": "adr",
+      "node_type": "docs:adr",
+      "owner": "engineering",
+      "path": "docs/adr/rfc/027-deployment-contract-ownership-lanes.md",
+      "root": "docs",
+      "status": "",
+      "title": "Deployment Contract \u2014 Ownership Lanes Between App and GitOps Repos"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/adr/rfc/034-event-contract-and-transport-independence.md",
       "lane": "adr",
       "node_type": "docs:adr",
       "owner": "platform-events",
       "path": "docs/adr/rfc/034-event-contract-and-transport-independence.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "",
       "title": "Event Contract and Transport Independence"
     },
     {
@@ -25655,17 +24893,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/adr/rfc/ADR-025-deployment-boundary.md",
-      "lane": "adr",
-      "node_type": "docs:adr",
-      "owner": "",
-      "path": "docs/adr/rfc/ADR-025-deployment-boundary.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-025: Deployment Boundary \u2014 App Repo vs Infrastructure/GitOps Repo"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/adr/rfc/README.md",
       "lane": "adr",
       "node_type": "docs:adr",
@@ -25680,22 +24907,22 @@
       "id": "docs/adr/rfc/RFC-claim-based-role-sync.md",
       "lane": "adr",
       "node_type": "docs:adr",
-      "owner": "",
+      "owner": "platform-team",
       "path": "docs/adr/rfc/RFC-claim-based-role-sync.md",
       "root": "docs",
       "status": "",
-      "title": "RFC: Claim-Based Role Sync (Authentik -> Open edX)"
+      "title": "Claim-Based Role Sync"
     },
     {
       "classification": "supporting",
       "id": "docs/adr/rfc/RFC-learning-slot-expansion-proposal.md",
       "lane": "adr",
       "node_type": "docs:adr",
-      "owner": "",
+      "owner": "platform-team",
       "path": "docs/adr/rfc/RFC-learning-slot-expansion-proposal.md",
       "root": "docs",
       "status": "",
-      "title": "Learning MFE Slot Expansion Proposal"
+      "title": "Learning Slot Expansion Proposal"
     },
     {
       "classification": "supporting",
@@ -25706,7 +24933,7 @@
       "path": "docs/adr/status-map.yaml",
       "root": "docs",
       "status": "",
-      "title": "Generated from docs/adr/manifest.yaml. Do not hand-edit."
+      "title": "status-map"
     },
     {
       "classification": "supporting",
@@ -25765,72 +24992,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/architecture/ADR_LANGUAGE_STYLE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/ADR_LANGUAGE_STYLE.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR Language Style Contract"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/ADR_NUMBERING_AND_NAMING.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/ADR_NUMBERING_AND_NAMING.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR Numbering And Naming"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/AGENT_WORKPACKETS.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/AGENT_WORKPACKETS.md",
-      "root": "docs",
-      "status": "",
-      "title": "Agent Work Packets"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/ARCHITECTURE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/ARCHITECTURE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Architecture Governance Overlay"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/FOUNDATIONS_PROGRAM.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/FOUNDATIONS_PROGRAM.md",
-      "root": "docs",
-      "status": "",
-      "title": "Foundations Rework Program (v2 Overlay)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/PROGRAM_UPDATE_V2_BRIEF.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/PROGRAM_UPDATE_V2_BRIEF.md",
-      "root": "docs",
-      "status": "",
-      "title": "Program Update \u2014 Read Before Execution"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/architecture/README.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -25838,458 +24999,7 @@
       "path": "docs/architecture/README.md",
       "root": "docs",
       "status": "",
-      "title": "Architecture System"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/bundle-rules.yaml",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/bundle-rules.yaml",
-      "root": "docs",
-      "status": "",
-      "title": "bundle-rules"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/charter.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/charter.md",
-      "root": "docs",
-      "status": "",
-      "title": "Architecture Charter"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/constitution/README.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/README.md",
-      "root": "docs",
-      "status": "",
-      "title": "Constitution"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/constitution/authorization-model.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/authorization-model.md",
-      "root": "docs",
-      "status": "",
-      "title": "Authorization Model"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/constitution/control-planes.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/control-planes.md",
-      "root": "docs",
-      "status": "",
-      "title": "Control Planes"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/constitution/data-governance.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/data-governance.md",
-      "root": "docs",
-      "status": "",
-      "title": "Data Governance"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/constitution/identity-and-domain-boundaries.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/identity-and-domain-boundaries.md",
-      "root": "docs",
-      "status": "",
-      "title": "Identity And Domain Boundaries"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/constitution/release-and-change-policy.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/release-and-change-policy.md",
-      "root": "docs",
-      "status": "",
-      "title": "Release And Change Policy"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/constitution/tenant-lifecycle.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/tenant-lifecycle.md",
-      "root": "docs",
-      "status": "",
-      "title": "Tenant Lifecycle"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/constitution/tutor-and-extension-model.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/tutor-and-extension-model.md",
-      "root": "docs",
-      "status": "",
-      "title": "Tutor And Extension Model"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/decision-map.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/decision-map.md",
-      "root": "docs",
-      "status": "",
-      "title": "Architecture Decision Map"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/glossary.yaml",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/glossary.yaml",
-      "root": "docs",
-      "status": "",
-      "title": "glossary"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/ARCHITECTURE_MONGODB.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/ARCHITECTURE_MONGODB.md",
-      "root": "docs",
-      "status": "",
-      "title": "MongoDB Architecture (Reality + Target)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/BRAND_PARITY.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/BRAND_PARITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Brand Parity Architecture (WhiteCliff Lane)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/DATABASE_ARCHITECTURE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/DATABASE_ARCHITECTURE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Database Architecture Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Design Tokens Migration"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/FOOTER_PARITY.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/FOOTER_PARITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Footer Parity Architecture"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/MULTISITE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/MULTISITE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Multi-site LMS Playbook"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/MULTI_BRAND_MULTI_SITE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/MULTI_BRAND_MULTI_SITE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Multi-Brand Multi-Site Architecture"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/PROCTORING_INTEGRATION.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/PROCTORING_INTEGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Proctoring Integration Architecture"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Production Architecture - The Real Setup"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/PURCHASE_GATEWAY.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/PURCHASE_GATEWAY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Purchase Gateway Architecture"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/VIDEO_PIPELINE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/VIDEO_PIPELINE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Video Pipeline & Delivery Architecture"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/content-libraries-overview.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/content-libraries-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Content Libraries v2 Architecture Overview"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/enterprise-services-overview.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/enterprise-services-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Enterprise Microservices Architecture Overview"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/multi-tenancy-overview.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/multi-tenancy-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Multi-Tenancy Overview"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/notification-pipeline-overview.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/notification-pipeline-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Notification Pipeline Overview"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/proctoring-architecture-overview.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/proctoring-architecture-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Proctoring Architecture Overview"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/overviews/purchase-gateway-overview.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/purchase-gateway-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Purchase Gateway Architecture Overview"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/ADR-025-deployment-boundary.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/ADR-025-deployment-boundary.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-025: Deployment Boundary \u2014 App Repo vs Infrastructure/GitOps Repo"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/README.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/README.md",
-      "root": "docs",
-      "status": "",
-      "title": "Architecture RFCs"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-034-event-contract-and-transport-independence.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-034-event-contract-and-transport-independence.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-034 Event Contract And Transport Independence"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-035 Frontend Runtime Composition And Dependency Alignment"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-036 Cache Topology And Invalidation Strategy"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-037-async-task-user-facing-contract.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-037-async-task-user-facing-contract.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-037 Async Task User-Facing Contract"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-038 Commerce System Of Record And Reconciliation"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-039-translations-and-internationalization-strategy.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-039-translations-and-internationalization-strategy.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-039 Translations And Internationalization Strategy"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-040 Internal Packages Plugins And Versioning Policy"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-041-authorization-and-role-boundary-model.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-041-authorization-and-role-boundary-model.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-041 Authorization And Role-Boundary Model"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-claim-based-role-sync.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-claim-based-role-sync.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC: Claim-Based Role Sync (Authentik -> Open edX)"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/rfc/RFC-learning-slot-expansion-proposal.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-learning-slot-expansion-proposal.md",
-      "root": "docs",
-      "status": "",
-      "title": "Learning MFE Slot Expansion Proposal"
+      "title": "Architecture Root Retired"
     },
     {
       "classification": "archival",
@@ -28071,18 +26781,7 @@
       "path": "docs/archive/reports/docs-program-scorecard-20260313-template.md",
       "root": "docs",
       "status": "",
-      "title": "Docs Program Scorecard 2026-03-13"
-    },
-    {
-      "classification": "archival",
-      "id": "docs/archive/reports/docs-program-scorecard-20260313.md",
-      "lane": "archive",
-      "node_type": "docs:archive",
-      "owner": "",
-      "path": "docs/archive/reports/docs-program-scorecard-20260313.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Program Scorecard 2026-03-13"
+      "title": "Docs Program Scorecard Template for 2026-03-13"
     },
     {
       "classification": "archival",
@@ -30715,6 +29414,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/concepts/architecture/bundle-rules.yaml",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/concepts/architecture/bundle-rules.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "bundle-rules"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/concepts/architecture/content-libraries-overview.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -30734,6 +29444,17 @@
       "root": "docs",
       "status": "",
       "title": "Enterprise Microservices Architecture Overview"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/concepts/architecture/glossary.yaml",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/concepts/architecture/glossary.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "glossary"
     },
     {
       "classification": "supporting",
@@ -31716,6 +30437,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/guides/standards/SPEC_VERIFICATION_METHOD.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/standards/SPEC_VERIFICATION_METHOD.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-011: Convention-Based Spec Verification (V3)"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/guides/standards/STATUS_REPORTING_STANDARD.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -31900,6 +30632,17 @@
       "root": "docs",
       "status": "",
       "title": "Wave 6 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR Contradictions Register (v2 Overlay)"
     },
     {
       "classification": "supporting",
@@ -32131,6 +30874,116 @@
       "root": "docs",
       "status": "",
       "title": "Wave 4 Wrapper Retirement Ledger"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE9_CLOSEOUT.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE9_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 9 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 9 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 9 Findings Ledger"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 9 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE_ADR_RESET_CLOSEOUT.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ADR_RESET_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave ADR Reset Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE_ADR_RESET_REVIEW_HANDOFF.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ADR_RESET_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave ADR Reset Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE_ADR_RESET_TRACKER.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ADR_RESET_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave ADR Reset Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave Architecture Root Reset Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave Architecture Root Reset Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave Architecture Root Reset Tracker"
     },
     {
       "classification": "supporting",
@@ -38258,6 +37111,61 @@
       "root": "docs",
       "status": "",
       "title": "Tutor Configuration Safety Guide"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-017: Analytics Target Decision (Aspects/Superset Deployment)"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-014: MFE Branding Strategy - Migration Path Analysis"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/programs/mobile/ANDROID_SUPPORT_DECISION.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/programs/mobile/ANDROID_SUPPORT_DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-016: Android App Support Decision"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/programs/mobile/PUSH_NOTIFICATION_PROVIDER_DECISION.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/programs/mobile/PUSH_NOTIFICATION_PROVIDER_DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-015: Mobile Push Notification Provider Selection"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/programs/observability/TRACING_PILOT_DECISION.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/programs/observability/TRACING_PILOT_DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-020: Tracing Scope and Pilot Decision for Mereka LMS"
     },
     {
       "classification": "supporting",

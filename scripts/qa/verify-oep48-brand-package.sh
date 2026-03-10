@@ -20,7 +20,7 @@
 # Exits 1 if any FAIL checks are found.
 # Remaining SKIP checks represent known OEP-48 gaps documented in OEP48_BRAND_PACKAGE.md.
 #
-# Related: docs/architecture/OEP48_BRAND_PACKAGE.md
+# Related: docs/concepts/architecture/OEP48_BRAND_PACKAGE.md
 # Tracker: T110
 
 set -euo pipefail
@@ -67,7 +67,7 @@ CMS_FOOTER_WIDGET="${THEME_ROOT}/cms/templates/widgets/footer.html"
 MFE_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/mfe-build/Dockerfile"
 PLUGIN_FILE="${PLUGIN_MAIN}"
 PROVENANCE="${ASSETS_BRANDING}/tokens.provenance.json"
-OEP48_DOC="${REPO_ROOT}/docs/architecture/OEP48_BRAND_PACKAGE.md"
+OEP48_DOC="${REPO_ROOT}/docs/concepts/architecture/OEP48_BRAND_PACKAGE.md"
 TOKEN_GENERATOR="${REPO_ROOT}/scripts/branding/generate-tokens-from-canonical.sh"
 
 # Logo/favicon sets required on every surface
@@ -673,14 +673,14 @@ echo ""
 echo "[SECTION 11] OEP-48 documentation"
 
 if [[ -f "${OEP48_DOC}" ]]; then
-  pass "docs/architecture/OEP48_BRAND_PACKAGE.md exists"
+  pass "docs/concepts/architecture/OEP48_BRAND_PACKAGE.md exists"
   if grep -q "Gap Analysis\|GAP-" "${OEP48_DOC}"; then
     pass "OEP48_BRAND_PACKAGE.md contains gap analysis section"
   else
     warn "OEP48_BRAND_PACKAGE.md missing gap analysis section"
   fi
 else
-  fail "docs/architecture/OEP48_BRAND_PACKAGE.md MISSING"
+  fail "docs/concepts/architecture/OEP48_BRAND_PACKAGE.md MISSING"
 fi
 
 echo ""
@@ -694,7 +694,7 @@ echo "========================================================"
 echo ""
 if [[ "${SKIP}" -gt 0 ]]; then
   echo "Remaining SKIP items are documented OEP-48 gaps (not blocking failures)."
-  echo "See: docs/architecture/OEP48_BRAND_PACKAGE.md — Gap Analysis section."
+  echo "See: docs/concepts/architecture/OEP48_BRAND_PACKAGE.md — Gap Analysis section."
 else
   echo "No remaining OEP-48 gap SKIPs in this verifier."
 fi

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$REPO_ROOT"
 
 RANGE_OVERRIDE=""
@@ -248,13 +248,19 @@ else
   echo "No changed markdown docs in scope."
 fi
 
+echo "Check 5/5: legacy architecture root retired"
+legacy_arch_status="pass"
+if ! python3 tools/docs/verify/verify_legacy_architecture_root.py --repo-root .; then
+  legacy_arch_status="fail"
+fi
+
 status="pass"
-if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]]; then
+if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]] || [[ "$legacy_arch_status" = "fail" ]]; then
   status="fail"
 fi
 
 if [[ -n "$SUMMARY_JSON" ]]; then
-  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" <<'PY'
+  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" "$legacy_arch_status" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -265,13 +271,14 @@ root_allowlist_violations = int(sys.argv[3])
 content_status = sys.argv[4]
 changed_markdown_files = int(sys.argv[5])
 content_summary_path = Path(sys.argv[6])
+legacy_arch_status = sys.argv[7]
 
 content_summary = {"status": "pass", "files_checked": 0, "errors": []}
 if content_summary_path.exists():
     content_summary = json.loads(content_summary_path.read_text(encoding="utf-8"))
 
 overall_status = "pass"
-if root_allowlist_violations > 0 or content_status != "pass":
+if root_allowlist_violations > 0 or content_status != "pass" or legacy_arch_status != "pass":
     overall_status = "fail"
 
 payload = {
@@ -282,6 +289,7 @@ payload = {
     "content_status": content_summary.get("status", content_status),
     "content_files_checked": content_summary.get("files_checked", 0),
     "content_errors": content_summary.get("errors", []),
+    "legacy_architecture_root": legacy_arch_status,
 }
 out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 PY
@@ -292,6 +300,9 @@ if [[ "$failures" -gt 0 ]]; then
 fi
 if [[ "$content_status" = "fail" ]]; then
   echo "Docs policy failed due to canonical metadata/superseded/link errors."
+fi
+if [[ "$legacy_arch_status" = "fail" ]]; then
+  echo "Docs policy failed because docs/architecture is still acting like a living root."
 fi
 if [[ "$status" = "fail" ]]; then
   exit 1

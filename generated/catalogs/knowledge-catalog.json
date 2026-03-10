@@ -1,9 +1,9 @@
 {
   "classifications": {
-    "archival": 292,
+    "archival": 291,
     "canonical": 44,
     "generated": 49,
-    "supporting": 1281
+    "supporting": 1240
   },
   "entries": [
     {
@@ -45,110 +45,11 @@
     {
       "classification": "supporting",
       "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/001-mongodb-atlas.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-001: MongoDB Atlas vs Local MongoDB"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/002-multisite-architecture.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-002: Multisite Architecture"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/003-image-build-pipeline.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-003: Image Build Pipeline"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/004-secrets-management.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-004: Secrets Management"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/005-domain-migration.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-005: Domain Migration (legacy environment \u2192 academyV2)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
       "owner": "engineering",
       "path": "docs/adr/006-tutor-plugin-based-configuration.md",
       "root": "docs",
-      "status": "accepted",
+      "status": "",
       "title": "Tutor Plugin-Based Configuration Resilience"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/007-forum-migration-ruby-to-python.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-007: Forum Service Migration from Ruby to Python"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/008-redis-streams-event-bus.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-008: Redis Streams as Event Bus"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/009-in-cluster-storage.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-009: In-Cluster MySQL/Redis vs Cloud SQL/Memorystore"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/010-monorepo-architecture.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-010: Monorepo Architecture"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/011-convention-based-spec-verification.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-011: Convention-Based Spec Verification (V3)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/012-no-runtime-css-overlay.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-012: Eliminate Runtime CSS ConfigMap Overlay"
     },
     {
       "classification": "supporting",
@@ -162,42 +63,6 @@
     {
       "classification": "supporting",
       "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/014-mfe-branding-strategy.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-014: MFE Branding Strategy - Migration Path Analysis"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/015-mobile-push-notification-provider.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-015: Mobile Push Notification Provider Selection"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/016-android-app-support-decision.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-016: Android App Support Decision"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/017-analytics-target-decision.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-017: Analytics Target Decision (Aspects/Superset Deployment)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
       "owner": "commerce-platform",
       "path": "docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md",
       "root": "docs",
@@ -207,20 +72,11 @@
     {
       "classification": "supporting",
       "lane": "adr",
-      "owner": "",
+      "owner": "platform-team",
       "path": "docs/adr/019-tutor-upgrade-policy.md",
       "root": "docs",
       "status": "",
-      "title": "ADR-019: Tutor Upgrade Cadence and EOL Policy"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/020-tracing-scope-and-pilot-decision.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-020: Tracing Scope and Pilot Decision for Mereka LMS"
+      "title": "Tutor Upgrade Cadence and EOL Policy"
     },
     {
       "classification": "supporting",
@@ -228,7 +84,7 @@
       "owner": "engineering",
       "path": "docs/adr/021-openedx-tutor-methodology.md",
       "root": "docs",
-      "status": "accepted",
+      "status": "",
       "title": "Open edX / Tutor Deployment Methodology"
     },
     {
@@ -244,18 +100,9 @@
       "classification": "supporting",
       "lane": "adr",
       "owner": "engineering",
-      "path": "docs/adr/023-enterprise-images-ghcr-migration.md",
-      "root": "docs",
-      "status": "accepted",
-      "title": "Enterprise Images GHCR Migration"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "engineering",
       "path": "docs/adr/024-multi-tenancy-true-tenants.md",
       "root": "docs",
-      "status": "accepted",
+      "status": "",
       "title": "True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)"
     },
     {
@@ -264,26 +111,8 @@
       "owner": "engineering",
       "path": "docs/adr/025-csp-nonce-migration.md",
       "root": "docs",
-      "status": "accepted",
+      "status": "",
       "title": "CSP Nonce Migration \u2014 Removing unsafe-eval / unsafe-inline"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "engineering",
-      "path": "docs/adr/026-cicd-build-pipeline-lessons.md",
-      "root": "docs",
-      "status": "accepted",
-      "title": "CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "engineering",
-      "path": "docs/adr/027-deployment-contract-ownership-lanes.md",
-      "root": "docs",
-      "status": "proposed",
-      "title": "Deployment Contract \u2014 Ownership Lanes Between App and GitOps Repos"
     },
     {
       "classification": "supporting",
@@ -291,7 +120,7 @@
       "owner": "platform-team",
       "path": "docs/adr/028-platform-sources-of-truth-and-control-planes.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "",
       "title": "Platform Sources of Truth and Control Planes"
     },
     {
@@ -343,82 +172,37 @@
       "classification": "supporting",
       "lane": "adr",
       "owner": "",
-      "path": "docs/adr/034-event-contract-and-transport-independence.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/035-frontend-runtime-composition-and-dependency-alignment.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/036-cache-topology-and-invalidation-strategy.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/037-async-task-user-facing-contract.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/038-commerce-system-of-record-and-reconciliation.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/039-translations-and-internationalization-strategy.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/040-internal-packages-plugins-and-versioning-policy.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/041-authorization-and-role-boundary-model.md",
-      "root": "docs",
-      "status": "superseded",
-      "title": "Superseded path"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
       "path": "docs/adr/README.md",
       "root": "docs",
       "status": "",
-      "title": "Architecture Decision Records"
+      "title": "Architecture Decision Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "",
+      "path": "docs/adr/_generated/decision-index.json",
+      "root": "docs",
+      "status": "",
+      "title": "decision-index"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "",
+      "path": "docs/adr/_generated/history-map.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR History Map"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "",
+      "path": "docs/adr/_generated/hot-path.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR Hot Path"
     },
     {
       "classification": "supporting",
@@ -427,16 +211,115 @@
       "path": "docs/adr/classification-map.yaml",
       "root": "docs",
       "status": "",
-      "title": "Generated from docs/adr/manifest.yaml. Do not hand-edit."
+      "title": "classification-map"
     },
     {
       "classification": "supporting",
       "lane": "adr",
-      "owner": "",
-      "path": "docs/adr/contradictions-register.md",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/001-mongodb-atlas.md",
       "root": "docs",
       "status": "",
-      "title": "ADR Contradictions Register (v2 Overlay)"
+      "title": "MongoDB Atlas vs Local MongoDB"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/002-multisite-architecture.md",
+      "root": "docs",
+      "status": "",
+      "title": "Multisite Architecture"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/003-image-build-pipeline.md",
+      "root": "docs",
+      "status": "",
+      "title": "Image Build Pipeline"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/004-secrets-management.md",
+      "root": "docs",
+      "status": "",
+      "title": "Secrets Management"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/005-domain-migration.md",
+      "root": "docs",
+      "status": "",
+      "title": "Domain Migration (legacy environment \u2192 academyV2)"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/007-forum-migration-ruby-to-python.md",
+      "root": "docs",
+      "status": "",
+      "title": "Forum Service Migration from Ruby to Python"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/008-redis-streams-event-bus.md",
+      "root": "docs",
+      "status": "",
+      "title": "Redis Streams as Event Bus"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/009-in-cluster-storage.md",
+      "root": "docs",
+      "status": "",
+      "title": "In-Cluster MySQL/Redis vs Cloud SQL/Memorystore"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/010-monorepo-architecture.md",
+      "root": "docs",
+      "status": "",
+      "title": "Monorepo Architecture"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "platform-team",
+      "path": "docs/adr/historical/012-no-runtime-css-overlay.md",
+      "root": "docs",
+      "status": "",
+      "title": "Eliminate Runtime CSS ConfigMap Overlay"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "engineering",
+      "path": "docs/adr/historical/023-enterprise-images-ghcr-migration.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Images GHCR Migration"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
+      "owner": "engineering",
+      "path": "docs/adr/historical/026-cicd-build-pipeline-lessons.md",
+      "root": "docs",
+      "status": "",
+      "title": "CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)"
     },
     {
       "classification": "supporting",
@@ -450,10 +333,19 @@
     {
       "classification": "supporting",
       "lane": "adr",
+      "owner": "engineering",
+      "path": "docs/adr/rfc/027-deployment-contract-ownership-lanes.md",
+      "root": "docs",
+      "status": "",
+      "title": "Deployment Contract \u2014 Ownership Lanes Between App and GitOps Repos"
+    },
+    {
+      "classification": "supporting",
+      "lane": "adr",
       "owner": "platform-events",
       "path": "docs/adr/rfc/034-event-contract-and-transport-independence.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "",
       "title": "Event Contract and Transport Independence"
     },
     {
@@ -523,15 +415,6 @@
       "classification": "supporting",
       "lane": "adr",
       "owner": "",
-      "path": "docs/adr/rfc/ADR-025-deployment-boundary.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-025: Deployment Boundary \u2014 App Repo vs Infrastructure/GitOps Repo"
-    },
-    {
-      "classification": "supporting",
-      "lane": "adr",
-      "owner": "",
       "path": "docs/adr/rfc/README.md",
       "root": "docs",
       "status": "",
@@ -540,20 +423,20 @@
     {
       "classification": "supporting",
       "lane": "adr",
-      "owner": "",
+      "owner": "platform-team",
       "path": "docs/adr/rfc/RFC-claim-based-role-sync.md",
       "root": "docs",
       "status": "",
-      "title": "RFC: Claim-Based Role Sync (Authentik -> Open edX)"
+      "title": "Claim-Based Role Sync"
     },
     {
       "classification": "supporting",
       "lane": "adr",
-      "owner": "",
+      "owner": "platform-team",
       "path": "docs/adr/rfc/RFC-learning-slot-expansion-proposal.md",
       "root": "docs",
       "status": "",
-      "title": "Learning MFE Slot Expansion Proposal"
+      "title": "Learning Slot Expansion Proposal"
     },
     {
       "classification": "supporting",
@@ -562,7 +445,7 @@
       "path": "docs/adr/status-map.yaml",
       "root": "docs",
       "status": "",
-      "title": "Generated from docs/adr/manifest.yaml. Do not hand-edit."
+      "title": "status-map"
     },
     {
       "classification": "supporting",
@@ -613,433 +496,10 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/architecture/ADR_LANGUAGE_STYLE.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR Language Style Contract"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/ADR_NUMBERING_AND_NAMING.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR Numbering And Naming"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/AGENT_WORKPACKETS.md",
-      "root": "docs",
-      "status": "",
-      "title": "Agent Work Packets"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/ARCHITECTURE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Architecture Governance Overlay"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/FOUNDATIONS_PROGRAM.md",
-      "root": "docs",
-      "status": "",
-      "title": "Foundations Rework Program (v2 Overlay)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/PROGRAM_UPDATE_V2_BRIEF.md",
-      "root": "docs",
-      "status": "",
-      "title": "Program Update \u2014 Read Before Execution"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
       "path": "docs/architecture/README.md",
       "root": "docs",
       "status": "",
-      "title": "Architecture System"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/bundle-rules.yaml",
-      "root": "docs",
-      "status": "",
-      "title": "bundle-rules"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/charter.md",
-      "root": "docs",
-      "status": "",
-      "title": "Architecture Charter"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/README.md",
-      "root": "docs",
-      "status": "",
-      "title": "Constitution"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/authorization-model.md",
-      "root": "docs",
-      "status": "",
-      "title": "Authorization Model"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/control-planes.md",
-      "root": "docs",
-      "status": "",
-      "title": "Control Planes"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/data-governance.md",
-      "root": "docs",
-      "status": "",
-      "title": "Data Governance"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/identity-and-domain-boundaries.md",
-      "root": "docs",
-      "status": "",
-      "title": "Identity And Domain Boundaries"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/release-and-change-policy.md",
-      "root": "docs",
-      "status": "",
-      "title": "Release And Change Policy"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/tenant-lifecycle.md",
-      "root": "docs",
-      "status": "",
-      "title": "Tenant Lifecycle"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/constitution/tutor-and-extension-model.md",
-      "root": "docs",
-      "status": "",
-      "title": "Tutor And Extension Model"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/decision-map.md",
-      "root": "docs",
-      "status": "",
-      "title": "Architecture Decision Map"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/glossary.yaml",
-      "root": "docs",
-      "status": "",
-      "title": "glossary"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/ARCHITECTURE_MONGODB.md",
-      "root": "docs",
-      "status": "",
-      "title": "MongoDB Architecture (Reality + Target)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/BRAND_PARITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Brand Parity Architecture (WhiteCliff Lane)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/DATABASE_ARCHITECTURE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Database Architecture Guide"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Design Tokens Migration"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/FOOTER_PARITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Footer Parity Architecture"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/MULTISITE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Multi-site LMS Playbook"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/MULTI_BRAND_MULTI_SITE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Multi-Brand Multi-Site Architecture"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/PROCTORING_INTEGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Proctoring Integration Architecture"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Production Architecture - The Real Setup"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/PURCHASE_GATEWAY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Purchase Gateway Architecture"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/VIDEO_PIPELINE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Video Pipeline & Delivery Architecture"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/content-libraries-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Content Libraries v2 Architecture Overview"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/enterprise-services-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Enterprise Microservices Architecture Overview"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/multi-tenancy-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Multi-Tenancy Overview"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/notification-pipeline-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Notification Pipeline Overview"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/proctoring-architecture-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Proctoring Architecture Overview"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/overviews/purchase-gateway-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Purchase Gateway Architecture Overview"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/ADR-025-deployment-boundary.md",
-      "root": "docs",
-      "status": "",
-      "title": "ADR-025: Deployment Boundary \u2014 App Repo vs Infrastructure/GitOps Repo"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/README.md",
-      "root": "docs",
-      "status": "",
-      "title": "Architecture RFCs"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-034-event-contract-and-transport-independence.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-034 Event Contract And Transport Independence"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-035 Frontend Runtime Composition And Dependency Alignment"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-036 Cache Topology And Invalidation Strategy"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-037-async-task-user-facing-contract.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-037 Async Task User-Facing Contract"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-038 Commerce System Of Record And Reconciliation"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-039-translations-and-internationalization-strategy.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-039 Translations And Internationalization Strategy"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-040 Internal Packages Plugins And Versioning Policy"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-041-authorization-and-role-boundary-model.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC-041 Authorization And Role-Boundary Model"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-claim-based-role-sync.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC: Claim-Based Role Sync (Authentik -> Open edX)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/architecture/rfc/RFC-learning-slot-expansion-proposal.md",
-      "root": "docs",
-      "status": "",
-      "title": "Learning MFE Slot Expansion Proposal"
+      "title": "Architecture Root Retired"
     },
     {
       "classification": "archival",
@@ -2497,16 +1957,7 @@
       "path": "docs/archive/reports/docs-program-scorecard-20260313-template.md",
       "root": "docs",
       "status": "",
-      "title": "Docs Program Scorecard 2026-03-13"
-    },
-    {
-      "classification": "archival",
-      "lane": "archive",
-      "owner": "",
-      "path": "docs/archive/reports/docs-program-scorecard-20260313.md",
-      "root": "docs",
-      "status": "",
-      "title": "Docs Program Scorecard 2026-03-13"
+      "title": "Docs Program Scorecard Template for 2026-03-13"
     },
     {
       "classification": "archival",
@@ -4663,6 +4114,15 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/concepts/architecture/bundle-rules.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "bundle-rules"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/concepts/architecture/content-libraries-overview.md",
       "root": "docs",
       "status": "",
@@ -4676,6 +4136,15 @@
       "root": "docs",
       "status": "",
       "title": "Enterprise Microservices Architecture Overview"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/concepts/architecture/glossary.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "glossary"
     },
     {
       "classification": "supporting",
@@ -5481,6 +4950,15 @@
     {
       "classification": "supporting",
       "lane": "concept",
+      "owner": "",
+      "path": "docs/guides/standards/SPEC_VERIFICATION_METHOD.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-011: Convention-Based Spec Verification (V3)"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
       "owner": "Platform Team",
       "path": "docs/guides/standards/STATUS_REPORTING_STANDARD.md",
       "root": "docs",
@@ -5630,6 +5108,15 @@
       "root": "docs",
       "status": "",
       "title": "Wave 6 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR Contradictions Register (v2 Overlay)"
     },
     {
       "classification": "supporting",
@@ -5819,6 +5306,96 @@
       "root": "docs",
       "status": "",
       "title": "Wave 4 Wrapper Retirement Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE9_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 9 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 9 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 9 Findings Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 9 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ADR_RESET_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave ADR Reset Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ADR_RESET_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave ADR Reset Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ADR_RESET_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave ADR Reset Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave Architecture Root Reset Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave Architecture Root Reset Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave Architecture Root Reset Tracker"
     },
     {
       "classification": "supporting",
@@ -10837,6 +10414,51 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-017: Analytics Target Decision (Aspects/Superset Deployment)"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-014: MFE Branding Strategy - Migration Path Analysis"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/programs/mobile/ANDROID_SUPPORT_DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-016: Android App Support Decision"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/programs/mobile/PUSH_NOTIFICATION_PROVIDER_DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-015: Mobile Push Notification Provider Selection"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/programs/observability/TRACING_PILOT_DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "ADR-020: Tracing Scope and Pilot Decision for Mereka LMS"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/qa/OBS-PILOT-TRACING-01.md",
       "root": "docs",
       "status": "",
@@ -15001,17 +14623,17 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1666,
+  "entry_count": 1624,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
-    "docs:adr": 63,
-    "docs:archive": 292,
-    "docs:concept": 338,
+    "docs:adr": 50,
+    "docs:archive": 291,
+    "docs:concept": 294,
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 211,
-    "docs:review": 48,
+    "docs:other": 216,
+    "docs:review": 59,
     "docs:runbook": 482,
     "specs:evidence": 43,
     "specs:generated": 48,
@@ -15023,7 +14645,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1448,
+    "docs": 1406,
     "specs": 218
   }
 }

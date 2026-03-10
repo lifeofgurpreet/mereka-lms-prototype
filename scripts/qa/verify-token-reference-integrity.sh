@@ -13,7 +13,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
-CONTRACT_DOC="$REPO_ROOT/docs/architecture/TOKEN_REFERENCE_INTEGRITY.md"
+CONTRACT_DOC="$REPO_ROOT/docs/concepts/architecture/TOKEN_REFERENCE_INTEGRITY.md"
 COMMON_DESIGN_TOKENS="$THEME_DIR/common/static/css/mereka-design-tokens.css"
 COMMON_OVERRIDES="$THEME_DIR/common/static/css/mereka-overrides.css"
 LMS_OVERRIDES="$THEME_DIR/lms/static/css/mereka-overrides.css"

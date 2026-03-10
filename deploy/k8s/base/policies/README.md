@@ -3,7 +3,7 @@
 These Kyverno `ClusterPolicy` resources are **cluster-scoped** and belong in
 `bbi-infrastructure`, not in the app repo.
 
-Per `docs/architecture/DEPLOYMENT_CONTRACT.md` and `DEPLOYMENT_BOUNDARY.md`,
+Per `docs/reference/architecture/DEPLOYMENT_CONTRACT.md` and `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md`,
 cluster-scoped resources are owned by the GitOps repo.
 
 ## Migration plan

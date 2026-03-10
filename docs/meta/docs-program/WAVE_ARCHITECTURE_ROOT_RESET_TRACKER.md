@@ -1,0 +1,93 @@
+# Wave Architecture Root Reset Tracker
+
+Status: completed
+Owner: codex
+Branch: docs/architecture-root-reset
+Worktree: /home/gurpreet/projects/k8s/mereka-lms-wt-architecture-root-reset
+Started from: c0de95d631e327abbb40a1cb3c49960984748d9e
+
+## Objective
+
+Retire `docs/architecture/**` as an active documentation root so that:
+- `docs/concepts/architecture/**` is the only living architecture root
+- `docs/adr/**` is the only ADR and RFC root
+- `docs/guides/standards/**` is the only standards root
+- `docs/meta/docs-program/**` is the only docs-program governance root
+
+## Packet A Classification
+
+### Delete after reference rewrite
+
+- `docs/architecture/ADR_LANGUAGE_STYLE.md`
+- `docs/architecture/ADR_NUMBERING_AND_NAMING.md`
+- `docs/architecture/AGENT_WORKPACKETS.md`
+- `docs/architecture/ARCHITECTURE.md`
+- `docs/architecture/FOUNDATIONS_PROGRAM.md`
+- `docs/architecture/PROGRAM_UPDATE_V2_BRIEF.md`
+- `docs/architecture/charter.md`
+- `docs/architecture/decision-map.md`
+- `docs/architecture/constitution/**`
+- `docs/architecture/overviews/**`
+- `docs/architecture/rfc/**`
+- `docs/architecture/diagrams/adr-layer-map.mmd`
+- `docs/architecture/diagrams/decision-graph.mmd`
+- `docs/architecture/diagrams/repo-structure.txt`
+
+### Retain only if needed
+
+- `docs/architecture/README.md`
+  - preferred end state: tombstone only
+
+### Move into canonical living architecture root
+
+- `docs/architecture/bundle-rules.yaml` -> `docs/concepts/architecture/bundle-rules.yaml`
+- `docs/architecture/glossary.yaml` -> `docs/concepts/architecture/glossary.yaml`
+
+## Sidecar Decision
+
+- `bundle-rules.yaml` is live: consumed by `scripts/qa/build_decision_graph.py` and `scripts/qa/resolve_adr_impact.py`
+- `glossary.yaml` is live: referenced by ADR authoring and governance docs for controlled tokens
+- neither sidecar should remain under a retired compatibility root
+- packet B will move both files into `docs/concepts/architecture/` and update consumers
+
+## Reference Sweep
+
+Observed live internal references fall into these groups:
+- active docs and specs still pointing at wrapper paths under `docs/architecture/overviews/**` and `docs/architecture/rfc/**`
+- governance docs still treating `docs/architecture/charter.md`, `glossary.yaml`, and `bundle-rules.yaml` as active
+- scripts and validators still consuming `docs/architecture/**` as if it were canonical
+- archive and superseded docs also contain old references; these are lower priority unless they block clean validation
+
+## Packet Targets
+
+### Packet B
+
+- move the two surviving sidecars into `docs/concepts/architecture/`
+- update direct consumers and governance references
+
+### Packet C
+
+- rewrite active internal references away from `docs/architecture/**`
+- delete wrapper trees and dead diagrams
+
+### Packet D
+
+- reduce `docs/architecture/**` to tombstone-only `README.md` or remove directory entirely if safe
+- add no-regrowth guardrail
+
+### Packet E
+
+- write closeout and review handoff
+
+## Open Risks
+
+- historical/archive surfaces and a few transitional-policy files still mention `docs/architecture/**` intentionally as retired topology history
+- some legacy scripts already pointed at now-canonical `docs/concepts/architecture/**` files that were missing from this wave's explicit classification; those refs were rewritten when they were active, but this wave did not attempt to normalize every historical prompt or archive reference
+
+## Final State
+
+- `docs/architecture/**` now contains only `README.md`
+- `bundle-rules.yaml` and `glossary.yaml` live under `docs/concepts/architecture/`
+- wrapper trees under `constitution/`, `overviews/`, `rfc/`, and `diagrams/` were deleted
+- active internal references were rewritten to `docs/concepts/architecture/**`, `docs/adr/**`, `docs/reference/architecture/**`, or docs-program roots as appropriate
+- `tools/docs/verify/verify_legacy_architecture_root.py` now prevents regrowth beyond the tombstone README

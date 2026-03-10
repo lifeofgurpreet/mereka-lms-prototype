@@ -42,7 +42,7 @@ This runbook defines the mandatory authoring flow for ADR updates under `docs/ad
 
 ## Controlled vocabulary
 
-- `governs` and `does_not_govern` for governed ADRs must use controlled tokens from `docs/architecture/glossary.yaml`.
+- `governs` and `does_not_govern` for governed ADRs must use controlled tokens from `docs/concepts/architecture/glossary.yaml`.
 - Do not introduce ad hoc free-form scope labels.
 - Do not leave governed ADRs with placeholder titles (`---`) or empty `governs`.
 

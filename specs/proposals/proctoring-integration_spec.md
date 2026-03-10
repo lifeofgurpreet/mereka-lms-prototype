@@ -11,7 +11,7 @@ depends_on:
 - specs/advanced-assessment-xqueue_spec.md
 links:
   related_docs:
-  - docs/architecture/proctoring-architecture-overview.md
+  - docs/concepts/architecture/proctoring-architecture-overview.md
   - docs/runbooks/proctoring-operations-runbook.md
   - docs/runbooks/operations/TROUBLESHOOTING.md
   related_specs:

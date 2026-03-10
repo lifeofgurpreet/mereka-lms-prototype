@@ -15,7 +15,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
-BUDGET_DOC="$REPO_ROOT/docs/architecture/PERFORMANCE_BUDGETS.md"
+BUDGET_DOC="$REPO_ROOT/docs/concepts/architecture/PERFORMANCE_BUDGETS.md"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 
 PASS=0
@@ -157,7 +157,7 @@ if [ -f "$CADDYFILE" ]; then
   else
     do_warn "Caddyfile has NO Cache-Control headers (documented config gap in AC-UIPERF-003)"
     do_warn "Expected: Cache-Control headers for hashed assets, index.html, API responses"
-    do_warn "See: docs/architecture/PERFORMANCE_BUDGETS.md section 'Caddy Configuration Requirements'"
+    do_warn "See: docs/concepts/architecture/PERFORMANCE_BUDGETS.md section 'Caddy Configuration Requirements'"
   fi
 else
   do_fail "Cannot verify Caddyfile cache headers (file not found)"

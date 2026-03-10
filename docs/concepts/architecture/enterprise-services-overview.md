@@ -260,7 +260,7 @@ Response: [
 ## Related Specs and ADRs
 - **Spec**: `specs/enterprise-microservices_spec.md`
 - **Runbook**: `docs/archive/superseded/runbooks/enterprise-services-runbook.md`
-- **Architecture**: `docs/architecture/overviews/enterprise-services-overview.md`
+- **Architecture**: `docs/concepts/architecture/enterprise-services-overview.md`
 - **Multi-Tenancy**: `specs/multi-tenancy-architecture_spec.md`
 - **K8s Deployment**: `specs/k8s-deployment_spec.md`
 - **Secrets Management**: `specs/secrets-management_spec.md`

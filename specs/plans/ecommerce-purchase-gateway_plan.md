@@ -211,7 +211,7 @@ These map to the spec's Open Questions. Each MUST be resolved before starting th
 
 - [ ] **[M]** D.1 — Write Stripe webhook setup guide for the gateway endpoint (`docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md` -- update existing) | Depends: 3.1
 - [ ] **[M]** D.2 — Write operational runbook: startup, health checks, troubleshooting, manual enrollment, manual refund (`docs/runbooks/purchase-gateway-runbook.md`) | Depends: All Milestone 1-6
-- [ ] **[M]** D.3 — Write architecture overview: component diagram, data flow, integration points (`docs/architecture/purchase-gateway-overview.md`) | Depends: None
+- [ ] **[M]** D.3 — Write architecture overview: component diagram, data flow, integration points (`docs/concepts/architecture/purchase-gateway-overview.md`) | Depends: None
 - [ ] **[S]** D.4 — Write OAuth2 troubleshooting guide for gateway <-> LMS authentication (`docs/runbooks/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` -- update existing) | Depends: 4.2
 - [ ] **[S]** D.5 — Update `CLAUDE.md` with gateway service details, ports, PM2/K8s references | Depends: 6.2
 

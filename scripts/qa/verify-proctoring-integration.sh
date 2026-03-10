@@ -80,7 +80,7 @@ LMS_PROD_SETTINGS="deploy/k8s/base/apps/openedx/settings/lms/production.py"
 EXTERNAL_SECRETS="deploy/k8s/base/secrets/external-secrets.yaml"
 VENDOR_READINESS="docs/status/readiness/PROCTORING_VENDOR_READINESS.md"
 RUNBOOK="docs/operations/runbooks/PROCTORING_RUNBOOK.md"
-ARCH_DOC="docs/architecture/PROCTORING_INTEGRATION.md"
+ARCH_DOC="docs/concepts/architecture/PROCTORING_INTEGRATION.md"
 SPEC_FILE="specs/proposals/proctoring-integration_spec.md"
 
 # ---------------------------------------------------------------------------
@@ -353,7 +353,7 @@ DOCS=(
   "$VENDOR_READINESS:PROCTORING_VENDOR_READINESS.md"
   "$RUNBOOK:PROCTORING_RUNBOOK.md"
   "$ARCH_DOC:PROCTORING_INTEGRATION.md (architecture doc)"
-  "docs/architecture/proctoring-architecture-overview.md:proctoring-architecture-overview.md"
+  "docs/concepts/architecture/proctoring-architecture-overview.md:proctoring-architecture-overview.md"
 )
 
 for entry in "${DOCS[@]}"; do

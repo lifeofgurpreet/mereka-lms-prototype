@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Verify mobile token parity: design token alignment, API endpoint inventory,
-# and critical theming gaps identified in docs/architecture/MOBILE_TOKEN_PARITY.md
+# and critical theming gaps identified in docs/concepts/architecture/MOBILE_TOKEN_PARITY.md
 #
 # @spec: proposals/mobile-apps-enterprise_spec.md
 # @covers: AC-MOB-001, AC-MOB-023
@@ -31,7 +31,7 @@ skip() { echo -e "  ${YELLOW}SKIP${NC} $1"; SKIP=$((SKIP + 1)); }
 TOKENS_CSS="assets/branding/tokens.css"
 MOBILE_API_DIR="infrastructure/tutor/custom-apps/openedx_mobile_api"
 PUSH_NOTIF_DIR="infrastructure/tutor/custom-apps/openedx_push_notifications"
-PARITY_DOC="docs/architecture/MOBILE_TOKEN_PARITY.md"
+PARITY_DOC="docs/concepts/architecture/MOBILE_TOKEN_PARITY.md"
 AASA_FILE="$MOBILE_API_DIR/static/.well-known/apple-app-site-association"
 
 # ---------------------------------------------------------------------------
@@ -373,7 +373,7 @@ echo ""
 
 if [[ "$FAIL" -gt 0 ]]; then
   echo -e "${RED}Verification FAILED — ${FAIL} check(s) require attention.${NC}"
-  echo "See docs/architecture/MOBILE_TOKEN_PARITY.md for remediation guidance."
+  echo "See docs/concepts/architecture/MOBILE_TOKEN_PARITY.md for remediation guidance."
   exit 1
 else
   echo -e "${GREEN}Verification PASSED.${NC}"

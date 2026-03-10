@@ -50,7 +50,7 @@ Tasks are grouped by category and ordered by dependency. Eachcompleted task incl
   - No schema migration required (both use cs_comments_service database)
   - Confirmed 183MB of forum data in MongoDB Atlas
 
-- [x] **[M]** Document search backend migration path (`docs/architecture/forum-search-migration.md`) | AC: #3 | Depends: Research
+- [x] **[M]** Document search backend migration path (`docs/concepts/architecture/forum-search-migration.md`) | AC: #3 | Depends: Research
   - Elasticsearch → Meilisearch v1.8.4 migration path documented
   - Meilisearch chosen for simplicity and performance
   - Search reindexing strategy documented
@@ -204,7 +204,7 @@ Tasks are grouped by category and ordered by dependency. Eachcompleted task incl
 
 ## Documentation Tasks
 
-- [x] **[S]** Document forum architecture post-migration (`docs/architecture/forum-architecture.md`) | Depends: Productiondeployment
+- [x] **[S]** Document forum architecture post-migration (`docs/concepts/architecture/forum-architecture.md`) | Depends: Productiondeployment
   - Python forum integrated into LMS process
   - Meilisearch search backend
   - MongoDB Atlas storage

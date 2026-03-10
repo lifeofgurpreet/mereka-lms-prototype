@@ -2,14 +2,14 @@
 # verify-mfe-version-pinning.sh — AC-UI-004: MFE version pinning + verification
 #
 # Verifies that MFE versions are pinned in kustomization.yaml and match
-# the documented versions in docs/architecture/MFE_VERSIONS.md.
+# the documented versions in docs/concepts/architecture/MFE_VERSIONS.md.
 #
 # Usage: ./scripts/qa/verify-mfe-version-pinning.sh
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 KUSTOMIZATION="$REPO_ROOT/deploy/k8s/base/kustomization.yaml"
-MFE_VERSIONS_DOC="$REPO_ROOT/docs/architecture/MFE_VERSIONS.md"
+MFE_VERSIONS_DOC="$REPO_ROOT/docs/concepts/architecture/MFE_VERSIONS.md"
 
 PASS=0
 FAIL=0
@@ -75,7 +75,7 @@ if [ -f "$MFE_VERSIONS_DOC" ]; then
     do_warn "No version changelog in MFE_VERSIONS.md"
   fi
 else
-  do_fail "MFE_VERSIONS.md not found at docs/architecture/MFE_VERSIONS.md"
+  do_fail "MFE_VERSIONS.md not found at docs/concepts/architecture/MFE_VERSIONS.md"
 fi
 
 # 3. No 'latest' tags in deployment manifests

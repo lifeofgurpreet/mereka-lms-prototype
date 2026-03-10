@@ -438,7 +438,7 @@ validity 10000`
 
 ## Documentation Tasks
 
-- [ ] **[S]** Write mobile apps architecture overview (`docs/architecture/mobile-apps-overview.md`) | Depends: All build tasks
+- [ ] **[S]** Write mobile apps architecture overview (`docs/concepts/architecture/mobile-apps-overview.md`) | Depends: All build tasks
   - System diagram: mobile apps ↔ LMS API ↔ Open edX backend
   - OAuth 2.0 flow with PKCE
   - Push notification flow: LMS → FCM → APNs/Android

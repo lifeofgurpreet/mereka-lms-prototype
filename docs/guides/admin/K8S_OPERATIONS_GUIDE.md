@@ -584,7 +584,7 @@ velero restore describe <restore-name>
 
 Use Atlas Console for point-in-time recovery or restore from snapshot.
 
-Note: production modulestore/forum traffic is Atlas-backed. Legacy in-cluster MongoDB deployment has been retired; keep the production overlay patch that deletes `Service/mongodb` so this path cannot reappear silently (see `docs/architecture/overviews/ARCHITECTURE_MONGODB.md`).
+Note: production modulestore/forum traffic is Atlas-backed. Legacy in-cluster MongoDB deployment has been retired; keep the production overlay patch that deletes `Service/mongodb` so this path cannot reappear silently (see `docs/concepts/architecture/ARCHITECTURE_MONGODB.md`).
 
 ### Velero Commands Reference
 

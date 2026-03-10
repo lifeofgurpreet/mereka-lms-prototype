@@ -53,10 +53,10 @@ warn() {
 
 echo -e "${BLUE}## Policy Documentation${NC}"
 
-if [[ -f "docs/architecture/MFE_FIRST_POLICY.md" ]]; then
+if [[ -f "docs/concepts/architecture/MFE_FIRST_POLICY.md" ]]; then
   pass "MFE-first policy document exists"
 else
-  fail "MFE-first policy document missing (docs/architecture/MFE_FIRST_POLICY.md)"
+  fail "MFE-first policy document missing (docs/concepts/architecture/MFE_FIRST_POLICY.md)"
 fi
 
 if grep -rq "MFE-first\|MFE-First\|mfe-first" docs/ 2>/dev/null; then
@@ -85,7 +85,7 @@ else
 fi
 
 # Check plugin slot inventory exists
-if [[ -f "docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md" ]]; then
+if [[ -f "docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md" ]]; then
   pass "Plugin slot inventory exists"
 else
   fail "Plugin slot inventory missing"
@@ -200,7 +200,7 @@ echo ""
 
 echo -e "${BLUE}## Exception Documentation${NC}"
 
-if grep -rq "Exception\|exception\|Legitimate" docs/architecture/MFE_FIRST_POLICY.md 2>/dev/null; then
+if grep -rq "Exception\|exception\|Legitimate" docs/concepts/architecture/MFE_FIRST_POLICY.md 2>/dev/null; then
   pass "Exception process documented in policy"
 else
   warn "Exception process not documented"
@@ -209,7 +209,7 @@ fi
 # Check known legitimate Django templates are documented
 FOOTER_TEMPLATE="infrastructure/tutor/themes/mereka/lms/templates/footer.html"
 if [[ -f "$FOOTER_TEMPLATE" ]]; then
-  if grep -q "footer.html" docs/architecture/MFE_FIRST_POLICY.md 2>/dev/null; then
+  if grep -q "footer.html" docs/concepts/architecture/MFE_FIRST_POLICY.md 2>/dev/null; then
     pass "LMS footer template documented as known exception"
   else
     warn "LMS footer template exists but not documented as exception"

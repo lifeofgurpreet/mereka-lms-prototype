@@ -49,7 +49,7 @@ do_warn() {
 echo "=== Multi-Site UX Consistency Verification ==="
 echo "Spec: branding-system_spec.md"
 echo "Coverage: AC-MSUX-001, AC-MSUX-002, AC-MSUX-003"
-echo "Contract: docs/architecture/MULTISITE_UX_CONSISTENCY.md"
+echo "Contract: docs/concepts/architecture/MULTISITE_UX_CONSISTENCY.md"
 echo
 
 # =============================================================================
@@ -58,7 +58,7 @@ echo
 echo "=== Section 1: Contract Existence (AC-MSUX-001) ==="
 echo
 
-CONTRACT_FILE="$REPO_ROOT/docs/architecture/MULTISITE_UX_CONSISTENCY.md"
+CONTRACT_FILE="$REPO_ROOT/docs/concepts/architecture/MULTISITE_UX_CONSISTENCY.md"
 
 if [[ -f "$CONTRACT_FILE" ]]; then
   do_pass "AC-MSUX-001: Contract document exists"
@@ -304,7 +304,7 @@ echo
 if [[ $FAILED -gt 0 ]]; then
   echo "Multi-site UX consistency issues detected."
   echo "Action required: Fix hardcoded domain references."
-  echo "See: docs/architecture/MULTISITE_UX_CONSISTENCY.md"
+  echo "See: docs/concepts/architecture/MULTISITE_UX_CONSISTENCY.md"
   exit 1
 fi
 

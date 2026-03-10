@@ -236,7 +236,7 @@ Already GREEN. Add any new verifiers for tenant-specific branding contracts as n
 
 - **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - **Provisioning**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
-- **Architecture**: `docs/architecture/overviews/multi-tenancy-overview.md`
+- **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Branding Model**: `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - **Verifier**: `scripts/qa/verify-tenant-branding-contract.sh`

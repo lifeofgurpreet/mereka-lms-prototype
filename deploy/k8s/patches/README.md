@@ -8,7 +8,7 @@
 > - `caddy-staging-fix.yaml` — legacy emergency patch with hardcoded prod domains, never referenced by any kustomization.
 > - `smtp-ses-relay.yaml` — manual-apply patch never integrated into any overlay.
 >
-> See [docs/architecture/DEPLOYMENT_BOUNDARY.md](../../../docs/architecture/DEPLOYMENT_BOUNDARY.md) for details.
+> See [docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md](../../../docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md) for details.
 
 This directory contains Kubernetes patches for fixing deployment issues that can't be resolved through Tutor configuration alone.
 

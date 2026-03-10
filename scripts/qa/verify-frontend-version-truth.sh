@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # verify-frontend-version-truth.sh — AC-UIVER-003: Frontend version drift checker
 #
-# Verifies that docs/architecture/MFE_VERSIONS.md (canonical source of truth)
+# Verifies that docs/concepts/architecture/MFE_VERSIONS.md (canonical source of truth)
 # matches version pins in CI workflows, setup scripts, and K8s manifests.
 #
 # Usage: ./scripts/qa/verify-frontend-version-truth.sh
@@ -9,7 +9,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
-MFE_VERSIONS_DOC="$REPO_ROOT/docs/architecture/MFE_VERSIONS.md"
+MFE_VERSIONS_DOC="$REPO_ROOT/docs/concepts/architecture/MFE_VERSIONS.md"
 BUILD_WORKFLOW="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
 SETUP_SCRIPT="$REPO_ROOT/scripts/shared/setup-local.sh"
 KUSTOMIZATION_BASE="$REPO_ROOT/deploy/k8s/base/kustomization.yaml"
@@ -28,7 +28,7 @@ echo ""
 # 1. Verify MFE_VERSIONS.md exists and has Version Baseline table
 echo "--- MFE_VERSIONS.md Canonical Doc Check ---"
 if [ ! -f "$MFE_VERSIONS_DOC" ]; then
-  do_fail "MFE_VERSIONS.md not found at docs/architecture/MFE_VERSIONS.md"
+  do_fail "MFE_VERSIONS.md not found at docs/concepts/architecture/MFE_VERSIONS.md"
   echo ""
   echo "=== AC-UIVER-003 Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
   exit 1

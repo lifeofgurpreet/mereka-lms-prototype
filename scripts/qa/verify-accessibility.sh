@@ -77,7 +77,7 @@ if [[ "$MODE_OFFLINE" == true ]]; then
 
   # -- 1. Policy document exists and mentions WCAG 2.2 AA criteria --
   echo -e "${BLUE}### 1. Policy Documentation${NC}"
-  POLICY_DOC="$REPO_ROOT/docs/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md"
+  POLICY_DOC="$REPO_ROOT/docs/concepts/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md"
 
   if [[ -f "$POLICY_DOC" ]]; then
     do_pass "ACCESSIBILITY_CONFORMANCE_POLICY.md exists"

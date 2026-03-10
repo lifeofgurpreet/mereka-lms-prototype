@@ -26,7 +26,7 @@ This runbook defines review gates for ADR-bearing pull requests.
    - `docs/ops/runbooks/**` or `docs/guides/**` for procedures
    - `docs/evidence/**` for active proof
 8. Validate vocabulary discipline:
-   - `governs` and `does_not_govern` use controlled tokens from `docs/architecture/glossary.yaml`.
+   - `governs` and `does_not_govern` use controlled tokens from `docs/concepts/architecture/glossary.yaml`.
 
 ## Required commands
 

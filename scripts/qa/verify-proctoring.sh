@@ -289,7 +289,7 @@ echo ""
 echo "Checking proctoring documentation..."
 
 PROCTORING_DOCS=(
-  "docs/architecture/proctoring-architecture-overview.md"
+  "docs/concepts/architecture/proctoring-architecture-overview.md"
   "docs/runbooks/proctoring-operations-runbook.md"
   "specs/proposals/proctoring-integration_spec.md"
 )

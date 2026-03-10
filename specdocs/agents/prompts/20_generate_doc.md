@@ -15,7 +15,7 @@
 | Architecture decision | ADR | `docs/adr/NNN-{slug}.md` |
 | Operational procedure | Runbook | `docs/operations/{slug}.md` |
 | Setup/getting started | Onboarding | `docs/onboarding/{slug}.md` |
-| System design explanation | Architecture | `docs/architecture/{slug}.md` |
+| System design explanation | Architecture | `docs/concepts/architecture/{slug}.md` |
 | Migration playbook | Migration | `docs/migrations/{slug}.md` |
 | Quick reference | Quickref | `docs/operations/quickref/{slug}.md` |
 

@@ -223,7 +223,7 @@ scripts/qa/load-test-multi-tenant.sh --tenants=50
 test -f infrastructure/clickhouse/benchmarks/partition-strategy.md && echo "PASS"
 
 # Scaling report documented
-test -f docs/architecture/multi-tenancy-scaling-report.md && echo "PASS"
+test -f docs/concepts/architecture/multi-tenancy-scaling-report.md && echo "PASS"
 ```
 
 ---

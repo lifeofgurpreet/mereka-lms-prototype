@@ -277,7 +277,7 @@ Data Flow:
 ## Related Specs and ADRs
 - **Spec**: `specs/proposals/proctoring-integration_spec.md`
 - **Runbook**: `docs/archive/superseded/runbooks/proctoring-operations-runbook.md`
-- **Architecture**: `docs/architecture/overviews/proctoring-architecture-overview.md`
+- **Architecture**: `docs/concepts/architecture/proctoring-architecture-overview.md`
 - **Enterprise Services**: `specs/enterprise-microservices_spec.md`
 - **Multi-Tenancy**: `specs/multi-tenancy-architecture_spec.md`
 - **Secrets Management**: `specs/secrets-management_spec.md`

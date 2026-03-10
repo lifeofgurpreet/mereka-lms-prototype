@@ -190,7 +190,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 ## Documentation Tasks
 
-- [ ] **[S]** Write video pipeline architecture overview (`docs/architecture/video-pipeline-overview.md`) | Depends: All build tasks
+- [ ] **[S]** Write video pipeline architecture overview (`docs/concepts/architecture/video-pipeline-overview.md`) | Depends: All build tasks
   - System diagram: MCT/Kajabi → Mux → CDN → Video XBlock → Analytics
   - Data flow: upload → transcode → playback
   - Integration points: Mux API, Aspects pipeline

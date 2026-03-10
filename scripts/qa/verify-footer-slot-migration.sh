@@ -23,7 +23,7 @@ PLUGIN_BUNDLE=""
 PLUGIN_FILE="$PLUGIN_MAIN"
 PATCHES_FILE="${REPO_ROOT}/infrastructure/tutor/apply-patches.sh"
 FOOTER_PATCH_FILE="${REPO_ROOT}/infrastructure/tutor/patches/footer-component.sh"
-CONTRACT_DOC="${REPO_ROOT}/docs/architecture/FOOTER_SLOT_MIGRATION.md"
+CONTRACT_DOC="${REPO_ROOT}/docs/concepts/architecture/FOOTER_SLOT_MIGRATION.md"
 CI_STATIC_FILE="${REPO_ROOT}/.github/ci-scripts-static.txt"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
@@ -56,9 +56,9 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "AC-FTSLOT-001: Contract Document"
 if [[ -f "${CONTRACT_DOC}" ]]; then
-    do_pass "Contract document exists at docs/architecture/FOOTER_SLOT_MIGRATION.md"
+    do_pass "Contract document exists at docs/concepts/architecture/FOOTER_SLOT_MIGRATION.md"
 else
-    do_fail "Contract document missing: docs/architecture/FOOTER_SLOT_MIGRATION.md"
+    do_fail "Contract document missing: docs/concepts/architecture/FOOTER_SLOT_MIGRATION.md"
 fi
 
 # AC-FTSLOT-002: Canonical source checks (mereka_lms.py)

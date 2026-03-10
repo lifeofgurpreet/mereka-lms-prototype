@@ -2,9 +2,9 @@
 
 > **PARTIALLY SUPERSEDED**: The directory structure described below is outdated. The canonical
 > reference for what belongs in this directory vs `bbi-infrastructure` is:
-> - [docs/architecture/DEPLOYMENT_BOUNDARY.md](../../docs/architecture/DEPLOYMENT_BOUNDARY.md) — authoritative boundary (ADR-025)
-> - [docs/architecture/DEPLOYMENT_CONTRACT.md](../../docs/architecture/DEPLOYMENT_CONTRACT.md) — interface contract
-> - [docs/architecture/RESOURCE_OWNERSHIP_MATRIX.md](../../docs/architecture/RESOURCE_OWNERSHIP_MATRIX.md) — per-file classification
+> - [docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md](../../docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md) — authoritative boundary ADR
+> - [docs/reference/architecture/DEPLOYMENT_CONTRACT.md](../../docs/reference/architecture/DEPLOYMENT_CONTRACT.md) — interface contract
+> - [docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md](../../docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md) — per-file classification
 >
 > Key differences from the description below: `overlays/local/`, `overlays/rke2-nonprod/`, and
 > `overlays/staging/` exist (production was not "to be created" — it exists and is frozen at 0

@@ -506,7 +506,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 ## Documentation Tasks (DEFERRED)
 
-- [ ] **[M] [DEFERRED]** Write proctoring architecture overview (`docs/architecture/proctoring-architecture-overview.md`)| Depends: All build tasks
+- [ ] **[M] [DEFERRED]** Write proctoring architecture overview (`docs/concepts/architecture/proctoring-architecture-overview.md`)| Depends: All build tasks
   - System diagram
   - Provider integration architecture
   - Data flows: exam setup → environment check → identity verification → exam session → recording → AI analysis → proctorreview → grading

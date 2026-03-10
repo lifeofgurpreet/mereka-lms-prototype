@@ -95,7 +95,7 @@ Before starting Phase 0, verify:
 
 - [ ] **[S]** Create data residency documentation | AC: N/A (Req: Data Residency) | Depends: None
   - Done: Document mapping all data stores to geographic regions with SCC status
-  - Files: `docs/architecture/data-residency-map.md`
+  - Files: `docs/concepts/architecture/data-residency-map.md`
 
 - [ ] **[S]** Initialize `services/privacy-tools/` project structure | AC: N/A | Depends: None
   - Done: Python package with `pyproject.toml`, `requirements.txt`, `Dockerfile`, directory structure per spec monorepo layout

@@ -61,11 +61,11 @@ MFE_SCSS="$THEME_DIR/mfe/mereka.scss"
 COMMON_CSS="$THEME_DIR/common/static/css/mereka-overrides.css"
 LMS_CSS="$THEME_DIR/lms/static/css/mereka-overrides.css"
 CMS_CSS="$THEME_DIR/cms/static/css/mereka-overrides.css"
-AUDIT_DOC="$REPO_ROOT/docs/architecture/CSS_SCOPING_AUDIT.md"
+AUDIT_DOC="$REPO_ROOT/docs/concepts/architecture/CSS_SCOPING_AUDIT.md"
 
 echo -e "${BLUE}=== CSS Scoping Audit Gate ===${NC}"
 echo "  Theme dir: infrastructure/tutor/themes/mereka/"
-echo "  Audit doc: docs/architecture/CSS_SCOPING_AUDIT.md"
+echo "  Audit doc: docs/concepts/architecture/CSS_SCOPING_AUDIT.md"
 echo ""
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ echo ""
 echo -e "${BLUE}## AC-CSS-SCOPE-001: Audit documentation${NC}"
 
 if [[ ! -f "$AUDIT_DOC" ]]; then
-  do_fail "AC-CSS-SCOPE-001: CSS_SCOPING_AUDIT.md not found at docs/architecture/"
+  do_fail "AC-CSS-SCOPE-001: CSS_SCOPING_AUDIT.md not found at docs/concepts/architecture/"
 else
   do_pass "AC-CSS-SCOPE-001: CSS_SCOPING_AUDIT.md exists"
 
@@ -466,7 +466,7 @@ if [[ "$FAIL" -eq 0 ]]; then
   if [[ "$WARN" -gt 0 ]]; then
     echo ""
     echo "WARN items are documented gaps tracked in T106. They are not CI-blocking."
-    echo "See docs/architecture/CSS_SCOPING_AUDIT.md Section 5 for the full list."
+    echo "See docs/concepts/architecture/CSS_SCOPING_AUDIT.md Section 5 for the full list."
   fi
   exit 0
 else
@@ -474,6 +474,6 @@ else
   echo ""
   echo "Fix FAIL items before merging."
   echo "WARN items are documented known gaps (not blocking)."
-  echo "See docs/architecture/CSS_SCOPING_AUDIT.md for context."
+  echo "See docs/concepts/architecture/CSS_SCOPING_AUDIT.md for context."
   exit 1
 fi

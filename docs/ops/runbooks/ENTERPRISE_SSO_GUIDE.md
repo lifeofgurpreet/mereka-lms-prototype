@@ -316,4 +316,4 @@ A `SecretSyncedError` condition indicates the GCP secret does not exist.
 | `scripts/qa/verify-auth-hardening.sh` | Full auth hardening suite runner |
 | `../../policies/operations/AUTH_HARDENING_SPEC.md` | Auth hardening decisions and implementation |
 | `docs/reference/operations/AUTH_AND_PERMISSIONS.md` | Permissions model documentation |
-| `docs/architecture/rfc/RFC-claim-based-role-sync.md` | RFC for IdP claim → role mapping |
+| `docs/adr/rfc/RFC-claim-based-role-sync.md` | RFC for IdP claim → role mapping |

@@ -65,7 +65,7 @@ This plan implements a multi-tenancy architecture for MerekaAcademy Open edX, en
   - Patch license-manager cache layer to use namespaced keys
   - Verify shared platform cache keys (course metadata not scoped to tenant) do not include UUID
 
-- [ ] **[S]** Document Redis cache key naming conventions (`docs/architecture/REDIS_TENANT_CACHE_KEYS.md`) | Depends: Redis namespacing
+- [ ] **[S]** Document Redis cache key naming conventions (`docs/concepts/architecture/REDIS_TENANT_CACHE_KEYS.md`) | Depends: Redis namespacing
   - Naming pattern documentation
   - Examples of tenant-specific vs shared keys
   - Cache invalidation patterns per tenant
@@ -410,7 +410,7 @@ This plan implements a multi-tenancy architecture for MerekaAcademy Open edX, en
   - Data deletion verification
   - Compliance checklist (PDPA/GDPR)
 
-- [ ] **[M]** Write multi-tenancy architecture overview (`docs/architecture/multi-tenancy-overview.md`) | Depends: All implementations
+- [ ] **[M]** Write multi-tenancy architecture overview (`docs/concepts/architecture/multi-tenancy-overview.md`) | Depends: All implementations
   - Tenant data model (EnterpriseCustomer as tenant boundary)
   - Isolation strategy (application-level, shared database)
   - Branding system architecture

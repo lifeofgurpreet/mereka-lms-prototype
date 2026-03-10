@@ -671,7 +671,7 @@ vim scripts/tenants/acme-branding.json
 - **Template**: `scripts/tenants/brand-pack-template.json`
 - **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - **Provisioning**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
-- **Multi-site**: `docs/architecture/overviews/MULTISITE.md`
+- **Multi-site**: `docs/concepts/architecture/MULTISITE.md`
 - **Validation**: `scripts/tenants/validate-tenant-brand-pack.sh`
 - **CI Gates**: `.github/workflows/ci.yml`
 

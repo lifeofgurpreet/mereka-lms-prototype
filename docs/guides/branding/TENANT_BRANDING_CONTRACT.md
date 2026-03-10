@@ -699,7 +699,7 @@ curl -s https://studio.academyv2.mereka.io/ | grep -i "powered by open edx" && e
 
 - **Provisioning Guide**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
 - **RAG Assessment**: `docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`
-- **Architecture**: `docs/architecture/overviews/multi-tenancy-overview.md`
+- **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Branding Model**: `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - **Domain/SSL**: `docs/runbooks/operations/DOMAIN_MANAGEMENT.md`

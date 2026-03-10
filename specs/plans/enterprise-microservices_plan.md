@@ -389,7 +389,7 @@ Before starting any task in this plan:
   - Add enterprise services section with common issues and fixes
   - **Done**: Enterprise section exists in troubleshooting guide
 
-- [ ] **[S] Task 5.14**: Create architecture overview doc (`docs/architecture/enterprise-services-overview.md`) | Depends: None
+- [ ] **[S] Task 5.14**: Create architecture overview doc (`docs/concepts/architecture/enterprise-services-overview.md`) | Depends: None
   - System diagram showing all 5 services, MFEs, LMS, event bus, databases
   - Communication patterns (internal HTTP, Redis Streams, OAuth2)
   - **Done**: Document exists with diagrams

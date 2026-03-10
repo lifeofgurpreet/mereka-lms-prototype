@@ -16,8 +16,8 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 
 ## 2) Multi-Tenant Architecture & Provisioning
 
-- [`docs/architecture/overviews/multi-tenancy-overview.md`](../concepts/architecture/multi-tenancy-overview.md) - Architecture model and data isolation.
-- [`docs/architecture/overviews/enterprise-services-overview.md`](../concepts/architecture/enterprise-services-overview.md) - Enterprise services design.
+- [`docs/concepts/architecture/multi-tenancy-overview.md`](../concepts/architecture/multi-tenancy-overview.md) - Architecture model and data isolation.
+- [`docs/concepts/architecture/enterprise-services-overview.md`](../concepts/architecture/enterprise-services-overview.md) - Enterprise services design.
 - [`docs/operations/MULTISITE.md`](MULTISITE.md) - Tenant model (shared services vs per-tenant domains).
 - [`docs/ops/runbooks/MULTI_TENANCY_RUNBOOK.md`](../ops/runbooks/MULTI_TENANCY_RUNBOOK.md) - Runbook for verification and isolation checks.
 - [`docs/runbooks/operations/TENANT_PROVISIONING.md`](TENANT_PROVISIONING.md) - Provisioning command and brand-pack path.
@@ -28,7 +28,7 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 
 - `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md` - Operational surface for enterprise microservices.
 - [`docs/archive/superseded/runbooks/enterprise-services-runbook.md`](../archive/superseded/runbooks/enterprise-services-runbook.md) - End-user runbook for onboarding, allocations, and service health.
-- [`docs/architecture/overviews/enterprise-services-overview.md`](../concepts/architecture/enterprise-services-overview.md) - Data flow and component model.
+- [`docs/concepts/architecture/enterprise-services-overview.md`](../concepts/architecture/enterprise-services-overview.md) - Data flow and component model.
 - [`specs/enterprise-microservices_spec.md`](../../specs/enterprise-microservices_spec.md) - Formal acceptance criteria.
 - [`specs/multi-tenancy-architecture_spec.md`](../../specs/multi-tenancy-architecture_spec.md) - Multi-tenancy ACs.
 

@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 MANIFEST = Path('docs/adr/manifest.yaml')
-GLOSSARY = Path('docs/architecture/glossary.yaml')
+GLOSSARY = Path('docs/concepts/architecture/glossary.yaml')
 ALLOWED_DOC_DOMAINS = ('https://docs.openedx.org', 'https://docs.tutor.edly.io')
 ALLOWED_STATUSES = {'proposed', 'accepted', 'deprecated', 'superseded', 'deferred', 'rejected'}
 ALLOWED_TYPES = {'foundation', 'domain', 'migration', 'exception'}

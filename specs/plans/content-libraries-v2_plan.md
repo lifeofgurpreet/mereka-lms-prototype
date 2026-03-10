@@ -34,7 +34,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Verify Blockstore Django app is configured in INSTALLED_APPS
   - Verify Blockstore storage backend points to GCS bucket `lms-blockstore` for production
   - Verify local filesystem path for development
-  - Document current Blockstore configuration in `docs/architecture/content-libraries-overview.md`
+  - Document current Blockstore configuration in `docs/concepts/architecture/content-libraries-overview.md`
 
 - [ ] **[M]** Configure Content Libraries v2 REST API routes(`deploy/k8s/base/apps/openedx/urls/lms.py`, `deploy/k8s/base/apps/openedx/urls/cms.py`) | AC: #1 | Depends: Blockstore verification
   - Verify `/api/libraries/v2/` routes are exposed
@@ -47,7 +47,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Add library content index configuration to CMS settings
   - Configure index mapping for library titles, descriptions,component content
   - Add feature flag `CONTENT_LIBRARIES_SEARCH_ENABLED` (default: off)
-  - Document search configuration in `docs/architecture/content-libraries-overview.md`
+  - Document search configuration in `docs/concepts/architecture/content-libraries-overview.md`
 
 - [ ] **[S]** Add Content Libraries v2 feature flags to Django settings (`deploy/k8s/base/apps/openedx/settings/common.py`) | AC: All | Depends: None
   - `CONTENT_LIBRARIES_V2_ENABLED` (default: on) -- master gate for UI in Studio
@@ -499,7 +499,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 - [ ] **[M]** Expose Prometheus metrics endpoint (`/metrics/`) | AC: All | Depends: Metrics implementation
   - Verify metrics endpoint is accessible from Prometheus scraper
   - Test metrics are updated in real-time
-  - Document metrics in `docs/architecture/content-libraries-overview.md`
+  - Document metrics in `docs/concepts/architecture/content-libraries-overview.md`
 
 ### Logging
 
@@ -554,7 +554,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 ### Architecture Documentation
 
-- [ ] **[M]** Write Content Libraries v2 architecture overview (`docs/architecture/content-libraries-overview.md`) | AC: All | Depends: Build tasks
+- [ ] **[M]** Write Content Libraries v2 architecture overview (`docs/concepts/architecture/content-libraries-overview.md`) | AC: All | Depends: Build tasks
   - System architecture diagram (Blockstore, LMS/CMS, Studio,authoring MFE, search index)
   - Data flow: component authoring → draft → publish → coursereference → learner view
   - Blockstore integration: bundle storage, versioning, GCS backend

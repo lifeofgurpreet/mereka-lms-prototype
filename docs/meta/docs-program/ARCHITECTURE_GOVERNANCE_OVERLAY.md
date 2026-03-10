@@ -23,9 +23,9 @@ The architecture system is split into five layers:
 
 ## Sources Of Truth
 
-- Charter: `docs/architecture/charter.md`
-- Govern vocabulary: `docs/architecture/glossary.yaml`
-- Bundle rules: `docs/architecture/bundle-rules.yaml`
+- Charter: `docs/concepts/architecture/ARCHITECTURE_CHARTER.md`
+- Govern vocabulary: `docs/concepts/architecture/glossary.yaml`
+- Bundle rules: `docs/concepts/architecture/bundle-rules.yaml`
 - ADR corpus: `docs/adr/*.md`
 - ADR file frontmatter under `docs/adr/**`
 - ADR generated outputs: `generated/`
@@ -37,7 +37,7 @@ The architecture system is split into five layers:
 ## Progressive Disclosure Model
 
 Agents MUST read:
-1. `docs/architecture/charter.md`
+1. `docs/concepts/architecture/ARCHITECTURE_CHARTER.md`
 2. `generated/adr-bundles/00-foundations.md`
 3. One domain bundle relevant to changed files
 4. Any linked migration/exception ADRs required by `depends_on` / `read_next`

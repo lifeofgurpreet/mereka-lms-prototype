@@ -65,7 +65,7 @@ Before starting this spec, the following must be substantially complete:
 
 - [ ] **[S] P0-4.** Verify `edx-proctoring` no-op backend is available for timed-only exams by checking Django settings `PROCTORING_BACKENDS` configuration (`infrastructure/tutor/apply-patches.sh`) | AC: #10 | Depends: None
 
-- [ ] **[S] P0-5.** Document CodeJail status: confirm `nonexistingpythonbinary` configuration, document path to enable AppArmor-secured sandbox (`docs/architecture/codejail-status.md`) | AC: N/A (open question #1) | Depends: None
+- [ ] **[S] P0-5.** Document CodeJail status: confirm `nonexistingpythonbinary` configuration, document path to enable AppArmor-secured sandbox (`docs/concepts/architecture/codejail-status.md`) | AC: N/A (open question #1) | Depends: None
 
 - [ ] **[M] P0-6.** Create test course in Studio with basic ORA2 assignments, timed exam subsections, and standard problem types for baseline smoke testing (`scripts/qa/setup-assessment-test-course.sh`) | AC: #1, #10, #21 | Depends: P0-1, P0-4
 
@@ -73,7 +73,7 @@ Before starting this spec, the following must be substantially complete:
 
 #### Docs
 
-- [ ] **[S] P0-8.** Create assessment audit report documenting current state of ORA2, XQueue, timed exams, and advanced XBlocks (`docs/architecture/assessment-audit-report.md`) | Depends: P0-1 through P0-5
+- [ ] **[S] P0-8.** Create assessment audit report documenting current state of ORA2, XQueue, timed exams, and advanced XBlocks (`docs/concepts/architecture/assessment-audit-report.md`) | Depends: P0-1 through P0-5
 
 ---
 

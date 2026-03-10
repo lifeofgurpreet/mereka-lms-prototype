@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 manifest = yaml.safe_load(Path('docs/adr/manifest.yaml').read_text(encoding='utf-8'))
-bundle_rules = yaml.safe_load(Path('docs/architecture/bundle-rules.yaml').read_text(encoding='utf-8'))
+bundle_rules = yaml.safe_load(Path('docs/concepts/architecture/bundle-rules.yaml').read_text(encoding='utf-8'))
 BANNER = '> Generated file. Do not hand-edit. Regenerate from the ADR source inputs.'
 adrs = manifest.get('adrs', [])
 accepted_adrs = [a for a in adrs if (a.get('decision_status') or '').lower() != 'proposed']

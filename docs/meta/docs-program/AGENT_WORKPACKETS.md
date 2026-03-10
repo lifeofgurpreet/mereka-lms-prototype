@@ -16,9 +16,9 @@ Deliverables:
 Owner: Harness Engineer
 
 Deliverables:
-- `docs/architecture/charter.md`
-- `docs/architecture/glossary.yaml`
-- `docs/architecture/bundle-rules.yaml`
+- `docs/concepts/architecture/ARCHITECTURE_CHARTER.md`
+- `docs/concepts/architecture/glossary.yaml`
+- `docs/concepts/architecture/bundle-rules.yaml`
 - ADR templates
 - ADR suite scripts
 - decision graph generator

@@ -14,10 +14,10 @@ MFE_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 CORE_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css"
 LIGHT_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/light.min.css"
 MEREKA_THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
-AUDIT_DOC="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT.md"
-MISSING_TSV="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv"
-DEFINES_TSV="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv"
-DEFINED_TSV="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv"
+AUDIT_DOC="$REPO_ROOT/docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT.md"
+MISSING_TSV="$REPO_ROOT/docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv"
+DEFINES_TSV="$REPO_ROOT/docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv"
+DEFINED_TSV="$REPO_ROOT/docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

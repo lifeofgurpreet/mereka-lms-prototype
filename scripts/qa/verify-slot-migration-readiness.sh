@@ -21,7 +21,7 @@ echo ""
 # ---------------------------------------------------------------------------
 # Check 1: MFE_PLUGIN_SLOT_INVENTORY.md exists and has comprehensive inventory
 # ---------------------------------------------------------------------------
-INVENTORY_DOC="docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
+INVENTORY_DOC="docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
 
 if [[ ! -f "$INVENTORY_DOC" ]]; then
   fail "MFE_PLUGIN_SLOT_INVENTORY.md not found at $INVENTORY_DOC"
@@ -105,7 +105,7 @@ if [[ -d infrastructure/tutor/themes/mereka/ ]]; then
 fi
 
 # Count documented slot-wirable customizations from policy doc
-POLICY_DOC="docs/architecture/SELECTOR_HARDENING_POLICY.md"
+POLICY_DOC="docs/concepts/architecture/SELECTOR_HARDENING_POLICY.md"
 SLOT_WIRABLE=0
 
 if [[ -f "$POLICY_DOC" ]]; then

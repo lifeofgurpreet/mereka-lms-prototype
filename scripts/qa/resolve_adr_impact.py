@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 
 MANIFEST = Path("docs/adr/manifest.yaml")
-BUNDLE_RULES = Path("docs/architecture/bundle-rules.yaml")
+BUNDLE_RULES = Path("docs/concepts/architecture/bundle-rules.yaml")
 REL_KEYS = ("depends_on", "read_next", "amends", "supersedes")
 
 

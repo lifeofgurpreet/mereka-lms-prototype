@@ -83,10 +83,10 @@ else
 fi
 
 # Multi-tenancy architecture overview exists
-if [[ -f "docs/architecture/multi-tenancy-overview.md" ]]; then
+if [[ -f "docs/concepts/architecture/multi-tenancy-overview.md" ]]; then
   pass "Multi-tenancy architecture doc exists"
 else
-  fail "Multi-tenancy architecture doc missing (docs/architecture/multi-tenancy-overview.md)"
+  fail "Multi-tenancy architecture doc missing (docs/concepts/architecture/multi-tenancy-overview.md)"
 fi
 
 echo ""

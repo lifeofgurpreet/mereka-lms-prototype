@@ -35,7 +35,7 @@ echo ""
 
 # --- 1. Decision gate document exists ---
 echo "--- Decision Gate Document ---"
-DECISION_GATE="docs/architecture/ANALYTICS_DECISION_GATE.md"
+DECISION_GATE="docs/concepts/architecture/ANALYTICS_DECISION_GATE.md"
 if [[ -f "$DECISION_GATE" ]]; then
   do_pass "Decision gate document exists: $DECISION_GATE"
 else

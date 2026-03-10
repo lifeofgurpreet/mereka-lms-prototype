@@ -88,7 +88,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/policies/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md | 2 | Platform Architecture | fix inline path references and missing commands |
 | reports/2026/closures/ASSESSMENT_EPIC_CLOSURE.md | 2 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md | 2 | Platform Architecture | fix inline path references and missing commands |
-| docs/architecture/overviews/PROCTORING_INTEGRATION.md | 2 | Platform Architecture | fix inline path references and missing commands |
+| docs/concepts/architecture/PROCTORING_INTEGRATION.md | 2 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/admin/MULTI_SITE_GUIDE.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/admin/OBSERVABILITY_GUIDE.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/standards/DOCUMENTATION_STANDARDS.md | 2 | Docs Lead | fix inline path references and missing commands |
@@ -267,8 +267,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 160 | docs/archive/oscar-ecommerce-settings/ |
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 65 | services/purchase-gateway/app/middleware/migration.py |
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 99 | scripts/infra/decommission-legacy-ecommerce.sh |
-| docs/architecture/overviews/PROCTORING_INTEGRATION.md | 197 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
-| docs/architecture/overviews/PROCTORING_INTEGRATION.md | 217 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
+| docs/concepts/architecture/PROCTORING_INTEGRATION.md | 197 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
+| docs/concepts/architecture/PROCTORING_INTEGRATION.md | 217 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
 | docs/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md | 483 | deploy/k8s/base/plugins/aspects/backup-cronjob.yml |
 | docs/guides/INDEX_BY_AUDIENCE.md | 389 | scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh |
 | docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md | 547 | docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md |
@@ -594,6 +594,6 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 ## Suggested execution sequence
 
 1. Ops/operations cluster: repair paths in docs/ops/** and docs/operations/** (fastest operational impact).
-2. ADR/architecture cluster: repair docs/adr/** and docs/architecture/** paths.
+2. ADR/architecture cluster: repair docs/adr/** and docs/concepts/architecture/** paths.
 3. Guide/onboarding cluster: repair docs/guides/** and docs/onboarding/** paths.
 4. Re-run the non-archive command-reference audit and confirm missing references trend down.

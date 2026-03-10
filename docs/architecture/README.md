@@ -1,20 +1,19 @@
-# Architecture System
-_Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-08 • Status: superseded_
+# Architecture Root Retired
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-10 • Status: superseded_
 
 superseded_by: docs/concepts/architecture/README.md
 
-This root is transitional compatibility surface during Wave 2.
+`docs/architecture/**` is retired and is no longer a living documentation root.
 
-## Canonical replacement
+## Use these roots instead
 
-- Read [docs/concepts/architecture/README.md](../concepts/architecture/README.md) for the living architecture root.
-- Read [ARCHITECTURE_CHARTER.md](../concepts/architecture/ARCHITECTURE_CHARTER.md) for the authority model.
-- Read [DOCUMENTATION_AUTHORITY_RESOLVER.md](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md) before moving or linking docs.
+- [docs/concepts/architecture/README.md](../concepts/architecture/README.md) for living architecture material
+- [docs/adr/README.md](../adr/README.md) for accepted ADRs and RFCs
+- [`docs/guides/standards/`](../guides/standards/) for standards and writing/process guidance
+- [`docs/meta/docs-program/`](../meta/docs-program/) for docs-program governance and closeout records
 
-## Scope of this directory now
+## Rules
 
-- compatibility for legacy links
-- transitional program material
-- generated or legacy files that have not yet been fully collapsed
-
-Do not add new canonical living-standard content under `docs/architecture/**`.
+- Do not add new canonical content under `docs/architecture/**`.
+- Do not recreate wrapper trees under this root.
+- If a path under this root is still referenced, rewrite the reference to a canonical root instead of adding another compatibility file.

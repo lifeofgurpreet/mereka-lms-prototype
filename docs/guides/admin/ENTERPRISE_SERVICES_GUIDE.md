@@ -542,7 +542,7 @@ Checks:
 
 **Spec**: `specs/enterprise-microservices_spec.md` (36 ACs, 100% complete)
 
-**Architecture**: `docs/architecture/overviews/enterprise-services-overview.md`
+**Architecture**: `docs/concepts/architecture/enterprise-services-overview.md`
 
 **Runbooks**: `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md`
 

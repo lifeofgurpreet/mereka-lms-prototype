@@ -488,459 +488,9 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/ADR_LANGUAGE_STYLE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/ADR_NUMBERING_AND_NAMING.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/AGENT_WORKPACKETS.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/ARCHITECTURE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/FOUNDATIONS_PROGRAM.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/PROGRAM_UPDATE_V2_BRIEF.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
+    "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "architecture/README.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/bundle-rules.yaml",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/charter.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/constitution/README.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/constitution/authorization-model.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/constitution/control-planes.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/constitution/data-governance.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/constitution/identity-and-domain-boundaries.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/constitution/release-and-change-policy.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/constitution/tenant-lifecycle.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/constitution/tutor-and-extension-model.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/decision-map.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/diagrams/adr-layer-map.mmd",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/diagrams/decision-graph.mmd",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/diagrams/repo-structure.txt",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/glossary.yaml",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-07",
-    "owner": "Docs Team",
-    "path": "architecture/overviews/ARCHITECTURE_MONGODB.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
-    "path": "architecture/overviews/BRAND_PARITY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-11",
-    "owner": "Infra Team",
-    "path": "architecture/overviews/DATABASE_ARCHITECTURE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/overviews/DESIGN_TOKENS_MIGRATION.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/overviews/FOOTER_PARITY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-05",
-    "owner": "Infra Team",
-    "path": "architecture/overviews/MULTISITE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
-    "path": "architecture/overviews/MULTI_BRAND_MULTI_SITE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": "Platform Team",
-    "path": "architecture/overviews/PROCTORING_INTEGRATION.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-05",
-    "owner": null,
-    "path": "architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": "Platform Team",
-    "path": "architecture/overviews/PURCHASE_GATEWAY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": null,
-    "path": "architecture/overviews/VIDEO_PIPELINE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
-    "owner": null,
-    "path": "architecture/overviews/content-libraries-overview.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
-    "owner": null,
-    "path": "architecture/overviews/enterprise-services-overview.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
-    "owner": null,
-    "path": "architecture/overviews/multi-tenancy-overview.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
-    "owner": null,
-    "path": "architecture/overviews/notification-pipeline-overview.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
-    "owner": null,
-    "path": "architecture/overviews/proctoring-architecture-overview.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
-    "owner": null,
-    "path": "architecture/overviews/purchase-gateway-overview.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/ADR-025-deployment-boundary.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/README.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/RFC-034-event-contract-and-transport-independence.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/RFC-035-frontend-runtime-composition-and-dependency-alignment.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/RFC-036-cache-topology-and-invalidation-strategy.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/RFC-037-async-task-user-facing-contract.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/RFC-038-commerce-system-of-record-and-reconciliation.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/RFC-039-translations-and-internationalization-strategy.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/RFC-040-internal-packages-plugins-and-versioning-policy.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "architecture/rfc/RFC-041-authorization-and-role-boundary-model.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-06",
-    "owner": "Platform",
-    "path": "architecture/rfc/RFC-claim-based-role-sync.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-28",
-    "owner": null,
-    "path": "architecture/rfc/RFC-learning-slot-expansion-proposal.md",
     "status": "superseded",
     "type": "concept"
   },
@@ -5042,6 +4592,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "concepts/architecture/bundle-rules.yaml",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "concepts/architecture/content-libraries-overview.md",
@@ -5054,6 +4613,15 @@
     "last_verified_or_updated": "2026-02-10",
     "owner": null,
     "path": "concepts/architecture/enterprise-services-overview.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "concepts/architecture/glossary.yaml",
     "status": "supporting",
     "type": "concept"
   },
@@ -6341,6 +5909,33 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/WAVE_ADR_RESET_TRACKER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md",
     "status": "supporting",
     "type": "other"
   },

@@ -136,7 +136,7 @@ The package manifest uses an explicit `exports` map and does not expose `paragon
 
 ### 5. Design Token Pipeline
 
-Full documentation: `docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md`
+Full documentation: `docs/concepts/architecture/DESIGN_TOKENS_MIGRATION.md`
 
 ```
 assets/branding/tokens.css   (Figma export — ONLY file with raw hex values)
@@ -279,10 +279,10 @@ These are improvements beyond the current T110 scope, listed for completeness:
 
 ## Related Documentation
 
-- `docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md` — token pipeline architecture (Phase 3 complete)
+- `docs/concepts/architecture/DESIGN_TOKENS_MIGRATION.md` — token pipeline architecture (Phase 3 complete)
 - `docs/reference/architecture/TOKEN_GENERATION_PIPELINE.md` — pipeline contract
 - `docs/policies/architecture/WCAG_CONTRAST_POLICY_V2.md` — contrast compliance
-- `docs/architecture/overviews/BRAND_PARITY.md` — brand parity across surfaces
+- `docs/concepts/architecture/BRAND_PARITY.md` — brand parity across surfaces
 - `specs/design-tokens-system_spec.md` — acceptance criteria for token system
 - `assets/branding/tokens.provenance.json` — upstream sync metadata
 - `infrastructure/tutor/mfe-build/README.md` — MFE Dockerfile notes including brand migration pending
