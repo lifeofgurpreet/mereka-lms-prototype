@@ -99,12 +99,11 @@ Modules:
 
 ## 6. Post-deploy tasks
 
-- Create superuser:
+- Ensure the canonical platform-admin accounts exist and have staff/superuser access:
   ```bash
-  tutor k8s do createuser gurpreet@biji-biji.com \
-    gurpreet@biji-biji.com --staff --superuser --password-from-env SUPERUSER_PASSWORD
+  ./scripts/infra/ensure-platform-admins.sh
   ```
-  (Set the password via Secret Manager or prompt; never commit credentials.)
+  See `docs/guides/admin/ADMIN_LOGIN_GUIDE.md` for the current admin-account policy and local recovery flow. Never hardcode credentials in docs or shell history.
 - Smoke test LMS, Studio, Discovery, MFEs (`./scripts/qa/smoke-test.sh` covers the public endpoints).
 - Configure backups (Velero-driven):
   - Audit posture: `./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
