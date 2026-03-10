@@ -1,31 +1,39 @@
 # Wave 11 Execution Tracker
 
 ## Latest substantive packet head
-- 86ca46e44560def7bf916b0e84a892ac4095bc94
+- 845fc4a52cf91e15b2d7c0cdbadf2a364eb1a5eb
 
 ## Last completed batch
-- commit: 86ca46e44560def7bf916b0e84a892ac4095bc94
-- scope: Wave 11 Packet C
-- validators run: portable repo discovery write/check, pack registry check, schema verifier, skill runtime gate, docs catalog governance
+- commit: 845fc4a52cf91e15b2d7c0cdbadf2a364eb1a5eb
+- scope: Wave 11 Packet D
+- validators run: runtime convergence write/check, pack registry write/check, schema verifier, skill runtime gate, docs catalog governance
 - result: passed
 
 ## Current target batch
 - files:
   - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
   - docs/meta/skills/AGENT_PACK_ABI.yaml
-  - docs/meta/skills/schemas/runtime-convergence-report.schema.json
-  - tools/skills/build_runtime_convergence_report.py
-  - generated/skills/runtime-convergence-report.json
+  - docs/meta/skills/schemas/skill-registry.schema.json
+  - docs/meta/skills/schemas/evidence-sufficiency-map.schema.json
+  - docs/meta/skills/schemas/mixed-diff-arbitration.schema.json
+  - tools/skills/build_skill_registry.py
+  - tools/skills/build_skill_abi_maps.py
+  - tools/skills/build_pack_registry.py
+  - tools/skills/verify_agent_pack_schemas.py
+  - generated/skills/skill-registry.json
+  - generated/skills/evidence-sufficiency-map.json
+  - generated/skills/mixed-diff-arbitration.json
+  - generated/skills/pack-registry.json
 - goal:
-  - prove cross-repo runtime convergence from canonical repo truth
-  - compare skill-pack claims against contracts, workflows, and registries
-  - expose mismatches as machine-readable findings instead of prose assumptions
+  - define the minimal neutral skill ABI on top of the pack runtime
+  - add evidence sufficiency and mixed-diff arbitration as machine-readable runtime surfaces
+  - register those surfaces in the canonical pack discovery layer
 - stop condition:
-  - runtime convergence report validates and one commit is created
+  - skill ABI surfaces validate and one commit is created
 
 ## Open residue
 - generated Wave 10 pack surfaces are not present on this branch and must be treated as external canonical inputs, not assumed local artifacts
-- runtime convergence, evidence sufficiency, and mixed-diff arbitration remain to be added in later packets
+- assistant surface exports are not yet rebuilt on fresh Wave 11 external branches
 
 ## Next queued batch
-- Packet E: Minimal skill ABI on top of the packs
+- Packet F: Runtime verifier and CI adoption

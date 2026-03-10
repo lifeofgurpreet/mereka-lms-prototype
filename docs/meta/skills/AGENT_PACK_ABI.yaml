@@ -28,7 +28,6 @@ canonical_packs:
   - read-first
   - pack-registry
   - runtime-convergence-report
-future_wave11_packs:
   - evidence-sufficiency-map
   - mixed-diff-arbitration
 schema_root: docs/meta/skills/schemas

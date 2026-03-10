@@ -6,7 +6,9 @@
     "generated/skills/scenario-packs.json",
     "generated/skills/skill-dependency-graph.json",
     "generated/skills/read-first.json",
-    "generated/skills/runtime-convergence-report.json"
+    "generated/skills/runtime-convergence-report.json",
+    "generated/skills/evidence-sufficiency-map.json",
+    "generated/skills/mixed-diff-arbitration.json"
   ],
   "generated_by": "tools/skills/build_pack_registry.py",
   "pack_id": "pack-registry",
@@ -37,6 +39,56 @@
       ],
       "stability": "stable",
       "title": "Command Registry"
+    },
+    {
+      "canonical_inputs": [
+        "generated/skills/skill-registry.json"
+      ],
+      "canonical_path": "generated/skills/evidence-sufficiency-map.json",
+      "depends_on": [
+        "generated/skills/skill-registry.json"
+      ],
+      "owner": "platform-team",
+      "pack_id": "evidence-sufficiency-map",
+      "primary_repo": "mereka-lms",
+      "projection_paths": [],
+      "schema_path": "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json",
+      "schema_version": 1,
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "source_generators": [
+        "tools/skills/build_skill_abi_maps.py"
+      ],
+      "stability": "evolving",
+      "title": "Evidence Sufficiency Map"
+    },
+    {
+      "canonical_inputs": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/scenario-packs.json"
+      ],
+      "canonical_path": "generated/skills/mixed-diff-arbitration.json",
+      "depends_on": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/scenario-packs.json"
+      ],
+      "owner": "platform-team",
+      "pack_id": "mixed-diff-arbitration",
+      "primary_repo": "mereka-lms",
+      "projection_paths": [],
+      "schema_path": "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json",
+      "schema_version": 1,
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "source_generators": [
+        "tools/skills/build_skill_abi_maps.py"
+      ],
+      "stability": "evolving",
+      "title": "Mixed Diff Arbitration"
     },
     {
       "canonical_inputs": [

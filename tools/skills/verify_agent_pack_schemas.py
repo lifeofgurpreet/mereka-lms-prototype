@@ -26,6 +26,8 @@ PACKS = {
     "generated/skills/read-first.json": "docs/meta/skills/schemas/read-first.schema.json",
     "generated/skills/pack-registry.json": "docs/meta/skills/schemas/pack-registry.schema.json",
     "generated/skills/runtime-convergence-report.json": "docs/meta/skills/schemas/runtime-convergence-report.schema.json",
+    "generated/skills/evidence-sufficiency-map.json": "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json",
+    "generated/skills/mixed-diff-arbitration.json": "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json",
 }
 
 

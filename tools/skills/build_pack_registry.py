@@ -105,6 +105,35 @@ PACKS: dict[str, dict[str, Any]] = {
             "generated/skills/pack-registry.json",
         ],
     },
+    "evidence-sufficiency-map": {
+        "title": "Evidence Sufficiency Map",
+        "canonical_path": "generated/skills/evidence-sufficiency-map.json",
+        "schema_path": "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json",
+        "projection_paths": [],
+        "source_generators": ["tools/skills/build_skill_abi_maps.py"],
+        "primary_repo": "mereka-lms",
+        "secondary_repos": ["bbi-infrastructure", "platform-control-plane"],
+        "owner": "platform-team",
+        "stability": "evolving",
+        "depends_on": [
+            "generated/skills/skill-registry.json",
+        ],
+    },
+    "mixed-diff-arbitration": {
+        "title": "Mixed Diff Arbitration",
+        "canonical_path": "generated/skills/mixed-diff-arbitration.json",
+        "schema_path": "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json",
+        "projection_paths": [],
+        "source_generators": ["tools/skills/build_skill_abi_maps.py"],
+        "primary_repo": "mereka-lms",
+        "secondary_repos": ["bbi-infrastructure", "platform-control-plane"],
+        "owner": "platform-team",
+        "stability": "evolving",
+        "depends_on": [
+            "generated/skills/skill-registry.json",
+            "generated/skills/scenario-packs.json",
+        ],
+    },
 }
 
 
@@ -177,6 +206,8 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
             "generated/skills/skill-dependency-graph.json",
             "generated/skills/read-first.json",
             "generated/skills/runtime-convergence-report.json",
+            "generated/skills/evidence-sufficiency-map.json",
+            "generated/skills/mixed-diff-arbitration.json",
         ],
         "schema_version": 1,
         "packs": entries,

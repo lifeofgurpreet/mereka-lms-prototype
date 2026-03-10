@@ -16,6 +16,29 @@ from repo_discovery import RepoRoots, load_yaml, resolve_repo_roots
 DEFAULT_OUTPUT = Path("generated/skills/skill-registry.json")
 
 
+PACK_DEPENDENCIES = {
+    "documentation-truth": ["pack-registry", "read-first"],
+    "review": ["pack-registry", "read-first", "runtime-convergence-report"],
+    "release": ["pack-registry", "runtime-convergence-report", "evidence-sufficiency-map"],
+    "contracts": ["pack-registry", "runtime-convergence-report", "mixed-diff-arbitration"],
+    "topology": ["pack-registry", "runtime-convergence-report"],
+    "operations": ["pack-registry", "read-first", "evidence-sufficiency-map"],
+    "wrapper-retirement": ["pack-registry"],
+    "cross-repo-impact": ["pack-registry", "runtime-convergence-report", "mixed-diff-arbitration"],
+}
+
+COMMAND_IDS = {
+    "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD": "docs-catalog-governance",
+    "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD": "docs-policy-gate",
+    "bash tools/docs/verify/run-docs-world-class-gates.sh": "docs-world-class-gates",
+    "./scripts/plan-all.sh --validate-only": "platform-plan-validate",
+    "bash scripts/promote.sh --dry-run": "promote-dry-run",
+    "bash scripts/promote.sh --help": "promote-help",
+    "python3 scripts/qa/spec-tools/spec_verify.py specs/ --scan-dirs tests/ scripts/ --repo-root .": "spec-verify",
+    "python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue": "wrapper-residue-scan",
+}
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build the Wave 11 skill registry.")
     parser.add_argument("--repo-root", default=".")
@@ -99,16 +122,23 @@ def build_registry(args: argparse.Namespace) -> dict[str, Any]:
             commands.append({"repo": item["repo"], "command": item["command"]})
 
         primary_repo = definition["primary_repo"]
+        applies_to_repos = [primary_repo, *definition["secondary_repos"]]
+        pack_dependencies = PACK_DEPENDENCIES.get(definition["category"], ["pack-registry"])
+        command_dependencies = [COMMAND_IDS[item["command"]] for item in definition["command_refs"] if item["command"] in COMMAND_IDS]
         registry_entry = {
             "id": skill_id,
+            "skill_id": skill_id,
             "title": definition["title"],
             "purpose": definition["purpose"],
             "scope": definition["scope"],
             "category": definition["category"],
             "authoritative_sources": source_entries,
             "generated_dependencies": sorted(set(generated_dependencies)),
+            "pack_dependencies": pack_dependencies,
+            "command_dependencies": command_dependencies,
             "primary_repo": primary_repo,
             "secondary_repos": definition["secondary_repos"],
+            "applies_to_repos": applies_to_repos,
             "allowed_commands": commands,
             "forbidden_or_destructive_commands": [
                 "git reset --hard",
@@ -119,6 +149,22 @@ def build_registry(args: argparse.Namespace) -> dict[str, Any]:
             "canonical_entrypoints": commands[:2],
             "required_reviewers": definition["required_reviewers"],
             "required_evidence_classes": definition["required_evidence_classes"],
+            "reviewer_rules": {
+                "required_reviewers": definition["required_reviewers"],
+                "merge_strategy": "union-then-prioritize-primary-repo-owner",
+            },
+            "evidence_rules": {
+                "required_evidence_classes": definition["required_evidence_classes"],
+                "sufficiency_policy": "all-required-evidence-classes-must-be-present",
+            },
+            "escalation_rules": {
+                "triggers": [
+                    "canonical source missing or contradictory",
+                    "cross-repo contract unknown",
+                    "validation command fails",
+                ],
+                "manual_review_required": True,
+            },
             "escalation_triggers": [
                 "canonical source missing or contradictory",
                 "cross-repo contract unknown",
@@ -138,6 +184,7 @@ def build_registry(args: argparse.Namespace) -> dict[str, Any]:
                 "cross-repo disagreement requiring human escalation",
             ],
             "read_first_paths": read_first_paths,
+            "stable_inputs": source_entries,
             "historical_or_archive_dependencies": [],
             "stability_level": definition["stability_level"],
         }

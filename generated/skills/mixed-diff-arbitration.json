@@ -1,0 +1,77 @@
+{
+  "canonical_inputs": [
+    "generated/skills/skill-registry.json",
+    "generated/skills/scenario-packs.json"
+  ],
+  "covered_categories": [
+    "contracts",
+    "cross-repo-impact",
+    "documentation-truth",
+    "operations",
+    "release",
+    "review",
+    "topology",
+    "wrapper-retirement"
+  ],
+  "generated_by": "tools/skills/build_skill_abi_maps.py",
+  "pack_id": "mixed-diff-arbitration",
+  "rules": [
+    {
+      "evidence_merge_strategy": "union-evidence-classes",
+      "manual_arbitration_trigger": [
+        "workflow-and-contract-disagree",
+        "service-identity-ambiguous"
+      ],
+      "primary_read_first_skill": "cross-repo-release-contract-review",
+      "reviewer_merge_strategy": "union-reviewers-prioritize-platform-and-release",
+      "rule_id": "contracts-release",
+      "when_categories": [
+        "contracts",
+        "release"
+      ]
+    },
+    {
+      "evidence_merge_strategy": "union-evidence-classes",
+      "manual_arbitration_trigger": [
+        "canonical-owner-unclear",
+        "docs-vs-contract-conflict"
+      ],
+      "primary_read_first_skill": "change-impact-triage",
+      "reviewer_merge_strategy": "union-reviewers-prioritize-docs-then-platform",
+      "rule_id": "documentation-cross-repo-impact",
+      "when_categories": [
+        "documentation-truth",
+        "cross-repo-impact"
+      ]
+    },
+    {
+      "evidence_merge_strategy": "union-evidence-classes",
+      "manual_arbitration_trigger": [
+        "evidence-insufficient",
+        "rollback-path-unclear"
+      ],
+      "primary_read_first_skill": "runbook-evidence-triage",
+      "reviewer_merge_strategy": "union-reviewers-prioritize-ops-and-release",
+      "rule_id": "operations-release",
+      "when_categories": [
+        "operations",
+        "release"
+      ]
+    },
+    {
+      "evidence_merge_strategy": "union-evidence-classes",
+      "manual_arbitration_trigger": [
+        "alias-or-domain-registry-conflict"
+      ],
+      "primary_read_first_skill": "topology-lookup",
+      "reviewer_merge_strategy": "union-reviewers-prioritize-platform",
+      "rule_id": "topology-contracts",
+      "when_categories": [
+        "topology",
+        "contracts"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source_range": null
+}
