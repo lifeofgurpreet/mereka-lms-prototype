@@ -2,6 +2,8 @@
 
 Use this matrix to decide which layer owns a change before anyone edits anything.
 
+Before using the matrix, confirm the current tenant and shared-versus-platform topology in [Team Topology Reference](../../reference/platform/TEAM_TOPOLOGY_REFERENCE.md).
+
 | Setting class | Who can change it | Where it lives | Tenant-specific or global | Approval needed | Examples | Official reference |
 | --- | --- | --- | --- | --- | --- | --- |
 | Course outline and content | Course team | Studio course authoring UI | Tenant-scoped by course | Course owner approval | sections, subsections, units, problems, handouts | `https://docs.openedx.org/en/release-teak/educators/quickstarts/build_a_course.html` |

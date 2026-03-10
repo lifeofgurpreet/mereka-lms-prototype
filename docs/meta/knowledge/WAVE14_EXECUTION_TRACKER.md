@@ -1,31 +1,27 @@
 # Wave 14 Execution Tracker
 
 ## Latest substantive packet head
-- e1ff43e6b322bdde9308703c5976a97786a90950
+- b56825ee5731b95b0c72d89486ec149cbefec74d
 
 ## Last completed batch
-- commit: e1ff43e6b322bdde9308703c5976a97786a90950
-- scope: Wave 14 Packet C team topology reference generator
-- validators run: team topology generator write/check, docs catalog rebuild, docs catalog governance
-- result: lane topology and shared-versus-tenant behavior are machine-backed and linked to Packet B conflict evidence
+- commit: b56825ee5731b95b0c72d89486ec149cbefec74d
+- scope: Wave 14 Packet D human handbook pages
+- validators run: docs catalog rebuild, docs catalog governance, local link integrity for handbook pages
+- result: thin handbook pages exist and route readers back to the generated references
 
 ## Current target packet
 - files:
-  - docs/guides/platform/PLATFORM_START_HERE.md
-  - docs/guides/platform/OPENEDX_FOR_TEAM_MEMBERS.md
-  - docs/guides/platform/COURSE_AUTHORING_QUICKSTART.md
-  - docs/guides/platform/OPENEDX_SETTINGS_MATRIX.md
-  - docs/guides/platform/MULTI_TENANCY_EXPLAINED.md
-  - docs/guides/platform/SUPPORT_AND_ESCALATION.md
+  - tools/docs/verify/verify_team_handbook.py
+  - scripts/qa/run-team-handbook-gates.sh
   - docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md
 - goal:
-  - write the thin human handbook pages on top of the generated references
-  - keep volatile facts out of handbook prose
-  - link generic product behavior to official Open edX and Tutor docs instead of duplicating it
+  - enforce handbook structure and no-drift rules locally
+  - make generated references and footer requirements machine-checkable
+  - prepare the wave for minimal CI adoption
 - stop condition:
-  - all six handbook pages exist with the required footer block
-  - handbook prose points back to generated references for volatile facts
-  - docs governance and local link integrity pass for the new handbook pages
+  - handbook verifier passes
+  - dedicated handbook gate passes
+  - docs governance still passes on the full Wave 14 diff
 
 ## Locked handbook topology
 - human-authored handbook root: `docs/guides/platform/`
@@ -50,4 +46,4 @@
 - live approval state, live runtime evidence attachment, and vendor bot integrations remain intentionally unresolved outside the scope of this handbook wave
 
 ## Next queued packet
-- Packet E: add handbook verification and a dedicated handbook gate
+- Packet F: link the handbook from canonical front doors and write closeout/handoff
