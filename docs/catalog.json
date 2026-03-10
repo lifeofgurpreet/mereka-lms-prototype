@@ -5924,6 +5924,69 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/platform/COURSE_AUTHORING_QUICKSTART.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/platform/MULTI_TENANCY_EXPLAINED.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/platform/OPENEDX_FOR_TEAM_MEMBERS.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/platform/OPENEDX_SETTINGS_MATRIX.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/platform/PLATFORM_START_HERE.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/platform/SOURCE_MAP.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/platform/SUPPORT_AND_ESCALATION.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "guides/standards/ADR_LANGUAGE_STYLE.md",
@@ -6476,6 +6539,33 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/knowledge/WAVE13_REVIEW_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/WAVE14_CLOSEOUT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/WAVE14_EXECUTION_TRACKER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/WAVE14_REVIEW_HANDOFF.md",
     "status": "supporting",
     "type": "other"
   },
@@ -12002,6 +12092,24 @@
     "last_verified_or_updated": "2026-02-12",
     "owner": "Platform Team",
     "path": "reference/operations/USER_FACING_URLS.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/platform/TEAM_TOPOLOGY_REFERENCE.md",
     "status": "supporting",
     "type": "other"
   },

@@ -6,15 +6,20 @@ on:
       - "docs/**"
       - "specs/**"
       - "generated/agent/**"
+      - "generated/platform/**"
       - "generated/skills/**"
       - "generated/knowledge/**"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/docs/build_domain_access_reference.py"
+      - "tools/docs/build_team_topology_reference.py"
+      - "tools/docs/verify/verify_team_handbook.py"
       - "tools/skills/**"
       - "tools/knowledge/**"
       - "scripts/qa/spec-tools/**"
+      - "scripts/qa/run-team-handbook-gates.sh"
       - "scripts/qa/run-cross-repo-agent-gates.sh"
       - "scripts/qa/run-skill-runtime-gates.sh"
       - "scripts/qa/run-agent-pack-runtime-gates.sh"
@@ -25,15 +30,20 @@ on:
       - "docs/**"
       - "specs/**"
       - "generated/agent/**"
+      - "generated/platform/**"
       - "generated/skills/**"
       - "generated/knowledge/**"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/docs/build_domain_access_reference.py"
+      - "tools/docs/build_team_topology_reference.py"
+      - "tools/docs/verify/verify_team_handbook.py"
       - "tools/skills/**"
       - "tools/knowledge/**"
       - "scripts/qa/spec-tools/**"
+      - "scripts/qa/run-team-handbook-gates.sh"
       - "scripts/qa/run-cross-repo-agent-gates.sh"
       - "scripts/qa/run-skill-runtime-gates.sh"
       - "scripts/qa/run-agent-pack-runtime-gates.sh"
@@ -113,3 +123,13 @@ jobs:
           fi
           chmod +x scripts/qa/run-execution-proof-runtime-gates.sh
           ./scripts/qa/run-execution-proof-runtime-gates.sh
+
+      - name: Verify team handbook
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-team-handbook-gates.sh
+          ./scripts/qa/run-team-handbook-gates.sh
