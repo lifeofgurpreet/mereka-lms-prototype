@@ -217,6 +217,6 @@ When adding new cards:
 
 ### Project Documentation
 
-- [CLAUDE.md](../../../CLAUDE.md) - Project overview and rules
+- [Standing Orders](../../meta/standing-orders/README.md) - Canonical maintainer and agent standing orders
 - [AGENTS.md](../../../AGENTS.md) - Repository guidelines
 - [docs/README.md](../../README.md) - Documentation index

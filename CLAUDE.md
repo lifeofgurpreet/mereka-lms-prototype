@@ -1,5 +1,14 @@
 # CLAUDE.md
 
+> Summary surface only. Do not use this file as the canonical starting point for release,
+> governance, or architecture truth.
+>
+> Read first instead:
+> - `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`
+> - `docs/meta/standing-orders/README.md`
+> - `scripts/governance/canonical-entrypoints.yaml`
+> - `docs/reference/operations/RELEASE_PROCESS.md`
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
@@ -42,7 +51,7 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
 > `base/arc/`, `base/logging/`, `base/policies/`, `overlays/production/`, `overlays/rke2-nonprod/`,
 > and `overlays/staging/` are classified for migration to `bbi-infrastructure`. Only `base/` app
 > resources and `overlays/local/` permanently belong in this repo. See
-> `docs/architecture/DEPLOYMENT_BOUNDARY.md` for the authoritative classification.
+> `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md` for the authoritative classification.
 
 ```
 deploy/k8s/               # Kubernetes manifests

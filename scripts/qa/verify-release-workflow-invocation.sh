@@ -4,12 +4,16 @@
 #
 # Verify release workflow can be invoked:
 #   - release.yml exists with workflow_dispatch trigger
-#   - create-release.sh exists and is executable
+#   - canonical-release.sh exists and is executable
+#   - release-openedx-gitops.sh exists and is executable
+#   - create-release.sh exists and is executable as the tag helper
 #   - Release process doc exists
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 RELEASE_WF="$REPO_ROOT/.github/workflows/release.yml"
+CANONICAL_RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/canonical-release.sh"
+PROMOTION_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
 RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
 RELEASE_DOC="$REPO_ROOT/docs/reference/operations/RELEASE_PROCESS.md"
 
@@ -32,7 +36,29 @@ else
   fail "release.yml not found"
 fi
 
-# Release script
+# Canonical release script
+if [[ -f "$CANONICAL_RELEASE_SCRIPT" ]]; then
+  pass "canonical-release.sh exists"
+  if [[ -x "$CANONICAL_RELEASE_SCRIPT" ]]; then
+    pass "canonical-release.sh is executable"
+  else
+    fail "canonical-release.sh is not executable"
+  fi
+else
+  fail "canonical-release.sh not found"
+fi
+
+if [[ -f "$PROMOTION_SCRIPT" ]]; then
+  pass "release-openedx-gitops.sh exists"
+  if [[ -x "$PROMOTION_SCRIPT" ]]; then
+    pass "release-openedx-gitops.sh is executable"
+  else
+    fail "release-openedx-gitops.sh is not executable"
+  fi
+else
+  fail "release-openedx-gitops.sh not found"
+fi
+
 if [[ -f "$RELEASE_SCRIPT" ]]; then
   pass "create-release.sh exists"
   if [[ -x "$RELEASE_SCRIPT" ]]; then

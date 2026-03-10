@@ -264,7 +264,7 @@ Run this after every P1 or P2. For P3/P4 it's optional but recommended if the sa
 
 ### Learning Capture (always)
 
-- [ ] **CLAUDE.md / runbook updated**: If this incident revealed a gap in our detection setup or response steps, update this file now
+- [ ] **Standing orders / runbook updated**: If this incident revealed a gap in our detection setup or response steps, update `docs/meta/standing-orders/README.md` or the relevant runbook now
 - [ ] **Postmortem filed** (P1/P2 only): `docs/operations/postmortems/YYYY-MM-DD-supply-chain-<slug>.md` — use the template in `INCIDENT_TEMPLATES.md`
 
 ---

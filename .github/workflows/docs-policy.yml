@@ -33,6 +33,12 @@ on:
       - "tools/docs/verify/verify_team_handbook.py"
       - "tools/skills/**"
       - "tools/knowledge/**"
+      - "tools/docs/verify/verify_temporal_integrity.py"
+      - "tools/docs/verify/verify_generated_navigation.py"
+      - "tools/knowledge/verify_review_runtime.py"
+      - "tools/knowledge/build_wave9_findings_ledger.py"
+      - "scripts/qa/run-review-runtime-gates.sh"
+      - "scripts/qa/build_decision_graph.py"
       - "scripts/qa/spec-tools/**"
       - "scripts/qa/run-team-handbook-gates.sh"
       - "scripts/qa/run-cross-repo-agent-gates.sh"
@@ -72,6 +78,12 @@ on:
       - "tools/docs/verify/verify_team_handbook.py"
       - "tools/skills/**"
       - "tools/knowledge/**"
+      - "tools/docs/verify/verify_temporal_integrity.py"
+      - "tools/docs/verify/verify_generated_navigation.py"
+      - "tools/knowledge/verify_review_runtime.py"
+      - "tools/knowledge/build_wave9_findings_ledger.py"
+      - "scripts/qa/run-review-runtime-gates.sh"
+      - "scripts/qa/build_decision_graph.py"
       - "scripts/qa/spec-tools/**"
       - "scripts/qa/run-team-handbook-gates.sh"
       - "scripts/qa/run-cross-repo-agent-gates.sh"
@@ -213,3 +225,15 @@ jobs:
           fi
           chmod +x scripts/qa/run-agent-readiness-gates.sh
           ./scripts/qa/run-agent-readiness-gates.sh
+
+      - name: Verify temporal integrity
+        run: python3 tools/docs/verify/verify_temporal_integrity.py
+
+      - name: Verify generated navigation
+        run: python3 tools/docs/verify/verify_generated_navigation.py
+
+      - name: Verify review/runtime semantics
+        run: |
+          export REVIEW_RUNTIME_RANGE="${DOCS_POLICY_RANGE}"
+          chmod +x scripts/qa/run-review-runtime-gates.sh
+          ./scripts/qa/run-review-runtime-gates.sh

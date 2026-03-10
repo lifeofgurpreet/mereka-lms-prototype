@@ -93,4 +93,5 @@ To review results:
 
 ## Disclosure Process
 
-For vulnerabilities found in this repository, follow the process in [SECURITY.md](../../../SECURITY.md).
+Use [SECURITY.md](../../../SECURITY.md) for disclosure contact and response timing only.
+Treat this document as the canonical operational control surface for secret scanning behavior.

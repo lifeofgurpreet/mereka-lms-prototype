@@ -1,10 +1,13 @@
 # Release Process
 
-<!-- Last verified: 2026-02-25 -->
+<!-- Last verified: 2026-03-09 -->
 
-This document defines the end-to-end release lifecycle for `mereka-lms`: how versions are
-numbered, how releases are created, how changelogs are generated, and how to roll back or
-hotfix.
+This document defines the canonical release lifecycle for `mereka-lms`.
+The authoritative operator path is the canonical entrypoint map in
+`scripts/governance/canonical-entrypoints.yaml`.
+
+Use this document for the release sequence and validation order.
+Do not treat legacy summaries or local agent notes as release authority.
 
 ---
 
@@ -47,51 +50,76 @@ Tags are prefixed with `v`: `v1.0.0`, `v1.2.3`, `v2.0.0`.
 
 Run these steps in order. Do not skip steps.
 
-### 1. Verify
+### 1. Structural verification
 
 ```bash
-# Run full verification suite
 ./scripts/qa/verify-release-automation.sh
+./scripts/qa/verify-release-workflow-invocation.sh
 ./scripts/qa/verify-build-workflow-contract.sh
 ./scripts/qa/verify-no-latest-prod-tags.sh
 ```
 
 All scripts must exit 0. Fix any failures before proceeding.
 
-### 2. Review
+### 2. Review and standing orders
 
 - Open a PR if unreleased commits have not been reviewed
-- Reviewer must be Opus-tier (see `~/.claude/CLAUDE.md` — auto-review rule)
+- Follow current standing orders under `docs/meta/standing-orders/`
 - Check for any uncommitted changes: `git status`
 - Confirm you are on `main` and up to date: `git pull --ff-only`
 
-### 3. Tag
+### 3. Canonical preflight and dry-run
 
-Use the release helper script (validates semver, generates changelog, creates annotated tag):
+The canonical release front door is:
+
+```bash
+./scripts/infra/canonical-release.sh --check-only
+./scripts/infra/canonical-release.sh --dry-run \
+  --openedx-tag <TAG> --mfe-tag <TAG>
+```
+
+This wrapper enforces canonical path, branch/worktree expectations, and delegates
+GitOps promotion to `scripts/infra/release-openedx-gitops.sh`.
+
+### 4. Optional tag creation
+
+If you need a semver Git tag and GitHub Release record, use the helper:
 
 ```bash
 ./scripts/infra/create-release.sh v1.2.0
 ```
 
-The script will:
+This script:
 - Validate semver format
 - Generate a changelog from conventional commits since the previous tag
 - Create an annotated git tag
-- Push the tag to origin (this triggers the `release.yml` workflow)
+- Push the tag to origin (this triggers `.github/workflows/release.yml`)
 - Print the rollback command for reference
 
-### 4. GitHub Release
+Tag creation is part of release bookkeeping. It is not the canonical deployment step.
 
-The `release.yml` workflow fires automatically on tag push and:
-- Generates a changelog from conventional commits
-- Creates a GitHub Release with the changelog as the body
+### 5. Apply the canonical release
 
-Monitor the workflow at: `https://github.com/<org>/mereka-lms/actions`
+```bash
+CONFIRM_CANONICAL_RELEASE=CANONICAL_RELEASE \
+CONFIRM_PUSH_CANONICAL_RELEASE=PUSH_CANONICAL_RELEASE \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/canonical-release.sh \
+  --openedx-tag <TAG> --mfe-tag <TAG> \
+  --apply --commit --push --verify-runtime
+```
 
-### 5. ArgoCD Sync
+This is the canonical production release path.
+
+### 6. GitHub Release metadata
+
+The `release.yml` workflow fires automatically on tag push and creates the GitHub Release metadata.
+Monitor the workflow in GitHub Actions if you used `create-release.sh`.
+
+### 7. ArgoCD Sync
 
 ArgoCD reconciles automatically within ~3 minutes of the GitOps repo updating.
-Do **not** patch resources directly — see `~/.claude/rules/gitops-enforcement.md`.
+Do **not** patch resources directly.
 
 Verify sync:
 
@@ -102,7 +130,7 @@ kubectl -n mereka-lms rollout status deployment/cms
 kubectl -n mereka-lms rollout status deployment/mfe
 ```
 
-### 6. Post-Deploy Smoke Test
+### 8. Post-Deploy Smoke Test
 
 ```bash
 # Branding and public health
@@ -227,8 +255,11 @@ Breaking changes are indicated by `!` after the type/scope: `feat(k8s)!: migrate
 
 ## References
 
-- Existing release checklist: `docs/runbooks/operations/RELEASE_CHECKLIST.md`
-- GitOps enforcement rules: `~/.claude/rules/gitops-enforcement.md`
-- Release orchestrator: `scripts/infra/release-openedx-gitops.sh`
+- Canonical entrypoint map: `scripts/governance/canonical-entrypoints.yaml`
+- Canonical deploy contract: `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md`
+- Existing release checklist: `docs/ops/runbooks/RELEASE_CHECKLIST.md`
+- Standing orders: `docs/meta/standing-orders/README.md`
+- Canonical release wrapper: `scripts/infra/canonical-release.sh`
+- GitOps release orchestrator: `scripts/infra/release-openedx-gitops.sh`
 - CI pipeline spec: `specs/ci-cd-pipeline_spec.md`
 - ADR-012: `docs/adr/012-no-runtime-css-overlay.md`

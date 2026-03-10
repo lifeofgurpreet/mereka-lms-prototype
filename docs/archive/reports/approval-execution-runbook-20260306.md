@@ -1,6 +1,8 @@
 # Approval Execution Runbook 2026-03-06
 _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified: 2026-03-06 • Status: supporting_
 
+**Document class**: plan
+
 ## Goal
 Close the remaining governance gates with deterministic approvals and evidence updates.
 
@@ -23,7 +25,7 @@ Close the remaining governance gates with deterministic approvals and evidence u
    - `GOV-02` -> `DONE`
 
 ## Second-Cycle KPI Step (2026-03-13)
-1. Create/update `docs/archive/reports/docs-program-scorecard-20260313.md` from template.
+1. Create `docs/archive/reports/docs-program-scorecard-20260313.md` from `docs/archive/reports/docs-program-scorecard-20260313-template.md` no earlier than 2026-03-13.
 2. Recompute KPI snapshot (classification, duplicate canonicals, broken links, stale canonical ratio, stub debt).
 3. If targets still hold, update:
    - `CLS-01` -> `DONE`

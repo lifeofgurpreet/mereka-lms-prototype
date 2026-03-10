@@ -485,5 +485,5 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n mereka-lms get 
 
 - [BRANDING.md](../guides/branding/BRANDING.md) - Brand guidelines and token reference
 - [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - General troubleshooting
-- [CLAUDE.md](../../CLAUDE.md) - Repository overview and workflows
+- [Standing Orders](../../meta/standing-orders/README.md) - Canonical maintainer and agent standing orders
 - [Brand Assets Repository](https://github.com/biji-biji-initiative/bbbi-mereka-brand-assets)

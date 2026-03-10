@@ -53,7 +53,7 @@ for bundle in bundle_rules.get('bundles', []):
         for a in ordered:
             path = a.get('path', '')
             governs = ', '.join(a.get('governs') or []) or 'n/a'
-            lines.append(f"- `{a['id']}` [{a.get('title', a['id'])}](../../{path.replace('docs/adr/', '')})")
+            lines.append(f"- `{a['id']}` [{a.get('title', a['id'])}](../../{path})")
             lines.append(f"  - Governs: `{governs}`")
     (bundles_dir / bundle_file).write_text('\n'.join(lines) + '\n', encoding='utf-8')
 print(f'ADR_GRAPH_OK nodes={len(nodes)} links={len(links)}')

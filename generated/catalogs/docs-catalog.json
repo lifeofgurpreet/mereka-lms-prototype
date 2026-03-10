@@ -2846,18 +2846,9 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-13",
-    "owner": "Platform Team",
-    "path": "archive/reports/docs-program-scorecard-20260313-template.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "Platform Team",
-    "path": "archive/reports/docs-program-scorecard-20260313.md",
+    "path": "archive/reports/docs-program-scorecard-20260313-template.md",
     "status": "supporting",
     "type": "status"
   },
@@ -6387,6 +6378,42 @@
     "owner": null,
     "path": "meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md",
     "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE9_CLOSEOUT.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE9_EXECUTION_TRACKER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE9_REVIEW_HANDOFF.md",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -12359,7 +12386,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-25",
+    "last_verified_or_updated": "2026-03-09",
     "owner": null,
     "path": "reference/operations/RELEASE_PROCESS.md",
     "status": "supporting",

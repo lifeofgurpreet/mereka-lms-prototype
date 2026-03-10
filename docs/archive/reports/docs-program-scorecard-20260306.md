@@ -2,6 +2,8 @@
 
 _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified: 2026-03-06 • Status: supporting_
 
+**Document class**: evidence
+
 ## KPI Snapshot
 - Classification coverage: 100.00% (953/953)
 - Duplicate canonical topics: 0
@@ -37,6 +39,6 @@ _Audience: Docs Lead + Domain Owners • Owner: Platform Team • Last verified:
 - Confirm whether `>=25%` debt reduction is measured from original baseline (`81`) or rolling sprint start.
 - Use `docs/archive/reports/program-closure-readiness-20260306.md` as closure gate checklist for `CLS-02`.
 - Execute approvals via `docs/archive/reports/approval-execution-runbook-20260306.md`.
-- Publish second-cycle KPI at `docs/archive/reports/docs-program-scorecard-20260313.md` (template: `docs/archive/reports/docs-program-scorecard-20260313-template.md`).
+- Prepare the second-cycle KPI from `docs/archive/reports/docs-program-scorecard-20260313-template.md`; do not publish the dated scorecard artifact before 2026-03-13.
 - Approve migration sequencing for `docs/archive/reports/transitional-operations-link-gap-20260306.md`.
 - Acknowledge and approve `docs/archive/reports/transitional-path-deprecation-timeline-20260306.md`.

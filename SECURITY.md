@@ -1,5 +1,11 @@
 # Security Policy
 
+> Summary surface only.
+> Use this file for vulnerability disclosure and response expectations.
+> For active operational controls and scanning behavior, start with:
+> - `docs/reference/operations/SECRET_SCANNING.md`
+> - `docs/policies/operations/BRANCH_PROTECTION.md`
+
 ## Supported Versions
 
 | Version | Supported |
