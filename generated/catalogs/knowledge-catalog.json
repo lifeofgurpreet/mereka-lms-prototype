@@ -3,7 +3,7 @@
     "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 826
+    "supporting": 825
   },
   "entries": [
     {
@@ -7804,15 +7804,6 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Lesson Content Issue"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
       "path": "docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md",
       "root": "docs",
       "status": "",
@@ -7888,7 +7879,7 @@
       "path": "docs/reference/migrations/mct/MCT_PLATFORM_RESEARCH.md",
       "root": "docs",
       "status": "",
-      "title": "MCT Platform Integration Spec"
+      "title": "MCT Platform Research"
     },
     {
       "classification": "supporting",
@@ -10960,12 +10951,12 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1217,
+  "entry_count": 1216,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 197,
+    "docs:concept": 196,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
@@ -10982,7 +10973,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 999,
+    "docs": 998,
     "specs": 218
   }
 }

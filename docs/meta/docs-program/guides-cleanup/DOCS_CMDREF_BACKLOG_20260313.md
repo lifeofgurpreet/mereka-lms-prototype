@@ -119,7 +119,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/guides/onboarding/LOCAL_SETUP.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/onboarding/TEAM_SCALING_GUIDE.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 1 | Unassigned (determine domain owner) | keep lesson-content repair guidance aligned with the current migration pipeline |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/archive/reports/mct/EXPORT_COMPLETE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/archive/reports/mct/EXPORT_SUMMARY.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
@@ -313,7 +313,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 54 | scripts/migrations/kajabi/transform_data.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 65 | scripts/migrations/kajabi/build_course_packages.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 66 | scripts/migrations/kajabi/output/course_structure.json |
-| docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 93 | scripts/migrations/kajabi/build_course_packages.py |
+| docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 93 | scripts/migrations/kajabi/build_course_packages.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 17 | scripts/migrations/kajabi/transform_data.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 32 | scripts/migrations/kajabi/build_course_packages.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 33 | scripts/migrations/kajabi/output/course_structure.json |

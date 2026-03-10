@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 3654,
+  "edge_count": 3651,
   "edges": [
     {
       "edge_type": "classifies",
@@ -4825,11 +4825,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md"
     },
     {
@@ -10475,11 +10470,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md"
     },
     {
@@ -13466,11 +13456,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/reference/migrations/mct/MCT_PLATFORM_RESEARCH.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md"
     },
     {
       "edge_type": "classifies",
@@ -18274,7 +18259,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1241,
+  "node_count": 1240,
   "nodes": [
     {
       "id": "classification:archival",
@@ -27941,17 +27926,6 @@
       "root": "docs",
       "status": "",
       "title": "MCT Platform Integration Spec"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Pre-Migration Inventory"
     },
     {
       "classification": "supporting",

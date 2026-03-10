@@ -4,6 +4,8 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-08-18
 ## Overview
 Fixed the pipeline to capture actual lesson content (body, HTML, media URLs) instead of just metadata.
 
+This is the canonical lesson-content reference for Kajabi migration work. Older “lesson content issue” notes have been absorbed here: the pipeline now attempts to fetch full lesson detail first, then falls back to placeholders only when Kajabi omits body/content fields for a specific lesson.
+
 ## Changes Made
 
 1. **Extended `scripts/migrations/kajabi/kajabi-course-structure.mjs`**

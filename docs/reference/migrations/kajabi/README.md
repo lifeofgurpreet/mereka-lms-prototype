@@ -16,5 +16,4 @@ All Kajabi-related content lives in this folder. Start with [`KAJABI_MIGRATION.m
 | [`../../../../reports/2025/recovery/KAJABI_VERIFY_AFTER_SITE_RECOVERY_2025-11-09.md`](../../../../reports/2025/recovery/KAJABI_VERIFY_AFTER_SITE_RECOVERY_2025-11-09.md) | Historical recovery note for the 2025 site-down verification pass. |
 | [`../../../ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md`](../../../ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md) | How to re-sync deltas after the initial import. |
 | [`KAJABI_CERTIFICATE_MIGRATION.md`](KAJABI_CERTIFICATE_MIGRATION.md) | Certificate-specific migration steps. |
-| [`KAJABI_LESSON_CONTENT_FIX.md`](KAJABI_LESSON_CONTENT_FIX.md) | Script notes for repairing malformed lessons. |
-| [`KAJABI_LESSON_CONTENT_ISSUE.md`](KAJABI_LESSON_CONTENT_ISSUE.md) | Ongoing bug tracker for lesson imports. |
+| [`KAJABI_LESSON_CONTENT_FIX.md`](KAJABI_LESSON_CONTENT_FIX.md) | Canonical lesson-content repair and fallback reference for malformed or API-limited lessons. |
