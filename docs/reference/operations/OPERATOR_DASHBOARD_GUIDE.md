@@ -1,11 +1,7 @@
 # Operator Dashboard Guide — Mereka Academy
 
 _Audience: Platform Engineers • Owner: Engineering Lead • Last verified: 2026-03-06 • Status: canonical_
-
-_Audience: Platform Engineers, SREs, On-call responders_
-_Owner: Engineering Lead_
-_Last updated: 2026-02-25_
-_Related: [TROUBLESHOOTING.md](../../operations/TROUBLESHOOTING.md) · [ONCALL_OBSERVABILITY_PLAYBOOK.md](../../operations/ONCALL_OBSERVABILITY_PLAYBOOK.md) · [INCIDENT_RESPONSE.md](../../operations/INCIDENT_RESPONSE.md)_
+_Related: [site-down.md](../../ops/runbooks/site-down.md) · [ONCALL_OBSERVABILITY_PLAYBOOK.md](../../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md) · [INCIDENT_RESPONSE.md](../../ops/runbooks/INCIDENT_RESPONSE.md)_
 
 ---
 
@@ -75,7 +71,7 @@ Access: **console.cloud.google.com → Monitoring** (filter by namespace `mereka
 | `pvc-utilization-high.json` | WARNING | PVC usage > threshold |
 | `mysql-saturation-high.json` | WARNING | MySQL thread saturation |
 
-Full matrix: [ALERT_SEVERITY_MATRIX.md](../../operations/ALERT_SEVERITY_MATRIX.md)
+Full matrix: [ALERT_SEVERITY_MATRIX.md](ALERT_SEVERITY_MATRIX.md)
 
 ---
 
@@ -122,7 +118,7 @@ The standard Open edX admin panel is available at:
 | Dev (kind) | https://academyv2.mereka.dev/admin |
 | Local | http://localhost/admin |
 
-Access: requires `is_staff=True` or `is_superuser=True` on the LMS user record. See [AUTH_AND_PERMISSIONS.md](../../ops/security/AUTH_AND_PERMISSIONS.md) for granting access.
+Access: requires `is_staff=True` or `is_superuser=True` on the LMS user record. See [AUTH_AND_PERMISSIONS.md](AUTH_AND_PERMISSIONS.md) for granting access.
 
 Common operator tasks via Django admin:
 - Create/deactivate user accounts
@@ -143,7 +139,7 @@ The `frontend-app-admin-console` MFE replaces Django admin for common RBAC opera
 - View recent permission change audit log
 
 Access: `is_staff=True` OR assigned `organisation_admin` role.
-Setup guide: [ADMIN_CONSOLE_SETUP.md](../../operations/ADMIN_CONSOLE_SETUP.md)
+Setup guide: [ADMIN_CONSOLE_SETUP.md](ADMIN_CONSOLE_SETUP.md)
 
 ---
 
@@ -160,7 +156,7 @@ Manifests exist at `deploy/k8s/base/plugins/aspects/` but are **not wired into t
 
 Target URL when deployed: `https://analytics.academyv2.mereka.io` (prod) / `https://analytics.academyv2.mereka.dev` (dev).
 Deployment tracked: T148.
-Setup guide (when deployed): [ASPECTS_ANALYTICS_SETUP.md](../../operations/ASPECTS_ANALYTICS_SETUP.md)
+Setup guide (when deployed): [ASPECTS_ANALYTICS_SETUP.md](ASPECTS_ANALYTICS_SETUP.md)
 
 ---
 
@@ -245,13 +241,13 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=50
 kubectl get app mereka-lms -n argocd -o jsonpath='{.status.sync.status}'
 ```
 
-Full cheatsheet: [quickref/kubectl-cheatsheet.md](../quickref/kubectl-cheatsheet.md)
+Full cheatsheet: [kubectl-cheatsheet.md](../../ops/quickref/kubectl-cheatsheet.md)
 
 ---
 
 ## 3. SLO Definitions Summary
 
-Defined in [SLO_POLICY.md](../../operations/SLO_POLICY.md). Quick reference:
+Defined in [SLO_POLICY.md](../../policies/operations/SLO_POLICY.md). Quick reference:
 
 | Service | Tier | Availability SLO | Latency p99 | Error budget (30d) |
 |---|---|---|---|---|
@@ -289,9 +285,9 @@ Burn rate alerts fire when error budget consumption rate exceeds 1× (warning) o
 | 5xx error rate spike | Check LMS logs → Prometheus → Grafana | Engineering Lead if > 10 min |
 | Branding / UI regression | `public-health-check.sh`, visual smoke | Fix-forward; P4 unless enrolment affected |
 
-Full on-call structure: [ONCALL_ROTATION.md](../../operations/ONCALL_ROTATION.md)
-Incident response workflow: [INCIDENT_RESPONSE.md](../../operations/INCIDENT_RESPONSE.md)
-Post-mortem template: [POST_MORTEM_TEMPLATE.md](../../operations/POST_MORTEM_TEMPLATE.md)
+Full on-call structure: [ONCALL_ROTATION.md](../../policies/operations/ONCALL_ROTATION.md)
+Incident response workflow: [INCIDENT_RESPONSE.md](../../ops/runbooks/INCIDENT_RESPONSE.md)
+Post-mortem template: [POST_MORTEM_TEMPLATE.md](../../meta/templates/POST_MORTEM_TEMPLATE.md)
 
 ---
 
@@ -316,7 +312,7 @@ If any fail: proceed to section 2 scripts for the affected area.
 
 ### 5.2 Site Down Response (5–10 minutes)
 
-Follow the decision tree in [../runbooks/site-down.md](../runbooks/site-down.md).
+Follow the decision tree in [site-down.md](../../ops/runbooks/site-down.md).
 
 Quick path for the most common cause (service selector mismatch):
 ```bash
@@ -356,7 +352,7 @@ kubectl get endpoints -n mereka-lms
 CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 ```
 
-Full checklist: [RELEASE_CHECKLIST.md](../../operations/RELEASE_CHECKLIST.md) and [POST_DEPLOY_GATE.md](../../operations/POST_DEPLOY_GATE.md).
+Full checklist: [RELEASE_CHECKLIST.md](../../ops/runbooks/RELEASE_CHECKLIST.md) and [POST_DEPLOY_GATE.md](../../ops/runbooks/POST_DEPLOY_GATE.md).
 
 ---
 
@@ -398,7 +394,7 @@ Full checklist: [RELEASE_CHECKLIST.md](../../operations/RELEASE_CHECKLIST.md) an
 - Data-risk alerts (Velero restore/verification, storage ENOSPC) require explicit senior approval before reducing sensitivity.
 - Tune workflow: export last 7 days → classify → adjust one threshold → PR → re-apply with `./scripts/infra/apply-monitoring-configs.sh apply`.
 
-Full SOP: [ALERT_TUNING_SOP.md](../../operations/ALERT_TUNING_SOP.md)
+Full SOP: [ALERT_TUNING_SOP.md](../../ops/runbooks/ALERT_TUNING_SOP.md)
 
 ---
 
@@ -406,21 +402,20 @@ Full SOP: [ALERT_TUNING_SOP.md](../../operations/ALERT_TUNING_SOP.md)
 
 | Document | Purpose |
 |---|---|
-| [TROUBLESHOOTING.md](../../operations/TROUBLESHOOTING.md) | Quick fixes for common symptoms |
-| [OBSERVABILITY_QUICKSTART.md](OBSERVABILITY_QUICKSTART.md) | 2-minute health check script sequence |
-| [ONCALL_OBSERVABILITY_PLAYBOOK.md](../../operations/ONCALL_OBSERVABILITY_PLAYBOOK.md) | Structured on-call health sequence |
-| [ONCALL_ROTATION.md](../../operations/ONCALL_ROTATION.md) | On-call schedule and escalation structure |
-| [INCIDENT_RESPONSE.md](../../operations/INCIDENT_RESPONSE.md) | Incident declaration and triage workflow |
-| [INCIDENT_TEMPLATES.md](../../operations/INCIDENT_TEMPLATES.md) | Copy-paste incident declaration + postmortem templates |
-| [ALERT_SEVERITY_MATRIX.md](../../operations/ALERT_SEVERITY_MATRIX.md) | Full alert → severity → routing mapping |
-| [ALERT_TUNING_SOP.md](../../operations/ALERT_TUNING_SOP.md) | How to tune alert thresholds safely |
-| [SLO_POLICY.md](../../operations/SLO_POLICY.md) | SLO targets and error budget policy |
-| [SLO_DASHBOARDS_SETUP.md](../../operations/SLO_DASHBOARDS_SETUP.md) | Grafana SLO dashboard architecture |
-| [ADMIN_CONSOLE_SETUP.md](../../operations/ADMIN_CONSOLE_SETUP.md) | Admin Console MFE access and capabilities |
-| [ASPECTS_ANALYTICS_SETUP.md](../../operations/ASPECTS_ANALYTICS_SETUP.md) | Aspects/Superset analytics (future) |
-| [../runbooks/site-down.md](../runbooks/site-down.md) | Site down decision tree + fixes |
-| [../runbooks/emergency-rollback.md](../runbooks/emergency-rollback.md) | GitOps rollback procedure |
-| [../runbooks/DISASTER_RECOVERY.md](../runbooks/DISASTER_RECOVERY.md) | Full DR procedure |
-| [../quickref/kubectl-cheatsheet.md](../quickref/kubectl-cheatsheet.md) | kubectl commands reference |
-| [ACCESS_URLS.md](../../operations/ACCESS_URLS.md) | All environment URLs (local, dev, prod) |
-| [CAPACITY_PLANNING.md](../../operations/CAPACITY_PLANNING.md) | Pod resource limits, HPA config, load test baselines |
+| [site-down.md](../../ops/runbooks/site-down.md) | Quick fixes for common symptoms |
+| [OBSERVABILITY_QUICKSTART.md](../../ops/monitoring/OBSERVABILITY_QUICKSTART.md) | 2-minute health check script sequence |
+| [ONCALL_OBSERVABILITY_PLAYBOOK.md](../../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md) | Structured on-call health sequence |
+| [ONCALL_ROTATION.md](../../policies/operations/ONCALL_ROTATION.md) | On-call schedule and escalation structure |
+| [INCIDENT_RESPONSE.md](../../ops/runbooks/INCIDENT_RESPONSE.md) | Incident declaration and triage workflow |
+| [INCIDENT_TEMPLATES.md](../../ops/runbooks/INCIDENT_TEMPLATES.md) | Copy-paste incident declaration + postmortem templates |
+| [ALERT_SEVERITY_MATRIX.md](ALERT_SEVERITY_MATRIX.md) | Full alert → severity → routing mapping |
+| [ALERT_TUNING_SOP.md](../../ops/runbooks/ALERT_TUNING_SOP.md) | How to tune alert thresholds safely |
+| [SLO_POLICY.md](../../policies/operations/SLO_POLICY.md) | SLO targets and error budget policy |
+| [SLO_DASHBOARDS_SETUP.md](../../ops/runbooks/SLO_DASHBOARDS_SETUP.md) | Grafana SLO dashboard architecture |
+| [ADMIN_CONSOLE_SETUP.md](ADMIN_CONSOLE_SETUP.md) | Admin Console MFE access and capabilities |
+| [ASPECTS_ANALYTICS_SETUP.md](ASPECTS_ANALYTICS_SETUP.md) | Aspects/Superset analytics (future) |
+| [emergency-rollback.md](../../ops/runbooks/emergency-rollback.md) | GitOps rollback procedure |
+| [DISASTER_RECOVERY.md](../../ops/runbooks/DISASTER_RECOVERY.md) | Full DR procedure |
+| [kubectl-cheatsheet.md](../../ops/quickref/kubectl-cheatsheet.md) | kubectl commands reference |
+| [access-urls.md](../../ops/quickref/access-urls.md) | All environment URLs (local, dev, prod) |
+| [CAPACITY_PLANNING.md](CAPACITY_PLANNING.md) | Pod resource limits, HPA config, load test baselines |
