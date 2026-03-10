@@ -156,4 +156,75 @@
     z-index: 2;
     white-space: nowrap;
   }
+  /* ── Header layout hotfix ─────────────────────────────────────
+     mereka-overrides.css has the full header rules but the staticfiles
+     volume is read-only at runtime. These essential rules are inlined
+     here so they take effect via ConfigMap without an image rebuild. */
+  .global-header { position: sticky; top: 0; z-index: 1000; width: 100%; }
+  .main-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 0 1.5rem; height: 64px; max-width: 1400px; margin: 0 auto;
+  }
+  .header-logo { margin: 0; padding: 0; line-height: 1; flex-shrink: 0; }
+  .header-logo .logo { display: block; height: 36px; width: auto; }
+  .nav-links {
+    display: flex; align-items: center; gap: 0.5rem; flex: 1; justify-content: flex-end;
+  }
+  .nav-links .main { display: flex; align-items: center; gap: 0.25rem; margin-right: auto; }
+  .nav-links .secondary { display: flex; align-items: center; gap: 0.5rem; }
+  .nav-links .secondary > div { display: flex; align-items: center; gap: 0.5rem; }
+  .nav-item, .mobile-nav-item { display: flex; align-items: center; }
+  .nav-links .nav-item a {
+    display: inline-block; padding: 0.5rem 0.85rem; font-size: 0.9rem;
+    font-weight: 500; color: var(--mereka-color-ink-700, #4a494a);
+    text-decoration: none; border-radius: 8px; white-space: nowrap;
+    transition: color 150ms ease, background 150ms ease;
+  }
+  .nav-links .nav-item a:hover, .nav-links .nav-item a:focus {
+    color: var(--mereka-color-teal, #237072);
+    background: rgba(35, 112, 114, 0.06); text-decoration: none;
+  }
+  .nav-links .register-btn, .nav-links a.register-btn {
+    display: inline-flex; align-items: center; padding: 0.55rem 1.1rem;
+    font-size: 0.875rem; font-weight: 600; color: var(--pgn-color-white, #fff);
+    background: var(--mereka-color-magenta, #ab3b78); border: none;
+    border-radius: 999px; text-decoration: none; white-space: nowrap;
+    box-shadow: 0 8px 20px rgba(171, 59, 120, 0.25);
+    transition: background 150ms ease, box-shadow 150ms ease;
+  }
+  .nav-links .register-btn:hover, .nav-links a.register-btn:hover {
+    background: var(--mereka-color-magenta-dark, #8a2f60); color: #fff;
+    text-decoration: none; box-shadow: 0 10px 24px rgba(171, 59, 120, 0.35);
+  }
+  .nav-links .sign-in-btn, .nav-links a.sign-in-btn {
+    display: inline-flex; align-items: center; padding: 0.5rem 1.1rem;
+    font-size: 0.875rem; font-weight: 600; color: var(--mereka-color-teal, #237072);
+    background: transparent; border: 1.5px solid var(--mereka-color-teal, #237072);
+    border-radius: 999px; text-decoration: none; white-space: nowrap;
+    transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+  }
+  .nav-links .sign-in-btn:hover, .nav-links a.sign-in-btn:hover {
+    background: var(--mereka-color-teal, #237072); color: #fff; text-decoration: none;
+  }
+  .hamburger-menu {
+    display: none; flex-direction: column; justify-content: center; align-items: center;
+    gap: 5px; width: 40px; height: 40px; cursor: pointer; border-radius: 8px;
+    padding: 4px; flex-shrink: 0;
+  }
+  .hamburger-menu .line {
+    display: block; width: 22px; height: 2px;
+    background: var(--mereka-color-ink-700, #4a494a); border-radius: 2px;
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+  .hamburger-menu[aria-expanded="true"] .line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-menu[aria-expanded="true"] .line:nth-child(2) { opacity: 0; }
+  .hamburger-menu[aria-expanded="true"] .line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .mobile-menu { background: var(--pgn-color-white, #fff); border-top: 1px solid rgba(26, 22, 35, 0.08); padding: 0.75rem 1.5rem 1rem; }
+  .mobile-menu.hidden { display: none; }
+  @media (max-width: 768px) {
+    .main-header { padding: 0 1rem; height: 56px; }
+    .hamburger-menu { display: flex; }
+    .hidden-mobile { display: none !important; }
+    .nav-links { display: none; }
+  }
 </style>
