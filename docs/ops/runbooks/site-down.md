@@ -474,7 +474,7 @@ kubectl exec -n mereka-lms deploy/cms -- /bin/bash -c \
   "cd /openedx/edx-platform && ./manage.py cms shell -c \
   \"from django.contrib.auth import get_user_model; \
 from cms.djangoapps.course_creators.models import CourseCreator; \
-u=get_user_model().objects.get(email='gurpreet@biji-biji.com'); \
+u=get_user_model().objects.get(email='<platform-admin-email>'); \
 qs=CourseCreator.objects.filter(user=u); \
 (qs.update(state=CourseCreator.GRANTED, all_organizations=True) if qs.exists() \
 else CourseCreator.objects.bulk_create([CourseCreator(user=u, state=CourseCreator.GRANTED, all_organizations=True)]));\""
@@ -520,7 +520,7 @@ Kind nodes do not have Artifact Registry credentials by default.
 
 **Fix:**
 ```bash
-cd /home/gurpreet/projects/k8s/mereka-lms
+cd <repo-root>
 source .venv/bin/activate
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor images build openedx
@@ -545,7 +545,7 @@ tutor images build openedx
 **Fix:**
 ```bash
 # source SHA must come from mereka-lms repo
-git -C /home/gurpreet/projects/k8s/mereka-lms rev-parse HEAD
+git -C <repo-root> rev-parse HEAD
 
 # update pinned ref in BBI-K8 (active GitOps repo) and push
 # then force Argo refresh for app:
@@ -1083,7 +1083,7 @@ If public checks pass but Studio still 500s, treat it as a runtime secret/config
 ```bash
 kubectl exec -n mereka-lms deploy/lms -- bash -c "
 cd /openedx/edx-platform && ./manage.py lms shell -c \\
-\"from django.contrib.auth import get_user_model; from common.djangoapps.student.models import UserProfile; U=get_user_model(); u=U.objects.get(email='gurpreet@biji-biji.com'); UserProfile.objects.get_or_create(user=u, defaults={'name': u.username or u.email}); print('✅ Profile ensured')\""
+\"from django.contrib.auth import get_user_model; from common.djangoapps.student.models import UserProfile; U=get_user_model(); u=U.objects.get(email='<platform-admin-email>'); UserProfile.objects.get_or_create(user=u, defaults={'name': u.username or u.email}); print('✅ Profile ensured')\""
 ```
 
 **Prevention:**
