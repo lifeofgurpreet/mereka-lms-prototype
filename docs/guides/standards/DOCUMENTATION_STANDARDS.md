@@ -42,10 +42,11 @@ Before writing, decide what kind of thing you are producing.
 
 Do not place new canonical docs in transitional roots such as:
 - `docs/operations/README.md` tombstone only
-- `docs/onboarding/**`
+- `docs/onboarding/README.md`
 - `docs/branding/README.md`
 - `docs/runbooks/README.md`
 - `docs/architecture/README.md`
+- `docs/ci-cd/README.md`
 
 ## Required metadata
 

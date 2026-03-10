@@ -3591,30 +3591,12 @@
     "type": "guide"
   },
   {
-    "canonical_conflict_group": "fastlane-automation",
+    "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "ci-cd/FASTLANE_AUTOMATION.md",
-    "status": "archive-candidate",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": "tutor-config-ci",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "ci-cd/TUTOR_CONFIG_CI.md",
-    "status": "archive-candidate",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": "ios-cicd-spec",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "ci-cd/ios-cicd-spec.md",
-    "status": "archive-candidate",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ci-cd/README.md",
+    "status": "superseded",
     "type": "other"
   },
   {
@@ -5801,6 +5783,33 @@
     "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_BRANDING_ROOT_RESET_TRACKER.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE_CI_CD_ROOT_RESET_CLOSEOUT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE_CI_CD_ROOT_RESET_REVIEW_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE_CI_CD_ROOT_RESET_TRACKER.md",
     "status": "canonical",
     "type": "other"
   },
