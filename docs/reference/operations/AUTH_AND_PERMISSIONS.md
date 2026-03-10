@@ -26,9 +26,10 @@ Implications:
 
 ## Required Platform Admins
 
-These humans must have full permissions in production and dev:
-- `gurpreet@biji-biji.com`
-- `malasari@mereka.my`
+The platform-admin allowlist is managed through the canonical admin-access
+process and enforced automatically in production and dev. Use
+`docs/guides/admin/ADMIN_LOGIN_GUIDE.md` for the human ownership model and
+`./scripts/infra/ensure-platform-admins.sh` for the enforced runtime state.
 
 Enforce (idempotent):
 ```bash
@@ -60,16 +61,18 @@ Hardening (prevents drift automatically at runtime):
 | Forum (`forum.*`) | API-first (used by LMS); no separate SSO UI | API permissions | Not an admin UI surface | N/A | `scripts/qa/verify-auth-surfaces.sh` (expects `401` unauth) |
 
 One-line answer to “am I super admin of everything?”:
-- In the **Open edX ecosystem**, both Gurpreet and Malasari are enforced as `is_superuser` everywhere (LMS/CMS/Discovery/Credentials/Ecommerce).
-- In **Authentik**, only Gurpreet is an admin.
+- In the **Open edX ecosystem**, users on the enforced platform-admin allowlist
+  are granted `is_superuser` everywhere (LMS/CMS/Discovery/Credentials/Ecommerce).
+- In **Authentik**, admin access is a separate allowlist with stricter control.
 
 ## Authentik Admin (Separate)
 
 Authentik has its own admin permissions which are **independent** of Open edX.
 
 Policy:
-- **Gurpreet** is an Authentik admin (superuser)
-- **Malasari** is **not** an Authentik admin
+- Authentik admin rights are managed separately from Open edX superuser access.
+- Only the explicitly approved Authentik admin allowlist should have Authentik
+  superuser access.
 
 Verify/apply:
 ```bash
