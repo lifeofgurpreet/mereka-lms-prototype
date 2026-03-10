@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_id",
+    "schema_version",
+    "generated_by",
+    "source_range",
+    "canonical_inputs",
+    "receipts",
+    "decision_outputs"
+  ],
+  "properties": {
+    "pack_id": { "const": "proof-bundle-manifest" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": { "type": "string", "minLength": 1 },
+    "canonical_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "receipts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "decision_outputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    }
+  }
+}

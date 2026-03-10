@@ -1,0 +1,105 @@
+{
+  "canonical_inputs": [
+    "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+    "generated/skills/skill-registry.json",
+    "generated/skills/command-registry.json",
+    "generated/skills/pack-registry.json",
+    "bbi-infrastructure/config/domain-registry.yaml",
+    "bbi-infrastructure/config/bootstrap-lane-topology.yaml",
+    "bbi-infrastructure/.github/workflows/promote-image.yml",
+    "platform-control-plane/contracts/release-contracts.yaml",
+    "platform-control-plane/contracts/service-identity-contract.yaml"
+  ],
+  "checks": [
+    {
+      "canonical_sources": [
+        "bbi-infrastructure/.github/workflows/promote-image.yml",
+        "platform-control-plane/contracts/release-contracts.yaml"
+      ],
+      "check_id": "promotion-contract-alignment",
+      "details": "workflow target environments=['prod', 'staging']; release contract lanes=['authentik', 'cal.com', 'listmonk', 'mereka-lms', 'reka-slackbot', 'temporal', 'weaviate']; promote-help present=True; cross-repo-release-contract-review present=True",
+      "evidence": [
+        "generated/skills/command-registry.json",
+        "generated/skills/skill-registry.json"
+      ],
+      "status": "pass",
+      "title": "Promotion workflow, command registry, and release contract review skill align on release control sources"
+    },
+    {
+      "canonical_sources": [
+        "platform-control-plane/contracts/service-identity-contract.yaml"
+      ],
+      "check_id": "service-identity-normalization",
+      "details": "canonical service ids=['authentik', 'cal.com', 'listmonk', 'mereka-lms', 'reka-slackbot', 'temporal', 'weaviate']",
+      "evidence": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/scenario-packs.json"
+      ],
+      "status": "pass",
+      "title": "Service identity aliases resolve against canonical platform service identifiers"
+    },
+    {
+      "canonical_sources": [
+        "bbi-infrastructure/config/bootstrap-lane-topology.yaml",
+        "bbi-infrastructure/config/domain-registry.yaml"
+      ],
+      "check_id": "topology-alignment",
+      "details": "topology lanes=['dev', 'nonprod_platform', 'preview', 'prod', 'staging']; domain environments=['dev', 'prod', 'staging']",
+      "evidence": [
+        "generated/skills/read-first.json"
+      ],
+      "status": "pass",
+      "title": "Topology and hostname registries align on active environment names"
+    },
+    {
+      "canonical_sources": [
+        "platform-control-plane/contracts/release-contracts.yaml",
+        "bbi-infrastructure/.github/workflows/promote-image.yml"
+      ],
+      "check_id": "release-obligations-alignment",
+      "details": "Skill registry contains release-obligations-review and command registry contains promote workflow/plan validators.",
+      "evidence": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/command-registry.json"
+      ],
+      "status": "pass",
+      "title": "Release-obligations review skill exists for canonical release contract sources"
+    },
+    {
+      "canonical_sources": [
+        "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+        "platform-control-plane/contracts/release-contracts.yaml",
+        "platform-control-plane/contracts/service-identity-contract.yaml"
+      ],
+      "check_id": "assistant-front-door-subordination",
+      "details": "Wave 11 consumes canonical contract and runtime sources directly; rebuilt assistant exports on fresh Wave 11 external branches remain pending.",
+      "evidence": [
+        "generated/skills/pack-registry.json",
+        "generated/skills/read-first.json"
+      ],
+      "status": "warning",
+      "title": "Assistant/runtime front doors remain subordinate to canonical contract surfaces"
+    },
+    {
+      "canonical_sources": [
+        "docs/meta/skills/AGENT_PACK_ABI.yaml"
+      ],
+      "check_id": "pack-runtime-alignment",
+      "details": "registered packs=['command-registry', 'evidence-sufficiency-map', 'mixed-diff-arbitration', 'read-first', 'runtime-convergence-report', 'scenario-packs', 'skill-dependency-graph', 'skill-registry']",
+      "evidence": [
+        "generated/skills/pack-registry.json"
+      ],
+      "status": "pass",
+      "title": "Canonical skill packs are registered and consumable as machine truth"
+    }
+  ],
+  "generated_by": "tools/skills/build_runtime_convergence_report.py",
+  "pack_id": "runtime-convergence-report",
+  "schema_version": 1,
+  "source_range": null,
+  "summary": {
+    "fail": 0,
+    "pass": 5,
+    "warning": 1
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "blocking_obligations": [
+    {
+      "blocking": true,
+      "id": "source_of_truth_map",
+      "type": "required_evidence_pack"
+    },
+    {
+      "blocking": true,
+      "id": "validation_run",
+      "type": "required_evidence_pack"
+    },
+    {
+      "blocking": true,
+      "id": "docs_policy",
+      "type": "required_status_update"
+    },
+    {
+      "blocking": true,
+      "id": "catalog_governance",
+      "type": "required_status_update"
+    }
+  ],
+  "canonical_inputs": [
+    "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+    "generated/knowledge/evidence-obligations.json",
+    "generated/knowledge/review-decision.json",
+    "generated/skills/evidence-sufficiency-map.json"
+  ],
+  "generated_by": "tools/knowledge/build_evidence_receipt.py",
+  "missing_evidence_classes": [
+    "source_of_truth_map",
+    "validation_run"
+  ],
+  "receipt_id": "evidence-receipt",
+  "required_evidence_classes": [
+    "source_of_truth_map",
+    "validation_run"
+  ],
+  "satisfied_evidence_classes": [],
+  "schema_version": 1,
+  "source_range": "origin/main...HEAD",
+  "status_update_requirements": [
+    "catalog_governance",
+    "docs_policy"
+  ]
+}

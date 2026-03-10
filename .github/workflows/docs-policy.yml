@@ -5,20 +5,36 @@ on:
     paths:
       - "docs/**"
       - "specs/**"
+      - "generated/skills/**"
+      - "generated/knowledge/**"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/skills/**"
+      - "tools/knowledge/**"
       - "scripts/qa/spec-tools/**"
+      - "scripts/qa/run-skill-runtime-gates.sh"
+      - "scripts/qa/run-agent-pack-runtime-gates.sh"
+      - "scripts/qa/run-decision-runtime-gates.sh"
+      - "scripts/qa/run-execution-proof-runtime-gates.sh"
   push:
     paths:
       - "docs/**"
       - "specs/**"
+      - "generated/skills/**"
+      - "generated/knowledge/**"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/skills/**"
+      - "tools/knowledge/**"
       - "scripts/qa/spec-tools/**"
+      - "scripts/qa/run-skill-runtime-gates.sh"
+      - "scripts/qa/run-agent-pack-runtime-gates.sh"
+      - "scripts/qa/run-decision-runtime-gates.sh"
+      - "scripts/qa/run-execution-proof-runtime-gates.sh"
 
 permissions: {}
 
@@ -43,3 +59,43 @@ jobs:
           fi
           chmod +x tools/docs/verify/verify-docs-policy.sh
           ./tools/docs/verify/verify-docs-policy.sh
+
+      - name: Verify skill runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-skill-runtime-gates.sh
+          ./scripts/qa/run-skill-runtime-gates.sh
+
+      - name: Verify agent pack runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-agent-pack-runtime-gates.sh
+          ./scripts/qa/run-agent-pack-runtime-gates.sh
+
+      - name: Verify decision runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-decision-runtime-gates.sh
+          ./scripts/qa/run-decision-runtime-gates.sh
+
+      - name: Verify execution proof runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-execution-proof-runtime-gates.sh
+          ./scripts/qa/run-execution-proof-runtime-gates.sh

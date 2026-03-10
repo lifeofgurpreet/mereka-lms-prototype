@@ -1,0 +1,28 @@
+{
+  "canonical_inputs": [
+    "generated/knowledge/approval-receipt.json",
+    "generated/knowledge/evidence-receipt.json",
+    "generated/knowledge/execution-receipt.json",
+    "generated/knowledge/release-decision-receipt.json",
+    "generated/knowledge/runtime-proof-receipt.json"
+  ],
+  "decision_outputs": [
+    "generated/knowledge/review-decision.json",
+    "generated/knowledge/reviewer-obligations.json",
+    "generated/knowledge/evidence-obligations.json",
+    "generated/knowledge/read-first-packs.json",
+    "generated/knowledge/release-readiness.json",
+    "generated/knowledge/runtime-evaluation.json"
+  ],
+  "generated_by": "tools/knowledge/build_runtime_proof_receipt.py",
+  "pack_id": "proof-bundle-manifest",
+  "receipts": [
+    "generated/knowledge/execution-receipt.json",
+    "generated/knowledge/approval-receipt.json",
+    "generated/knowledge/evidence-receipt.json",
+    "generated/knowledge/release-decision-receipt.json",
+    "generated/knowledge/runtime-proof-receipt.json"
+  ],
+  "schema_version": 1,
+  "source_range": "origin/main...HEAD"
+}

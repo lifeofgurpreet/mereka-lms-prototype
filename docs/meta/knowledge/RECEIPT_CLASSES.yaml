@@ -1,0 +1,65 @@
+receipt_classes:
+  - id: execution_receipt
+    purpose: prove which deterministic commands and generators ran
+    canonical_inputs:
+      - generated/knowledge/review-decision.json
+      - generated/knowledge/reviewer-obligations.json
+      - generated/knowledge/evidence-obligations.json
+    required_fields:
+      - receipt_id
+      - schema_version
+      - commands_run
+      - generated_outputs
+      - canonical_inputs
+      - execution_scope
+    blocking_if_missing: true
+  - id: approval_receipt
+    purpose: record reviewer obligations and unresolved live approval inputs
+    canonical_inputs:
+      - generated/knowledge/reviewer-obligations.json
+      - generated/knowledge/release-readiness.json
+    required_fields:
+      - receipt_id
+      - schema_version
+      - required_reviewers
+      - escalation_reviewers
+      - unresolved_live_inputs
+      - canonical_inputs
+    blocking_if_missing: true
+  - id: evidence_receipt
+    purpose: record which evidence obligations are satisfied or still missing
+    canonical_inputs:
+      - generated/knowledge/evidence-obligations.json
+      - generated/skills/evidence-sufficiency-map.json
+    required_fields:
+      - receipt_id
+      - schema_version
+      - required_evidence_classes
+      - satisfied_evidence_classes
+      - missing_evidence_classes
+      - canonical_inputs
+    blocking_if_missing: true
+  - id: runtime_proof_receipt
+    purpose: attach runtime proof references without fabricating live convergence
+    canonical_inputs:
+      - generated/skills/runtime-convergence-report.json
+      - generated/knowledge/release-readiness.json
+    required_fields:
+      - receipt_id
+      - schema_version
+      - proof_references
+      - unresolved_runtime_inputs
+      - canonical_inputs
+    blocking_if_missing: false
+  - id: release_decision_receipt
+    purpose: bind release readiness to the receipts and decision inputs actually used
+    canonical_inputs:
+      - generated/knowledge/release-readiness.json
+      - generated/knowledge/review-decision.json
+    required_fields:
+      - receipt_id
+      - schema_version
+      - release_status
+      - dependent_receipts
+      - canonical_inputs
+    blocking_if_missing: true

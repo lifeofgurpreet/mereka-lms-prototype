@@ -1,0 +1,198 @@
+{
+  "canonical_inputs": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "generated/skills/evidence-sufficiency-map.json",
+    "generated/skills/mixed-diff-arbitration.json",
+    "generated/skills/pack-registry.json",
+    "generated/skills/runtime-convergence-report.json",
+    "generated/skills/skill-registry.json"
+  ],
+  "change_classes": [
+    "cross-repo-impact",
+    "documentation-truth",
+    "review"
+  ],
+  "decision": {
+    "blocking": false,
+    "reviewer_state": "required-reviewers-derived-live-approvals-unavailable",
+    "runtime_convergence_state": "warning",
+    "selected_skills": [
+      "change-impact-triage",
+      "control-plane-validation",
+      "docs-truth-review"
+    ],
+    "severity": "high"
+  },
+  "diff_range": "origin/main...HEAD",
+  "explanation": {
+    "blocking_reasons": [],
+    "evidence_summary": [
+      {
+        "evidence_class": "catalog_governance",
+        "required_reviewers": [
+          "docs",
+          "governance"
+        ]
+      },
+      {
+        "evidence_class": "docs_policy",
+        "required_reviewers": [
+          "docs",
+          "governance"
+        ]
+      },
+      {
+        "evidence_class": "source_of_truth_map",
+        "required_reviewers": [
+          "docs",
+          "platform"
+        ]
+      },
+      {
+        "evidence_class": "validation_run",
+        "required_reviewers": [
+          "docs",
+          "platform"
+        ]
+      }
+    ],
+    "required_evidence_classes": [
+      "catalog_governance",
+      "docs_policy",
+      "source_of_truth_map",
+      "validation_run"
+    ],
+    "selected_skill_categories": [
+      "cross-repo-impact",
+      "documentation-truth",
+      "review"
+    ]
+  },
+  "generated_by": "tools/knowledge/build_review_decision.py",
+  "missing_reviewers": [],
+  "pack_id": "review-decision",
+  "rationale_references": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "generated/skills/pack-registry.json",
+    "generated/skills/skill-registry.json",
+    "generated/skills/runtime-convergence-report.json",
+    "generated/skills/evidence-sufficiency-map.json",
+    "generated/skills/mixed-diff-arbitration.json"
+  ],
+  "read_first_packs": [
+    {
+      "pack_id": "pack-registry",
+      "reason": "required by change-impact-triage",
+      "source_skill": "change-impact-triage"
+    },
+    {
+      "pack_id": "runtime-convergence-report",
+      "reason": "required by change-impact-triage",
+      "source_skill": "change-impact-triage"
+    },
+    {
+      "pack_id": "mixed-diff-arbitration",
+      "reason": "required by change-impact-triage",
+      "source_skill": "change-impact-triage"
+    },
+    {
+      "pack_id": "read-first",
+      "reason": "required by control-plane-validation",
+      "source_skill": "control-plane-validation"
+    }
+  ],
+  "required_reviewers": [
+    "docs",
+    "governance",
+    "platform"
+  ],
+  "schema_version": 1,
+  "source_range": "origin/main...HEAD",
+  "touched_files": [
+    ".github/workflows/docs-policy.yml",
+    "docs/catalog.json",
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md",
+    "docs/meta/knowledge/schemas/evidence-obligations.schema.json",
+    "docs/meta/knowledge/schemas/read-first-packs.schema.json",
+    "docs/meta/knowledge/schemas/release-readiness.schema.json",
+    "docs/meta/knowledge/schemas/review-decision.schema.json",
+    "docs/meta/knowledge/schemas/reviewer-obligations.schema.json",
+    "docs/meta/knowledge/schemas/runtime-evaluation.schema.json",
+    "docs/meta/skills/AGENT_PACK_ABI.yaml",
+    "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+    "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+    "docs/meta/skills/SKILL_TAXONOMY.yaml",
+    "docs/meta/skills/WAVE11_CLOSEOUT.md",
+    "docs/meta/skills/WAVE11_EXECUTION_TRACKER.md",
+    "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md",
+    "docs/meta/skills/schemas/command-registry.schema.json",
+    "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json",
+    "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json",
+    "docs/meta/skills/schemas/pack-registry.schema.json",
+    "docs/meta/skills/schemas/read-first.schema.json",
+    "docs/meta/skills/schemas/runtime-convergence-report.schema.json",
+    "docs/meta/skills/schemas/scenario-packs.schema.json",
+    "docs/meta/skills/schemas/skill-dependency-graph.schema.json",
+    "docs/meta/skills/schemas/skill-registry.schema.json",
+    "fixtures/decision-runtime/scenarios.json",
+    "generated/catalogs/docs-catalog.json",
+    "generated/knowledge/evidence-obligations.json",
+    "generated/knowledge/read-first-packs.json",
+    "generated/knowledge/release-readiness.json",
+    "generated/knowledge/release-readiness.md",
+    "generated/knowledge/review-decision.json",
+    "generated/knowledge/review-decision.md",
+    "generated/knowledge/reviewer-obligations.json",
+    "generated/knowledge/runtime-evaluation.json",
+    "generated/skills/command-registry.json",
+    "generated/skills/evidence-sufficiency-map.json",
+    "generated/skills/mixed-diff-arbitration.json",
+    "generated/skills/pack-registry.json",
+    "generated/skills/read-first.json",
+    "generated/skills/read-first.md",
+    "generated/skills/runtime-convergence-report.json",
+    "generated/skills/scenario-packs.json",
+    "generated/skills/skill-dependency-graph.json",
+    "generated/skills/skill-registry.json",
+    "scripts/qa/run-agent-pack-runtime-gates.sh",
+    "scripts/qa/run-decision-runtime-gates.sh",
+    "scripts/qa/run-skill-runtime-gates.sh",
+    "tools/knowledge/build_evidence_obligations.py",
+    "tools/knowledge/build_read_first_packs.py",
+    "tools/knowledge/build_release_readiness.py",
+    "tools/knowledge/build_review_decision.py",
+    "tools/knowledge/build_reviewer_obligations.py",
+    "tools/knowledge/build_runtime_evaluation.py",
+    "tools/knowledge/verify_decision_runtime.py",
+    "tools/skills/build_command_registry.py",
+    "tools/skills/build_pack_registry.py",
+    "tools/skills/build_runtime_convergence_report.py",
+    "tools/skills/build_scenario_packs.py",
+    "tools/skills/build_skill_abi_maps.py",
+    "tools/skills/build_skill_dependency_graph.py",
+    "tools/skills/build_skill_registry.py",
+    "tools/skills/repo_discovery.py",
+    "tools/skills/verify_agent_pack_runtime.py",
+    "tools/skills/verify_agent_pack_schemas.py",
+    "tools/skills/verify_skill_runtime.py"
+  ],
+  "touched_repos": [
+    "bbi-infrastructure",
+    "mereka-lms",
+    "platform-control-plane"
+  ],
+  "touched_roots": [
+    ".github/workflows",
+    "docs",
+    "docs/meta/knowledge",
+    "docs/meta/skills",
+    "fixtures",
+    "generated",
+    "generated/catalogs",
+    "generated/skills",
+    "scripts/qa",
+    "tools",
+    "tools/skills"
+  ]
+}

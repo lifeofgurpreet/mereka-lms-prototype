@@ -1,0 +1,399 @@
+{
+  "canonical_inputs": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "fixtures/decision-runtime/scenarios.json",
+    "generated/skills/evidence-sufficiency-map.json",
+    "generated/skills/mixed-diff-arbitration.json",
+    "generated/skills/pack-registry.json",
+    "generated/skills/skill-registry.json"
+  ],
+  "fail_count": 0,
+  "false_positive_notes": [],
+  "generated_by": "tools/knowledge/build_runtime_evaluation.py",
+  "pack_id": "runtime-evaluation",
+  "pass_count": 10,
+  "regression_count": 0,
+  "scenario_results": [
+    {
+      "actual_evidence_classes": [
+        "catalog_governance",
+        "docs_policy"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "read-first"
+      ],
+      "actual_release_status": "ready",
+      "actual_reviewers": [
+        "docs",
+        "governance"
+      ],
+      "expected_evidence_classes": [
+        "catalog_governance",
+        "docs_policy"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "read-first"
+      ],
+      "expected_release_status": "ready",
+      "expected_reviewers": [
+        "docs",
+        "governance"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "docs_only_low_risk"
+    },
+    {
+      "actual_evidence_classes": [
+        "catalog_governance",
+        "docs_policy",
+        "validation_run"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "read-first"
+      ],
+      "actual_release_status": "advisory",
+      "actual_reviewers": [
+        "docs",
+        "governance",
+        "platform"
+      ],
+      "expected_evidence_classes": [
+        "catalog_governance",
+        "docs_policy",
+        "validation_run"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "read-first"
+      ],
+      "expected_release_status": "advisory",
+      "expected_reviewers": [
+        "docs",
+        "governance",
+        "platform"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "specs_only_normative"
+    },
+    {
+      "actual_evidence_classes": [
+        "cross_repo_alignment",
+        "release_contract",
+        "release_obligations",
+        "workflow_dispatch"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "evidence-sufficiency-map",
+        "mixed-diff-arbitration"
+      ],
+      "actual_release_status": "advisory",
+      "actual_reviewers": [
+        "docs",
+        "platform",
+        "release"
+      ],
+      "expected_evidence_classes": [
+        "cross_repo_alignment",
+        "release_contract",
+        "release_obligations",
+        "workflow_dispatch"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "evidence-sufficiency-map",
+        "mixed-diff-arbitration"
+      ],
+      "expected_release_status": "advisory",
+      "expected_reviewers": [
+        "docs",
+        "platform",
+        "release"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "workflow_or_contract_change"
+    },
+    {
+      "actual_evidence_classes": [
+        "cross_repo_alignment",
+        "release_contract",
+        "release_obligations",
+        "source_of_truth_map",
+        "workflow_dispatch"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "evidence-sufficiency-map",
+        "mixed-diff-arbitration"
+      ],
+      "actual_release_status": "break-glass-only",
+      "actual_reviewers": [
+        "docs",
+        "platform",
+        "release"
+      ],
+      "expected_evidence_classes": [
+        "cross_repo_alignment",
+        "release_contract",
+        "release_obligations",
+        "source_of_truth_map",
+        "workflow_dispatch"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "evidence-sufficiency-map",
+        "mixed-diff-arbitration"
+      ],
+      "expected_release_status": "break-glass-only",
+      "expected_reviewers": [
+        "docs",
+        "platform",
+        "release"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "cross_repo_release_change"
+    },
+    {
+      "actual_evidence_classes": [
+        "catalog_governance",
+        "cross_repo_alignment",
+        "docs_policy",
+        "release_obligations",
+        "source_of_truth_map"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration",
+        "read-first"
+      ],
+      "actual_release_status": "advisory",
+      "actual_reviewers": [
+        "docs",
+        "governance",
+        "platform"
+      ],
+      "expected_evidence_classes": [
+        "catalog_governance",
+        "cross_repo_alignment",
+        "docs_policy",
+        "release_obligations",
+        "source_of_truth_map"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration",
+        "read-first"
+      ],
+      "expected_release_status": "advisory",
+      "expected_reviewers": [
+        "docs",
+        "governance",
+        "platform"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "mixed_docs_specs_contracts"
+    },
+    {
+      "actual_evidence_classes": [
+        "catalog_governance",
+        "docs_policy"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "read-first"
+      ],
+      "actual_release_status": "ready",
+      "actual_reviewers": [
+        "docs",
+        "governance"
+      ],
+      "expected_evidence_classes": [
+        "catalog_governance",
+        "docs_policy"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "read-first"
+      ],
+      "expected_release_status": "ready",
+      "expected_reviewers": [
+        "docs",
+        "governance"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "proposal_only_change"
+    },
+    {
+      "actual_evidence_classes": [
+        "transitional_residue"
+      ],
+      "actual_read_first_order": [
+        "pack-registry"
+      ],
+      "actual_release_status": "ready",
+      "actual_reviewers": [
+        "docs"
+      ],
+      "expected_evidence_classes": [
+        "transitional_residue"
+      ],
+      "expected_read_first_order": [
+        "pack-registry"
+      ],
+      "expected_release_status": "ready",
+      "expected_reviewers": [
+        "docs"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "wrapper_retirement_change"
+    },
+    {
+      "actual_evidence_classes": [
+        "source_of_truth_map",
+        "validation_run"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration",
+        "read-first"
+      ],
+      "actual_release_status": "advisory",
+      "actual_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "expected_evidence_classes": [
+        "source_of_truth_map",
+        "validation_run"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration",
+        "read-first"
+      ],
+      "expected_release_status": "advisory",
+      "expected_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "runtime_control_plane_change"
+    },
+    {
+      "actual_evidence_classes": [
+        "catalog_governance",
+        "docs_policy",
+        "source_of_truth_map",
+        "validation_run"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration",
+        "read-first"
+      ],
+      "actual_release_status": "advisory",
+      "actual_reviewers": [
+        "docs",
+        "governance",
+        "platform"
+      ],
+      "expected_evidence_classes": [
+        "catalog_governance",
+        "docs_policy",
+        "source_of_truth_map",
+        "validation_run"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration",
+        "read-first"
+      ],
+      "expected_release_status": "advisory",
+      "expected_reviewers": [
+        "docs",
+        "governance",
+        "platform"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "high_risk_normative_change"
+    },
+    {
+      "actual_evidence_classes": [
+        "cross_repo_alignment",
+        "release_contract",
+        "release_notes_diff",
+        "release_obligations",
+        "rollback_target_reference",
+        "smoke_test_result",
+        "workflow_dispatch"
+      ],
+      "actual_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "evidence-sufficiency-map",
+        "mixed-diff-arbitration"
+      ],
+      "actual_release_status": "break-glass-only",
+      "actual_reviewers": [
+        "docs",
+        "platform",
+        "release"
+      ],
+      "expected_evidence_classes": [
+        "cross_repo_alignment",
+        "release_contract",
+        "release_notes_diff",
+        "release_obligations",
+        "rollback_target_reference",
+        "smoke_test_result",
+        "workflow_dispatch"
+      ],
+      "expected_read_first_order": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "evidence-sufficiency-map",
+        "mixed-diff-arbitration"
+      ],
+      "expected_release_status": "break-glass-only",
+      "expected_reviewers": [
+        "docs",
+        "platform",
+        "release"
+      ],
+      "mismatches": [],
+      "pass": true,
+      "scenario_id": "release_break_glass_scenario"
+    }
+  ],
+  "scenarios_run": 10,
+  "schema_version": 1,
+  "source_range": null,
+  "unresolved_ambiguities": [
+    "release readiness does not model live approval state",
+    "runtime convergence warnings still require manual follow-up"
+  ]
+}

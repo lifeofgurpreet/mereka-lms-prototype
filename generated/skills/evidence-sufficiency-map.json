@@ -1,0 +1,233 @@
+{
+  "canonical_inputs": [
+    "generated/skills/skill-registry.json"
+  ],
+  "evidence_classes": [
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "catalog_governance",
+      "required_for_skills": [
+        "docs-truth-review"
+      ],
+      "required_reviewers": [
+        "docs",
+        "governance"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "cross_repo_alignment",
+      "required_for_skills": [
+        "cross-repo-release-contract-review"
+      ],
+      "required_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "docs_policy",
+      "required_for_skills": [
+        "docs-truth-review"
+      ],
+      "required_reviewers": [
+        "docs",
+        "governance"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "release_contract",
+      "required_for_skills": [
+        "promotion-workflow-review"
+      ],
+      "required_reviewers": [
+        "platform",
+        "release"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "release_notes_diff",
+      "required_for_skills": [
+        "release-obligations-review"
+      ],
+      "required_reviewers": [
+        "platform",
+        "release"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "release_obligations",
+      "required_for_skills": [
+        "cross-repo-release-contract-review"
+      ],
+      "required_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "rollback_target_reference",
+      "required_for_skills": [
+        "release-obligations-review"
+      ],
+      "required_reviewers": [
+        "platform",
+        "release"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "runbook_reference",
+      "required_for_skills": [
+        "runbook-evidence-triage"
+      ],
+      "required_reviewers": [
+        "docs",
+        "ops"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "service_identity",
+      "required_for_skills": [
+        "service-identity-lookup"
+      ],
+      "required_reviewers": [
+        "platform"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "smoke_test_result",
+      "required_for_skills": [
+        "release-obligations-review"
+      ],
+      "required_reviewers": [
+        "platform",
+        "release"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "source_of_truth_map",
+      "required_for_skills": [
+        "change-impact-triage"
+      ],
+      "required_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "topology_contract",
+      "required_for_skills": [
+        "topology-lookup"
+      ],
+      "required_reviewers": [
+        "platform"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "transitional_residue",
+      "required_for_skills": [
+        "wrapper-retirement-assessment"
+      ],
+      "required_reviewers": [
+        "docs"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "validation_run",
+      "required_for_skills": [
+        "control-plane-validation"
+      ],
+      "required_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    },
+    {
+      "escalation_if_missing": [
+        "block merge or promotion",
+        "route to highest-risk reviewer set"
+      ],
+      "evidence_class": "workflow_dispatch",
+      "required_for_skills": [
+        "promotion-workflow-review"
+      ],
+      "required_reviewers": [
+        "platform",
+        "release"
+      ],
+      "sufficiency_policy": "all-required-reviewers-must-confirm-or-explicitly-delegate"
+    }
+  ],
+  "generated_by": "tools/skills/build_skill_abi_maps.py",
+  "pack_id": "evidence-sufficiency-map",
+  "schema_version": 1,
+  "source_range": null
+}

@@ -1,0 +1,45 @@
+{
+  "affected_contracts": [
+    "contracts/release-contracts.yaml",
+    "contracts/service-identity-contract.yaml"
+  ],
+  "affected_repos": [
+    "bbi-infrastructure",
+    "mereka-lms",
+    "platform-control-plane"
+  ],
+  "canonical_inputs": [
+    "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+    "generated/knowledge/approval-receipt.json",
+    "generated/knowledge/evidence-receipt.json",
+    "generated/knowledge/execution-receipt.json",
+    "generated/knowledge/release-readiness.json",
+    "generated/knowledge/review-decision.json"
+  ],
+  "dependent_receipts": [
+    "generated/knowledge/execution-receipt.json",
+    "generated/knowledge/approval-receipt.json",
+    "generated/knowledge/evidence-receipt.json"
+  ],
+  "explanation": [
+    "blocking decision state is False",
+    "decision severity is high",
+    "read-first priority packs: pack-registry, runtime-convergence-report, mixed-diff-arbitration",
+    "required evidence obligations: 4",
+    "required reviewer groups: docs, governance, platform",
+    "review severity is high",
+    "runtime convergence state is warning"
+  ],
+  "generated_by": "tools/knowledge/build_release_decision_receipt.py",
+  "receipt_id": "release-decision-receipt",
+  "release_status": "advisory",
+  "schema_version": 1,
+  "source_range": "origin/main...HEAD",
+  "unresolved_inputs": [
+    "catalog_governance",
+    "docs_policy",
+    "live reviewer approvals are unresolved input",
+    "source_of_truth_map",
+    "validation_run"
+  ]
+}

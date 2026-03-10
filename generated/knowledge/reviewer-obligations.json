@@ -1,0 +1,52 @@
+{
+  "canonical_inputs": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "generated/knowledge/review-decision.json",
+    "generated/skills/skill-registry.json"
+  ],
+  "diff_range": "origin/main...HEAD",
+  "escalation_reviewers": [
+    "docs",
+    "governance",
+    "platform"
+  ],
+  "generated_by": "tools/knowledge/build_reviewer_obligations.py",
+  "optional_reviewers": [],
+  "pack_id": "reviewer-obligations",
+  "required_reviewer_groups": [
+    "docs",
+    "governance",
+    "platform"
+  ],
+  "reviewer_justifications": [
+    {
+      "blocking": true,
+      "reason": "docs is required because change-impact-triage, control-plane-validation, docs-truth-review selects this reviewer in the canonical skill registry",
+      "required_by_skills": [
+        "change-impact-triage",
+        "control-plane-validation",
+        "docs-truth-review"
+      ],
+      "reviewer": "docs"
+    },
+    {
+      "blocking": true,
+      "reason": "governance is required because docs-truth-review selects this reviewer in the canonical skill registry",
+      "required_by_skills": [
+        "docs-truth-review"
+      ],
+      "reviewer": "governance"
+    },
+    {
+      "blocking": true,
+      "reason": "platform is required because change-impact-triage, control-plane-validation selects this reviewer in the canonical skill registry",
+      "required_by_skills": [
+        "change-impact-triage",
+        "control-plane-validation"
+      ],
+      "reviewer": "platform"
+    }
+  ],
+  "schema_version": 1,
+  "source_range": "origin/main...HEAD"
+}
