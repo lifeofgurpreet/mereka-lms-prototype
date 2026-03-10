@@ -1,10 +1,9 @@
-# Kajabi Re-Migration Runbook (Feb 2026)
+# Kajabi Re-Migration Runbook
 
-_Audience: Platform Eng • Owner: Migration Squad • Created: 2026-02-08_
+_Audience: Platform Eng • Owner: Migration Squad • Last reviewed: 2026-03-10_
 
-> The Open edX instance (`mereka-lms` namespace on GKE) was intentionally rebuilt
-> and is empty (0 courses, 0 users, 0 enrollments). This runbook covers the fresh
-> re-migration from Kajabi.
+> Use this runbook when the target Open edX environment must be repopulated from
+> the Kajabi export pipeline after a rebuild, reset, or failed migration attempt.
 
 ## Prerequisites
 
@@ -188,7 +187,8 @@ python3 scripts/migrations/kajabi/prepare_openedx_imports.py \
   --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 ```
 
-**TODO**: Filter users_import.csv to only enrolled users (~73K), not all contacts.
+The import set must be limited to users with actual enrollments rather than the
+full Kajabi contacts universe.
 
 ---
 
@@ -251,12 +251,11 @@ with open('exports/kajabi/completions.ndjson') as f:
             if key not in completions:
                 completions[key] = d
 print(f'Unique course completions: {len(completions)}')
-# TODO: Map course_prefix to Open edX course key, then call generate_certificates
 "
 ```
 
-Full certificate issuance script TBD — requires mapping tag prefixes (F101, MYFC, PB, etc.)
-to Open edX course keys.
+Certificate issuance requires a maintained mapping from Kajabi tag prefixes to
+Open edX course keys before invoking the certificate workflow.
 
 ---
 
@@ -297,87 +296,6 @@ python3 scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
 | `Missing KAJABI_CLIENT_ID` | Use `infisical run --path=/mereka-lms/kajabi` prefix |
 | Course import fails | Check CMS pod logs: `kubectl logs -n mereka-lms deploy/cms --tail=50` |
 | Batch import resumes wrong | Delete offset file in `scripts/migrations/kajabi/logs/` |
-
----
-
-## Current Status (2026-02-08)
-
-### Completed
-
-- [x] **Infisical**: Kajabi credentials at `/mereka-lms/kajabi` (prod + dev)
-- [x] **Full API export**: All 17 resources to `exports/kajabi/` (691MB)
-- [x] **Course structure**: 218 courses, 846 modules, 3,146 lessons
-- [x] **New endpoints**: landing_pages (22), podcasts (1), blog_posts (0), contact_notes (0)
-- [x] **Completions export**: 11,179 records from 50 lifecycle tags (via `filter[has_tag_id]`)
-- [x] **Transform**: CSVs + 109 OLX packages ready
-- [x] **User filter**: Import pipeline filters to enrolled users only (73K, not 326K contacts)
-- [x] **Tag-to-course mapping**: All 9 standard + 3 non-standard tag prefixes mapped to Open edX course keys
-- [x] **Script updates**: All scripts committed and pushed
-
-### Pending (import not yet started)
-
-- [ ] **Import**: Courses, users, enrollments into Open edX (dry-run first)
-- [ ] **Certificates**: Use completions + mapping to issue certs via `generate_certificates`
-- [ ] **Lesson content**: Scrape HTML bodies from Kajabi admin (API doesn't expose them)
-- [ ] **Webhooks**: Deploy real-time sync for new purchases/enrollments
-
-### Export Counts (Feb 2026)
-
-| Resource | Count |
-|----------|-------|
-| contacts | 326,104 |
-| customers | 189,640 |
-| courses_index | 218 |
-| purchases | 219,204 |
-| offers | 768 |
-| products | 224 |
-| contact_tags | 196 |
-| custom_fields | 52 |
-| landing_pages | 22 |
-| podcasts | 1 |
-| completions | 11,179 |
-| structure/modules | 846 |
-| structure/lessons | 3,146 |
-| structure/lesson_media | 1,394 |
-
-### Import-Ready Counts
-
-| File | Records |
-|------|---------|
-| `users_import.csv` | 73,107 (enrolled users only, deduplicated) |
-| `enrollments_import.csv` | 386,300 |
-| `course_packages/` | 109 OLX tarballs |
-| `tag_prefix_to_course_mapping.json` | 12 prefix mappings (9 standard + 3 non-standard) |
-
-### Completion Tags Summary
-
-50 lifecycle tags across 9 course prefixes. Key counts:
-
-| Tag Type | Example | Typical Count |
-|----------|---------|---------------|
-| `course_completed` | "F101 - Course Completed" | 100–1,134 |
-| `quiz_completed` | "MYFC - Quiz 3 Completed" | 50–800 |
-| `started` | "PB - Started" | 200–1,134 |
-| `onboarded` | "PF - Onboarded" | 100–900 |
-| `certificate` | "mce-cert" | 1–100 |
-
-**API gotcha**: Use `filter[has_tag_id]` (NOT `filter[tag_id]`) — Kajabi silently ignores unknown filter params.
-
-### Courses Without Completion Tags
-
-These courses have quiz lessons but no Kajabi tags were set up for them:
-- **DP**: Digital Presence / Keterlihatan Digital
-- **DT**: Digital Transformation / Transformasi Digital
-- **AI**: Azure AI Fundamentals AI-900
-- **PKMU**: Profil Keterampilan yang Membuatmu Unggul (Indonesian Skills Profiling)
-
-### Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `kajabi-export.mjs` | Full API export (17 resource types) |
-| `kajabi-course-structure.mjs` | Course modules/lessons/media |
-| `kajabi-export-completions.mjs` | Tag-based completion data (`filter[has_tag_id]`) |
 | `transform_data.py` | NDJSON → CSVs |
 | `build_course_packages.py` | CSVs → OLX tarballs |
 | `prepare_openedx_imports.py` | Generate import-ready CSVs (enrolled-only, deduplicated) |
