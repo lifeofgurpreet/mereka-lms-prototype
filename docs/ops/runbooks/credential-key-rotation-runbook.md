@@ -81,11 +81,11 @@ print(f"Public key (base64): {public_b64}")
 ### 2. Store New Private Key in Infisical
 
 ```bash
-# Set Infisical context (must run from repo with .infisical.json)
-cd /home/gurpreet/projects/k8s/mereka-lms
+# Set Infisical context (must run from the app repo with `.infisical.json`)
+cd <repo-root>
 
 # Store new private key (base64-encoded)
-INFISICAL=/home/gurpreet/projects/vps/infrastructure/scripts/infisical
+INFISICAL="${INFISICAL:-<path-to-infisical-cli>}"
 NEW_PRIVATE_KEY_B64=$(cat private_key_b64.txt)
 
 ${INFISICAL} secrets set MEREKA_LMS_VC_SIGNING_PRIVATE_KEY="${NEW_PRIVATE_KEY_B64}" \

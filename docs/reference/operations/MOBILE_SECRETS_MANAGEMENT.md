@@ -130,7 +130,7 @@ kubectl exec -it -n mereka-lms deploy/lms -- bash
 # (Secret is printed during creation if --skip-authorization is used)
 
 # 3. Update Infisical
-INFISICAL=/home/gurpreet/projects/vps/infrastructure/scripts/infisical
+INFISICAL="${INFISICAL:-<path-to-infisical-cli>}"
 ${INFISICAL} secrets set MEREKA_LMS_MOBILE_IOS_PROD_CLIENT_SECRET="<new-secret>" \
   --domain https://secrets.mereka.io/api \
   --env prod \
