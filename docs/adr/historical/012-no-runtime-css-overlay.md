@@ -148,6 +148,6 @@ A routine OpenEdX image rebuild changed the collectstatic hash from `859d9914b5f
 
 - [ADR-003: Image Build Pipeline](003-image-build-pipeline.md)
 - [BRANDING_GUARDRAILS.md](../guides/branding/BRANDING_GUARDRAILS.md)
-- [RELEASE_CHECKLIST.md](../operations/RELEASE_CHECKLIST.md)
+- [RELEASE_CHECKLIST.md](../../ops/runbooks/RELEASE_CHECKLIST.md)
 - [Django ManifestStaticFilesStorage](https://docs.djangoproject.com/en/4.2/ref/contrib/staticfiles/#manifeststaticfilesstorage)
 - Incident: 2026-02-10 production branding regression (commit `6193b75` in infrastructure)

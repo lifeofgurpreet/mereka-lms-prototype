@@ -152,7 +152,7 @@ The `rke2-nonprod` overlay kustomization (`deploy/k8s/overlays/rke2-nonprod/kust
 ### Risks
 
 - **GHCR package visibility**: GHCR packages default to private. If the `ghcr-registry` secret is ever rotated or deleted from the namespace, enterprise pods will fail to pull. Mitigation: `ghcr-registry` is managed as an ExternalSecret synced from Infisical; rotation is handled automatically.
-- **Forking frozen upstreams**: If a CVE is discovered in a frozen enterprise service, a fork-and-rebuild process is required. This process is not yet documented. Mitigation: add a runbook to `docs/operations/` if a CVE event occurs; the Trivy scan in CI will surface CVEs in the base images.
+- **Forking frozen upstreams**: If a CVE is discovered in a frozen enterprise service, a fork-and-rebuild process is required. This process is not yet documented. Mitigation: add a runbook under `docs/ops/runbooks/` if a CVE event occurs; the Trivy scan in CI will surface CVEs in the base images.
 - **MFE upstream divergence**: `enterprise-admin-portal` and `enterprise-learner-portal` are not frozen. If upstream makes a breaking change to the MFE, the Dockerfile in `infrastructure/docker/enterprise-mfe-clean/` will need to be updated. Mitigation: the rebuild workflow is manually triggered, giving the team control over when to adopt upstream changes.
 
 ## Alternatives Considered

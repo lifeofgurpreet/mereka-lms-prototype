@@ -20,13 +20,13 @@ Wave 2B-Final closed the gap between the documentation governance model and the 
 
 ## Losing roots now stub-only
 
-These roots are now transitional-only and must not carry live substantive content:
+These losing roots are now tombstone-only or archival and must not carry live substantive content:
 
-- `docs/operations/**`
-- `docs/architecture/**`
-- `docs/runbooks/**`
-- `docs/onboarding/**`
-- `docs/branding/**`
+- `docs/operations/README.md`
+- `docs/architecture/README.md`
+- `docs/runbooks/README.md`
+- `docs/onboarding/README.md`
+- `docs/branding/README.md`
 - top-level `evidence/**`
 - overlapping active report roots under `reports/**`
 
