@@ -5924,6 +5924,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/platform/SOURCE_MAP.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "guides/standards/ADR_LANGUAGE_STYLE.md",
@@ -6476,6 +6485,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/knowledge/WAVE13_REVIEW_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/WAVE14_EXECUTION_TRACKER.md",
     "status": "supporting",
     "type": "other"
   },

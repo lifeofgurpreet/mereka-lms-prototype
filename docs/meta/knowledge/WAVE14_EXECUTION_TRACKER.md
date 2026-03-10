@@ -1,25 +1,29 @@
 # Wave 14 Execution Tracker
 
 ## Latest substantive packet head
-- 191761c29aeabec3e62720bcf44e68bc640d3ec1
+- cc21ba6f2645fe5a4142a1c34c4157ec18539fe1
 
 ## Last completed batch
-- commit: 191761c29aeabec3e62720bcf44e68bc640d3ec1
-- scope: Wave 13 closeout baseline inherited for Wave 14 start
-- validators run: inherited from Wave 13 closeout; Wave 14 Packet A validators pending on first substantive commit
-- result: base is review-ready and safe to branch from
+- commit: cc21ba6f2645fe5a4142a1c34c4157ec18539fe1
+- scope: reconciled Wave 10-13 runtime lineage landed on dedicated mainline-ready branch
+- validators run: docs policy, cross-repo agent gates, skill runtime gates, agent pack runtime gates, decision runtime gates, execution proof runtime gates
+- result: Wave 14 now builds on the reconciled runtime base instead of the split lineage
 
 ## Current target packet
 - files:
+  - docs/catalog.json
+  - generated/catalogs/docs-catalog.json
   - docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md
   - docs/guides/platform/SOURCE_MAP.md
 - goal:
+  - reassert Packet A on top of the reconciled runtime base
   - lock the Wave 14 handbook tree before prose or generators land
   - map human handbook pages to canonical internal and official external sources
   - keep volatile access and topology facts on generated reference surfaces only
 - stop condition:
   - tracker exists
   - handbook tree is locked under canonical docs roots
+  - docs catalog reflects the new handbook source map
   - generated references are explicitly separated from handwritten pages
 
 ## Locked handbook topology
@@ -40,7 +44,7 @@
 
 ## Open residue
 - base `main` is current with `origin/main`, but the base checkout is dirty and must remain untouched during Wave 14
-- some historical Wave 10 example paths named in the brief are not present on the current `main` checkout; Wave 14 must anchor to live canonical paths on the Wave 13 lineage instead of recreating them
+- some historical Wave 10 example paths named in the brief are not present on the current `main` checkout; Wave 14 must anchor to live canonical paths on the reconciled Wave 10-13 lineage instead of recreating them
 - live approval state, live runtime evidence attachment, and vendor bot integrations remain intentionally unresolved outside the scope of this handbook wave
 
 ## Next queued packet
