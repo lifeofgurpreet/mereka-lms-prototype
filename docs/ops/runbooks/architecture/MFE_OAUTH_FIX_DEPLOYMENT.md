@@ -40,7 +40,7 @@ scripts/qa/test-mfe-oauth-fix.sh
 The custom app needs to be built into the Open edX Docker image:
 
 ```bash
-cd /home/gurpreet/projects/k8s/mereka-lms
+cd <repo-root>
 
 # Source Tutor environment
 source infrastructure/tutor/tutor-env.sh
@@ -112,7 +112,7 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=100 | grep -i "m
 If you want to test locally first:
 
 ```bash
-cd /home/gurpreet/projects/k8s/mereka-lms
+cd <repo-root>
 
 # Apply patches
 ./infrastructure/tutor/apply-patches.sh
@@ -221,9 +221,9 @@ tutor images build openedx
 
 ## Related Files
 
-- Custom app: `/home/gurpreet/projects/k8s/mereka-lms/infrastructure/tutor/custom-apps/mfe_oauth_fix/`
-- Test script: `/home/gurpreet/projects/k8s/mereka-lms/scripts/qa/test-mfe-oauth-fix.sh`
-- Patches: `/home/gurpreet/projects/k8s/mereka-lms/infrastructure/tutor/apply-patches.sh`
+- Custom app: `infrastructure/tutor/custom-apps/mfe_oauth_fix/`
+- Test script: `scripts/qa/test-mfe-oauth-fix.sh`
+- Patches: `infrastructure/tutor/apply-patches.sh`
 
 ## References
 

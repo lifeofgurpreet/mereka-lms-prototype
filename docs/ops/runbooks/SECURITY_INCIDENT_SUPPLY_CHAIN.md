@@ -101,8 +101,8 @@ echo "| $(date -I) | <package>==<version> | CVE-XXXX-XXXXX | INC-NNN | $(date -d
 kubectl get secret -n mereka-lms -o name | xargs -I{} \
   kubectl get {} -n mereka-lms -o jsonpath='{.metadata.name}: {.metadata.annotations}'
 
-# Rotate via Infisical — run from reka-slackbot dir:
-cd /home/gurpreet/projects/k8s/reka-slackbot
+# Rotate via Infisical — run from any repo/workdir configured with `.infisical.json`:
+cd <repo-root-with-infisical-context>
 infisical secrets set MEREKA_LMS_<SECRET_NAME>="<NEW_VALUE>" \
   --domain https://secrets.mereka.io/api --env prod --path /
 ```
