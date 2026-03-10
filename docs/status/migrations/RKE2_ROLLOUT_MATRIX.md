@@ -142,14 +142,19 @@ kubectl --context <ctx> get deploy lms -n mereka-lms \
 
 ### Evidence Folder Convention
 
-```
-docs/operations/
-├── RKE2_LMS_HANDOFF.md           # Cross-repo touchpoint note (2j6g)
-├── RKE2_ROLLOUT_MATRIX.md        # This file (2j6g.1 + 2j6g.2)
-├── docs/evidence/operations/KIND_CLUSTER_RECOVERY_EVIDENCE.md  # Kind fixes (3cdw)
-├── docs/evidence/operations/GKE_WORKLOAD_TRIAGE_EVIDENCE.md    # GKE triage (3k2i)
-└── ops/runbooks/
-    └── DEPLOYMENT_RUNBOOK.md      # Full deployment procedure
+```text
+reports/2026/closures/
+├── RKE2_LMS_HANDOFF.md                  # Cross-repo touchpoint note (2j6g)
+docs/status/migrations/
+├── RKE2_ROLLOUT_MATRIX.md               # This file (2j6g.1 + 2j6g.2)
+docs/evidence/operations/
+├── KIND_CLUSTER_RECOVERY_EVIDENCE.md    # Kind fixes (3cdw)
+├── GKE_WORKLOAD_TRIAGE_EVIDENCE.md      # GKE triage (3k2i)
+docs/reference/operations/
+└── CANONICAL_DEPLOY_CONTRACT.md         # Canonical deploy contract
+docs/ops/runbooks/
+├── RELEASE_EXECUTE_RUNBOOK.md           # Release execution procedure
+└── POSTDEPLOY_SMOKE_AND_INCIDENT.md     # Postdeploy validation / incident path
 ```
 
 ### Deliverable Checksums

@@ -68,8 +68,8 @@
 
 ### Evidence Artifacts Required at Contract Closure
 
-- [ ] Signed contract PDF → `docs/operations/contracts/PROCTORING_CONTRACT_<provider>.pdf`
-- [ ] DPA acknowledgement → `docs/operations/contracts/PROCTORING_DPA_<provider>.pdf`
+- [ ] Signed contract PDF → secure legal/vendor evidence store (not committed to this repo)
+- [ ] DPA acknowledgement → secure legal/vendor evidence store (not committed to this repo)
 - [ ] API credentials → GCP SM `bbi-k8` project (see §3)
 - [ ] Sandbox test evidence → `docs/status/readiness/PROCTORING_IMPLEMENTATION_READINESS.md`
 
