@@ -42,11 +42,14 @@ def render_index(specs_dir: Path) -> str:
     # Count by status
     status_counts = {}
     lane_counts = {}
+    doc_type_counts = {}
     for entry in entries:
         s = entry.get("status", "—")
         status_counts[s] = status_counts.get(s, 0) + 1
         lane = entry.get("lane", "unknown")
         lane_counts[lane] = lane_counts.get(lane, 0) + 1
+        doc_type = entry.get("doc_type", "unknown")
+        doc_type_counts[doc_type] = doc_type_counts.get(doc_type, 0) + 1
 
     lines = [
         "# Specification Index",
@@ -62,13 +65,26 @@ def render_index(specs_dir: Path) -> str:
         lines.append(f"- **{status}**: {count} items")
     for lane, count in sorted(lane_counts.items()):
         lines.append(f"- **lane:{lane}**: {count} items")
+    for doc_type, count in sorted(doc_type_counts.items()):
+        lines.append(f"- **type:{doc_type}**: {count} items")
     lines.append("")
 
     sections = [
-        ("Normative Specs", [e for e in entries if e.get("lane") == "normative"]),
+        (
+            "Normative Specs",
+            [
+                e
+                for e in entries
+                if e.get("lane") == "normative" and e.get("doc_type") != "generated"
+            ],
+        ),
         ("Proposal Specs", [e for e in entries if e.get("lane") == "proposal"]),
         ("Plans", [e for e in entries if e.get("lane") == "plan"]),
         ("Test Plans", [e for e in entries if e.get("lane") == "testplan"]),
+        (
+            "Compatibility Wrappers",
+            [e for e in entries if e.get("doc_type") == "generated"],
+        ),
     ]
     for title, section_entries in sections:
         if section_entries:

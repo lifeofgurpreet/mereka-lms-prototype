@@ -21,7 +21,7 @@ depends_on:
   - "specs/badges-credentials-enterprise_spec.md"
   - "specs/content-libraries-v2_spec.md"
   - "specs/advanced-assessment-xqueue_spec.md"
-  - "specs/external-registration-hubspot_spec.md"
+  - "specs/proposals/external-registration-hubspot_spec.md"
 supersedes: []
 superseded_by: null
 verification_sources:
@@ -126,7 +126,7 @@ Without this spec:
   - PCI DSS compliance (Stripe handles all card data per `specs/ecommerce-purchase-gateway_spec.md`)
   - HIPAA compliance (no health data is processed)
   - Children's data protection (COPPA, Age Appropriate Design Code) unless an enterprise tenant specifically requires it
-  - Mobile app privacy controls (covered by `specs/mobile-apps-enterprise_spec.md`)
+  - Mobile app privacy controls (covered by `specs/proposals/mobile-apps-enterprise_spec.md`)
 
 ## Non-goals
 

@@ -249,5 +249,5 @@ class NotificationPreference(models.Model):
 - **Runbook**: `docs/archive/superseded/runbooks/email-notifications-runbook.md`
 - **Operations**: `docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md`
 - **Multi-Tenancy**: `specs/multi-tenancy-architecture_spec.md`
-- **Mobile Apps**: `specs/mobile-apps-enterprise_spec.md`
+- **Mobile Apps**: `specs/proposals/mobile-apps-enterprise_spec.md`
 - **GDPR Compliance**: `specs/data-privacy-gdpr-compliance_spec.md`

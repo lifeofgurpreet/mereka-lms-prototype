@@ -3,7 +3,7 @@
 **Status**: Accepted
 **Date**: 2026-02-13
 **Deciders**: Platform Team
-**Related**: [Mobile Apps Secrets Management Spec](../../specs/mobile-apps-secrets-management_spec.md)
+**Related**: [Mobile Apps Secrets Management Spec](../../specs/proposals/mobile-apps-secrets-management_spec.md)
 
 <!-- Last verified: 2026-02-13 -->
 
@@ -203,7 +203,7 @@ Open edX uses **ACE (Automated Communication Engine)** with a pluggable `ACE_PUS
 
 ### Firebase Setup (Current)
 
-**Required secrets** (see `specs/mobile-apps-secrets-management_spec.md`):
+**Required secrets** (see `specs/proposals/mobile-apps-secrets-management_spec.md`):
 ```
 MEREKA_LMS_MOBILE_FCM_SERVICE_ACCOUNT_JSON  # Firebase service account
 MEREKA_LMS_MOBILE_FCM_SERVER_KEY            # Legacy API key (deprecated)

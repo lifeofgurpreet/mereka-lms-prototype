@@ -57,7 +57,7 @@ Generated from `depends_on` frontmatter in spec files.
 | Spec | ACs | Title |
 |------|-----|-------|
 | auth-sso-enterprise_spec.md | 45 | Authentication & SSO Enterprise Integration |
-| paragon-design-tokens-migration_spec.md | 41 | Paragon Design Tokens Migration *(depends on: oep48-brand-package, design-tokens-system)* |
+| plans/paragon-design-tokens-migration_spec.md | 41 | Paragon Design Tokens Migration *(depends on: oep48-brand-package, design-tokens-system)* |
 
 ## Tier 6
 
@@ -74,14 +74,14 @@ Generated from `depends_on` frontmatter in spec files.
 | content-libraries-v2_spec.md | 33 | Content Libraries v2 Management & Enterprise Usage |
 | ecommerce-purchase-gateway_spec.md | 33 | Ecommerce Purchase Gateway (Stripe -> Open edX Integration) |
 | email-notifications-pipeline_spec.md | 45 | Email & Notifications Pipeline |
-| mobile-apps-enterprise_spec.md | 37 | Mobile Apps (iOS + Android) Enterprise Deployment |
+| proposals/mobile-apps-enterprise_spec.md | 37 | Mobile Apps (iOS + Android) Enterprise Deployment |
 
 ## Tier 8
 
 | Spec | ACs | Title |
 |------|-----|-------|
-| external-registration-hubspot_spec.md | 26 | External Registration via HubSpot |
-| proctoring-integration_spec.md | 38 | Proctoring Integration for Enterprise Open edX |
+| proposals/external-registration-hubspot_spec.md | 26 | External Registration via HubSpot |
+| proposals/proctoring-integration_spec.md | 38 | Proctoring Integration for Enterprise Open edX |
 
 ## Tier 9
 

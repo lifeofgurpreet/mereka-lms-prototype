@@ -138,7 +138,7 @@ These have specs but are explicitly deferred. They'll be picked up when there's 
 | Feature | Spec | ACs | Trigger | ADR |
 |---------|------|-----|---------|-----|
 | **Proctoring** | `proctoring-integration_spec.md` | 38 | Client demand (2027+) | ADR-015 |
-| **Android Mobile** | `mobile-apps-enterprise_spec.md` | 37 | Resource availability (iOS first) | ADR-016 |
+| **Android Mobile** | `proposals/mobile-apps-enterprise_spec.md` | 37 | Resource availability (iOS first) | ADR-016 |
 | **Data Privacy/GDPR** | `data-privacy-gdpr-compliance_spec.md` | 93 | Regulatory requirement | — |
 
 ---

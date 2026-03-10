@@ -102,9 +102,9 @@ Mereka Academy's target users are in Southeast Asia where network conditions ran
 - CDN deployment in front of Caddy/LoadBalancer (future infrastructure work)
 - Service worker implementation (deferred -- documented as consideration only)
 - Backend API response time optimization (covered by cross-cutting NFRs)
-- PARAGON_THEME_URLS runtime theming (covered by `paragon-design-tokens-migration_spec.md`)
+- PARAGON_THEME_URLS runtime theming (covered by `specs/plans/paragon-design-tokens-migration_spec.md`)
 - MFE code splitting implementation details (this spec defines the budget, not the technique)
-- Mobile native app performance (covered by `mobile-apps-enterprise_spec.md`)
+- Mobile native app performance (covered by `proposals/mobile-apps-enterprise_spec.md`)
 
 ## Non-goals
 
@@ -272,7 +272,7 @@ Mereka Academy's target users are in Southeast Asia where network conditions ran
 
 ### Downstream
 
-- **paragon-design-tokens-migration_spec.md**: When PARAGON_THEME_URLS is enabled, CSS delivery changes from build-time to runtime. Performance budgets may need adjustment (MFE CSS shrinks, but runtime CSS fetch adds latency).
+- **specs/plans/paragon-design-tokens-migration_spec.md**: When PARAGON_THEME_URLS is enabled, CSS delivery changes from build-time to runtime. Performance budgets may need adjustment (MFE CSS shrinks, but runtime CSS fetch adds latency).
 - **oep48-brand-package_spec.md**: The brand package consolidation may change how fonts and logos are referenced, affecting preload hints and cache behavior.
 
 ## Verification

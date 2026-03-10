@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @covers AC-TKN-018, AC-TKN-019, AC-TKN-024, AC-TKN-025, AC-TKN-026
 # @covers AC-TKN-027, AC-TKN-028, AC-TKN-032, AC-008
-# @spec: paragon-design-tokens-migration_spec.md
+# @spec: plans/paragon-design-tokens-migration_spec.md
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

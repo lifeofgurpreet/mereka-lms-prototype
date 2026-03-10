@@ -5,9 +5,16 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 import yaml
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.specs.spec_tooling import iter_lane_files
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
 
@@ -37,11 +44,10 @@ def main() -> None:
 
     repo_root = Path(args.repo_root).resolve()
     taxonomy = load_taxonomy(repo_root / "specs" / "standards" / "spec-taxonomy.yaml")
-    specs = sorted((repo_root / "specs").glob("*_spec.md"))
+    lane_files = [path for _, path in iter_lane_files(repo_root)]
     invalid = []
-    legacy_status_hits = 0
 
-    for spec in specs:
+    for spec in lane_files:
         fm = parse_frontmatter(spec)
         checks = {
             "status": fm.get("status"),
@@ -54,17 +60,13 @@ def main() -> None:
                 continue
             if value not in taxonomy[key]:
                 invalid.append((spec.relative_to(repo_root).as_posix(), key, value))
-            elif key == "status" and value in {"completed", "in_progress", "deferred"}:
-                legacy_status_hits += 1
 
     if invalid:
         for path, key, value in invalid:
             print(f"SPEC_TAXONOMY_FAIL {path} field={key} value={value}")
         raise SystemExit(1)
 
-    print(
-        f"SPEC_TAXONOMY_OK files_checked={len(specs)} legacy_status_hits={legacy_status_hits}"
-    )
+    print(f"SPEC_TAXONOMY_OK files_checked={len(lane_files)} legacy_status_hits=0")
 
 
 if __name__ == "__main__":

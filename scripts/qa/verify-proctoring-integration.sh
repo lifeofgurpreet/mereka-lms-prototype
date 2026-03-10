@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# @spec: proctoring-integration_spec.md
+# @spec: proposals/proctoring-integration_spec.md
 # @covers AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-020, AC-021, AC-022, AC-023, AC-024, AC-025, AC-026, AC-027, AC-028, AC-029, AC-030, AC-031, AC-032, AC-033, AC-034, AC-035, AC-036, AC-037, AC-038
 #
 # Consolidated proctoring integration verification script.
 #
-# Covers all 38 ACs in proctoring-integration_spec.md:
+# Covers all 38 ACs in proposals/proctoring-integration_spec.md:
 #   Offline mode  — checks edx-proctoring package presence in requirements,
 #                   proctoring settings in LMS config, secret key definitions
 #                   in ExternalSecrets, and documentation completeness.
@@ -81,11 +81,11 @@ EXTERNAL_SECRETS="deploy/k8s/base/secrets/external-secrets.yaml"
 VENDOR_READINESS="docs/status/readiness/PROCTORING_VENDOR_READINESS.md"
 RUNBOOK="docs/operations/runbooks/PROCTORING_RUNBOOK.md"
 ARCH_DOC="docs/architecture/PROCTORING_INTEGRATION.md"
-SPEC_FILE="specs/proctoring-integration_spec.md"
+SPEC_FILE="specs/proposals/proctoring-integration_spec.md"
 
 # ---------------------------------------------------------------------------
 echo "=== Proctoring Integration Verification ==="
-echo "Spec: proctoring-integration_spec.md (status: deferred — Tier 6)"
+echo "Spec: proposals/proctoring-integration_spec.md (status: deferred — Tier 6)"
 echo "Mode: offline$( $ONLINE && echo " + online" || true )"
 echo ""
 
@@ -349,7 +349,7 @@ echo ""
 echo "--- Documentation completeness (supporting all 38 ACs) ---"
 
 DOCS=(
-  "$SPEC_FILE:proctoring-integration_spec.md"
+  "$SPEC_FILE:proposals/proctoring-integration_spec.md"
   "$VENDOR_READINESS:PROCTORING_VENDOR_READINESS.md"
   "$RUNBOOK:PROCTORING_RUNBOOK.md"
   "$ARCH_DOC:PROCTORING_INTEGRATION.md (architecture doc)"
@@ -459,7 +459,7 @@ fi
 echo "=== Summary ==="
 echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC} $SKIP"
 echo ""
-echo "Context: proctoring-integration_spec.md status is 'deferred' (Tier 6)."
+echo "Context: proposals/proctoring-integration_spec.md status is 'deferred' (Tier 6)."
 echo "SKIP results are expected until a proctoring provider contract is signed"
 echo "and implementation begins. FAIL results require immediate attention."
 echo ""

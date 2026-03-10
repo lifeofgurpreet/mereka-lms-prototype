@@ -310,7 +310,7 @@ services/
 
 **Where to add**: New microservice → `services/<service-name>/`
 
-**Related specs**: `specs/external-registration-hubspot_spec.md`, `specs/ecommerce-purchase-gateway_spec.md`
+**Related specs**: `specs/proposals/external-registration-hubspot_spec.md`, `specs/ecommerce-purchase-gateway_spec.md`
 
 ---
 

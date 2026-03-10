@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-HUB-001, AC-HUB-002, AC-HUB-003, AC-HUB-004, AC-HUB-005, AC-HUB-006, AC-HUB-007, AC-HUB-008, AC-HUB-009, AC-HUB-010, AC-HUB-011, AC-HUB-012, AC-HUB-013, AC-HUB-014, AC-HUB-015, AC-HUB-016, AC-HUB-017, AC-HUB-018, AC-HUB-019, AC-HUB-020, AC-HUB-021, AC-HUB-022, AC-HUB-023, AC-HUB-024, AC-HUB-025, AC-HUB-026
-# @spec: external-registration-hubspot_spec.md
+# @spec: proposals/external-registration-hubspot_spec.md
 # Comprehensive verification of HubSpot registration service (all 26 ACs)
 #
 # Usage: ./scripts/qa/verify-hubspot-registration.sh [--skip-cluster]
@@ -59,7 +59,7 @@ skip() {
 }
 
 echo "=== HubSpot Registration Service - Full Verification ==="
-echo "Spec: external-registration-hubspot_spec.md"
+echo "Spec: proposals/external-registration-hubspot_spec.md"
 echo "Coverage: 26 ACs"
 echo ""
 
@@ -395,7 +395,7 @@ else
 fi
 
 # Check spec documentation
-SPEC_FILE="$REPO_ROOT/specs/external-registration-hubspot_spec.md"
+SPEC_FILE="$REPO_ROOT/specs/proposals/external-registration-hubspot_spec.md"
 check "Docs" "Feature spec exists" test -f "$SPEC_FILE"
 
 echo ""
@@ -489,7 +489,7 @@ echo "Skipped: $SKIP"
 echo ""
 
 if [[ $FAIL -gt 0 ]]; then
-  error "Some checks failed. See external-registration-hubspot_spec.md"
+  error "Some checks failed. See proposals/external-registration-hubspot_spec.md"
   exit 1
 else
   info "All checks passed!"

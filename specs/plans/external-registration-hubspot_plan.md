@@ -1,5 +1,5 @@
 ---
-spec: external-registration-hubspot_spec.md
+spec: proposals/external-registration-hubspot_spec.md
 tier: 2
 status: draft
 estimated_effort: L
@@ -8,7 +8,7 @@ last_updated: "2026-02-10"
 
 # Implementation Plan: External Registration via HubSpot
 
-**Source Spec**: `specs/external-registration-hubspot_spec.md`
+**Source Spec**: `specs/proposals/external-registration-hubspot_spec.md`
 **Tier**: 2 -- Services (depends on secrets-management, k8s-deployment)
 **Estimated Total Effort**: L (large, 8-12 days -- new K8s service with complex integrations)
 

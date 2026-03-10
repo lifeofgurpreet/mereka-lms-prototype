@@ -15,7 +15,7 @@ last_updated: '2026-02-10'
 
 **Test Coverage Target**: 100% of 22 acceptance criteria + all edge cases
 
-**Migration Status**: COMPLETED (2026-02-10)
+**Migration Status**: ACTIVE (migration completed on 2026-02-10; verification evidence remains canonical)
 
 ---
 

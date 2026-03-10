@@ -1,6 +1,6 @@
 {
   "catalog": "specs/catalog.json",
-  "edge_count": 235,
+  "edge_count": 249,
   "edges": [
     {
       "edge_type": "generated_testmap",
@@ -725,7 +725,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/external-registration-hubspot_plan.md",
-      "target": "specs/external-registration-hubspot_spec.md"
+      "target": "specs/proposals/external-registration-hubspot_spec.md"
     },
     {
       "edge_type": "source_plan",
@@ -735,7 +735,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/external-registration-hubspot_testplan.md",
-      "target": "specs/external-registration-hubspot_spec.md"
+      "target": "specs/proposals/external-registration-hubspot_spec.md"
     },
     {
       "edge_type": "source_spec",
@@ -770,7 +770,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/mobile-apps-enterprise_plan.md",
-      "target": "specs/mobile-apps-enterprise_spec.md"
+      "target": "specs/proposals/mobile-apps-enterprise_spec.md"
     },
     {
       "edge_type": "source_plan",
@@ -780,7 +780,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/mobile-apps-enterprise_testplan.md",
-      "target": "specs/mobile-apps-enterprise_spec.md"
+      "target": "specs/proposals/mobile-apps-enterprise_spec.md"
     },
     {
       "edge_type": "source_spec",
@@ -860,7 +860,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/proctoring-integration_plan.md",
-      "target": "specs/proctoring-integration_spec.md"
+      "target": "specs/proposals/proctoring-integration_spec.md"
     },
     {
       "edge_type": "source_plan",
@@ -870,7 +870,7 @@
     {
       "edge_type": "source_spec",
       "source": "specs/plans/proctoring-integration_testplan.md",
-      "target": "specs/proctoring-integration_spec.md"
+      "target": "specs/proposals/proctoring-integration_spec.md"
     },
     {
       "edge_type": "source_spec",
@@ -1000,6 +1000,76 @@
     {
       "edge_type": "testplan",
       "source": "specs/proctoring-integration_spec.md",
+      "target": "specs/plans/proctoring-integration_testplan.md"
+    },
+    {
+      "edge_type": "generated_testmap",
+      "source": "specs/proposals/external-registration-hubspot_spec.md",
+      "target": "specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml"
+    },
+    {
+      "edge_type": "legacy_testmap",
+      "source": "specs/proposals/external-registration-hubspot_spec.md",
+      "target": "specs/testmaps/external-registration-hubspot_spec.testmap.yml"
+    },
+    {
+      "edge_type": "plan",
+      "source": "specs/proposals/external-registration-hubspot_spec.md",
+      "target": "specs/plans/external-registration-hubspot_plan.md"
+    },
+    {
+      "edge_type": "testplan",
+      "source": "specs/proposals/external-registration-hubspot_spec.md",
+      "target": "specs/plans/external-registration-hubspot_testplan.md"
+    },
+    {
+      "edge_type": "generated_testmap",
+      "source": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "target": "specs/_generated/testmaps/mobile-apps-enterprise_spec.testmap.yml"
+    },
+    {
+      "edge_type": "legacy_testmap",
+      "source": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "target": "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml"
+    },
+    {
+      "edge_type": "plan",
+      "source": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "target": "specs/plans/mobile-apps-enterprise_plan.md"
+    },
+    {
+      "edge_type": "testplan",
+      "source": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "target": "specs/plans/mobile-apps-enterprise_testplan.md"
+    },
+    {
+      "edge_type": "generated_testmap",
+      "source": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "target": "specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml"
+    },
+    {
+      "edge_type": "legacy_testmap",
+      "source": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "target": "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml"
+    },
+    {
+      "edge_type": "generated_testmap",
+      "source": "specs/proposals/proctoring-integration_spec.md",
+      "target": "specs/_generated/testmaps/proctoring-integration_spec.testmap.yml"
+    },
+    {
+      "edge_type": "legacy_testmap",
+      "source": "specs/proposals/proctoring-integration_spec.md",
+      "target": "specs/testmaps/proctoring-integration_spec.testmap.yml"
+    },
+    {
+      "edge_type": "plan",
+      "source": "specs/proposals/proctoring-integration_spec.md",
+      "target": "specs/plans/proctoring-integration_plan.md"
+    },
+    {
+      "edge_type": "testplan",
+      "source": "specs/proposals/proctoring-integration_spec.md",
       "target": "specs/plans/proctoring-integration_testplan.md"
     },
     {
@@ -1179,7 +1249,7 @@
     }
   ],
   "generated_by": "tools/specs/build_spec_graph.py",
-  "node_count": 196,
+  "node_count": 200,
   "nodes": [
     {
       "id": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
@@ -1537,9 +1607,14 @@
     },
     {
       "id": "specs/external-registration-hubspot_spec.md",
-      "node_type": "spec",
+      "lane": "normative",
+      "node_type": "generated",
+      "normativity": "generated",
+      "owner": "engineering",
       "path": "specs/external-registration-hubspot_spec.md",
-      "title": "external-registration-hubspot_spec.md"
+      "spec_class": "generated",
+      "status": "superseded",
+      "title": "Compatibility Wrapper: External Registration via HubSpot"
     },
     {
       "id": "specs/forum-service-migration_spec.md",
@@ -1577,7 +1652,7 @@
       "owner": "platform-team",
       "path": "specs/github-actions-cost-monitoring_spec.md",
       "spec_class": "integration",
-      "status": "approved",
+      "status": "active",
       "title": "GitHub Actions Cost Monitoring"
     },
     {
@@ -1599,20 +1674,25 @@
     },
     {
       "id": "specs/mobile-apps-enterprise_spec.md",
-      "node_type": "spec",
+      "lane": "normative",
+      "node_type": "generated",
+      "normativity": "generated",
+      "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
-      "title": "mobile-apps-enterprise_spec.md"
+      "spec_class": "generated",
+      "status": "superseded",
+      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
     },
     {
       "id": "specs/mobile-apps-secrets-management_spec.md",
       "lane": "normative",
-      "node_type": "spec",
-      "normativity": "proposed",
+      "node_type": "generated",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
-      "spec_class": "security",
-      "status": "draft",
-      "title": "Mobile Apps API Keys & Secrets Management"
+      "spec_class": "generated",
+      "status": "superseded",
+      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
     },
     {
       "id": "specs/mongodb-atlas-integration_spec.md",
@@ -1663,12 +1743,12 @@
     {
       "id": "specs/paragon-design-tokens-migration_spec.md",
       "lane": "normative",
-      "node_type": "spec",
-      "normativity": "planning",
+      "node_type": "generated",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
-      "spec_class": "plan",
-      "status": "completed",
+      "spec_class": "generated",
+      "status": "superseded",
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
@@ -1934,14 +2014,9 @@
     },
     {
       "id": "specs/plans/external-registration-hubspot_testplan.md",
-      "lane": "testplan",
       "node_type": "testplan",
-      "normativity": "planning",
-      "owner": null,
       "path": "specs/plans/external-registration-hubspot_testplan.md",
-      "spec_class": "plan",
-      "status": "draft",
-      "title": "Test Plan: External Registration via HubSpot"
+      "title": "external-registration-hubspot_testplan.md"
     },
     {
       "id": "specs/plans/forum-service-migration_plan.md",
@@ -1957,7 +2032,7 @@
       "owner": null,
       "path": "specs/plans/forum-service-migration_testplan.md",
       "spec_class": "plan",
-      "status": "completed",
+      "status": "active",
       "title": "Forum Service Migration - Test Plan"
     },
     {
@@ -1985,14 +2060,9 @@
     },
     {
       "id": "specs/plans/mobile-apps-enterprise_testplan.md",
-      "lane": "testplan",
       "node_type": "testplan",
-      "normativity": "planning",
-      "owner": null,
       "path": "specs/plans/mobile-apps-enterprise_testplan.md",
-      "spec_class": "plan",
-      "status": "ready",
-      "title": "Mobile Apps (iOS + Android) Enterprise Deployment - Test Plan"
+      "title": "mobile-apps-enterprise_testplan.md"
     },
     {
       "id": "specs/plans/mongodb-atlas-integration_plan.md",
@@ -2166,18 +2236,62 @@
       "owner": "engineering",
       "path": "specs/platform-middleware-custom-apps_spec.md",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "title": "Platform Middleware and Custom Apps"
     },
     {
       "id": "specs/proctoring-integration_spec.md",
       "lane": "normative",
+      "node_type": "generated",
+      "normativity": "generated",
+      "owner": "engineering",
+      "path": "specs/proctoring-integration_spec.md",
+      "spec_class": "generated",
+      "status": "superseded",
+      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
+    },
+    {
+      "id": "specs/proposals/external-registration-hubspot_spec.md",
+      "lane": "proposal",
       "node_type": "spec",
       "normativity": "proposed",
       "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
+      "path": "specs/proposals/external-registration-hubspot_spec.md",
       "spec_class": "proposal",
-      "status": "deferred",
+      "status": "draft",
+      "title": "External Registration via HubSpot"
+    },
+    {
+      "id": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "lane": "proposal",
+      "node_type": "spec",
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "spec_class": "proposal",
+      "status": "draft",
+      "title": "Mobile Apps (iOS + Android) Enterprise Deployment"
+    },
+    {
+      "id": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "lane": "proposal",
+      "node_type": "spec",
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "spec_class": "proposal",
+      "status": "draft",
+      "title": "Mobile Apps API Keys & Secrets Management"
+    },
+    {
+      "id": "specs/proposals/proctoring-integration_spec.md",
+      "lane": "proposal",
+      "node_type": "spec",
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/proctoring-integration_spec.md",
+      "spec_class": "proposal",
+      "status": "draft",
       "title": "Proctoring Integration for Enterprise Open edX"
     },
     {
@@ -2199,7 +2313,7 @@
       "owner": "engineering",
       "path": "specs/secrets-management_spec.md",
       "spec_class": "security",
-      "status": "completed",
+      "status": "active",
       "title": "Secrets Management Specification"
     },
     {
@@ -2210,7 +2324,7 @@
       "owner": "engineering",
       "path": "specs/slo-sla-service-level-management_spec.md",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "title": "SLO/SLA Definitions & Service Level Management"
     },
     {
@@ -2502,7 +2616,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration-resilience_spec.md",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "title": "Tutor Configuration Resilience and Patch Automation"
     },
     {
@@ -2513,7 +2627,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration_spec.md",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "title": "Tutor Configuration Lifecycle"
     },
     {
@@ -2579,7 +2693,7 @@
       "owner": "engineering",
       "path": "specs/video-pipeline-delivery_spec.md",
       "spec_class": "integration",
-      "status": "approved",
+      "status": "active",
       "title": "Video Pipeline & Delivery System"
     }
   ],

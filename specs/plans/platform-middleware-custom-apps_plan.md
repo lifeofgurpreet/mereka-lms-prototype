@@ -1,7 +1,7 @@
 ---
 spec: platform-middleware-custom-apps_spec.md
 tier: 2
-status: completed
+status: in_progress
 estimated_effort: "1-2 weeks (retrospective documentation + verification scripts + hardening)"
 owner: engineering
 last_updated: "2026-02-10"
@@ -17,7 +17,7 @@ prerequisites:
 
 **Source Spec**: specs/platform-middleware-custom-apps_spec.md
 **Tier**: 2 -- Platform Extensions
-**Status**: COMPLETED (code already deployed)
+**Status**: ACTIVE (code deployed; verification and hardening remain live)
 
 ## Summary
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-HUB-026
-# @spec: external-registration-hubspot_spec.md
+# @spec: proposals/external-registration-hubspot_spec.md
 # Verify HubSpot registration service alert rules in K8s manifests
 # AC-HUB-026: Alert fires when user creation success rate < 95%
 #
@@ -124,7 +124,7 @@ main() {
     exit 0
   else
     error "${failures} alert configuration issue(s) found"
-    error "  See specs/external-registration-hubspot_spec.md Observability > Alerts"
+    error "  See specs/proposals/external-registration-hubspot_spec.md Observability > Alerts"
     exit 1
   fi
 }

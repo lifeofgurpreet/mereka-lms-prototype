@@ -2,7 +2,7 @@
 title: "Forum Service Migration: Ruby cs_comments_service to Python openedx-forum"
 type: "migration_spec"
 id: "SPEC-FORUM-SERVICE-MIGRATION"
-status: "completed"
+status: "approved"
 owner: "engineering"
 vehicle: "talent_platform"
 spec_class: "integration"

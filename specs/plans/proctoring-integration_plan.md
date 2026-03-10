@@ -1,15 +1,15 @@
 ---
-source_spec: specs/proctoring-integration_spec.md
+source_spec: specs/proposals/proctoring-integration_spec.md
 status: deferred_until_2027
 created: 2026-02-10
 updated: 2026-02-10
-spec: proctoring-integration_spec.md
+spec: proposals/proctoring-integration_spec.md
 last_updated: '2026-02-10'
 ---
 
 # Proctoring Integration - Implementation Plan
 
-**Source Spec**: `specs/proctoring-integration_spec.md`
+**Source Spec**: `specs/proposals/proctoring-integration_spec.md`
 
 **Status**: DEFERRED UNTIL 2027 - No paid subscriptions required. This plan is ready for tracking and future implementation.
 

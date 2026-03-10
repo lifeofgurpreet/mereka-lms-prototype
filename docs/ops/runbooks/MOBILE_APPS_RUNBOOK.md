@@ -5,7 +5,7 @@ This runbook covers operational procedures for enterprise mobile app testing.
 
 > **Status**: Mobile app enterprise features are **not yet implemented** (Tier 6). This runbook documents target-state procedures.
 > **Runtime verification**: REQUIRED before operational use - Mobile API enablement and OAuth setup have not been runtime-verified
-> **Spec**: `specs/mobile-apps-enterprise_spec.md`
+> **Spec**: `specs/proposals/mobile-apps-enterprise_spec.md`
 > **Testmap**: `specs/testmaps/mobile-apps-enterprise_spec.testmap.yml`
 
 ## Runtime Verification Commands

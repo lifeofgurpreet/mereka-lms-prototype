@@ -1,6 +1,6 @@
 ---
 title: 'Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline'
-spec_class: plan
+spec_class: generated
 status: completed
 owner: engineering
 vehicle: talent_platform
@@ -9,9 +9,8 @@ id: SPEC-PARAGON-DESIGN-TOKENS-MIGRATION
 created: '2026-03-09'
 review_due: '2026-06-09'
 domain: frontend
-normativity: planning
-summary: Planning artifact for the Paragon design tokens migration retained at the
-  spec root as compatibility residue.
+normativity: generated
+summary: Compatibility wrapper retained at the legacy root spec path; the live planning artifact now lives under specs/plans.
 ---
 
 # Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline

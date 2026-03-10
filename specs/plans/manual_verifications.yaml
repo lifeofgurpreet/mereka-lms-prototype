@@ -869,7 +869,7 @@ entries:
     justification: Requires access to Grafana dashboard with accumulated forum metrics data
     file: docs/operations/OBSERVABILITY_VERIFICATION.md
 - id: AC-035
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: 'Given a release candidate build, whensubmitted to the Apple App Store, then the submission includes: app description,...'
   verify:
   - type: manual
@@ -878,7 +878,7 @@ entries:
     justification: Requires physical mobile device with configured FCM/APNs credentials for end-to-end push verification
     file: N/A (manual verification)
 - id: AC-036
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: 'Given a release candidate build, whensubmitted to Google Play Store, then the submission includes: store listing,
     scr...'
   verify:
@@ -888,7 +888,7 @@ entries:
     justification: Requires mobile device in airplane mode to verify offline content caching and sync behavior
     file: N/A (manual verification)
 - id: AC-037
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: 'Given a production release is approved, when the app is published, then it uses a phased/staged rollout (iOS:
     phased ...'
   verify:
@@ -2665,7 +2665,7 @@ entries:
     justification: Requires running LMS pod with kubectl exec; cannot inspect runtime settings without live cluster access
     file: scripts/qa/verify-tutor-multisite-domains.sh
 - id: AC-001
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: iOS sign-in opens system browser to LMS OAuth authorize endpoint with PKCE parameters
   verify:
   - type: manual
@@ -2673,7 +2673,7 @@ entries:
     section: OAuth PKCE Flow
     justification: Feature not yet implemented; mobile app not yet developed
 - id: AC-002
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Android sign-in opens Custom Tab to LMS OAuth authorize endpoint with PKCE parameters
   verify:
   - type: manual
@@ -2681,7 +2681,7 @@ entries:
     section: OAuth PKCE Flow
     justification: Feature not yet implemented; mobile app not yet developed
 - id: AC-003
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Authorization code exchanged for tokens; tokens stored in Keychain (iOS) or EncryptedSharedPreferences (Android)
   verify:
   - type: manual
@@ -2689,7 +2689,7 @@ entries:
     section: Token Storage Security
     justification: Feature not yet implemented; secure token storage not yet implemented in mobile app
 - id: AC-004
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Access token with < 5 minutes remaining proactively refreshed before API call
   verify:
   - type: manual
@@ -2697,7 +2697,7 @@ entries:
     section: Token Refresh Logic
     justification: Feature not yet implemented; proactive token refresh not yet implemented
 - id: AC-005
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Concurrent burst of 10 API calls during token refresh results in exactly one refresh request (single-flight)
   verify:
   - type: manual
@@ -2705,7 +2705,7 @@ entries:
     section: Token Refresh Deduplication
     justification: Feature not yet implemented; single-flight token refresh not yet implemented
 - id: AC-006
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: 401 API response with valid refresh token triggers token refresh and single retry of original request
   verify:
   - type: manual
@@ -2713,7 +2713,7 @@ entries:
     section: 401 Retry Flow
     justification: Feature not yet implemented; 401 retry with refresh not yet implemented
 - id: AC-007
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Failed token refresh redirects to login screen and clears all tokens
   verify:
   - type: manual
@@ -2721,7 +2721,7 @@ entries:
     section: Token Failure Handling
     justification: Feature not yet implemented; token failure handling not yet implemented
 - id: AC-008
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Logout revokes refresh token server-side and clears all local tokens, cache, and branding overrides
   verify:
   - type: manual
@@ -2729,7 +2729,7 @@ entries:
     section: Logout Flow
     justification: Feature not yet implemented; logout with server-side revocation not yet implemented
 - id: AC-009
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Push notification permission requested after first login, not at app launch
   verify:
   - type: manual
@@ -2737,7 +2737,7 @@ entries:
     section: Push Notification Permission
     justification: Feature not yet implemented; mobile app push permission flow not yet built
 - id: AC-010
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Device token registered with backend including device_token, platform, app_version, org_slug
   verify:
   - type: manual
@@ -2745,7 +2745,7 @@ entries:
     section: Device Registration
     justification: Feature not yet implemented; device token registration API not yet built
 - id: AC-011
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Course announcement push notification appears in system notification center within 60 seconds
   verify:
   - type: manual
@@ -2753,7 +2753,7 @@ entries:
     section: Push Notification Delivery
     justification: Feature not yet implemented; requires physical device with FCM/APNs configured
 - id: AC-012
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Tapping notification with deep_link_url navigates to assignment within course
   verify:
   - type: manual
@@ -2761,7 +2761,7 @@ entries:
     section: Notification Deep Linking
     justification: Feature not yet implemented; notification deep link handling not yet implemented
 - id: AC-013
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Logout unregisters device token from backend
   verify:
   - type: manual
@@ -2769,7 +2769,7 @@ entries:
     section: Device Token Deregistration on Logout
     justification: Feature not yet implemented; logout-triggered device deregistration not yet implemented
 - id: AC-014
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: AASA file at /.well-known/apple-app-site-association enables Universal Links for academyv2.mereka.io
   verify:
   - type: manual
@@ -2777,7 +2777,7 @@ entries:
     section: Universal Links Verification
     justification: Feature not yet implemented; AASA file not yet configured in LMS web server
 - id: AC-015
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: assetlinks.json at /.well-known/assetlinks.json enables Android App Links
   verify:
   - type: manual
@@ -2785,7 +2785,7 @@ entries:
     section: App Links Verification
     justification: Feature not yet implemented; assetlinks.json not yet configured in LMS web server
 - id: AC-016
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Deep link to courseware URL navigates to correct section in app
   verify:
   - type: manual
@@ -2793,7 +2793,7 @@ entries:
     section: Deep Link Routing
     justification: Feature not yet implemented; mobile app deep link routing not yet built
 - id: AC-017
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Unauthenticated deep link stores URL, presents login, then navigates after authentication
   verify:
   - type: manual
@@ -2801,7 +2801,7 @@ entries:
     section: Authenticated Deep Link Flow
     justification: Feature not yet implemented; stored URL post-login navigation not yet implemented
 - id: AC-018
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Deep link to unsupported path (e.g. /admin/) opens in in-app browser
   verify:
   - type: manual
@@ -2809,7 +2809,7 @@ entries:
     section: Fallback Deep Link Handling
     justification: Feature not yet implemented; in-app browser fallback not yet implemented
 - id: AC-019
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Downloaded course section content available offline (video, HTML, PDF)
   verify:
   - type: manual
@@ -2817,7 +2817,7 @@ entries:
     section: Offline Content Download
     justification: Feature not yet implemented; offline content download not yet implemented
 - id: AC-020
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Offline quiz completion syncs score to backend within 60 seconds of connectivity restore
   verify:
   - type: manual
@@ -2825,7 +2825,7 @@ entries:
     section: Offline Sync
     justification: Feature not yet implemented; offline-first sync layer not yet built
 - id: AC-021
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Storage warning shown when device has < 500 MB free before download starts
   verify:
   - type: manual
@@ -2833,7 +2833,7 @@ entries:
     section: Download Storage Warning
     justification: Feature not yet implemented; storage check before download not yet implemented
 - id: AC-022
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Manage Downloads screen shows per-section storage usage with delete option
   verify:
   - type: manual
@@ -2841,7 +2841,7 @@ entries:
     section: Download Management UI
     justification: Feature not yet implemented; download management screen not yet built
 - id: AC-023
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Background download completes and fires local notification (iOS background URLSession, Android WorkManager)
   verify:
   - type: manual
@@ -2849,7 +2849,7 @@ entries:
     section: Background Download
     justification: Feature not yet implemented; background download infrastructure not yet implemented
 - id: AC-024
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: org_slug=client-a with primary_color=#FF5733 renders nav bar and primary elements in that color
   verify:
   - type: manual
@@ -2857,7 +2857,7 @@ entries:
     section: Multi-Tenant Branding
     justification: Feature not yet implemented; tenant branding in mobile app not yet built
 - id: AC-025
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Branding config endpoint unreachable with cached config — renders using cached branding
   verify:
   - type: manual
@@ -2865,7 +2865,7 @@ entries:
     section: Branding Cache Fallback
     justification: Feature not yet implemented; branding cache fallback not yet implemented
 - id: AC-026
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Branding config endpoint unreachable with no cache — renders using default Mereka Academy branding
   verify:
   - type: manual
@@ -2873,7 +2873,7 @@ entries:
     section: Default Branding Fallback
     justification: Feature not yet implemented; default branding fallback not yet implemented
 - id: AC-027
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: User authenticated under org_slug=client-a sees only client-a courses (no cross-tenant leakage)
   verify:
   - type: manual
@@ -2881,7 +2881,7 @@ entries:
     section: Tenant Course Isolation
     justification: Feature not yet implemented; tenant-scoped course listing not yet implemented in mobile app
 - id: AC-028
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: App validates TLS certificate against pinned intermediate CA certificates for academyv2.mereka.io
   verify:
   - type: manual
@@ -2889,7 +2889,7 @@ entries:
     section: Certificate Pinning
     justification: Feature not yet implemented; certificate pinning not yet implemented in mobile app
 - id: AC-029
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Certificate pin mismatch shows security warning and prevents data transmission
   verify:
   - type: manual
@@ -2897,7 +2897,7 @@ entries:
     section: Certificate Pin Mismatch Handling
     justification: Feature not yet implemented; MITM detection and warning not yet implemented
 - id: AC-030
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Task-switcher screenshot shows branded splash screen (not sensitive content)
   verify:
   - type: manual
@@ -2905,7 +2905,7 @@ entries:
     section: Screenshot Protection
     justification: Feature not yet implemented; screenshot masking in task switcher not yet implemented
 - id: AC-031
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Release build contains no debug logs, test API endpoints, or hardcoded credentials
   verify:
   - type: manual
@@ -2913,7 +2913,7 @@ entries:
     section: Release Build Security Audit
     justification: Feature not yet implemented; release build security audit process not yet established
 - id: AC-032
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Push to mobile/ios/** on main produces signed IPA and uploads to TestFlight without manual intervention
   verify:
   - type: manual
@@ -2921,7 +2921,7 @@ entries:
     section: iOS CI Pipeline
     justification: Feature not yet implemented; iOS CI pipeline and TestFlight upload not yet configured
 - id: AC-033
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: Push to mobile/android/** on main produces signed AAB and uploads to Google Play Internal Testing
   verify:
   - type: manual
@@ -2929,7 +2929,7 @@ entries:
     section: Android CI Pipeline
     justification: Feature not yet implemented; Android CI pipeline and Play Store upload not yet configured
 - id: AC-034
-  spec: mobile-apps-enterprise_spec.md
+  spec: proposals/mobile-apps-enterprise_spec.md
   description: New client org_slug=new-client added to branding config — no code changes or pipeline modifications required
   verify:
   - type: manual

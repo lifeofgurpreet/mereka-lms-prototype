@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @spec: proctoring-integration_spec.md
+# @spec: proposals/proctoring-integration_spec.md
 # @covers AC-004, AC-005, AC-009, AC-010, AC-011, AC-012, AC-013, AC-016, AC-024, AC-025, AC-026, AC-027, AC-028, AC-029, AC-030, AC-031, AC-032, AC-033, AC-034, AC-035
 #
 # Advanced proctoring integration verification:
@@ -197,7 +197,7 @@ echo "Total: $((PASS + FAIL + SKIP))"
 
 # Note about deferred spec
 echo ""
-echo "NOTE: proctoring-integration_spec.md has status 'deferred'."
+echo "NOTE: proposals/proctoring-integration_spec.md has status 'deferred'."
 echo "Most ACs are not yet implemented. This script will remain mostly SKIP"
 echo "until the proctoring feature is prioritized for development."
 

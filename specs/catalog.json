@@ -81,7 +81,7 @@
       "path": "specs/auth-sso-enterprise_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "domain",
-      "status": "approved",
+      "status": "active",
       "summary": "Normative contract for enterprise SSO, tenant-scoped identity federation, session behavior, and privileged-auth hardening across Mereka LMS.",
       "tags": [
         "auth.oidc",
@@ -143,7 +143,7 @@
       "path": "specs/ci-cd-pipeline_spec.md",
       "review_due": "2026-06-12",
       "spec_class": "system",
-      "status": "approved",
+      "status": "active",
       "summary": "Defines the CI/CD contract for building, validating, and promoting platform artifacts through the canonical GitOps release flow.",
       "tags": [
         "build.gitops-promotion",
@@ -238,7 +238,7 @@
       "path": "specs/data-migrations-kajabi-mct_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "domain",
-      "status": "in_progress",
+      "status": "active",
       "summary": "Normative contract for migrating Kajabi and MCT legacy data into the Mereka LMS platform.",
       "tags": [],
       "title": "Data Migrations: Kajabi & MCT Legacy Systems",
@@ -326,7 +326,7 @@
       "path": "specs/disaster-recovery-business-continuity_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines recovery objectives, backup coverage, restore validation, and continuity expectations for the platform.",
       "tags": [
         "runtime.recovery",
@@ -357,7 +357,7 @@
       "path": "specs/ecommerce-purchase-gateway_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "integration",
-      "status": "in_progress",
+      "status": "active",
       "summary": "Defines the purchase gateway contract from Stripe checkout through fulfillment into Open edX commerce ownership.",
       "tags": [
         "commerce.reconciliation",
@@ -417,7 +417,7 @@
       "path": "specs/enterprise-microservices_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines the deployed enterprise microservices boundary, required platform integrations, and runtime expectations for catalog, access, subsidy, and integrated-channel services.",
       "tags": [
         "tenant.isolation",
@@ -429,13 +429,13 @@
       "version": "1.0.0"
     },
     {
-      "acceptance_criteria_count": 26,
-      "created": "2026-02-12",
-      "doc_type": "spec",
+      "acceptance_criteria_count": 0,
+      "created": "2026-03-09",
+      "doc_type": "generated",
       "domain": "commerce",
-      "id": "SPEC-EXTERNAL-REGISTRATION-HUBSPOT",
+      "id": "SPEC-COMPAT-EXTERNAL-REGISTRATION-HUBSPOT",
       "lane": "normative",
-      "last_reviewed": "2026-02-12",
+      "last_reviewed": "2026-03-09",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/external-registration-hubspot_spec.testmap.yml",
@@ -444,16 +444,19 @@
         "source_spec": null,
         "testplan": "specs/plans/external-registration-hubspot_testplan.md"
       },
-      "normativity": "proposed",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/external-registration-hubspot_spec.md",
-      "review_due": "2026-05-13",
-      "spec_class": "proposal",
-      "status": "deferred",
-      "summary": "Proposal-stage contract for integrating HubSpot-driven external registration with Mereka LMS enrollment flows.",
-      "tags": [],
-      "title": "External Registration via HubSpot",
-      "version": "1.0.0"
+      "review_due": "2026-06-09",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
+      "tags": [
+        "compatibility",
+        "proposal-lane"
+      ],
+      "title": "Compatibility Wrapper: External Registration via HubSpot",
+      "version": null
     },
     {
       "acceptance_criteria_count": 25,
@@ -476,7 +479,7 @@
       "path": "specs/forum-service-migration_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines the production migration contract from the legacy Ruby forum service to the integrated Python forum service, including storage, search, and routing dependencies.",
       "tags": [
         "platform.control-plane",
@@ -569,7 +572,7 @@
       "path": "specs/github-actions-cost-monitoring_spec.md",
       "review_due": "2026-06-12",
       "spec_class": "integration",
-      "status": "approved",
+      "status": "active",
       "summary": "Defines how GitHub Actions cost telemetry is measured, reported, and reviewed as part of the platform CI/CD contract.",
       "tags": [
         "build.gitops-promotion",
@@ -642,11 +645,11 @@
       "version": "1.0.0"
     },
     {
-      "acceptance_criteria_count": 37,
-      "created": "2026-02-10",
-      "doc_type": "spec",
+      "acceptance_criteria_count": 0,
+      "created": "2026-03-09",
+      "doc_type": "generated",
       "domain": "frontend",
-      "id": "SPEC-MOBILE-APPS-ENTERPRISE",
+      "id": "SPEC-COMPAT-MOBILE-APPS-ENTERPRISE",
       "lane": "normative",
       "last_reviewed": "2026-03-09",
       "links": {
@@ -657,27 +660,26 @@
         "source_spec": null,
         "testplan": "specs/plans/mobile-apps-enterprise_testplan.md"
       },
-      "normativity": "proposed",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
       "review_due": "2026-06-09",
-      "spec_class": "domain",
-      "status": "draft",
-      "summary": "Defines the proposed enterprise deployment contract for Mereka mobile applications, including identity, branding, release, and platform integration expectations.",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
       "tags": [
-        "frontend.composition",
-        "tenant.isolation",
-        "auth.oidc"
+        "compatibility",
+        "proposal-lane"
       ],
-      "title": "Mobile Apps (iOS + Android) Enterprise Deployment",
-      "version": "1.0.0"
+      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment",
+      "version": null
     },
     {
-      "acceptance_criteria_count": 25,
-      "created": "2026-02-13",
-      "doc_type": "spec",
+      "acceptance_criteria_count": 0,
+      "created": "2026-03-09",
+      "doc_type": "generated",
       "domain": "platform",
-      "id": "SPEC-MOBILE-SECRETS-MANAGEMENT",
+      "id": "SPEC-COMPAT-MOBILE-APPS-SECRETS-MANAGEMENT",
       "lane": "normative",
       "last_reviewed": "2026-03-09",
       "links": {
@@ -688,20 +690,19 @@
         "source_spec": null,
         "testplan": null
       },
-      "normativity": "proposed",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
       "review_due": "2026-06-09",
-      "spec_class": "security",
-      "status": "draft",
-      "summary": "Defines the proposed secret, credential, and API-key management contract for Mereka mobile application delivery pipelines.",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
       "tags": [
-        "platform.control-plane",
-        "auth.oidc",
-        "build.version-pin"
+        "compatibility",
+        "proposal-lane"
       ],
-      "title": "Mobile Apps API Keys & Secrets Management",
-      "version": "1.0.0"
+      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management",
+      "version": null
     },
     {
       "acceptance_criteria_count": 9,
@@ -724,7 +725,7 @@
       "path": "specs/mongodb-atlas-integration_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines the managed MongoDB Atlas contract for modulestore and forum data, replacing in-cluster MongoDB across supported environments.",
       "tags": [
         "platform.control-plane",
@@ -754,7 +755,7 @@
       "path": "specs/multi-site-domains_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines the required domain, host-routing, site-configuration, and environment contract for multi-site Open edX deployments.",
       "tags": [
         "tenant.lifecycle",
@@ -888,7 +889,7 @@
     {
       "acceptance_criteria_count": 0,
       "created": "2026-03-09",
-      "doc_type": "spec",
+      "doc_type": "generated",
       "domain": "frontend",
       "id": "SPEC-PARAGON-DESIGN-TOKENS-MIGRATION",
       "lane": "normative",
@@ -901,13 +902,13 @@
         "source_spec": null,
         "testplan": null
       },
-      "normativity": "planning",
+      "normativity": "generated",
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "review_due": "2026-06-09",
-      "spec_class": "plan",
-      "status": "completed",
-      "summary": "Planning artifact for the Paragon design tokens migration retained at the spec root as compatibility residue.",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live planning artifact now lives under specs/plans.",
       "tags": [],
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline",
       "version": null
@@ -1681,7 +1682,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": null,
-        "source_spec": "specs/external-registration-hubspot_spec.md",
+        "source_spec": "specs/proposals/external-registration-hubspot_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -1708,7 +1709,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": "specs/plans/external-registration-hubspot_plan.md",
-        "source_spec": "specs/external-registration-hubspot_spec.md",
+        "source_spec": "specs/proposals/external-registration-hubspot_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -1743,7 +1744,7 @@
       "path": "specs/plans/forum-service-migration_plan.md",
       "review_due": null,
       "spec_class": "plan",
-      "status": "completed",
+      "status": "active",
       "summary": null,
       "tags": [],
       "title": "Forum Service Migration - Implementation Plan",
@@ -1770,7 +1771,7 @@
       "path": "specs/plans/forum-service-migration_testplan.md",
       "review_due": null,
       "spec_class": "plan",
-      "status": "completed",
+      "status": "active",
       "summary": null,
       "tags": [],
       "title": "Forum Service Migration - Test Plan",
@@ -1843,7 +1844,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": null,
-        "source_spec": "specs/mobile-apps-enterprise_spec.md",
+        "source_spec": "specs/proposals/mobile-apps-enterprise_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -1870,7 +1871,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": "specs/plans/mobile-apps-enterprise_plan.md",
-        "source_spec": "specs/mobile-apps-enterprise_spec.md",
+        "source_spec": "specs/proposals/mobile-apps-enterprise_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -2121,7 +2122,7 @@
       "path": "specs/plans/platform-middleware-custom-apps_plan.md",
       "review_due": null,
       "spec_class": "plan",
-      "status": "completed",
+      "status": "active",
       "summary": null,
       "tags": [],
       "title": "Implementation Plan: Platform Middleware and Custom Apps",
@@ -2167,7 +2168,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": null,
-        "source_spec": "specs/proctoring-integration_spec.md",
+        "source_spec": "specs/proposals/proctoring-integration_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -2194,7 +2195,7 @@
         "legacy_testmap": null,
         "plan": null,
         "source_plan": "specs/plans/proctoring-integration_plan.md",
-        "source_spec": "specs/proctoring-integration_spec.md",
+        "source_spec": "specs/proposals/proctoring-integration_spec.md",
         "testplan": null
       },
       "normativity": "planning",
@@ -2553,10 +2554,129 @@
       "path": "specs/platform-middleware-custom-apps_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "summary": "Normative contract for platform middleware behavior and custom app integration points.",
       "tags": [],
       "title": "Platform Middleware and Custom Apps",
+      "version": "1.0.0"
+    },
+    {
+      "acceptance_criteria_count": 0,
+      "created": "2026-03-09",
+      "doc_type": "generated",
+      "domain": "platform",
+      "id": "SPEC-COMPAT-PROCTORING-INTEGRATION",
+      "lane": "normative",
+      "last_reviewed": "2026-03-09",
+      "links": {
+        "generated_testmap": "specs/_generated/testmaps/proctoring-integration_spec.testmap.yml",
+        "legacy_testmap": "specs/testmaps/proctoring-integration_spec.testmap.yml",
+        "plan": "specs/plans/proctoring-integration_plan.md",
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": "specs/plans/proctoring-integration_testplan.md"
+      },
+      "normativity": "generated",
+      "owner": "engineering",
+      "path": "specs/proctoring-integration_spec.md",
+      "review_due": "2026-06-09",
+      "spec_class": "generated",
+      "status": "superseded",
+      "summary": "Compatibility wrapper retained at the legacy root spec path; the live proposal now lives under specs/proposals.",
+      "tags": [
+        "compatibility",
+        "proposal-lane"
+      ],
+      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX",
+      "version": null
+    },
+    {
+      "acceptance_criteria_count": 26,
+      "created": "2026-02-12",
+      "doc_type": "spec",
+      "domain": "commerce",
+      "id": "SPEC-EXTERNAL-REGISTRATION-HUBSPOT",
+      "lane": "proposal",
+      "last_reviewed": "2026-02-12",
+      "links": {
+        "generated_testmap": "specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml",
+        "legacy_testmap": "specs/testmaps/external-registration-hubspot_spec.testmap.yml",
+        "plan": "specs/plans/external-registration-hubspot_plan.md",
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": "specs/plans/external-registration-hubspot_testplan.md"
+      },
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/external-registration-hubspot_spec.md",
+      "review_due": "2026-05-13",
+      "spec_class": "proposal",
+      "status": "draft",
+      "summary": "Proposal-stage contract for integrating HubSpot-driven external registration with Mereka LMS enrollment flows.",
+      "tags": [],
+      "title": "External Registration via HubSpot",
+      "version": "1.0.0"
+    },
+    {
+      "acceptance_criteria_count": 37,
+      "created": "2026-02-10",
+      "doc_type": "spec",
+      "domain": "frontend",
+      "id": "SPEC-MOBILE-APPS-ENTERPRISE",
+      "lane": "proposal",
+      "last_reviewed": "2026-03-09",
+      "links": {
+        "generated_testmap": "specs/_generated/testmaps/mobile-apps-enterprise_spec.testmap.yml",
+        "legacy_testmap": "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml",
+        "plan": "specs/plans/mobile-apps-enterprise_plan.md",
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": "specs/plans/mobile-apps-enterprise_testplan.md"
+      },
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/mobile-apps-enterprise_spec.md",
+      "review_due": "2026-06-09",
+      "spec_class": "proposal",
+      "status": "draft",
+      "summary": "Defines the proposed enterprise deployment contract for Mereka mobile applications, including identity, branding, release, and platform integration expectations.",
+      "tags": [
+        "frontend.composition",
+        "tenant.isolation",
+        "auth.oidc"
+      ],
+      "title": "Mobile Apps (iOS + Android) Enterprise Deployment",
+      "version": "1.0.0"
+    },
+    {
+      "acceptance_criteria_count": 25,
+      "created": "2026-02-13",
+      "doc_type": "spec",
+      "domain": "platform",
+      "id": "SPEC-MOBILE-SECRETS-MANAGEMENT",
+      "lane": "proposal",
+      "last_reviewed": "2026-03-09",
+      "links": {
+        "generated_testmap": "specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
+        "legacy_testmap": "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
+        "plan": null,
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": null
+      },
+      "normativity": "proposed",
+      "owner": "engineering",
+      "path": "specs/proposals/mobile-apps-secrets-management_spec.md",
+      "review_due": "2026-06-09",
+      "spec_class": "proposal",
+      "status": "draft",
+      "summary": "Defines the proposed secret, credential, and API-key management contract for Mereka mobile application delivery pipelines.",
+      "tags": [
+        "platform.control-plane",
+        "auth.oidc",
+        "build.version-pin"
+      ],
+      "title": "Mobile Apps API Keys & Secrets Management",
       "version": "1.0.0"
     },
     {
@@ -2565,7 +2685,7 @@
       "doc_type": "spec",
       "domain": "platform",
       "id": "SPEC-PROCTORING-INTEGRATION",
-      "lane": "normative",
+      "lane": "proposal",
       "last_reviewed": "2026-02-10",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/proctoring-integration_spec.testmap.yml",
@@ -2577,10 +2697,10 @@
       },
       "normativity": "proposed",
       "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
+      "path": "specs/proposals/proctoring-integration_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "proposal",
-      "status": "deferred",
+      "status": "draft",
       "summary": "Proposal-stage contract for enterprise proctoring integration work that remains outside the normative root lane.",
       "tags": [],
       "title": "Proctoring Integration for Enterprise Open edX",
@@ -2638,7 +2758,7 @@
       "path": "specs/secrets-management_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "security",
-      "status": "completed",
+      "status": "active",
       "summary": "Normative contract for secret storage, delivery, and rotation across Mereka LMS environments.",
       "tags": [],
       "title": "Secrets Management Specification",
@@ -2665,7 +2785,7 @@
       "path": "specs/slo-sla-service-level-management_spec.md",
       "review_due": "2026-05-11",
       "spec_class": "integration",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines service-level indicators, objectives, agreements, and operational management expectations for the platform.",
       "tags": [
         "observability.slo",
@@ -2726,7 +2846,7 @@
       "path": "specs/tutor-configuration-resilience_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines resilience requirements for Tutor configuration regeneration, patch application, and operational recovery from drift.",
       "tags": [
         "platform.control-plane",
@@ -2756,7 +2876,7 @@
       "path": "specs/tutor-configuration_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "system",
-      "status": "completed",
+      "status": "active",
       "summary": "Defines the expected lifecycle, control points, and verification contract for Tutor configuration in local and managed environments.",
       "tags": [
         "platform.control-plane",
@@ -2941,7 +3061,7 @@
       "path": "specs/video-pipeline-delivery_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "integration",
-      "status": "approved",
+      "status": "active",
       "summary": "Defines the normative delivery contract for Mereka video ingestion, processing, storage, and playback across the platform.",
       "tags": [
         "data.retention",
@@ -2952,7 +3072,7 @@
       "version": "1.0.0"
     }
   ],
-  "entry_count": 104,
+  "entry_count": 108,
   "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
   "root": "specs",
   "taxonomy": "specs/standards/spec-taxonomy.yaml"

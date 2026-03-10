@@ -2,7 +2,7 @@
 id: "SPEC-PLT-002"
 title: "Tutor Configuration Resilience and Patch Automation"
 type: "feature_spec"
-status: "completed"
+status: "approved"
 spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"

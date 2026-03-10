@@ -106,7 +106,7 @@ This spec also addresses critical security gaps: there is no formal contract for
   - User self-registration flows for non-enterprise users (existing Open edX registration continues unchanged)
   - Social login providers (Google, Facebook, Apple) beyond what Open edX supports natively (already documented in `docs/integrations/GOOGLE_OAUTH_SETUP.md`)
   - Payment/billing integration for SSO-provisioned users (handled by ecommerce service)
-  - Mobile app SSO flows (covered by `specs/mobile-apps-enterprise_spec.md`)
+  - Mobile app SSO flows (covered by `specs/proposals/mobile-apps-enterprise_spec.md`)
   - Biometric authentication or hardware token-specific implementation details
 
 ## Non-goals
@@ -239,7 +239,7 @@ This spec also addresses critical security gaps: there is no formal contract for
 #### Identity Verification Workflows
 
 - The system MUST support email verification for JIT-provisioned accounts: if the IdP assertion does not include a verified email attribute (`email_verified=true` or equivalent), the system MUST send a verification email before granting full access
-- The system SHOULD support identity proofing integration for high-stakes assessments (proctored exams) via the Open edX identity verification framework (per `specs/proctoring-integration_spec.md`)
+- The system SHOULD support identity proofing integration for high-stakes assessments (proctored exams) via the Open edX identity verification framework (per `specs/proposals/proctoring-integration_spec.md`)
 - The system MUST support administrator-initiated identity verification: a platform operator MUST be able to manually verify a user's identity in Django admin and record the verification method and date
 - The system MUST NOT allow unverified accounts to access enterprise-subsidized content (content gated behind subscription/license access policies)
 

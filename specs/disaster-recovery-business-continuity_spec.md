@@ -1,7 +1,7 @@
 ---
 title: "Disaster Recovery & Business Continuity"
 type: "feature_spec"
-status: "completed"
+status: "approved"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"

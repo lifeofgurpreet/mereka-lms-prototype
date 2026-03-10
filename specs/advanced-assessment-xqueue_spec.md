@@ -35,7 +35,7 @@ links:
     - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
     - "docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md"
   related_specs:
-    - "specs/proctoring-integration_spec.md"
+    - "specs/proposals/proctoring-integration_spec.md"
     - "specs/enterprise-microservices_spec.md"
     - "specs/k8s-deployment_spec.md"
     - "specs/secrets-management_spec.md"
@@ -116,7 +116,7 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
   - Observability: logging, metrics, alerts for ORA2, XQueue, and assessment pipeline operations
 
 - Out of scope:
-  - **Proctoring integration** (explicitly deferred to 2027; see `specs/proctoring-integration_spec.md` which has status `deferred`)
+  - **Proctoring integration** (explicitly deferred to 2027; see `specs/proposals/proctoring-integration_spec.md` which has status `deferred`)
   - Paid proctoring provider subscriptions (Examity, Respondus, ProctorTrack, Proctorio)
   - Browser lockdown software integration
   - Student identity verification for exams
@@ -132,7 +132,7 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
 
 ### Proctoring Integration (Deferred)
 
-Proctoring features referenced in this spec are defined in `specs/proctoring-integration_spec.md` (Tier 8, status: `deferred`). Assessment features MUST function without proctoring enabled. Proctoring-dependent features MUST be gated behind the `ENABLE_PROCTORED_EXAMS` feature flag.
+Proctoring features referenced in this spec are defined in `specs/proposals/proctoring-integration_spec.md` (Tier 8, status: `deferred`). Assessment features MUST function without proctoring enabled. Proctoring-dependent features MUST be gated behind the `ENABLE_PROCTORED_EXAMS` feature flag.
 
 **Proctoring-related features not included in this spec**:
 - Student identity verification (photo ID capture, facial recognition)
@@ -155,7 +155,7 @@ Proctoring features referenced in this spec are defined in `specs/proctoring-int
 - Automated AI essay grading for ORA2 (AI-assisted grading provides suggestions to human graders, not autonomous scoring)
 - Supporting assessment types that require browser plugins or desktop software installation
 
-**Proctoring boundary**: The system MUST NOT implement browser lockdown, identity verification, or live proctor assignment. These features are deferred to Q3 2027 per `specs/proctoring-integration_spec.md`. Assessment security (non-proctored) is limited to time limits, randomization, and one-at-a-time display.
+**Proctoring boundary**: The system MUST NOT implement browser lockdown, identity verification, or live proctor assignment. These features are deferred to Q3 2027 per `specs/proposals/proctoring-integration_spec.md`. Assessment security (non-proctored) is limited to time limits, randomization, and one-at-a-time display.
 
 ## Assumptions
 

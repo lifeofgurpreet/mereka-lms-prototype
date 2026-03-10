@@ -2,7 +2,7 @@
 title: "Enterprise Microservices Deployment"
 type: "feature_spec"
 id: "SPEC-ENTERPRISE-MICROSERVICES"
-status: "completed"
+status: "approved"
 owner: "engineering"
 vehicle: "talent_platform"
 spec_class: "integration"
@@ -46,7 +46,7 @@ links:
     - "specs/k8s-deployment_spec.md"
     - "specs/secrets-management_spec.md"
     - "specs/multi-site-domains_spec.md"
-    - "specs/mobile-apps-enterprise_spec.md"
+    - "specs/proposals/mobile-apps-enterprise_spec.md"
     - "specs/observability-stack_spec.md"
     - "specs/cross-cutting-requirements_spec.md"
 ---
@@ -103,7 +103,7 @@ Mereka Academy's growth strategy depends on onboarding corporate clients who nee
 
 - Out of scope:
   - Open edX platform (LMS/CMS) core changes beyond configuration (the platform is consumed as-is)
-  - Mobile app enterprise features (covered by `specs/mobile-apps-enterprise_spec.md`)
+  - Mobile app enterprise features (covered by `specs/proposals/mobile-apps-enterprise_spec.md`)
   - Individual course content creation or curriculum design
   - Custom enterprise MFE development beyond Open edX upstream
   - Payment gateway integration (Stripe already operational via ecommerce service)

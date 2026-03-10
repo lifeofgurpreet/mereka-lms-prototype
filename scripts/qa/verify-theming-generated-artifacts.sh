@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-TKN-033, AC-TKN-034
-# @spec: paragon-design-tokens-migration_spec.md
+# @spec: plans/paragon-design-tokens-migration_spec.md
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"

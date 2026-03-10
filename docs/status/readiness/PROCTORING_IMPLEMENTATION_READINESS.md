@@ -226,7 +226,7 @@ print('Config:', b.get_configuration())
 | `scripts/qa/verify-proctoring-advanced.sh` | AC-004, 005, 009, 010, 011, 012, 013, 016, 024, 025, 026, 027, 028, 029, 030, 031, 032, 033, 034, 035 | Run after contract |
 | `scripts/qa/verify-proctoring-environment.sh` | AC-003, 014, 015, 017, 018, 019, 023 | 10 PASS, 0 FAIL, 5 SKIP (expected) |
 
-**Total**: All 38 ACs mapped across 3 scripts with `@covers` annotations and `@spec: proctoring-integration_spec.md`.
+**Total**: All 38 ACs mapped across 3 scripts with `@covers` annotations and `@spec: proposals/proctoring-integration_spec.md`.
 
 ---
 
@@ -250,7 +250,7 @@ print('Config:', b.get_configuration())
 
 - `docs/status/readiness/PROCTORING_VENDOR_READINESS.md` — Vendor matrix + blocker tracker (33ff)
 - `docs/ops/runbooks/PROCTORING_RUNBOOK.md` — Operational runbook (i8lo.1)
-- `specs/proctoring-integration_spec.md` — Full 38-AC specification
+- `specs/proposals/proctoring-integration_spec.md` — Full 38-AC specification
 - `scripts/qa/verify-proctoring.sh` — AC-001/002/006..008/020..022/036..038
 - `scripts/qa/verify-proctoring-advanced.sh` — AC-004/005/009..013/016/024..035
 - `scripts/qa/verify-proctoring-environment.sh` — AC-003/014/015/017..019/023

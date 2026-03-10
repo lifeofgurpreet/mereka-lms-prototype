@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-001, AC-002, AC-006, AC-007, AC-008, AC-020, AC-021, AC-022, AC-036, AC-037, AC-038
-# @spec: proctoring-integration_spec.md
+# @spec: proposals/proctoring-integration_spec.md
 # Verify proctoring integration infrastructure readiness
 #
 # NOTE: This spec is marked as "deferred" status. This script checks for
@@ -291,7 +291,7 @@ echo "Checking proctoring documentation..."
 PROCTORING_DOCS=(
   "docs/architecture/proctoring-architecture-overview.md"
   "docs/runbooks/proctoring-operations-runbook.md"
-  "specs/proctoring-integration_spec.md"
+  "specs/proposals/proctoring-integration_spec.md"
 )
 
 DOCS_FOUND=false

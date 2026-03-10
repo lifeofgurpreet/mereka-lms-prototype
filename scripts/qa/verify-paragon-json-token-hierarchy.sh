@@ -2,7 +2,7 @@
 # @covers AC-TKN-001, AC-TKN-002, AC-TKN-003, AC-TKN-004, AC-TKN-005
 # @covers AC-TKN-006, AC-TKN-007, AC-TKN-008, AC-TKN-009, AC-TKN-015
 # @covers AC-TKN-INT-001
-# @spec: paragon-design-tokens-migration_spec.md
+# @spec: plans/paragon-design-tokens-migration_spec.md
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

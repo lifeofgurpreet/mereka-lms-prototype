@@ -89,10 +89,10 @@
 
 | Capability | Status | Environment | Verification | Notes |
 |-----------|--------|-------------|--------------|-------|
-| **iOS App** | DRAFT | — | Spec exists, runtime status UNVERIFIED | Spec: mobile-apps-enterprise_spec.md (draft, 37 ACs). Setup docs exist but not verified in production |
+| **iOS App** | DRAFT | — | Spec exists, runtime status UNVERIFIED | Spec: proposals/mobile-apps-enterprise_spec.md (draft, 37 ACs). Setup docs exist but not verified in production |
 | **Android App** | DEFERRED | — | No infrastructure exists | ADR-016: Deferred until iOS app verified operational and user demand demonstrated |
 | **Mobile API Endpoints** | DEPLOYED | prod+dev | Standard Open edX API | LMS provides mobile API |
-| **Mobile Secrets Management** | DRAFT | — | Spec exists | Spec: mobile-apps-secrets-management_spec.md (draft, 25 ACs) |
+| **Mobile Secrets Management** | DRAFT | — | Spec exists | Spec: proposals/mobile-apps-secrets-management_spec.md (draft, 25 ACs) |
 
 ## Infrastructure & Operations
 
@@ -149,7 +149,7 @@
 
 | Capability | Status | Environment | Verification | Notes |
 |-----------|--------|-------------|--------------|-------|
-| **HubSpot Registration** | DEFERRED | — | Spec exists | Spec: external-registration-hubspot_spec.md (deferred, 26 ACs) |
+| **HubSpot Registration** | DEFERRED | — | Spec exists | Spec: proposals/external-registration-hubspot_spec.md (deferred, 26 ACs) |
 | **HubSpot Webhooks** | DEPLOYED | prod | services/purchase-gateway/ | Microservice deployed |
 | **Cloudflare DNS** | DEPLOYED | prod+dev | Managed via Cloudflare API | Multi-level subdomains with DNS-only mode |
 | **Infisical Secrets** | DEPLOYED | prod+dev | ExternalSecrets operator | Secrets stored in Infisical, synced to GCP SM |
@@ -160,7 +160,7 @@
 
 | Capability | Status | Environment | Verification | Notes |
 |-----------|--------|-------------|--------------|-------|
-| **Proctoring Integration** | DEFERRED | — | Spec exists | Spec: proctoring-integration_spec.md (deferred, 38 ACs) |
+| **Proctoring Integration** | DEFERRED | — | Spec exists | Spec: proposals/proctoring-integration_spec.md (deferred, 38 ACs) |
 | **XQueue (External Grading)** | DEPLOYED | prod+dev | `kubectl get pod xqueue-*` | Basic deployment complete |
 | **Advanced Assessment Integration** | DRAFT | — | Spec exists | Spec: advanced-assessment-xqueue_spec.md (draft, 44 ACs) |
 

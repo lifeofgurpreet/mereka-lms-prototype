@@ -1,5 +1,5 @@
 ---
-source_spec: specs/mobile-apps-enterprise_spec.md
+source_spec: specs/proposals/mobile-apps-enterprise_spec.md
 status: ready
 created: 2026-02-10
 updated: 2026-02-10
@@ -9,7 +9,7 @@ last_updated: '2026-02-10'
 
 # Mobile Apps (iOS + Android) Enterprise Deployment - Test Plan
 
-**Source Spec**: `specs/mobile-apps-enterprise_spec.md`
+**Source Spec**: `specs/proposals/mobile-apps-enterprise_spec.md`
 
 **Test Frameworks**:
 - **iOS**: XCTest (unit), Detox or XCUITest (E2E)

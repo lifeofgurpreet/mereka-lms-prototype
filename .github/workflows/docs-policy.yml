@@ -9,6 +9,9 @@ on:
       - "generated/platform/**"
       - "generated/skills/**"
       - "generated/knowledge/**"
+      - "generated/graphs/**"
+      - "generated/catalogs/knowledge-catalog.json"
+      - "scripts/qa/run-knowledge-integrity-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -33,6 +36,9 @@ on:
       - "generated/platform/**"
       - "generated/skills/**"
       - "generated/knowledge/**"
+      - "generated/graphs/**"
+      - "generated/catalogs/knowledge-catalog.json"
+      - "scripts/qa/run-knowledge-integrity-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -133,3 +139,13 @@ jobs:
           fi
           chmod +x scripts/qa/run-team-handbook-gates.sh
           ./scripts/qa/run-team-handbook-gates.sh
+
+      - name: Verify unified knowledge control plane
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-knowledge-integrity-gates.sh
+          ./scripts/qa/run-knowledge-integrity-gates.sh

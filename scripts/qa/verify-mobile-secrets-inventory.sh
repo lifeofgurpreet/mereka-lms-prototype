@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-MAS-001, AC-MAS-002, AC-MAS-004, AC-MAS-005, AC-MAS-006, AC-MAS-007, AC-MAS-013, AC-MAS-014, AC-MAS-015, AC-MAS-023, AC-MAS-024
-# @spec: mobile-apps-secrets-management_spec.md
+# @spec: proposals/mobile-apps-secrets-management_spec.md
 # Verify mobile app secrets inventory and naming conventions
 #
 # Checks:
