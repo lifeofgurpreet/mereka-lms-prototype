@@ -2331,11 +2331,74 @@
     "type": "status"
   },
   {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-08-31",
+    "owner": "Migration Squad",
+    "path": "archive/reports/mct/DOCUMENTATION_COMPLETE.md",
+    "status": "archive-candidate",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-12-18",
+    "owner": "Migration Squad",
+    "path": "archive/reports/mct/EXPORT_COMPLETE.md",
+    "status": "archive-candidate",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-08-25",
+    "owner": "Migration Squad",
+    "path": "archive/reports/mct/EXPORT_SUCCESS.md",
+    "status": "archive-candidate",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-12-18",
+    "owner": "Migration Squad",
+    "path": "archive/reports/mct/EXPORT_SUMMARY.md",
+    "status": "archive-candidate",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-08-25",
+    "owner": "Migration Squad",
+    "path": "archive/reports/mct/EXPORT_TEST_RESULTS.md",
+    "status": "archive-candidate",
+    "type": "status"
+  },
+  {
     "canonical_conflict_group": "mct-migration-status",
     "freshness_risk": "low",
     "last_verified_or_updated": "2025-08-31",
     "owner": "Migration Squad",
     "path": "archive/reports/mct/MCT_MIGRATION_STATUS.md",
+    "status": "archive-candidate",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md",
+    "status": "archive-candidate",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/reports/migrations/BBI-K8-MIGRATION.md",
     "status": "archive-candidate",
     "type": "status"
   },
@@ -5818,6 +5881,24 @@
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_CLOSEOUT.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_REVIEW_HANDOFF.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_TRACKER.md",
     "status": "canonical",
     "type": "other"
@@ -6770,92 +6851,11 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "migrations/BBI-K8-MIGRATION.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Migration Squad",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "migrations/README.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "index"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-18",
-    "owner": "Migration Squad",
-    "path": "migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-09-30",
-    "owner": "Migration Squad",
-    "path": "migrations/kajabi/KAJABI_MIGRATION_NOTES.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-31",
-    "owner": "Migration Squad",
-    "path": "migrations/mct/DOCUMENTATION_COMPLETE.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-12-18",
-    "owner": "Migration Squad",
-    "path": "migrations/mct/EXPORT_COMPLETE.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-25",
-    "owner": "Migration Squad",
-    "path": "migrations/mct/EXPORT_SUCCESS.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-12-18",
-    "owner": "Migration Squad",
-    "path": "migrations/mct/EXPORT_SUMMARY.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-25",
-    "owner": "Migration Squad",
-    "path": "migrations/mct/EXPORT_TEST_RESULTS.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "migrations/mct/MCT_USER_IMPORT_COMPLETE.md",
-    "status": "supporting",
-    "type": "other"
   },
   {
     "canonical_conflict_group": null,
@@ -9545,6 +9545,24 @@
     "last_verified_or_updated": "2025-09-20",
     "owner": "Migration Squad",
     "path": "reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-08-18",
+    "owner": "Migration Squad",
+    "path": "reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-09-30",
+    "owner": "Migration Squad",
+    "path": "reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md",
     "status": "supporting",
     "type": "other"
   },
