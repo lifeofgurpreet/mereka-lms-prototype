@@ -1,10 +1,10 @@
-# Kajabi → Open edX Data Migration Notes
-_Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-09-30_
+# Kajabi Data Migration Notes
+_Audience: Platform Engineering + Migration Operators • Owner: Migration Squad • Last verified: 2026-03-10 • Status: canonical_
 
 > **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
 
 ## Credentials & Endpoints
-- Base API URL: `https://academy.mereka.my/api` (tenant-specific).
+- Base API URL: tenant-specific Kajabi API host for the source environment.
 - OAuth2 client credentials flow against `https://api.kajabi.com/v1/oauth/token`.
  Environment variables needed for scripts:
   - `KAJABI_CLIENT_ID` / `KAJABI_API_KEY`
@@ -66,7 +66,7 @@ node scripts/migrations/kajabi/kajabi-export.mjs
 # chunk a large resource (contacts pages 1-50 only):
 node scripts/migrations/kajabi/kajabi-export.mjs \
   --resources contacts \
-  --site 2147565329 \
+  --site "$KAJABI_SITE_ID" \
   --start-page 1 \
   --end-page 50 \
   --page-size 100
@@ -74,7 +74,7 @@ node scripts/migrations/kajabi/kajabi-export.mjs \
 # courses index + details (10 pages) without lesson expansion:
 node scripts/migrations/kajabi/kajabi-export.mjs \
   --resources courses \
-  --site 2147565329 \
+  --site "$KAJABI_SITE_ID" \
   --page-size 50 \
   --start-page 1 \
   --end-page 10 \
@@ -88,26 +88,26 @@ Key features:
 - Course exports attempt `include=modules,lessons,lessons.media,offers` and fall back to basic course payload if Kajabi returns 500s.
 - Webhook provisioning available with `--ensure-webhooks --webhook-target https://...` (or `WEBHOOK_TARGET_URL` env).
 
-Sample output sizes (latest pull):
+Typical output artifacts:
 
-| File | Records |
+| File | Notes |
 |------|---------|
-| `contacts.ndjson` | 85,206 |
-| `customers.ndjson` | 85,202 |
-| `offers.ndjson` | 375 |
-| `products.ndjson` | 110 |
-| `purchases.ndjson` | 104,470 |
-| `transactions.ndjson` | 3 |
-| `contact_tags.ndjson` | 100 |
-| `forms.ndjson` | 17 |
-| `form_submissions.ndjson` | 2 |
-| `courses_index.ndjson` | 107 (entire catalog) |
-| `courses_full.ndjson` | 107 (course metadata + any modules/lessons returned by `include=...` requests) |
-| `structure/modules.ndjson` | 401 |
-| `structure/lessons.ndjson` | 1,527 |
-| `structure/lesson_media.ndjson` | 32 (only courses where `lessons.media` succeeded) |
+| `contacts.ndjson` | Contact export, often the largest person-level dataset |
+| `customers.ndjson` | Login-capable members |
+| `offers.ndjson` | Offer / entitlement catalog |
+| `products.ndjson` | Product catalog |
+| `purchases.ndjson` | Commerce history used for enrollment/certificate eligibility |
+| `transactions.ndjson` | Payment/refund/dispute history when available |
+| `contact_tags.ndjson` | Tag catalog and segmentation helpers |
+| `forms.ndjson` | Opt-in form definitions |
+| `form_submissions.ndjson` | Form submission history when exported |
+| `courses_index.ndjson` | Entire course catalog index |
+| `courses_full.ndjson` | Course metadata plus any included lesson/module payloads |
+| `structure/modules.ndjson` | Normalized module export |
+| `structure/lessons.ndjson` | Normalized lesson export |
+| `structure/lesson_media.ndjson` | Media expansion for lessons where Kajabi returns media successfully |
 
-> For very large tables (contacts, purchases) run the exporter in batches, e.g. `--start-page 1 --end-page 100`, then resume with `--start-page 101`.
+> For very large tables (contacts, purchases) run the exporter in batches, e.g. `--start-page 1 --end-page 100`, then resume with the next page range.
 
 ### Course structure helper
 `scripts/migrations/kajabi/kajabi-course-structure.mjs` reads `courses_index.ndjson` and for each course:
