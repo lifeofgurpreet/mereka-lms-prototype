@@ -1,12 +1,13 @@
-# Kajabi → Open edX Transformation Pipeline
+# Kajabi Transformation Reference
+_Audience: Platform Engineering + Migration Operators • Owner: Migration Squad • Last verified: 2026-03-10 • Status: canonical_
 
-This folder holds the tooling that turns the raw Kajabi exports (stored under `exports/kajabi/`) into production files we can feed into Open edX.
+This document explains the stable Kajabi transformation and import tooling that converts raw exports into Open edX-ready packages and CSVs.
 
 > **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
 
 ## Inputs
 
-Run the exporter from the repo root (already done once):
+Run the exporter from the repo root:
 
 ```
 exports/kajabi/
@@ -103,7 +104,7 @@ tutor local run lms ./manage.py lms bulk_enroll --csv /tmp/kajabi-enrollments.cs
   --settings=tutor.production --email-students False --auto-enroll True
 
 # 3) Courses – easiest via Studio UI
-# Sign in to http://studio.localhost, choose "Import Course",
+# Sign in to your Studio host, choose "Import Course",
 # and upload the desired tarball from scripts/migrations/kajabi/output/course_packages/<slug>/<slug>.tar.gz
 ```
 
@@ -137,4 +138,4 @@ Options:
 - `--dry-run` prints the plan without calling Tutor.
 - `--keep-temp` leaves the extracted `/tmp/kajabi-import/<slug>` folders inside the CMS container for debugging.
 
-By default the script streams each tarball into `tutor local run cms` for extraction, runs `manage.py cms import` against that directory, and then removes the temp folder. Keep Tutor’s services running during the import marathon.
+By default the script streams each tarball into `tutor local run cms` for extraction, runs `manage.py cms import` against that directory, and then removes the temp folder. Keep Tutor’s services running for the duration of the import.
