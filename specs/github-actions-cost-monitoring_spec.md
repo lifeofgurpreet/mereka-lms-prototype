@@ -2,7 +2,7 @@
 title: "GitHub Actions Cost Monitoring"
 type: "feature_spec"
 id: "SPEC-GHA-COST-MONITORING"
-status: "active"
+status: "approved"
 spec_class: "integration"
 owner: "platform-team"
 vehicle: "talent_platform"

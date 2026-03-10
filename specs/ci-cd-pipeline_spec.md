@@ -2,7 +2,7 @@
 title: "CI/CD Pipeline Specification"
 type: "feature_spec"
 id: "SPEC-CICD-PIPELINE"
-status: "active"
+status: "approved"
 spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"

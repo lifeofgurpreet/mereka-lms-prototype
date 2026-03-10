@@ -81,7 +81,7 @@
       "path": "specs/auth-sso-enterprise_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "domain",
-      "status": "active",
+      "status": "approved",
       "summary": "Normative contract for enterprise SSO, tenant-scoped identity federation, session behavior, and privileged-auth hardening across Mereka LMS.",
       "tags": [
         "auth.oidc",
@@ -143,7 +143,7 @@
       "path": "specs/ci-cd-pipeline_spec.md",
       "review_due": "2026-06-12",
       "spec_class": "system",
-      "status": "active",
+      "status": "approved",
       "summary": "Defines the CI/CD contract for building, validating, and promoting platform artifacts through the canonical GitOps release flow.",
       "tags": [
         "build.gitops-promotion",
@@ -569,7 +569,7 @@
       "path": "specs/github-actions-cost-monitoring_spec.md",
       "review_due": "2026-06-12",
       "spec_class": "integration",
-      "status": "active",
+      "status": "approved",
       "summary": "Defines how GitHub Actions cost telemetry is measured, reported, and reviewed as part of the platform CI/CD contract.",
       "tags": [
         "build.gitops-promotion",
@@ -906,7 +906,7 @@
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "plan",
-      "status": "superseded",
+      "status": "completed",
       "summary": "Planning artifact for the Paragon design tokens migration retained at the spec root as compatibility residue.",
       "tags": [],
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline",
@@ -2941,7 +2941,7 @@
       "path": "specs/video-pipeline-delivery_spec.md",
       "review_due": "2026-06-09",
       "spec_class": "integration",
-      "status": "active",
+      "status": "approved",
       "summary": "Defines the normative delivery contract for Mereka video ingestion, processing, storage, and playback across the platform.",
       "tags": [
         "data.retention",

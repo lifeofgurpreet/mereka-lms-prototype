@@ -2,7 +2,7 @@
 title: "Authentication & SSO Enterprise Integration"
 type: "feature_spec"
 id: "SPEC-AUTH-SSO-ENTERPRISE"
-status: "active"
+status: "approved"
 spec_class: "domain"
 owner: "engineering"
 vehicle: "talent_platform"

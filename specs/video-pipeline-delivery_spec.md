@@ -2,7 +2,7 @@
 id: "SPEC-VIDEO-PIPELINE-DELIVERY"
 title: "Video Pipeline & Delivery System"
 type: "feature_spec"
-status: "active"
+status: "approved"
 spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"

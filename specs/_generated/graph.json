@@ -1577,7 +1577,7 @@
       "owner": "platform-team",
       "path": "specs/github-actions-cost-monitoring_spec.md",
       "spec_class": "integration",
-      "status": "active",
+      "status": "approved",
       "title": "GitHub Actions Cost Monitoring"
     },
     {
@@ -1668,7 +1668,7 @@
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "spec_class": "plan",
-      "status": "superseded",
+      "status": "completed",
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
@@ -2579,7 +2579,7 @@
       "owner": "engineering",
       "path": "specs/video-pipeline-delivery_spec.md",
       "spec_class": "integration",
-      "status": "active",
+      "status": "approved",
       "title": "Video Pipeline & Delivery System"
     }
   ],

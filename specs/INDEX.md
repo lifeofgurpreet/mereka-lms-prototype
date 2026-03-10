@@ -5,15 +5,13 @@
 
 ## Summary
 
-- **active**: 4 items
-- **approved**: 13 items
-- **completed**: 13 items
+- **approved**: 17 items
+- **completed**: 14 items
 - **deferred**: 2 items
 - **deferred_until_2027**: 2 items
 - **draft**: 60 items
 - **in_progress**: 2 items
 - **ready**: 7 items
-- **superseded**: 1 items
 - **lane:normative**: 44 items
 - **lane:plan**: 29 items
 - **lane:testplan**: 31 items
@@ -24,9 +22,9 @@
 |---|-------|------|-------|--------|---------|-----|----------|
 | 1 | [Advanced Assessment & XQueue Integration (Non-Proctored)](advanced-assessment-xqueue_spec.md) | normative | integration | draft | 1.0.0 | 44 | 2026-03-09 |
 | 2 | [Analytics Pipeline (Aspects/Panorama)](analytics-pipeline_spec.md) | normative | integration | approved | 1.0.0 | 8 | 2026-03-09 |
-| 3 | [Authentication & SSO Enterprise Integration](auth-sso-enterprise_spec.md) | normative | domain | active | 1.0.0 | 45 | 2026-03-09 |
+| 3 | [Authentication & SSO Enterprise Integration](auth-sso-enterprise_spec.md) | normative | domain | approved | 1.0.0 | 45 | 2026-03-09 |
 | 4 | [Branding System](branding-system_spec.md) | normative | domain | approved | 1.1.0 | 13 | 2026-03-09 |
-| 5 | [CI/CD Pipeline Specification](ci-cd-pipeline_spec.md) | normative | system | active | 1.0.0 | 43 | 2026-02-12 |
+| 5 | [CI/CD Pipeline Specification](ci-cd-pipeline_spec.md) | normative | system | approved | 1.0.0 | 43 | 2026-02-12 |
 | 6 | [Content Libraries v2 Management & Enterprise Usage](content-libraries-v2_spec.md) | normative | domain | draft | 1.0.0 | 33 | 2026-03-09 |
 | 7 | [Cross-Cutting Requirements](cross-cutting-requirements_spec.md) | normative | system | approved | 1.0.0 | 12 | 2026-03-09 |
 | 8 | [Data Migrations: Kajabi & MCT Legacy Systems](data-migrations-kajabi-mct_spec.md) | normative | domain | in_progress | 1.0.0 | 44 | 2026-02-10 |
@@ -40,7 +38,7 @@
 | 16 | [Forum Service Migration: Ruby cs_comments_service to Python openedx-forum](forum-service-migration_spec.md) | normative | integration | completed | 1.0.0 | 25 | 2026-03-09 |
 | 17 | [Frontend Accessibility: WCAG 2.1 AA Compliance for Mereka Branding Overlays](frontend-accessibility_spec.md) | normative | integration | draft | 1.0.0 | 26 | 2026-03-09 |
 | 18 | [Frontend Performance Budgets: Core Web Vitals, Bundle Sizes, and Caching for SEA Users](frontend-performance-budgets_spec.md) | normative | domain | draft | 1.0.0 | 30 | 2026-03-09 |
-| 19 | [GitHub Actions Cost Monitoring](github-actions-cost-monitoring_spec.md) | normative | integration | active | 1.0.0 | 14 | 2026-02-12 |
+| 19 | [GitHub Actions Cost Monitoring](github-actions-cost-monitoring_spec.md) | normative | integration | approved | 1.0.0 | 14 | 2026-02-12 |
 | 20 | [Kubernetes Deployment Specification](k8s-deployment_spec.md) | normative | system | approved | 1.0.0 | 37 | 2026-03-09 |
 | 21 | [MFE Plugin Slots: FPF Slot Activation Roadmap](mfe-plugin-slots_spec.md) | normative | integration | draft | 1.0.0 | 29 | 2026-03-09 |
 | 22 | [Mobile Apps (iOS + Android) Enterprise Deployment](mobile-apps-enterprise_spec.md) | normative | domain | draft | 1.0.0 | 37 | 2026-03-09 |
@@ -51,7 +49,7 @@
 | 27 | [Observability Stack (Prometheus/Tempo/Loki)](observability-stack_spec.md) | normative | integration | approved | 1.0.0 | 16 | 2026-03-09 |
 | 28 | [Observability Validation & SLI/SLO Compliance Requirements](observability-validation-requirements_spec.md) | normative | integration | draft | 1.0.0 | 31 | 2026-02-13 |
 | 29 | [OEP-48 Brand Package (@edx/brand for Mereka Academy)](oep48-brand-package_spec.md) | normative | domain | draft | 1.0.0 | 37 | 2026-02-27 |
-| 30 | [Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline](paragon-design-tokens-migration_spec.md) | normative | plan | superseded | None | 0 | 2026-03-09 |
+| 30 | [Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline](paragon-design-tokens-migration_spec.md) | normative | plan | completed | None | 0 | 2026-03-09 |
 | 31 | [Platform Middleware and Custom Apps](platform-middleware-custom-apps_spec.md) | normative | integration | completed | 1.0.0 | 20 | 2026-02-10 |
 | 32 | [Proctoring Integration for Enterprise Open edX](proctoring-integration_spec.md) | normative | proposal | deferred | 1.0.0 | 38 | 2026-02-10 |
 | 33 | [Repository Structure Specification](repository-structure_spec.md) | normative | system | approved | 1.0.0 | 12 | 2026-03-09 |
@@ -65,7 +63,7 @@
 | 41 | [CRED-050: Ops & Reliability](verifiable-credentials-ops_spec.md) | normative | integration | approved | 1.0.0 | 9 | 2026-03-09 |
 | 42 | [CRED-010: Credential Types & Mapping](verifiable-credentials-types_spec.md) | normative | domain | approved | 1.0.0 | 8 | 2026-03-09 |
 | 43 | [CRED-040: Verification](verifiable-credentials-verification_spec.md) | normative | security | approved | 1.0.0 | 8 | 2026-03-09 |
-| 44 | [Video Pipeline & Delivery System](video-pipeline-delivery_spec.md) | normative | integration | active | 1.0.0 | 38 | 2026-03-09 |
+| 44 | [Video Pipeline & Delivery System](video-pipeline-delivery_spec.md) | normative | integration | approved | 1.0.0 | 38 | 2026-03-09 |
 
 ## Plans
 
