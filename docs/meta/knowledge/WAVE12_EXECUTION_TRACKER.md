@@ -1,26 +1,27 @@
 # Wave 12 Execution Tracker
 
 ## Latest substantive packet head
-- ca24849a7cdffb9ec3053c7064b1aaa41de8d2ea
+- 8892594fd3843ea2b0466c976688964fdfad68b9
 
 ## Last completed batch
-- commit: ca24849a7cdffb9ec3053c7064b1aaa41de8d2ea
-- scope: Wave 12 Packet C
-- validators run: reviewer obligations generator write/check, evidence obligations generator write/check, docs catalog governance
+- commit: 8892594fd3843ea2b0466c976688964fdfad68b9
+- scope: Wave 12 Packet D
+- validators run: read-first packs generator write/check, docs catalog governance
 - result: passed
 
 ## Current target packet
 - files:
-  - docs/meta/knowledge/schemas/read-first-packs.schema.json
-  - tools/knowledge/build_read_first_packs.py
-  - generated/knowledge/read-first-packs.json
+  - docs/meta/knowledge/schemas/release-readiness.schema.json
+  - tools/knowledge/build_release_readiness.py
+  - generated/knowledge/release-readiness.json
+  - generated/knowledge/release-readiness.md
   - docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md
 - goal:
-  - produce deterministic read-first pack ordering from canonical skill and pack inputs
-  - make mixed-diff arbitration explicit in one machine-readable output
-  - tell humans and agents which packs can be skipped for this diff
+  - produce a deterministic release-readiness verdict from review, reviewer, evidence, read-first, and convergence inputs
+  - keep live approval state unresolved rather than guessed
+  - provide both canonical machine output and markdown projection
 - stop condition:
-  - read-first packs output is generated deterministically and one substantive commit is created
+  - release readiness outputs are generated deterministically and one substantive commit is created
 
 ## Open residue
 - assistant surface exports are not yet rebuilt on the fresh Wave 11 external branches
@@ -28,4 +29,4 @@
 - runtime convergence warning still requires manual follow-up and must remain non-hidden in Wave 12 outputs
 
 ## Next queued packet
-- Packet E: Release readiness engine
+- Packet F: Fixture suite and golden tests

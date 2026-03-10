@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_id",
+    "schema_version",
+    "generated_by",
+    "source_range",
+    "canonical_inputs",
+    "diff_range",
+    "release_status",
+    "why",
+    "missing_evidence",
+    "missing_reviewer_inputs",
+    "affected_contracts",
+    "affected_repos",
+    "rollback_obligations",
+    "promotion_contract_implications",
+    "runtime_convergence_implications"
+  ],
+  "properties": {
+    "pack_id": { "const": "release-readiness" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": { "type": ["string", "null"] },
+    "canonical_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "diff_range": { "type": "string", "minLength": 1 },
+    "release_status": {
+      "type": "string",
+      "enum": ["ready", "blocked", "advisory", "break-glass-only"]
+    },
+    "why": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "missing_evidence": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "missing_reviewer_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "affected_contracts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "affected_repos": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "rollback_obligations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "promotion_contract_implications": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "runtime_convergence_implications": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    }
+  }
+}
