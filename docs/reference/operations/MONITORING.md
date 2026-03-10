@@ -1,9 +1,9 @@
 # Monitoring & Alerting Guide
-_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-08_
+_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-03-10 • Status: canonical_
 
 This checklist focuses on the production **GKE Autopilot** cluster that runs the `academyv2.mereka.io` stack (dev is `academyv2.mereka.dev` on VPS kind).
 
-Reality-first (as of 2026-02-06):
+Current infrastructure baseline:
 - **MySQL** and **Redis** are **in-cluster** and PVC-backed (`kubectl get pvc -n mereka-lms`).
 - Some older docs/templates reference **Cloud SQL** / **Memorystore**; treat those as **legacy** unless explicitly reintroduced.
 - Backups are driven by **Velero** (see `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`).

@@ -8984,19 +8984,19 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-08",
+    "last_verified_or_updated": "2026-03-10",
     "owner": "Infra Team",
     "path": "reference/operations/MONITORING.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/MULTITENANT_BRAND_PLATFORM.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {

@@ -1,6 +1,6 @@
 # Multitenant Brand Platform
 
-_Bead: mereka-lms-115d.26 | Last updated: 2026-02-18_
+_Audience: Platform Engineering + Tenant Operations • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
 This document is the operational reference for the Mereka LMS multi-tenant brand platform. It covers the brand config model, runtime fallback rules, per-tenant smoke paths, contract test strategy, the SkillOurFuture migration guide, and governance policy.
 
