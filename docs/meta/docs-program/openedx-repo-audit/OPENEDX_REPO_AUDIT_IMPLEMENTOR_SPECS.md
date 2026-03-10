@@ -76,7 +76,7 @@ Issue: https://github.com/Biji-Biji-Initiative/mereka-lms/issues/215
 
 1. Add `scripts/qa/verify-evidence-redaction.sh` and wire it into `.github/workflows/ci.yml`.
 2. Add pre-commit check for staged evidence files with same signature set.
-3. Add docs/operations/EVIDENCE_STORAGE_POLICY.md with redaction examples.
+3. Add `docs/guides/standards/EVIDENCE_PACK_STANDARD.md` updates with redaction examples if the existing standard needs expansion.
 4. Refactor evidence-producing workflows to:
    - write raw files into `var/ci/**`
    - upload with `actions/upload-artifact`

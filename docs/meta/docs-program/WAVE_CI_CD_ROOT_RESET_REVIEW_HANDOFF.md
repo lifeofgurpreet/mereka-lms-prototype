@@ -8,7 +8,7 @@ Retire `docs/ci-cd/**` as a duplicate live root and leave only a tombstone READM
 
 1. Confirm `docs/ops/ci-cd/**` is now the only living CI/CD operator root.
 2. Confirm no active docs, specs, infra, or scripts depend on deleted `docs/ci-cd/**` files.
-3. Confirm `docs/ops/ci-cd/README.md` is tombstone-only.
+3. Confirm `docs/ci-cd/README.md` is tombstone-only.
 4. Confirm the legacy CI/CD guard fails if substantive files reappear under `docs/ci-cd/**`.
 
 ## Expected final shape

@@ -15,7 +15,7 @@ The canonical living CI/CD operator root is now `docs/ops/ci-cd/**`.
 
 ## What changed
 
-- Added `docs/ops/ci-cd/README.md` as a tombstone redirect.
+- Kept `docs/ci-cd/README.md` as a tombstone redirect.
 - Deleted duplicate CI/CD wrapper docs from `docs/ci-cd/**`.
 - Updated active front-door and contribution guidance to describe the retired-root state correctly.
 - Added a guard that blocks `docs/ci-cd/**` from regrowing as a living root.
@@ -30,7 +30,7 @@ The canonical living CI/CD operator root is now `docs/ops/ci-cd/**`.
 
 `tools/docs/verify/verify_legacy_ci_cd_root.py` prevents regrowth by failing when:
 
-- any file other than `docs/ops/ci-cd/README.md` exists under `docs/ci-cd/**`
+- any file other than `docs/ci-cd/README.md` exists under `docs/ci-cd/**`
 - active documentation, infra, or workflow surfaces still rely on `docs/ci-cd/**` as a living root
 
 This guard is enforced through `tools/docs/verify/verify-docs-policy.sh`.

@@ -8,7 +8,7 @@ Retire `docs/branding/**` as a duplicate live root and leave only a tombstone RE
 
 1. Confirm `docs/guides/branding/**` is now the only living branding root.
 2. Confirm no active docs/specs/infra surfaces still depend on deleted `docs/branding/**` files.
-3. Confirm `docs/guides/branding/README.md` is tombstone-only and does not behave like a front door.
+3. Confirm `docs/branding/README.md` is tombstone-only and does not behave like a front door.
 4. Confirm the branding-root guard fails if substantive files reappear under `docs/branding/**`.
 
 ## Expected final shape
