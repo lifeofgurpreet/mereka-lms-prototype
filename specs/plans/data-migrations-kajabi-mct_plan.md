@@ -236,7 +236,7 @@ Before starting any migration task:
   - Verify a specific MCT course (e.g., Basic Microsoft) hassections
   - **Done**: Sample verification passes; MCT Basic Microsofthas 12 sections
 
-- [ ] **T33 [S]** Add user login spot-check procedure (`docs/migrations/VERIFICATION_CHECKLIST.md`) | AC: #33 | Depends: T17, T21
+- [ ] **T33 [S]** Add user login spot-check procedure (`docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md`) | AC: #33 | Depends: T17, T21
   - Document manual procedure: login as 5 sample users, verify enrolled courses visible in dashboard
   - **Done**: Checklist document exists with step-by-step login verification for 5 users
 
@@ -274,14 +274,14 @@ Before starting any migration task:
   - Alert 30 days before 2026-12-17 MCT credential expiry
   - **Done**: Alert fires when <30 days remain on MCT serviceprincipal
 
-- [ ] **T40 [S]** Create post-migration entity count dashboard (`docs/migrations/MIGRATION_DASHBOARD.md` or Grafana panel)| Req: Dashboards | Depends: T31
+- [ ] **T40 [S]** Create post-migration entity count dashboard (`docs/status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md` or Grafana panel)| Req: Dashboards | Depends: T31
   - Track: Users, Enrollments, Courses, Certificates, Videos,Programs with source counts and deltas
   - Can be manual spreadsheet or Grafana panel
   - **Done**: Dashboard (or spreadsheet) exists with all entity counts and deltas
 
 ### Phase 7: Documentation (T41-T42)
 
-- [ ] **T41 [M]** Write unified migration runbook (`docs/migrations/MIGRATION_RUNBOOK.md`) | Req: Rollout | Depends: T31,T34
+- [ ] **T41 [M]** Write unified migration runbook (`docs/ops/runbooks/migrations/MIGRATION_RUNBOOK.md`) | Req: Rollout | Depends: T31,T34
   - Pre-migration checklist (credentials, disk space, pod health)
   - Step-by-step execution sequence (backup, export, transform, import, verify)
   - Maintenance window announcement template
@@ -290,7 +290,7 @@ Before starting any migration task:
   - Rollback procedures (full restore, selective unenroll, re-run from scratch)
   - **Done**: Runbook is complete and covers all phases; reviewed by migration squad
 
-- [ ] **T42 [S]** Update migration README and link to spec (`scripts/migrations/README.md`, `docs/migrations/README.md`) |Req: Docs | Depends: T41
+- [ ] **T42 [S]** Update migration README and link to spec (`scripts/migrations/README.md`, `docs/ops/runbooks/migrations/README.md`) |Req: Docs | Depends: T41
   - Link to spec, runbook, and verification scripts
   - Update usage instructions with current script locations and flags
   - **Done**: README references spec, runbook, and all scripts

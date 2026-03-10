@@ -14,7 +14,7 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-10-05
 - **All course tarballs imported** via `scripts/migrations/kajabi/import_courses.py --backend k8s --k8s-namespace mereka-lms`
 - **Batch tooling:** `scripts/migrations/kajabi/run_batches.py` + `openedx_bulk_import.py` handle offsets, retries, and log each batch to `scripts/migrations/kajabi/logs/`
 - **Webhook receiver:** FastAPI app under `services/kajabi-webhook/` (with Dockerfile + README) captures real-time Kajabi events, verifies HMAC, and writes NDJSON outbox files
-- **Documentation:** `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md` documents the full pipeline (exports, batched imports, course imports, validation, and webhook wiring)
+- **Documentation:** `docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md` documents the full pipeline (exports, batched imports, course imports, validation, and webhook wiring)
 
 ## Handover Checklist
 
@@ -310,8 +310,8 @@ curl https://<service-url>/healthz
 ### 8. Documentation Reference
 
 **Primary docs:**
-- `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md` - Full pipeline documentation, API coverage, webhook details
-- `docs/migrations/kajabi/KAJABI_MIGRATION.md` - Transformation pipeline overview
+- `docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md` - Full pipeline documentation, API coverage, webhook details
+- `docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md` - Transformation pipeline overview
 - `services/kajabi-webhook/README.md` - Webhook receiver setup
 
 **Script locations:**
@@ -409,5 +409,5 @@ python3 scripts/migrations/kajabi/import_courses.py \
 
 ---
 
-**All relevant code/config lives under `scripts/migrations/kajabi/` and `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`.**  
+**All relevant code/config lives under `scripts/migrations/kajabi/` and `docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`.**  
 **With this playbook, the next person can reproduce the migration end-to-end or push it into production without retracing the last few days of trial-and-error.**

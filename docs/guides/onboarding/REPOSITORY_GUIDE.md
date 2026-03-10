@@ -450,7 +450,7 @@ Quick reference for frequently accessed files:
 |-------------|-----------|
 | Deploy to K8s | `deploy/k8s/overlays/production/` + `scripts/infra/` |
 | Run local Tutor | `scripts/infra/tutor-config-save.sh` + `infrastructure/tutor/` |
-| Migrate data | `scripts/migrations/` + `docs/migrations/` |
+| Migrate data | `scripts/migrations/` + `docs/ops/runbooks/migrations/` + `docs/reference/migrations/` |
 | Update branding | `infrastructure/tutor/themes/mereka/` + `scripts/branding/` |
 | Verify a spec | `scripts/qa/verify-*.sh` matching the spec name |
 | Find URLs | `docs/ops/quickref/access-urls.md` |
@@ -470,7 +470,7 @@ Quick reference for frequently accessed files:
 | Prometheus | `infrastructure/monitoring/` |
 | Terraform | `infrastructure/terraform/` |
 | Cloudflare | `infrastructure/cloudflare/` |
-| Kajabi | `scripts/migrations/kajabi-*.sh`, `docs/migrations/kajabi/` |
+| Kajabi | `scripts/migrations/kajabi-*.sh`, `docs/ops/runbooks/migrations/kajabi/`, `docs/reference/migrations/kajabi/` |
 
 ### By Grep
 

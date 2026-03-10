@@ -1,12 +1,13 @@
-# Migration Runbooks
-_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2026-03-06 • Status: canonical_
+# Migrations Root Retired
+_Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-10 • Status: tombstone_
 
-Every large-scale content or user migration lives under this folder. Pick the domain below to jump into the relevant export/import guides, verification plans, and rollback checklists.
+`docs/migrations/**` is retired as a living mixed root.
 
-| Domain | Entry Doc | Focus | Last Verified |
-| --- | --- | --- | --- |
-| Kajabi | [`kajabi/README.md`](kajabi/README.md) | Canonical export -> transform -> import playbook plus QA/rollback notes. | 2025-11-09 |
-| MCT | [`mct/README.md`](mct/README.md) | Legacy Microsoft Community Training migration docs and API research. | 2025-08-31 |
-| Drive + Airtable Video Inventory | [`drive-airtable/README.md`](drive-airtable/README.md), [`drive-airtable/STATUS.md`](drive-airtable/STATUS.md), [`drive-airtable/REVIEW_QUEUE.md`](drive-airtable/REVIEW_QUEUE.md) | Course-first pipeline with migration-readiness gates, blocker tracking, subtitle integrity checks, and Open edX handoff mapping. | 2026-03-05 |
+Use these canonical roots instead:
 
-**Adding another system?** Create `docs/migrations/<system>/README.md`, mirror the metadata block, and cross-link it from here and the global docs index.
+- Runbooks: [`../ops/runbooks/migrations/README.md`](../ops/runbooks/migrations/README.md)
+- Reference: [`../reference/migrations/README.md`](../reference/migrations/README.md)
+- Status: [`../status/migrations/README.md`](../status/migrations/README.md)
+- Historical reports: [`../archive/reports/mct/`](../archive/reports/mct/) and [`../archive/reports/migrations/`](../archive/reports/migrations/)
+
+Do not add new canonical content under `docs/migrations/**`.

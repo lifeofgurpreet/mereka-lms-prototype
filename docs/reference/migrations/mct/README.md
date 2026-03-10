@@ -94,7 +94,7 @@ For the complete list of 15 courses and their structure, see `MCT_MIGRATION_STAT
 | [`DOCUMENTATION_INDEX.md`](DOCUMENTATION_INDEX.md) | Canonical index for all MCT docs (legacy). |
 | [`../../../ops/runbooks/migrations/mct/MIGRATION_PLAN.md`](../../../ops/runbooks/migrations/mct/MIGRATION_PLAN.md) | End-to-end plan for MCT migration. |
 | [`../../../ops/runbooks/migrations/mct/EXPORT_GUIDE.md`](../../../ops/runbooks/migrations/mct/EXPORT_GUIDE.md) | Steps to export data from MCT. |
-| [`../../../migrations/mct/EXPORT_TEST_RESULTS.md`](../../../migrations/mct/EXPORT_TEST_RESULTS.md) | Latest test evidence and validation. |
+| [`../../../archive/reports/mct/EXPORT_TEST_RESULTS.md`](../../../archive/reports/mct/EXPORT_TEST_RESULTS.md) | Latest historical test evidence and validation. |
 | [`API_COMPLETE_REFERENCE.md`](API_COMPLETE_REFERENCE.md) | Full API reference captured during migration. |
 | [`API_EXPLORATION.md`](API_EXPLORATION.md) | API discovery results and version comparison notes. |
 | [`DATA_MODEL_COMPLETE.md`](DATA_MODEL_COMPLETE.md) | Detailed data model mapping. |

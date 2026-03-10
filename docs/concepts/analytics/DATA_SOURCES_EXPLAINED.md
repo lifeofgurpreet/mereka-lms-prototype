@@ -39,7 +39,7 @@ _Understanding Kajabi vs MCT Course Data • Last updated: 2025-11-12_
 **Data Present:**
 - ❌ Not imported yet
 
-**Next Step:** Kajabi course import pipeline (see `docs/migrations/kajabi/`)
+**Next Step:** Kajabi course import pipeline (see `docs/ops/runbooks/migrations/kajabi/`)
 
 ## 🗄️ Open edX Data Architecture
 
@@ -122,7 +122,7 @@ open http://studio.localhost
 ```
 
 ### Option 3: Import Kajabi Courses
-See `docs/migrations/kajabi/` for Kajabi import pipeline
+See `docs/ops/runbooks/migrations/kajabi/` for Kajabi import pipeline
 
 ## 📝 Key Takeaways
 

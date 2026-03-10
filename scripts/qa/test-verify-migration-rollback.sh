@@ -9,13 +9,12 @@ tmpdir="$(mktemp -d -t verify-migration-rollback.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p \
-  "$tmpdir/docs/migrations/kajabi" \
+  "$tmpdir/docs/ops/runbooks/migrations/kajabi" \
   "$tmpdir/scripts/migrations" \
   "$tmpdir/specs" \
   "$tmpdir/scripts/qa"
 
 write_pass_fixtures() {
-  mkdir -p "$tmpdir/docs/ops/runbooks/migrations/kajabi"
   cat >"$tmpdir/docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md" <<'EOF'
 # Rollback and Safety
 Use tutor local do restore-db after taking mysql database backup.

@@ -82,7 +82,7 @@ See `docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md` for detailed import ins
 - **Imported:** 68,565 users (98.77% success rate)
 - **Total Processed:** 69,419 users
 - **Script:** `scripts/migrations/mct/openedx_bulk_import_mct.py`
-- **Documentation:** `/docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md`
+- **Documentation:** `/docs/archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md`
 
 ### Next Steps
 1. **Enrollment Import** - Ready to proceed
@@ -133,5 +133,5 @@ username,email,full_name,first_name,last_name,country,gender,dob,learning_pathwa
 email,course_id,mode,is_active
 ```
 
-See `/docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md` for the full migration strategy and detailed results.
+See `/docs/archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md` for the full migration strategy and detailed results.
 

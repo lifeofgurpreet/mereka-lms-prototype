@@ -99,7 +99,7 @@ if [[ -f "$SAMPLE_EXPORT" ]]; then
 fi
 
 # Check for sync documentation
-SYNC_DOCS="docs/migrations/INCREMENTAL_SYNC.md"
+SYNC_DOCS="docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md"
 if [[ -f "$SYNC_DOCS" ]]; then
   pass "Incremental sync documentation exists"
 else

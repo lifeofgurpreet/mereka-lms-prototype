@@ -28,12 +28,12 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
 
 ### Testing & Results
 
-4. **`docs/migrations/mct/EXPORT_TEST_RESULTS.md`**
+4. **`docs/archive/reports/mct/EXPORT_TEST_RESULTS.md`**
    - Initial test results
    - Authentication issues encountered
    - Resolution steps
 
-5. **`docs/migrations/mct/EXPORT_SUCCESS.md`**
+5. **`docs/archive/reports/mct/EXPORT_SUCCESS.md`**
    - Final test results
    - Export statistics
    - Data quality verification
@@ -146,7 +146,7 @@ See `docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md` → Troubleshooting secti
 
 ## 🔗 Related Documentation
 
-- **Kajabi Migration:** `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
+- **Kajabi Migration:** `docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
 - **Local Setup:** `docs/guides/onboarding/LOCAL_SETUP.md`
 - **Deployment:** `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
 - **Branding:** `docs/guides/branding/BRANDING.md`

@@ -25,5 +25,5 @@ Use this folder whenever you need to instrument, deploy, or interpret analytics 
 | [`ENROLLMENT_COMPARISON_QUICKSTART.md`](ENROLLMENT_COMPARISON_QUICKSTART.md) | Script-driven checklist for reconciling Kajabi vs Open edX enrollments. | 2025-10-01 |
 
 **Related folders:**
-- `docs/migrations/kajabi/` for the import/export runbooks that feed analytics.
+- `docs/ops/runbooks/migrations/kajabi/` for the import/export runbooks that feed analytics.
 - `scripts/` for Python/Node helpers such as `scripts/analytics/openedx-analytics.py` when you need raw extracts.

@@ -404,7 +404,7 @@ These courses have quiz lessons but no Kajabi tags were set up for them:
 │   │   ├── openedx/                         # Import-ready CSVs
 │   │   └── tag_prefix_to_course_mapping.json
 │   └── logs/                                # Import logs
-└── docs/migrations/kajabi/
+└── docs/ops/runbooks/migrations/kajabi/
     └── KAJABI_REMIGRATION_RUNBOOK.md         # This file
 ```
 

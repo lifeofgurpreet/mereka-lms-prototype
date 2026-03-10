@@ -335,7 +335,7 @@ echo ""
 echo "--- AC-MB-005: SkillOurFuture Brand Migration Guide ---"
 
 if [[ ! -f "$SOF_MIGRATION_DOC" ]]; then
-  fail "AC-MB-005: SKILLOURFUTURE_BRAND_MIGRATION.md not found at docs/migrations/"
+  fail "AC-MB-005: SKILLOURFUTURE_BRAND_MIGRATION.md not found at docs/ops/runbooks/migrations/"
 else
   pass "AC-MB-005: SKILLOURFUTURE_BRAND_MIGRATION.md exists"
 

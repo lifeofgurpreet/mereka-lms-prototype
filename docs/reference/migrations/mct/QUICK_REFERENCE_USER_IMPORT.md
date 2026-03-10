@@ -78,7 +78,7 @@ if user:
 
 ### Documentation
 - Summary: `/MCT_USER_IMPORT_SUMMARY.md`
-- Full Report: `/docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md`
+- Full Report: `/docs/archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md`
 - This Guide: `/docs/reference/migrations/mct/QUICK_REFERENCE_USER_IMPORT.md`
 
 ## Sample Users (Verified Imported)
@@ -116,6 +116,6 @@ if user:
 ## Need Help?
 
 See full documentation:
-- Complete report: `/docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md`
+- Complete report: `/docs/archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md`
 - Executive summary: `/MCT_USER_IMPORT_SUMMARY.md`
 - Migration README: `/scripts/migrations/mct/README.md`

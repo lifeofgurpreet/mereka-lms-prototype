@@ -171,10 +171,26 @@ This is not a wrapper-only retirement. The current root still mixes reference, s
 ### Packet D
 
 - Scope: rehome or archive historical notes/status summaries and rewrite references.
+- Applied in this packet:
+  - `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md` -> `docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
+  - `docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md` -> `docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md`
+  - `docs/migrations/mct/DOCUMENTATION_COMPLETE.md` -> `docs/archive/reports/mct/DOCUMENTATION_COMPLETE.md`
+  - `docs/migrations/mct/EXPORT_COMPLETE.md` -> `docs/archive/reports/mct/EXPORT_COMPLETE.md`
+  - `docs/migrations/mct/EXPORT_SUCCESS.md` -> `docs/archive/reports/mct/EXPORT_SUCCESS.md`
+  - `docs/migrations/mct/EXPORT_SUMMARY.md` -> `docs/archive/reports/mct/EXPORT_SUMMARY.md`
+  - `docs/migrations/mct/EXPORT_TEST_RESULTS.md` -> `docs/archive/reports/mct/EXPORT_TEST_RESULTS.md`
+  - `docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md` -> `docs/archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md`
+  - `docs/migrations/BBI-K8-MIGRATION.md` -> `docs/archive/reports/migrations/BBI-K8-MIGRATION.md`
+- Active consumers re-routed to canonical runbooks, reference, status, or archive roots.
 
 ### Packet E
 
 - Scope: collapse `docs/migrations/**` to a tombstone README, add no-regrowth guard, and close out.
+- Applied in this packet:
+  - rewrote `docs/migrations/README.md` as a tombstone-only redirect
+  - added `tools/docs/verify/verify_legacy_migrations_root.py`
+  - wired the guard into docs policy validation and CI triggers
+  - created closeout and review handoff docs
 
 ## Current blocker status
 

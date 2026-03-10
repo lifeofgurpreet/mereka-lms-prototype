@@ -533,7 +533,7 @@ entries:
     the last successful offset without duplicating previously imported users
   verify:
   - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
     section: Pod Restart Recovery
     justification: Requires intentional pod kill during active import; cannot be safely automated in production GKE cluster
 - id: AC-025
@@ -542,7 +542,7 @@ entries:
     in a program, then the Credentials service can issue a program certificate
   verify:
   - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
     section: MCT Program Certificates
     justification: ProgramCertificate verification requires Discovery admin UI navigation and Credentials service API inspection;
       not scriptable without admin session tokens
@@ -552,7 +552,7 @@ entries:
     units, content) renders correctly
   verify:
   - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
     section: Studio Course Spot-Check
     justification: Visual rendering verification requires human inspection of Studio UI for 10 sample courses to confirm section/unit/content
       display
@@ -562,7 +562,7 @@ entries:
     in the dashboard
   verify:
   - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
     section: User Login Spot-Check
     justification: User login and dashboard verification requires browser-based interaction with the LMS as specific users
 - id: AC-034
@@ -571,7 +571,7 @@ entries:
     pre-migration state
   verify:
   - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
     section: Full Rollback Test
     justification: Full database restore is a destructive operation that must be tested manually in a staging environment
       with operator oversight
@@ -1725,7 +1725,7 @@ entries:
     {"status":"ok"} with HTTP 200 if KAJABI_WEBHOOK_SECRET is configured
   verify:
   - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
     section: Kajabi Webhook Health Check
     justification: Requires running webhook service with KAJABI_WEBHOOK_SECRET set; not deployable in stateless CI
 - id: AC-001

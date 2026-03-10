@@ -33,7 +33,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/status/active/CI_OPTIMIZATION_TRACKER.md | 28 | Ops Platform Owner | fix inline path references and missing commands |
 | docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md | 19 | Ops Platform Owner | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md | 15 | Platform Architecture | fix inline path references and missing commands |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 13 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 13 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 11 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 9 | Platform Architecture | fix inline path references and missing commands |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 8 | Unassigned (determine domain owner) | fix inline path references and missing commands |
@@ -119,10 +119,10 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/guides/onboarding/LOCAL_SETUP.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/onboarding/TEAM_SCALING_GUIDE.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/migrations/mct/EXPORT_COMPLETE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/migrations/mct/EXPORT_SUMMARY.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/archive/reports/mct/EXPORT_COMPLETE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/archive/reports/mct/EXPORT_SUMMARY.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/ops/runbooks/A11Y_TENANT_BRANDING_GATE.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md | 1 | Operations Lead | fix inline path references and missing commands |
 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md | 1 | Operations Lead | fix inline path references and missing commands |
@@ -313,7 +313,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 54 | scripts/migrations/kajabi/transform_data.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 65 | scripts/migrations/kajabi/build_course_packages.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 66 | scripts/migrations/kajabi/output/course_structure.json |
-| docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 93 | scripts/migrations/kajabi/build_course_packages.py |
+| docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 93 | scripts/migrations/kajabi/build_course_packages.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 17 | scripts/migrations/kajabi/transform_data.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 32 | scripts/migrations/kajabi/build_course_packages.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 33 | scripts/migrations/kajabi/output/course_structure.json |
@@ -356,19 +356,19 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 86 | scripts/migrations/kajabi/transform_data.py |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 92 | scripts/migrations/kajabi/build_course_packages.py |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 93 | scripts/migrations/kajabi/output/course_structure.json |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 126 | scripts/migrations/kajabi/output/ |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 153 | scripts/migrations/kajabi/openedx_bulk_import.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 154 | scripts/migrations/kajabi/run_batches.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 161 | scripts/migrations/kajabi/run_batches.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 175 | scripts/migrations/kajabi/run_batches.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 188 | scripts/migrations/kajabi/import_courses.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 194 | scripts/migrations/kajabi/import_courses.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 235 | services/kajabi-webhook/ |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 257 | scripts/migrations/kajabi/scrape_lessons.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 260 | scripts/migrations/kajabi/requirements.txt |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 265 | scripts/migrations/kajabi/scrape_lessons.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 266 | scripts/migrations/kajabi/output/course_structure.json |
-| docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 278 | scripts/migrations/kajabi/transform_data.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 126 | scripts/migrations/kajabi/output/ |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 153 | scripts/migrations/kajabi/openedx_bulk_import.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 154 | scripts/migrations/kajabi/run_batches.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 161 | scripts/migrations/kajabi/run_batches.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 175 | scripts/migrations/kajabi/run_batches.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 188 | scripts/migrations/kajabi/import_courses.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 194 | scripts/migrations/kajabi/import_courses.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 235 | services/kajabi-webhook/ |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 257 | scripts/migrations/kajabi/scrape_lessons.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 260 | scripts/migrations/kajabi/requirements.txt |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 265 | scripts/migrations/kajabi/scrape_lessons.py |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 266 | scripts/migrations/kajabi/output/course_structure.json |
+| docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 278 | scripts/migrations/kajabi/transform_data.py |
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 128 | scripts/migrations/kajabi/output/ |
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 129 | scripts/migrations/kajabi/output/course_packages/ |
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 139 | scripts/migrations/kajabi/transform_data.py |
@@ -399,8 +399,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 118 | scripts/migrations/kajabi/output/verification/summary.txt |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 133 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 86 | scripts/migrations/kajabi/output/verification_current/summary.txt |
-| docs/migrations/mct/EXPORT_COMPLETE.md | 215 | scripts/migrations/mct/transform_data.py |
-| docs/migrations/mct/EXPORT_SUMMARY.md | 128 | scripts/migrations/mct/transform_data.py |
+| docs/archive/reports/mct/EXPORT_COMPLETE.md | 215 | scripts/migrations/mct/transform_data.py |
+| docs/archive/reports/mct/EXPORT_SUMMARY.md | 128 | scripts/migrations/mct/transform_data.py |
 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 197 | scripts/migrations/mct/transform_data.py |
 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 220 | scripts/migrations/mct/output/ |
 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 234 | scripts/migrations/mct/build_course_packages.py |

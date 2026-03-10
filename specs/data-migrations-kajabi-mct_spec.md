@@ -11,10 +11,10 @@ depends_on:
 - specs/secrets-management_spec.md
 links:
   related_docs:
-  - docs/migrations/kajabi/KAJABI_MIGRATION_HANDOVER.md
-  - docs/migrations/kajabi/KAJABI_MIGRATION_STATUS.md
+  - reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md
+  - docs/status/migrations/KAJABI_MIGRATION_STATUS.md
   - docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md
-  - docs/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md
+  - docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md
   - docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md
   - docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md
   - docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md
@@ -23,7 +23,7 @@ links:
   - docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md
   - docs/ops/runbooks/migrations/mct/VIDEO_MIGRATION.md
   - docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md
-  - docs/migrations/BBI-K8-MIGRATION.md
+  - docs/archive/reports/migrations/BBI-K8-MIGRATION.md
   related_specs:
   - specs/secrets-management_spec.md
   - specs/k8s-deployment_spec.md

@@ -10,7 +10,7 @@ Scripts for migrating data from Kajabi and MCT (Microsoft Community Training) to
 
 ## Usage
 
-See `docs/migrations/` for complete migration playbooks.
+See `docs/ops/runbooks/migrations/` for execution playbooks and `docs/reference/migrations/` for source-system reference.
 
 ### Dry Run (Smoke Test)
 

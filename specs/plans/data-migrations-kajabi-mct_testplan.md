@@ -17,7 +17,7 @@ This project does not use a standard unit test framework (no `vitest.config`, `j
 - **`shell_verification`**: Bash scripts that check file existence, row counts, format correctness, and command exit codes
 - **`manual_verification`**: Human-executed checklists for UI spot-checks, login tests, and visual content inspection
 
-All shell verification scripts live under `scripts/qa/` and `scripts/migrations/`. Manual verification steps are documented in `docs/migrations/`.
+All shell verification scripts live under `scripts/qa/` and `scripts/migrations/`. Manual verification steps are documented in `docs/ops/runbooks/migrations/`.
 
 ## Test Matrix
 
@@ -54,7 +54,7 @@ All shell verification scripts live under `scripts/qa/` and `scripts/migrations/
 | AC-012 | MCT import creates 68K+ users (accounting for email collisions with Kajabi users) | shell_verification | `scripts/qa/verify-user-import-counts.sh --source mct` | Open edX Django shell access; pre/post counts |
 | AC-013 | User present in both Kajabi and MCT results in exactly one Open edX account with enrollments from both | shell_verification | `scripts/qa/verify-cross-system-identity.sh` | Known overlapping email addresses from both exports |
 | AC-013 (negative) | Duplicate user accounts are not created when same email exists in both systems | shell_verification | `scripts/qa/verify-cross-system-identity.sh --check-no-duplicates` | Django shell query for duplicate emails |
-| AC-014 | Import resumes from last offset after pod restart (no duplicate users created) | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Pod Restart Recovery" | Simulate pod restart mid-import; check offset file and re-run |
+| AC-014 | Import resumes from last offset after pod restart (no duplicate users created) | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Pod Restart Recovery" | Simulate pod restart mid-import; check offset file and re-run |
 
 ### Course Import Phase Tests
 
@@ -84,7 +84,7 @@ All shell verification scripts live under `scripts/qa/` and `scripts/migrations/
 | AC-023 | `GeneratedCertificate` records created for all mappable (email, course_key) pairs with `downloadable` status | shell_verification | `scripts/qa/verify-certificate-issuance.sh --source kajabi` | Django shell; `tag_prefix_to_course_mapping.json` |
 | AC-024 | At least 3,265 certificates issued from 3,268 completion records (3 unfound emails logged) | shell_verification | `scripts/qa/verify-certificate-issuance.sh --check-counts` | Certificate issuance log; Django shell count |
 | AC-024 (negative) | Certificate issuance skips unfound emails without failing the pipeline | shell_verification | `scripts/qa/verify-certificate-issuance.sh --check-skips` | Certificate issuance log showing skip entries |
-| AC-025 | MCT ProgramCertificate records exist in Credentials service for each program | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "MCT Program Certificates" | Discovery admin UI; Credentials service API |
+| AC-025 | MCT ProgramCertificate records exist in Credentials service for each program | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "MCT Program Certificates" | Discovery admin UI; Credentials service API |
 
 ### Video Migration Phase Tests
 
@@ -104,14 +104,14 @@ All shell verification scripts live under `scripts/qa/` and `scripts/migrations/
 | AC-030 | Count verification shows <0.5% discrepancy for Users, Enrollments, and Courses | shell_verification | `scripts/migrations/run-verification-pipeline.sh` | Full migration completed; Django shell access |
 | AC-030 (negative) | Verification flags discrepancies >0.5% with error and non-zero exit code | shell_verification | `scripts/qa/verify-migration-counts.sh --simulate-discrepancy` | Synthetic count mismatch |
 | AC-031 | Comparison report produced per course with discrepancy explanations | shell_verification | `scripts/migrations/run-verification-pipeline.sh` -- output check | `scripts/migrations/kajabi/output/verification/` directory |
-| AC-032 | 10 sample courses render correctly in Studio (sections, units, content visible) | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Studio Course Spot-Check" | Studio UI access; list of 10 sample course keys |
-| AC-033 | 5 sample users see enrolled courses in LMS dashboard after login | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "User Login Spot-Check" | LMS access; 5 sample user credentials |
+| AC-032 | 10 sample courses render correctly in Studio (sections, units, content visible) | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Studio Course Spot-Check" | Studio UI access; list of 10 sample course keys |
+| AC-033 | 5 sample users see enrolled courses in LMS dashboard after login | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "User Login Spot-Check" | LMS access; 5 sample user credentials |
 
 ### Rollback Phase Tests
 
 | AC # | Test Case | Type | File / Command | Fixtures / Prerequisites |
 |------|-----------|------|----------------|--------------------------|
-| AC-034 | Database restore via `tutor local do restore-db` reverts to pre-migration state | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Full Rollback Test" | Pre-migration MySQL and MongoDB backups |
+| AC-034 | Database restore via `tutor local do restore-db` reverts to pre-migration state | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Full Rollback Test" | Pre-migration MySQL and MongoDB backups |
 | AC-035 | Rollback script with `--action unenroll --dry-run` reports correct count without modifying data | shell_verification | `scripts/qa/verify-rollback-dry-run.sh` | `rollback-openedx-imports.py`; enrollment CSV |
 | AC-035 (negative) | Dry-run mode does not modify any enrollment records | shell_verification | `scripts/qa/verify-rollback-dry-run.sh --check-no-mutations` | Pre/post enrollment count comparison |
 | AC-036 | Re-executing full import pipeline after failure creates no duplicate records | shell_verification | `scripts/qa/verify-idempotency.sh` | Two successive pipeline runs; entity count comparison |
@@ -128,11 +128,11 @@ All shell verification scripts live under `scripts/qa/` and `scripts/migrations/
 
 | Edge Case | Test Case | Type | File / Command | Fixtures / Prerequisites |
 |-----------|-----------|------|----------------|--------------------------|
-| Kajabi API rate limiting (429) | Export survives 429 with exponential backoff | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Rate Limit Handling" | Export log showing 429 retries |
+| Kajabi API rate limiting (429) | Export survives 429 with exponential backoff | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Rate Limit Handling" | Export log showing 429 retries |
 | Kajabi API pagination duplicates | Post-export dedup removes duplicate pages | shell_verification | `scripts/qa/verify-kajabi-export.sh --check-dedup-stats` | Dedup log in export output |
-| MCT SAS token expiry | Video upload pipeline re-exports fresh URLs before upload | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "SAS Token Refresh" | Upload log; video URL validity check |
-| Pod restart during import | Import resumes from last offset; no duplicates | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Pod Restart Recovery" | Simulate pod kill; check offset and re-run |
-| Pod OOM during course import | CMS pod restarts; failed course retried with `--only` flag | manual_verification | `docs/migrations/VERIFICATION_CHECKLIST.md` -- Section: "OOM Recovery" | Monitor pod memory; retry single course |
+| MCT SAS token expiry | Video upload pipeline re-exports fresh URLs before upload | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "SAS Token Refresh" | Upload log; video URL validity check |
+| Pod restart during import | Import resumes from last offset; no duplicates | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "Pod Restart Recovery" | Simulate pod kill; check offset and re-run |
+| Pod OOM during course import | CMS pod restarts; failed course retried with `--only` flag | manual_verification | `docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md` -- Section: "OOM Recovery" | Monitor pod memory; retry single course |
 | Users without emails | Skipped in transform; count logged | shell_verification | `scripts/qa/verify-kajabi-transform.sh --check-skips` | Raw contacts NDJSON |
 | Duplicate usernames | Collision avoidance suffix applied | shell_verification | `scripts/qa/verify-user-import-counts.sh --check-username-collisions` | Django shell query for username patterns |
 | Missing UserProfile | Created before certificate issuance | shell_verification | `scripts/qa/verify-certificate-issuance.sh --check-profiles` | Django shell query |

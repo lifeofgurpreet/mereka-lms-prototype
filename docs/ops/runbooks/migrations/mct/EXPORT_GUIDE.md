@@ -516,8 +516,8 @@ node scripts/migrations/mct/mct-export.mjs
 
 - `docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md` - Overall migration strategy
 - `docs/reference/migrations/mct/API_EXPLORATION.md` - API endpoint discovery
-- `docs/migrations/mct/EXPORT_TEST_RESULTS.md` - Test results
-- `docs/migrations/mct/EXPORT_SUCCESS.md` - Success summary
+- `docs/archive/reports/mct/EXPORT_TEST_RESULTS.md` - Test results
+- `docs/archive/reports/mct/EXPORT_SUCCESS.md` - Success summary
 - `hubspot-webhook-mct/functions/index.js` - Working authentication reference
 
 ---
@@ -578,7 +578,7 @@ node scripts/migrations/mct/mct-export.mjs
 - `docs/reference/migrations/mct/DOCUMENTATION_INDEX.md` - Index of all MCT documentation
 - `docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md` - Overall migration strategy
 - `docs/reference/migrations/mct/API_EXPLORATION.md` - API endpoint discovery
-- `docs/migrations/mct/EXPORT_TEST_RESULTS.md` - Test results
-- `docs/migrations/mct/EXPORT_SUCCESS.md` - Success summary
+- `docs/archive/reports/mct/EXPORT_TEST_RESULTS.md` - Test results
+- `docs/archive/reports/mct/EXPORT_SUCCESS.md` - Success summary
 - `hubspot-webhook-mct/functions/index.js` - Working authentication reference
 

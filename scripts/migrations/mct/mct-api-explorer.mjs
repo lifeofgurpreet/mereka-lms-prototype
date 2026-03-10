@@ -32,7 +32,7 @@ if (!MCT_CLIENT_ID || !MCT_CLIENT_SECRET || !MCT_TENANT_ID || !MCT_API_URI) {
 }
 
 const API_BASE = `https://${MCT_BASE_URL}/api`;
-const OUTPUT_DIR = path.resolve("./docs/migrations/mct/api-endpoints");
+const OUTPUT_DIR = path.resolve("./docs/reference/migrations/mct/api-endpoints");
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
