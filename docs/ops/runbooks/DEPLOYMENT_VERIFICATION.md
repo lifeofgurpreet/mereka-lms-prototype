@@ -9,7 +9,7 @@ Every K8s deployment now has **automated verification** to catch issues before t
 ## Architecture
 
 ### 1. Hook (Automatic)
-**File**: `/home/gurpreet/.claude/hooks/post_k8s_deploy.py`
+**File**: your local post-deploy hook script (for example `~/.claude/hooks/post_k8s_deploy.py`)
 
 **Triggers**: Automatically after any `kubectl apply` or `kustomize` command
 
@@ -96,7 +96,7 @@ kubectl apply -k deploy/k8s/overlays/production/
 
 ## Hook Configuration
 
-**Location**: `/home/gurpreet/.claude/settings.json`
+**Location**: your local agent settings file (for example `~/.claude/settings.json`)
 
 ```json
 {
@@ -107,7 +107,7 @@ kubectl apply -k deploy/k8s/overlays/production/
         "hooks": [
           {
             "type": "command",
-            "command": "python3 /home/gurpreet/.claude/hooks/post_k8s_deploy.py"
+            "command": "python3 ~/.claude/hooks/post_k8s_deploy.py"
           }
         ]
       }
@@ -121,11 +121,11 @@ kubectl apply -k deploy/k8s/overlays/production/
 ### Hook not running
 ```bash
 # Check hook exists and is executable
-ls -l /home/gurpreet/.claude/hooks/post_k8s_deploy.py
-chmod +x /home/gurpreet/.claude/hooks/post_k8s_deploy.py
+ls -l ~/.claude/hooks/post_k8s_deploy.py
+chmod +x ~/.claude/hooks/post_k8s_deploy.py
 
 # Check settings.json has hook configured
-grep -A 10 "PostToolUse" /home/gurpreet/.claude/settings.json
+grep -A 10 "PostToolUse" ~/.claude/settings.json
 ```
 
 ### Verification script not found
@@ -134,7 +134,7 @@ grep -A 10 "PostToolUse" /home/gurpreet/.claude/settings.json
 ls -l scripts/infra/verify-deployment.sh
 
 # Make sure you're in repo root
-cd /data/projects/mereka-lms  # or /home/gurpreet/projects/k8s/mereka-lms
+cd <repo-root>
 ```
 
 ### False positives
@@ -144,6 +144,5 @@ cd /data/projects/mereka-lms  # or /home/gurpreet/projects/k8s/mereka-lms
 
 ## Related Documentation
 
-- K8s Operations Skill: `~/.claude/skills/k8s-operations/SKILL.md`
-- Reka Slackbot Deployment Skill: `~/.claude/skills/reka-slackbot-deployment/SKILL.md`
+- Local agent hook configuration (if you use automatic post-tool verification)
 - [Troubleshooting Guide](TROUBLESHOOTING.md)
