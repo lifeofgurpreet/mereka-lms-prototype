@@ -1,5 +1,5 @@
 {
-  "change_count": 465,
+  "change_count": 508,
   "classification_counts": {
     "infra_counterpart_required": 3,
     "manual_review_required": 3
@@ -22,7 +22,19 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "CLAUDE.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "Makefile",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "SECURITY.md",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -79,6 +91,12 @@
       "touched_services": [
         "runner-ci"
       ]
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
@@ -246,6 +264,24 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/archive/reports/approval-execution-runbook-20260306.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/archive/reports/docs-program-scorecard-20260306.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/archive/reports/docs-program-scorecard-20260313-template.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/archive/superseded/ROADMAP.md",
       "path_class": "repo_support_change",
       "touched_services": []
@@ -349,6 +385,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/guides/onboarding/DEVCONTAINER_GUIDE.md",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -582,6 +624,30 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/docs-program/WAVE9_CLOSEOUT.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/meta/docs-program/metadata/METADATA_MODEL.md",
       "path_class": "repo_support_change",
       "touched_services": []
@@ -601,6 +667,24 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/meta/docs-program/metadata/governs-taxonomy.yaml",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -741,6 +825,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/knowledge/WAVE8_EXECUTION_TRACKER.md",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -950,6 +1040,12 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/ops/quickref/README.md",
+      "path_class": "runbook_or_ops_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/ops/quickref/verification-scripts.md",
       "path_class": "runbook_or_ops_change",
       "touched_services": []
@@ -986,7 +1082,28 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/ops/runbooks/REPOSITORY_STRUCTURE_RUNBOOK.md",
+      "path_class": "runbook_or_ops_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_required",
+      "path": "docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md",
+      "path_class": "runbook_or_ops_change",
+      "touched_services": [
+        "openedx",
+        "purchase-gateway"
+      ]
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/ops/runbooks/TENANT_PROVISIONING.md",
+      "path_class": "runbook_or_ops_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/ops/runbooks/THEME_DEPLOYMENT.md",
       "path_class": "runbook_or_ops_change",
       "touched_services": []
     },
@@ -994,6 +1111,24 @@
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md",
       "path_class": "runbook_or_ops_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/policies/architecture/OSCAR_DEPRECATION.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/policies/operations/BRANCH_PROTECTION.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/policies/operations/TUTOR_CONFIG_SAFETY.md",
+      "path_class": "repo_support_change",
       "touched_services": []
     },
     {
@@ -1011,6 +1146,18 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/reference/operations/CAPABILITY_MATRIX.md",
+      "path_class": "runbook_or_ops_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/reference/operations/RELEASE_PROCESS.md",
+      "path_class": "runbook_or_ops_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/reference/operations/SECRET_SCANNING.md",
       "path_class": "runbook_or_ops_change",
       "touched_services": []
     },
@@ -1047,6 +1194,24 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "generated/adr-bundles/10-auth-and-tenancy.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/adr-bundles/20-build-and-release.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/adr-bundles/30-frontend.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/adr-bundles/40-data-and-events.md",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1125,6 +1290,18 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "generated/graphs/knowledge-graph.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-entrypoints.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-readiness-report.json",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1238,19 +1415,13 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/architecture_or_adr_change.md",
-      "path_class": "generated_surface_refresh",
-      "touched_services": []
-    },
-    {
-      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md",
+      "path": "generated/knowledge/task-bundles/cross-repo-contract-change.md",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1262,7 +1433,13 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+      "path": "generated/knowledge/task-bundles/docs-architecture-change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/evidence-status-update.md",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1274,19 +1451,25 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/evidence_or_status_change.md",
-      "path_class": "generated_surface_refresh",
-      "touched_services": []
-    },
-    {
-      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "generated/knowledge/task-bundles/generated_surface_refresh.json",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/generated_surface_refresh.md",
+      "path": "generated/knowledge/task-bundles/incident-debug.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/migration-change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/normative-spec-change.md",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1298,7 +1481,7 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/normative_spec_change.md",
+      "path": "generated/knowledge/task-bundles/proposal-change.md",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1310,7 +1493,7 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+      "path": "generated/knowledge/task-bundles/release-change.md",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1322,7 +1505,7 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/release_or_runtime_change.md",
+      "path": "generated/knowledge/task-bundles/reviewer-pass.md",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1334,19 +1517,13 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
-      "path_class": "generated_surface_refresh",
-      "touched_services": []
-    },
-    {
-      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "generated/knowledge/task-bundles/runbook_or_ops_change.json",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
-      "path": "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+      "path": "generated/knowledge/task-bundles/wrapper-retirement.md",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1365,6 +1542,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "generated/knowledge/wave10-source-map.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/wave9-findings-ledger.json",
       "path_class": "generated_surface_refresh",
       "touched_services": []
     },
@@ -1472,7 +1655,19 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/qa/build_decision_graph.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "scripts/qa/run-agent-pack-runtime-gates.sh",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/qa/run-agent-readiness-gates.sh",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -1509,6 +1704,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "scripts/qa/run-knowledge-runtime-gates.sh",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/qa/run-review-runtime-gates.sh",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -1695,6 +1896,18 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "scripts/qa/verify-proctoring.sh",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/qa/verify-release-automation.sh",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/qa/verify-release-workflow-invocation.sh",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -2507,7 +2720,37 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/docs/verify/verify_generated_navigation.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "tools/docs/verify/verify_team_handbook.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/docs/verify/verify_temporal_integrity.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_agent_entrypoints.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_agent_readiness_report.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_agent_task_bundles.py",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -2633,6 +2876,12 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_wave9_findings_ledger.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "tools/knowledge/build_wrapper_retirement_ledger.py",
       "path_class": "repo_support_change",
       "touched_services": []
@@ -2681,6 +2930,12 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/verify_agent_consumption_runtime.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "tools/knowledge/verify_decision_runtime.py",
       "path_class": "repo_support_change",
       "touched_services": []
@@ -2694,6 +2949,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "tools/knowledge/verify_knowledge_runtime.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/verify_review_runtime.py",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -2935,6 +3196,7 @@
         ".github/workflows/ci.yml",
         "deploy/contracts/service-contracts/openedx.yaml",
         "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+        "docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md",
         "specs/k8s-deployment_spec.md",
         "specs/secrets-management_spec.md"
       ],
@@ -2964,6 +3226,7 @@
       "touched_paths": [
         "deploy/contracts/service-contracts/purchase-gateway.yaml",
         "docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md",
+        "docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md",
         "specs/ecommerce-purchase-gateway_spec.md",
         "specs/secrets-management_spec.md"
       ],

@@ -35,6 +35,10 @@
     ],
     "touched_roots": [
       ".github/workflows",
+      "CLAUDE.md",
+      "Makefile",
+      "SECURITY.md",
+      "deploy",
       "docs",
       "docs/meta/knowledge",
       "docs/meta/skills",
@@ -42,9 +46,15 @@
       "generated",
       "generated/catalogs",
       "generated/skills",
+      "infrastructure",
+      "scripts",
       "scripts/qa",
+      "specdocs",
+      "specdocs.config.yml",
+      "specs",
       "tools",
-      "tools/skills"
+      "tools/skills",
+      "verification"
     ]
   },
   "generated_by": "tools/knowledge/build_execution_receipt.py",
