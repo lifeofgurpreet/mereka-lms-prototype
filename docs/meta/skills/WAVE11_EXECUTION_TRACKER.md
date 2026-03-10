@@ -1,30 +1,29 @@
 # Wave 11 Execution Tracker
 
 ## Latest substantive packet head
-- 05bcd0db8bb64fd5ca95123cf6f7542da6e0d6cf
+- b038207f39dcaac2cff12f7fb85a6472da2285af
 
 ## Last completed batch
-- commit: 05bcd0db8bb64fd5ca95123cf6f7542da6e0d6cf
-- scope: Wave 11 Packet D
-- validators run: skill dependency graph write/check, docs catalog governance
+- commit: b038207f39dcaac2cff12f7fb85a6472da2285af
+- scope: Wave 11 Packet E
+- validators run: skill runtime gate, verifier, docs-policy workflow YAML validation
 - result: passed
 
 ## Current target batch
 - files:
   - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
-  - tools/skills/verify_skill_runtime.py
-  - scripts/qa/run-skill-runtime-gates.sh
-  - .github/workflows/docs-policy.yml
+  - docs/meta/skills/WAVE11_CLOSEOUT.md
+  - docs/meta/skills/WAVE11_REVIEW_HANDOFF.md
 - goal:
-  - make the skill runtime CI-enforceable
-  - fail on dead paths, dead commands, stale generated outputs, and missing high-risk classifications
-  - align local and CI validation entrypoints
+  - leave Wave 11 review-ready and adoption-ready
+  - document the final read-first path and review order
+  - record remaining manual-only surfaces and known risks
 - stop condition:
-  - skill runtime gates validate and one commit is created
+  - closeout and handoff docs validate and one commit is created
 
 ## Open residue
 - knowledge-runtime outputs from later branch-local waves are not assumed on this branch
 - cross-repo runtime convergence remains out of scope for Wave 11
 
 ## Next queued batch
-- Packet F: review handoff and closeout
+- wave-closeout
