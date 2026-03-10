@@ -544,7 +544,7 @@ Checks:
 
 **Architecture**: `docs/concepts/architecture/enterprise-services-overview.md`
 
-**Runbooks**: `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md`
+**Runbooks**: `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`
 
 **Scripts**:
 - `scripts/qa/verify-enterprise-all-acs.sh` - Full stack verification

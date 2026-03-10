@@ -336,7 +336,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 - Rollback MUST be performed by re-running `release-openedx-gitops.sh` with prior known-good tags.
 - Rollback MUST NOT require a new image build -- it MUST reference previously built, immutable-tagged images.
 - Rollback MUST complete within 10 minutes from operator decision to pod convergence.
-- Rollback procedure MUST be documented in `docs/runbooks/operations/RELEASE_CHECKLIST.md` section 7.
+- Rollback procedure MUST be documented in `docs/ops/runbooks/RELEASE_CHECKLIST.md` section 7.
 - The pipeline SHOULD maintain a record of the last 5 successful production deployments (tag + digest pairs) for quick rollback reference.
 
 #### Notification and Alerting

@@ -119,7 +119,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/runbooks/operations/DOMAIN_MANAGEMENT.md
+    runbook: docs/ops/runbooks/DOMAIN_MANAGEMENT.md
     section: Verification > Profile Image Upload
     justification: Full upload flow requires authenticated browser session with file
       selection; curl can only test rejection path

@@ -242,7 +242,7 @@ gh pr create --title "feat(tenancy): onboard newclient" --body "..."
 gh pr merge --merge --delete-branch
 
 # 5. If image rebuild needed (theme/MFE changes):
-#    Follow `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md` steps 1-3
+#    Follow `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` steps 1-3
 ```
 
 ## Step 8: Verify
@@ -394,7 +394,7 @@ print([o for o in settings.CSRF_TRUSTED_ORIGINS if 'newclient' in o])
 
 # Repair: re-run apply-patches.sh and rebuild
 ./infrastructure/tutor/apply-patches.sh
-# Then follow `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md` for image rebuild + deploy
+# Then follow `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` for image rebuild + deploy
 ```
 
 **Owner**: Infrastructure team. **Evidence**: grep output from production.py settings.
@@ -720,7 +720,7 @@ Non-Plugin Customization Exception Policy in `BRANDING_OPERATING_MODEL.md`.
 - `infrastructure/tutor/multisite-sites.yml` — Canonical site registry
 - `docs/reference/operations/TENANT_BRANDING_SURFACE_MATRIX.md` — Per-domain verification matrix
 - `docs/policies/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md` — Deployment protocol
-- `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md` — Image build + deploy steps
+- `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` — Image build + deploy steps
 - `scripts/tenants/provision-tenant.sh` — Provisioning script
 - `specs/multi-site-domains_spec.md` — Domain configuration spec
 - `specs/multi-tenancy-architecture_spec.md` — Multi-tenancy architecture spec

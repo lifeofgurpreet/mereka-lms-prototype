@@ -377,7 +377,7 @@ GitOps workflow.
 
 ## Related Documents
 
-- `docs/runbooks/operations/ARGOCD_DRIFT.md` — "Synced but wrong" drift detection
+- `docs/ops/runbooks/ARGOCD_DRIFT.md` — "Synced but wrong" drift detection
 - `deploy/k8s/patches/argocd-configmap-ignore.yaml` — resource exclusions
 - `.claude/rules/gitops-enforcement.md` — ABSOLUTE RULE: no direct kubectl patch on ArgoCD-managed resources
 - `specs/k8s-deployment_spec.md` — AC-003, AC-028, AC-032 (probe + health requirements)

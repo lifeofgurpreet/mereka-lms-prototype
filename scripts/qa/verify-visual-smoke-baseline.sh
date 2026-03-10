@@ -92,11 +92,11 @@ else
 fi
 
 # 1d. Visual smoke baseline doc itself must exist.
-BASELINE_DOC="$REPO_ROOT/docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md"
+BASELINE_DOC="$REPO_ROOT/docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md"
 if [[ -f "$BASELINE_DOC" ]]; then
   do_pass "VISUAL_SMOKE_BASELINE.md exists"
 else
-  do_fail "VISUAL_SMOKE_BASELINE.md not found (create docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md)"
+  do_fail "VISUAL_SMOKE_BASELINE.md not found (create docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md)"
 fi
 
 # 1e. LIVE mode — attempt a real auth check (placeholder).
@@ -206,7 +206,7 @@ else
 fi
 
 # Check existing visual regression runbook as a fallback reference.
-VIS_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md"
+VIS_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
 if [[ -f "$VIS_RUNBOOK" ]]; then
   do_pass "AC-VIS-003: VISUAL_REGRESSION_RUNBOOK.md exists (baseline threshold reference)"
   if grep -qiE "5%|threshold|RMSE" "$VIS_RUNBOOK"; then
@@ -299,10 +299,10 @@ echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Action required: Fix FAIL items above."
-  echo "  - Create docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md if missing"
+  echo "  - Create docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md if missing"
   echo "  - Ensure smoke-authenticated.sh covers all 5 MFE routes"
   echo "  - Wire verify-visual-smoke-baseline.sh into .github/workflows/ci.yml"
-  echo "  - See docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md for full runbook"
+  echo "  - See docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md for full runbook"
   exit 1
 fi
 

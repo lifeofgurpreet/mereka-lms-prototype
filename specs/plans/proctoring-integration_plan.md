@@ -557,7 +557,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Configure review SLA
   - View usage statistics
 
-- [ ] **[S] [DEFERRED]** Update main troubleshooting doc (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: All build tasks
+- [ ] **[S] [DEFERRED]** Update main troubleshooting doc (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: All build tasks
   - Add proctoring diagnostic commands
   - Common proctoring issues and fixes
   - Provider API troubleshooting

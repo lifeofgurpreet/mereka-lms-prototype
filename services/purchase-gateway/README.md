@@ -95,4 +95,4 @@ Full specification: `specs/ecommerce-purchase-gateway_spec.md`
 
 Operational replay and reconciliation procedures are documented in:
 
-- `docs/runbooks/operations/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md`
+- `docs/ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md`

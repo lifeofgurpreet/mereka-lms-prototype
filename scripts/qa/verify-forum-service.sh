@@ -348,6 +348,6 @@ else
   echo "  - Meilisearch not deployed"
   echo "  - Ruby forum references not removed from manifests"
   echo ""
-  echo "See docs/runbooks/operations/TROUBLESHOOTING.md for more details"
+  echo "See docs/ops/runbooks/TROUBLESHOOTING.md for more details"
   exit 1
 fi

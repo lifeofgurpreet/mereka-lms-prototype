@@ -1,7 +1,7 @@
 # GDPR Compliance Operational Runbook
 
 > **Spec**: `specs/data-privacy-gdpr-compliance_spec.md`
-> **Related**: `docs/runbooks/operations/PRIVACY_RUNBOOK.md` (brief quick-reference)
+> **Related**: `docs/ops/runbooks/PRIVACY_RUNBOOK.md` (brief quick-reference)
 > **Owner**: platform-engineering
 > **Last Updated**: 2026-02-24
 > **Regulations covered**: GDPR (EU), PDPA (Malaysia Personal Data Protection Act 2010)
@@ -541,7 +541,7 @@ most CONSENT-* checks will show SKIP. This is expected. The FAIL count should re
 
 - Spec: `specs/data-privacy-gdpr-compliance_spec.md`
 - PII Registry: `specs/pii-registry.yml` (to be created)
-- Privacy Runbook (quick-reference): `docs/runbooks/operations/PRIVACY_RUNBOOK.md`
+- Privacy Runbook (quick-reference): `docs/ops/runbooks/PRIVACY_RUNBOOK.md`
 - Open edX User Retirement: https://docs.openedx.org/en/latest/developers/references/user_retirement/index.html
 - GDPR Article 17 (Right to Erasure): https://gdpr-info.eu/art-17-gdpr/
 - PDPA Malaysia: https://www.pdp.gov.my/

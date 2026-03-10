@@ -445,8 +445,8 @@ scripts/qa/verify-cicd-lessons-compliance.sh
     - `docs/reference/operations/CI_CD_SETUP.md` ✓ (workflow table + section renamed + detail block updated)
     - `OBSERVABILITY_ENHANCEMENT_PLAN.md` ✓ (2 references: CI automation entry + alert routing audit)
     - `OBSERVABILITY_ROADMAP_MEREKA_LMS.md` ✓ (parity matrix variables note)
-    - `docs/runbooks/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md` ✓ (purpose line + consolidation note)
-    - `docs/runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md` ✓ (workflow table + Phase 1 example workflow)
+    - `docs/ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md` ✓ (purpose line + consolidation note)
+    - `docs/ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md` ✓ (workflow table + Phase 1 example workflow)
     - `verification/catalogs/OBSERVABILITY_CANONICAL_INDEX.md` ✓ (parity execution source entry)
     - `docs/status/readiness/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md` ✓ (2 references: enforcement point + PAR-C004 row)
 

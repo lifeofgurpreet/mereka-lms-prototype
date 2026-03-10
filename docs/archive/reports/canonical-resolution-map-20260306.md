@@ -14,9 +14,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `accessibility-conformance-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
+  - `docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
@@ -147,9 +147,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `branding-release-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md`
+  - `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
@@ -185,9 +185,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `build-pipeline-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md`
+  - `docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
@@ -311,18 +311,18 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `csp-reporting-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/CSP_REPORTING_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/CSP_REPORTING_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/CSP_REPORTING_RUNBOOK.md`
+  - `docs/ops/runbooks/CSP_REPORTING_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
 
 ## Cluster: `data-erasure-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md`
+  - `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
@@ -347,9 +347,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `enterprise-services-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md`
+  - `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`
 - Superseded/archive candidates: 
   - `docs/archive/superseded/runbooks/enterprise-services-runbook.md`
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
@@ -613,9 +613,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `module-surface-validation-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/MODULE_SURFACE_VALIDATION_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/MODULE_SURFACE_VALIDATION_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/MODULE_SURFACE_VALIDATION_RUNBOOK.md`
+  - `docs/ops/runbooks/MODULE_SURFACE_VALIDATION_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
@@ -818,9 +818,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `privacy-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/PRIVACY_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/PRIVACY_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/PRIVACY_RUNBOOK.md`
+  - `docs/ops/runbooks/PRIVACY_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
@@ -855,7 +855,7 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `release-checklist-domain-secrets`
 
-- Proposed canonical: `docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
+- Proposed canonical: `docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
 - Supporting docs: 
   - `docs/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
 - Superseded/archive candidates: none
@@ -864,9 +864,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `release-execute-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/RELEASE_EXECUTE_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/RELEASE_EXECUTE_RUNBOOK.md`
+  - `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
@@ -904,7 +904,7 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `secret-rotation-checklist`
 
-- Proposed canonical: `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`
+- Proposed canonical: `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`
 - Supporting docs: 
   - `docs/operations/SECRET_ROTATION_CHECKLIST.md`
 - Superseded/archive candidates: none
@@ -940,7 +940,7 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `security-incident-supply-chain`
 
-- Proposed canonical: `docs/runbooks/operations/SECURITY_INCIDENT_SUPPLY_CHAIN.md`
+- Proposed canonical: `docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md`
 - Supporting docs: 
   - `docs/operations/SECURITY_INCIDENT_SUPPLY_CHAIN.md`
 - Superseded/archive candidates: none
@@ -1005,9 +1005,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `tenant-branding-qa-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/TENANT_BRANDING_QA_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/TENANT_BRANDING_QA_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/TENANT_BRANDING_QA_RUNBOOK.md`
+  - `docs/ops/runbooks/TENANT_BRANDING_QA_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead
@@ -1026,7 +1026,7 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 - Proposed canonical: `docs/guides/branding/TENANT_ONBOARDING_PLAYBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/TENANT_ONBOARDING_PLAYBOOK.md`
+  - `docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md`
   - `docs/guides/branding/TENANT_ONBOARDING_PLAYBOOK.md`
 - Superseded/archive candidates: 
   - `docs/archive/superseded/branding/TENANT_ONBOARDING_PLAYBOOK.md`
@@ -1075,9 +1075,9 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `visual-regression-runbook`
 
-- Proposed canonical: `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md`
+- Proposed canonical: `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`
 - Supporting docs: 
-  - `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md`
+  - `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`
 - Superseded/archive candidates: none
 - Rationale: prioritize active docs trees (ops/guides/concepts), prefer non-archive paths, and keep archive copies as non-canonical history.
 - Owner approval required: Domain Owner + Docs Lead

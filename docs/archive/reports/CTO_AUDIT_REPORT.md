@@ -82,8 +82,8 @@ After completing 16 batches (91 tasks), the codebase has comprehensive verificat
 |---|-------|-----|
 | 17 | Several docs reference files/scripts that don't exist yet | Audit broken links with `scripts/qa/lint-repo-conventions.sh` |
 | 18 | Stale Ruby forum references in some older docs | Grep for `4567`, `cs_comments_service`, `Ruby` in docs/ |
-| 19 | Missing incident response runbook | Create `docs/runbooks/operations/INCIDENT_RESPONSE.md` |
-| 20 | Missing on-call rotation doc | Create `docs/runbooks/operations/ON_CALL.md` |
+| 19 | Missing incident response runbook | Create `docs/ops/runbooks/INCIDENT_RESPONSE.md` |
+| 20 | Missing on-call rotation doc | Create `docs/ops/runbooks/ON_CALL.md` |
 
 ### Infrastructure
 

@@ -194,7 +194,7 @@ After fixing the DB, also fix the YAML file and raise a PR so git reflects reali
 | `host_collision` on a production domain (`*.mereka.io`) | P0 — tenant data isolation at risk. Page on-call. |
 | `allowlist_policy` expired entry in use in prod | P1 — fix within 24 hours before next audit cycle. |
 | `schema_violation` blocking bootstrap | P1 — prevents new tenant onboarding. Fix and merge. |
-| Repeated failures across 3+ consecutive daily runs | Review `docs/runbooks/operations/TENANT_ONBOARDING_PLAYBOOK.md` and open a bead. |
+| Repeated failures across 3+ consecutive daily runs | Review `docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md` and open a bead. |
 
 ## References
 
@@ -202,6 +202,6 @@ After fixing the DB, also fix the YAML file and raise a PR so git reflects reali
 - Branding fallback: `scripts/qa/verify-tenant-branding-fallback.sh`
 - Host collision check: `scripts/shared/multisite_bootstrap_django.py --check`
 - Allowlist file: `infrastructure/tutor/multisite-shared-host-allowlist.txt`
-- Tenant onboarding: `docs/runbooks/operations/TENANT_ONBOARDING_PLAYBOOK.md`
+- Tenant onboarding: `docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md`
 - Multi-tenancy architecture: `docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md`
 - Provisioning script: `scripts/tenants/provision-tenant.sh`

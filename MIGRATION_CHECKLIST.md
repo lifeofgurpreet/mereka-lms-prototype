@@ -63,7 +63,7 @@
    - Replace `infrastructure/tutor/apply-patches.sh` → `make tutor-apply` or `./infrastructure/tutor/apply-patches.sh`
    - Replace `tools/` → `scripts/{domain}/`
    - Replace `docs/QUICK_START_LOCAL.md` → `docs/onboarding/QUICK_START_LOCAL.md`
-   - Replace `docs/ops/TROUBLESHOOTING.md` → `docs/runbooks/operations/TROUBLESHOOTING.md`
+   - Replace `docs/ops/TROUBLESHOOTING.md` → `docs/ops/runbooks/TROUBLESHOOTING.md`
 
 4. **Test your workflows**
    ```bash
@@ -120,7 +120,7 @@ Once team is fully migrated:
 
 ## 🆘 Need Help?
 
-- Check [`docs/runbooks/operations/TROUBLESHOOTING.md`](docs/runbooks/operations/TROUBLESHOOTING.md) for common issues
+- Check [`docs/ops/runbooks/TROUBLESHOOTING.md`](docs/ops/runbooks/TROUBLESHOOTING.md) for common issues
 - Review [`docs/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`](docs/onboarding/LOCAL_DEVELOPMENT_GUIDE.md) for setup
 - See [`REORGANIZATION_SUMMARY.md`](REORGANIZATION_SUMMARY.md) for path mappings
 

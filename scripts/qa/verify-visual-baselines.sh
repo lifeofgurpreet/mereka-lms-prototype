@@ -244,7 +244,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "    1. Run capture-branding-screenshots.sh to refresh screenshots."
   echo "    2. Update visual-baselines/baselines.json with new capture_date,"
   echo "       approved_by, and git_sha."
-  echo "    3. Open a PR for baseline approval per docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md."
+  echo "    3. Open a PR for baseline approval per docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md."
   exit 1
 fi
 

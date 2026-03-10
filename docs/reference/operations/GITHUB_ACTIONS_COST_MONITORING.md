@@ -309,7 +309,7 @@ A Grafana dashboard can visualize GitHub Actions usage trends.
 
 - **CI/CD Pipeline Spec**: `specs/ci-cd-pipeline_spec.md` - Workflow definitions and gates
 - **CI/CD Setup**: `docs/reference/operations/CI_CD_SETUP.md` - GitHub Actions configuration
-- **Release Checklist**: `docs/runbooks/operations/RELEASE_CHECKLIST.md` - Deployment workflows
+- **Release Checklist**: `docs/ops/runbooks/RELEASE_CHECKLIST.md` - Deployment workflows
 - **Cost Optimization Analysis**: `reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md` - Expert review findings and phased plan
 - **Optimization Tracker**: `docs/status/active/CI_OPTIMIZATION_TRACKER.md` - Implementation tasks with file mappings
 

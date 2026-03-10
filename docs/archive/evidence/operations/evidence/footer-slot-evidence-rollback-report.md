@@ -90,7 +90,7 @@ PLUGIN_SLOTS.add_item(("learner_dashboard.sidebar.v1", { "keepDefault": True, ..
 
 ### Rollback Playbook Location
 
-`docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md` → "Rollback Procedure" section
+`docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md` → "Rollback Procedure" section
 
 ### Rollback Steps (from LEGACY_FOOTER_REMOVAL.md)
 
@@ -125,4 +125,4 @@ observable for debugging and verification.
 - `docs/archive/evidence/operations/evidence/footer-migration-diff.md` — Before/after diff from bead 1rns
 - `docs/archive/evidence/operations/evidence/selector-to-slot-migration-diff.md` — Slot migration diff from bead 2dcy.2
 - `docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md` — CSS exception documentation (AC-FRONT-082)
-- `docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md` — Rollback playbook (AC-FRONT-084)
+- `docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md` — Rollback playbook (AC-FRONT-084)

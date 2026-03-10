@@ -36,7 +36,7 @@ Prevent sensitive operational artifacts from entering git history while preservi
    - `docs/policies/operations/EVIDENCE_REDACTION_POLICY.md`
 5. Cross-link docs:
    - `docs/meta/templates/EVIDENCE_SCHEMA.md`
-   - `docs/runbooks/operations/DEPLOY_EVIDENCE_GATES.md`
+   - `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md`
 
 ### Script Contract (`verify-evidence-redaction.sh`)
 

@@ -264,6 +264,6 @@ scripts/qa/verify-ecommerce-config.sh
 |----------|-------------|
 | `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` | ADR: Oscar deprecation decision |
 | `docs/reference/operations/ECOMMERCE_DEPRECATION_INVENTORY.md` | All Oscar references + disposition |
-| `docs/runbooks/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` | OAuth2 client setup for Oscar |
+| `docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` | OAuth2 client setup for Oscar |
 | `services/purchase-gateway/` | Replacement service (FastAPI + PostgreSQL + Stripe) |
 | `specs/ecommerce-purchase-gateway_spec.md` | Full spec (AC-027 through AC-033) |

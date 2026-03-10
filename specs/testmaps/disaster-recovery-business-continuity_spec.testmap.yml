@@ -279,7 +279,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
     section: Full Rotation Procedure
     justification: Secret rotation touches Infisical, GCP SM, and K8s in sequence;
       requires human verification of non-disruption

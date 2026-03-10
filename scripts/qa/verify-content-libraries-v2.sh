@@ -263,7 +263,7 @@ if [[ "$MODE" == "local" || "$MODE" == "all" ]]; then
   if grep -q "cronjob-library-export" "$PROM_KUST" 2>/dev/null; then
     check_pass "cronjob-library-export.yaml already added to kustomization"
   else
-    check_skip "cronjob-library-export.yaml NOT yet in kustomization — operator action needed (see docs/runbooks/operations/CONTENT_LIBRARIES_V2_MIGRATION.md step 3)"
+    check_skip "cronjob-library-export.yaml NOT yet in kustomization — operator action needed (see docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md step 3)"
   fi
 
   # ── 21. LIBRARY_ACCESS_LOGGING_ENABLED wired in LMS ─────────────
@@ -494,11 +494,11 @@ if [[ "$FAILED" -eq 0 ]]; then
   echo "  5. Run: python manage.py lms migrate openedx_content_libraries"
   echo "  6. Run: python manage.py lms create_platform_library (for shared-templates lib)"
   echo ""
-  echo "See docs/runbooks/operations/CONTENT_LIBRARIES_V2_MIGRATION.md for the full runbook."
+  echo "See docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md for the full runbook."
   exit 0
 else
   echo -e "${RED}$FAILED check(s) FAILED. Review the output above and consult the runbook.${NC}"
   echo ""
-  echo "Runbook: docs/runbooks/operations/CONTENT_LIBRARIES_V2_MIGRATION.md"
+  echo "Runbook: docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md"
   exit 1
 fi

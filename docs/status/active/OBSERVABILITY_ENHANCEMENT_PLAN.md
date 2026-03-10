@@ -166,7 +166,7 @@ metrics needs explicit validation and documentation.
 
 **Deliverables**
 - Confirm datasource config and connectivity.
-- Document steps in `docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md`.
+- Document steps in `docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md`.
 
 ### 4) SLO burn‑rate alerts (optional / if required)
 **Why:** Useful for proactive incident response.  
@@ -238,9 +238,9 @@ Verify in:
 
 ## References
 
-- `docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md`
+- `docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md`
 - `docs/reference/operations/MONITORING.md`
-- `docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md`
+- `docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md`
 - `scripts/infra/apply-monitoring-configs.sh`
 - `scripts/qa/public-health-check.sh`
 - `scripts/qa/audit-observability.sh`

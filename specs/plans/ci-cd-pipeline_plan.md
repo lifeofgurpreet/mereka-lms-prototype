@@ -184,7 +184,7 @@ last_updated: '2026-02-10'
   - Require linear history (no merge commits)
   - Disable force pushes
   - Allow admin bypass for emergency hotfixes only
-  - Document protection rules in `docs/runbooks/operations/RELEASE_CHECKLIST.md`
+  - Document protection rules in `docs/ops/runbooks/RELEASE_CHECKLIST.md`
 
 #### Artifact Management
 
@@ -203,7 +203,7 @@ last_updated: '2026-02-10'
 
 #### Rollback Mechanism
 
-- [ ] **[M]** Document rollback procedure in release checklist (`docs/runbooks/operations/RELEASE_CHECKLIST.md` section 7) | AC: #2| Depends: None
+- [ ] **[M]** Document rollback procedure in release checklist (`docs/ops/runbooks/RELEASE_CHECKLIST.md` section 7) | AC: #2| Depends: None
   - Step-by-step rollback instructions
   - How to identify last 5 successful production deployments
   - Command to re-run `release-openedx-gitops.sh` with priortags
@@ -375,7 +375,7 @@ last_updated: '2026-02-10'
   - Emergency bypass procedures
   - Rollback procedures
 
-- [ ] **[M]** Update release checklist with CI/CD integration(`docs/runbooks/operations/RELEASE_CHECKLIST.md`) | AC: #21 | Depends: None
+- [ ] **[M]** Update release checklist with CI/CD integration(`docs/ops/runbooks/RELEASE_CHECKLIST.md`) | AC: #21 | Depends: None
   - Pre-release: run policy checks, generate release evidence
   - Release: trigger build workflow with GitOps update
   - Post-release: verify deployment, check observability

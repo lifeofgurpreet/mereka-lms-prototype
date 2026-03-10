@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/TROUBLESHOOTING.md`
+Canonical document: `docs/ops/runbooks/TROUBLESHOOTING.md`

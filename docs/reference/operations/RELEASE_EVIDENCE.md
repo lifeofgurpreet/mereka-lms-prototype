@@ -208,5 +208,5 @@ print(f'OK: {len(manifest[\"files\"])} files verified')
 - `scripts/infra/assemble-release-evidence.sh` — Assembly script
 - `.github/workflows/release-evidence-bundle.yml` — CI workflow
 - `docs/meta/templates/EVIDENCE_SCHEMA.md` — General evidence naming schema
-- `docs/runbooks/operations/RELEASE_CHECKLIST.md` — Release checklist
-- `docs/runbooks/operations/DEPLOY_EVIDENCE_GATES.md` — Deploy gates
+- `docs/ops/runbooks/RELEASE_CHECKLIST.md` — Release checklist
+- `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md` — Deploy gates

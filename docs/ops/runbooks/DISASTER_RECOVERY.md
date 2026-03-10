@@ -33,7 +33,7 @@ Production already has Velero schedules. Audit them (and restore drills) with:
 ```
 
 For full procedure and interpretation, see:
-- `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`
+- `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`
 - `.github/workflows/dr-evidence-bundle.yml` (monthly evidence artifact automation)
 
 ## Atlas Backups (Only If/When Used)

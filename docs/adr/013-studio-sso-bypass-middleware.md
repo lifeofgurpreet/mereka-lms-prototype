@@ -26,7 +26,7 @@ related_tutor_docs:
 - https://docs.tutor.edly.io
 related_specs: []
 related_runbooks:
-- docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md
+- docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md
 related_evidence: []
 fitness_functions:
 - scripts/qa/verify-auth-surfaces.sh prod

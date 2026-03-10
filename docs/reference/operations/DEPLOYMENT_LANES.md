@@ -153,7 +153,7 @@ document being created:
    lane), sometimes a proposed-but-never-built GKE staging lane.
 
 2. **STAGING_ACTIVATION.md describes a future GKE lane**: The three-environment promotion
-   path described in `docs/runbooks/operations/STAGING_ACTIVATION.md`
+   path described in `docs/ops/runbooks/STAGING_ACTIVATION.md`
    (`rke2-nonprod → staging → production`) reflects a possible future state. Today the
    active promotion path is `rke2-nonprod → production`.
 
@@ -170,9 +170,9 @@ marked in its `kustomization.yaml` header.
 
 ## Related Documentation
 
-- `docs/runbooks/operations/STAGING_ACTIVATION.md` — prerequisites and steps to activate a future
+- `docs/ops/runbooks/STAGING_ACTIVATION.md` — prerequisites and steps to activate a future
   GKE staging lane (not currently active)
 - `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md` — step-by-step deploy procedure
 - `docs/ops/runbooks/GITOPS_WORKFLOW.md` — GitOps rules (never patch directly)
-- `docs/runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md` — rke2-nonprod first-deploy checklist
+- `docs/ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md` — rke2-nonprod first-deploy checklist
 - `scripts/qa/verify-deployment-lanes.sh` — automated verification of this document

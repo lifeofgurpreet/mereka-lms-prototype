@@ -51,7 +51,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md
+    runbook: docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
     section: Dashboard Verification
     justification: Dashboard load time and visual correctness require human verification
       in browser
@@ -149,7 +149,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
+    runbook: docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md
     section: Alert Verification > OOM Simulation
     justification: OOM simulation requires deliberate resource exhaustion which cannot
       be safely automated in production
@@ -181,7 +181,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md
+    runbook: docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
     section: Trace-Log Correlation
     justification: Click-through navigation from logs to traces requires visual verification
       in Grafana UI

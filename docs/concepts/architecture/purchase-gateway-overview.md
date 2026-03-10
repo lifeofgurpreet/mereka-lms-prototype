@@ -243,6 +243,6 @@ The Purchase Gateway is a custom Stripe-to-Open edX enrollment bridge that repla
 ## Related Specs and ADRs
 - **Spec**: `specs/ecommerce-purchase-gateway_spec.md`
 - **Runbook**: `docs/archive/superseded/runbooks/purchase-gateway-runbook.md`
-- **Stripe Webhooks Setup**: `docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md`
+- **Stripe Webhooks Setup**: `docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md`
 - **Multi-Tenancy**: `specs/multi-tenancy-architecture_spec.md`
 - **Secrets Management**: `specs/secrets-management_spec.md`

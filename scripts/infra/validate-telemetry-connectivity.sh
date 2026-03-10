@@ -451,7 +451,7 @@ else
     echo "Open Grafana: https://grafana.mereka.dev/d/bbi-app-mereka-lms"
   else
     echo -e "${RED}✗ Telemetry connectivity validation failed.${NC}"
-    echo "See docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md for remediation."
+    echo "See docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md for remediation."
   fi
 fi
 

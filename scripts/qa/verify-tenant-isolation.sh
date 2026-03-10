@@ -16,7 +16,7 @@ MGMT_CMD="$TENANT_APP/management/commands/provision_tenant.py"
 BACKFILL_CMD="$TENANT_APP/management/commands/backfill_xapi_enterprise_uuid.py"
 PROVISION_SCRIPT="$REPO_ROOT/scripts/tenants/provision-tenant.sh"
 MEREKA_ENV="$REPO_ROOT/scripts/tenants/mereka-tenant.env"
-TENANT_DOC="$REPO_ROOT/docs/runbooks/operations/TENANT_PROVISIONING.md"
+TENANT_DOC="$REPO_ROOT/docs/ops/runbooks/TENANT_PROVISIONING.md"
 
 # Colors
 RED='\033[0;31m'
@@ -308,7 +308,7 @@ check_xapi_backfill() {
 check_provisioning_documentation() {
   echo "Section 5: Provisioning Documentation"
 
-  # docs/runbooks/operations/TENANT_PROVISIONING.md exists
+  # docs/ops/runbooks/TENANT_PROVISIONING.md exists
   if [[ -f "$TENANT_DOC" ]]; then
     pass "TENANT_PROVISIONING.md exists"
   else

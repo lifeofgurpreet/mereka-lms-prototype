@@ -26,7 +26,7 @@ fail() { echo "FAIL: $1"; FAIL=$((FAIL + 1)); }
 skip() { echo "SKIP: $1"; SKIP=$((SKIP + 1)); }
 
 RETENTION_DOC="$REPO_ROOT/docs/policies/operations/DATA_RETENTION_POLICY.md"
-ERASURE_DOC="$REPO_ROOT/docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md"
+ERASURE_DOC="$REPO_ROOT/docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md"
 RETENTION_JOBS="$REPO_ROOT/scripts/infra/data-retention-jobs.sh"
 EXPORT_SCRIPT="$REPO_ROOT/scripts/infra/user-data-export.sh"
 

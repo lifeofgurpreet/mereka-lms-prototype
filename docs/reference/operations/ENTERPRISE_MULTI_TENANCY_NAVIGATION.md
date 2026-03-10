@@ -11,8 +11,8 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 - [`docs/reference/operations/OPENEDX_HOSTNAMES.md`](OPENEDX_HOSTNAMES.md) - Generated hostname registry used by infrastructure.
 - [`docs/concepts/architecture/MULTISITE.md`](../../concepts/architecture/MULTISITE.md) - Domain + platform configuration details for tenant deployment.
 - [`docs/policies/operations/MULTISITE_GOVERNANCE.md`](../../policies/operations/MULTISITE_GOVERNANCE.md) - Governance checks and recurring controls.
-- [`docs/runbooks/operations/DOMAIN_CHANGE_RUNBOOK.md`](../../ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md) - Domain update and validation sequence.
-- [`docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`](../../ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md) - Domain/secret change safety checks.
+- [`docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md`](../../ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md) - Domain update and validation sequence.
+- [`docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`](../../ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md) - Domain/secret change safety checks.
 
 ## 2) Multi-Tenant Architecture & Provisioning
 
@@ -20,13 +20,13 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 - [`docs/concepts/architecture/enterprise-services-overview.md`](../../concepts/architecture/enterprise-services-overview.md) - Enterprise services design.
 - [`docs/concepts/architecture/MULTISITE.md`](../../concepts/architecture/MULTISITE.md) - Tenant model (shared services vs per-tenant domains).
 - [`docs/ops/runbooks/MULTI_TENANCY_RUNBOOK.md`](../../ops/runbooks/MULTI_TENANCY_RUNBOOK.md) - Runbook for verification and isolation checks.
-- [`docs/runbooks/operations/TENANT_PROVISIONING.md`](../../ops/runbooks/TENANT_PROVISIONING.md) - Provisioning command and brand-pack path.
+- [`docs/ops/runbooks/TENANT_PROVISIONING.md`](../../ops/runbooks/TENANT_PROVISIONING.md) - Provisioning command and brand-pack path.
 - [`docs/archive/superseded/runbooks/tenant-provisioning-runbook.md`](../../archive/superseded/runbooks/tenant-provisioning-runbook.md) - Full provision + offboarding workflow.
 - [`scripts/qa/verify-multisite-config.sh`](../../../scripts/qa/verify-multisite-config.sh) / [`scripts/qa/verify-org-role-ownership.sh`](../../../scripts/qa/verify-org-role-ownership.sh) - Readiness checks.
 
 ## 3) Enterprise Features, Licensing, and Admin Surfaces
 
-- [`docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md`](../../ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md) - Operational surface for enterprise microservices.
+- [`docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`](../../ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md) - Operational surface for enterprise microservices.
 - [`docs/archive/superseded/runbooks/enterprise-services-runbook.md`](../../archive/superseded/runbooks/enterprise-services-runbook.md) - End-user runbook for onboarding, allocations, and service health.
 - [`docs/concepts/architecture/enterprise-services-overview.md`](../../concepts/architecture/enterprise-services-overview.md) - Data flow and component model.
 - `specs/enterprise-microservices_spec.md` - Formal acceptance criteria.
@@ -45,7 +45,7 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 - [`docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`](../../status/readiness/TENANT_BRANDING_READINESS_RAG.md) - Branding readiness state and gaps.
 - [`../guides/branding/BRANDING_GUARDRAILS.md`](../../guides/branding/BRANDING_GUARDRAILS.md) - Guardrails and regression checks.
 - [`../guides/branding/FOOTER_V2_TO_LMS_MAPPING.md`](../../guides/branding/FOOTER_V2_TO_LMS_MAPPING.md) - Footer mapping for LMS/MFE alignment.
-- [`docs/runbooks/operations/TENANT_BRANDING_TROUBLESHOOTING.md`](../../ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md) - Branding breakages and fixes.
+- [`docs/ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md`](../../ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md) - Branding breakages and fixes.
 - [`docs/ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md`](../../ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md) - Plugin strategy for Tutor/MFE customization.
 
 ## 5) Deployment, Verification, and Gates to Run

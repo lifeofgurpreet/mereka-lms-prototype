@@ -41,7 +41,7 @@ Mobile apps use OAuth2 Authorization Code flow for user authentication. Each app
 - **Redirect URI**: `merekaacademy://oauth`
 - **Scopes**: `user_id email profile read write`
 - **Skip Authorization**: Yes (first-party app)
-- **Created**: via `tutor local exec lms ./manage.py lms create_dot_application` (see `docs/runbooks/operations/MOBILE_OAUTH_PROVISIONING.md`)
+- **Created**: via `tutor local exec lms ./manage.py lms create_dot_application` (see `docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md`)
 
 ### Platform API Keys
 
@@ -146,7 +146,7 @@ gcloud secrets versions access latest --secret=MEREKA_LMS_MOBILE_IOS_PROD_CLIENT
 gh workflow run ios-build.yml --ref main
 
 # 7. Test OAuth flow in TestFlight build
-# (Manual verification - see docs/runbooks/operations/MOBILE_OAUTH_PROVISIONING.md)
+# (Manual verification - see docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md)
 ```
 
 ## Audit Procedures
@@ -246,7 +246,7 @@ Verify all mobile secrets exist in Infisical and GCP SM:
 
 ## Related Documentation
 
-- **OAuth Provisioning**: `docs/runbooks/operations/MOBILE_OAUTH_PROVISIONING.md` - OAuth app creation and verification
+- **OAuth Provisioning**: `docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md` - OAuth app creation and verification
 - **Secrets Management Spec**: `specs/secrets-management_spec.md` - Pipeline architecture and validation
 - **CI/CD Pipeline Spec**: `specs/ci-cd-pipeline_spec.md` - iOS build workflow
 - **iOS App Setup**: `docs/archive/ios/MOBILE_IOS_APP_SETUP.md` - iOS app configuration (if exists)

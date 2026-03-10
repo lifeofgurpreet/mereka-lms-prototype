@@ -55,7 +55,7 @@ if [[ ! -f "$CANONICAL" ]]; then
   fail "AC-TOKEN-003: Canonical source not found: assets/branding/tokens.css"
   echo ""
   echo "Remediation: Create assets/branding/tokens.css with :root { --<token>: <value>; } blocks."
-  echo "See docs/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md for the full authoring guide."
+  echo "See docs/ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md for the full authoring guide."
 else
   CANONICAL_COUNT=$(grep -cP '^\s+--[a-z0-9_-]+\s*:' "$CANONICAL" || true)
   if [[ "$CANONICAL_COUNT" -ge 80 ]]; then
@@ -149,7 +149,7 @@ else
   echo "  1. Add missing token to infrastructure/tutor/themes/mereka/scss/_tokens.scss :root block"
   echo "  2. Mirror the definition in */static/css/mereka-overrides.css (common/lms/cms)"
   echo "  3. Run this script again to confirm PASS"
-  echo "  4. See docs/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md for canonical procedure"
+  echo "  4. See docs/ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md for canonical procedure"
 fi
 
 # ── AC-TOKEN-002: Explicit ink-600 gap check ──────────────────────────────────
@@ -242,11 +242,11 @@ else
 fi
 
 # Check for TOKEN_DRIFT_REMEDIATION doc (drift-check documentation)
-DOC_PATH="$REPO_ROOT/docs/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md"
+DOC_PATH="$REPO_ROOT/docs/ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md"
 if [[ -f "$DOC_PATH" ]]; then
   pass "AC-TOKEN-004: TOKEN_DRIFT_REMEDIATION.md present (drift-check flow documented)"
 else
-  warn "AC-TOKEN-004: docs/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md not found — create it to document drift-check flow"
+  warn "AC-TOKEN-004: docs/ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md not found — create it to document drift-check flow"
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────
@@ -261,7 +261,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  2. Decide: define it in _tokens.scss :root, OR replace the reference with a defined token"
   echo "  3. Mirror any new definitions in all three mereka-overrides.css targets (common/lms/cms)"
   echo "  4. Re-run this script to confirm PASS"
-  echo "  5. See docs/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md for the full canonical procedure"
+  echo "  5. See docs/ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md for the full canonical procedure"
   exit 1
 fi
 

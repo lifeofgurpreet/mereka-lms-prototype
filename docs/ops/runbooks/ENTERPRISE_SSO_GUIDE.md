@@ -259,7 +259,7 @@ For testing without a real enterprise IdP, use a free SAML IdP simulator such as
 - **SAML assertions with SHA-1 signatures MUST be rejected.** Open edX's `python-social-auth` rejects SHA-1 by default; do not override this.
 - **Assertion replay prevention** is handled by `python-social-auth`'s Redis-backed assertion ID cache (TTL = assertion validity window). Confirm Redis is healthy before enabling enterprise SSO.
 - **Cross-tenant isolation**: Enterprise IdP linkage (preferred: `EnterpriseCustomerIdentityProvider`, legacy: `identity_provider`) enforces which IdP can authenticate to which tenant. Never configure a shared IdP slug for multiple tenants.
-- **SCIM bearer tokens** should be rotated annually per `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`.
+- **SCIM bearer tokens** should be rotated annually per `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`.
 
 ---
 

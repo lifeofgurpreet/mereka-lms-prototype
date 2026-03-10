@@ -58,7 +58,7 @@ Configure Django site framework to apply Mereka Academy branding to academy.biji
 **Size:** 3.6 KB
 **Permissions:** Executable (755)
 
-### 3. docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
+### 3. docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
 **Purpose:** Comprehensive technical documentation
 **Contents:**
 - Solution overview
@@ -278,7 +278,7 @@ site_values:
 - **DEPLOY_BRANDING_FIX.md** - Step-by-step deployment guide
 
 ### Technical
-- **docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md** - Full technical details
+- **docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md** - Full technical details
 
 ### Summary
 - **ALTERNATIVE_DOMAIN_FIX_SUMMARY.md** - Implementation summary

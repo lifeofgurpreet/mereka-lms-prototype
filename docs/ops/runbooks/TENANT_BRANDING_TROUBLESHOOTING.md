@@ -16,7 +16,7 @@ This guide covers troubleshooting for the multi-tenant branding system when `ENA
 - Runtime verifier: `scripts/qa/verify-tenant-branding-runtime.sh`
 - Governance gate: `scripts/qa/run-multisite-governance-gates.sh`
 - Readiness assessment: `docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`
-- General troubleshooting: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- General troubleshooting: `docs/ops/runbooks/TROUBLESHOOTING.md`
 
 ---
 
@@ -395,7 +395,7 @@ EOF
 ./scripts/tenants/provision-tenant.sh --from-env scripts/tenants/newclient-tenant.env
 ```
 
-**See**: `docs/runbooks/operations/TENANT_PROVISIONING.md` for full provisioning workflow.
+**See**: `docs/ops/runbooks/TENANT_PROVISIONING.md` for full provisioning workflow.
 
 ---
 
@@ -473,11 +473,11 @@ kubectl exec -n mereka-lms -it deploy/lms -- \
 ## Related Documentation
 
 - **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
-- **Provisioning**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
+- **Provisioning**: `docs/ops/runbooks/TENANT_PROVISIONING.md`
 - **Readiness**: `docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`
 - **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
-- **General troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- **General troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`
 
 ---
 

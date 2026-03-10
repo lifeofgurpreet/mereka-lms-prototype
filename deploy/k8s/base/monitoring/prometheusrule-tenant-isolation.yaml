@@ -39,7 +39,7 @@ spec:
               2. Verify cache isolation manually
               3. Verify API isolation manually
               4. Escalate to security team
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/runbooks/operations/TROUBLESHOOTING.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/ops/runbooks/TROUBLESHOOTING.md"
 
         - alert: TenantIsolationTestMissing
           expr: absent(tenant_isolation_failures)

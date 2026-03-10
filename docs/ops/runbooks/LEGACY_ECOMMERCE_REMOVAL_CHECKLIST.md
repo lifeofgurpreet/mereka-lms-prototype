@@ -55,8 +55,8 @@
 
 - [ ] Archive legacy ecommerce docs to `docs/archive/superseded/operations/`:
   - `docs/reference/operations/ECOMMERCE_THEMING.md`
-  - `docs/runbooks/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md`
-  - `docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md` (if Oscar-specific sections)
+  - `docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md`
+  - `docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md` (if Oscar-specific sections)
 - [ ] Remove ecommerce references from `docs/ops/quickref/access-urls.md`
 - [ ] Remove ecommerce references from `docs/reference/operations/USER_FACING_URLS.md`
 - [ ] Update `docs/reference/operations/CAPABILITY_MATRIX.md` to remove legacy ecommerce row

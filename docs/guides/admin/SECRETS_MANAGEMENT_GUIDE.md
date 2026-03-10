@@ -243,7 +243,7 @@ kubectl rollout restart deployment/lms -n mereka-lms
 
 **When**: Secret compromised, leaked, expired, or routine rotation (90-day policy).
 
-**Prerequisites**: Read `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` for full procedure.
+**Prerequisites**: Read `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md` for full procedure.
 
 **Quick steps**:
 
@@ -621,10 +621,10 @@ STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
 - **Full spec**: `specs/secrets-management_spec.md` (18 ACs, complete reference)
 
 ### Operations Docs
-- **Rotation checklist**: `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` (step-by-step)
+- **Rotation checklist**: `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md` (step-by-step)
 - **Secrets inventory**: `docs/reference/operations/SECRETS_SNAPSHOT.md` (complete list)
 - **Infisical keys**: `docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md` (detailed inventory)
-- **Domain secrets**: `docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md` (multi-site release)
+- **Domain secrets**: `docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md` (multi-site release)
 
 ### Architecture Decisions
 - **ADR-004**: `docs/adr/historical/004-secrets-management.md` (why Infisical + ExternalSecrets)

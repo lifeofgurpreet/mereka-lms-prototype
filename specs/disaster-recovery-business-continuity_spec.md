@@ -205,7 +205,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 
 - The system MUST be able to restore all K8s secrets from Infisical + GCP Secret Manager without relying on in-cluster secret state
 - The system MUST rotate all secrets after a security-related DR event (compromise scenario DR-006)
-- The system MUST document the secret rotation checklist in `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`
+- The system MUST document the secret rotation checklist in `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`
 - The system SHOULD complete full secret rotation within 1 hour of incident declaration
 
 #### Business Continuity

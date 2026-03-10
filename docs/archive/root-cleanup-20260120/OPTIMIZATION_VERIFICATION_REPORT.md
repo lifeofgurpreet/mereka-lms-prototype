@@ -561,5 +561,5 @@ These optimizations are appropriate for dev/staging. Before production launch, s
 
 **For questions or issues:**
 - See: `COST_OPTIMIZATION_SUMMARY.md`
-- See: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- See: `docs/ops/runbooks/TROUBLESHOOTING.md`
 - Run: `kubectl get pods -n mereka-lms` to verify service health

@@ -366,7 +366,7 @@ If something doesn't work:
 2. Verify config: `grep -E "MYSQL_HOST|MONGODB_HOST" tutor_env/config.yml`
 3. Check containers: `docker ps --filter "name=tutor_local"`
 4. Review this guide's "Common Issues" section
-5. Check `docs/runbooks/operations/TROUBLESHOOTING.md` for more detailed troubleshooting
+5. Check `docs/ops/runbooks/TROUBLESHOOTING.md` for more detailed troubleshooting
 
 ---
 

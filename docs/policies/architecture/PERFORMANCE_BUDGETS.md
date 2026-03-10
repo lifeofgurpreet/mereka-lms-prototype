@@ -432,7 +432,7 @@ Open edX MFEs have different complexity levels. Per-MFE budgets:
 - **Selector Hardening**: `docs/policies/architecture/SELECTOR_HARDENING_POLICY.md`
 - **Frontend Audit**: `../../reports/2026/audits/FRONTEND_AUDIT_CHECKLIST.md`
 - **Caddyfile**: `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
-- **Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- **Troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`
 
 ---
 

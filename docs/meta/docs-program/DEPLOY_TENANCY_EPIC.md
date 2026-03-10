@@ -346,7 +346,7 @@ Deployment is successful when:
 
 After successful deployment, update:
 
-- [ ] `docs/runbooks/operations/TENANT_PROVISIONING.md` — Architecture overview
+- [ ] `docs/ops/runbooks/TENANT_PROVISIONING.md` — Architecture overview
 - [ ] `scripts/tenants/provision-tenant.sh` — Tenant provisioning guide
 - [ ] `CHANGELOG.md` — Add entry for tenancy epic completion
 

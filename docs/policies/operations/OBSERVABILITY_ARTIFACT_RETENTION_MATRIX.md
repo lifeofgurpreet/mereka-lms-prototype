@@ -37,7 +37,7 @@ Retention references in this matrix apply to:
 - Any artifact deleted before retention window must have:
   - a release note reference
   - approval from platform observability owner
-  - a reason logged in `docs/runbooks/operations/RELEASE_CHECKLIST.md` or equivalent postmortem
+  - a reason logged in `docs/ops/runbooks/RELEASE_CHECKLIST.md` or equivalent postmortem
 
 ## Cleanup commands
 

@@ -66,7 +66,7 @@ Use this as the next agent’s executable plan, not prose. Each day ends with a 
 - [x] Create a script: `tools/docs/verify/verify-doc-command-refs.sh`
 - [ ] Script must:
   - scan canonical docs for command snippets in fenced code blocks and inline command references;
-  - parse markdown path targets in inline code, markdown links (`[x](docs/runbooks/operations/TROUBLESHOOTING.md)`), and markdown autolinks (`<docs/runbooks/operations/TROUBLESHOOTING.md>`);
+  - parse markdown path targets in inline code, markdown links (`[x](docs/ops/runbooks/TROUBLESHOOTING.md)`), and markdown autolinks (`<docs/ops/runbooks/TROUBLESHOOTING.md>`);
   - validate each referenced command/script exists in repo (`scripts/**`, `.github/workflows/**`, canonical runbook commands);
   - emit summary JSON with stable schema even for zero-scope runs (include `candidate_sources` keys with zero values);
   - normalize missing `candidate_sources` keys to zero in consolidated compliance outputs.

@@ -251,7 +251,7 @@ See `.github/workflows/ci.yml` job `a11y-tenant-branding`.
 
 ## Related Documents
 
-- `docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md` — Token contrast + focus-visible gate (public routes)
+- `docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md` — Token contrast + focus-visible gate (public routes)
 - `ACCESSIBILITY_CONFORMANCE_RUNBOOK.md` — Landmark requirements for authenticated routes
 - `../../policies/operations/A11Y_EXCEPTIONS.md` — Active exception log (create when first needed)
 - `scripts/qa/verify-a11y-contrast-focus.sh` — Contrast + focus-visible verification

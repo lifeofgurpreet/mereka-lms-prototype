@@ -110,7 +110,7 @@ Modules:
   - Audit posture: `./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
   - Pre-op backup before risky operations:
     `velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait`
-  - Docs: `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`, `docs/ops/runbooks/DISASTER_RECOVERY.md`
+  - Docs: `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`, `docs/ops/runbooks/DISASTER_RECOVERY.md`
 - Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and Atlas host/user/password inputs for `FORUM_MONGODB_SRV`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
 - Apply the Mereka branding pack after each upgrade:
   ```bash
@@ -133,7 +133,7 @@ Modules:
 ## 7. GitHub integration
 
 - Repo: `https://github.com/Biji-Biji-Initiative/mereka-lms` (remote `origin` already configured locally).
-- Backups: Cloud SQL backup workflow is legacy and manual-only. Production backups are Velero-driven (see `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`).
+- Backups: Cloud SQL backup workflow is legacy and manual-only. Production backups are Velero-driven (see `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`).
 - Next pipeline work: add workflows for (a) Tutor image build/push + smoke tests and (b) Terraform plan/apply with manual approvals. Store any additional credentials (Artifact Registry robot, MongoDB Atlas API, etc.) as repo secrets instead of committing them here.
 
 ## 8. Cutover checklist

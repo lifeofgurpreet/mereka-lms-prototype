@@ -126,4 +126,4 @@ Run at the start of each quarter:
 - HPA configs: `deploy/k8s/base/apps/lms/hpa.yaml`, `apps/cms/hpa.yaml`, `base/operational/hpa-baselines.yaml`, `base/monitoring/hpa-enterprise.yaml`
 - Resource limits: `deploy/k8s/overlays/production/patches/resource-limits.yaml`
 - SLO targets: `docs/policies/operations/SLO_POLICY.md`
-- Troubleshooting: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- Troubleshooting: `docs/ops/runbooks/TROUBLESHOOTING.md`

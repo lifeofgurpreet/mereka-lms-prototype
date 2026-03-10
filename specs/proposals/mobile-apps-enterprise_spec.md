@@ -34,7 +34,7 @@ links:
     - "docs/archive/ios/IOS_DEPLOYMENT_LEARNINGS.md"
     - "docs/archive/ios/IOS_APP_SETUP_NOW.md"
     - "docs/archive/ios/IOS_APP_CI_SETUP.md"
-    - "docs/runbooks/operations/MOBILE_DEPLOYMENT.md"
+    - "docs/ops/runbooks/MOBILE_DEPLOYMENT.md"
   related_specs:
     - "specs/secrets-management_spec.md"
     - "specs/branding-system_spec.md"

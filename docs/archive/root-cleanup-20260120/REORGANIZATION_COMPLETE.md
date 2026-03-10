@@ -176,7 +176,7 @@ make format
 | `tools/kajabi-export.mjs` | `scripts/migrations/kajabi/kajabi-export.mjs` |
 | `tools/sync-brand-assets.sh` | `scripts/branding/sync-brand-assets.sh` |
 | `docs/QUICK_START_LOCAL.md` | `docs/onboarding/QUICK_START_LOCAL.md` |
-| `docs/ops/TROUBLESHOOTING.md` | `docs/runbooks/operations/TROUBLESHOOTING.md` |
+| `docs/ops/TROUBLESHOOTING.md` | `docs/ops/runbooks/TROUBLESHOOTING.md` |
 
 ## Documentation
 

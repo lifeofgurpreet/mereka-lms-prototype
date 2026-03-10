@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/TRANSLATION_WORKFLOW.md`
+Canonical document: `docs/ops/runbooks/TRANSLATION_WORKFLOW.md`

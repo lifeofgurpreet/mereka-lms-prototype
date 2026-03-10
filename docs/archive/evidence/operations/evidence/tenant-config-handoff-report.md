@@ -107,7 +107,7 @@ The guide links to:
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - `docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md`
-- `docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md`
+- `docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md`
 - `docs/operations/MULTISITE.md`
 - `docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md`
 - `infrastructure/tutor/plugins/mereka_lms.py`

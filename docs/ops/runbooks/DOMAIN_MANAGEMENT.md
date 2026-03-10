@@ -19,7 +19,7 @@ This runbook covers operational procedures for multi-site domain management.
 
 - Cloudflare DNS access for mereka.io and biji-biji.com
 - Access to production GKE cluster
-- Understanding of multi-level subdomain SSL constraints (see `docs/runbooks/operations/DOMAIN_MANAGEMENT.md`)
+- Understanding of multi-level subdomain SSL constraints (see `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`)
 
 ---
 

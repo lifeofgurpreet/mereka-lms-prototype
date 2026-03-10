@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/PATCH_IDEMPOTENCY.md`
+Canonical document: `docs/ops/runbooks/PATCH_IDEMPOTENCY.md`

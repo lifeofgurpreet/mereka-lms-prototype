@@ -101,7 +101,7 @@ Colors sourced from:
 === AC-FRONT-032: Runbook-Grade Smoke Path ===
 ✅ Smoke path script exists at scripts/qa/verify-authenticated-smoke-a11y.sh
 ✅ Script is executable
-✅ Runbook doc exists at docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md
+✅ Runbook doc exists at docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md
 ...
 
 === AC-FRONT-033: WCAG AA Contrast Validation ===

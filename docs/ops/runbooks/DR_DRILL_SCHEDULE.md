@@ -50,7 +50,7 @@ All non-production access to <system> may be temporarily paused.
 | Backup window | 02:00 UTC |
 | Retention | 7 days (automated), 30 days (on-demand) |
 | Verify script | `./scripts/qa/verify-cloud-sql-snapshots.sh` |
-| Drill runbook | `docs/runbooks/operations/CLOUD_SQL_RESTORE_DRILL.md` |
+| Drill runbook | `docs/ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md` |
 
 **Check backup freshness:**
 ```bash
@@ -116,7 +116,7 @@ kubectl get backup -n velero --sort-by=.status.completionTimestamp | tail -5
 
 ### MySQL (Cloud SQL)
 
-Full procedure: `docs/runbooks/operations/CLOUD_SQL_RESTORE_DRILL.md`
+Full procedure: `docs/ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md`
 
 1. List available backups:
    ```bash

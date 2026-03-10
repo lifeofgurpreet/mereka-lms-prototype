@@ -76,10 +76,10 @@ else
 fi
 
 # Tenant provisioning guide exists
-if [[ -f "docs/runbooks/operations/TENANT_PROVISIONING.md" ]]; then
+if [[ -f "docs/ops/runbooks/TENANT_PROVISIONING.md" ]]; then
   pass "Tenant provisioning guide exists"
 else
-  fail "Tenant provisioning guide missing (docs/runbooks/operations/TENANT_PROVISIONING.md)"
+  fail "Tenant provisioning guide missing (docs/ops/runbooks/TENANT_PROVISIONING.md)"
 fi
 
 # Multi-tenancy architecture overview exists

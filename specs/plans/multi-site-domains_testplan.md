@@ -70,7 +70,7 @@ Test types used:
 | p95 <2s response | All domain endpoints respond within 2s |smoke_test | `scripts/qa/smoke-test.sh` | Add `-w %{time_total}` to curl checks |
 | CSRF failure <0.5% | CSRF validation failure rate monitoring | monitoring | `deploy/k8s/base/monitoring/prometheusrule-lms.yaml` | PrometheusRule alert |
 | Zero re-login on subdomain nav | Session cookie propagationtest | smoke_test | `scripts/qa/verify-session-persistence.sh` (new) | Covered by AC-002 test |
-| Domain add/remove <30min | Documented procedure timed | manual_verification | `docs/runbooks/operations/DOMAIN_MANAGEMENT.md` | Document with step timings |
+| Domain add/remove <30min | Documented procedure timed | manual_verification | `docs/ops/runbooks/DOMAIN_MANAGEMENT.md` | Document with step timings |
 | 99.9% availability | Per-domain uptime monitoring | monitoring | Upptime config (`~/infrastructure/upptime/`) | Alreadytracked via status.mereka.dev |
 | Body limit enforcement | 1MB/4MB limits enforced without truncation | smoke_test | `scripts/qa/verify-body-limits.sh` (new) | curl with oversized payload |
 
@@ -99,7 +99,7 @@ Test types used:
 **Justification**: Procedure timing cannot be automated; requires human execution.
 
 **Steps**:
-1. Follow `docs/runbooks/operations/DOMAIN_MANAGEMENT.md` to add a test domain
+1. Follow `docs/ops/runbooks/DOMAIN_MANAGEMENT.md` to add a test domain
 2. Time each step
 3. Verify total time is under 30 minutes
 4. Remove the test domain

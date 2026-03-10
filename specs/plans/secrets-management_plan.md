@@ -163,8 +163,8 @@ Before starting implementation:
 ### Docs
 
 #### D1. Update SECRET_ROTATION_CHECKLIST.md to match spec procedures
-- [ ] **[S]** Ensure `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` matches the rotation procedure in the spec's Rollout section (7-step sequence).
-- **Files**: `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`
+- [ ] **[S]** Ensure `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md` matches the rotation procedure in the spec's Rollout section (7-step sequence).
+- **Files**: `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`
 - **AC**: Rollout/Rotation (spec requirement)
 - **Depends**: None
 - **Done**: Checklist steps match spec.

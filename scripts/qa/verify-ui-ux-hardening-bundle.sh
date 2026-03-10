@@ -51,9 +51,9 @@ echo ""
 HARDENING_DOC="$REPO_ROOT/docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md"
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 PERF_BUDGET_DOC="$REPO_ROOT/docs/concepts/architecture/PERFORMANCE_BUDGETS.md"
-A11Y_GATE_DOC="$REPO_ROOT/docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md"
-VISUAL_BASELINE_DOC="$REPO_ROOT/docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md"
-VISUAL_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md"
+A11Y_GATE_DOC="$REPO_ROOT/docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md"
+VISUAL_BASELINE_DOC="$REPO_ROOT/docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md"
+VISUAL_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
 VISUAL_PARITY_DOC="$REPO_ROOT/docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
 
 # ===========================================================================

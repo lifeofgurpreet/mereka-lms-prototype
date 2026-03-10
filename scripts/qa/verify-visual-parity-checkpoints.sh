@@ -48,8 +48,8 @@ echo ""
 # Paths used across multiple ACs
 # ---------------------------------------------------------------------------
 CHECKPOINT_DOC="$REPO_ROOT/docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
-BASELINE_DOC="$REPO_ROOT/docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md"
-VISUAL_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md"
+BASELINE_DOC="$REPO_ROOT/docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md"
+VISUAL_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
 BRANDING_OPS="$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 COMMON_CSS_DIR="$THEME_DIR/common/static/css"

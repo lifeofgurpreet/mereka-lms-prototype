@@ -246,8 +246,8 @@ docker images --format '{{.Repository}}:{{.Tag}} {{.Size}} {{.CreatedAt}}' | gre
 
 ## Related
 
-- `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md` — Production rollout steps
-- `docs/runbooks/operations/TENANT_ONBOARDING_PLAYBOOK.md` — Tenant onboarding with pre-deploy checklist
+- `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` — Production rollout steps
+- `docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md` — Tenant onboarding with pre-deploy checklist
 - `scripts/infra/check-worktree-freshness.sh` — Pre-build stale worktree gate
 - `scripts/qa/ops-preflight.sh` — Environment pre-flight check
 - `scripts/qa/ops-confidence.sh` — Post-deploy confidence bundle

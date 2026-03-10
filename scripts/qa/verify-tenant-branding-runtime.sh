@@ -316,7 +316,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "- ENABLE_MULTI_TENANT_BRANDING=False: Check Tutor config"
   echo "- Caddy routing: Verify domain in Caddyfile and restart Caddy"
   echo ""
-  echo "See docs/runbooks/operations/TROUBLESHOOTING.md for detailed troubleshooting"
+  echo "See docs/ops/runbooks/TROUBLESHOOTING.md for detailed troubleshooting"
   exit 1
 elif [[ "$RUNTIME_AVAILABLE" -eq 0 ]] && [[ "$SKIP" -gt 0 ]]; then
   echo -e "${YELLOW}SKIPPED:${NC} Runtime not available"

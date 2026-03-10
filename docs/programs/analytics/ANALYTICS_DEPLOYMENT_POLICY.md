@@ -186,4 +186,4 @@ If Aspects is deployed in the future, ensure:
 - `docs/concepts/analytics/ASPECTS_INSTALLATION.md` (deployment guide)
 - `docs/concepts/analytics/ASPECTS_VS_PANORAMA.md` (comparison with commercial alternative)
 - `docs/reference/operations/CAPABILITY_MATRIX.md` (capability tracking)
-- `docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md` (deployment checklist)
+- `docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md` (deployment checklist)

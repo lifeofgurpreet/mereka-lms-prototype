@@ -7,4 +7,4 @@ This document has moved to:
 - `../../runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md`
 
 Reason:
-- Runtime verification procedures now live under `docs/runbooks/operations/`.
+- Runtime verification procedures now live under `docs/ops/runbooks/`.

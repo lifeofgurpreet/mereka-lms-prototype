@@ -161,7 +161,7 @@ Follow this checklist when onboarding a 4th (or nth) branded domain:
   - `ALLOWED_HOSTS` (via apply-patches.sh or tutor config)
 
 - [ ] **7. SSL certificate** — for multi-level subdomains (`x.y.mereka.io`), use DNS-only
-  (gray cloud) + Let's Encrypt. See `docs/runbooks/operations/DOMAIN_MANAGEMENT.md`.
+  (gray cloud) + Let's Encrypt. See `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`.
 
 - [ ] **8. Rebuild and redeploy MFE**:
   ```bash
@@ -204,7 +204,7 @@ The script checks:
 - [`infrastructure/tutor/plugins/mereka_lms.py`](../../infrastructure/tutor/plugins/mereka_lms.py) — `SITE_VARIANTS` map, `MerekaFooter` component
 - [`docs/policies/architecture/COPY_TERMINOLOGY_CONTRACT.md`](../concepts/architecture/COPY_TERMINOLOGY_CONTRACT.md) — domain → brand copy table
 - [`docs/policies/architecture/MULTISITE_UX_CONSISTENCY.md`](../concepts/architecture/MULTISITE_UX_CONSISTENCY.md) — SITE_VARIANTS UX consistency requirements
-- [`docs/runbooks/architecture/FOOTER_SLOT_MIGRATION.md`](../concepts/architecture/FOOTER_SLOT_MIGRATION.md) — footer slot wiring contract
+- [`docs/ops/runbooks/architecture/FOOTER_SLOT_MIGRATION.md`](../concepts/architecture/FOOTER_SLOT_MIGRATION.md) — footer slot wiring contract
 - [`infrastructure/tutor/plugins/multi-tenancy/`](../../infrastructure/tutor/plugins/multi-tenancy/) — TenantConfig model
 - [`scripts/tenants/provision-tenant.sh`](../../scripts/tenants/provision-tenant.sh) — tenant provisioning
 - [`scripts/qa/verify-footer-variant-matrix.sh`](../../scripts/qa/verify-footer-variant-matrix.sh) — verification script

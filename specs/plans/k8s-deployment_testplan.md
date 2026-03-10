@@ -164,7 +164,7 @@ These correspond to the Edge Cases section of the spec. Theyare primarily runtim
 | EC-07: MySQL auth plugin | `--mysql-native-password=ON` verified in args | shell_verification | `scripts/qa/verify-k8s-deployment-spec.sh --check mysql-args` | AC-007 |
 | EC-08: CrashLoopBackOff | OpenEdxCrashLoopingContainers alert exists | shell_verification | PrometheusRule check | AC-02|
 | EC-09: Partial deployment | All Deployment statuses checkedpost-apply, not just first | kubectl_check | `scripts/qa/verify-k8s-live-cluster.sh --check deployments` | AC-003 |
-| EC-10: Volume data corruption | Manual procedure documentedin troubleshooting | manual_verification | `docs/runbooks/operations/TROUBLESHOOTING.md` | D-03 adds entries |
+| EC-10: Volume data corruption | Manual procedure documentedin troubleshooting | manual_verification | `docs/ops/runbooks/TROUBLESHOOTING.md` | D-03 adds entries |
 | EC-11: Celery worker starvation | --max-tasks-per-child=100in worker args | shell_verification | `scripts/qa/verify-k8s-deployment-spec.sh --check worker-args` | Implicit in workerDeployment check |
 
 ---

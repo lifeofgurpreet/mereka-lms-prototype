@@ -2557,7 +2557,7 @@ gcloud sql instances delete mereka-lms-mysql-read-prod
 - This Plan: `docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`
 - GCP Roadmap: `docs/operations/GCP_ROADMAP.md`
 - Cost Analysis: `GCP_BILLING_ANALYSIS.md`
-- Troubleshooting: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- Troubleshooting: `docs/ops/runbooks/TROUBLESHOOTING.md`
 - Tutor Guide: `CLAUDE.md`
 
 ---

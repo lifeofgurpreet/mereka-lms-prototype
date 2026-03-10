@@ -18,7 +18,7 @@ Two dependency specs are complete:
   script (`scripts/branding/generate-tokens-from-canonical.sh`) propagates values to the
   SCSS bridge and runtime CSS layers. All known drift was resolved 2026-02-25.
 
-- **T032 — Mobile deployment** (`docs/runbooks/operations/MOBILE_DEPLOYMENT.md`): iOS is active on
+- **T032 — Mobile deployment** (`docs/ops/runbooks/MOBILE_DEPLOYMENT.md`): iOS is active on
   TestFlight. Android is deferred (ADR-016). The custom mobile API lives under
   `infrastructure/tutor/custom-apps/openedx_mobile_api/`. Push notifications live under
   `infrastructure/tutor/custom-apps/openedx_push_notifications/`.
@@ -207,7 +207,7 @@ implement `httpx`/`aiohttp` APNs HTTP/2 calls here. Mark as UNIMPLEMENTED until 
 
 **Problem**: The file contains `"TEAM_ID.io.mereka.academy"`. The value `TEAM_ID` is a
 placeholder. The actual Apple Developer Team ID is `44F7G2D7U6` (from
-`docs/runbooks/operations/MOBILE_DEPLOYMENT.md`). Additionally, the bundle ID in the AASA
+`docs/ops/runbooks/MOBILE_DEPLOYMENT.md`). Additionally, the bundle ID in the AASA
 (`io.mereka.academy`) does not match the bundle ID in the iOS workflow
 (`com.mereka.academy.mobile`).
 
@@ -255,5 +255,5 @@ branding records.
 | `infrastructure/tutor/custom-apps/openedx_mobile_api/static/.well-known/apple-app-site-association` | AASA file (contains placeholder team ID) |
 | `infrastructure/tutor/custom-apps/openedx_push_notifications/models.py` | Push notification device model |
 | `docs/reference/architecture/TOKEN_GENERATION_PIPELINE.md` | Token pipeline architecture (T107) |
-| `docs/runbooks/operations/MOBILE_DEPLOYMENT.md` | Mobile deployment ops (T032) |
+| `docs/ops/runbooks/MOBILE_DEPLOYMENT.md` | Mobile deployment ops (T032) |
 | `specs/proposals/mobile-apps-enterprise_spec.md` | Full mobile spec (37 ACs) |

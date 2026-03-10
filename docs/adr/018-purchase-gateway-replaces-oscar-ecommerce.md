@@ -30,8 +30,8 @@ related_tutor_docs:
 related_specs:
 - specs/ecommerce-purchase-gateway_spec.md
 related_runbooks:
-- docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
-- docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md
+- docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+- docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md
 related_evidence: []
 fitness_functions:
 - scripts/qa/verify-ecommerce-worker-health.sh
@@ -77,7 +77,7 @@ Legacy Oscar is archived upstream, operationally expensive, and misaligned with 
 
 - `scripts/qa/verify-ecommerce-worker-health.sh`
 - service-level tests under `services/purchase-gateway/tests`
-- retirement checklist evidence in `docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md`
+- retirement checklist evidence in `docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md`
 
 ## Failure modes
 

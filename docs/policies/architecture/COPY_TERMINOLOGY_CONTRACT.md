@@ -139,7 +139,7 @@ Mereka Academy supports **three branded domains** with unique copy per domain:
 - Multi-tenancy middleware (`infrastructure/tutor/plugins/multi-tenancy/`) detects request domain
 - `SITE_NAME` overridden dynamically per request
 - MFE footer component reads `SITE_NAME` from `env.config.jsx` and renders appropriate variant
-- See `docs/runbooks/architecture/FOOTER_SLOT_MIGRATION.md` for footer slot wiring
+- See `docs/ops/runbooks/architecture/FOOTER_SLOT_MIGRATION.md` for footer slot wiring
 
 **Config Requirements**:
 - All domains must have `PLATFORM_NAME` containing "Academy"
@@ -259,7 +259,7 @@ grep -A 5 "FOOTER_VARIANT" infrastructure/tutor/plugins/mereka_lms.py
 
 ## Related Documentation
 
-- **MFE Footer v2 Design**: `docs/runbooks/architecture/FOOTER_SLOT_MIGRATION.md` — Footer variant mapping
+- **MFE Footer v2 Design**: `docs/ops/runbooks/architecture/FOOTER_SLOT_MIGRATION.md` — Footer variant mapping
 - **Tenant Branding Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md` — Brand pack schema
 - **Frontend Audit Checklist**: `../../reports/2026/audits/FRONTEND_AUDIT_CHECKLIST.md` — Copy/Terminology section
 - **Branding System Spec**: `specs/branding-system_spec.md` — Branding requirements

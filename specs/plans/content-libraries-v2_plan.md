@@ -55,7 +55,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - `CONTENT_LIBRARIES_ANALYTICS_ENABLED` (default: off) -- usage tracking
   - `CONTENT_LIBRARIES_BULK_IMPORT_ENABLED` (default: off) --bulk import tools
   - `CONTENT_LIBRARIES_PUBLIC_READ_ENABLED` (default: off) --allow_public_read feature
-  - Document flags in `docs/runbooks/operations/TROUBLESHOOTING.md`
+  - Document flags in `docs/ops/runbooks/TROUBLESHOOTING.md`
 
 ### Library Lifecycle Management
 
@@ -278,7 +278,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 - [ ] **[M]** Verify library metadata backup via Cloud SQL |AC: #28 | Depends: None
   - Verify library metadata tables are included in Cloud SQLbackup schedule
-  - Document backup schedule in `docs/runbooks/operations/TROUBLESHOOTING.md`
+  - Document backup schedule in `docs/ops/runbooks/TROUBLESHOOTING.md`
   - Test metadata restore from Cloud SQL backup (staging environment)
 
 - [ ] **[M]** Verify Blockstore content bundle backup | AC: #| Depends: Blockstore verification
@@ -583,7 +583,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Troubleshooting common issues: publish failures, sync errors, access denials
   - Monitoring and alerting: key metrics, alert response procedures
 
-- [ ] **[M]** Update troubleshooting guide with library-specific issues (`docs/runbooks/operations/TROUBLESHOOTING.md`) | AC: All |Depends: Runbook
+- [ ] **[M]** Update troubleshooting guide with library-specific issues (`docs/ops/runbooks/TROUBLESHOOTING.md`) | AC: All |Depends: Runbook
   - Issue: Library not visible in Studio → Check organizationmembership, feature flag
   - Issue: Component not rendering in course → Check publishstatus, XBlock type installed
   - Issue: Sync from library fails → Check library exists, check permissions

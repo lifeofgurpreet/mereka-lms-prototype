@@ -71,7 +71,7 @@ This spec covers a Node.js microservice deployed to Kubernetes. Testing strategy
 | EC-8: Password Generation Weak Randomness | `crypto.randomBytes()` fails (rare) → retry 3 times, enqueue to DLQ if all retries fail, never fall back to `Math.random()` | `unit_test` | `tests/unit/test_password_generator.js` | P1 |
 | EC-9: Consent Field Not "true" | HubSpot contact `consent` field missing or not `"true"` → reject webhook with `400 Bad Request`, log rejection reason | `integration_test` | `tests/integration/test_consent_validation.js` | P1 |
 | EC-10: Signature Timestamp Replay Attack | Webhook signature older than 5 minutes → reject with `401 Unauthorized` | `unit_test` + `integration_test` | `tests/unit/test_signature.js`, `tests/integration/test_webhook_receiver.js` | P1 |
-| EC-11: Concurrent Secret Updates | No automated test; covered by rotation checklist coordination | `manual_verification` | `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` | P3 |
+| EC-11: Concurrent Secret Updates | No automated test; covered by rotation checklist coordination | `manual_verification` | `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md` | P3 |
 | EC-12: Error Stack Trace Includes Secrets | Stack trace logged after error contains environment variables → sanitize before logging, strip env vars | `unit_test` | `tests/unit/test_sanitize.js` | P1 |
 
 ---

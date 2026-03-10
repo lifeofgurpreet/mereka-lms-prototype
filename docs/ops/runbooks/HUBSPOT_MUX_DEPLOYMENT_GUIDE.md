@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md`
+Canonical document: `docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md`

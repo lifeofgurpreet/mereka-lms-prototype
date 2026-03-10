@@ -471,10 +471,10 @@ Checks:
 **Spec**: `specs/observability-stack_spec.md` (8 ACs, 100% complete)
 
 **Operations Docs**:
-- `docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md` - Quick setup guide
-- `docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md` - On-call runbook
+- `docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md` - Quick setup guide
+- `docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md` - On-call runbook
 - `docs/reference/operations/MONITORING.md` - Monitoring strategy
-- `docs/runbooks/operations/ALERT_TUNING_SOP.md` - Alert tuning procedures
+- `docs/ops/runbooks/ALERT_TUNING_SOP.md` - Alert tuning procedures
 
 **Scripts**:
 - `scripts/qa/verify-observability-stack.sh` - Health check

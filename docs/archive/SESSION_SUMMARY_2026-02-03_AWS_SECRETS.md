@@ -206,7 +206,7 @@ The domain migration by the other agent affects:
 
 ### Existing Docs
 - `docs/TASK3_SES_SETUP_COMPLETE.md` - SES SMTP relay setup
-- `docs/runbooks/operations/TROUBLESHOOTING.md` - Troubleshooting guide
+- `docs/ops/runbooks/TROUBLESHOOTING.md` - Troubleshooting guide
 
 ---
 

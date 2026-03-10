@@ -36,7 +36,7 @@ acceptance_criteria:
     and LMS connects without authentication errors.
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: MySQL Authentication Verification
     justification: Requires running MySQL 8 pod in GKE; kubectl exec to verify flag;
       cannot run against live cluster in CI
@@ -47,7 +47,7 @@ acceptance_criteria:
     in the running pod, then `ALLOWED_HOSTS` contains all three domains.
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Multi-Site Domain Verification
     justification: Requires running LMS pod with kubectl exec; cannot inspect runtime
       settings without live cluster access

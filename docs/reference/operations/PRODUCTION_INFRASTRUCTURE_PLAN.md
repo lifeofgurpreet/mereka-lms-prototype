@@ -75,13 +75,13 @@ See `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md` for the full, step-by-step flow.
 - Monthly automation: `.github/workflows/dr-evidence-bundle.yml`
 
 References:
-- `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`
+- `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`
 - `docs/ops/runbooks/DISASTER_RECOVERY.md`
 - `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md`
 
 ## References
 
-- `docs/runbooks/operations/DOMAIN_CHANGE_RUNBOOK.md`
-- `docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
+- `docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md`
+- `docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`
 - `docs/guides/admin/K8S_OPERATIONS_GUIDE.md`
 - `docs/ops/runbooks/DISASTER_RECOVERY.md`

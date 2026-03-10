@@ -40,7 +40,7 @@ echo "fixture"
 EOF
   chmod +x "$tmpdir/scripts/qa/verify-post-deploy-gate.sh"
 
-  cat >"$tmpdir/docs/runbooks/operations/POST_DEPLOY_GATE.md" <<'EOF'
+  cat >"$tmpdir/docs/ops/runbooks/POST_DEPLOY_GATE.md" <<'EOF'
 # Post Deploy Gate
 EOF
 }

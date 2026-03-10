@@ -7,4 +7,4 @@ This document has moved to:
 - `../../runbooks/operations/ENTERPRISE_SSO_GUIDE.md`
 
 Reason:
-- Enterprise onboarding and operator execution guides now live under `docs/runbooks/operations/`.
+- Enterprise onboarding and operator execution guides now live under `docs/ops/runbooks/`.

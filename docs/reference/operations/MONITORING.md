@@ -6,7 +6,7 @@ This checklist focuses on the production **GKE Autopilot** cluster that runs the
 Reality-first (as of 2026-02-06):
 - **MySQL** and **Redis** are **in-cluster** and PVC-backed (`kubectl get pvc -n mereka-lms`).
 - Some older docs/templates reference **Cloud SQL** / **Memorystore**; treat those as **legacy** unless explicitly reintroduced.
-- Backups are driven by **Velero** (see `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`).
+- Backups are driven by **Velero** (see `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`).
 
 ## Canonical Observability Commands
 
@@ -249,10 +249,10 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 - Sentry wiring contract: `./scripts/qa/verify-sentry-wiring.sh --mode local`
   (runtime enforcement: `STRICT_RUNTIME=1 ./scripts/qa/verify-sentry-wiring.sh --mode runtime`).
 - Canonical logging + Sentry runbook: `docs/reference/operations/LOGGING_AND_SENTRY.md`.
-- Fast operator flow: `docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md`.
+- Fast operator flow: `docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md`.
 - Ownership model: `docs/policies/operations/OBSERVABILITY_OWNERSHIP.md`.
 - Severity policy: `docs/reference/operations/ALERT_SEVERITY_MATRIX.md`.
-- On-call runbook: `docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md`.
+- On-call runbook: `docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md`.
 
 ## Operational Runbook Tips
 

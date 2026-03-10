@@ -1,9 +1,0 @@
-# RKE2 Dev Readiness Runbook
-
-_Status: superseded_  
-_Superseded by: docs/ops/runbooks/RKE2_DEV_READINESS.md_
-
-This path is transitional only. The live document is now maintained at:
-- docs/ops/runbooks/RKE2_DEV_READINESS.md
-
-Do not add new substantive content here.

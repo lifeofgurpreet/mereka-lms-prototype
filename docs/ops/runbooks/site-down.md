@@ -592,7 +592,7 @@ print('DOC_STORE_DB', cfg.get('db'));"
 3. Verify CMS logs after restart.
 
 **Fix (if `CourseOverview` is 0)**
-See `docs/runbooks/operations/COURSE_DATA_RECOVERY.md` (this is usually import/restore work, not an auth issue).
+See `docs/ops/runbooks/COURSE_DATA_RECOVERY.md` (this is usually import/restore work, not an auth issue).
 
 **See Also**: [Database Issues Runbook](database-issues.md) - MongoDB Atlas connectivity and permissions
 

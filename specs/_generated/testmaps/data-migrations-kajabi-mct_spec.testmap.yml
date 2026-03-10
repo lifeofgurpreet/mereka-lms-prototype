@@ -451,7 +451,7 @@ acceptance_criteria:
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service and valid HMAC signature computation
 - id: AC-041
@@ -463,7 +463,7 @@ acceptance_criteria:
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with crafted invalid signature
 - id: AC-042
@@ -475,7 +475,7 @@ acceptance_criteria:
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with crafted payload
 - id: AC-043
@@ -488,7 +488,7 @@ acceptance_criteria:
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with non-standard event type
 - id: AC-044
@@ -500,7 +500,7 @@ acceptance_criteria:
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service without secret env var
 

@@ -45,7 +45,7 @@
 | Contrast pairs documented | ✅ PASS | All brand color pairs documented |
 | WCAG 2.1 AA compliance (4.5:1 normal text) | ✅ PASS | Verified for all primary brand colors |
 | WCAG 2.1 AA compliance (3:1 large text) | ✅ PASS | |
-| Focus visibility requirements doc | ✅ PASS | `docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md` has Focus Visibility section |
+| Focus visibility requirements doc | ✅ PASS | `docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md` has Focus Visibility section |
 | Exception process documented | ✅ PASS | |
 | WARN items (3) | ⚠️ WARN | Q2 2026 timeline — not blocking; documented exceptions |
 

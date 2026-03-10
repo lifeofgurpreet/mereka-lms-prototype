@@ -161,6 +161,6 @@ The `tutor_env/` directory is gitignored. Docker images are cached locally:
 - Architecture: `docs/reference/architecture/DEPLOYMENT_CONTRACT.md` — interface contract between app repo and GitOps repo
 - Script: `scripts/infra/canonical-release.sh`
 - Script: `scripts/infra/release-openedx-gitops.sh`
-- Runbook: `docs/runbooks/operations/RELEASE_EXECUTE_RUNBOOK.md`
-- Runbook: `docs/runbooks/operations/DEPLOY_EVIDENCE_GATES.md`
+- Runbook: `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md`
+- Runbook: `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md`
 - Handoff: `reports/2026/closures/RKE2_LMS_HANDOFF.md`

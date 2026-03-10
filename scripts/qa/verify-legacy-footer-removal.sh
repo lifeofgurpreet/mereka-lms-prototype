@@ -11,7 +11,7 @@
 #            via PLUGIN_SLOTS (no fallback flag — slot is the only path).
 # AC-UI-403: MFE config (authn, dashboard, learning) env.config.jsx coverage exists
 #            via slot mechanism in the plugin.
-# AC-UI-404: docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md exists and contains rollback steps.
+# AC-UI-404: docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md exists and contains rollback steps.
 # AC-UI-405: Before/after diff evidence file exists.
 #
 # Usage:
@@ -30,7 +30,7 @@ PATCHES_FILE="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN_FILE="$PLUGIN_MAIN"
-OPS_DOC="$REPO_ROOT/docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md"
+OPS_DOC="$REPO_ROOT/docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md"
 EVIDENCE_FILE="$REPO_ROOT/docs/evidence/operations/footer-migration-diff.md"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
@@ -252,9 +252,9 @@ echo ""
 echo "--- AC-UI-404: Rollback Documentation ---"
 
 if [[ ! -f "$OPS_DOC" ]]; then
-  fail "AC-UI-404: docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md not found"
+  fail "AC-UI-404: docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md not found"
 else
-  pass "AC-UI-404: docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md exists"
+  pass "AC-UI-404: docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md exists"
 
   # Check for rollback section
   if grep -qi 'rollback' "$OPS_DOC"; then
@@ -366,7 +366,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "             in infrastructure/tutor/apply-patches.sh"
   echo "  AC-UI-402: Ensure footer_slot PLUGIN_SLOTS.add_item is present in plugin contract sources"
   echo "  AC-UI-403: Ensure mfe-env-config patch and frontend-plugin-framework are in plugin contract sources"
-  echo "  AC-UI-404: Create docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md with rollback steps"
+  echo "  AC-UI-404: Create docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md with rollback steps"
   echo "  AC-UI-405: Create docs/evidence/operations/footer-migration-diff.md with before/after diff"
   exit 1
 fi

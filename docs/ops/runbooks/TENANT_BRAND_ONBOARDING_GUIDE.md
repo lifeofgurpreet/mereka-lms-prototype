@@ -227,7 +227,7 @@ Run the full verification suite for the new tenant:
 1. Check `CSRF_TRUSTED_ORIGINS` includes the new domain
 2. Check `ALLOWED_HOSTS` includes the new domain
 3. Check `SESSION_COOKIE_SAMESITE = "None"` in LMS settings
-4. See `docs/runbooks/operations/FRONTEND_REGRESSION_CHECKLIST.md` for full triage
+4. See `docs/ops/runbooks/FRONTEND_REGRESSION_CHECKLIST.md` for full triage
 
 ### Domain not reachable
 
@@ -254,7 +254,7 @@ Run the full verification suite for the new tenant:
 
 ## Related Documents
 
-- `docs/runbooks/operations/TENANT_ONBOARDING_PLAYBOOK.md` — Full tenant provisioning flow
+- `docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md` — Full tenant provisioning flow
 - `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — Plugin slot inventory
 - `docs/policies/architecture/footer-slot-exceptions.md` — Footer exception register
 - `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` — Override inventory

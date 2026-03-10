@@ -61,7 +61,7 @@ Located in `/home/gurpreet/projects/k8s/mereka-lms/deploy/k8s/base/logging/`:
    - Debugging procedures
    - Performance monitoring
 
-3. **docs/runbooks/operations/GKE_LOKI_FORWARDING.md**
+3. **docs/ops/runbooks/GKE_LOKI_FORWARDING.md**
    - Full architecture decision record
    - Security considerations
    - Monitoring and alerting
@@ -209,7 +209,7 @@ A  deploy/k8s/base/logging/promtail-configmap.yaml
 A  deploy/k8s/base/logging/promtail-daemonset.yaml
 A  deploy/k8s/base/logging/promtail-rbac.yaml
 A  deploy/k8s/base/logging/promtail-service.yaml
-A  docs/runbooks/operations/GKE_LOKI_FORWARDING.md
+A  docs/ops/runbooks/GKE_LOKI_FORWARDING.md
 ```
 
 ## Next Steps
@@ -226,7 +226,7 @@ A  docs/runbooks/operations/GKE_LOKI_FORWARDING.md
 
 - **Deployment**: `deploy/k8s/base/logging/README.md`
 - **Testing**: `deploy/k8s/base/logging/TESTING.md`
-- **Operations**: `docs/runbooks/operations/GKE_LOKI_FORWARDING.md`
+- **Operations**: `docs/ops/runbooks/GKE_LOKI_FORWARDING.md`
 
 ## Rollback
 

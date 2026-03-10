@@ -242,7 +242,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "== Section 8: WIF documentation =="
 
-WIF_DOC="docs/runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md"
+WIF_DOC="docs/ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md"
 
 if [[ -f "$WIF_DOC" ]]; then
   pass "WIF migration guide exists: ${WIF_DOC}"
@@ -272,7 +272,7 @@ if [[ "$FAILED" -gt 0 ]]; then
 elif [[ "$WARNED" -gt 0 ]]; then
   echo -e "${YELLOW}WIF readiness check complete with warnings.${NC}"
   echo "  Review warning details above and resolve any remaining gaps."
-  echo "  See docs/runbooks/operations/WORKLOAD_IDENTITY_FEDERATION.md for steps."
+  echo "  See docs/ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md for steps."
   echo ""
   exit 0
 else

@@ -332,7 +332,7 @@ Use the branding screenshot script:
 2. **Test Locally**: `tutor local restart ecommerce`
 3. **Capture Screenshots**: `./scripts/qa/capture-branding-screenshots.sh --target ecommerce`
 4. **Build Image**: `tutor images build ecommerce`
-5. **Deploy**: Follow `docs/runbooks/operations/THEME_DEPLOYMENT.md`
+5. **Deploy**: Follow `docs/ops/runbooks/THEME_DEPLOYMENT.md`
 
 ## Verification
 
@@ -349,6 +349,6 @@ kubectl exec -it -n mereka-lms deploy/ecommerce -- ls -la /openedx/ecommerce/tem
 
 ## Related Documentation
 
-- `docs/runbooks/operations/THEME_DEPLOYMENT.md` - Full deployment guide
+- `docs/ops/runbooks/THEME_DEPLOYMENT.md` - Full deployment guide
 - `docs/guides/branding/BRANDING.md` - Branding system overview
 - `infrastructure/tutor/themes/mereka/` - Design tokens and assets

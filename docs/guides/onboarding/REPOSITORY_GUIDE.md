@@ -424,7 +424,7 @@ Quick reference for frequently accessed files:
 
 ### Documentation
 - Quick start: `docs/guides/onboarding/QUICK_START_LOCAL.md`
-- Troubleshooting: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- Troubleshooting: `docs/ops/runbooks/TROUBLESHOOTING.md`
 - Service URLs: `docs/ops/quickref/access-urls.md`
 - Doc index: `docs/README.md`
 
@@ -454,7 +454,7 @@ Quick reference for frequently accessed files:
 | Update branding | `infrastructure/tutor/themes/mereka/` + `scripts/branding/` |
 | Verify a spec | `scripts/qa/verify-*.sh` matching the spec name |
 | Find URLs | `docs/ops/quickref/access-urls.md` |
-| Troubleshoot outage | `docs/runbooks/operations/TROUBLESHOOTING.md` |
+| Troubleshoot outage | `docs/ops/runbooks/TROUBLESHOOTING.md` |
 | Add a secret | `deploy/k8s/base/secrets/external-secrets.yaml` |
 | Add monitoring | `infrastructure/monitoring/` |
 | Write an ADR | `docs/adr/NNN-<slug>.md` (next number) |

@@ -55,7 +55,7 @@ This is a **non-invasive fix** that:
 3. **Testing** (`scripts/qa/test-mfe-oauth-fix.sh`)
    - Automated test script to verify fix works
 
-4. **Documentation** (`docs/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md`)
+4. **Documentation** (`docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md`)
    - Complete deployment guide
    - Troubleshooting steps
    - Rollback instructions
@@ -208,7 +208,7 @@ If issues occur:
 ## Contact
 
 For questions or issues:
-- Check deployment guide: `docs/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md`
+- Check deployment guide: `docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md`
 - Check app README: `infrastructure/tutor/custom-apps/mfe_oauth_fix/README.md`
 - Review logs: `kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms`
 

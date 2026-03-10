@@ -52,4 +52,4 @@ authorization: bearer eyJ...
 ## Related
 
 - `docs/meta/templates/EVIDENCE_SCHEMA.md`
-- `docs/runbooks/operations/DEPLOY_EVIDENCE_GATES.md`
+- `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md`

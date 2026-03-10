@@ -473,7 +473,7 @@ if [[ $FAIL -gt 0 ]]; then
   echo "  kubectl describe deployment $DEPLOYMENT_NAME -n $NAMESPACE"
   echo "  kubectl logs -n $NAMESPACE deploy/$DEPLOYMENT_NAME --tail=50"
   echo "  kubectl get externalsecret payments-gateway-secrets -n $NAMESPACE -o yaml"
-  echo "  See docs/runbooks/operations/PURCHASE_GATEWAY_K8S.md"
+  echo "  See docs/ops/runbooks/PURCHASE_GATEWAY_K8S.md"
   echo ""
   exit 1
 fi

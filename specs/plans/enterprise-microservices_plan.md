@@ -385,7 +385,7 @@ Before starting any task in this plan:
   - SAML troubleshooting
   - **Done**: Runbook exists with all sections
 
-- [ ] **[M] Task 5.13**: Update main TROUBLESHOOTING.md (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: All phases
+- [ ] **[M] Task 5.13**: Update main TROUBLESHOOTING.md (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: All phases
   - Add enterprise services section with common issues and fixes
   - **Done**: Enterprise section exists in troubleshooting guide
 

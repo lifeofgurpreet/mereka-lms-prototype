@@ -19,10 +19,10 @@ This document is the single authoritative reference for the UI/UX hardening lane
 - Exception register for intentional cosmetic deviations with rollback safety markers
 
 Related documents:
-- `docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md` — visual smoke baseline per environment
-- `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md` — visual regression runbook
+- `docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md` — visual smoke baseline per environment
+- `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md` — visual regression runbook
 - `docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md` — checkpoint matrix (5 routes × 3 domains)
-- `docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md` — contrast and focus-visible gate details
+- `docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md` — contrast and focus-visible gate details
 - `docs/policies/architecture/PERFORMANCE_BUDGETS.md` — full Web Vitals + cache-control policy
 
 ---
@@ -395,10 +395,10 @@ UI_HARDENING_LIVE=1 UI_HARDENING_DOMAIN=academyv2.mereka.io \
 
 | Document | Purpose |
 |----------|---------|
-| `docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md` | Per-environment visual smoke baseline |
-| `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md` | Visual regression investigation runbook |
+| `docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md` | Per-environment visual smoke baseline |
+| `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md` | Visual regression investigation runbook |
 | `docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md` | 5-route × 3-domain checkpoint matrix |
-| `docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md` | Contrast gate WCAG AA thresholds |
-| `docs/runbooks/operations/A11Y_TENANT_BRANDING_GATE.md` | Tenant a11y gate |
+| `docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md` | Contrast gate WCAG AA thresholds |
+| `docs/ops/runbooks/A11Y_TENANT_BRANDING_GATE.md` | Tenant a11y gate |
 | `docs/policies/architecture/PERFORMANCE_BUDGETS.md` | Web Vitals thresholds, cache-control policy |
-| `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md` | Branding release checklist |
+| `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` | Branding release checklist |

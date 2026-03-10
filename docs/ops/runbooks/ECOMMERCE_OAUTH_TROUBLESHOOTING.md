@@ -34,7 +34,7 @@ print([(a.name,a.client_id,a.redirect_uris) for a in Application.objects.filter(
 ```
 
 If the `manage.py` checks fail with MySQL `1045 Access denied`, see
-`docs/runbooks/operations/TROUBLESHOOTING.md` (Issue 4d). The most common cause is a
+`docs/ops/runbooks/TROUBLESHOOTING.md` (Issue 4d). The most common cause is a
 trailing newline in `OPENEDX_MYSQL_PASSWORD` from the secret store.
 
 ## ✅ OAuth Scopes (ApplicationAccess)
@@ -176,7 +176,7 @@ Webhook can remain unset until you configure Stripe webhooks, but **real payment
 flows will not be reliable without webhooks**.
 
 For a full setup guide, see:
-- `docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md`
+- `docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md`
 
 If the logs show OAuth client errors, re-check client IDs, secrets, and redirect URIs.
 

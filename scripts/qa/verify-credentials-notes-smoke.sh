@@ -454,7 +454,7 @@ if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "  - Caddy routing missing for credentials/notes subdomain"
   echo "  - MySQL migrations not run on first deploy (run python manage.py migrate)"
   echo ""
-  echo "See docs/runbooks/operations/TROUBLESHOOTING.md for K8s pod and endpoint diagnostics."
+  echo "See docs/ops/runbooks/TROUBLESHOOTING.md for K8s pod and endpoint diagnostics."
   exit 1
 fi
 

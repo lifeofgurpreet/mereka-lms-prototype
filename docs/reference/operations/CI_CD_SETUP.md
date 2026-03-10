@@ -175,7 +175,7 @@ This generates and uploads an artifact bundle containing:
 - release metadata JSON (run id, SHA, actor, tags, target env)
 
 For full operator flow, see:
-- `docs/runbooks/operations/RELEASE_CHECKLIST.md`
+- `docs/ops/runbooks/RELEASE_CHECKLIST.md`
 
 Digest strictness:
 - Release invocations now support `--require-digests`.

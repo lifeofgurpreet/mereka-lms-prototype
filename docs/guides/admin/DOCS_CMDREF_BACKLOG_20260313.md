@@ -47,7 +47,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/reference/migrations/kajabi/OPS_KAJABI_README.md | 6 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/mct/MIGRATION_PLAN.md | 6 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 6 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/MOBILE_DEPLOYMENT.md | 6 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 6 | Operations Lead | fix inline path references and missing commands |
 | docs/concepts/analytics/OPENEDX_ANALYTICS.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | reports/2025/closures/MONGODB_ATLAS_MIGRATION.md | 5 | Platform Architecture | fix inline path references and missing commands |
@@ -55,14 +55,14 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/runbooks/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 5 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/TENANT_PROVISIONING.md | 5 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 5 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/TENANT_PROVISIONING.md | 5 | Operations Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/scaling.md | 5 | Ops Platform Owner | fix inline path references and missing commands |
 | do../../reports/2026/audits/FRONTEND_AUDIT_CHECKLIST.md | 5 | Docs QA | fix inline path references and missing commands |
 | docs/policies/architecture/ANALYTICS_DECISION_GATE.md | 4 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md | 4 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/branding/TENANT_BRANDING_CONTRACT.md | 4 | Docs Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md | 4 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 4 | Operations Lead | fix inline path references and missing commands |
 | docs/status/readiness/CREDENTIALS_READINESS.md | 4 | Operations Lead | fix inline path references and missing commands |
 | docs/adr/016-android-app-support-decision.md | 3 | ADR / Architecture Owner | fix inline path references and missing commands |
 | docs/concepts/analytics/ASPECTS_ACCESS.md | 3 | Platform Architecture | fix inline path references and missing commands |
@@ -74,9 +74,9 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_221_PACKET.md | 3 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/branding/TENANT_CONFIG_HANDOFF.md | 3 | Docs Lead | fix inline path references and missing commands |
 | docs/status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md | 3 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md | 3 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md | 3 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md | 3 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md | 3 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md | 3 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md | 3 | Operations Lead | fix inline path references and missing commands |
 | reports/2026/closures/POSTMERGE_GOVERNANCE_CLOSURE.md | 3 | Operations Lead | fix inline path references and missing commands |
 | docs/status/readiness/PROCTORING_IMPLEMENTATION_READINESS.md | 3 | Operations Lead | fix inline path references and missing commands |
 | docs/ops/quickref/verification-scripts.md | 3 | Ops Platform Owner | fix inline path references and missing commands |
@@ -92,15 +92,15 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/guides/admin/MULTI_SITE_GUIDE.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/admin/OBSERVABILITY_GUIDE.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/standards/DOCUMENTATION_STANDARDS.md | 2 | Docs Lead | fix inline path references and missing commands |
-| docs/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md | 2 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/ECOMMERCE_THEMING.md | 2 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/FORUM_AUTH_E2E.md | 2 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/FORUM_AUTH_E2E.md | 2 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/FORUM_MEILISEARCH.md | 2 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/GDPR_COMPLIANCE.md | 2 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md | 2 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/GDPR_COMPLIANCE.md | 2 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md | 2 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md | 2 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md | 2 | Operations Lead | fix inline path references and missing commands |
 | docs/status/active/blocked-epics.md | 2 | Operations Lead | fix inline path references and missing commands |
@@ -112,7 +112,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/concepts/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md | 1 | Platform Architecture | fix inline path references and missing commands |
 | docs/reference/architecture/ASPECTS_DEPLOYMENT_READINESS.md | 1 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_216_PACKET.md | 1 | Platform Architecture | fix inline path references and missing commands |
-| docs/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md | 1 | Platform Architecture | fix inline path references and missing commands |
+| docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md | 1 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/INDEX_BY_AUDIENCE.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md | 1 | Docs Lead | fix inline path references and missing commands |
@@ -120,33 +120,33 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/guides/onboarding/TEAM_SCALING_GUIDE.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/mct/EXPORT_COMPLETE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/mct/EXPORT_SUMMARY.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/runbooks/operations/A11Y_TENANT_BRANDING_GATE.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/A11Y_TENANT_BRANDING_GATE.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md | 1 | Operations Lead | fix inline path references and missing commands |
 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/policies/operations/DATA_RETENTION_POLICY.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/DOMAIN_MANAGEMENT.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/DOMAIN_MANAGEMENT.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/FOOTER_VARIANT_MATRIX.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md | 1 | Operations Lead | fix inline path references and missing commands |
 | reports/2026/closures/LOGO-404-EMERGENCY-FIX.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/MOBILE_OAUTH_PROVISIONING.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/MONGODB_DEV_SEED.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/MONGODB_DEV_SEED.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/policies/operations/MULTISITE_GOVERNANCE.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/policies/operations/OBSERVABILITY_GA_READINESS_GATE.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/status/readiness/PROCTORING_VENDOR_READINESS.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/RELEASE_EVIDENCE.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/ROUTE_MATRIX.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/policies/operations/SLO_POLICY.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/TENANT_BRANDING_MATRIX.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/TENANT_BRANDING_TROUBLESHOOTING.md | 1 | Operations Lead | fix inline path references and missing commands |
-| docs/runbooks/operations/TENANT_FOOTER_VARIANT_LANE.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md | 1 | Operations Lead | fix inline path references and missing commands |
+| docs/ops/runbooks/TENANT_FOOTER_VARIANT_LANE.md | 1 | Operations Lead | fix inline path references and missing commands |
 | reports/2026/audits/UI_UX_AUDIT_REPORT.md | 1 | Operations Lead | fix inline path references and missing commands |
 | docs/reference/operations/CI_CD_SETUP.md | 1 | Ops Platform Owner | fix inline path references and missing commands |
 
@@ -269,9 +269,9 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 99 | scripts/infra/decommission-legacy-ecommerce.sh |
 | docs/concepts/architecture/PROCTORING_INTEGRATION.md | 197 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
 | docs/concepts/architecture/PROCTORING_INTEGRATION.md | 217 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
-| docs/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md | 483 | deploy/k8s/base/plugins/aspects/backup-cronjob.yml |
+| docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md | 483 | deploy/k8s/base/plugins/aspects/backup-cronjob.yml |
 | docs/guides/INDEX_BY_AUDIENCE.md | 389 | scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh |
-| docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md | 547 | docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md |
+| docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md | 547 | docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md |
 | docs/guides/admin/MULTI_SITE_GUIDE.md | 175 | deploy/k8s/overlays/production/ingress-openedx-lms.yaml |
 | docs/guides/admin/MULTI_SITE_GUIDE.md | 446 | deploy/k8s/overlays/production/ingress-openedx-lms.yaml |
 | docs/guides/admin/OBSERVABILITY_GUIDE.md | 136 | deploy/k8s/base/monitoring/prometheusrule-services.yaml |
@@ -305,8 +305,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 265 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
 | docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 277 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md |
 | docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 66 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
-| docs/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 139 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
-| docs/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 82 | scripts/migrations/kajabi/openedx_bulk_import.py |
+| docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 139 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
+| docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 82 | scripts/migrations/kajabi/openedx_bulk_import.py |
 | docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 172 | scripts/migrations/kajabi/prepare_openedx_imports.py |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 13 | scripts/migrations/kajabi/transform_data.py |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 17 | scripts/migrations/kajabi/build_course_packages.py |
@@ -380,8 +380,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 150 | services/kajabi-webhook/ |
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 51 | scripts/migrations/kajabi/output/ |
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 88 | services/kajabi-webhook/ |
-| docs/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md | 175 | scripts/migrations/kajabi/output/course_structure.json |
-| docs/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md | 299 | scripts/migrations/kajabi/logs/ |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md | 175 | scripts/migrations/kajabi/output/course_structure.json |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md | 299 | scripts/migrations/kajabi/logs/ |
 | docs/status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md | 197 | scripts/migrations/kajabi/rollback-openedx-imports.py |
 | docs/status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md | 73 | scripts/migrations/kajabi/rollback-openedx-imports.py |
 | docs/status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md | 80 | scripts/migrations/kajabi/rollback-openedx-imports.py |
@@ -396,9 +396,9 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 133 | scripts/migrations/kajabi/rollback-openedx-imports.py |
 | docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 219 | scripts/migrations/kajabi/rollback-openedx-imports.py |
 | docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 96 | scripts/migrations/kajabi/rollback-openedx-imports.py |
-| docs/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 118 | scripts/migrations/kajabi/output/verification/summary.txt |
-| docs/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 133 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
-| docs/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 86 | scripts/migrations/kajabi/output/verification_current/summary.txt |
+| docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 118 | scripts/migrations/kajabi/output/verification/summary.txt |
+| docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 133 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
+| docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 86 | scripts/migrations/kajabi/output/verification_current/summary.txt |
 | docs/migrations/mct/EXPORT_COMPLETE.md | 215 | scripts/migrations/mct/transform_data.py |
 | docs/migrations/mct/EXPORT_SUMMARY.md | 128 | scripts/migrations/mct/transform_data.py |
 | docs/migrations/mct/MIGRATION_PLAN.md | 197 | scripts/migrations/mct/transform_data.py |
@@ -415,18 +415,18 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/migrations/mct/OPS_MCT_README.md | 70 | scripts/migrations/mct/prepare_openedx_imports.py |
 | docs/migrations/mct/OPS_MCT_README.md | 77 | docs/migrations/mct/MIGRATION_PLAN.md |
 | docs/migrations/mct/OPS_MCT_README.md | 84 | scripts/migrations/mct/openedx_bulk_import_mct.py |
-| docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md | 111 | docs/policies/operations/A11Y_EXCEPTIONS.md |
-| docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md | 134 | docs/policies/operations/A11Y_EXCEPTIONS.md |
-| docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md | 174 | docs/policies/operations/A11Y_EXCEPTIONS.md |
-| docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md | 175 | scripts/qa/verify-accessibility.sh |
-| docs/runbooks/operations/A11Y_TENANT_BRANDING_GATE.md | 256 | docs/policies/operations/A11Y_EXCEPTIONS.md |
-| docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md | 179 | assets/branding/tenants/biji-biji/ |
-| docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md | 225 | deploy/k8s/overlays/rke2-nonprod/ingress-aspects-superset.yaml |
-| docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md | 256 | deploy/k8s/overlays/rke2-nonprod/ingress-aspects-superset.yaml |
-| docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md | 464 | deploy/k8s/overlays/production/ingress-aspects-superset.yaml |
-| docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md | 127 | docs/archive/evidence/operations/authenticated-smoke-a11y-report.md |
-| docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md | 135 | docs/archive/evidence/operations/authenticated-smoke-a11y-report.md |
-| docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md | 142 | docs/archive/evidence/operations/authenticated-smoke-a11y-report.md |
+| docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 111 | docs/policies/operations/A11Y_EXCEPTIONS.md |
+| docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 134 | docs/policies/operations/A11Y_EXCEPTIONS.md |
+| docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 174 | docs/policies/operations/A11Y_EXCEPTIONS.md |
+| docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 175 | scripts/qa/verify-accessibility.sh |
+| docs/ops/runbooks/A11Y_TENANT_BRANDING_GATE.md | 256 | docs/policies/operations/A11Y_EXCEPTIONS.md |
+| docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md | 179 | assets/branding/tenants/biji-biji/ |
+| docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md | 225 | deploy/k8s/overlays/rke2-nonprod/ingress-aspects-superset.yaml |
+| docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md | 256 | deploy/k8s/overlays/rke2-nonprod/ingress-aspects-superset.yaml |
+| docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md | 464 | deploy/k8s/overlays/production/ingress-aspects-superset.yaml |
+| docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md | 127 | docs/archive/evidence/operations/authenticated-smoke-a11y-report.md |
+| docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md | 135 | docs/archive/evidence/operations/authenticated-smoke-a11y-report.md |
+| docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md | 142 | docs/archive/evidence/operations/authenticated-smoke-a11y-report.md |
 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md | 115 | deploy/k8s/patches/argocd-configmap-ignore.yaml |
 | docs/status/readiness/CREDENTIALS_READINESS.md | 312 | deploy/k8s/base/apps/lms/deployment.yaml |
 | docs/status/readiness/CREDENTIALS_READINESS.md | 313 | deploy/k8s/base/services.yml |
@@ -435,16 +435,16 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/policies/operations/DATA_RETENTION_POLICY.md | 246 | docs/policies/operations/DATA_RETENTION_POLICY.md |
 | docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md | 349 | docs/concepts/architecture/MULTI_TENANCY.md |
 | docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md | 350 | scripts/tenants/PROVISIONING.md |
-| docs/runbooks/operations/DOMAIN_MANAGEMENT.md | 22 | docs/runbooks/operations/DOMAIN_MANAGEMENT.md |
-| docs/runbooks/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md | 100 | deploy/k8s/base/apps/purchase-gateway/deployment.yaml |
+| docs/ops/runbooks/DOMAIN_MANAGEMENT.md | 22 | docs/ops/runbooks/DOMAIN_MANAGEMENT.md |
+| docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md | 100 | deploy/k8s/base/apps/purchase-gateway/deployment.yaml |
 | docs/reference/operations/ECOMMERCE_THEMING.md | 26 | infrastructure/tutor/branding/design-tokens.yml |
 | docs/reference/operations/ECOMMERCE_THEMING.md | 354 | infrastructure/tutor/branding/ |
-| docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md | 137 | deploy/k8s/base/apps/lms/deployment.yaml |
-| docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md | 150 | deploy/k8s/base/apps/lms/deployment.yaml |
-| docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md | 233 | scripts/infra/decommission-legacy-ecommerce.sh |
-| docs/reference/operations/FOOTER_VARIANT_MATRIX.md | 164 | docs/runbooks/operations/DOMAIN_MANAGEMENT.md |
-| docs/runbooks/operations/FORUM_AUTH_E2E.md | 131 | scripts/infra/sync-secrets.sh |
-| docs/runbooks/operations/FORUM_AUTH_E2E.md | 187 | scripts/qa/verify-forum-integration.sh |
+| docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md | 137 | deploy/k8s/base/apps/lms/deployment.yaml |
+| docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md | 150 | deploy/k8s/base/apps/lms/deployment.yaml |
+| docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md | 233 | scripts/infra/decommission-legacy-ecommerce.sh |
+| docs/reference/operations/FOOTER_VARIANT_MATRIX.md | 164 | docs/ops/runbooks/DOMAIN_MANAGEMENT.md |
+| docs/ops/runbooks/FORUM_AUTH_E2E.md | 131 | scripts/infra/sync-secrets.sh |
+| docs/ops/runbooks/FORUM_AUTH_E2E.md | 187 | scripts/qa/verify-forum-integration.sh |
 | docs/reference/operations/FORUM_MEILISEARCH.md | 32 | deploy/k8s/base/apps/lms/deployment.yaml |
 | docs/reference/operations/FORUM_MEILISEARCH.md | 33 | deploy/k8s/base/services.yml |
 | docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 11 | .github/workflows/frontend-contracts.yml |
@@ -453,34 +453,34 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 12 | scripts/qa/verify-frontend-extended-surfaces-workflow.sh |
 | docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 36 | scripts/qa/verify-make-help-contract.sh |
 | docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 37 | scripts/qa/verify-frontend-qa-make-targets.sh |
-| docs/runbooks/operations/GDPR_COMPLIANCE.md | 421 | infrastructure/monitoring/ |
-| docs/runbooks/operations/GDPR_COMPLIANCE.md | 60 | infrastructure/tutor/mfe/ |
-| docs/runbooks/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 179 | deploy/k8s/base/secrets/hubspot-registration-secrets.yaml |
-| docs/runbooks/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 257 | deploy/k8s/base/monitoring/prometheusrule-hubspot.yaml |
-| docs/runbooks/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 331 | deploy/k8s/base/monitoring/servicemonitor-hubspot.yaml |
-| docs/runbooks/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 466 | deploy/k8s/base/monitoring/prometheusrule-mux.yaml |
-| docs/runbooks/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 88 | deploy/k8s/base/apps/hubspot-registration/ |
-| docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md | 35 | deploy/k8s/base/apps/ecommerce/ |
-| docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md | 56 | docs/archive/legacy-ecommerce/ |
-| docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md | 132 | docs/archive/evidence/operations/footer-migration-diff.md |
+| docs/ops/runbooks/GDPR_COMPLIANCE.md | 421 | infrastructure/monitoring/ |
+| docs/ops/runbooks/GDPR_COMPLIANCE.md | 60 | infrastructure/tutor/mfe/ |
+| docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 179 | deploy/k8s/base/secrets/hubspot-registration-secrets.yaml |
+| docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 257 | deploy/k8s/base/monitoring/prometheusrule-hubspot.yaml |
+| docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 331 | deploy/k8s/base/monitoring/servicemonitor-hubspot.yaml |
+| docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 466 | deploy/k8s/base/monitoring/prometheusrule-mux.yaml |
+| docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 88 | deploy/k8s/base/apps/hubspot-registration/ |
+| docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md | 35 | deploy/k8s/base/apps/ecommerce/ |
+| docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md | 56 | docs/archive/legacy-ecommerce/ |
+| docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md | 132 | docs/archive/evidence/operations/footer-migration-diff.md |
 | reports/2026/closures/LOGO-404-EMERGENCY-FIX.md | 157 | deploy/k8s/base/apps/lms/deployment.yaml |
 | docs/reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md | 183 | docs/adr/014-mfe-plugin-slot-first.md |
 | docs/reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md | 312 | docs/adr/014-mfe-plugin-slot-first.md |
 | docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md | 100 | docs/archive/evidence/operations/selector-to-slot-migration-diff.md |
-| docs/runbooks/operations/MOBILE_DEPLOYMENT.md | 202 | deploy/k8s/base/secrets/external-secrets-mobile.yaml |
-| docs/runbooks/operations/MOBILE_DEPLOYMENT.md | 380 | docs/archive/ios/MOBILE_IOS_APP_SETUP.md |
-| docs/runbooks/operations/MOBILE_DEPLOYMENT.md | 381 | docs/IOS_DEPLOYMENT_LEARNINGS.md |
-| docs/runbooks/operations/MOBILE_DEPLOYMENT.md | 382 | docs/IOS_APP_CI_SETUP.md |
-| docs/runbooks/operations/MOBILE_DEPLOYMENT.md | 383 | docs/adr/016-android-deferral.md |
-| docs/runbooks/operations/MOBILE_DEPLOYMENT.md | 6 | docs/adr/016-android-deferral.md |
-| docs/runbooks/operations/MOBILE_OAUTH_PROVISIONING.md | 275 | docs/archive/ios/MOBILE_IOS_APP_SETUP.md |
-| docs/runbooks/operations/MONGODB_DEV_SEED.md | 140 | scripts/tenants/acme-branding.json |
+| docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 202 | deploy/k8s/base/secrets/external-secrets-mobile.yaml |
+| docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 380 | docs/archive/ios/MOBILE_IOS_APP_SETUP.md |
+| docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 381 | docs/IOS_DEPLOYMENT_LEARNINGS.md |
+| docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 382 | docs/IOS_APP_CI_SETUP.md |
+| docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 383 | docs/adr/016-android-deferral.md |
+| docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 6 | docs/adr/016-android-deferral.md |
+| docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md | 275 | docs/archive/ios/MOBILE_IOS_APP_SETUP.md |
+| docs/ops/runbooks/MONGODB_DEV_SEED.md | 140 | scripts/tenants/acme-branding.json |
 | docs/policies/operations/MULTISITE_GOVERNANCE.md | 81 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md |
 | docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md | 279 | infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json |
 | docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md | 332 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md |
 | docs/policies/operations/OBSERVABILITY_GA_READINESS_GATE.md | 85 | docs/archive/evidence/operations/observability-drills/ |
-| docs/runbooks/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md | 9 | .github/workflows/observability-parity-runtime.yml |
-| docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md | 191 | docs/archive/evidence/operations/observability-drills/ |
+| docs/ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md | 9 | .github/workflows/observability-parity-runtime.yml |
+| docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md | 191 | docs/archive/evidence/operations/observability-drills/ |
 | docs/status/active/PLUGIN_SPLIT_STATUS_2026-03-02.md | 171 | scripts/qa/verify-tutor-patches-inventory.sh |
 | docs/status/active/PLUGIN_SPLIT_STATUS_2026-03-02.md | 184 | scripts/qa/verify-tutor-patches-inventory.sh |
 | docs/status/active/PLUGIN_SPLIT_STATUS_2026-03-02.md | 261 | scripts/qa/verify-postmerge-governance-closure.sh |
@@ -498,15 +498,15 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/reference/operations/RELEASE_EVIDENCE.md | 86 | scripts/infra/assemble-release-evidence.sh |
 | docs/reference/operations/ROUTE_MATRIX.md | 161 | infrastructure/tutor/plugins/mereka_lms.py |
 | docs/policies/operations/SLO_POLICY.md | 152 | deploy/k8s/base/monitoring/README.md |
-| docs/reference/operations/TENANT_BRANDING_MATRIX.md | 88 | docs/runbooks/operations/DOMAIN_MANAGEMENT.md |
+| docs/reference/operations/TENANT_BRANDING_MATRIX.md | 88 | docs/ops/runbooks/DOMAIN_MANAGEMENT.md |
 | docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md | 37 | infrastructure/tutor/plugins/multi-tenancy/middleware.py |
-| docs/runbooks/operations/TENANT_BRANDING_TROUBLESHOOTING.md | 351 | scripts/branding/sync-brand-assets.sh |
-| docs/runbooks/operations/TENANT_FOOTER_VARIANT_LANE.md | 279 | docs/runbooks/operations/DOMAIN_MANAGEMENT.md |
-| docs/runbooks/operations/TENANT_PROVISIONING.md | 173 | infrastructure/tutor/themes/mereka/tenants/acme-corp/branding.json |
-| docs/runbooks/operations/TENANT_PROVISIONING.md | 206 | infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo.png |
-| docs/runbooks/operations/TENANT_PROVISIONING.md | 212 | infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo-square.png |
-| docs/runbooks/operations/TENANT_PROVISIONING.md | 215 | infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo-white.png |
-| docs/runbooks/operations/TENANT_PROVISIONING.md | 581 | scripts/branding/sync-brand-assets.sh |
+| docs/ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md | 351 | scripts/branding/sync-brand-assets.sh |
+| docs/ops/runbooks/TENANT_FOOTER_VARIANT_LANE.md | 279 | docs/ops/runbooks/DOMAIN_MANAGEMENT.md |
+| docs/ops/runbooks/TENANT_PROVISIONING.md | 173 | infrastructure/tutor/themes/mereka/tenants/acme-corp/branding.json |
+| docs/ops/runbooks/TENANT_PROVISIONING.md | 206 | infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo.png |
+| docs/ops/runbooks/TENANT_PROVISIONING.md | 212 | infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo-square.png |
+| docs/ops/runbooks/TENANT_PROVISIONING.md | 215 | infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo-white.png |
+| docs/ops/runbooks/TENANT_PROVISIONING.md | 581 | scripts/branding/sync-brand-assets.sh |
 | reports/2026/audits/UI_UX_AUDIT_REPORT.md | 332 | scripts/branding/sync-brand-assets.sh |
 | docs/status/active/blocked-epics.md | 70 | docs/archive/evidence/operations/1bdm1-mux-creds-mapping-cleanup.md |
 | docs/status/active/blocked-epics.md | 95 | docs/archive/evidence/operations/1bdm1-mux-creds-mapping-cleanup.md |

@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md`
+Canonical document: `docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md`

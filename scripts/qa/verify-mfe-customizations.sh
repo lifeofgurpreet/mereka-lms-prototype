@@ -212,7 +212,7 @@ echo ""
 
 if [[ "$FAIL" -gt 0 ]]; then
   echo "  RESULT: FAIL — run ./infrastructure/tutor/apply-patches.sh to re-apply patches"
-  echo "  See docs/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md for full maintenance guide."
+  echo "  See docs/ops/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md for full maintenance guide."
   exit 1
 else
   echo "  RESULT: PASS — all MFE customizations detected"

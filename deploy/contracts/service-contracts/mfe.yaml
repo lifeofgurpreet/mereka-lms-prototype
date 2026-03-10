@@ -24,8 +24,8 @@ secret_surfaces:
   - specs/secrets-management_spec.md
 runbook_surfaces:
   - docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
-  - docs/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
-  - docs/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md
+  - docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
+  - docs/ops/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md
 evidence_surfaces:
   - docs/archive/evidence/operations/evidence/mfe-surface-inventory.md
 review_groups:

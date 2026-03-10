@@ -352,5 +352,5 @@ If a Tutor plugin hook exists → use it. `apply-patches.sh` entries should decr
 | Regression gates | `docs/guides/branding/BRANDING_GUARDRAILS.md` |
 | MFE v2 footer zone mapping | `docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md` |
 | Paragon design token alignment | `docs/guides/branding/PARAGON_TOKEN_ALIGNMENT.md` |
-| Tenant provisioning runbook | `docs/runbooks/operations/TENANT_PROVISIONING.md` |
+| Tenant provisioning runbook | `docs/ops/runbooks/TENANT_PROVISIONING.md` |
 | Post-deploy verification | `scripts/qa/post-deploy-verify.sh` |

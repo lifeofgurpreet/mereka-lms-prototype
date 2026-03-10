@@ -168,7 +168,7 @@ necessary. Key obligations:
   3. Additionally delete ClickHouse PII events: `DELETE FROM tracking.pii_events WHERE actor_account_name = '<username>'`
   4. Confirm deletion in writing within **30 days**.
 
-See also: `docs/runbooks/operations/PRIVACY_RUNBOOK.md`
+See also: `docs/ops/runbooks/PRIVACY_RUNBOOK.md`
 
 ### GDPR (where applicable)
 
@@ -192,6 +192,6 @@ If the `last_reviewed` date is older than 180 days, the verification script will
 
 - Machine-readable config: `infrastructure/tutor/analytics-retention-config.yaml`
 - Verify script: `scripts/qa/verify-analytics-retention.sh`
-- Privacy runbook: `docs/runbooks/operations/PRIVACY_RUNBOOK.md`
+- Privacy runbook: `docs/ops/runbooks/PRIVACY_RUNBOOK.md`
 - Aspects plugin: https://github.com/openedx/tutor-contrib-aspects
 - ClickHouse TTL docs: https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-ttl

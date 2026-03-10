@@ -178,4 +178,4 @@ MFE footer changes require `tutor images build mfe` + rolling restart.
 - **Tenant footer contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - **Caddy source**: `deploy/k8s/base/apps/caddy/Caddyfile`
 - **Multi-tenancy plugin**: `infrastructure/tutor/plugins/multi-tenancy/`
-- **Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- **Troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`

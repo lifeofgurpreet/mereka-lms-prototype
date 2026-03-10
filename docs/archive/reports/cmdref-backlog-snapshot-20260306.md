@@ -30,7 +30,7 @@
 | 5 | `docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md` |
 | 5 | `docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md` |
 | 5 | `docs/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md` |
-| 5 | `docs/runbooks/operations/TENANT_PROVISIONING.md` |
+| 5 | `docs/ops/runbooks/TENANT_PROVISIONING.md` |
 
 ## First-iteration cleanup targets
 
@@ -53,4 +53,4 @@
 - [ ] docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md (5)
 - [ ] docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md (5)
 - [ ] docs/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md (5)
-- [ ] docs/runbooks/operations/TENANT_PROVISIONING.md (5)
+- [ ] docs/ops/runbooks/TENANT_PROVISIONING.md (5)

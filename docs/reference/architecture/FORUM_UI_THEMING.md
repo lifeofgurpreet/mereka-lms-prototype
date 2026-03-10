@@ -326,10 +326,10 @@ $font-family-base: $mereka-font-primary;
 1. **Edit CSS**: Modify `tutor_env/plugins/forum/static/css/forum-theme.css`
 2. **Test Locally**: `tutor local restart lms`
 3. **Build Image**: `tutor images build openedx`
-4. **Deploy**: Follow `docs/runbooks/operations/THEME_DEPLOYMENT.md`
+4. **Deploy**: Follow `docs/ops/runbooks/THEME_DEPLOYMENT.md`
 
 ## Related Documentation
 
-- `docs/runbooks/operations/THEME_DEPLOYMENT.md` - Full deployment guide
-- `docs/runbooks/operations/FORUM_AUTH_E2E.md` - Forum authentication flow
+- `docs/ops/runbooks/THEME_DEPLOYMENT.md` - Full deployment guide
+- `docs/ops/runbooks/FORUM_AUTH_E2E.md` - Forum authentication flow
 - `docs/guides/branding/BRANDING.md` - Branding system overview

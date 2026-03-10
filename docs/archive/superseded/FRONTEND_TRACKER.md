@@ -13,7 +13,7 @@ Canonical frontend status and execution docs now live in:
 - `docs/FRONTEND_PHASE_C_PROMPT.md`
 - `docs/FRONTEND_PHASE_D_PROMPT.md`
 - `docs/FRONTEND_AUDIT_CHECKLIST.md`
-- `docs/runbooks/operations/FRONTEND_REGRESSION_CHECKLIST.md`
+- `docs/ops/runbooks/FRONTEND_REGRESSION_CHECKLIST.md`
 
 ## Current Focus
 

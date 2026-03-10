@@ -149,17 +149,17 @@ Before implementing, review what already exists:
 
 ### Docs
 
-- [ ] **[M]** Write domain addition/removal runbook (`docs/runbooks/operations/DOMAIN_MANAGEMENT.md`) | Depends: All build tasks
+- [ ] **[M]** Write domain addition/removal runbook (`docs/ops/runbooks/DOMAIN_MANAGEMENT.md`) | Depends: All build tasks
   - **New doc**: Step-by-step procedure for adding or removing a domain. Target: <30 minutes including verification. Include: apply-patches.sh edit, Caddy/Nginx config, SiteConfiguration creation, DNS record, verification script.
-  - **Files**: `docs/runbooks/operations/DOMAIN_MANAGEMENT.md` (new)
+  - **Files**: `docs/ops/runbooks/DOMAIN_MANAGEMENT.md` (new)
 
 - [ ] **[S]** Update `docs/reference/operations/OPENEDX_HOSTNAMES.md` with current domain inventory | Depends: None
   - **Existing doc**: Ensure it reflects all three productiondomains plus dev domains. Cross-reference with `scripts/shared/config.sh`.
   - **Files**: `docs/reference/operations/OPENEDX_HOSTNAMES.md`
 
-- [ ] **[S]** Update `docs/runbooks/operations/TROUBLESHOOTING.md` with multisite edge cases | Depends: None
+- [ ] **[S]** Update `docs/ops/runbooks/TROUBLESHOOTING.md` with multisite edge cases | Depends: None
   - **Existing doc**: Add entries for cookie domain mismatch,CSRF rejection, and reverse proxy host header issues from the spec's Edge Cases section.
-  - **Files**: `docs/runbooks/operations/TROUBLESHOOTING.md`
+  - **Files**: `docs/ops/runbooks/TROUBLESHOOTING.md`
 
 ### Rollout
 
@@ -168,8 +168,8 @@ Before implementing, review what already exists:
   - **Files**: `scripts/qa/run-multisite-governance-gates.sh`
 
 - [ ] **[S]** Document rollback procedure in domain management runbook | Depends: Docs task
-  - **Done**: Already included in the spec. Copy to `docs/runbooks/operations/DOMAIN_MANAGEMENT.md` with concrete commands.
-  - **Files**: `docs/runbooks/operations/DOMAIN_MANAGEMENT.md`
+  - **Done**: Already included in the spec. Copy to `docs/ops/runbooks/DOMAIN_MANAGEMENT.md` with concrete commands.
+  - **Files**: `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`
 
 ---
 

@@ -47,7 +47,7 @@ jobs:
             echo "./scripts/qa/verify-atlas-health.sh --live"
             echo "\`\`\`"
             echo ""
-            echo "See \`docs/runbooks/operations/ATLAS_HEALTH.md\` for full operational guidance."
+            echo "See \`docs/ops/runbooks/ATLAS_HEALTH.md\` for full operational guidance."
             echo ""
             echo "Log artifacts: \`var/ci/atlas-health.log\`"
           } >> "$GITHUB_STEP_SUMMARY"

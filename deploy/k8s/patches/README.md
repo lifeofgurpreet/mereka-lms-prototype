@@ -67,4 +67,4 @@ kubectl get pods -n mereka-lms -w
 
 - Tutor patches: `infrastructure/tutor/README.md`
 - Patch manifest: `infrastructure/tutor/patch-manifest.yml`
-- Troubleshooting: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- Troubleshooting: `docs/ops/runbooks/TROUBLESHOOTING.md`

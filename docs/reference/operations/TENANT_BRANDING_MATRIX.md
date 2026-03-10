@@ -85,7 +85,7 @@ Follow this checklist when onboarding a new branded domain:
 - [ ] **5. Configure DNS + SSL**:
   - Single-level subdomain (e.g., `academy.mereka.io`): Cloudflare proxy (orange cloud) is fine.
   - Multi-level subdomain (e.g., `x.y.mereka.io`): Use DNS-only (gray cloud) + Let's Encrypt.
-  - See `docs/runbooks/operations/DOMAIN_MANAGEMENT.md`.
+  - See `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`.
 
 - [ ] **6. Add Caddy host block if needed** (only for domains not routed via existing wildcard).
 

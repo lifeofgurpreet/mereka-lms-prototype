@@ -284,8 +284,8 @@ canonical-release.sh exits non-zero
 |------|-------------|--------|
 | `docs/status/readiness/tenant-hosting-readiness.md` | AC-OPS-201..205 | ✅ This file |
 | `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md` | AC-OPS-051..054, 061..063, 111..114 | ✅ Closed (36va.1/2/5) |
-| `docs/runbooks/operations/DEPLOY_EVIDENCE_GATES.md` | AC-OPS-301..305 | ✅ Closed (3qy2) |
-| `docs/runbooks/operations/POSTDEPLOY_SMOKE_AND_INCIDENT.md` | AC-OPS-071..073, 090..093, 131..135 | ✅ Closed (36va.3/4) |
+| `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md` | AC-OPS-301..305 | ✅ Closed (3qy2) |
+| `docs/ops/runbooks/POSTDEPLOY_SMOKE_AND_INCIDENT.md` | AC-OPS-071..073, 090..093, 131..135 | ✅ Closed (36va.3/4) |
 | `docs/status/migrations/RKE2_ROLLOUT_MATRIX.md` | AC-RKE2-006..015 | ✅ Closed (2j6g.1/2) |
 
 ### Rollout Status Summary
@@ -304,6 +304,6 @@ canonical-release.sh exits non-zero
 
 - `docs/status/migrations/RKE2_ROLLOUT_MATRIX.md` — RKE2 gate-by-gate procedure
 - `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md` — Build/tag/push flow, environment deltas
-- `docs/runbooks/operations/DEPLOY_EVIDENCE_GATES.md` — GKE parity proof commands
+- `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md` — GKE parity proof commands
 - `scripts/infra/canonical-release.sh` — Canonical release wrapper with validation
 - `deploy/k8s/overlays/production/` — GKE ingress rules per domain

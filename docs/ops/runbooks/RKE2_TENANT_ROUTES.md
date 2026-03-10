@@ -236,9 +236,9 @@ Run `./scripts/infra/fix-service-selectors.sh` to repair selector mismatches.
 ## Related Documents
 
 - **Verification script**: `scripts/qa/verify-rke2-tenant-routes.sh`
-- **LMS RKE2 validation**: `docs/runbooks/operations/LMS_RKE2_VALIDATION.md`
+- **LMS RKE2 validation**: `docs/ops/runbooks/LMS_RKE2_VALIDATION.md`
 - **Route matrix (production)**: `docs/reference/operations/ROUTE_MATRIX.md`
-- **RKE2 dev readiness**: `docs/runbooks/operations/RKE2_DEV_READINESS.md`
-- **Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- **RKE2 dev readiness**: `docs/ops/runbooks/RKE2_DEV_READINESS.md`
+- **Troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`
 - **Forum routing**: `docs/reference/operations/FORUM_MEILISEARCH.md`
 - **Ingress manifests**: `deploy/k8s/overlays/rke2-nonprod/`

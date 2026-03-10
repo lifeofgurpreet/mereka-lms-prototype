@@ -79,7 +79,7 @@ This is an infrastructure/operations spec. There is no application-level test fr
 | AC-015 | Negative: Restore fails if backup is corrupted or unavailable | manual_verification | Attempt restore from deleted backup | Live cluster |
 | AC-016 | Happy: Full namespace restore via `velero restore create --namespace-mappings` within 1 hour | manual_verification | Follow DR-003 procedure in DR doc | Live cluster; throwaway NS |
 | AC-016 | Negative: Namespace stuck in Terminating after restore (edge case EC-3) | manual_verification | Follow finalizer cleanup procedure | Live cluster |
-| AC-017 | Happy: Secret rotation completes within 1 hour following DR-006 checklist | manual_verification | Follow `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` | Infisical + GCP SM access |
+| AC-017 | Happy: Secret rotation completes within 1 hour following DR-006 checklist | manual_verification | Follow `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md` | Infisical + GCP SM access |
 | AC-017 | Negative: Secrets desync after restore (edge case EC-6) | manual_verification | Force ExternalSecrets resync after restore | Live cluster |
 | AC-018 | Happy: Full cluster rebuild within 4 hours with RPO <= 1 hour (DR-007) | manual_verification | Tabletop exercise or actual drill following DR doc | Full infrastructure access |
 | AC-018 | Negative: GCS bucket inaccessible during restore (edge case EC-7) | manual_verification | Verify fallback to Atlas + Git rebuild | Documentation review |

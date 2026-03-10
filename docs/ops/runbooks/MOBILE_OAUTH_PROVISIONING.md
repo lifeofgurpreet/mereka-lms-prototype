@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/MOBILE_OAUTH_PROVISIONING.md`
+Canonical document: `docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md`

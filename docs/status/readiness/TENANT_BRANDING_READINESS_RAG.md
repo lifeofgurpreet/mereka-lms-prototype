@@ -131,14 +131,14 @@ Already GREEN. Add any new verifiers for tenant-specific branding contracts as n
 
 | Workflow | Status | Documentation |
 |----------|--------|---------------|
-| Provision new tenant | ✅ Complete | `docs/runbooks/operations/TENANT_PROVISIONING.md` |
-| DNS configuration | ✅ Complete | `docs/runbooks/operations/TENANT_PROVISIONING.md:299-307` |
-| SSO setup | ✅ Complete | `docs/runbooks/operations/TENANT_PROVISIONING.md:325-330` |
-| Upload branding assets | 🟡 AMBER | `docs/runbooks/operations/TENANT_PROVISIONING.md:334-343` (requires image rebuild) |
-| Catalog creation | ✅ Complete | `docs/runbooks/operations/TENANT_PROVISIONING.md:347-350` |
-| Subscription plans | ✅ Complete | `docs/runbooks/operations/TENANT_PROVISIONING.md:352-357` |
-| Isolation verification | ✅ Complete | `docs/runbooks/operations/TENANT_PROVISIONING.md:360-362` |
-| Rollback/offboarding | ✅ Complete | `docs/runbooks/operations/TENANT_PROVISIONING.md:429-476` |
+| Provision new tenant | ✅ Complete | `docs/ops/runbooks/TENANT_PROVISIONING.md` |
+| DNS configuration | ✅ Complete | `docs/ops/runbooks/TENANT_PROVISIONING.md:299-307` |
+| SSO setup | ✅ Complete | `docs/ops/runbooks/TENANT_PROVISIONING.md:325-330` |
+| Upload branding assets | 🟡 AMBER | `docs/ops/runbooks/TENANT_PROVISIONING.md:334-343` (requires image rebuild) |
+| Catalog creation | ✅ Complete | `docs/ops/runbooks/TENANT_PROVISIONING.md:347-350` |
+| Subscription plans | ✅ Complete | `docs/ops/runbooks/TENANT_PROVISIONING.md:352-357` |
+| Isolation verification | ✅ Complete | `docs/ops/runbooks/TENANT_PROVISIONING.md:360-362` |
+| Rollback/offboarding | ✅ Complete | `docs/ops/runbooks/TENANT_PROVISIONING.md:429-476` |
 | Zero-downtime brand-pack update | 🔴 RED | Not documented (blocks scale) |
 
 ### Gaps
@@ -152,7 +152,7 @@ Already GREEN. Add any new verifiers for tenant-specific branding contracts as n
 1. Document zero-downtime brand-pack workflow in contract (AC-TBR-005)
 2. Clarify asset sync requirements: static assets vs. database config
 3. Test workflow: update Mereka logo → verify change propagates without downtime
-4. Add workflow to `docs/runbooks/operations/TENANT_PROVISIONING.md` or create separate runbook
+4. Add workflow to `docs/ops/runbooks/TENANT_PROVISIONING.md` or create separate runbook
 
 **Estimated effort**: 4-6 hours (test workflow + document + verify)
 
@@ -235,7 +235,7 @@ Already GREEN. Add any new verifiers for tenant-specific branding contracts as n
 ## Related Documents
 
 - **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
-- **Provisioning**: `docs/runbooks/operations/TENANT_PROVISIONING.md`
+- **Provisioning**: `docs/ops/runbooks/TENANT_PROVISIONING.md`
 - **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Branding Model**: `docs/guides/branding/BRANDING_OPERATING_MODEL.md`

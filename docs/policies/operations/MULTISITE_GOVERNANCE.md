@@ -77,5 +77,5 @@ Canonical gate:
 
 ## 7. Change Control
 
-- [ ] Use `docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md` for any domain or secret changes.
+- [ ] Use `docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md` for any domain or secret changes.
 - [ ] Log changes in `reports/2026/audits/CONFIG_REVIEW_2026-02-03.md`.

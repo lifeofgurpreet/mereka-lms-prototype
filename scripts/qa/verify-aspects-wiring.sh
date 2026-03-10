@@ -47,7 +47,7 @@ NONPROD_KUSTOMIZATION="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/kustomizati
 PROD_KUSTOMIZATION="${REPO_ROOT}/deploy/k8s/overlays/production/kustomization.yaml"
 NONPROD_PATCHES_DIR="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/patches"
 EXTERNAL_SECRETS_FILE="${REPO_ROOT}/deploy/k8s/base/secrets/external-secrets.yaml"
-WIRING_CHECKLIST="${REPO_ROOT}/docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md"
+WIRING_CHECKLIST="${REPO_ROOT}/docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md"
 SETUP_DOC="${REPO_ROOT}/docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md"
 
 # Runtime flags
@@ -419,7 +419,7 @@ echo ""
 echo -e "${BLUE}-- Section 6: Documentation --${NC}"
 
 if [[ -f "${WIRING_CHECKLIST}" ]]; then
-  do_pass "Wiring checklist exists: docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md"
+  do_pass "Wiring checklist exists: docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md"
 
   # Verify key sections are present
   for section in "Phase 1" "Phase 2" "Pre-flight" "Step 1.1" "Step 1.3" "Step 1.7" "Step 1.8" "Ralph" "Rollback"; do
@@ -430,7 +430,7 @@ if [[ -f "${WIRING_CHECKLIST}" ]]; then
     fi
   done
 else
-  do_fail "Wiring checklist missing: docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md"
+  do_fail "Wiring checklist missing: docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md"
 fi
 
 if [[ -f "${SETUP_DOC}" ]]; then
@@ -454,7 +454,7 @@ if [[ "${FAIL}" -gt 0 ]]; then
   echo ""
   echo "Next steps:"
   echo "  1. Review FAIL items above"
-  echo "  2. Follow docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md step by step"
+  echo "  2. Follow docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md step by step"
   echo "  3. Re-run this script after each step to verify progress"
   echo "  4. Section 4/5 checks SKIP when cluster is unavailable (offline/CI) — run on-cluster to verify"
   exit 1
@@ -468,7 +468,7 @@ else
   if [[ "${ASPECTS_WIRED}" != "1" ]]; then
     echo ""
     echo "Aspects is NOT yet wired. Prerequisites checked above are not yet complete."
-    echo "Follow docs/runbooks/operations/ASPECTS_WIRING_CHECKLIST.md to wire Aspects into dev."
+    echo "Follow docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md to wire Aspects into dev."
   fi
   exit 0
 fi

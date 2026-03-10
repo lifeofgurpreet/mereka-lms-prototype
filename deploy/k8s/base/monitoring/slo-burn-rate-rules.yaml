@@ -1061,7 +1061,7 @@ spec:
               at {{ $value | printf "%.1f" }}x the sustainable rate over the last hour.
               At this rate, the 30-day error budget will be exhausted within hours.
               Page on-call immediately.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
 
         # ── Slow Burn (P2): 6h+30m > 6× ─────────────────────────────
         # 5% of monthly budget consumed in 6 hours → create ticket.
@@ -1100,7 +1100,7 @@ spec:
               {{ $labels.journey }} ({{ $labels.service }}, tier {{ $labels.tier }}) is burning
               error budget at {{ $value | printf "%.1f" }}x sustainable rate over the last hour.
               Triggered on multi-window 5m/1h burn-rate check; investigate and mitigate immediately.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
 
         # ── Journey Slow Burn (P2): 6h+30m > 6× ────────────────────────
         - alert: SLOBudgetSlowBurnJourney
@@ -1169,7 +1169,7 @@ spec:
               {{ $labels.service }} (tier {{ $labels.tier }}) has consumed its entire 30-day
               error budget. Deployment freeze active. Activate reliability sprint.
               No feature deployments until budget recovers to ≥ 10%.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
 
         # ── Budget Low (P2): < 25% remaining ──────────────────────────
         - alert: SLOBudgetLowExtended

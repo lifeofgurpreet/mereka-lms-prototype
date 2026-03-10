@@ -5,7 +5,7 @@ Use this checklist to deploy the OAuth provider fix.
 ## Pre-Deployment
 
 - [ ] Read `MFE_OAUTH_FIX_SUMMARY.md` for context
-- [ ] Read `docs/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md` for detailed steps
+- [ ] Read `docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md` for detailed steps
 - [ ] Verify current issue exists:
   ```bash
   curl -s https://academyv2.mereka.io/api/mfe_context | jq '.contextData.providers'
@@ -229,7 +229,7 @@ If verification fails, check:
    - Check Python path includes /openedx
    - Review LMS error logs
 
-For detailed troubleshooting, see: `docs/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md`
+For detailed troubleshooting, see: `docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md`
 
 ---
 

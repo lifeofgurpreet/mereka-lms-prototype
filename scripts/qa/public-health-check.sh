@@ -89,7 +89,7 @@ dev_forum_diagnostics() {
   echo "Dev forum health check failed. Common cause: MongoDB Atlas allowlist drift (dev VPS egress IP not allowed)." >&2
   echo "Docs:" >&2
   echo "  - docs/MONGODB_ATLAS.md" >&2
-  echo "  - docs/runbooks/operations/TROUBLESHOOTING.md (forum/Atlas sections)" >&2
+  echo "  - docs/ops/runbooks/TROUBLESHOOTING.md (forum/Atlas sections)" >&2
 
   if ! command -v kubectl >/dev/null 2>&1; then
     return

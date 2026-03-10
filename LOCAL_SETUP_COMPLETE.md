@@ -17,4 +17,4 @@ See [docs/onboarding/QUICK_START_LOCAL.md](docs/onboarding/QUICK_START_LOCAL.md)
 
 ## Troubleshooting
 
-See [docs/runbooks/operations/TROUBLESHOOTING.md](docs/runbooks/operations/TROUBLESHOOTING.md) for common issues.
+See [docs/ops/runbooks/TROUBLESHOOTING.md](docs/ops/runbooks/TROUBLESHOOTING.md) for common issues.

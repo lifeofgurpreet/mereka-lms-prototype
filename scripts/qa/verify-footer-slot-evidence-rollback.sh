@@ -32,7 +32,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 EXCEPTIONS_FILE="$REPO_ROOT/docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md"
-LEGACY_FOOTER_DOC="$REPO_ROOT/docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md"
+LEGACY_FOOTER_DOC="$REPO_ROOT/docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md"
 INVENTORY_FILE="$REPO_ROOT/docs/evidence/operations/mfe-surface-inventory.md"
 
 RED='\033[0;31m'

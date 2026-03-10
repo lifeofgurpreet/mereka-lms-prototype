@@ -290,25 +290,25 @@ if [[ "$MODE_OFFLINE" == true ]]; then
   # ── 1d. Documentation prerequisites ──────────────────────────────────────
   echo "  -- Documentation prerequisites --"
 
-  STAGING_ACTIVATION_DOC="$REPO_ROOT/docs/runbooks/operations/STAGING_ACTIVATION.md"
+  STAGING_ACTIVATION_DOC="$REPO_ROOT/docs/ops/runbooks/STAGING_ACTIVATION.md"
   if [[ -f "$STAGING_ACTIVATION_DOC" ]]; then
-    pass_check "staging activation runbook exists: docs/runbooks/operations/STAGING_ACTIVATION.md"
+    pass_check "staging activation runbook exists: docs/ops/runbooks/STAGING_ACTIVATION.md"
   else
-    fail_check "staging activation runbook missing: docs/runbooks/operations/STAGING_ACTIVATION.md"
+    fail_check "staging activation runbook missing: docs/ops/runbooks/STAGING_ACTIVATION.md"
   fi
 
-  RELEASE_CHECKLIST="$REPO_ROOT/docs/runbooks/operations/RELEASE_CHECKLIST.md"
+  RELEASE_CHECKLIST="$REPO_ROOT/docs/ops/runbooks/RELEASE_CHECKLIST.md"
   if [[ -f "$RELEASE_CHECKLIST" ]]; then
-    pass_check "release checklist exists: docs/runbooks/operations/RELEASE_CHECKLIST.md"
+    pass_check "release checklist exists: docs/ops/runbooks/RELEASE_CHECKLIST.md"
   else
-    skip_check "release checklist missing: docs/runbooks/operations/RELEASE_CHECKLIST.md"
+    skip_check "release checklist missing: docs/ops/runbooks/RELEASE_CHECKLIST.md"
   fi
 
-  TROUBLESHOOTING_DOC="$REPO_ROOT/docs/runbooks/operations/TROUBLESHOOTING.md"
+  TROUBLESHOOTING_DOC="$REPO_ROOT/docs/ops/runbooks/TROUBLESHOOTING.md"
   if [[ -f "$TROUBLESHOOTING_DOC" ]]; then
-    pass_check "troubleshooting runbook exists: docs/runbooks/operations/TROUBLESHOOTING.md"
+    pass_check "troubleshooting runbook exists: docs/ops/runbooks/TROUBLESHOOTING.md"
   else
-    fail_check "troubleshooting runbook missing: docs/runbooks/operations/TROUBLESHOOTING.md"
+    fail_check "troubleshooting runbook missing: docs/ops/runbooks/TROUBLESHOOTING.md"
   fi
 
   echo ""
@@ -476,10 +476,10 @@ if [[ "$MODE_OFFLINE" == true ]]; then
     check_prereq "ApplicationSet staging entry is uncommented in kustomize-apps.yaml" "skip"
   fi
 
-  if [[ -f "$REPO_ROOT/docs/runbooks/operations/STAGING_ACTIVATION.md" ]]; then
+  if [[ -f "$REPO_ROOT/docs/ops/runbooks/STAGING_ACTIVATION.md" ]]; then
     check_prereq "staging activation runbook exists" "pass"
   else
-    check_prereq "staging activation runbook exists (docs/runbooks/operations/STAGING_ACTIVATION.md)" "fail"
+    check_prereq "staging activation runbook exists (docs/ops/runbooks/STAGING_ACTIVATION.md)" "fail"
   fi
 
   echo ""
@@ -498,17 +498,17 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  S1 (manifests):  Check deploy/k8s/overlays/staging/ in this repo"
   echo "  S1 (gitops):     Check bbi-infrastructure/apps/mereka-lms/overlays/staging/"
   echo "  S1 (argocd):     Uncomment staging block in bbi-infrastructure/applicationsets/kustomize-apps.yaml"
-  echo "  S1 (docs):       See docs/runbooks/operations/STAGING_ACTIVATION.md for activation steps"
+  echo "  S1 (docs):       See docs/ops/runbooks/STAGING_ACTIVATION.md for activation steps"
   echo "  S2 (live):       Run with --online after fixing offline failures"
   echo ""
-  echo "See docs/runbooks/operations/STAGING_ACTIVATION.md for the full promotion path."
+  echo "See docs/ops/runbooks/STAGING_ACTIVATION.md for the full promotion path."
   exit 1
 fi
 
 if [[ "$SKIP" -gt 0 && "$PASS" -gt 0 ]]; then
   echo ""
   echo "Note: SKIP items indicate staging is not yet activated (expected for pre-activation state)."
-  echo "Follow docs/runbooks/operations/STAGING_ACTIVATION.md to complete staging setup."
+  echo "Follow docs/ops/runbooks/STAGING_ACTIVATION.md to complete staging setup."
 fi
 
 exit 0

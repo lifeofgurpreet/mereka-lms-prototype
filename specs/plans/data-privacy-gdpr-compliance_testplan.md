@@ -306,7 +306,7 @@ This plan converts the DR/BC spec into actionable implementation tasks grouped b
   - Add Artifact Registry row
   - Done: Matrix includes all components from spec with verification commands
 
-- [ ] **[S]** Create SECRET_ROTATION_CHECKLIST.md runbook (`docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`) | AC: #17 | Depends: None
+- [ ] **[S]** Create SECRET_ROTATION_CHECKLIST.md runbook (`docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`) | AC: #17 | Depends: None
   - List all secrets that must be rotated after compromise (Infisical, GCP SM, K8s)
   - Add step-by-step rotation procedure for each secret type
   - Add verification steps (ExternalSecrets sync, pod restarts)
@@ -621,7 +621,7 @@ This plan converts the DR/BC spec into actionable implementation tasks grouped b
   - Add cross-region failover reference
   - Done: DISASTER_RECOVERY.md matches spec requirements
 
-- [ ] **[M]** Update VELERO_BACKUP_AUDIT.md with new validation steps (`docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`) | AC: #1,#2, #3 | Depends: Build Phase 1 complete
+- [ ] **[M]** Update VELERO_BACKUP_AUDIT.md with new validation steps (`docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`) | AC: #1,#2, #3 | Depends: Build Phase 1 complete
   - Add volumeSnapshotsCompleted validation
   - Add BackupStorageLocation phase validation
   - Add emptyDir detection validation
@@ -651,7 +651,7 @@ This plan converts the DR/BC spec into actionable implementation tasks grouped b
   - Document rollback procedure
   - Done: Runbook includes copy-paste commands
 
-- [ ] **[S]** Create SECRET_ROTATION_CHECKLIST.md runbook (`docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`) | AC: #17 | Depends: Build Phase 1 complete
+- [ ] **[S]** Create SECRET_ROTATION_CHECKLIST.md runbook (`docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`) | AC: #17 | Depends: Build Phase 1 complete
   - Document secret rotation procedure for all secret types
   - Document verification steps (ExternalSecrets sync, pod restarts)
   - Document estimated time for full rotation (1h target)
@@ -668,7 +668,7 @@ This plan converts the DR/BC spec into actionable implementation tasks grouped b
   - Document escalation procedure for P1/P2 incidents
   - Done: Document approved by leadership
 
-- [ ] **[S]** Update ONCALL_OBSERVABILITY_PLAYBOOK.md with DRalerts (`docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md`)| AC: #12, #13, #14 | Depends: Build Phase 2 complete
+- [ ] **[S]** Update ONCALL_OBSERVABILITY_PLAYBOOK.md with DRalerts (`docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md`)| AC: #12, #13, #14 | Depends: Build Phase 2 complete
   - Add DR alert playbook entries for all 8 alerts
   - Add symptom → investigation → resolution steps
   - Add cross-references to runbooks

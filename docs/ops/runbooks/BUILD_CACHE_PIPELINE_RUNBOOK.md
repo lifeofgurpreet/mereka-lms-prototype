@@ -603,7 +603,7 @@ workflow.
 - ARC runner setup guide: `docs/ops/ci-cd/CI_CD_RUNNERS.md`
 - CI optimization tracker: `docs/status/active/CI_OPTIMIZATION_TRACKER.md`
 - CI cost analysis: `reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md`
-- Branding release runbook: `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md`
+- Branding release runbook: `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md`
 - Tutor configuration runbook: `docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md`
 - ADR-021 (Tutor methodology): `docs/adr/021-openedx-tutor-methodology.md`
 - BRANDING.md (theme sync guide): `docs/guides/branding/BRANDING.md`

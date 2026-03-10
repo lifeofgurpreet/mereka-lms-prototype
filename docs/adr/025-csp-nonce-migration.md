@@ -150,7 +150,7 @@ This document does not replace broader platform standards, runbooks, or implemen
 - Sentry's CSP endpoint (via `/_/csp-report/`) is a drop-in option if Sentry
   DSN is already configured.
 - Runtime collector smoke checks are documented in
-  `docs/runbooks/operations/CSP_REPORTING_RUNBOOK.md` and enforced statically by
+  `docs/ops/runbooks/CSP_REPORTING_RUNBOOK.md` and enforced statically by
   `scripts/qa/verify-csp-report-pipeline.sh`.
 - The `Content-Security-Policy-Report-Only` header is emitted by django-csp
   when `CSP_REPORT_ONLY = True`; the enforcement header is emitted when

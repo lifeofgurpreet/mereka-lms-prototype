@@ -28,7 +28,7 @@ kubectl rollout restart deployment/lms -n mereka-lms
 - **ALTERNATIVE_DOMAIN_FIX_SUMMARY.md** - Complete implementation summary
 
 ### For Technical Details
-- **docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md** - Comprehensive technical documentation
+- **docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md** - Comprehensive technical documentation
 
 ## What This Fixes
 
@@ -51,7 +51,7 @@ kubectl rollout restart deployment/lms -n mereka-lms
 ### New Files
 - `scripts/shared/multisite_bootstrap_django.py` - Django ORM implementation
 - `scripts/infra/apply-multisite-config.sh` - Automated deployment script
-- `docs/runbooks/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md` - Technical docs
+- `docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md` - Technical docs
 - `ALTERNATIVE_DOMAIN_FIX_SUMMARY.md` - Implementation summary
 - `DEPLOY_BRANDING_FIX.md` - Deployment guide
 - `FIX_README.md` - This file

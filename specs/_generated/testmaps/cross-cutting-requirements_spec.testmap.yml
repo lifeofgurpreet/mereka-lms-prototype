@@ -8,7 +8,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Tenant Isolation Testing
     justification: Requires multi-tenant test data and authenticated API calls across
       tenant contexts
@@ -27,7 +27,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Log Format Verification
     justification: Requires running pods and log stream inspection via kubectl
 - id: AC-CCR-004
@@ -70,7 +70,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Tenant Offboarding
     justification: Requires actual tenant data and deletion workflow — not yet implemented
 - id: AC-CCR-008
@@ -99,7 +99,7 @@ acceptance_criteria:
     file: scripts/qa/verify-translations.sh
     command: scripts/qa/verify-translations.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Payment Idempotency Testing
     justification: Requires ecommerce/purchase-gateway service with test transactions
       — not yet implemented
@@ -111,7 +111,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Celery Worker Log Verification
     justification: Requires running Celery workers with forced failure scenarios
 - id: AC-CCR-012
@@ -122,7 +122,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Event Bus Verification
     justification: Redis Streams event bus not yet implemented — deferred to Tier
       4

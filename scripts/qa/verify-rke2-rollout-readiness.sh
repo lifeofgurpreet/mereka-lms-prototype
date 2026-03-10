@@ -531,11 +531,11 @@ echo ""
 echo "S7: Runbook Completeness"
 
 REQUIRED_DOCS=(
-  "docs/runbooks/operations/TROUBLESHOOTING.md"
-  "docs/runbooks/operations/RKE2_DEV_READINESS.md"
+  "docs/ops/runbooks/TROUBLESHOOTING.md"
+  "docs/ops/runbooks/RKE2_DEV_READINESS.md"
   "docs/status/migrations/RKE2_ROLLOUT_MATRIX.md"
   "docs/policies/operations/MAINTENANCE_WINDOWS.md"
-  "docs/runbooks/operations/INCIDENT_TEMPLATES.md"
+  "docs/ops/runbooks/INCIDENT_TEMPLATES.md"
   "docs/policies/operations/ONCALL_ROTATION.md"
   "docs/reference/operations/BACKUP_COVERAGE_MATRIX.md"
 )
@@ -548,11 +548,11 @@ for doc in "${REQUIRED_DOCS[@]}"; do
 done
 
 # Checklist for this rollout
-ROLLOUT_CHECKLIST="$REPO_ROOT/docs/runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md"
+ROLLOUT_CHECKLIST="$REPO_ROOT/docs/ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md"
 if [[ -f "$ROLLOUT_CHECKLIST" ]]; then
   pass_check "RKE2 rollout checklist exists"
 else
-  fail_check "RKE2 rollout checklist missing (docs/runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md)"
+  fail_check "RKE2 rollout checklist missing (docs/ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md)"
 fi
 
 echo ""
@@ -575,7 +575,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  S6 (live):      Run with --online after fixing offline checks"
   echo "  S7 (runbooks):  Create missing docs in docs/ops/runbooks/ or docs/reference/operations/"
   echo ""
-  echo "See docs/runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md for full sign-off procedure."
+  echo "See docs/ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md for full sign-off procedure."
   exit 1
 fi
 

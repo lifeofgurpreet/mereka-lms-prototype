@@ -127,7 +127,7 @@ Revenue impact is direct: every course purchase, program enrollment, and enterpr
 
 ## Assumptions
 
-- Stripe account is already provisioned and operational (confirmed: webhook delivery probe accepted HTTP 200 per `docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md`)
+- Stripe account is already provisioned and operational (confirmed: webhook delivery probe accepted HTTP 200 per `docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md`)
 - The Open edX Enrollment API (`/api/enrollment/v1/enrollment`) is stable and available for programmatic enrollment creation
 - The Open edX user creation API or registration flow supports account creation triggered by an invitation link
 - The existing GKE cluster has capacity for 2 additional Deployments (gateway API + worker) with estimated 1 vCPU / 2 GB RAM total at baseline

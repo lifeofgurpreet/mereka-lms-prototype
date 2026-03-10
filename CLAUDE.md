@@ -354,7 +354,7 @@ tutor local restart
 ```
 
 ### Site Down Troubleshooting
-1. Check `docs/runbooks/operations/TROUBLESHOOTING.md` (5-command diagnostic)
+1. Check `docs/ops/runbooks/TROUBLESHOOTING.md` (5-command diagnostic)
 2. Most common issue: service selector mismatches after pod restarts
 3. Quick fix: `./scripts/infra/fix-service-selectors.sh`
 4. Verify endpoints: `kubectl get endpoints -n mereka-lms`
@@ -533,7 +533,7 @@ Running verification checks...
 
 - **Quick Start**: `docs/guides/onboarding/QUICK_START_LOCAL.md` (5-min setup)
 - **Full Setup**: `docs/guides/onboarding/DEVELOPER_ONBOARDING.md`
-- **Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- **Troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`
 - **Branding**: `docs/BRANDING.md`
 - **Migrations**: `docs/migrations/` (Kajabi, MCT playbooks)
 - **Architecture**: `docs/concepts/architecture/`

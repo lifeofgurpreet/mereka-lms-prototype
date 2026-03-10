@@ -66,7 +66,7 @@ Decision options are based on objective evidence only:
 ### 2) Parity continuity
 
 - `observability-parity-rollup.json` shows `PAR-001` and `PAR-002` in closed state.
-- No new `PAR-*` failures introduced without corresponding assigned owner in `docs/runbooks/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md`.
+- No new `PAR-*` failures introduced without corresponding assigned owner in `docs/ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md`.
 
 ### 3) Alert and monitoring readiness
 
@@ -81,7 +81,7 @@ Decision options are based on objective evidence only:
 
 ### 5) Human process readiness
 
-- `docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md` drill runbook remains current.
+- `docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md` drill runbook remains current.
 - Monthly operator drill completed (within last 30 days) with attendance artifact in `docs/archive/evidence/operations/observability-drills/`.
 - No high-severity alerting change since last review without service-owner ack recorded in PR/evidence.
 

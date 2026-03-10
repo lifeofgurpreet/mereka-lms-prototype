@@ -391,7 +391,7 @@ If slot injection fails (MFE build error or runtime slot not rendering):
 - `docs/guides/branding/BRANDING_ROADMAP.md`
 - `docs/guides/branding/BRANDING_INCIDENT_TEMPLATE.md`
 - `docs/guides/branding/BRANDING.md`
-- `docs/runbooks/operations/THEME_DEPLOYMENT.md`
+- `docs/ops/runbooks/THEME_DEPLOYMENT.md`
 - `docs/reference/operations/OPENEDX_HOSTNAMES.md`
 - `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`
 - `docs/reference/operations/FOOTER_VARIANT_MATRIX.md`

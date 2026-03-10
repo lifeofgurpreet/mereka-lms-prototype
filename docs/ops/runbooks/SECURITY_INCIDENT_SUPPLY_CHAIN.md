@@ -299,7 +299,7 @@ scorecard --repo github.com/<org>/<repo>
 
 ## Related Documents
 
-- `docs/runbooks/operations/INCIDENT_TEMPLATES.md` — postmortem template
-- `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` — secret rotation procedure
+- `docs/ops/runbooks/INCIDENT_TEMPLATES.md` — postmortem template
+- `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md` — secret rotation procedure
 - `docs/reference/operations/SECRETS_SNAPSHOT.md` — current secret inventory
 - `specs/secrets-management.md` — secrets architecture

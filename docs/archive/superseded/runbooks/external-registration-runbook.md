@@ -209,4 +209,4 @@ Conference booth or marketing campaign generates 100+ registrations in 5 minutes
 - **Spec**: `specs/proposals/external-registration-hubspot_spec.md`
 - **HubSpot Webhook Service**: `services/hubspot-webhook/README.md`
 - **Email Pipeline**: `specs/email-notifications-pipeline_spec.md`
-- **General Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- **General Troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`

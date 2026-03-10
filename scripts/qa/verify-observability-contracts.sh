@@ -252,7 +252,7 @@ if [[ -f "$ds" ]]; then
 fi
 
 # Log retention documented
-loki_doc="docs/runbooks/operations/GKE_LOKI_FORWARDING.md"
+loki_doc="docs/ops/runbooks/GKE_LOKI_FORWARDING.md"
 if [[ -f "$loki_doc" ]]; then
   report PASS "Loki forwarding documentation exists: $loki_doc"
 else

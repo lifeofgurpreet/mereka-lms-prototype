@@ -7,4 +7,4 @@ This document has moved to:
 - `../../runbooks/operations/AUTH_CHANGE_CHECKLIST.md`
 
 Reason:
-- Operational auth change checklists now live under `docs/runbooks/operations/`.
+- Operational auth change checklists now live under `docs/ops/runbooks/`.

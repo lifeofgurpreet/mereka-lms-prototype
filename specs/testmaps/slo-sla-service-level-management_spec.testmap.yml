@@ -160,7 +160,7 @@ acceptance_criteria:
     file: scripts/qa/verify-slo-contracts.sh
     command: scripts/qa/verify-slo-contracts.sh
   - type: manual
-    runbook: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md
+    runbook: docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md
     section: Verification > Simulate Budget Burn
     justification: Requires scaling LMS to 0 replicas to trigger real alert; not safe
       to automate in production
@@ -223,7 +223,7 @@ acceptance_criteria:
     file: scripts/qa/verify-regression-detection.sh
     command: scripts/qa/verify-regression-detection.sh
   - type: manual
-    runbook: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md
+    runbook: docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md
     section: Verification > Simulate Latency Regression
     justification: Requires injecting artificial latency in production to verify alert
       fires within 15 minutes; not safe to automate
@@ -353,7 +353,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/runbooks/operations/INCIDENT_TEMPLATES.md
+    runbook: docs/ops/runbooks/INCIDENT_TEMPLATES.md
     section: Postmortem > Required Sections Checklist
     justification: Tests organizational process (postmortem published within 5 business
       days with required sections); cannot be automated without incident tracking

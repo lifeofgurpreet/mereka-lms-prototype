@@ -38,7 +38,7 @@ related_specs:
 - specs/repository-structure_spec.md
 related_runbooks:
 - docs/policies/operations/REPO_BOUNDARIES.md
-- docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md
+- docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md
 related_evidence: []
 fitness_functions:
 - scripts/qa/verify-repo-structure.sh

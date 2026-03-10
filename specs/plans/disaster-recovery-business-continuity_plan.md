@@ -155,7 +155,7 @@ The codebase already provides substantial coverage:
 
 - [ ] **[L]** B-26: Document and validate all disaster scenario response procedures (DR-001 through DR-011) -- create or update runbook entries for each scenario with step-by-step recovery commands, expected RTO, and verification commands (`docs/operations/DISASTER_RECOVERY.md`) | AC: #015-#018 | Depends: None
 
-- [ ] **[M]** B-27: Create secret rotation checklist -- document the full rotation procedure for all K8s secrets via Infisical + GCP SM, including post-rotation pod restart verification (`docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`) | AC: #017 | Depends: None
+- [ ] **[M]** B-27: Create secret rotation checklist -- document the full rotation procedure for all K8s secrets via Infisical + GCP SM, including post-rotation pod restart verification (`docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`) | AC: #017 | Depends: None
 
 - [ ] **[M]** B-28: Verify Terraform/Kustomize IaC is deployable to any GKE cluster -- run `kubectl kustomize deploy/k8s/overlays/production` and validate manifests are self-contained (`scripts/qa/verify-cross-region-iac.sh`) | AC: #021 | Depends: None
 
@@ -193,7 +193,7 @@ The codebase already provides substantial coverage:
 
 #### Docs
 
-- [ ] **[M]** D-01: Update `docs/runbooks/operations/TROUBLESHOOTING.md` with all edge cases from spec (zero-snapshot backup, broken CronJob, stuck namespace, Atlas verification, partial restore, secrets desync, GCS inaccessible, concurrent backup/restore, clock skew) (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: None
+- [ ] **[M]** D-01: Update `docs/ops/runbooks/TROUBLESHOOTING.md` with all edge cases from spec (zero-snapshot backup, broken CronJob, stuck namespace, Atlas verification, partial restore, secrets desync, GCS inaccessible, concurrent backup/restore, clock skew) (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: None
 
 - [ ] **[S]** D-02: Update `docs/operations/DEPLOYMENT_RUNBOOK.md` to reference pre-operation backup procedure (`docs/operations/DEPLOYMENT_RUNBOOK.md`) | Depends: B-08
 

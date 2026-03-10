@@ -399,7 +399,7 @@ Before starting implementation:
 - [ ] **[S]** Update `docs/operations/DISASTER_RECOVERY.md` with spec RPO/RTO table and scenario matrix (`docs/operations/DISASTER_RECOVERY.md`) | AC: #15-#18 | Depends: None
   - **Done**: DR doc contains the 6-tier RPO/RTO table and the 11-scenario DR matrix with response procedures
 
-- [ ] **[S]** Update `docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md` to cover DR-006 scenario (`docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md`) | AC: #17 | Depends: None
+- [ ] **[S]** Update `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md` to cover DR-006 scenario (`docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`) | AC: #17 | Depends: None
   - **Done**: Checklist includes Infisical rotation, GCP SM sync, ExternalSecrets resync, pod restart, and 1-hour target
 
 ---
@@ -521,13 +521,13 @@ Before starting implementation:
 
 #### Docs
 
-- [ ] **[S]** Update `docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`with spec-aligned procedures (`docs/runbooks/operations/VELERO_BACKUP_AUDIT.md`) | Depends: Phase 1
+- [ ] **[S]** Update `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`with spec-aligned procedures (`docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`) | Depends: Phase 1
   - **Done**: Doc references all three schedules, links to audit scripts, and includes troubleshooting for edge cases
 
-- [ ] **[S]** Update `docs/runbooks/operations/COURSE_DATA_RECOVERY.md` with spec-aligned recovery procedures (`docs/runbooks/operations/COURSE_DATA_RECOVERY.md`) | Depends: Phase 1
+- [ ] **[S]** Update `docs/ops/runbooks/COURSE_DATA_RECOVERY.md` with spec-aligned recovery procedures (`docs/ops/runbooks/COURSE_DATA_RECOVERY.md`) | Depends: Phase 1
   - **Done**: Doc covers Tier 1 (MySQL) and Tier 2 (MongoDB)recovery with specific commands and verification steps
 
-- [ ] **[S]** Update `docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md` with DR alert response procedures (`docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md`) | Depends: Phase 2
+- [ ] **[S]** Update `docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md` with DR alert response procedures (`docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md`) | Depends: Phase 2
   - **Done**: Playbook includes response procedures for all 8DR-related alerts
 
 - [ ] **[S]** Ensure `docs/operations/DR_TEST_RESULTS.md` isupdated after each drill (`docs/operations/DR_TEST_RESULTS.md`) | Depends: Phase 4

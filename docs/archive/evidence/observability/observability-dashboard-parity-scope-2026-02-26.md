@@ -17,13 +17,13 @@ Owner: mereka-lms observability
     - `video-cost.json`
     - `video-operations.json`
   - Dashboard required set now skips these by default during parity checks.
-- `docs/runbooks/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md`
+- `docs/ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md`
   - Added dashboard parity scope behavior + remediation command block (`apply-monitoring-configs.sh plan/apply`).
 - `docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md`
   - Added dashboard scope requirement entry.
 - `infrastructure/monitoring/README.md`
   - Documented mixed folder semantics and explicit GCP-vs-Grafana split.
-- `docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md`
+- `docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md`
   - Added dashboard-remediation quick command and temporary Grafana-only opt-in guidance.
 - `docs/qa/OBSERVABILITY_NEXT50_TRACKER_MEREKA_LMS.md`
   - Marked `OBS-052` done after classification documentation.

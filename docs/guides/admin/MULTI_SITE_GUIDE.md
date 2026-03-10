@@ -430,8 +430,8 @@ Must pass all 3 checks:
 
 **Operations Docs**:
 - `docs/reference/operations/OPENEDX_HOSTNAMES.md` - Complete hostname registry
-- `docs/runbooks/operations/DOMAIN_CHANGE_RUNBOOK.md` - Domain change procedures
-- `docs/runbooks/operations/DOMAIN_MANAGEMENT.md` - DNS management
+- `docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md` - Domain change procedures
+- `docs/ops/runbooks/DOMAIN_MANAGEMENT.md` - DNS management
 - `docs/reference/operations/AUTH_AND_PERMISSIONS.md` - OIDC and auth config
 
 **Scripts**:

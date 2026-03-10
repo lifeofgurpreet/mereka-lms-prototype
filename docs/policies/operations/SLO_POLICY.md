@@ -156,7 +156,7 @@ Alertmanager config: `deploy/k8s/base/monitoring/README.md`
 ## Related Resources
 
 - PrometheusRules: `deploy/k8s/base/monitoring/prometheusrule-slo.yaml`, `slo-burn-rate-rules.yaml`
-- SLO dashboards: `docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md`
+- SLO dashboards: `docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md`
 - SLA reporting: `docs/policies/operations/SLA_REPORTING.md`
-- Incident response: `docs/runbooks/operations/INCIDENT_RESPONSE.md`
+- Incident response: `docs/ops/runbooks/INCIDENT_RESPONSE.md`
 - Alert severity matrix: `docs/reference/operations/ALERT_SEVERITY_MATRIX.md`

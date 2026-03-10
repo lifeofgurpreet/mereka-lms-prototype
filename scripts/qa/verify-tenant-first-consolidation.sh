@@ -139,7 +139,7 @@ echo ""
 
 echo "── AC-TF-004: Tenant brand onboarding documentation ──"
 
-GUIDE="$REPO_ROOT/docs/runbooks/operations/TENANT_BRAND_ONBOARDING_GUIDE.md"
+GUIDE="$REPO_ROOT/docs/ops/runbooks/TENANT_BRAND_ONBOARDING_GUIDE.md"
 if [[ -f "$GUIDE" ]]; then
   pass "TENANT_BRAND_ONBOARDING_GUIDE.md exists"
 
@@ -156,7 +156,7 @@ else
 fi
 
 # Check TENANT_ONBOARDING_PLAYBOOK.md also exists
-if [[ -f "$REPO_ROOT/docs/runbooks/operations/TENANT_ONBOARDING_PLAYBOOK.md" ]]; then
+if [[ -f "$REPO_ROOT/docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md" ]]; then
   pass "TENANT_ONBOARDING_PLAYBOOK.md exists (comprehensive playbook)"
 else
   warn "TENANT_ONBOARDING_PLAYBOOK.md not found"

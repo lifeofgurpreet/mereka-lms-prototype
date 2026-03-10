@@ -549,7 +549,7 @@ check_ac_016() {
 check_ac_017() {
   echo "--- AC-017: Secret rotation checklist documented ---"
 
-  local checklist="${REPO_ROOT}/docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md"
+  local checklist="${REPO_ROOT}/docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md"
   if [[ -f "$checklist" ]]; then
     pass "AC-017: SECRET_ROTATION_CHECKLIST.md exists"
   else

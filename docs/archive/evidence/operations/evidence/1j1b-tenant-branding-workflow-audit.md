@@ -80,7 +80,7 @@ Three active subsites validated against the onboarding flow:
 | MFE branding strategy | ADR-014 (`docs/adr/014-mfe-branding-strategy.md`) | `docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md` | platform-engineering |
 | Plugin slot migration | (covered in platform-middleware spec) | `docs/ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md` | platform-engineering |
 | Visual parity checkpoints | `specs/platform-middleware-custom-apps_spec.md` (AC-UI-105/106) | `docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md` | design / platform-engineering |
-| A11y contrast/focus | (covered in platform-middleware spec) | `docs/runbooks/operations/A11Y_CONTRAST_FOCUS_GATE.md` | platform-engineering / design |
+| A11y contrast/focus | (covered in platform-middleware spec) | `docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md` | platform-engineering / design |
 
 **Tenant owner table** (from MULTI_TENANT_BRANDING_OPS.md):
 | Tenant | Branding Owner | Escalation |

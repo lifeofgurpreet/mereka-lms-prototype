@@ -257,11 +257,11 @@ run_offline_checks() {
     skip "ADR-018 not found at docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md"
   fi
 
-  RUNBOOK="${REPO_ROOT}/docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md"
+  RUNBOOK="${REPO_ROOT}/docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md"
   if [[ -f "$RUNBOOK" ]]; then
     pass "ecommerce-worker troubleshooting runbook exists"
   else
-    skip "Runbook not found at docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md"
+    skip "Runbook not found at docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md"
   fi
 }
 
@@ -307,7 +307,7 @@ run_online_checks() {
   if echo "$WORKER_PODS" | grep -q "CrashLoopBackOff"; then
     fail "ecommerce-worker pod(s) in CrashLoopBackOff"
     info "This is expected on nonprod if Oscar is not fully configured"
-    info "See docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md for decision tree"
+    info "See docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md for decision tree"
   elif echo "$WORKER_PODS" | grep -q "Running"; then
     pass "ecommerce-worker pod(s) in Running state"
   elif echo "$WORKER_PODS" | grep -q "Error"; then
@@ -434,7 +434,7 @@ printf "\n"
 
 if [[ "$FAIL" -gt 0 ]]; then
   printf "RESULT: FAIL — %d check(s) failed\n\n" "$FAIL"
-  printf "See docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md for the decision\n"
+  printf "See docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md for the decision\n"
   printf "tree: fix Oscar worker OR scale to 0 and rely on Purchase Gateway.\n\n"
   exit 1
 else

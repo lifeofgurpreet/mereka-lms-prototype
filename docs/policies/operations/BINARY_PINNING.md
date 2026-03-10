@@ -154,6 +154,6 @@ The script will SKIP all cross-repo checks if `infrastructure` is not found loca
 
 - `docs/policies/operations/ALLOWED_ACTIONS_POLICY.md` — GitHub Actions `uses:` SHA pinning
 - `docs/reference/operations/SLSA_PROVENANCE.md` — Build provenance and image signing
-- `docs/runbooks/operations/SECURITY_INCIDENT_SUPPLY_CHAIN.md` — Supply-chain incident response
+- `docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md` — Supply-chain incident response
 - `scripts/qa/verify-actions-pinned.sh` — Verifies `uses:` SHA pinning in this repo
 - `scripts/qa/verify-slsa-provenance.sh` — Verifies SLSA provenance workflow

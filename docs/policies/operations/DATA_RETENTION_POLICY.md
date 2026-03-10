@@ -227,7 +227,7 @@ Reference: https://open-edx-proposals.readthedocs.io/en/latest/architectural-dec
 ### Erasure request (GDPR Art 17 / PDPA Sec 35)
 
 1. Confirm no legal hold applies (see Section 7).
-2. Follow `docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md` step by step.
+2. Follow `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md` step by step.
 3. Document completion in erasure register with step log.
 4. Notify user of completion within 30-day SLA.
 
@@ -293,8 +293,8 @@ Certificates may be retained for 10 years to support verification requests from 
 ## References
 
 - PII Inventory: `docs/policies/operations/PII_DATA_INVENTORY.md`
-- Erasure Runbook: `docs/runbooks/operations/DATA_ERASURE_RUNBOOK.md`
-- GDPR Compliance Runbook: `docs/runbooks/operations/GDPR_COMPLIANCE.md`
+- Erasure Runbook: `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md`
+- GDPR Compliance Runbook: `docs/ops/runbooks/GDPR_COMPLIANCE.md`
 - Spec: `specs/data-privacy-gdpr-compliance_spec.md`
 - OEP-30 (PII Markup): https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0030-arch-pii-markup-and-auditing.html
 - PDPA Malaysia: https://www.pdp.gov.my/

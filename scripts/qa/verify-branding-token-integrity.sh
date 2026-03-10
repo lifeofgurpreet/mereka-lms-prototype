@@ -239,7 +239,7 @@ echo "--- AC-TOK-005: Documentation ---"
 
 # Check for token-related docs
 DOCS_FOUND=0
-for doc in "$REPO_ROOT/docs/runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md" \
+for doc in "$REPO_ROOT/docs/ops/runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md" \
            "$REPO_ROOT/docs/concepts/architecture/TOKEN_REFERENCE_INTEGRITY.md" \
            "$REPO_ROOT/docs/guides/branding/TOKEN_INTEGRITY.md"; do
   if [[ -f "$doc" ]]; then

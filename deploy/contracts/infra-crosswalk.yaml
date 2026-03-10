@@ -29,7 +29,7 @@ crosswalk:
       - .github/workflows/build-enterprise-mfe.yml
       - .github/workflows/smoke-authn-mfe.yml
       - docs/reference/architecture/MFE_RUNTIME_CONFIG.md
-      - docs/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
+      - docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
     infra_counterpart:
       status: partial
       overlays:

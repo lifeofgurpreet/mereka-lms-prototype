@@ -391,7 +391,7 @@ For the 24-hour stability window after cutover:
 | Cross-repo handoff | `reports/2026/closures/RKE2_LMS_HANDOFF.md` |
 | Gate-by-gate rollout matrix | `docs/status/migrations/RKE2_ROLLOUT_MATRIX.md` |
 | DNS management | `docs/archive/reports/CLOUDFLARE` |
-| Troubleshooting | `docs/runbooks/operations/TROUBLESHOOTING.md` |
-| Post-deploy smoke | `docs/runbooks/operations/POSTDEPLOY_SMOKE_AND_INCIDENT.md` |
+| Troubleshooting | `docs/ops/runbooks/TROUBLESHOOTING.md` |
+| Post-deploy smoke | `docs/ops/runbooks/POSTDEPLOY_SMOKE_AND_INCIDENT.md` |
 | Canonical deploy contract | `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md` |
 | Verification script | `scripts/qa/verify-migration-completion-plan.sh` |

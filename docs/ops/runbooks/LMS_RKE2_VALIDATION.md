@@ -317,6 +317,6 @@ kubectl --context rke2-nonprod get clusterissuer letsencrypt-prod
 - `scripts/qa/verify-rke2-deployment-readiness.sh` — Blocker-specific checks (B1-B4)
 - `scripts/qa/verify-rke2-dev-readiness.sh` — Dev environment prereq validation
 - `scripts/qa/verify-k8s-deployment-spec.sh` — Manifest static analysis
-- `docs/runbooks/operations/TROUBLESHOOTING.md` — General LMS troubleshooting
+- `docs/ops/runbooks/TROUBLESHOOTING.md` — General LMS troubleshooting
 - `deploy/k8s/overlays/rke2-nonprod/` — RKE2 nonprod Kustomize overlay
 - `specs/k8s-deployment_spec.md` — K8s deployment specification

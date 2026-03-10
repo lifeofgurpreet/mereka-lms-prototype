@@ -6,7 +6,7 @@ _Audience: Developers & SRE | Owner: SRE | Status: Active_
 
 Operations guide for the Purchase Gateway service deployed in the `mereka-lms` GKE namespace. The Purchase Gateway is the canonical replacement for the deprecated Oscar/ecommerce service.
 
-Related: `specs/ecommerce-purchase-gateway_spec.md` | `docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md`
+Related: `specs/ecommerce-purchase-gateway_spec.md` | `docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md`
 
 ---
 
@@ -252,7 +252,7 @@ The Stripe webhook secret (`MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY`) is tied t
 6. Verify test webhook events reach the new endpoint.
 7. Delete the old Stripe webhook endpoint.
 
-Reference: `docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md`
+Reference: `docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md`
 
 ### Rotate PostgreSQL Password
 

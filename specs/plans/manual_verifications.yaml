@@ -231,7 +231,7 @@ entries:
     section: Release Process Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
-    file: docs/runbooks/operations/RELEASE_CHECKLIST.md
+    file: docs/ops/runbooks/RELEASE_CHECKLIST.md
 - id: AC-022
   spec: ci-cd-pipeline_spec.md
   description: Given the public-health-check.yml runs on schedule, when branding is correct on prod and dev, then no failures
@@ -477,7 +477,7 @@ entries:
   description: Tenant data isolation — API responses must contain zero records from other tenants
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Tenant Isolation Testing
     justification: Requires multi-tenant test data and authenticated API calls across tenant contexts
 - id: AC-CCR-003
@@ -485,7 +485,7 @@ entries:
   description: All log entries must be structured JSON with timestamp, level, service, request_id
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Log Format Verification
     justification: Requires running pods and log stream inspection via kubectl
 - id: AC-CCR-006
@@ -500,7 +500,7 @@ entries:
   description: Tenant offboarding must produce cryptographic deletion certificate
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Tenant Offboarding
     justification: Requires actual tenant data and deletion workflow — not yet implemented
 - id: AC-CCR-010
@@ -508,7 +508,7 @@ entries:
   description: Financial write operations must be idempotent
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Payment Idempotency Testing
     justification: Requires ecommerce/purchase-gateway service with test transactions — not yet implemented
 - id: AC-CCR-011
@@ -516,7 +516,7 @@ entries:
   description: Background job failure logs must include error code, message, context, and stack trace
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Celery Worker Log Verification
     justification: Requires running Celery workers with forced failure scenarios
 - id: AC-CCR-012
@@ -524,7 +524,7 @@ entries:
   description: Redis Streams consumers must implement idempotent handling with deduplication
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Event Bus Verification
     justification: Redis Streams event bus not yet implemented — deferred to Tier 4
 - id: AC-014
@@ -580,7 +580,7 @@ entries:
   description: Valid webhook with HMAC signature persists event to outbox
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service and valid HMAC signature computation
 - id: AC-041
@@ -588,7 +588,7 @@ entries:
   description: Invalid signature returns HTTP 401
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with crafted invalid signature
 - id: AC-042
@@ -596,7 +596,7 @@ entries:
   description: Missing event key returns HTTP 400
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with crafted payload
 - id: AC-043
@@ -604,7 +604,7 @@ entries:
   description: Unknown event type written to unknown__ outbox file
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service with non-standard event type
 - id: AC-044
@@ -612,7 +612,7 @@ entries:
   description: Missing KAJABI_WEBHOOK_SECRET returns HTTP 500 on healthcheck
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
     justification: Requires running webhook service without secret env var
 - id: AC-011
@@ -666,7 +666,7 @@ entries:
   description: Secret rotation completes within 1 hour following DR-006 checklist
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
     section: Full Rotation Procedure
     justification: Secret rotation touches Infisical, GCP SM, and K8s in sequence; requires human verification of non-disruption
 - id: AC-018
@@ -914,7 +914,7 @@ entries:
   description: Profile image upload from MFE succeeds
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/DOMAIN_MANAGEMENT.md
+    runbook: docs/ops/runbooks/DOMAIN_MANAGEMENT.md
     section: Verification > Profile Image Upload
     justification: Full upload flow requires authenticated browser session with file selection; curl can only test rejection
       path
@@ -932,7 +932,7 @@ entries:
   description: 'Grafana shows pod CPU/memory: Dashboard visible at https://grafana.mereka.io'
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md
+    runbook: docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
     section: Dashboard Verification
     justification: Dashboard load time and visual correctness require human verification in browser
 - id: AC-006
@@ -940,7 +940,7 @@ entries:
   description: 'Alerts fire on OOM: Simulate OOM and verify alert in Slack'
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
+    runbook: docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md
     section: Alert Verification > OOM Simulation
     justification: OOM simulation requires deliberate resource exhaustion which cannot be safely automated in production
 - id: AC-007
@@ -948,7 +948,7 @@ entries:
   description: 'Log correlation works: Click trace ID in Grafana, jumps to Loki logs'
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/OBSERVABILITY_QUICKSTART.md
+    runbook: docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
     section: Trace-Log Correlation
     justification: Click-through navigation from logs to traces requires visual verification in Grafana UI
 - id: AC-020
@@ -1045,7 +1045,7 @@ entries:
   description: ExternalSecrets show STATUS=SecretSynced for openedx-secrets and database-secrets
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
     section: Verification > ExternalSecrets are synced
     justification: Requires live GKE cluster access; cannot be verified in CI without cluster credentials
 - id: AC-002
@@ -1053,7 +1053,7 @@ entries:
   description: Deployments use envFrom with secretRef foropenedx-secrets and database-secrets
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
     section: Verification > Pods have envFrom referencing secrets
     justification: Requires live GKE cluster access; K8sdeploy manifests reference envFrom but runtime verificationneeds cluster
 - id: AC-003
@@ -1061,7 +1061,7 @@ entries:
   description: LMS pod has non-empty OPENEDX_SECRET_KEY environment variable
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
     section: Verification > Runtime health
     justification: Requires live GKE cluster with running LMS pod; cannot be simulated in CI
 - id: AC-009
@@ -1101,7 +1101,7 @@ entries:
   description: Rotated secret propagates end-to-end aftersync + force-sync annotation + pod restart
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
+    runbook: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
     section: Full Rotation Procedure
     justification: End-to-end rotation test requires live Infisical, GCP SM, GKE cluster, and running pods; executedquarterly
       during game days
@@ -1119,7 +1119,7 @@ entries:
     the engineering channel within 5 minutes
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md
+    runbook: docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md
     section: Verification > Simulate Budget Burn
     justification: Requires scaling LMS to 0 replicas to trigger real alert; not safe to automate in production
 - id: AC-013
@@ -1128,7 +1128,7 @@ entries:
     then a P2 alert fires and is delivered to on-call
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md
+    runbook: docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md
     section: Verification > Simulate Latency Regression
     justification: Requires injecting artificial latency in production to verify alert fires within 15 minutes; not safe to
       automate
@@ -1175,7 +1175,7 @@ entries:
     days and contains: timeline, root cause, impact, remediation, and prevention sections'
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/INCIDENT_TEMPLATES.md
+    runbook: docs/ops/runbooks/INCIDENT_TEMPLATES.md
     section: Postmortem > Required Sections Checklist
     justification: Tests organizational process (postmortem published within 5 business days with required sections); cannot
       be automated without incident tracking system integration
@@ -2650,7 +2650,7 @@ entries:
     includes --mysql-native-password=ON flag and LMS connects without authentication errors
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: MySQL Authentication Verification
     justification: Requires running MySQL 8 pod in GKE; kubectl exec to verify flag; cannot run against live cluster in CI
     file: scripts/infra/verify-tutor-config.sh
@@ -2660,7 +2660,7 @@ entries:
     then ALLOWED_HOSTS contains all three domains
   verify:
   - type: manual
-    runbook: docs/runbooks/operations/TROUBLESHOOTING.md
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
     section: Multi-Site Domain Verification
     justification: Requires running LMS pod with kubectl exec; cannot inspect runtime settings without live cluster access
     file: scripts/qa/verify-tutor-multisite-domains.sh

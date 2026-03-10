@@ -149,7 +149,7 @@ curl -sI https://apps.academyv2.mereka.io | head -1
 | Auth loop | `ops/runbooks/AUTH_SSO_RUNBOOK.md` | Check SESSION_COOKIE_* settings |
 | DB connection refused | `ops/runbooks/database-issues.md` | Check MySQL pod + secrets |
 | MFE blank page | `FRONTEND_REGRESSION_CHECKLIST.md` | Check MFE image tag + config API |
-| Enterprise 403 | `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md` | Check image pull + service account |
+| Enterprise 403 | `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md` | Check image pull + service account |
 | XQueue backlog | `ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md` | Check consumer logs |
 | SSL cert expired | `ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md` | Check cert-manager + Cloudflare |
 | Meilisearch denied | `docs/evidence/operations/KIND_CLUSTER_RECOVERY_EVIDENCE.md` | Add `runAsNonRoot: true` |
@@ -188,7 +188,7 @@ curl -sI https://apps.academyv2.mereka.io | head -1
 ## Related
 
 - `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md` — Build/tag/push flow
-- `docs/runbooks/operations/RELEASE_EXECUTE_RUNBOOK.md` — Step-by-step release
-- `docs/runbooks/operations/DEPLOY_EVIDENCE_GATES.md` — Parity proof commands
+- `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md` — Step-by-step release
+- `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md` — Parity proof commands
 - `docs/reference/operations/ECOMMERCE_DEPRECATION_INVENTORY.md` — Legacy ecommerce removal
-- `docs/runbooks/operations/ENTERPRISE_SERVICES_RUNBOOK.md` — Enterprise service operations
+- `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md` — Enterprise service operations

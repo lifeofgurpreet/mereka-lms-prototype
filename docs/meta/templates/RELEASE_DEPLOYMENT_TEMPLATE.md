@@ -367,9 +367,9 @@ production rollout.
 
 ## Related
 
-- `docs/runbooks/operations/RELEASE_CHECKLIST.md` — Condensed release checklist
+- `docs/ops/runbooks/RELEASE_CHECKLIST.md` — Condensed release checklist
 - `docs/policies/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md` — Merge-first rules
-- `docs/runbooks/operations/BRANDING_RELEASE_RUNBOOK.md` — Branding-specific rollout
+- `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` — Branding-specific rollout
 - `scripts/infra/verify-release-preflight.sh` — Pre-deploy gating script
 - `scripts/infra/release-openedx-gitops.sh` — Canonical release orchestrator
 - `scripts/qa/verify-release-readiness.sh` — Evidence package generator

@@ -192,4 +192,4 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=cms --tail=100 | grep -i bl
 ## Related Documentation
 - **Spec**: `specs/content-libraries-v2_spec.md`
 - **Architecture**: `docs/architecture/content-libraries-overview.md`
-- **General Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`
+- **General Troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`

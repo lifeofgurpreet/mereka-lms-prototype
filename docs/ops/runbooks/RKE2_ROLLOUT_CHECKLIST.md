@@ -312,11 +312,11 @@ for b in sorted(data.get('items', []), key=lambda x: x['metadata']['creationTime
 
 ### 6.1 Required Runbooks
 
-- [ ] `docs/runbooks/operations/TROUBLESHOOTING.md` — current and covers RKE2-specific issues
-- [ ] `docs/runbooks/operations/RKE2_DEV_READINESS.md` — covers bootstrap procedure
+- [ ] `docs/ops/runbooks/TROUBLESHOOTING.md` — current and covers RKE2-specific issues
+- [ ] `docs/ops/runbooks/RKE2_DEV_READINESS.md` — covers bootstrap procedure
 - [ ] `docs/status/migrations/RKE2_ROLLOUT_MATRIX.md` — gate-by-gate rollout steps
 - [ ] `docs/policies/operations/MAINTENANCE_WINDOWS.md` — scheduled maintenance process
-- [ ] `docs/runbooks/operations/INCIDENT_TEMPLATES.md` — incident response templates
+- [ ] `docs/ops/runbooks/INCIDENT_TEMPLATES.md` — incident response templates
 - [ ] `docs/policies/operations/ONCALL_ROTATION.md` — current on-call contacts
 - [ ] `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md` — what is backed up and where
 
@@ -329,7 +329,7 @@ for b in sorted(data.get('items', []), key=lambda x: x['metadata']['creationTime
 ### 6.3 Ecommerce Deprecation Docs
 
 - [ ] `docs/reference/operations/ECOMMERCE_DEPRECATION_INVENTORY.md` — Oscar removal status documented
-- [ ] `docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md` — removal steps tracked
+- [ ] `docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md` — removal steps tracked
 
 **Gate 6 Sign-off**: `[ ]` Runbooks complete and current — reviewer: _____ date: _____
 
@@ -393,7 +393,7 @@ Security reviewer sign-off: _____________  Date: _______________
 
 ## Related Documents
 
-- `docs/runbooks/operations/RKE2_DEV_READINESS.md` — bootstrap procedure
+- `docs/ops/runbooks/RKE2_DEV_READINESS.md` — bootstrap procedure
 - `docs/status/migrations/RKE2_ROLLOUT_MATRIX.md` — gate-by-gate steps with rollback signals
 - `reports/2026/closures/RKE2_LMS_HANDOFF.md` — cross-repo touchpoint (infrastructure)
 - `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md` — environment deltas

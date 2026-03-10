@@ -13,7 +13,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-RUNBOOK_DOC="$REPO_ROOT/docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md"
+RUNBOOK_DOC="$REPO_ROOT/docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md"
 EVIDENCE_REPORT="$REPO_ROOT/docs/evidence/operations/authenticated-smoke-a11y-report.md"
 
 RED='\033[0;31m'
@@ -119,9 +119,9 @@ fi
 
 # Verify the runbook doc exists
 if [[ -f "$RUNBOOK_DOC" ]]; then
-  pass_check "AC-FRONT-032: Runbook doc exists at docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md"
+  pass_check "AC-FRONT-032: Runbook doc exists at docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md"
 else
-  fail_check "AC-FRONT-032: Runbook doc missing at docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md"
+  fail_check "AC-FRONT-032: Runbook doc missing at docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md"
 fi
 
 # Verify runbook has required sections

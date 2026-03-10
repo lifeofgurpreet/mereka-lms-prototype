@@ -131,7 +131,7 @@ make tutor-apply  # or ./infrastructure/tutor/apply-patches.sh
 
 **New paths**:
 - `docs/onboarding/QUICK_START_LOCAL.md`
-- `docs/runbooks/operations/TROUBLESHOOTING.md`
+- `docs/ops/runbooks/TROUBLESHOOTING.md`
 - `docs/reference/migrations/kajabi/README.md` (unchanged)
 
 ## Verification Checklist

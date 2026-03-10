@@ -191,7 +191,7 @@ After setup, you should be able to:
 1. Check `docs/` directory for guides
 2. Run `./scripts/qa/verify-setup.sh` to diagnose issues
 3. Check logs: `tutor local logs --tail=50 <service>`
-4. Review `docs/runbooks/operations/TROUBLESHOOTING.md`
+4. Review `docs/ops/runbooks/TROUBLESHOOTING.md`
 
 ---
 

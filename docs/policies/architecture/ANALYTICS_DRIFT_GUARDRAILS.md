@@ -276,7 +276,7 @@ When analytics deployment is approved, follow these steps to formally close the 
 11. **Enable Superset ingress** (in Caddy):
     ```bash
     # Apply patch to add Superset route to Caddyfile
-    # See docs/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md for full Caddy config
+    # See docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md for full Caddy config
     tutor local restart caddy
     ```
 
@@ -318,7 +318,7 @@ When analytics deployment is approved, follow these steps to formally close the 
 ### Phase 5: Handoff
 
 16. **Document operational procedures**:
-    - Follow `docs/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md` for ongoing operations
+    - Follow `docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md` for ongoing operations
     - Set up monitoring alerts (event lag, query performance, disk usage)
     - Schedule first dashboard review meeting with course creators
 
@@ -422,7 +422,7 @@ kubectl get pods -n mereka-lms -l app.kubernetes.io/part-of=aspects
 
 - ADR-017: Analytics Target Decision (`docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md`)
 - Analytics spec: `specs/analytics-pipeline_spec.md`
-- Superset deployment runbook: `docs/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md`
+- Superset deployment runbook: `docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md`
 - Capability matrix: `docs/reference/operations/CAPABILITY_MATRIX.md`
 
 ---

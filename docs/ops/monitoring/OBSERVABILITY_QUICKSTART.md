@@ -7,4 +7,4 @@ This document has moved to:
 - `../../runbooks/operations/OBSERVABILITY_QUICKSTART.md`
 
 Reason:
-- Fast operator execution guides now live under `docs/runbooks/operations/`.
+- Fast operator execution guides now live under `docs/ops/runbooks/`.

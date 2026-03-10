@@ -210,7 +210,7 @@ Tasks are grouped by category and ordered by dependency. Eachcompleted task incl
   - MongoDB Atlas storage
   - No separate forum service required
 
-- [x] **[M]** Update troubleshooting guide (`docs/runbooks/operations/TROUBLESHOOTING.md`) | Depends: Production verification
+- [x] **[M]** Update troubleshooting guide (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: Production verification
   - Added Meilisearch troubleshooting section
   - Updated forum diagnostic commands for Python forum
   - Removed Ruby forum references

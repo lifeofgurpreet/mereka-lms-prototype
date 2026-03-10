@@ -28,7 +28,7 @@ related_tutor_docs:
 - https://docs.tutor.edly.io
 related_specs: []
 related_runbooks:
-- docs/runbooks/operations/FORUM_AUTH_E2E.md
+- docs/ops/runbooks/FORUM_AUTH_E2E.md
 related_evidence: []
 fitness_functions:
 - scripts/qa/verify-auth-surfaces.sh prod

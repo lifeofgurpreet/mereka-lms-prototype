@@ -120,9 +120,9 @@ The pre-deploy release lane (below) uses the **strict** threshold (RMSE ≤ 2.0)
 2. If intentional (design update), re-capture baseline with `RUN_SCREENSHOTS=1`
 3. If unintentional, revert the offending change before deploy
 
-Cross-reference: `docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md` for the full RMSE
+Cross-reference: `docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md` for the full RMSE
 policy including the 5.0 / 2.0 gate lifecycle. See also
-`docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md` for ImageMagick command syntax.
+`docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md` for ImageMagick command syntax.
 
 ### 10 Critical Baseline Routes
 
@@ -274,8 +274,8 @@ Trigger the PR gate by including one of these keywords in the PR title:
 
 ## References
 
-- `docs/runbooks/operations/VISUAL_SMOKE_BASELINE.md` — RMSE policy, auth cookie flow, 5-route baseline
-- `docs/runbooks/operations/VISUAL_REGRESSION_RUNBOOK.md` — ImageMagick commands, diff triage
+- `docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md` — RMSE policy, auth cookie flow, 5-route baseline
+- `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md` — ImageMagick commands, diff triage
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — Branding governance and release ops
 - `docs/guides/branding/BRANDING_GUARDRAILS.md` — CSS/SCSS guardrails
 - `infrastructure/tutor/apply-patches.sh` — MerekaFooter injection source

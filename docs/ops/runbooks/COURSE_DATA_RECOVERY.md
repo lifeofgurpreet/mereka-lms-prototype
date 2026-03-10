@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/COURSE_DATA_RECOVERY.md`
+Canonical document: `docs/ops/runbooks/COURSE_DATA_RECOVERY.md`

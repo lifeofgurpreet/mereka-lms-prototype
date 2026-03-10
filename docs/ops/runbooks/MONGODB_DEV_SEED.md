@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/runbooks/operations/MONGODB_DEV_SEED.md`
+Canonical document: `docs/ops/runbooks/MONGODB_DEV_SEED.md`
