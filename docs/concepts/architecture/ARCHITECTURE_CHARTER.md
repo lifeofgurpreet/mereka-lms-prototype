@@ -129,8 +129,8 @@ The following roots are transitional in Wave 2 and must converge toward stub-onl
 - `docs/operations/**`
 - `docs/onboarding/**`
 - `docs/branding/**`
-- `docs/runbooks/**`
-- `docs/architecture/**`
+- `docs/runbooks/README.md`
+- `docs/architecture/README.md`
 
 They MAY preserve compatibility notes and replacement pointers during migration. They MUST NOT continue to grow as competing active roots.
 

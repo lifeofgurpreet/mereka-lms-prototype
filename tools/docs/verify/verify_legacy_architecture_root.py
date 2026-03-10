@@ -20,6 +20,7 @@ EXEMPT_REFERENCERS = {
     "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md",
     "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md",
     "docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md",
+    "docs/meta/docs-program/WAVE_RUNBOOKS_ROOT_RESET_TRACKER.md",
     "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
     "scripts/qa/verify-architecture-doc-path-drift.sh",
     "scripts/qa/test-verify-architecture-doc-path-drift.sh",

@@ -49,8 +49,8 @@ If a transitional or archive path contradicts a winning root, the winning root g
 
 | Artifact kind | Canonical root | Transitional roots | Cold / historical root |
 | --- | --- | --- | --- |
-| Living architecture / standards | `docs/concepts/architecture/**` | `docs/architecture/**` | `docs/archive/**` |
-| Operator procedures | `docs/ops/**` | `docs/operations/**`, `docs/runbooks/**` | `docs/archive/**` |
+| Living architecture / standards | `docs/concepts/architecture/**` | `docs/architecture/README.md` | `docs/archive/**` |
+| Operator procedures | `docs/ops/**` | `docs/operations/README.md`, `docs/runbooks/README.md` | `docs/archive/**` |
 | Human guidance / onboarding | `docs/guides/**` | `docs/onboarding/**`, `docs/branding/**` | `docs/archive/**` |
 | Stable lookup / reference | `docs/reference/**` | none | `docs/archive/**` |
 | Durable rules / policy | `docs/policies/**` | none | `docs/archive/**` |
@@ -143,7 +143,7 @@ These are locked for this wave:
 - `docs/evidence/**` is the single active evidence root
 - `docs/status/**` is the single active status root
 - `docs/concepts/architecture/**` is the canonical architecture narrative and living standards root
-- `docs/architecture/**` is transitional if retained
+- `docs/architecture/README.md` is the only retained tombstone path under the retired root
 - proposed `ADR-034` to `ADR-041` must leave the accepted ADR hot path and live in `docs/adr/rfc/`
 
 ## Local validation entrypoints

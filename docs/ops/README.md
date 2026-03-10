@@ -24,7 +24,7 @@ Choose the smallest subroot that matches the task:
 
 Do not use these losing roots as live operator authority:
 - `docs/operations/README.md` tombstone only
-- `docs/runbooks/**`
+- `docs/runbooks/README.md` tombstone only
 - `docs/archive/**`
 
 ## Subroots

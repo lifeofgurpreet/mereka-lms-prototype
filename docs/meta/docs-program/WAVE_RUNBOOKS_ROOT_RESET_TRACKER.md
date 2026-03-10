@@ -1,6 +1,6 @@
 # Wave Runbooks Root Reset Tracker
 
-Status: in_progress  
+Status: review_ready  
 Branch: `docs/runbooks-root-reset`  
 Worktree: `/home/gurpreet/projects/k8s/mereka-lms-wt-runbooks-root-reset`
 
@@ -16,7 +16,7 @@ workflow, and docs references intact.
 
 ### Inventory
 
-Current files under `docs/runbooks/**`:
+Original files under `docs/runbooks/**`:
 
 - `docs/runbooks/README.md`
 - `docs/runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md`
@@ -102,11 +102,32 @@ source of truth for this wave is this tracker plus the actual repo state on bran
 - The existing transitional-root verifier currently allows stub-only markdown under
   `docs/runbooks/**`; the end-state guard should be stricter once the collapse is complete.
 
+## Packets completed
+
+### Packet B
+
+- Rewrote active references from duplicate `docs/runbooks/**` paths to
+  `docs/ops/runbooks/**`.
+- Removed duplicate files under `operations/`, `architecture/`, `migrations/`, and the
+  root `LMS_RUNTIME_CLOSURE_RUNBOOK.md`.
+
+### Packet C/D
+
+- Reduced `docs/runbooks/**` to `README.md` only.
+- Added `tools/docs/verify/verify_legacy_runbooks_root.py`.
+- Wired the guard into `tools/docs/verify/verify-docs-policy.sh`.
+- Refreshed catalog, knowledge, and contract outputs touched by the collapse.
+
+## Final state
+
+```text
+docs/runbooks/
+  README.md
+```
+
+The canonical runbooks root is `docs/ops/runbooks/**`.
+
 ## Next packet
 
-Packet B should:
-
-1. rewrite the highest-signal active references from `docs/runbooks/operations/**` to
-   `docs/ops/runbooks/**`
-2. remove the corresponding duplicate wrapper files from `docs/runbooks/operations/**`
-3. validate docs policy and docs catalog freshness
+- None for this wave. The next cleanup should target a different retired root rather than
+  additional work under `docs/runbooks/**`.

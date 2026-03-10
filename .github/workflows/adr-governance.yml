@@ -4,9 +4,9 @@ on:
   pull_request:
     paths:
       - "docs/adr/**"
-      - "docs/architecture/**"
+      - "docs/concepts/architecture/**"
       - "evidence/**"
-      - "docs/runbooks/**"
+      - "docs/ops/runbooks/**"
       - "scripts/qa/run-adr-gates.sh"
       - "scripts/qa/generate_adr_readme.py"
       - "tools/docs/adr_ledger.py"
@@ -16,9 +16,9 @@ on:
     branches: ["main"]
     paths:
       - "docs/adr/**"
-      - "docs/architecture/**"
+      - "docs/concepts/architecture/**"
       - "evidence/**"
-      - "docs/runbooks/**"
+      - "docs/ops/runbooks/**"
       - "scripts/qa/run-adr-gates.sh"
       - "scripts/qa/generate_adr_readme.py"
       - "tools/docs/adr_ledger.py"

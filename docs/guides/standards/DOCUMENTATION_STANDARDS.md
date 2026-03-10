@@ -44,8 +44,8 @@ Do not place new canonical docs in transitional roots such as:
 - `docs/operations/README.md` tombstone only
 - `docs/onboarding/**`
 - `docs/branding/**`
-- `docs/runbooks/**`
-- `docs/architecture/**`
+- `docs/runbooks/README.md`
+- `docs/architecture/README.md`
 
 ## Required metadata
 

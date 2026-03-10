@@ -30,7 +30,7 @@ Use this checklist when writing or editing docs in this repository. This guide i
 - `docs/status/**` for active reporting
 - `docs/adr/**` for decisions and proposals
 
-Do not create new canonical docs under retired or transitional roots such as `docs/operations/README.md` or `docs/runbooks/**`.
+Do not create new canonical docs under retired or transitional roots such as `docs/operations/README.md`, `docs/runbooks/README.md`, or `docs/architecture/README.md`.
 
 ## 2. Metadata block
 

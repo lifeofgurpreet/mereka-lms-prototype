@@ -17,7 +17,7 @@ Use this root when the question is normative:
 
 Do not use these roots as live policy authority:
 - `docs/operations/README.md` tombstone only
-- `docs/runbooks/**`
+- `docs/runbooks/README.md` tombstone only
 - `docs/archive/**`
 
 ## Typical contents

@@ -9,7 +9,7 @@ if [[ -z "$changed" ]]; then
   exit 0
 fi
 
-if ! grep -qE '^(docs/adr/|docs/concepts/architecture/|evidence/|docs/runbooks/|scripts/qa/verify_adr_|scripts/qa/build_decision_graph\.py|scripts/qa/resolve_adr_impact\.py)' <<<"$changed"; then
+if ! grep -qE '^(docs/adr/|docs/concepts/architecture/|docs/ops/runbooks/|evidence/|scripts/qa/verify_adr_|scripts/qa/build_decision_graph\.py|scripts/qa/resolve_adr_impact\.py)' <<<"$changed"; then
   exit 0
 fi
 
