@@ -19,7 +19,7 @@ Use this root when the question is instructional:
 | Understand writing rules and docs governance | `standards/` | `../CONTRIBUTING.md` for the contributor workflow |
 
 Do not use these roots as the winning guidance surface:
-- `docs/onboarding/**`
+- `docs/onboarding/README.md` tombstone only
 - `docs/operations/README.md` tombstone only
 - `docs/runbooks/README.md` tombstone only
 - `docs/branding/README.md` tombstone only

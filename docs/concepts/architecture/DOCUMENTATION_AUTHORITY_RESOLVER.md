@@ -51,7 +51,7 @@ If a transitional or archive path contradicts a winning root, the winning root g
 | --- | --- | --- | --- |
 | Living architecture / standards | `docs/concepts/architecture/**` | `docs/architecture/README.md` | `docs/archive/**` |
 | Operator procedures | `docs/ops/**` | `docs/operations/README.md`, `docs/runbooks/README.md` | `docs/archive/**` |
-| Human guidance / onboarding | `docs/guides/**` | `docs/onboarding/**`, `docs/branding/README.md` | `docs/archive/**` |
+| Human guidance / onboarding | `docs/guides/**` | `docs/onboarding/README.md`, `docs/branding/README.md` | `docs/archive/**` |
 | Stable lookup / reference | `docs/reference/**` | none | `docs/archive/**` |
 | Durable rules / policy | `docs/policies/**` | none | `docs/archive/**` |
 | Docs-program internals / templates | `docs/meta/**` | none | `docs/archive/**` |
@@ -139,7 +139,7 @@ These are locked for this wave:
 
 - `docs/ops/**` is the canonical operator-doc root
 - `docs/reference/**`, `docs/policies/**`, and `docs/meta/**` are canonical roots and MUST NOT be treated as incidental side surfaces
-- `docs/operations/**` is stub-only transitional
+- `docs/operations/README.md` is the only retained tombstone path under the retired operations root
 - `docs/evidence/**` is the single active evidence root
 - `docs/status/**` is the single active status root
 - `docs/concepts/architecture/**` is the canonical architecture narrative and living standards root

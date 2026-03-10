@@ -593,7 +593,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 
 ## Suggested execution sequence
 
-1. Ops/operations cluster: repair paths in docs/ops/** and docs/operations/** (fastest operational impact).
+1. Ops/operations cluster: repair paths in docs/ops/** and `docs/operations/README.md` historical mentions (fastest operational impact).
 2. ADR/architecture cluster: repair docs/adr/** and docs/concepts/architecture/** paths.
-3. Guide/onboarding cluster: repair docs/guides/** and docs/onboarding/** paths.
+3. Guide/onboarding cluster: repair docs/guides/** and `docs/onboarding/README.md` historical mentions.
 4. Re-run the non-archive command-reference audit and confirm missing references trend down.
