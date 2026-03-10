@@ -35,7 +35,6 @@ This is the canonical onboarding index for local development and day-to-day work
 - [`README_LOCAL.md`](README_LOCAL.md)
 - [`REPOSITORY_GUIDE.md`](REPOSITORY_GUIDE.md)
 - [`TEAM_SCALING_GUIDE.md`](TEAM_SCALING_GUIDE.md)
-- [`DOCUMENTATION_INDEX.md`](DOCUMENTATION_INDEX.md)
 
 ## What this directory is not
 

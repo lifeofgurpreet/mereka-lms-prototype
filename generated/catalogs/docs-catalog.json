@@ -4473,15 +4473,6 @@
     "type": "guide"
   },
   {
-    "canonical_conflict_group": "documentation-index",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Platform Team",
-    "path": "guides/onboarding/DOCUMENTATION_INDEX.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": "2025-11-12",
