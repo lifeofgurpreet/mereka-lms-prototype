@@ -7,7 +7,7 @@ Use this root when you need the operator-facing monitoring and observability sur
 
 | If you need to... | Read this first | Then go deeper in |
 |---|---|---|
-| Get oriented quickly on the monitoring surface | [`OBSERVABILITY_QUICKSTART.md`](OBSERVABILITY_QUICKSTART.md) | [`../../reference/operations/README.md`](../../reference/operations/README.md) |
+| Get oriented quickly on the monitoring surface | [`../runbooks/OBSERVABILITY_QUICKSTART.md`](../runbooks/OBSERVABILITY_QUICKSTART.md) | [`../../reference/operations/README.md`](../../reference/operations/README.md) |
 | Check logging and Sentry behavior | [`LOGGING_AND_SENTRY.md`](LOGGING_AND_SENTRY.md) | [`../../reference/operations/MONITORING.md`](../../reference/operations/MONITORING.md) |
 | Understand who owns what in observability | [`OBSERVABILITY_OWNERSHIP.md`](OBSERVABILITY_OWNERSHIP.md) | [`../../policies/operations/README.md`](../../policies/operations/README.md) |
 | Compare expected versus actual monitoring coverage | [`OBSERVABILITY_PARITY_MATRIX.md`](OBSERVABILITY_PARITY_MATRIX.md) | [`../../status/readiness/README.md`](../../status/readiness/README.md) |
@@ -30,7 +30,7 @@ Use this root when you need the operator-facing monitoring and observability sur
 
 | Doc | Use it when... |
 |---|---|
-| [`OBSERVABILITY_QUICKSTART.md`](OBSERVABILITY_QUICKSTART.md) | You need the fastest route into the observability surface. |
+| [`../runbooks/OBSERVABILITY_QUICKSTART.md`](../runbooks/OBSERVABILITY_QUICKSTART.md) | You need the fastest route into the observability surface. |
 | [`LOGGING_AND_SENTRY.md`](LOGGING_AND_SENTRY.md) | You are checking application logs, Sentry wiring, or error tracking posture. |
 | [`OBSERVABILITY_OWNERSHIP.md`](OBSERVABILITY_OWNERSHIP.md) | You need to know who owns an alerting or telemetry concern. |
 | [`OBSERVABILITY_PARITY_MATRIX.md`](OBSERVABILITY_PARITY_MATRIX.md) | You are checking whether expected telemetry is actually present. |

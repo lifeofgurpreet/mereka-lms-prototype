@@ -403,7 +403,7 @@ Full SOP: [ALERT_TUNING_SOP.md](../../ops/runbooks/ALERT_TUNING_SOP.md)
 | Document | Purpose |
 |---|---|
 | [site-down.md](../../ops/runbooks/site-down.md) | Quick fixes for common symptoms |
-| [OBSERVABILITY_QUICKSTART.md](../../ops/monitoring/OBSERVABILITY_QUICKSTART.md) | 2-minute health check script sequence |
+| [OBSERVABILITY_QUICKSTART.md](../../ops/runbooks/OBSERVABILITY_QUICKSTART.md) | 2-minute health check script sequence |
 | [ONCALL_OBSERVABILITY_PLAYBOOK.md](../../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md) | Structured on-call health sequence |
 | [ONCALL_ROTATION.md](../../policies/operations/ONCALL_ROTATION.md) | On-call schedule and escalation structure |
 | [INCIDENT_RESPONSE.md](../../ops/runbooks/INCIDENT_RESPONSE.md) | Incident declaration and triage workflow |

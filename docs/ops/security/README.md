@@ -8,8 +8,8 @@ This directory contains the canonical operator-facing security surface for secre
 | If you need to... | Read this first | Then go deeper in |
 |---|---|---|
 | Check what actions operators are allowed to take | [`ALLOWED_ACTIONS_POLICY.md`](ALLOWED_ACTIONS_POLICY.md) | [`../../policies/operations/README.md`](../../policies/operations/README.md) |
-| Roll out or verify auth changes | [`AUTH_CHANGE_CHECKLIST.md`](AUTH_CHANGE_CHECKLIST.md) | [`ENTERPRISE_SSO_GUIDE.md`](ENTERPRISE_SSO_GUIDE.md) |
-| Check the enforced auth contract | [`AUTH_HARDENING_SPEC.md`](AUTH_HARDENING_SPEC.md) | [`in-cluster-auth-verification.md`](in-cluster-auth-verification.md) |
+| Roll out or verify auth changes | [`../runbooks/AUTH_CHANGE_CHECKLIST.md`](../runbooks/AUTH_CHANGE_CHECKLIST.md) | [`../runbooks/ENTERPRISE_SSO_GUIDE.md`](../runbooks/ENTERPRISE_SSO_GUIDE.md) |
+| Check the enforced auth contract | [`AUTH_HARDENING_SPEC.md`](AUTH_HARDENING_SPEC.md) | [`../runbooks/IN_CLUSTER_AUTH_VERIFICATION.md`](../runbooks/IN_CLUSTER_AUTH_VERIFICATION.md) |
 | Check secret posture or inventory | [`SECRET_SCANNING.md`](SECRET_SCANNING.md) | [`SECRETS_SNAPSHOT.md`](SECRETS_SNAPSHOT.md) |
 | Handle mobile secret concerns | [`MOBILE_SECRETS_MANAGEMENT.md`](MOBILE_SECRETS_MANAGEMENT.md) | [`../../reference/operations/README.md`](../../reference/operations/README.md) |
 
@@ -24,12 +24,12 @@ This directory contains the canonical operator-facing security surface for secre
 
 - [`ALLOWED_ACTIONS_POLICY.md`](ALLOWED_ACTIONS_POLICY.md) for operator action boundaries
 - [`AUTH_HARDENING_SPEC.md`](AUTH_HARDENING_SPEC.md) for the enforced auth hardening contract
-- [`AUTH_CHANGE_CHECKLIST.md`](AUTH_CHANGE_CHECKLIST.md) for auth rollout and change sequencing
-- [`ENTERPRISE_SSO_GUIDE.md`](ENTERPRISE_SSO_GUIDE.md) for enterprise SSO operational setup
+- [`../runbooks/AUTH_CHANGE_CHECKLIST.md`](../runbooks/AUTH_CHANGE_CHECKLIST.md) for auth rollout and change sequencing
+- [`../runbooks/ENTERPRISE_SSO_GUIDE.md`](../runbooks/ENTERPRISE_SSO_GUIDE.md) for enterprise SSO operational setup
 - [`SECRET_SCANNING.md`](SECRET_SCANNING.md) for secret scanning expectations and posture
 - [`SECRETS_SNAPSHOT.md`](SECRETS_SNAPSHOT.md) for current secret inventory snapshots
 - [`MOBILE_SECRETS_MANAGEMENT.md`](MOBILE_SECRETS_MANAGEMENT.md) for mobile secret handling
-- [`in-cluster-auth-verification.md`](in-cluster-auth-verification.md) for runtime auth verification inside the cluster
+- [`../runbooks/IN_CLUSTER_AUTH_VERIFICATION.md`](../runbooks/IN_CLUSTER_AUTH_VERIFICATION.md) for runtime auth verification inside the cluster
 
 ## Supporting artifacts
 

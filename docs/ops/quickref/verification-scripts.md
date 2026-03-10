@@ -59,9 +59,9 @@ python3 scripts/qa/generate-verification-catalog.py
 ```
 
 Catalog outputs:
-- `../../operations/verification/verification_catalog.json`
-- `../../operations/verification/VERIFICATION_CATALOG.md`
-- `../../operations/verification/VERIFICATION_GOVERNANCE.md`
+- `../../../verification/catalogs/verification_catalog.json`
+- `../../../verification/catalogs/VERIFICATION_CATALOG.md`
+- `../../../verification/assurance/VERIFICATION_GOVERNANCE.md`
 
 ---
 
@@ -512,4 +512,4 @@ jobs:
 - [Kubectl Cheatsheet](./kubectl-cheatsheet.md) - K8s operations
 - [Tutor Commands](./tutor-commands.md) - Tutor operations
 - [Common Troubleshooting](./common-troubleshooting.md) - 1-page debug guide
-- [Verification Report](../../operations/VERIFICATION_REPORT.md) - Latest validation results
+- [Verification Catalog](../../../verification/catalogs/VERIFICATION_CATALOG.md) - Current verification surface and entrypoints

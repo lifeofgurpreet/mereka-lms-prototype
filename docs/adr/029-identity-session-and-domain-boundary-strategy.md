@@ -31,7 +31,7 @@ related_tutor_docs:
 - https://docs.tutor.edly.io
 related_specs: []
 related_runbooks:
-- docs/ops/security/ENTERPRISE_SSO_GUIDE.md
+- docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md
 - docs/reference/operations/OPENEDX_HOSTNAMES.md
 - docs/reference/operations/DOMAIN_MATRIX.md
 related_evidence: []

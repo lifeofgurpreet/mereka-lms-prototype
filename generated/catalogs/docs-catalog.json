@@ -6354,15 +6354,6 @@
     "type": "runbook"
   },
   {
-    "canonical_conflict_group": "observability-quickstart",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/monitoring/OBSERVABILITY_QUICKSTART.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
     "canonical_conflict_group": "observability-roadmap-mereka-lms",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
@@ -7875,15 +7866,6 @@
     "type": "runbook"
   },
   {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/security/AUTH_CHANGE_CHECKLIST.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
     "canonical_conflict_group": "auth-hardening-spec",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
@@ -7898,15 +7880,6 @@
     "last_verified_or_updated": "2026-03-08",
     "owner": "Docs Team",
     "path": "ops/security/AUTH_PR_SECTION.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "enterprise-sso-guide",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/security/ENTERPRISE_SSO_GUIDE.md",
     "status": "superseded",
     "type": "runbook"
   },
@@ -7952,15 +7925,6 @@
     "last_verified_or_updated": "2026-03-08",
     "owner": "Docs Team",
     "path": "ops/security/SECRET_SCANNING.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "ops/security/in-cluster-auth-verification.md",
     "status": "superseded",
     "type": "runbook"
   },
@@ -9137,19 +9101,19 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/ASPECTS_ANALYTICS_SETUP.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -9227,10 +9191,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/COMMIT_SIGNING.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -9281,10 +9245,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/EMAIL_PIPELINE.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -9308,10 +9272,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/FORUM_MEILISEARCH.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -9353,10 +9317,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/LIBRARIES_GCS_SETUP.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -9533,10 +9497,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/SLSA_PROVENANCE.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -9569,10 +9533,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
     "path": "reference/operations/TTFS_ONBOARDING.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {

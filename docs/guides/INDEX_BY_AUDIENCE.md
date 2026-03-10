@@ -37,7 +37,7 @@ _Deploy, scale, monitor, and maintain the platform day-to-day_
 **Daily Operations**:
 - [QUICK_REFERENCE.md](../ops/quickref/QUICK_REFERENCE.md) - Common commands
 - [ACCESS_URLS.md](../ops/quickref/access-urls.md) - All system URLs
-- [OBSERVABILITY_QUICKSTART.md](../ops/monitoring/OBSERVABILITY_QUICKSTART.md) - Fast health checks
+- [OBSERVABILITY_QUICKSTART.md](../ops/runbooks/OBSERVABILITY_QUICKSTART.md) - Fast health checks
 
 **Configuration**:
 - [TUTOR_CONFIG_SAFETY.md](../policies/operations/TUTOR_CONFIG_SAFETY.md) - Safe config changes
@@ -105,7 +105,7 @@ _Incident response, performance troubleshooting, disaster recovery_
 
 **Diagnostics**:
 - [TROUBLESHOOTING.md](../ops/runbooks/site-down.md) - Common issues checklist
-- [OBSERVABILITY_QUICKSTART.md](../ops/monitoring/OBSERVABILITY_QUICKSTART.md) - Fast health audit
+- [OBSERVABILITY_QUICKSTART.md](../ops/runbooks/OBSERVABILITY_QUICKSTART.md) - Fast health audit
 - [DEPLOYMENT_VERIFICATION.md](../ops/runbooks/DEPLOYMENT_VERIFICATION.md) - Post-deploy checks
 
 **Recovery**:
@@ -332,7 +332,7 @@ _Security configs, compliance, audit logs, secrets management_
 #### Foundational (First Week)
 5. [Data Privacy Compliance Runbook](../archive/superseded/runbooks/data-privacy-compliance-runbook.md) - GDPR/PDPA compliance
 6. [Auth and Permissions](../reference/operations/AUTH_AND_PERMISSIONS.md) - Auth model
-7. [In-Cluster Auth Verification](../ops/security/in-cluster-auth-verification.md) - Auth surface checks
+7. [In-Cluster Auth Verification](../ops/runbooks/IN_CLUSTER_AUTH_VERIFICATION.md) - Auth surface checks
 8. [Secret Rotation Checklist](../ops/runbooks/SECRET_ROTATION_CHECKLIST.md) - Secret rotation
 
 #### Advanced Topics
@@ -352,7 +352,7 @@ _Security configs, compliance, audit logs, secrets management_
 **Authentication**:
 - [AUTH_HARDENING_SPEC.md](../ops/security/AUTH_HARDENING_SPEC.md) - Hardening spec
 - [AUTH_AND_PERMISSIONS.md](../reference/operations/AUTH_AND_PERMISSIONS.md) - Permission model
-- [in-cluster-auth-verification.md](../ops/security/in-cluster-auth-verification.md) - Verification
+- [in-cluster-auth-verification.md](../ops/runbooks/IN_CLUSTER_AUTH_VERIFICATION.md) - Verification
 - [RFC-claim-based-role-sync.md](../adr/rfc/RFC-claim-based-role-sync.md) - Role sync
 
 **Compliance**:

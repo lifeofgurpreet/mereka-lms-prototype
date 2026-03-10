@@ -537,9 +537,9 @@ make qa-smoke
 ## Get More Help
 
 - **Full troubleshooting**: [K8s Operations Guide](../../guides/admin/K8S_OPERATIONS_GUIDE.md)
-- **Tutor config**: [Tutor Config Safety](../../operations/TUTOR_CONFIG_SAFETY.md)
-- **Incident templates**: [Incident Templates](../../operations/INCIDENT_TEMPLATES.md)
-- **Oncall playbook**: [Oncall Observability Playbook](../../operations/ONCALL_OBSERVABILITY_PLAYBOOK.md)
+- **Tutor config**: [Tutor Config Safety](../../policies/operations/TUTOR_CONFIG_SAFETY.md)
+- **Incident templates**: [Incident Templates](../runbooks/INCIDENT_TEMPLATES.md)
+- **Oncall playbook**: [Oncall Observability Playbook](../runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md)
 
 ---
 

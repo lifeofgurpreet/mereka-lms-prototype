@@ -508,4 +508,4 @@ tutor local restart
 - [Kubectl Cheatsheet](./kubectl-cheatsheet.md) - Kubernetes operations
 - [Verification Scripts](./verification-scripts.md) - Automated checks
 - [Common Troubleshooting](./common-troubleshooting.md) - 1-page debug guide
-- [Tutor Config Safety](../../operations/TUTOR_CONFIG_SAFETY.md) - Config best practices
+- [Tutor Config Safety](../../policies/operations/TUTOR_CONFIG_SAFETY.md) - Config best practices

@@ -173,7 +173,7 @@ kubectl exec -n mereka-lms $DISCOVERY_POD -- python manage.py dbshell
 
 - **Full Setup Guide**: [DISCOVERY_DEMO_COURSE_SETUP.md](../../ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md)
 - **MongoDB Issue**: [MONGODB_PERMISSIONS_ISSUE.md](../../ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md)
-- **General Troubleshooting**: [TROUBLESHOOTING.md](../../operations/TROUBLESHOOTING.md)
+- **General Troubleshooting**: [TROUBLESHOOTING.md](../runbooks/TROUBLESHOOTING.md)
 
 ## Manual Commands
 
