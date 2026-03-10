@@ -17,6 +17,7 @@ on:
       - "scripts/qa/run-skill-runtime-gates.sh"
       - "scripts/qa/run-agent-pack-runtime-gates.sh"
       - "scripts/qa/run-decision-runtime-gates.sh"
+      - "scripts/qa/run-execution-proof-runtime-gates.sh"
   push:
     paths:
       - "docs/**"
@@ -33,6 +34,7 @@ on:
       - "scripts/qa/run-skill-runtime-gates.sh"
       - "scripts/qa/run-agent-pack-runtime-gates.sh"
       - "scripts/qa/run-decision-runtime-gates.sh"
+      - "scripts/qa/run-execution-proof-runtime-gates.sh"
 
 permissions: {}
 
@@ -87,3 +89,13 @@ jobs:
           fi
           chmod +x scripts/qa/run-decision-runtime-gates.sh
           ./scripts/qa/run-decision-runtime-gates.sh
+
+      - name: Verify execution proof runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-execution-proof-runtime-gates.sh
+          ./scripts/qa/run-execution-proof-runtime-gates.sh
