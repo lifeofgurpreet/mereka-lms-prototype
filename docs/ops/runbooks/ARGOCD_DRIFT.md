@@ -91,4 +91,4 @@ The drift check runs every 6 hours via `.github/workflows/argocd-drift-check.yml
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `BBI_INFRA` | `/home/gurpreet/projects/k8s/infrastructure` | Path to infrastructure repo clone |
+| `BBI_INFRA` | `<path-to-bbi-infrastructure>` | Path to infrastructure repo clone |
