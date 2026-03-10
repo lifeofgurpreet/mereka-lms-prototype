@@ -1,5 +1,5 @@
 # Microsoft Community Training → Open edX Migration Plan
-_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2025-08-31_
+_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2026-03-10_
 
 > **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
 
@@ -41,13 +41,13 @@ The MCT Swagger UI is available at:
   - `Authorization: Bearer <token>`
   - `ClientType: service` (required by MCT API)
 
-**B. Token-Based Authentication** (For testing/exploration)
+**B. Token-Based Authentication** (Exploration only; do not rely on this for repeatable operator workflows)
 - Obtain access token manually:
   1. Log into MCT portal (`https://learn.skillourfuture.org`) in a browser
   2. Open browser DevTools (F12) → Network tab
   3. Filter by "Fetch/XHR" requests
   4. Make any API call (e.g., load a course page)
-  5. Inspect request headers → Find `Authorization: Bearer <token>`
+  5. Inspect request headers only if you need to understand the interactive flow; do not persist copied tokens in docs, scripts, or shell history
   6. Copy the token value
 - Useful for manual testing and Swagger UI exploration
 - **Note:** Tokens expire; refresh by logging in again
@@ -59,10 +59,10 @@ MCT_BASE_URL=learn.skillourfuture.org  # Domain only (no https://)
 MCT_API_VERSION=v1  # Recommended: v1 (most comprehensive)
 
 # Service-to-Service Auth (Option A - Recommended)
-MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9
+MCT_CLIENT_ID=<retrieve-from-secret-source>
 MCT_CLIENT_SECRET=<your-secret>
-MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da
-MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3
+MCT_TENANT_ID=<retrieve-from-secret-source>
+MCT_API_URI=<retrieve-from-secret-source>
 
 # OR Token-Based Auth (Option B - Testing only)
 MCT_ACCESS_TOKEN=<bearer-token-from-browser>
@@ -170,10 +170,10 @@ Create `scripts/migrations/mct/mct-export.mjs` (similar to `scripts/migrations/k
 ```bash
 # Export all resources using service-to-service auth (recommended):
 MCT_BASE_URL=learn.skillourfuture.org \
-MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
+MCT_API_URI=<retrieve-from-secret-source> \
 MCT_CLIENT_ID=<client-id> \
 MCT_CLIENT_SECRET=<client-secret> \
-MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
+MCT_TENANT_ID=<retrieve-from-secret-source> \
 node scripts/migrations/mct/mct-export.mjs
 
 # Export specific resources:

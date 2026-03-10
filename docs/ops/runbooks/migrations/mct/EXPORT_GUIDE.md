@@ -1,5 +1,5 @@
 # MCT Export Documentation
-_Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-08-20_
+_Audience: Platform Eng • Owner: Migration Squad • Last verified: 2026-03-10_
 
 **Complete guide for exporting data from Microsoft Community Training (MCT) platform**
 
@@ -48,9 +48,7 @@ The MCT export script (`scripts/migrations/mct/mct-export.mjs`) exports data fro
    ```
 
 2. **Azure AD App Registration** - Service principal with MCT API permissions
-   - App ID: `caa4dce3-e49c-4c09-9160-031d51bfd2a9`
-   - Tenant ID: `b1aab053-6242-46ec-9cf8-bd02e63dd2da`
-   - API URI: `api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4`
+   - Retrieve the app ID, tenant ID, and API URI from the team-managed secret/config source before running the export.
 
 ### Credential Refresh (IMPORTANT)
 
@@ -58,16 +56,16 @@ The MCT export script (`scripts/migrations/mct/mct-export.mjs`) exports data fro
 
 ```bash
 # List current credentials (to see expiration)
-az ad app credential list --id caa4dce3-e49c-4c09-9160-031d51bfd2a9
+az ad app credential list --id <mct-app-id>
 
 # Create new client secret
-az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
+az ad app credential reset --id <mct-app-id> --append
 
 # Output will show:
 # {
-#   "appId": "caa4dce3-e49c-4c09-9160-031d51bfd2a9",
+#   "appId": "<mct-app-id>",
 #   "password": "NEW_SECRET_HERE",
-#   "tenant": "b1aab053-6242-46ec-9cf8-bd02e63dd2da"
+#   "tenant": "<mct-tenant-id>"
 # }
 ```
 
@@ -78,10 +76,10 @@ az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
 ```bash
 # Required
 MCT_BASE_URL=learn.skillourfuture.org  # Domain only (no https://)
-MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4
-MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9
-MCT_CLIENT_SECRET=<secret-from-azure-cli>
-MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da
+MCT_API_URI=<retrieve-from-secret-source>
+MCT_CLIENT_ID=<retrieve-from-secret-source>
+MCT_CLIENT_SECRET=<retrieve-from-secret-source>
+MCT_TENANT_ID=<retrieve-from-secret-source>
 
 # Optional
 MCT_API_VERSION=v1  # Default: v1 (recommended)
@@ -96,10 +94,10 @@ MCT_API_VERSION=v1  # Default: v1 (recommended)
 ```bash
 # Export all default resources
 MCT_BASE_URL=learn.skillourfuture.org \
-MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4 \
-MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
+MCT_API_URI=<retrieve-from-secret-source> \
+MCT_CLIENT_ID=<retrieve-from-secret-source> \
 MCT_CLIENT_SECRET='<your-secret>' \
-MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
+MCT_TENANT_ID=<retrieve-from-secret-source> \
 node scripts/migrations/mct/mct-export.mjs
 ```
 
@@ -304,7 +302,7 @@ All API requests must include:
 
 **Solution:** Refresh the client secret using Azure CLI:
 ```bash
-az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
+az ad app credential reset --id <mct-app-id> --append
 ```
 
 #### Error: `AADSTS7000215: Invalid client secret provided`
@@ -316,8 +314,8 @@ az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
 
 **Solution:**
 1. Verify secret is copied correctly (no extra spaces)
-2. Create new secret: `az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append`
-3. Verify app ID matches: `caa4dce3-e49c-4c09-9160-031d51bfd2a9`
+2. Create new secret: `az ad app credential reset --id <mct-app-id> --append`
+3. Verify the app ID matches the team-managed MCT application registration
 
 #### Error: `AADSTS65001: The user or administrator has not consented`
 
@@ -386,16 +384,16 @@ curl -H "Authorization: Bearer <token>" \
 ### Current Credentials
 
 **App Registration:**
-- **App ID:** `caa4dce3-e49c-4c09-9160-031d51bfd2a9`
-- **Tenant ID:** `b1aab053-6242-46ec-9cf8-bd02e63dd2da`
-- **API URI:** `api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4`
+- **App ID:** retrieve from the team-managed secret/config source
+- **Tenant ID:** retrieve from the team-managed secret/config source
+- **API URI:** retrieve from the team-managed secret/config source
 - **Base URL:** `learn.skillourfuture.org`
 
 ### Checking Credential Expiration
 
 ```bash
 # List all credentials for the app
-az ad app credential list --id caa4dce3-e49c-4c09-9160-031d51bfd2a9
+az ad app credential list --id <mct-app-id>
 
 # Output shows:
 # - keyId
@@ -407,10 +405,10 @@ az ad app credential list --id caa4dce3-e49c-4c09-9160-031d51bfd2a9
 
 ```bash
 # Create new secret (keeps old ones active)
-az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
+az ad app credential reset --id <mct-app-id> --append
 
 # Create new secret (revokes old ones immediately)
-az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9
+az ad app credential reset --id <mct-app-id>
 ```
 
 **⚠️ Important:** 
@@ -424,18 +422,18 @@ az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9
 **Do NOT commit secrets to git!**
 
 **Recommended:**
-1. Store in environment variables
-2. Use secret management (Azure Key Vault, AWS Secrets Manager)
-3. Use `.env` file (add to `.gitignore`)
-4. Document in secure password manager
+1. Retrieve values from the approved team-managed secret source
+2. Export them into the current shell only for the duration of the run
+3. If a local `.env` file is temporarily required, keep it out of git and delete it after use
+4. Document only the retrieval process in docs, not the values themselves
 
 **Example `.env` file:**
 ```bash
 MCT_BASE_URL=learn.skillourfuture.org
-MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4
-MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9
+MCT_API_URI=<retrieve-from-secret-source>
+MCT_CLIENT_ID=<retrieve-from-secret-source>
 MCT_CLIENT_SECRET=<your-secret-here>
-MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da
+MCT_TENANT_ID=<retrieve-from-secret-source>
 ```
 
 Then source it:
@@ -478,16 +476,16 @@ node scripts/migrations/mct/mct-export.mjs
 
 ### Refresh Credentials
 ```bash
-az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
+az ad app credential reset --id <mct-app-id> --append
 ```
 
 ### Test Authentication
 ```bash
 MCT_BASE_URL=learn.skillourfuture.org \
-MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4 \
-MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
+MCT_API_URI=<retrieve-from-secret-source> \
+MCT_CLIENT_ID=<retrieve-from-secret-source> \
 MCT_CLIENT_SECRET='<secret>' \
-MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
+MCT_TENANT_ID=<retrieve-from-secret-source> \
 node scripts/migrations/mct/mct-export.mjs --resources organizations --start-page 1 --end-page 1
 ```
 
@@ -501,10 +499,10 @@ node scripts/migrations/mct/mct-export.mjs --dry-run
 ```bash
 # Set credentials in environment
 export MCT_BASE_URL=learn.skillourfuture.org
-export MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4
-export MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9
+export MCT_API_URI=<retrieve-from-secret-source>
+export MCT_CLIENT_ID=<retrieve-from-secret-source>
 export MCT_CLIENT_SECRET='<secret>'
-export MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da
+export MCT_TENANT_ID=<retrieve-from-secret-source>
 
 # Run export
 node scripts/migrations/mct/mct-export.mjs
@@ -546,7 +544,7 @@ node scripts/migrations/mct/mct-export.mjs
 
 1. **Credentials Expire** - Client secrets expire every 6-12 months. Use Azure CLI to refresh:
    ```bash
-   az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
+   az ad app credential reset --id <mct-app-id> --append
    ```
 
 2. **API Quirks** - Reports endpoints return CSV (not JSON). Script handles this automatically.

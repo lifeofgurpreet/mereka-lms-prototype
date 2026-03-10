@@ -7364,7 +7364,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-20",
+    "last_verified_or_updated": "2026-03-10",
     "owner": "Migration Squad",
     "path": "ops/runbooks/migrations/mct/EXPORT_GUIDE.md",
     "status": "supporting",
@@ -7373,7 +7373,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-31",
+    "last_verified_or_updated": "2026-03-10",
     "owner": "Migration Squad",
     "path": "ops/runbooks/migrations/mct/MIGRATION_PLAN.md",
     "status": "supporting",
