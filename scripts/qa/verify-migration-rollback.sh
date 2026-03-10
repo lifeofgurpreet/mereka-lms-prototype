@@ -38,9 +38,9 @@ echo
 
 # Check 1: Kajabi rollback documentation exists
 echo "--- Kajabi Rollback Documentation ---"
-kajabi_rollback="$REPO_ROOT/docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md"
+kajabi_rollback="$REPO_ROOT/docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md"
 if [[ -f "$kajabi_rollback" ]]; then
-  pass "Kajabi rollback doc exists: docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md"
+  pass "Kajabi rollback doc exists: docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md"
 
   # Check it mentions database restore
   if grep -qiE "(restore-db|restore|database backup|mysql.*dump)" "$kajabi_rollback"; then

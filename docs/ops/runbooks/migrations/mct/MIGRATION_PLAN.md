@@ -391,7 +391,7 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 
 - [Microsoft Community Training API Documentation](https://learn.microsoft.com/en-us/azure/industry/training-services/microsoft-community-training/ga-version/get-started/ga-version-migration/rest-api-documentation)
 - **Working MCT Integration:** `hubspot-webhook-mct/functions/index.js` - Production code showing authentication and API usage patterns
-- **📖 Complete Export Guide:** `docs/migrations/mct/EXPORT_GUIDE.md` - Comprehensive documentation for MCT export process
+- **📖 Complete Export Guide:** `docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md` - Comprehensive documentation for MCT export process
 - Kajabi migration pattern: `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
 - Kajabi transformation scripts: `scripts/migrations/kajabi/`
 - Open edX bulk import commands: `docs/guides/onboarding/LOCAL_SETUP.md`

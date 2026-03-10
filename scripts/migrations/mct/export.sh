@@ -180,8 +180,8 @@ fi
 # Check documentation references
 echo ""
 echo "Checking for export documentation..."
-if [[ -f "docs/migrations/mct/EXPORT_GUIDE.md" ]]; then
-  pass "Export guide exists: docs/migrations/mct/EXPORT_GUIDE.md"
+if [[ -f "docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md" ]]; then
+  pass "Export guide exists: docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md"
 else
   skip "Export guide not found (may be in different location)"
 fi

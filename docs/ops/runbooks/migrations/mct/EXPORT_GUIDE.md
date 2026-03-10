@@ -514,7 +514,7 @@ node scripts/migrations/mct/mct-export.mjs
 
 ## Related Documentation
 
-- `docs/migrations/mct/MIGRATION_PLAN.md` - Overall migration strategy
+- `docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md` - Overall migration strategy
 - `docs/reference/migrations/mct/API_EXPLORATION.md` - API endpoint discovery
 - `docs/migrations/mct/EXPORT_TEST_RESULTS.md` - Test results
 - `docs/migrations/mct/EXPORT_SUCCESS.md` - Success summary
@@ -565,9 +565,9 @@ node scripts/migrations/mct/mct-export.mjs
 
 ### Documentation Hierarchy
 
-1. **Start Here:** `docs/migrations/mct/EXPORT_GUIDE.md` (this file) - Complete guide
+1. **Start Here:** `docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md` (this file) - Complete guide
 2. **Reference:** `docs/reference/migrations/mct/DOCUMENTATION_INDEX.md` - Index of all docs
-3. **Strategy:** `docs/migrations/mct/MIGRATION_PLAN.md` - Overall migration plan
+3. **Strategy:** `docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md` - Overall migration plan
 4. **API Details:** `docs/reference/migrations/mct/API_EXPLORATION.md` - Endpoint discovery
 5. **Code Reference:** `hubspot-webhook-mct/functions/index.js` - Working auth pattern
 
@@ -576,7 +576,7 @@ node scripts/migrations/mct/mct-export.mjs
 ## Related Documentation
 
 - `docs/reference/migrations/mct/DOCUMENTATION_INDEX.md` - Index of all MCT documentation
-- `docs/migrations/mct/MIGRATION_PLAN.md` - Overall migration strategy
+- `docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md` - Overall migration strategy
 - `docs/reference/migrations/mct/API_EXPLORATION.md` - API endpoint discovery
 - `docs/migrations/mct/EXPORT_TEST_RESULTS.md` - Test results
 - `docs/migrations/mct/EXPORT_SUCCESS.md` - Success summary

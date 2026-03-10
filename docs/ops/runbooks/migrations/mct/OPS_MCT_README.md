@@ -74,7 +74,7 @@ python scripts/migrations/mct/prepare_openedx_imports.py \
 
 ### 5. Import into Open edX
 
-See `docs/migrations/mct/MIGRATION_PLAN.md` for detailed import instructions.
+See `docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md` for detailed import instructions.
 
 ## Status
 

@@ -7,14 +7,14 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
 
 ### Primary Documentation
 
-1. **`docs/migrations/mct/EXPORT_GUIDE.md`** ⭐ **START HERE**
+1. **`docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md`** ⭐ **START HERE**
    - Complete guide for MCT export process
    - Authentication setup and credential management
    - API endpoints and data formats
    - Troubleshooting guide
    - Quick reference commands
 
-2. **`docs/migrations/mct/MIGRATION_PLAN.md`**
+2. **`docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md`**
    - Overall migration strategy
    - Phase-by-phase plan
    - Data entity mappings
@@ -38,7 +38,7 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
    - Export statistics
    - Data quality verification
 
-6. **`docs/migrations/mct/EXPORT_TESTING.md`**
+6. **`docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md`**
    - Testing procedures
    - Step-by-step test checklist
    - Success criteria
@@ -62,7 +62,7 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
 
 ### For New Agents
 
-1. **Read:** `docs/migrations/mct/EXPORT_GUIDE.md` (complete guide)
+1. **Read:** `docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md` (complete guide)
 2. **Check:** Credentials status (see Credential Management section)
 3. **Test:** Run dry-run first: `node scripts/migrations/mct/mct-export.mjs --dry-run`
 4. **Export:** Follow Quick Reference section in guide
@@ -124,7 +124,7 @@ node scripts/migrations/mct/mct-export.mjs
 
 ## 🐛 Troubleshooting
 
-See `docs/migrations/mct/EXPORT_GUIDE.md` → Troubleshooting section for:
+See `docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md` → Troubleshooting section for:
 - Authentication errors
 - API errors
 - Export issues

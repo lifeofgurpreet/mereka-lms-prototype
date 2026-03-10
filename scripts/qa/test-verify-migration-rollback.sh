@@ -15,7 +15,8 @@ mkdir -p \
   "$tmpdir/scripts/qa"
 
 write_pass_fixtures() {
-  cat >"$tmpdir/docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md" <<'EOF'
+  mkdir -p "$tmpdir/docs/ops/runbooks/migrations/kajabi"
+  cat >"$tmpdir/docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md" <<'EOF'
 # Rollback and Safety
 Use tutor local do restore-db after taking mysql database backup.
 EOF

@@ -36,8 +36,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md | 13 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 11 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 9 | Platform Architecture | fix inline path references and missing commands |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 8 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/migrations/mct/OPS_MCT_README.md | 8 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 8 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 8 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_217_PACKET.md | 7 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md | 7 | Platform Architecture | fix inline path references and missing commands |
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 7 | Platform Architecture | fix inline path references and missing commands |
@@ -45,7 +45,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/status/active/PLUGIN_SPLIT_STATUS_2026-03-02.md | 7 | Operations Lead | fix inline path references and missing commands |
 | reports/2026/sprints/SPRINT-03-auth-sso-phase1.md | 7 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/reference/migrations/kajabi/OPS_KAJABI_README.md | 6 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/migrations/mct/MIGRATION_PLAN.md | 6 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 6 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 6 | Operations Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 6 | Operations Lead | fix inline path references and missing commands |
 | docs/concepts/analytics/OPENEDX_ANALYTICS.md | 5 | Platform Architecture | fix inline path references and missing commands |
@@ -53,8 +53,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | reports/2025/closures/MONGODB_ATLAS_MIGRATION.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/onboarding/DEVELOPER_ONBOARDING.md | 5 | Docs Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 5 | Operations Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/TENANT_PROVISIONING.md | 5 | Operations Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/scaling.md | 5 | Ops Platform Owner | fix inline path references and missing commands |
@@ -308,20 +308,20 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 139 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
 | docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 82 | scripts/migrations/kajabi/openedx_bulk_import.py |
 | docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 172 | scripts/migrations/kajabi/prepare_openedx_imports.py |
-| docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 13 | scripts/migrations/kajabi/transform_data.py |
-| docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 17 | scripts/migrations/kajabi/build_course_packages.py |
-| docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 54 | scripts/migrations/kajabi/transform_data.py |
-| docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 65 | scripts/migrations/kajabi/build_course_packages.py |
-| docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 66 | scripts/migrations/kajabi/output/course_structure.json |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 13 | scripts/migrations/kajabi/transform_data.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 17 | scripts/migrations/kajabi/build_course_packages.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 54 | scripts/migrations/kajabi/transform_data.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 65 | scripts/migrations/kajabi/build_course_packages.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 66 | scripts/migrations/kajabi/output/course_structure.json |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 93 | scripts/migrations/kajabi/build_course_packages.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 17 | scripts/migrations/kajabi/transform_data.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 32 | scripts/migrations/kajabi/build_course_packages.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 33 | scripts/migrations/kajabi/output/course_structure.json |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 44 | scripts/migrations/kajabi/prepare_openedx_imports.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 70 | scripts/migrations/kajabi/import_courses.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 74 | scripts/migrations/kajabi/run_batches.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 77 | scripts/migrations/kajabi/run_batches.py |
-| docs/migrations/kajabi/KAJABI_MIGRATION.md | 82 | scripts/migrations/kajabi/logs/ |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 17 | scripts/migrations/kajabi/transform_data.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 32 | scripts/migrations/kajabi/build_course_packages.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 33 | scripts/migrations/kajabi/output/course_structure.json |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 44 | scripts/migrations/kajabi/prepare_openedx_imports.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 70 | scripts/migrations/kajabi/import_courses.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 74 | scripts/migrations/kajabi/run_batches.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 77 | scripts/migrations/kajabi/run_batches.py |
+| docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 82 | scripts/migrations/kajabi/logs/ |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 102 | scripts/migrations/kajabi/prepare_openedx_imports.py |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 117 | scripts/migrations/kajabi/run_batches.py |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 132 | scripts/migrations/kajabi/run_batches.py |
@@ -335,7 +335,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 182 | scripts/migrations/kajabi/import_courses.py |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 193 | scripts/migrations/kajabi/import_courses.py |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 203 | scripts/migrations/kajabi/import_courses.py |
-| reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 314 | docs/migrations/kajabi/KAJABI_MIGRATION.md |
+| reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 314 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 315 | services/kajabi-webhook/README.md |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 320 | scripts/migrations/kajabi/transform_data.py |
 | reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md | 321 | scripts/migrations/kajabi/build_course_packages.py |
@@ -391,30 +391,30 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/reference/migrations/kajabi/OPS_KAJABI_README.md | 53 | scripts/migrations/kajabi/output/course_structure.json |
 | docs/reference/migrations/kajabi/OPS_KAJABI_README.md | 74 | scripts/migrations/kajabi/prepare_openedx_imports.py |
 | docs/reference/migrations/kajabi/OPS_KAJABI_README.md | 79 | scripts/migrations/kajabi/output/openedx/ |
-| docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 103 | scripts/migrations/kajabi/rollback-openedx-imports.py |
-| docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 128 | scripts/migrations/kajabi/create-rollback-csv.py |
-| docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 133 | scripts/migrations/kajabi/rollback-openedx-imports.py |
-| docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 219 | scripts/migrations/kajabi/rollback-openedx-imports.py |
-| docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 96 | scripts/migrations/kajabi/rollback-openedx-imports.py |
+| docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 103 | scripts/migrations/kajabi/rollback-openedx-imports.py |
+| docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 128 | scripts/migrations/kajabi/create-rollback-csv.py |
+| docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 133 | scripts/migrations/kajabi/rollback-openedx-imports.py |
+| docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 219 | scripts/migrations/kajabi/rollback-openedx-imports.py |
+| docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 96 | scripts/migrations/kajabi/rollback-openedx-imports.py |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 118 | scripts/migrations/kajabi/output/verification/summary.txt |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 133 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 86 | scripts/migrations/kajabi/output/verification_current/summary.txt |
 | docs/migrations/mct/EXPORT_COMPLETE.md | 215 | scripts/migrations/mct/transform_data.py |
 | docs/migrations/mct/EXPORT_SUMMARY.md | 128 | scripts/migrations/mct/transform_data.py |
-| docs/migrations/mct/MIGRATION_PLAN.md | 197 | scripts/migrations/mct/transform_data.py |
-| docs/migrations/mct/MIGRATION_PLAN.md | 220 | scripts/migrations/mct/output/ |
-| docs/migrations/mct/MIGRATION_PLAN.md | 234 | scripts/migrations/mct/build_course_packages.py |
-| docs/migrations/mct/MIGRATION_PLAN.md | 264 | scripts/migrations/mct/import_courses_k8s.py |
-| docs/migrations/mct/MIGRATION_PLAN.md | 375 | scripts/migrations/mct/transform_data.py |
-| docs/migrations/mct/MIGRATION_PLAN.md | 396 | scripts/migrations/kajabi/ |
-| docs/migrations/mct/OPS_MCT_README.md | 100 | scripts/migrations/mct/openedx_bulk_import_mct.py |
-| docs/migrations/mct/OPS_MCT_README.md | 121 | scripts/migrations/mct/run_user_import_k8s.sh |
-| docs/migrations/mct/OPS_MCT_README.md | 122 | scripts/migrations/mct/test_user_import.sh |
-| docs/migrations/mct/OPS_MCT_README.md | 45 | scripts/migrations/mct/transform_data.py |
-| docs/migrations/mct/OPS_MCT_README.md | 55 | scripts/migrations/mct/build_course_packages.py |
-| docs/migrations/mct/OPS_MCT_README.md | 70 | scripts/migrations/mct/prepare_openedx_imports.py |
-| docs/migrations/mct/OPS_MCT_README.md | 77 | docs/migrations/mct/MIGRATION_PLAN.md |
-| docs/migrations/mct/OPS_MCT_README.md | 84 | scripts/migrations/mct/openedx_bulk_import_mct.py |
+| docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 197 | scripts/migrations/mct/transform_data.py |
+| docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 220 | scripts/migrations/mct/output/ |
+| docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 234 | scripts/migrations/mct/build_course_packages.py |
+| docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 264 | scripts/migrations/mct/import_courses_k8s.py |
+| docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 375 | scripts/migrations/mct/transform_data.py |
+| docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 396 | scripts/migrations/kajabi/ |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 100 | scripts/migrations/mct/openedx_bulk_import_mct.py |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 121 | scripts/migrations/mct/run_user_import_k8s.sh |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 122 | scripts/migrations/mct/test_user_import.sh |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 45 | scripts/migrations/mct/transform_data.py |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 55 | scripts/migrations/mct/build_course_packages.py |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 70 | scripts/migrations/mct/prepare_openedx_imports.py |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 77 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md |
+| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 84 | scripts/migrations/mct/openedx_bulk_import_mct.py |
 | docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 111 | docs/policies/operations/A11Y_EXCEPTIONS.md |
 | docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 134 | docs/policies/operations/A11Y_EXCEPTIONS.md |
 | docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 174 | docs/policies/operations/A11Y_EXCEPTIONS.md |

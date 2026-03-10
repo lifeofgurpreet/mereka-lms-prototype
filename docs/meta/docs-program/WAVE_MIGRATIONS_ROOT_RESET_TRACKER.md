@@ -151,6 +151,22 @@ This is not a wrapper-only retirement. The current root still mixes reference, s
 ### Packet C
 
 - Scope: rehome execution guides into `docs/ops/runbooks/migrations/**`.
+- Applied in this packet:
+  - `docs/migrations/kajabi/KAJABI_MIGRATION.md` -> `docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md`
+  - `docs/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md` -> `docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md`
+  - `docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md` -> `docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md`
+  - `docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md` -> `docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md`
+  - `docs/migrations/mct/EXPORT_GUIDE.md` -> `docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md`
+  - `docs/migrations/mct/EXPORT_TESTING.md` -> `docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md`
+  - `docs/migrations/mct/MIGRATION_PLAN.md` -> `docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md`
+  - `docs/migrations/mct/OPS_MCT_README.md` -> `docs/ops/runbooks/migrations/mct/OPS_MCT_README.md`
+  - `docs/migrations/mct/PROGRAMS_SETUP_PLAN.md` -> `docs/ops/runbooks/migrations/mct/PROGRAMS_SETUP_PLAN.md`
+  - `docs/migrations/mct/SMOKE_TEST.md` -> `docs/ops/runbooks/migrations/mct/SMOKE_TEST.md`
+  - `docs/migrations/mct/VIDEO_MIGRATION.md` -> `docs/ops/runbooks/migrations/mct/VIDEO_MIGRATION.md`
+  - created canonical subroot index `docs/ops/runbooks/migrations/mct/README.md`
+- Validation:
+  - `bash scripts/qa/verify-migration-rollback.sh`
+  - `bash scripts/qa/test-verify-migration-rollback.sh`
 
 ### Packet D
 
