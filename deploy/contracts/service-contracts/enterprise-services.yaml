@@ -1,0 +1,39 @@
+version: 1
+service: enterprise-services
+service_family: enterprise_services
+service_type: supporting_runtime
+owning_repo: mereka-lms
+deployment_repo: bbi-infrastructure
+high_risk_surface: openedx_runtime
+deployment_surfaces:
+  - image_source
+  - gitops_overlay
+  - secret_source
+  - runbook_surface
+  - evidence_surface
+environment_surfaces:
+  - dev
+  - prod
+image_source:
+  repo_owner: mereka-lms
+  source_surfaces:
+    - specs/enterprise-microservices_spec.md
+    - docs/concepts/architecture/enterprise-services-overview.md
+secret_surfaces:
+  - specs/secrets-management_spec.md
+runbook_surfaces:
+  - docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
+  - docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md
+evidence_surfaces:
+  - docs/status/readiness/ENTERPRISE_DOMAIN_READINESS_REPORT_2026-02-28.md
+review_groups:
+  - architecture
+  - platform
+  - tenancy_auth
+  - release
+infra_counterpart_expectation: conditional
+change_classes:
+  - deployment_affecting_change
+  - secret_surface_change
+unknowns:
+  - Service-by-service deployment ownership inside enterprise-access, enterprise-catalog, or related overlays is not yet decomposed.

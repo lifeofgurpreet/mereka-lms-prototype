@@ -1,0 +1,94 @@
+version: 1
+environments:
+  dev:
+    deployment_controls:
+      - gitops overlays
+      - image tag promotion
+      - secret wiring
+    expected_repo_owner: bbi-infrastructure
+    release_obligation_level: low
+  prod:
+    deployment_controls:
+      - gitops overlays
+      - image tag promotion
+      - secret wiring
+      - ingress and dns
+      - monitoring and alerting
+    expected_repo_owner: bbi-infrastructure
+    release_obligation_level: high
+
+surface_families:
+  image_source:
+    description: Container image source, version, and promotion contract
+    owning_repo: mereka-lms
+    counterpart_repo: bbi-infrastructure
+  gitops_overlay:
+    description: Overlay, application, or appset realization in GitOps
+    owning_repo: bbi-infrastructure
+    counterpart_repo: mereka-lms
+  secret_source:
+    description: Source-of-truth secret definition and expected consumer wiring
+    owning_repo: bbi-infrastructure
+    counterpart_repo: mereka-lms
+  ingress_dns:
+    description: Network edge exposure, DNS, and ingress behavior
+    owning_repo: bbi-infrastructure
+    counterpart_repo: mereka-lms
+  runbook_surface:
+    description: Operational or release runbook that must move with deployment truth
+    owning_repo: mereka-lms
+    counterpart_repo: bbi-infrastructure
+  evidence_surface:
+    description: Evidence artifact proving a deployment-affecting change is reviewable
+    owning_repo: mereka-lms
+    counterpart_repo: bbi-infrastructure
+
+major_service_families:
+  openedx:
+    high_risk_surface: openedx_runtime
+    deployment_surfaces:
+      - image_source
+      - gitops_overlay
+      - secret_source
+      - ingress_dns
+      - runbook_surface
+      - evidence_surface
+  mfe:
+    high_risk_surface: mfe_runtime
+    deployment_surfaces:
+      - image_source
+      - gitops_overlay
+      - ingress_dns
+      - runbook_surface
+      - evidence_surface
+  purchase_gateway:
+    high_risk_surface: purchase_flows
+    deployment_surfaces:
+      - image_source
+      - gitops_overlay
+      - secret_source
+      - ingress_dns
+      - runbook_surface
+      - evidence_surface
+  enterprise_services:
+    high_risk_surface: openedx_runtime
+    deployment_surfaces:
+      - image_source
+      - gitops_overlay
+      - secret_source
+      - runbook_surface
+      - evidence_surface
+  runner_ci:
+    high_risk_surface: observability_release
+    deployment_surfaces:
+      - image_source
+      - gitops_overlay
+      - secret_source
+      - evidence_surface
+  observability_runtime:
+    high_risk_surface: observability_release
+    deployment_surfaces:
+      - gitops_overlay
+      - secret_source
+      - runbook_surface
+      - evidence_surface

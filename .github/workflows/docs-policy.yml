@@ -5,16 +5,22 @@ on:
     paths:
       - "docs/**"
       - "docs/meta/knowledge/**"
+      - "docs/meta/contracts/**"
+      - "deploy/contracts/**"
       - "specs/**"
       - "generated/agent/**"
       - "generated/platform/**"
       - "generated/skills/**"
       - "generated/knowledge/**"
+      - "tools/knowledge/**"
+      - "tools/contracts/**"
       - "generated/graphs/**"
       - "generated/catalogs/knowledge-catalog.json"
       - "generated/knowledge/**"
+      - "generated/contracts/**"
       - "scripts/qa/run-knowledge-integrity-gates.sh"
       - "scripts/qa/run-knowledge-runtime-gates.sh"
+      - "scripts/qa/run-cross-repo-contract-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -35,16 +41,22 @@ on:
     paths:
       - "docs/**"
       - "docs/meta/knowledge/**"
+      - "docs/meta/contracts/**"
+      - "deploy/contracts/**"
       - "specs/**"
       - "generated/agent/**"
       - "generated/platform/**"
       - "generated/skills/**"
       - "generated/knowledge/**"
+      - "tools/knowledge/**"
+      - "tools/contracts/**"
       - "generated/graphs/**"
       - "generated/catalogs/knowledge-catalog.json"
       - "generated/knowledge/**"
+      - "generated/contracts/**"
       - "scripts/qa/run-knowledge-integrity-gates.sh"
       - "scripts/qa/run-knowledge-runtime-gates.sh"
+      - "scripts/qa/run-cross-repo-contract-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -165,3 +177,13 @@ jobs:
           fi
           chmod +x scripts/qa/run-knowledge-runtime-gates.sh
           ./scripts/qa/run-knowledge-runtime-gates.sh
+
+      - name: Verify cross-repo contract runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export CONTRACT_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export CONTRACT_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-cross-repo-contract-gates.sh
+          ./scripts/qa/run-cross-repo-contract-gates.sh

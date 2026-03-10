@@ -1,0 +1,41 @@
+version: 1
+service: mfe
+service_family: mfe
+service_type: frontend_runtime
+owning_repo: mereka-lms
+deployment_repo: bbi-infrastructure
+high_risk_surface: mfe_runtime
+deployment_surfaces:
+  - image_source
+  - gitops_overlay
+  - ingress_dns
+  - runbook_surface
+  - evidence_surface
+environment_surfaces:
+  - dev
+  - prod
+image_source:
+  repo_owner: mereka-lms
+  source_surfaces:
+    - .github/workflows/build-enterprise-mfe.yml
+    - .github/workflows/smoke-authn-mfe.yml
+    - docs/reference/architecture/MFE_RUNTIME_CONFIG.md
+secret_surfaces:
+  - specs/secrets-management_spec.md
+runbook_surfaces:
+  - docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+  - docs/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
+  - docs/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md
+evidence_surfaces:
+  - docs/archive/evidence/operations/evidence/mfe-surface-inventory.md
+review_groups:
+  - architecture
+  - platform
+  - release
+infra_counterpart_expectation: conditional
+change_classes:
+  - deployment_affecting_change
+  - image_or_artifact_change
+  - ingress_dns_edge_change
+unknowns:
+  - Exact MFE appset, ingress, and CDN-edge realization in bbi-infrastructure is not yet declared here.

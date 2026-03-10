@@ -1,0 +1,38 @@
+version: 1
+service: runner-ci
+service_family: runner_ci
+service_type: delivery_runtime
+owning_repo: mereka-lms
+deployment_repo: bbi-infrastructure
+high_risk_surface: observability_release
+deployment_surfaces:
+  - image_source
+  - gitops_overlay
+  - secret_source
+  - evidence_surface
+environment_surfaces:
+  - dev
+  - prod
+image_source:
+  repo_owner: mereka-lms
+  source_surfaces:
+    - .github/workflows/ci.yml
+    - docs/operations/CI_RUNNER_POLICY.md
+secret_surfaces:
+  - specs/secrets-management_spec.md
+runbook_surfaces:
+  - docs/ops/runbooks/CI_CD_RUNBOOK.md
+  - docs/reference/operations/CI_CD_SETUP.md
+evidence_surfaces:
+  - docs/operations/CI_OPTIMIZATION_TRACKER.md
+review_groups:
+  - platform
+  - release
+  - security
+infra_counterpart_expectation: true
+change_classes:
+  - deployment_affecting_change
+  - secret_surface_change
+  - image_or_artifact_change
+unknowns:
+  - Exact runner host realization and secret-distribution paths in bbi-infrastructure are not yet mapped.
