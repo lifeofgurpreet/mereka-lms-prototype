@@ -1,0 +1,62 @@
+{
+  "canonical_inputs": [
+    "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+    "generated/knowledge/evidence-obligations.json",
+    "generated/knowledge/review-decision.json",
+    "generated/knowledge/reviewer-obligations.json"
+  ],
+  "commands_run": [
+    "python3 tools/knowledge/build_review_decision.py --check --repo-root . --range origin/main...HEAD",
+    "python3 tools/knowledge/build_reviewer_obligations.py --check --repo-root .",
+    "python3 tools/knowledge/build_evidence_obligations.py --check --repo-root .",
+    "python3 tools/knowledge/build_read_first_packs.py --check --repo-root .",
+    "python3 tools/knowledge/build_release_readiness.py --check --repo-root .",
+    "python3 tools/knowledge/build_runtime_evaluation.py --check --repo-root ."
+  ],
+  "decision_reference": {
+    "blocking": false,
+    "selected_skills": [
+      "change-impact-triage",
+      "control-plane-validation",
+      "docs-truth-review"
+    ],
+    "severity": "high"
+  },
+  "execution_scope": {
+    "change_classes": [
+      "cross-repo-impact",
+      "documentation-truth",
+      "review"
+    ],
+    "touched_repos": [
+      "bbi-infrastructure",
+      "mereka-lms",
+      "platform-control-plane"
+    ],
+    "touched_roots": [
+      ".github/workflows",
+      "docs",
+      "docs/meta/knowledge",
+      "docs/meta/skills",
+      "fixtures",
+      "generated",
+      "generated/catalogs",
+      "generated/skills",
+      "scripts/qa",
+      "tools",
+      "tools/skills"
+    ]
+  },
+  "generated_by": "tools/knowledge/build_execution_receipt.py",
+  "generated_outputs": [
+    "generated/knowledge/review-decision.json",
+    "generated/knowledge/reviewer-obligations.json",
+    "generated/knowledge/evidence-obligations.json",
+    "generated/knowledge/read-first-packs.json",
+    "generated/knowledge/release-readiness.json",
+    "generated/knowledge/runtime-evaluation.json"
+  ],
+  "receipt_id": "execution-receipt",
+  "schema_version": 1,
+  "source_range": "origin/main...HEAD"
+}

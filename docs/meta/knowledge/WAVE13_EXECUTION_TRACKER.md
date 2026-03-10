@@ -1,25 +1,29 @@
 # Wave 13 Execution Tracker
 
 ## Latest substantive packet head
-- none yet
+- 4a4961c6d063a4adea1a732dcb3566fd6328a24c
 
 ## Last completed batch
-- commit: none yet
+- commit: 4a4961c6d063a4adea1a732dcb3566fd6328a24c
 - scope: Wave 13 Packet A
-- validators run: pending
+- validators run: receipt-classes YAML parse, docs catalog write/check, docs catalog governance
 - result: in progress
 
 ## Current target packet
 - files:
   - docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md
-  - docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md
-  - docs/meta/knowledge/RECEIPT_CLASSES.yaml
+  - docs/meta/knowledge/schemas/execution-receipt.schema.json
+  - docs/meta/knowledge/schemas/approval-receipt.schema.json
+  - tools/knowledge/build_execution_receipt.py
+  - tools/knowledge/build_approval_receipt.py
+  - generated/knowledge/execution-receipt.json
+  - generated/knowledge/approval-receipt.json
 - goal:
-  - define the execution and approval receipt model on top of the Wave 12 decision runtime
-  - lock the canonical receipt classes before generators and proofs are added
-  - keep Wave 13 grounded in deterministic repo truth rather than manual status claims
+  - generate the first canonical proof receipts on top of the Wave 12 decision runtime
+  - bind executed commands and unresolved live approvals into machine-readable receipt form
+  - keep unresolved approval state explicit instead of fabricating completion
 - stop condition:
-  - the receipt model is written, validators pass, and one substantive commit is created
+  - execution and approval receipts are generated deterministically and one substantive commit is created
 
 ## Open residue
 - live approval state is still an unresolved input outside repo truth
@@ -27,4 +31,4 @@
 - external Wave 11 assistant/front-door exports remain branch-local
 
 ## Next queued packet
-- Packet B: execution receipt and approval receipt generators
+- Packet C: evidence and release decision receipts
