@@ -25,6 +25,7 @@ PACKS = {
     "generated/skills/skill-dependency-graph.json": "docs/meta/skills/schemas/skill-dependency-graph.schema.json",
     "generated/skills/read-first.json": "docs/meta/skills/schemas/read-first.schema.json",
     "generated/skills/pack-registry.json": "docs/meta/skills/schemas/pack-registry.schema.json",
+    "generated/skills/runtime-convergence-report.json": "docs/meta/skills/schemas/runtime-convergence-report.schema.json",
 }
 
 

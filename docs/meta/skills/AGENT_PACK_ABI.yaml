@@ -27,8 +27,8 @@ canonical_packs:
   - skill-dependency-graph
   - read-first
   - pack-registry
-future_wave11_packs:
   - runtime-convergence-report
+future_wave11_packs:
   - evidence-sufficiency-map
   - mixed-diff-arbitration
 schema_root: docs/meta/skills/schemas

@@ -1,33 +1,31 @@
 # Wave 11 Execution Tracker
 
 ## Latest substantive packet head
-- b0547b1aff17f482e9a23399513b6c412224b97c
+- 86ca46e44560def7bf916b0e84a892ac4095bc94
 
 ## Last completed batch
-- commit: b0547b1aff17f482e9a23399513b6c412224b97c
-- scope: Wave 11 Packet B
-- validators run: pack registry write/check, schema verifier, docs catalog governance
+- commit: 86ca46e44560def7bf916b0e84a892ac4095bc94
+- scope: Wave 11 Packet C
+- validators run: portable repo discovery write/check, pack registry check, schema verifier, skill runtime gate, docs catalog governance
 - result: passed
 
 ## Current target batch
 - files:
   - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
-  - docs/meta/skills/REPO_DISCOVERY_MODEL.yaml
-  - tools/skills/repo_discovery.py
-  - tools/skills/build_skill_registry.py
-  - tools/skills/build_command_registry.py
-  - tools/skills/verify_skill_runtime.py
-  - scripts/qa/run-skill-runtime-gates.sh
+  - docs/meta/skills/AGENT_PACK_ABI.yaml
+  - docs/meta/skills/schemas/runtime-convergence-report.schema.json
+  - tools/skills/build_runtime_convergence_report.py
+  - generated/skills/runtime-convergence-report.json
 - goal:
-  - centralize portable sibling-repo discovery in one runtime helper
-  - ensure the active pack runtime emits no machine-local absolute paths
-  - make the runtime gates enforce portability on the generated skill surfaces
+  - prove cross-repo runtime convergence from canonical repo truth
+  - compare skill-pack claims against contracts, workflows, and registries
+  - expose mismatches as machine-readable findings instead of prose assumptions
 - stop condition:
-  - portability checks pass and one commit is created
+  - runtime convergence report validates and one commit is created
 
 ## Open residue
 - generated Wave 10 pack surfaces are not present on this branch and must be treated as external canonical inputs, not assumed local artifacts
 - runtime convergence, evidence sufficiency, and mixed-diff arbitration remain to be added in later packets
 
 ## Next queued batch
-- Packet D: Runtime convergence proof
+- Packet E: Minimal skill ABI on top of the packs

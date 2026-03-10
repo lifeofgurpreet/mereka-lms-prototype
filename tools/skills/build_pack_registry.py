@@ -89,6 +89,22 @@ PACKS: dict[str, dict[str, Any]] = {
             "generated/skills/scenario-packs.json",
         ],
     },
+    "runtime-convergence-report": {
+        "title": "Runtime Convergence Report",
+        "canonical_path": "generated/skills/runtime-convergence-report.json",
+        "schema_path": "docs/meta/skills/schemas/runtime-convergence-report.schema.json",
+        "projection_paths": [],
+        "source_generators": ["tools/skills/build_runtime_convergence_report.py"],
+        "primary_repo": "mereka-lms",
+        "secondary_repos": ["bbi-infrastructure", "platform-control-plane"],
+        "owner": "platform-team",
+        "stability": "evolving",
+        "depends_on": [
+            "generated/skills/skill-registry.json",
+            "generated/skills/command-registry.json",
+            "generated/skills/pack-registry.json",
+        ],
+    },
 }
 
 
@@ -160,6 +176,7 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
             "generated/skills/scenario-packs.json",
             "generated/skills/skill-dependency-graph.json",
             "generated/skills/read-first.json",
+            "generated/skills/runtime-convergence-report.json",
         ],
         "schema_version": 1,
         "packs": entries,

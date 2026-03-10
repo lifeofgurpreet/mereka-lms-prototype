@@ -5,7 +5,8 @@
     "generated/skills/command-registry.json",
     "generated/skills/scenario-packs.json",
     "generated/skills/skill-dependency-graph.json",
-    "generated/skills/read-first.json"
+    "generated/skills/read-first.json",
+    "generated/skills/runtime-convergence-report.json"
   ],
   "generated_by": "tools/skills/build_pack_registry.py",
   "pack_id": "pack-registry",
@@ -64,6 +65,40 @@
       ],
       "stability": "stable",
       "title": "Read-First Pack"
+    },
+    {
+      "canonical_inputs": [
+        "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+        "generated/skills/skill-registry.json",
+        "generated/skills/command-registry.json",
+        "generated/skills/pack-registry.json",
+        "bbi-infrastructure/config/domain-registry.yaml",
+        "bbi-infrastructure/config/bootstrap-lane-topology.yaml",
+        "bbi-infrastructure/.github/workflows/promote-image.yml",
+        "platform-control-plane/contracts/release-contracts.yaml",
+        "platform-control-plane/contracts/service-identity-contract.yaml"
+      ],
+      "canonical_path": "generated/skills/runtime-convergence-report.json",
+      "depends_on": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/command-registry.json",
+        "generated/skills/pack-registry.json"
+      ],
+      "owner": "platform-team",
+      "pack_id": "runtime-convergence-report",
+      "primary_repo": "mereka-lms",
+      "projection_paths": [],
+      "schema_path": "docs/meta/skills/schemas/runtime-convergence-report.schema.json",
+      "schema_version": 1,
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "source_generators": [
+        "tools/skills/build_runtime_convergence_report.py"
+      ],
+      "stability": "evolving",
+      "title": "Runtime Convergence Report"
     },
     {
       "canonical_inputs": [
