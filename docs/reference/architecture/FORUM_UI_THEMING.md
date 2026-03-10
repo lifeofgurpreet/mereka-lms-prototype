@@ -1,8 +1,8 @@
-# Forum UI Theming Guide
+# Forum UI Theming Reference
 
 <!-- Last verified: 2026-02-13 -->
 
-This document covers theming the forum UI to match the Mereka LMS branding, including typography, header/footer integration, and CSS variable overrides.
+This reference documents the theming surface for the forum UI, including typography, header/footer integration, and CSS variable overrides.
 
 ## Forum UI Architecture
 

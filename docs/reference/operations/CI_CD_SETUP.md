@@ -1,4 +1,4 @@
-# CI/CD Setup Guide
+# CI/CD Setup Reference
 
 <!-- Last verified: 2026-02-13 -->
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This repository uses GitHub Actions for CI/CD with the following workflows:
+This reference records the current CI/CD workflows, required secrets, and environment expectations for this repository.
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|

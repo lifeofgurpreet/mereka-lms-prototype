@@ -1,4 +1,4 @@
-# Operator Dashboard Guide — Mereka Academy
+# Operator Dashboard Reference — Mereka Academy
 
 _Audience: Platform Engineers • Owner: Engineering Lead • Last verified: 2026-03-06 • Status: canonical_
 _Related: [site-down.md](../../ops/runbooks/site-down.md) · [ONCALL_OBSERVABILITY_PLAYBOOK.md](../../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md) · [INCIDENT_RESPONSE.md](../../ops/runbooks/INCIDENT_RESPONSE.md)_
@@ -7,7 +7,7 @@ _Related: [site-down.md](../../ops/runbooks/site-down.md) · [ONCALL_OBSERVABILI
 
 ## Purpose
 
-This guide is the single starting point for an operator who wants to know:
+This reference is the single starting point for an operator who wants to know:
 
 1. What dashboards and tools exist — and where to find them.
 2. Which tool to use for which job.
