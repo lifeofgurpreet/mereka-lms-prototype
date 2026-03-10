@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4968,
+  "edge_count": 4986,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3990,7 +3990,22 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/skills/AGENT_SKILL_CHARTER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
     },
     {
       "edge_type": "classifies",
@@ -4001,6 +4016,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/skills/SKILL_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
     },
     {
       "edge_type": "classifies",
@@ -4016,6 +4036,16 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/WAVE7_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -11830,7 +11860,22 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/skills/AGENT_SKILL_CHARTER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
     },
     {
       "edge_type": "contains",
@@ -11841,6 +11886,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/skills/SKILL_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
     },
     {
       "edge_type": "contains",
@@ -11856,6 +11906,16 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/WAVE7_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "contains",
@@ -19280,7 +19340,22 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/skills/AGENT_SKILL_CHARTER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml"
     },
     {
       "edge_type": "classifies",
@@ -19291,6 +19366,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:other",
       "target": "docs/meta/skills/SKILL_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml"
     },
     {
       "edge_type": "classifies",
@@ -19306,6 +19386,16 @@
       "edge_type": "classifies",
       "source": "lane:docs:other",
       "target": "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/WAVE7_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -24844,7 +24934,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1679,
+  "node_count": 1685,
   "nodes": [
     {
       "id": "classification:archival",
@@ -32677,6 +32767,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Agent Skill Charter"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
       "lane": "other",
       "node_type": "docs:other",
@@ -32685,6 +32786,28 @@
       "root": "docs",
       "status": "",
       "title": "REPO_DISCOVERY_MODEL"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Review Handoff Model"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "SKILL_BUNDLE_RULES"
     },
     {
       "classification": "supporting",
@@ -32707,6 +32830,17 @@
       "root": "docs",
       "status": "",
       "title": "SKILL_TAXONOMY"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "TASK_TYPE_TAXONOMY"
     },
     {
       "classification": "supporting",
@@ -32740,6 +32874,28 @@
       "root": "docs",
       "status": "",
       "title": "Wave 11 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/WAVE7_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE7_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Execution Tracker"
     },
     {
       "classification": "supporting",

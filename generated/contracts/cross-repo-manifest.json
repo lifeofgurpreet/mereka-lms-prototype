@@ -1,5 +1,5 @@
 {
-  "change_count": 406,
+  "change_count": 430,
   "classification_counts": {
     "infra_counterpart_required": 3,
     "manual_review_required": 3
@@ -25,6 +25,60 @@
       "path": "Makefile",
       "path_class": "repo_support_change",
       "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "deploy/contracts/infra-crosswalk.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "manual_review_required",
+      "path": "deploy/contracts/service-contracts/enterprise-services.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": [
+        "enterprise-services"
+      ]
+    },
+    {
+      "cross_repo_verdict": "manual_review_required",
+      "path": "deploy/contracts/service-contracts/mfe.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": [
+        "mfe"
+      ]
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_required",
+      "path": "deploy/contracts/service-contracts/observability-runtime.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": [
+        "observability-runtime"
+      ]
+    },
+    {
+      "cross_repo_verdict": "manual_review_required",
+      "path": "deploy/contracts/service-contracts/openedx.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": [
+        "openedx"
+      ]
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_required",
+      "path": "deploy/contracts/service-contracts/purchase-gateway.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": [
+        "purchase-gateway"
+      ]
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_required",
+      "path": "deploy/contracts/service-contracts/runner-ci.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": [
+        "runner-ci"
+      ]
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
@@ -398,6 +452,54 @@
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "docs/guides/standards/STYLE_GUIDE.md",
       "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/INFRA_CROSSWALK.md",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
+      "path_class": "contract_runtime_source",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
+      "path_class": "contract_runtime_source",
       "touched_services": []
     },
     {
@@ -968,6 +1070,24 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/contracts/cross-repo-manifest.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/contracts/deployment-impact-report.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/contracts/release-obligations.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "generated/graphs/knowledge-graph.json",
       "path_class": "generated_surface_refresh",
       "touched_services": []
@@ -1191,6 +1311,12 @@
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "scripts/qa/run-cross-repo-agent-gates.sh",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/qa/run-cross-repo-contract-gates.sh",
       "path_class": "repo_support_change",
       "touched_services": []
     },
@@ -2147,6 +2273,36 @@
     },
     {
       "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/build_cross_repo_manifest.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/build_deployment_impact_report.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/build_release_obligations.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/contract_runtime.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/contracts/verify_cross_repo_contracts.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
       "path": "tools/docs/build_domain_access_reference.py",
       "path_class": "repo_support_change",
       "touched_services": []
@@ -2487,6 +2643,7 @@
       "service": "enterprise-services",
       "service_family": "enterprise_services",
       "touched_paths": [
+        "deploy/contracts/service-contracts/enterprise-services.yaml",
         "specs/enterprise-microservices_spec.md",
         "specs/secrets-management_spec.md"
       ],
@@ -2513,6 +2670,7 @@
       "service": "mfe",
       "service_family": "mfe",
       "touched_paths": [
+        "deploy/contracts/service-contracts/mfe.yaml",
         "specs/secrets-management_spec.md"
       ],
       "unknowns": [
@@ -2537,6 +2695,7 @@
       "service": "observability-runtime",
       "service_family": "observability_runtime",
       "touched_paths": [
+        "deploy/contracts/service-contracts/observability-runtime.yaml",
         "specs/observability-stack_spec.md",
         "specs/secrets-management_spec.md"
       ],
@@ -2564,6 +2723,7 @@
       "service_family": "openedx",
       "touched_paths": [
         ".github/workflows/ci.yml",
+        "deploy/contracts/service-contracts/openedx.yaml",
         "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
         "specs/k8s-deployment_spec.md",
         "specs/secrets-management_spec.md"
@@ -2592,6 +2752,7 @@
       "service": "purchase-gateway",
       "service_family": "purchase_gateway",
       "touched_paths": [
+        "deploy/contracts/service-contracts/purchase-gateway.yaml",
         "docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md",
         "specs/ecommerce-purchase-gateway_spec.md",
         "specs/secrets-management_spec.md"
@@ -2619,6 +2780,7 @@
       "service_family": "runner_ci",
       "touched_paths": [
         ".github/workflows/ci.yml",
+        "deploy/contracts/service-contracts/runner-ci.yaml",
         "specs/secrets-management_spec.md"
       ],
       "unknowns": [

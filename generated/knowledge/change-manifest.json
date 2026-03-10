@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 406,
+  "change_count": 430,
   "changed_roots": [
     "docs",
     "specs"
@@ -121,6 +121,237 @@
       "root": "other",
       "status": "",
       "title": "Makefile"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/infra-crosswalk.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/infra-crosswalk.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "infra-crosswalk"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/enterprise-services.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/enterprise-services.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "enterprise-services"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/mfe.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/mfe.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "mfe"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/observability-runtime.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/observability-runtime.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "observability-runtime"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/openedx.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/openedx.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "openedx"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/purchase-gateway.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/purchase-gateway.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "purchase-gateway"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "deploy/contracts/service-contracts/runner-ci.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "deploy/contracts/service-contracts/runner-ci.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "runner-ci"
     },
     {
       "change_class": "docs_support_change",
@@ -2529,6 +2760,286 @@
       "root": "docs",
       "status": "canonical",
       "title": "Documentation Style Guide"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Cross-Repo Contract Runtime Closeout"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Contract Runtime Model"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "CROSS_REPO_OWNERSHIP"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "ENVIRONMENT_SURFACES"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/INFRA_CROSSWALK.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/INFRA_CROSSWALK.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Infra Crosswalk"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "RELEASE_OBLIGATIONS"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Review Handoff Model"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 6 Execution Tracker"
     },
     {
       "change_class": "docs_support_change",
@@ -5990,6 +6501,105 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "generated/contracts/cross-repo-manifest.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/contracts/cross-repo-manifest.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "cross-repo-manifest"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/contracts/deployment-impact-report.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/contracts/deployment-impact-report.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "deployment-impact-report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/contracts/release-obligations.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/contracts/release-obligations.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Wave 6 Release Obligations"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "generated/graphs/knowledge-graph.json"
       ],
       "lane": "other",
@@ -7229,6 +7839,39 @@
       "root": "other",
       "status": "",
       "title": "run-cross-repo-agent-gates"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "scripts/qa/run-cross-repo-contract-gates.sh"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "scripts/qa/run-cross-repo-contract-gates.sh",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "run-cross-repo-contract-gates"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -12924,6 +13567,171 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/contracts/build_cross_repo_manifest.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/build_cross_repo_manifest.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_cross_repo_manifest"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/contracts/build_deployment_impact_report.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/build_deployment_impact_report.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_deployment_impact_report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/contracts/build_release_obligations.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/build_release_obligations.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_release_obligations"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/contracts/contract_runtime.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/contract_runtime.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "contract_runtime"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/contracts/verify_cross_repo_contracts.py"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/contracts/verify_cross_repo_contracts.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "verify_cross_repo_contracts"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/docs/build_domain_access_reference.py"
       ],
       "lane": "other",
@@ -14873,6 +15681,13 @@
     ".github/workflows/ci.yml",
     ".github/workflows/docs-policy.yml",
     "Makefile",
+    "deploy/contracts/infra-crosswalk.yaml",
+    "deploy/contracts/service-contracts/enterprise-services.yaml",
+    "deploy/contracts/service-contracts/mfe.yaml",
+    "deploy/contracts/service-contracts/observability-runtime.yaml",
+    "deploy/contracts/service-contracts/openedx.yaml",
+    "deploy/contracts/service-contracts/purchase-gateway.yaml",
+    "deploy/contracts/service-contracts/runner-ci.yaml",
     "docs/README.md",
     "docs/_generated/bundles/60-docs-specs-contract.md",
     "docs/adr/011-convention-based-spec-verification.md",
@@ -14935,6 +15750,14 @@
     "docs/guides/standards/README.md",
     "docs/guides/standards/STATUS_REPORTING_STANDARD.md",
     "docs/guides/standards/STYLE_GUIDE.md",
+    "docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md",
+    "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+    "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+    "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+    "docs/meta/contracts/INFRA_CROSSWALK.md",
+    "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+    "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md",
+    "docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md",
     "docs/meta/docs-program/IMPLEMENTATION_ROADMAP.md",
     "docs/meta/docs-program/README.md",
     "docs/meta/docs-program/SPEC_COVERAGE.md",
@@ -15029,6 +15852,9 @@
     "generated/agent/topology-pack.json",
     "generated/catalogs/docs-catalog.json",
     "generated/catalogs/knowledge-catalog.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md",
     "generated/graphs/knowledge-graph.json",
     "generated/knowledge/approval-receipt.json",
     "generated/knowledge/change-manifest.json",
@@ -15067,6 +15893,7 @@
     "scripts/mobile/validate-mobile-secrets.sh",
     "scripts/qa/run-agent-pack-runtime-gates.sh",
     "scripts/qa/run-cross-repo-agent-gates.sh",
+    "scripts/qa/run-cross-repo-contract-gates.sh",
     "scripts/qa/run-decision-runtime-gates.sh",
     "scripts/qa/run-execution-proof-runtime-gates.sh",
     "scripts/qa/run-knowledge-integrity-gates.sh",
@@ -15278,6 +16105,11 @@
     "specs/verifiable-credentials-types_spec.md",
     "specs/verifiable-credentials-verification_spec.md",
     "specs/video-pipeline-delivery_spec.md",
+    "tools/contracts/build_cross_repo_manifest.py",
+    "tools/contracts/build_deployment_impact_report.py",
+    "tools/contracts/build_release_obligations.py",
+    "tools/contracts/contract_runtime.py",
+    "tools/contracts/verify_cross_repo_contracts.py",
     "tools/docs/build_domain_access_reference.py",
     "tools/docs/build_team_topology_reference.py",
     "tools/docs/verify/report-hotpath-doc-metadata.py",

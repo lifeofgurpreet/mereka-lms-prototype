@@ -3,7 +3,7 @@
     "archival": 292,
     "canonical": 44,
     "generated": 49,
-    "supporting": 1271
+    "supporting": 1277
   },
   "entries": [
     {
@@ -6391,10 +6391,37 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/meta/skills/AGENT_SKILL_CHARTER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Agent Skill Charter"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
       "root": "docs",
       "status": "",
       "title": "REPO_DISCOVERY_MODEL"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/REVIEW_HANDOFF_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Review Handoff Model"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/SKILL_BUNDLE_RULES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "SKILL_BUNDLE_RULES"
     },
     {
       "classification": "supporting",
@@ -6413,6 +6440,15 @@
       "root": "docs",
       "status": "",
       "title": "SKILL_TAXONOMY"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/TASK_TYPE_TAXONOMY.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "TASK_TYPE_TAXONOMY"
     },
     {
       "classification": "supporting",
@@ -6440,6 +6476,24 @@
       "root": "docs",
       "status": "",
       "title": "Wave 11 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE7_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE7_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 7 Execution Tracker"
     },
     {
       "classification": "supporting",
@@ -14911,7 +14965,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1656,
+  "entry_count": 1662,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14920,7 +14974,7 @@
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 201,
+    "docs:other": 207,
     "docs:review": 48,
     "docs:runbook": 482,
     "specs:evidence": 43,
@@ -14933,7 +14987,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1438,
+    "docs": 1444,
     "specs": 218
   }
 }

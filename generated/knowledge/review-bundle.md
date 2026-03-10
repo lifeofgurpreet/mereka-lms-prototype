@@ -1,7 +1,7 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `406`
+- Changes classified: `430`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
@@ -9,9 +9,9 @@
 
 ### Change Classes
 - `archival_only_change`: 7
-- `docs_support_change`: 160
+- `docs_support_change`: 168
 - `evidence_only_change`: 1
-- `generated_surface_refresh`: 154
+- `generated_surface_refresh`: 170
 - `normative_contract_change`: 39
 - `plan_only`: 36
 - `proposal_only`: 4
@@ -25,7 +25,7 @@
 - `generated`: 8
 - `index`: 2
 - `normative`: 39
-- `other`: 218
+- `other`: 242
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -50,22 +50,22 @@
 ## Safe To Triage Later
 - `.github/workflows/ci.yml` [generated_surface_refresh]
 - `Makefile` [generated_surface_refresh]
+- `deploy/contracts/infra-crosswalk.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/enterprise-services.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/mfe.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/observability-runtime.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/openedx.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/purchase-gateway.yaml` [generated_surface_refresh]
+- `deploy/contracts/service-contracts/runner-ci.yaml` [generated_surface_refresh]
 - `docs/_generated/bundles/60-docs-specs-contract.md` [generated_surface_refresh]
 - `docs/archive/FRONTEND_PHASE_B_PROMPT.md` [archival_only_change]
 - `docs/archive/FRONTEND_PHASE_C_PROMPT.md` [archival_only_change]
-- `docs/archive/FRONTEND_PHASE_D_PROMPT.md` [archival_only_change]
-- `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md` [archival_only_change]
-- `docs/archive/superseded/ROADMAP.md` [archival_only_change]
-- `docs/archive/superseded/runbooks/external-registration-runbook.md` [archival_only_change]
-- `docs/archive/superseded/runbooks/proctoring-operations-runbook.md` [archival_only_change]
-- `docs/meta/docs-program/WAVE3_CLOSEOUT.md` [reviewer_handoff_only]
-- `docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md` [reviewer_handoff_only]
 
 ## Required Evidence And Follow-Up
-- status update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +237 more
+- status update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +245 more
 - evidence pack: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +73 more
-- runbook update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +232 more
-- ADR update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +200 more
+- runbook update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +240 more
+- ADR update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +208 more
 - plan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +76 more
 - testplan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +72 more
 
@@ -73,6 +73,13 @@
 - `.github/workflows/ci.yml`
 - `.github/workflows/docs-policy.yml`
 - `Makefile`
+- `deploy/contracts/infra-crosswalk.yaml`
+- `deploy/contracts/service-contracts/enterprise-services.yaml`
+- `deploy/contracts/service-contracts/mfe.yaml`
+- `deploy/contracts/service-contracts/observability-runtime.yaml`
+- `deploy/contracts/service-contracts/openedx.yaml`
+- `deploy/contracts/service-contracts/purchase-gateway.yaml`
+- `deploy/contracts/service-contracts/runner-ci.yaml`
 - `docs/README.md`
 - `docs/_generated/bundles/60-docs-specs-contract.md`
 - `docs/adr/011-convention-based-spec-verification.md`
@@ -83,13 +90,6 @@
 - `docs/adr/022-session-cookie-samesite-policy.md`
 - `docs/adr/028-platform-sources-of-truth-and-control-planes.md`
 - `docs/adr/029-identity-session-and-domain-boundary-strategy.md`
-- `docs/adr/030-feature-flag-and-rollout-lifecycle.md`
-- `docs/adr/031-deprecation-and-removal-policy.md`
-- `docs/adr/032-data-governance-pii-retention-and-deletion.md`
-- `docs/adr/033-tenant-lifecycle-contract.md`
-- `docs/adr/manifest.yaml`
-- `docs/adr/rfc/034-event-contract-and-transport-independence.md`
-- `docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md`
 
 ## Owner Teams By Change Class
 - `normative_contract_change` -> `architecture`
@@ -201,24 +201,24 @@
 - `.github/workflows/ci.yml`
 - `.github/workflows/docs-policy.yml`
 - `Makefile`
+- `deploy/contracts/infra-crosswalk.yaml`
+- `deploy/contracts/service-contracts/enterprise-services.yaml`
+- `deploy/contracts/service-contracts/mfe.yaml`
+- `deploy/contracts/service-contracts/observability-runtime.yaml`
+- `deploy/contracts/service-contracts/openedx.yaml`
+- `deploy/contracts/service-contracts/purchase-gateway.yaml`
+- `deploy/contracts/service-contracts/runner-ci.yaml`
+- `docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md`
+- `docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md`
+- `docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml`
+- `docs/meta/contracts/ENVIRONMENT_SURFACES.yaml`
+- `docs/meta/contracts/INFRA_CROSSWALK.md`
+- `docs/meta/contracts/RELEASE_OBLIGATIONS.yaml`
+- `docs/meta/contracts/REVIEW_HANDOFF_MODEL.md`
+- `docs/meta/contracts/WAVE6_EXECUTION_TRACKER.md`
 - `docs/meta/knowledge/CHANGE_CLASSES.yaml`
 - `docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md`
-- `docs/meta/knowledge/DECISION_RUNTIME_MODEL.md`
-- `docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml`
-- `docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md`
-- `docs/meta/knowledge/OWNERSHIP_MAP.yaml`
-- `docs/meta/knowledge/RECEIPT_CLASSES.yaml`
-- `docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md`
-- `docs/meta/knowledge/REVIEW_RULES.yaml`
-- `docs/meta/knowledge/WAVE10_CLOSEOUT.md`
-- `docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md`
-- `docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md`
-- `docs/meta/knowledge/WAVE10_SOURCE_OF_TRUTH_MAP.md`
-- `docs/meta/knowledge/WAVE12_CLOSEOUT.md`
-- `docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md`
-- `docs/meta/knowledge/WAVE12_REVIEW_HANDOFF.md`
-- `docs/meta/knowledge/WAVE13_CLOSEOUT.md`
-- `... 198 more`
+- `... 222 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`

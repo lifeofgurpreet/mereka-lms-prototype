@@ -1,0 +1,183 @@
+version: 2
+authority_order:
+  - explicit Wave 4/5/6 resolver and contract docs
+  - canonical specs / contracts / runbooks / architecture docs for the affected task type
+  - generated runtime outputs derived from those surfaces
+  - status/evidence surfaces
+  - archive only when explicitly named as historical context
+required_bundle_fields:
+  - task_type
+  - intent
+  - authority_order
+  - primary_roots
+  - read_first
+  - related_contracts
+  - related_specs
+  - related_runbooks
+  - related_generated_surfaces
+  - affected_truth_surfaces
+  - required_reviewers
+  - required_evidence
+  - required_commands
+  - likely_cross_repo_dependencies
+  - out_of_scope
+  - escalation_conditions
+  - source_runtime_artifacts
+  - generated_by
+  - bundle_version
+required_generated_surfaces_high_risk:
+  - generated/knowledge/change-manifest.json
+  - generated/knowledge/review-bundle.md
+  - generated/knowledge/truth-impact-report.json
+  - generated/knowledge/task-context-report.json
+  - generated/knowledge/skill-index.json
+forbidden_surfaces_by_task_type:
+  normative_spec_change:
+    - "docs/archive/**"
+    - "specs/archive/**"
+    - "specs/proposals/**"
+  proposal_or_rfc_change:
+    - "specs/archive/**"
+    - "docs/archive/**"
+  architecture_or_adr_change:
+    - "docs/archive/**"
+  cross_repo_contract_change:
+    - "docs/archive/**"
+    - "specs/archive/**"
+  release_or_runtime_change:
+    - "docs/archive/**"
+    - "specs/archive/**"
+  runbook_or_ops_change:
+    - "docs/archive/**"
+  evidence_or_status_change:
+    - "specs/archive/**"
+  generated_surface_refresh:
+    - "docs/archive/**"
+    - "specs/archive/**"
+  compatibility_or_wrapper_cleanup:
+    - "specs/archive/**"
+  reviewer_handoff_or_policy_change:
+    - "specs/archive/**"
+seeded_read_first_surfaces:
+  normative_spec_change:
+    - path: docs/meta/docs-program/WAVE4_CLOSEOUT.md
+      reason: Wave 4 remains the topology and authority baseline.
+      priority: 1
+    - path: specs/standards/SPEC_SYSTEM_CHARTER.md
+      reason: Governs normative spec intent and contract scope.
+      priority: 2
+    - path: specs/standards/SPEC_METADATA_MODEL.md
+      reason: Governs normative spec metadata obligations.
+      priority: 3
+    - path: specs/standards/SPEC_AUTHORING_STANDARD.md
+      reason: Governs normative authoring and boundary rules.
+      priority: 4
+  proposal_or_rfc_change:
+    - path: docs/meta/docs-program/WAVE4_CLOSEOUT.md
+      reason: Keeps proposal work aligned with canonical topology.
+      priority: 1
+    - path: specs/proposals/README.md
+      reason: Governs proposal-lane meaning and boundaries.
+      priority: 2
+  architecture_or_adr_change:
+    - path: docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
+      reason: Fastest architecture-oriented entry path into canonical docs.
+      priority: 1
+    - path: docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+      reason: Existing reviewer runtime model must remain authoritative.
+      priority: 2
+  cross_repo_contract_change:
+    - path: docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md
+      reason: Wave 6 defines the cross-repo contract runtime law.
+      priority: 1
+    - path: docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml
+      reason: Defines repo ownership and mandatory review groups.
+      priority: 2
+    - path: docs/meta/contracts/RELEASE_OBLIGATIONS.yaml
+      reason: Defines release and evidence obligations.
+      priority: 3
+    - path: docs/meta/contracts/ENVIRONMENT_SURFACES.yaml
+      reason: Defines environment and deployment surfaces.
+      priority: 4
+    - path: docs/meta/contracts/INFRA_CROSSWALK.md
+      reason: Defines the app-to-infra crosswalk boundary.
+      priority: 5
+  release_or_runtime_change:
+    - path: docs/meta/contracts/RELEASE_OBLIGATIONS.yaml
+      reason: Governs release evidence and reviewer requirements.
+      priority: 1
+    - path: docs/meta/contracts/INFRA_CROSSWALK.md
+      reason: Shows what else must move in GitOps.
+      priority: 2
+    - path: docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+      reason: Keeps runtime changes aligned with reviewer flow.
+      priority: 3
+  runbook_or_ops_change:
+    - path: docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+      reason: Existing review runtime still governs ops-facing updates.
+      priority: 1
+  evidence_or_status_change:
+    - path: docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md
+      reason: Wave 5 defines evidence and review runtime semantics.
+      priority: 1
+    - path: docs/meta/contracts/CHANGE_RUNTIME_CLOSEOUT.md
+      reason: Wave 6 defines release and contract evidence semantics.
+      priority: 2
+  generated_surface_refresh:
+    - path: docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
+      reason: Generated surfaces still derive from Wave 4 topology.
+      priority: 1
+  compatibility_or_wrapper_cleanup:
+    - path: docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md
+      reason: Governs compatibility retirement policy and holdouts.
+      priority: 1
+  reviewer_handoff_or_policy_change:
+    - path: docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md
+      reason: Existing reviewer handoff runtime is primary.
+      priority: 1
+    - path: docs/meta/contracts/REVIEW_HANDOFF_MODEL.md
+      reason: Cross-repo reviewer path remains authoritative.
+      priority: 2
+default_command_families:
+  baseline:
+    - bash scripts/qa/run-knowledge-runtime-gates.sh
+    - bash scripts/qa/run-cross-repo-contract-gates.sh
+    - python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD
+  spec_truth:
+    - python3 tools/specs/verify_spec_frontmatter.py --repo-root .
+    - python3 tools/specs/verify_spec_taxonomy.py --repo-root .
+    - python3 tools/specs/verify_spec_paths.py --repo-root .
+    - python3 tools/specs/verify_docs_specs_boundary.py --repo-root .
+  task_runtime:
+    - python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json
+    - python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json
+    - python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles
+    - python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles
+    - python3 tools/knowledge/build_skill_index.py --repo-root .
+    - python3 tools/knowledge/build_skill_index.py --check --repo-root .
+    - python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD
+    - bash scripts/qa/run-task-runtime-gates.sh
+escalation_triggers:
+  normative_spec_change:
+    - cross-repo contract surfaces are also touched
+    - release/runtime validators change in the same packet
+  proposal_or_rfc_change:
+    - root normative specs are touched in the same packet
+  architecture_or_adr_change:
+    - runtime or deployment obligations shift without corresponding contract review
+  cross_repo_contract_change:
+    - Wave 6 verdict is manual_review_required
+    - Wave 6 verdict is unknown_mapping
+  release_or_runtime_change:
+    - deployment-affecting services span multiple review groups
+    - security review is implicated
+  runbook_or_ops_change:
+    - ops guidance diverges from normative or contract surfaces
+  evidence_or_status_change:
+    - evidence claims move without corresponding runtime or contract updates
+  generated_surface_refresh:
+    - generated output drifts after source updates
+  compatibility_or_wrapper_cleanup:
+    - wrapper retirement would remove the last live path
+  reviewer_handoff_or_policy_change:
+    - review policy diverges from Wave 5 or Wave 6 source rules

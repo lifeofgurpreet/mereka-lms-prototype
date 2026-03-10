@@ -1,0 +1,168 @@
+version: 2
+generated_by_wave: wave7
+task_types:
+  normative_spec_change:
+    description: Change normative product, platform, or policy contract truth.
+    risk: high
+    primary_signal_roots: [specs, docs]
+    primary_signal_lanes: [specs:normative, docs:concept, docs:runbook]
+    primary_signal_change_classes: [normative_contract_change]
+    required_bundle_sections: [read_first, related_specs, required_reviewers, required_evidence, required_commands]
+    cross_repo_analysis_mandatory: false
+    evidence_mandatory: true
+    review_mandatory: true
+    trigger_patterns:
+      - "specs/*_spec.md"
+    excludes:
+      - "specs/proposals/**"
+      - "specs/plans/**"
+      - "specs/archive/**"
+  proposal_or_rfc_change:
+    description: Change proposal-lane, RFC, or future-shape design material.
+    risk: medium
+    primary_signal_roots: [specs, docs]
+    primary_signal_lanes: [specs:proposal, docs:review, docs:concept]
+    primary_signal_change_classes: [proposal_only]
+    required_bundle_sections: [read_first, related_specs, required_reviewers, required_commands]
+    cross_repo_analysis_mandatory: false
+    evidence_mandatory: false
+    review_mandatory: true
+    trigger_patterns:
+      - "specs/proposals/**/*_spec.md"
+      - "docs/adr/rfc/**"
+    excludes:
+      - "specs/*_spec.md"
+      - "specs/plans/**"
+  architecture_or_adr_change:
+    description: Change architecture rationale, decision-ledger truth, or system model docs.
+    risk: high
+    primary_signal_roots: [docs, specs]
+    primary_signal_lanes: [docs:adr, docs:concept, specs:normative]
+    primary_signal_change_classes: [docs_support_change]
+    required_bundle_sections: [read_first, related_contracts, related_specs, required_reviewers, escalation_conditions]
+    cross_repo_analysis_mandatory: false
+    evidence_mandatory: conditional
+    review_mandatory: true
+    trigger_patterns:
+      - "docs/adr/**"
+      - "docs/concepts/architecture/**"
+  cross_repo_contract_change:
+    description: Change service, environment, release, or cross-repo deployment contract truth.
+    risk: high
+    primary_signal_roots: [docs, deploy, specs]
+    primary_signal_lanes: [deploy:service_contract, deploy:infra_crosswalk, specs:normative, docs:runbook]
+    primary_signal_change_classes: [docs_support_change]
+    required_bundle_sections: [read_first, related_contracts, required_reviewers, required_evidence, likely_cross_repo_dependencies]
+    cross_repo_analysis_mandatory: true
+    evidence_mandatory: true
+    review_mandatory: true
+    trigger_patterns:
+      - "deploy/contracts/**"
+      - "docs/meta/contracts/**"
+      - "tools/contracts/**"
+      - "generated/contracts/**"
+  release_or_runtime_change:
+    description: Change release, deployment, runtime, or validator behavior affecting shipped reality.
+    risk: high
+    primary_signal_roots: [docs, scripts, tools, specs]
+    primary_signal_lanes: [docs:runbook, docs:evidence, specs:normative]
+    primary_signal_change_classes: [docs_support_change, evidence_only_change]
+    required_bundle_sections: [read_first, related_runbooks, required_reviewers, required_evidence, required_commands]
+    cross_repo_analysis_mandatory: true
+    evidence_mandatory: true
+    review_mandatory: true
+    trigger_patterns:
+      - "scripts/qa/**"
+      - "tools/docs/verify/**"
+      - "tools/contracts/**"
+      - "specs/*deployment*_spec.md"
+      - "specs/*runtime*_spec.md"
+  runbook_or_ops_change:
+    description: Change operational guidance, incident response, or maintenance instructions.
+    risk: medium
+    primary_signal_roots: [docs, specs]
+    primary_signal_lanes: [docs:runbook, docs:concept]
+    primary_signal_change_classes: [docs_support_change]
+    required_bundle_sections: [read_first, related_runbooks, required_reviewers, required_commands]
+    cross_repo_analysis_mandatory: false
+    evidence_mandatory: conditional
+    review_mandatory: true
+    trigger_patterns:
+      - "docs/ops/**"
+      - "docs/runbooks/**"
+  evidence_or_status_change:
+    description: Change evidence, status, readiness, or proof surfaces without altering the governing contract.
+    risk: medium
+    primary_signal_roots: [docs, specs]
+    primary_signal_lanes: [docs:evidence, docs:review, specs:evidence]
+    primary_signal_change_classes: [evidence_only_change]
+    required_bundle_sections: [read_first, related_generated_surfaces, required_evidence, required_commands]
+    cross_repo_analysis_mandatory: false
+    evidence_mandatory: true
+    review_mandatory: conditional
+    trigger_patterns:
+      - "docs/meta/**"
+      - "docs/archive/evidence/**"
+      - "specs/testmaps/**"
+      - "specs/_generated/testmaps/**"
+  generated_surface_refresh:
+    description: Refresh generated catalogs, graphs, manifests, bundles, and indexes without changing governing policy.
+    risk: low
+    primary_signal_roots: [generated, docs, specs]
+    primary_signal_lanes: [docs:generated, specs:generated]
+    primary_signal_change_classes: [generated_surface_refresh]
+    required_bundle_sections: [read_first, related_generated_surfaces, required_commands]
+    cross_repo_analysis_mandatory: false
+    evidence_mandatory: false
+    review_mandatory: false
+    trigger_patterns:
+      - "generated/**"
+      - "docs/catalog.json"
+      - "specs/catalog.json"
+      - "specs/_generated/**"
+  compatibility_or_wrapper_cleanup:
+    description: Retire or adjust compatibility-only surfaces without restoring them as primary truth.
+    risk: medium
+    primary_signal_roots: [specs, docs]
+    primary_signal_lanes: [specs:reference, docs:review]
+    primary_signal_change_classes: [compatibility_wrapper_update]
+    required_bundle_sections: [read_first, related_generated_surfaces, required_reviewers, escalation_conditions]
+    cross_repo_analysis_mandatory: false
+    evidence_mandatory: false
+    review_mandatory: true
+    trigger_patterns:
+      - "specs/*_spec.md"
+      - "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md"
+    explicit_paths:
+      - "specs/external-registration-hubspot_spec.md"
+      - "specs/proctoring-integration_spec.md"
+      - "specs/mobile-apps-enterprise_spec.md"
+      - "specs/mobile-apps-secrets-management_spec.md"
+      - "specs/paragon-design-tokens-migration_spec.md"
+  reviewer_handoff_or_policy_change:
+    description: Change reviewer handoff, skill policy, or runtime-facing control-plane docs.
+    risk: low
+    primary_signal_roots: [docs, tools]
+    primary_signal_lanes: [docs:review]
+    primary_signal_change_classes: [reviewer_handoff_only, docs_support_change]
+    required_bundle_sections: [read_first, related_generated_surfaces, required_commands, escalation_conditions]
+    cross_repo_analysis_mandatory: false
+    evidence_mandatory: false
+    review_mandatory: true
+    trigger_patterns:
+      - "docs/meta/knowledge/**"
+      - "docs/meta/skills/**"
+      - "docs/meta/contracts/REVIEW_HANDOFF_MODEL.md"
+      - "docs/meta/**/WAVE*_EXECUTION_TRACKER.md"
+      - "docs/meta/**/WAVE*_CLOSEOUT.md"
+task_resolution_order:
+  - cross_repo_contract_change
+  - release_or_runtime_change
+  - normative_spec_change
+  - architecture_or_adr_change
+  - proposal_or_rfc_change
+  - runbook_or_ops_change
+  - evidence_or_status_change
+  - compatibility_or_wrapper_cleanup
+  - reviewer_handoff_or_policy_change
+  - generated_surface_refresh

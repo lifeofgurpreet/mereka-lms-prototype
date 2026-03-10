@@ -6961,7 +6961,34 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "meta/skills/AGENT_SKILL_CHARTER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "meta/skills/REPO_DISCOVERY_MODEL.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/REVIEW_HANDOFF_MODEL.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/SKILL_BUNDLE_RULES.yaml",
     "status": "supporting",
     "type": "other"
   },
@@ -6980,6 +7007,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/skills/SKILL_TAXONOMY.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/TASK_TYPE_TAXONOMY.yaml",
     "status": "supporting",
     "type": "other"
   },
@@ -7007,6 +7043,24 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/skills/WAVE11_REVIEW_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/WAVE7_CLOSEOUT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/WAVE7_EXECUTION_TRACKER.md",
     "status": "supporting",
     "type": "other"
   },
