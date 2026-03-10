@@ -1,5 +1,19 @@
+---
+title: Documentation Standards
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/guides
+doc_class: guide
+summary: Baseline writing, placement, and review standards for canonical documentation in this repository.
+tags:
+  - docs
+  - standards
+  - writing
+audience: All contributors
+---
+
 # Documentation Standards
-_Audience: All contributors • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
 This guide defines the baseline writing and structure standards for documentation in this repository. Use it with the documentation authority resolver and the docs/specs contract.
 

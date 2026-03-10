@@ -26,7 +26,7 @@ This document provides the systematic implementation order for all Mereka Academ
 
 ## Implementation Tiers
 
-Based on `specs/IMPLEMENTATION_ORDER.md` (computed from `depends_on` frontmatter):
+Based on `specs/plans/IMPLEMENTATION_ORDER.md` (computed from `depends_on` frontmatter):
 
 ### Tier 0: Foundation (100% ✅)
 - `repository-structure_spec.md` - 12 ACs ✅
@@ -177,10 +177,10 @@ python3 scripts/qa/spec-tools/spec_coverage_report.py \
 
 ## Resources
 
-- **Dependency graph**: `specs/IMPLEMENTATION_ORDER.md`
+- **Dependency graph**: `specs/plans/IMPLEMENTATION_ORDER.md`
 - **Coverage reports**: `docs/archive/reports/`
 - **Sprint plans**: `reports/2026/sprints/`
-- **Manual verifications**: `specs/manual_verifications.yaml`
+- **Manual verifications**: `specs/plans/manual_verifications.yaml`
 - **ADR**: `docs/adr/011-convention-based-spec-verification.md`
 
 ---

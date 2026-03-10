@@ -1,25 +1,33 @@
 ---
-title: "Secrets Management Specification"
-type: "feature_spec"
-status: "completed"
-owner: "engineering"
-vehicle: "talent_platform"
-last_updated: "2026-02-10"
-version: "1.0.0"
+title: Secrets Management Specification
+type: feature_spec
+status: completed
+owner: engineering
+vehicle: talent_platform
+version: 1.0.0
 depends_on:
-  - "specs/repository-structure_spec.md"
+- specs/repository-structure_spec.md
 links:
   related_docs:
-    - "docs/reference/operations/SECRETS_SNAPSHOT.md"
-    - "docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md"
-    - "docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md"
-    - "docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md"
-    - "docs/adr/004-secrets-management.md"
+  - docs/reference/operations/SECRETS_SNAPSHOT.md
+  - docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
+  - docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md
+  - docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md
+  - docs/adr/004-secrets-management.md
   related_specs:
-    - "specs/k8s-deployment_spec.md"
-    - "specs/observability-stack_spec.md"
-    - "specs/disaster-recovery-business-continuity_spec.md"
-    - "specs/cross-cutting-requirements_spec.md"
+  - specs/k8s-deployment_spec.md
+  - specs/observability-stack_spec.md
+  - specs/disaster-recovery-business-continuity_spec.md
+  - specs/cross-cutting-requirements_spec.md
+id: SPEC-SECRETS-MANAGEMENT
+spec_class: security
+created: '2026-02-10'
+last_reviewed: '2026-02-10'
+review_due: '2026-05-11'
+domain: platform
+normativity: normative
+summary: Normative contract for secret storage, delivery, and rotation across Mereka
+  LMS environments.
 ---
 
 # Human Summary

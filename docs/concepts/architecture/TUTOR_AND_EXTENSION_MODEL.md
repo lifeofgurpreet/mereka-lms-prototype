@@ -1,5 +1,22 @@
+---
+title: Tutor And Extension Model
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/concepts/architecture
+doc_class: architecture-standard
+audience:
+  - Engineering Team
+summary: Defines how Tutor, plugins, and extension points are used to customize and operate the platform safely.
+tags:
+  - architecture
+  - platform.control-plane
+governs:
+  - platform.extension-model
+  - build.version-pin
+  - build.image.registry
+---
 # Tutor And Extension Model
-_Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
 
 ## Governs
 

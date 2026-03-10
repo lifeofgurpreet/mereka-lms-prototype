@@ -1,25 +1,37 @@
 ---
-id: ADR-039
 title: Translations and Internationalization Strategy
-decision_status: proposed
-decision_type: domain
-rollout_state: planned
+proposal_state: proposed
 owner: frontend-platform
 created: 2026-03-07
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr/rfc
+doc_class: rfc
+summary: Proposes translation and internationalization rules for frontend surfaces.
+tags:
+  - frontend.i18n
+decision_type: domain
+decision_status: proposed
+governs:
+- frontend.i18n
+id: ADR-039
+rollout_state: planned
 supersedes: []
 amends: []
-depends_on: ["ADR-035"]
+depends_on:
+- ADR-035
 read_next: []
-governs: ["i18n-message-contract", "translation-release-flow", "locale-fallback-policy"]
-does_not_govern: ["content-authoring-language-policy"]
+does_not_govern:
+- content-authoring-language-policy
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
 related_specs: []
 related_runbooks: []
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-translation-contract.sh"]
+fitness_functions:
+- scripts/qa/verify-translation-contract.sh
 expiry_date: null
 removal_condition: null
 ---

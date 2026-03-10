@@ -1,7 +1,9 @@
 ---
-title: "Cross-Cutting Requirements Test Plan"
-spec: "cross-cutting-requirements_spec.md"
-last_updated: "2026-02-13"
+title: Cross-Cutting Requirements Test Plan
+spec: cross-cutting-requirements_spec.md
+last_updated: '2026-02-13'
+plan: cross-cutting-requirements_plan.md
+status: draft
 ---
 
 # Cross-Cutting Requirements Test Plan

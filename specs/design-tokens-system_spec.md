@@ -1,8 +1,27 @@
 ---
+id: "SPEC-DESIGN-TOKENS-SYSTEM"
 title: "Design Tokens System"
 type: "feature_spec"
-status: "completed"
-owner: "engineering"
+status: "approved"
+spec_class: "system"
+owner: "platform"
+created: "2026-02-27"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "frontend"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/branding/verify-token-drift.sh"
+  - "scripts/branding/update-token-provenance.sh"
+interfaces:
+  - "assets/branding/tokens.css"
+  - "assets/branding/tokens.provenance.json"
+tags:
+  - "frontend.brand.tokens"
+  - "docs.catalog"
+summary: "Defines the canonical design token system, provenance tracking, and drift verification for Mereka Academy branding values."
 vehicle: "talent_platform"
 last_updated: "2026-02-27"
 version: "1.1.0"
@@ -19,7 +38,7 @@ links:
     - "specs/multi-site-domains_spec.md"
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/oep48-brand-package_spec.md"
-    - "specs/paragon-design-tokens-migration_spec.md"
+    - "specs/plans/paragon-design-tokens-migration_spec.md"
 ---
 
 # Human Summary
@@ -49,9 +68,9 @@ This spec covers the design token system for Mereka Academy, including token cat
 ## Non-goals
 
 - Automatic token propagation from Figma to production (tokens are synced manually via `update-token-provenance.sh`)
-- Multi-brand token switching (the system manages a single Mereka brand) — **NOW PLANNED**: see `specs/paragon-design-tokens-migration_spec.md` for multi-tenant token support via PARAGON_THEME_URLS
-- Token aliases or semantic layering (tokens are flat, not nested) — **NOW PLANNED**: see `specs/paragon-design-tokens-migration_spec.md` for three-tier hierarchy (global → alias → component)
-- Runtime token hot-reloading (tokens are compiled at build time, not runtime) — **NOW PLANNED**: PARAGON_THEME_URLS enables runtime CDN theming, see `specs/paragon-design-tokens-migration_spec.md`
+- Multi-brand token switching (the system manages a single Mereka brand) — **NOW PLANNED**: see `specs/plans/paragon-design-tokens-migration_spec.md` for multi-tenant token support via PARAGON_THEME_URLS
+- Token aliases or semantic layering (tokens are flat, not nested) — **NOW PLANNED**: see `specs/plans/paragon-design-tokens-migration_spec.md` for three-tier hierarchy (global → alias → component)
+- Runtime token hot-reloading (tokens are compiled at build time, not runtime) — **NOW PLANNED**: PARAGON_THEME_URLS enables runtime CDN theming, see `specs/plans/paragon-design-tokens-migration_spec.md`
 - Token documentation generation (Figma is the design documentation source of truth)
 
 ## Requirements

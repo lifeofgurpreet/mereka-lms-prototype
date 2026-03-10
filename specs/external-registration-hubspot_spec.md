@@ -1,28 +1,37 @@
 ---
-title: "External Registration via HubSpot"
-type: "feature_spec"
-status: "deferred"
-owner: "engineering"
-vehicle: "talent_platform"
-last_updated: "2026-02-12"
-version: "1.0.0"
-deferred_reason: "SkillOurFuture/MCT migration only - deploy when ready to migrate MCT users"
+title: External Registration via HubSpot
+type: feature_spec
+status: deferred
+owner: engineering
+vehicle: talent_platform
+version: 1.0.0
+deferred_reason: SkillOurFuture/MCT migration only - deploy when ready to migrate
+  MCT users
 depends_on:
-  - "specs/k8s-deployment_spec.md"
-  - "specs/secrets-management_spec.md"
-  - "specs/email-notifications-pipeline_spec.md"
+- specs/k8s-deployment_spec.md
+- specs/secrets-management_spec.md
+- specs/email-notifications-pipeline_spec.md
 links:
   related_docs:
-    - "services/hubspot-webhook/README.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/runbooks/external-registration-runbook.md"
+  - services/hubspot-webhook/README.md
+  - docs/runbooks/operations/TROUBLESHOOTING.md
+  - docs/runbooks/external-registration-runbook.md
   related_specs:
-    - "specs/secrets-management_spec.md"
-    - "specs/k8s-deployment_spec.md"
-    - "specs/observability-stack_spec.md"
-    - "specs/email-notifications-pipeline_spec.md"
-    - "specs/multi-tenancy-architecture_spec.md"
-    - "specs/cross-cutting-requirements_spec.md"
+  - specs/secrets-management_spec.md
+  - specs/k8s-deployment_spec.md
+  - specs/observability-stack_spec.md
+  - specs/email-notifications-pipeline_spec.md
+  - specs/multi-tenancy-architecture_spec.md
+  - specs/cross-cutting-requirements_spec.md
+id: SPEC-EXTERNAL-REGISTRATION-HUBSPOT
+spec_class: proposal
+created: '2026-02-12'
+last_reviewed: '2026-02-12'
+review_due: '2026-05-13'
+domain: commerce
+normativity: proposed
+summary: Proposal-stage contract for integrating HubSpot-driven external registration
+  with Mereka LMS enrollment flows.
 ---
 
 # Human Summary

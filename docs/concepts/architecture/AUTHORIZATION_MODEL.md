@@ -1,5 +1,21 @@
+---
+title: Authorization Model
+owner: Auth Platform
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/concepts/architecture
+doc_class: architecture-standard
+audience:
+  - Engineering Team
+summary: Defines role, permission, and authorization boundaries across platform and tenant surfaces.
+tags:
+  - architecture
+  - auth.authorization.roles
+governs:
+  - auth.authorization.roles
+  - tenant.isolation
+---
 # Authorization Model
-_Audience: Engineering Team • Owner: Auth Platform • Last verified: 2026-03-09 • Status: canonical_
 
 ## Governs
 

@@ -91,8 +91,8 @@ def test_something():
 As of 2026-02-11:
 - **769 ACs** across 31 specs
 - **371 automated** (48.2%)
-- **83 manual** (in `specs/manual_verifications.yaml`)
-- **4 monitoring** (in `specs/manual_verifications.yaml`)
+- **83 manual** (in `specs/plans/manual_verifications.yaml`)
+- **4 monitoring** (in `specs/plans/manual_verifications.yaml`)
 - **311 unmapped** (59.6% overall coverage)
 
 ### Coverage Dashboard (Quick View)
@@ -373,7 +373,7 @@ These don't need `@spec` annotation (prefix makes them unique).
 
 For ACs that can't be automated (UI checks, manual processes):
 
-**File**: `specs/manual_verifications.yaml`
+**File**: `specs/plans/manual_verifications.yaml`
 
 ```yaml
 - ac_id: AC-001

@@ -1,9 +1,16 @@
 ---
 title: "Email & Notifications Pipeline"
 type: "feature_spec"
+id: "SPEC-PLT-007"
 status: "draft"
+spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "platform"
+normativity: "normative"
 last_updated: "2026-02-10"
 version: "1.0.0"
 depends_on:
@@ -11,11 +18,24 @@ depends_on:
   - "specs/multi-tenancy-architecture_spec.md"
   - "specs/k8s-deployment_spec.md"
   - "specs/secrets-management_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+interfaces:
+  - "ACE"
+  - "AWS SES"
+  - "Firebase Cloud Messaging"
+  - "Apple Push Notification service"
+tags:
+  - "platform.control-plane"
+  - "runtime.async-task"
+summary: "Defines the platform-wide contract for transactional email, bulk notifications, and mobile push delivery across the Mereka Open edX stack."
 links:
   related_docs:
-    - "docs/runbooks/email-notifications-runbook.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
-    - "docs/architecture/notification-pipeline-overview.md"
+    - "docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/reference/operations/EMAIL_PIPELINE.md"
   related_specs:
     - "specs/mobile-apps-enterprise_spec.md"
     - "specs/enterprise-microservices_spec.md"

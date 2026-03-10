@@ -3,12 +3,12 @@ source_spec: specs/forum-service-migration_spec.md
 status: completed
 created: 2026-02-10
 updated: 2026-02-10
-completion_notes: |
-  Migration completed via Tutor v18→v21 (Ulmo) upgrade on 2026-02-10.
-  Python forum (openedx-forum v0.3.8) now integrated into LMSprocess.
-  Meilisearch v1.8.4 deployed for search (replaces Elasticsearch).
-  Zero data loss - 183MB MySQL backup created pre-upgrade.
-  Deployed to production GKE with zero downtime.
+completion_notes: "Migration completed via Tutor v18\u2192v21 (Ulmo) upgrade on 2026-02-10.\n\
+  Python forum (openedx-forum v0.3.8) now integrated into LMSprocess.\nMeilisearch\
+  \ v1.8.4 deployed for search (replaces Elasticsearch).\nZero data loss - 183MB MySQL\
+  \ backup created pre-upgrade.\nDeployed to production GKE with zero downtime."
+spec: forum-service-migration_spec.md
+last_updated: '2026-02-10'
 ---
 
 # Forum Service Migration - Implementation Plan

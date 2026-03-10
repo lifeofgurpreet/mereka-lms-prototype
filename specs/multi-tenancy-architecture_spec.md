@@ -1,9 +1,16 @@
 ---
 title: "Multi-Tenancy Architecture"
 type: "feature_spec"
-status: "completed"
+id: "SPEC-MULTI-TENANCY-ARCHITECTURE"
+status: "approved"
+spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-13"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "tenancy"
+normativity: "normative"
 last_updated: "2026-02-13"
 version: "1.0.0"
 depends_on:
@@ -14,11 +21,25 @@ depends_on:
   - "specs/branding-system_spec.md"
   - "specs/multi-site-domains_spec.md"
   - "specs/platform-middleware-custom-apps_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/verify-multisite-config.sh"
+  - "scripts/qa/verify-org-role-ownership.sh"
+  - "scripts/qa/run-multisite-governance-gates.sh"
+interfaces:
+  - "django-sites"
+  - "enterprise-customer"
+tags:
+  - "tenant.lifecycle"
+  - "tenant.isolation"
+  - "platform.control-plane"
+summary: "System-level contract for tenant identity, isolation boundaries, provisioning, branding, and shared-infrastructure multi-tenancy across Mereka LMS."
 links:
   related_docs:
-    - "docs/architecture/multi-tenancy-overview.md"
-    - "docs/runbooks/tenant-provisioning-runbook.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/concepts/architecture/MULTISITE.md"
+    - "docs/ops/runbooks/TENANT_PROVISIONING.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
   related_specs:
     - "specs/enterprise-microservices_spec.md"
     - "specs/branding-system_spec.md"

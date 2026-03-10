@@ -9,7 +9,7 @@ An AC is considered **covered** when at least one of the following is true:
 |---|---|
 | A generated `testmap.yml` entry with a `file:` path or `type: automated` | `specs/_generated/testmaps/<spec>.testmap.yml` |
 | A reference to the spec basename in `tests/` | `tests/` |
-| An entry in `specs/manual_verifications.yaml` | `specs/manual_verifications.yaml` |
+| An entry in `specs/plans/manual_verifications.yaml` | `specs/plans/manual_verifications.yaml` |
 
 **Coverage percentage** = (ACs with at least one evidence entry / total ACs in spec) × 100.
 
@@ -31,7 +31,7 @@ unverified intent — it may already be broken in production and nobody would kn
 3. **Count covered ACs per spec**:
    - If `specs/_generated/testmaps/<spec>.testmap.yml` exists, a Python snippet counts AC
      blocks that contain either `type: automated` or a `file:` reference.
-   - Otherwise, a grep over `tests/` and `specs/manual_verifications.yaml`
+   - Otherwise, a grep over `tests/` and `specs/plans/manual_verifications.yaml`
      checks whether the spec is referenced at all.
 
 4. **Print a summary table** with per-file and overall totals.

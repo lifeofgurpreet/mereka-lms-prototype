@@ -1,23 +1,41 @@
 ---
+id: "SPEC-COM-001"
 title: "Ecommerce Purchase Gateway (Stripe -> Open edX Integration)"
 type: "feature_spec"
 status: "in_progress"
+spec_class: "integration"
 owner: "engineering"
 vehicle: "talent_platform"
+created: "2026-02-10"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
 last_updated: "2026-02-10"
 version: "1.0.0"
+domain: "commerce"
+normativity: "normative"
 depends_on:
   - "specs/enterprise-microservices_spec.md"
   - "specs/multi-tenancy-architecture_spec.md"
   - "specs/k8s-deployment_spec.md"
   - "specs/secrets-management_spec.md"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "scripts/qa/run-spec-integrity-gates.sh"
+interfaces:
+  - "Stripe"
+  - "Open edX"
+tags:
+  - "commerce.reconciliation"
+  - "build.gitops-promotion"
+summary: "Defines the purchase gateway contract from Stripe checkout through fulfillment into Open edX commerce ownership."
 links:
   related_docs:
-    - "docs/runbooks/operations/STRIPE_WEBHOOKS_SETUP.md"
-    - "docs/runbooks/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md"
-    - "docs/runbooks/purchase-gateway-runbook.md"
-    - "docs/architecture/purchase-gateway-overview.md"
-    - "docs/runbooks/operations/TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md"
+    - "docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
+    - "docs/concepts/architecture/purchase-gateway-overview.md"
+    - "docs/ops/runbooks/TROUBLESHOOTING.md"
   related_specs:
     - "specs/enterprise-microservices_spec.md"
     - "specs/multi-tenancy-architecture_spec.md"
@@ -806,4 +824,3 @@ All source code for the Purchase Gateway lives within this repository:
 11. **Webhook retry window**: Stripe retries failed webhook deliveries for up to 3 days with exponential backoff. Should we implement our own event polling as a safety net (periodically query the Stripe Events API for events we may have missed)? This adds complexity but increases reliability. Need reliability assessment.
 
 12. **Multi-item checkout (v2)**: The spec explicitly excludes multi-item shopping cart as a non-goal for v1. Should the database schema be designed to support it from day one (multiple line items per order) even if the v1 checkout only allows single-offering purchases? This is a schema design question that affects migration complexity later.
-

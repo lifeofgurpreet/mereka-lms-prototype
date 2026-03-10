@@ -1,7 +1,9 @@
 ---
-title: "Authentication & SSO Enterprise Integration Test Plan"
-spec: "auth-sso-enterprise_spec.md"
-last_updated: "2026-02-13"
+title: Authentication & SSO Enterprise Integration Test Plan
+spec: auth-sso-enterprise_spec.md
+last_updated: '2026-02-13'
+plan: auth-sso-enterprise_plan.md
+status: draft
 ---
 
 # Authentication & SSO Enterprise Integration Test Plan

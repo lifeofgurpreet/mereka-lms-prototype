@@ -331,7 +331,7 @@ spec-lint: ## Run spec integrity gates (lint + verify + format + coverage)
 spec-coverage: ## Show spec coverage report (text)
 	python3 scripts/qa/spec-tools/spec_coverage_report.py \
 		--specs-dir specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-		--manual-file specs/manual_verifications.yaml --repo-root . --format text
+		--manual-file specs/plans/manual_verifications.yaml --repo-root . --format text
 
 spec-compliance: ## Run automated tests and report spec compliance (repo-local only)
 	python3 scripts/qa/spec-tools/run_spec_compliance.py --mode local --timeout 30
@@ -342,10 +342,10 @@ lint-specs: ## Fast spec lint only (Mereka rules, errors only)
 verify-specs: ## Verify @covers annotations match spec ACs
 	python3 scripts/qa/spec-tools/mereka_spec_verify.py specs/ --repo-root . \
 		--scan-dirs scripts/ tests/ \
-		--manual-file specs/manual_verifications.yaml
+		--manual-file specs/plans/manual_verifications.yaml
 
 validate-testmaps: ## Validate testmap YAML format
-	python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/
+	python3 scripts/qa/spec-tools/validate_testmap_format.py specs/_generated/testmaps/
 
 generate-testmaps: ## Generate per-spec testmaps from @covers annotations
 	@for spec in specs/*_spec.md; do \
@@ -353,8 +353,8 @@ generate-testmaps: ## Generate per-spec testmaps from @covers annotations
 		python3 scripts/qa/spec-tools/discover_testmap.py \
 			--spec "$$spec" \
 			--scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-			--manual-file specs/manual_verifications.yaml --repo-root . \
-			--format yaml --output "specs/testmaps/$${name}.testmap.yml"; \
+			--manual-file specs/plans/manual_verifications.yaml --repo-root . \
+			--format yaml --output "specs/_generated/testmaps/$${name}.testmap.yml"; \
 	done
 
 lint-conventions: ## Check repo file/naming conventions (glob-ability, grep-ability, boundaries)
@@ -365,7 +365,7 @@ check-fast: lint-specs validate-testmaps lint-conventions ## Fast quality gates 
 
 spec-dashboard: ## Show per-spec coverage dashboard
 	python3 scripts/qa/spec-tools/spec_coverage_dashboard.py \
-		--specs-dir specs/ --testmaps-dir specs/testmaps/
+		--specs-dir specs/ --testmaps-dir specs/_generated/testmaps/
 
 check: lint-specs validate-testmaps lint-conventions verify-specs spec-coverage ## Full spec quality suite
 	@echo "All spec checks passed."

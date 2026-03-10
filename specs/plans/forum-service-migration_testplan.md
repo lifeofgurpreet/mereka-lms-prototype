@@ -3,6 +3,8 @@ source_spec: specs/forum-service-migration_spec.md
 status: completed
 created: 2026-02-10
 updated: 2026-02-10
+plan: forum-service-migration_plan.md
+last_updated: '2026-02-10'
 ---
 
 # Forum Service Migration - Test Plan

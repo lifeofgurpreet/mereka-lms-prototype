@@ -1,5 +1,23 @@
+---
+title: Tenant Lifecycle
+owner: Multisite Platform
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/concepts/architecture
+doc_class: architecture-standard
+audience:
+  - Engineering Team
+summary: Defines lifecycle states, transitions, and operational obligations for tenants.
+tags:
+  - architecture
+  - tenant.lifecycle
+  - tenant.isolation
+governs:
+  - tenant.lifecycle
+  - tenant.isolation
+  - frontend.brand.tokens
+---
 # Tenant Lifecycle
-_Audience: Engineering Team • Owner: Multisite Platform • Last verified: 2026-03-09 • Status: canonical_
 
 ## Governs
 

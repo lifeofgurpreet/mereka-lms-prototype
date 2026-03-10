@@ -4,6 +4,25 @@ type: "feature_spec"
 status: "draft"
 version: "1.0.0"
 owner: "engineering"
+id: "SPEC-FE-STUDIO-CUSTOMIZATION"
+spec_class: "integration"
+created: "2026-02-27"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "frontend"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "tests"
+  - "manual-verification"
+interfaces:
+  - "studio"
+  - "theme-overrides"
+tags:
+  - "frontend.brand.tokens"
+  - "frontend.composition"
+summary: "Defines the customization contract for Mereka Studio branding, navigation, authoring experience, and supported extension points."
 vehicle: "talent_platform"
 last_updated: "2026-02-27"
 depends_on:
@@ -11,8 +30,9 @@ depends_on:
   - "specs/tutor-configuration_spec.md"
 links:
   related_docs:
-    - "docs/BRANDING.md"
-    - "docs/branding/BRANDING_ROADMAP.md"
+    - "docs/guides/branding/BRANDING.md"
+    - "docs/guides/branding/BRANDING_OPERATING_MODEL.md"
+    - "docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md"
   related_specs:
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/branding-system_spec.md"

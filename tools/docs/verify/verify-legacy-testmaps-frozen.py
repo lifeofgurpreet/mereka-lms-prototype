@@ -9,7 +9,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-ALLOWED_LEGACY_PATHS = {"specs/testmaps/README.md"}
+ALLOWED_LEGACY_PATHS = {
+    "specs/testmaps/README.md",
+    "specs/testmaps/RETIREMENT_PLAN.md",
+}
 
 
 def git_changed_files(repo_root: Path, diff_range: str) -> list[str]:

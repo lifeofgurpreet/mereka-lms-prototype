@@ -1,3 +1,9 @@
+---
+spec: slo-sla-service-level-management_spec.md
+status: draft
+last_updated: '2026-03-09'
+---
+
 # SLO/SLA Service Level Management - Implementation Plan
 
 **Source Spec**: `specs/slo-sla-service-level-management_spec.md`

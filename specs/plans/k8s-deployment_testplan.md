@@ -2,8 +2,9 @@
 spec: k8s-deployment_spec.md
 tier: 1
 status: draft
-last_updated: "2026-02-10"
+last_updated: '2026-02-10'
 test_framework: shell_verification (bash scripts + kubectl kustomize)
+plan: k8s-deployment_plan.md
 ---
 
 # Test Plan: Kubernetes Deployment Specification

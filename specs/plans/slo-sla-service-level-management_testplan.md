@@ -2,7 +2,8 @@
 spec: slo-sla-service-level-management_spec.md
 tier: 2
 status: draft
-last_updated: "2026-02-10"
+last_updated: '2026-02-10'
+plan: slo-sla-service-level-management_plan.md
 ---
 
 # Test Plan: SLO/SLA Definitions & Service Level Management

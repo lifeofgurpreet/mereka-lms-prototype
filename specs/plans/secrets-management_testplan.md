@@ -1,7 +1,8 @@
 ---
 spec: secrets-management_spec.md
 plan: secrets-management_plan.md
-last_updated: "2026-02-10"
+last_updated: '2026-02-10'
+status: draft
 ---
 
 # Test Plan: Secrets Management

@@ -1,8 +1,10 @@
 ---
-title: "CI/CD Pipeline - Test Plan"
-source_spec: "specs/ci-cd-pipeline_spec.md"
-created: "2026-02-10"
-status: "draft"
+title: CI/CD Pipeline - Test Plan
+source_spec: specs/ci-cd-pipeline_spec.md
+created: '2026-02-10'
+status: draft
+plan: ci-cd-pipeline_plan.md
+last_updated: '2026-02-10'
 ---
 
 # Test Plan: CI/CD Pipeline

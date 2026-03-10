@@ -1,8 +1,10 @@
 ---
-title: "CI/CD Pipeline - Implementation Plan"
-source_spec: "specs/ci-cd-pipeline_spec.md"
-created: "2026-02-10"
-status: "draft"
+title: CI/CD Pipeline - Implementation Plan
+source_spec: specs/ci-cd-pipeline_spec.md
+created: '2026-02-10'
+status: draft
+spec: ci-cd-pipeline_spec.md
+last_updated: '2026-02-10'
 ---
 
 # Implementation Tasks: CI/CD Pipeline

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """extract_manual_entries.py — Extract manual/monitoring entries from testmaps.
 
-Creates specs/manual_verifications.yaml with all non-automated entries.
+Creates specs/plans/manual_verifications.yaml with all non-automated entries.
 
 Usage:
   python3 extract_manual_entries.py                    # Dry-run
@@ -22,8 +22,9 @@ except ImportError as exc:
     raise SystemExit("PyYAML required: pip install pyyaml") from exc
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TESTMAPS_DIR = REPO_ROOT / "specs" / "testmaps"
-OUTPUT_PATH = REPO_ROOT / "specs" / "manual_verifications.yaml"
+PRIMARY_TESTMAPS_DIR = REPO_ROOT / "specs" / "_generated" / "testmaps"
+LEGACY_TESTMAPS_DIR = REPO_ROOT / "specs" / "testmaps"
+OUTPUT_PATH = REPO_ROOT / "specs" / "plans" / "manual_verifications.yaml"
 
 
 def normalize_spec_name(raw: str) -> str:
@@ -143,14 +144,19 @@ def main():
     parser.add_argument("--apply", action="store_true", help="Write file (default: dry-run)")
     args = parser.parse_args()
 
-    if not TESTMAPS_DIR.is_dir():
-        print(f"ERROR: Testmaps directory not found: {TESTMAPS_DIR}", file=sys.stderr)
+    testmaps_dir = PRIMARY_TESTMAPS_DIR if PRIMARY_TESTMAPS_DIR.is_dir() else LEGACY_TESTMAPS_DIR
+
+    if not testmaps_dir.is_dir():
+        print(
+            f"ERROR: Testmaps directory not found: {PRIMARY_TESTMAPS_DIR} or {LEGACY_TESTMAPS_DIR}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
-    print(f"{'APPLYING' if args.apply else 'DRY RUN'}: Reading testmaps from {TESTMAPS_DIR}")
+    print(f"{'APPLYING' if args.apply else 'DRY RUN'}: Reading testmaps from {testmaps_dir}")
     print()
 
-    entries = extract_entries(TESTMAPS_DIR)
+    entries = extract_entries(testmaps_dir)
     entries.sort(key=sort_key)
 
     # Stats by type and spec

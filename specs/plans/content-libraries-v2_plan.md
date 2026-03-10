@@ -3,6 +3,8 @@ source_spec: specs/content-libraries-v2_spec.md
 status: ready
 created: 2026-02-10
 updated: 2026-02-10
+spec: content-libraries-v2_spec.md
+last_updated: '2026-02-10'
 ---
 
 # Content Libraries v2 Management & Enterprise Usage - Implementation Plan

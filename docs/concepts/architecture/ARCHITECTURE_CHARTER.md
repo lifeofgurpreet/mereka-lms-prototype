@@ -1,5 +1,23 @@
+---
+title: Architecture Charter
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-08
+canonical_root: docs/concepts/architecture
+doc_class: architecture-standard
+summary: Defines the documentation and architecture control plane, winning roots, and non-negotiable authority rules.
+tags:
+  - architecture
+  - governance
+  - control-plane
+governs:
+  - platform.control-plane
+  - platform.repo-boundary
+  - docs.policy
+review_cycle: quarterly
+---
+
 # Architecture Charter
-_Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-08 • Status: canonical_
 
 This charter defines the living architecture control model for the repository. It exists so humans and agents can determine which documentation roots are current law, which ones are transitional, and which ones are cold storage.
 

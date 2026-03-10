@@ -3,6 +3,8 @@ source_spec: specs/data-privacy-gdpr-compliance_spec.md
 status: ready
 created: 2026-02-10
 updated: 2026-02-10
+plan: data-privacy-gdpr-compliance_plan.md
+last_updated: '2026-02-10'
 ---
 
 # Data Privacy & GDPR Compliance - Test Plan

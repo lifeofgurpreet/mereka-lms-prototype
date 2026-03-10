@@ -1,5 +1,19 @@
+---
+title: Evidence Pack Standard
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-08
+canonical_root: docs/guides/standards
+doc_class: guide
+audience:
+  - contributors
+summary: Defines the active evidence-pack contract, expected structure, and rejection criteria for docs/evidence.
+tags:
+  - docs.evidence
+  - docs.policy
+---
+
 # Evidence Pack Standard
-_Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-08 • Status: canonical_
 
 This standard defines the active evidence contract for `docs/evidence/**`.
 

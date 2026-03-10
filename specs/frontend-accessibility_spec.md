@@ -4,6 +4,25 @@ type: "feature_spec"
 status: "draft"
 version: "1.0.0"
 owner: "engineering"
+id: "SPEC-FE-ACCESSIBILITY"
+spec_class: "integration"
+created: "2026-02-27"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "frontend"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "tests"
+  - "manual-verification"
+interfaces:
+  - "lms-mfe"
+  - "authn-mfe"
+tags:
+  - "frontend.accessibility"
+  - "frontend.brand.tokens"
+summary: "Defines WCAG 2.1 AA accessibility requirements for Mereka branding overlays across LMS, Studio, and MFEs."
 vehicle: "talent_platform"
 last_updated: "2026-02-27"
 depends_on:
@@ -11,14 +30,15 @@ depends_on:
   - "specs/cross-cutting-requirements_spec.md"
 links:
   related_docs:
-    - "docs/BRANDING.md"
-    - "docs/branding/BRANDING_GUARDRAILS.md"
+    - "docs/guides/branding/BRANDING.md"
+    - "docs/guides/branding/BRANDING_GUARDRAILS.md"
+    - "docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
   related_specs:
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/branding-system_spec.md"
     - "specs/mfe-plugin-slots_spec.md"
     - "specs/design-tokens-system_spec.md"
-    - "specs/paragon-design-tokens-migration_spec.md"
+    - "specs/plans/paragon-design-tokens-migration_spec.md"
 ---
 
 # Human Summary
@@ -345,7 +365,7 @@ scripts/qa/spec-tools/ac-coverage-report.py
 
 ### Manual Verification
 
-The following require human verification with assistive technology. Add to `specs/manual_verifications.yaml`:
+The following require human verification with assistive technology. Add to `specs/plans/manual_verifications.yaml`:
 
 1. **NVDA + Chrome (Windows)**: Navigate LMS homepage, /login, /dashboard using NVDA screen reader. Verify all custom Mereka elements (footer, header logo, hero section, course cards) are announced correctly with meaningful labels.
 2. **VoiceOver + Safari (macOS)**: Navigate the same pages using VoiceOver. Verify rotor landmarks include the custom footer, and all links have descriptive text.

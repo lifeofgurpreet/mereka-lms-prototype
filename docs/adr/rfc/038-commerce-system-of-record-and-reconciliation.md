@@ -1,25 +1,42 @@
 ---
-id: ADR-038
 title: Commerce System of Record and Reconciliation
-decision_status: proposed
-decision_type: domain
-rollout_state: planned
+proposal_state: proposed
 owner: commerce-platform
 created: 2026-03-07
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr/rfc
+doc_class: rfc
+summary: Proposes commerce ownership and reconciliation rules for financial state.
+tags:
+  - commerce.reconciliation
+decision_type: domain
+decision_status: proposed
+governs:
+- commerce.system-of-record
+- commerce.reconciliation
+id: ADR-038
+rollout_state: planned
 supersedes: []
-amends: ["ADR-018"]
-depends_on: ["ADR-028", "ADR-033"]
+amends:
+- ADR-018
+depends_on:
+- ADR-028
+- ADR-033
 read_next: []
-governs: ["commerce-ledger-source-of-truth", "reconciliation-contract", "financial-auditability"]
-does_not_govern: ["pricing-policy"]
+does_not_govern:
+- pricing-policy
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
-related_specs: ["specs/ecommerce-purchase-gateway_spec.md"]
-related_runbooks: ["docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md"]
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs:
+- specs/ecommerce-purchase-gateway_spec.md
+related_runbooks:
+  - docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-ecommerce-worker-health.sh"]
+fitness_functions:
+- scripts/qa/verify-ecommerce-worker-health.sh
 expiry_date: null
 removal_condition: null
 ---

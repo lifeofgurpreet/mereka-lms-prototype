@@ -94,25 +94,61 @@ echo "=== Spec Integrity Gates ==="
 echo "Artifacts: $ARTIFACT_DIR"
 echo ""
 
-# 1. Spec lint (Mereka-specific rules)
+# 1. Spec frontmatter validation
+run_check "spec-frontmatter" \
+  python3 tools/specs/verify_spec_frontmatter.py --repo-root .
+
+# 2. Spec taxonomy validation
+run_check "spec-taxonomy" \
+  python3 tools/specs/verify_spec_taxonomy.py --repo-root .
+
+# 3. Spec path placement validation
+run_check "spec-paths" \
+  python3 tools/specs/verify_spec_paths.py --repo-root .
+
+# 4. Docs/specs twin-root boundary validation
+run_check "docs-specs-boundary" \
+  python3 tools/specs/verify_docs_specs_boundary.py --repo-root .
+
+# 5. Spec lint (Mereka-specific rules)
 run_check "spec-lint" \
   python3 "${TOOL_DIR}/mereka_spec_lint.py" specs/ --severity-filter error
 
-# 2. Testmap format validation
+# 6. Testmap format validation
 run_check "testmap-validate" \
   python3 "${TOOL_DIR}/validate_testmap_format.py" specs/_generated/testmaps/
 
-# 3. Spec verification via @covers annotations (informational — coverage may not be 100%)
+# 7. Legacy testmap freeze enforcement
+run_check "legacy-testmaps-frozen" \
+  python3 tools/docs/verify/verify-legacy-testmaps-frozen.py --range origin/main...HEAD
+
+# 8. Generated spec catalog freshness
+run_check "spec-catalog" \
+  python3 "${TOOL_DIR}/build_spec_catalog.py" --check
+
+# 9. Generated spec index freshness
+run_check "spec-index" \
+  python3 "${TOOL_DIR}/render_index.py" --check
+
+# 10. Generated spec graph freshness
+run_check "spec-graph" \
+  python3 tools/specs/build_spec_graph.py --check
+
+# 11. Generated spec bundle freshness
+run_check "spec-bundles" \
+  python3 tools/specs/build_spec_bundles.py --check
+
+# 12. Spec verification via @covers annotations (informational — coverage may not be 100%)
 run_check_info "spec-verify" \
   python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . \
     --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-    --manual-file specs/manual_verifications.yaml
+    --manual-file specs/plans/manual_verifications.yaml
 
-# 4. Coverage report with threshold
+# 13. Coverage report with threshold
 run_check "spec-coverage" \
   python3 "${TOOL_DIR}/spec_coverage_report.py" \
     --specs-dir specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-    --manual-file specs/manual_verifications.yaml \
+    --manual-file specs/plans/manual_verifications.yaml \
     --repo-root . --format text --fail-under "$FAIL_UNDER"
 
 # Write summary artifacts

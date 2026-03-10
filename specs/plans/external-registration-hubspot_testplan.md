@@ -1,7 +1,8 @@
 ---
 spec: external-registration-hubspot_spec.md
-plan: plans/external-registration-hubspot_plan.md
-last_updated: "2026-02-10"
+plan: external-registration-hubspot_plan.md
+last_updated: '2026-02-10'
+status: draft
 ---
 
 # Test Plan: External Registration via HubSpot

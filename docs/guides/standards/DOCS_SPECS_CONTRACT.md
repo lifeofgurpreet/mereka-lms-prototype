@@ -1,5 +1,19 @@
+---
+title: Docs / Specs Contract
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-03-08
+canonical_root: docs/guides
+doc_class: guide
+summary: Defines the boundary between specs, docs, and generated testmaps so verification truth stays unambiguous.
+tags:
+  - docs
+  - specs
+  - verification
+audience: Contributors
+---
+
 # Docs / Specs Contract
-_Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-08 • Status: canonical_
 
 This contract separates explanation from intention and closes the current split-brain around verification artifacts.
 
@@ -20,7 +34,8 @@ If you are explaining or operating the current system, you are probably changing
 | Specs | `specs/**` | Normative intended behavior |
 | Plans | `specs/plans/**` or explicit planning docs | Implementation sequencing and execution planning |
 | Test plans | `specs/**` or plan-attached validation sections | Validation strategy |
-| Testmaps | generated output | Verification mapping derived from source annotations and spec metadata |
+| Spec catalog | `specs/catalog.json` | Machine-readable index of the normative spec corpus |
+| Testmaps | generated output under `specs/_generated/testmaps/**` | Verification mapping derived from source annotations and spec metadata |
 | Docs | `docs/**` | Explanation, operation, history, evidence, and status |
 
 ## Hard rules

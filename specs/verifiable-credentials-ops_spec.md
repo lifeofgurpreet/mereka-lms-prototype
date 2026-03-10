@@ -1,21 +1,40 @@
 ---
-title: "CRED-050: Ops & Reliability"
-type: "feature_spec"
-status: "approved"
-owner: "engineering"
-vehicle: "talent_platform"
-last_updated: "2026-02-14"
-version: "1.0.0"
+title: 'CRED-050: Ops & Reliability'
+type: feature_spec
+status: approved
+owner: engineering
+vehicle: talent_platform
+last_updated: '2026-02-14'
+version: 1.0.0
 depends_on:
-  - "specs/verifiable-credentials-types_spec.md"
-  - "specs/verifiable-credentials-issuer_spec.md"
-  - "specs/verifiable-credentials-issuance_spec.md"
-  - "specs/verifiable-credentials-verification_spec.md"
+- specs/verifiable-credentials-types_spec.md
+- specs/verifiable-credentials-issuer_spec.md
+- specs/verifiable-credentials-issuance_spec.md
+- specs/verifiable-credentials-verification_spec.md
 links:
   related_specs:
-    - "specs/cross-cutting-requirements_spec.md"
-    - "specs/slo-sla-service-level-management_spec.md"
-    - "specs/observability-stack_spec.md"
+  - specs/cross-cutting-requirements_spec.md
+  - specs/slo-sla-service-level-management_spec.md
+  - specs/observability-stack_spec.md
+id: SPEC-VC-OPS-001
+spec_class: integration
+created: '2026-02-10'
+last_reviewed: '2026-03-09'
+review_due: '2026-06-09'
+domain: auth
+normativity: normative
+supersedes: []
+superseded_by: null
+verification_sources: []
+interfaces:
+- ops:credentials
+- runbook:credentialing
+tags:
+- auth.verifiable-credentials
+- auth.operations
+- platform.credentials
+summary: Defines the normative operational contract for running, monitoring, troubleshooting,
+  and recovering the verifiable credentials subsystem.
 ---
 
 # CRED-050: Ops & Reliability

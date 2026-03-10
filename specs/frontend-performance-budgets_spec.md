@@ -1,9 +1,29 @@
 ---
+id: "SPEC-FRONTEND-PERFORMANCE-BUDGETS"
 title: "Frontend Performance Budgets: Core Web Vitals, Bundle Sizes, and Caching for SEA Users"
 type: "feature_spec"
 status: "draft"
+spec_class: "domain"
 version: "1.0.0"
-owner: "engineering"
+owner: "platform"
+created: "2026-02-27"
+last_reviewed: "2026-03-09"
+review_due: "2026-06-09"
+domain: "frontend"
+normativity: "normative"
+supersedes: []
+superseded_by: null
+verification_sources:
+  - "infrastructure/monitoring/lighthouse-budgets.json"
+  - ".github/workflows/lighthouse-ci.yml"
+interfaces:
+  - "apps.academyv2.mereka.io"
+  - "infrastructure/monitoring/lighthouse-budgets.json"
+tags:
+  - "frontend.composition"
+  - "frontend.brand.tokens"
+  - "runtime.cache"
+summary: "Defines enforceable frontend performance budgets, Lighthouse thresholds, and cache expectations for the Mereka Academy web surfaces."
 vehicle: "talent_platform"
 last_updated: "2026-02-27"
 depends_on:
@@ -11,17 +31,17 @@ depends_on:
   - "specs/k8s-deployment_spec.md"
 depends_on_optional:
   - "specs/oep48-brand-package_spec.md"
-  - "specs/paragon-design-tokens-migration_spec.md"
+  - "specs/plans/paragon-design-tokens-migration_spec.md"
 links:
   related_docs:
-    - "docs/architecture/PERFORMANCE_BUDGETS.md"
+    - "docs/policies/architecture/PERFORMANCE_BUDGETS.md"
     - "docs/policies/architecture/LIGHTHOUSE_BUDGETS.md"
-    - "docs/BRANDING.md"
+    - "docs/guides/branding/BRANDING.md"
   related_specs:
     - "specs/cross-cutting-requirements_spec.md"
     - "specs/branding-system_spec.md"
     - "specs/oep48-brand-package_spec.md"
-    - "specs/paragon-design-tokens-migration_spec.md"
+    - "specs/plans/paragon-design-tokens-migration_spec.md"
     - "specs/multi-site-domains_spec.md"
     - "specs/ci-cd-pipeline_spec.md"
 ---

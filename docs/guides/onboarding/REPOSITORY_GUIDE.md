@@ -264,7 +264,7 @@ specs/
 ├── auth-sso-enterprise_spec.md       # Enterprise SSO integration
 ├── cross-cutting-requirements_spec.md  # Platform-wide shared requirements
 ├── IMPLEMENTATION_ORDER.md           # Dependency graph (computed)
-└── manual_verifications.yaml         # Non-automated verification entries
+└── plans/manual_verifications.yaml   # Non-automated verification entries
 ```
 
 **Spec vs Doc**:
@@ -438,7 +438,7 @@ Quick reference for frequently accessed files:
 - Repository structure: `specs/repository-structure_spec.md`
 - Secrets management: `specs/secrets-management_spec.md`
 - K8s deployment: `specs/k8s-deployment_spec.md`
-- Implementation order: `specs/IMPLEMENTATION_ORDER.md`
+- Implementation order: `specs/plans/IMPLEMENTATION_ORDER.md`
 
 ---
 
@@ -562,7 +562,7 @@ python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/my-feature_spec.md
 
 # 4. Update IMPLEMENTATION_ORDER.md
 python3 scripts/qa/spec-tools/compute_dependency_graph.py \
-  --specs-dir specs/ --format markdown > specs/IMPLEMENTATION_ORDER.md
+  --specs-dir specs/ --format markdown > specs/plans/IMPLEMENTATION_ORDER.md
 ```
 
 **Adding a new doc**:

@@ -3,7 +3,7 @@
 # Machine-checkable verifier for tenant brand pack schema compliance.
 #
 # Validates that tenant config.json files conform to the brand pack schema
-# defined in specs/brand-pack-schema.json and the contract in
+# defined in specs/standards/brand-pack-schema.json and the contract in
 # docs/guides/branding/TENANT_BRANDING_CONTRACT.md.
 #
 # Usage:
@@ -66,15 +66,15 @@ warn() {
 echo -e "${BLUE}## Schema and Template Files${NC}"
 
 # Schema file exists
-if [[ -f "specs/brand-pack-schema.json" ]]; then
-  pass "Schema file exists (specs/brand-pack-schema.json)"
+if [[ -f "specs/standards/brand-pack-schema.json" ]]; then
+  pass "Schema file exists (specs/standards/brand-pack-schema.json)"
 else
-  fail "Schema file missing (specs/brand-pack-schema.json)"
+  fail "Schema file missing (specs/standards/brand-pack-schema.json)"
 fi
 
 # Schema is valid JSON
-if [[ -f "specs/brand-pack-schema.json" ]]; then
-  if jq empty specs/brand-pack-schema.json 2>/dev/null; then
+if [[ -f "specs/standards/brand-pack-schema.json" ]]; then
+  if jq empty specs/standards/brand-pack-schema.json 2>/dev/null; then
     pass "Schema is valid JSON"
   else
     fail "Schema is not valid JSON"

@@ -320,10 +320,10 @@ for tenant_dir in "${TENANT_DIRS[@]}"; do
   fi
 
   # JSON Schema validation (if schema file exists)
-  if [[ -f "specs/brand-pack-schema.json" ]]; then
+  if [[ -f "specs/standards/brand-pack-schema.json" ]]; then
     # Check if ajv-cli is available
     if command -v ajv >/dev/null 2>&1; then
-      if ajv validate -s specs/brand-pack-schema.json -d "$tenant_dir/branding.json" >/dev/null 2>&1; then
+      if ajv validate -s specs/standards/brand-pack-schema.json -d "$tenant_dir/branding.json" >/dev/null 2>&1; then
         pass "branding.json validates against JSON Schema"
       else
         fail "branding.json does not validate against JSON Schema"

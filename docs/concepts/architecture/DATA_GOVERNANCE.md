@@ -1,5 +1,23 @@
+---
+title: Data Governance
+owner: Platform Security
+status: canonical
+last_reviewed: 2026-03-09
+canonical_root: docs/concepts/architecture
+doc_class: architecture-standard
+audience:
+  - Engineering Team
+summary: Defines governance rules for data classification, retention, deletion, and handling across the platform.
+tags:
+  - architecture
+  - data.pii
+  - data.retention
+governs:
+  - data.pii
+  - data.retention
+  - data.deletion
+---
 # Data Governance
-_Audience: Engineering Team • Owner: Platform Security • Last verified: 2026-03-09 • Status: canonical_
 
 ## Governs
 

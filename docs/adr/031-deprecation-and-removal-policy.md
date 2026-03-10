@@ -1,25 +1,40 @@
 ---
-id: ADR-031
 title: Deprecation and Removal Policy
-decision_status: accepted
-decision_type: foundation
-rollout_state: active
 owner: platform-team
 created: 2026-03-07
 last_reviewed: 2026-03-07
 review_due: 2026-06-30
+canonical_root: docs/adr
+doc_class: adr
+summary: Deprecation contract for temporary paths, exception expiry, and evidence-backed removal of superseded implementation paths.
+tags:
+- docs.policy
+- platform.repo-boundary
+decision_type: foundation
+decision_status: accepted
+governs:
+- platform.change-policy
+id: ADR-031
+rollout_state: active
 supersedes: []
-amends: ["ADR-013", "ADR-022"]
-depends_on: ["ADR-028", "ADR-030"]
+amends:
+- ADR-013
+- ADR-022
+depends_on:
+- ADR-028
+- ADR-030
 read_next: []
-governs: ["deprecation-policy", "sunset-lifecycle", "exception-expiry"]
-does_not_govern: ["incident-response runtime triage"]
+does_not_govern:
+- incident-response runtime triage
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org"]
+related_tutor_docs:
+- https://docs.openedx.org
 related_specs: []
-related_runbooks: ["reports/2026/closures/POSTMERGE_GOVERNANCE_CLOSURE.md"]
+related_runbooks:
+- reports/2026/closures/POSTMERGE_GOVERNANCE_CLOSURE.md
 related_evidence: []
-fitness_functions: ["scripts/qa/verify_exception_expiry.py"]
+fitness_functions:
+- scripts/qa/verify_exception_expiry.py
 expiry_date: null
 removal_condition: null
 ---
