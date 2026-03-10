@@ -44,7 +44,7 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 - **Aspects** - Official Open edX analytics using Apache Superset for visualization (Tutor plugin)
 - **Superset** - Data visualization tool (used by Aspects)
 - **Current Choice**: Aspects + Superset infrastructure in place
-- **Current Status**: Analytics not deployed, see `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
+- **Current state**: Analytics not deployed. See `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
 - **Note**: Panorama is a separate analytics platform (alternative to Aspects), but we're using Aspects
 
 ---
@@ -131,8 +131,8 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 12. **LMS** - https://skillourfuture.academy.mereka.io
     - Purpose: MCT migration target, skill development courses
     - Admin: https://skillourfuture.academy.mereka.io/admin
-    - Stats (as of 2025-12-29): 68,565 users, 449,615 enrollments, 30 courses
     - Organization: "SKILLOURFUTURE" in Open edX
+    - Current migration counts/status belong in `docs/status/migrations/**`
 
 **Shared Services**:
 - Studio: https://studio.academyv2.mereka.io (shared with main tenant)
@@ -312,7 +312,7 @@ When adding a new tenant, ensure these URLs are configured:
   - Uses Apache Superset as reporting tool
   - **Sources**: [Aspects Docs](https://docs.openedx.org/projects/openedx-aspects/), [Superset Decision](https://docs.openedx.org/projects/openedx-aspects/en/latest/technical_documentation/decisions/0003_superset.html)
 - **Our Choice**: Aspects + Superset
-- **Current Status**: Not yet deployed, see `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
+- **Current state**: Not yet deployed. See `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
 - **Note**: Panorama is an alternative analytics platform by Aulasneo, but we're using Aspects
 
 **Preview Domain**:
@@ -323,8 +323,8 @@ When adding a new tenant, ensure these URLs are configured:
 **Admin Panel Access**:
 - All `/admin` URLs require superuser privileges
 - SSO-protected (redirects to Authentik, then back to admin panel)
-- Platform admins: gurpreet@biji-biji.com, malasari@mereka.my
-- Enforcement: `./scripts/infra/ensure-platform-admins.sh`
+- Platform-admin ownership and access policy live in `docs/guides/admin/ADMIN_LOGIN_GUIDE.md`
+- Runtime enforcement uses `./scripts/infra/ensure-platform-admins.sh`
 
 **Shared Service Multi-Tenancy**:
 - Discovery/Ecommerce/Credentials use **organization filtering**
