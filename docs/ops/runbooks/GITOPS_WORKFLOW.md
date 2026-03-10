@@ -2,7 +2,7 @@
 _Audience: Platform Eng + DevOps • Owner: Engineering Lead • Last updated: 2026-03-06_
 
 > **Deployment boundary**: For the authoritative classification of what belongs in this repo
-> vs `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`, previously known as `infrastructure`), see [DEPLOYMENT_CONTRACT.md](../../reference/architecture/DEPLOYMENT_CONTRACT.md)
+> vs `BBI-K8` (the infrastructure repo, previously known as `infrastructure`), see [DEPLOYMENT_CONTRACT.md](../../reference/architecture/DEPLOYMENT_CONTRACT.md)
 > and [RESOURCE_OWNERSHIP_MATRIX.md](../../reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md).
 > Note: `deploy/k8s/overlays/production/` and `overlays/rke2-nonprod/` are classified
 > ENVIRONMENT_SPECIFIC and are managed by the active GitOps repo in this environment.
@@ -14,12 +14,12 @@ Mereka LMS uses a **two-repository GitOps architecture**:
 1. **Application Repository** (`mereka-lms`): Source code, base K8s manifests, CI/CD pipeline
 2. **Infrastructure Repository** (`BBI-K8`, previously `infrastructure`, legacy `bbi-infrastructure`): Production overlay, ArgoCD configuration
 
-**CRITICAL**: ArgoCD syncs from `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`; legacy name `bbi-infrastructure`), NOT from `mereka-lms`. Any `kubectl patch` commands targeting production will be reverted on the next ArgoCD sync cycle.
+**CRITICAL**: ArgoCD syncs from `BBI-K8` (legacy name `bbi-infrastructure`), NOT from `mereka-lms`. Any `kubectl patch` commands targeting production will be reverted on the next ArgoCD sync cycle.
 
 ```bash
 # Optional defaults used by the examples below
-APP_REPO="${APP_REPO:-/home/gurpreet/projects/k8s/mereka-lms}"
-INFRA_REPO="${INFRA_REPO:-/home/gurpreet/projects/k8s/infrastructure}"
+APP_REPO="${APP_REPO:-$(pwd)}"
+INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
 ```
 
 ## Architecture
@@ -65,16 +65,9 @@ Image tags can diverge between repositories when:
    - Emergency rollback changes tag in the infra repo
    - App repo never updated to match
 
-## Current Image Tag Drift (2026-02-12)
+## Drift Pattern
 
-As of commit `[TBD]`, the following drift exists:
-
-| Image | App Repo Tag | Infra Repo Tag | Status |
-|-------|--------------|----------------|--------|
-| `openedx` | `20260210-v21-mfe-only-b988d63` | `91125f2-20260210164818` | **DRIFT** |
-| `openedx-mfe` | `20260208-mfe-discussions-pass4-c17df16` | `b732a7d-20260210161437` | **DRIFT** |
-
-**Impact**: Production cluster runs images defined in infra repo, NOT app repo.
+Image tag drift happens whenever the app repo and infra repo point at different image tags for the same environment. Production always follows the tags in the infra repo, not the app repo.
 
 ## Verification Commands
 
@@ -246,8 +239,8 @@ kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms
 # scripts/infra/sync-production-tags.sh
 set -euo pipefail
 
-APP_REPO="${APP_REPO:-/home/gurpreet/projects/k8s/mereka-lms}"
-INFRA_REPO="${INFRA_REPO:-/home/gurpreet/projects/k8s/infrastructure}"
+APP_REPO="${APP_REPO:-$(pwd)}"
+INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
 
 # Get tags from app repo
 cd "$APP_REPO"
@@ -459,8 +452,8 @@ gcloud artifacts docker tags list \
 
 1. **Automated Tag Sync in CI/CD**
    - GitHub Action to auto-sync tags from app repo to infra repo after CI build
-   - Requires PAT with write access to `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`)
-   - Requires PAT with write access to `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`, legacy `bbi-infrastructure`)
+   - Requires PAT with write access to `BBI-K8`
+   - Uses the infrastructure repo currently designated as the GitOps source of truth
 
 2. **Slack Notifications on Drift**
    - Daily cron job runs `verify-gitops-image-overrides.sh`
