@@ -24,6 +24,7 @@ PACKS = {
     "generated/skills/scenario-packs.json": "docs/meta/skills/schemas/scenario-packs.schema.json",
     "generated/skills/skill-dependency-graph.json": "docs/meta/skills/schemas/skill-dependency-graph.schema.json",
     "generated/skills/read-first.json": "docs/meta/skills/schemas/read-first.schema.json",
+    "generated/skills/pack-registry.json": "docs/meta/skills/schemas/pack-registry.schema.json",
 }
 
 

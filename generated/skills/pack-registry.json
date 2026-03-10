@@ -1,0 +1,150 @@
+{
+  "canonical_inputs": [
+    "docs/meta/skills/AGENT_PACK_ABI.yaml",
+    "generated/skills/skill-registry.json",
+    "generated/skills/command-registry.json",
+    "generated/skills/scenario-packs.json",
+    "generated/skills/skill-dependency-graph.json",
+    "generated/skills/read-first.json"
+  ],
+  "generated_by": "tools/skills/build_pack_registry.py",
+  "pack_id": "pack-registry",
+  "packs": [
+    {
+      "canonical_inputs": [
+        "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+        "generated/skills/skill-registry.json"
+      ],
+      "canonical_path": "generated/skills/command-registry.json",
+      "depends_on": [
+        "generated/skills/skill-registry.json",
+        "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml"
+      ],
+      "owner": "platform-team",
+      "pack_id": "command-registry",
+      "primary_repo": "mereka-lms",
+      "projection_paths": [],
+      "schema_path": "docs/meta/skills/schemas/command-registry.schema.json",
+      "schema_version": 1,
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "source_generators": [
+        "tools/skills/build_command_registry.py"
+      ],
+      "stability": "stable",
+      "title": "Command Registry"
+    },
+    {
+      "canonical_inputs": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/scenario-packs.json"
+      ],
+      "canonical_path": "generated/skills/read-first.json",
+      "depends_on": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/scenario-packs.json"
+      ],
+      "owner": "platform-team",
+      "pack_id": "read-first",
+      "primary_repo": "mereka-lms",
+      "projection_paths": [
+        "generated/skills/read-first.md"
+      ],
+      "schema_path": "docs/meta/skills/schemas/read-first.schema.json",
+      "schema_version": 1,
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "source_generators": [
+        "tools/skills/build_skill_dependency_graph.py"
+      ],
+      "stability": "stable",
+      "title": "Read-First Pack"
+    },
+    {
+      "canonical_inputs": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/command-registry.json"
+      ],
+      "canonical_path": "generated/skills/scenario-packs.json",
+      "depends_on": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/command-registry.json"
+      ],
+      "owner": "platform-team",
+      "pack_id": "scenario-packs",
+      "primary_repo": "mereka-lms",
+      "projection_paths": [],
+      "schema_path": "docs/meta/skills/schemas/scenario-packs.schema.json",
+      "schema_version": 1,
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "source_generators": [
+        "tools/skills/build_scenario_packs.py"
+      ],
+      "stability": "stable",
+      "title": "Scenario Packs"
+    },
+    {
+      "canonical_inputs": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/command-registry.json",
+        "generated/skills/scenario-packs.json"
+      ],
+      "canonical_path": "generated/skills/skill-dependency-graph.json",
+      "depends_on": [
+        "generated/skills/skill-registry.json",
+        "generated/skills/command-registry.json",
+        "generated/skills/scenario-packs.json"
+      ],
+      "owner": "platform-team",
+      "pack_id": "skill-dependency-graph",
+      "primary_repo": "mereka-lms",
+      "projection_paths": [],
+      "schema_path": "docs/meta/skills/schemas/skill-dependency-graph.schema.json",
+      "schema_version": 1,
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "source_generators": [
+        "tools/skills/build_skill_dependency_graph.py"
+      ],
+      "stability": "evolving",
+      "title": "Skill Dependency Graph"
+    },
+    {
+      "canonical_inputs": [
+        "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+        "docs/meta/skills/SKILL_TAXONOMY.yaml"
+      ],
+      "canonical_path": "generated/skills/skill-registry.json",
+      "depends_on": [
+        "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+        "docs/meta/skills/SKILL_TAXONOMY.yaml"
+      ],
+      "owner": "platform-team",
+      "pack_id": "skill-registry",
+      "primary_repo": "mereka-lms",
+      "projection_paths": [],
+      "schema_path": "docs/meta/skills/schemas/skill-registry.schema.json",
+      "schema_version": 1,
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "source_generators": [
+        "tools/skills/build_skill_registry.py"
+      ],
+      "stability": "stable",
+      "title": "Skill Registry"
+    }
+  ],
+  "schema_version": 1,
+  "source_range": null
+}

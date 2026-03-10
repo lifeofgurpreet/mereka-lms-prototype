@@ -12,21 +12,20 @@
 ## Current target batch
 - files:
   - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
-  - docs/meta/skills/AGENT_PACK_ABI.yaml
-  - docs/meta/skills/REPO_DISCOVERY_MODEL.yaml
-  - docs/meta/skills/schemas/*.json
+  - docs/meta/skills/schemas/pack-registry.schema.json
+  - tools/skills/build_pack_registry.py
   - tools/skills/verify_agent_pack_schemas.py
-  - generated/skills/read-first.json
+  - generated/skills/pack-registry.json
 - goal:
-  - define the canonical pack ABI and schema versioning policy
-  - make the current machine-readable pack payloads schema-validatable
-  - promote read-first JSON to the canonical machine form behind the markdown projection
+  - make pack discovery explicit instead of filename-driven
+  - register every canonical Wave 11 pack with schema and generator metadata
+  - fail fast if a registered pack or projection is missing
 - stop condition:
-  - pack schemas validate and one commit is created
+  - pack registry validates and one commit is created
 
 ## Open residue
 - generated Wave 10 pack surfaces are not present on this branch and must be treated as external canonical inputs, not assumed local artifacts
-- pack discovery, runtime convergence, evidence sufficiency, and mixed-diff arbitration remain to be added in later packets
+- runtime convergence, evidence sufficiency, and mixed-diff arbitration remain to be added in later packets
 
 ## Next queued batch
-- Packet B: Pack registry and discovery
+- Packet C: Repo discovery and portability

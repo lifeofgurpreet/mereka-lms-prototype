@@ -26,8 +26,8 @@ canonical_packs:
   - scenario-packs
   - skill-dependency-graph
   - read-first
-future_wave11_packs:
   - pack-registry
+future_wave11_packs:
   - runtime-convergence-report
   - evidence-sufficiency-map
   - mixed-diff-arbitration
