@@ -52,7 +52,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | reports/2025/closures/MONGODB_ATLAS_MIGRATION.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/onboarding/DEVELOPER_ONBOARDING.md | 5 | Docs Lead | fix inline path references and missing commands |
-| docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md | 5 | Operations Lead | fix inline path references and missing commands |
@@ -300,11 +300,11 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/guides/onboarding/TEAM_SCALING_GUIDE.md | 584 | specs/templates/spec-template.md |
 | docs/guides/standards/DOCUMENTATION_STANDARDS.md | 501 | docs/archive/superseded/ |
 | docs/guides/standards/DOCUMENTATION_STANDARDS.md | 842 | docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md |
-| docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 127 | infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json |
-| docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 211 | infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json |
-| docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 265 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
-| docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 277 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md |
-| docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 66 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
+| docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 127 | infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json |
+| docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 211 | infrastructure/tutor/plugins/multi-tenancy/tenants/skillourfuture-brand.json |
+| docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 265 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
+| docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 277 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md |
+| docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 66 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
 | docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 139 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
 | docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 82 | scripts/migrations/kajabi/openedx_bulk_import.py |
 | docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 172 | scripts/migrations/kajabi/prepare_openedx_imports.py |

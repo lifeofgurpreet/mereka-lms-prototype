@@ -263,7 +263,7 @@ Run `verify-no-dom-overrides.sh` and `verify-footer-variant-matrix.sh` to enforc
 
 ## 5. SkillOurFuture Brand Migration Guide
 
-See also: `docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md` (full step-by-step guide with checklist).
+See also: `docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md` (full step-by-step guide with checklist).
 
 ### Summary
 
@@ -371,6 +371,6 @@ RUN_LIVE_GATE=0 BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh pro
 | `docs/reference/operations/FOOTER_VARIANT_MATRIX.md` | Footer variant per domain |
 | `docs/evidence/operations/TENANT_ISOLATION_EVIDENCE.md` | Cross-tenant isolation controls |
 | `docs/policies/operations/MULTISITE_GOVERNANCE.md` | Site + domain governance checklist |
-| `docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md` | SkillOurFuture brand migration guide |
+| `docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md` | SkillOurFuture brand migration guide |
 | `infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json` | JSON Schema for brand profiles |
 | `specs/multi-tenancy-architecture_spec.md` | Multi-tenancy architecture specification |

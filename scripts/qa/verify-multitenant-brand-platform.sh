@@ -54,7 +54,7 @@ echo ""
 # ---------------------------------------------------------------------------
 BRAND_SCHEMA="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy/brand-config-schema.json"
 BRAND_PLATFORM_DOC="$REPO_ROOT/docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md"
-SOF_MIGRATION_DOC="$REPO_ROOT/docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md"
+SOF_MIGRATION_DOC="$REPO_ROOT/docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md"
 MULTISITE_GOV="$REPO_ROOT/docs/policies/operations/MULTISITE_GOVERNANCE.md"
 TENANT_MODEL="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy/models.py"
 FOOTER_MATRIX_SCRIPT="$REPO_ROOT/scripts/qa/verify-footer-variant-matrix.sh"
@@ -511,7 +511,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  - AC-MB-002: Document fallback rules in docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md"
   echo "  - AC-MB-003: Document per-tenant smoke paths in MULTITENANT_BRAND_PLATFORM.md"
   echo "  - AC-MB-004: Ensure contract test scripts exist (verify-footer-variant-matrix.sh, etc.)"
-  echo "  - AC-MB-005: Create docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md"
+  echo "  - AC-MB-005: Create docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md"
   echo "  - AC-MB-006: Add governance policy to MULTITENANT_BRAND_PLATFORM.md"
   exit 1
 fi

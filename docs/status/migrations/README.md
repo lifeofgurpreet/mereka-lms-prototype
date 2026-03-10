@@ -8,6 +8,7 @@ This directory is the active migration-reporting surface for in-flight migration
 | If you need to... | Read this first | Then go deeper in |
 |---|---|---|
 | Check Kajabi migration status | [KAJABI_MIGRATION_STATUS.md](KAJABI_MIGRATION_STATUS.md) | [`../../reference/migrations/kajabi/README.md`](../../reference/migrations/kajabi/README.md) |
+| Check the Kajabi completion-data decision | [KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md](KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md) | [KAJABI_MIGRATION_STATUS.md](KAJABI_MIGRATION_STATUS.md) |
 | Check MCT migration status | [MCT_MIGRATION_STATUS.md](MCT_MIGRATION_STATUS.md) | [`../../reference/migrations/mct/README.md`](../../reference/migrations/mct/README.md) |
 | Check Drive/Airtable migration state | [drive-airtable-STATUS.md](drive-airtable-STATUS.md) | [`../../reference/migrations/drive-airtable/README.md`](../../reference/migrations/drive-airtable/README.md) |
 | Check rollout/rollback posture around migration work | [MIGRATION_STATUS_AND_ROLLBACK.md](MIGRATION_STATUS_AND_ROLLBACK.md) | [RKE2_MIGRATION_PLAN.md](RKE2_MIGRATION_PLAN.md) |
@@ -38,6 +39,7 @@ Do not create new active migration status docs under legacy `reports/**` paths.
 |---|---|
 | [drive-airtable-STATUS.md](drive-airtable-STATUS.md) | You need the current Drive/Airtable migration state. |
 | [2026-03-wave-2b-final-closeout.md](2026-03-wave-2b-final-closeout.md) | You need the canonical closeout record for the completed Wave 2B-Final convergence wave. |
+| [KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md](KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md) | You need the current decision on Kajabi courses that lack historical completion data. |
 | [KAJABI_MIGRATION_STATUS.md](KAJABI_MIGRATION_STATUS.md) | You need the current Kajabi migration state. |
 | [MCT_MIGRATION_STATUS.md](MCT_MIGRATION_STATUS.md) | You need the current MCT migration state. |
 | [MIGRATION_STATUS_AND_ROLLBACK.md](MIGRATION_STATUS_AND_ROLLBACK.md) | You need migration rollback and active rollout posture. |

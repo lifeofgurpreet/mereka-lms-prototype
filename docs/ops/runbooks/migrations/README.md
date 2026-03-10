@@ -9,10 +9,13 @@ This subroot holds operator procedures for live migration execution, verificatio
   - start with [`VERIFICATION_CHECKLIST.md`](VERIFICATION_CHECKLIST.md)
 - Need the Kajabi remigration and sync procedures:
   - go to [`kajabi/README.md`](kajabi/README.md)
+- Need the SkillOurFuture tenant-brand migration procedure:
+  - start with [`SKILLOURFUTURE_BRAND_MIGRATION.md`](SKILLOURFUTURE_BRAND_MIGRATION.md)
 
 ## Runbooks in this subroot
 
 - [`VERIFICATION_CHECKLIST.md`](VERIFICATION_CHECKLIST.md)
+- [`SKILLOURFUTURE_BRAND_MIGRATION.md`](SKILLOURFUTURE_BRAND_MIGRATION.md)
 - [`kajabi/README.md`](kajabi/README.md)
 
 ## What this subroot is not

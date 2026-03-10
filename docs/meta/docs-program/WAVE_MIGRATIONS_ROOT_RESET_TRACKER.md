@@ -142,6 +142,11 @@ This is not a wrapper-only retirement. The current root still mixes reference, s
 ### Packet B
 
 - Scope: rehome root-level files and obvious Kajabi/MCT reference docs.
+- Applied in this packet:
+  - `docs/migrations/KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md` -> `docs/status/migrations/KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md`
+  - `docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md` -> `docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md`
+- Deferred in this packet:
+  - `docs/migrations/BBI-K8-MIGRATION.md` remains in place until its active spec reference is re-routed intentionally.
 
 ### Packet C
 
