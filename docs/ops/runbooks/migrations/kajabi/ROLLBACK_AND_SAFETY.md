@@ -1,54 +1,15 @@
 # Rollback & Safety Guide for Kajabi → Open edX Migration
-_Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-11-09_
+_Audience: Platform Eng • Owner: Migration Squad • Last verified: 2026-03-10_
 
-## Current Situation Analysis
+Use this runbook before re-running Kajabi imports or when you need a safe rollback path for a failed or partial import. It focuses on durable safety steps, not dated migration-status snapshots.
 
-### What We Found
+## Safety Principles
 
-1. **Prepared Import Files Exist:**
-   - `users_import.csv`: 85,216 users ready to import
-   - `enrollments_import.csv`: 180,785 enrollments ready to import
-
-2. **Verification Shows:**
-   - Kajabi has: 138,585 enrollments
-   - Open edX has: 0 enrollments (empty or not accessible)
-
-3. **Discrepancy:**
-   - Prepared file has **180,785** enrollments
-   - Verification found **138,585** enrollments
-   - **Difference: ~42,000 enrollments**
-
-### Why the Discrepancy?
-
-The difference likely comes from:
-- **Prepared file** (`enrollments_import.csv`): Includes ALL purchases, including duplicates/multiple purchases per user
-- **Verification file** (`fix_missing_enrollments.csv`): Counts unique email+course combinations
-
-**Both are valid**, but we should use the verification file (unique combinations) as it's more accurate.
-
-## Migration Status
-
-### ✅ What's Been Done
-
-1. **Data Exported from Kajabi** ✅
-   - Users, enrollments, courses, certificates eligibility
-   - All source data captured
-
-2. **Data Transformed** ✅
-   - Users CSV prepared
-   - Enrollments CSV prepared
-   - Course packages built
-
-3. **Verification Tools Created** ✅
-   - Comparison scripts
-   - Fix scripts
-   - Rollback tools
-
-### ⏳ What's NOT Been Done
-
-1. **Users NOT imported yet** (or imported but not verified)
-2. **Enrollments NOT imported yet** (Open edX shows 0)
-3. **Certificates NOT generated yet**
+- backup before importing or re-importing
+- test with a small batch before bulk enrollment changes
+- prefer verified import inputs over older prepared snapshots
+- keep rollback commands/script selection explicit and reviewable
+- re-run verification after every material import step
 
 ## Safety & Rollback Plan
 
@@ -168,23 +129,6 @@ tutor local run lms ./manage.py lms shell -c "print('unenroll from rollback_spec
 
 5. **Handle Certificates** (after marking completions)
 
-## File Comparison
-
-### Which File to Use?
-
-**For Enrollments:**
-- ✅ **Use:** `fix_missing_enrollments.csv` (from verification)
-  - 138,585 enrollments
-  - Unique email+course combinations
-  - More accurate count
-  
-- ⚠️ **Alternative:** `enrollments_import.csv` (prepared earlier)
-  - 180,785 enrollments
-  - May include duplicates
-  - Use if you want all purchase records
-
-**Recommendation:** Use `fix_missing_enrollments.csv` - it's verified against Kajabi source of truth.
-
 ## Verification Checklist
 
 Before importing:
@@ -208,18 +152,4 @@ If something goes wrong:
 # Quick unenroll all Kajabi enrollments (replace with your rollback helper command)
 tutor local run lms ./manage.py lms shell -c "print('dry-run full Kajabi unenroll rollback')"
 ```
-
-## Questions Answered
-
-**Q: Have we completely migrated to Open edX yet?**  
-A: **No** - Open edX appears empty. The import files are prepared but not imported yet.
-
-**Q: What if this is done wrongly?**  
-A: **Rollback is possible**:
-- Unenroll users (safe, reversible)
-- Restore database backup (complete rollback)
-- Selective removal by course/user
-
-**Q: Can we roll back?**  
-A: **Yes** - Use the rollback tool or database restore. Always backup first!
 
