@@ -54,6 +54,11 @@ This directory contains canonical standards for how documentation is authored, c
 - [`EVIDENCE_PACK_STANDARD.md`](EVIDENCE_PACK_STANDARD.md)
 - [`STATUS_REPORTING_STANDARD.md`](STATUS_REPORTING_STANDARD.md)
 
+## Delivery checklists
+
+- [`DOCUMENTATION_DELIVERY_CHECKLIST.md`](DOCUMENTATION_DELIVERY_CHECKLIST.md)
+- [`SPEC_DELIVERY_CHECKLIST.md`](SPEC_DELIVERY_CHECKLIST.md)
+
 ## ADR contributor standards
 
 - [`ADR_LANGUAGE_STYLE.md`](ADR_LANGUAGE_STYLE.md)

@@ -4430,6 +4430,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/standards/DOCUMENTATION_DELIVERY_CHECKLIST.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "guides/standards/DOCUMENTATION_STANDARDS.md",
@@ -4452,6 +4461,15 @@
     "owner": "Platform Team",
     "path": "guides/standards/README.md",
     "status": "canonical",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/standards/SPEC_DELIVERY_CHECKLIST.md",
+    "status": "supporting",
     "type": "guide"
   },
   {
@@ -6054,24 +6072,6 @@
     "owner": "Platform Team",
     "path": "ops/quickref/access-urls.md",
     "status": "canonical",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "ops/quickref/checklists/doc-delivery-checklist.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "ops/quickref/checklists/spec-delivery-checklist.md",
-    "status": "supporting",
     "type": "runbook"
   },
   {

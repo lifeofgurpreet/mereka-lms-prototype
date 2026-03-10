@@ -3915,6 +3915,15 @@
     {
       "classification": "supporting",
       "lane": "concept",
+      "owner": "",
+      "path": "docs/guides/standards/DOCUMENTATION_DELIVERY_CHECKLIST.md",
+      "root": "docs",
+      "status": "",
+      "title": "Documentation Delivery Checklist"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
       "owner": "Platform Team",
       "path": "docs/guides/standards/DOCUMENTATION_STANDARDS.md",
       "root": "docs",
@@ -3938,6 +3947,15 @@
       "root": "docs",
       "status": "canonical",
       "title": "Documentation Standards"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/guides/standards/SPEC_DELIVERY_CHECKLIST.md",
+      "root": "docs",
+      "status": "",
+      "title": "Spec Delivery Checklist"
     },
     {
       "classification": "supporting",
@@ -5540,24 +5558,6 @@
       "root": "docs",
       "status": "",
       "title": "Access URLs and User Management"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/checklists/doc-delivery-checklist.md",
-      "root": "docs",
-      "status": "",
-      "title": "Documentation Delivery Checklist"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/checklists/spec-delivery-checklist.md",
-      "root": "docs",
-      "status": "",
-      "title": "Spec Delivery Checklist"
     },
     {
       "classification": "supporting",
@@ -11010,13 +11010,13 @@
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 196,
+    "docs:concept": 198,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
     "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 172,
+    "docs:runbook": 170,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,

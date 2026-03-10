@@ -24,14 +24,13 @@ Use this root when you need the shortest path to an operational answer. Quick re
 | [common-troubleshooting.md](./common-troubleshooting.md) | Troubleshooting | Site down, performance issues, config problems |
 | [access-urls.md](./access-urls.md) | Service URLs and local access points | You need hostnames, ports, or local URLs quickly |
 | [discovery-quickstart.md](./discovery-quickstart.md) | Discovery service quickstart | You need to work on Discovery without reading the full guide |
-| [checklists/doc-delivery-checklist.md](./checklists/doc-delivery-checklist.md) | Docs delivery checklist | You are shipping doc changes and need a final pass |
-| [checklists/spec-delivery-checklist.md](./checklists/spec-delivery-checklist.md) | Spec delivery checklist | You are shipping spec-driven work and need a final pass |
 
 ## What This Root Is Not
 
 - Not the source of architecture policy. Use [`../../concepts/architecture/`](../../concepts/architecture/README.md) for living standards and authority rules.
 - Not the main operator procedure root. Use [`../runbooks/`](../runbooks/README.md) when you need a full operational workflow.
 - Not the system of record for reference material. Use [`../../reference/operations/`](../../reference/operations/README.md) for contracts, inventories, and factual reference.
+- Not the place for documentation/spec delivery process checklists. Use [`../../guides/standards/`](../../guides/standards/README.md) for contributor-facing standards and review gates.
 
 ---
 

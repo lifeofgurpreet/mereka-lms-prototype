@@ -2615,6 +2615,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/guides/standards/DOCUMENTATION_DELIVERY_CHECKLIST.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/guides/standards/DOCUMENTATION_STANDARDS.md"
     },
     {
@@ -2626,6 +2631,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/guides/standards/README.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/guides/standards/SPEC_DELIVERY_CHECKLIST.md"
     },
     {
       "edge_type": "classifies",
@@ -3516,16 +3526,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/ops/quickref/access-urls.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/quickref/checklists/doc-delivery-checklist.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/quickref/checklists/spec-delivery-checklist.md"
     },
     {
       "edge_type": "classifies",
@@ -8285,6 +8285,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/guides/standards/DOCUMENTATION_DELIVERY_CHECKLIST.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/guides/standards/DOCUMENTATION_STANDARDS.md"
     },
     {
@@ -8296,6 +8301,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/guides/standards/README.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/guides/standards/SPEC_DELIVERY_CHECKLIST.md"
     },
     {
       "edge_type": "contains",
@@ -9186,16 +9196,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/ops/quickref/access-urls.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/quickref/checklists/doc-delivery-checklist.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/quickref/checklists/spec-delivery-checklist.md"
     },
     {
       "edge_type": "contains",
@@ -13225,6 +13225,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/guides/standards/DOCUMENTATION_DELIVERY_CHECKLIST.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/guides/standards/DOCUMENTATION_STANDARDS.md"
     },
     {
@@ -13236,6 +13241,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/guides/standards/README.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/guides/standards/SPEC_DELIVERY_CHECKLIST.md"
     },
     {
       "edge_type": "classifies",
@@ -15336,16 +15346,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
       "target": "docs/ops/quickref/access-urls.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/quickref/checklists/doc-delivery-checklist.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/quickref/checklists/spec-delivery-checklist.md"
     },
     {
       "edge_type": "classifies",
@@ -23142,6 +23142,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/guides/standards/DOCUMENTATION_DELIVERY_CHECKLIST.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/standards/DOCUMENTATION_DELIVERY_CHECKLIST.md",
+      "root": "docs",
+      "status": "",
+      "title": "Documentation Delivery Checklist"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/guides/standards/DOCUMENTATION_STANDARDS.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -23172,6 +23183,17 @@
       "root": "docs",
       "status": "canonical",
       "title": "Documentation Standards"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/guides/standards/SPEC_DELIVERY_CHECKLIST.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/standards/SPEC_DELIVERY_CHECKLIST.md",
+      "root": "docs",
+      "status": "",
+      "title": "Spec Delivery Checklist"
     },
     {
       "classification": "supporting",
@@ -25130,28 +25152,6 @@
       "root": "docs",
       "status": "",
       "title": "Access URLs and User Management"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/quickref/checklists/doc-delivery-checklist.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/checklists/doc-delivery-checklist.md",
-      "root": "docs",
-      "status": "",
-      "title": "Documentation Delivery Checklist"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/quickref/checklists/spec-delivery-checklist.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/checklists/spec-delivery-checklist.md",
-      "root": "docs",
-      "status": "",
-      "title": "Spec Delivery Checklist"
     },
     {
       "classification": "supporting",
