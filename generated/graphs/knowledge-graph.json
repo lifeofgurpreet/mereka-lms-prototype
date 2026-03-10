@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4779,
+  "edge_count": 4938,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3445,6 +3445,41 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/guides/platform/COURSE_AUTHORING_QUICKSTART.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/guides/platform/MULTI_TENANCY_EXPLAINED.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/guides/platform/OPENEDX_FOR_TEAM_MEMBERS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/guides/platform/OPENEDX_SETTINGS_MATRIX.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/guides/platform/PLATFORM_START_HERE.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/guides/platform/SOURCE_MAP.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/guides/platform/SUPPORT_AND_ESCALATION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/guides/standards/ADR_LANGUAGE_STYLE.md"
     },
     {
@@ -3756,6 +3791,226 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/docs-program/root-collapse/docs-top-level-evidence-collapse-map.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/RECEIPT_CLASSES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE10_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE10_SOURCE_OF_TRUTH_MAP.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE12_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE12_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE13_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE13_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE14_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/approval-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/evidence-obligations.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/evidence-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/execution-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/proof-bundle-manifest.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/read-first-packs.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/release-decision-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/release-readiness.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/review-decision.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/reviewer-obligations.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/runtime-evaluation.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/schemas/runtime-proof-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/AGENT_PACK_ABI.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/SKILL_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/WAVE11_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/WAVE11_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/command-registry.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/pack-registry.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/read-first.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/runtime-convergence-report.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/scenario-packs.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/skill-dependency-graph.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/skills/schemas/skill-registry.schema.json"
     },
     {
       "edge_type": "classifies",
@@ -6616,6 +6871,16 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/reference/operations/USER_FACING_URLS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md"
     },
     {
       "edge_type": "classifies",
@@ -10945,6 +11210,41 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/guides/platform/COURSE_AUTHORING_QUICKSTART.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/guides/platform/MULTI_TENANCY_EXPLAINED.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/guides/platform/OPENEDX_FOR_TEAM_MEMBERS.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/guides/platform/OPENEDX_SETTINGS_MATRIX.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/guides/platform/PLATFORM_START_HERE.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/guides/platform/SOURCE_MAP.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/guides/platform/SUPPORT_AND_ESCALATION.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/guides/standards/ADR_LANGUAGE_STYLE.md"
     },
     {
@@ -11256,6 +11556,226 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/docs-program/root-collapse/docs-top-level-evidence-collapse-map.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/RECEIPT_CLASSES.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE10_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE10_SOURCE_OF_TRUTH_MAP.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE12_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE12_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE13_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE13_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE14_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/approval-receipt.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/evidence-obligations.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/evidence-receipt.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/execution-receipt.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/proof-bundle-manifest.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/read-first-packs.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/release-decision-receipt.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/release-readiness.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/review-decision.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/reviewer-obligations.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/runtime-evaluation.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/schemas/runtime-proof-receipt.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/AGENT_PACK_ABI.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/SKILL_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/WAVE11_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/WAVE11_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/command-registry.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/pack-registry.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/read-first.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/runtime-convergence-report.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/scenario-packs.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/skill-dependency-graph.schema.json"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/skills/schemas/skill-registry.schema.json"
     },
     {
       "edge_type": "contains",
@@ -14116,6 +14636,16 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/reference/operations/USER_FACING_URLS.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md"
     },
     {
       "edge_type": "contains",
@@ -17710,6 +18240,41 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/guides/platform/COURSE_AUTHORING_QUICKSTART.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/guides/platform/MULTI_TENANCY_EXPLAINED.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/guides/platform/OPENEDX_FOR_TEAM_MEMBERS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/guides/platform/OPENEDX_SETTINGS_MATRIX.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/guides/platform/PLATFORM_START_HERE.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/guides/platform/SOURCE_MAP.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/guides/platform/SUPPORT_AND_ESCALATION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/guides/standards/ADR_LANGUAGE_STYLE.md"
     },
     {
@@ -18239,6 +18804,16 @@
     },
     {
       "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md"
+    },
+    {
+      "edge_type": "classifies",
       "source": "lane:docs:evidence",
       "target": "docs/evidence/operations/2026-03-wave-2b-final-closeout/README.md"
     },
@@ -18356,6 +18931,226 @@
       "edge_type": "classifies",
       "source": "lane:docs:other",
       "target": "docs/meta/adr-process/adr-rollout.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/RECEIPT_CLASSES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE10_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE10_SOURCE_OF_TRUTH_MAP.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE12_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE12_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE13_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE13_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE14_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/approval-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/evidence-obligations.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/evidence-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/execution-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/proof-bundle-manifest.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/read-first-packs.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/release-decision-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/release-readiness.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/review-decision.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/reviewer-obligations.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/runtime-evaluation.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/schemas/runtime-proof-receipt.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/AGENT_PACK_ABI.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/SKILL_TAXONOMY.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/WAVE11_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/WAVE11_EXECUTION_TRACKER.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/command-registry.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/pack-registry.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/read-first.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/runtime-convergence-report.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/scenario-packs.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/skill-dependency-graph.schema.json"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/skills/schemas/skill-registry.schema.json"
     },
     {
       "edge_type": "classifies",
@@ -23899,7 +24694,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1617,
+  "node_count": 1670,
   "nodes": [
     {
       "id": "classification:archival",
@@ -30484,6 +31279,83 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/guides/platform/COURSE_AUTHORING_QUICKSTART.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/platform/COURSE_AUTHORING_QUICKSTART.md",
+      "root": "docs",
+      "status": "",
+      "title": "Course Authoring Quickstart"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/guides/platform/MULTI_TENANCY_EXPLAINED.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/platform/MULTI_TENANCY_EXPLAINED.md",
+      "root": "docs",
+      "status": "",
+      "title": "Multi-Tenancy Explained"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/guides/platform/OPENEDX_FOR_TEAM_MEMBERS.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/platform/OPENEDX_FOR_TEAM_MEMBERS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Open edX For Team Members"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/guides/platform/OPENEDX_SETTINGS_MATRIX.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/platform/OPENEDX_SETTINGS_MATRIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Open edX Settings Matrix"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/guides/platform/PLATFORM_START_HERE.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/platform/PLATFORM_START_HERE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Platform Start Here"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/guides/platform/SOURCE_MAP.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/platform/SOURCE_MAP.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 14 Team Handbook Source Map"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/guides/platform/SUPPORT_AND_ESCALATION.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/guides/platform/SUPPORT_AND_ESCALATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Support And Escalation"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/guides/standards/ADR_LANGUAGE_STYLE.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -31174,6 +32046,490 @@
       "root": "docs",
       "status": "",
       "title": "docs-top-level-evidence-collapse-map"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Decision Runtime Model"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Execution Proof Runtime Model"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/RECEIPT_CLASSES.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/RECEIPT_CLASSES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "RECEIPT_CLASSES"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE10_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE10_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 10 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 10 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 10 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE10_SOURCE_OF_TRUTH_MAP.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE10_SOURCE_OF_TRUTH_MAP.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 10 Source Of Truth Map"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE12_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE12_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 12 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 12 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE12_REVIEW_HANDOFF.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE12_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 12 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE13_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE13_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 13 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 13 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE13_REVIEW_HANDOFF.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE13_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 13 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE14_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE14_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 14 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 14 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 14 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/approval-receipt.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/approval-receipt.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "approval-receipt.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/evidence-obligations.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/evidence-obligations.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "evidence-obligations.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/evidence-receipt.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/evidence-receipt.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "evidence-receipt.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/execution-receipt.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/execution-receipt.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "execution-receipt.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/proof-bundle-manifest.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/proof-bundle-manifest.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "proof-bundle-manifest.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/read-first-packs.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/read-first-packs.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "read-first-packs.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/release-decision-receipt.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/release-decision-receipt.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "release-decision-receipt.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/release-readiness.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/release-readiness.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "release-readiness.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/review-decision.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/review-decision.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "review-decision.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/reviewer-obligations.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/reviewer-obligations.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "reviewer-obligations.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/runtime-evaluation.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/runtime-evaluation.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "runtime-evaluation.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/schemas/runtime-proof-receipt.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/schemas/runtime-proof-receipt.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "runtime-proof-receipt.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/AGENT_PACK_ABI.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/AGENT_PACK_ABI.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "AGENT_PACK_ABI"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "REPO_DISCOVERY_MODEL"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "SKILL_RUNTIME_MODEL"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/SKILL_TAXONOMY.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/SKILL_TAXONOMY.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "SKILL_TAXONOMY"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/WAVE11_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE11_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 11 Closeout"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/WAVE11_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE11_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 11 Execution Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/WAVE11_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 11 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/command-registry.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/command-registry.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "command-registry.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/evidence-sufficiency-map.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "evidence-sufficiency-map.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/mixed-diff-arbitration.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "mixed-diff-arbitration.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/pack-registry.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/pack-registry.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "pack-registry.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/read-first.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/read-first.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "read-first.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/runtime-convergence-report.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/runtime-convergence-report.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "runtime-convergence-report.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/scenario-packs.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/scenario-packs.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "scenario-packs.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/skill-dependency-graph.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/skill-dependency-graph.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "skill-dependency-graph.schema"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/skills/schemas/skill-registry.schema.json",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/skills/schemas/skill-registry.schema.json",
+      "root": "docs",
+      "status": "",
+      "title": "skill-registry.schema"
     },
     {
       "classification": "supporting",
@@ -37469,6 +38825,28 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Domain And Access Reference"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Team Topology Reference"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md",
       "lane": "runbook",
       "node_type": "docs:runbook",
@@ -39750,7 +41128,7 @@
       "owner": "engineering",
       "path": "specs/auth-sso-enterprise_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Authentication & SSO Enterprise Integration"
     },
     {
@@ -39794,7 +41172,7 @@
       "owner": "engineering",
       "path": "specs/ci-cd-pipeline_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "CI/CD Pipeline Specification"
     },
     {
@@ -39827,7 +41205,7 @@
       "owner": "migration-squad",
       "path": "specs/data-migrations-kajabi-mct_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Data Migrations: Kajabi & MCT Legacy Systems"
     },
     {
@@ -39860,7 +41238,7 @@
       "owner": "engineering",
       "path": "specs/disaster-recovery-business-continuity_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Disaster Recovery & Business Continuity"
     },
     {
@@ -39871,7 +41249,7 @@
       "owner": "engineering",
       "path": "specs/ecommerce-purchase-gateway_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Ecommerce Purchase Gateway (Stripe -> Open edX Integration)"
     },
     {
@@ -39893,7 +41271,7 @@
       "owner": "engineering",
       "path": "specs/enterprise-microservices_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Enterprise Microservices Deployment"
     },
     {
@@ -39904,7 +41282,7 @@
       "owner": "engineering",
       "path": "specs/external-registration-hubspot_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: External Registration via HubSpot"
     },
     {
@@ -39915,7 +41293,7 @@
       "owner": "engineering",
       "path": "specs/forum-service-migration_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Forum Service Migration: Ruby cs_comments_service to Python openedx-forum"
     },
     {
@@ -39948,7 +41326,7 @@
       "owner": "platform-team",
       "path": "specs/github-actions-cost-monitoring_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "GitHub Actions Cost Monitoring"
     },
     {
@@ -39992,7 +41370,7 @@
       "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
     },
     {
@@ -40003,7 +41381,7 @@
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
     },
     {
@@ -40014,7 +41392,7 @@
       "owner": "engineering",
       "path": "specs/mongodb-atlas-integration_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "MongoDB Atlas Integration"
     },
     {
@@ -40025,7 +41403,7 @@
       "owner": "engineering",
       "path": "specs/multi-site-domains_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Multi-Site Domain Configuration"
     },
     {
@@ -40080,7 +41458,7 @@
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
@@ -40443,7 +41821,7 @@
       "owner": "",
       "path": "specs/plans/forum-service-migration_plan.md",
       "root": "specs",
-      "status": "active",
+      "status": "completed",
       "title": "Forum Service Migration - Implementation Plan"
     },
     {
@@ -40454,7 +41832,7 @@
       "owner": "",
       "path": "specs/plans/forum-service-migration_testplan.md",
       "root": "specs",
-      "status": "active",
+      "status": "completed",
       "title": "Forum Service Migration - Test Plan"
     },
     {
@@ -40619,7 +41997,7 @@
       "owner": "engineering",
       "path": "specs/plans/platform-middleware-custom-apps_plan.md",
       "root": "specs",
-      "status": "active",
+      "status": "in_progress",
       "title": "Implementation Plan: Platform Middleware and Custom Apps"
     },
     {
@@ -40795,7 +42173,7 @@
       "owner": "engineering",
       "path": "specs/platform-middleware-custom-apps_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Platform Middleware and Custom Apps"
     },
     {
@@ -40806,7 +42184,7 @@
       "owner": "engineering",
       "path": "specs/proctoring-integration_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
     },
     {
@@ -40883,7 +42261,7 @@
       "owner": "engineering",
       "path": "specs/secrets-management_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Secrets Management Specification"
     },
     {
@@ -40894,7 +42272,7 @@
       "owner": "engineering",
       "path": "specs/slo-sla-service-level-management_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "SLO/SLA Definitions & Service Level Management"
     },
     {
@@ -41488,7 +42866,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration-resilience_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Tutor Configuration Resilience and Patch Automation"
     },
     {
@@ -41499,7 +42877,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Tutor Configuration Lifecycle"
     },
     {
@@ -41565,7 +42943,7 @@
       "owner": "engineering",
       "path": "specs/video-pipeline-delivery_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Video Pipeline & Delivery System"
     }
   ]

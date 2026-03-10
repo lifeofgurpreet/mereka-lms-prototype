@@ -3,7 +3,11 @@ version: 1
 status:
   - draft
   - active
+  - review
   - approved
+  - in_progress
+  - completed
+  - deferred
   - ready
   - deprecated
   - superseded

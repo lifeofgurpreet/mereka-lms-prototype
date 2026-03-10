@@ -1613,7 +1613,7 @@
       "owner": "engineering",
       "path": "specs/external-registration-hubspot_spec.md",
       "spec_class": "generated",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: External Registration via HubSpot"
     },
     {
@@ -1652,7 +1652,7 @@
       "owner": "platform-team",
       "path": "specs/github-actions-cost-monitoring_spec.md",
       "spec_class": "integration",
-      "status": "active",
+      "status": "approved",
       "title": "GitHub Actions Cost Monitoring"
     },
     {
@@ -1680,7 +1680,7 @@
       "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
       "spec_class": "generated",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
     },
     {
@@ -1691,7 +1691,7 @@
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
       "spec_class": "generated",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
     },
     {
@@ -1748,7 +1748,7 @@
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "spec_class": "generated",
-      "status": "superseded",
+      "status": "completed",
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
@@ -2032,7 +2032,7 @@
       "owner": null,
       "path": "specs/plans/forum-service-migration_testplan.md",
       "spec_class": "plan",
-      "status": "active",
+      "status": "completed",
       "title": "Forum Service Migration - Test Plan"
     },
     {
@@ -2236,7 +2236,7 @@
       "owner": "engineering",
       "path": "specs/platform-middleware-custom-apps_spec.md",
       "spec_class": "integration",
-      "status": "active",
+      "status": "approved",
       "title": "Platform Middleware and Custom Apps"
     },
     {
@@ -2247,7 +2247,7 @@
       "owner": "engineering",
       "path": "specs/proctoring-integration_spec.md",
       "spec_class": "generated",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
     },
     {
@@ -2313,7 +2313,7 @@
       "owner": "engineering",
       "path": "specs/secrets-management_spec.md",
       "spec_class": "security",
-      "status": "active",
+      "status": "approved",
       "title": "Secrets Management Specification"
     },
     {
@@ -2324,7 +2324,7 @@
       "owner": "engineering",
       "path": "specs/slo-sla-service-level-management_spec.md",
       "spec_class": "integration",
-      "status": "active",
+      "status": "approved",
       "title": "SLO/SLA Definitions & Service Level Management"
     },
     {
@@ -2616,7 +2616,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration-resilience_spec.md",
       "spec_class": "system",
-      "status": "active",
+      "status": "approved",
       "title": "Tutor Configuration Resilience and Patch Automation"
     },
     {
@@ -2627,7 +2627,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration_spec.md",
       "spec_class": "system",
-      "status": "active",
+      "status": "approved",
       "title": "Tutor Configuration Lifecycle"
     },
     {
@@ -2693,7 +2693,7 @@
       "owner": "engineering",
       "path": "specs/video-pipeline-delivery_spec.md",
       "spec_class": "integration",
-      "status": "active",
+      "status": "approved",
       "title": "Video Pipeline & Delivery System"
     }
   ],

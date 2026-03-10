@@ -5,12 +5,12 @@
 
 ## Summary
 
-- **active**: 19 items
-- **approved**: 13 items
+- **approved**: 29 items
+- **completed**: 7 items
 - **deferred_until_2027**: 2 items
 - **draft**: 62 items
+- **in_progress**: 1 items
 - **ready**: 7 items
-- **superseded**: 5 items
 - **lane:normative**: 44 items
 - **lane:plan**: 29 items
 - **lane:proposal**: 4 items
@@ -26,43 +26,43 @@
 |---|-------|------|-------|--------|---------|-----|----------|
 | 1 | [Advanced Assessment & XQueue Integration (Non-Proctored)](advanced-assessment-xqueue_spec.md) | normative | integration | draft | 1.0.0 | 44 | 2026-03-09 |
 | 2 | [Analytics Pipeline (Aspects/Panorama)](analytics-pipeline_spec.md) | normative | integration | approved | 1.0.0 | 8 | 2026-03-09 |
-| 3 | [Authentication & SSO Enterprise Integration](auth-sso-enterprise_spec.md) | normative | domain | active | 1.0.0 | 45 | 2026-03-09 |
+| 3 | [Authentication & SSO Enterprise Integration](auth-sso-enterprise_spec.md) | normative | domain | approved | 1.0.0 | 45 | 2026-03-09 |
 | 4 | [Branding System](branding-system_spec.md) | normative | domain | approved | 1.1.0 | 13 | 2026-03-09 |
-| 5 | [CI/CD Pipeline Specification](ci-cd-pipeline_spec.md) | normative | system | active | 1.0.0 | 43 | 2026-02-12 |
+| 5 | [CI/CD Pipeline Specification](ci-cd-pipeline_spec.md) | normative | system | approved | 1.0.0 | 43 | 2026-02-12 |
 | 6 | [Content Libraries v2 Management & Enterprise Usage](content-libraries-v2_spec.md) | normative | domain | draft | 1.0.0 | 33 | 2026-03-09 |
 | 7 | [Cross-Cutting Requirements](cross-cutting-requirements_spec.md) | normative | system | approved | 1.0.0 | 12 | 2026-03-09 |
-| 8 | [Data Migrations: Kajabi & MCT Legacy Systems](data-migrations-kajabi-mct_spec.md) | normative | domain | active | 1.0.0 | 44 | 2026-02-10 |
+| 8 | [Data Migrations: Kajabi & MCT Legacy Systems](data-migrations-kajabi-mct_spec.md) | normative | domain | approved | 1.0.0 | 44 | 2026-02-10 |
 | 9 | [Data Privacy & GDPR Compliance](data-privacy-gdpr-compliance_spec.md) | normative | security | draft | 1.0.0 | 93 | 2026-03-09 |
 | 10 | [Design Tokens System](design-tokens-system_spec.md) | normative | system | approved | 1.1.0 | 12 | 2026-03-09 |
-| 11 | [Disaster Recovery & Business Continuity](disaster-recovery-business-continuity_spec.md) | normative | system | active | 1.0.0 | 26 | 2026-02-10 |
-| 12 | [Ecommerce Purchase Gateway (Stripe -> Open edX Integration)](ecommerce-purchase-gateway_spec.md) | normative | integration | active | 1.0.0 | 34 | 2026-03-09 |
+| 11 | [Disaster Recovery & Business Continuity](disaster-recovery-business-continuity_spec.md) | normative | system | approved | 1.0.0 | 26 | 2026-02-10 |
+| 12 | [Ecommerce Purchase Gateway (Stripe -> Open edX Integration)](ecommerce-purchase-gateway_spec.md) | normative | integration | approved | 1.0.0 | 34 | 2026-03-09 |
 | 13 | [Email & Notifications Pipeline](email-notifications-pipeline_spec.md) | normative | integration | draft | 1.0.0 | 45 | 2026-03-09 |
-| 14 | [Enterprise Microservices Deployment](enterprise-microservices_spec.md) | normative | integration | active | 1.0.0 | 37 | 2026-03-09 |
-| 15 | [Forum Service Migration: Ruby cs_comments_service to Python openedx-forum](forum-service-migration_spec.md) | normative | integration | active | 1.0.0 | 25 | 2026-03-09 |
+| 14 | [Enterprise Microservices Deployment](enterprise-microservices_spec.md) | normative | integration | approved | 1.0.0 | 37 | 2026-03-09 |
+| 15 | [Forum Service Migration: Ruby cs_comments_service to Python openedx-forum](forum-service-migration_spec.md) | normative | integration | approved | 1.0.0 | 25 | 2026-03-09 |
 | 16 | [Frontend Accessibility: WCAG 2.1 AA Compliance for Mereka Branding Overlays](frontend-accessibility_spec.md) | normative | integration | draft | 1.0.0 | 26 | 2026-03-09 |
 | 17 | [Frontend Performance Budgets: Core Web Vitals, Bundle Sizes, and Caching for SEA Users](frontend-performance-budgets_spec.md) | normative | domain | draft | 1.0.0 | 30 | 2026-03-09 |
-| 18 | [GitHub Actions Cost Monitoring](github-actions-cost-monitoring_spec.md) | normative | integration | active | 1.0.0 | 14 | 2026-02-12 |
+| 18 | [GitHub Actions Cost Monitoring](github-actions-cost-monitoring_spec.md) | normative | integration | approved | 1.0.0 | 14 | 2026-02-12 |
 | 19 | [Kubernetes Deployment Specification](k8s-deployment_spec.md) | normative | system | approved | 1.0.0 | 37 | 2026-03-09 |
 | 20 | [MFE Plugin Slots: FPF Slot Activation Roadmap](mfe-plugin-slots_spec.md) | normative | integration | draft | 1.0.0 | 29 | 2026-03-09 |
-| 21 | [MongoDB Atlas Integration](mongodb-atlas-integration_spec.md) | normative | integration | active | 1.0.0 | 9 | 2026-03-09 |
-| 22 | [Multi-Site Domain Configuration](multi-site-domains_spec.md) | normative | system | active | 1.0.0 | 9 | 2026-03-09 |
+| 21 | [MongoDB Atlas Integration](mongodb-atlas-integration_spec.md) | normative | integration | approved | 1.0.0 | 9 | 2026-03-09 |
+| 22 | [Multi-Site Domain Configuration](multi-site-domains_spec.md) | normative | system | approved | 1.0.0 | 9 | 2026-03-09 |
 | 23 | [Multi-Tenancy Architecture](multi-tenancy-architecture_spec.md) | normative | system | approved | 1.0.0 | 33 | 2026-03-09 |
 | 24 | [Observability Stack (Prometheus/Tempo/Loki)](observability-stack_spec.md) | normative | integration | approved | 1.0.0 | 16 | 2026-03-09 |
 | 25 | [Observability Validation & SLI/SLO Compliance Requirements](observability-validation-requirements_spec.md) | normative | integration | draft | 1.0.0 | 31 | 2026-02-13 |
 | 26 | [OEP-48 Brand Package (@edx/brand for Mereka Academy)](oep48-brand-package_spec.md) | normative | domain | draft | 1.0.0 | 37 | 2026-02-27 |
-| 27 | [Platform Middleware and Custom Apps](platform-middleware-custom-apps_spec.md) | normative | integration | active | 1.0.0 | 20 | 2026-02-10 |
+| 27 | [Platform Middleware and Custom Apps](platform-middleware-custom-apps_spec.md) | normative | integration | approved | 1.0.0 | 20 | 2026-02-10 |
 | 28 | [Repository Structure Specification](repository-structure_spec.md) | normative | system | approved | 1.0.0 | 12 | 2026-03-09 |
-| 29 | [Secrets Management Specification](secrets-management_spec.md) | normative | security | active | 1.0.0 | 18 | 2026-02-10 |
-| 30 | [SLO/SLA Definitions & Service Level Management](slo-sla-service-level-management_spec.md) | normative | integration | active | 1.0.0 | 53 | 2026-02-10 |
+| 29 | [Secrets Management Specification](secrets-management_spec.md) | normative | security | approved | 1.0.0 | 18 | 2026-02-10 |
+| 30 | [SLO/SLA Definitions & Service Level Management](slo-sla-service-level-management_spec.md) | normative | integration | approved | 1.0.0 | 53 | 2026-02-10 |
 | 31 | [Studio Customization: Mereka Academy Course Authoring Experience](studio-customization_spec.md) | normative | integration | draft | 1.0.0 | 28 | 2026-03-09 |
-| 32 | [Tutor Configuration Resilience and Patch Automation](tutor-configuration-resilience_spec.md) | normative | system | active | 1.0.0 | 12 | 2026-03-09 |
-| 33 | [Tutor Configuration Lifecycle](tutor-configuration_spec.md) | normative | system | active | 1.0.0 | 10 | 2026-03-09 |
+| 32 | [Tutor Configuration Resilience and Patch Automation](tutor-configuration-resilience_spec.md) | normative | system | approved | 1.0.0 | 12 | 2026-03-09 |
+| 33 | [Tutor Configuration Lifecycle](tutor-configuration_spec.md) | normative | system | approved | 1.0.0 | 10 | 2026-03-09 |
 | 34 | [CRED-030: Issuance Flows](verifiable-credentials-issuance_spec.md) | normative | integration | approved | 1.0.0 | 8 | 2026-03-09 |
 | 35 | [CRED-020: Issuer Identity, Keys, and Rotation](verifiable-credentials-issuer_spec.md) | normative | integration | approved | 1.0.0 | 6 | 2026-03-09 |
 | 36 | [CRED-050: Ops & Reliability](verifiable-credentials-ops_spec.md) | normative | integration | approved | 1.0.0 | 9 | 2026-03-09 |
 | 37 | [CRED-010: Credential Types & Mapping](verifiable-credentials-types_spec.md) | normative | domain | approved | 1.0.0 | 8 | 2026-03-09 |
 | 38 | [CRED-040: Verification](verifiable-credentials-verification_spec.md) | normative | security | approved | 1.0.0 | 8 | 2026-03-09 |
-| 39 | [Video Pipeline & Delivery System](video-pipeline-delivery_spec.md) | normative | integration | active | 1.0.0 | 38 | 2026-03-09 |
+| 39 | [Video Pipeline & Delivery System](video-pipeline-delivery_spec.md) | normative | integration | approved | 1.0.0 | 38 | 2026-03-09 |
 
 ## Proposal Specs
 
@@ -91,14 +91,14 @@
 | 12 | [Implementation Plan: Email & Notifications Pipeline](plans/email-notifications-pipeline_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 13 | [Implementation Plan: Enterprise Microservices Deployment](plans/enterprise-microservices_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 14 | [Implementation Plan: External Registration via HubSpot](plans/external-registration-hubspot_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
-| 15 | [Forum Service Migration - Implementation Plan](plans/forum-service-migration_plan.md) | plan | plan | active | None | 0 | 2026-02-10 |
+| 15 | [Forum Service Migration - Implementation Plan](plans/forum-service-migration_plan.md) | plan | plan | completed | None | 0 | 2026-02-10 |
 | 16 | [Implementation Plan: Kubernetes Deployment Specification](plans/k8s-deployment_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 17 | [Mobile Apps (iOS + Android) Enterprise Deployment - Implementation Plan](plans/mobile-apps-enterprise_plan.md) | plan | plan | ready | None | 0 | 2026-02-10 |
 | 18 | [Implementation Plan: MongoDB Atlas Integration](plans/mongodb-atlas-integration_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 19 | [Implementation Plan: Multi-Site Domain Configuration](plans/multi-site-domains_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 20 | [Multi-Tenancy Architecture - Implementation Plan](plans/multi-tenancy-architecture_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 21 | [Implementation Plan: Observability Stack (Prometheus/Tempo/Loki)](plans/observability-stack_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
-| 22 | [Implementation Plan: Platform Middleware and Custom Apps](plans/platform-middleware-custom-apps_plan.md) | plan | plan | active | None | 0 | 2026-02-10 |
+| 22 | [Implementation Plan: Platform Middleware and Custom Apps](plans/platform-middleware-custom-apps_plan.md) | plan | plan | in_progress | None | 0 | 2026-02-10 |
 | 23 | [Proctoring Integration - Implementation Plan](plans/proctoring-integration_plan.md) | plan | plan | deferred_until_2027 | None | 0 | 2026-02-10 |
 | 24 | [Implementation Plan: Repository Structure](plans/repository-structure_plan.md) | plan | plan | draft | None | 0 | 2026-03-09 |
 | 25 | [Implementation Plan: Secrets Management](plans/secrets-management_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
@@ -127,7 +127,7 @@
 | 14 | [Email & Notifications Pipeline - Test Plan](plans/email-notifications-pipeline_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
 | 15 | [Enterprise Microservices Deployment Test Plan](plans/enterprise-microservices_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-13 |
 | 16 | [Test Plan: External Registration via HubSpot](plans/external-registration-hubspot_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
-| 17 | [Forum Service Migration - Test Plan](plans/forum-service-migration_testplan.md) | testplan | plan | active | None | 0 | 2026-02-10 |
+| 17 | [Forum Service Migration - Test Plan](plans/forum-service-migration_testplan.md) | testplan | plan | completed | None | 0 | 2026-02-10 |
 | 18 | [Test Plan: Kubernetes Deployment Specification](plans/k8s-deployment_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
 | 19 | [Mobile Apps (iOS + Android) Enterprise Deployment - Test Plan](plans/mobile-apps-enterprise_testplan.md) | testplan | plan | ready | None | 0 | 2026-02-10 |
 | 20 | [Test Plan: MongoDB Atlas Integration](plans/mongodb-atlas-integration_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
@@ -147,11 +147,11 @@
 
 | # | Title | Lane | Class | Status | Version | ACs | Reviewed |
 |---|-------|------|-------|--------|---------|-----|----------|
-| 1 | [Compatibility Wrapper: External Registration via HubSpot](external-registration-hubspot_spec.md) | normative | generated | superseded | None | 0 | 2026-03-09 |
-| 2 | [Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment](mobile-apps-enterprise_spec.md) | normative | generated | superseded | None | 0 | 2026-03-09 |
-| 3 | [Compatibility Wrapper: Mobile Apps API Keys & Secrets Management](mobile-apps-secrets-management_spec.md) | normative | generated | superseded | None | 0 | 2026-03-09 |
-| 4 | [Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline](paragon-design-tokens-migration_spec.md) | normative | generated | superseded | None | 0 | 2026-03-09 |
-| 5 | [Compatibility Wrapper: Proctoring Integration for Enterprise Open edX](proctoring-integration_spec.md) | normative | generated | superseded | None | 0 | 2026-03-09 |
+| 1 | [Compatibility Wrapper: External Registration via HubSpot](external-registration-hubspot_spec.md) | normative | generated | completed | None | 0 | 2026-03-09 |
+| 2 | [Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment](mobile-apps-enterprise_spec.md) | normative | generated | completed | None | 0 | 2026-03-09 |
+| 3 | [Compatibility Wrapper: Mobile Apps API Keys & Secrets Management](mobile-apps-secrets-management_spec.md) | normative | generated | completed | None | 0 | 2026-03-09 |
+| 4 | [Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline](paragon-design-tokens-migration_spec.md) | normative | generated | completed | None | 0 | 2026-03-09 |
+| 5 | [Compatibility Wrapper: Proctoring Integration for Enterprise Open edX](proctoring-integration_spec.md) | normative | generated | completed | None | 0 | 2026-03-09 |
 
 
 ## Related Surfaces

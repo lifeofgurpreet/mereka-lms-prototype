@@ -13333,7 +13333,7 @@
       "owner": "engineering",
       "path": "specs/auth-sso-enterprise_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Authentication & SSO Enterprise Integration"
     },
     {
@@ -13369,7 +13369,7 @@
       "owner": "engineering",
       "path": "specs/ci-cd-pipeline_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "CI/CD Pipeline Specification"
     },
     {
@@ -13396,7 +13396,7 @@
       "owner": "migration-squad",
       "path": "specs/data-migrations-kajabi-mct_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Data Migrations: Kajabi & MCT Legacy Systems"
     },
     {
@@ -13423,7 +13423,7 @@
       "owner": "engineering",
       "path": "specs/disaster-recovery-business-continuity_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Disaster Recovery & Business Continuity"
     },
     {
@@ -13432,7 +13432,7 @@
       "owner": "engineering",
       "path": "specs/ecommerce-purchase-gateway_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Ecommerce Purchase Gateway (Stripe -> Open edX Integration)"
     },
     {
@@ -13450,7 +13450,7 @@
       "owner": "engineering",
       "path": "specs/enterprise-microservices_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Enterprise Microservices Deployment"
     },
     {
@@ -13459,7 +13459,7 @@
       "owner": "engineering",
       "path": "specs/external-registration-hubspot_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: External Registration via HubSpot"
     },
     {
@@ -13468,7 +13468,7 @@
       "owner": "engineering",
       "path": "specs/forum-service-migration_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Forum Service Migration: Ruby cs_comments_service to Python openedx-forum"
     },
     {
@@ -13495,7 +13495,7 @@
       "owner": "platform-team",
       "path": "specs/github-actions-cost-monitoring_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "GitHub Actions Cost Monitoring"
     },
     {
@@ -13531,7 +13531,7 @@
       "owner": "engineering",
       "path": "specs/mobile-apps-enterprise_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
     },
     {
@@ -13540,7 +13540,7 @@
       "owner": "engineering",
       "path": "specs/mobile-apps-secrets-management_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
     },
     {
@@ -13549,7 +13549,7 @@
       "owner": "engineering",
       "path": "specs/mongodb-atlas-integration_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "MongoDB Atlas Integration"
     },
     {
@@ -13558,7 +13558,7 @@
       "owner": "engineering",
       "path": "specs/multi-site-domains_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Multi-Site Domain Configuration"
     },
     {
@@ -13603,7 +13603,7 @@
       "owner": "engineering",
       "path": "specs/paragon-design-tokens-migration_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
@@ -13900,7 +13900,7 @@
       "owner": "",
       "path": "specs/plans/forum-service-migration_plan.md",
       "root": "specs",
-      "status": "active",
+      "status": "completed",
       "title": "Forum Service Migration - Implementation Plan"
     },
     {
@@ -13909,7 +13909,7 @@
       "owner": "",
       "path": "specs/plans/forum-service-migration_testplan.md",
       "root": "specs",
-      "status": "active",
+      "status": "completed",
       "title": "Forum Service Migration - Test Plan"
     },
     {
@@ -14044,7 +14044,7 @@
       "owner": "engineering",
       "path": "specs/plans/platform-middleware-custom-apps_plan.md",
       "root": "specs",
-      "status": "active",
+      "status": "in_progress",
       "title": "Implementation Plan: Platform Middleware and Custom Apps"
     },
     {
@@ -14188,7 +14188,7 @@
       "owner": "engineering",
       "path": "specs/platform-middleware-custom-apps_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Platform Middleware and Custom Apps"
     },
     {
@@ -14197,7 +14197,7 @@
       "owner": "engineering",
       "path": "specs/proctoring-integration_spec.md",
       "root": "specs",
-      "status": "superseded",
+      "status": "completed",
       "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
     },
     {
@@ -14260,7 +14260,7 @@
       "owner": "engineering",
       "path": "specs/secrets-management_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Secrets Management Specification"
     },
     {
@@ -14269,7 +14269,7 @@
       "owner": "engineering",
       "path": "specs/slo-sla-service-level-management_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "SLO/SLA Definitions & Service Level Management"
     },
     {
@@ -14755,7 +14755,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration-resilience_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Tutor Configuration Resilience and Patch Automation"
     },
     {
@@ -14764,7 +14764,7 @@
       "owner": "engineering",
       "path": "specs/tutor-configuration_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Tutor Configuration Lifecycle"
     },
     {
@@ -14818,7 +14818,7 @@
       "owner": "engineering",
       "path": "specs/video-pipeline-delivery_spec.md",
       "root": "specs",
-      "status": "active",
+      "status": "approved",
       "title": "Video Pipeline & Delivery System"
     }
   ],
