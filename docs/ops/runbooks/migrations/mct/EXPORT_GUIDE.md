@@ -518,6 +518,7 @@ node scripts/migrations/mct/mct-export.mjs
 - `docs/reference/migrations/mct/API_EXPLORATION.md` - API endpoint discovery
 - `docs/archive/reports/mct/EXPORT_TEST_RESULTS.md` - Test results
 - `docs/archive/reports/mct/EXPORT_SUCCESS.md` - Success summary
+- `reports/2025/mct/EXPORT_TESTING_GUIDE_2025-08-24.md` - Historical test procedure snapshot
 - `hubspot-webhook-mct/functions/index.js` - Working authentication reference
 
 ---
@@ -580,5 +581,6 @@ node scripts/migrations/mct/mct-export.mjs
 - `docs/reference/migrations/mct/API_EXPLORATION.md` - API endpoint discovery
 - `docs/archive/reports/mct/EXPORT_TEST_RESULTS.md` - Test results
 - `docs/archive/reports/mct/EXPORT_SUCCESS.md` - Success summary
+- `reports/2025/mct/EXPORT_TESTING_GUIDE_2025-08-24.md` - Historical test procedure snapshot
 - `hubspot-webhook-mct/functions/index.js` - Working authentication reference
 

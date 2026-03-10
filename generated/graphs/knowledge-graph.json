@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 3672,
+  "edge_count": 3666,
   "edges": [
     {
       "edge_type": "classifies",
@@ -4250,11 +4250,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md"
     },
     {
@@ -4271,11 +4266,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/ops/runbooks/migrations/mct/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/runbooks/migrations/mct/SMOKE_TEST.md"
     },
     {
       "edge_type": "classifies",
@@ -9930,11 +9920,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md"
     },
     {
@@ -9951,11 +9936,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/ops/runbooks/migrations/mct/README.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/runbooks/migrations/mct/SMOKE_TEST.md"
     },
     {
       "edge_type": "contains",
@@ -16075,11 +16055,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
-      "target": "docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
       "target": "docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md"
     },
     {
@@ -16096,11 +16071,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
       "target": "docs/ops/runbooks/migrations/mct/README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/runbooks/migrations/mct/SMOKE_TEST.md"
     },
     {
       "edge_type": "classifies",
@@ -18364,7 +18334,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1247,
+  "node_count": 1245,
   "nodes": [
     {
       "id": "classification:archival",
@@ -26769,17 +26739,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Script Testing Guide"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md",
       "lane": "runbook",
       "node_type": "docs:runbook",
@@ -26821,17 +26780,6 @@
       "root": "docs",
       "status": "",
       "title": "MCT Migration Runbooks"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/runbooks/migrations/mct/SMOKE_TEST.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/runbooks/migrations/mct/SMOKE_TEST.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Script - Smoke Test Results"
     },
     {
       "classification": "supporting",

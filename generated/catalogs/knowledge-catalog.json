@@ -3,7 +3,7 @@
     "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 833
+    "supporting": 831
   },
   "entries": [
     {
@@ -6859,15 +6859,6 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
-      "path": "docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Script Testing Guide"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
       "path": "docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md",
       "root": "docs",
       "status": "",
@@ -6899,15 +6890,6 @@
       "root": "docs",
       "status": "",
       "title": "MCT Migration Runbooks"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
-      "path": "docs/ops/runbooks/migrations/mct/SMOKE_TEST.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Script - Smoke Test Results"
     },
     {
       "classification": "supporting",
@@ -11023,7 +11005,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1224,
+  "entry_count": 1222,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
@@ -11034,7 +11016,7 @@
     "docs:index": 5,
     "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 177,
+    "docs:runbook": 175,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,
@@ -11045,7 +11027,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1006,
+    "docs": 1004,
     "specs": 218
   }
 }

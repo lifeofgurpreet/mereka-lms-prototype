@@ -7373,15 +7373,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-24",
-    "owner": "Migration Squad",
-    "path": "ops/runbooks/migrations/mct/EXPORT_TESTING.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2025-08-31",
     "owner": "Migration Squad",
     "path": "ops/runbooks/migrations/mct/MIGRATION_PLAN.md",
@@ -7413,15 +7404,6 @@
     "owner": "Platform Team",
     "path": "ops/runbooks/migrations/mct/README.md",
     "status": "canonical",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-27",
-    "owner": "Migration Squad",
-    "path": "ops/runbooks/migrations/mct/SMOKE_TEST.md",
-    "status": "supporting",
     "type": "runbook"
   },
   {

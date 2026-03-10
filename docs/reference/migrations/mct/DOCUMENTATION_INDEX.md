@@ -38,10 +38,10 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
    - Export statistics
    - Data quality verification
 
-6. **`docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md`**
-   - Testing procedures
-   - Step-by-step test checklist
-   - Success criteria
+6. **`reports/2025/mct/EXPORT_TESTING_GUIDE_2025-08-24.md`**
+   - Historical testing procedure snapshot
+   - Step-by-step test checklist used during the export phase
+   - Preserved for audit/history, not as an active runbook
 
 ### Reference Code
 
@@ -79,7 +79,7 @@ az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
 MCT_BASE_URL=learn.skillourfuture.org \
 MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
-MCT_CLIENT_SECRET='<secret>' \
+MCT_CLIENT_SECRET='<retrieve-from-secret-manager>' \
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
 node scripts/migrations/mct/mct-export.mjs --resources organizations --start-page 1 --end-page 1
 ```
@@ -100,6 +100,7 @@ node scripts/migrations/mct/mct-export.mjs
 - **Tenant ID:** `b1aab053-6242-46ec-9cf8-bd02e63dd2da`
 - **API URI:** `api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3`
 - **Base URL:** `learn.skillourfuture.org`
+- **Secret source:** retrieve the client secret from the canonical secret store, not from docs
 
 ### Important Notes
 
