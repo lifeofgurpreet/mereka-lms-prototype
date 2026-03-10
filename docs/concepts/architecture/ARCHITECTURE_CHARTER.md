@@ -129,7 +129,7 @@ The following roots are transitional in Wave 2 and must converge toward stub-onl
 
 - `docs/operations/**`
 - `docs/onboarding/**`
-- `docs/branding/**`
+- `docs/branding/README.md`
 - `docs/runbooks/README.md`
 - `docs/architecture/README.md`
 

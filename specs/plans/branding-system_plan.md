@@ -129,7 +129,7 @@ The work is primarily verification and hardening, not greenfield development.
   - Run `du -sh infrastructure/tutor/themes/mereka/` and confirm < 5 MB per copy (common, lms, cms, mfe)
   - **Done**: Total per-copy under 5 MB
 
-- [ ] **[S]** Document branding CI dashboard expectations (`docs/branding/BRANDING_OPERATING_MODEL.md`) | Req: OBS-dashboard | Depends: None
+- [ ] **[S]** Document branding CI dashboard expectations (`docs/guides/branding/BRANDING_OPERATING_MODEL.md`) | Req: OBS-dashboard | Depends: None
   - Verify branding health section in operating model doc references CI dashboard pass/fail
   - **Done**: Doc section exists describing CI gate integration
 
@@ -140,7 +140,7 @@ The work is primarily verification and hardening, not greenfield development.
   - Confirm rollout workflow documented for new team members
   - **Done**: Docs reviewed and accurate
 
-- [ ] **[S]** Verify operating model and guardrails docs (`docs/branding/BRANDING_OPERATING_MODEL.md`, `docs/branding/BRANDING_GUARDRAILS.md`) | Depends: None
+- [ ] **[S]** Verify operating model and guardrails docs (`docs/guides/branding/BRANDING_OPERATING_MODEL.md`, `docs/guides/branding/BRANDING_GUARDRAILS.md`) | Depends: None
   - Confirm edge case recovery procedures match spec edge cases section
   - **Done**: Recovery steps for logo-not-appearing, Google-fonts-still-loading, MFE-footer-not-rendering, font-files-missing, and theme-cache-invalidation all documented
 

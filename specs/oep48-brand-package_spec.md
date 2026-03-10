@@ -11,7 +11,7 @@ depends_on:
 links:
   related_docs:
   - docs/BRANDING.md
-  - docs/branding/BRANDING_OPERATING_MODEL.md
+  - docs/guides/branding/BRANDING_OPERATING_MODEL.md
   related_specs:
   - specs/cross-cutting-requirements_spec.md
   - specs/branding-system_spec.md

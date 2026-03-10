@@ -44,7 +44,7 @@ Canonical and supporting docs must carry:
 - `Status`
 
 ### Transitional Path Policy
-- `docs/operations/README.md`, `docs/runbooks/README.md`, and `docs/architecture/README.md` are retired compatibility tombstones; `docs/onboarding/**` and `docs/branding/**` remain compatibility paths.
+- `docs/operations/README.md`, `docs/runbooks/README.md`, `docs/branding/README.md`, and `docs/architecture/README.md` are retired compatibility tombstones; `docs/onboarding/**` remains a compatibility path.
 - Do not create new canonical docs under transitional paths.
 - If you must touch a transitional file, preserve pointer semantics and prefer updating the canonical target instead.
 - Transitional files should collapse to stub-only replacements with `Status: superseded` and `superseded_by`.

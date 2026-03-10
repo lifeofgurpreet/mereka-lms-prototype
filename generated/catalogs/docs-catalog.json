@@ -3582,174 +3582,12 @@
     "type": "other"
   },
   {
-    "canonical_conflict_group": "branding",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/BRANDING.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "branding-guardrails",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/BRANDING_GUARDRAILS.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "branding-incident-template",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/BRANDING_INCIDENT_TEMPLATE.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "branding-operating-model",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/BRANDING_OPERATING_MODEL.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "branding-operator-guide",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/BRANDING_OPERATOR_GUIDE.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "branding-plan",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/BRANDING_PLAN.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "branding-roadmap",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/BRANDING_ROADMAP.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "branding-verification-checklist",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/BRANDING_VERIFICATION_CHECKLIST.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "footer-v-to-lms-mapping",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/FOOTER_V2_TO_LMS_MAPPING.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "multi-tenant-branding-ops",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/MULTI_TENANT_BRANDING_OPS.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "paragon-token-alignment",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/PARAGON_TOKEN_ALIGNMENT.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "plugin-migration-survey",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/PLUGIN_MIGRATION_SURVEY.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "Platform Team",
     "path": "branding/README.md",
     "status": "superseded",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "tenant-branding-contract",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/TENANT_BRANDING_CONTRACT.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "tenant-brand-pack-schema",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/TENANT_BRAND_PACK_SCHEMA.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "tenant-config-handoff",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/TENANT_CONFIG_HANDOFF.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "tenant-onboarding-playbook",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/TENANT_ONBOARDING_PLAYBOOK.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": "visual-parity-checkpoints",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/VISUAL_PARITY_CHECKPOINTS.md",
-    "status": "archive-candidate",
-    "type": "guide"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "branding/audit-2026-02-05/README.md",
-    "status": "archive-candidate",
     "type": "guide"
   },
   {
@@ -5937,6 +5775,33 @@
     "owner": null,
     "path": "meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md",
     "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE_BRANDING_ROOT_RESET_CLOSEOUT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/WAVE_BRANDING_ROOT_RESET_REVIEW_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE_BRANDING_ROOT_RESET_TRACKER.md",
+    "status": "canonical",
     "type": "other"
   },
   {

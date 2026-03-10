@@ -125,7 +125,7 @@ This plan focuses on **documentation, verification hardening, and closing minor 
   - Document when to sync tokens (after Figma updates)
   - Document verification steps before/after sync
   - Document rollback procedure
-  - **Done**: Operating model documented in `docs/branding/TOKEN_SYSTEM_OPERATING_MODEL.md`
+  - **Done**: Operating model documented in `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 
 ### CI Integration
 

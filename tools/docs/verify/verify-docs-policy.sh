@@ -260,19 +260,25 @@ if ! python3 tools/docs/verify/verify_legacy_operations_root.py --repo-root .; t
   legacy_ops_status="fail"
 fi
 
-echo "Check 7/7: legacy runbooks root retired"
+echo "Check 7/8: legacy branding root retired"
+legacy_branding_status="pass"
+if ! python3 tools/docs/verify/verify_legacy_branding_root.py --repo-root .; then
+  legacy_branding_status="fail"
+fi
+
+echo "Check 8/8: legacy runbooks root retired"
 legacy_runbooks_status="pass"
 if ! python3 tools/docs/verify/verify_legacy_runbooks_root.py --repo-root .; then
   legacy_runbooks_status="fail"
 fi
 
 status="pass"
-if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]] || [[ "$legacy_arch_status" = "fail" ]] || [[ "$legacy_ops_status" = "fail" ]] || [[ "$legacy_runbooks_status" = "fail" ]]; then
+if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]] || [[ "$legacy_arch_status" = "fail" ]] || [[ "$legacy_ops_status" = "fail" ]] || [[ "$legacy_branding_status" = "fail" ]] || [[ "$legacy_runbooks_status" = "fail" ]]; then
   status="fail"
 fi
 
 if [[ -n "$SUMMARY_JSON" ]]; then
-  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" "$legacy_arch_status" "$legacy_ops_status" "$legacy_runbooks_status" <<'PY'
+  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" "$legacy_arch_status" "$legacy_ops_status" "$legacy_branding_status" "$legacy_runbooks_status" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -285,14 +291,15 @@ changed_markdown_files = int(sys.argv[5])
 content_summary_path = Path(sys.argv[6])
 legacy_arch_status = sys.argv[7]
 legacy_ops_status = sys.argv[8]
-legacy_runbooks_status = sys.argv[9]
+legacy_branding_status = sys.argv[9]
+legacy_runbooks_status = sys.argv[10]
 
 content_summary = {"status": "pass", "files_checked": 0, "errors": []}
 if content_summary_path.exists():
     content_summary = json.loads(content_summary_path.read_text(encoding="utf-8"))
 
 overall_status = "pass"
-if root_allowlist_violations > 0 or content_status != "pass" or legacy_arch_status != "pass" or legacy_ops_status != "pass" or legacy_runbooks_status != "pass":
+if root_allowlist_violations > 0 or content_status != "pass" or legacy_arch_status != "pass" or legacy_ops_status != "pass" or legacy_branding_status != "pass" or legacy_runbooks_status != "pass":
     overall_status = "fail"
 
 payload = {
@@ -305,6 +312,7 @@ payload = {
     "content_errors": content_summary.get("errors", []),
     "legacy_architecture_root": legacy_arch_status,
     "legacy_operations_root": legacy_ops_status,
+    "legacy_branding_root": legacy_branding_status,
     "legacy_runbooks_root": legacy_runbooks_status,
 }
 out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -322,6 +330,9 @@ if [[ "$legacy_arch_status" = "fail" ]]; then
 fi
 if [[ "$legacy_ops_status" = "fail" ]]; then
   echo "Docs policy failed because docs/operations is still acting like a living root."
+fi
+if [[ "$legacy_branding_status" = "fail" ]]; then
+  echo "Docs policy failed because docs/branding is still acting like a living root."
 fi
 if [[ "$legacy_runbooks_status" = "fail" ]]; then
   echo "Docs policy failed because docs/runbooks is still acting like a living root."
