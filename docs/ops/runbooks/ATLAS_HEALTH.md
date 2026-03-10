@@ -33,13 +33,12 @@ The job is `continue-on-error: true` — failures are informational and do not b
 Live checks require a valid `MONGODB_URI` with read access to `openedx` and `cs_comments_service`.
 
 ```bash
-# 1. Retrieve the URI from Infisical (run from reka-slackbot dir for .infisical.json)
-cd /home/gurpreet/projects/k8s/reka-slackbot
+# 1. Retrieve the URI from Infisical (run from any repo/workdir configured with `.infisical.json`)
+cd <repo-root-with-infisical-context>
 MONGO_USER=$(infisical secrets get MEREKA_LMS_MONGODB_USERNAME \
   --domain https://secrets.mereka.io/api --env prod --path / --plain 2>/dev/null)
 MONGO_PASS=$(infisical secrets get MEREKA_LMS_MONGODB_PASSWORD \
   --domain https://secrets.mereka.io/api --env prod --path / --plain 2>/dev/null)
-cd -
 
 # 2. Run with --live flag
 export MONGODB_URI="mongodb+srv://${MONGO_USER}:${MONGO_PASS}@cluster-mereka-lms.2pjex4s.mongodb.net/"
