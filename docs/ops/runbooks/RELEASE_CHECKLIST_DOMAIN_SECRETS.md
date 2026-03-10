@@ -58,7 +58,7 @@ Use this checklist for any domain or secret change on production (GKE). There is
   ```
 - [ ] Verify secrets live under `/k8s/mereka-lms` (prod + dev), not `/`
   ```bash
-  INFISICAL=/home/gurpreet/projects/vps/infrastructure/scripts/infisical
+  INFISICAL="${INFISICAL:-<path-to-infisical-cli>}"
   ${INFISICAL} secrets --env prod --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
   ${INFISICAL} secrets --env dev --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
   ```

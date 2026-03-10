@@ -69,7 +69,7 @@ kubectl --context rke2-nonprod get app mereka-lms-dev -n argocd \
 ### 2. Set MYSQL_ROOT_PASSWORD in Infisical
 
 ```bash
-INFISICAL=/home/gurpreet/projects/vps/infrastructure/scripts/infisical
+INFISICAL="${INFISICAL:-<path-to-infisical-cli>}"
 ${INFISICAL} secrets set MEREKA_LMS_MYSQL_ROOT_PASSWORD="<password>" \
   --domain https://secrets.mereka.io/api --env dev --path /
 ```
