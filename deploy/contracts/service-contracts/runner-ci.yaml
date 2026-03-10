@@ -24,7 +24,7 @@ runbook_surfaces:
   - docs/ops/runbooks/CI_CD_RUNBOOK.md
   - docs/reference/operations/CI_CD_SETUP.md
 evidence_surfaces:
-  - docs/operations/CI_OPTIMIZATION_TRACKER.md
+  - docs/status/active/CI_OPTIMIZATION_TRACKER.md
 review_groups:
   - platform
   - release

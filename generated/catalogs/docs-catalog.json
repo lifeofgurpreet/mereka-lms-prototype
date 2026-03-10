@@ -5944,6 +5944,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_TRACKER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "meta/docs-program/boundary-debt-manifest.md",
     "status": "supporting",
     "type": "other"
@@ -7335,15 +7344,6 @@
     "type": "runbook"
   },
   {
-    "canonical_conflict_group": "ci-cd-runners",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "operations/CI_CD_RUNNERS.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
     "canonical_conflict_group": "ci-cd-setup",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
@@ -7358,24 +7358,6 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Docs Team",
     "path": "operations/CI_CEREMONY_REDUCTION_MATRIX_104.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "ci-optimization-tracker",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "operations/CI_OPTIMIZATION_TRACKER.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "ci-pipeline-cost-optimization",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "operations/CI_PIPELINE_COST_OPTIMIZATION.md",
     "status": "superseded",
     "type": "runbook"
   },
@@ -7430,15 +7412,6 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Ops Domain Owner",
     "path": "operations/COST_ESTIMATE.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Platform Team",
-    "path": "operations/COST_OPTIMIZATION.md",
     "status": "superseded",
     "type": "runbook"
   },
@@ -7526,15 +7499,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
-    "owner": "Engineering Lead",
-    "path": "operations/DOMAIN_MANAGEMENT.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-24",
     "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
     "path": "operations/DR_DRILL_SCHEDULE.md",
@@ -7610,15 +7574,6 @@
     "last_verified_or_updated": "2026-02-17",
     "owner": null,
     "path": "operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "enterprise-sso-guide",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "operations/ENTERPRISE_SSO_GUIDE.md",
     "status": "superseded",
     "type": "runbook"
   },
@@ -8487,15 +8442,6 @@
     "type": "runbook"
   },
   {
-    "canonical_conflict_group": "secret-scanning",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "operations/SECRET_SCANNING.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
     "canonical_conflict_group": "security-exceptions",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
@@ -8654,15 +8600,6 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "operations/TENANT_ONBOARDING_PLAYBOOK.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/TENANT_PROVISIONING.md",
     "status": "superseded",
     "type": "runbook"
   },

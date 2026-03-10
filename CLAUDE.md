@@ -152,8 +152,8 @@ tutor_env/                # Generated Tutor state (gitignored)
 - Deployed separately from main overlay (`kubectl apply -k deploy/k8s/base/arc/`) because the overlay's namespace transformer would override ARC's `arc-systems`/`arc-runners` namespaces
 - Authenticates via GitHub App (secret `arc-github-app-secret` in `arc-runners` namespace)
 - Heavy runners have persistent PVC caches: `arc-docker-cache` (50Gi) and `arc-dep-cache` (10Gi)
-- Full setup guide: `docs/operations/CI_CD_RUNNERS.md`
-- Optimization tracker: `docs/operations/CI_OPTIMIZATION_TRACKER.md`
+- Full setup guide: `docs/ops/ci-cd/CI_CD_RUNNERS.md`
+- Optimization tracker: `docs/status/active/CI_OPTIMIZATION_TRACKER.md`
 
 **MongoDB Atlas (No Local MongoDB)**:
 - **Cluster**: `cluster-mereka-lms.2pjex4s.mongodb.net`
@@ -538,9 +538,9 @@ Running verification checks...
 - **Migrations**: `docs/migrations/` (Kajabi, MCT playbooks)
 - **Architecture**: `docs/concepts/architecture/`
 - **ADRs**: `docs/adr/` (Architecture Decision Records)
-- **CI/CD Runners**: `docs/operations/CI_CD_RUNNERS.md` (ARC setup, runner labels, PVC caching)
-- **CI/CD Optimization**: `docs/operations/CI_OPTIMIZATION_TRACKER.md` (phase tracker)
-- **CI/CD Cost Analysis**: `docs/operations/CI_PIPELINE_COST_OPTIMIZATION.md`
+- **CI/CD Runners**: `docs/ops/ci-cd/CI_CD_RUNNERS.md` (ARC setup, runner labels, PVC caching)
+- **CI/CD Optimization**: `docs/status/active/CI_OPTIMIZATION_TRACKER.md` (phase tracker)
+- **CI/CD Cost Analysis**: `reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md`
 - **Repo Guidelines**: `AGENTS.md` (complements this file)
 
 ## Specifications
