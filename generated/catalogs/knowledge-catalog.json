@@ -3,7 +3,7 @@
     "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 828
+    "supporting": 827
   },
   "entries": [
     {
@@ -6754,7 +6754,7 @@
       "path": "docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md",
       "root": "docs",
       "status": "",
-      "title": "SkillOurFuture Brand Migration Guide"
+      "title": "SkillOurFuture Brand Migration Runbook"
     },
     {
       "classification": "supporting",
@@ -6781,7 +6781,7 @@
       "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "Kajabi Re-Migration Runbook (Feb 2026)"
+      "title": "Kajabi Re-Migration Runbook"
     },
     {
       "classification": "supporting",
@@ -7943,15 +7943,6 @@
       "root": "docs",
       "status": "",
       "title": "MCT Learning Pathways to Open edX Programs - Setup Plan"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/reference/migrations/mct/QUICK_REFERENCE_USER_IMPORT.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT User Import - Quick Reference"
     },
     {
       "classification": "supporting",
@@ -10978,12 +10969,12 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1219,
+  "entry_count": 1218,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 199,
+    "docs:concept": 198,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
@@ -11000,7 +10991,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1001,
+    "docs": 1000,
     "specs": 218
   }
 }

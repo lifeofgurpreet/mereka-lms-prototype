@@ -98,6 +98,7 @@ For the complete list of 15 courses and their structure, see `MCT_MIGRATION_STAT
 | [`VIDEO_MIGRATION_TO_MUX.md`](VIDEO_MIGRATION_TO_MUX.md) | Completed video migration reference for Mux ingestion and Open edX wiring. |
 | [`PROGRAMS_SETUP_PLAN.md`](PROGRAMS_SETUP_PLAN.md) | Planning-phase program setup design for Open edX Programs. |
 | [`../../../archive/reports/mct/EXPORT_TEST_RESULTS.md`](../../../archive/reports/mct/EXPORT_TEST_RESULTS.md) | Latest historical test evidence and validation. |
+| [`../../../reports/2025/mct/MCT_USER_IMPORT_QUICK_REFERENCE_2025-12-18.md`](../../../reports/2025/mct/MCT_USER_IMPORT_QUICK_REFERENCE_2025-12-18.md) | Historical quick summary of the completed 2025 MCT user import. |
 | [`API_COMPLETE_REFERENCE.md`](API_COMPLETE_REFERENCE.md) | Full API reference captured during migration. |
 | [`API_EXPLORATION.md`](API_EXPLORATION.md) | API discovery results and version comparison notes. |
 | [`DATA_MODEL_COMPLETE.md`](DATA_MODEL_COMPLETE.md) | Detailed data model mapping. |

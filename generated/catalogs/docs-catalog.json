@@ -8615,15 +8615,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "reference/migrations/mct/QUICK_REFERENCE_USER_IMPORT.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "Migration Squad",
     "path": "reference/migrations/mct/README.md",
