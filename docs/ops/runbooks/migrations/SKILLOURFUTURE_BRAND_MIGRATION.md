@@ -1,8 +1,11 @@
-# SkillOurFuture Brand Migration Guide
+# SkillOurFuture Brand Migration Runbook
 
-_Bead: mereka-lms-115d.26 | Last updated: 2026-02-18_
+_Audience: Platform Eng • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-This guide covers the step-by-step process for importing the SkillOurFuture brand profile into the Mereka LMS multi-tenant brand platform. It maps existing branding assets to the `brand-config-schema.json` fields and provides a validation checklist.
+This runbook covers the step-by-step process for applying the SkillOurFuture
+brand profile to the Mereka LMS multi-tenant platform. It maps existing
+branding assets to the `brand-config-schema.json` fields and provides the
+required validation checklist.
 
 ---
 
