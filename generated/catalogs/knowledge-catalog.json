@@ -6778,15 +6778,6 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
-      "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Lesson Content Migration Fix"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
       "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md",
       "root": "docs",
       "status": "",
@@ -7817,6 +7808,15 @@
       "root": "docs",
       "status": "",
       "title": "Kajabi Certificate Migration & Enrollment Comparison"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi Lesson Content Migration Fix"
     },
     {
       "classification": "supporting",
@@ -11001,13 +11001,13 @@
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 198,
+    "docs:concept": 199,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
     "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 169,
+    "docs:runbook": 168,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,

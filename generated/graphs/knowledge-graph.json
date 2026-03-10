@@ -4205,11 +4205,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md"
     },
     {
@@ -4781,6 +4776,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md"
     },
     {
       "edge_type": "classifies",
@@ -9870,11 +9870,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md"
     },
     {
@@ -10446,6 +10441,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md"
     },
     {
       "edge_type": "contains",
@@ -13445,6 +13445,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md"
     },
     {
@@ -16011,11 +16016,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
       "target": "docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md"
     },
     {
       "edge_type": "classifies",
@@ -26625,17 +26625,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Lesson Content Migration Fix"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md",
       "lane": "runbook",
       "node_type": "docs:runbook",
@@ -27898,6 +27887,17 @@
       "root": "docs",
       "status": "",
       "title": "Kajabi Certificate Migration & Enrollment Comparison"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi Lesson Content Migration Fix"
     },
     {
       "classification": "supporting",

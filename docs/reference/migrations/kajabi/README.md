@@ -16,5 +16,5 @@ All Kajabi-related content lives in this folder. Start with [`KAJABI_MIGRATION.m
 | [`../../../ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md`](../../../ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md) | Instructions for re-running verification after downtime. |
 | [`../../../ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md`](../../../ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md) | How to re-sync deltas after the initial import. |
 | [`KAJABI_CERTIFICATE_MIGRATION.md`](KAJABI_CERTIFICATE_MIGRATION.md) | Certificate-specific migration steps. |
-| [`../../../ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md`](../../../ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md) | Script notes for repairing malformed lessons. |
+| [`KAJABI_LESSON_CONTENT_FIX.md`](KAJABI_LESSON_CONTENT_FIX.md) | Script notes for repairing malformed lessons. |
 | [`KAJABI_LESSON_CONTENT_ISSUE.md`](KAJABI_LESSON_CONTENT_ISSUE.md) | Ongoing bug tracker for lesson imports. |

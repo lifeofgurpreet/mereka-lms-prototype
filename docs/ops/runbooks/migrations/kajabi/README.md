@@ -15,7 +15,6 @@ This subroot holds the live Kajabi migration execution and recovery procedures.
 - [`EXECUTION_PLAN_VERIFICATION.md`](EXECUTION_PLAN_VERIFICATION.md)
 - [`KAJABI_MIGRATION.md`](KAJABI_MIGRATION.md)
 - [`KAJABI_REMIGRATION_RUNBOOK.md`](KAJABI_REMIGRATION_RUNBOOK.md)
-- [`KAJABI_LESSON_CONTENT_FIX.md`](KAJABI_LESSON_CONTENT_FIX.md)
 - [`ROLLBACK_AND_SAFETY.md`](ROLLBACK_AND_SAFETY.md)
 - [`VERIFY_AND_SYNC_KAJABI.md`](VERIFY_AND_SYNC_KAJABI.md)
 - [`VERIFY_WHEN_SITE_BACK_UP.md`](VERIFY_WHEN_SITE_BACK_UP.md)
@@ -26,3 +25,4 @@ Do not use this subroot for:
 - reference material, which belongs in `docs/reference/migrations/kajabi/**`
 - migration status reporting, which belongs in `docs/status/migrations/**`
 - completed verification reports, which belong in `reports/**`
+- script repair notes and content-fix references, which belong in `docs/reference/migrations/kajabi/**`

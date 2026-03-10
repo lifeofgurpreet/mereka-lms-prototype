@@ -7292,15 +7292,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-08-18",
-    "owner": "Migration Squad",
-    "path": "ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2025-11-09",
     "owner": "Migration Squad",
     "path": "ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md",
@@ -8483,6 +8474,15 @@
     "last_verified_or_updated": "2025-09-20",
     "owner": "Migration Squad",
     "path": "reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2025-08-18",
+    "owner": "Migration Squad",
+    "path": "reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
     "status": "supporting",
     "type": "other"
   },

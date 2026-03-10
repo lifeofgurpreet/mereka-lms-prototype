@@ -87,4 +87,4 @@ The script uploads `openedx_bulk_import.py`, runs it inside the LMS pod, and tra
 2. Record progress in `docs/status/migrations/KAJABI_MIGRATION_STATUS.md`.
 3. Update `reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md` once Ops validates prod and QA signs off.
 
-> Need to debug a broken lesson or mismatched structure? See `docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md` and `docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md` for known patterns and scripts.
+> Need to debug a broken lesson or mismatched structure? See `docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md` and `docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md` for known patterns and scripts.
