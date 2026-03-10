@@ -158,3 +158,16 @@ Packet D rule:
 - rewrite live active references first
 - then delete the wrapper
 - leave archival migration metadata in place
+
+## Packet E Scope
+
+Fourth duplicate-collapse packet for pure wrapper files with canonical replacements already in place and no remaining active repo consumers outside migration metadata:
+
+- `docs/operations/BUILD_CACHE_PIPELINE_RUNBOOK.md` -> `docs/ops/runbooks/BUILD_CACHE_PIPELINE_RUNBOOK.md`
+- `docs/operations/CANONICAL_DEPLOY_CONTRACT.md` -> `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md`
+- `docs/operations/CAPACITY_PLANNING.md` -> `docs/reference/operations/CAPACITY_PLANNING.md`
+- `docs/operations/CI_CD_SETUP.md` -> `docs/reference/operations/CI_CD_SETUP.md`
+- `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md` -> `docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md`
+- `docs/operations/CLOUD_SQL_RESTORE_DRILL.md` -> `docs/ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md`
+- `docs/operations/COMMIT_SIGNING.md` -> `docs/reference/operations/COMMIT_SIGNING.md`
+- `docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md` -> `docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md`

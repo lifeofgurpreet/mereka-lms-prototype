@@ -7173,51 +7173,6 @@
     "type": "runbook"
   },
   {
-    "canonical_conflict_group": "build-cache-pipeline-runbook",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "operations/BUILD_CACHE_PIPELINE_RUNBOOK.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/CANONICAL_DEPLOY_CONTRACT.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-25",
-    "owner": "Engineering Lead | Last updated: 2026-02-25",
-    "path": "operations/CAPACITY_PLANNING.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "ci-cd-setup",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
-    "owner": "Docs Team",
-    "path": "operations/CI_CD_SETUP.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": "ci-ceremony-reduction-matrix",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Docs Team",
-    "path": "operations/CI_CEREMONY_REDUCTION_MATRIX_104.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
     "canonical_conflict_group": "ci-runner-policy",
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
@@ -7232,33 +7187,6 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Platform Team",
     "path": "operations/CLOUDFLARE_DNS.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/CLOUD_SQL_RESTORE_DRILL.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": null,
-    "path": "operations/COMMIT_SIGNING.md",
-    "status": "superseded",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/CONTENT_LIBRARIES_V2_MIGRATION.md",
     "status": "superseded",
     "type": "runbook"
   },
