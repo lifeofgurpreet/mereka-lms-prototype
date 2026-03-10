@@ -1,27 +1,29 @@
 # Wave 12 Execution Tracker
 
 ## Latest substantive packet head
-- 10c4c0735f7870d9fce2979bdd7d283080c79ae1
+- 7f7fe8c68eca528abecc3b19c5c1cd44ebad1fcb
 
 ## Last completed batch
-- commit: 10c4c0735f7870d9fce2979bdd7d283080c79ae1
-- scope: Wave 12 Packet A
-- validators run: agent-pack runtime gate, docs catalog governance
+- commit: 7f7fe8c68eca528abecc3b19c5c1cd44ebad1fcb
+- scope: Wave 12 Packet B
+- validators run: review decision generator write/check, docs catalog governance
 - result: passed
 
 ## Current target packet
 - files:
-  - docs/meta/knowledge/schemas/review-decision.schema.json
-  - tools/knowledge/build_review_decision.py
-  - generated/knowledge/review-decision.json
-  - generated/knowledge/review-decision.md
+  - docs/meta/knowledge/schemas/reviewer-obligations.schema.json
+  - docs/meta/knowledge/schemas/evidence-obligations.schema.json
+  - tools/knowledge/build_reviewer_obligations.py
+  - tools/knowledge/build_evidence_obligations.py
+  - generated/knowledge/reviewer-obligations.json
+  - generated/knowledge/evidence-obligations.json
   - docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md
 - goal:
-  - produce the canonical review decision output for the current diff range
-  - derive required reviewers, read-first packs, and blocking state from Wave 11 skill/runtime inputs
-  - create both canonical machine output and markdown projection
+  - separate reviewer routing from evidence routing into canonical machine outputs
+  - derive each from review-decision plus Wave 11 skill/evidence inputs without duplicating logic
+  - make reviewer and evidence obligations independently checkable
 - stop condition:
-  - review decision outputs are generated deterministically and one substantive commit is created
+  - reviewer and evidence obligations are generated deterministically and one substantive commit is created
 
 ## Open residue
 - assistant surface exports are not yet rebuilt on the fresh Wave 11 external branches
@@ -29,4 +31,4 @@
 - runtime convergence warning still requires manual follow-up and must remain non-hidden in Wave 12 outputs
 
 ## Next queued packet
-- Packet C: Reviewer and evidence obligations engines
+- Packet D: Read-first and mixed-diff arbitration runtime
