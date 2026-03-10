@@ -43,11 +43,11 @@ python3 tools/docs/verify/verify-legacy-testmaps-frozen.py --range origin/main..
 
 Final inventory target for losing roots:
 
-- `docs/operations/**`
-- `docs/architecture/**`
-- `docs/runbooks/**`
-- `docs/onboarding/**`
-- `docs/branding/**`
+- `docs/operations/README.md`
+- `docs/architecture/README.md`
+- `docs/runbooks/README.md`
+- `docs/onboarding/README.md`
+- `docs/branding/README.md`
 
 Proof command:
 
