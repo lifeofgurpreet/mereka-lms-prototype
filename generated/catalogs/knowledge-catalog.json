@@ -2,9 +2,8 @@
   "classifications": {
     "archival": 292,
     "canonical": 44,
-    "compatibility": 5,
     "generated": 49,
-    "supporting": 1256
+    "supporting": 1263
   },
   "entries": [
     {
@@ -5996,10 +5995,37 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "CHANGE_CLASSES"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Change Runtime Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
       "root": "docs",
       "status": "",
       "title": "Decision Runtime Model"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "EVIDENCE_OBLIGATIONS"
     },
     {
       "classification": "supporting",
@@ -6014,10 +6040,37 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "OWNERSHIP_MAP"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/meta/knowledge/RECEIPT_CLASSES.yaml",
       "root": "docs",
       "status": "",
       "title": "RECEIPT_CLASSES"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Review Handoff Model"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_RULES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "REVIEW_RULES"
     },
     {
       "classification": "supporting",
@@ -6135,6 +6188,15 @@
       "root": "docs",
       "status": "",
       "title": "Wave 14 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Execution Tracker"
     },
     {
       "classification": "supporting",
@@ -13454,15 +13516,6 @@
       "title": "Enterprise Microservices Deployment"
     },
     {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/external-registration-hubspot_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Compatibility Wrapper: External Registration via HubSpot"
-    },
-    {
       "classification": "canonical",
       "lane": "normative",
       "owner": "engineering",
@@ -13526,24 +13579,6 @@
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
     },
     {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-enterprise_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
-    },
-    {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-secrets-management_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
-    },
-    {
       "classification": "canonical",
       "lane": "normative",
       "owner": "engineering",
@@ -13596,15 +13631,6 @@
       "root": "specs",
       "status": "draft",
       "title": "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
-    },
-    {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
       "classification": "supporting",
@@ -14190,15 +14216,6 @@
       "root": "specs",
       "status": "approved",
       "title": "Platform Middleware and Custom Apps"
-    },
-    {
-      "classification": "compatibility",
-      "lane": "normative",
-      "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
     },
     {
       "classification": "supporting",
@@ -14822,7 +14839,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1646,
+  "entry_count": 1648,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 63,
@@ -14831,12 +14848,12 @@
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 186,
+    "docs:other": 193,
     "docs:review": 48,
     "docs:runbook": 482,
     "specs:evidence": 43,
     "specs:generated": 48,
-    "specs:normative": 44,
+    "specs:normative": 39,
     "specs:other": 15,
     "specs:plan": 29,
     "specs:proposal": 4,
@@ -14844,7 +14861,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1423,
-    "specs": 223
+    "docs": 1430,
+    "specs": 218
   }
 }

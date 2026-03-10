@@ -4,7 +4,7 @@ _Audience: Platform Eng + Marketing Operations • Owner: Engineering Lead • L
 This runbook covers operational procedures for the HubSpot-to-Open edX registration service.
 
 > **Status**: External registration is **not yet implemented** (Tier 3). This runbook documents target-state procedures.
-> **Spec**: `specs/external-registration-hubspot_spec.md`
+> **Spec**: `specs/proposals/external-registration-hubspot_spec.md`
 > **Testmap**: `specs/testmaps/external-registration-hubspot_spec.testmap.yml`
 
 ## Prerequisites
@@ -206,7 +206,7 @@ Conference booth or marketing campaign generates 100+ registrations in 5 minutes
 ---
 
 ## Related Documentation
-- **Spec**: `specs/external-registration-hubspot_spec.md`
+- **Spec**: `specs/proposals/external-registration-hubspot_spec.md`
 - **HubSpot Webhook Service**: `services/hubspot-webhook/README.md`
 - **Email Pipeline**: `specs/email-notifications-pipeline_spec.md`
 - **General Troubleshooting**: `docs/runbooks/operations/TROUBLESHOOTING.md`

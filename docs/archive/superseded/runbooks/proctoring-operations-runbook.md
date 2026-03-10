@@ -4,7 +4,7 @@ _Audience: Platform Eng + Academic Operations • Owner: Engineering Lead • La
 This runbook covers operational procedures for proctoring integration in Mereka Academy.
 
 > **Status**: Proctoring is **not yet implemented** (Tier 5). This runbook documents target-state procedures.
-> **Spec**: `specs/proctoring-integration_spec.md`
+> **Spec**: `specs/proposals/proctoring-integration_spec.md`
 > **Testmap**: `specs/testmaps/proctoring-integration_spec.testmap.yml`
 
 ## Prerequisites

@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4938,
+  "edge_count": 4944,
   "edges": [
     {
       "edge_type": "classifies",
@@ -1681,31 +1681,6 @@
       "edge_type": "classifies",
       "source": "classification:canonical",
       "target": "specs/video-pipeline-delivery_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
-      "target": "specs/external-registration-hubspot_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
-      "target": "specs/mobile-apps-enterprise_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
-      "target": "specs/mobile-apps-secrets-management_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
-      "target": "specs/paragon-design-tokens-migration_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:compatibility",
-      "target": "specs/proctoring-integration_spec.md"
     },
     {
       "edge_type": "classifies",
@@ -3795,7 +3770,22 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
     },
     {
       "edge_type": "classifies",
@@ -3805,7 +3795,22 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/knowledge/RECEIPT_CLASSES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/REVIEW_RULES.yaml"
     },
     {
       "edge_type": "classifies",
@@ -3871,6 +3876,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -11560,7 +11570,22 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
     },
     {
       "edge_type": "contains",
@@ -11570,7 +11595,22 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/knowledge/RECEIPT_CLASSES.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/REVIEW_RULES.yaml"
     },
     {
       "edge_type": "contains",
@@ -11636,6 +11676,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "contains",
@@ -18935,7 +18980,22 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/CHANGE_CLASSES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
     },
     {
       "edge_type": "classifies",
@@ -18945,7 +19005,22 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/meta/knowledge/RECEIPT_CLASSES.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/REVIEW_RULES.yaml"
     },
     {
       "edge_type": "classifies",
@@ -19011,6 +19086,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:other",
       "target": "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
+      "target": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
     },
     {
       "edge_type": "classifies",
@@ -22990,11 +23070,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:specs:normative",
-      "target": "specs/external-registration-hubspot_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
       "target": "specs/forum-service-migration_spec.md"
     },
     {
@@ -23021,16 +23096,6 @@
       "edge_type": "classifies",
       "source": "lane:specs:normative",
       "target": "specs/mfe-plugin-slots_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
-      "target": "specs/mobile-apps-enterprise_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
-      "target": "specs/mobile-apps-secrets-management_spec.md"
     },
     {
       "edge_type": "classifies",
@@ -23065,17 +23130,7 @@
     {
       "edge_type": "classifies",
       "source": "lane:specs:normative",
-      "target": "specs/paragon-design-tokens-migration_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
       "target": "specs/platform-middleware-custom-apps_spec.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:specs:normative",
-      "target": "specs/proctoring-integration_spec.md"
     },
     {
       "edge_type": "classifies",
@@ -23935,11 +23990,6 @@
     {
       "edge_type": "contains",
       "source": "specs",
-      "target": "specs/external-registration-hubspot_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
       "target": "specs/forum-service-migration_spec.md"
     },
     {
@@ -23975,16 +24025,6 @@
     {
       "edge_type": "contains",
       "source": "specs",
-      "target": "specs/mobile-apps-enterprise_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
-      "target": "specs/mobile-apps-secrets-management_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
       "target": "specs/mongodb-atlas-integration_spec.md"
     },
     {
@@ -24011,11 +24051,6 @@
       "edge_type": "contains",
       "source": "specs",
       "target": "specs/oep48-brand-package_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
-      "target": "specs/paragon-design-tokens-migration_spec.md"
     },
     {
       "edge_type": "contains",
@@ -24341,11 +24376,6 @@
       "edge_type": "contains",
       "source": "specs",
       "target": "specs/platform-middleware-custom-apps_spec.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "specs",
-      "target": "specs/proctoring-integration_spec.md"
     },
     {
       "edge_type": "contains",
@@ -24694,7 +24724,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1670,
+  "node_count": 1671,
   "nodes": [
     {
       "id": "classification:archival",
@@ -24707,12 +24737,6 @@
       "node_type": "classification",
       "path": "classification:canonical",
       "title": "canonical"
-    },
-    {
-      "id": "classification:compatibility",
-      "node_type": "classification",
-      "path": "classification:compatibility",
-      "title": "compatibility"
     },
     {
       "id": "classification:generated",
@@ -32049,6 +32073,28 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "CHANGE_CLASSES"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Change Runtime Closeout"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
       "lane": "other",
       "node_type": "docs:other",
@@ -32057,6 +32103,17 @@
       "root": "docs",
       "status": "",
       "title": "Decision Runtime Model"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "EVIDENCE_OBLIGATIONS"
     },
     {
       "classification": "supporting",
@@ -32071,6 +32128,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "OWNERSHIP_MAP"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/meta/knowledge/RECEIPT_CLASSES.yaml",
       "lane": "other",
       "node_type": "docs:other",
@@ -32079,6 +32147,28 @@
       "root": "docs",
       "status": "",
       "title": "RECEIPT_CLASSES"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Review Handoff Model"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/REVIEW_RULES.yaml",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_RULES.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "REVIEW_RULES"
     },
     {
       "classification": "supporting",
@@ -32222,6 +32312,17 @@
       "root": "docs",
       "status": "",
       "title": "Wave 14 Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Execution Tracker"
     },
     {
       "classification": "supporting",
@@ -41275,17 +41376,6 @@
       "title": "Enterprise Microservices Deployment"
     },
     {
-      "classification": "compatibility",
-      "id": "specs/external-registration-hubspot_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/external-registration-hubspot_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Compatibility Wrapper: External Registration via HubSpot"
-    },
-    {
       "classification": "canonical",
       "id": "specs/forum-service-migration_spec.md",
       "lane": "normative",
@@ -41363,28 +41453,6 @@
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
     },
     {
-      "classification": "compatibility",
-      "id": "specs/mobile-apps-enterprise_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-enterprise_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
-    },
-    {
-      "classification": "compatibility",
-      "id": "specs/mobile-apps-secrets-management_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-secrets-management_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
-    },
-    {
       "classification": "canonical",
       "id": "specs/mongodb-atlas-integration_spec.md",
       "lane": "normative",
@@ -41449,17 +41517,6 @@
       "root": "specs",
       "status": "draft",
       "title": "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
-    },
-    {
-      "classification": "compatibility",
-      "id": "specs/paragon-design-tokens-migration_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
       "classification": "supporting",
@@ -42175,17 +42232,6 @@
       "root": "specs",
       "status": "approved",
       "title": "Platform Middleware and Custom Apps"
-    },
-    {
-      "classification": "compatibility",
-      "id": "specs/proctoring-integration_spec.md",
-      "lane": "normative",
-      "node_type": "specs:normative",
-      "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
-      "root": "specs",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
     },
     {
       "classification": "supporting",

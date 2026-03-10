@@ -2,7 +2,7 @@
 
 **Date**: 2026-02-27
 **Prerequisite**: Phase A complete (FE-003, FE-004, FE-013, FE-014, FE-016 all DONE)
-**Specs**: `specs/oep48-brand-package_spec.md`, `specs/paragon-design-tokens-migration_spec.md`
+**Specs**: `specs/oep48-brand-package_spec.md`, `specs/plans/paragon-design-tokens-migration_spec.md`
 
 **Status**: Phase B is COMPLETE.
 
@@ -335,7 +335,7 @@ After all tasks:
 | File | Why |
 |------|-----|
 | `specs/oep48-brand-package_spec.md` | Full spec with acceptance criteria |
-| `specs/paragon-design-tokens-migration_spec.md` | Token format and migration phases |
+| `specs/plans/paragon-design-tokens-migration_spec.md` | Token format and migration phases |
 | `infrastructure/tutor/plugins/mereka_lms.py` | Understand existing plugin hooks |
 | `infrastructure/tutor/patches/mfe-node.sh` | See how the MFE Dockerfile is patched |
 | `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | Current token state |

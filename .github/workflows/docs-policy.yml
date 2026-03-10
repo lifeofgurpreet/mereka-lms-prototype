@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "docs/**"
+      - "docs/meta/knowledge/**"
       - "specs/**"
       - "generated/agent/**"
       - "generated/platform/**"
@@ -11,7 +12,9 @@ on:
       - "generated/knowledge/**"
       - "generated/graphs/**"
       - "generated/catalogs/knowledge-catalog.json"
+      - "generated/knowledge/**"
       - "scripts/qa/run-knowledge-integrity-gates.sh"
+      - "scripts/qa/run-knowledge-runtime-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -31,6 +34,7 @@ on:
   push:
     paths:
       - "docs/**"
+      - "docs/meta/knowledge/**"
       - "specs/**"
       - "generated/agent/**"
       - "generated/platform/**"
@@ -38,7 +42,9 @@ on:
       - "generated/knowledge/**"
       - "generated/graphs/**"
       - "generated/catalogs/knowledge-catalog.json"
+      - "generated/knowledge/**"
       - "scripts/qa/run-knowledge-integrity-gates.sh"
+      - "scripts/qa/run-knowledge-runtime-gates.sh"
       - ".github/workflows/docs-policy.yml"
       - ".github/CODEOWNERS"
       - ".github/PULL_REQUEST_TEMPLATE.md"
@@ -149,3 +155,13 @@ jobs:
           fi
           chmod +x scripts/qa/run-knowledge-integrity-gates.sh
           ./scripts/qa/run-knowledge-integrity-gates.sh
+
+      - name: Verify change intelligence runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export KNOWLEDGE_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export KNOWLEDGE_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-knowledge-runtime-gates.sh
+          ./scripts/qa/run-knowledge-runtime-gates.sh

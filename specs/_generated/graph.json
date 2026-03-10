@@ -1,6 +1,6 @@
 {
   "catalog": "specs/catalog.json",
-  "edge_count": 249,
+  "edge_count": 233,
   "edges": [
     {
       "edge_type": "generated_testmap",
@@ -279,26 +279,6 @@
     },
     {
       "edge_type": "generated_testmap",
-      "source": "specs/external-registration-hubspot_spec.md",
-      "target": "specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml"
-    },
-    {
-      "edge_type": "legacy_testmap",
-      "source": "specs/external-registration-hubspot_spec.md",
-      "target": "specs/testmaps/external-registration-hubspot_spec.testmap.yml"
-    },
-    {
-      "edge_type": "plan",
-      "source": "specs/external-registration-hubspot_spec.md",
-      "target": "specs/plans/external-registration-hubspot_plan.md"
-    },
-    {
-      "edge_type": "testplan",
-      "source": "specs/external-registration-hubspot_spec.md",
-      "target": "specs/plans/external-registration-hubspot_testplan.md"
-    },
-    {
-      "edge_type": "generated_testmap",
       "source": "specs/forum-service-migration_spec.md",
       "target": "specs/_generated/testmaps/forum-service-migration_spec.testmap.yml"
     },
@@ -366,36 +346,6 @@
       "edge_type": "legacy_testmap",
       "source": "specs/mfe-plugin-slots_spec.md",
       "target": "specs/testmaps/mfe-plugin-slots_spec.testmap.yml"
-    },
-    {
-      "edge_type": "generated_testmap",
-      "source": "specs/mobile-apps-enterprise_spec.md",
-      "target": "specs/_generated/testmaps/mobile-apps-enterprise_spec.testmap.yml"
-    },
-    {
-      "edge_type": "legacy_testmap",
-      "source": "specs/mobile-apps-enterprise_spec.md",
-      "target": "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml"
-    },
-    {
-      "edge_type": "plan",
-      "source": "specs/mobile-apps-enterprise_spec.md",
-      "target": "specs/plans/mobile-apps-enterprise_plan.md"
-    },
-    {
-      "edge_type": "testplan",
-      "source": "specs/mobile-apps-enterprise_spec.md",
-      "target": "specs/plans/mobile-apps-enterprise_testplan.md"
-    },
-    {
-      "edge_type": "generated_testmap",
-      "source": "specs/mobile-apps-secrets-management_spec.md",
-      "target": "specs/_generated/testmaps/mobile-apps-secrets-management_spec.testmap.yml"
-    },
-    {
-      "edge_type": "legacy_testmap",
-      "source": "specs/mobile-apps-secrets-management_spec.md",
-      "target": "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml"
     },
     {
       "edge_type": "generated_testmap",
@@ -496,16 +446,6 @@
       "edge_type": "legacy_testmap",
       "source": "specs/oep48-brand-package_spec.md",
       "target": "specs/testmaps/oep48-brand-package_spec.testmap.yml"
-    },
-    {
-      "edge_type": "generated_testmap",
-      "source": "specs/paragon-design-tokens-migration_spec.md",
-      "target": "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml"
-    },
-    {
-      "edge_type": "legacy_testmap",
-      "source": "specs/paragon-design-tokens-migration_spec.md",
-      "target": "specs/testmaps/paragon-design-tokens-migration_spec.testmap.yml"
     },
     {
       "edge_type": "source_spec",
@@ -984,26 +924,6 @@
     },
     {
       "edge_type": "generated_testmap",
-      "source": "specs/proctoring-integration_spec.md",
-      "target": "specs/_generated/testmaps/proctoring-integration_spec.testmap.yml"
-    },
-    {
-      "edge_type": "legacy_testmap",
-      "source": "specs/proctoring-integration_spec.md",
-      "target": "specs/testmaps/proctoring-integration_spec.testmap.yml"
-    },
-    {
-      "edge_type": "plan",
-      "source": "specs/proctoring-integration_spec.md",
-      "target": "specs/plans/proctoring-integration_plan.md"
-    },
-    {
-      "edge_type": "testplan",
-      "source": "specs/proctoring-integration_spec.md",
-      "target": "specs/plans/proctoring-integration_testplan.md"
-    },
-    {
-      "edge_type": "generated_testmap",
       "source": "specs/proposals/external-registration-hubspot_spec.md",
       "target": "specs/_generated/testmaps/external-registration-hubspot_spec.testmap.yml"
     },
@@ -1249,7 +1169,7 @@
     }
   ],
   "generated_by": "tools/specs/build_spec_graph.py",
-  "node_count": 200,
+  "node_count": 193,
   "nodes": [
     {
       "id": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
@@ -1426,12 +1346,6 @@
       "title": "oep48-brand-package_spec.testmap.yml"
     },
     {
-      "id": "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
-      "node_type": "generated_testmap",
-      "path": "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
-      "title": "paragon-design-tokens-migration_spec.testmap.yml"
-    },
-    {
       "id": "specs/_generated/testmaps/platform-middleware-custom-apps_spec.testmap.yml",
       "node_type": "generated_testmap",
       "path": "specs/_generated/testmaps/platform-middleware-custom-apps_spec.testmap.yml",
@@ -1606,17 +1520,6 @@
       "title": "enterprise-microservices_spec.md"
     },
     {
-      "id": "specs/external-registration-hubspot_spec.md",
-      "lane": "normative",
-      "node_type": "generated",
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/external-registration-hubspot_spec.md",
-      "spec_class": "generated",
-      "status": "completed",
-      "title": "Compatibility Wrapper: External Registration via HubSpot"
-    },
-    {
       "id": "specs/forum-service-migration_spec.md",
       "node_type": "spec",
       "path": "specs/forum-service-migration_spec.md",
@@ -1673,28 +1576,6 @@
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
     },
     {
-      "id": "specs/mobile-apps-enterprise_spec.md",
-      "lane": "normative",
-      "node_type": "generated",
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-enterprise_spec.md",
-      "spec_class": "generated",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Mobile Apps (iOS + Android) Enterprise Deployment"
-    },
-    {
-      "id": "specs/mobile-apps-secrets-management_spec.md",
-      "lane": "normative",
-      "node_type": "generated",
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/mobile-apps-secrets-management_spec.md",
-      "spec_class": "generated",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Mobile Apps API Keys & Secrets Management"
-    },
-    {
       "id": "specs/mongodb-atlas-integration_spec.md",
       "node_type": "spec",
       "path": "specs/mongodb-atlas-integration_spec.md",
@@ -1739,17 +1620,6 @@
       "spec_class": "domain",
       "status": "draft",
       "title": "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
-    },
-    {
-      "id": "specs/paragon-design-tokens-migration_spec.md",
-      "lane": "normative",
-      "node_type": "generated",
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "spec_class": "generated",
-      "status": "completed",
-      "title": "Paragon Design Tokens Migration: SCSS Variable Overrides to JSON Token Pipeline"
     },
     {
       "id": "specs/plans/advanced-assessment-xqueue_plan.md",
@@ -2240,17 +2110,6 @@
       "title": "Platform Middleware and Custom Apps"
     },
     {
-      "id": "specs/proctoring-integration_spec.md",
-      "lane": "normative",
-      "node_type": "generated",
-      "normativity": "generated",
-      "owner": "engineering",
-      "path": "specs/proctoring-integration_spec.md",
-      "spec_class": "generated",
-      "status": "completed",
-      "title": "Compatibility Wrapper: Proctoring Integration for Enterprise Open edX"
-    },
-    {
       "id": "specs/proposals/external-registration-hubspot_spec.md",
       "lane": "proposal",
       "node_type": "spec",
@@ -2523,12 +2382,6 @@
       "node_type": "legacy_testmap",
       "path": "specs/testmaps/oep48-brand-package_spec.testmap.yml",
       "title": "oep48-brand-package_spec.testmap.yml"
-    },
-    {
-      "id": "specs/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
-      "node_type": "legacy_testmap",
-      "path": "specs/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
-      "title": "paragon-design-tokens-migration_spec.testmap.yml"
     },
     {
       "id": "specs/testmaps/platform-middleware-custom-apps_spec.testmap.yml",
