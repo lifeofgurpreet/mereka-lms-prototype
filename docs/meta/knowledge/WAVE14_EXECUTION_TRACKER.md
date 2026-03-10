@@ -1,30 +1,29 @@
 # Wave 14 Execution Tracker
 
 ## Latest substantive packet head
-- cc21ba6f2645fe5a4142a1c34c4157ec18539fe1
+- c0ac67a289fe6c3f0cf0885c038d4741f3d5f836
 
 ## Last completed batch
-- commit: cc21ba6f2645fe5a4142a1c34c4157ec18539fe1
-- scope: reconciled Wave 10-13 runtime lineage landed on dedicated mainline-ready branch
-- validators run: docs policy, cross-repo agent gates, skill runtime gates, agent pack runtime gates, decision runtime gates, execution proof runtime gates
-- result: Wave 14 now builds on the reconciled runtime base instead of the split lineage
+- commit: c0ac67a289fe6c3f0cf0885c038d4741f3d5f836
+- scope: Wave 14 Packet A rebased onto the reconciled Wave 10-13 runtime base
+- validators run: docs catalog rebuild, docs catalog governance, source path existence checks
+- result: handbook topology is locked on the reconciled base and catalog-visible
 
 ## Current target packet
 - files:
-  - docs/catalog.json
-  - generated/catalogs/docs-catalog.json
+  - tools/docs/build_domain_access_reference.py
+  - generated/platform/domain-access-reference.json
+  - docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md
   - docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md
-  - docs/guides/platform/SOURCE_MAP.md
 - goal:
-  - reassert Packet A on top of the reconciled runtime base
-  - lock the Wave 14 handbook tree before prose or generators land
-  - map human handbook pages to canonical internal and official external sources
-  - keep volatile access and topology facts on generated reference surfaces only
+  - generate the domain and access reference from canonical inputs
+  - keep registry-backed main tenant domains machine-derived
+  - make cross-reference conflicts explicit instead of guessing tenant URLs
 - stop condition:
-  - tracker exists
-  - handbook tree is locked under canonical docs roots
-  - docs catalog reflects the new handbook source map
-  - generated references are explicitly separated from handwritten pages
+  - canonical JSON output exists and passes `--check`
+  - markdown projection exists and is clearly generated
+  - unresolved tenant URL conflicts are explicit rather than silently normalized
+  - docs governance passes with the new reference surface
 
 ## Locked handbook topology
 - human-authored handbook root: `docs/guides/platform/`
@@ -45,7 +44,8 @@
 ## Open residue
 - base `main` is current with `origin/main`, but the base checkout is dirty and must remain untouched during Wave 14
 - some historical Wave 10 example paths named in the brief are not present on the current `main` checkout; Wave 14 must anchor to live canonical paths on the reconciled Wave 10-13 lineage instead of recreating them
+- SkillOurFuture production Studio and MFE URLs are currently in conflict between `DOMAIN_MATRIX.md` and `USER_FACING_URLS.md`; Packet B records the conflict instead of inventing a winner
 - live approval state, live runtime evidence attachment, and vendor bot integrations remain intentionally unresolved outside the scope of this handbook wave
 
 ## Next queued packet
-- Packet B: generate `generated/platform/domain-access-reference.json` and project it to `docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md`
+- Packet C: generate `generated/platform/team-topology-reference.json` and project it to `docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md`

@@ -12028,6 +12028,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md",
     "status": "superseded",
     "type": "runbook"
