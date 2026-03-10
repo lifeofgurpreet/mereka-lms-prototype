@@ -16,11 +16,11 @@ links:
   - docs/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md
   - docs/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md
   - docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md
-  - docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md
+  - docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md
   - docs/migrations/mct/MIGRATION_PLAN.md
-  - docs/migrations/mct/MCT_MIGRATION_STATUS.md
-  - docs/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md
-  - docs/migrations/mct/MCT_TO_OPENEDX_MAPPING.md
+  - docs/status/migrations/MCT_MIGRATION_STATUS.md
+  - docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md
+  - docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md
   - docs/migrations/mct/VIDEO_MIGRATION.md
   - docs/migrations/mct/EXPORT_GUIDE.md
   - docs/migrations/BBI-K8-MIGRATION.md

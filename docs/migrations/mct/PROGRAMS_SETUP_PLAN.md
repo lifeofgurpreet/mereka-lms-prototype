@@ -1492,8 +1492,8 @@ For programs with certificates:
 
 ### Related Project Documentation
 
-- `/docs/migrations/mct/OPENEDX_PROGRAMS_SETUP.md` - Original setup notes
-- `/docs/migrations/mct/MCT_TO_OPENEDX_MAPPING.md` - MCT to Open edX mapping
+- `/docs/reference/migrations/mct/OPENEDX_PROGRAMS_SETUP.md` - Original setup notes
+- `/docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md` - MCT to Open edX mapping
 - `/var/migrations/mct/programs_mapping.json` - Programs mapping data
 
 ### API Endpoints

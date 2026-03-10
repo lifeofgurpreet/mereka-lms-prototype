@@ -815,10 +815,10 @@ Full Tutor-deployed stack with 25 pods: 2 LMS replicas + 2 workers, CMS + worker
 | Document | Path | Status |
 |----------|------|--------|
 | Migration status | `docs/status/migrations/MCT_MIGRATION_STATUS.md` | Needs update (instance rebuilt) |
-| OpenEdX mapping | `docs/migrations/mct/MCT_TO_OPENEDX_MAPPING.md` | Needs update (Scheme A + LP API) |
+| OpenEdX mapping | `docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md` | Needs update (Scheme A + LP API) |
 | API reference | `docs/reference/migrations/mct/API_COMPLETE_REFERENCE.md` | Needs update (add LP endpoints) |
 | Export guide | `docs/migrations/mct/EXPORT_GUIDE.md` | Updated 2026-02-08 |
 | Video migration | `docs/migrations/mct/VIDEO_MIGRATION.md` | Updated 2026-02-08 |
-| Data model | `docs/migrations/mct/DATA_MODEL_COMPLETE.md` | Needs count updates |
+| Data model | `docs/reference/migrations/mct/DATA_MODEL_COMPLETE.md` | Needs count updates |
 | Secrets management | `specs/secrets-management.md` | Current |
 | LP research data | `/tmp/mct-learning-path-research.json` | Move to exports/mct/ |

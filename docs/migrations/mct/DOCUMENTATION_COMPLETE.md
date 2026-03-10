@@ -29,7 +29,7 @@ All MCT export documentation has been created and is ready for use by future age
 ### Supporting Documentation
 
 3. **`docs/migrations/mct/MIGRATION_PLAN.md`** (Migration strategy)
-4. **`docs/migrations/mct/API_EXPLORATION.md`** (API discovery results)
+4. **`docs/reference/migrations/mct/API_EXPLORATION.md`** (API discovery results)
 5. **`docs/migrations/mct/EXPORT_TEST_RESULTS.md`** (Test results)
 6. **`docs/migrations/mct/EXPORT_SUCCESS.md`** (Success summary)
 7. **`docs/migrations/mct/EXPORT_TESTING.md`** (Testing procedures)

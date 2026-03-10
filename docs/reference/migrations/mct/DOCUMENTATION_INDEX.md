@@ -20,7 +20,7 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
    - Data entity mappings
    - Transformation approach
 
-3. **`docs/migrations/mct/API_EXPLORATION.md`**
+3. **`docs/reference/migrations/mct/API_EXPLORATION.md`**
    - API version comparison (V1, V3, V4)
    - Endpoint discovery results
    - Data models identified

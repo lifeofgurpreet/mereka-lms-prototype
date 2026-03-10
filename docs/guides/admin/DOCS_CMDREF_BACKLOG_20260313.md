@@ -118,7 +118,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/onboarding/LOCAL_SETUP.md | 1 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/onboarding/TEAM_SCALING_GUIDE.md | 1 | Docs Lead | fix inline path references and missing commands |
-| docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/migrations/mct/EXPORT_COMPLETE.md | 1 | Unassigned (determine domain owner) | fix inline path references and missing commands |
@@ -307,7 +307,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 66 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
 | docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 139 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
 | docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 82 | scripts/migrations/kajabi/openedx_bulk_import.py |
-| docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 172 | scripts/migrations/kajabi/prepare_openedx_imports.py |
+| docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 172 | scripts/migrations/kajabi/prepare_openedx_imports.py |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 13 | scripts/migrations/kajabi/transform_data.py |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 17 | scripts/migrations/kajabi/build_course_packages.py |
 | docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 54 | scripts/migrations/kajabi/transform_data.py |

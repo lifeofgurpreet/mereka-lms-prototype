@@ -96,6 +96,10 @@ For the complete list of 15 courses and their structure, see `MCT_MIGRATION_STAT
 | [`EXPORT_GUIDE.md`](EXPORT_GUIDE.md) | Steps to export data from MCT. |
 | [`EXPORT_TEST_RESULTS.md`](EXPORT_TEST_RESULTS.md) | Latest test evidence and validation. |
 | [`API_COMPLETE_REFERENCE.md`](API_COMPLETE_REFERENCE.md) | Full API reference captured during migration. |
+| [`API_EXPLORATION.md`](API_EXPLORATION.md) | API discovery results and version comparison notes. |
 | [`DATA_MODEL_COMPLETE.md`](DATA_MODEL_COMPLETE.md) | Detailed data model mapping. |
+| [`MCT_PLATFORM_RESEARCH.md`](MCT_PLATFORM_RESEARCH.md) | Platform research and migration constraints. |
 | [`MCT_MIGRATION_STATUS.md`](MCT_MIGRATION_STATUS.md) | Status tracker for processed artifacts. |
+| [`MCT_PRE_MIGRATION_INVENTORY.md`](MCT_PRE_MIGRATION_INVENTORY.md) | Pre-migration inventory and verified structure assumptions. |
 | [`MCT_TO_OPENEDX_MAPPING.md`](MCT_TO_OPENEDX_MAPPING.md) | Mapping between MCT entities and Open edX. |
+| [`OPENEDX_PROGRAMS_SETUP.md`](OPENEDX_PROGRAMS_SETUP.md) | Original notes for Open edX programs setup. |

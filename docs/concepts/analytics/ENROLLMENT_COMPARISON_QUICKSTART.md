@@ -66,4 +66,4 @@ Since Kajabi API doesn't expose certificates:
      --settings=tutor.production
    ```
 
-See [`docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md`](../../migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md) for detailed instructions.
+See [`docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md`](../../reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md) for detailed instructions.

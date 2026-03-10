@@ -47,7 +47,7 @@
    - Course mappings
    - Configuration metadata
 
-3. **Original Notes:** `/docs/migrations/mct/OPENEDX_PROGRAMS_SETUP.md`
+3. **Original Notes:** `/docs/reference/migrations/mct/OPENEDX_PROGRAMS_SETUP.md`
    - Initial research and setup notes
 
 ---

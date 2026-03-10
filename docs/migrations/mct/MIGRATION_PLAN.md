@@ -363,7 +363,7 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 
 1. **Immediate:**
    - [x] ✅ Export script created (`scripts/migrations/mct/mct-export.mjs`) with working authentication pattern
-   - [x] ✅ API exploration documented (`docs/migrations/mct/API_EXPLORATION.md`)
+   - [x] ✅ API exploration documented (`docs/reference/migrations/mct/API_EXPLORATION.md`)
    - [x] ✅ Migration plan updated with verified endpoints
    - [ ] **Get authentication credentials** - Use existing service principal or create new one
    - [ ] **Test export script** - Run with small dataset (e.g., `--start-page 1 --end-page 1`)
@@ -395,4 +395,4 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 - Kajabi migration pattern: `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
 - Kajabi transformation scripts: `scripts/migrations/kajabi/`
 - Open edX bulk import commands: `docs/guides/onboarding/LOCAL_SETUP.md`
-- MCT API exploration results: `docs/migrations/mct/API_EXPLORATION.md`
+- MCT API exploration results: `docs/reference/migrations/mct/API_EXPLORATION.md`
