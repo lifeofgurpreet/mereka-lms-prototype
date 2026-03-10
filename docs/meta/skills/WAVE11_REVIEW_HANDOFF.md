@@ -1,41 +1,69 @@
 # Wave 11 Review Handoff
-_Audience: reviewers and future agent-runtime implementors • Owner: Platform Team • Status: canonical_
 
-## Review order
+Review Wave 11 in this order.
 
-1. `docs/meta/skills/SKILL_RUNTIME_MODEL.yaml`
-2. `docs/meta/skills/SKILL_TAXONOMY.yaml`
-3. `generated/skills/skill-registry.json`
-4. `generated/skills/command-registry.json`
-5. `generated/skills/scenario-packs.json`
-6. `generated/skills/read-first.md`
-7. `generated/skills/skill-dependency-graph.json`
-8. `tools/skills/verify_skill_runtime.py`
-9. `scripts/qa/run-skill-runtime-gates.sh`
+## 1. ABI and discovery
 
-## What to verify
+- `docs/meta/skills/AGENT_PACK_ABI.yaml`
+- `docs/meta/skills/REPO_DISCOVERY_MODEL.yaml`
+- `generated/skills/pack-registry.json`
 
-- every skill points only to canonical or compiled truthful surfaces
-- every command entry points to a live script, workflow, or validator
-- no scenario references a missing skill or command
-- the read-first pack stays within 12 entries
-- no default read-first path points into archive or transitional roots
+Confirm:
 
-## Human review questions
+- canonical packs are explicitly discoverable
+- every registered pack has a schema
+- no machine-local absolute paths appear in canonical pack discovery
 
-- Does each skill solve a real recurring task rather than repeat prose?
-- Are any command entrypoints still ambiguous or duplicated?
-- Are any high-risk skills missing reviewer or evidence classes?
-- Does the read-first pack feel minimal enough for a new engineer or agent?
+## 2. Neutral skill layer
+
+- `generated/skills/skill-registry.json`
+- `generated/skills/evidence-sufficiency-map.json`
+- `generated/skills/mixed-diff-arbitration.json`
+
+Confirm:
+
+- high-risk skills carry reviewer and evidence rules
+- evidence classes resolve back to real skills
+- mixed-diff rules reference real skill IDs and cover current categories
+
+## 3. Runtime convergence
+
+- `generated/skills/runtime-convergence-report.json`
+
+Confirm:
+
+- the report compares actual contracts, workflows, registries, and pack/runtime surfaces
+- the remaining warning is explicit and intentional, not hidden drift
+
+## 4. Enforcement
+
+- `tools/skills/verify_agent_pack_schemas.py`
+- `tools/skills/verify_skill_runtime.py`
+- `tools/skills/verify_agent_pack_runtime.py`
+- `scripts/qa/run-skill-runtime-gates.sh`
+- `scripts/qa/run-agent-pack-runtime-gates.sh`
+- `.github/workflows/docs-policy.yml`
+
+Confirm:
+
+- local and CI paths are aligned
+- schema and runtime verification are both required
+- the agent-pack runtime now participates in docs-policy CI
+
+## 5. Start path
+
+- `generated/skills/read-first.json`
+- `generated/skills/read-first.md`
+- `docs/meta/skills/WAVE11_CLOSEOUT.md`
+
+Confirm:
+
+- JSON is canonical
+- Markdown is projection only
+- default read-first remains at 12 entries or fewer
 
 ## Remaining risks
 
-- cross-repo runtime convergence is still not machine-proven
-- some external Wave 10 compiled assistant/front-door surfaces are not yet rebuilt on the new Wave 11 branches
-- the current runtime is neutral and machine-consumable, but not yet packaged behind a stable vendor-facing ABI
-
-## Reviewer start command
-
-```bash
-bash scripts/qa/run-skill-runtime-gates.sh
-```
+- assistant/front-door exports are not yet rebuilt on the fresh external Wave 11 branches
+- Wave 10 generated agent packs are not present on this branch
+- runtime convergence is still repo-truth convergence, not live runtime truth
