@@ -1,29 +1,29 @@
 # Wave 13 Execution Tracker
 
 ## Latest substantive packet head
-- 4a4961c6d063a4adea1a732dcb3566fd6328a24c
+- bf7697a65ec53f3153fd7ea686e0de464ff196f2
 
 ## Last completed batch
-- commit: 4a4961c6d063a4adea1a732dcb3566fd6328a24c
-- scope: Wave 13 Packet A
-- validators run: receipt-classes YAML parse, docs catalog write/check, docs catalog governance
-- result: in progress
+- commit: bf7697a65ec53f3153fd7ea686e0de464ff196f2
+- scope: Wave 13 Packet B
+- validators run: execution receipt write/check, approval receipt write/check, docs catalog governance
+- result: passed
 
 ## Current target packet
 - files:
   - docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md
-  - docs/meta/knowledge/schemas/execution-receipt.schema.json
-  - docs/meta/knowledge/schemas/approval-receipt.schema.json
-  - tools/knowledge/build_execution_receipt.py
-  - tools/knowledge/build_approval_receipt.py
-  - generated/knowledge/execution-receipt.json
-  - generated/knowledge/approval-receipt.json
+  - docs/meta/knowledge/schemas/evidence-receipt.schema.json
+  - docs/meta/knowledge/schemas/release-decision-receipt.schema.json
+  - tools/knowledge/build_evidence_receipt.py
+  - tools/knowledge/build_release_decision_receipt.py
+  - generated/knowledge/evidence-receipt.json
+  - generated/knowledge/release-decision-receipt.json
 - goal:
-  - generate the first canonical proof receipts on top of the Wave 12 decision runtime
-  - bind executed commands and unresolved live approvals into machine-readable receipt form
-  - keep unresolved approval state explicit instead of fabricating completion
+  - bind evidence obligations into a canonical receipt surface
+  - bind release-readiness to the exact dependent receipts and decision inputs used
+  - close the core proof chain before runtime-proof attachment work begins
 - stop condition:
-  - execution and approval receipts are generated deterministically and one substantive commit is created
+  - evidence and release decision receipts are generated deterministically and one substantive commit is created
 
 ## Open residue
 - live approval state is still an unresolved input outside repo truth
@@ -31,4 +31,4 @@
 - external Wave 11 assistant/front-door exports remain branch-local
 
 ## Next queued packet
-- Packet C: evidence and release decision receipts
+- Packet D: runtime proof receipt and proof bundle manifest
