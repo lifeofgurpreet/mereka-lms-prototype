@@ -168,7 +168,7 @@ infrastructure/tutor/themes/mereka/
 Edit the theme files as needed:
 
 ```bash
-cd /home/gurpreet/projects/k8s/mereka-lms
+cd <repo-root>
 
 # Color tokens
 vim infrastructure/tutor/themes/mereka/scss/_tokens.scss
@@ -344,23 +344,27 @@ Do not use `kubectl set image` for normal releases.
 Fast path: use `scripts/infra/release-openedx-gitops.sh` (section above).
 
 ```bash
+# Set repo roots explicitly for the release flow
+APP_REPO="${APP_REPO:-$(pwd)}"
+INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
+
 # 1) Push this repo first (mereka-lms) so the new base ref exists remotely.
-git -C /home/gurpreet/projects/k8s/mereka-lms push
+git -C "${APP_REPO}" push
 
 # 2) In GitOps repo checkout, update BOTH:
 #    a) pinned base ref
 #    b) production overlay image tags
-git -C /home/gurpreet/projects/k8s/infrastructure pull --rebase
-$EDITOR /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/base/kustomization.yaml
-$EDITOR /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+git -C "${INFRA_REPO}" pull --rebase
+$EDITOR "${INFRA_REPO}/apps/mereka-lms/base/kustomization.yaml"
+$EDITOR "${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustomization.yaml"
 
 # 3) Verify no image-tag drift between repos before push.
 ./scripts/qa/verify-gitops-image-overrides.sh --check-infra
 
 # 4) Commit + push GitOps repo.
-git -C /home/gurpreet/projects/k8s/infrastructure add apps/mereka-lms/base/kustomization.yaml apps/mereka-lms/overlays/prod/kustomization.yaml
-git -C /home/gurpreet/projects/k8s/infrastructure commit -m "chore: rollout openedx/openedx-mfe tags ${TAG}"
-git -C /home/gurpreet/projects/k8s/infrastructure push
+git -C "${INFRA_REPO}" add apps/mereka-lms/base/kustomization.yaml apps/mereka-lms/overlays/prod/kustomization.yaml
+git -C "${INFRA_REPO}" commit -m "chore: rollout openedx/openedx-mfe tags ${TAG}"
+git -C "${INFRA_REPO}" push
 ```
 
 ### Step 9: Verify Deployment
@@ -406,9 +410,10 @@ If issues arise after deployment:
 
 ```bash
 # 1) Revert GitOps commit(s) in infrastructure checkout.
-git -C /home/gurpreet/projects/k8s/infrastructure log --oneline -n 5
-git -C /home/gurpreet/projects/k8s/infrastructure revert <bad_commit_sha>
-git -C /home/gurpreet/projects/k8s/infrastructure push
+INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
+git -C "${INFRA_REPO}" log --oneline -n 5
+git -C "${INFRA_REPO}" revert <bad_commit_sha>
+git -C "${INFRA_REPO}" push
 
 # 2) Confirm Argo converges back to known-good revision/images.
 kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n argocd get applications.argoproj.io mereka-lms-local \
@@ -441,7 +446,8 @@ Most common cause is GitOps overlay tag drift, not rollout failure.
 rg -n "openedx-mfe|openedx:" deploy/k8s/overlays/production/kustomization.yaml
 
 # GitOps overlay tag (active source for prod)
-rg -n "openedx-mfe|openedx:" /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
+rg -n "openedx-mfe|openedx:" "${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustomization.yaml"
 
 # Contract check
 ./scripts/qa/verify-gitops-image-overrides.sh --check-infra
