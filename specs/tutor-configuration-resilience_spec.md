@@ -31,7 +31,7 @@ links:
   related_docs:
     - "docs/adr/006-tutor-plugin-based-configuration.md"
     - "docs/guides/onboarding/QUICK_START_LOCAL.md"
-    - "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
+    - "docs/guides/onboarding/LOCAL_SETUP.md"
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
   related_specs:
@@ -566,7 +566,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 **Phase 3: Git Hooks (Week 4)**
 
 8. Add pre-commit hook that runs verification when `infrastructure/tutor/` files change.
-9. Document hook installation in `docs/onboarding/DEVELOPER_ONBOARDING.md`.
+9. Document hook installation in `docs/guides/onboarding/LOCAL_SETUP.md`.
 
 **Phase 4: Tutor Plugin (Week 5-8)**
 

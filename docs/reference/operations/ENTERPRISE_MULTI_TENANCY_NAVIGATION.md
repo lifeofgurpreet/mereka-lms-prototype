@@ -41,10 +41,10 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 
 - [`../guides/branding/BRANDING_OPERATING_MODEL.md`](../../guides/branding/BRANDING_OPERATING_MODEL.md) - Brand execution model.
 - [`../guides/branding/TENANT_BRANDING_CONTRACT.md`](../../guides/branding/TENANT_BRANDING_CONTRACT.md) - Required branding inputs + ownership.
-- [`../guides/branding/TENANT_BRAND_PACK_SCHEMA.md`](../../guides/branding/TENANT_BRAND_PACK_SCHEMA.md) - JSON schema for tenant brand packs.
+- [`TENANT_BRAND_PACK_SCHEMA.md`](TENANT_BRAND_PACK_SCHEMA.md) - JSON schema for tenant brand packs.
 - [`docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`](../../status/readiness/TENANT_BRANDING_READINESS_RAG.md) - Branding readiness state and gaps.
 - [`../guides/branding/BRANDING_GUARDRAILS.md`](../../guides/branding/BRANDING_GUARDRAILS.md) - Guardrails and regression checks.
-- [`../guides/branding/FOOTER_V2_TO_LMS_MAPPING.md`](../../guides/branding/FOOTER_V2_TO_LMS_MAPPING.md) - Footer mapping for LMS/MFE alignment.
+- [`../architecture/FOOTER_V2_TO_LMS_MAPPING.md`](../architecture/FOOTER_V2_TO_LMS_MAPPING.md) - Footer mapping for LMS/MFE alignment.
 - [`docs/ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md`](../../ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md) - Branding breakages and fixes.
 - [`docs/ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md`](../../ops/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md) - Plugin strategy for Tutor/MFE customization.
 

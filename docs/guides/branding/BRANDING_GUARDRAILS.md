@@ -210,4 +210,4 @@ Use `docs/ops/runbooks/THEME_DEPLOYMENT.md` as the canonical deployment runbook.
 ## Roadmap
 
 The current bead-backed plan lives at:
-- `docs/guides/branding/BRANDING_ROADMAP.md`
+- `docs/status/active/BRANDING_ROADMAP_2026-02-08.md`

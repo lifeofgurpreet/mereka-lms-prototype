@@ -3,6 +3,14 @@ _Audience: Platform Eng • Owner: Infra Team • Last verified: 2025-08-30_
 
 This guide walks through setting up Google Login for OpenEdX LMS sites.
 
+## Quick checklist
+
+1. Create or rotate the OAuth client in Google Cloud Console.
+2. Store the client ID and secret in the approved secret-management flow.
+3. Apply the values through Tutor config or the supported setup script.
+4. Restart LMS and verify the provider is enabled in Django admin.
+5. Test the login flow on the exact target domain.
+
 ## Prerequisites
 
 - Access to Google Cloud Console with permissions to create OAuth credentials
@@ -66,7 +74,7 @@ This guide walks through setting up Google Login for OpenEdX LMS sites.
 5. **Save Credentials:**
    - Click **Create**
    - **IMPORTANT:** Copy the **Client ID** and **Client Secret** immediately
-   - Store these securely (we'll add them to Tutor config)
+   - Store these securely using the secret-management flow before applying them
 
 ## Step 2: Configure OpenEdX
 
@@ -152,12 +160,8 @@ tutor k8s restart lms
 ## Security Best Practices
 
 1. **Store Credentials Securely:**
-   - Use Google Secret Manager for production:
-     ```bash
-     gcloud secrets create google-oauth-client-id --data-file=-
-     gcloud secrets create google-oauth-client-secret --data-file=-
-     ```
-   - Reference in Tutor config via environment variables
+   - Use the approved secret-management flow described in `docs/guides/admin/SECRETS_MANAGEMENT_GUIDE.md`
+   - Do not paste client secrets into issues, guides, or ad hoc scripts
 
 2. **Restrict OAuth Consent Screen:**
    - Add only authorized domains
@@ -181,4 +185,3 @@ For multiple sites (e.g., `skillourfuture.academy.mereka.io`):
 - [OpenEdX Third-Party Authentication Documentation](https://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/configuration/tpa/index.html)
 - [Google OAuth 2.0 Documentation](https://developers.google.com/identity/protocols/oauth2)
 - [Django Social Auth Documentation](https://python-social-auth.readthedocs.io/)
-

@@ -179,7 +179,7 @@ _None yet._
 ## Related Documents
 
 - `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — Full slot migration inventory
-- `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` — All override categories (not just footer)
+- `docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md` — All override categories (not just footer)
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — Exception policy with expiry
 - `infrastructure/tutor/plugins/mereka_lms.py` — MerekaFooter component + PLUGIN_SLOTS wiring
 - `docs/ops/runbooks/FRONTEND_REGRESSION_CHECKLIST.md` — Regression triage for footer issues

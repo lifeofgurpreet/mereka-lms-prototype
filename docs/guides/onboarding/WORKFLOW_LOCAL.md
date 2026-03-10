@@ -105,7 +105,7 @@ Use the Playwright helper bundled in the repo or your browser DevTools to captur
 - `http://discovery.localhost`
 - `http://ecommerce.localhost` (after logging in via LMS)
 
-Store screenshots under `screenshots/` with a descriptive filename (e.g., `screenshots/lms-home.png`) and link them from `docs/guides/branding/BRANDING_PLAN.md` when checking off tasks.
+Store screenshots under `screenshots/` with a descriptive filename (e.g., `screenshots/lms-home.png`) and attach them to the current evidence or status surface rather than a guide-root tracker.
 
 ## 9. Troubleshooting Highlights
 

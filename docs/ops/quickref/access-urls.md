@@ -267,7 +267,7 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 
 **Local:**
 1. Go to: http://localhost/admin
-2. Login with superuser credentials (`admin` / `admin123`)
+2. Login with the local superuser credentials created during setup
 
 **GKE (Production):**
 1. Go to: https://academyv2.mereka.io/admin

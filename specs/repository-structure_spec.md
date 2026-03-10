@@ -27,7 +27,7 @@ tags:
 summary: "Normative repository layout contract defining canonical roots, deprecated paths, and structural verification expectations."
 links:
   related_docs:
-    - "docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md"
+    - "docs/guides/onboarding/LOCAL_SETUP.md"
     - "docs/guides/onboarding/QUICK_START_LOCAL.md"
     - "CLAUDE.md"
     - "AGENTS.md"

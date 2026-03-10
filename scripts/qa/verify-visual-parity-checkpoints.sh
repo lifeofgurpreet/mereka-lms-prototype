@@ -47,7 +47,7 @@ echo ""
 # ---------------------------------------------------------------------------
 # Paths used across multiple ACs
 # ---------------------------------------------------------------------------
-CHECKPOINT_DOC="$REPO_ROOT/docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md"
+CHECKPOINT_DOC="$REPO_ROOT/docs/ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md"
 BASELINE_DOC="$REPO_ROOT/docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md"
 VISUAL_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md"
 BRANDING_OPS="$REPO_ROOT/docs/guides/branding/BRANDING_OPERATING_MODEL.md"
@@ -68,7 +68,7 @@ echo "--- AC-UI-101: Visual Checkpoint Matrix ---"
 if [[ -f "$CHECKPOINT_DOC" ]]; then
   do_pass "AC-UI-101: VISUAL_PARITY_CHECKPOINTS.md exists"
 else
-  do_fail "AC-UI-101: VISUAL_PARITY_CHECKPOINTS.md not found at docs/guides/branding/"
+  do_fail "AC-UI-101: VISUAL_PARITY_CHECKPOINTS.md not found at docs/ops/runbooks/"
 fi
 
 # 1b. Must cover the 5 required authn surfaces.
@@ -520,11 +520,11 @@ echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Action required: Fix FAIL items above."
-  echo "  - Create docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md if missing"
+  echo "  - Create docs/ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md if missing"
   echo "  - Ensure 5-route x 3-domain matrix (15 entries) is documented"
   echo "  - Verify MerekaFooter wiring in apply-patches.sh"
   echo "  - Add verify-visual-parity-checkpoints.sh to .github/workflows/ci.yml"
-  echo "  - See docs/guides/branding/VISUAL_PARITY_CHECKPOINTS.md for full runbook"
+  echo "  - See docs/ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md for full runbook"
   exit 1
 fi
 

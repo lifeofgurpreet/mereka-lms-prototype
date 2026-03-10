@@ -389,9 +389,9 @@ This plan converts the SLO/SLA spec's 23 acceptance criteriainto actionable impl
   - **Done**: Central monitoring doc links to all SLO/SLA docs
   - **Files**: `docs/reference/operations/MONITORING.md`
 
-- [ ] **[S]** Add SLO/SLA section to onboarding docs (`docs/onboarding/DEVELOPER_ONBOARDING.md`) | Depends: All docs
+- [ ] **[S]** Add SLO/SLA section to onboarding docs (`docs/guides/onboarding/LOCAL_SETUP.md`) | Depends: All docs
   - **Done**: New developers understand SLO measurement and error budget policy
-  - **Files**: `docs/onboarding/DEVELOPER_ONBOARDING.md`
+  - **Files**: `docs/guides/onboarding/LOCAL_SETUP.md`
 
 ### Rollback Plan
 

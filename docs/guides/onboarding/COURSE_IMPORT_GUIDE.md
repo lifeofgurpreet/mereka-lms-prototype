@@ -76,12 +76,12 @@ docker exec tutor_local-mongodb-1 mongosh openedx --quiet --eval \
   "db['modulestore.structures'].countDocuments({})"
 
 # Check course overviews
-docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu openedx -e \
+docker exec -it tutor_local-mysql-1 mysql -uroot -p openedx -e \
   "SELECT id, display_name FROM course_overviews_courseoverview;"
 
 # View in browser
 open http://studio.localhost
-# Login: admin / admin123
+# Log in with the local admin account created during setup
 ```
 
 ## 📊 Top 5 MCT Courses to Import

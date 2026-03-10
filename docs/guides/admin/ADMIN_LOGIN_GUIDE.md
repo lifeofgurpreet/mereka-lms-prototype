@@ -129,8 +129,9 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 # 2. Clear all sessions
 docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.sessions.models import Session; Session.objects.all().delete(); print('Sessions cleared')"
 
-# 3. Reset admin password (local example)
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='admin'); u.set_password('admin123'); u.is_active = True; u.is_staff = True; u.is_superuser = True; u.save(); print('Admin reset')"
+# 3. Reset the local admin password using a local-only value
+export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
+docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "import os; from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='admin'); u.set_password(os.environ['LOCAL_ADMIN_PASSWORD']); u.is_active = True; u.is_staff = True; u.is_superuser = True; u.save(); print('Admin reset')"
 ```
 
 ### Automated Fix Script
@@ -176,6 +177,7 @@ else:
 - **Cache Issues (local):** If local login fails, clear cache first.
 - **Session Issues (local):** Clear sessions if "too many attempts" error persists.
 - **Password Reset (local):** Only reset local passwords if you explicitly need a local-admin backdoor.
+- **Leaked credentials:** Treat any credential pasted into a guide or ticket as compromised and follow `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`.
 - **Browser:** Try incognito/private mode if issues persist
 - **Cookies:** Clear browser cookies for localhost if needed
 - **Two login flows are expected:** Local username/password (native Open edX) + Authentik OIDC. Both should work; only disable local login if you explicitly want SSO-only.

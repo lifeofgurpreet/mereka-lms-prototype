@@ -285,7 +285,7 @@ Each exception must include:
 2. **Review**: Monthly review during platform eng standup
 3. **Expiry**: On expiry date, either migrate or renew with justification
 4. **Enforcement**: `scripts/qa/check-forbidden-overrides.sh` warns on expired exceptions
-5. **Audit**: `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` tracks full inventory
+5. **Audit**: `docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md` tracks full inventory
 
 ### Renewal Rules
 
@@ -388,7 +388,7 @@ If slot injection fails (MFE build error or runtime slot not rendering):
 ## Related Documents
 
 - `docs/guides/branding/BRANDING_GUARDRAILS.md`
-- `docs/guides/branding/BRANDING_ROADMAP.md`
+- `docs/status/active/BRANDING_ROADMAP_2026-02-08.md`
 - `docs/guides/branding/BRANDING_INCIDENT_TEMPLATE.md`
 - `docs/guides/branding/BRANDING.md`
 - `docs/ops/runbooks/THEME_DEPLOYMENT.md`

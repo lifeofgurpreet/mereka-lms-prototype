@@ -85,14 +85,16 @@ tutor local restart
 make tutor-start
 ```
 
-Create an admin user after first launch:
+Create a local admin user after first launch:
 
 ```bash
+export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
 docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "
+import os
 from django.contrib.auth import get_user_model
 User = get_user_model()
 u, _ = User.objects.get_or_create(username='admin')
-u.set_password('admin123')
+u.set_password(os.environ['LOCAL_ADMIN_PASSWORD'])
 u.is_staff = True
 u.is_superuser = True
 u.save()
@@ -109,7 +111,7 @@ Access URLs (forward ports are configured in `devcontainer.json`):
 | MFE Login | http://apps.localhost/authn/login |
 | Admin | http://localhost/admin |
 
-Default credentials: `admin` / `admin123`.
+Use the local-only username/password you created during setup. Do not paste shared credentials into this guide or into devcontainer config.
 
 ## Daily Workflow
 
@@ -211,7 +213,7 @@ VS Code auto-forwards ports 80, 443, 8000, 8001, 8002. Check the Ports panel (`C
 ## Reference
 
 - Quick start: `docs/guides/onboarding/QUICK_START_LOCAL.md`
-- Full setup guide: `docs/guides/onboarding/DEVELOPER_ONBOARDING.md`
+- Full setup guide: `docs/guides/onboarding/LOCAL_SETUP.md`
 - Troubleshooting: `docs/ops/runbooks/TROUBLESHOOTING.md`
 - Standing orders: `docs/meta/standing-orders/README.md`
 - Authority resolver: `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`

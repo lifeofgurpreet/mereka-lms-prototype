@@ -213,7 +213,7 @@ docs/
 │   └── 001-mongodb-atlas.md   # Numbered ADRs
 ├── onboarding/                # Setup and getting started
 │   ├── QUICK_START_LOCAL.md   # 5-minute setup
-│   ├── DEVELOPER_ONBOARDING.md  # Complete onboarding
+│   ├── LOCAL_SETUP.md           # Complete onboarding setup
 │   └── REPOSITORY_GUIDE.md    # This file
 ├── operations/                # Runbooks and operational procedures
 │   ├── TROUBLESHOOTING.md     # Site down diagnostic
@@ -623,7 +623,7 @@ RESULT: PASS (all checks passed)
 
 - **Spec**: `specs/repository-structure_spec.md` — Full specification
 - **Roadmap**: `../meta/docs-program/IMPLEMENTATION_ROADMAP.md` — Implementation progress
-- **Onboarding**: `docs/guides/onboarding/DEVELOPER_ONBOARDING.md` — Complete setup guide
+- **Onboarding**: `docs/guides/onboarding/LOCAL_SETUP.md` — Complete setup guide
 - **Quick Start**: `docs/guides/onboarding/QUICK_START_LOCAL.md` — 5-minute setup
 - **Agent Guide**: `AGENTS.md` — Agent-specific guidelines
 

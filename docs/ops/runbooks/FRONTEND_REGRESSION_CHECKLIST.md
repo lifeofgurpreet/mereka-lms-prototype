@@ -125,7 +125,7 @@ After fixing any regression, capture evidence:
 
 ## Related
 
-- `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` — Full override inventory
+- `docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md` — Full override inventory
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — Exception policy
 - `docs/policies/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md` — Deploy protocol
 - `docs/ops/runbooks/TROUBLESHOOTING.md` — Request-path diagnostics

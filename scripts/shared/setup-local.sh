@@ -157,8 +157,8 @@ User = get_user_model()
 try:
     u = User.objects.get(username='admin')
 except User.DoesNotExist:
-    u = User.objects.create_user('admin', 'admin@mereka.academy', 'admin123')
-u.set_password('admin123')
+    u = User.objects.create_user('admin', 'admin@mereka.academy', 'changeme-local-only')
+u.set_password('changeme-local-only')
 u.is_active = True
 u.is_staff = True
 u.is_superuser = True
@@ -220,7 +220,7 @@ echo "    • Admin: http://localhost/admin"
 echo ""
 echo "  🔐 Credentials:"
 echo "    • Username: admin"
-echo "    • Password: admin123"
+echo "    • Password: changeme-local-only (reset during first local login)"
 echo ""
 echo "  🛠️  Next Steps:"
 echo "    • Run: ./tools/comprehensive-test.sh"
@@ -228,4 +228,3 @@ echo "    • Read: docs/QUICK_REFERENCE.md"
 echo "    • Check: docs/OPERATIONAL_STATUS.md"
 echo ""
 echo "╚══════════════════════════════════════════════════════════════╝"
-

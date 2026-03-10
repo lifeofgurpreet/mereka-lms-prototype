@@ -4,7 +4,7 @@ _Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 20
 Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 > **Related specs**: [branding-system_spec.md](../../../specs/branding-system_spec.md), [oep48-brand-package_spec.md](../../../specs/oep48-brand-package_spec.md), [paragon-design-tokens-migration_spec.md](../../../specs/plans/paragon-design-tokens-migration_spec.md)
-> **Related docs**: [BRANDING.md](BRANDING.md), [MFE Complete List](../../reference/architecture/MFE_COMPLETE_LIST.md), [FRONTEND_TRACKER.md](../../archive/superseded/FRONTEND_TRACKER.md)
+> **Related docs**: [BRANDING.md](../../guides/branding/BRANDING.md), [MFE Complete List](../../reference/architecture/MFE_COMPLETE_LIST.md), [FRONTEND_TRACKER.md](../../archive/superseded/FRONTEND_TRACKER.md)
 
 ## Progress Summary
 

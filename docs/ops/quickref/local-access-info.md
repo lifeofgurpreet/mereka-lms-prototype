@@ -4,7 +4,7 @@ _Audience: Developers • Owner: Ops Domain Owner • Last verified: 2026-03-06 
 ## 🔐 Admin Credentials
 
 **Username:** `admin`
-**Password:** `admin123`
+**Password:** local-only value chosen during setup
 **Email:** `admin@mereka.academy`
 **Access Level:** Staff + Superuser
 
@@ -70,5 +70,5 @@ _Audience: Developers • Owner: Ops Domain Owner • Last verified: 2026-03-06 
 
 - **Complete URL Reference:** `docs/ops/quickref/access-urls.md` (local, dev, production)
 - **Parity Strategy:** [LOCAL_PRODUCTION_PARITY.md](local-production-parity.md)
-- **MFE List:** [MFE_COMPLETE_LIST.md](../../concepts/architecture/MFE_COMPLETE_LIST.md)
-- **Setup Guide:** [LOCAL_DEVELOPMENT_GUIDE.md](../../guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md)
+- **MFE List:** [MFE_COMPLETE_LIST.md](../../reference/architecture/MFE_COMPLETE_LIST.md)
+- **Setup Guide:** [LOCAL_SETUP.md](../../guides/onboarding/LOCAL_SETUP.md)

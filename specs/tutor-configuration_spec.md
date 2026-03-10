@@ -29,7 +29,7 @@ summary: "Defines the expected lifecycle, control points, and verification contr
 links:
   related_docs:
     - "docs/guides/onboarding/QUICK_START_LOCAL.md"
-    - "docs/guides/onboarding/DEVELOPER_ONBOARDING.md"
+    - "docs/guides/onboarding/LOCAL_SETUP.md"
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/ops/runbooks/THEME_DEPLOYMENT.md"
     - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"

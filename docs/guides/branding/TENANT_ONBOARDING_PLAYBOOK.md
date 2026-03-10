@@ -12,7 +12,7 @@ Related deep-dive docs (read before implementing):
 - [`MULTI_TENANT_BRANDING_OPS.md`](MULTI_TENANT_BRANDING_OPS.md) — Full branding ops model (layers, per-tenant runbook, CI, escalation)
 - [`TENANT_BRANDING_CONTRACT.md`](TENANT_BRANDING_CONTRACT.md) — Required inputs, RAG matrix, brand pack schema
 - [`BRANDING_OPERATING_MODEL.md`](BRANDING_OPERATING_MODEL.md) — Change types, signoff, change queue
-- [`VISUAL_PARITY_CHECKPOINTS.md`](VISUAL_PARITY_CHECKPOINTS.md) — Visual release gates
+- [`../../ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md`](../../ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md) — Visual release gates
 - [`docs/archive/superseded/runbooks/tenant-provisioning-runbook.md`](../../archive/superseded/runbooks/tenant-provisioning-runbook.md) — K8s provisioning runbook
 - [`specs/multi-tenancy-architecture_spec.md`](../../../specs/multi-tenancy-architecture_spec.md) — Architecture spec (Tier 4.1)
 
@@ -233,4 +233,4 @@ If any item fails post-handoff:
 1. **P1 (site down)**: Ping Engineering Lead immediately → 30-min SLA
 2. **P2 (branding wrong)**: Create `docs/guides/branding/BRANDING_INCIDENT_TEMPLATE.md` entry → 4-hour SLA
 3. **P3 (cosmetic)**: File GitHub issue → next sprint
-4. **P4 (future enhancement)**: Add to `docs/guides/branding/BRANDING_ROADMAP.md`
+4. **P4 (future enhancement)**: Add to `docs/status/active/BRANDING_ROADMAP_2026-02-08.md`

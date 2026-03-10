@@ -1,40 +1,44 @@
 # Onboarding Documentation
-_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-03-06 • Status: canonical_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
 ## Scope
-This is the canonical onboarding index for local development and day-to-day workflows.
+This is the canonical onboarding index for local setup and daily development workflow.
 
 ## Start here
 
-- New contributor or new agent session:
-  1. [`AGENT_SETUP_CHECKLIST.md`](AGENT_SETUP_CHECKLIST.md)
-  2. [`QUICK_START_LOCAL.md`](QUICK_START_LOCAL.md)
-  3. [`LOCAL_SETUP.md`](LOCAL_SETUP.md)
-- Already bootstrapped and just need daily workflow:
+- Need the fastest local bootstrap:
+  - [`QUICK_START_LOCAL.md`](QUICK_START_LOCAL.md)
+- Need the full canonical setup:
+  - [`LOCAL_SETUP.md`](LOCAL_SETUP.md)
+- Need the day-to-day command flow after setup:
   - [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md)
-- Working with multiple contributors or parallel agents:
-  - [`MULTI_DEVELOPER_WORKFLOW.md`](MULTI_DEVELOPER_WORKFLOW.md)
-- Using a dev container instead of a host setup:
+- Working in a devcontainer instead of a host install:
   - [`DEVCONTAINER_GUIDE.md`](DEVCONTAINER_GUIDE.md)
-- Need local access or environment reference:
-  - see `Supporting references` below
+- Coordinating with multiple contributors or agents:
+  - [`MULTI_DEVELOPER_WORKFLOW.md`](MULTI_DEVELOPER_WORKFLOW.md)
 
-## Canonical Onboarding Guides
-- [`AGENT_SETUP_CHECKLIST.md`](AGENT_SETUP_CHECKLIST.md)
+## Canonical onboarding set
+
+- [`README.md`](README.md)
 - [`QUICK_START_LOCAL.md`](QUICK_START_LOCAL.md)
 - [`LOCAL_SETUP.md`](LOCAL_SETUP.md)
 - [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md)
-- [`MULTI_DEVELOPER_WORKFLOW.md`](MULTI_DEVELOPER_WORKFLOW.md)
 - [`DEVCONTAINER_GUIDE.md`](DEVCONTAINER_GUIDE.md)
+- [`MULTI_DEVELOPER_WORKFLOW.md`](MULTI_DEVELOPER_WORKFLOW.md)
+- [`REPOSITORY_GUIDE.md`](REPOSITORY_GUIDE.md)
 - [`COURSE_IMPORT_GUIDE.md`](COURSE_IMPORT_GUIDE.md)
 
-## Supporting References
-- [`DEVELOPER_ONBOARDING.md`](DEVELOPER_ONBOARDING.md)
-- [`LOCAL_DEVELOPMENT_GUIDE.md`](LOCAL_DEVELOPMENT_GUIDE.md)
-- [`LOCAL_ACCESS_GUIDE.md`](LOCAL_ACCESS_GUIDE.md)
-- [`README_LOCAL.md`](README_LOCAL.md)
-- [`REPOSITORY_GUIDE.md`](REPOSITORY_GUIDE.md)
-- [`TEAM_SCALING_GUIDE.md`](TEAM_SCALING_GUIDE.md)
+## Supporting guide
+
+- [`AGENT_SETUP_CHECKLIST.md`](AGENT_SETUP_CHECKLIST.md) for agent-oriented preflight only
+
+## Security note
+
+Do not store local usernames, passwords, tokens, or copied service credentials in this directory.
+Use the local setup flow to create a local-only admin password at bootstrap time, and use
+[`../admin/SECRETS_MANAGEMENT_GUIDE.md`](../admin/SECRETS_MANAGEMENT_GUIDE.md) plus
+[`../../ops/runbooks/SECRET_ROTATION_CHECKLIST.md`](../../ops/runbooks/SECRET_ROTATION_CHECKLIST.md)
+if a credential is ever exposed.
 
 ## What this directory is not
 

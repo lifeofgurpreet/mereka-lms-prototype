@@ -6,7 +6,7 @@ This document captures the brand tokens we apply across LMS/Studio and all MFEs 
 Quick operational entrypoint (read this before changing anything):
 - `docs/guides/branding/BRANDING_GUARDRAILS.md`
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
-- `docs/guides/branding/BRANDING_ROADMAP.md`
+- `docs/status/active/BRANDING_ROADMAP_2026-02-08.md`
 
 ## Palette
 
@@ -434,9 +434,9 @@ find infrastructure/tutor/themes/mereka -name "*.scss"
 **Operations Docs**:
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md` - Branding workflow and ownership
 - `docs/guides/branding/BRANDING_GUARDRAILS.md` - What NOT to change
-- `docs/guides/branding/BRANDING_ROADMAP.md` - Future branding plans
+- `docs/status/active/BRANDING_ROADMAP_2026-02-08.md` - Future branding plans
 - `docs/guides/branding/BRANDING_VERIFICATION_CHECKLIST.md` - Pre-deploy checklist
-- `docs/guides/branding/BRANDING_PLAN.md` - Rollout plan
+- `docs/status/active/BRANDING_PLAN_2026-03-03.md` - Active rollout/status tracker
 - `docs/reference/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md` - Source vs generated theming contract
 
 **Scripts**:

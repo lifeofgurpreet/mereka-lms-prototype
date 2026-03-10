@@ -284,25 +284,31 @@ if ! python3 tools/docs/verify/verify_legacy_migrations_root.py --repo-root .; t
   legacy_migrations_status="fail"
 fi
 
-echo "Check 11/11: concepts architecture root is clean"
+echo "Check 11/13: concepts architecture root is clean"
 concepts_architecture_status="pass"
 if ! python3 tools/docs/verify/verify_concepts_architecture_clean.py --repo-root .; then
   concepts_architecture_status="fail"
 fi
 
-echo "Check 12/12: reference root has no self-stub docs"
+echo "Check 12/13: reference root has no self-stub docs"
 reference_self_stubs_status="pass"
 if ! python3 tools/docs/verify/verify_reference_no_self_stubs.py --repo-root .; then
   reference_self_stubs_status="fail"
 fi
 
+echo "Check 13/13: guides root hygiene"
+guides_hygiene_status="pass"
+if ! python3 tools/docs/verify/verify_guides_hygiene.py --repo-root .; then
+  guides_hygiene_status="fail"
+fi
+
 status="pass"
-if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]] || [[ "$legacy_arch_status" = "fail" ]] || [[ "$legacy_ops_status" = "fail" ]] || [[ "$legacy_ci_cd_status" = "fail" ]] || [[ "$legacy_branding_status" = "fail" ]] || [[ "$legacy_runbooks_status" = "fail" ]] || [[ "$legacy_migrations_status" = "fail" ]] || [[ "$concepts_architecture_status" = "fail" ]] || [[ "$reference_self_stubs_status" = "fail" ]]; then
+if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]] || [[ "$legacy_arch_status" = "fail" ]] || [[ "$legacy_ops_status" = "fail" ]] || [[ "$legacy_ci_cd_status" = "fail" ]] || [[ "$legacy_branding_status" = "fail" ]] || [[ "$legacy_runbooks_status" = "fail" ]] || [[ "$legacy_migrations_status" = "fail" ]] || [[ "$concepts_architecture_status" = "fail" ]] || [[ "$reference_self_stubs_status" = "fail" ]] || [[ "$guides_hygiene_status" = "fail" ]]; then
   status="fail"
 fi
 
 if [[ -n "$SUMMARY_JSON" ]]; then
-  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" "$legacy_arch_status" "$legacy_ops_status" "$legacy_ci_cd_status" "$legacy_branding_status" "$legacy_runbooks_status" "$legacy_migrations_status" "$concepts_architecture_status" "$reference_self_stubs_status" <<'PY'
+  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" "$legacy_arch_status" "$legacy_ops_status" "$legacy_ci_cd_status" "$legacy_branding_status" "$legacy_runbooks_status" "$legacy_migrations_status" "$concepts_architecture_status" "$reference_self_stubs_status" "$guides_hygiene_status" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -321,13 +327,14 @@ legacy_runbooks_status = sys.argv[11]
 legacy_migrations_status = sys.argv[12]
 concepts_architecture_status = sys.argv[13]
 reference_self_stubs_status = sys.argv[14]
+guides_hygiene_status = sys.argv[15]
 
 content_summary = {"status": "pass", "files_checked": 0, "errors": []}
 if content_summary_path.exists():
     content_summary = json.loads(content_summary_path.read_text(encoding="utf-8"))
 
 overall_status = "pass"
-if root_allowlist_violations > 0 or content_status != "pass" or legacy_arch_status != "pass" or legacy_ops_status != "pass" or legacy_ci_cd_status != "pass" or legacy_branding_status != "pass" or legacy_runbooks_status != "pass" or legacy_migrations_status != "pass" or concepts_architecture_status != "pass" or reference_self_stubs_status != "pass":
+if root_allowlist_violations > 0 or content_status != "pass" or legacy_arch_status != "pass" or legacy_ops_status != "pass" or legacy_ci_cd_status != "pass" or legacy_branding_status != "pass" or legacy_runbooks_status != "pass" or legacy_migrations_status != "pass" or concepts_architecture_status != "pass" or reference_self_stubs_status != "pass" or guides_hygiene_status != "pass":
     overall_status = "fail"
 
 payload = {
@@ -346,6 +353,7 @@ payload = {
     "legacy_migrations_root": legacy_migrations_status,
     "concepts_architecture_root": concepts_architecture_status,
     "reference_self_stubs": reference_self_stubs_status,
+    "guides_hygiene": guides_hygiene_status,
 }
 out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 PY
@@ -380,6 +388,9 @@ if [[ "$concepts_architecture_status" = "fail" ]]; then
 fi
 if [[ "$reference_self_stubs_status" = "fail" ]]; then
   echo "Docs policy failed because docs/reference still contains self-referential stub docs."
+fi
+if [[ "$guides_hygiene_status" = "fail" ]]; then
+  echo "Docs policy failed because docs/guides regressed into credential, stub, or docs-program clutter."
 fi
 if [[ "$status" = "fail" ]]; then
   exit 1

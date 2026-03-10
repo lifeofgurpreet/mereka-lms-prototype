@@ -125,7 +125,7 @@ jobs:
               '# Baseline high-risk docs that must always be command-reference validated.' \
               'docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md' \
               'docs/ops/quickref/QUICK_REFERENCE.md' \
-              'docs/guides/branding/BRANDING_OPERATOR_GUIDE.md' \
+              'docs/guides/branding/BRANDING_OPERATING_MODEL.md' \
               'docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md' \
               > tools/docs/verify/.doc-command-ref-baseline
           fi

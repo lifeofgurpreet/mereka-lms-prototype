@@ -107,7 +107,7 @@ if [ "$COURSE_COUNT" -gt 0 ]; then
     echo -e "${GREEN}Success! View courses at:${NC}"
     echo "  Studio: http://studio.localhost"
     echo "  LMS: http://localhost"
-    echo "  Login: admin / admin123"
+    echo "  Login: admin / <your local-only password>"
 else
     echo -e "${YELLOW}⚠️  No courses found after restore${NC}"
 fi
@@ -116,6 +116,5 @@ echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        Sync Complete                                          ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
-
 
 

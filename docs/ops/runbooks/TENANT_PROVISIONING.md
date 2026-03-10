@@ -194,7 +194,7 @@ cp scripts/tenants/acme-branding.json /tmp/acme-branding.example.json
 
 **Reference**:
 - **Schema**: `specs/standards/brand-pack-schema.json`
-- **Docs**: `docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md`
+- **Docs**: `docs/reference/operations/TENANT_BRAND_PACK_SCHEMA.md`
 - **Template**: `infrastructure/tutor/themes/mereka/tenants/_template/`
 
 ---
@@ -361,7 +361,7 @@ curl -H "Host: acme.academyv2.mereka.io" \
 
 **Reference**:
 - **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md` (fallback rules, ownership boundaries)
-- **Schema Docs**: `docs/guides/branding/TENANT_BRAND_PACK_SCHEMA.md` (asset requirements, validation)
+- **Schema Docs**: `docs/reference/operations/TENANT_BRAND_PACK_SCHEMA.md` (asset requirements, validation)
 - **Multi-site**: `docs/concepts/architecture/multi-tenancy-overview.md` (DNS, TLS, domain mapping)
 
 ---

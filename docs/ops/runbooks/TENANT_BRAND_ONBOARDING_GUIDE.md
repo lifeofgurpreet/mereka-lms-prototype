@@ -257,5 +257,5 @@ Run the full verification suite for the new tenant:
 - `docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md` — Full tenant provisioning flow
 - `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — Plugin slot inventory
 - `docs/policies/architecture/footer-slot-exceptions.md` — Footer exception register
-- `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` — Override inventory
+- `docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md` — Override inventory
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — Exception policy

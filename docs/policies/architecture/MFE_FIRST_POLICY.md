@@ -79,7 +79,7 @@ PLUGIN_SLOTS.add_item({
 })
 ```
 
-See `docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md` for the complete footer slot wiring example.
+See `docs/reference/architecture/FOOTER_V2_TO_LMS_MAPPING.md` for the complete footer slot wiring example.
 
 ## Exceptions (AC-UIMFE-003)
 
@@ -126,5 +126,5 @@ rg -n "MFE-first|plugin slots|no new edx-platform frontend" docs/
 - **ADR-014**: `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` (plugin-first rationale)
 - **Slot Inventory**: `docs/reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md` (100+ slots)
 - **MFE Versions**: `docs/reference/architecture/MFE_VERSIONS.md` (active MFEs)
-- **Footer Mapping**: `docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md` (slot example)
+- **Footer Mapping**: `docs/reference/architecture/FOOTER_V2_TO_LMS_MAPPING.md` (slot example)
 - **Branding Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`

@@ -3,6 +3,7 @@ title: Documentation Standards
 owner: Platform Team
 status: canonical
 last_reviewed: 2026-03-09
+last_updated: 2026-03-10
 canonical_root: docs/guides/standards
 doc_class: guide
 audience:
@@ -53,9 +54,15 @@ This directory contains canonical standards for how documentation is authored, c
 - [`EVIDENCE_PACK_STANDARD.md`](EVIDENCE_PACK_STANDARD.md)
 - [`STATUS_REPORTING_STANDARD.md`](STATUS_REPORTING_STANDARD.md)
 
-## Contributor workflow references
+## ADR contributor standards
 
-- [`bead-v2-format.md`](bead-v2-format.md)
+- [`ADR_LANGUAGE_STYLE.md`](ADR_LANGUAGE_STYLE.md)
+- [`ADR_NUMBERING_AND_NAMING.md`](ADR_NUMBERING_AND_NAMING.md)
+
+## Docs-program workflow note
+
+Bead format guidance is docs-program internal process material and now lives in
+`docs/meta/docs-program/bead-v2-format.md`.
 
 ## What this directory is not
 

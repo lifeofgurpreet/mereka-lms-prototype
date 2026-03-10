@@ -1,7 +1,5 @@
 # Quick Start: Local Development Setup
-
-<!-- Last verified: 2026-02-13 -->
-_For Coding Agents • 5-minute setup guide_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
 ## 🚀 Fast Setup (Copy-Paste Ready)
 
@@ -47,9 +45,10 @@ tutor local launch -I --skip-build
 ./infrastructure/tutor/apply-patches.sh
 tutor local restart
 
-# 9. Create admin user
+# 9. Create local admin user
+export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
 docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms manage_user --superuser --staff admin admin@mereka.academy
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='admin'); u.set_password('admin123'); u.is_staff = True; u.is_superuser = True; u.save(); print('✅ Admin created')"
+docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "import os; from django.contrib.auth import get_user_model; User = get_user_model(); u = User.objects.get(username='admin'); u.set_password(os.environ['LOCAL_ADMIN_PASSWORD']); u.is_staff = True; u.is_superuser = True; u.save(); print('✅ Local admin updated')"
 
 # 10. Verify
 curl -I http://localhost
@@ -118,10 +117,10 @@ tutor local restart
 
 ## 📚 Full Documentation
 
-- **Complete Guide:** `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
-- **Workflow:** `docs/guides/onboarding/WORKFLOW_LOCAL.md`
-- **Setup Details:** `docs/guides/onboarding/LOCAL_SETUP.md`
-- **Troubleshooting:** `docs/ops/runbooks/TROUBLESHOOTING.md`
+- **Full setup:** `docs/guides/onboarding/LOCAL_SETUP.md`
+- **Daily workflow:** `docs/guides/onboarding/WORKFLOW_LOCAL.md`
+- **Repository map:** `docs/guides/onboarding/REPOSITORY_GUIDE.md`
+- **Troubleshooting:** `docs/ops/runbooks/site-down.md`
 
 ## 🌐 Access URLs
 
@@ -129,9 +128,8 @@ tutor local restart
 - Studio: http://studio.localhost
 - MFE Login: http://apps.localhost/authn/login
 - Admin: http://localhost/admin
-- Credentials: `admin` / `admin123`
+- Admin credentials: local-only values you created during setup
 
 ---
 
-**Remember:** Always verify config uses local Docker services (`mysql`, `mongodb`, `redis`) not cloud IPs!
-
+**Remember:** Always verify config uses local Docker services (`mysql`, `mongodb`, `redis`) not cloud IPs, and never commit local passwords or copied secrets.

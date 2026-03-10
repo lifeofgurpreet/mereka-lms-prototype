@@ -97,7 +97,11 @@ kubectl get deployments -n mereka-lms | grep enterprise
 # Create databases in Cloud SQL (via LMS pod)
 kubectl exec -it -n mereka-lms deployment/lms -- python manage.py lms shell -c "
 import pymysql
-conn = pymysql.connect(host='mysql', user='root', password='<MYSQL_ROOT_PASSWORD>')
+conn = pymysql.connect(
+    host='mysql',
+    user='root',
+    password=os.environ['MYSQL_ROOT_PASSWORD'],
+)
 cursor = conn.cursor()
 cursor.execute('CREATE DATABASE IF NOT EXISTS enterprise_catalog DEFAULT CHARACTER SET utf8mb4')
 cursor.execute('CREATE DATABASE IF NOT EXISTS license_manager DEFAULT CHARACTER SET utf8mb4')
@@ -114,6 +118,8 @@ kubectl exec -it -n mereka-lms deployment/license-manager -- python manage.py mi
 kubectl exec -it -n mereka-lms deployment/enterprise-access -- python manage.py migrate
 kubectl exec -it -n mereka-lms deployment/enterprise-subsidy -- python manage.py migrate
 ```
+
+Retrieve `MYSQL_ROOT_PASSWORD` from the active secret-management flow before running this locally or in-cluster. Do not paste secret values into this guide.
 
 ### OAuth2 Client Registration
 
@@ -193,7 +199,7 @@ print(f'UUID: {customer.uuid}')
 ```bash
 # Create catalog via catalog service
 curl -X POST https://catalog.mereka.io/api/v1/enterprise-catalogs/ \
-  -H "Authorization: Bearer <admin-token>" \
+  -H "Authorization: Bearer ${ENTERPRISE_ADMIN_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
     "uuid": "auto-generated",
@@ -206,6 +212,8 @@ curl -X POST https://catalog.mereka.io/api/v1/enterprise-catalogs/ \
     }
   }'
 ```
+
+Retrieve `ENTERPRISE_ADMIN_TOKEN` from the approved secret store or admin console workflow. Do not store bearer tokens in docs.
 
 **Or via Django admin**:
 1. Navigate: **Enterprise Catalog** → **Catalogs** → **Add**

@@ -125,7 +125,7 @@ Key deliverables:
   - **Done definition**: CLAUDE.md references `verify-tutor-patches.sh` and `verify-tutor-services.sh` in the appropriatesections.
   - **Complexity**: S (<1h) -- small documentation update.
 
-- [ ] **[S] Task 16: Update onboarding docs to reference spec** (`docs/onboarding/DEVELOPER_ONBOARDING.md`, `docs/onboarding/QUICK_START_LOCAL.md`) | Depends: Task 14
+- [ ] **[S] Task 16: Update onboarding docs to reference spec** (`docs/guides/onboarding/LOCAL_SETUP.md`, `docs/guides/onboarding/QUICK_START_LOCAL.md`) | Depends: Task 14
   - **Description**: Add a reference to the Tutor Configuration spec and runbook in the onboarding documentation, so new developers understand the mandatory patch workflow.
   - **Done definition**: Both onboarding docs link to spec and runbook. "After config changes" section references verification scripts.
   - **Complexity**: S (<1h) -- small documentation update.

@@ -20,7 +20,7 @@ tutor local start -d
 
 **Credentials:**
 - Username: `admin`
-- Password: `admin123`
+- Password: local-only value chosen during setup
 
 **Production/Dev (GKE + VPS kind):**
 - Use platform admin accounts (e.g., `gurpreet@biji-biji.com`, `malasari@mereka.my`)
@@ -82,7 +82,7 @@ docker ps --filter "name=tutor_local"
 
 ## 📚 Documentation
 
-- **Setup:** `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
+- **Setup:** `docs/guides/onboarding/LOCAL_SETUP.md`
 - **URLs:** `docs/ops/quickref/access-urls.md`
 - **Admin:** `docs/guides/admin/ADMIN_LOGIN_GUIDE.md`
 - **Analytics:** `docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md`

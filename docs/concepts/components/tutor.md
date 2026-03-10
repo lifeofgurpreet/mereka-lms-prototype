@@ -18,10 +18,9 @@ Tutor is the deployment and environment orchestration layer for this Open edX st
 
 ## Canonical Guides
 - [Local Setup](../../guides/onboarding/LOCAL_SETUP.md)
-- [Local Development Guide](../../guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md)
+- [Local Setup](../../guides/onboarding/LOCAL_SETUP.md)
 - [Repository Guide](../../guides/onboarding/REPOSITORY_GUIDE.md)
 
 ## Active CI/Workflow References
 - [CI Workflow](../../../.github/workflows/ci.yml)
 - [Build Tutor Images Workflow](../../../.github/workflows/build-tutor-images.yml)
-

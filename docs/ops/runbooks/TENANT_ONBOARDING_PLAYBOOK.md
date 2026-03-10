@@ -709,7 +709,7 @@ The provisioning script sets:
 
 ### Step 6: Document in migration survey
 
-After onboarding, update `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` if any
+After onboarding, update `docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md` if any
 new exceptions were needed. All exceptions must have an expiry date per the
 Non-Plugin Customization Exception Policy in `BRANDING_OPERATING_MODEL.md`.
 
@@ -724,5 +724,5 @@ Non-Plugin Customization Exception Policy in `BRANDING_OPERATING_MODEL.md`.
 - `scripts/tenants/provision-tenant.sh` — Provisioning script
 - `specs/multi-site-domains_spec.md` — Domain configuration spec
 - `specs/multi-tenancy-architecture_spec.md` — Multi-tenancy architecture spec
-- `docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md` — Override inventory + migration status
+- `docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md` — Override inventory + migration status
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — Exception policy for non-plugin overrides

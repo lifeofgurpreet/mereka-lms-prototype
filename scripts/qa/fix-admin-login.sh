@@ -23,9 +23,9 @@ User = get_user_model()
 try:
     u = User.objects.get(username='admin')
 except User.DoesNotExist:
-    u = User.objects.create_user('admin', 'admin@mereka.academy', 'admin123')
+    u = User.objects.create_user('admin', 'admin@mereka.academy', 'changeme-local-only')
     print('✅ Created admin user')
-u.set_password('admin123')
+u.set_password('changeme-local-only')
 u.is_active = True
 u.is_staff = True
 u.is_superuser = True
@@ -40,10 +40,9 @@ echo "╚═══════════════════════�
 echo ""
 echo "You can now login with:"
 echo "  Username: admin"
-echo "  Password: admin123"
+echo "  Password: changeme-local-only (reset immediately if you reuse this helper)"
 echo ""
 echo "Login URLs:"
 echo "  LMS: http://localhost/login"
 echo "  MFE: http://apps.localhost/authn/login"
 echo "  Admin Panel: http://localhost/admin"
-

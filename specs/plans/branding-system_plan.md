@@ -135,7 +135,7 @@ The work is primarily verification and hardening, not greenfield development.
 
 ### Docs
 
-- [ ] **[S]** Verify branding docs are up-to-date (`docs/BRANDING.md`, `docs/BRANDING_PLAN.md`, `docs/BRANDING_VERIFICATION_CHECKLIST.md`) | Depends: None
+- [ ] **[S]** Verify branding docs are up-to-date (`docs/guides/branding/BRANDING.md`, `docs/status/active/BRANDING_PLAN_2026-03-03.md`, `docs/guides/branding/BRANDING_VERIFICATION_CHECKLIST.md`) | Depends: None
   - Confirm docs match current asset paths and script names
   - Confirm rollout workflow documented for new team members
   - **Done**: Docs reviewed and accurate

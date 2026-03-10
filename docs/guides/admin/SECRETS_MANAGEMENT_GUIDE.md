@@ -243,6 +243,8 @@ kubectl rollout restart deployment/lms -n mereka-lms
 
 **When**: Secret compromised, leaked, expired, or routine rotation (90-day policy).
 
+This includes any credential that was pasted into repository documentation, issue comments, or other long-lived text surfaces. Treat documentation exposure as a suspected compromise and follow the rotation path below.
+
 **Prerequisites**: Read `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md` for full procedure.
 
 **Quick steps**:

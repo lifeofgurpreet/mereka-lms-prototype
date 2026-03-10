@@ -138,7 +138,7 @@ fi
 
 echo ""
 echo "--- Migration Survey Cross-Check ---"
-SURVEY="$REPO_ROOT/docs/guides/branding/PLUGIN_MIGRATION_SURVEY.md"
+SURVEY="$REPO_ROOT/docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md"
 if [[ -f "$SURVEY" ]]; then
   pass "PLUGIN_MIGRATION_SURVEY.md exists"
 else

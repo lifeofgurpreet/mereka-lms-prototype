@@ -55,5 +55,5 @@ STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - `docs/guides/branding/BRANDING_GUARDRAILS.md`
-- `docs/guides/branding/BRANDING_ROADMAP.md`
+- `docs/status/active/BRANDING_ROADMAP_2026-02-08.md`
 - `docs/ops/runbooks/THEME_DEPLOYMENT.md`

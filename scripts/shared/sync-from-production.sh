@@ -164,13 +164,12 @@ echo "  📍 View courses:"
 echo "    • Studio: http://studio.localhost"
 echo "    • LMS (main): http://localhost"
 echo "    • Skill Our Future: http://skillourfuture.academy.mereka.io"
-echo "    • Login: admin / admin123"
+echo "    • Login: admin / <your local-only password>"
 echo ""
 echo "  👥 User breakdown:"
 echo "    • All current users: MCT (84,378)"
 echo "    • Kajabi users: Will be tagged when imported"
 echo ""
 echo "╚══════════════════════════════════════════════════════════════╝"
-
 
 

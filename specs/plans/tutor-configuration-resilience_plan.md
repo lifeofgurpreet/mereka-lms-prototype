@@ -166,7 +166,7 @@ Significant implementation has already been completed by prior agents. Below is 
 
 ### Docs
 
-- [ ] **[S] Task D-1: Update developer onboarding guide** (`docs/onboarding/DEVELOPER_ONBOARDING.md`) | AC: (Rollout) | Depends: B-3, B-4
+- [ ] **[S] Task D-1: Update developer onboarding guide** (`docs/guides/onboarding/LOCAL_SETUP.md`) | AC: (Rollout) | Depends: B-3, B-4
   - **Description**: Add section on pre-commit hook installation, plugin usage, and `make tutor-apply` workflow. Include troubleshooting for common hook failures.
   - **Done definition**: Onboarding guide includes Tutor config resilience section with clear step-by-step instructions.
   - **Complexity**: S (1-2h).

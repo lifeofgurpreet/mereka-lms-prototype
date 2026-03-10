@@ -13,10 +13,11 @@ Use this root when the question is instructional:
 |---|---|---|
 | Get oriented by role | [`INDEX_BY_AUDIENCE.md`](INDEX_BY_AUDIENCE.md) | The specific guide root below |
 | Use the platform handbook to find URLs, tenant rules, or escalation paths | [`platform/PLATFORM_START_HERE.md`](platform/PLATFORM_START_HERE.md) | [`../reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md`](../reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md) and [`../reference/platform/TEAM_TOPOLOGY_REFERENCE.md`](../reference/platform/TEAM_TOPOLOGY_REFERENCE.md) |
-| Set up locally or learn the daily dev workflow | `onboarding/` | `../ops/quickref/README.md` for fast operator commands |
-| Operate or administer the platform | `admin/` | `../ops/README.md` for runtime procedures |
-| Work on branding execution | `branding/` | `../reference/architecture/README.md` for frontend/runtime reference |
-| Understand writing rules and docs governance | `standards/` | `../CONTRIBUTING.md` for the contributor workflow |
+| Set up locally or learn the daily dev workflow | [`onboarding/README.md`](onboarding/README.md) | [`../ops/quickref/README.md`](../ops/quickref/README.md) for fast operator commands |
+| Operate or administer the platform | [`admin/README.md`](admin/README.md) | [`../ops/README.md`](../ops/README.md) for runtime procedures |
+| Work on branding execution | [`branding/README.md`](branding/README.md) | [`../reference/architecture/README.md`](../reference/architecture/README.md) for frontend/runtime reference |
+| Understand integrations | [`integrations/README.md`](integrations/README.md) | [`../reference/operations/README.md`](../reference/operations/README.md) for deep reference |
+| Understand writing rules and docs governance | [`standards/README.md`](standards/README.md) | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) for the contributor workflow |
 
 Do not use these roots as the winning guidance surface:
 - `docs/onboarding/README.md` tombstone only
@@ -32,6 +33,7 @@ Do not use these roots as the winning guidance surface:
 - `onboarding/` for setup and local workflow guidance
 - `admin/` for platform/operator guidance
 - `branding/` for brand execution guidance
+- `integrations/` for live third-party integration guides
 - `standards/` for documentation and governance standards
 
 ## What this root is not

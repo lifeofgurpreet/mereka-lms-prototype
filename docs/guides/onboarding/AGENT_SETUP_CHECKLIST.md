@@ -1,6 +1,6 @@
 # Agent Setup Checklist
 
-_Audience: Agent Operators • Owner: Platform Team • Last verified: 2026-03-06 • Status: supporting_
+_Audience: Agent Operators • Owner: Platform Team • Last verified: 2026-03-10 • Status: supporting_
 
 ## ✅ Pre-Flight Checklist
 
@@ -91,10 +91,11 @@ tutor local launch -I --skip-build
 tutor local restart
 ```
 
-### 7. Create Admin User
+### 7. Create Local Admin User
 ```bash
+export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
 docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms manage_user --superuser --staff admin admin@mereka.academy
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='admin'); u.set_password('admin123'); u.is_staff = True; u.is_superuser = True; u.save(); print('✅ Admin created')"
+docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "import os; from django.contrib.auth import get_user_model; User = get_user_model(); u = User.objects.get(username='admin'); u.set_password(os.environ['LOCAL_ADMIN_PASSWORD']); u.is_staff = True; u.is_superuser = True; u.save(); print('✅ Local admin updated')"
 ```
 
 ## ✅ Verification Steps
@@ -165,13 +166,14 @@ tutor local restart lms cms
 ## 📚 Next Steps
 
 Once setup is complete:
-1. Read `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md` for detailed workflows
-2. Bookmark `docs/guides/onboarding/QUICK_START_LOCAL.md` for daily reference
+1. Read `docs/guides/onboarding/LOCAL_SETUP.md` for the full canonical setup
+2. Bookmark `docs/guides/onboarding/QUICK_START_LOCAL.md` for fast restarts
+3. Use `docs/guides/onboarding/WORKFLOW_LOCAL.md` for day-to-day work
 3. Review `AGENTS.md` for coding guidelines
 
 ## 🔗 Quick Links
 
-- **Complete Guide:** `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
+- **Complete Guide:** `docs/guides/onboarding/LOCAL_SETUP.md`
 - **Quick Reference:** `docs/guides/onboarding/QUICK_START_LOCAL.md`
 - **Daily Workflow:** `docs/guides/onboarding/WORKFLOW_LOCAL.md`
 - **Access Info:** `docs/ops/quickref/local-access-info.md`

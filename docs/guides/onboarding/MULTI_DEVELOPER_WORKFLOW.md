@@ -1,5 +1,5 @@
 # Multi-Developer Workflow Guide
-_Audience: Developer Operations • Owner: Docs Team • Last verified: 2026-03-06 • Status: canonical_
+_Audience: Developer Operations • Owner: Docs Team • Last verified: 2026-03-10 • Status: canonical_
 
 ## 🎯 Overview
 
@@ -18,7 +18,7 @@ This automatically:
 - Builds Docker images
 - Initializes database
 - Configures multi-site
-- Creates admin user
+- Creates or prepares a local admin user
 - Verifies everything works
 
 **Time:** 45-60 minutes (first time), < 5 minutes (subsequent)
@@ -231,9 +231,10 @@ tutor config save  # Reconfigure
 
 ## 📚 Documentation
 
-- **Onboarding:** `docs/guides/onboarding/DEVELOPER_ONBOARDING.md`
+- **Quick start:** `docs/guides/onboarding/QUICK_START_LOCAL.md`
+- **Full setup:** `docs/guides/onboarding/LOCAL_SETUP.md`
+- **Daily workflow:** `docs/guides/onboarding/WORKFLOW_LOCAL.md`
 - **Quick Reference:** `docs/ops/quickref/QUICK_REFERENCE.md`
-- **Complete Guide:** `docs/guides/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
 - **Parity Strategy:** `docs/ops/quickref/local-production-parity.md`
 
 ## ✅ Checklist for New Developers
@@ -241,8 +242,8 @@ tutor config save  # Reconfigure
 - [ ] Ran `./scripts/shared/setup-local.sh`
 - [ ] Verified with `./scripts/qa/verify-setup.sh`
 - [ ] Can access http://localhost
-- [ ] Can login with admin/admin123
-- [ ] Read `docs/guides/onboarding/DEVELOPER_ONBOARDING.md`
+- [ ] Can log in with the local admin account created during setup
+- [ ] Read `docs/guides/onboarding/LOCAL_SETUP.md`
 - [ ] Bookmarked `docs/ops/quickref/QUICK_REFERENCE.md`
 - [ ] Understand local vs production separation
 
