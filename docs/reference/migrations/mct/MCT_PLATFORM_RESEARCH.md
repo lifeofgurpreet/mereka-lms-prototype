@@ -1,14 +1,10 @@
-# MCT Platform Integration Spec
+# MCT Platform Research
 
-_Last verified: 2026-02-08 | Owner: Platform Eng_
+_Audience: Platform Engineering + Migration Operators • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-## Status: RE-MIGRATION REQUIRED
+This document captures the durable API, topology, and mapping findings from the MCT integration work. Treat dated migration state, import counts, and execution snapshots as report material; this file is for the stable platform facts that still shape MCT export, mapping, and verification.
 
-**Verified 2026-02-08 via kubectl exec into LMS pod**: The `mereka-lms` Open edX instance is **empty**. Zero courses, zero programs, zero learner users, zero enrollments. The instance was intentionally rebuilt/reset.
-
-All MCT source data is fully exported and mapped (30 categories, 178 courses, 833 lessons, 503 Mux videos, 2.3M enrollments). The data pipeline and mapping files are ready. A fresh migration into the current Open edX instance is needed.
-
-**Decision**: Use **Scheme A** (category-level courses) with **Learning Path API** for Programs.
+**Decision basis retained here**: use **Scheme A** (category-level courses) with the Learning Path API for Programs.
 
 ---
 
@@ -19,15 +15,15 @@ All MCT source data is fully exported and mapped (30 categories, 178 courses, 83
 | Parameter | Value | Notes |
 |-----------|-------|-------|
 | Token endpoint | `https://login.microsoft.com/{tenant_id}/oauth2/v2.0/token` | |
-| Tenant ID | `b1aab053-6242-46ec-9cf8-bd02e63dd2da` | BBI Azure AD |
-| Client ID | `caa4dce3-e49c-4c09-9160-031d51bfd2a9` | **SOF S2S-Client** (the ONLY whitelisted client) |
-| API URI / Scope | `api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4/.default` | UNDP App Registration (audience) |
+| Tenant ID | Stored in secure config (`MCT_TENANT_ID`) | Retrieve from Infisical |
+| Client ID | Stored in secure config (`MCT_CLIENT_ID`) | Retrieve from Infisical |
+| API URI / Scope | Stored in secure config (`MCT_API_URI`) | Retrieve from Infisical |
 | Grant type | `client_credentials` | |
 | Secret expiry | **2026-08-07** | Stored in Infisical |
 
 ### CRITICAL: ServiceApplicationIds Whitelist
 
-MCT's Azure App Service has a `ServiceApplicationIds` setting that whitelists which client app IDs can call the API. **Only `caa4dce3` (SOF S2S-Client) is whitelisted.** The UNDP S2S-Client (`f16cdc2f`) will always get HTTP 401.
+MCT's Azure App Service has a `ServiceApplicationIds` setting that whitelists which client app IDs can call the API. Use the currently approved MCT service-to-service client from secure configuration; do not rely on stale copied IDs in docs. Non-whitelisted clients will return HTTP 401.
 
 ### Required HTTP Headers
 
@@ -95,7 +91,9 @@ Base URL: `https://learn.skillourfuture.org`
 
 ---
 
-## 3. Data Volumes (Verified 2026-02-07)
+## 3. Historical Migration Snapshot
+
+The counts below are the verified migration-era baseline captured during the 2025-2026 MCT import work. Keep them for reference and reconciliation context, but treat current completion state as status/report material rather than active platform truth.
 
 | Data Set | Count | Size | Source |
 |----------|-------|------|--------|
