@@ -1,4 +1,4 @@
-# MCT Pre-Migration Inventory
+# MCT Pre-Migration Inventory (2025-12-17)
 
 **Document Created:** 2025-12-17
 **Source Platform:** Microsoft Community Training (learn.skillourfuture.org)

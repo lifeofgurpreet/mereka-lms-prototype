@@ -3,7 +3,7 @@
     "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 827
+    "supporting": 826
   },
   "entries": [
     {
@@ -7894,15 +7894,6 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Pre-Migration Inventory"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
       "path": "docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md",
       "root": "docs",
       "status": "",
@@ -10969,12 +10960,12 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1218,
+  "entry_count": 1217,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 198,
+    "docs:concept": 197,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
@@ -10991,7 +10982,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1000,
+    "docs": 999,
     "specs": 218
   }
 }

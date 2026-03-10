@@ -8561,15 +8561,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2025-12-17",
     "owner": "Migration Squad",
     "path": "reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md",

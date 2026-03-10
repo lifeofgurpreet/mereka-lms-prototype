@@ -162,5 +162,5 @@ If rollback to in-cluster MongoDB is needed:
 
 ## Related Documentation
 
-- [MCT Pre-Migration Inventory](../../migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md)
+- [MCT Pre-Migration Inventory](../mct/MCT_PRE_MIGRATION_INVENTORY_2025-12-17.md)
 - [Database Architecture](DATABASE_ARCHITECTURE.md)

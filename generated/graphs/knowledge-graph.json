@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 3657,
+  "edge_count": 3654,
   "edges": [
     {
       "edge_type": "classifies",
@@ -4855,11 +4855,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/reference/migrations/mct/QUICK_REFERENCE_USER_IMPORT.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/reference/migrations/mct/README.md"
     },
     {
@@ -10510,11 +10505,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/reference/migrations/mct/QUICK_REFERENCE_USER_IMPORT.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/reference/migrations/mct/README.md"
     },
     {
@@ -13506,11 +13496,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/reference/migrations/mct/PROGRAMS_SETUP_PLAN.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/reference/migrations/mct/QUICK_REFERENCE_USER_IMPORT.md"
     },
     {
       "edge_type": "classifies",
@@ -18289,7 +18274,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1242,
+  "node_count": 1241,
   "nodes": [
     {
       "id": "classification:archival",
@@ -26569,7 +26554,7 @@
       "path": "docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md",
       "root": "docs",
       "status": "",
-      "title": "SkillOurFuture Brand Migration Guide"
+      "title": "SkillOurFuture Brand Migration Runbook"
     },
     {
       "classification": "supporting",
@@ -26602,7 +26587,7 @@
       "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md",
       "root": "docs",
       "status": "",
-      "title": "Kajabi Re-Migration Runbook (Feb 2026)"
+      "title": "Kajabi Re-Migration Runbook"
     },
     {
       "classification": "supporting",
@@ -28022,17 +28007,6 @@
       "root": "docs",
       "status": "",
       "title": "MCT Learning Pathways to Open edX Programs - Setup Plan"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/reference/migrations/mct/QUICK_REFERENCE_USER_IMPORT.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/reference/migrations/mct/QUICK_REFERENCE_USER_IMPORT.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT User Import - Quick Reference"
     },
     {
       "classification": "supporting",

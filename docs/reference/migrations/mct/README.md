@@ -104,6 +104,6 @@ For the complete list of 15 courses and their structure, see `MCT_MIGRATION_STAT
 | [`DATA_MODEL_COMPLETE.md`](DATA_MODEL_COMPLETE.md) | Detailed data model mapping. |
 | [`MCT_PLATFORM_RESEARCH.md`](MCT_PLATFORM_RESEARCH.md) | Platform research and migration constraints. |
 | [`../../../status/migrations/MCT_MIGRATION_STATUS.md`](../../../status/migrations/MCT_MIGRATION_STATUS.md) | Status tracker for processed artifacts. |
-| [`MCT_PRE_MIGRATION_INVENTORY.md`](MCT_PRE_MIGRATION_INVENTORY.md) | Pre-migration inventory and verified structure assumptions. |
+| [`../../../reports/2025/mct/MCT_PRE_MIGRATION_INVENTORY_2025-12-17.md`](../../../reports/2025/mct/MCT_PRE_MIGRATION_INVENTORY_2025-12-17.md) | Historical pre-migration inventory snapshot and structure assumptions captured before the 2025 import. |
 | [`MCT_TO_OPENEDX_MAPPING.md`](MCT_TO_OPENEDX_MAPPING.md) | Mapping between MCT entities and Open edX. |
 | [`OPENEDX_PROGRAMS_SETUP.md`](OPENEDX_PROGRAMS_SETUP.md) | Original notes for Open edX programs setup. |
