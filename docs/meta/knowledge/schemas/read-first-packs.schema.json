@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_id",
+    "schema_version",
+    "generated_by",
+    "source_range",
+    "canonical_inputs",
+    "diff_range",
+    "priority_buckets",
+    "ordered_packs",
+    "skip_packs",
+    "arbitration"
+  ],
+  "properties": {
+    "pack_id": { "const": "read-first-packs" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": { "type": ["string", "null"] },
+    "canonical_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "diff_range": { "type": "string", "minLength": 1 },
+    "priority_buckets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["high_risk", "medium_risk", "low_risk"],
+      "properties": {
+        "high_risk": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "medium_risk": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "low_risk": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "ordered_packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pack_id", "priority", "reason", "source_skill"],
+        "properties": {
+          "pack_id": { "type": "string", "minLength": 1 },
+          "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+          "reason": { "type": "string", "minLength": 1 },
+          "source_skill": { "type": "string", "minLength": 1 }
+        }
+      },
+      "minItems": 1
+    },
+    "skip_packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pack_id", "reason"],
+        "properties": {
+          "pack_id": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "arbitration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applied_rules",
+        "reviewer_merge_strategy",
+        "evidence_merge_strategy",
+        "primary_skill_order",
+        "blocking_release_checks"
+      ],
+      "properties": {
+        "applied_rules": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "reviewer_merge_strategy": { "type": "string", "minLength": 1 },
+        "evidence_merge_strategy": { "type": "string", "minLength": 1 },
+        "primary_skill_order": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "blocking_release_checks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

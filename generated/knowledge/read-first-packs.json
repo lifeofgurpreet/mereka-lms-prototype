@@ -1,0 +1,90 @@
+{
+  "arbitration": {
+    "applied_rules": [
+      "documentation-cross-repo-impact"
+    ],
+    "blocking_release_checks": [
+      "required-reviewer-groups-present",
+      "required-evidence-obligations-present",
+      "runtime-convergence-not-failing"
+    ],
+    "evidence_merge_strategy": "union-evidence-classes",
+    "primary_skill_order": [
+      "change-impact-triage"
+    ],
+    "reviewer_merge_strategy": "union-reviewers-prioritize-docs-then-platform"
+  },
+  "canonical_inputs": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "generated/knowledge/evidence-obligations.json",
+    "generated/knowledge/review-decision.json",
+    "generated/knowledge/reviewer-obligations.json",
+    "generated/skills/mixed-diff-arbitration.json",
+    "generated/skills/pack-registry.json",
+    "generated/skills/skill-registry.json"
+  ],
+  "diff_range": "origin/main...HEAD",
+  "generated_by": "tools/knowledge/build_read_first_packs.py",
+  "ordered_packs": [
+    {
+      "pack_id": "pack-registry",
+      "priority": "high",
+      "reason": "required by change-impact-triage",
+      "source_skill": "change-impact-triage"
+    },
+    {
+      "pack_id": "runtime-convergence-report",
+      "priority": "high",
+      "reason": "required by change-impact-triage",
+      "source_skill": "change-impact-triage"
+    },
+    {
+      "pack_id": "mixed-diff-arbitration",
+      "priority": "high",
+      "reason": "required by change-impact-triage",
+      "source_skill": "change-impact-triage"
+    },
+    {
+      "pack_id": "read-first",
+      "priority": "medium",
+      "reason": "required by control-plane-validation",
+      "source_skill": "control-plane-validation"
+    }
+  ],
+  "pack_id": "read-first-packs",
+  "priority_buckets": {
+    "high_risk": [
+      "pack-registry",
+      "runtime-convergence-report",
+      "mixed-diff-arbitration"
+    ],
+    "low_risk": [],
+    "medium_risk": [
+      "read-first"
+    ]
+  },
+  "schema_version": 1,
+  "skip_packs": [
+    {
+      "pack_id": "command-registry",
+      "reason": "not required by selected skills or arbitration rules for this diff"
+    },
+    {
+      "pack_id": "evidence-sufficiency-map",
+      "reason": "not required by selected skills or arbitration rules for this diff"
+    },
+    {
+      "pack_id": "scenario-packs",
+      "reason": "not required by selected skills or arbitration rules for this diff"
+    },
+    {
+      "pack_id": "skill-dependency-graph",
+      "reason": "not required by selected skills or arbitration rules for this diff"
+    },
+    {
+      "pack_id": "skill-registry",
+      "reason": "not required by selected skills or arbitration rules for this diff"
+    }
+  ],
+  "source_range": "origin/main...HEAD"
+}

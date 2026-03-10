@@ -1,29 +1,26 @@
 # Wave 12 Execution Tracker
 
 ## Latest substantive packet head
-- 7f7fe8c68eca528abecc3b19c5c1cd44ebad1fcb
+- ca24849a7cdffb9ec3053c7064b1aaa41de8d2ea
 
 ## Last completed batch
-- commit: 7f7fe8c68eca528abecc3b19c5c1cd44ebad1fcb
-- scope: Wave 12 Packet B
-- validators run: review decision generator write/check, docs catalog governance
+- commit: ca24849a7cdffb9ec3053c7064b1aaa41de8d2ea
+- scope: Wave 12 Packet C
+- validators run: reviewer obligations generator write/check, evidence obligations generator write/check, docs catalog governance
 - result: passed
 
 ## Current target packet
 - files:
-  - docs/meta/knowledge/schemas/reviewer-obligations.schema.json
-  - docs/meta/knowledge/schemas/evidence-obligations.schema.json
-  - tools/knowledge/build_reviewer_obligations.py
-  - tools/knowledge/build_evidence_obligations.py
-  - generated/knowledge/reviewer-obligations.json
-  - generated/knowledge/evidence-obligations.json
+  - docs/meta/knowledge/schemas/read-first-packs.schema.json
+  - tools/knowledge/build_read_first_packs.py
+  - generated/knowledge/read-first-packs.json
   - docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md
 - goal:
-  - separate reviewer routing from evidence routing into canonical machine outputs
-  - derive each from review-decision plus Wave 11 skill/evidence inputs without duplicating logic
-  - make reviewer and evidence obligations independently checkable
+  - produce deterministic read-first pack ordering from canonical skill and pack inputs
+  - make mixed-diff arbitration explicit in one machine-readable output
+  - tell humans and agents which packs can be skipped for this diff
 - stop condition:
-  - reviewer and evidence obligations are generated deterministically and one substantive commit is created
+  - read-first packs output is generated deterministically and one substantive commit is created
 
 ## Open residue
 - assistant surface exports are not yet rebuilt on the fresh Wave 11 external branches
@@ -31,4 +28,4 @@
 - runtime convergence warning still requires manual follow-up and must remain non-hidden in Wave 12 outputs
 
 ## Next queued packet
-- Packet D: Read-first and mixed-diff arbitration runtime
+- Packet E: Release readiness engine
