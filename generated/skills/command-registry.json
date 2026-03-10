@@ -230,6 +230,7 @@
       "validator": "python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue"
     }
   ],
+  "repo_discovery_model": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
   "schema_version": 1,
   "source_skill_registry": "generated/skills/skill-registry.json"
 }

@@ -4,6 +4,22 @@ owner: platform-team
 purpose: >
   Neutral machine-consumable skill runtime compiled from canonical repo truth
   across mereka-lms, bbi-infrastructure, and platform-control-plane.
+repo_discovery:
+  environment_overrides:
+    mereka_lms: MEREKA_LMS_ROOT
+    bbi_infrastructure: BBI_INFRASTRUCTURE_ROOT
+    platform_control_plane: PLATFORM_CONTROL_PLANE_ROOT
+  preferred_relative_candidates:
+    mereka_lms:
+      - .
+    bbi_infrastructure:
+      - ../bbi-infrastructure
+      - ../bbi-infrastructure-wt-wave11-skill-exports
+      - ../bbi-infrastructure-wt-wave10-contract-compiled-front-doors
+    platform_control_plane:
+      - ../../platform-control-plane
+      - ../../platform-control-plane-wt-wave11-skill-exports
+      - ../../platform-control-plane-wt-wave10-contract-docsync
 authoritative_policy:
   - docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md
   - docs/meta/standing-orders/README.md
@@ -11,7 +27,6 @@ authoritative_policy:
 repos:
   mereka_lms:
     repo_label: mereka-lms
-    repo_root: /home/gurpreet/projects/k8s/mereka-lms-wt-wave11-agent-skill-runtime
     canonical_roots:
       - docs/
       - specs/
@@ -20,7 +35,6 @@ repos:
       - generated/
   bbi_infrastructure:
     repo_label: bbi-infrastructure
-    repo_root: /home/gurpreet/projects/k8s/bbi-infrastructure-wt-wave11-skill-exports
     canonical_roots:
       - config/
       - docs/
@@ -28,7 +42,6 @@ repos:
       - .github/workflows/
   platform_control_plane:
     repo_label: platform-control-plane
-    repo_root: /home/gurpreet/projects/platform-control-plane-wt-wave11-skill-exports
     canonical_roots:
       - contracts/
       - specs/

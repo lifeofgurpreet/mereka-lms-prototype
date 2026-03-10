@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import shutil
 from pathlib import Path
 from typing import Any
 
+import yaml
 
 DEFAULT_OUTPUT = Path("generated/skills/command-registry.json")
 
@@ -17,15 +19,42 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT))
     parser.add_argument("--check", action="store_true")
-    parser.add_argument(
-        "--bbi-root",
-        default="/home/gurpreet/projects/k8s/bbi-infrastructure-wt-wave11-skill-exports",
-    )
-    parser.add_argument(
-        "--platform-root",
-        default="/home/gurpreet/projects/platform-control-plane-wt-wave11-skill-exports",
-    )
+    parser.add_argument("--bbi-root")
+    parser.add_argument("--platform-root")
     return parser.parse_args()
+
+
+def load_yaml(path: Path) -> Any:
+    return yaml.safe_load(path.read_text())
+
+
+def discover_repo_root(
+    repo_root: Path,
+    override: str | None,
+    env_var: str,
+    candidates: list[str],
+    label: str,
+) -> Path:
+    candidate_values = []
+    if override:
+        candidate_values.append(Path(override))
+    env_value = os.environ.get(env_var)
+    if env_value:
+        candidate_values.append(Path(env_value))
+    for candidate in candidates:
+        candidate_values.append((repo_root / candidate).resolve())
+
+    checked: list[str] = []
+    for candidate in candidate_values:
+        resolved = candidate.resolve()
+        checked.append(str(resolved))
+        if resolved.exists():
+            return resolved
+
+    raise FileNotFoundError(
+        f"Unable to resolve {label} repo root. Checked: {', '.join(checked)}. "
+        f"Set {env_var} or pass an explicit override."
+    )
 
 
 def ensure_command_exists(command: str, repo_root: Path) -> None:
@@ -79,8 +108,21 @@ def write_or_check(path: Path, payload: dict[str, Any], check: bool) -> None:
 def main() -> None:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
-    bbi_root = Path(args.bbi_root).resolve()
-    platform_root = Path(args.platform_root).resolve()
+    runtime_model = load_yaml(repo_root / "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml")
+    bbi_root = discover_repo_root(
+        repo_root,
+        args.bbi_root,
+        runtime_model["repo_discovery"]["environment_overrides"]["bbi_infrastructure"],
+        runtime_model["repo_discovery"]["preferred_relative_candidates"]["bbi_infrastructure"],
+        "bbi-infrastructure",
+    )
+    platform_root = discover_repo_root(
+        repo_root,
+        args.platform_root,
+        runtime_model["repo_discovery"]["environment_overrides"]["platform_control_plane"],
+        runtime_model["repo_discovery"]["preferred_relative_candidates"]["platform_control_plane"],
+        "platform-control-plane",
+    )
 
     skill_registry = json.loads((repo_root / "generated/skills/skill-registry.json").read_text())
 
@@ -243,6 +285,7 @@ def main() -> None:
 
     payload = {
         "schema_version": 1,
+        "repo_discovery_model": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
         "source_skill_registry": "generated/skills/skill-registry.json",
         "commands": commands,
     }

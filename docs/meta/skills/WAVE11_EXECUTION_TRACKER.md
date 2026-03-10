@@ -1,29 +1,30 @@
 # Wave 11 Execution Tracker
 
 ## Latest substantive packet head
-- b038207f39dcaac2cff12f7fb85a6472da2285af
+- none yet for the repurposed Wave 11 ABI/runtime brief
 
 ## Last completed batch
-- commit: b038207f39dcaac2cff12f7fb85a6472da2285af
-- scope: Wave 11 Packet E
-- validators run: skill runtime gate, verifier, docs-policy workflow YAML validation
-- result: passed
+- commit: none yet
+- scope: Wave 11 Packet 0
+- validators run: pending
+- result: in progress
 
 ## Current target batch
 - files:
   - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
-  - docs/meta/skills/WAVE11_CLOSEOUT.md
-  - docs/meta/skills/WAVE11_REVIEW_HANDOFF.md
+  - docs/meta/skills/SKILL_RUNTIME_MODEL.yaml
+  - tools/skills/build_skill_registry.py
+  - tools/skills/build_command_registry.py
 - goal:
-  - leave Wave 11 review-ready and adoption-ready
-  - document the final read-first path and review order
-  - record remaining manual-only surfaces and known risks
+  - remove machine-local repo root assumptions from the active Wave 11 runtime
+  - make the existing skill generators discover sibling repos portably
+  - ensure the repurposed Wave 11 starts from canonical inputs that are fit for ABI/schema hardening
 - stop condition:
-  - closeout and handoff docs validate and one commit is created
+  - preflight portability checks pass and one commit is created
 
 ## Open residue
-- knowledge-runtime outputs from later branch-local waves are not assumed on this branch
-- cross-repo runtime convergence remains out of scope for Wave 11
+- generated Wave 10 pack surfaces are not present on this branch and must be treated as external canonical inputs, not assumed local artifacts
+- absolute-path assumptions still exist outside the active Wave 11 toolchain and may need later packet treatment if they block the ABI/runtime work
 
 ## Next queued batch
-- wave-closeout
+- Packet A: Agent Pack ABI and schema versioning
