@@ -1734,7 +1734,7 @@ entries:
     fields
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: PII Registry Validation
     justification: Feature not yet implemented; PII registry and validation tool not yet created
 - id: AC-002
@@ -1742,7 +1742,7 @@ entries:
   description: CI pipeline requires PII registry update when migration adds PII field
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: PII Registry CI Gate
     justification: Feature not yet implemented; CI PII gate not yet created
 - id: AC-003
@@ -1750,7 +1750,7 @@ entries:
   description: New user registration creates consent records for all mandatory and optional purposes per user selection
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Record Creation
     justification: Feature not yet implemented; consent management system not yet deployed
 - id: AC-004
@@ -1758,7 +1758,7 @@ entries:
   description: Authenticated user at /account/privacy/ can view and toggle non-essential consents
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy Preferences UI
     justification: Feature not yet implemented; privacy preferences UI not yet built
 - id: AC-005
@@ -1766,7 +1766,7 @@ entries:
   description: Analytics consent withdrawal stops event collection within 24h with audit entry
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Withdrawal
     justification: Feature not yet implemented; analytics consent gating not yet implemented
 - id: AC-006
@@ -1774,7 +1774,7 @@ entries:
   description: EU user sees cookie consent banner on first visit; no non-essential cookies before consent
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Cookie Consent Banner
     justification: Feature not yet implemented; geo-targeted cookie banner not yet deployed
 - id: AC-007
@@ -1782,7 +1782,7 @@ entries:
   description: Analytics cookie revocation clears cookies and deactivates tracking pixel on next page load
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Cookie Revocation
     justification: Feature not yet implemented; cookie consent revocation flow not yet built
 - id: AC-008
@@ -1790,7 +1790,7 @@ entries:
   description: Deletion request via POST /api/v1/privacy/deletion-request/ begins processing within 48 hours
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure
     justification: Feature not yet implemented; deletion request API not yet created
 - id: AC-009
@@ -1799,7 +1799,7 @@ entries:
     ClickHouse events, Purchase Gateway PII
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Deletion Pipeline Execution
     justification: Feature not yet implemented; deletion pipeline not yet built
 - id: AC-010
@@ -1807,7 +1807,7 @@ entries:
   description: Deletion pipeline produces cryptographic proof document with action per data store and valid signature
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Deletion Proof
     justification: Feature not yet implemented; cryptographic deletion proof not yet implemented
 - id: AC-011
@@ -1815,7 +1815,7 @@ entries:
   description: Deletion pipeline retains financial records within 7-year retention period with legal basis noted
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Retention-Based Deletion
     justification: Feature not yet implemented; legal retention hold in deletion pipeline not yet built
 - id: AC-012
@@ -1823,7 +1823,7 @@ entries:
   description: Deletion pipeline partial failure (MongoDB error) transitions request to partially_completed and fires alert
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Deletion Failure Handling
     justification: Feature not yet implemented; partial failure handling in deletion pipeline not yet built
 - id: AC-013
@@ -1831,7 +1831,7 @@ entries:
   description: Export request via POST /api/v1/privacy/export-request/ produces ZIP with all required files
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Data Portability
     justification: Feature not yet implemented; export request API not yet created
 - id: AC-014
@@ -1839,7 +1839,7 @@ entries:
   description: Export archive is encrypted and download link expires after 48 hours
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Export Security
     justification: Feature not yet implemented; encrypted export with expiring link not yet built
 - id: AC-015
@@ -1847,7 +1847,7 @@ entries:
   description: Fourth export request within 30 days rejected with HTTP 429 and rate limit message
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Export Rate Limiting
     justification: Feature not yet implemented; export rate limiter not yet built
 - id: AC-016
@@ -1855,7 +1855,7 @@ entries:
   description: Account inactive 18 months triggers reminder email warning of deletion at 24 months
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Enforcement
     justification: Feature not yet implemented; retention enforcement job not yet created
 - id: AC-017
@@ -1863,7 +1863,7 @@ entries:
   description: Account inactive 24 months with no response to reminder enters deletion pipeline
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Enforcement
     justification: Feature not yet implemented; automatic account deletion after 24 months not yet built
 - id: AC-018
@@ -1871,7 +1871,7 @@ entries:
   description: ClickHouse events older than 365 days dropped by retention enforcement job
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: ClickHouse Retention
     justification: Feature not yet implemented; ClickHouse partition TTL retention not yet configured
 - id: AC-019
@@ -1879,7 +1879,7 @@ entries:
   description: Loki log entries older than 30 days no longer queryable after retention policy executes
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Loki Retention
     justification: Loki retention period needs periodic verification against configured retention; cannot automate without
       time-travel testing
@@ -1889,7 +1889,7 @@ entries:
     event
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Audit Trail
     justification: Feature not yet implemented; append-only audit trail with hash chain not yet built
 - id: AC-021
@@ -1897,7 +1897,7 @@ entries:
   description: Audit trail integrity verification tool validates complete hash chain with zero broken links
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Audit Trail Integrity
     justification: Feature not yet implemented; hash chain verification tool not yet built
 - id: AC-022
@@ -1905,7 +1905,7 @@ entries:
   description: GCS copy of audit trail provides evidence of original entry when database entry is tampered
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Audit Trail GCS Backup
     justification: Feature not yet implemented; GCS audit trail replication not yet configured
 - id: AC-023
@@ -1913,7 +1913,7 @@ entries:
   description: PII leakage scanner creates breach_detected audit entry and Warning alert on raw email in Loki
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: PII Leakage Scanning
     justification: Feature not yet implemented; Loki PII leakage scanner not yet built
 - id: AC-024
@@ -1921,7 +1921,7 @@ entries:
   description: Confirmed breach >100 users auto-populates breach notification template with authority contact list
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Breach Notification
     justification: Feature not yet implemented; breach notification workflow not yet built
 - id: AC-025
@@ -1929,7 +1929,7 @@ entries:
   description: PII leakage scanner flags Loki log lines matching raw email pattern
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: PII Leakage Scanning
     justification: Feature not yet implemented; Loki PII log scanner not yet created
 - id: AC-026
@@ -1937,7 +1937,7 @@ entries:
   description: PII scanner flags unhashed email in ClickHouse xapi_events_all as critical leakage
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: ClickHouse PII Scanning
     justification: Feature not yet implemented; ClickHouse schema PII scanner not yet built
 - id: AC-027
@@ -1945,7 +1945,7 @@ entries:
   description: Compliance dashboard GET /api/v1/privacy/compliance/consent-coverage/ returns percentage per purpose
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Compliance Dashboard
     justification: Feature not yet implemented; compliance dashboard API not yet created
 - id: AC-028
@@ -1953,7 +1953,7 @@ entries:
   description: Compliance dashboard shows pending deletion requests with status, elapsed time, SLA compliance
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Compliance Dashboard
     justification: Feature not yet implemented; deletion request SLA tracking not yet built
 - id: AC-029
@@ -1961,7 +1961,7 @@ entries:
   description: Analytics pipeline drops events for users who have withdrawn analytics consent before reaching ClickHouse
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent-Gated Analytics
     justification: Feature not yet implemented; consent-gated analytics event filtering not yet built
 - id: AC-030
@@ -1969,7 +1969,7 @@ entries:
   description: Tenant offboarding processes all tenant user data through deletion or export pipeline per DPA terms
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Tenant Offboarding
     justification: Feature not yet implemented; tenant offboarding data pipeline not yet built
 - id: AC-031
@@ -1977,7 +1977,7 @@ entries:
   description: Data processing agreements for all third-party processors listed in processor registry
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Third-Party DPA Registry
     justification: Legal/operational verification; DPA registry maintained manually by privacy team
 - id: AC-032
@@ -1985,7 +1985,7 @@ entries:
   description: Privacy impact assessment completed for all new features processing PII
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy Impact Assessment
     justification: Organizational process; PIA completion verified during feature review, not automatable
 - id: AC-033
@@ -1993,7 +1993,7 @@ entries:
   description: Consent banner A/B test — variant with detailed purpose explanations increases opt-in rate
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Banner Optimization
     justification: Feature not yet implemented; A/B testing infrastructure for consent banner not yet built
 - id: AC-034
@@ -2001,7 +2001,7 @@ entries:
   description: Consent management platform integrates with OneTrust for DPIA workflow
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: OneTrust Integration
     justification: Feature not yet implemented; OneTrust integration not yet scoped
 - id: AC-035
@@ -2009,7 +2009,7 @@ entries:
   description: Cross-border data transfer mechanisms documented (SCCs) for Atlas US cluster
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Cross-Border Data Transfers
     justification: Legal/operational verification; SCC documentation maintained by legal team
 - id: AC-036
@@ -2017,7 +2017,7 @@ entries:
   description: Privacy notice updated within 30 days of any material change to data processing
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy Notice Updates
     justification: Organizational process; privacy notice update cadence verified by privacy team
 - id: AC-037
@@ -2025,7 +2025,7 @@ entries:
   description: Annual privacy training completion rate >= 95% of staff who access personal data
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy Training
     justification: Organizational process; training completion tracked in HR system, not automatable
 - id: AC-038
@@ -2033,7 +2033,7 @@ entries:
   description: Quarterly internal privacy audit covers all data flows and processing activities
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy Audit
     justification: Organizational process; audit results documented in privacy register by DPO
 - id: AC-039
@@ -2041,7 +2041,7 @@ entries:
   description: Supervisory authority contact details maintained and verified quarterly
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Supervisory Authority Contacts
     justification: Operational process; contact list maintained by privacy team, verified manually
 - id: AC-040
@@ -2049,7 +2049,7 @@ entries:
   description: Personal data inventory covers all databases, third-party processors, and backup systems
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Personal Data Inventory
     justification: Organizational process; inventory maintained by privacy team and updated quarterly
 - id: AC-041
@@ -2057,7 +2057,7 @@ entries:
   description: All staff accessing personal data have signed confidentiality agreements
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Staff Confidentiality
     justification: HR/legal process; confidentiality agreement tracking maintained by HR system
 - id: AC-042
@@ -2065,7 +2065,7 @@ entries:
   description: Access controls reviewed and revalidated quarterly; stale access removed within 5 business days
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Access Control Review
     justification: Operational process; quarterly access review conducted by security team
 - id: AC-043
@@ -2073,7 +2073,7 @@ entries:
   description: Backup encryption verified; restore test confirms data is accessible only with valid key
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Backup Encryption Verification
     justification: Requires restore test from encrypted backup; conducted during quarterly DR drills
 - id: AC-044
@@ -2081,7 +2081,7 @@ entries:
   description: Vulnerability management — critical CVEs patched within 7 days, high within 30 days
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Vulnerability Management
     justification: Operational process; patch cadence tracked in vulnerability management system
 - id: AC-045
@@ -2089,7 +2089,7 @@ entries:
   description: Penetration test conducted annually; findings remediated within agreed timeline
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Penetration Testing
     justification: Annual engagement with third-party pen tester; results reviewed by security team
 - id: AC-046
@@ -2097,7 +2097,7 @@ entries:
   description: Security incident response plan tested annually with tabletop exercise
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Incident Response Testing
     justification: Organizational process; tabletop exercise conducted annually with documented outcomes
 - id: AC-047
@@ -2105,7 +2105,7 @@ entries:
   description: Privacy by design checklist completed for all new product features
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy by Design
     justification: Product process; checklist completion verified during feature design review
 - id: AC-048
@@ -2113,7 +2113,7 @@ entries:
   description: Records of processing activities (ROPA) maintained and reviewed semi-annually
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: ROPA Maintenance
     justification: Legal process; ROPA maintained by DPO and reviewed semi-annually
 - id: AC-049
@@ -2121,7 +2121,7 @@ entries:
   description: Data subject request portal accessible at /privacy/requests/ with form validation
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Portal
     justification: Feature not yet implemented; data subject request portal not yet built
 - id: AC-050
@@ -2129,7 +2129,7 @@ entries:
   description: Data subject identity verification required before processing deletion or export request
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Identity Verification for DSRs
     justification: Feature not yet implemented; DSR identity verification flow not yet built
 - id: AC-051
@@ -2137,7 +2137,7 @@ entries:
   description: DSR status updates sent to data subject by email at each state transition
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: DSR Status Notifications
     justification: Feature not yet implemented; DSR email notification pipeline not yet built
 - id: AC-052
@@ -2152,7 +2152,7 @@ entries:
   description: Consent withdrawal for analytics reflected in real-time event filtering within 1 minute
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Real-Time Consent Enforcement
     justification: Feature not yet implemented; real-time consent propagation to event pipeline not yet built
 - id: AC-054
@@ -2160,7 +2160,7 @@ entries:
   description: Cross-tenant PII isolation — tenant A admin cannot query tenant B user data via privacy APIs
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Cross-Tenant Privacy Isolation
     justification: Feature not yet implemented; tenant-scoped privacy API not yet built
 - id: AC-055
@@ -2168,7 +2168,7 @@ entries:
   description: Privacy API rate limiting — 10 requests/minute per authenticated user
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy API Rate Limiting
     justification: Feature not yet implemented; rate limiter for privacy API not yet configured
 - id: AC-056
@@ -2176,7 +2176,7 @@ entries:
   description: All privacy API endpoints require authentication; unauthenticated requests return HTTP 401
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy API Authentication
     justification: Feature not yet implemented; privacy API endpoints not yet created
 - id: AC-057
@@ -2184,7 +2184,7 @@ entries:
   description: Deletion pipeline idempotent — re-running for already-deleted user does not produce errors
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Deletion Pipeline Idempotency
     justification: Feature not yet implemented; idempotent deletion pipeline not yet built
 - id: AC-058
@@ -2192,7 +2192,7 @@ entries:
   description: Export archive contains README.md explaining each file's contents and data schema
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Export Archive Documentation
     justification: Feature not yet implemented; export archive documentation not yet written
 - id: AC-059
@@ -2200,7 +2200,7 @@ entries:
   description: PII fields in logs masked or omitted per structured logging policy
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Log PII Masking
     justification: Requires inspection of structured logs in Loki for PII field patterns; not automatable without live log
       data
@@ -2209,7 +2209,7 @@ entries:
   description: Database column-level encryption applied to highest-sensitivity PII fields
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Column-Level Encryption
     justification: Feature not yet implemented; column-level encryption for PII not yet scoped
 - id: AC-061
@@ -2217,7 +2217,7 @@ entries:
   description: Privacy engineering review required for all database schema changes adding PII columns
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Schema Change Review
     justification: Organizational process; privacy engineering review enforced via PR template
 - id: AC-062
@@ -2225,7 +2225,7 @@ entries:
   description: Consent records retained for 7 years after consent was given or withdrawn
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Record Retention
     justification: Feature not yet implemented; consent record retention policy not yet configured
 - id: AC-063
@@ -2233,7 +2233,7 @@ entries:
   description: Deletion proof documents retained for 5 years for audit purposes
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Deletion Proof Retention
     justification: Feature not yet implemented; deletion proof retention configuration not yet set
 - id: AC-064
@@ -2241,7 +2241,7 @@ entries:
   description: Privacy compliance status dashboard summarises open DSRs, consent coverage, and breach history
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Privacy Compliance Dashboard
     justification: Feature not yet implemented; privacy compliance dashboard not yet built
 - id: AC-065
@@ -2249,7 +2249,7 @@ entries:
   description: Annual privacy report submitted to management covering DSR volumes, breach incidents, and training completion
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Annual Privacy Report
     justification: Organizational process; annual report prepared by DPO and submitted to management
 - id: AC-024
@@ -2640,7 +2640,7 @@ entries:
     subscription_plan_uuid, error_type, and user_email_hash (not raw email)
   verify:
   - type: manual
-    runbook: docs/operations/ENTERPRISE_SERVICES_RUNBOOK.md
+    runbook: docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
     section: License Assignment Error Logging
     justification: Requires running enterprise-subsidy service with a simulated license assignment failure; not available
       without live enterprise data
@@ -3176,7 +3176,7 @@ entries:
   description: 'Erasure verification: auth_user.email anonymized to retired_email_*@retired.invalid after RTBF'
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Requires live user deletion flow; verified by operator running retire_user and querying DB
 - id: AC-PRIVACY-004
@@ -3184,7 +3184,7 @@ entries:
   description: PII leakage scanner flags raw email in ClickHouse actor_mbox field
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Verification
     justification: ClickHouse analytics pipeline not yet deployed; scanner tool not yet implemented
 - id: AC-PRIVACY-005
@@ -3192,7 +3192,7 @@ entries:
   description: GCS profile-image blobs deleted and verified zero count after deletion pipeline
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: GCS deletion step requires operator action with gsutil; cannot be automated in CI
 - id: AC-PRIVACY-006
@@ -3200,7 +3200,7 @@ entries:
   description: PostgreSQL orders.buyer_email anonymized while retaining financial fields for 7-year window
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Purchase Gateway deletion logic not yet implemented; requires legal retention review
 - id: AC-PRIVACY-007
@@ -3208,7 +3208,7 @@ entries:
   description: MongoDB forum posts author_username anonymized to [deleted] with body retained
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Forum anonymization verified by operator querying MongoDB Atlas after retire_user run
 - id: AC-PRIVACY-008
@@ -3216,7 +3216,7 @@ entries:
   description: Redis session keys for user:{user_id}:* deleted and verified empty after pipeline
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Redis key deletion requires operator access; automated verification needs deletion pipeline implementation
 - id: AC-PRIVACY-009
@@ -3224,7 +3224,7 @@ entries:
   description: Loki logs expire within 30 days; deletion certificate notes no new PII logs post-deletion
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Verification
     justification: Log retention is time-based; PII scanner not yet implemented; operator verifies policy config only
 - id: AC-PRIVACY-010
@@ -3232,7 +3232,7 @@ entries:
   description: Privacy impact assessment triggered and users notified when classification matrix retention period reduced
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: PIA workflow and user notification for policy changes not yet implemented
 - id: AC-EXPORT-001
@@ -3240,7 +3240,7 @@ entries:
   description: Export pipeline aggregates data from all export_included data stores per classification matrix
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Data export pipeline (POST /api/v1/privacy/export-request/) not yet implemented
 - id: AC-EXPORT-002
@@ -3248,7 +3248,7 @@ entries:
   description: Export pipeline retries failed stores 3x with backoff and produces partially_completed status
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Export pipeline retry logic not yet implemented
 - id: AC-EXPORT-004
@@ -3256,7 +3256,7 @@ entries:
   description: Export archive is AES-256 encrypted with user password or auto-generated key
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Archive encryption feature not yet implemented
 - id: AC-EXPORT-005
@@ -3264,7 +3264,7 @@ entries:
   description: Download link expires after 48h or single download; server file deleted within 1h of expiry
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Export link expiry and file cleanup not yet implemented
 - id: AC-EXPORT-006
@@ -3272,7 +3272,7 @@ entries:
   description: Duplicate export request returns HTTP 409 with existing request ID
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Export deduplication logic not yet implemented
 - id: AC-EXPORT-007
@@ -3280,7 +3280,7 @@ entries:
   description: 'Rate limit: >3 export requests in 30 days returns HTTP 429 with Retry-After header'
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Export rate limiting not yet implemented
 - id: AC-EXPORT-008
@@ -3288,7 +3288,7 @@ entries:
   description: Export exceeding 72h SLA transitions to failed state and fires alert
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Export SLA monitoring and alert not yet implemented
 - id: AC-EXPORT-009
@@ -3296,7 +3296,7 @@ entries:
   description: Audit trail entry created with export_downloaded event on archive download
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Export audit trail not yet implemented
 - id: AC-EXPORT-010
@@ -3304,7 +3304,7 @@ entries:
   description: Large exports (500MB+) split into 200MB ZIP parts with manifest and SHA-256 checksums
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Multi-part export splitting not yet implemented
 - id: AC-DELETE-002
@@ -3312,7 +3312,7 @@ entries:
   description: Each deletion step verifies success by querying the data store for user identifiers
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Multi-store deletion pipeline with per-step verification not yet implemented
 - id: AC-DELETE-003
@@ -3320,7 +3320,7 @@ entries:
   description: Deletion step failure triggers 3x retry with backoff; pipeline continues on failure
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Rollback / Incident Response
     justification: Deletion pipeline retry orchestration not yet implemented
 - id: AC-DELETE-004
@@ -3328,7 +3328,7 @@ entries:
   description: Partially completed deletion can be re-run idempotently skipping completed stores
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Rollback / Incident Response
     justification: Idempotent deletion re-run mechanism not yet implemented
 - id: AC-DELETE-006
@@ -3336,7 +3336,7 @@ entries:
   description: Deletion certificate signature verifiable by independent auditor tool
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Deletion certificate signing and verification not yet implemented
 - id: AC-DELETE-007
@@ -3344,7 +3344,7 @@ entries:
   description: 'Purchase Gateway orders within 7-year window: buyer_email anonymized, financial fields retained'
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Purchase Gateway GDPR deletion step not yet implemented; legal retention basis documented
 - id: AC-DELETE-008
@@ -3352,7 +3352,7 @@ entries:
   description: Consent records anonymized with username hashed; granted/timestamps retained per GDPR Art 7
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Consent record anonymization on deletion not yet implemented
 - id: AC-DELETE-009
@@ -3360,7 +3360,7 @@ entries:
   description: GCS profile-image blobs listed, deleted, and verified zero for deleted user
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: GCS deletion step in pipeline not yet implemented; requires gsutil with service account
 - id: AC-DELETE-010
@@ -3368,7 +3368,7 @@ entries:
   description: Completion email sent to original address; address deleted from temp table after send
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Deletion completion notification workflow not yet implemented
 - id: AC-DELETE-011
@@ -3376,7 +3376,7 @@ entries:
   description: Deletion request with in-flight order polls every 6h; escalates after 14 days
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: In-flight order handling in deletion pipeline not yet implemented
 - id: AC-DELETE-012
@@ -3384,7 +3384,7 @@ entries:
   description: Enterprise admin deletion triggers 7-day warning to tenant; proceeds after handover
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Enterprise admin handover workflow during deletion not yet implemented
 - id: AC-PARTIAL-001
@@ -3392,7 +3392,7 @@ entries:
   description: Partially completed deletion certificate includes failures array with error context
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Rollback / Incident Response
     justification: Deletion certificate with failures array not yet implemented
 - id: AC-PARTIAL-002
@@ -3400,7 +3400,7 @@ entries:
   description: Export with failed ClickHouse retrieval includes MISSING_DATA.txt in archive
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Partial export with MISSING_DATA.txt not yet implemented
 - id: AC-PARTIAL-003
@@ -3408,7 +3408,7 @@ entries:
   description: Deletion pipeline re-run skips completed stores and updates certificate on success
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Rollback / Incident Response
     justification: Idempotent re-run with certificate update not yet implemented
 - id: AC-AUDIT-002
@@ -3416,7 +3416,7 @@ entries:
   description: Audit trail entry logged with export_completed event including data stores and duration
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Subject Request Handling
     justification: Export audit trail logging not yet implemented
 - id: AC-AUDIT-003
@@ -3424,7 +3424,7 @@ entries:
   description: Audit trail entry logged with deletion_processing_started event and estimated completion
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Deletion audit trail logging not yet implemented
 - id: AC-AUDIT-004
@@ -3432,7 +3432,7 @@ entries:
   description: Audit trail entry logged per store with deletion_step_completed event and verification status
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Right to Erasure (RTBF)
     justification: Per-store audit trail logging in deletion pipeline not yet implemented
 - id: AC-CONSENT-002
@@ -3440,7 +3440,7 @@ entries:
   description: Consent stored with version, timestamp, method, IP hash, and per-category status
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Consent storage schema with all required fields not yet implemented
 - id: AC-CONSENT-003
@@ -3448,7 +3448,7 @@ entries:
   description: Consent withdrawal via /account/privacy/ updates record with withdrawn_at within 24h
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Self-service consent withdrawal endpoint not yet implemented
 - id: AC-CONSENT-004
@@ -3456,7 +3456,7 @@ entries:
   description: Cookie banner loads asynchronously and LMS core works even if banner JS fails
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Requires browser testing with JS disabled; not automatable in CI
 - id: AC-CONSENT-005
@@ -3464,7 +3464,7 @@ entries:
   description: Privacy policy acceptance logged with policy_version, timestamp, and IP hash
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Privacy policy acceptance audit trail not yet implemented
 - id: AC-CONSENT-006
@@ -3472,7 +3472,7 @@ entries:
   description: Updated privacy policy presented for acceptance on first login after version change
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Policy version gate middleware not yet implemented
 - id: AC-CONSENT-007
@@ -3480,7 +3480,7 @@ entries:
   description: Multi-language privacy policy versions supported (EN/MY/ZH) per user language preference
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Multi-language policy versions not yet implemented
 - id: AC-CONSENT-008
@@ -3488,7 +3488,7 @@ entries:
   description: Per-purpose consent change is tracked independently without affecting other purposes
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Granular per-purpose consent tracking not yet implemented
 - id: AC-CONSENT-009
@@ -3496,7 +3496,7 @@ entries:
   description: Consent history API returns all versions with purpose, status, and timestamps ordered by date
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Consent history API endpoint not yet implemented
 - id: AC-CONSENT-010
@@ -3504,7 +3504,7 @@ entries:
   description: Schema change (new purpose) triggers re-consent for all active users on next login
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Re-consent trigger on schema version change not yet implemented
 - id: AC-RETENTION-002
@@ -3512,7 +3512,7 @@ entries:
   description: Retention purge CronJob logs audit trail entry per purge operation with counts and duration
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Verification
     justification: Retention CronJob with audit trail logging not yet implemented
 - id: AC-RETENTION-003
@@ -3520,7 +3520,7 @@ entries:
   description: Retention CronJob dry-run mode identifies eligible records and logs plan without deleting
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Verification
     justification: Dry-run mode for retention CronJob not yet implemented
 - id: AC-RETENTION-004
@@ -3528,7 +3528,7 @@ entries:
   description: Retention job skips timed-out store, continues others, and fires Warning alert
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Verification
     justification: Retention job timeout handling and partial continuation not yet implemented
 - id: AC-COMPLIANCE-002
@@ -3536,7 +3536,7 @@ entries:
   description: Compliance dashboard DSAR metric aggregates export/deletion counts and avg completion times
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Verification
     justification: Compliance dashboard not yet implemented
 - id: AC-COMPLIANCE-003
@@ -3544,7 +3544,7 @@ entries:
   description: Dashboard shows partially_completed deletion requests with re-run action for privacy_admin
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Verification
     justification: Compliance dashboard with re-run action not yet implemented
 - id: AC-COMPLIANCE-004
@@ -3552,7 +3552,7 @@ entries:
   description: Consent rate by purpose calculated as consented/active_users*100 for analytics/marketing/functional
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Consent Management
     justification: Consent rate metric computation not yet implemented
 - id: AC-COMPLIANCE-005
@@ -3560,7 +3560,7 @@ entries:
   description: Data retention compliance score computed per store with color-coded dashboard display
   verify:
   - type: manual
-    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    runbook: docs/ops/runbooks/PRIVACY_RUNBOOK.md
     section: Data Retention Verification
     justification: Retention compliance score metric not yet implemented
 - id: AC-GAC-001
@@ -3816,7 +3816,7 @@ entries:
   description: SVG logo variants exist for required branding assets
   verify:
   - type: manual
-    runbook: docs/BRANDING.md
+    runbook: docs/guides/branding/BRANDING.md
     section: Asset Inventory
     justification: Asset existence is validated during branding release checklist
 - id: AC-PERF-013

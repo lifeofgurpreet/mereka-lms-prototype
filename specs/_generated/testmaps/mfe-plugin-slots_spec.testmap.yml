@@ -10,7 +10,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Header Branding
     justification: Requires UI validation across deployed MFE surfaces and hostnames
 - id: AC-SLOT-002
@@ -24,7 +24,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Header Branding
     justification: Requires viewport-specific visual verification
 - id: AC-SLOT-003
@@ -37,7 +37,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Header Branding
     justification: Navigation behavior is validated through browser interaction
 - id: AC-SLOT-004
@@ -50,7 +50,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Header Branding
     justification: Requires live tenant-host verification
 - id: AC-SLOT-005
@@ -63,7 +63,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Header Branding
     justification: Menu content must be verified in rendered UI state
 - id: AC-SLOT-006
@@ -76,7 +76,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Header Branding
     justification: Requires cross-viewport parity validation
 - id: AC-SLOT-007
@@ -90,7 +90,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Header Branding
     justification: Build and runtime-rendered config evidence is environment-dependent
 - id: AC-SLOT-008
@@ -103,7 +103,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Learning Surface
     justification: Requires visual validation in a live course context
 - id: AC-SLOT-009
@@ -117,7 +117,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Learning Surface
     justification: Styling verification is visual and runtime-specific
 - id: AC-SLOT-010
@@ -130,7 +130,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Learning Surface
     justification: Requires controlled course-state UI check
 - id: AC-SLOT-011
@@ -143,7 +143,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Learning Surface
     justification: Build/runtime verification is environment-coupled
 - id: AC-SLOT-012
@@ -156,7 +156,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Account And Profile
     justification: Requires authenticated UI verification
 - id: AC-SLOT-013
@@ -169,7 +169,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Account And Profile
     justification: Public profile surface branding requires visual validation
 - id: AC-SLOT-014
@@ -182,7 +182,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-slot-profile-persistence.sh
     command: scripts/qa/verify-mfe-slot-profile-persistence.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Account And Profile
     justification: Requires stateful API/UI roundtrip checks
 - id: AC-SLOT-015
@@ -195,7 +195,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Account And Profile
     justification: Build/runtime verification is environment-coupled
 - id: AC-SLOT-016
@@ -210,7 +210,7 @@ acceptance_criteria:
     file: scripts/qa/verify-plugin-slot-wiring.sh
     command: scripts/qa/verify-plugin-slot-wiring.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Slot Registration Pattern
     justification: Pattern compliance is verified via source + rendered behavior audit
 - id: AC-SLOT-017
@@ -223,7 +223,7 @@ acceptance_criteria:
     file: scripts/qa/verify-plugin-slot-wiring.sh
     command: scripts/qa/verify-plugin-slot-wiring.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Slot Registration Pattern
     justification: Requires source and generated runtime patch inspection
 - id: AC-SLOT-018
@@ -237,7 +237,7 @@ acceptance_criteria:
     file: scripts/qa/verify-plugin-slot-wiring.sh
     command: scripts/qa/verify-plugin-slot-wiring.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Slot Registration Pattern
     justification: Requires multi-host runtime checks
 - id: AC-SLOT-019
@@ -250,7 +250,7 @@ acceptance_criteria:
     file: scripts/qa/verify-plugin-slot-wiring.sh
     command: scripts/qa/verify-plugin-slot-wiring.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Slot Registration Pattern
     justification: Cross-MFE runtime verification required
 - id: AC-SLOT-020
@@ -263,7 +263,7 @@ acceptance_criteria:
     file: scripts/qa/verify-plugin-slot-wiring.sh
     command: scripts/qa/verify-plugin-slot-wiring.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Slot Registration Pattern
     justification: Requires negative-path runtime validation
 - id: AC-SLOT-021
@@ -276,7 +276,7 @@ acceptance_criteria:
     file: scripts/qa/visual-regression-branding.sh
     command: scripts/qa/visual-regression-branding.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Test Execution
     justification: Screenshot baseline review requires operator adjudication
 - id: AC-SLOT-022
@@ -294,7 +294,7 @@ acceptance_criteria:
     Open edX logo in the header.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Test Execution
     justification: Requires page-level visual checks across several routes
 - id: AC-SLOT-024
@@ -307,7 +307,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-plugin-slots.sh
     command: scripts/qa/verify-mfe-plugin-slots.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Test Execution
     justification: Requires intentional failure injection and build-log review
 - id: AC-SLOT-025
@@ -320,7 +320,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-slot-nfr.sh
     command: scripts/qa/verify-mfe-slot-nfr.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Non-Functional Checks
     justification: Timing measurements require runtime instrumentation and interpretation
 - id: AC-SLOT-026
@@ -333,7 +333,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-slot-nfr.sh
     command: scripts/qa/verify-mfe-slot-nfr.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Non-Functional Checks
     justification: Requires build artifact analysis in release pipeline context
 - id: AC-SLOT-027
@@ -346,7 +346,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-slot-nfr.sh
     command: scripts/qa/verify-mfe-slot-nfr.sh
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Non-Functional Checks
     justification: Requires viewport matrix UI checks
 - id: AC-SLOT-028
@@ -356,7 +356,7 @@ acceptance_criteria:
     404 errors.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Cross-Spec Checks
     justification: Requires network and page render validation across surfaces
 - id: AC-SLOT-029
@@ -365,7 +365,7 @@ acceptance_criteria:
     generated by slot components.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Cross-Spec Checks
     justification: Requires runtime network inspection
 

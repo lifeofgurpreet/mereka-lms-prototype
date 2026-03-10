@@ -194,7 +194,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: DR Evidence Generation
     justification: Requires human to initiate enterprise audit request and verify
       completeness against client requirements
@@ -251,7 +251,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: 'DR-002: Single PVC Data Corruption'
     justification: Requires live cluster with simulated PVC failure; destructive test
       cannot be fully automated against production
@@ -265,7 +265,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: 'DR-003: Namespace Deletion/Corruption'
     justification: Full namespace restore requires human approval gate and coordination;
       tested during quarterly drills
@@ -293,7 +293,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: 'DR-007: Full Cluster Loss'
     justification: Full cluster rebuild cannot be automated as a test; verified via
       semi-annual tabletop exercise
@@ -315,7 +315,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: Data Integrity Verification
     justification: 5% tolerance comparison requires baseline count from production
       which varies over time
@@ -371,7 +371,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: Cross-Region Readiness Verification
     justification: GCS bucket configuration requires gcloud auth and varies by environment;
       verified during Phase 3 implementation
@@ -399,7 +399,7 @@ acceptance_criteria:
     file: scripts/qa/verify-dr-drill-schedule.sh
     command: scripts/qa/verify-dr-drill-schedule.sh
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: Quarterly Restore Drill Schedule
     justification: Requires documented drill schedule with all required fields; verified
       during quarterly DR planning cycle
@@ -408,7 +408,7 @@ acceptance_criteria:
     is run, then it produces valid manifests deployable to any GKE cluster
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: Cluster Rebuild from Config
     justification: Full cluster rebuild validation requires a target GKE cluster;
       kustomize build validates structure but not full deployability without a live
@@ -419,7 +419,7 @@ acceptance_criteria:
     then it is configured for multi-region storage or cross-region replication
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: Cross-Region Readiness Verification
     justification: GCS bucket multi-region verification requires gcloud auth; verified
       during Phase 3 implementation and quarterly DR review

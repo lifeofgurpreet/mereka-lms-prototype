@@ -15,7 +15,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Configuration
     justification: Feature not yet implemented; requires Studio UI interaction and
       live course data
@@ -35,7 +35,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Peer Grading
     justification: Feature not yet implemented; requires populated peer review data
       in running LMS
@@ -53,7 +53,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 File Upload
     justification: Feature not yet implemented; requires live LMS with student session
 - id: AC-004
@@ -70,7 +70,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 File Upload Validation
     justification: Feature not yet implemented; requires live LMS with student session
 - id: AC-005
@@ -88,7 +88,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Rubric Locking
     justification: Feature not yet implemented; requires Studio UI with active submissions
 - id: AC-006
@@ -105,7 +105,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Calibration
     justification: Feature not yet implemented; requires live LMS with calibration
       configured
@@ -123,7 +123,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA Grading MFE
     justification: Feature not yet implemented; requires live MFE deployment with
       submissions
@@ -141,7 +141,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA Grading MFE
     justification: Feature not yet implemented; requires live MFE with authenticated
       staff session
@@ -154,7 +154,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Gradebook Sync
     justification: Feature not yet implemented; requires live LMS with gradebook integration
 - id: AC-010
@@ -167,7 +167,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exams
     justification: Feature not yet implemented; requires live LMS with timed exam
       configured
@@ -181,7 +181,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exams
     justification: Feature not yet implemented; requires live LMS with running timed
       exam
@@ -195,7 +195,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Auto-Submit
     justification: Feature not yet implemented; requires live LMS with timer reaching
       zero
@@ -209,7 +209,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Post-Submit
     justification: Feature not yet implemented; requires live LMS with auto-submitted
       exam
@@ -223,7 +223,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Extensions
     justification: Feature not yet implemented; requires live LMS with instructor-granted
       extension
@@ -237,7 +237,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Grading
     justification: Feature not yet implemented; requires live LMS with timed exam
       grading
@@ -252,7 +252,7 @@ acceptance_criteria:
     file: scripts/qa/verify-xqueue-deployment.sh
     command: scripts/qa/verify-xqueue-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Grader Verification
     justification: Feature not yet implemented; requires XQueue service with grader
       worker deployed
@@ -269,7 +269,7 @@ acceptance_criteria:
     file: scripts/qa/verify-xqueue-deployment.sh
     command: scripts/qa/verify-xqueue-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Security Sandbox
     justification: Feature not yet implemented; requires XQueue grader with sandbox
       configured
@@ -283,7 +283,7 @@ acceptance_criteria:
     file: scripts/qa/verify-xqueue-deployment.sh
     command: scripts/qa/verify-xqueue-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Security Sandbox
     justification: Feature not yet implemented; requires XQueue grader with seccomp/syscall
       filtering
@@ -301,7 +301,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Queue Resilience
     justification: Feature not yet implemented; requires XQueue with configurable
       visibility timeout
@@ -319,7 +319,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Gradebook Integration
     justification: Feature not yet implemented; requires live LMS with XQueue grader
       integration
@@ -338,7 +338,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Memory Sandbox
     justification: Feature not yet implemented; requires XQueue grader with memory
       limit enforcement
@@ -353,7 +353,7 @@ acceptance_criteria:
     file: scripts/qa/verify-xqueue-graders.sh
     command: scripts/qa/verify-xqueue-graders.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Security Sandbox
     justification: Feature not yet implemented; requires XQueue grader with seccomp
       profile
@@ -368,7 +368,7 @@ acceptance_criteria:
     file: scripts/qa/verify-xqueue-graders.sh
     command: scripts/qa/verify-xqueue-graders.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Network Sandbox
     justification: Feature not yet implemented; requires XQueue grader with network
       namespace isolation
@@ -383,7 +383,7 @@ acceptance_criteria:
     file: scripts/qa/verify-xqueue-graders.sh
     command: scripts/qa/verify-xqueue-graders.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Filesystem Sandbox
     justification: Feature not yet implemented; requires XQueue grader with filesystem
       restrictions
@@ -398,7 +398,7 @@ acceptance_criteria:
     file: scripts/qa/verify-xqueue-graders.sh
     command: scripts/qa/verify-xqueue-graders.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Secret Isolation
     justification: Feature not yet implemented; requires XQueue grader with minimal
       env vars
@@ -412,7 +412,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Advanced Components
     justification: Feature not yet implemented; requires Studio with advanced components
       installed
@@ -426,7 +426,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Drag-and-Drop Accessibility
     justification: Feature not yet implemented; requires live LMS with drag-and-drop
       configured
@@ -440,7 +440,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Math Expression Grading
     justification: Feature not yet implemented; requires live LMS with SymPy-based
       grader
@@ -454,7 +454,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Randomized Assessments
     justification: Feature not yet implemented; requires live LMS with randomized
       problem pool
@@ -468,7 +468,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Randomized Question Order
     justification: Feature not yet implemented; requires live LMS with order randomization
       configured
@@ -482,7 +482,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Answer Shuffling
     justification: Feature not yet implemented; requires live LMS with answer shuffling
       enabled
@@ -495,7 +495,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: One-at-a-Time Exams
     justification: Feature not yet implemented; requires live LMS with one-at-a-time
       mode
@@ -508,7 +508,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Attempt Limits
     justification: Feature not yet implemented; requires live LMS with attempt limit
       set
@@ -522,7 +522,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Grade Weighting
     justification: Feature not yet implemented; requires live LMS with all three graded
       components
@@ -536,7 +536,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Grade Overrides
     justification: Feature not yet implemented; requires live LMS with instructor
       grade override
@@ -551,7 +551,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Bulk Grade Export
     justification: Feature not yet implemented; requires live LMS with course enrollment
       data
@@ -565,7 +565,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Bulk Regrade
     justification: Feature not yet implemented; requires live LMS with 2000 submissions
 - id: AC-038
@@ -578,7 +578,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Bulk Grade Import
     justification: Feature not yet implemented; requires live LMS with bulk import
       capability
@@ -591,7 +591,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Bulk Regrade Progress
     justification: Feature not yet implemented; requires live LMS with async regrade
       job
@@ -605,7 +605,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 i18n
     justification: Feature not yet implemented; requires live LMS with Malay translation
       configured
@@ -619,7 +619,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Accessibility
     justification: Feature not yet implemented; requires live LMS with screen reader
       testing
@@ -633,7 +633,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Drag-and-Drop Keyboard Access
     justification: Feature not yet implemented; requires live LMS with keyboard-only
       user testing
@@ -647,7 +647,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Email Notifications
     justification: Feature not yet implemented; requires live LMS with email pipeline
       configured
@@ -662,7 +662,7 @@ acceptance_criteria:
     file: scripts/qa/verify-assessment-bulk.sh
     command: scripts/qa/verify-assessment-bulk.sh
   - type: manual
-    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    runbook: docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Show Correctness Policy
     justification: Feature not yet implemented; requires live LMS with show_correctness
       configured

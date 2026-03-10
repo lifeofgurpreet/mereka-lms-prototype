@@ -6,7 +6,7 @@ acceptance_criteria:
     reach Running state with no missing environment variable errors in logs.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    runbook: docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
     section: Integration Tests
     justification: Validated on live cluster — kubectl get pods -n mereka-lms shows
       all Running; ExternalSecrets READY=True
@@ -16,7 +16,7 @@ acceptance_criteria:
     value matching the GCP Secret Manager source.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    runbook: docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
     section: Integration Tests
     justification: Validated on live cluster — kubectl exec lms-pod confirms OPENEDX_SECRET_KEY
       is set and non-empty
@@ -26,7 +26,7 @@ acceptance_criteria:
     manual K8s Secret edits.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    runbook: docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
     section: Secret Rotation
     justification: Secret rotation flow not yet end-to-end tested; ExternalSecret
       TTL=1h is configured but rotation test requires coordination with Infisical

@@ -88,7 +88,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: MFE Build Verification
     justification: Full image build (15-20 min) cannot run in CI; script verifies
       Dockerfile contract
@@ -104,7 +104,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: MySQL Authentication Verification
     justification: Requires running MySQL 8 Docker container; cannot run in CI without
       Docker-in-Docker
@@ -128,7 +128,7 @@ acceptance_criteria:
     file: scripts/qa/verify-tutor-branding-render.sh
     command: scripts/qa/verify-tutor-branding-render.sh
   - type: manual
-    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: Visual Branding Verification
     justification: Visual rendering requires browser inspection; automated checks
       verify file presence only
@@ -140,7 +140,7 @@ acceptance_criteria:
     file: scripts/qa/verify-tutor-services.sh
     command: scripts/qa/verify-tutor-services.sh
   - type: manual
-    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: Service Health Verification
     justification: Requires running Docker Compose stack; cannot run in standard CI
 

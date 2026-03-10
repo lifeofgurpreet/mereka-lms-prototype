@@ -116,7 +116,7 @@ This plan focuses on **documentation, verification hardening, and closing minor 
   - **Done**: All edge cases documented with recovery steps
 
 - [ ] **[S]** Document token sync workflow in branding docs | Depends: None
-  - Update `docs/BRANDING.md` with token sync workflow (7-step sequence from spec)
+  - Update `docs/guides/branding/BRANDING.md` with token sync workflow (7-step sequence from spec)
   - Document rollback procedure
   - Document emergency recovery (provenance lost/corrupted)
   - **Done**: Workflow documented with examples

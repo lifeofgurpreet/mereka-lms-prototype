@@ -583,7 +583,7 @@ acceptance_criteria:
     and `user_email_hash` (not the raw email)
   verify:
   - type: manual
-    runbook: docs/operations/ENTERPRISE_SERVICES_RUNBOOK.md
+    runbook: docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
     section: License Assignment Error Logging
     justification: Requires running enterprise-subsidy service with a simulated license
       assignment failure; not available without live enterprise data

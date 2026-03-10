@@ -107,7 +107,7 @@ acceptance_criteria:
     PNG variants MAY exist alongside.
   verify:
   - type: manual
-    runbook: docs/BRANDING.md
+    runbook: docs/guides/branding/BRANDING.md
     section: Asset Inventory
     justification: Asset existence is validated during branding release checklist
 - id: AC-PERF-013
@@ -182,7 +182,7 @@ acceptance_criteria:
     single MFE Docker image, then the build MUST complete in under 10 minutes.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Build timing is observed from CI job duration metrics
 - id: AC-PERF-022
@@ -190,7 +190,7 @@ acceptance_criteria:
     openedx Docker image, then the build MUST complete in under 45 minutes.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Build timing is observed from CI job duration metrics
 - id: AC-PERF-023
@@ -215,7 +215,7 @@ acceptance_criteria:
     for any SEA country segment (MY, ID, PH, VN), then an alert MUST fire to `#ops-warnings`.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
+    runbook: docs/ops/runbooks/ANALYTICS_RUNBOOK.md
     section: Alert Verification
     justification: Requires live telemetry windows and alert routing checks
 

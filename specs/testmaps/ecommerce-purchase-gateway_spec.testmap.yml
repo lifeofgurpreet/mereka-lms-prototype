@@ -671,7 +671,7 @@ acceptance_criteria:
     mode with Let's Encrypt SSL (not Cloudflare proxy)
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/DEPLOYMENT_RUNBOOK.md
+    runbook: docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md
     section: SSL Configuration Verification
     justification: SSL mode is configured at DNS level (Cloudflare dashboard); not
       inspectable via Kubernetes manifests alone

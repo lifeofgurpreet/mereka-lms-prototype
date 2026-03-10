@@ -11,7 +11,7 @@ depends_on:
   - "specs/design-tokens-system_spec.md"
 links:
   related_docs:
-    - "docs/BRANDING.md"
+    - "docs/guides/branding/BRANDING.md"
     - "assets/branding/tokens.css"
     - "assets/branding/tokens.provenance.json"
     - "infrastructure/tutor/themes/mereka/scss/_tokens.scss"
@@ -80,7 +80,7 @@ Additionally, `PARAGON_THEME_URLS` enables runtime theming. Instead of rebuildin
 - Verification scripts: token count validation, drift detection between JSON source and CSS output, visual regression gates
 - CDN endpoint configuration for serving compiled theme CSS
 - CI pipeline integration: token build + validation in `.github/ci-scripts-static.txt`
-- Documentation updates to `docs/BRANDING.md`
+- Documentation updates to `docs/guides/branding/BRANDING.md`
 
 ### Out of Scope
 
@@ -328,7 +328,7 @@ Add to `specs/plans/manual_verifications.yaml`:
   spec: "paragon-design-tokens-migration_spec.md"
   verify:
     - type: manual
-      runbook: "docs/BRANDING.md"
+      runbook: "docs/guides/branding/BRANDING.md"
       section: "Visual Regression Testing"
       justification: "Pixel-level visual comparison requires human judgment for acceptable differences"
 ```
@@ -505,7 +505,7 @@ See `specs/plans/paragon-design-tokens-migration_test_plan.md` for comprehensive
 1. `_tokens.scss` reduced to only the Mereka-specific palette variables (lines 1-36) and the `:root` block with only structural `--mereka-*` properties not covered by Paragon tokens
 2. `mereka.scss` contains only structural overrides that cannot be expressed as tokens
 3. Verification that no MFE renders with default Paragon branding
-4. Updated `docs/BRANDING.md` documenting the new token-based workflow
+4. Updated `docs/guides/branding/BRANDING.md` documenting the new token-based workflow
 
 **Acceptance**: AC-TKN-022 and AC-TKN-023 are no longer applicable (backward compat removed). All other ACs still pass.
 

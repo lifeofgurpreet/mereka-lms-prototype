@@ -40,7 +40,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
+    runbook: docs/ops/runbooks/ANALYTICS_RUNBOOK.md
     section: ClickHouse Disk Space
     justification: Verifying actual TTL-based deletion requires inserting backdated
       data and waiting for merge cycle orforcing OPTIMIZE TABLE -- not automatable
@@ -71,7 +71,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
-    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
+    runbook: docs/ops/runbooks/ANALYTICS_RUNBOOK.md
     section: Dashboard Verification
     justification: Verifying dashboard load time < 5s andvisual correctness requires
       browser interaction that cannot be automated with kubectl alone
@@ -99,7 +99,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
+    runbook: docs/ops/runbooks/ANALYTICS_RUNBOOK.md
     section: Dashboard Embedding Verification
     justification: Dashboard embedding requires browser-based verification of iframe
       rendering within LMS course pages;no headless equivalent available in the current

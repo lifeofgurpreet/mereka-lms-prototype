@@ -591,7 +591,7 @@ acceptance_criteria:
     file: scripts/qa/verify-proctoring-integration.sh
     command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
-    runbook: docs/operations/runbooks/PROCTORING_RUNBOOK.md
+    runbook: docs/ops/runbooks/PROCTORING_RUNBOOK.md
     section: Verification > Instructor Override
     justification: Feature not yet implemented; instructor override with grade restore
       not yet built

@@ -22,7 +22,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: ACE Pipeline Verification
     justification: Requires active SES configuration with verified sender domain and
       test recipient
@@ -48,7 +48,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Email Template Rendering
     justification: Requires sending actual test emails through SES to verify template
       rendering across email clients
@@ -71,7 +71,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: ACE Pipeline Verification
     justification: Feature not yet implemented; ACE email pipeline with SES not yet
       deployed
@@ -93,7 +93,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: DMARC Alignment Verification
     justification: Requires sending actual test emails through SES with DMARC verification
 - id: AC-005
@@ -114,7 +114,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Enterprise Tenant Email Branding
     justification: Feature not yet implemented; per-tenant email branding not yet
       built
@@ -136,7 +136,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Multi-Channel Dispatch
     justification: Feature not yet implemented; ACE multi-channel pipeline not yet
       deployed
@@ -150,7 +150,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Channel Preference Enforcement
     justification: Feature not yet implemented; preference-based channel filtering
       not yet built
@@ -171,7 +171,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Non-Suppressible System Emails
     justification: Feature not yet implemented; non-suppressible email category not
       yet implemented
@@ -181,7 +181,7 @@ acceptance_criteria:
     60 seconds
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Celery Queue Throughput
     justification: Feature not yet implemented; requires running Celery workers with
       load test
@@ -190,7 +190,7 @@ acceptance_criteria:
     then the response is `{"unread_count": 5}` with p95 latency <= 100ms'
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Notification API Verification
     justification: Feature not yet implemented; in-app notification API not yet deployed
 - id: AC-011
@@ -199,7 +199,7 @@ acceptance_criteria:
     are returned, sorted by `created_at` descending
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Notification List Filtering
     justification: Feature not yet implemented; in-app notification list API not yet
       deployed
@@ -212,7 +212,7 @@ acceptance_criteria:
     file: scripts/qa/deprecated/verify-email-inapp-code.sh
     command: scripts/qa/deprecated/verify-email-inapp-code.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Notification Expiry
     justification: Feature not yet implemented; notification expiry enforcement not
       yet built
@@ -222,7 +222,7 @@ acceptance_criteria:
     `{"unread_count": 0}`'
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Mark All Read
     justification: Feature not yet implemented; mark-all-read API endpoint not yet
       created
@@ -235,7 +235,7 @@ acceptance_criteria:
     file: scripts/qa/deprecated/verify-email-inapp-code.sh
     command: scripts/qa/deprecated/verify-email-inapp-code.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Tenant Notification Isolation
     justification: Feature not yet implemented; tenant-scoped notification query not
       yet implemented
@@ -245,7 +245,7 @@ acceptance_criteria:
     the push notification is delivered to FCM within 60 seconds
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Push Notification Delivery
     justification: Feature not yet implemented; FCM push notification pipeline not
       yet deployed
@@ -259,7 +259,7 @@ acceptance_criteria:
     file: scripts/qa/deprecated/verify-email-push-code.sh
     command: scripts/qa/deprecated/verify-email-push-code.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Device Token Cleanup
     justification: Feature not yet implemented; FCM token deregistration handling
       not yet built
@@ -269,7 +269,7 @@ acceptance_criteria:
     to the deregistered device
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Device Token Deregistration
     justification: Feature not yet implemented; logout-triggered device deregistration
       not yet implemented
@@ -283,7 +283,7 @@ acceptance_criteria:
     file: scripts/qa/deprecated/verify-email-push-code.sh
     command: scripts/qa/deprecated/verify-email-push-code.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: FCM Batch Sending
     justification: Feature not yet implemented; FCM batch sender not yet implemented
 - id: AC-019
@@ -299,7 +299,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Tenant Push Isolation
     justification: Feature not yet implemented; tenant-scoped push dispatch not yet
       built
@@ -329,7 +329,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Default Notification Preferences
     justification: Feature not yet implemented; notification preferences API not yet
       created
@@ -356,7 +356,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Preference-Based Dispatch
     justification: Feature not yet implemented; per-channel preference enforcement
       not yet built
@@ -379,7 +379,7 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
     command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: One-Click Unsubscribe
     justification: Feature not yet implemented; one-click unsubscribe via signed token
       not yet built
@@ -397,7 +397,7 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
     command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Preference Audit Log
     justification: Feature not yet implemented; preference change audit logging not
       yet built
@@ -411,7 +411,7 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/middleware.py
     command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/middleware.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bulk Campaign Headers
     justification: Feature not yet implemented; bulk campaign email headers not yet
       configured
@@ -424,7 +424,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-template-multilang.sh
     command: scripts/qa/verify-email-template-multilang.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Multilingual Email Templates
     justification: Feature not yet implemented; Malay email templates not yet created
 - id: AC-026
@@ -436,7 +436,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-notifications.sh
     command: scripts/qa/verify-email-notifications.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Multilingual Email Templates
     justification: Feature not yet implemented; Simplified Chinese email templates
       not yet created
@@ -449,7 +449,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-notifications.sh
     command: scripts/qa/verify-email-notifications.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Language Fallback
     justification: Feature not yet implemented; language fallback logic in email templates
       not yet built
@@ -463,7 +463,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-notifications.sh
     command: scripts/qa/verify-email-notifications.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Tenant Email Branding
     justification: Feature not yet implemented; tenant-branded email template rendering
       not yet built
@@ -473,7 +473,7 @@ acceptance_criteria:
     sending and completes within 30 minutes
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bulk Campaign Scheduling
     justification: Feature not yet implemented; scheduled bulk campaign dispatch not
       yet built
@@ -483,7 +483,7 @@ acceptance_criteria:
     sending continues from the next unsent recipient
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bulk Campaign Pause/Resume
     justification: Feature not yet implemented; campaign pause/resume control not
       yet built
@@ -497,7 +497,7 @@ acceptance_criteria:
     file: scripts/qa/deprecated/verify-email-bulk-campaigns.sh
     command: scripts/qa/deprecated/verify-email-bulk-campaigns.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bulk Campaign Opt-Out Enforcement
     justification: Feature not yet implemented; opt-out enforcement in bulk campaign
       dispatch not yet built
@@ -511,7 +511,7 @@ acceptance_criteria:
     file: scripts/qa/deprecated/verify-email-bulk-campaigns.sh
     command: scripts/qa/deprecated/verify-email-bulk-campaigns.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Per-Tenant Rate Limiting
     justification: Feature not yet implemented; per-tenant SES rate limiting not yet
       implemented
@@ -541,7 +541,7 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
     command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bounce Handling
     justification: Feature not yet implemented; SES bounce webhook processing not
       yet built
@@ -571,7 +571,7 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
     command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Soft Bounce Accumulation
     justification: Feature not yet implemented; soft bounce accumulation logic not
       yet implemented
@@ -601,7 +601,7 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
     command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Complaint Handling
     justification: Feature not yet implemented; SES complaint webhook processing not
       yet built
@@ -635,7 +635,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-digests.sh
     command: scripts/qa/verify-email-digests.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Daily Digest Delivery
     justification: Feature not yet implemented; digest scheduler and aggregator not
       yet built
@@ -653,7 +653,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-digests.sh
     command: scripts/qa/verify-email-digests.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Digest Batching
     justification: Feature not yet implemented; digest batching suppressing immediate
       email not yet built
@@ -671,7 +671,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-digests.sh
     command: scripts/qa/verify-email-digests.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Digest Thread Grouping
     justification: Feature not yet implemented; thread grouping in digest render not
       yet implemented
@@ -689,7 +689,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-digests.sh
     command: scripts/qa/verify-email-digests.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Email Engagement Tracking
     justification: Feature not yet implemented; SES open/click event tracking pipeline
       not yet built
@@ -707,7 +707,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-digests.sh
     command: scripts/qa/verify-email-digests.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Click Tracking
     justification: Feature not yet implemented; click tracking redirect service not
       yet built
@@ -725,7 +725,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-digests.sh
     command: scripts/qa/verify-email-digests.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Campaign Analytics Isolation
     justification: Feature not yet implemented; tenant-scoped campaign analytics not
       yet built
@@ -742,7 +742,7 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/utils.py
     command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/utils.py
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Marketing Opt-In Gate
     justification: Feature not yet implemented; explicit opt-in requirement for bulk
       campaigns not yet implemented
@@ -756,7 +756,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-gdpr-code.sh
     command: scripts/qa/verify-email-gdpr-code.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: GDPR Data Export
     justification: Feature not yet implemented; notification data export pipeline
       not yet built
@@ -770,7 +770,7 @@ acceptance_criteria:
     file: scripts/qa/verify-email-gdpr-code.sh
     command: scripts/qa/verify-email-gdpr-code.sh
   - type: manual
-    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/ops/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: GDPR Deletion
     justification: Feature not yet implemented; notification data deletion in GDPR
       pipeline not yet built

@@ -14,7 +14,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: OAuth PKCE Flow
     justification: Feature not yet implemented; mobile app not yet developed
 - id: AC-002
@@ -30,7 +30,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: OAuth PKCE Flow
     justification: Feature not yet implemented; mobile app not yet developed
 - id: AC-003
@@ -47,7 +47,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Storage Security
     justification: Feature not yet implemented; secure token storage not yet implemented
       in mobile app
@@ -65,7 +65,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Refresh Logic
     justification: Feature not yet implemented; proactive token refresh not yet implemented
 - id: AC-005
@@ -82,7 +82,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Refresh Deduplication
     justification: Feature not yet implemented; single-flight token refresh not yet
       implemented
@@ -100,7 +100,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: 401 Retry Flow
     justification: Feature not yet implemented; 401 retry with refresh not yet implemented
 - id: AC-007
@@ -117,7 +117,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Failure Handling
     justification: Feature not yet implemented; token failure handling not yet implemented
 - id: AC-008
@@ -134,7 +134,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Logout Flow
     justification: Feature not yet implemented; logout with server-side revocation
       not yet implemented
@@ -148,7 +148,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Permission
     justification: Feature not yet implemented; mobile app push permission flow not
       yet built
@@ -162,7 +162,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Device Registration
     justification: Feature not yet implemented; device token registration API not
       yet built
@@ -176,7 +176,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Delivery
     justification: Feature not yet implemented; requires physical device with FCM/APNs
       configured
@@ -190,7 +190,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Notification Deep Linking
     justification: Feature not yet implemented; notification deep link handling not
       yet implemented
@@ -203,7 +203,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Device Token Deregistration on Logout
     justification: Feature not yet implemented; logout-triggered device deregistration
       not yet implemented
@@ -216,7 +216,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Universal Links Verification
     justification: Feature not yet implemented; AASA file not yet configured in LMS
       web server
@@ -229,7 +229,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: App Links Verification
     justification: Feature not yet implemented; assetlinks.json not yet configured
       in LMS web server
@@ -243,7 +243,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Deep Link Routing
     justification: Feature not yet implemented; mobile app deep link routing not yet
       built
@@ -257,7 +257,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Authenticated Deep Link Flow
     justification: Feature not yet implemented; stored URL post-login navigation not
       yet implemented
@@ -270,7 +270,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Fallback Deep Link Handling
     justification: Feature not yet implemented; in-app browser fallback not yet implemented
 - id: AC-019
@@ -287,7 +287,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Content Download
     justification: Feature not yet implemented; offline content download not yet implemented
 - id: AC-020
@@ -304,7 +304,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Sync
     justification: Feature not yet implemented; offline-first sync layer not yet built
 - id: AC-021
@@ -320,7 +320,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Download Storage Warning
     justification: Feature not yet implemented; storage check before download not
       yet implemented
@@ -333,7 +333,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Download Management UI
     justification: Feature not yet implemented; download management screen not yet
       built
@@ -347,7 +347,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Background Download
     justification: Feature not yet implemented; background download infrastructure
       not yet implemented
@@ -360,7 +360,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Multi-Tenant Branding
     justification: Feature not yet implemented; tenant branding in mobile app not
       yet built
@@ -373,7 +373,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Branding Cache Fallback
     justification: Feature not yet implemented; branding cache fallback not yet implemented
 - id: AC-026
@@ -385,7 +385,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Default Branding Fallback
     justification: Feature not yet implemented; default branding fallback not yet
       implemented
@@ -399,7 +399,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Tenant Course Isolation
     justification: Feature not yet implemented; tenant-scoped course listing not yet
       implemented in mobile app
@@ -412,7 +412,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Certificate Pinning
     justification: Feature not yet implemented; certificate pinning not yet implemented
       in mobile app
@@ -425,7 +425,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Certificate Pin Mismatch Handling
     justification: Feature not yet implemented; MITM detection and warning not yet
       implemented
@@ -438,7 +438,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Screenshot Protection
     justification: Feature not yet implemented; screenshot masking in task switcher
       not yet implemented
@@ -451,7 +451,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Release Build Security Audit
     justification: Feature not yet implemented; release build security audit process
       not yet established
@@ -465,7 +465,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: iOS CI Pipeline
     justification: Feature not yet implemented; iOS CI pipeline and TestFlight upload
       not yet configured
@@ -479,7 +479,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Android CI Pipeline
     justification: Feature not yet implemented; Android CI pipeline and Play Store
       upload not yet configured
@@ -493,7 +493,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Configuration-Only Tenant Onboarding
     justification: Feature not yet implemented; configuration-only tenant onboarding
       for mobile not yet built
@@ -507,7 +507,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Testing
     justification: Requires physical mobile device with configured FCM/APNs credentials
       for end-to-end push verification
@@ -522,7 +522,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Mode Testing
     justification: Requires mobile device in airplane mode to verify offline content
       caching and sync behavior
@@ -537,7 +537,7 @@ acceptance_criteria:
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
-    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Deep Link Testing
     justification: Requires mobile device with installed app to verify deep link routing
       from email/web to native screens

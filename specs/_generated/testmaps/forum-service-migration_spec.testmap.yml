@@ -6,7 +6,7 @@ acceptance_criteria:
     without local MongoDB dependency and logs show successful SRV connection.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_RUNBOOK.md
     section: Integration Tests
     justification: Validated on live cluster — Forum v2 (Python) running as part of
       LMS process, connects to Atlas SRV; kubectl logs lms confirms forum startup
@@ -16,7 +16,7 @@ acceptance_criteria:
     match Ruby forum baseline with zero data loss.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_RUNBOOK.md
     section: Data Integrity
     justification: Migration from Ruby to Python forum was done; full data integrity
       comparison requires Ruby baseline snapshot which was not captured pre-migration
@@ -26,7 +26,7 @@ acceptance_criteria:
     non-empty endpoints and forum API responds on configured port.
   verify:
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_RUNBOOK.md
     section: Integration Tests
     justification: Forum v2 runs in-process within LMS — no separate forum K8s service/endpoint;
       forum routes served via LMS caddy proxy on forum.academyv2.mereka.io
@@ -60,7 +60,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Thread Count Verification
     justification: Requires access to MongoDB Atlas dashboard and comparison between
       production snapshots before/after migration
@@ -79,7 +79,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Content Hash Verification
     justification: Requires MongoDB Atlas access for random sampling and custom script
       to compute stable content hashes across 1000 posts
@@ -97,7 +97,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Vote Count Verification
     justification: Requires running both Python and Ruby forum instances against production
       data to compare API responses
@@ -133,7 +133,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Thread CRUD Operations
     justification: Requires running LMS instance with authenticated user session and
       populated course data to test end-to-end MFE functionality
@@ -152,7 +152,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Vote Persistence Testing
     justification: Requires running LMS instance with authenticated user session to
       test vote interactions and persistence across browser refreshes
@@ -171,7 +171,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Moderation Queue Verification
     justification: Requires running LMS instance with both regular user and moderator
       accounts to test abuse flagging workflow
@@ -190,7 +190,7 @@ acceptance_criteria:
     file: scripts/qa/verify-forum-smoke.sh
     command: scripts/qa/verify-forum-smoke.sh
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Meilisearch Index Verification
     justification: Requires running LMS instance with populated course forum data
       indexed in Meilisearch to test search relevance
@@ -243,7 +243,7 @@ acceptance_criteria:
     file: scripts/qa/verify-forum-smoke.sh
     command: scripts/qa/verify-forum-smoke.sh
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Production Health Check
     justification: Requires production Kubernetes cluster with LMS deployment to verify
       startup timing and health check behavior
@@ -266,7 +266,7 @@ acceptance_criteria:
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Performance Testing
     justification: Requires sustained concurrent load generation against live forum
       endpoints with realistic thread volumes
@@ -280,7 +280,7 @@ acceptance_criteria:
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Performance Testing
     justification: Requires sustained concurrent load generation against live forum
       endpoints with realistic thread volumes
@@ -294,7 +294,7 @@ acceptance_criteria:
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Performance Testing
     justification: Requires sustained concurrent load generation against live forum
       endpoints with realistic thread volumes
@@ -309,7 +309,7 @@ acceptance_criteria:
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Rollback Procedure
     justification: Requires documentation review and validation against production
       deployment architecture for rollback feasibility
@@ -328,7 +328,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Rollback Data Integrity
     justification: Requires rollback scenario testing with production-like data to
       verify data accessibility across forum service versions
@@ -347,7 +347,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Observability Verification
     justification: Requires access to Grafana dashboard with accumulated forum metrics
       data
@@ -370,7 +370,7 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
-    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Observability Verification
     justification: Requires access to Grafana dashboard with accumulated forum metrics
       data
