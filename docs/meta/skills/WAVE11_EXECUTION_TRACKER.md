@@ -1,39 +1,31 @@
 # Wave 11 Execution Tracker
 
 ## Latest substantive packet head
-- 845fc4a52cf91e15b2d7c0cdbadf2a364eb1a5eb
+- 23bc348d8774e9cb9f624390cca50f3743f485f1
 
 ## Last completed batch
-- commit: 845fc4a52cf91e15b2d7c0cdbadf2a364eb1a5eb
-- scope: Wave 11 Packet D
-- validators run: runtime convergence write/check, pack registry write/check, schema verifier, skill runtime gate, docs catalog governance
+- commit: 23bc348d8774e9cb9f624390cca50f3743f485f1
+- scope: Wave 11 Packet E
+- validators run: skill registry write/check, ABI map write/check, pack registry write/check, schema verifier, skill runtime gate, docs catalog governance
 - result: passed
 
 ## Current target batch
 - files:
   - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
-  - docs/meta/skills/AGENT_PACK_ABI.yaml
-  - docs/meta/skills/schemas/skill-registry.schema.json
-  - docs/meta/skills/schemas/evidence-sufficiency-map.schema.json
-  - docs/meta/skills/schemas/mixed-diff-arbitration.schema.json
-  - tools/skills/build_skill_registry.py
-  - tools/skills/build_skill_abi_maps.py
-  - tools/skills/build_pack_registry.py
-  - tools/skills/verify_agent_pack_schemas.py
-  - generated/skills/skill-registry.json
-  - generated/skills/evidence-sufficiency-map.json
-  - generated/skills/mixed-diff-arbitration.json
-  - generated/skills/pack-registry.json
+  - docs/meta/skills/WAVE11_EXECUTION_TRACKER.md
+  - tools/skills/verify_agent_pack_runtime.py
+  - scripts/qa/run-agent-pack-runtime-gates.sh
+  - .github/workflows/docs-policy.yml
 - goal:
-  - define the minimal neutral skill ABI on top of the pack runtime
-  - add evidence sufficiency and mixed-diff arbitration as machine-readable runtime surfaces
-  - register those surfaces in the canonical pack discovery layer
+  - make the Wave 11 agent pack runtime enforceable in local and CI flows
+  - fail on missing pack/schema/runtime contradictions and high-risk skill metadata gaps
+  - align the new agent pack gate with the existing docs policy workflow
 - stop condition:
-  - skill ABI surfaces validate and one commit is created
+  - runtime verifier and CI gate are green and one commit is created
 
 ## Open residue
 - generated Wave 10 pack surfaces are not present on this branch and must be treated as external canonical inputs, not assumed local artifacts
 - assistant surface exports are not yet rebuilt on fresh Wave 11 external branches
 
 ## Next queued batch
-- Packet F: Runtime verifier and CI adoption
+- Packet G: Closeout and reviewer handoff

@@ -13,6 +13,7 @@ on:
       - "tools/skills/**"
       - "scripts/qa/spec-tools/**"
       - "scripts/qa/run-skill-runtime-gates.sh"
+      - "scripts/qa/run-agent-pack-runtime-gates.sh"
   push:
     paths:
       - "docs/**"
@@ -25,6 +26,7 @@ on:
       - "tools/skills/**"
       - "scripts/qa/spec-tools/**"
       - "scripts/qa/run-skill-runtime-gates.sh"
+      - "scripts/qa/run-agent-pack-runtime-gates.sh"
 
 permissions: {}
 
@@ -59,3 +61,13 @@ jobs:
           fi
           chmod +x scripts/qa/run-skill-runtime-gates.sh
           ./scripts/qa/run-skill-runtime-gates.sh
+
+      - name: Verify agent pack runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-agent-pack-runtime-gates.sh
+          ./scripts/qa/run-agent-pack-runtime-gates.sh

@@ -85,7 +85,7 @@
         "docs/meta/skills/AGENT_PACK_ABI.yaml"
       ],
       "check_id": "pack-runtime-alignment",
-      "details": "registered packs=['command-registry', 'read-first', 'runtime-convergence-report', 'scenario-packs', 'skill-dependency-graph', 'skill-registry']",
+      "details": "registered packs=['command-registry', 'evidence-sufficiency-map', 'mixed-diff-arbitration', 'read-first', 'runtime-convergence-report', 'scenario-packs', 'skill-dependency-graph', 'skill-registry']",
       "evidence": [
         "generated/skills/pack-registry.json"
       ],
