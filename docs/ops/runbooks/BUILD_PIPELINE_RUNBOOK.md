@@ -1,10 +1,10 @@
-# BUILD_PIPELINE_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Build Pipeline Runbook
+_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md`
+Use this runbook for the build-pipeline execution lane.
 
-This document has moved to:
-- `docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`../ci-cd/CI_CD_RUNNERS.md`](../ci-cd/CI_CD_RUNNERS.md)
+- [`../../reference/operations/CI_CD_SETUP.md`](../../reference/operations/CI_CD_SETUP.md)
+- [`../../../.github/workflows/ci.yml`](../../../.github/workflows/ci.yml)

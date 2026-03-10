@@ -1,10 +1,11 @@
-# ENTERPRISE_SERVICES_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Enterprise Services Runbook
+_Audience: Operators and enterprise admins • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`
+Use this runbook as the operational entry point for enterprise microservices, tenant entitlements, and enterprise admin surfaces.
 
-This document has moved to:
-- `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`../../guides/admin/ENTERPRISE_SERVICES_GUIDE.md`](../../guides/admin/ENTERPRISE_SERVICES_GUIDE.md)
+- [`../../reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md`](../../reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md)
+- [`AUTH_SSO_RUNBOOK.md`](AUTH_SSO_RUNBOOK.md)
+- [`MULTI_TENANCY_RUNBOOK.md`](MULTI_TENANCY_RUNBOOK.md)

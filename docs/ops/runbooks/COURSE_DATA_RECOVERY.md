@@ -1,3 +1,10 @@
-# Superseded Path Notice
+# Course Data Recovery Runbook
+_Audience: Operators and recovery responders • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-Canonical document: `docs/ops/runbooks/COURSE_DATA_RECOVERY.md`
+Use this runbook when learner or course data recovery is required after an outage or failed operation.
+
+## Start here
+
+- [`DISASTER_RECOVERY.md`](DISASTER_RECOVERY.md)
+- [`site-down.md`](site-down.md)
+- [`database-issues.md`](database-issues.md)

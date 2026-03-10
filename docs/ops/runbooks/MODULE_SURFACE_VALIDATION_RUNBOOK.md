@@ -1,10 +1,10 @@
-# MODULE_SURFACE_VALIDATION_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Module Surface Validation Runbook
+_Audience: Operators and frontend owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/MODULE_SURFACE_VALIDATION_RUNBOOK.md`
+Use this runbook for module-surface validation and plugin-slot verification.
 
-This document has moved to:
-- `docs/ops/runbooks/MODULE_SURFACE_VALIDATION_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`MFE_PLUGIN_SLOTS_RUNBOOK.md`](MFE_PLUGIN_SLOTS_RUNBOOK.md)
+- [`../../reference/architecture/FPF_PLUGIN_SLOT_REGISTRY.md`](../../reference/architecture/FPF_PLUGIN_SLOT_REGISTRY.md)
+- [`../../../scripts/qa/verify-module-surface-validation.sh`](../../../scripts/qa/verify-module-surface-validation.sh)

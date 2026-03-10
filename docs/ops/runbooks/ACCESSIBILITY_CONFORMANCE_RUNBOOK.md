@@ -1,10 +1,16 @@
-# ACCESSIBILITY_CONFORMANCE_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Accessibility Conformance Runbook
+_Audience: Operators and QA • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
+Use this runbook when you need the operator path for accessibility verification on branded LMS, Studio, and MFE surfaces.
 
-This document has moved to:
-- `docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`A11Y_CONTRAST_FOCUS_GATE.md`](A11Y_CONTRAST_FOCUS_GATE.md) for contrast and focus checks
+- [`A11Y_REGRESSION_LANE.md`](A11Y_REGRESSION_LANE.md) for the accessibility regression lane
+- [`FRONTEND_REGRESSION_CHECKLIST.md`](FRONTEND_REGRESSION_CHECKLIST.md) for post-change UI verification
+- [`VISUAL_PARITY_CHECKPOINTS.md`](VISUAL_PARITY_CHECKPOINTS.md) for route-by-route parity proof
+
+## Use this runbook when
+
+- a branding or frontend change must clear accessibility gates
+- a spec or guide references accessibility conformance as the operator check surface

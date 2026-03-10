@@ -1,10 +1,11 @@
-# BRANDING_RELEASE_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Branding Release Runbook
+_Audience: Operators and frontend owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md`
+Use this runbook as the operator router for tenant branding releases.
 
-This document has moved to:
-- `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`../../guides/branding/BRANDING_OPERATING_MODEL.md`](../../guides/branding/BRANDING_OPERATING_MODEL.md)
+- [`../../guides/branding/BRANDING_VERIFICATION_CHECKLIST.md`](../../guides/branding/BRANDING_VERIFICATION_CHECKLIST.md)
+- [`VISUAL_PARITY_CHECKPOINTS.md`](VISUAL_PARITY_CHECKPOINTS.md)
+- [`TENANT_BRANDING_TROUBLESHOOTING.md`](TENANT_BRANDING_TROUBLESHOOTING.md)

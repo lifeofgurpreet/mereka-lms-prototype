@@ -1,10 +1,10 @@
-# VISUAL_REGRESSION_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Visual Regression Runbook
+_Audience: Operators and QA • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`
+Use this runbook when a doc or script refers to the visual-regression lane and you need the live execution surfaces.
 
-This document has moved to:
-- `docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`VISUAL_SMOKE_BASELINE.md`](VISUAL_SMOKE_BASELINE.md)
+- [`VISUAL_PARITY_CHECKPOINTS.md`](VISUAL_PARITY_CHECKPOINTS.md)
+- [`../../guides/branding/BRANDING_VERIFICATION_CHECKLIST.md`](../../guides/branding/BRANDING_VERIFICATION_CHECKLIST.md)

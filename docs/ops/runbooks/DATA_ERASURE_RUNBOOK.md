@@ -1,10 +1,10 @@
-# DATA_ERASURE_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Data Erasure Runbook
+_Audience: Operators and privacy responders • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md`
+Use this runbook for the operator path when a deletion or right-to-erasure workflow must be executed or verified.
 
-This document has moved to:
-- `docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`GDPR_COMPLIANCE.md`](GDPR_COMPLIANCE.md) for the full retirement and deletion flow
+- [`../../policies/operations/DATA_RETENTION_POLICY.md`](../../policies/operations/DATA_RETENTION_POLICY.md) for retention and deletion rules
+- [`../../../scripts/qa/verify-pii-inventory.sh`](../../../scripts/qa/verify-pii-inventory.sh) for supporting verification

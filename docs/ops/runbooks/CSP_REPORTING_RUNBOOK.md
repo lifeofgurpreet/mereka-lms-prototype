@@ -1,10 +1,10 @@
-# CSP_REPORTING_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# CSP Reporting Runbook
+_Audience: Operators and security responders • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/CSP_REPORTING_RUNBOOK.md`
+Use this runbook for CSP-reporting verification and remediation.
 
-This document has moved to:
-- `docs/ops/runbooks/CSP_REPORTING_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`../../adr/025-csp-nonce-migration.md`](../../adr/025-csp-nonce-migration.md)
+- [`../../../scripts/qa/verify-csp-report-pipeline.sh`](../../../scripts/qa/verify-csp-report-pipeline.sh)
+- [`../../../scripts/qa/verify-csp-headers.sh`](../../../scripts/qa/verify-csp-headers.sh)

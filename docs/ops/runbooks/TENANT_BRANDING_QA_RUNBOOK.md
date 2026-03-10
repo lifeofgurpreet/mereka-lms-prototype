@@ -1,10 +1,10 @@
-# TENANT_BRANDING_QA_RUNBOOK (Superseded)
-_Audience: Ops • Owner: Docs Team • Last verified: 2026-03-08 • Status: superseded_
+# Tenant Branding QA Runbook
+_Audience: Operators and QA • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
 
-superseded_by: `docs/ops/runbooks/TENANT_BRANDING_QA_RUNBOOK.md`
+Use this runbook for the tenant-branding verification lane after a visual or theming change.
 
-This document has moved to:
-- `docs/ops/runbooks/TENANT_BRANDING_QA_RUNBOOK.md`
+## Start here
 
-Reason:
-- Canonicalized to the document-kind surface during docs architecture cleanup.
+- [`VISUAL_PARITY_CHECKPOINTS.md`](VISUAL_PARITY_CHECKPOINTS.md)
+- [`TENANT_BRANDING_TROUBLESHOOTING.md`](TENANT_BRANDING_TROUBLESHOOTING.md)
+- [`../../guides/branding/BRANDING_VERIFICATION_CHECKLIST.md`](../../guides/branding/BRANDING_VERIFICATION_CHECKLIST.md)
