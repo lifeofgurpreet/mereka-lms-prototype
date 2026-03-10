@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "scenario_id": "docs_only_low_risk",
+      "title": "Docs-only low-risk change",
+      "diff_range": "fixture://docs_only_low_risk",
+      "selected_skills": ["docs-truth-review"],
+      "severity": "low",
+      "runtime_convergence_state": "pass",
+      "expected_reviewers": ["docs", "governance"],
+      "expected_evidence_classes": ["catalog_governance", "docs_policy"],
+      "expected_release_status": "ready",
+      "expected_read_first_order": ["pack-registry", "read-first"]
+    },
+    {
+      "scenario_id": "specs_only_normative",
+      "title": "Specs-only normative change",
+      "diff_range": "fixture://specs_only_normative",
+      "selected_skills": ["docs-truth-review", "control-plane-validation"],
+      "severity": "high",
+      "runtime_convergence_state": "pass",
+      "expected_reviewers": ["docs", "governance", "platform"],
+      "expected_evidence_classes": ["catalog_governance", "docs_policy", "validation_run"],
+      "expected_release_status": "advisory",
+      "expected_read_first_order": ["pack-registry", "runtime-convergence-report", "read-first"]
+    },
+    {
+      "scenario_id": "workflow_or_contract_change",
+      "title": "Workflow or contract change",
+      "diff_range": "fixture://workflow_or_contract_change",
+      "selected_skills": ["cross-repo-release-contract-review", "promotion-workflow-review"],
+      "severity": "release-critical",
+      "runtime_convergence_state": "pass",
+      "expected_reviewers": ["docs", "platform", "release"],
+      "expected_evidence_classes": ["cross_repo_alignment", "release_contract", "release_obligations", "workflow_dispatch"],
+      "expected_release_status": "advisory",
+      "expected_read_first_order": ["pack-registry", "runtime-convergence-report", "evidence-sufficiency-map", "mixed-diff-arbitration"]
+    },
+    {
+      "scenario_id": "cross_repo_release_change",
+      "title": "Cross-repo release-affecting change",
+      "diff_range": "fixture://cross_repo_release_change",
+      "selected_skills": ["change-impact-triage", "cross-repo-release-contract-review", "promotion-workflow-review"],
+      "severity": "release-critical",
+      "runtime_convergence_state": "warning",
+      "expected_reviewers": ["docs", "platform", "release"],
+      "expected_evidence_classes": ["cross_repo_alignment", "release_contract", "release_obligations", "source_of_truth_map", "workflow_dispatch"],
+      "expected_release_status": "break-glass-only",
+      "expected_read_first_order": ["pack-registry", "runtime-convergence-report", "evidence-sufficiency-map", "mixed-diff-arbitration"]
+    },
+    {
+      "scenario_id": "mixed_docs_specs_contracts",
+      "title": "Mixed docs/specs/contracts change",
+      "diff_range": "fixture://mixed_docs_specs_contracts",
+      "selected_skills": ["docs-truth-review", "change-impact-triage", "cross-repo-release-contract-review"],
+      "severity": "high",
+      "runtime_convergence_state": "pass",
+      "expected_reviewers": ["docs", "governance", "platform"],
+      "expected_evidence_classes": ["catalog_governance", "cross_repo_alignment", "docs_policy", "release_obligations", "source_of_truth_map"],
+      "expected_release_status": "advisory",
+      "expected_read_first_order": ["pack-registry", "runtime-convergence-report", "mixed-diff-arbitration", "read-first"]
+    },
+    {
+      "scenario_id": "proposal_only_change",
+      "title": "Proposal-only change",
+      "diff_range": "fixture://proposal_only_change",
+      "selected_skills": ["docs-truth-review"],
+      "severity": "low",
+      "runtime_convergence_state": "pass",
+      "expected_reviewers": ["docs", "governance"],
+      "expected_evidence_classes": ["catalog_governance", "docs_policy"],
+      "expected_release_status": "ready",
+      "expected_read_first_order": ["pack-registry", "read-first"]
+    },
+    {
+      "scenario_id": "wrapper_retirement_change",
+      "title": "Wrapper retirement change",
+      "diff_range": "fixture://wrapper_retirement_change",
+      "selected_skills": ["wrapper-retirement-assessment"],
+      "severity": "medium",
+      "runtime_convergence_state": "pass",
+      "expected_reviewers": ["docs"],
+      "expected_evidence_classes": ["transitional_residue"],
+      "expected_release_status": "ready",
+      "expected_read_first_order": ["pack-registry"]
+    },
+    {
+      "scenario_id": "runtime_control_plane_change",
+      "title": "Runtime control-plane change",
+      "diff_range": "fixture://runtime_control_plane_change",
+      "selected_skills": ["change-impact-triage", "control-plane-validation"],
+      "severity": "high",
+      "runtime_convergence_state": "warning",
+      "expected_reviewers": ["docs", "platform"],
+      "expected_evidence_classes": ["source_of_truth_map", "validation_run"],
+      "expected_release_status": "advisory",
+      "expected_read_first_order": ["pack-registry", "runtime-convergence-report", "mixed-diff-arbitration", "read-first"]
+    },
+    {
+      "scenario_id": "high_risk_normative_change",
+      "title": "High-risk normative change",
+      "diff_range": "fixture://high_risk_normative_change",
+      "selected_skills": ["docs-truth-review", "change-impact-triage", "control-plane-validation"],
+      "severity": "high",
+      "runtime_convergence_state": "warning",
+      "expected_reviewers": ["docs", "governance", "platform"],
+      "expected_evidence_classes": ["catalog_governance", "docs_policy", "source_of_truth_map", "validation_run"],
+      "expected_release_status": "advisory",
+      "expected_read_first_order": ["pack-registry", "runtime-convergence-report", "mixed-diff-arbitration", "read-first"]
+    },
+    {
+      "scenario_id": "release_break_glass_scenario",
+      "title": "Release break-glass scenario",
+      "diff_range": "fixture://release_break_glass_scenario",
+      "selected_skills": ["cross-repo-release-contract-review", "promotion-workflow-review", "release-obligations-review"],
+      "severity": "release-critical",
+      "runtime_convergence_state": "warning",
+      "expected_reviewers": ["docs", "platform", "release"],
+      "expected_evidence_classes": ["cross_repo_alignment", "release_contract", "release_notes_diff", "release_obligations", "rollback_target_reference", "smoke_test_result", "workflow_dispatch"],
+      "expected_release_status": "break-glass-only",
+      "expected_read_first_order": ["pack-registry", "runtime-convergence-report", "evidence-sufficiency-map", "mixed-diff-arbitration"]
+    }
+  ]
+}

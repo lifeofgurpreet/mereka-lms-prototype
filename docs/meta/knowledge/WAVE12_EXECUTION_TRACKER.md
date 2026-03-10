@@ -1,27 +1,27 @@
 # Wave 12 Execution Tracker
 
 ## Latest substantive packet head
-- 8892594fd3843ea2b0466c976688964fdfad68b9
+- f475496bc7f5102bc369045a23ef5883f9d29105
 
 ## Last completed batch
-- commit: 8892594fd3843ea2b0466c976688964fdfad68b9
-- scope: Wave 12 Packet D
-- validators run: read-first packs generator write/check, docs catalog governance
+- commit: f475496bc7f5102bc369045a23ef5883f9d29105
+- scope: Wave 12 Packet E
+- validators run: release readiness generator write/check, docs catalog governance
 - result: passed
 
 ## Current target packet
 - files:
-  - docs/meta/knowledge/schemas/release-readiness.schema.json
-  - tools/knowledge/build_release_readiness.py
-  - generated/knowledge/release-readiness.json
-  - generated/knowledge/release-readiness.md
+  - docs/meta/knowledge/schemas/runtime-evaluation.schema.json
+  - fixtures/decision-runtime/scenarios.json
+  - tools/knowledge/build_runtime_evaluation.py
+  - generated/knowledge/runtime-evaluation.json
   - docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md
 - goal:
-  - produce a deterministic release-readiness verdict from review, reviewer, evidence, read-first, and convergence inputs
-  - keep live approval state unresolved rather than guessed
-  - provide both canonical machine output and markdown projection
+  - prove the decision runtime against deterministic fixture scenarios
+  - add golden expectations for reviewer routing, evidence routing, release readiness, and read-first order
+  - summarize runtime evaluation in one machine-readable output
 - stop condition:
-  - release readiness outputs are generated deterministically and one substantive commit is created
+  - runtime evaluation output is generated deterministically and one substantive commit is created
 
 ## Open residue
 - assistant surface exports are not yet rebuilt on the fresh Wave 11 external branches
@@ -29,4 +29,4 @@
 - runtime convergence warning still requires manual follow-up and must remain non-hidden in Wave 12 outputs
 
 ## Next queued packet
-- Packet F: Fixture suite and golden tests
+- Packet G: Runtime verifier, CI, and artifact workflow

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_id",
+    "schema_version",
+    "generated_by",
+    "source_range",
+    "canonical_inputs",
+    "scenarios_run",
+    "pass_count",
+    "fail_count",
+    "regression_count",
+    "false_positive_notes",
+    "unresolved_ambiguities",
+    "scenario_results"
+  ],
+  "properties": {
+    "pack_id": { "const": "runtime-evaluation" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": { "type": ["string", "null"] },
+    "canonical_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "scenarios_run": { "type": "integer", "minimum": 1 },
+    "pass_count": { "type": "integer", "minimum": 0 },
+    "fail_count": { "type": "integer", "minimum": 0 },
+    "regression_count": { "type": "integer", "minimum": 0 },
+    "false_positive_notes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "unresolved_ambiguities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "scenario_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scenario_id",
+          "pass",
+          "expected_reviewers",
+          "actual_reviewers",
+          "expected_evidence_classes",
+          "actual_evidence_classes",
+          "expected_release_status",
+          "actual_release_status",
+          "expected_read_first_order",
+          "actual_read_first_order",
+          "mismatches"
+        ],
+        "properties": {
+          "scenario_id": { "type": "string", "minLength": 1 },
+          "pass": { "type": "boolean" },
+          "expected_reviewers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "actual_reviewers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "expected_evidence_classes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "actual_evidence_classes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "expected_release_status": { "type": "string", "minLength": 1 },
+          "actual_release_status": { "type": "string", "minLength": 1 },
+          "expected_read_first_order": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "actual_read_first_order": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "mismatches": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "minItems": 1
+    }
+  }
+}
