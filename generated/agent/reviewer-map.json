@@ -1,0 +1,133 @@
+{
+  "generated_by": "tools/knowledge/build_cross_repo_agent_packs.py",
+  "reviewer_map": [
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_reviewers": [
+        "@platform",
+        "@applications"
+      ],
+      "truth_lane": "release_lanes"
+    },
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform"
+      ],
+      "required_reviewers": [
+        "@platform"
+      ],
+      "truth_lane": "service_identity_aliases"
+    },
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform"
+      ],
+      "required_reviewers": [
+        "@platform"
+      ],
+      "truth_lane": "domain_registry_hostnames"
+    },
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform"
+      ],
+      "required_reviewers": [
+        "@platform"
+      ],
+      "truth_lane": "bootstrap_lane_topology"
+    },
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_reviewers": [
+        "@platform",
+        "@applications"
+      ],
+      "truth_lane": "promotion_workflow_semantics"
+    },
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform",
+        "@docs"
+      ],
+      "required_reviewers": [
+        "@platform",
+        "@docs"
+      ],
+      "truth_lane": "runtime_review_evidence_rules"
+    },
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform"
+      ],
+      "required_reviewers": [
+        "@platform"
+      ],
+      "truth_lane": "opentofu_backend_workspace_rules"
+    },
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_reviewers": [
+        "@platform",
+        "@applications"
+      ],
+      "truth_lane": "app_deployment_contracts"
+    },
+    {
+      "escalation_rules": [
+        "Escalate when canonical source and compiled projection disagree",
+        "Escalate when cross-repo change touches more than one authoritative repo"
+      ],
+      "owners": [
+        "@platform",
+        "@docs"
+      ],
+      "required_reviewers": [
+        "@platform",
+        "@docs"
+      ],
+      "truth_lane": "canonical_entrypoints"
+    }
+  ],
+  "version": 1
+}

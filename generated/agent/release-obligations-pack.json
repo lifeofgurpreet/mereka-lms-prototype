@@ -1,0 +1,141 @@
+{
+  "generated_by": "tools/knowledge/build_cross_repo_agent_packs.py",
+  "release_lanes": {
+    "authentik": {
+      "approved_intake_paths": [
+        "gitops-manifest-pr",
+        "upstream-chart-version-review",
+        "internal-oci-promotion"
+      ],
+      "owners": [
+        "@platform",
+        "@security"
+      ],
+      "required_evidence": [
+        "release_notes_diff",
+        "config_change_summary",
+        "smoke_test_result",
+        "security_delta_summary",
+        "approval_record",
+        "rollback_target_reference"
+      ],
+      "rollback_method": "gitops_revert_to_previous_release_bundle"
+    },
+    "cal.com": {
+      "approved_intake_paths": [
+        "gitops-manifest-pr",
+        "internal-oci-promotion",
+        "upstream-chart-version-review"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_evidence": [
+        "release_notes_diff",
+        "config_change_summary",
+        "smoke_test_result",
+        "security_delta_summary",
+        "rollback_target_reference"
+      ],
+      "rollback_method": "gitops_revert_to_previous_release_bundle"
+    },
+    "listmonk": {
+      "approved_intake_paths": [
+        "gitops-manifest-pr",
+        "internal-oci-promotion"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_evidence": [
+        "release_notes_diff",
+        "config_change_summary",
+        "smoke_test_result",
+        "rollback_target_reference"
+      ],
+      "rollback_method": "gitops_revert_to_previous_release_bundle"
+    },
+    "mereka-lms": {
+      "approved_intake_paths": [
+        "gitops-manifest-pr",
+        "internal-image-build-and-promotion"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_evidence": [
+        "release_notes_diff",
+        "config_change_summary",
+        "migration_summary",
+        "smoke_test_result",
+        "release_gate_result",
+        "rollback_target_reference"
+      ],
+      "rollback_method": "gitops_revert_to_previous_release_bundle"
+    },
+    "reka-slackbot": {
+      "approved_intake_paths": [
+        "gitops-manifest-pr",
+        "internal-image-build-and-promotion"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_evidence": [
+        "release_notes_diff",
+        "config_change_summary",
+        "smoke_test_result",
+        "rollback_target_reference"
+      ],
+      "rollback_method": "gitops_revert_to_previous_release_bundle"
+    },
+    "temporal": {
+      "approved_intake_paths": [
+        "gitops-manifest-pr",
+        "upstream-chart-version-review",
+        "internal-oci-promotion"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_evidence": [
+        "release_notes_diff",
+        "config_change_summary",
+        "migration_summary",
+        "smoke_test_result",
+        "rollback_target_reference"
+      ],
+      "rollback_method": "gitops_revert_to_previous_release_bundle"
+    },
+    "weaviate": {
+      "approved_intake_paths": [
+        "gitops-manifest-pr",
+        "upstream-chart-version-review",
+        "internal-oci-promotion"
+      ],
+      "owners": [
+        "@platform",
+        "@data"
+      ],
+      "required_evidence": [
+        "release_notes_diff",
+        "config_change_summary",
+        "migration_summary",
+        "smoke_test_result",
+        "rollback_target_reference"
+      ],
+      "rollback_method": "gitops_revert_to_previous_release_bundle"
+    }
+  },
+  "source_pointers": [
+    "/home/gurpreet/projects/platform-control-plane-wt-wave10-contract-docsync/contracts/release-contracts.yaml",
+    "/home/gurpreet/projects/k8s/mereka-lms-wt-wave10-agent-consumption-runtime/docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md",
+    "/home/gurpreet/projects/k8s/bbi-infrastructure-wt-wave10-contract-compiled-front-doors/docs/reference/PROMOTION_CONTRACT_REFERENCE.md"
+  ],
+  "version": 1
+}
