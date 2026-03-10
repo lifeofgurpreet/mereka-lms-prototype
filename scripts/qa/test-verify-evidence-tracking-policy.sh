@@ -10,11 +10,11 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 init_repo() {
   local repo="$1"
-  mkdir -p "$repo/docs/operations/evidence"
+  mkdir -p "$repo/docs/evidence/operations"
   git -C "$repo" init -q
   git -C "$repo" config user.email "ci@example.com"
   git -C "$repo" config user.name "CI"
-  cat >"$repo/docs/operations/evidence/README.md" <<'EOF'
+  cat >"$repo/docs/evidence/operations/README.md" <<'EOF'
 # Evidence
 EOF
   git -C "$repo" add .
@@ -48,7 +48,7 @@ run_expect_fail() {
 # Case 1: markdown evidence additions should pass.
 repo_ok="$tmpdir/repo-ok"
 init_repo "$repo_ok"
-cat >"$repo_ok/docs/operations/evidence/check-1.md" <<'EOF'
+cat >"$repo_ok/docs/evidence/operations/check-1.md" <<'EOF'
 # Check 1
 
 Summary evidence with redacted data.
@@ -60,7 +60,7 @@ run_expect_pass "$repo_ok" "markdown-only evidence additions pass policy"
 # Case 2: binary evidence additions should fail.
 repo_bad="$tmpdir/repo-bad"
 init_repo "$repo_bad"
-printf '\x89PNG\r\n\x1a\n' >"$repo_bad/docs/operations/evidence/screenshot.png"
+printf '\x89PNG\r\n\x1a\n' >"$repo_bad/docs/evidence/operations/screenshot.png"
 git -C "$repo_bad" add .
 git -C "$repo_bad" commit -q -m "add binary evidence"
 run_expect_fail "$repo_bad" "non-markdown evidence artifacts are rejected"

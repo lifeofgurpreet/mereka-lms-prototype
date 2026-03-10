@@ -183,7 +183,7 @@ fi
 if [[ -f "$A11Y_RUNBOOK" ]]; then
   do_pass "AC-UVIS-303: ACCESSIBILITY_CONFORMANCE_RUNBOOK.md exists"
 else
-  do_fail "AC-UVIS-303: ACCESSIBILITY_CONFORMANCE_RUNBOOK.md not found at docs/operations/"
+  do_fail "AC-UVIS-303: ACCESSIBILITY_CONFORMANCE_RUNBOOK.md not found at docs/runbooks/operations/ or docs/ops/runbooks/"
 fi
 
 # UI_UX_POSTDEPLOY_SMOKE.md must cross-reference a11y checks.

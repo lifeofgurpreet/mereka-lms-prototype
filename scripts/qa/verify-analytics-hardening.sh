@@ -13,7 +13,7 @@
 #                 only in approved LMS/Studio settings hooks.
 #   AC-FRONT-054: Regression test — sentinel values filtered, no active sentinel literals
 #                 in config files.
-#   AC-FRONT-055: Evidence bundle exists at docs/operations/evidence/analytics-hardening-report.md
+#   AC-FRONT-055: Evidence bundle exists at docs/evidence/operations/analytics-hardening-report.md
 #                 referencing parent bead 2dcy.
 
 set -euo pipefail
@@ -38,7 +38,7 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
 FOOTER_HTML="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
-EVIDENCE_REPORT="$REPO_ROOT/docs/operations/evidence/analytics-hardening-report.md"
+EVIDENCE_REPORT="$REPO_ROOT/docs/evidence/operations/analytics-hardening-report.md"
 CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
@@ -352,9 +352,9 @@ echo "AC-FRONT-055: Evidence bundle path and bead reference"
 
 # Check 23: Evidence report exists
 if [[ -f "$EVIDENCE_REPORT" ]]; then
-  pass_check "Evidence report exists at docs/operations/evidence/analytics-hardening-report.md"
+  pass_check "Evidence report exists at docs/evidence/operations/analytics-hardening-report.md"
 else
-  fail_check "Evidence report missing at docs/operations/evidence/analytics-hardening-report.md"
+  fail_check "Evidence report missing at docs/evidence/operations/analytics-hardening-report.md"
 fi
 
 # Check 24: Evidence report references parent bead 2dcy
@@ -416,7 +416,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  AC-FRONT-054: Audit infrastructure/ for literal sentinel strings assigned as"
   echo "                SEGMENT_KEY. Ensure footer.html runtime guard is present."
   echo ""
-  echo "  AC-FRONT-055: Create docs/operations/evidence/analytics-hardening-report.md."
+  echo "  AC-FRONT-055: Create docs/evidence/operations/analytics-hardening-report.md."
   echo "                Add 'analytics-hardening' job to .github/workflows/ci.yml."
   exit 1
 fi

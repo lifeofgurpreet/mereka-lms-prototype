@@ -197,7 +197,7 @@ Before declaring the incident resolved:
 
 **Postmortem template**: [postmortems/README.md](postmortems/README.md) → full template in [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md).
 
-File as: `docs/operations/postmortems/YYYY-MM-DD-<slug>.md`
+File as: `docs/status/incidents/YYYY-MM-DD-<slug>.md`
 
 ---
 

@@ -8,8 +8,8 @@ SCRIPT_PATH="$REPO_ROOT/scripts/infra/rebuild-dev-openedx-db.sh"
 # Check both canonical and legacy paths (docs were reorganized)
 if [[ -f "$REPO_ROOT/docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md" ]]; then
   RUNBOOK_PATH="$REPO_ROOT/docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md"
-elif [[ -f "$REPO_ROOT/docs/operations/runbooks/DEV_DB_REBUILD_CANONICAL.md" ]]; then
-  RUNBOOK_PATH="$REPO_ROOT/docs/operations/runbooks/DEV_DB_REBUILD_CANONICAL.md"
+elif [[ -f "$REPO_ROOT/docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md" ]]; then
+  RUNBOOK_PATH="$REPO_ROOT/docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md"
 else
   RUNBOOK_PATH="$REPO_ROOT/docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md"
 fi
@@ -58,9 +58,9 @@ else
 fi
 
 if [[ -f "$RUNBOOK_PATH" ]]; then
-  pass "Runbook exists: docs/operations/runbooks/DEV_DB_REBUILD_CANONICAL.md"
+  pass "Runbook exists: docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md"
 else
-  fail "Missing runbook: docs/operations/runbooks/DEV_DB_REBUILD_CANONICAL.md"
+  fail "Missing runbook: docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md"
 fi
 
 if [[ -f "$SCRIPT_PATH" ]]; then

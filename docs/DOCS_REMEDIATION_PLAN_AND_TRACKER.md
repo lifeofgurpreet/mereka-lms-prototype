@@ -85,7 +85,7 @@ Target architecture (staged migration, not big-bang):
 - `docs/archive/` — historical, superseded, and aged evidence.
 
 Transitional authority rules:
-- Existing `docs/operations/**` remains valid until moved to `docs/ops/**`.
+- `docs/operations/**` has been retired to a tombstone root; use `docs/ops/**` as the live operator surface.
 - Existing `docs/onboarding/**` remains valid until moved to `docs/guides/**`.
 - `docs/runbooks/**` is legacy; use redirect-only stubs during transition.
 - One topic may have many supporting docs but only one canonical doc.
@@ -144,7 +144,7 @@ docs/
 ```
 
 Notes:
-- `docs/operations/**`, `docs/onboarding/**`, and `docs/runbooks/**` are transitional and should eventually converge to `docs/ops/**` and `docs/guides/**`.
+- `docs/operations/**` is retired to a tombstone root; `docs/onboarding/**` and `docs/runbooks/**` remain transitional and should eventually converge to `docs/ops/**` and `docs/guides/**`.
 - Transitional folders are not final-state targets.
 
 ---
@@ -171,14 +171,14 @@ Use this deterministic mapping unless explicitly overridden by owner approval.
 
 | Legacy Path Pattern | Target Path Pattern | Notes |
 |---|---|---|
-| `docs/operations/runbooks/**` | `docs/ops/runbooks/**` | canonical runbook home |
+| `docs/ops/runbooks/**` | `docs/ops/runbooks/**` | canonical runbook home |
 | `docs/runbooks/**` | `docs/archive/superseded/runbooks/**` | keep stubs until link migration complete |
 | `docs/onboarding/**` | `docs/guides/onboarding/**` | onboarding guides |
 | `docs/architecture/**` | `docs/concepts/architecture/**` | conceptual architecture |
 | `docs/analytics/**` | `docs/concepts/analytics/**` | analytics concepts and references |
 | `docs/branding/**` | `docs/guides/branding/**` and `docs/concepts/branding/**` | split by procedural vs conceptual content |
 | `evidence/**` | `archive/evidence/**` (tiered) | evidence lifecycle policy applies |
-| `docs/operations/evidence/**` | `docs/archive/evidence/**` (tiered) | evidence lifecycle policy applies |
+| `docs/evidence/operations/**` | `docs/archive/evidence/**` (tiered) | evidence lifecycle policy applies |
 | `docs/ci-cd/**` | `docs/ops/ci-cd/**` | operational pipeline docs |
 | `docs/status/**` | `docs/status/**` | active reporting/status root; archive only after cold-storage transition |
 
@@ -758,9 +758,9 @@ Status values: `TODO`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | INV-02 | 1 | Generate overlap matrix | Agent Operator | DONE | catalog + docs | `overlap-matrix-YYYYMMDD.md` | All major clusters mapped | 2026-03-06: `docs/archive/reports/overlap-matrix-20260306.md` generated |
 | INV-03 | 1 | Canonical conflict report | Agent Operator | DONE | overlap matrix | `canonical-resolution-map-YYYYMMDD.md` | One canonical proposed per cluster | 2026-03-06: `docs/archive/reports/canonical-resolution-map-20260306.md` generated with canonical proposals; major-cluster approval matrix published at `docs/archive/reports/canonical-authority-approval-matrix-20260306.md` (owner approvals pending) |
 | STR-01 | 2 | Runbook tree authority consolidation | Agent Operator | DONE | approved map | move ledger + stubs | No dual canonical runbook trees | 2026-03-06: legacy runbook duplicates in `docs/operations/**` converted to superseded stubs with canonical pointers to `docs/ops/runbooks/**`; latest overlap (`VISUAL_REGRESSION.md`) retired in move-ledger; runbook contradiction audit published at `docs/archive/reports/runbooks-contradiction-audit-20260306.md` |
-| STR-02 | 2 | Root cleanup by allowlist | Agent Operator | DONE | root docs | move ledger updates | Root reduced to allowlist only | 2026-03-06: docs root matches allowlist exactly (`README.md`, `CONTRIBUTING.md`, `DOCS_REMEDIATION_PLAN_AND_TRACKER.md`, `catalog.json`); transitional deprecation timeline published at `docs/archive/reports/transitional-path-deprecation-timeline-20260306.md`; migration queue advanced with `docs/operations/DISCOVERY_QUICKSTART.md -> docs/ops/quickref/discovery-quickstart.md`, `docs/operations/LOCAL_ACCESS_INFO.md -> docs/ops/quickref/local-access-info.md`, `docs/operations/LOCAL_PRODUCTION_PARITY.md -> docs/ops/quickref/local-production-parity.md`, `docs/operations/LOCAL_WORK_REMAINING.md -> docs/ops/quickref/local-work-remaining.md`, `docs/operations/IN_CLUSTER_AUTH_VERIFICATION.md -> docs/runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md`, `docs/operations/DJANGO_RAW_SQL_BYPASS.md -> docs/ops/runbooks/django-raw-sql-bypass.md`, `docs/operations/TASK3_SES_SMTP_GUIDE.md -> docs/ops/runbooks/task3-ses-smtp-guide.md`, `docs/operations/COST_ESTIMATE.md -> docs/ops/ci-cd/cost-estimate.md`, and `docs/operations/PRODUCTION_VERIFICATION_CHECKLIST.md -> docs/ops/runbooks/production-verification-checklist.md` (superseded stubs retained) |
+| STR-02 | 2 | Root cleanup by allowlist | Agent Operator | DONE | root docs | move ledger updates | Root reduced to allowlist only | 2026-03-06: docs root matches allowlist exactly (`README.md`, `CONTRIBUTING.md`, `DOCS_REMEDIATION_PLAN_AND_TRACKER.md`, `catalog.json`); transitional deprecation timeline published at `docs/archive/reports/transitional-path-deprecation-timeline-20260306.md`; migration queue advanced with `docs/ops/quickref/discovery-quickstart.md -> docs/ops/quickref/discovery-quickstart.md`, `docs/ops/quickref/local-access-info.md -> docs/ops/quickref/local-access-info.md`, `docs/ops/quickref/local-production-parity.md -> docs/ops/quickref/local-production-parity.md`, `docs/ops/quickref/local-work-remaining.md -> docs/ops/quickref/local-work-remaining.md`, `docs/runbooks/operations/IN -> docs/runbooks/operations/IN_CLUSTER_AUTH_VERIFICATION.md`, `docs/ops/runbooks/django-raw-sql-bypass.md -> docs/ops/runbooks/django-raw-sql-bypass.md`, `docs/ops/runbooks/task3-ses-smtp-guide.md -> docs/ops/runbooks/task3-ses-smtp-guide.md`, `docs/ops/ci-cd/cost-estimate.md -> docs/ops/ci-cd/cost-estimate.md`, and `docs/ops/runbooks/production-verification-checklist.md -> docs/ops/runbooks/production-verification-checklist.md` (superseded stubs retained) |
 | CNT-01 | 3 | Onboarding cluster consolidation | Agent Operator | DONE | approved map | updated canonical + stubs | No contradictory setup paths | 2026-03-06: canonical onboarding index set to `docs/guides/onboarding/README.md`; duplicate indexes superseded; contradictions resolved in `docs/archive/reports/onboarding-contradiction-audit-20260306.md` |
-| CNT-02 | 3 | Access URLs consolidation | Agent Operator | DONE | approved map | canonical + local subset | One access canonical source | 2026-03-06: canonical moved to `docs/ops/quickref/access-urls.md`; legacy `docs/operations/ACCESS_URLS.md` transitioned to `archive-candidate` shim after dependency cleanup; contradictions resolved in `docs/archive/reports/access-contradiction-audit-20260306.md` |
+| CNT-02 | 3 | Access URLs consolidation | Agent Operator | DONE | approved map | canonical + local subset | One access canonical source | 2026-03-06: canonical moved to `docs/ops/quickref/access-urls.md`; legacy `docs/ops/quickref/access-urls.md` transitioned to `archive-candidate` shim after dependency cleanup; contradictions resolved in `docs/archive/reports/access-contradiction-audit-20260306.md` |
 | CNT-03 | 3 | Branding docs role-boundary consolidation | Agent Operator | DONE | approved map | contract/guardrail/reference split | No duplicated gate definitions | 2026-03-06: canonical role-boundary index added at `docs/guides/branding/README.md`; legacy `docs/branding/README.md` retained as transitional archive-candidate shim; contradictions resolved in `docs/archive/reports/branding-contradiction-audit-20260306.md` |
 | EVD-01 | 3 | Evidence retention dry-run | Agent Operator | DONE | evidence paths | retention dry-run report | owner-approved candidate list | 2026-03-06: `docs/archive/reports/evidence-retention-dry-run-20260306.md` generated with policy-safe signals; candidate count `0` (no pending approval-gated moves this cycle); contradiction findings documented in `docs/archive/reports/evidence-contradiction-audit-20260306.md` |
 | EVD-02 | 3 | Evidence archive moves (approved only) | Agent Operator | DONE | approved dry-run | archive move ledger | tiered lifecycle applied | 2026-03-06: no-op execution for this cycle (`0` approved candidates); lifecycle workflow remains active and canonical archive evidence path is enforced in QA tooling defaults/checks |

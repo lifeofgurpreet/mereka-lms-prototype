@@ -158,7 +158,7 @@ The gate runs as a dedicated job (`a11y-contrast-focus`) in
 - `assets/branding/tokens.css`
 - `infrastructure/tutor/themes/mereka/**`
 - `scripts/qa/verify-a11y-contrast-focus.sh`
-- `docs/operations/A11Y_*.md`
+- `docs/ops/runbooks/A11Y_*.md`
 
 **Artifacts**: The script writes `var/a11y-contrast-focus-gate.txt` with
 machine-readable counters for downstream consumption.

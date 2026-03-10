@@ -34,7 +34,7 @@ tracked = subprocess.check_output(
     [
         "git",
         "ls-files",
-        "docs/operations/evidence",
+        "docs/evidence/operations",
         "docs/evidence/observability",
         "docs/archive/evidence/observability",
     ],

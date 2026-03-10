@@ -75,7 +75,7 @@ Every P1/P2 postmortem MUST be published within 5 business days of resolution an
 
 **Verification procedure**:
 
-1. **Locate the postmortem** in `docs/operations/postmortems/` or the incident tracking system
+1. **Locate the postmortem** in `docs/status/incidents/` or the incident tracking system
 2. **Check publication date** is within 5 business days of incident resolution
 3. **Verify all required sections** are present using the checklist above
 4. **Verify action items** have owners and due dates assigned
@@ -141,5 +141,5 @@ Every P1/P2 postmortem MUST be published within 5 business days of resolution an
 
 ## Filing Location
 
-- Postmortems: `docs/operations/postmortems/<YYYY-MM-DD>-<slug>.md`
+- Postmortems: `docs/status/incidents/<YYYY-MM-DD>-<slug>.md`
 - Incident log: maintained in monthly SLA report (sanitized for client visibility)

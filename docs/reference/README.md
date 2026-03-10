@@ -17,7 +17,7 @@ Use this root when the question is factual rather than procedural:
 | Decide whether something belongs in reference at all | `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` | `docs/guides/standards/DOCS_SPECS_CONTRACT.md` if the question is docs vs specs |
 
 Do not use these roots as the winning reference surface:
-- `docs/operations/**`
+- `docs/operations/README.md` tombstone only
 - `docs/concepts/**` for factual inventories
 - `docs/archive/**`
 

@@ -109,7 +109,7 @@ echo ""
 if [ "$FAIL" -gt 0 ]; then
   echo "  RESULT: FAIL — runtime NREUM workaround detected or build artifacts missing"
   echo "  Fix: bash scripts/infra/build-enterprise-mfe-clean.sh"
-  echo "  Docs: docs/operations/runbooks/DEPLOYMENT_RUNBOOK.md (Section 9)"
+  echo "  Docs: docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md (Section 9)"
   exit 1
 else
   echo "  RESULT: PASS — enterprise MFE manifests are clean (no runtime workaround)"

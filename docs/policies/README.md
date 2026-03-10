@@ -16,7 +16,7 @@ Use this root when the question is normative:
 | Resolve a disagreement about where a rule belongs | `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` | `docs/CONTRIBUTING.md` for the contribution workflow |
 
 Do not use these roots as live policy authority:
-- `docs/operations/**`
+- `docs/operations/README.md` tombstone only
 - `docs/runbooks/**`
 - `docs/archive/**`
 

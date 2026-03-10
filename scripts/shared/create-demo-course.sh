@@ -118,7 +118,7 @@ ${BLUE}Step 7: Verify${NC}
   ${GREEN}https://${MFE_DOMAIN}/${NC}
 
 ${YELLOW}For automatic course import (requires MongoDB fix):${NC}
-  See: docs/operations/MONGODB_PERMISSIONS_ISSUE.md
+  See: docs/ops/runbooks/MONGODB
 
 ${GREEN}=== End Instructions ===${NC}
 
@@ -266,7 +266,7 @@ EXAMPLES:
 
 SEE ALSO:
   docs/ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md
-  docs/operations/MONGODB_PERMISSIONS_ISSUE.md
+  docs/ops/runbooks/MONGODB
 
 EOF
 }

@@ -77,7 +77,7 @@ MFE_DOMAIN="apps.academyv2.mereka.dev"
 PLAN_DOC="$REPO_ROOT/docs/status/migrations/RKE2_MIGRATION_PLAN.md"
 HANDOFF_DOC="$REPO_ROOT/reports/2026/closures/RKE2_LMS_HANDOFF.md"
 ROLLOUT_MATRIX="$REPO_ROOT/docs/status/migrations/RKE2_ROLLOUT_MATRIX.md"
-CF_DNS_DOC="$REPO_ROOT/docs/operations/CLOUDFLARE_DNS.md"
+CF_DNS_DOC="$REPO_ROOT/docs/archive/reports/CLOUDFLARE"
 RKE2_OVERLAY="$REPO_ROOT/deploy/k8s/overlays/rke2-nonprod"
 BASE_SECRETS="$REPO_ROOT/deploy/k8s/base/secrets/external-secrets.yaml"
 
@@ -566,7 +566,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  Migration plan:  docs/status/migrations/RKE2_MIGRATION_PLAN.md"
   echo "  Handoff doc:     reports/2026/closures/RKE2_LMS_HANDOFF.md"
   echo "  Rollout matrix:  docs/status/migrations/RKE2_ROLLOUT_MATRIX.md"
-  echo "  DNS docs:        docs/operations/CLOUDFLARE_DNS.md"
+  echo "  DNS docs:        docs/archive/reports/CLOUDFLARE"
   if [[ "$MODE" == "online" ]]; then
     echo ""
     echo "Rollback signals (any triggered = immediate rollback):"

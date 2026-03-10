@@ -1080,7 +1080,7 @@ spec:
               {{ $labels.service }} (tier {{ $labels.tier }}) is consuming error budget
               at {{ $value | printf "%.1f" }}x the sustainable rate over the last 6 hours.
               Create incident ticket and investigate within 2 hours.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/operations/SLO_POLICY.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
 
         # ── Journey Fast Burn (P1): 1h+5m > 14.4× ─────────────────────
         # Journey-owner contract (Tier-1): alert on direct journey burn-rate signals.
@@ -1119,7 +1119,7 @@ spec:
               {{ $labels.journey }} ({{ $labels.service }}, tier {{ $labels.tier }}) is burning
               error budget at {{ $value | printf "%.1f" }}x sustainable rate over the last 6 hours.
               Open ticket and include service owner + affected journey.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/operations/SLO_POLICY.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
 
         # ── Very Slow Burn (P3): 6h burn > 1× for 3 days ─────────────
         # Budget on track to fully exhaust by end of 30-day window.
@@ -1136,7 +1136,7 @@ spec:
               {{ $labels.service }} (tier {{ $labels.tier }}) burn rate {{ $value | printf "%.2f" }}x
               sustained for 3+ hours. At this pace the monthly error budget will be exhausted
               before month-end. Add to weekly review agenda.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/operations/SLO_POLICY.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
 
         # ── Journey Very Slow Burn (P3): 6h burn > 1× for 3 hours ────────
         - alert: SLOBudgetVerySlowBurnJourney
@@ -1153,7 +1153,7 @@ spec:
               {{ $labels.journey }} ({{ $labels.service }}, tier {{ $labels.tier }}) has
               sustained burn above 1× for 3 hours. Budget will likely exhaust by month-end.
               Track in weekly reliability review with owner follow-up.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/operations/SLO_POLICY.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
 
         # ── Budget Exhausted (P1) ──────────────────────────────────────
         - alert: SLOBudgetExhaustedExtended
@@ -1187,7 +1187,7 @@ spec:
               {{ $labels.service }} (tier {{ $labels.tier }}) has only
               {{ $value | humanizePercentage }} of its 30-day error budget remaining.
               Restrict deployments to critical fixes only.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/operations/SLO_POLICY.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
 
         # ── SLI Measurement Gap ────────────────────────────────────────
         - alert: SLIMeasurementDownExtended
@@ -1204,4 +1204,4 @@ spec:
             description: >-
               No availability SLI data recorded for {{ $labels.service }} in the last 10 minutes.
               Verify the ServiceMonitor is scraping the metrics endpoint and the job label is correct.
-            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/operations/SLO_POLICY.md"
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"

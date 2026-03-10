@@ -383,7 +383,7 @@ if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "  2. Run: cd tests/e2e && npm install"
   echo "  3. Install browser: npx playwright install chromium"
   echo "  4. Set E2E_USERNAME, E2E_PASSWORD, E2E_COURSE_ID, E2E_CERT_URL for authenticated tests"
-  echo "  5. See docs/operations/E2E_TESTING.md for full setup guide"
+  echo "  5. See docs/guides/admin/ or docs/ops/runbooks/ for the current E2E setup guide"
   echo ""
   exit 1
 fi

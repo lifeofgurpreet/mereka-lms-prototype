@@ -98,11 +98,11 @@ file_exists "docs/runbooks/operations/SLO_DASHBOARDS_SETUP.md"
 file_exists "docs/reference/operations/ADMIN_CONSOLE_SETUP.md"
 file_exists "docs/ops/quickref/access-urls.md"
 file_exists "docs/reference/operations/CAPACITY_PLANNING.md"
-file_exists "docs/operations/runbooks/site-down.md"
-file_exists "docs/operations/runbooks/emergency-rollback.md"
-file_exists "docs/operations/runbooks/DISASTER_RECOVERY.md"
-file_exists "docs/operations/quickref/kubectl-cheatsheet.md"
-file_exists "docs/operations/quickref/common-troubleshooting.md"
+file_exists "docs/ops/runbooks/site-down.md"
+file_exists "docs/ops/runbooks/emergency-rollback.md"
+file_exists "docs/ops/runbooks/DISASTER_RECOVERY.md"
+file_exists "docs/ops/quickref/kubectl-cheatsheet.md"
+file_exists "docs/ops/quickref/common-troubleshooting.md"
 
 # ─── Section 2: OPERATOR_DASHBOARD_GUIDE content checks ────────────────────
 
@@ -308,7 +308,7 @@ fi
 
 section "9. Site-down runbook references key scripts"
 
-SITE_DOWN="${REPO_ROOT}/docs/operations/runbooks/site-down.md"
+SITE_DOWN="${REPO_ROOT}/docs/ops/runbooks/site-down.md"
 if [[ -f "$SITE_DOWN" ]]; then
   for keyword in "fix-service-selectors" "kubectl get endpoints" "kubectl get pods"; do
     if grep -qF "$keyword" "$SITE_DOWN"; then

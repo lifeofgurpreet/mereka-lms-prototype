@@ -196,7 +196,7 @@ run_offline_checks() {
   fi
 
   # AC-005: single-flight token refresh verification pathway must be documented
-  check_contains "docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md" \
+  check_contains "docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md" \
     "Token Refresh Deduplication" \
     "AC-005: mobile runbook includes single-flight token refresh verification section"
 

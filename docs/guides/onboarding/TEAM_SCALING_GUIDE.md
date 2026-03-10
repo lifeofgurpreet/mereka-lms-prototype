@@ -195,7 +195,7 @@ _Role: Incident response, performance troubleshooting, disaster recovery_
 #### Week 4: On-Call Readiness
 - [ ] **Shadow**: Full on-call shift with senior SRE
 - [ ] **Practice**: Execute all common incident responses on dev
-- [ ] **Review**: Postmortems from last 3 months (`docs/operations/postmortems/`)
+- [ ] **Review**: Postmortems from last 3 months (`docs/status/incidents/`)
 - [ ] **Ready**: Begin on-call rotation (paired with senior SRE)
 
 ### Common Workflows

@@ -33,7 +33,7 @@ source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 EXCEPTIONS_FILE="$REPO_ROOT/docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md"
 LEGACY_FOOTER_DOC="$REPO_ROOT/docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md"
-INVENTORY_FILE="$REPO_ROOT/docs/operations/evidence/mfe-surface-inventory.md"
+INVENTORY_FILE="$REPO_ROOT/docs/evidence/operations/mfe-surface-inventory.md"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

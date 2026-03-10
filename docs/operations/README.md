@@ -1,10 +1,16 @@
-# Operations Documentation
+# Operations Root Retired
 
 _Status: superseded_  
-_Superseded by: ../ops/quickref/README.md_
+_Superseded by: ../ops/README.md_
 
-This path is transitional only. The live document is now maintained at:
+`docs/operations/**` is retired as an active documentation root.
 
-- `../ops/quickref/README.md`
+Use these canonical roots instead:
 
-Do not add new substantive content here.
+- `../ops/README.md` for operator quick references, runbooks, monitoring, CI/CD, and security
+- `../reference/operations/README.md` for operations reference material
+- `../policies/operations/README.md` for operations policy
+- `../evidence/operations/README.md` for active operations evidence
+- `../status/INDEX.md` for incidents, readiness, and migration status
+
+Do not add new substantive content under `docs/operations/**`.

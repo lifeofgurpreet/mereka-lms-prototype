@@ -36,7 +36,7 @@ For the current decision-grade review and agent hot path, also read:
 | [docs/meta/](meta/README.md) | Docs-program internals, templates, standing orders, and transition ledgers | Canonical |
 | [docs/evidence/](evidence/INDEX.md) | Active proof bundles | Canonical |
 | [docs/status/](status/INDEX.md) | Active reporting and status tracking | Canonical |
-| `docs/operations/**` | Legacy compatibility surface | Transitional |
+| `docs/operations/**` | Retired compatibility tombstone | Tombstone-only |
 | `docs/onboarding/**` | Legacy compatibility surface | Transitional |
 | `docs/branding/**` | Legacy compatibility surface | Transitional |
 | `docs/runbooks/**` | Legacy compatibility surface | Transitional |
@@ -161,7 +161,7 @@ If a generated file conflicts with a canonical source doc, fix the source and re
 
 ## What not to do
 
-- Do not treat `docs/operations/**`, `docs/runbooks/**`, `docs/onboarding/**`, `docs/branding/**`, or `docs/architecture/**` as living authority.
+- Do not treat `docs/operations/**`, `docs/runbooks/**`, `docs/onboarding/**`, `docs/branding/**`, or `docs/architecture/**` as living authority. `docs/operations/**` is now tombstone-only.
 - Do not put proof artifacts under random roots when `docs/evidence/**` owns them.
 - Do not put active reporting under archive or top-level `reports/**` when `docs/status/**` owns it.
 - Do not hand-edit generated catalog or testmap outputs and call that authoritative.

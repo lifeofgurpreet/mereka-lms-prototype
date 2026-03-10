@@ -17,7 +17,7 @@ image_source:
   repo_owner: mereka-lms
   source_surfaces:
     - .github/workflows/ci.yml
-    - docs/operations/CI_RUNNER_POLICY.md
+    - docs/policies/operations/CI
 secret_surfaces:
   - specs/secrets-management_spec.md
 runbook_surfaces:

@@ -63,7 +63,7 @@
       "targetBlank": true,
       "title": "Deployment Runbook",
       "type": "link",
-      "url": "https://github.com/mereka-lms/mereka-lms/blob/main/docs/operations/DEPLOYMENT_RUNBOOK.md"
+      "url": "https://github.com/mereka-lms/mereka-lms/blob/main/docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
     },
     {
       "icon": "doc",

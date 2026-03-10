@@ -79,7 +79,7 @@ skip() { echo -e "${YELLOW}SKIP${NC} $1"; SKIP=$((SKIP + 1)); }
 LMS_PROD_SETTINGS="deploy/k8s/base/apps/openedx/settings/lms/production.py"
 EXTERNAL_SECRETS="deploy/k8s/base/secrets/external-secrets.yaml"
 VENDOR_READINESS="docs/status/readiness/PROCTORING_VENDOR_READINESS.md"
-RUNBOOK="docs/operations/runbooks/PROCTORING_RUNBOOK.md"
+RUNBOOK="docs/ops/runbooks/PROCTORING_RUNBOOK.md"
 ARCH_DOC="docs/concepts/architecture/PROCTORING_INTEGRATION.md"
 SPEC_FILE="specs/proposals/proctoring-integration_spec.md"
 

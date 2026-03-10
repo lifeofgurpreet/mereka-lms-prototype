@@ -345,7 +345,7 @@ jobs:
       - name: Verify OPENEDX_HOSTNAMES.md is generated and current
         run: |
           ./scripts/gen/update-openedx-hostnames-doc.sh
-          git diff --exit-code -- docs/operations/OPENEDX_HOSTNAMES.md
+          git diff --exit-code -- docs/reference/operations/OPENEDX
 
       - name: Verify axe journey coverage
         run: bash scripts/qa/check-axe-journey-coverage.sh

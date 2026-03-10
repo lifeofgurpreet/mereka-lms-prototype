@@ -369,7 +369,7 @@ echo ""
 echo -e "${BLUE}## AC-A11Y-004: Exception Documentation${NC}"
 
 if [[ ! -f "$EXCEPTION_DOC" ]]; then
-  do_fail "AC-A11Y-004: A11Y_CONTRAST_FOCUS_GATE.md not found at docs/operations/"
+  do_fail "AC-A11Y-004: A11Y_CONTRAST_FOCUS_GATE.md not found at docs/ops/runbooks/"
 else
   do_pass "AC-A11Y-004: A11Y_CONTRAST_FOCUS_GATE.md exists"
 

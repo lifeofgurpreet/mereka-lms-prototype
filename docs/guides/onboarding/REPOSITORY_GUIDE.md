@@ -569,7 +569,7 @@ python3 scripts/qa/spec-tools/compute_dependency_graph.py \
 ```bash
 # 1. Determine correct subdirectory
 # Onboarding? → docs/guides/onboarding/
-# Runbook? → docs/operations/
+# Runbook? → docs/ops/runbooks/
 # Architecture? → docs/concepts/architecture/
 
 # 2. Create the file

@@ -39,7 +39,7 @@ jobs:
             echo ""
             echo "### Next steps"
             echo "- To run Lighthouse against live MFEs: \`lhci collect --url=https://apps.academyv2.mereka.io/authn/login\`"
-            echo "- See \`docs/operations/LIGHTHOUSE_BUDGETS.md\` for full setup guide"
+            echo "- See \`docs/policies/architecture/LIGHTHOUSE_BUDGETS.md\` for full setup guide"
             echo ""
             echo "Log artifacts: \`var/ci/lighthouse-budget-verify.log\`"
           } >> "$GITHUB_STEP_SUMMARY"

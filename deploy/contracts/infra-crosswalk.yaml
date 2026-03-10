@@ -85,7 +85,7 @@ crosswalk:
     deployment_repo: bbi-infrastructure
     app_repo_surfaces:
       - .github/workflows/ci.yml
-      - docs/operations/CI_RUNNER_POLICY.md
+      - docs/policies/operations/CI
       - docs/ops/runbooks/CI_CD_RUNBOOK.md
       - scripts/infra/release-openedx-gitops.sh
       - scripts/infra/sync-gitops-prod-image-tags.sh

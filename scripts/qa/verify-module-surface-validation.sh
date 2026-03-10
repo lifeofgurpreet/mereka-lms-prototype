@@ -10,7 +10,7 @@
 #   AC-MOD-002: Expected status-code mapping per service; authn proxy routes
 #               present in Caddyfile.
 #   AC-MOD-003: 5xx monitoring/alerting config present; regression baseline docs.
-#   AC-MOD-004: Command runbook doc exists in docs/operations/ with expected outputs.
+#   AC-MOD-004: Command runbook doc exists in docs/ops/runbooks/ with expected outputs.
 #   AC-MOD-005: Evidence bundle directory structure / template present.
 #
 # Usage:
@@ -64,7 +64,7 @@ CADDYFILE="$REPO_ROOT/deploy/k8s/base/apps/caddy/Caddyfile"
 MONITORING_DIR="$REPO_ROOT/deploy/k8s/base/monitoring"
 
 # Docs dir
-DOCS_OPS="$REPO_ROOT/docs/operations"
+DOCS_OPS="$REPO_ROOT/docs/ops/runbooks"
 
 # Evidence dir
 EVIDENCE_DIR="$REPO_ROOT/var/module-surface-evidence"
@@ -301,7 +301,7 @@ check_pattern_in_file "$DOCS_OPS/MODULE_SURFACE_VALIDATION_RUNBOOK.md" \
 echo ""
 
 # ---------------------------------------------------------------------------
-# AC-MOD-004 — Command runbook in docs/operations/ with expected outputs
+# AC-MOD-004 — Command runbook in docs/ops/runbooks/ with expected outputs
 # ---------------------------------------------------------------------------
 echo -e "${CYAN}--- AC-MOD-004: Command Runbook ---${NC}"
 

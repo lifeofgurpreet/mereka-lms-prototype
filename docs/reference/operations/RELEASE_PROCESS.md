@@ -180,7 +180,7 @@ kubectl -n mereka-lms rollout status deployment/lms
 ./scripts/qa/public-health-check.sh prod
 ```
 
-Document the incident in `docs/operations/postmortems/`.
+Document the incident in `docs/status/incidents/`.
 
 ---
 

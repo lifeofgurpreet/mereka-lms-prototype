@@ -118,4 +118,4 @@ The cryptographic identity layer for credential issuance. This defines how the C
 |-----------|------|
 | DID Document endpoint | Credentials Service (Django view) |
 | Signing key secret | `deploy/k8s/base/secrets/external-secrets.yaml` |
-| Key rotation runbook | `docs/operations/credential-key-rotation-runbook.md` |
+| Key rotation runbook | `docs/ops/runbooks/credential-key-rotation-runbook.md` |

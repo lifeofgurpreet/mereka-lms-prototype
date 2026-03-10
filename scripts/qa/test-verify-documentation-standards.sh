@@ -10,7 +10,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p \
   "$tmpdir/docs/guides/standards" \
-  "$tmpdir/docs/operations/runbooks" \
+  "$tmpdir/docs/ops/runbooks" \
   "$tmpdir/docs/adr" \
   "$tmpdir/specs" \
   "$tmpdir/scripts/qa"
@@ -19,7 +19,7 @@ cat >"$tmpdir/docs/guides/standards/DOCUMENTATION_STANDARDS.md" <<'EOF'
 # Documentation Standards
 EOF
 
-cat >"$tmpdir/docs/operations/runbooks/example.md" <<'EOF'
+cat >"$tmpdir/docs/ops/runbooks/example.md" <<'EOF'
 _Audience: Operators • Owner: Platform Team • Last verified: 2026-03-01_
 
 # Example Runbook

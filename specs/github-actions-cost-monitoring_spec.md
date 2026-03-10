@@ -487,7 +487,7 @@ kubectl patch cronjob -n mereka-lms github-actions-cost-tracker -p '{"spec":{"su
 ## Related Documentation
 
 - `.github/workflows/ci.yml` - Main CI workflow (includes verification; `verify-specs.yml` merged into `ci.yml` in Phase 4)
-- `docs/operations/runbooks/CI_CD_RUNBOOK.md` - CI/CD operations
+- `docs/ops/runbooks/CI_CD_RUNBOOK.md` - CI/CD operations
 - `specs/ci-cd-pipeline_spec.md` - CI/CD requirements
 - [GitHub Actions Billing](https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions)
 

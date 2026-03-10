@@ -30,4 +30,3 @@ git commit -m "chore(mfe): snapshot Dockerfile after apply-patches.sh run"
 
 - Brand migration: `@edly-io/indigo-brand-openedx` → `@openedx/brand-openedx` Design Tokens
 - Remove `--legacy-peer-deps` once brand is ulmo-compatible
-- See: `docs/operations/DEPLOYMENT_ISSUES_AND_ROADMAP.md`

@@ -65,7 +65,7 @@ echo "--- AC-HB-001: Visual Regression Baseline ---"
 if [[ -f "$HARDENING_DOC" ]]; then
   do_pass "AC-HB-001: UI_UX_HARDENING_BUNDLE.md exists"
 else
-  do_fail "AC-HB-001: UI_UX_HARDENING_BUNDLE.md not found at docs/operations/"
+  do_fail "AC-HB-001: UI_UX_HARDENING_BUNDLE.md not found at docs/meta/docs-program/"
 fi
 
 # 1b. Hardening doc must declare 10+ critical routes.

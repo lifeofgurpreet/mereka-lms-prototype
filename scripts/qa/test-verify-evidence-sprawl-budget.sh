@@ -17,7 +17,7 @@ chmod +x "$tmpdir/scripts/qa/verify-evidence-sprawl-budget.sh"
 cd "$tmpdir"
 git init -q
 
-mkdir -p docs/operations/verification docs/operations/evidence
+mkdir -p docs/archive/verification docs/evidence/operations
 cat > verification/manifests/evidence_sprawl_budget.json <<'EOF_BUDGET'
 {
   "tracked_evidence_max_files": 5,
@@ -27,11 +27,11 @@ cat > verification/manifests/evidence_sprawl_budget.json <<'EOF_BUDGET'
 }
 EOF_BUDGET
 
-cat > docs/operations/evidence/example.md <<'EOF_EVIDENCE'
+cat > docs/evidence/operations/example.md <<'EOF_EVIDENCE'
 # Example evidence
 EOF_EVIDENCE
 
-git add scripts/qa/verify-evidence-sprawl-budget.sh verification/manifests/evidence_sprawl_budget.json docs/operations/evidence/example.md
+git add scripts/qa/verify-evidence-sprawl-budget.sh verification/manifests/evidence_sprawl_budget.json docs/evidence/operations/example.md
 
 if ./scripts/qa/verify-evidence-sprawl-budget.sh >/tmp/test-evidence-budget-pass.log 2>&1; then
   :

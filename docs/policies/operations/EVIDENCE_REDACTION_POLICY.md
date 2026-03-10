@@ -10,7 +10,7 @@ Canonical:
 - `docs/archive/evidence/observability/**`
 
 Transitional compatibility:
-- `docs/operations/evidence/**`
+- `docs/evidence/operations/**`
 - `docs/evidence/observability/**`
 
 Raw operational outputs belong in `var/**` (gitignored) and workflow artifacts.

@@ -23,7 +23,7 @@ Choose the smallest subroot that matches the task:
   - start in [`security/README.md`](security/README.md)
 
 Do not use these losing roots as live operator authority:
-- `docs/operations/**`
+- `docs/operations/README.md` tombstone only
 - `docs/runbooks/**`
 - `docs/archive/**`
 

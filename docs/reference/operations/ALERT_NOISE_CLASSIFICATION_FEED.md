@@ -54,7 +54,7 @@ The feed is consumed by:
 ## Example Export
 
 ```bash
-ALERT_NOISE_FP_CLASSIFICATION_FEED=docs/operations/alert-noise-manual-fp-feed.json \
+ALERT_NOISE_FP_CLASSIFICATION_FEED=var/ci/alert-noise-manual-fp-feed.json \
   STRICT_RUNTIME=1 ./scripts/qa/build-alert-noise-runtime-sample.sh --out var/ci/alert-noise-runtime-sample.json
 ```
 
@@ -63,7 +63,7 @@ ALERT_NOISE_FP_CLASSIFICATION_FEED=docs/operations/alert-noise-manual-fp-feed.js
 {
   "false_positive_summary": { "label_matches": 3, "feed_matches": 2 },
   "classification_feed": {
-    "path": "docs/operations/alert-noise-classification-feed.json",
+    "path": "var/ci/alert-noise-classification-feed.json",
     "entries_total": 7,
     "entries_accepted": 6,
     "entries_rejected": 1

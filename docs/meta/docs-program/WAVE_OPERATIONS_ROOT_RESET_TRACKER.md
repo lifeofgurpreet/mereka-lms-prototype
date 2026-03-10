@@ -12,7 +12,7 @@ Determine whether `docs/operations/**` can be retired as an active root, partial
 
 ## Initial Findings
 
-- `docs/operations/README.md` is already a superseded pointer to `docs/ops/quickref/README.md`.
+- `docs/ops/quickref/README.md` is already a superseded pointer to `docs/ops/quickref/README.md`.
 - The root still contains approximately 199 markdown files plus evidence and postmortem subdirectories.
 - There are 98 filename collisions between `docs/operations/**` and `docs/ops/**`.
 - Unlike the already-retired architecture root, this root is not a wrapper-only graveyard. It appears to mix:
@@ -64,7 +64,7 @@ Confirmed direct duplicate-name overlaps already exist with canonical `docs/ops/
 - `docs/operations/DOMAIN_MANAGEMENT.md` -> `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`
 - `docs/operations/ENTERPRISE_SSO_GUIDE.md` -> `docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md`
 - `docs/operations/TENANT_PROVISIONING.md` -> `docs/ops/runbooks/TENANT_PROVISIONING.md`
-- `docs/operations/OBSERVABILITY_ROADMAP_MEREKA_LMS.md` -> `docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
+- `docs/ops/monitoring/OBSERVABILITY` -> `docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
 - `docs/operations/SECRET_SCANNING.md` -> `docs/ops/security/SECRET_SCANNING.md`
 
 This strongly suggests the next safe cleanup packet is:
@@ -184,3 +184,13 @@ Fifth duplicate-collapse packet for additional wrapper-only files whose canonica
 - `docs/operations/ECOMMERCE_DEPRECATION_INVENTORY.md` -> `docs/reference/operations/ECOMMERCE_DEPRECATION_INVENTORY.md`
 - `docs/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` -> `docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md`
 - `docs/operations/ECOMMERCE_THEMING.md` -> `docs/reference/operations/ECOMMERCE_THEMING.md`
+
+## Final State
+
+- `docs/operations/**` reduced to `docs/operations/README.md` only
+- all remaining wrapper files deleted
+- active consumers rewritten to canonical homes under `docs/ops/**`, `docs/reference/operations/**`, `docs/policies/operations/**`, `docs/evidence/operations/**`, and `docs/status/**`
+- `tools/docs/verify/verify_legacy_operations_root.py` added as the no-regrowth guard
+- closeout docs:
+  - `docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_CLOSEOUT.md`
+  - `docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_REVIEW_HANDOFF.md`

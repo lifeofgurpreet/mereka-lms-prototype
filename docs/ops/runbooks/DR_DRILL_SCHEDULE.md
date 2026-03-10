@@ -337,7 +337,7 @@ If a drill is blocked due to environment access, an Engineering Lead can approve
 
 2. **Within 1 hour**: Engineering Lead reviews the failure. If the failure indicates a real backup integrity problem, create a P0 incident.
 
-3. **Within 1 business day**: Root cause identified and documented in `docs/operations/postmortems/`.
+3. **Within 1 business day**: Root cause identified and documented in `docs/status/incidents/`.
 
 4. **Before next release**: Fix is implemented and drill is re-run successfully.
 

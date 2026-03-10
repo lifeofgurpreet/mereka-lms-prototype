@@ -44,7 +44,7 @@ jobs:
             echo "It will not block merges during the adoption ramp-up period."
             echo ""
             echo "### Next steps"
-            echo "- See \`docs/operations/COMMIT_SIGNING.md\` for setup instructions"
+            echo "- See \`docs/reference/operations/COMMIT_SIGNING.md\` for setup instructions"
             echo "- GPG, SSH, or Sigstore Gitsign all produce valid signatures"
             echo "- Migration plan: soft gate → hard gate timeline is in the doc above"
             echo ""

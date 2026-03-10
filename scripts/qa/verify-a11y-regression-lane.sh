@@ -21,7 +21,7 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PARENT_SCRIPT="$REPO_ROOT/scripts/qa/verify-authenticated-smoke-a11y.sh"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 A11Y_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/A11Y_REGRESSION_LANE.md"
-EVIDENCE_REPORT="$REPO_ROOT/docs/operations/evidence/a11y-regression-lane-report.md"
+EVIDENCE_REPORT="$REPO_ROOT/docs/evidence/operations/a11y-regression-lane-report.md"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -219,9 +219,9 @@ echo ""
 echo "=== AC-FRONT-074: Branding Evidence Artifact Capture ==="
 
 if [[ -f "$EVIDENCE_REPORT" ]]; then
-  pass_check "AC-FRONT-074: Evidence report exists at docs/operations/evidence/a11y-regression-lane-report.md"
+  pass_check "AC-FRONT-074: Evidence report exists at docs/evidence/operations/a11y-regression-lane-report.md"
 else
-  fail_check "AC-FRONT-074: Evidence report missing at docs/operations/evidence/a11y-regression-lane-report.md"
+  fail_check "AC-FRONT-074: Evidence report missing at docs/evidence/operations/a11y-regression-lane-report.md"
 fi
 
 if [[ -f "$EVIDENCE_REPORT" ]]; then

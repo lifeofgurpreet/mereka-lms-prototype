@@ -56,7 +56,7 @@ When rotating keys:
 4. New credentials signed with new key
 5. Old public keys remain in DID document for ≥5 years
 
-See `docs/operations/credential-key-rotation-runbook.md` for detailed procedure.
+See `docs/ops/runbooks/credential-key-rotation-runbook.md` for detailed procedure.
 
 ## URL Routing
 

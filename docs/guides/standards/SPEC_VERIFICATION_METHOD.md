@@ -82,7 +82,7 @@ def test_external_secret_sync():
 manual_verifications:
   - ac_id: AC-BRD-003
     verification_type: manual
-    runbook: docs/operations/BRANDING.md
+    runbook: docs/guides/branding/BRANDING.md
     section: "Theme Customization"
     justification: "Visual verification required for theme rendering"
   - ac_id: AC-MON-001

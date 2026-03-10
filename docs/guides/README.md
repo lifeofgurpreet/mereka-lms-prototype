@@ -21,7 +21,7 @@ Use this root when the question is instructional:
 Do not use these roots as the winning guidance surface:
 - `docs/onboarding/**`
 - `docs/branding/**`
-- `docs/operations/**`
+- `docs/operations/README.md` tombstone only
 - `docs/archive/**`
 
 ## Main guide surfaces

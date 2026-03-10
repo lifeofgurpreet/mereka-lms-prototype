@@ -1152,7 +1152,7 @@ To ensure the alert delivery pipeline (Alertmanager → Slack/PagerDuty) remains
 - All alerts MUST include the following annotations:
   - `summary`: Brief description of the alert
   - `description`: Detailed explanation including current metric value, threshold, and affected service
-  - `runbook`: Link to runbook for this alert type (e.g., `docs/operations/runbooks/slo-budget-exhausted.md`)
+  - `runbook`: Link to runbook for this alert type (e.g., `docs/ops/runbooks/slo-budget-exhausted.md`)
   - `dashboard`: Link to relevant Grafana dashboard for investigation
   - `service`: Affected service name
   - `tier`: Service tier (1, 2, or 3)

@@ -334,7 +334,7 @@ else
 fi
 
 # Check SLA breach runbook
-BREACH_RUNBOOK="docs/operations/SLA_BREACH_RESPONSE.md"
+BREACH_RUNBOOK="docs/policies/operations/SLA_REPORTING.md"
 if [[ -f "$BREACH_RUNBOOK" ]]; then
   pass "SLA breach response runbook exists ($BREACH_RUNBOOK)"
 

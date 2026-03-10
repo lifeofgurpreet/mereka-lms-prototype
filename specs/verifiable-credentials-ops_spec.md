@@ -162,7 +162,7 @@ The following runbooks MUST be created in `docs/operations/`:
 - [ ] AC-CRED-045: Given a VC is issued, when the application log is inspected, then a structured JSON log entry exists with credential UUID, learner ID, tenant UUID, and timestamp
 - [ ] AC-CRED-046: Given expired claim tokens exist in the database, when the daily cleanup job runs, then tokens older than 24 hours are deleted
 - [ ] AC-CRED-047: Given the Grafana dashboard is loaded, then 7 panels are visible covering issuance, latency, claims, verification, DID, signing health, and LinkedIn shares
-- [ ] AC-CRED-048: Given key rotation runbook `docs/operations/credential-key-rotation-runbook.md`, when followed step by step, then old credentials verify successfully and new credentials use the new key
+- [ ] AC-CRED-048: Given key rotation runbook `docs/ops/runbooks/credential-key-rotation-runbook.md`, when followed step by step, then old credentials verify successfully and new credentials use the new key
 
 ---
 

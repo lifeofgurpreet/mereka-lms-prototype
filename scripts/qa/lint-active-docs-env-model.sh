@@ -5,10 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-DOMAIN_CHANGE_RUNBOOK="$REPO_ROOT/docs/runbooks/operations/DOMAIN_CHANGE_RUNBOOK.md"
-if [[ ! -f "$DOMAIN_CHANGE_RUNBOOK" && -f "$REPO_ROOT/docs/operations/DOMAIN_CHANGE_RUNBOOK.md" ]]; then
-  DOMAIN_CHANGE_RUNBOOK="$REPO_ROOT/docs/operations/DOMAIN_CHANGE_RUNBOOK.md"
-fi
+DOMAIN_CHANGE_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md"
 
 docs=(
   "$REPO_ROOT/AGENTS.md"

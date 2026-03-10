@@ -208,5 +208,5 @@ Suggested post-checks:
   kubectl --context ${K8S_CONTEXT} -n ${APP_NS} get jobs
 
 If init/migrations fail after rebuild, restore from the pre-op backup created above.
-See docs/operations/runbooks/DEV_DB_REBUILD_CANONICAL.md for rollback procedure.
+See docs/ops/runbooks/DEV_DB_REBUILD_CANONICAL.md for rollback procedure.
 POST

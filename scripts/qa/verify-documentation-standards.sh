@@ -41,7 +41,7 @@ check_runbook_metadata() {
     echo ""
     echo "=== Checking Runbook Metadata ==="
 
-    local runbooks_dir="docs/operations/runbooks"
+    local runbooks_dir="docs/ops/runbooks"
     if [[ ! -d "$runbooks_dir" ]]; then
         warn "Runbooks directory not found: $runbooks_dir"
         return

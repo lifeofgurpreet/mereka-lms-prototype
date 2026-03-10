@@ -139,8 +139,8 @@ The `tutor_env/` directory is gitignored. Docker images are cached locally:
 
 | Artifact Type | Path Pattern | Example |
 |---------------|-------------|---------|
-| Release evidence | `docs/operations/releases/YYYY-MM-DD-<tag>.md` | `2026-02-18-mereka-brand.md` |
-| Incident report | `docs/operations/incidents/YYYY-MM-DD-<slug>.md` | `2026-02-18-cms-oom.md` |
+| Release evidence | `docs/evidence/operations/YYYY-MM-DD-<tag>.md` | `2026-02-18-mereka-brand.md` |
+| Incident report | `docs/status/incidents/YYYY-MM-DD-<slug>.md` | `2026-02-18-cms-oom.md` |
 | Dry-run log | PR body or `var/release-logs/` (gitignored) | Inline in PR |
 | Recovery evidence | `docs/evidence/operations/*_EVIDENCE.md` | `GKE_WORKLOAD_TRIAGE_EVIDENCE.md` |
 

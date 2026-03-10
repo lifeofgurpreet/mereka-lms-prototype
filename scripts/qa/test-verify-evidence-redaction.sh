@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-evidence-redaction.sh"
 tmpdir="$(mktemp -d -t verify-evidence-redaction.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/docs/operations/evidence"
+mkdir -p "$tmpdir/docs/evidence/operations"
 
 run_expect_pass() {
   local label="$1"
@@ -30,7 +30,7 @@ run_expect_fail() {
   echo "PASS ${label}"
 }
 
-cat >"$tmpdir/docs/operations/evidence/safe.md" <<'EOF'
+cat >"$tmpdir/docs/evidence/operations/safe.md" <<'EOF'
 # Evidence
 Set-Cookie: <REDACTED>
 Cookie: <REDACTED>
@@ -38,7 +38,7 @@ Authorization: Bearer <REDACTED>
 EOF
 run_expect_pass "redacted evidence passes"
 
-cat >"$tmpdir/docs/operations/evidence/leak.log" <<'EOF'
+cat >"$tmpdir/docs/evidence/operations/leak.log" <<'EOF'
 HTTP/1.1 200 OK
 Set-Cookie: sessionid=abc123def456ghi789; Path=/; Secure
 EOF

@@ -573,7 +573,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  S4 (backup):    Configure Velero schedule; run: scripts/qa/audit-velero.sh"
   echo "  S5 (logs):      Verify Loki/Promtail pipeline; see docs/reference/operations/LOGGING_AND_SENTRY.md"
   echo "  S6 (live):      Run with --online after fixing offline checks"
-  echo "  S7 (runbooks):  Create missing docs in docs/operations/"
+  echo "  S7 (runbooks):  Create missing docs in docs/ops/runbooks/ or docs/reference/operations/"
   echo ""
   echo "See docs/runbooks/operations/RKE2_ROLLOUT_CHECKLIST.md for full sign-off procedure."
   exit 1

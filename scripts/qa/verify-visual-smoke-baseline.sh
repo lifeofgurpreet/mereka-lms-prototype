@@ -88,7 +88,7 @@ if [[ -f "$AUTH_DOC" ]]; then
     do_warn "Auth doc does not reference SSO_USERNAME env var pattern"
   fi
 else
-  do_warn "AUTHENTICATED_SMOKE_CREDENTIALS.md not found (expected at docs/operations/)"
+  do_warn "AUTHENTICATED_SMOKE_CREDENTIALS.md not found (expected at docs/reference/operations/)"
 fi
 
 # 1d. Visual smoke baseline doc itself must exist.

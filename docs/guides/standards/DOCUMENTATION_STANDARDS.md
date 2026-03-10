@@ -41,7 +41,7 @@ Before writing, decide what kind of thing you are producing.
 - Use `specs/**` for normative intended behavior.
 
 Do not place new canonical docs in transitional roots such as:
-- `docs/operations/**`
+- `docs/operations/README.md` tombstone only
 - `docs/onboarding/**`
 - `docs/branding/**`
 - `docs/runbooks/**`

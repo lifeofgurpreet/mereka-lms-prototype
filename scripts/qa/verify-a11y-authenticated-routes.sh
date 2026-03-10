@@ -49,7 +49,7 @@ echo ""
 echo -e "${BLUE}## AC-ACCSS-201: Authenticated Route Scenario Coverage${NC}"
 
 if [[ ! -f "$RUNBOOK" ]]; then
-  do_fail "AC-ACCSS-201: ACCESSIBILITY_CONFORMANCE_RUNBOOK.md not found at docs/operations/"
+  do_fail "AC-ACCSS-201: ACCESSIBILITY_CONFORMANCE_RUNBOOK.md not found at docs/runbooks/operations/ or docs/ops/runbooks/"
   echo ""
   echo "  Create the runbook at docs/runbooks/operations/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md"
   echo "  It must document route scenarios for dashboard, account/profile, and learning routes."

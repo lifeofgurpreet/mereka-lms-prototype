@@ -6,7 +6,7 @@
 # Regression guard: enterprise admin/learner portal HTML must NOT contain
 # NREUM browser agent with undefined_license_key placeholder.
 #
-# Root cause docs: docs/operations/evidence/3evf-5xcl-enterprise-mfe-nreum-fix.md
+# Root cause docs: docs/evidence/operations/3evf-5xcl-enterprise-mfe-nreum-fix.md
 # Fix intent: remove legacy runtime sanitize workaround from enterprise portal deployments.
 #
 # SKIP mode: if the portals are unreachable, checks are skipped (not failed).
@@ -58,7 +58,7 @@ else
   if echo "$ADMIN_HTML" | grep -q 'undefined_license_key'; then
     fail_check "Admin portal HTML contains 'undefined_license_key' (NREUM not sanitized)"
     echo "    Fix: argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal"
-    echo "    Docs: docs/operations/evidence/3evf-5xcl-enterprise-mfe-nreum-fix.md"
+    echo "    Docs: docs/evidence/operations/3evf-5xcl-enterprise-mfe-nreum-fix.md"
   else
     pass_check "Admin portal HTML has no 'undefined_license_key'"
   fi
@@ -158,7 +158,7 @@ echo "  PASS: $PASS | FAIL: $FAIL | SKIP: $SKIP"
 echo ""
 if [ "$FAIL" -gt 0 ]; then
   echo "  RESULT: FAIL"
-  echo "  See: docs/operations/evidence/3evf-5xcl-enterprise-mfe-nreum-fix.md"
+  echo "  See: docs/evidence/operations/3evf-5xcl-enterprise-mfe-nreum-fix.md"
   exit 1
 elif [ "$PASS" -eq 0 ]; then
   echo "  RESULT: SKIP (all checks skipped — cluster unreachable)"

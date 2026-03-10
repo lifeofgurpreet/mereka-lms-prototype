@@ -31,7 +31,7 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN_FILE="$PLUGIN_MAIN"
 OPS_DOC="$REPO_ROOT/docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md"
-EVIDENCE_FILE="$REPO_ROOT/docs/operations/evidence/footer-migration-diff.md"
+EVIDENCE_FILE="$REPO_ROOT/docs/evidence/operations/footer-migration-diff.md"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
   PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
@@ -314,9 +314,9 @@ echo ""
 echo "--- AC-UI-405: Before/After Diff Evidence ---"
 
 if [[ ! -f "$EVIDENCE_FILE" ]]; then
-  fail "AC-UI-405: docs/operations/evidence/footer-migration-diff.md not found"
+  fail "AC-UI-405: docs/evidence/operations/footer-migration-diff.md not found"
 else
-  pass "AC-UI-405: docs/operations/evidence/footer-migration-diff.md exists"
+  pass "AC-UI-405: docs/evidence/operations/footer-migration-diff.md exists"
 
   # Check for before state
   if grep -qi 'before state\|before.*bead\|before.*dual-path' "$EVIDENCE_FILE"; then
@@ -367,7 +367,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  AC-UI-402: Ensure footer_slot PLUGIN_SLOTS.add_item is present in plugin contract sources"
   echo "  AC-UI-403: Ensure mfe-env-config patch and frontend-plugin-framework are in plugin contract sources"
   echo "  AC-UI-404: Create docs/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md with rollback steps"
-  echo "  AC-UI-405: Create docs/operations/evidence/footer-migration-diff.md with before/after diff"
+  echo "  AC-UI-405: Create docs/evidence/operations/footer-migration-diff.md with before/after diff"
   exit 1
 fi
 

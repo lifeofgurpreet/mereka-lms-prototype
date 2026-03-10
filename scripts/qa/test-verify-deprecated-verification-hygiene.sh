@@ -9,7 +9,7 @@ tmpdir="$(mktemp -d -t verify-deprecated-hygiene.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p \
-  "$tmpdir/docs/operations/verification" \
+  "$tmpdir/docs/archive/verification" \
   "$tmpdir/.github/workflows" \
   "$tmpdir/scripts/qa/deprecated"
 

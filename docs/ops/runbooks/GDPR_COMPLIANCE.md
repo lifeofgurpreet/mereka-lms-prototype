@@ -487,7 +487,7 @@ kubectl exec -n mereka-lms deployment/lms -- \
   python manage.py lms force_password_reset \
   --username <username>
 
-# 4. Document in incident log (docs/operations/postmortems/)
+# 4. Document in incident log (docs/status/incidents/)
 ```
 
 ---

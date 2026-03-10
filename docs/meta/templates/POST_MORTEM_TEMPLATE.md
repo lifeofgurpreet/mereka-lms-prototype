@@ -1,7 +1,7 @@
 <!-- @spec: cross-cutting-requirements_spec.md -->
 # Post-Mortem Template
 
-_Copy this file to `docs/operations/postmortems/YYYY-MM-DD-<slug>.md` and fill it in._
+_Copy this file to `docs/status/incidents/YYYY-MM-DD-<slug>.md` and fill it in._
 
 **Requirements**: See [postmortems/README.md](postmortems/README.md) for publishing guidelines.
 **Full communication templates**: [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md)

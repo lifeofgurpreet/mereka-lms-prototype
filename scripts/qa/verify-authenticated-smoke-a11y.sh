@@ -14,7 +14,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 RUNBOOK_DOC="$REPO_ROOT/docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md"
-EVIDENCE_REPORT="$REPO_ROOT/docs/operations/evidence/authenticated-smoke-a11y-report.md"
+EVIDENCE_REPORT="$REPO_ROOT/docs/evidence/operations/authenticated-smoke-a11y-report.md"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -254,9 +254,9 @@ echo ""
 echo "=== AC-FRONT-034: Evidence Report ==="
 
 if [[ -f "$EVIDENCE_REPORT" ]]; then
-  pass_check "AC-FRONT-034: Evidence report exists at docs/operations/evidence/authenticated-smoke-a11y-report.md"
+  pass_check "AC-FRONT-034: Evidence report exists at docs/evidence/operations/authenticated-smoke-a11y-report.md"
 else
-  fail_check "AC-FRONT-034: Evidence report missing at docs/operations/evidence/authenticated-smoke-a11y-report.md"
+  fail_check "AC-FRONT-034: Evidence report missing at docs/evidence/operations/authenticated-smoke-a11y-report.md"
 fi
 
 if [[ -f "$EVIDENCE_REPORT" ]]; then

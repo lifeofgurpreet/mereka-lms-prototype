@@ -26,7 +26,7 @@ spec:
           annotations:
             summary: "Content library cross-tenant access denials are spiking"
             description: "User {{ $labels.user }} has triggered {{ $value }} cross-tenant access denials per minute over the last 5 minutes. This may indicate an unauthorized access attempt or misconfigured tenant isolation."
-            runbook_url: "docs/operations/content-libraries-runbook.md#cross-tenant-denial-spike"
+            runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#cross-tenant-denial-spike"
 
     - name: content-library-health
       interval: 30s
@@ -41,7 +41,7 @@ spec:
           annotations:
             summary: "Content library publish failures are spiking"
             description: "More than 5 content library publish operations have failed in the last 10 minutes. Library {{ $labels.library_key }} publish pipeline may be degraded."
-            runbook_url: "docs/operations/content-libraries-runbook.md#publish-failure-spike"
+            runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#publish-failure-spike"
 
         # Warning alert for search index lag
         - alert: ContentLibrarySearchIndexLag
@@ -53,7 +53,7 @@ spec:
           annotations:
             summary: "Content library search index is lagging behind"
             description: "Content library {{ $labels.library_key }} search index is {{ $value | humanizeDuration }} behind the primary datastore. Search results may be stale."
-            runbook_url: "docs/operations/content-libraries-runbook.md#search-index-lag"
+            runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#search-index-lag"
 
         # Warning alert for high API latency
         - alert: ContentLibraryAPILatencyHigh
@@ -65,7 +65,7 @@ spec:
           annotations:
             summary: "Content library API latency is high"
             description: "95th percentile API latency for {{ $labels.endpoint }} is {{ $value | humanizeDuration }}, exceeding 2s threshold for 15 minutes. Users may experience slow responses."
-            runbook_url: "docs/operations/content-libraries-runbook.md#api-latency-high"
+            runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#api-latency-high"
 
         # Informational alert for large exports
         - alert: ContentLibraryExportLarge
@@ -77,4 +77,4 @@ spec:
           annotations:
             summary: "Content library export is unusually large"
             description: "Library {{ $labels.library_key }} export size is {{ $value | humanize1024 }}, exceeding 100MB. Consider reviewing library size and export configuration."
-            runbook_url: "docs/operations/content-libraries-runbook.md#export-large"
+            runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#export-large"

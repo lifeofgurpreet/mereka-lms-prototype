@@ -60,7 +60,7 @@
 - [ ] Remove ecommerce references from `docs/ops/quickref/access-urls.md`
 - [ ] Remove ecommerce references from `docs/reference/operations/USER_FACING_URLS.md`
 - [ ] Update `docs/reference/operations/CAPABILITY_MATRIX.md` to remove legacy ecommerce row
-- [ ] Remove ecommerce from `docs/operations/MULTISITE.md` shared services list
+- [ ] Remove ecommerce from `docs/concepts/architecture/MULTISITE.md` shared services list
 - [ ] Update `scripts/shared/config.sh` to remove `ECOMMERCE_DOMAIN` and `DEV_ECOMMERCE_DOMAIN` variables
 
 ---

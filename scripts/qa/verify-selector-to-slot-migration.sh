@@ -10,7 +10,7 @@ set -euo pipefail
 # AC-FRONT-022: Plugin slot registrations exist in plugin contract sources
 # AC-FRONT-023: Exception documentation file exists at docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md
 # AC-FRONT-024: No active `updated.replace("RenderWidget` string surgery in apply-patches.sh
-# AC-FRONT-025: Evidence file exists at docs/operations/evidence/selector-to-slot-migration-diff.md
+# AC-FRONT-025: Evidence file exists at docs/evidence/operations/selector-to-slot-migration-diff.md
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
@@ -19,7 +19,7 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 SCSS_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 PATCHES_FILE="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 EXCEPTIONS_DOC="$REPO_ROOT/docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md"
-EVIDENCE_FILE="$REPO_ROOT/docs/operations/evidence/selector-to-slot-migration-diff.md"
+EVIDENCE_FILE="$REPO_ROOT/docs/evidence/operations/selector-to-slot-migration-diff.md"
 
 PASS=0
 FAIL=0

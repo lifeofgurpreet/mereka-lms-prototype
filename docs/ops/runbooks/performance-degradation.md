@@ -363,7 +363,7 @@ Expected results:
 
 ## 📝 Post-Incident Actions
 
-1. Document the incident in `docs/operations/postmortems/`
+1. Document the incident in `docs/status/incidents/`
 2. Update baseline metrics if capacity changed
 3. Consider permanent scaling if temporary scaling was effective
 4. Create Jira ticket for any code optimizations identified
