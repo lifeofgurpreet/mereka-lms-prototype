@@ -1,27 +1,26 @@
 # Wave 12 Execution Tracker
 
 ## Latest substantive packet head
-- f475496bc7f5102bc369045a23ef5883f9d29105
+- 7fea40321d4210f8844f4cb34da65023c682ac1f
 
 ## Last completed batch
-- commit: f475496bc7f5102bc369045a23ef5883f9d29105
-- scope: Wave 12 Packet E
-- validators run: release readiness generator write/check, docs catalog governance
+- commit: 7fea40321d4210f8844f4cb34da65023c682ac1f
+- scope: Wave 12 Packet F
+- validators run: runtime evaluation generator write/check, docs catalog governance
 - result: passed
 
 ## Current target packet
 - files:
-  - docs/meta/knowledge/schemas/runtime-evaluation.schema.json
-  - fixtures/decision-runtime/scenarios.json
-  - tools/knowledge/build_runtime_evaluation.py
-  - generated/knowledge/runtime-evaluation.json
+  - tools/knowledge/verify_decision_runtime.py
+  - scripts/qa/run-decision-runtime-gates.sh
+  - .github/workflows/docs-policy.yml
   - docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md
 - goal:
-  - prove the decision runtime against deterministic fixture scenarios
-  - add golden expectations for reviewer routing, evidence routing, release readiness, and read-first order
-  - summarize runtime evaluation in one machine-readable output
+  - enforce the decision runtime outputs through one verifier and one gate
+  - wire the decision runtime into CI artifact generation and verification flow
+  - fail when decision outputs drift, lose schema validity, or stop being explainable from canonical inputs
 - stop condition:
-  - runtime evaluation output is generated deterministically and one substantive commit is created
+  - decision runtime verifier and gate pass locally and one substantive commit is created
 
 ## Open residue
 - assistant surface exports are not yet rebuilt on the fresh Wave 11 external branches
@@ -29,4 +28,4 @@
 - runtime convergence warning still requires manual follow-up and must remain non-hidden in Wave 12 outputs
 
 ## Next queued packet
-- Packet G: Runtime verifier, CI, and artifact workflow
+- Packet H: Closeout and reviewer handoff
