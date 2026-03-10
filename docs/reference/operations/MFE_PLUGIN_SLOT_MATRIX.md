@@ -222,7 +222,7 @@ For the complete override-to-slot migration plan, see [MFE_PLUGIN_SLOT_MIGRATION
 - **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
 - **Migration Register**: [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md)
 - **Selector Hardening Audit**: [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
-- **ADR-014**: [MFE Branding Strategy](../adr/014-mfe-branding-strategy.md)
+- **ADR-014**: [MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
 - **Verification Script**: [verify-plugin-slot-wiring.sh](../../scripts/qa/verify-plugin-slot-wiring.sh)
 - **Selector Hardening Verification**: [verify-mfe-selector-hardening.sh](../../scripts/qa/verify-mfe-selector-hardening.sh)
 - **OEP-65**: [Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)

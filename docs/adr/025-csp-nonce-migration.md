@@ -1,17 +1,33 @@
 ---
-title: "CSP Nonce Migration — Removing unsafe-eval / unsafe-inline"
-type: "adr"
-status: "accepted"
-owner: "engineering"
-last_updated: "2026-03-05"
-links:
-  related_adrs:
-    - "docs/adr/021-openedx-tutor-methodology.md"
-    - "docs/adr/022-session-cookie-samesite-policy.md"
-  related_specs:
-    - "specs/security-hardening_spec.md"
-  related_docs:
-    - "docs/runbooks/operations/CSP_REPORTING_RUNBOOK.md"
+id: ADR-025
+title: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline
+decision_status: accepted
+decision_type: domain
+rollout_state: active
+owner: engineering
+created: '2026-03-05'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
+supersedes: []
+amends: []
+depends_on: []
+read_next:
+- ADR-021
+- ADR-022
+governs:
+- frontend.csp
+- auth.cookie-boundary
+does_not_govern: []
+related_oep: []
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs: []
+related_runbooks: []
+related_evidence: []
+fitness_functions: []
+expiry_date: null
+removal_condition: null
 ---
 
 # ADR-025: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline
@@ -86,6 +102,18 @@ We adopt a **phased nonce-based migration** rather than a flag day:
 - Audit Studio drag-drop / Sortable for eval-free alternatives.
 - Remove `'unsafe-eval'` from `CSP_SCRIPT_SRC`.
 - Final policy: `default-src 'self'; script-src 'strict-dynamic' 'nonce-{value}'`.
+
+## Scope
+
+This ADR governs the decision boundary described by ADR-025.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- No dedicated automated fitness function is registered yet; use linked specs and runbooks for review.
 
 ## Consequences
 

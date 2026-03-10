@@ -17,7 +17,7 @@ Close the non-production tracing pilot gap for `AC-005`/`AC-007` by producing re
 
 ## Acceptance Criteria
 
-- [ ] `docs/adr/020-tracing-scope-and-pilot-decision.md` is the accepted tracing scope contract.
+- [ ] `docs/programs/observability/TRACING_PILOT_DECISION.md` is the accepted tracing scope contract.
 - [ ] `build-observability-tracing-pilot-bundle.sh` writes a nonprod tracing bundle under `docs/archive/evidence/observability/` each run.
 - [ ] Nonprod pilot run verifies:
   - Tempo manifests/runtime presence check passes.

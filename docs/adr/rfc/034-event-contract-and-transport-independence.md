@@ -1,38 +1,34 @@
 ---
 id: ADR-034
-adr_id: ADR-034
 title: Event Contract and Transport Independence
-status: canonical
-canonical_root: docs/adr
-doc_class: rfc
-summary: Proposes schema-first event contracts so broker transport can change without changing event meaning.
-tags:
-  - adr
-  - rfc
-  - events
-  - contracts
 decision_status: proposed
 decision_type: domain
 rollout_state: planned
-proposal_state: proposed
 owner: platform-events
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
-amends: ["ADR-008"]
-depends_on: ["ADR-028"]
-read_next: ["ADR-037"]
+amends:
+- ADR-008
+depends_on:
+- ADR-028
+read_next:
+- ADR-037
 governs:
-  - events.schema
-  - events.transport
-does_not_govern: ["single-broker-implementation-details"]
+- events.schema
+- events.transport
+does_not_govern:
+- single-broker-implementation-details
 related_oep: []
-related_tutor_docs: ["https://docs.openedx.org", "https://docs.tutor.edly.io"]
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
 related_specs: []
 related_runbooks: []
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-spec-tools-spec-lint.sh"]
+fitness_functions:
+- scripts/qa/verify-spec-tools-spec-lint.sh
 expiry_date: null
 removal_condition: null
 ---

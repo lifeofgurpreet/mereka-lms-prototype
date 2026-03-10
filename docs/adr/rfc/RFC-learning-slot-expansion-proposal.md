@@ -1,3 +1,35 @@
+---
+id: RFC-learning-slot-expansion-proposal
+title: Learning Slot Expansion Proposal
+decision_status: proposed
+decision_type: domain
+rollout_state: planned
+owner: platform-team
+created: '2026-03-07'
+last_reviewed: '2026-03-10'
+review_due: '2026-06-30'
+supersedes: []
+amends: []
+depends_on:
+- ADR-021
+read_next:
+- ADR-035
+governs:
+- frontend.runtime-composition
+does_not_govern:
+- current accepted frontend slot law
+related_oep: []
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs: []
+related_runbooks: []
+related_evidence: []
+fitness_functions: []
+expiry_date: null
+removal_condition: null
+---
+
 # Learning MFE Slot Expansion Proposal
 
 **Date**: 2026-02-28  
@@ -57,3 +89,15 @@ For each slot:
 - Inventory baseline: `docs/reference/architecture/FPF_PLUGIN_SLOT_REGISTRY.md`
 - Migration tracker: `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`
 - Dead selector context: `docs/reference/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md`
+
+## Scope
+
+This proposal governs the decision boundary described by RFC-learning-slot-expansion-proposal.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- No dedicated automated fitness function is registered yet; use linked specs and runbooks for review.

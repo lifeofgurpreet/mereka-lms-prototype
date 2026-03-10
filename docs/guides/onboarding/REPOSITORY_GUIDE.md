@@ -92,7 +92,7 @@ deploy/k8s/
 - Local dev override → `deploy/k8s/overlays/local/`
 - Environment-specific config → `infrastructure` repo (not here)
 
-**Related docs**: `docs/architecture/rfc/ADR-025-deployment-boundary.md`, `docs/reference/architecture/DEPLOYMENT_CONTRACT.md`, `docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `specs/k8s-deployment_spec.md`, `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
+**Related docs**: `docs/adr/rfc/027-deployment-contract-ownership-lanes.md`, `docs/reference/architecture/DEPLOYMENT_CONTRACT.md`, `docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md`, `specs/k8s-deployment_spec.md`, `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
 
 ---
 

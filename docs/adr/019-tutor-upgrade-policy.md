@@ -1,3 +1,37 @@
+---
+id: ADR-019
+title: Tutor Upgrade Cadence and EOL Policy
+decision_status: accepted
+decision_type: foundation
+rollout_state: active
+owner: platform-team
+created: '2026-02-24'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
+supersedes: []
+amends: []
+depends_on: []
+read_next:
+- ADR-021
+- ADR-028
+governs:
+- build.release-line
+- platform.upgrade-policy
+does_not_govern: []
+related_oep: []
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs: []
+related_runbooks: []
+related_evidence: []
+fitness_functions:
+- scripts/qa/verify-tutor-version-governance.sh
+- scripts/qa/verify-repo-structure.sh
+expiry_date: null
+removal_condition: null
+---
+
 # ADR-019: Tutor Upgrade Cadence and EOL Policy
 
 **Status**: Accepted (Updated 2026-03-03)
@@ -108,6 +142,19 @@ To verify all repo references are consistent, run:
 ```bash
 ./scripts/qa/verify-tutor-version-pin.sh
 ```
+
+## Scope
+
+This ADR governs the decision boundary described by ADR-019.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- `scripts/qa/verify-tutor-version-governance.sh`
+- `scripts/qa/verify-repo-structure.sh`
 
 ## Consequences
 

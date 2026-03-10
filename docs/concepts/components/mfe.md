@@ -5,7 +5,7 @@ _Audience: Frontend Engineers and Operators • Owner: Platform Team • Last ve
 MFEs are the learner/admin frontend surfaces and associated plugin slots, asset pipelines, and release controls.
 
 ## Canonical ADR Links
-- [ADR 014: MFE branding strategy](../../adr/014-mfe-branding-strategy.md)
+- [ADR 014: MFE branding strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
 - [ADR 021: Open edX Tutor methodology](../../adr/021-openedx-tutor-methodology.md)
 
 ## Canonical Operational Runbooks

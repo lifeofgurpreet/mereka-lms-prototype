@@ -1,23 +1,13 @@
 ---
-title: Internal Packages, Plugins, and Versioning Policy
-proposal_state: proposed
-owner: platform-team
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr/rfc
-doc_class: rfc
-summary: Proposes internal package, plugin, and versioning rules for platform extensions.
-tags:
-  - platform.extension-model
-  - build.version-pin
-decision_type: domain
-decision_status: proposed
-governs:
-- platform.extension-model
-- build.version-pin
 id: ADR-040
+title: Internal Packages, Plugins, and Versioning Policy
+decision_status: proposed
+decision_type: domain
 rollout_state: planned
+owner: platform-team
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends:
 - ADR-006
@@ -26,6 +16,9 @@ depends_on:
 - ADR-028
 - ADR-030
 read_next: []
+governs:
+- platform.extension-model
+- build.version-pin
 does_not_govern:
 - external-upstream-release-timelines
 related_oep: []
@@ -35,7 +28,9 @@ related_tutor_docs:
 related_specs: []
 related_runbooks: []
 related_evidence: []
-fitness_functions: []
+fitness_functions:
+- scripts/qa/verify-tutor-version-pin.sh
+- scripts/qa/verify-repo-structure.sh
 expiry_date: null
 removal_condition: null
 ---

@@ -1,21 +1,13 @@
 ---
-title: Deprecation and Removal Policy
-owner: platform-team
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr
-doc_class: adr
-summary: Deprecation contract for temporary paths, exception expiry, and evidence-backed removal of superseded implementation paths.
-tags:
-- docs.policy
-- platform.repo-boundary
-decision_type: foundation
-decision_status: accepted
-governs:
-- platform.change-policy
 id: ADR-031
+title: Deprecation and Removal Policy
+decision_status: accepted
+decision_type: foundation
 rollout_state: active
+owner: platform-team
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends:
 - ADR-013
@@ -24,6 +16,8 @@ depends_on:
 - ADR-028
 - ADR-030
 read_next: []
+governs:
+- platform.change-policy
 does_not_govern:
 - incident-response runtime triage
 related_oep: []

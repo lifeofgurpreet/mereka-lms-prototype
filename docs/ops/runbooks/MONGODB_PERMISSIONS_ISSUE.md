@@ -149,7 +149,7 @@ except Exception as e:
 ## Related Files
 
 - `deploy/k8s/base/secrets/external-secrets.yaml` - Secret mappings
-- `docs/adr/001-mongodb-atlas.md` - MongoDB Atlas decision record
+- `docs/adr/historical/001-mongodb-atlas.md` - MongoDB Atlas decision record
 
 ## Action Items
 

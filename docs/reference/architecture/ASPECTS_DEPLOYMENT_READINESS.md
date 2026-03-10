@@ -3,7 +3,7 @@
 **Status**: READY FOR DEPLOYMENT DECISION
 **Last Updated**: 2026-02-17
 **Owner**: Platform Engineering
-**Related**: [ADR-017: Analytics Target Decision](../../adr/017-analytics-target-decision.md)
+**Related**: [ADR-017: Analytics Target Decision](../../programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md)
 
 ---
 
@@ -539,7 +539,7 @@ After deployment, the following conditions confirm successful enablement:
 
 ## Related Documentation
 
-- [ADR-017: Analytics Target Decision](../../adr/017-analytics-target-decision.md) - Deferral decision and revisit conditions
+- [ADR-017: Analytics Target Decision](../../programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md) - Deferral decision and revisit conditions
 - [Analytics Pipeline Spec](../../../specs/analytics-pipeline_spec.md) - Requirements and acceptance criteria
 - [Aspects Installation Guide](../analytics/ASPECTS_INSTALLATION.md) - Step-by-step deployment
 - [Aspects Quickstart](../analytics/ASPECTS_QUICKSTART.md) - Post-install validation

@@ -95,7 +95,7 @@ Before starting:
 - [ ] **[S]** Update `docs/runbooks/operations/TROUBLESHOOTING.md` with MongoDB Atlas-specific troubleshooting entries | Depends: Runbook
   - **Done**: Troubleshooting doc includes MongoDB Atlas section with symptom-to-fix table.
 
-- [ ] **[S]** Verify ADR-001 is up to date with current state(`docs/adr/001-mongodb-atlas.md`) | Depends: None
+- [ ] **[S]** Verify ADR-001 is up to date with current state(`docs/adr/historical/001-mongodb-atlas.md`) | Depends: None
   - **Done**: ADR reflects cutover completion date and current verified state.
 
 ### Rollout

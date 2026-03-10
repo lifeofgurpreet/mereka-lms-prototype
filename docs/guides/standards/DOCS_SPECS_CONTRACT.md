@@ -145,4 +145,4 @@ Reviewers should ask:
 
 - [ARCHITECTURE_CHARTER.md](../../concepts/architecture/ARCHITECTURE_CHARTER.md)
 - [DOCUMENTATION_AUTHORITY_RESOLVER.md](../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
-- [ADR-011: Convention-Based Spec Verification](../../adr/011-convention-based-spec-verification.md)
+- [ADR-011: Convention-Based Spec Verification](SPEC_VERIFICATION_METHOD.md)

@@ -66,7 +66,7 @@ Come here when you need:
 - **[PRODUCTION_ARCHITECTURE_REALITY.md](PRODUCTION_ARCHITECTURE_REALITY.md)** - runtime reality and system-shape checkpoint
 - **[MONGODB_ATLAS_MIGRATION.md](MONGODB_ATLAS_MIGRATION.md)** - historical Atlas migration closeout still useful as architecture context
 - **[MULTISITE_ANALYSIS.md](../../../reports/2025/audits/MULTISITE_ANALYSIS.md)** - historical multi-site audit retained for comparison context
-- **[ADR-025-deployment-boundary.md](../../adr/rfc/ADR-025-deployment-boundary.md)** - deployment-boundary proposal in the active RFC queue
+- **[ADR-027: deployment contract ownership lanes](../../adr/rfc/027-deployment-contract-ownership-lanes.md)** - deployment-boundary proposal in the active RFC queue
 
 ## Core standards and contracts
 

@@ -403,7 +403,7 @@ Some workflows use `${{ github.run_id }}-${{ github.run_attempt }}` in artifact 
 
 ## Lessons Learned (ADR-026)
 
-*Documented: 2026-03-05 | See: [docs/adr/026-cicd-build-pipeline-lessons.md](../../adr/026-cicd-build-pipeline-lessons.md)*
+*Documented: 2026-03-05 | See: [docs/adr/historical/026-cicd-build-pipeline-lessons.md](../../adr/historical/026-cicd-build-pipeline-lessons.md)*
 
 Eight failure modes discovered during the ARC migration and GHCR switch (March 2026) are
 captured as binding decisions in ADR-026. A compliance verification script runs on every PR:

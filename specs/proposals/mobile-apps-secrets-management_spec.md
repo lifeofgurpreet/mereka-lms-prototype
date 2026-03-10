@@ -525,7 +525,7 @@ kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data}' | jq 'key
    - **Clarification**: Firebase is ONLY used for push notifications (FCM), NOT for hosting
    - Open edX backend runs on GCP, but mobile apps use FCM to send push notifications to learners' devices
    - **Rationale**: Zero infrastructure management, works out-of-box with Open edX ACE, free tier covers our needs
-- **Future path**: May migrate to self-hosted (Gotify/UnifiedPush) on Mereka VPS later - see [ADR-015](../docs/adr/015-mobile-push-notification-provider.md)
+- **Future path**: May migrate to self-hosted (Gotify/UnifiedPush) on Mereka VPS later - see [ADR-015](../docs/programs/mobile/PUSH_NOTIFICATION_PROVIDER_DECISION.md)
    - **Decision deferred**: Firebase project sharing (dev vs prod) - will decide when mobile app deployment is ready
 
 3. **✅ APNs Authentication Key (.p8)**: Use APNs Authentication Key (no expiry, works for all apps) instead of per-app certificates.

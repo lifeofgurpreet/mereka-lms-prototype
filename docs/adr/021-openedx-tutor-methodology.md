@@ -1,15 +1,37 @@
 ---
-title: "Open edX / Tutor Deployment Methodology"
-type: "adr"
-status: "accepted"
-owner: "engineering"
-last_updated: "2026-03-03"
-links:
-  related_adrs:
-    - "docs/adr/006-tutor-plugin-based-configuration.md"
-    - "docs/adr/014-mfe-branding-strategy.md"
-    - "docs/adr/019-tutor-upgrade-policy.md"
-    - "docs/adr/003-image-build-pipeline.md"
+id: ADR-021
+title: Open edX / Tutor Deployment Methodology
+decision_status: accepted
+decision_type: foundation
+rollout_state: active
+owner: engineering
+created: '2026-03-03'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
+supersedes: []
+amends: []
+depends_on: []
+read_next:
+- ADR-028
+- ADR-029
+- ADR-030
+governs:
+- platform.deployment-methodology
+- build.tutor.plugin
+- build.release-line
+does_not_govern: []
+related_oep: []
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs: []
+related_runbooks: []
+related_evidence: []
+fitness_functions:
+- scripts/qa/verify-repo-structure.sh
+- scripts/qa/verify-tutor-config-safety.sh
+expiry_date: null
+removal_condition: null
 ---
 
 # ADR-021: Open edX / Tutor Deployment Methodology
@@ -134,6 +156,19 @@ These six concerns are independent. A decision in one track does not imply anyth
 
 Example of conflating tracks (wrong): "We're staying on Tutor 18.x (release line), so I'll use the old Dockerfile surgery approach (customization mechanism)." The customization mechanism decision is independent of the release line decision. Plugin API is the correct mechanism on all supported release lines.
 
+## Scope
+
+This ADR governs the decision boundary described by ADR-021.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- `scripts/qa/verify-repo-structure.sh`
+- `scripts/qa/verify-tutor-config-safety.sh`
+
 ## Consequences
 
 ### Positive
@@ -159,7 +194,7 @@ Example of conflating tracks (wrong): "We're staying on Tutor 18.x (release line
 ## References
 
 - [ADR-006: Tutor Plugin-Based Configuration](006-tutor-plugin-based-configuration.md)
-- [ADR-014: MFE Branding Strategy](014-mfe-branding-strategy.md)
+- [ADR-014: MFE Branding Strategy](../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
 - [ADR-019: Tutor Upgrade Cadence and EOL Policy](019-tutor-upgrade-policy.md)
 - [ADR-003: Image Build Pipeline](003-image-build-pipeline.md)
 - [Tutor Plugin API documentation](https://docs.tutor.edly.io/tutorials/plugin.html)

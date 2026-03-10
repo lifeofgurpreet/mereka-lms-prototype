@@ -1,27 +1,21 @@
 ---
-title: Feature Flag and Rollout Lifecycle
-owner: platform-team
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr
-doc_class: adr
-summary: Lifecycle contract for runtime feature flags, including ownership, rollout evidence, rollback posture, and removal expectations.
-tags:
-- docs.policy
-- runtime.async-task
-decision_type: foundation
-decision_status: accepted
-governs:
-- platform.change-policy
 id: ADR-030
+title: Feature Flag and Rollout Lifecycle
+decision_status: accepted
+decision_type: foundation
 rollout_state: active
+owner: platform-team
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends: []
 depends_on:
 - ADR-028
 read_next:
 - ADR-031
+governs:
+- platform.change-policy
 does_not_govern:
 - product-prioritization
 related_oep: []

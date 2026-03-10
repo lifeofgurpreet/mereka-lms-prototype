@@ -107,7 +107,7 @@ analytics.academyv2.mereka.io {
 - `Status: Superseded` (if replaced by newer ADR)
 
 **Scope**:
-- `docs/adr/017-analytics-target-decision.md` frontmatter
+- `docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md` frontmatter
 
 **Enforcement**: Verifier parses ADR frontmatter and checks Status field.
 
@@ -175,7 +175,7 @@ When analytics deployment is approved, follow these steps to formally close the 
 
 2. **Update ADR-017**:
    ```bash
-   # Edit docs/adr/017-analytics-target-decision.md
+   # Edit docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md
    # Change:
    #   Status: Deferred
    # To:
@@ -324,7 +324,7 @@ When analytics deployment is approved, follow these steps to formally close the 
 
 17. **Commit decision closure**:
     ```bash
-    git add docs/adr/017-analytics-target-decision.md
+    git add docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md
     git add specs/analytics-pipeline_spec.md
     git add deploy/k8s/overlays/production/kustomization.yaml
     git add deploy/k8s/base/secrets/external-secrets.yaml
@@ -368,7 +368,7 @@ When analytics deployment is approved, follow these steps to formally close the 
 ### Individual Checks
 ```bash
 # Check ADR status
-grep "^**Status**:" docs/adr/017-analytics-target-decision.md
+grep "^**Status**:" docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md
 
 # Check spec status
 yq eval '.status' specs/analytics-pipeline_spec.md
@@ -420,7 +420,7 @@ kubectl get pods -n mereka-lms -l app.kubernetes.io/part-of=aspects
 
 ## Related Documentation
 
-- ADR-017: Analytics Target Decision (`docs/adr/017-analytics-target-decision.md`)
+- ADR-017: Analytics Target Decision (`docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md`)
 - Analytics spec: `specs/analytics-pipeline_spec.md`
 - Superset deployment runbook: `docs/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md`
 - Capability matrix: `docs/reference/operations/CAPABILITY_MATRIX.md`

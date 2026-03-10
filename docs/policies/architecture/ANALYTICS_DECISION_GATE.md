@@ -4,7 +4,7 @@
 **Last Review**: 2026-02-17
 **Next Review**: 2026-05-17 (90 days)
 **Owner**: Platform Team
-**Related ADR**: [ADR-017: Analytics Target Decision](../../adr/017-analytics-target-decision.md)
+**Related ADR**: [ADR-017: Analytics Target Decision](../../programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md)
 **Related Spec**: [specs/analytics-pipeline_spec.md](../../../specs/analytics-pipeline_spec.md)
 
 ---
@@ -342,7 +342,7 @@ This document satisfies the following acceptance criteria:
 
 ## Related Documentation
 
-- **ADR**: [ADR-017: Analytics Target Decision](../../adr/017-analytics-target-decision.md)
+- **ADR**: [ADR-017: Analytics Target Decision](../../programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md)
 - **Spec**: [specs/analytics-pipeline_spec.md](../../../specs/analytics-pipeline_spec.md)
 - **Installation Guide**: [docs/concepts/analytics/ASPECTS_INSTALLATION.md](../analytics/ASPECTS_INSTALLATION.md)
 - **Comparison**: [docs/concepts/analytics/ASPECTS_VS_PANORAMA.md](../analytics/ASPECTS_VS_PANORAMA.md)

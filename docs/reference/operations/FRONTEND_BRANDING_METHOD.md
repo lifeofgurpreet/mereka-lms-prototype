@@ -280,7 +280,7 @@ grep "pgn-color-primary-base" infrastructure/tutor/themes/mereka/scss/_tokens.sc
 
 ### Migration to OEP-48 Brand Package (@mereka/brand)
 
-**Status**: 🔴 **DECISION PENDING** - See [ADR-014](../adr/014-mfe-branding-strategy.md)
+**Status**: 🔴 **DECISION PENDING** - See [ADR-014](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
 
 **Current Analysis** (2026-02-12):
 - OEP-48 brand package approach is industry standard
@@ -294,7 +294,7 @@ grep "pgn-color-primary-base" infrastructure/tutor/themes/mereka/scss/_tokens.sc
 3. Team scaling planned?
 4. Need custom React footers in MFEs?
 
-**Read full analysis**: [ADR-014: MFE Branding Strategy](../adr/014-mfe-branding-strategy.md)
+**Read full analysis**: [ADR-014: MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
 
 ---
 

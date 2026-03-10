@@ -256,7 +256,7 @@ The target approach uses `tutormfe.hooks.PLUGIN_SLOTS` to register a **Direct pl
 
 **Verification**: `./scripts/qa/verify-mfe-footer-slot.sh` (16 PASS — checks plugin definition, slot registration, fallback wiring, FPF dependency)
 
-See `docs/adr/014-mfe-branding-strategy.md` § "Plugin-First Migration" for full migration steps and available slots.
+See `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` § "Plugin-First Migration" for full migration steps and available slots.
 
 - To bake the branding into Tutor's production MFE image: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
 - Always run `./infrastructure/tutor/apply-patches.sh` immediately before `tutor images build mfe` (ensures idempotent theming copy and npm retry/timeouts).

@@ -14,7 +14,7 @@ source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 INVENTORY="$REPO_ROOT/docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
-ADR014="$REPO_ROOT/docs/adr/014-mfe-branding-strategy.md"
+ADR014="$REPO_ROOT/docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md"
 
 PASS=0
 FAIL=0

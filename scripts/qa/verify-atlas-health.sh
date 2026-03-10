@@ -57,7 +57,7 @@ done
 
 ATLAS_HOSTNAME="cluster-mereka-lms.2pjex4s.mongodb.net"
 ES_FILE="deploy/k8s/base/secrets/external-secrets.yaml"
-ADR_FILE="docs/adr/001-mongodb-atlas.md"
+ADR_FILE="docs/adr/historical/001-mongodb-atlas.md"
 PATCHES_FILE="infrastructure/tutor/apply-patches.sh"
 CONFIG_FILE="scripts/shared/config.sh"
 

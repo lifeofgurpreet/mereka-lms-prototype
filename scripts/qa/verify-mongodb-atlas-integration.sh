@@ -288,6 +288,6 @@ else
   echo "  - MONGODB_HOST not set in LMS/CMS deployments"
   echo "  - Local MongoDB deployment not removed from manifests"
   echo ""
-  echo "See docs/adr/001-mongodb-atlas.md for more details"
+  echo "See docs/adr/historical/001-mongodb-atlas.md for more details"
   exit 1
 fi

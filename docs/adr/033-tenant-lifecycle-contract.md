@@ -1,25 +1,13 @@
 ---
-title: Tenant Lifecycle Contract
-owner: multisite-platform
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr
-doc_class: adr
-summary: Tenant lifecycle contract covering onboarding, runtime validation, isolation, branding handoff, and offboarding outcomes.
-tags:
-- tenant.lifecycle
-- tenant.isolation
-- frontend.brand.tokens
-decision_type: foundation
-decision_status: accepted
-governs:
-- tenant.lifecycle
-- tenant.isolation
-- tenant.domain-boundary
-- frontend.brand.tokens
 id: ADR-033
+title: Tenant Lifecycle Contract
+decision_status: accepted
+decision_type: foundation
 rollout_state: active
+owner: multisite-platform
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends:
 - ADR-024
@@ -28,6 +16,11 @@ depends_on:
 - ADR-029
 - ADR-032
 read_next: []
+governs:
+- tenant.lifecycle
+- tenant.isolation
+- tenant.domain-boundary
+- frontend.brand.tokens
 does_not_govern:
 - tenant commercial terms
 related_oep: []

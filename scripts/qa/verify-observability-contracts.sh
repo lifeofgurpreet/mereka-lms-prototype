@@ -353,12 +353,12 @@ fi
 echo ""
 echo "=== Distributed Tracing (Tempo/OTEL) ==="
 
-if [[ -f "docs/adr/020-tracing-scope-and-pilot-decision.md" ]]; then
-  report PASS "Tracing scope ADR exists: docs/adr/020-tracing-scope-and-pilot-decision.md"
+if [[ -f "docs/programs/observability/TRACING_PILOT_DECISION.md" ]]; then
+  report PASS "Tracing scope ADR exists: docs/programs/observability/TRACING_PILOT_DECISION.md"
 elif [[ "$TRACING_REQUIRED" == "1" ]]; then
-  report FAIL "Tracing scope ADR missing: docs/adr/020-tracing-scope-and-pilot-decision.md"
+  report FAIL "Tracing scope ADR missing: docs/programs/observability/TRACING_PILOT_DECISION.md"
 else
-  report SKIP "Tracing scope ADR missing: docs/adr/020-tracing-scope-and-pilot-decision.md"
+  report SKIP "Tracing scope ADR missing: docs/programs/observability/TRACING_PILOT_DECISION.md"
 fi
 
 if [[ -f "docs/reference/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md" ]]; then

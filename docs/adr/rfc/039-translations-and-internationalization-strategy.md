@@ -1,26 +1,20 @@
 ---
-title: Translations and Internationalization Strategy
-proposal_state: proposed
-owner: frontend-platform
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr/rfc
-doc_class: rfc
-summary: Proposes translation and internationalization rules for frontend surfaces.
-tags:
-  - frontend.i18n
-decision_type: domain
-decision_status: proposed
-governs:
-- frontend.i18n
 id: ADR-039
+title: Translations and Internationalization Strategy
+decision_status: proposed
+decision_type: domain
 rollout_state: planned
+owner: frontend-platform
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends: []
 depends_on:
 - ADR-035
 read_next: []
+governs:
+- frontend.i18n
 does_not_govern:
 - content-authoring-language-policy
 related_oep: []

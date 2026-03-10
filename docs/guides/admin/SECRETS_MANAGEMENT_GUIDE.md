@@ -627,7 +627,7 @@ STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
 - **Domain secrets**: `docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md` (multi-site release)
 
 ### Architecture Decisions
-- **ADR-004**: `docs/adr/004-secrets-management.md` (why Infisical + ExternalSecrets)
+- **ADR-004**: `docs/adr/historical/004-secrets-management.md` (why Infisical + ExternalSecrets)
 
 ### Scripts
 - Validation: `scripts/infra/infisical-validate-mereka-lms.sh`

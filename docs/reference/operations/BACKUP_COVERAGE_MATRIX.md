@@ -35,7 +35,7 @@ This document answers one question: **if we lose a node/zone/cluster, what data 
 ## Known Gaps (As Of 2026-02-07)
 
 1. **Accidental local MongoDB risk (dev-only):** kind dev may still run in-cluster MongoDB for forum testing.
-   - Production is Atlas-only (see `docs/adr/001-mongodb-atlas.md`) and should not keep `mongodb` service/deployment active.
+   - Production is Atlas-only (see `docs/adr/historical/001-mongodb-atlas.md`) and should not keep `mongodb` service/deployment active.
    - In kind dev, do not rely on in-cluster MongoDB for durable course content.
 2. **DR process discipline still required:** restore drill mechanics are fixed, but monthly evidence review and restore-drill artifacts must stay on schedule.
    - Run: `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`

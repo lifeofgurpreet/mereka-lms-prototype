@@ -6,10 +6,10 @@ _Audience: Contributors and reviewers • Owner: Platform Team • Last verified
 Owner: Corpus Cartographer
 
 Deliverables:
-- `docs/adr/contradictions-register.md`
-- `docs/adr/status-map.yaml` (generated from `docs/adr/manifest.yaml`)
-- `docs/adr/classification-map.yaml` (generated from `docs/adr/manifest.yaml`)
-- coverage of all ADRs in `docs/adr/manifest.yaml`
+- `docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md`
+- `docs/adr/status-map.yaml` (generated compatibility view from ADR frontmatter)
+- `docs/adr/classification-map.yaml` (generated compatibility view from ADR frontmatter)
+- coverage of ADRs declared by file frontmatter under `docs/adr/**`
 
 ## Packet 01 — Overlay Scaffolding
 

@@ -1,23 +1,13 @@
 ---
-title: Authorization and Role-Boundary Model
-proposal_state: proposed
-owner: auth-platform
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr/rfc
-doc_class: rfc
-summary: Proposes the authorization and role-boundary model for tenant-aware access.
-tags:
-  - auth.authorization.roles
-  - tenant.isolation
-decision_type: domain
-decision_status: proposed
-governs:
-- auth.authorization.roles
-- tenant.isolation
 id: ADR-041
+title: Authorization and Role-Boundary Model
+decision_status: proposed
+decision_type: domain
 rollout_state: planned
+owner: auth-platform
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends:
 - ADR-029
@@ -26,6 +16,9 @@ depends_on:
 - ADR-029
 - ADR-033
 read_next: []
+governs:
+- auth.authorization.roles
+- tenant.isolation
 does_not_govern:
 - identity-provider-protocol-selection
 related_oep: []

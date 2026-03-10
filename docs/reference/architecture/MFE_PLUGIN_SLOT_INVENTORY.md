@@ -2,7 +2,7 @@
 
 **Purpose**: Comprehensive inventory of all FPF (Frontend Plugin Framework) plugin slots available in Open edX Tutor 21 (Ulmo), with Mereka Academy's current wiring status and migration roadmap.
 **Last verified**: 2026-02-28
-**Related**: [ADR-014: MFE Branding Strategy](../../adr/014-mfe-branding-strategy.md), [OEP-65: FPF](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html), [mfe-plugin-slots_spec.md](../../../specs/mfe-plugin-slots_spec.md)
+**Related**: [ADR-014: MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md), [OEP-65: FPF](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html), [mfe-plugin-slots_spec.md](../../../specs/mfe-plugin-slots_spec.md)
 
 ---
 
@@ -441,4 +441,4 @@ grep -r "pluginSlots" tutor_env/env/plugins/mfe/build/mfe/env.config.jsx
 - [Open edX Plugin Slots Browser](https://discuss.openedx.org/t/open-edx-plugin-slots-browser/18407)
 - [How to Use Frontend Plugin Slots](https://docs.openedx.org/en/latest/site_ops/how-tos/use-frontend-plugin-slots.html)
 - [Frontend Plugin Framework](https://github.com/openedx/frontend-plugin-framework)
-- [ADR-014: MFE Branding Strategy](../../adr/014-mfe-branding-strategy.md)
+- [ADR-014: MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)

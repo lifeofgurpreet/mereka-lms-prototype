@@ -322,7 +322,7 @@ collection.find(...).read_preference(ReadPreference.SECONDARY_PREFERRED)
 
 **Specs**: `specs/mongodb-atlas-integration_spec.md` (9 ACs, 100% complete)
 
-**ADR**: `docs/adr/001-mongodb-atlas.md` - Architectural rationale
+**ADR**: `docs/adr/historical/001-mongodb-atlas.md` - Architectural rationale
 
 **Scripts**:
 - `scripts/infra/check-atlas-allowlist.sh` - Verify IP allowlist

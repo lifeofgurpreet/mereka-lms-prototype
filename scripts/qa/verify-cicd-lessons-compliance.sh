@@ -156,7 +156,7 @@ check_dirs=(
 
 # Files we exempt: documentation, test fixtures, this ADR itself
 exempt_patterns=(
-  "docs/adr/026-cicd-build-pipeline-lessons.md"
+  "docs/adr/historical/026-cicd-build-pipeline-lessons.md"
   "verify-cicd-lessons-compliance.sh"
 )
 
@@ -233,7 +233,7 @@ echo "  Results: ${PASS}/${TOTAL} checks passed"
 
 if [[ "$FAIL" -gt 0 ]]; then
   echo "  FAIL — ${FAIL} check(s) failed. See ADR-026 for remediation guidance."
-  echo "         docs/adr/026-cicd-build-pipeline-lessons.md"
+  echo "         docs/adr/historical/026-cicd-build-pipeline-lessons.md"
   exit 1
 else
   echo "  PASS — All CI/CD lessons compliance checks passed."

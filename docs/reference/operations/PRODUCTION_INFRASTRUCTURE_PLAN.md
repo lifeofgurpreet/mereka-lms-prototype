@@ -30,7 +30,7 @@ references staging has been archived at:
 - **MySQL**: in-cluster (PVC-backed) in production and dev.
 - **Redis**: in-cluster (PVC-backed) in production and dev.
 - **MongoDB**:
-  - Target state: Atlas-only (see `docs/adr/001-mongodb-atlas.md`).
+  - Target state: Atlas-only (see `docs/adr/historical/001-mongodb-atlas.md`).
   - Current production reality: modulestore + forum are Atlas-backed; legacy deployment is retired and production overlay removes `Service/mongodb` to prevent drift (see `docs/architecture/overviews/ARCHITECTURE_MONGODB.md`).
 
 ## Secrets

@@ -1,40 +1,48 @@
 ---
 id: ADR-028
-adr_id: ADR-028
 title: Platform Sources of Truth and Control Planes
-status: canonical
-canonical_root: docs/adr
-doc_class: adr
-summary: Defines the platform control planes and ownership boundaries for code, GitOps, and runtime state.
-tags:
-  - adr
-  - platform
-  - gitops
-  - governance
 decision_status: accepted
 decision_type: foundation
 rollout_state: active
 owner: platform-team
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
-amends: ["ADR-003", "ADR-019", "ADR-021", "ADR-026", "ADR-027"]
+amends:
+- ADR-003
+- ADR-019
+- ADR-021
+- ADR-026
+- ADR-027
 depends_on: []
-read_next: ["ADR-029", "ADR-030", "ADR-031", "ADR-032", "ADR-033"]
+read_next:
+- ADR-029
+- ADR-030
+- ADR-031
+- ADR-032
+- ADR-033
 governs:
-  - platform.control-plane
-  - platform.repo-boundary
-  - build.image.registry
-  - build.gitops-promotion
-  - docs.policy
-does_not_govern: ["feature-level business logic", "tenant-specific UX copy"]
+- platform.control-plane
+- platform.repo-boundary
+- build.image.registry
+- build.gitops-promotion
+- docs.policy
+does_not_govern:
+- feature-level business logic
+- tenant-specific UX copy
 related_oep: []
-related_tutor_docs: ["https://docs.tutor.edly.io"]
-related_specs: ["specs/repository-structure_spec.md"]
-related_runbooks: ["docs/policies/operations/REPO_BOUNDARIES.md", "docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md"]
+related_tutor_docs:
+- https://docs.tutor.edly.io
+related_specs:
+- specs/repository-structure_spec.md
+related_runbooks:
+- docs/policies/operations/REPO_BOUNDARIES.md
+- docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md
 related_evidence: []
-fitness_functions: ["scripts/qa/verify-repo-structure.sh", "scripts/qa/verify-gitops-image-overrides.sh --check-infra"]
+fitness_functions:
+- scripts/qa/verify-repo-structure.sh
+- scripts/qa/verify-gitops-image-overrides.sh --check-infra
 expiry_date: null
 removal_condition: null
 ---

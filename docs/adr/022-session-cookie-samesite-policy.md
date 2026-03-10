@@ -1,22 +1,13 @@
 ---
-title: Session Cookie SameSite Policy and Stale Cookie Mitigation
-owner: auth-platform
-created: 2026-03-04
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr
-doc_class: adr
-summary: Defines the session-cookie SameSite policy and related cookie boundary rules.
-tags:
-- auth
-- cookies
-- sessions
-decision_type: exception
-decision_status: accepted
-governs:
-- auth.cookie-boundary
 id: ADR-022
+title: Session Cookie SameSite Policy and Stale Cookie Mitigation
+decision_status: accepted
+decision_type: exception
 rollout_state: temporary
+owner: auth-platform
+created: '2026-03-04'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends:
 - ADR-002
@@ -24,7 +15,11 @@ amends:
 depends_on:
 - ADR-029
 - ADR-031
-read_next: []
+read_next:
+- ADR-029
+- ADR-031
+governs:
+- auth.cookie-boundary
 does_not_govern:
 - final steady-state cross-domain identity architecture
 related_oep: []
@@ -105,6 +100,19 @@ Studio's session cookie name remains `"studio_session_id"` (set in `infrastructu
 | `infrastructure production-staging.py` | `SESSION_COOKIE_SAMESITE = "None"`, `_dedup_session_cookie()` method added to `MerekaCookieDomainMiddleware` |
 | `infrastructure production-prod.py` | Same |
 | `deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py` | Base class for middleware (not deployed via ConfigMap; serves as canonical reference) |
+
+## Scope
+
+This ADR governs the decision boundary described by ADR-022.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- `scripts/qa/verify-auth-surfaces.sh prod`
+- `scripts/qa/verify-mfe-config-contract.sh --env prod`
 
 ## Consequences
 

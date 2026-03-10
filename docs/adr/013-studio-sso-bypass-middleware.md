@@ -1,22 +1,13 @@
 ---
-title: Studio SSO Bypass Middleware
-owner: auth-platform
-created: 2026-02-12
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr
-doc_class: adr
-summary: Defines the Studio SSO bypass middleware contract for OIDC flows.
-tags:
-- auth
-- studio
-- oidc
-decision_type: exception
-decision_status: accepted
-governs:
-- auth.oidc
 id: ADR-013
+title: Studio SSO Bypass Middleware
+decision_status: accepted
+decision_type: exception
 rollout_state: temporary
+owner: auth-platform
+created: '2026-02-12'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends: []
 depends_on:
@@ -24,6 +15,9 @@ depends_on:
 - ADR-031
 read_next:
 - ADR-022
+- ADR-029
+governs:
+- auth.oidc
 does_not_govern:
 - long-term authn frontend architecture
 related_oep: []
@@ -73,6 +67,18 @@ Add `StudioSSOBypassMiddleware` to the LMS Django middleware stack that:
 The middleware is positioned early in the stack (index 1, after forwarded-headers hardening).
 
 Location: `StudioSSOBypassMiddleware` class in infrastructure production-prod.py (the LMS settings overlay).
+
+## Scope
+
+This ADR governs the decision boundary described by ADR-013.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- `scripts/qa/verify-auth-surfaces.sh prod`
 
 ## Consequences
 

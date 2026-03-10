@@ -35,7 +35,7 @@ jobs:
             echo "### What was checked (offline)"
             echo "- Atlas SRV hostname present in \`scripts/shared/config.sh\`"
             echo "- ExternalSecret maps MongoDB password from GCP Secret Manager"
-            echo "- Atlas cluster hostname documented in \`docs/adr/001-mongodb-atlas.md\`"
+            echo "- Atlas cluster hostname documented in \`docs/adr/historical/001-mongodb-atlas.md\`"
             echo "- MongoDB password injected via ExternalSecret (not hardcoded)"
             echo "- SRV format (\`mongodb+srv://\`) referenced in config chain"
             echo "- \`pymongo[srv]\` dependency referenced in \`infrastructure/tutor/apply-patches.sh\`"

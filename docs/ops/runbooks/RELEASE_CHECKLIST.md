@@ -122,7 +122,7 @@ Do not use direct `kubectl set image` for normal production rollouts.
     - workflow: `.github/workflows/npm-start-mfe-smoke.yml` (`workflow_dispatch`)
 - Why mandatory: The 2026-02-10 incident showed that branding regressions can be silent
   (no pod crashes, no log errors). Only post-deploy branding verification catches them.
-  See [ADR-012](../adr/012-no-runtime-css-overlay.md).
+  See [ADR-012](../../adr/historical/012-no-runtime-css-overlay.md).
 
 ## 7. Observability and Parity Sign-off (MANDATORY)
 

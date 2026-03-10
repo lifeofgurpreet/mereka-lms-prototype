@@ -1,6 +1,6 @@
 # Deployment Contract -- Mereka LMS
 
-> Machine-readable version: [`contract.json`](contract.json) | ADR: [ADR-027](../../docs/adr/027-deployment-contract-ownership-lanes.md)
+> Machine-readable version: [`contract.json`](contract.json) | ADR: [ADR-027](../../docs/adr/rfc/027-deployment-contract-ownership-lanes.md)
 
 ## Contract Version
 

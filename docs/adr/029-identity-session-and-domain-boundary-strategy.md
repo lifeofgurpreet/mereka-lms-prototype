@@ -1,24 +1,13 @@
 ---
-title: Identity, Session, and Domain-Boundary Strategy
-owner: auth-platform
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr
-doc_class: adr
-summary: Identity and session contract for root-domain boundaries, federation-first sign-in, and explicit cross-domain authentication flows.
-tags:
-- auth.oidc
-- auth.cookie-boundary
-- tenant.isolation
-decision_type: foundation
-decision_status: accepted
-governs:
-- auth.oidc
-- auth.cookie-boundary
-- tenant.domain-boundary
 id: ADR-029
+title: Identity, Session, and Domain-Boundary Strategy
+decision_status: accepted
+decision_type: foundation
 rollout_state: active
+owner: auth-platform
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends:
 - ADR-002
@@ -29,6 +18,10 @@ depends_on:
 - ADR-028
 read_next:
 - ADR-033
+governs:
+- auth.oidc
+- auth.cookie-boundary
+- tenant.domain-boundary
 does_not_govern:
 - branding copy
 - course-content permissions

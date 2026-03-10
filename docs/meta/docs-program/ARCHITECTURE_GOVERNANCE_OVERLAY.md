@@ -27,11 +27,12 @@ The architecture system is split into five layers:
 - Govern vocabulary: `docs/architecture/glossary.yaml`
 - Bundle rules: `docs/architecture/bundle-rules.yaml`
 - ADR corpus: `docs/adr/*.md`
-- ADR manifest: `docs/adr/manifest.yaml`
+- ADR file frontmatter under `docs/adr/**`
 - ADR generated outputs: `generated/`
-- Contradictions register: `docs/adr/contradictions-register.md`
-- Classification map (generated from the ADR manifest): `docs/adr/classification-map.yaml`
-- Status map (generated from the ADR manifest): `docs/adr/status-map.yaml`
+- Contradictions register: `docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md`
+- Compatibility manifest (generated from ADR frontmatter): `docs/adr/manifest.yaml`
+- Classification map (generated from ADR frontmatter): `docs/adr/classification-map.yaml`
+- Status map (generated from ADR frontmatter): `docs/adr/status-map.yaml`
 
 ## Progressive Disclosure Model
 

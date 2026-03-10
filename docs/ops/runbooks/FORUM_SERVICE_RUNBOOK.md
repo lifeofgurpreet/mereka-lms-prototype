@@ -5,7 +5,7 @@ This runbook covers operational procedures for the Python-based forum service (o
 
 > **Spec**: `specs/forum-service-migration_spec.md`
 > **Testmap**: `specs/_generated/testmaps/forum-service-migration_spec.testmap.yml`
-> **ADR**: `docs/adr/007-forum-migration-ruby-to-python.md`
+> **ADR**: `docs/adr/historical/007-forum-migration-ruby-to-python.md`
 
 ## Architecture
 

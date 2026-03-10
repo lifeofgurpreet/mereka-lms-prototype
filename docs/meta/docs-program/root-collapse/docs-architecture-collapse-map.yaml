@@ -120,8 +120,8 @@ entries:
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
-  - old_path: docs/architecture/rfc/ADR-025-deployment-boundary.md
-    destination_path: docs/adr/rfc/ADR-025-deployment-boundary.md
+  - old_path: docs/adr/rfc/027-deployment-contract-ownership-lanes.md
+    destination_path: docs/adr/rfc/027-deployment-contract-ownership-lanes.md
     destination_root: docs/adr
     classification: adr.rfc
     action: move_and_stub

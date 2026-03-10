@@ -123,7 +123,7 @@ rg -n "MFE-first|plugin slots|no new edx-platform frontend" docs/
 
 ## Related Documents
 
-- **ADR-014**: `docs/adr/014-mfe-branding-strategy.md` (plugin-first rationale)
+- **ADR-014**: `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` (plugin-first rationale)
 - **Slot Inventory**: `docs/reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md` (100+ slots)
 - **MFE Versions**: `docs/reference/architecture/MFE_VERSIONS.md` (active MFEs)
 - **Footer Mapping**: `docs/guides/branding/FOOTER_V2_TO_LMS_MAPPING.md` (slot example)

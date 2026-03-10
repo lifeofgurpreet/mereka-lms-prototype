@@ -1,26 +1,20 @@
 ---
-title: Async Task User-Facing Contract
-proposal_state: proposed
-owner: platform-runtime
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr/rfc
-doc_class: rfc
-summary: Proposes the user-facing contract for async task status, retry, and recovery.
-tags:
-  - runtime.async-task
-decision_type: domain
-decision_status: proposed
-governs:
-- runtime.async-task
 id: ADR-037
+title: Async Task User-Facing Contract
+decision_status: proposed
+decision_type: domain
 rollout_state: planned
+owner: platform-runtime
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends: []
 depends_on:
 - ADR-034
 read_next: []
+governs:
+- runtime.async-task
 does_not_govern:
 - internal-task-runner-selection
 related_oep: []
@@ -30,7 +24,8 @@ related_tutor_docs:
 related_specs: []
 related_runbooks: []
 related_evidence: []
-fitness_functions: []
+fitness_functions:
+- scripts/qa/verify-authenticated-sso-canary.sh --env prod
 expiry_date: null
 removal_condition: null
 ---

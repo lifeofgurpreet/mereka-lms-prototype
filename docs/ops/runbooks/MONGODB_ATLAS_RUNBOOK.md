@@ -5,7 +5,7 @@ This runbook covers operational procedures for MongoDB Atlas integration with Me
 
 > **Spec**: `specs/mongodb-atlas-integration_spec.md`
 > **Testmap**: `specs/testmaps/mongodb-atlas-integration_spec.testmap.yml`
-> **ADR**: `docs/adr/001-mongodb-atlas.md`
+> **ADR**: `docs/adr/historical/001-mongodb-atlas.md`
 
 ## Architecture
 

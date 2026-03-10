@@ -262,4 +262,4 @@ Breaking changes are indicated by `!` after the type/scope: `feat(k8s)!: migrate
 - Canonical release wrapper: `scripts/infra/canonical-release.sh`
 - GitOps release orchestrator: `scripts/infra/release-openedx-gitops.sh`
 - CI pipeline spec: `specs/ci-cd-pipeline_spec.md`
-- ADR-012: `docs/adr/012-no-runtime-css-overlay.md`
+- ADR-012: `docs/adr/historical/012-no-runtime-css-overlay.md`

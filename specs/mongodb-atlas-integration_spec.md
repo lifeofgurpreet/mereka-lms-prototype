@@ -32,7 +32,7 @@ tags:
 summary: "Defines the managed MongoDB Atlas contract for modulestore and forum data, replacing in-cluster MongoDB across supported environments."
 links:
   related_docs:
-    - "docs/adr/001-mongodb-atlas.md"
+    - "docs/adr/historical/001-mongodb-atlas.md"
     - "docs/concepts/architecture/MONGODB_ATLAS_MIGRATION.md"
     - "docs/concepts/architecture/DATABASE_ARCHITECTURE.md"
     - "docs/ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md"
@@ -70,7 +70,7 @@ Running a stateful database inside Kubernetes introduces significant operational
 
 This spec covers the integration of MongoDB Atlas as the managed database for Open edX modulestore (course structure) and forum data. It replaces local MongoDB containers with a cloud-hosted cluster to eliminate maintenance overhead and improve reliability.
 
-See ADR-001 for architectural rationale: `docs/adr/001-mongodb-atlas.md`
+See ADR-001 for architectural rationale: `docs/adr/historical/001-mongodb-atlas.md`
 
 ## Non-goals
 

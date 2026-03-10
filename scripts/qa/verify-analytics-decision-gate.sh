@@ -45,7 +45,7 @@ fi
 # --- 2. ADR-017 exists ---
 echo ""
 echo "--- ADR-017: Analytics Target Decision ---"
-ADR="docs/adr/017-analytics-target-decision.md"
+ADR="docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md"
 if [[ ! -f "$ADR" ]]; then
   do_fail "ADR-017 missing: $ADR"
 else

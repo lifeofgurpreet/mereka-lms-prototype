@@ -1,13 +1,31 @@
 ---
-title: "Enterprise Images GHCR Migration"
-type: "adr"
-status: "accepted"
-owner: "engineering"
-last_updated: "2026-03-04"
-links:
-  related_adrs:
-    - "docs/adr/003-image-build-pipeline.md"
-    - "docs/adr/010-monorepo-architecture.md"
+id: ADR-023
+title: Enterprise Images GHCR Migration
+decision_status: accepted
+decision_type: domain
+rollout_state: historical
+owner: engineering
+created: '2026-03-04'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
+supersedes: []
+amends: []
+depends_on: []
+read_next: []
+governs: []
+does_not_govern: []
+related_oep: []
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs: []
+related_runbooks: []
+related_evidence: []
+fitness_functions: []
+expiry_date: null
+removal_condition: null
+historical_reason: Completed migration with active law absorbed by newer platform/build
+  governance.
 ---
 
 # ADR-023: Enterprise Images GHCR Migration

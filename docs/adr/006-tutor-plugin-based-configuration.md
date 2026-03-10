@@ -1,18 +1,33 @@
 ---
-title: "Tutor Plugin-Based Configuration Resilience"
-type: "adr"
-status: "accepted"
-owner: "engineering"
-last_updated: "2026-02-16"
-links:
-  related_specs:
-    - "specs/tutor-configuration-resilience_spec.md"
-    - "specs/tutor-configuration_spec.md"
-    - "specs/ci-cd-pipeline_spec.md"
-    - "specs/cross-cutting-requirements_spec.md"
-    - "specs/branding-system_spec.md"
-  related_adrs:
-    - "docs/adr/014-mfe-branding-strategy.md"
+id: ADR-006
+title: Tutor Plugin-Based Configuration Resilience
+decision_status: accepted
+decision_type: domain
+rollout_state: active
+owner: engineering
+created: '2026-02-10'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
+supersedes: []
+amends: []
+depends_on: []
+read_next:
+- ADR-021
+- ADR-028
+governs:
+- build.tutor.plugin
+- platform.config-rendering
+does_not_govern: []
+related_oep: []
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs: []
+related_runbooks: []
+related_evidence: []
+fitness_functions: []
+expiry_date: null
+removal_condition: null
 ---
 
 # ADR-006: Tutor Plugin-Based Configuration with Three-Layer Defense
@@ -111,6 +126,18 @@ Use a custom deployment tool (Helm charts, raw Docker Compose) instead of Tutor.
 Contribute all patches upstream to the Tutor project so they become part of the default template.
 
 **Why not primary approach**: Some patches are Mereka-specific (multi-site domains, custom theme, custom apps) and would not be accepted upstream. Other patches (MySQL auth fix, MFE Node version) could be upstreamed but the Tutor project has its own release cadence. Upstreaming is a complementary strategy, not a replacement for local resilience. The spec tracks upstream contribution as a non-goal for this iteration but the plugin architecture makes upstreaming easier by clearly separating Mereka-specific patches from general fixes.
+
+## Scope
+
+This ADR governs the decision boundary described by ADR-006.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- No dedicated automated fitness function is registered yet; use linked specs and runbooks for review.
 
 ## Consequences
 

@@ -1,1282 +1,299 @@
-version: 2
-generated_on: '2026-03-07'
-adrs:
+version: 3
+generated_from: adr-frontmatter
+entries:
 - id: ADR-001
-  path: docs/adr/001-mongodb-atlas.md
-  title: 'ADR-001: MongoDB Atlas vs Local MongoDB'
+  path: docs/adr/historical/001-mongodb-atlas.md
+  title: MongoDB Atlas vs Local MongoDB
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-03'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-tutor-version-pin.sh
-  - scripts/qa/verify-repo-structure.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-002
-  path: docs/adr/002-multisite-architecture.md
-  title: 'ADR-002: Multisite Architecture'
+  path: docs/adr/historical/002-multisite-architecture.md
+  title: Multisite Architecture
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-03'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-repo-structure.sh
-  - scripts/qa/verify-tutor-config-safety.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-003
-  path: docs/adr/003-image-build-pipeline.md
-  title: 'ADR-003: Image Build Pipeline'
+  path: docs/adr/historical/003-image-build-pipeline.md
+  title: Image Build Pipeline
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-03'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-multisite-config.sh prod
-  - scripts/qa/verify-org-role-ownership.sh both
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-004
-  path: docs/adr/004-secrets-management.md
-  title: 'ADR-004: Secrets Management'
+  path: docs/adr/historical/004-secrets-management.md
+  title: Secrets Management
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-03'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-authenticated-sso-canary.sh --env prod
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-005
-  path: docs/adr/005-domain-migration.md
-  title: "ADR-005: Domain Migration (legacy environment \u2192 academyV2)"
+  path: docs/adr/historical/005-domain-migration.md
+  title: Domain Migration (legacy environment → academyV2)
+  bucket: historical
   decision_status: accepted
   decision_type: migration
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-03'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-tutor-version-pin.sh
-  - scripts/qa/verify-repo-structure.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-006
   path: docs/adr/006-tutor-plugin-based-configuration.md
-  title: 'ADR-006: Tutor Plugin-Based Configuration with Three-Layer Defense'
+  title: Tutor Plugin-Based Configuration Resilience
+  bucket: accepted
   decision_status: accepted
   decision_type: domain
   rollout_state: active
-  owner: platform-team
-  created: '2026-02-10'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
+  owner: engineering
 - id: ADR-007
-  path: docs/adr/007-forum-migration-ruby-to-python.md
-  title: 'ADR-007: Forum Service Migration from Ruby to Python'
+  path: docs/adr/historical/007-forum-migration-ruby-to-python.md
+  title: Forum Service Migration from Ruby to Python
+  bucket: historical
   decision_status: accepted
   decision_type: migration
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-03-07'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-008
-  path: docs/adr/008-redis-streams-event-bus.md
-  title: 'ADR-008: Redis Streams as Event Bus'
+  path: docs/adr/historical/008-redis-streams-event-bus.md
+  title: Redis Streams as Event Bus
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-10'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-009
-  path: docs/adr/009-in-cluster-storage.md
-  title: 'ADR-009: In-Cluster MySQL/Redis vs Cloud SQL/Memorystore'
+  path: docs/adr/historical/009-in-cluster-storage.md
+  title: In-Cluster MySQL/Redis vs Cloud SQL/Memorystore
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-10'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-010
-  path: docs/adr/010-monorepo-architecture.md
-  title: 'ADR-010: Monorepo Architecture'
+  path: docs/adr/historical/010-monorepo-architecture.md
+  title: Monorepo Architecture
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-10'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
-- id: ADR-011
-  path: docs/adr/011-convention-based-spec-verification.md
-  title: 'ADR-011: Convention-Based Spec Verification (V3)'
-  decision_status: accepted
-  decision_type: domain
-  rollout_state: active
-  owner: platform-team
-  created: '2026-02-11'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-012
-  path: docs/adr/012-no-runtime-css-overlay.md
-  title: 'ADR-012: Eliminate Runtime CSS ConfigMap Overlay'
+  path: docs/adr/historical/012-no-runtime-css-overlay.md
+  title: Eliminate Runtime CSS ConfigMap Overlay
+  bucket: historical
   decision_status: accepted
   decision_type: migration
-  rollout_state: active
+  rollout_state: historical
   owner: platform-team
-  created: '2026-02-10'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-013
   path: docs/adr/013-studio-sso-bypass-middleware.md
   title: Studio SSO Bypass Middleware
+  bucket: accepted
   decision_status: accepted
   decision_type: exception
   rollout_state: temporary
   owner: auth-platform
-  created: 2026-02-12
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends: []
-  depends_on:
-  - ADR-029
-  - ADR-031
-  read_next:
-  - ADR-022
-  governs:
-  - auth.oidc
-  does_not_govern:
-  - long-term authn frontend architecture
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks:
-  - docs/runbooks/operations/AUTHENTICATED_SMOKE_A11Y.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-auth-surfaces.sh prod
-  expiry_date: 2026-09-30
-  removal_condition: Upstream/frontend authn flow preserves OAuth next state without
-    middleware bypass.
-  frontmatter_required: true
-- id: ADR-014
-  path: docs/adr/014-mfe-branding-strategy.md
-  title: 'ADR-014: MFE Branding Strategy - Migration Path Analysis'
-  decision_status: accepted
-  decision_type: domain
-  rollout_state: active
-  owner: platform-team
-  created: '2026-02-12'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
-- id: ADR-015
-  path: docs/adr/015-mobile-push-notification-provider.md
-  title: 'ADR-015: Mobile Push Notification Provider Selection'
-  decision_status: accepted
-  decision_type: domain
-  rollout_state: active
-  owner: platform-team
-  created: '2026-02-13'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
-- id: ADR-016
-  path: docs/adr/016-android-app-support-decision.md
-  title: 'ADR-016: Android App Support Decision'
-  decision_status: deferred
-  decision_type: domain
-  rollout_state: planned
-  owner: platform-team
-  created: '2026-02-13'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
-- id: ADR-017
-  path: docs/adr/017-analytics-target-decision.md
-  title: 'ADR-017: Analytics Target Decision (Aspects/Superset Deployment)'
-  decision_status: accepted
-  decision_type: migration
-  rollout_state: active
-  owner: platform-team
-  created: '2026-02-13'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-018
   path: docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md
   title: Purchase Gateway Replaces Legacy Oscar Ecommerce
+  bucket: accepted
   decision_status: accepted
   decision_type: migration
   rollout_state: active
   owner: commerce-platform
-  created: 2026-02-16
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends: []
-  depends_on:
-  - ADR-028
-  - ADR-033
-  read_next: []
-  governs:
-  - commerce.system-of-record
-  - commerce.reconciliation
-  - platform.change-policy
-  does_not_govern:
-  - pricing-strategy
-  - catalog-content-authoring
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs:
-  - specs/ecommerce-purchase-gateway_spec.md
-  related_runbooks:
-  - docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
-  - docs/runbooks/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-ecommerce-worker-health.sh
-  - scripts/qa/verify-repo-structure.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-019
   path: docs/adr/019-tutor-upgrade-policy.md
-  title: 'ADR-019: Tutor Upgrade Cadence and EOL Policy'
+  title: Tutor Upgrade Cadence and EOL Policy
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
   owner: platform-team
-  created: '2026-02-24'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-tutor-version-governance.sh
-  - scripts/qa/verify-repo-structure.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
-- id: ADR-020
-  path: docs/adr/020-tracing-scope-and-pilot-decision.md
-  title: 'ADR-020: Tracing Scope and Pilot Decision for Mereka LMS'
-  decision_status: accepted
-  decision_type: domain
-  rollout_state: active
-  owner: platform-team
-  created: '2026-02-25'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
 - id: ADR-021
   path: docs/adr/021-openedx-tutor-methodology.md
-  title: 'ADR-021: Open edX / Tutor Deployment Methodology'
+  title: Open edX / Tutor Deployment Methodology
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
-  owner: platform-team
-  created: '2026-03-03'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-repo-structure.sh
-  - scripts/qa/verify-tutor-config-safety.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
+  owner: engineering
 - id: ADR-022
   path: docs/adr/022-session-cookie-samesite-policy.md
   title: Session Cookie SameSite Policy and Stale Cookie Mitigation
+  bucket: accepted
   decision_status: accepted
   decision_type: exception
   rollout_state: temporary
   owner: auth-platform
-  created: 2026-03-04
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-002
-  - ADR-013
-  depends_on:
-  - ADR-029
-  - ADR-031
-  read_next: []
-  governs:
-  - auth.cookie-boundary
-  does_not_govern:
-  - final steady-state cross-domain identity architecture
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks:
-  - docs/runbooks/operations/FORUM_AUTH_E2E.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-auth-surfaces.sh prod
-  - scripts/qa/verify-mfe-config-contract.sh --env prod
-  expiry_date: 2026-09-30
-  removal_condition: SameSite and dedup exception removed after stable federated auth
-    flow without stale-cookie reliance.
-  frontmatter_required: true
 - id: ADR-023
-  path: docs/adr/023-enterprise-images-ghcr-migration.md
-  title: 'ADR-023: Enterprise Images GHCR Migration'
+  path: docs/adr/historical/023-enterprise-images-ghcr-migration.md
+  title: Enterprise Images GHCR Migration
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
-  owner: platform-team
-  created: '2026-03-04'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
+  rollout_state: historical
+  owner: engineering
 - id: ADR-024
   path: docs/adr/024-multi-tenancy-true-tenants.md
-  title: 'ADR-024: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)'
+  title: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
-  owner: platform-team
-  created: '2026-03-05'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-multisite-config.sh prod
-  - scripts/qa/verify-org-role-ownership.sh both
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
+  owner: engineering
 - id: ADR-025
   path: docs/adr/025-csp-nonce-migration.md
-  title: "ADR-025: CSP Nonce Migration \u2014 Removing unsafe-eval / unsafe-inline"
+  title: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline
+  bucket: accepted
   decision_status: accepted
   decision_type: domain
   rollout_state: active
-  owner: platform-team
-  created: '2026-03-05'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
+  owner: engineering
 - id: ADR-026
-  path: docs/adr/026-cicd-build-pipeline-lessons.md
-  title: 'ADR-026: CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)'
+  path: docs/adr/historical/026-cicd-build-pipeline-lessons.md
+  title: CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)
+  bucket: historical
   decision_status: accepted
   decision_type: domain
-  rollout_state: active
-  owner: platform-team
-  created: '2026-03-05'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
+  rollout_state: historical
+  owner: engineering
 - id: ADR-027
-  path: docs/adr/027-deployment-contract-ownership-lanes.md
-  title: "ADR-027: Deployment Contract \u2014 Ownership Lanes Between App and GitOps\
-    \ Repos"
+  path: docs/adr/rfc/027-deployment-contract-ownership-lanes.md
+  title: Deployment Contract — Ownership Lanes Between App and GitOps Repos
+  bucket: rfc
   decision_status: proposed
   decision_type: foundation
   rollout_state: planned
-  owner: platform-team
-  created: '2026-03-06'
-  last_reviewed: '2026-03-07'
-  review_due: '2026-06-30'
-  supersedes: []
-  amends: []
-  depends_on: []
-  read_next: []
-  governs: []
-  does_not_govern: []
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions: []
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: false
+  owner: engineering
 - id: ADR-028
   path: docs/adr/028-platform-sources-of-truth-and-control-planes.md
   title: Platform Sources of Truth and Control Planes
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
   owner: platform-team
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-003
-  - ADR-019
-  - ADR-021
-  - ADR-026
-  - ADR-027
-  depends_on: []
-  read_next:
-  - ADR-029
-  - ADR-030
-  - ADR-031
-  - ADR-032
-  - ADR-033
-  governs:
-  - platform.control-plane
-  - platform.repo-boundary
-  - build.gitops-promotion
-  does_not_govern:
-  - feature-level business logic
-  - tenant-specific UX copy
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.tutor.edly.io
-  related_specs:
-  - specs/repository-structure_spec.md
-  related_runbooks:
-  - docs/policies/operations/REPO_BOUNDARIES.md
-  - docs/runbooks/operations/BUILD_PIPELINE_RUNBOOK.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-repo-structure.sh
-  - scripts/qa/verify-gitops-image-overrides.sh --check-infra
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-029
   path: docs/adr/029-identity-session-and-domain-boundary-strategy.md
   title: Identity, Session, and Domain-Boundary Strategy
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
   owner: auth-platform
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-002
-  - ADR-005
-  - ADR-022
-  - ADR-024
-  depends_on:
-  - ADR-028
-  read_next:
-  - ADR-033
-  governs:
-  - auth.oidc
-  - auth.cookie-boundary
-  - tenant.domain-boundary
-  does_not_govern:
-  - branding copy
-  - course-content permissions
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks:
-  - docs/reference/operations/OPENEDX_HOSTNAMES.md
-  - docs/reference/operations/DOMAIN_MATRIX.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-auth-surfaces.sh prod
-  - scripts/qa/verify-mfe-config-contract.sh --env prod
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-030
   path: docs/adr/030-feature-flag-and-rollout-lifecycle.md
   title: Feature Flag and Rollout Lifecycle
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
   owner: platform-team
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends: []
-  depends_on:
-  - ADR-028
-  read_next:
-  - ADR-031
-  governs:
-  - platform.change-policy
-  does_not_govern:
-  - product-prioritization
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  related_specs: []
-  related_runbooks:
-  - docs/reference/operations/RELEASE_EVIDENCE.md
-  related_evidence: []
-  fitness_functions:
-  - tools/docs/verify/verify-docs-policy.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-031
   path: docs/adr/031-deprecation-and-removal-policy.md
   title: Deprecation and Removal Policy
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
   owner: platform-team
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-013
-  - ADR-022
-  depends_on:
-  - ADR-028
-  - ADR-030
-  read_next: []
-  governs:
-  - platform.change-policy
-  does_not_govern:
-  - incident-response runtime triage
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  related_specs: []
-  related_runbooks:
-  - reports/2026/closures/POSTMERGE_GOVERNANCE_CLOSURE.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify_exception_expiry.py
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-032
   path: docs/adr/032-data-governance-pii-retention-and-deletion.md
   title: Data Governance, PII, Retention, and Deletion
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
   owner: platform-security
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends: []
-  depends_on:
-  - ADR-028
-  - ADR-031
-  read_next:
-  - ADR-033
-  governs:
-  - data.pii
-  - data.retention
-  - data.deletion
-  does_not_govern:
-  - business analytics questions
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  related_specs: []
-  related_runbooks:
-  - docs/policies/operations/DATA_RETENTION_POLICY.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-evidence-redaction.sh
-  - scripts/qa/scan-secrets-fast.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-033
   path: docs/adr/033-tenant-lifecycle-contract.md
   title: Tenant Lifecycle Contract
+  bucket: accepted
   decision_status: accepted
   decision_type: foundation
   rollout_state: active
   owner: multisite-platform
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-024
-  depends_on:
-  - ADR-028
-  - ADR-029
-  - ADR-032
-  read_next: []
-  governs:
-  - tenant.lifecycle
-  - tenant.isolation
-  - tenant.domain-boundary
-  - frontend.brand.tokens
-  does_not_govern:
-  - tenant commercial terms
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs:
-  - specs/multi-tenancy-architecture_spec.md
-  related_runbooks:
-  - docs/runbooks/operations/TENANT_PROVISIONING.md
-  - docs/guides/branding/TENANT_CONFIG_HANDOFF.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-tenant-isolation.sh
-  - scripts/qa/verify-multisite-config.sh prod
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-034
   path: docs/adr/rfc/034-event-contract-and-transport-independence.md
   title: Event Contract and Transport Independence
+  bucket: rfc
   decision_status: proposed
   decision_type: domain
   rollout_state: planned
   owner: platform-events
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-008
-  depends_on:
-  - ADR-028
-  read_next:
-  - ADR-037
-  governs:
-  - events.schema
-  - events.transport
-  does_not_govern:
-  - single-broker-implementation-details
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-spec-tools-spec-lint.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-035
   path: docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md
   title: Frontend Runtime Composition and Dependency Alignment
+  bucket: rfc
   decision_status: proposed
   decision_type: domain
   rollout_state: planned
   owner: frontend-platform
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-014
-  - ADR-021
-  depends_on:
-  - ADR-028
-  - ADR-029
-  read_next: []
-  governs:
-  - frontend.composition
-  - frontend.brand.tokens
-  - build.version-pin
-  does_not_govern:
-  - visual-brand-campaign-content
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks:
-  - docs/guides/branding/BRANDING_OPERATING_MODEL.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-mfe-image-branding.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-036
   path: docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md
   title: Cache Topology and Invalidation Strategy
+  bucket: rfc
   decision_status: proposed
   decision_type: domain
   rollout_state: planned
   owner: platform-runtime
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends: []
-  depends_on:
-  - ADR-028
-  - ADR-033
-  read_next: []
-  governs:
-  - runtime.cache
-  does_not_govern:
-  - business-feature-priorities
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks:
-  - docs/runbooks/operations/TROUBLESHOOTING.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-mfe-config-contract.sh --env prod
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-037
   path: docs/adr/rfc/037-async-task-user-facing-contract.md
   title: Async Task User-Facing Contract
+  bucket: rfc
   decision_status: proposed
   decision_type: domain
   rollout_state: planned
   owner: platform-runtime
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends: []
-  depends_on:
-  - ADR-034
-  read_next: []
-  governs:
-  - runtime.async-task
-  does_not_govern:
-  - internal-task-runner-selection
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-authenticated-sso-canary.sh --env prod
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-038
   path: docs/adr/rfc/038-commerce-system-of-record-and-reconciliation.md
   title: Commerce System of Record and Reconciliation
+  bucket: rfc
   decision_status: proposed
   decision_type: domain
   rollout_state: planned
   owner: commerce-platform
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-018
-  depends_on:
-  - ADR-028
-  - ADR-033
-  read_next: []
-  governs:
-  - commerce.system-of-record
-  - commerce.reconciliation
-  does_not_govern:
-  - pricing-policy
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs:
-  - specs/ecommerce-purchase-gateway_spec.md
-  related_runbooks:
-  - docs/runbooks/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-ecommerce-worker-health.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-039
   path: docs/adr/rfc/039-translations-and-internationalization-strategy.md
   title: Translations and Internationalization Strategy
+  bucket: rfc
   decision_status: proposed
   decision_type: domain
   rollout_state: planned
   owner: frontend-platform
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends: []
-  depends_on:
-  - ADR-035
-  read_next: []
-  governs:
-  - frontend.i18n
-  does_not_govern:
-  - content-authoring-language-policy
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-translation-contract.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-040
   path: docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md
   title: Internal Packages, Plugins, and Versioning Policy
+  bucket: rfc
   decision_status: proposed
   decision_type: domain
   rollout_state: planned
   owner: platform-team
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-006
-  - ADR-021
-  depends_on:
-  - ADR-028
-  - ADR-030
-  read_next: []
-  governs:
-  - platform.extension-model
-  - build.version-pin
-  does_not_govern:
-  - external-upstream-release-timelines
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-tutor-version-pin.sh
-  - scripts/qa/verify-repo-structure.sh
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
 - id: ADR-041
   path: docs/adr/rfc/041-authorization-and-role-boundary-model.md
   title: Authorization and Role-Boundary Model
+  bucket: rfc
   decision_status: proposed
   decision_type: domain
   rollout_state: planned
   owner: auth-platform
-  created: 2026-03-07
-  last_reviewed: 2026-03-07
-  review_due: 2026-06-30
-  supersedes: []
-  amends:
-  - ADR-029
-  - ADR-033
-  depends_on:
-  - ADR-029
-  - ADR-033
-  read_next: []
-  governs:
-  - auth.authorization.roles
-  - tenant.isolation
-  does_not_govern:
-  - identity-provider-protocol-selection
-  related_oep: []
-  related_tutor_docs:
-  - https://docs.openedx.org
-  - https://docs.tutor.edly.io
-  related_specs: []
-  related_runbooks: []
-  related_evidence: []
-  fitness_functions:
-  - scripts/qa/verify-org-role-ownership.sh both
-  expiry_date: null
-  removal_condition: null
-  frontmatter_required: true
+- id: RFC-claim-based-role-sync
+  path: docs/adr/rfc/RFC-claim-based-role-sync.md
+  title: Claim-Based Role Sync
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: platform-team
+- id: RFC-learning-slot-expansion-proposal
+  path: docs/adr/rfc/RFC-learning-slot-expansion-proposal.md
+  title: Learning Slot Expansion Proposal
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: platform-team

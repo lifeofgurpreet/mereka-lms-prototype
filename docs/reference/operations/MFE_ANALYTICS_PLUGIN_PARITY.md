@@ -180,7 +180,7 @@ const MerekaFooter = () => { ... };
 ### Plugin Slot First Policy
 
 All component-level overrides must use the Frontend Plugin Framework (FPF) slot system
-when a slot is available upstream. See `docs/adr/014-mfe-branding-strategy.md`.
+when a slot is available upstream. See `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md`.
 
 ```python
 # Forward-compatible slot registration (mereka_lms.py)
@@ -309,7 +309,7 @@ Diagnosis:
 
 - `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — full migration inventory
 - `docs/reference/operations/MFE_PLUGIN_SLOT_MATRIX.md` — slot availability by MFE
-- `docs/adr/014-mfe-branding-strategy.md` — plugin-slot-first architecture decision
+- `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` — plugin-slot-first architecture decision
 - `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — No DOM Override Policy
 - `scripts/qa/verify-analytics-key.sh` — analytics key injection safety check
 - `scripts/qa/verify-no-dom-overrides.sh` — DOM override policy enforcement

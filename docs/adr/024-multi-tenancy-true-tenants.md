@@ -1,18 +1,35 @@
 ---
-title: "True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)"
-type: "adr"
-status: "accepted"
-owner: "engineering"
-last_updated: "2026-03-05"
-links:
-  related_adrs:
-    - "docs/adr/001-mongodb-atlas.md"
-    - "docs/adr/021-openedx-tutor-methodology.md"
-  related_specs:
-    - "specs/multi-tenancy-architecture_spec.md"
-    - "specs/multi-site-domains_spec.md"
-    - "specs/enterprise-microservices_spec.md"
-    - "specs/branding-system_spec.md"
+id: ADR-024
+title: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)
+decision_status: accepted
+decision_type: foundation
+rollout_state: active
+owner: engineering
+created: '2026-03-05'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
+supersedes: []
+amends: []
+depends_on: []
+read_next:
+- ADR-029
+- ADR-033
+governs:
+- tenant.isolation
+- tenant.domain-boundary
+does_not_govern: []
+related_oep: []
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs: []
+related_runbooks: []
+related_evidence: []
+fitness_functions:
+- scripts/qa/verify-multisite-config.sh prod
+- scripts/qa/verify-org-role-ownership.sh both
+expiry_date: null
+removal_condition: null
 ---
 
 # ADR-024: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)
@@ -105,6 +122,19 @@ To be crystal clear on the shared-everything model:
 
 Isolation is at the **application layer** (Django querysets, API permission checks, Sites
 framework, EnterpriseCustomer scoping), not at the infrastructure layer.
+
+## Scope
+
+This ADR governs the decision boundary described by ADR-024.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- `scripts/qa/verify-multisite-config.sh prod`
+- `scripts/qa/verify-org-role-ownership.sh both`
 
 ## Consequences
 

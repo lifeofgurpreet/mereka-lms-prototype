@@ -280,7 +280,7 @@ From [MFE_PLUGIN_SLOT_INVENTORY.md](./MFE_PLUGIN_SLOT_INVENTORY.md), 100+ slots 
 
 - [MFE_PLUGIN_SLOT_INVENTORY.md](./MFE_PLUGIN_SLOT_INVENTORY.md) — Complete slot catalog
 - [MFE_FIRST_POLICY.md](./MFE_FIRST_POLICY.md) — Slot-first implementation strategy
-- [ADR-014: MFE Branding Strategy](../../adr/014-mfe-branding-strategy.md) — Historical context
+- [ADR-014: MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md) — Historical context
 - [verify-selector-hardening.sh](../../../scripts/qa/verify-selector-hardening.sh) — Automated checks
 
 ---

@@ -46,7 +46,7 @@ links:
     - "docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md"
     - "docs/guides/admin/K8S_OPERATIONS_GUIDE.md"
     - "docs/concepts/architecture/DATABASE_ARCHITECTURE.md"
-    - "docs/adr/001-mongodb-atlas.md"
+    - "docs/adr/historical/001-mongodb-atlas.md"
     - "docs/reference/architecture/MFE_COMPLETE_LIST.md"
   related_specs:
     - "specs/mongodb-atlas-integration_spec.md"

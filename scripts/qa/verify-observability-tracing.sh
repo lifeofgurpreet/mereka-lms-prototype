@@ -123,10 +123,10 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "=== Tracing docs and manifests ==="
 
-if [[ -f "docs/adr/020-tracing-scope-and-pilot-decision.md" ]]; then
+if [[ -f "docs/programs/observability/TRACING_PILOT_DECISION.md" ]]; then
   report PASS "Tracing scope decision ADR exists"
 else
-  report SKIP "Tracing scope decision ADR is missing: docs/adr/020-tracing-scope-and-pilot-decision.md"
+  report SKIP "Tracing scope decision ADR is missing: docs/programs/observability/TRACING_PILOT_DECISION.md"
 fi
 
 tracing_manifest_count=0

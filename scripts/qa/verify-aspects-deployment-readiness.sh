@@ -19,7 +19,7 @@ cd "$REPO_ROOT"
 
 # --- Paths ---
 CONTRACT="docs/architecture/ASPECTS_DEPLOYMENT_READINESS.md"
-ADR="docs/adr/017-analytics-target-decision.md"
+ADR="docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md"
 ASPECTS_K8S_DIR="deploy/k8s/base/plugins/aspects"
 PROD_KUSTOMIZATION="deploy/k8s/overlays/production/kustomization.yaml"
 TUTOR_CONFIG="infrastructure/tutor/config.example.yml"

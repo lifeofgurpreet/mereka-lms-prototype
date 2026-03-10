@@ -1,18 +1,33 @@
 ---
-title: "Deployment Contract — Ownership Lanes Between App and GitOps Repos"
-type: "adr"
-status: "proposed"
-owner: "engineering"
-last_updated: "2026-03-06"
-links:
-  related_adrs:
-    - "docs/adr/004-secrets-management.md"
-    - "docs/adr/010-monorepo-architecture.md"
-    - "docs/adr/024-multi-tenancy-true-tenants.md"
-  related_specs:
-    - "specs/k8s-deployment.md"
-    - "specs/secrets-management.md"
-    - "specs/ci-cd-pipeline_spec.md"
+id: ADR-027
+title: Deployment Contract — Ownership Lanes Between App and GitOps Repos
+decision_status: proposed
+decision_type: foundation
+rollout_state: planned
+owner: engineering
+created: '2026-03-06'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
+supersedes: []
+amends: []
+depends_on:
+- ADR-028
+read_next:
+- ADR-028
+governs:
+- platform.repo-boundary
+- platform.control-plane
+does_not_govern: []
+related_oep: []
+related_tutor_docs:
+- https://docs.openedx.org
+- https://docs.tutor.edly.io
+related_specs: []
+related_runbooks: []
+related_evidence: []
+fitness_functions: []
+expiry_date: null
+removal_condition: null
 ---
 
 # ADR-027: Deployment Contract — Ownership Lanes Between App and GitOps Repos
@@ -149,6 +164,18 @@ BBI_INFRA="${BBI_INFRA:-/home/gurpreet/projects/k8s/infrastructure}"
 
 The contract.json does NOT encode paths in the other repo. Each repo is responsible for knowing
 how to consume the other's published artifacts.
+
+## Scope
+
+This proposal governs the decision boundary described by ADR-027.
+
+## Non-goals
+
+This document does not replace broader platform standards, runbooks, or implementation evidence.
+
+## Verification
+
+- No dedicated automated fitness function is registered yet; use linked specs and runbooks for review.
 
 ## Consequences
 

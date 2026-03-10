@@ -1,0 +1,573 @@
+{
+  "authority_order": [
+    "adr-frontmatter",
+    "adr-body",
+    "generated-adr-projections",
+    "generated-compatibility-maps"
+  ],
+  "counts": {
+    "accepted": 14,
+    "historical": 12,
+    "rfc": 11
+  },
+  "entries": [
+    {
+      "id": "ADR-001",
+      "title": "MongoDB Atlas vs Local MongoDB",
+      "path": "docs/adr/historical/001-mongodb-atlas.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-002",
+      "title": "Multisite Architecture",
+      "path": "docs/adr/historical/002-multisite-architecture.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-003",
+      "title": "Image Build Pipeline",
+      "path": "docs/adr/historical/003-image-build-pipeline.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-004",
+      "title": "Secrets Management",
+      "path": "docs/adr/historical/004-secrets-management.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-005",
+      "title": "Domain Migration (legacy environment → academyV2)",
+      "path": "docs/adr/historical/005-domain-migration.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "migration",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-006",
+      "title": "Tutor Plugin-Based Configuration Resilience",
+      "path": "docs/adr/006-tutor-plugin-based-configuration.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "active",
+      "owner": "engineering",
+      "read_next": [
+        "ADR-021",
+        "ADR-028"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-007",
+      "title": "Forum Service Migration from Ruby to Python",
+      "path": "docs/adr/historical/007-forum-migration-ruby-to-python.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "migration",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-008",
+      "title": "Redis Streams as Event Bus",
+      "path": "docs/adr/historical/008-redis-streams-event-bus.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-009",
+      "title": "In-Cluster MySQL/Redis vs Cloud SQL/Memorystore",
+      "path": "docs/adr/historical/009-in-cluster-storage.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-010",
+      "title": "Monorepo Architecture",
+      "path": "docs/adr/historical/010-monorepo-architecture.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-012",
+      "title": "Eliminate Runtime CSS ConfigMap Overlay",
+      "path": "docs/adr/historical/012-no-runtime-css-overlay.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "migration",
+      "rollout_state": "historical",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-013",
+      "title": "Studio SSO Bypass Middleware",
+      "path": "docs/adr/013-studio-sso-bypass-middleware.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "exception",
+      "rollout_state": "temporary",
+      "owner": "auth-platform",
+      "read_next": [
+        "ADR-022",
+        "ADR-029"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-018",
+      "title": "Purchase Gateway Replaces Legacy Oscar Ecommerce",
+      "path": "docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "migration",
+      "rollout_state": "active",
+      "owner": "commerce-platform",
+      "read_next": [
+        "ADR-028",
+        "ADR-031"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-019",
+      "title": "Tutor Upgrade Cadence and EOL Policy",
+      "path": "docs/adr/019-tutor-upgrade-policy.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "platform-team",
+      "read_next": [
+        "ADR-021",
+        "ADR-028"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-021",
+      "title": "Open edX / Tutor Deployment Methodology",
+      "path": "docs/adr/021-openedx-tutor-methodology.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "engineering",
+      "read_next": [
+        "ADR-028",
+        "ADR-029",
+        "ADR-030"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-022",
+      "title": "Session Cookie SameSite Policy and Stale Cookie Mitigation",
+      "path": "docs/adr/022-session-cookie-samesite-policy.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "exception",
+      "rollout_state": "temporary",
+      "owner": "auth-platform",
+      "read_next": [
+        "ADR-029",
+        "ADR-031"
+      ],
+      "supersedes": [],
+      "amends": [
+        "ADR-002",
+        "ADR-013"
+      ]
+    },
+    {
+      "id": "ADR-023",
+      "title": "Enterprise Images GHCR Migration",
+      "path": "docs/adr/historical/023-enterprise-images-ghcr-migration.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "engineering",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-024",
+      "title": "True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)",
+      "path": "docs/adr/024-multi-tenancy-true-tenants.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "engineering",
+      "read_next": [
+        "ADR-029",
+        "ADR-033"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-025",
+      "title": "CSP Nonce Migration — Removing unsafe-eval / unsafe-inline",
+      "path": "docs/adr/025-csp-nonce-migration.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "active",
+      "owner": "engineering",
+      "read_next": [
+        "ADR-021",
+        "ADR-022"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-026",
+      "title": "CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)",
+      "path": "docs/adr/historical/026-cicd-build-pipeline-lessons.md",
+      "bucket": "historical",
+      "decision_status": "accepted",
+      "decision_type": "domain",
+      "rollout_state": "historical",
+      "owner": "engineering",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-027",
+      "title": "Deployment Contract — Ownership Lanes Between App and GitOps Repos",
+      "path": "docs/adr/rfc/027-deployment-contract-ownership-lanes.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "foundation",
+      "rollout_state": "planned",
+      "owner": "engineering",
+      "read_next": [
+        "ADR-028"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-028",
+      "title": "Platform Sources of Truth and Control Planes",
+      "path": "docs/adr/028-platform-sources-of-truth-and-control-planes.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "platform-team",
+      "read_next": [
+        "ADR-029",
+        "ADR-030",
+        "ADR-031",
+        "ADR-032",
+        "ADR-033"
+      ],
+      "supersedes": [],
+      "amends": [
+        "ADR-003",
+        "ADR-019",
+        "ADR-021",
+        "ADR-026",
+        "ADR-027"
+      ]
+    },
+    {
+      "id": "ADR-029",
+      "title": "Identity, Session, and Domain-Boundary Strategy",
+      "path": "docs/adr/029-identity-session-and-domain-boundary-strategy.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "auth-platform",
+      "read_next": [
+        "ADR-033"
+      ],
+      "supersedes": [],
+      "amends": [
+        "ADR-002",
+        "ADR-005",
+        "ADR-022",
+        "ADR-024"
+      ]
+    },
+    {
+      "id": "ADR-030",
+      "title": "Feature Flag and Rollout Lifecycle",
+      "path": "docs/adr/030-feature-flag-and-rollout-lifecycle.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "platform-team",
+      "read_next": [
+        "ADR-031"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-031",
+      "title": "Deprecation and Removal Policy",
+      "path": "docs/adr/031-deprecation-and-removal-policy.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": [
+        "ADR-013",
+        "ADR-022"
+      ]
+    },
+    {
+      "id": "ADR-032",
+      "title": "Data Governance, PII, Retention, and Deletion",
+      "path": "docs/adr/032-data-governance-pii-retention-and-deletion.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "platform-security",
+      "read_next": [
+        "ADR-033"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-033",
+      "title": "Tenant Lifecycle Contract",
+      "path": "docs/adr/033-tenant-lifecycle-contract.md",
+      "bucket": "accepted",
+      "decision_status": "accepted",
+      "decision_type": "foundation",
+      "rollout_state": "active",
+      "owner": "multisite-platform",
+      "read_next": [],
+      "supersedes": [],
+      "amends": [
+        "ADR-024"
+      ]
+    },
+    {
+      "id": "ADR-034",
+      "title": "Event Contract and Transport Independence",
+      "path": "docs/adr/rfc/034-event-contract-and-transport-independence.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "platform-events",
+      "read_next": [
+        "ADR-037"
+      ],
+      "supersedes": [],
+      "amends": [
+        "ADR-008"
+      ]
+    },
+    {
+      "id": "ADR-035",
+      "title": "Frontend Runtime Composition and Dependency Alignment",
+      "path": "docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "frontend-platform",
+      "read_next": [],
+      "supersedes": [],
+      "amends": [
+        "ADR-014",
+        "ADR-021"
+      ]
+    },
+    {
+      "id": "ADR-036",
+      "title": "Cache Topology and Invalidation Strategy",
+      "path": "docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "platform-runtime",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-037",
+      "title": "Async Task User-Facing Contract",
+      "path": "docs/adr/rfc/037-async-task-user-facing-contract.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "platform-runtime",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-038",
+      "title": "Commerce System of Record and Reconciliation",
+      "path": "docs/adr/rfc/038-commerce-system-of-record-and-reconciliation.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "commerce-platform",
+      "read_next": [],
+      "supersedes": [],
+      "amends": [
+        "ADR-018"
+      ]
+    },
+    {
+      "id": "ADR-039",
+      "title": "Translations and Internationalization Strategy",
+      "path": "docs/adr/rfc/039-translations-and-internationalization-strategy.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "frontend-platform",
+      "read_next": [],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "ADR-040",
+      "title": "Internal Packages, Plugins, and Versioning Policy",
+      "path": "docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "platform-team",
+      "read_next": [],
+      "supersedes": [],
+      "amends": [
+        "ADR-006",
+        "ADR-021"
+      ]
+    },
+    {
+      "id": "ADR-041",
+      "title": "Authorization and Role-Boundary Model",
+      "path": "docs/adr/rfc/041-authorization-and-role-boundary-model.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "auth-platform",
+      "read_next": [],
+      "supersedes": [],
+      "amends": [
+        "ADR-029",
+        "ADR-033"
+      ]
+    },
+    {
+      "id": "RFC-claim-based-role-sync",
+      "title": "Claim-Based Role Sync",
+      "path": "docs/adr/rfc/RFC-claim-based-role-sync.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "platform-team",
+      "read_next": [
+        "ADR-041"
+      ],
+      "supersedes": [],
+      "amends": []
+    },
+    {
+      "id": "RFC-learning-slot-expansion-proposal",
+      "title": "Learning Slot Expansion Proposal",
+      "path": "docs/adr/rfc/RFC-learning-slot-expansion-proposal.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "domain",
+      "rollout_state": "planned",
+      "owner": "platform-team",
+      "read_next": [
+        "ADR-035"
+      ],
+      "supersedes": [],
+      "amends": []
+    }
+  ]
+}

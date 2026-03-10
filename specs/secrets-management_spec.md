@@ -13,7 +13,7 @@ links:
   - docs/runbooks/operations/SECRET_ROTATION_CHECKLIST.md
   - docs/reference/operations/INFISICAL_MEREKA_LMS_KEYS.md
   - docs/runbooks/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md
-  - docs/adr/004-secrets-management.md
+  - docs/adr/historical/004-secrets-management.md
   related_specs:
   - specs/k8s-deployment_spec.md
   - specs/observability-stack_spec.md

@@ -20,7 +20,7 @@ This runbook defines the mandatory authoring flow for ADR updates under `docs/ad
    - Failure modes
    - Consequences
    - Alternatives considered
-5. Link the ADR into `docs/adr/manifest.yaml` with accurate relationship keys:
+5. Write complete ADR frontmatter in the file itself, then regenerate the compatibility views:
    - `depends_on`
    - `read_next`
    - `supersedes`
@@ -36,6 +36,7 @@ This runbook defines the mandatory authoring flow for ADR updates under `docs/ad
 
 - Use `docs/concepts/architecture/` when the content is living policy that will be reviewed over time.
 - Use `docs/adr/rfc/` when the decision is still open.
+- Regenerate the ledger with `python3 tools/docs/build_adr_ledger.py`.
 - Use `docs/ops/runbooks/` for operator procedures and `docs/guides/` for contributor-facing workflows.
 - Use `docs/evidence/` for active proof, logs, screenshots, or verification bundles.
 

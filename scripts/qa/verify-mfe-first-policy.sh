@@ -78,7 +78,7 @@ else
 fi
 
 # Check ADR-014 exists
-if [[ -f "docs/adr/014-mfe-branding-strategy.md" ]]; then
+if [[ -f "docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md" ]]; then
   pass "ADR-014 (plugin-first rationale) exists"
 else
   fail "ADR-014 missing"

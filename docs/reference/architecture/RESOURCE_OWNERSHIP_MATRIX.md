@@ -2,7 +2,7 @@
 
 **Generated:** 2026-03-06
 **Maintainer:** Platform Engineering
-**Related:** `docs/architecture/rfc/ADR-025-deployment-boundary.md`
+**Related:** `docs/adr/rfc/027-deployment-contract-ownership-lanes.md`
 
 This table classifies every file under `deploy/k8s/`. "Rendered By" lists which kustomization.yaml
 entry points include this file (directly or via a sub-kustomization). Files marked NOT RENDERED are

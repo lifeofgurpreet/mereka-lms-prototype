@@ -5,7 +5,7 @@ _Audience: Platform Team and Frontend Operators • Owner: Platform Team • Las
 Branding defines visual identity, theme behavior, tenant brand controls, and verification gates across LMS, Studio, and MFEs.
 
 ## Canonical ADR Links
-- [ADR 014: MFE branding strategy](../../adr/014-mfe-branding-strategy.md)
+- [ADR 014: MFE branding strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
 - [ADR 024: Multi-tenancy true tenants](../../adr/024-multi-tenancy-true-tenants.md)
 
 ## Canonical Operational Runbooks

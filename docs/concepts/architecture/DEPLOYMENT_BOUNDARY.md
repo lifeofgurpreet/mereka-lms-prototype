@@ -1,3 +1,3 @@
 # Superseded Path Notice
 
-Canonical document: `docs/architecture/rfc/ADR-025-deployment-boundary.md`
+Canonical document: `docs/adr/rfc/027-deployment-contract-ownership-lanes.md`

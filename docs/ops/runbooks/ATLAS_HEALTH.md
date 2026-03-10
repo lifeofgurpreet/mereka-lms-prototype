@@ -119,6 +119,6 @@ Infisical (MEREKA_LMS_MONGODB_PASSWORD)
 ```
 
 See also:
-- `docs/adr/001-mongodb-atlas.md` — architectural decision record
+- `docs/adr/historical/001-mongodb-atlas.md` — architectural decision record
 - `deploy/k8s/base/secrets/external-secrets.yaml` — ExternalSecret mapping
 - `infrastructure/tutor/apply-patches.sh` — `pymongo[srv]` installation

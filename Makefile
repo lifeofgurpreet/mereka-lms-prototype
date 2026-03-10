@@ -372,7 +372,7 @@ check: lint-specs validate-testmaps lint-conventions verify-specs spec-coverage 
 
 .PHONY: adr-governance adr-impact
 adr-governance: ## Run ADR governance suite (blocking local gate)
-	./scripts/qa/verify_adr_suite.sh
+	./scripts/qa/run-adr-gates.sh
 
 adr-impact: ## Print ADR impact summary for a diff range (requires DIFF_RANGE, e.g. make adr-impact DIFF_RANGE=HEAD~1...HEAD)
 	@test -n "$(DIFF_RANGE)" || (echo "DIFF_RANGE is required (e.g. make adr-impact DIFF_RANGE=HEAD~1...HEAD)"; exit 2)

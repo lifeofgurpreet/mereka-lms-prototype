@@ -2,7 +2,7 @@
 
 **Status**: Active Migration Path
 **Created**: 2026-02-17
-**Related**: [ADR-014: MFE Branding Strategy](../../adr/014-mfe-branding-strategy.md)
+**Related**: [ADR-014: MFE Branding Strategy](../../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
 **Verification**: `scripts/qa/verify-footer-slot-migration.sh`
 
 ---
@@ -215,7 +215,7 @@ If PLUGIN_SLOTS path fails in production:
 | `scripts/qa/verify-mfe-footer-slot.sh` | Component parity check | Active |
 | `scripts/qa/verify-plugin-slot-wiring.sh` | Slot wiring integrity | Active |
 | `scripts/qa/verify-footer-slot-migration.sh` | Migration progress tracking | NEW (this bead) |
-| `docs/adr/014-mfe-branding-strategy.md` | Strategic decision (plugin-first) | Reference |
+| `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` | Strategic decision (plugin-first) | Reference |
 
 ---
 

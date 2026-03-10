@@ -1,25 +1,13 @@
 ---
-title: Data Governance, PII, Retention, and Deletion
-owner: platform-security
-created: 2026-03-07
-last_reviewed: 2026-03-07
-review_due: 2026-06-30
-canonical_root: docs/adr
-doc_class: adr
-summary: Data governance contract for PII handling, retention, deletion workflows, and evidence hygiene across the platform.
-tags:
-- data.pii
-- data.retention
-- docs.evidence
-decision_type: foundation
-decision_status: accepted
-governs:
-- data.pii
-- data.retention
-- data.deletion
-- docs.evidence
 id: ADR-032
+title: Data Governance, PII, Retention, and Deletion
+decision_status: accepted
+decision_type: foundation
 rollout_state: active
+owner: platform-security
+created: '2026-03-07'
+last_reviewed: '2026-03-07'
+review_due: '2026-06-30'
 supersedes: []
 amends: []
 depends_on:
@@ -27,6 +15,11 @@ depends_on:
 - ADR-031
 read_next:
 - ADR-033
+governs:
+- data.pii
+- data.retention
+- data.deletion
+- docs.evidence
 does_not_govern:
 - business analytics questions
 related_oep: []

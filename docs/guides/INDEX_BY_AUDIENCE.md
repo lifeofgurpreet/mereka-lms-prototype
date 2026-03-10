@@ -220,19 +220,19 @@ _Local setup, feature development, testing, contribution_
 ### ADRs (Architecture Decision Records)
 
 **Infrastructure**:
-- [001-mongodb-atlas.md](../adr/001-mongodb-atlas.md) - Why MongoDB Atlas
-- [002-multisite-architecture.md](../adr/002-multisite-architecture.md) - Multi-domain approach
-- [003-image-build-pipeline.md](../adr/003-image-build-pipeline.md) - Image build strategy
-- [009-in-cluster-storage.md](../adr/009-in-cluster-storage.md) - Storage decisions
-- [010-monorepo-architecture.md](../adr/010-monorepo-architecture.md) - Monorepo rationale
+- [001-mongodb-atlas.md](../adr/historical/001-mongodb-atlas.md) - Why MongoDB Atlas
+- [002-multisite-architecture.md](../adr/historical/002-multisite-architecture.md) - Multi-domain approach
+- [003-image-build-pipeline.md](../adr/historical/003-image-build-pipeline.md) - Image build strategy
+- [009-in-cluster-storage.md](../adr/historical/009-in-cluster-storage.md) - Storage decisions
+- [010-monorepo-architecture.md](../adr/historical/010-monorepo-architecture.md) - Monorepo rationale
 
 **Security & Operations**:
-- [004-secrets-management.md](../adr/004-secrets-management.md) - Secrets pipeline
-- [005-domain-migration.md](../adr/005-domain-migration.md) - Domain changes
+- [004-secrets-management.md](../adr/historical/004-secrets-management.md) - Secrets pipeline
+- [005-domain-migration.md](../adr/historical/005-domain-migration.md) - Domain changes
 - [006-tutor-plugin-based-configuration.md](../adr/006-tutor-plugin-based-configuration.md) - Plugin architecture
-- [007-forum-migration-ruby-to-python.md](../adr/007-forum-migration-ruby-to-python.md) - Forum v2
-- [008-redis-streams-event-bus.md](../adr/008-redis-streams-event-bus.md) - Event bus
-- [011-convention-based-spec-verification.md](../adr/011-convention-based-spec-verification.md) - Test coverage
+- [007-forum-migration-ruby-to-python.md](../adr/historical/007-forum-migration-ruby-to-python.md) - Forum v2
+- [008-redis-streams-event-bus.md](../adr/historical/008-redis-streams-event-bus.md) - Event bus
+- [011-convention-based-spec-verification.md](standards/SPEC_VERIFICATION_METHOD.md) - Test coverage
 
 ### Contact/Escalation
 - **Technical Questions**: Engineering team Slack
@@ -375,7 +375,7 @@ _Security configs, compliance, audit logs, secrets management_
 ### Architecture Understanding
 
 **Security Architecture**:
-- [ADR 004: Secrets Management](../adr/004-secrets-management.md) - Secrets design
+- [ADR 004: Secrets Management](../adr/historical/004-secrets-management.md) - Secrets design
 - [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Tenant isolation
 - [DATABASE_ARCHITECTURE.md](../concepts/architecture/DATABASE_ARCHITECTURE.md) - Data layer security
 
