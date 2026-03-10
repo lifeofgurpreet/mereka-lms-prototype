@@ -9,7 +9,7 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 - [`Operations quick reference`](../../ops/quickref/README.md) - Operations documentation index.
 - [`docs/reference/operations/USER_FACING_URLS.md`](USER_FACING_URLS.md) - Complete URL matrix for production/dev/local and tenant-specific hosts.
 - [`docs/reference/operations/OPENEDX_HOSTNAMES.md`](OPENEDX_HOSTNAMES.md) - Generated hostname registry used by infrastructure.
-- [`docs/concepts/architecture/MULTISITE.md`](../../concepts/architecture/MULTISITE.md) - Domain + platform configuration details for tenant deployment.
+- [`docs/concepts/architecture/multi-tenancy-overview.md`](../../concepts/architecture/multi-tenancy-overview.md) - Domain + platform configuration details for tenant deployment.
 - [`docs/policies/operations/MULTISITE_GOVERNANCE.md`](../../policies/operations/MULTISITE_GOVERNANCE.md) - Governance checks and recurring controls.
 - [`docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md`](../../ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md) - Domain update and validation sequence.
 - [`docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`](../../ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md) - Domain/secret change safety checks.
@@ -18,7 +18,7 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 
 - [`docs/concepts/architecture/multi-tenancy-overview.md`](../../concepts/architecture/multi-tenancy-overview.md) - Architecture model and data isolation.
 - [`docs/concepts/architecture/enterprise-services-overview.md`](../../concepts/architecture/enterprise-services-overview.md) - Enterprise services design.
-- [`docs/concepts/architecture/MULTISITE.md`](../../concepts/architecture/MULTISITE.md) - Tenant model (shared services vs per-tenant domains).
+- [`docs/concepts/architecture/multi-tenancy-overview.md`](../../concepts/architecture/multi-tenancy-overview.md) - Tenant model (shared services vs per-tenant domains).
 - [`docs/ops/runbooks/MULTI_TENANCY_RUNBOOK.md`](../../ops/runbooks/MULTI_TENANCY_RUNBOOK.md) - Runbook for verification and isolation checks.
 - [`docs/ops/runbooks/TENANT_PROVISIONING.md`](../../ops/runbooks/TENANT_PROVISIONING.md) - Provisioning command and brand-pack path.
 - [`docs/archive/superseded/runbooks/tenant-provisioning-runbook.md`](../../archive/superseded/runbooks/tenant-provisioning-runbook.md) - Full provision + offboarding workflow.

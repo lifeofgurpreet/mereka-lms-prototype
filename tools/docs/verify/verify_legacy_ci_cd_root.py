@@ -77,7 +77,7 @@ def main() -> int:
             continue
         if rel in EXEMPT_REFERENCERS:
             continue
-        stripped = text.replace("docs/ci-cd/README.md", "")
+        stripped = text.replace("docs/ops/ci-cd/README.md", "")
         if "docs/ci-cd/" not in stripped:
             continue
         errors.append(f"active file still references retired ci-cd root: {rel}")

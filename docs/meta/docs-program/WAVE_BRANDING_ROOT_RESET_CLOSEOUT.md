@@ -18,7 +18,7 @@ The canonical living branding root is now `docs/guides/branding/**`.
 - Rewrote active repo references from `docs/branding/**` to `docs/guides/branding/**`.
 - Corrected one dead branding-plan link to the actual canonical operating model.
 - Deleted duplicate files under `docs/branding/**`, including the stale audit copy.
-- Kept `docs/branding/README.md` only as a tombstone redirect.
+- Kept `docs/guides/branding/README.md` only as a tombstone redirect.
 - Refreshed generated catalog surfaces impacted by the collapse.
 
 ## Canonical ownership now
@@ -31,7 +31,7 @@ The canonical living branding root is now `docs/guides/branding/**`.
 
 `tools/docs/verify/verify_legacy_branding_root.py` prevents regrowth by failing when:
 
-- any file other than `docs/branding/README.md` exists under `docs/branding/**`
+- any file other than `docs/guides/branding/README.md` exists under `docs/branding/**`
 - active documentation, infra, or workflow surfaces still rely on `docs/branding/**` as a living root
 
 This guard is enforced through `tools/docs/verify/verify-docs-policy.sh`.

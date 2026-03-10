@@ -332,7 +332,7 @@ collection.find(...).read_preference(ReadPreference.SECONDARY_PREFERRED)
 
 **Operations Docs**:
 - `docs/ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md` - Permission troubleshooting
-- `docs/concepts/architecture/DATABASE_ARCHITECTURE.md` - Complete DB architecture
+- `docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md` - Complete DB architecture
 
 **Atlas CLI**: https://www.mongodb.com/docs/atlas/cli/stable/
 - Install: `brew install mongodb-atlas-cli`

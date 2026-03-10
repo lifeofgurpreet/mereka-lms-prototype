@@ -33,8 +33,8 @@ summary: "Defines the managed MongoDB Atlas contract for modulestore and forum d
 links:
   related_docs:
     - "docs/adr/historical/001-mongodb-atlas.md"
-    - "docs/concepts/architecture/MONGODB_ATLAS_MIGRATION.md"
-    - "docs/concepts/architecture/DATABASE_ARCHITECTURE.md"
+    - "reports/2025/closures/MONGODB_ATLAS_MIGRATION.md"
+    - "docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md"
     - "docs/ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md"
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"

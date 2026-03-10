@@ -62,12 +62,12 @@ echo ""
 # ──────────────────────────────────────────────
 section "1. KPI Framework Document"
 
-KPI_DOC="${REPO_ROOT}/docs/concepts/architecture/PRODUCT_KPI_FRAMEWORK.md"
+KPI_DOC="${REPO_ROOT}/docs/reference/architecture/PRODUCT_KPI_FRAMEWORK.md"
 
 if [[ -f "${KPI_DOC}" ]]; then
-  pass "KPI framework document exists: docs/concepts/architecture/PRODUCT_KPI_FRAMEWORK.md"
+  pass "KPI framework document exists: docs/reference/architecture/PRODUCT_KPI_FRAMEWORK.md"
 else
-  fail "KPI framework document missing: docs/concepts/architecture/PRODUCT_KPI_FRAMEWORK.md"
+  fail "KPI framework document missing: docs/reference/architecture/PRODUCT_KPI_FRAMEWORK.md"
 fi
 
 # Check required sections are present

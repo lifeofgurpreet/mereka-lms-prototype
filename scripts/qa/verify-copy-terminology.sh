@@ -12,7 +12,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
-CONTRACT="$REPO_ROOT/docs/concepts/architecture/COPY_TERMINOLOGY_CONTRACT.md"
+CONTRACT="$REPO_ROOT/docs/policies/architecture/COPY_TERMINOLOGY_CONTRACT.md"
 THEMES_DIR="$REPO_ROOT/infrastructure/tutor/themes"
 CUSTOM_APPS_DIR="$REPO_ROOT/infrastructure/tutor/custom-apps"
 PLUGINS_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
@@ -389,7 +389,7 @@ if [ "$FAIL" -gt 0 ]; then
   echo "  1. Remove banned strings from templates"
   echo "  2. Verify PLATFORM_NAME configuration in plugins"
   echo "  3. Check multi-tenancy domain mappings"
-  echo "  4. See docs/concepts/architecture/COPY_TERMINOLOGY_CONTRACT.md for details"
+  echo "  4. See docs/policies/architecture/COPY_TERMINOLOGY_CONTRACT.md for details"
   exit 1
 fi
 

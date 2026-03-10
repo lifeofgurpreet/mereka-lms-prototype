@@ -48,7 +48,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 6 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 6 | Operations Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 6 | Operations Lead | fix inline path references and missing commands |
-| docs/concepts/analytics/OPENEDX_ANALYTICS.md | 5 | Platform Architecture | fix inline path references and missing commands |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | reports/2025/closures/MONGODB_ATLAS_MIGRATION.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/onboarding/DEVELOPER_ONBOARDING.md | 5 | Docs Lead | fix inline path references and missing commands |
@@ -65,8 +65,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 4 | Operations Lead | fix inline path references and missing commands |
 | docs/status/readiness/CREDENTIALS_READINESS.md | 4 | Operations Lead | fix inline path references and missing commands |
 | docs/adr/016-android-app-support-decision.md | 3 | ADR / Architecture Owner | fix inline path references and missing commands |
-| docs/concepts/analytics/ASPECTS_ACCESS.md | 3 | Platform Architecture | fix inline path references and missing commands |
-| docs/concepts/analytics/ASPECTS_QUICKSTART.md | 3 | Platform Architecture | fix inline path references and missing commands |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 3 | Platform Architecture | fix inline path references and missing commands |
+| docs/concepts/analytics/ASPECTS_TARGET_STATE.md | 3 | Platform Architecture | fix inline path references and missing commands |
 | docs/policies/architecture/COPY_TERMINOLOGY_CONTRACT.md | 3 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md | 3 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_IMPLEMENTOR_KICKOFF.md | 3 | Platform Architecture | fix inline path references and missing commands |
@@ -83,12 +83,12 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/database-issues.md | 3 | Ops Platform Owner | fix inline path references and missing commands |
 | docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/adr/006-tutor-plugin-based-configuration.md | 2 | ADR / Architecture Owner | fix inline path references and missing commands |
-| docs/concepts/analytics/ASPECTS_INSTALLATION.md | 2 | Platform Architecture | fix inline path references and missing commands |
-| docs/concepts/analytics/PANORAMA_ANALYTICS.md | 2 | Platform Architecture | fix inline path references and missing commands |
+| docs/concepts/analytics/ASPECTS_TARGET_STATE.md | 2 | Platform Architecture | fix inline path references and missing commands |
+| docs/concepts/analytics/ANALYTICS_TOOL_COMPARISON.md | 2 | Platform Architecture | fix inline path references and missing commands |
 | docs/policies/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md | 2 | Platform Architecture | fix inline path references and missing commands |
 | reports/2026/closures/ASSESSMENT_EPIC_CLOSURE.md | 2 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md | 2 | Platform Architecture | fix inline path references and missing commands |
-| docs/concepts/architecture/PROCTORING_INTEGRATION.md | 2 | Platform Architecture | fix inline path references and missing commands |
+| docs/concepts/architecture/proctoring-architecture-overview.md | 2 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/admin/MULTI_SITE_GUIDE.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/admin/OBSERVABILITY_GUIDE.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/standards/DOCUMENTATION_STANDARDS.md | 2 | Docs Lead | fix inline path references and missing commands |
@@ -109,7 +109,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/adr/009-in-cluster-storage.md | 1 | ADR / Architecture Owner | fix inline path references and missing commands |
 | docs/adr/010-monorepo-architecture.md | 1 | ADR / Architecture Owner | fix inline path references and missing commands |
 | docs/adr/017-analytics-target-decision.md | 1 | ADR / Architecture Owner | fix inline path references and missing commands |
-| docs/concepts/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md | 1 | Platform Architecture | fix inline path references and missing commands |
+| docs/reference/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md | 1 | Platform Architecture | fix inline path references and missing commands |
 | docs/reference/architecture/ASPECTS_DEPLOYMENT_READINESS.md | 1 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_216_PACKET.md | 1 | Platform Architecture | fix inline path references and missing commands |
 | docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md | 1 | Platform Architecture | fix inline path references and missing commands |
@@ -164,23 +164,23 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/adr/016-android-app-support-decision.md | 118 | docs/archive/ios/MOBILE_IOS_APP_SETUP.md |
 | docs/adr/016-android-app-support-decision.md | 14 | docs/archive/ios/MOBILE_IOS_APP_SETUP.md |
 | docs/adr/016-android-app-support-decision.md | 95 | docs/archive/ios/MOBILE_IOS_APP_SETUP.md |
-| docs/adr/017-analytics-target-decision.md | 104 | docs/concepts/analytics/ASPECTS_ANALYTICS.md |
-| docs/concepts/analytics/ASPECTS_ACCESS.md | 146 | docs/concepts/analytics/ASPECTS_ANALYTICS.md |
-| docs/concepts/analytics/ASPECTS_ACCESS.md | 147 | docs/ASPECTS_INSTALLATION.md |
-| docs/concepts/analytics/ASPECTS_ACCESS.md | 148 | docs/ASPECTS_VS_PANORAMA.md |
-| docs/concepts/analytics/ASPECTS_INSTALLATION.md | 167 | docs/concepts/analytics/ASPECTS_ANALYTICS.md |
-| docs/concepts/analytics/ASPECTS_INSTALLATION.md | 168 | docs/concepts/analytics/OPENEDX_ANALYTICS.md |
-| docs/concepts/analytics/ASPECTS_QUICKSTART.md | 79 | docs/ASPECTS_ACCESS.md |
-| docs/concepts/analytics/ASPECTS_QUICKSTART.md | 80 | docs/concepts/analytics/ASPECTS_ANALYTICS.md |
-| docs/concepts/analytics/ASPECTS_QUICKSTART.md | 81 | docs/ASPECTS_INSTALLATION.md |
-| docs/concepts/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md | 36 | scripts/migrations/kajabi/output/comparison/summary.txt |
-| docs/concepts/analytics/OPENEDX_ANALYTICS.md | 11 | docs/concepts/analytics/ASPECTS_ANALYTICS.md |
-| docs/concepts/analytics/OPENEDX_ANALYTICS.md | 122 | docs/PANORAMA_ANALYTICS.md |
-| docs/concepts/analytics/OPENEDX_ANALYTICS.md | 12 | docs/PANORAMA_ANALYTICS.md |
-| docs/concepts/analytics/OPENEDX_ANALYTICS.md | 471 | docs/MONITORING.md |
-| docs/concepts/analytics/OPENEDX_ANALYTICS.md | 80 | docs/concepts/analytics/ASPECTS_ANALYTICS.md |
-| docs/concepts/analytics/PANORAMA_ANALYTICS.md | 198 | docs/concepts/analytics/ASPECTS_ANALYTICS.md |
-| docs/concepts/analytics/PANORAMA_ANALYTICS.md | 232 | docs/concepts/analytics/ASPECTS_ANALYTICS.md |
+| docs/adr/017-analytics-target-decision.md | 104 | docs/concepts/analytics/ASPECTS_TARGET_STATE.md |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 146 | docs/concepts/analytics/ASPECTS_TARGET_STATE.md |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 147 | docs/ASPECTS_INSTALLATION.md |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 148 | docs/ASPECTS_VS_PANORAMA.md |
+| docs/concepts/analytics/ASPECTS_TARGET_STATE.md | 167 | docs/concepts/analytics/ASPECTS_TARGET_STATE.md |
+| docs/concepts/analytics/ASPECTS_TARGET_STATE.md | 168 | docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md |
+| docs/concepts/analytics/ASPECTS_TARGET_STATE.md | 79 | docs/ASPECTS_ACCESS.md |
+| docs/concepts/analytics/ASPECTS_TARGET_STATE.md | 80 | docs/concepts/analytics/ASPECTS_TARGET_STATE.md |
+| docs/concepts/analytics/ASPECTS_TARGET_STATE.md | 81 | docs/ASPECTS_INSTALLATION.md |
+| docs/reference/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md | 36 | scripts/migrations/kajabi/output/comparison/summary.txt |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 11 | docs/concepts/analytics/ASPECTS_TARGET_STATE.md |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 122 | docs/PANORAMA_ANALYTICS.md |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 12 | docs/PANORAMA_ANALYTICS.md |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 471 | docs/MONITORING.md |
+| docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 80 | docs/concepts/analytics/ASPECTS_TARGET_STATE.md |
+| docs/concepts/analytics/ANALYTICS_TOOL_COMPARISON.md | 198 | docs/concepts/analytics/ASPECTS_TARGET_STATE.md |
+| docs/concepts/analytics/ANALYTICS_TOOL_COMPARISON.md | 232 | docs/concepts/analytics/ASPECTS_TARGET_STATE.md |
 | docs/policies/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md | 229 | scripts/qa/verify-keyboard-navigation.sh |
 | docs/policies/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md | 349 | scripts/qa/verify-accessibility.sh |
 | docs/policies/architecture/ANALYTICS_DECISION_GATE.md | 105 | docs/product/FEATURE_REQUESTS.md |
@@ -267,8 +267,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 160 | docs/archive/oscar-ecommerce-settings/ |
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 65 | services/purchase-gateway/app/middleware/migration.py |
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 99 | scripts/infra/decommission-legacy-ecommerce.sh |
-| docs/concepts/architecture/PROCTORING_INTEGRATION.md | 197 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
-| docs/concepts/architecture/PROCTORING_INTEGRATION.md | 217 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
+| docs/concepts/architecture/proctoring-architecture-overview.md | 197 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
+| docs/concepts/architecture/proctoring-architecture-overview.md | 217 | docs/ops/runbooks/PROCTORING_RUNBOOK.md |
 | docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md | 483 | deploy/k8s/base/plugins/aspects/backup-cronjob.yml |
 | docs/guides/INDEX_BY_AUDIENCE.md | 389 | scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh |
 | docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md | 547 | docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md |

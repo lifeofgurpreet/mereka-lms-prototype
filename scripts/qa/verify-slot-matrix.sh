@@ -13,7 +13,7 @@ WARN=0
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MATRIX_DOC="${REPO_ROOT}/docs/reference/operations/MFE_PLUGIN_SLOT_MATRIX.md"
-INVENTORY_DOC="${REPO_ROOT}/docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
+INVENTORY_DOC="${REPO_ROOT}/docs/reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
 
 # Colors for output
 RED='\033[0;31m'
@@ -142,7 +142,7 @@ fi
 if [[ -f "$INVENTORY_DOC" ]]; then
   pass "Canonical inventory document exists (cross-reference valid)"
 else
-  fail "Canonical inventory document missing at docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
+  fail "Canonical inventory document missing at docs/reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
 fi
 
 # AC-UISLOT-005: Matrix includes at least one ACTIVE slot

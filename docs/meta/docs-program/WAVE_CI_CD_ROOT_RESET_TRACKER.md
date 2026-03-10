@@ -34,7 +34,7 @@ Retire `docs/ci-cd/**` as a living documentation root. The canonical CI/CD opera
 
 ### Retain
 
-- `docs/ci-cd/README.md`
+- `docs/ops/ci-cd/README.md`
   - Create as a tombstone-only redirect to `docs/ops/ci-cd/**`.
 
 ## Reference pressure found in Packet A

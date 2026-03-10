@@ -37,7 +37,7 @@ tags:
 summary: "System-level contract for tenant identity, isolation boundaries, provisioning, branding, and shared-infrastructure multi-tenancy across Mereka LMS."
 links:
   related_docs:
-    - "docs/concepts/architecture/MULTISITE.md"
+    - "docs/concepts/architecture/multi-tenancy-overview.md"
     - "docs/ops/runbooks/TENANT_PROVISIONING.md"
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
   related_specs:

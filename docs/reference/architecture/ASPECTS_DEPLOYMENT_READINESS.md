@@ -541,9 +541,9 @@ After deployment, the following conditions confirm successful enablement:
 
 - [ADR-017: Analytics Target Decision](../../programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md) - Deferral decision and revisit conditions
 - [Analytics Pipeline Spec](../../../specs/analytics-pipeline_spec.md) - Requirements and acceptance criteria
-- [Aspects Installation Guide](../analytics/ASPECTS_INSTALLATION.md) - Step-by-step deployment
-- [Aspects Quickstart](../analytics/ASPECTS_QUICKSTART.md) - Post-install validation
-- [Aspects vs Panorama Comparison](../analytics/ASPECTS_VS_PANORAMA.md) - Alternative analysis
+- [Aspects Target State](../../concepts/analytics/ASPECTS_TARGET_STATE.md) - Target-state deployment and access model
+- [Current Analytics State](../../concepts/analytics/CURRENT_ANALYTICS_STATE.md) - Current runtime truth
+- [Aspects vs Panorama Comparison](../../concepts/analytics/ANALYTICS_TOOL_COMPARISON.md) - Alternative analysis
 - [Open edX Aspects Documentation](https://docs.openedx.org/projects/openedx-aspects/) - Official upstream docs
 
 ---

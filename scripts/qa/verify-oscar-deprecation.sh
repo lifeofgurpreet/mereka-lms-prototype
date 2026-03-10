@@ -437,7 +437,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   exit 1
 else
   printf "  ${GREEN}RESULT: PASS${NC} — Oscar deprecation path is in expected state.\n"
-  printf "  Oscar is still active (transition period). See docs/concepts/architecture/OSCAR_DEPRECATION.md\n"
+  printf "  Oscar is still active (transition period). See docs/policies/architecture/OSCAR_DEPRECATION.md\n"
   printf "  for the step-by-step decommission plan.\n\n"
   exit 0
 fi

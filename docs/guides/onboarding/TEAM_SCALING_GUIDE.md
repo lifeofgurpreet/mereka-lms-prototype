@@ -187,9 +187,9 @@ _Role: Incident response, performance troubleshooting, disaster recovery_
 - [ ] **Practice**: Simulate incident response on dev
 
 #### Week 3: Architecture Understanding
-- [ ] **Read**: [Database Architecture](../../concepts/architecture/DATABASE_ARCHITECTURE.md)
-- [ ] **Read**: [Multisite Analysis](../../concepts/architecture/MULTISITE_ANALYSIS.md)
-- [ ] **Read**: [Production Architecture Reality](../../concepts/architecture/PRODUCTION_ARCHITECTURE_REALITY.md)
+- [ ] **Read**: [Database Architecture](../../reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md)
+- [ ] **Read**: [Multisite Analysis](../../concepts/architecture/multi-tenancy-overview.md)
+- [ ] **Read**: [Production Architecture Reality](../../reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md)
 - [ ] **Understand**: All service interactions and dependencies
 
 #### Week 4: On-Call Readiness
@@ -318,8 +318,8 @@ _Role: Feature development, bug fixes, local setup, testing_
 - [ ] **Practice**: Run tests: `./scripts/qa/comprehensive-test.sh`
 
 #### Day 4-5: Architecture and Testing
-- [ ] **Read**: [Database Architecture](../../concepts/architecture/DATABASE_ARCHITECTURE.md)
-- [ ] **Read**: [Production Architecture Reality](../../concepts/architecture/PRODUCTION_ARCHITECTURE_REALITY.md)
+- [ ] **Read**: [Database Architecture](../../reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md)
+- [ ] **Read**: [Production Architecture Reality](../../reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md)
 - [ ] **Read**: [Local Production Parity](../../ops/quickref/local-production-parity.md)
 - [ ] **Practice**: Verify parity: `./scripts/qa/check-parity.sh`
 

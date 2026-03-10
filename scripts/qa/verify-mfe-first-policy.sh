@@ -85,7 +85,7 @@ else
 fi
 
 # Check plugin slot inventory exists
-if [[ -f "docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md" ]]; then
+if [[ -f "docs/reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md" ]]; then
   pass "Plugin slot inventory exists"
 else
   fail "Plugin slot inventory missing"

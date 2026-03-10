@@ -21,7 +21,7 @@ echo ""
 # ---------------------------------------------------------------------------
 # Check 1: MFE_PLUGIN_SLOT_INVENTORY.md exists and has comprehensive inventory
 # ---------------------------------------------------------------------------
-INVENTORY_DOC="docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
+INVENTORY_DOC="docs/reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
 
 if [[ ! -f "$INVENTORY_DOC" ]]; then
   fail "MFE_PLUGIN_SLOT_INVENTORY.md not found at $INVENTORY_DOC"

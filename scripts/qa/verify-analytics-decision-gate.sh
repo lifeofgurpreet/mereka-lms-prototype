@@ -35,7 +35,7 @@ echo ""
 
 # --- 1. Decision gate document exists ---
 echo "--- Decision Gate Document ---"
-DECISION_GATE="docs/concepts/architecture/ANALYTICS_DECISION_GATE.md"
+DECISION_GATE="docs/policies/architecture/ANALYTICS_DECISION_GATE.md"
 if [[ -f "$DECISION_GATE" ]]; then
   do_pass "Decision gate document exists: $DECISION_GATE"
 else
@@ -225,7 +225,11 @@ fi
 # --- 13. Documentation exists ---
 echo ""
 echo "--- Documentation ---"
-analytics_docs=("docs/analytics/README.md" "docs/analytics/ASPECTS_INSTALLATION.md")
+analytics_docs=(
+  "docs/concepts/analytics/README.md"
+  "docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md"
+  "docs/concepts/analytics/ASPECTS_TARGET_STATE.md"
+)
 for doc in "${analytics_docs[@]}"; do
   if [[ -f "$doc" ]]; then
     do_pass "Documentation exists: $doc"

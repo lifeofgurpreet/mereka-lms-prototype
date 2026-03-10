@@ -41,7 +41,7 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `aspects-k-s-deployment`
 
-- Proposed canonical: `docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md`
+- Proposed canonical: `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
 - Supporting docs: none
 - Superseded/archive candidates: 
   - `docs/archive/superseded/ASPECTS_K8S_DEPLOYMENT.md`
@@ -747,7 +747,7 @@ _Audience: Docs Team • Owner: Platform Team • Last verified: 2026-03-06 • 
 
 ## Cluster: `openedx-analytics`
 
-- Proposed canonical: `docs/concepts/analytics/OPENEDX_ANALYTICS.md`
+- Proposed canonical: `docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md`
 - Supporting docs: none
 - Superseded/archive candidates: 
   - `docs/archive/tools-deprecated-20260120/openedx-analytics.py`

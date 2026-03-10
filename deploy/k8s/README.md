@@ -2,7 +2,7 @@
 
 > **PARTIALLY SUPERSEDED**: The directory structure described below is outdated. The canonical
 > reference for what belongs in this directory vs `bbi-infrastructure` is:
-> - [docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md](../../docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md) — authoritative boundary ADR
+> - [docs/reference/architecture/DEPLOYMENT_CONTRACT.md](../../docs/reference/architecture/DEPLOYMENT_CONTRACT.md) — authoritative boundary ADR
 > - [docs/reference/architecture/DEPLOYMENT_CONTRACT.md](../../docs/reference/architecture/DEPLOYMENT_CONTRACT.md) — interface contract
 > - [docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md](../../docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md) — per-file classification
 >

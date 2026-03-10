@@ -1584,7 +1584,7 @@ Verify Redis Streams consumers implement idempotent handling with deduplication 
 
 - [`docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
 - [`docs/ops/quickref/access-urls.md`](../../ops/quickref/access-urls.md) - Service URLs and access info
-- [`docs/concepts/architecture/DATABASE_ARCHITECTURE.md`](../../concepts/architecture/DATABASE_ARCHITECTURE.md) - Database connectivity guide
+- [`docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`](../../reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md) - Database connectivity guide
 
 ---
 

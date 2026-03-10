@@ -3665,127 +3665,37 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-12",
-    "owner": "Data/Analytics",
-    "path": "concepts/analytics/ANALYTICS_CONSOLE_ACCESS.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-07-25",
-    "owner": "Data/Analytics",
-    "path": "concepts/analytics/ASPECTS_ACCESS.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-07-25",
-    "owner": "Data/Analytics",
-    "path": "concepts/analytics/ASPECTS_ANALYTICS.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": "Data/Analytics",
-    "path": "concepts/analytics/ASPECTS_INSTALLATION.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "aspects-k-s-deployment",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-09",
+    "last_verified_or_updated": "2026-03-10",
     "owner": "Analytics Guild",
-    "path": "concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md",
-    "status": "supporting",
-    "type": "concept"
+    "path": "concepts/analytics/ANALYTICS_TOOL_COMPARISON.md",
+    "status": "canonical",
+    "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-07-25",
-    "owner": "Data/Analytics",
-    "path": "concepts/analytics/ASPECTS_QUICKSTART.md",
-    "status": "supporting",
-    "type": "concept"
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Analytics Guild",
+    "path": "concepts/analytics/ASPECTS_TARGET_STATE.md",
+    "status": "canonical",
+    "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": "Data/Analytics",
-    "path": "concepts/analytics/ASPECTS_VS_PANORAMA.md",
-    "status": "supporting",
-    "type": "concept"
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Analytics Guild",
+    "path": "concepts/analytics/CURRENT_ANALYTICS_STATE.md",
+    "status": "canonical",
+    "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-12",
-    "owner": null,
-    "path": "concepts/analytics/DATA_SOURCES_EXPLAINED.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-10-01",
-    "owner": "Migration Squad",
-    "path": "concepts/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-analytics",
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-07-25",
-    "owner": "Data/Analytics",
-    "path": "concepts/analytics/OPENEDX_ANALYTICS.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-07-25",
-    "owner": "Data/Analytics",
-    "path": "concepts/analytics/PANORAMA_ANALYTICS.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
+    "last_verified_or_updated": "2026-03-10",
     "owner": "Analytics Guild",
     "path": "concepts/analytics/README.md",
     "status": "canonical",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/ANALYTICS_DECISION_GATE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/ANALYTICS_DRIFT_GUARDRAILS.md",
-    "status": "superseded",
     "type": "concept"
   },
   {
@@ -3800,91 +3710,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-07",
-    "owner": "Docs Team",
-    "path": "concepts/architecture/ARCHITECTURE_MONGODB.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/ASPECTS_DEPLOYMENT_READINESS.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/ASSESSMENT_AUDIT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/ASSESSMENT_EPIC_CLOSURE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/ASSESSMENT_XQUEUE_EVIDENCE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/AUDIT_LOGGING_ASSESSMENT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Auth Platform",
     "path": "concepts/architecture/AUTHORIZATION_MODEL.md",
     "status": "canonical",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
-    "path": "concepts/architecture/BRAND_PARITY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/BUILD_OPTIMIZATIONS_REFACTOR.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/CATALOG_DISCOVERY_AUDIT.md",
-    "status": "superseded",
     "type": "concept"
   },
   {
@@ -3899,55 +3728,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/COPY_TERMINOLOGY_CONTRACT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/CSS_SCOPING_AUDIT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-11",
-    "owner": "Infra Team",
-    "path": "concepts/architecture/DATABASE_ARCHITECTURE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Security",
     "path": "concepts/architecture/DATA_GOVERNANCE.md",
     "status": "canonical",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/DEPLOYMENT_BOUNDARY.md",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/DESIGN_TOKENS_MIGRATION.md",
-    "status": "superseded",
     "type": "concept"
   },
   {
@@ -3962,42 +3746,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/FOOTER_PARITY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/FOOTER_SLOT_MIGRATION.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/FPF_PLUGIN_SLOT_REGISTRY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "gdpr-compliance",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/GDPR_COMPLIANCE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Auth Platform",
     "path": "concepts/architecture/IDENTITY_DOMAIN_BOUNDARIES.md",
@@ -4007,385 +3755,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/INTERACTION_STATE_CONTRACT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
-    "path": "concepts/architecture/LEGACY_COURSEWARE_AUDIT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
-    "path": "concepts/architecture/MFE_COMPLETE_LIST.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
-    "path": "concepts/architecture/MFE_RUNTIME_CONFIG.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MFE_SELECTOR_AUDIT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MFE_SELECTOR_DECISION_LOG.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MFE_VERSIONS.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MOBILE_TOKEN_PARITY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MONGODB_ATLAS_MIGRATION.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-05",
-    "owner": "Infra Team",
-    "path": "concepts/architecture/MULTISITE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-12",
-    "owner": null,
-    "path": "concepts/architecture/MULTISITE_ANALYSIS.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/MULTISITE_UX_CONSISTENCY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
-    "path": "concepts/architecture/MULTI_BRAND_MULTI_SITE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OEP48_BRAND_PACKAGE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OEP65_MODULE_READINESS.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Platform Team",
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_IMPLEMENTOR_KICKOFF.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_IMPLEMENTOR_PR_TEMPLATE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-05",
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-repo-audit-issue-packet",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-repo-audit-issue-packet",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_216_PACKET.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-repo-audit-issue-packet",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_217_PACKET.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-repo-audit-issue-packet",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_218_PACKET.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-repo-audit-issue-packet",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-repo-audit-issue-packet",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-repo-audit-issue-packet",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_221_PACKET.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": "openedx-repo-audit-issue-packet",
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/OSCAR_DEPRECATION.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/PARAGON_V22_TOKEN_AUDIT.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv",
-    "status": "supporting",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/PERFORMANCE_BUDGETS.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": "Platform Team",
-    "path": "concepts/architecture/PROCTORING_INTEGRATION.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-05",
-    "owner": null,
-    "path": "concepts/architecture/PRODUCTION_ARCHITECTURE_REALITY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/PRODUCT_KPI_FRAMEWORK.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": "Platform Team",
-    "path": "concepts/architecture/PURCHASE_GATEWAY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
+    "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "concepts/architecture/README.md",
     "status": "canonical",
@@ -4403,15 +3773,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-06",
-    "owner": "Platform",
-    "path": "concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Multisite Platform",
     "path": "concepts/architecture/TENANT_LIFECYCLE.md",
@@ -4421,55 +3782,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/TOKEN_GENERATION_PIPELINE.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/TOKEN_REFERENCE_INTEGRITY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "concepts/architecture/TUTOR_AND_EXTENSION_MODEL.md",
     "status": "canonical",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/TUTOR_PATCHES_INVENTORY.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "concepts/architecture/VIDEO_HOSTING_COST_COMPARISON.md",
-    "status": "superseded",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": null,
-    "path": "concepts/architecture/VIDEO_PIPELINE.md",
-    "status": "superseded",
     "type": "concept"
   },
   {
@@ -9281,6 +8597,33 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Analytics Guild",
+    "path": "reference/analytics/DATA_SOURCES_EXPLAINED.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Migration Squad",
+    "path": "reference/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Analytics Guild",
+    "path": "reference/analytics/README.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-25",
     "owner": "Platform Team",
     "path": "reference/architecture/API_CONTRACTS.md",
@@ -9446,6 +8789,33 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reference/architecture/PARAGON_V22_TOKEN_AUDIT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv",
     "status": "supporting",
     "type": "other"
   },

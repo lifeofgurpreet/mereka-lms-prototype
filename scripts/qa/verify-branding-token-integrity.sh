@@ -240,7 +240,7 @@ echo "--- AC-TOK-005: Documentation ---"
 # Check for token-related docs
 DOCS_FOUND=0
 for doc in "$REPO_ROOT/docs/ops/runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md" \
-           "$REPO_ROOT/docs/concepts/architecture/TOKEN_REFERENCE_INTEGRITY.md" \
+           "$REPO_ROOT/docs/reference/architecture/TOKEN_REFERENCE_INTEGRITY.md" \
            "$REPO_ROOT/docs/guides/branding/TOKEN_INTEGRITY.md"; do
   if [[ -f "$doc" ]]; then
     DOCS_FOUND=1
@@ -264,7 +264,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "1. Define missing tokens in _tokens.scss :root block"
   echo "2. Mirror values in mereka-overrides.css for all targets (common, lms, cms)"
   echo "3. Verify contrast ratios meet WCAG AA (4.5:1 normal text, 3:1 large text)"
-  echo "4. See docs/concepts/architecture/TOKEN_REFERENCE_INTEGRITY.md for full inventory"
+  echo "4. See docs/reference/architecture/TOKEN_REFERENCE_INTEGRITY.md for full inventory"
   exit 1
 fi
 

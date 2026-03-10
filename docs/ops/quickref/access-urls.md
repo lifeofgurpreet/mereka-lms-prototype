@@ -129,7 +129,7 @@ Platform admins are enforced separately (see `docs/guides/admin/ADMIN_LOGIN_GUID
   - **Health:** https://forum.academyv2.mereka.io/heartbeat (200)
 - **Analytics (Superset):** ❌ NOT DEPLOYED
   - **Status:** Documented but not yet deployed to K8s
-  - **Plan:** See [`docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md`](../../concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md)
+  - **Plan:** See [`docs/concepts/analytics/ASPECTS_TARGET_STATE.md`](../../concepts/analytics/ASPECTS_TARGET_STATE.md)
 
 ---
 
@@ -319,7 +319,7 @@ kubectl port-forward -n mereka-lms svc/cms 8000:8000
 # Forum (v2 — runs in-process with LMS, no separate service)
 # Access via LMS: https://academyv2.mereka.io/api/discussion/v2/courses/
 
-# Analytics (Superset) - See docs/concepts/analytics/ANALYTICS_CONSOLE_ACCESS.md
+# Analytics (Superset) - See docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md
 kubectl port-forward -n mereka-lms svc/superset 8088:8088
 # Then access at: http://localhost:8088
 # Default credentials: admin / admin

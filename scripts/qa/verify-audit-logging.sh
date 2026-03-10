@@ -47,7 +47,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- Assessment document ---"
 
-ASSESSMENT_DOC="${REPO_ROOT}/docs/concepts/architecture/AUDIT_LOGGING_ASSESSMENT.md"
+ASSESSMENT_DOC="${REPO_ROOT}/reports/2026/audits/AUDIT_LOGGING_ASSESSMENT.md"
 if [[ -f "${ASSESSMENT_DOC}" ]]; then
   pass "AUDIT_LOGGING_ASSESSMENT.md exists"
 else
@@ -364,7 +364,7 @@ echo "  Total ${TOTAL}"
 echo "=============================================="
 echo ""
 echo -e "${CYAN}Note${NC}: This is a P3 aspirational check. FAILs are informational."
-echo "See docs/concepts/architecture/AUDIT_LOGGING_ASSESSMENT.md for gap analysis and plan."
+echo "See reports/2026/audits/AUDIT_LOGGING_ASSESSMENT.md for gap analysis and plan."
 echo ""
 
 if [[ "${FAIL}" -gt 0 ]]; then

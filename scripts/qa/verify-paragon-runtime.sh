@@ -9,7 +9,7 @@ source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 SPEC_FILE="$REPO_ROOT/specs/plans/paragon-design-tokens-migration_spec.md"
 PROMPT_FILE="$REPO_ROOT/docs/FRONTEND_PHASE_C_PROMPT.md"
-AUDIT_DOC="$REPO_ROOT/docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT.md"
+AUDIT_DOC="$REPO_ROOT/docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT.md"
 BRANDING_CHECKLIST="$REPO_ROOT/docs/BRANDING_VERIFICATION_CHECKLIST.md"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css"

@@ -57,8 +57,8 @@ mereka-lms/
 **Purpose**: Kubernetes deployment manifests and Kustomize overlays.
 
 > **Boundary reference**: For the authoritative classification of what belongs here vs in
-> `infrastructure` (historical name: `infrastructure`), see [DEPLOYMENT_BOUNDARY.md](../../concepts/architecture/DEPLOYMENT_BOUNDARY.md)
-> and [DEPLOYMENT_CONTRACT.md](../../reference/architecture/DEPLOYMENT_CONTRACT.md).
+> `infrastructure` (historical name: `infrastructure`), see [DEPLOYMENT_CONTRACT.md](../../reference/architecture/DEPLOYMENT_CONTRACT.md)
+> and [RESOURCE_OWNERSHIP_MATRIX.md](../../reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md).
 
 **Structure**:
 ```

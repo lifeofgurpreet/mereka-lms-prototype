@@ -30,7 +30,7 @@ summary: "Platform-wide normative requirements for tenant isolation, observabili
 links:
   related_docs:
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
-    - "docs/concepts/architecture/MULTISITE.md"
+    - "docs/concepts/architecture/multi-tenancy-overview.md"
   related_specs:
     - "specs/multi-tenancy-architecture_spec.md"
     - "specs/secrets-management_spec.md"

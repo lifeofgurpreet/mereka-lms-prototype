@@ -3,8 +3,8 @@
 <!-- Last verified: 2026-02-13 -->
 
 > **Superseded in part by ADR-025**: For the authoritative per-file classification of every
-> resource in `deploy/k8s/`, see [DEPLOYMENT_BOUNDARY.md](../concepts/architecture/DEPLOYMENT_BOUNDARY.md)
-> and [DEPLOYMENT_CONTRACT.md](../concepts/architecture/DEPLOYMENT_CONTRACT.md). The high-level ownership
+> resource in `deploy/k8s/`, see [DEPLOYMENT_CONTRACT.md](../../reference/architecture/DEPLOYMENT_CONTRACT.md)
+> and [RESOURCE_OWNERSHIP_MATRIX.md](../../reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md). The high-level ownership
 > rules below remain accurate; the detailed matrix there takes precedence for specific files.
 
 This document defines ownership boundaries to prevent drift, duplication, and regression.

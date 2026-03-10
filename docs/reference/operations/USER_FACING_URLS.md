@@ -44,7 +44,7 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 - **Aspects** - Official Open edX analytics using Apache Superset for visualization (Tutor plugin)
 - **Superset** - Data visualization tool (used by Aspects)
 - **Current Choice**: Aspects + Superset infrastructure in place
-- **Current Status**: Analytics not deployed, see `docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md`
+- **Current Status**: Analytics not deployed, see `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
 - **Note**: Panorama is a separate analytics platform (alternative to Aspects), but we're using Aspects
 
 ---
@@ -312,7 +312,7 @@ When adding a new tenant, ensure these URLs are configured:
   - Uses Apache Superset as reporting tool
   - **Sources**: [Aspects Docs](https://docs.openedx.org/projects/openedx-aspects/), [Superset Decision](https://docs.openedx.org/projects/openedx-aspects/en/latest/technical_documentation/decisions/0003_superset.html)
 - **Our Choice**: Aspects + Superset
-- **Current Status**: Not yet deployed, see `docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md`
+- **Current Status**: Not yet deployed, see `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
 - **Note**: Panorama is an alternative analytics platform by Aulasneo, but we're using Aspects
 
 **Preview Domain**:

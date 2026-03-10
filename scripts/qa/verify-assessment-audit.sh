@@ -4,7 +4,7 @@
 # Verification script for Assessment Infrastructure Audit (Phase 0)
 # Covers ORA2 (AC-001..009) and Timed Exams (AC-010..015) baseline checks
 #
-# @audit: docs/concepts/architecture/ASSESSMENT_AUDIT.md
+# @audit: reports/2026/audits/ASSESSMENT_AUDIT.md
 #
 # Usage:
 #   ./scripts/qa/verify-assessment-audit.sh [--env local|production]
@@ -300,6 +300,6 @@ if [[ "$FAILED" -eq 0 ]]; then
   exit 0
 else
   echo -e "${RED}✗ ${FAILED} check(s) failed${NC}"
-  echo "Review failures above and check docs/concepts/architecture/ASSESSMENT_AUDIT.md"
+  echo "Review failures above and check reports/2026/audits/ASSESSMENT_AUDIT.md"
   exit 1
 fi

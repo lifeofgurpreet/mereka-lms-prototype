@@ -59,7 +59,7 @@ Modules:
    - `XQUEUE_DOCKER_IMAGE`: `ghcr.io/biji-biji-initiative/mereka-lms/openedx-xqueue:12.1.0`
    - `MONGODB_URI`: Atlas connection string (for forum and the Atlas-only target state).
    - Configure external service endpoints (GCS buckets, etc). For DB/cache, prefer in-cluster service DNS.
-   - For additional LMS domains (microsites), see `docs/concepts/architecture/MULTISITE.md` and re-run `./infrastructure/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
+   - For additional LMS domains (microsites), see `docs/concepts/architecture/multi-tenancy-overview.md` and re-run `./infrastructure/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
 2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
 3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=ghcr.io/biji-biji-initiative/mereka-lms`.
 
@@ -91,7 +91,7 @@ Modules:
    tutor k8s init
    tutor k8s start
    ```
-4. MongoDB (production): Atlas-only. Keep `MONGODB_HOST` wired to `openedx-secrets/FORUM_MONGODB_SRV` and ensure legacy `Service/mongodb` remains removed via production overlay patching (see `docs/concepts/architecture/ARCHITECTURE_MONGODB.md`).
+4. MongoDB (production): Atlas-only. Keep `MONGODB_HOST` wired to `openedx-secrets/FORUM_MONGODB_SRV` and ensure legacy `Service/mongodb` remains removed via production overlay patching (see `docs/guides/admin/MONGODB_ATLAS_GUIDE.md`).
 5. Verify pods: `kubectl get pods -n mereka-lms`.
 6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `academyv2-mereka-io`.
    - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./scripts/infra/cloudflare-sync.sh` keeps the `academyv2`, `studio.academyv2`, and `apps.academyv2` hostnames pointed at the GKE ingress (records defined in `infrastructure/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.

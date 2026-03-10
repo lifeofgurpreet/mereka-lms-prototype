@@ -49,7 +49,7 @@ Retire `docs/branding/**` as a living documentation root. The canonical branding
 
 ### Retain
 
-- `docs/branding/README.md`
+- `docs/guides/branding/README.md`
   - Rewrite as a tombstone-only redirect to `docs/guides/branding/**`.
 
 ## Reference pressure found in Packet A

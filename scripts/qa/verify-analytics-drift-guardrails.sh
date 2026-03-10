@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-GUARDRAILS_DOC="docs/concepts/architecture/ANALYTICS_DRIFT_GUARDRAILS.md"
+GUARDRAILS_DOC="docs/policies/architecture/ANALYTICS_DRIFT_GUARDRAILS.md"
 ADR_PATH="docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md"
 SPEC_PATH="specs/analytics-pipeline_spec.md"
 PROD_KUSTOMIZATION="deploy/k8s/overlays/production/kustomization.yaml"

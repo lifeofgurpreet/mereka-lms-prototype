@@ -52,7 +52,7 @@ links:
 
 > **Deployment boundary (ADR-025)**: For the authoritative classification of which files in
 > `deploy/k8s/` stay in this repo vs migrate to `bbi-infrastructure`, see
-> `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md` and `docs/reference/architecture/DEPLOYMENT_CONTRACT.md`.
+> `docs/reference/architecture/DEPLOYMENT_CONTRACT.md` and `docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md`.
 > The active development environment is now `rke2-nonprod` (not GKE). The production GKE overlay
 > is frozen at zero replicas pending the infrastructure repo migration.
 

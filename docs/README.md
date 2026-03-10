@@ -38,10 +38,10 @@ For the current decision-grade review and agent hot path, also read:
 | [docs/status/](status/INDEX.md) | Active reporting and status tracking | Canonical |
 | `docs/operations/README.md` | Retired compatibility tombstone | Tombstone-only |
 | `docs/onboarding/README.md` | Legacy compatibility tombstone | Tombstone-only |
-| `docs/branding/README.md` | Retired compatibility tombstone | Tombstone-only |
+| `docs/guides/branding/README.md` | Retired compatibility tombstone | Tombstone-only |
 | `docs/runbooks/README.md` | Retired compatibility tombstone | Tombstone-only |
 | `docs/architecture/README.md` | Retired compatibility tombstone | Tombstone-only |
-| `docs/ci-cd/README.md` | Retired compatibility tombstone | Tombstone-only |
+| `docs/ops/ci-cd/README.md` | Retired compatibility tombstone | Tombstone-only |
 | `docs/archive/**` | Retained history only | Cold |
 
 ## Hot path reading set
@@ -162,7 +162,7 @@ If a generated file conflicts with a canonical source doc, fix the source and re
 
 ## What not to do
 
-- Do not treat `docs/operations/README.md`, `docs/runbooks/README.md`, `docs/onboarding/README.md`, `docs/branding/README.md`, `docs/architecture/README.md`, or `docs/ci-cd/README.md` as living authority.
+- Do not treat `docs/operations/README.md`, `docs/runbooks/README.md`, `docs/onboarding/README.md`, `docs/guides/branding/README.md`, `docs/architecture/README.md`, or `docs/ops/ci-cd/README.md` as living authority.
 - Do not put proof artifacts under random roots when `docs/evidence/**` owns them.
 - Do not put active reporting under archive or top-level `reports/**` when `docs/status/**` owns it.
 - Do not hand-edit generated catalog or testmap outputs and call that authoritative.

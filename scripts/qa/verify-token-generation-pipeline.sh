@@ -8,7 +8,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-CONTRACT_DOC="$REPO_ROOT/docs/concepts/architecture/TOKEN_GENERATION_PIPELINE.md"
+CONTRACT_DOC="$REPO_ROOT/docs/reference/architecture/TOKEN_GENERATION_PIPELINE.md"
 TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 TOKENS_PROVENANCE="$REPO_ROOT/assets/branding/tokens.provenance.json"
 SCSS_BRIDGE="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
@@ -41,7 +41,7 @@ echo ""
 # ==============================
 echo "--- Contract & Files ---"
 if [[ -f "$CONTRACT_DOC" ]]; then
-  do_pass "Contract document exists at docs/concepts/architecture/TOKEN_GENERATION_PIPELINE.md"
+  do_pass "Contract document exists at docs/reference/architecture/TOKEN_GENERATION_PIPELINE.md"
 else
   do_fail "Contract document missing: $CONTRACT_DOC"
 fi

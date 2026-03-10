@@ -14,11 +14,10 @@ MFEs are the learner/admin frontend surfaces and associated plugin slots, asset 
 - [CI/CD Runbook](../../ops/runbooks/CI_CD_RUNBOOK.md)
 
 ## Canonical Guides
-- [MFE Complete List](../../concepts/architecture/MFE_COMPLETE_LIST.md)
+- [MFE Complete List](../../reference/architecture/MFE_COMPLETE_LIST.md)
 - [Branding Guide](../../guides/branding/BRANDING.md)
 - [Footer v2 to LMS Mapping](../../guides/branding/FOOTER_V2_TO_LMS_MAPPING.md)
 
 ## Active CI/Workflow References
 - [Build Tutor Images Workflow](../../../.github/workflows/build-tutor-images.yml)
 - [CI Workflow](../../../.github/workflows/ci.yml)
-

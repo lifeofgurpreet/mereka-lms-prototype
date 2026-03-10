@@ -2,8 +2,8 @@
 _Audience: Platform Eng + DevOps • Owner: Engineering Lead • Last updated: 2026-03-06_
 
 > **Deployment boundary**: For the authoritative classification of what belongs in this repo
-> vs `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`, previously known as `infrastructure`), see [DEPLOYMENT_BOUNDARY.md](../../concepts/architecture/DEPLOYMENT_BOUNDARY.md)
-> and [DEPLOYMENT_CONTRACT.md](../../reference/architecture/DEPLOYMENT_CONTRACT.md).
+> vs `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`, previously known as `infrastructure`), see [DEPLOYMENT_CONTRACT.md](../../reference/architecture/DEPLOYMENT_CONTRACT.md)
+> and [RESOURCE_OWNERSHIP_MATRIX.md](../../reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md).
 > Note: `deploy/k8s/overlays/production/` and `overlays/rke2-nonprod/` are classified
 > ENVIRONMENT_SPECIFIC and are managed by the active GitOps repo in this environment.
 

@@ -133,9 +133,9 @@ _Incident response, performance troubleshooting, disaster recovery_
 ### Architecture Understanding
 
 **System Design**:
-- [DATABASE_ARCHITECTURE.md](../concepts/architecture/DATABASE_ARCHITECTURE.md) - All databases explained
-- [MULTISITE_ANALYSIS.md](../concepts/architecture/MULTISITE_ANALYSIS.md) - Multi-domain architecture
-- [PRODUCTION_ARCHITECTURE_REALITY.md](../concepts/architecture/PRODUCTION_ARCHITECTURE_REALITY.md) - Current prod topology
+- [PRODUCTION_INFRASTRUCTURE_PLAN.md](../reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md) - Current topology and data plane
+- [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Multi-domain architecture
+- [ARCHITECTURE_CHARTER.md](../concepts/architecture/ARCHITECTURE_CHARTER.md) - Current architecture law
 
 **Service Interactions**:
 - [enterprise-services-overview.md](../concepts/architecture/enterprise-services-overview.md) - B2B services
@@ -206,9 +206,9 @@ _Local setup, feature development, testing, contribution_
 ### Architecture Understanding
 
 **System Overview**:
-- [DATABASE_ARCHITECTURE.md](../concepts/architecture/DATABASE_ARCHITECTURE.md) - Database layer
-- [MULTISITE_ANALYSIS.md](../concepts/architecture/MULTISITE_ANALYSIS.md) - Multi-site setup
-- [PRODUCTION_ARCHITECTURE_REALITY.md](../concepts/architecture/PRODUCTION_ARCHITECTURE_REALITY.md) - Current topology
+- [PRODUCTION_INFRASTRUCTURE_PLAN.md](../reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md) - Database layer and topology
+- [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Multi-site setup
+- [CONTROL_PLANES.md](../concepts/architecture/CONTROL_PLANES.md) - Current topology rules
 
 **Service Architecture**:
 - [enterprise-services-overview.md](../concepts/architecture/enterprise-services-overview.md) - B2B microservices
@@ -274,7 +274,7 @@ _Tenant management, SSO configuration, user provisioning_
 
 **Configuration**:
 - [AUTH_AND_PERMISSIONS.md](../reference/operations/AUTH_AND_PERMISSIONS.md) - Permission model
-- [MULTISITE.md](../concepts/architecture/MULTISITE.md) - Multi-site config
+- [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Multi-site config
 - [MULTI_SITE_GUIDE.md](./admin/MULTI_SITE_GUIDE.md) - Domain setup
 
 **User Management**:
@@ -291,7 +291,7 @@ _Tenant management, SSO configuration, user provisioning_
 **Authentication**:
 - [AUTH_SSO_RUNBOOK.md](../ops/runbooks/AUTH_SSO_RUNBOOK.md) - SSO setup
 - [auth-sso-enterprise-runbook.md](../archive/superseded/runbooks/auth-sso-enterprise-runbook.md) - Enterprise SSO
-- [RFC_CLAIM_BASED_ROLE_SYNC.md](../concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md) - Role synchronization
+- [RFC-claim-based-role-sync.md](../adr/rfc/RFC-claim-based-role-sync.md) - Role synchronization
 
 **Enterprise Features**:
 - [enterprise-services-runbook.md](../archive/superseded/runbooks/enterprise-services-runbook.md) - B2B services
@@ -302,7 +302,7 @@ _Tenant management, SSO configuration, user provisioning_
 
 **Multi-Tenancy**:
 - [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Tenant architecture
-- [MULTISITE_ANALYSIS.md](../concepts/architecture/MULTISITE_ANALYSIS.md) - Multi-site design
+- [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Multi-site design
 - [MULTISITE_GOVERNANCE.md](../policies/operations/MULTISITE_GOVERNANCE.md) - Governance model
 
 **Enterprise Services**:
@@ -353,7 +353,7 @@ _Security configs, compliance, audit logs, secrets management_
 - [AUTH_HARDENING_SPEC.md](../ops/security/AUTH_HARDENING_SPEC.md) - Hardening spec
 - [AUTH_AND_PERMISSIONS.md](../reference/operations/AUTH_AND_PERMISSIONS.md) - Permission model
 - [in-cluster-auth-verification.md](../ops/security/in-cluster-auth-verification.md) - Verification
-- [RFC_CLAIM_BASED_ROLE_SYNC.md](../concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md) - Role sync
+- [RFC-claim-based-role-sync.md](../adr/rfc/RFC-claim-based-role-sync.md) - Role sync
 
 **Compliance**:
 - [data-privacy-compliance-runbook.md](../archive/superseded/runbooks/data-privacy-compliance-runbook.md) - GDPR/PDPA
@@ -377,7 +377,7 @@ _Security configs, compliance, audit logs, secrets management_
 **Security Architecture**:
 - [ADR 004: Secrets Management](../adr/historical/004-secrets-management.md) - Secrets design
 - [multi-tenancy-overview.md](../concepts/architecture/multi-tenancy-overview.md) - Tenant isolation
-- [DATABASE_ARCHITECTURE.md](../concepts/architecture/DATABASE_ARCHITECTURE.md) - Data layer security
+- [PRODUCTION_INFRASTRUCTURE_PLAN.md](../reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md) - Data layer security
 
 **Authentication Flow**:
 - [AUTH_AND_PERMISSIONS.md](../reference/operations/AUTH_AND_PERMISSIONS.md) - Auth integration
@@ -407,15 +407,16 @@ _Security configs, compliance, audit logs, secrets management_
 ## 📊 Additional Resources
 
 ### Migrations & Data
-- **[Kajabi Migration**: migrations/kajabi/](../migrations/kajabi/) - Kajabi → Open edX migration
-- **[MCT Migration**: migrations/mct/](../migrations/mct/) - MCT → Open edX migration
+- **[Kajabi Migration Runbooks](../ops/runbooks/migrations/kajabi/README.md)** - Kajabi → Open edX migration
+- **[MCT Migration Runbooks](../ops/runbooks/migrations/mct/README.md)** - MCT → Open edX migration
 - **[Drive + Airtable Video Inventory**: migrations/drive-airtable/README.md](../reference/migrations/drive-airtable/README.md), [migrations/drive-airtable/STATUS.md](../status/migrations/drive-airtable-STATUS.md) - Course-first pipeline for nested Drive video mapping with migration-readiness gates, blocker queues, subtitle review, and Open edX contract tracking.
 - **[BBI K8s Migration**: BBI-K8-MIGRATION.md](../archive/reports/migrations/BBI-K8-MIGRATION.md) - Historical infrastructure migration
 
 ### Analytics & Reporting
 - **[Analytics Overview**: analytics/README.md](../concepts/analytics/README.md)
-- **[Aspects Installation**: analytics/ASPECTS_INSTALLATION.md](../concepts/analytics/ASPECTS_INSTALLATION.md)
-- **[Enrollment Comparison**: analytics/ENROLLMENT_COMPARISON_QUICKSTART.md](../concepts/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md)
+- **[Current Analytics State**: analytics/CURRENT_ANALYTICS_STATE.md](../concepts/analytics/CURRENT_ANALYTICS_STATE.md)
+- **[Aspects Target State**: analytics/ASPECTS_TARGET_STATE.md](../concepts/analytics/ASPECTS_TARGET_STATE.md)
+- **[Enrollment Comparison**: reference/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md](../reference/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md)
 
 ### Branding & Design
 - **Branding Guide**: [BRANDING.md](./branding/BRANDING.md)

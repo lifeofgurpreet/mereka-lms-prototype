@@ -17,7 +17,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
-INVENTORY="$REPO_ROOT/docs/concepts/architecture/TUTOR_PATCHES_INVENTORY.md"
+INVENTORY="$REPO_ROOT/docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md"
 PATCHES_DIR="$REPO_ROOT/infrastructure/tutor/patches"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 

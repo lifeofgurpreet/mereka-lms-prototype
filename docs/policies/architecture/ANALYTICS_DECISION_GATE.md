@@ -344,9 +344,9 @@ This document satisfies the following acceptance criteria:
 
 - **ADR**: [ADR-017: Analytics Target Decision](../../programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md)
 - **Spec**: [specs/analytics-pipeline_spec.md](../../../specs/analytics-pipeline_spec.md)
-- **Installation Guide**: [docs/concepts/analytics/ASPECTS_INSTALLATION.md](../analytics/ASPECTS_INSTALLATION.md)
-- **Comparison**: [docs/concepts/analytics/ASPECTS_VS_PANORAMA.md](../analytics/ASPECTS_VS_PANORAMA.md)
-- **Current Capabilities**: [docs/concepts/analytics/README.md](../analytics/README.md)
+- **Target-state deployment**: [docs/concepts/analytics/ASPECTS_TARGET_STATE.md](../../concepts/analytics/ASPECTS_TARGET_STATE.md)
+- **Comparison**: [docs/concepts/analytics/ANALYTICS_TOOL_COMPARISON.md](../../concepts/analytics/ANALYTICS_TOOL_COMPARISON.md)
+- **Current Capabilities**: [docs/concepts/analytics/README.md](../../concepts/analytics/README.md)
 
 ---
 

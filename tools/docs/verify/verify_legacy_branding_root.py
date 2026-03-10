@@ -84,7 +84,7 @@ def main() -> int:
             continue
         if rel in EXEMPT_REFERENCERS:
             continue
-        stripped = text.replace("docs/branding/README.md", "")
+        stripped = text.replace("docs/guides/branding/README.md", "")
         if "docs/branding/" not in stripped:
             continue
         errors.append(f"active file still references retired branding root: {rel}")

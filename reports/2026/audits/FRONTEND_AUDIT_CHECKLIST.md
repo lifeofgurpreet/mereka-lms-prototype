@@ -628,7 +628,7 @@ SSO_USERNAME=test@example.com SSO_PASSWORD=secret ./scripts/qa/smoke-authenticat
 | Aspects NOT deployed to production | PASS | 0 pods in mereka-lms namespace |
 | K8s manifests exist but inactive | PASS | `deploy/k8s/base/plugins/aspects/` exists, NOT in kustomization |
 | Analytics spec exists | PASS | `specs/analytics-pipeline_spec.md` (status: in_progress) |
-| Installation guide documented | PASS | `docs/concepts/analytics/ASPECTS_INSTALLATION.md` |
+| Installation guide documented | PASS | `docs/concepts/analytics/ASPECTS_TARGET_STATE.md` |
 | CI gate prevents stale decision | PASS | `monitoring-guardrails` CI job (syntax check) |
 
 **Script**: `scripts/qa/verify-analytics-decision-gate.sh` (expected: 10+ PASS / 0 FAIL / 2 WARN)

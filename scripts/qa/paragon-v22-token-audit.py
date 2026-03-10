@@ -13,7 +13,7 @@ DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 CORE_THEME_REL = Path("infrastructure/tutor/themes/mereka/mfe/theme/core.min.css")
 TOKENS_SCSS_REL = Path("infrastructure/tutor/themes/mereka/scss/_tokens.scss")
-DOC_REL = Path("docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT.md")
+DOC_REL = Path("docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT.md")
 FULL_MISSING_REL = Path("docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv")
 DEFINED_ONLY_REL = Path("docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv")
 CONSUMED_DEFINED_REL = Path("docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv")

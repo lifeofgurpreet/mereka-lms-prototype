@@ -1,9 +1,9 @@
 {
   "classifications": {
-    "archival": 291,
+    "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 950
+    "supporting": 864
   },
   "entries": [
     {
@@ -2008,10 +2008,73 @@
       "classification": "archival",
       "lane": "archive",
       "owner": "",
+      "path": "docs/archive/reports/mct/DOCUMENTATION_COMPLETE.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Export Documentation - Complete \u2705"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/reports/mct/EXPORT_COMPLETE.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Export - Complete Data Export \u2705"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/reports/mct/EXPORT_SUCCESS.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Export - End-to-End Test Results"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/reports/mct/EXPORT_SUMMARY.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Export Summary"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/reports/mct/EXPORT_TEST_RESULTS.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Export Testing Results"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
       "path": "docs/archive/reports/mct/MCT_MIGRATION_STATUS.md",
       "root": "docs",
       "status": "",
       "title": "MCT Migration Status - End-to-End Progress"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT User Import - Completion Report"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/reports/migrations/BBI-K8-MIGRATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Mereka-LMS Migration to BBI-K8"
     },
     {
       "classification": "archival",
@@ -3124,172 +3187,10 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/branding/BRANDING.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRANDING (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/BRANDING_GUARDRAILS.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRANDING GUARDRAILS (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/BRANDING_INCIDENT_TEMPLATE.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRANDING INCIDENT TEMPLATE (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/BRANDING_OPERATING_MODEL.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRANDING OPERATING MODEL (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/BRANDING_OPERATOR_GUIDE.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRANDING OPERATOR GUIDE (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/BRANDING_PLAN.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRANDING PLAN (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/BRANDING_ROADMAP.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRANDING ROADMAP (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/BRANDING_VERIFICATION_CHECKLIST.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRANDING VERIFICATION CHECKLIST (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/FOOTER_V2_TO_LMS_MAPPING.md",
-      "root": "docs",
-      "status": "",
-      "title": "FOOTER V2 TO LMS MAPPING (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/MULTI_TENANT_BRANDING_OPS.md",
-      "root": "docs",
-      "status": "",
-      "title": "MULTI TENANT BRANDING OPS (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/PARAGON_TOKEN_ALIGNMENT.md",
-      "root": "docs",
-      "status": "",
-      "title": "PARAGON TOKEN ALIGNMENT (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/PLUGIN_MIGRATION_SURVEY.md",
-      "root": "docs",
-      "status": "",
-      "title": "PLUGIN MIGRATION SURVEY (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
       "path": "docs/branding/README.md",
       "root": "docs",
       "status": "",
-      "title": "Branding Docs (Transitional, Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/TENANT_BRANDING_CONTRACT.md",
-      "root": "docs",
-      "status": "",
-      "title": "TENANT BRANDING CONTRACT (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/TENANT_BRAND_PACK_SCHEMA.md",
-      "root": "docs",
-      "status": "",
-      "title": "TENANT BRAND PACK SCHEMA (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/TENANT_CONFIG_HANDOFF.md",
-      "root": "docs",
-      "status": "",
-      "title": "TENANT CONFIG HANDOFF (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/TENANT_ONBOARDING_PLAYBOOK.md",
-      "root": "docs",
-      "status": "",
-      "title": "TENANT ONBOARDING PLAYBOOK (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/VISUAL_PARITY_CHECKPOINTS.md",
-      "root": "docs",
-      "status": "",
-      "title": "VISUAL PARITY CHECKPOINTS (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/branding/audit-2026-02-05/README.md",
-      "root": "docs",
-      "status": "",
-      "title": "README (Archive Candidate)"
+      "title": "Branding Root (Retired)"
     },
     {
       "classification": "canonical",
@@ -3304,127 +3205,37 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
-      "path": "docs/ci-cd/FASTLANE_AUTOMATION.md",
+      "path": "docs/ci-cd/README.md",
       "root": "docs",
       "status": "",
-      "title": "FASTLANE AUTOMATION (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/ci-cd/TUTOR_CONFIG_CI.md",
-      "root": "docs",
-      "status": "",
-      "title": "TUTOR CONFIG CI (Archive Candidate)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/ci-cd/ios-cicd-spec.md",
-      "root": "docs",
-      "status": "",
-      "title": "Ios cicd spec (Archive Candidate)"
+      "title": "CI/CD Root (Retired)"
     },
     {
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/concepts/analytics/ANALYTICS_CONSOLE_ACCESS.md",
+      "path": "docs/concepts/analytics/ANALYTICS_TOOL_COMPARISON.md",
       "root": "docs",
       "status": "",
-      "title": "Analytics Console Access Guide"
+      "title": "Analytics Tool Comparison"
     },
     {
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/concepts/analytics/ASPECTS_ACCESS.md",
+      "path": "docs/concepts/analytics/ASPECTS_TARGET_STATE.md",
       "root": "docs",
       "status": "",
-      "title": "Aspects Analytics - Access Guide"
+      "title": "Aspects Target State"
     },
     {
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/concepts/analytics/ASPECTS_ANALYTICS.md",
+      "path": "docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md",
       "root": "docs",
       "status": "",
-      "title": "Aspects Analytics - Platform-Wide Analytics for OpenEdX"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/analytics/ASPECTS_INSTALLATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Aspects Analytics Installation - Step by Step"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/analytics/ASPECTS_K8S_DEPLOYMENT.md",
-      "root": "docs",
-      "status": "",
-      "title": "Aspects Analytics - Kubernetes Deployment Guide"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/analytics/ASPECTS_QUICKSTART.md",
-      "root": "docs",
-      "status": "",
-      "title": "Aspects Analytics - Quick Start Guide"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/analytics/ASPECTS_VS_PANORAMA.md",
-      "root": "docs",
-      "status": "",
-      "title": "Aspects vs Panorama: Feature Comparison"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/analytics/DATA_SOURCES_EXPLAINED.md",
-      "root": "docs",
-      "status": "",
-      "title": "Data Sources Explained"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md",
-      "root": "docs",
-      "status": "",
-      "title": "Enrollment Comparison Quick Start"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/analytics/OPENEDX_ANALYTICS.md",
-      "root": "docs",
-      "status": "",
-      "title": "OpenEdX Analytics Guide"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/analytics/PANORAMA_ANALYTICS.md",
-      "root": "docs",
-      "status": "",
-      "title": "Panorama Analytics - Third-Party Analytics Platform"
+      "title": "Current Analytics State"
     },
     {
       "classification": "supporting",
@@ -3433,25 +3244,7 @@
       "path": "docs/concepts/analytics/README.md",
       "root": "docs",
       "status": "",
-      "title": "Analytics & Reporting"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/ANALYTICS_DECISION_GATE.md",
-      "root": "docs",
-      "status": "",
-      "title": "ANALYTICS_DECISION_GATE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/ANALYTICS_DRIFT_GUARDRAILS.md",
-      "root": "docs",
-      "status": "",
-      "title": "ANALYTICS_DRIFT_GUARDRAILS.md (Superseded)"
+      "title": "Analytics Concepts"
     },
     {
       "classification": "supporting",
@@ -3465,60 +3258,6 @@
     {
       "classification": "supporting",
       "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/ARCHITECTURE_MONGODB.md",
-      "root": "docs",
-      "status": "",
-      "title": "ARCHITECTURE_MONGODB.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/ASPECTS_DEPLOYMENT_READINESS.md",
-      "root": "docs",
-      "status": "",
-      "title": "ASPECTS_DEPLOYMENT_READINESS.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/ASSESSMENT_AUDIT.md",
-      "root": "docs",
-      "status": "",
-      "title": "ASSESSMENT_AUDIT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/ASSESSMENT_EPIC_CLOSURE.md",
-      "root": "docs",
-      "status": "",
-      "title": "ASSESSMENT_EPIC_CLOSURE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/ASSESSMENT_XQUEUE_EVIDENCE.md",
-      "root": "docs",
-      "status": "",
-      "title": "ASSESSMENT_XQUEUE_EVIDENCE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/AUDIT_LOGGING_ASSESSMENT.md",
-      "root": "docs",
-      "status": "",
-      "title": "AUDIT_LOGGING_ASSESSMENT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
       "owner": "Auth Platform",
       "path": "docs/concepts/architecture/AUTHORIZATION_MODEL.md",
       "root": "docs",
@@ -3528,65 +3267,11 @@
     {
       "classification": "supporting",
       "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/BRAND_PARITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "BRAND_PARITY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/BUILD_OPTIMIZATIONS_REFACTOR.md",
-      "root": "docs",
-      "status": "",
-      "title": "BUILD_OPTIMIZATIONS_REFACTOR.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/CATALOG_DISCOVERY_AUDIT.md",
-      "root": "docs",
-      "status": "",
-      "title": "CATALOG_DISCOVERY_AUDIT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
       "owner": "Platform Team",
       "path": "docs/concepts/architecture/CONTROL_PLANES.md",
       "root": "docs",
       "status": "canonical",
       "title": "Control Planes"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/COPY_TERMINOLOGY_CONTRACT.md",
-      "root": "docs",
-      "status": "",
-      "title": "COPY_TERMINOLOGY_CONTRACT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/CSS_SCOPING_AUDIT.md",
-      "root": "docs",
-      "status": "",
-      "title": "CSS_SCOPING_AUDIT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/DATABASE_ARCHITECTURE.md",
-      "root": "docs",
-      "status": "",
-      "title": "DATABASE_ARCHITECTURE.md (Superseded)"
     },
     {
       "classification": "supporting",
@@ -3601,24 +3286,6 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Superseded Path Notice"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/DESIGN_TOKENS_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "DESIGN_TOKENS_MIGRATION.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
       "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
       "root": "docs",
       "status": "",
@@ -3628,397 +3295,10 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/concepts/architecture/FOOTER_PARITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "FOOTER_PARITY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/FOOTER_SLOT_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "FOOTER_SLOT_MIGRATION.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/FPF_PLUGIN_SLOT_REGISTRY.md",
-      "root": "docs",
-      "status": "",
-      "title": "FPF_PLUGIN_SLOT_REGISTRY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/GDPR_COMPLIANCE.md",
-      "root": "docs",
-      "status": "",
-      "title": "GDPR_COMPLIANCE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
       "path": "docs/concepts/architecture/IDENTITY_DOMAIN_BOUNDARIES.md",
       "root": "docs",
       "status": "",
       "title": "Identity And Domain Boundaries"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/INTERACTION_STATE_CONTRACT.md",
-      "root": "docs",
-      "status": "",
-      "title": "INTERACTION_STATE_CONTRACT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md",
-      "root": "docs",
-      "status": "",
-      "title": "LEARNING_SLOT_EXPANSION_PROPOSAL.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/LEGACY_COURSEWARE_AUDIT.md",
-      "root": "docs",
-      "status": "",
-      "title": "LEGACY_COURSEWARE_AUDIT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MFE_COMPLETE_LIST.md",
-      "root": "docs",
-      "status": "",
-      "title": "MFE_COMPLETE_LIST.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MFE_PLUGIN_SLOT_INVENTORY.md",
-      "root": "docs",
-      "status": "",
-      "title": "MFE_PLUGIN_SLOT_INVENTORY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md",
-      "root": "docs",
-      "status": "",
-      "title": "MFE_ROUTE_TO_DIST_CONTRACT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MFE_RUNTIME_CONFIG.md",
-      "root": "docs",
-      "status": "",
-      "title": "MFE_RUNTIME_CONFIG.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MFE_SELECTOR_AUDIT.md",
-      "root": "docs",
-      "status": "",
-      "title": "MFE_SELECTOR_AUDIT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MFE_SELECTOR_DECISION_LOG.md",
-      "root": "docs",
-      "status": "",
-      "title": "MFE_SELECTOR_DECISION_LOG.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md",
-      "root": "docs",
-      "status": "",
-      "title": "MFE_SELECTOR_OVERRIDE_INVENTORY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MFE_VERSIONS.md",
-      "root": "docs",
-      "status": "",
-      "title": "MFE_VERSIONS.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MOBILE_TOKEN_PARITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "MOBILE_TOKEN_PARITY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MONGODB_ATLAS_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "MONGODB_ATLAS_MIGRATION.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MULTISITE.md",
-      "root": "docs",
-      "status": "",
-      "title": "MULTISITE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MULTISITE_ANALYSIS.md",
-      "root": "docs",
-      "status": "",
-      "title": "MULTISITE_ANALYSIS.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MULTISITE_UX_CONSISTENCY.md",
-      "root": "docs",
-      "status": "",
-      "title": "MULTISITE_UX_CONSISTENCY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/MULTI_BRAND_MULTI_SITE.md",
-      "root": "docs",
-      "status": "",
-      "title": "MULTI_BRAND_MULTI_SITE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OEP48_BRAND_PACKAGE.md",
-      "root": "docs",
-      "status": "",
-      "title": "OEP48_BRAND_PACKAGE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OEP65_MODULE_READINESS.md",
-      "root": "docs",
-      "status": "",
-      "title": "OEP65_MODULE_READINESS.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_IMPLEMENTOR_KICKOFF.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_IMPLEMENTOR_KICKOFF.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_IMPLEMENTOR_PR_TEMPLATE.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_IMPLEMENTOR_PR_TEMPLATE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_216_PACKET.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_ISSUE_216_PACKET.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_217_PACKET.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_ISSUE_217_PACKET.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_218_PACKET.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_ISSUE_218_PACKET.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_221_PACKET.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_ISSUE_221_PACKET.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md",
-      "root": "docs",
-      "status": "",
-      "title": "OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/OSCAR_DEPRECATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "OSCAR_DEPRECATION.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT.md",
-      "root": "docs",
-      "status": "",
-      "title": "PARAGON_V22_TOKEN_AUDIT.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/PERFORMANCE_BUDGETS.md",
-      "root": "docs",
-      "status": "",
-      "title": "PERFORMANCE_BUDGETS.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/PROCTORING_INTEGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "PROCTORING_INTEGRATION.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/PRODUCTION_ARCHITECTURE_REALITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "PRODUCTION_ARCHITECTURE_REALITY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/PRODUCT_KPI_FRAMEWORK.md",
-      "root": "docs",
-      "status": "",
-      "title": "PRODUCT_KPI_FRAMEWORK.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/PURCHASE_GATEWAY.md",
-      "root": "docs",
-      "status": "",
-      "title": "PURCHASE_GATEWAY.md (Superseded)"
     },
     {
       "classification": "supporting",
@@ -4041,15 +3321,6 @@
     {
       "classification": "supporting",
       "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/RFC_CLAIM_BASED_ROLE_SYNC.md",
-      "root": "docs",
-      "status": "",
-      "title": "RFC_CLAIM_BASED_ROLE_SYNC.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
       "owner": "Multisite Platform",
       "path": "docs/concepts/architecture/TENANT_LIFECYCLE.md",
       "root": "docs",
@@ -4059,56 +3330,11 @@
     {
       "classification": "supporting",
       "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/TOKEN_GENERATION_PIPELINE.md",
-      "root": "docs",
-      "status": "",
-      "title": "TOKEN_GENERATION_PIPELINE.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/TOKEN_REFERENCE_INTEGRITY.md",
-      "root": "docs",
-      "status": "",
-      "title": "TOKEN_REFERENCE_INTEGRITY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
       "owner": "Platform Team",
       "path": "docs/concepts/architecture/TUTOR_AND_EXTENSION_MODEL.md",
       "root": "docs",
       "status": "canonical",
       "title": "Tutor And Extension Model"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/TUTOR_PATCHES_INVENTORY.md",
-      "root": "docs",
-      "status": "",
-      "title": "TUTOR_PATCHES_INVENTORY.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/VIDEO_HOSTING_COST_COMPARISON.md",
-      "root": "docs",
-      "status": "",
-      "title": "VIDEO_HOSTING_COST_COMPARISON.md (Superseded)"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
-      "path": "docs/concepts/architecture/VIDEO_PIPELINE.md",
-      "root": "docs",
-      "status": "",
-      "title": "VIDEO_PIPELINE.md (Superseded)"
     },
     {
       "classification": "supporting",
@@ -5401,6 +4627,87 @@
       "classification": "supporting",
       "lane": "review",
       "owner": "",
+      "path": "docs/meta/docs-program/WAVE_BRANDING_ROOT_RESET_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave Branding Root Reset Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_BRANDING_ROOT_RESET_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave Branding Root Reset Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "Platform Team",
+      "path": "docs/meta/docs-program/WAVE_BRANDING_ROOT_RESET_TRACKER.md",
+      "root": "docs",
+      "status": "canonical",
+      "title": "Wave Branding Root Reset Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_CI_CD_ROOT_RESET_CLOSEOUT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave CI/CD Root Reset Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/WAVE_CI_CD_ROOT_RESET_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave CI/CD Root Reset Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "Platform Team",
+      "path": "docs/meta/docs-program/WAVE_CI_CD_ROOT_RESET_TRACKER.md",
+      "root": "docs",
+      "status": "canonical",
+      "title": "Wave CI/CD Root Reset Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "Platform Team",
+      "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_CLOSEOUT.md",
+      "root": "docs",
+      "status": "canonical",
+      "title": "Wave Migrations Root Reset Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "Platform Team",
+      "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_REVIEW_HANDOFF.md",
+      "root": "docs",
+      "status": "canonical",
+      "title": "Wave Migrations Root Reset Review Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "Platform Team",
+      "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_TRACKER.md",
+      "root": "docs",
+      "status": "canonical",
+      "title": "Wave Migrations Root Reset Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
       "path": "docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_CLOSEOUT.md",
       "root": "docs",
       "status": "",
@@ -5657,6 +4964,15 @@
       "root": "docs",
       "status": "",
       "title": "docs-legacy-testmaps-collapse-map"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/root-collapse/docs-migrations-collapse-map.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "docs-migrations-collapse-map"
     },
     {
       "classification": "supporting",
@@ -6337,271 +5653,10 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
-      "path": "docs/migrations/BBI-K8-MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Mereka-LMS Migration to BBI-K8"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Courses Without Completion Data"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
       "path": "docs/migrations/README.md",
       "root": "docs",
       "status": "",
-      "title": "Migration Runbooks"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "SkillOurFuture Brand Migration Guide"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Certificate Migration & Enrollment Comparison"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Lesson Content Migration Fix"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Lesson Content Issue"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/kajabi/KAJABI_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi \u2192 Open\u202fedX Migration Guide"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi \u2192 Open edX Data Migration Notes"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Kajabi Migration Verification Report"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md",
-      "root": "docs",
-      "status": "",
-      "title": "Rollback & Safety Guide for Kajabi \u2192 Open edX Migration"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/API_EXPLORATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT API Exploration Results"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/DATA_MODEL_COMPLETE.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Data Model & Terminology - Complete Understanding"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/DOCUMENTATION_COMPLETE.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Documentation - Complete \u2705"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/EXPORT_COMPLETE.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export - Complete Data Export \u2705"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/EXPORT_GUIDE.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Documentation"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/EXPORT_SUCCESS.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export - End-to-End Test Results"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/EXPORT_SUMMARY.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Summary"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/EXPORT_TESTING.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Script Testing Guide"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/EXPORT_TEST_RESULTS.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Testing Results"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/MCT_PLATFORM_RESEARCH.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Platform Integration Spec"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Pre-Migration Inventory"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/MCT_TO_OPENEDX_MAPPING.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT \u2192 Open edX Data Mapping"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT User Import - Completion Report"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/MIGRATION_PLAN.md",
-      "root": "docs",
-      "status": "",
-      "title": "Microsoft Community Training \u2192 Open edX Migration Plan"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/OPENEDX_PROGRAMS_SETUP.md",
-      "root": "docs",
-      "status": "",
-      "title": "Open edX Programs Setup for Learning Paths"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/OPS_MCT_README.md",
-      "root": "docs",
-      "status": "",
-      "title": "Microsoft Community Training \u2192 Open edX Migration"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/PROGRAMS_SETUP_PLAN.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Learning Pathways to Open edX Programs - Setup Plan"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/SMOKE_TEST.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Export Script - Smoke Test Results"
-    },
-    {
-      "classification": "supporting",
-      "lane": "other",
-      "owner": "",
-      "path": "docs/migrations/mct/VIDEO_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Video Migration to Mux"
+      "title": "Migrations Root Retired"
     },
     {
       "classification": "supporting",
@@ -8074,6 +7129,15 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
+      "path": "docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "SkillOurFuture Brand Migration Guide"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
       "path": "docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md",
       "root": "docs",
       "status": "",
@@ -8087,6 +7151,33 @@
       "root": "docs",
       "status": "",
       "title": "Execution Plan: Verify & Sync Kajabi \u2192 Open edX"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi Lesson Content Migration Fix"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi \u2192 Open\u202fedX Migration Guide"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi Migration Verification Report"
     },
     {
       "classification": "supporting",
@@ -8110,6 +7201,15 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
+      "path": "docs/ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Rollback & Safety Guide for Kajabi \u2192 Open edX Migration"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
       "path": "docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md",
       "root": "docs",
       "status": "",
@@ -8123,6 +7223,78 @@
       "root": "docs",
       "status": "",
       "title": "How to Verify When Open edX Site is Back Up"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Export Documentation"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/mct/EXPORT_TESTING.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Export Script Testing Guide"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md",
+      "root": "docs",
+      "status": "",
+      "title": "Microsoft Community Training \u2192 Open edX Migration Plan"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/mct/OPS_MCT_README.md",
+      "root": "docs",
+      "status": "",
+      "title": "Microsoft Community Training \u2192 Open edX Migration"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/mct/PROGRAMS_SETUP_PLAN.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Learning Pathways to Open edX Programs - Setup Plan"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/mct/README.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Migration Runbooks"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/mct/SMOKE_TEST.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Export Script - Smoke Test Results"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/migrations/mct/VIDEO_MIGRATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Video Migration to Mux"
     },
     {
       "classification": "supporting",
@@ -8785,6 +7957,33 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/analytics/DATA_SOURCES_EXPLAINED.md",
+      "root": "docs",
+      "status": "",
+      "title": "Data Sources Explained"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/analytics/ENROLLMENT_COMPARISON_QUICKSTART.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enrollment Comparison Quickstart"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/analytics/README.md",
+      "root": "docs",
+      "status": "",
+      "title": "Analytics Reference"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/architecture/API_CONTRACTS.md",
       "root": "docs",
       "status": "",
@@ -9046,6 +8245,33 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi Certificate Migration & Enrollment Comparison"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi Lesson Content Issue"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi \u2192 Open edX Data Migration Notes"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/migrations/kajabi/OPS_KAJABI_README.md",
       "root": "docs",
       "status": "",
@@ -9082,10 +8308,64 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/migrations/mct/API_EXPLORATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT API Exploration Results"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/DATA_MODEL_COMPLETE.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Data Model & Terminology - Complete Understanding"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/migrations/mct/DOCUMENTATION_INDEX.md",
       "root": "docs",
       "status": "",
       "title": "MCT Export Documentation Index"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/MCT_PLATFORM_RESEARCH.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Platform Integration Spec"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Pre-Migration Inventory"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT \u2192 Open edX Data Mapping"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/OPENEDX_PROGRAMS_SETUP.md",
+      "root": "docs",
+      "status": "",
+      "title": "Open edX Programs Setup for Learning Paths"
     },
     {
       "classification": "supporting",
@@ -9860,6 +9140,15 @@
       "root": "docs",
       "status": "",
       "title": "Wave 2B-Final Closeout"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/migrations/KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md",
+      "root": "docs",
+      "status": "",
+      "title": "Kajabi Courses Without Completion Data"
     },
     {
       "classification": "supporting",
@@ -12013,18 +11302,18 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1334,
+  "entry_count": 1255,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
-    "docs:archive": 291,
-    "docs:concept": 294,
+    "docs:archive": 298,
+    "docs:concept": 215,
     "docs:evidence": 8,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 216,
-    "docs:review": 65,
-    "docs:runbook": 186,
+    "docs:other": 186,
+    "docs:review": 75,
+    "docs:runbook": 199,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,
@@ -12035,7 +11324,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1116,
+    "docs": 1037,
     "specs": 218
   }
 }

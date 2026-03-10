@@ -18,7 +18,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 # --- Paths ---
-CONTRACT="docs/concepts/architecture/ASPECTS_DEPLOYMENT_READINESS.md"
+CONTRACT="docs/reference/architecture/ASPECTS_DEPLOYMENT_READINESS.md"
 ADR="docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md"
 ASPECTS_K8S_DIR="deploy/k8s/base/plugins/aspects"
 PROD_KUSTOMIZATION="deploy/k8s/overlays/production/kustomization.yaml"

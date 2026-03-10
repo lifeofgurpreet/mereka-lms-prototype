@@ -68,10 +68,10 @@ resolve_doc_path() {
 
 TRACKER="$(resolve_doc_path \
   "$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md" \
-  "$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md")"
+  "$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md")"
 BOARD="$(resolve_doc_path \
   "$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md" \
-  "$REPO_ROOT/docs/concepts/architecture/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md")"
+  "$REPO_ROOT/docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_EXECUTION_BOARD.md")"
 
 origin_url="$(git config --get remote.origin.url || true)"
 repo_slug=""

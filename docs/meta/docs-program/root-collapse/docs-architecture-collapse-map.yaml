@@ -2,77 +2,77 @@ version: 1
 root: docs/architecture
 entries:
   - old_path: docs/architecture/overviews/ARCHITECTURE_MONGODB.md
-    destination_path: docs/concepts/architecture/ARCHITECTURE_MONGODB.md
+    destination_path: docs/guides/admin/MONGODB_ATLAS_GUIDE.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/BRAND_PARITY.md
-    destination_path: docs/concepts/architecture/BRAND_PARITY.md
+    destination_path: docs/guides/branding/BRANDING_GUARDRAILS.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/DATABASE_ARCHITECTURE.md
-    destination_path: docs/concepts/architecture/DATABASE_ARCHITECTURE.md
+    destination_path: docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/DESIGN_TOKENS_MIGRATION.md
-    destination_path: docs/concepts/architecture/DESIGN_TOKENS_MIGRATION.md
+    destination_path: docs/reference/architecture/OEP48_BRAND_PACKAGE.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/FOOTER_PARITY.md
-    destination_path: docs/concepts/architecture/FOOTER_PARITY.md
+    destination_path: reports/2026/audits/FOOTER_PARITY_AUDIT.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/MULTISITE.md
-    destination_path: docs/concepts/architecture/MULTISITE.md
+    destination_path: docs/concepts/architecture/multi-tenancy-overview.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/MULTI_BRAND_MULTI_SITE.md
-    destination_path: docs/concepts/architecture/MULTI_BRAND_MULTI_SITE.md
+    destination_path: docs/concepts/architecture/multi-tenancy-overview.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/PROCTORING_INTEGRATION.md
-    destination_path: docs/concepts/architecture/PROCTORING_INTEGRATION.md
+    destination_path: docs/concepts/architecture/proctoring-architecture-overview.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/PRODUCTION_ARCHITECTURE_REALITY.md
-    destination_path: docs/concepts/architecture/PRODUCTION_ARCHITECTURE_REALITY.md
+    destination_path: docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/PURCHASE_GATEWAY.md
-    destination_path: docs/concepts/architecture/PURCHASE_GATEWAY.md
+    destination_path: docs/concepts/architecture/purchase-gateway-overview.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub
     owner: agent-architecture-collapse
     notes: manual or basename-based architecture mapping
   - old_path: docs/architecture/overviews/VIDEO_PIPELINE.md
-    destination_path: docs/concepts/architecture/VIDEO_PIPELINE.md
+    destination_path: docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md
     destination_root: docs/concepts
     classification: architecture.standard
     action: move_and_stub

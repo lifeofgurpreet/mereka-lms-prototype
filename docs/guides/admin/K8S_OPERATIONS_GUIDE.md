@@ -292,7 +292,7 @@ kubectl get events -n mereka-lms --watch
 
 ### Quick Reference
 
-For detailed troubleshooting procedures, see [TROUBLESHOOTING.md](../../operations/TROUBLESHOOTING.md).
+For detailed troubleshooting procedures, see [site-down.md](../../ops/runbooks/site-down.md).
 
 ### Most Common Issues
 
@@ -584,7 +584,7 @@ velero restore describe <restore-name>
 
 Use Atlas Console for point-in-time recovery or restore from snapshot.
 
-Note: production modulestore/forum traffic is Atlas-backed. Legacy in-cluster MongoDB deployment has been retired; keep the production overlay patch that deletes `Service/mongodb` so this path cannot reappear silently (see `docs/concepts/architecture/ARCHITECTURE_MONGODB.md`).
+Note: production modulestore/forum traffic is Atlas-backed. Legacy in-cluster MongoDB deployment has been retired; keep the production overlay patch that deletes `Service/mongodb` so this path cannot reappear silently (see `docs/guides/admin/MONGODB_ATLAS_GUIDE.md`).
 
 ### Velero Commands Reference
 
@@ -1116,7 +1116,7 @@ kubectl exec -it -n mereka-lms deployment/lms -- curl -I http://localhost:8000/h
 
 - **Specs**: `specs/k8s-deployment_spec.md` - Complete K8s deployment specification (32 ACs)
 - **Operations**:
-  - [TROUBLESHOOTING.md](../../operations/TROUBLESHOOTING.md) - Detailed troubleshooting procedures
+  - [site-down.md](../../ops/runbooks/site-down.md) - Detailed troubleshooting procedures
   - [DEPLOYMENT_RUNBOOK.md](../../ops/runbooks/DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
   - [SECRETS_MANAGEMENT_GUIDE.md](./SECRETS_MANAGEMENT_GUIDE.md) - Secrets pipeline and rotation
   - [access-urls.md](../../ops/quickref/access-urls.md) - Service URLs and access info

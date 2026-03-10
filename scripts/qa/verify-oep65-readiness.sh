@@ -73,9 +73,9 @@ DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
 ENV_CONFIG_JSX="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
 PLUGIN_PY="${PLUGIN_BUNDLE:-$PLUGIN_MAIN}"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-READINESS_DOC="$REPO_ROOT/docs/concepts/architecture/OEP65_MODULE_READINESS.md"
-RUNTIME_CONFIG_DOC="$REPO_ROOT/docs/concepts/architecture/MFE_RUNTIME_CONFIG.md"
-PATCHES_INVENTORY_DOC="$REPO_ROOT/docs/concepts/architecture/TUTOR_PATCHES_INVENTORY.md"
+READINESS_DOC="$REPO_ROOT/docs/reference/architecture/OEP65_MODULE_READINESS.md"
+RUNTIME_CONFIG_DOC="$REPO_ROOT/docs/reference/architecture/MFE_RUNTIME_CONFIG.md"
+PATCHES_INVENTORY_DOC="$REPO_ROOT/docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md"
 
 # ---------------------------------------------------------------------------
 echo "OEP-65 Frontend Composability Readiness Check"
@@ -335,7 +335,7 @@ echo "════════════════════════�
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "FAIL: $FAIL check(s) failed."
-  echo "See docs/concepts/architecture/OEP65_MODULE_READINESS.md for remediation guidance."
+  echo "See docs/reference/architecture/OEP65_MODULE_READINESS.md for remediation guidance."
   exit 1
 fi
 

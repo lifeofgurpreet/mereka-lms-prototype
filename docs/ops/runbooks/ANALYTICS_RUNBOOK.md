@@ -12,7 +12,7 @@ This runbook covers operational procedures for the analytics pipeline.
 >
 > **Infrastructure monitoring** (Prometheus/Grafana): OPERATIONAL - but this is separate from learning analytics
 >
-> **To deploy Aspects**: Follow `docs/concepts/analytics/ASPECTS_INSTALLATION.md`
+> **To deploy Aspects**: Follow `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
 >
 > **Spec**: `specs/analytics-pipeline_spec.md`
 > **Testmap**: `specs/testmaps/analytics-pipeline_spec.testmap.yml`

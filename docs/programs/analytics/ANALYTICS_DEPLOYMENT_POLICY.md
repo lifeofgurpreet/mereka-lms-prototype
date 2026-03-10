@@ -102,7 +102,7 @@ Current policy is no production Aspects deployment until the conditions below ar
    - No cleanup required - just don't deploy
 
 3. **Document interim analytics approach**:
-   - [ ] Create `docs/concepts/analytics/ASPECTS_ANALYTICS.md` documenting built-in LMS analytics usage
+   - [ ] Create `docs/concepts/analytics/ASPECTS_TARGET_STATE.md` documenting built-in LMS analytics usage
 
 ## Alternatives Considered
 
@@ -116,7 +116,7 @@ Current policy is no production Aspects deployment until the conditions below ar
 - **Rejected because**: Commercial solution, significant cost
 - **Rejected because**: Same operational complexity concerns as Aspects
 - **Rejected because**: No demand validation
-- See `docs/concepts/analytics/ASPECTS_VS_PANORAMA.md` for detailed comparison
+- See `docs/concepts/analytics/ANALYTICS_TOOL_COMPARISON.md` for detailed comparison
 
 ### Build custom analytics
 - **Rejected because**: Reinventing wheel - Aspects provides this
@@ -168,8 +168,8 @@ When analytics deployment is approved:
    - Implement via ClickHouse TTL: `ALTER TABLE xapi_events_all MODIFY TTL event_date + INTERVAL 90 DAY`
 
 ### Resources to Review Before Deployment
-- `docs/concepts/analytics/ASPECTS_INSTALLATION.md` (step-by-step deployment)
-- `docs/concepts/analytics/ASPECTS_QUICKSTART.md` (post-install validation)
+- `docs/concepts/analytics/ASPECTS_TARGET_STATE.md` (step-by-step deployment)
+- `docs/concepts/analytics/ASPECTS_TARGET_STATE.md` (post-install validation)
 - `specs/analytics-pipeline_spec.md` (requirements and acceptance criteria)
 - Open edX Aspects documentation: https://docs.openedx.org/projects/openedx-aspects/
 
@@ -183,7 +183,7 @@ If Aspects is deployed in the future, ensure:
 ## Related
 - ADR-016: Android app support decision (similar deferral pattern)
 - `specs/analytics-pipeline_spec.md` (analytics requirements)
-- `docs/concepts/analytics/ASPECTS_INSTALLATION.md` (deployment guide)
-- `docs/concepts/analytics/ASPECTS_VS_PANORAMA.md` (comparison with commercial alternative)
+- `docs/concepts/analytics/ASPECTS_TARGET_STATE.md` (deployment guide)
+- `docs/concepts/analytics/ANALYTICS_TOOL_COMPARISON.md` (comparison with commercial alternative)
 - `docs/reference/operations/CAPABILITY_MATRIX.md` (capability tracking)
 - `docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md` (deployment checklist)

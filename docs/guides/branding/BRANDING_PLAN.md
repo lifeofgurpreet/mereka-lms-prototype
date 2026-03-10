@@ -4,7 +4,7 @@ _Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 20
 Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 > **Related specs**: [branding-system_spec.md](../../../specs/branding-system_spec.md), [oep48-brand-package_spec.md](../../../specs/oep48-brand-package_spec.md), [paragon-design-tokens-migration_spec.md](../../../specs/plans/paragon-design-tokens-migration_spec.md)
-> **Related docs**: [BRANDING.md](BRANDING.md), [MFE_VERSIONS.md](../../concepts/architecture/MFE_VERSIONS.md), [FRONTEND_TRACKER.md](../../archive/superseded/FRONTEND_TRACKER.md)
+> **Related docs**: [BRANDING.md](BRANDING.md), [MFE Complete List](../../reference/architecture/MFE_COMPLETE_LIST.md), [FRONTEND_TRACKER.md](../../archive/superseded/FRONTEND_TRACKER.md)
 
 ## Progress Summary
 
@@ -148,7 +148,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] **OEP-48 asset-only contract enforced** — `package.json` has explicit exports map, no scripts/peerDependencies/dependencies, verified by `verify-mfe-css-architecture.sh` Check 5.
 
 ### Phase C — Token Grounding + BEM Hardening (COMPLETE)
-- [x] **Paragon v22 token audit** — 1,318 consumed tokens mapped; 30 consumed+defined, 1,288 consumed+missing, 50 defined+ignored. See [PARAGON_V22_TOKEN_AUDIT.md](../../concepts/architecture/PARAGON_V22_TOKEN_AUDIT.md).
+- [x] **Paragon v22 token audit** — 1,318 consumed tokens mapped; 30 consumed+defined, 1,288 consumed+missing, 50 defined+ignored. See [PARAGON_V22_TOKEN_AUDIT.md](../../reference/architecture/PARAGON_V22_TOKEN_AUDIT.md).
 - [x] **Canonical token naming enforced** — All 12 short-form→canonical mismatches resolved (`--pgn-color-primary` → `--pgn-color-primary-base`, etc.). Regression blocklist active in `verify-design-tokens-migration.sh` (55/55 PASS).
 - [x] **Legacy alias removal** — Zero `--mereka-teal`, `--mereka-magenta`, `--mereka-color-indigo-rgb` aliases remain.
 - [x] **BEM override hardening** — All 80 color/shadow/radius values in `mereka.scss` now use `var()` references. Zero hardcoded hex values outside comments.
@@ -157,7 +157,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] **Paragon token coverage verification** — `verify-paragon-token-coverage.sh` (49/49 PASS).
 
 ### Phase D — Dead Selector Cleanup + Slot Migration (COMPLETE)
-- [x] **Dead selector audit** — ~60% of `[class*="..."]` selectors confirmed phantom CSS. See [selector inventory](../../concepts/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md#critical-dead-selector-audit-2026-02-28).
+- [x] **Dead selector audit** — ~60% of `[class*="..."]` selectors confirmed phantom CSS. See [selector inventory](../../reference/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md#critical-dead-selector-audit-2026-02-28).
 - [x] **All dead selectors removed** — `[class*="authn"]`, `[class*="learner-dashboard"]`, `[class*="learning"]`, `[class*="discussions"]`, `[class*="account-page"]` all removed with tombstone comments.
 - [x] **Account wildcard replaced** — `[class*="account-settings"]` → explicit `.page__account-settings` class scope.
 - [x] **Header/footer/authn slots implemented** — `MerekaHeaderLogo`, `MerekaFooter`, `MerekaAuthnLoginBranding` components in `mereka_lms.py`.
@@ -172,7 +172,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 ## Phase 6 — Slot Branding Expansion (FROZEN BY DECISION #111)
 
-> **98 FPF slots available, 47 currently wired.** See [FPF_PLUGIN_SLOT_REGISTRY.md](../../concepts/architecture/FPF_PLUGIN_SLOT_REGISTRY.md).
+> **98 FPF slots available, 47 currently wired.** See [FPF_PLUGIN_SLOT_REGISTRY.md](../../reference/architecture/FPF_PLUGIN_SLOT_REGISTRY.md).
 
 ### Currently Wired Slots (47)
 
@@ -228,9 +228,9 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] Capture deterministic screenshot evidence for closure routes. Latest set: `var/screenshots/dev/20260302T061514Z/` (`./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`).
 - [x] Publish implementation notes/screenshots in `./BRANDING.md`.
 - [x] Update README/AGENTS with quick branding maintenance instructions.
-- [x] Dead selector audit documented in [MFE_SELECTOR_OVERRIDE_INVENTORY.md](../../concepts/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md).
-- [x] Token audit documented in [PARAGON_V22_TOKEN_AUDIT.md](../../concepts/architecture/PARAGON_V22_TOKEN_AUDIT.md).
-- [x] FPF slot registry documented in [FPF_PLUGIN_SLOT_REGISTRY.md](../../concepts/architecture/FPF_PLUGIN_SLOT_REGISTRY.md).
+- [x] Dead selector audit documented in [MFE_SELECTOR_OVERRIDE_INVENTORY.md](../../reference/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md).
+- [x] Token audit documented in [PARAGON_V22_TOKEN_AUDIT.md](../../reference/architecture/PARAGON_V22_TOKEN_AUDIT.md).
+- [x] FPF slot registry documented in [FPF_PLUGIN_SLOT_REGISTRY.md](../../reference/architecture/FPF_PLUGIN_SLOT_REGISTRY.md).
 - [x] Certificate branding verified — `verify-certificate-branding.sh` (CSS overrides, slot wiring, email templates, localized wrappers).
 
 ## Deployment Checklist

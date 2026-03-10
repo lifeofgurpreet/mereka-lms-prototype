@@ -13,7 +13,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-CONTRACT="$REPO_ROOT/docs/concepts/architecture/INTERACTION_STATE_CONTRACT.md"
+CONTRACT="$REPO_ROOT/docs/policies/architecture/INTERACTION_STATE_CONTRACT.md"
 TOKENS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 MFE_SCSS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe"
 

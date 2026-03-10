@@ -581,7 +581,7 @@ kubectl describe pod -n mereka-lms -l app.kubernetes.io/name=superset
 - ADR-017: Analytics Target Decision (deployment deferral rationale)
 - `specs/analytics-pipeline_spec.md`: Analytics requirements and acceptance criteria
 - `deploy/k8s/base/plugins/aspects/README.md`: Kubernetes deployment quick start
-- `docs/concepts/analytics/ASPECTS_INSTALLATION.md`: Step-by-step installation guide
+- `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`: Step-by-step installation guide
 - Open edX Aspects docs: https://docs.openedx.org/projects/openedx-aspects/
 
 ---

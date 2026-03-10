@@ -23,7 +23,7 @@
 | 7 | `reports/2026/sprints/SPRINT-03-auth-sso-phase1.md` |
 | 6 | `docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md` |
 | 6 | `docs/operations/MOBILE_DEPLOYMENT.md` |
-| 5 | `docs/concepts/analytics/OPENEDX_ANALYTICS.md` |
+| 5 | `docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md` |
 | 5 | `docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md` |
 | 5 | `reports/2025/closures/MONGODB_ATLAS_MIGRATION.md` |
 | 5 | `docs/guides/onboarding/DEVELOPER_ONBOARDING.md` |
@@ -46,7 +46,7 @@
 - [ ] reports/2026/sprints/SPRINT-03-auth-sso-phase1.md (7)
 - [ ] docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md (6)
 - [ ] docs/operations/MOBILE_DEPLOYMENT.md (6)
-- [ ] docs/concepts/analytics/OPENEDX_ANALYTICS.md (5)
+- [ ] docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md (5)
 - [ ] docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md (5)
 - [ ] reports/2025/closures/MONGODB_ATLAS_MIGRATION.md (5)
 - [ ] docs/guides/onboarding/DEVELOPER_ONBOARDING.md (5)

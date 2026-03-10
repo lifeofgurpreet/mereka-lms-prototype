@@ -65,7 +65,7 @@ Key components:
 
 ## Why
 
-Mereka Academy's target users are in Southeast Asia where network conditions range from fast urban 4G to intermittent rural 3G. Without enforceable budgets, bundle sizes creep (Open edX MFEs already ship large vendor bundles), custom branding adds unchecked CSS/font weight, and cache headers remain misconfigured (the Caddyfile currently sets `Cache-Control: no-store` on all responses, including static assets). The existing `docs/concepts/architecture/PERFORMANCE_BUDGETS.md` document defines aspirational targets but lacks spec-grade acceptance criteria, CI enforcement, and RUM feedback loops. Meanwhile, the Lighthouse CI workflow (`lighthouse-ci.yml`) and budget file (`infrastructure/monitoring/lighthouse-budgets.json`) are already in place but have no formal contract linking them to release gates.
+Mereka Academy's target users are in Southeast Asia where network conditions range from fast urban 4G to intermittent rural 3G. Without enforceable budgets, bundle sizes creep (Open edX MFEs already ship large vendor bundles), custom branding adds unchecked CSS/font weight, and cache headers remain misconfigured (the Caddyfile currently sets `Cache-Control: no-store` on all responses, including static assets). The existing `docs/policies/architecture/PERFORMANCE_BUDGETS.md` document defines aspirational targets but lacks spec-grade acceptance criteria, CI enforcement, and RUM feedback loops. Meanwhile, the Lighthouse CI workflow (`lighthouse-ci.yml`) and budget file (`infrastructure/monitoring/lighthouse-budgets.json`) are already in place but have no formal contract linking them to release gates.
 
 ## Success looks like
 
@@ -110,7 +110,7 @@ Mereka Academy's target users are in Southeast Asia where network conditions ran
 
 - Achieving sub-second LCP on 3G connections (3G targets are graceful degradation, not parity with 4G)
 - Mandating specific bundler configuration (webpack vs esbuild) -- budgets are tool-agnostic
-- Replacing the existing `docs/concepts/architecture/PERFORMANCE_BUDGETS.md` doc (that doc remains as the human-readable guide; this spec adds enforceable contracts)
+- Replacing the existing `docs/policies/architecture/PERFORMANCE_BUDGETS.md` doc (that doc remains as the human-readable guide; this spec adds enforceable contracts)
 - Optimizing third-party scripts (analytics, error tracking) -- only counting them toward budgets
 
 ## Requirements

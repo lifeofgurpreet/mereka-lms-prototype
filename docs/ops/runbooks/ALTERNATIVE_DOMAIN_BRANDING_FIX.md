@@ -239,7 +239,7 @@ print('Database connection successful!')
 
 ## References
 
-- **Multisite Documentation**: `docs/concepts/architecture/MULTISITE.md`
+- **Multisite Documentation**: `docs/concepts/architecture/multi-tenancy-overview.md`
 - **Multisite Bootstrap Script**: `scripts/shared/multisite_bootstrap.py`
 - **Deployment Script**: `scripts/infra/apply-multisite-config.sh`
 - **Configuration File**: `infrastructure/tutor/multisite-sites.yml`

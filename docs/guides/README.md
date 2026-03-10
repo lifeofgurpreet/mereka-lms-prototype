@@ -20,7 +20,7 @@ Use this root when the question is instructional:
 
 Do not use these roots as the winning guidance surface:
 - `docs/onboarding/**`
-- `docs/branding/README.md`
+- `docs/guides/branding/README.md`
 - `docs/operations/README.md` tombstone only
 - `docs/archive/**`
 

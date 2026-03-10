@@ -440,5 +440,5 @@ if [[ "${RENDERED_ONLY}" == false && "${UNRENDERED_ONLY}" == false ]]; then
   printf "\n"
   echo "  For the full classification, see:"
   echo "    docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md"
-  echo "    docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md"
+  echo "    docs/reference/architecture/DEPLOYMENT_CONTRACT.md"
 fi

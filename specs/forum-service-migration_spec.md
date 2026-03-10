@@ -45,7 +45,7 @@ links:
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md"
     - "docs/guides/admin/K8S_OPERATIONS_GUIDE.md"
-    - "docs/concepts/architecture/DATABASE_ARCHITECTURE.md"
+    - "docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md"
     - "docs/adr/historical/001-mongodb-atlas.md"
     - "docs/reference/architecture/MFE_COMPLETE_LIST.md"
   related_specs:

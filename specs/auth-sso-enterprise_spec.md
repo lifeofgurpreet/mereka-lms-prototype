@@ -35,7 +35,7 @@ links:
     - "docs/ops/security/AUTH_HARDENING_SPEC.md"
     - "docs/reference/operations/AUTH_AND_PERMISSIONS.md"
     - "docs/ops/security/in-cluster-auth-verification.md"
-    - "docs/adr/rfc/RFC_CLAIM_BASED_ROLE_SYNC.md"
+    - "docs/adr/rfc/RFC-claim-based-role-sync.md"
     - "docs/guides/integrations/GOOGLE_OAUTH_SETUP.md"
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/ops/security/ENTERPRISE_SSO_GUIDE.md"

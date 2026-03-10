@@ -43,11 +43,11 @@ LMS_PROD="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 LMS_DEV="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/development.py"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/apps/caddy/Caddyfile"
 ASSESSMENT_BULK_MW="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_assessment_bulk/middleware.py"
-AUDIT_DOC="$REPO_ROOT/docs/concepts/architecture/LEGACY_COURSEWARE_AUDIT.md"
+AUDIT_DOC="$REPO_ROOT/reports/2026/audits/LEGACY_COURSEWARE_AUDIT.md"
 
 echo -e "${BLUE}=== Legacy Courseware Migration Audit ===${NC}"
 echo "  Checks Tutor Ulmo (v21) Learning MFE wiring"
-echo "  Reference: docs/concepts/architecture/LEGACY_COURSEWARE_AUDIT.md"
+echo "  Reference: reports/2026/audits/LEGACY_COURSEWARE_AUDIT.md"
 echo ""
 
 # ── Check 1: LEARNING_MICROFRONTEND_URL configured ───────────────────
@@ -122,7 +122,7 @@ fi
 # ── Check 8: Audit document exists ───────────────────────────────────
 echo "-- Check 8: Audit document present"
 if [[ -f "$AUDIT_DOC" ]]; then
-  pass "Legacy courseware audit document present at docs/concepts/architecture/LEGACY_COURSEWARE_AUDIT.md"
+  pass "Legacy courseware audit document present at reports/2026/audits/LEGACY_COURSEWARE_AUDIT.md"
 else
   fail "Audit document missing: $AUDIT_DOC — create it to document migration decisions"
 fi

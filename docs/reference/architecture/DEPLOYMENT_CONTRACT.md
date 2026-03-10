@@ -2,7 +2,7 @@
 
 > Status: DRAFT — establishes the interface between app repo and GitOps repo.
 >
-> **Canonical reference**: This document and [DEPLOYMENT_BOUNDARY.md](DEPLOYMENT_BOUNDARY.md) are the authoritative sources for all questions about what belongs in this repo vs `infrastructure` (`infrastructure` in historical artifacts). When in doubt, consult these two docs first.
+> **Canonical reference**: This document and [RESOURCE_OWNERSHIP_MATRIX.md](RESOURCE_OWNERSHIP_MATRIX.md) are the authoritative sources for all questions about what belongs in this repo vs `infrastructure` (`infrastructure` in historical artifacts). When in doubt, consult these two docs first.
 
 ## Current State (as of 2026-03-06)
 

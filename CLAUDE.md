@@ -51,7 +51,7 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
 > `base/arc/`, `base/logging/`, `base/policies/`, `overlays/production/`, `overlays/rke2-nonprod/`,
 > and `overlays/staging/` are classified for migration to `bbi-infrastructure`. Only `base/` app
 > resources and `overlays/local/` permanently belong in this repo. See
-> `docs/concepts/architecture/DEPLOYMENT_BOUNDARY.md` for the authoritative classification.
+> `docs/reference/architecture/DEPLOYMENT_CONTRACT.md` for the authoritative classification.
 
 ```
 deploy/k8s/               # Kubernetes manifests

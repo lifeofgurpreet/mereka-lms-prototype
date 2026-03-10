@@ -258,7 +258,7 @@ check_contains "$INGRESS_PROD" "discovery.academyv2.mereka.io" "Discovery subdom
 
 section "9. SEO Gap Tracking (Audit Document)"
 
-AUDIT_DOC="$REPO_ROOT/docs/concepts/architecture/CATALOG_DISCOVERY_AUDIT.md"
+AUDIT_DOC="$REPO_ROOT/reports/2026/audits/CATALOG_DISCOVERY_AUDIT.md"
 
 check_file_exists "$AUDIT_DOC" "CATALOG_DISCOVERY_AUDIT.md exists"
 check_contains "$AUDIT_DOC" "JSON-LD" "Audit documents JSON-LD / structured data gap"

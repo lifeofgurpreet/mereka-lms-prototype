@@ -248,49 +248,55 @@ else
   echo "No changed markdown docs in scope."
 fi
 
-echo "Check 5/6: legacy architecture root retired"
+echo "Check 5/11: legacy architecture root retired"
 legacy_arch_status="pass"
 if ! python3 tools/docs/verify/verify_legacy_architecture_root.py --repo-root .; then
   legacy_arch_status="fail"
 fi
 
-echo "Check 6/9: legacy operations root retired"
+echo "Check 6/11: legacy operations root retired"
 legacy_ops_status="pass"
 if ! python3 tools/docs/verify/verify_legacy_operations_root.py --repo-root .; then
   legacy_ops_status="fail"
 fi
 
-echo "Check 7/9: legacy CI/CD root retired"
+echo "Check 7/11: legacy CI/CD root retired"
 legacy_ci_cd_status="pass"
 if ! python3 tools/docs/verify/verify_legacy_ci_cd_root.py --repo-root .; then
   legacy_ci_cd_status="fail"
 fi
 
-echo "Check 8/9: legacy branding root retired"
+echo "Check 8/11: legacy branding root retired"
 legacy_branding_status="pass"
 if ! python3 tools/docs/verify/verify_legacy_branding_root.py --repo-root .; then
   legacy_branding_status="fail"
 fi
 
-echo "Check 9/9: legacy runbooks root retired"
+echo "Check 9/11: legacy runbooks root retired"
 legacy_runbooks_status="pass"
 if ! python3 tools/docs/verify/verify_legacy_runbooks_root.py --repo-root .; then
   legacy_runbooks_status="fail"
 fi
 
-echo "Check 10/10: legacy migrations root retired"
+echo "Check 10/11: legacy migrations root retired"
 legacy_migrations_status="pass"
 if ! python3 tools/docs/verify/verify_legacy_migrations_root.py --repo-root .; then
   legacy_migrations_status="fail"
 fi
 
+echo "Check 11/11: concepts architecture root is clean"
+concepts_architecture_status="pass"
+if ! python3 tools/docs/verify/verify_concepts_architecture_clean.py --repo-root .; then
+  concepts_architecture_status="fail"
+fi
+
 status="pass"
-if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]] || [[ "$legacy_arch_status" = "fail" ]] || [[ "$legacy_ops_status" = "fail" ]] || [[ "$legacy_ci_cd_status" = "fail" ]] || [[ "$legacy_branding_status" = "fail" ]] || [[ "$legacy_runbooks_status" = "fail" ]] || [[ "$legacy_migrations_status" = "fail" ]]; then
+if [[ "$failures" -gt 0 ]] || [[ "$content_status" = "fail" ]] || [[ "$legacy_arch_status" = "fail" ]] || [[ "$legacy_ops_status" = "fail" ]] || [[ "$legacy_ci_cd_status" = "fail" ]] || [[ "$legacy_branding_status" = "fail" ]] || [[ "$legacy_runbooks_status" = "fail" ]] || [[ "$legacy_migrations_status" = "fail" ]] || [[ "$concepts_architecture_status" = "fail" ]]; then
   status="fail"
 fi
 
 if [[ -n "$SUMMARY_JSON" ]]; then
-  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" "$legacy_arch_status" "$legacy_ops_status" "$legacy_ci_cd_status" "$legacy_branding_status" "$legacy_runbooks_status" "$legacy_migrations_status" <<'PY'
+  python3 - "$SUMMARY_JSON" "$RANGE" "$failures" "$content_status" "${#changed_md[@]}" "$CONTENT_SUMMARY_JSON" "$legacy_arch_status" "$legacy_ops_status" "$legacy_ci_cd_status" "$legacy_branding_status" "$legacy_runbooks_status" "$legacy_migrations_status" "$concepts_architecture_status" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -307,13 +313,14 @@ legacy_ci_cd_status = sys.argv[9]
 legacy_branding_status = sys.argv[10]
 legacy_runbooks_status = sys.argv[11]
 legacy_migrations_status = sys.argv[12]
+concepts_architecture_status = sys.argv[13]
 
 content_summary = {"status": "pass", "files_checked": 0, "errors": []}
 if content_summary_path.exists():
     content_summary = json.loads(content_summary_path.read_text(encoding="utf-8"))
 
 overall_status = "pass"
-if root_allowlist_violations > 0 or content_status != "pass" or legacy_arch_status != "pass" or legacy_ops_status != "pass" or legacy_ci_cd_status != "pass" or legacy_branding_status != "pass" or legacy_runbooks_status != "pass" or legacy_migrations_status != "pass":
+if root_allowlist_violations > 0 or content_status != "pass" or legacy_arch_status != "pass" or legacy_ops_status != "pass" or legacy_ci_cd_status != "pass" or legacy_branding_status != "pass" or legacy_runbooks_status != "pass" or legacy_migrations_status != "pass" or concepts_architecture_status != "pass":
     overall_status = "fail"
 
 payload = {
@@ -330,6 +337,7 @@ payload = {
     "legacy_branding_root": legacy_branding_status,
     "legacy_runbooks_root": legacy_runbooks_status,
     "legacy_migrations_root": legacy_migrations_status,
+    "concepts_architecture_root": concepts_architecture_status,
 }
 out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 PY
@@ -358,6 +366,9 @@ if [[ "$legacy_runbooks_status" = "fail" ]]; then
 fi
 if [[ "$legacy_migrations_status" = "fail" ]]; then
   echo "Docs policy failed because docs/migrations is still acting like a living root."
+fi
+if [[ "$concepts_architecture_status" = "fail" ]]; then
+  echo "Docs policy failed because docs/concepts/architecture still contains redirect clutter."
 fi
 if [[ "$status" = "fail" ]]; then
   exit 1

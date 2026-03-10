@@ -22,7 +22,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 PRODUCTION_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 BRANDING_VERIFIER="$REPO_ROOT/scripts/qa/verify-mfe-branding.sh"
-CONTRACT_DOC="$REPO_ROOT/docs/concepts/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md"
+CONTRACT_DOC="$REPO_ROOT/docs/reference/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md"
 
 PASS=0
 FAIL=0
@@ -585,7 +585,7 @@ echo ""
 # =============================================================================
 echo "--- Selector Override Expiry Check (8jao.8) ---"
 
-DECISION_LOG="$REPO_ROOT/docs/concepts/architecture/MFE_SELECTOR_DECISION_LOG.md"
+DECISION_LOG="$REPO_ROOT/docs/reference/architecture/MFE_SELECTOR_DECISION_LOG.md"
 if [[ -f "$DECISION_LOG" ]]; then
   do_pass "8jao.8: Selector decision log exists"
 
@@ -604,7 +604,7 @@ if [[ -f "$DECISION_LOG" ]]; then
     do_pass "8jao.8: No expired selector overrides"
   fi
 else
-  do_warn "8jao.8: Selector decision log not found — create docs/concepts/architecture/MFE_SELECTOR_DECISION_LOG.md"
+  do_warn "8jao.8: Selector decision log not found — create docs/reference/architecture/MFE_SELECTOR_DECISION_LOG.md"
 fi
 echo ""
 
@@ -628,7 +628,7 @@ if [ "$FAIL" -gt 0 ]; then
   echo "  4. Inspect mounted configmap and runtime Caddy quickly:"
   echo "     kubectl get deploy -n $K8S_NAMESPACE mfe -o jsonpath='{.spec.template.spec.volumes[?(@.name==\"config\")].configMap.name}'"
   echo "     kubectl exec -n $K8S_NAMESPACE deploy/mfe -- cat /etc/caddy/Caddyfile | rg '/learner-record'"
-  echo "  5. See docs/concepts/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md for full guide"
+  echo "  5. See docs/reference/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md for full guide"
   echo ""
   exit 1
 fi
