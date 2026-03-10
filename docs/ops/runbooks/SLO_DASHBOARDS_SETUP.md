@@ -78,7 +78,7 @@ Based on STANDARDS.md Tier 2 classification:
 ### Platform Grafana Stack (GitOps)
 
 ```bash
-cd /home/gurpreet/projects/k8s/infrastructure
+cd <infra-repo-root>
 ./scripts/kube dev apply -f platform/monitoring/application.yaml
 ```
 
@@ -506,6 +506,6 @@ Caddy LoadBalancer and run `./scripts/infra/check-cert-sans.sh`. Caddy manages T
 - `infrastructure/platform/monitoring/overlays/{dev,prod}/dashboards/` (platform Grafana dashboards)
 - `vps/infrastructure/observability/` (VPS-only runtime observability assets)
 
-Legacy historical artifacts (deprecated workspace, do not use as active SoT):
-- `/home/gurpreet/projects/observability/dashboards/03-applications/bbi-mereka-lms.json`
-- `/home/gurpreet/projects/observability/alerts/applications.yaml`
+Legacy historical artifacts (deprecated workspace, do not use as active source of truth):
+- historical Grafana dashboard export for `bbi-mereka-lms`
+- historical alert definition snapshot for application alerts
