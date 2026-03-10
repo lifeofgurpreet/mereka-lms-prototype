@@ -83,7 +83,7 @@ The script uploads `openedx_bulk_import.py`, runs it inside the LMS pod, and tra
 
 ## 6. Verification & Sign-off
 
-1. Use [`EXECUTION_PLAN_VERIFICATION.md`](EXECUTION_PLAN_VERIFICATION.md) and [`VERIFY_AND_SYNC_KAJABI.md`](VERIFY_AND_SYNC_KAJABI.md) for current verification steps. The completed historical verification snapshot lives in [`../../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md`](../../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md).
+1. Use [`VERIFY_AND_SYNC_KAJABI.md`](VERIFY_AND_SYNC_KAJABI.md) for the current verification flow. The dated execution-plan and verification snapshots live in [`../../../../../reports/2025/recovery/KAJABI_VERIFY_SYNC_EXECUTION_PLAN_2025-11-09.md`](../../../../../reports/2025/recovery/KAJABI_VERIFY_SYNC_EXECUTION_PLAN_2025-11-09.md) and [`../../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md`](../../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md).
 2. Record progress in `docs/status/migrations/KAJABI_MIGRATION_STATUS.md`.
 3. Update `reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md` once Ops validates prod and QA signs off.
 

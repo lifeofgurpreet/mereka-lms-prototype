@@ -7285,15 +7285,6 @@
     "freshness_risk": "low",
     "last_verified_or_updated": "2025-11-09",
     "owner": "Migration Squad",
-    "path": "ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-09",
-    "owner": "Migration Squad",
     "path": "ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md",
     "status": "supporting",
     "type": "runbook"

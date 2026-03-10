@@ -92,7 +92,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/guides/admin/MULTI_SITE_GUIDE.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/admin/OBSERVABILITY_GUIDE.md | 2 | Docs Lead | fix inline path references and missing commands |
 | docs/guides/standards/DOCUMENTATION_STANDARDS.md | 2 | Docs Lead | fix inline path references and missing commands |
-| docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| reports/2025/recovery/KAJABI_VERIFY_SYNC_EXECUTION_PLAN_2025-11-09.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md | 2 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md | 2 | Operations Lead | fix inline path references and missing commands |
@@ -305,8 +305,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 265 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
 | docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 277 | reports/2026/audits/CONFIG_REVIEW_2026-02-03.md |
 | docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 66 | infrastructure/tutor/themes/mereka/common/static/images/sof/ |
-| docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 139 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
-| docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md | 82 | scripts/migrations/kajabi/openedx_bulk_import.py |
+| reports/2025/recovery/KAJABI_VERIFY_SYNC_EXECUTION_PLAN_2025-11-09.md | 139 | scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh |
+| reports/2025/recovery/KAJABI_VERIFY_SYNC_EXECUTION_PLAN_2025-11-09.md | 82 | scripts/migrations/kajabi/openedx_bulk_import.py |
 | docs/reference/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md | 172 | scripts/migrations/kajabi/prepare_openedx_imports.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 13 | scripts/migrations/kajabi/transform_data.py |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md | 17 | scripts/migrations/kajabi/build_course_packages.py |

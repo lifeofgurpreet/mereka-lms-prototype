@@ -10,7 +10,7 @@ All Kajabi-related content lives in this folder. Start with [`KAJABI_MIGRATION.m
 | [`../../../../reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md`](../../../../reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md) | Ops handoff checklist once migration moves to prod. |
 | [`../../../status/migrations/KAJABI_MIGRATION_STATUS.md`](../../../status/migrations/KAJABI_MIGRATION_STATUS.md) | Progress tracker for processed courses/users. |
 | [`../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md`](../../../../reports/2024/verifications/KAJABI_MIGRATION_VERIFICATION_2024-11-08.md) | Historical verification snapshot after the 2024 Kajabi import. |
-| [`../../../ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md`](../../../ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md) | Step-by-step plan for comparing Kajabi vs Open edX counts. |
+| [`../../../../reports/2025/recovery/KAJABI_VERIFY_SYNC_EXECUTION_PLAN_2025-11-09.md`](../../../../reports/2025/recovery/KAJABI_VERIFY_SYNC_EXECUTION_PLAN_2025-11-09.md) | Historical execution plan for the 2025 Kajabi verification/sync pass. |
 | [`../../../status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md`](../../../status/migrations/MIGRATION_STATUS_AND_ROLLBACK.md) | Snapshot of migration state plus rollback options. |
 | [`../../../ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md`](../../../ops/runbooks/migrations/kajabi/ROLLBACK_AND_SAFETY.md) | Safety checklist and rollback guidance before re-running imports. |
 | [`../../../../reports/2025/recovery/KAJABI_VERIFY_AFTER_SITE_RECOVERY_2025-11-09.md`](../../../../reports/2025/recovery/KAJABI_VERIFY_AFTER_SITE_RECOVERY_2025-11-09.md) | Historical recovery note for the 2025 site-down verification pass. |

@@ -3,7 +3,7 @@
     "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 829
+    "supporting": 828
   },
   "entries": [
     {
@@ -6769,15 +6769,6 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
-      "path": "docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "Execution Plan: Verify & Sync Kajabi \u2192 Open edX"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
       "path": "docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md",
       "root": "docs",
       "status": "",
@@ -10987,7 +10978,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1220,
+  "entry_count": 1219,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
@@ -10998,7 +10989,7 @@
     "docs:index": 5,
     "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 167,
+    "docs:runbook": 166,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,
@@ -11009,7 +11000,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1002,
+    "docs": 1001,
     "specs": 218
   }
 }
