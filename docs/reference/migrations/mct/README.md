@@ -95,6 +95,7 @@ For the complete list of 15 courses and their structure, see `MCT_MIGRATION_STAT
 | [`../../../ops/runbooks/migrations/mct/MIGRATION_PLAN.md`](../../../ops/runbooks/migrations/mct/MIGRATION_PLAN.md) | End-to-end plan for MCT migration. |
 | [`../../../ops/runbooks/migrations/mct/EXPORT_GUIDE.md`](../../../ops/runbooks/migrations/mct/EXPORT_GUIDE.md) | Steps to export data from MCT. |
 | [`OPS_MCT_README.md`](OPS_MCT_README.md) | Workflow/scripts overview and current migration shape. |
+| [`VIDEO_MIGRATION_TO_MUX.md`](VIDEO_MIGRATION_TO_MUX.md) | Completed video migration reference for Mux ingestion and Open edX wiring. |
 | [`PROGRAMS_SETUP_PLAN.md`](PROGRAMS_SETUP_PLAN.md) | Planning-phase program setup design for Open edX Programs. |
 | [`../../../archive/reports/mct/EXPORT_TEST_RESULTS.md`](../../../archive/reports/mct/EXPORT_TEST_RESULTS.md) | Latest historical test evidence and validation. |
 | [`API_COMPLETE_REFERENCE.md`](API_COMPLETE_REFERENCE.md) | Full API reference captured during migration. |

@@ -21,7 +21,7 @@ links:
   - docs/status/migrations/MCT_MIGRATION_STATUS.md
   - docs/reference/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md
   - docs/reference/migrations/mct/MCT_TO_OPENEDX_MAPPING.md
-  - docs/ops/runbooks/migrations/mct/VIDEO_MIGRATION.md
+  - docs/reference/migrations/mct/VIDEO_MIGRATION_TO_MUX.md
   - docs/ops/runbooks/migrations/mct/EXPORT_GUIDE.md
   - docs/archive/reports/migrations/BBI-K8-MIGRATION.md
   related_specs:

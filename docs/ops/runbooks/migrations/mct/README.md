@@ -16,13 +16,13 @@ This subroot holds the live Microsoft Community Training migration execution, ex
 
 - [`EXPORT_GUIDE.md`](EXPORT_GUIDE.md)
 - [`MIGRATION_PLAN.md`](MIGRATION_PLAN.md)
-- [`VIDEO_MIGRATION.md`](VIDEO_MIGRATION.md)
 
 ## What this subroot is not
 
 Do not use this subroot for:
 - source-system reference, which belongs in `docs/reference/migrations/mct/**`
 - workflow/script inventories and migration shape summaries, which belong in `docs/reference/migrations/mct/**`
+- completed migration references, which belong in `docs/reference/migrations/mct/**`
 - planning-phase program design, which belongs in `docs/reference/migrations/mct/**`
 - migration status reporting, which belongs in `docs/status/migrations/**`
 - historical closeout notes, which belong in archive/report surfaces

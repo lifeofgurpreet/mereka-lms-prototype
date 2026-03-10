@@ -1,7 +1,10 @@
 # MCT Video Migration to Mux
+_Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2026-03-10 • Status: canonical_
 
-**Last Updated:** 2025-12-29 (14:58 UTC+8)
-**Status:** ✅ COMPLETE - All 503 videos uploaded to Mux AND connected to Open edX
+This document records the completed MCT video migration to Mux and the durable reference points needed for replay, verification, or troubleshooting. It is not an active execution runbook.
+
+**Historical completion point:** 2025-12-29
+**Outcome:** all 503 videos were uploaded to Mux and wired into Open edX course packages.
 
 ---
 
@@ -55,10 +58,9 @@ You need to create Mux API credentials:
    - **Token ID** (e.g., `12345678-abcd-1234-efgh-567890abcdef`)
    - **Token Secret** (e.g., `a1b2c3d4e5f6...long-string...`)
 
-### 2. Mux Environment ID (optional)
+### 2. Mux environment selection
 
-If using multiple environments:
-- Environment ID: `d2pf0l73ablr4ghl1b607jpa2`
+If multiple Mux environments are in use, retrieve the correct environment identifier from the team-managed secret/config source before running any upload or verification flow.
 
 ---
 
@@ -69,7 +71,7 @@ If using multiple environments:
 MCT video URLs use Azure SAS tokens that expire after 6 hours. Before uploading to Mux, re-export to get fresh URLs:
 
 ```bash
-cd /home/dev/bbi-meta/mereka-lms
+cd <repo-root>
 
 MCT_BASE_URL="mctindonesia.azurewebsites.net" \
 MCT_CLIENT_ID="caa4dce3-e49c-4c09-9160-031d51bfd2a9" \
@@ -93,7 +95,7 @@ Output: `exports/mct/videos_for_mux.json`
 # Activate venv
 source .venv/bin/activate
 
-# Set Mux credentials
+# Set Mux credentials from the approved secret source
 export MUX_TOKEN_ID="your-token-id"
 export MUX_TOKEN_SECRET="your-token-secret"
 
@@ -200,7 +202,7 @@ The script includes 0.25s delays between uploads. Mux allows 5 requests/second.
 
 ## ✅ Completed Steps
 
-1. ✅ **Mux API credentials** configured in `.env.mux`
+1. ✅ **Mux API credentials** retrieved from the team-managed secret source
 2. ✅ **All 503 videos uploaded** to Mux
 3. ✅ **Videos verified** in Mux dashboard with proper titles
 4. ✅ **30 course packages rebuilt** with Mux Video XBlocks

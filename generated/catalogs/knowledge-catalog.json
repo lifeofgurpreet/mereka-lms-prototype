@@ -6877,15 +6877,6 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
-      "path": "docs/ops/runbooks/migrations/mct/VIDEO_MIGRATION.md",
-      "root": "docs",
-      "status": "",
-      "title": "MCT Video Migration to Mux"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
       "path": "docs/ops/runbooks/performance-degradation.md",
       "root": "docs",
       "status": "",
@@ -7997,6 +7988,15 @@
       "root": "docs",
       "status": "",
       "title": "MCT Migration Docs"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/VIDEO_MIGRATION_TO_MUX.md",
+      "root": "docs",
+      "status": "",
+      "title": "MCT Video Migration to Mux"
     },
     {
       "classification": "supporting",
@@ -11010,13 +11010,13 @@
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 195,
+    "docs:concept": 196,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
     "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 173,
+    "docs:runbook": 172,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,

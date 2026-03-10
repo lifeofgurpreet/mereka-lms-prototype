@@ -7391,15 +7391,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "ops/runbooks/migrations/mct/VIDEO_MIGRATION.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-12",
     "owner": "SRE",
     "path": "ops/runbooks/performance-degradation.md",
@@ -8663,6 +8654,15 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Migration Squad",
     "path": "reference/migrations/mct/README.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Migration Squad",
+    "path": "reference/migrations/mct/VIDEO_MIGRATION_TO_MUX.md",
     "status": "canonical",
     "type": "other"
   },
