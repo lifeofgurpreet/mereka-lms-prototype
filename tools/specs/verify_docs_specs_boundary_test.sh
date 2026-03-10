@@ -19,9 +19,9 @@ cat >"$tmpdir/specs/catalog.json" <<'JSON'
 {
   "root": "specs",
   "entries": [
-    {"path": "specs/example_spec.md", "spec_class": "system", "normativity": "normative"},
-    {"path": "specs/plans/rollout-plan.md", "spec_class": "plan", "normativity": "planning"},
-    {"path": "specs/proposals/new-contract.md", "spec_class": "proposal", "normativity": "proposed"}
+    {"path": "specs/example_spec.md", "doc_type": "spec", "spec_class": "system", "normativity": "normative"},
+    {"path": "specs/plans/rollout_plan.md", "lane": "plan", "doc_type": "plan", "spec_class": "plan", "normativity": "planning"},
+    {"path": "specs/proposals/new-contract_spec.md", "lane": "proposal", "doc_type": "spec", "spec_class": "proposal", "normativity": "proposed"}
   ]
 }
 JSON
