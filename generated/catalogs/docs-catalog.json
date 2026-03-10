@@ -6041,15 +6041,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-11-12",
-    "owner": null,
-    "path": "ops/quickref/QUICK_REFERENCE.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "SRE Team",
     "path": "ops/quickref/README.md",
@@ -6107,33 +6098,6 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "ops/quickref/kubectl-cheatsheet.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Ops Domain Owner",
-    "path": "ops/quickref/local-access-info.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Ops Domain Owner",
-    "path": "ops/quickref/local-production-parity.md",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
-    "owner": "Ops Domain Owner",
-    "path": "ops/quickref/local-work-remaining.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -9411,6 +9375,15 @@
     "owner": "Infra Team",
     "path": "status/active/INFRA_TEAM_ACTION_ITEMS.md",
     "status": "archive-candidate",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-06",
+    "owner": "Ops Domain Owner",
+    "path": "status/active/LOCAL_ENVIRONMENT_WORK_REMAINING_2026-03-06.md",
+    "status": "supporting",
     "type": "status"
   },
   {

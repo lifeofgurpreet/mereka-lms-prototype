@@ -234,8 +234,8 @@ tutor config save  # Reconfigure
 - **Quick start:** `docs/guides/onboarding/QUICK_START_LOCAL.md`
 - **Full setup:** `docs/guides/onboarding/LOCAL_SETUP.md`
 - **Daily workflow:** `docs/guides/onboarding/WORKFLOW_LOCAL.md`
-- **Quick Reference:** `docs/ops/quickref/QUICK_REFERENCE.md`
-- **Parity Strategy:** `docs/ops/quickref/local-production-parity.md`
+- **Quick Reference:** `docs/ops/quickref/README.md`
+- **Environment Access:** `docs/ops/quickref/access-urls.md`
 
 ## ✅ Checklist for New Developers
 
@@ -244,7 +244,7 @@ tutor config save  # Reconfigure
 - [ ] Can access http://localhost
 - [ ] Can log in with the local admin account created during setup
 - [ ] Read `docs/guides/onboarding/LOCAL_SETUP.md`
-- [ ] Bookmarked `docs/ops/quickref/QUICK_REFERENCE.md`
+- [ ] Bookmarked `docs/ops/quickref/README.md`
 - [ ] Understand local vs production separation
 
 ---

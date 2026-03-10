@@ -176,7 +176,7 @@ Once setup is complete:
 - **Complete Guide:** `docs/guides/onboarding/LOCAL_SETUP.md`
 - **Quick Reference:** `docs/guides/onboarding/QUICK_START_LOCAL.md`
 - **Daily Workflow:** `docs/guides/onboarding/WORKFLOW_LOCAL.md`
-- **Access Info:** `docs/ops/quickref/local-access-info.md`
+- **Access Info:** `docs/ops/quickref/access-urls.md`
 
 ---
 

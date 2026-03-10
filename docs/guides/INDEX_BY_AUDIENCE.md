@@ -38,7 +38,7 @@ This is a role router, not a global catalog. Start with the closest role below, 
   - [`onboarding/LOCAL_SETUP.md`](onboarding/LOCAL_SETUP.md)
   - [`onboarding/WORKFLOW_LOCAL.md`](onboarding/WORKFLOW_LOCAL.md)
   - [`onboarding/REPOSITORY_GUIDE.md`](onboarding/REPOSITORY_GUIDE.md)
-  - [`../ops/quickref/QUICK_REFERENCE.md`](../ops/quickref/QUICK_REFERENCE.md)
+  - [`../ops/quickref/README.md`](../ops/quickref/README.md)
 - High-stakes / escalation:
   - [`../concepts/architecture/README.md`](../concepts/architecture/README.md)
   - [`../adr/README.md`](../adr/README.md)

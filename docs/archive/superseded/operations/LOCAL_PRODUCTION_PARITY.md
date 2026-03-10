@@ -1,9 +1,9 @@
 # Local/Production Parity Strategy (Superseded)
 _Audience: Developers • Owner: Ops Domain Owner • Last verified: 2026-03-06 • Status: superseded_
-superseded_by: `docs/ops/quickref/local-production-parity.md`
+superseded_by: `docs/guides/onboarding/WORKFLOW_LOCAL.md`
 
 This document has moved to:
-- `docs/ops/quickref/local-production-parity.md`
+- `docs/guides/onboarding/WORKFLOW_LOCAL.md`
 
 Reason:
-- Consolidated under canonical quick references to reduce transitional `docs/operations/**` drift.
+- Local-vs-production workflow guidance now lives with the canonical onboarding workflow rather than a standalone quickref card.

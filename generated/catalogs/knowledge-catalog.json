@@ -3,7 +3,7 @@
     "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 837
+    "supporting": 834
   },
   "entries": [
     {
@@ -5527,15 +5527,6 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
-      "path": "docs/ops/quickref/QUICK_REFERENCE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Quick Reference Card"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
       "path": "docs/ops/quickref/README.md",
       "root": "docs",
       "status": "",
@@ -5594,33 +5585,6 @@
       "root": "docs",
       "status": "",
       "title": "Kubectl Cheatsheet - Mereka LMS"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/local-access-info.md",
-      "root": "docs",
-      "status": "",
-      "title": "Local Development Access Information"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/local-production-parity.md",
-      "root": "docs",
-      "status": "",
-      "title": "Local/Production Parity Strategy"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/local-work-remaining.md",
-      "root": "docs",
-      "status": "",
-      "title": "Local Development Work Remaining"
     },
     {
       "classification": "supporting",
@@ -8749,6 +8713,15 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/status/active/LOCAL_ENVIRONMENT_WORK_REMAINING_2026-03-06.md",
+      "root": "docs",
+      "status": "",
+      "title": "Local Environment Work Remaining"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/status/active/NEXT-PHASE-ROADMAP.md",
       "root": "docs",
       "status": "",
@@ -11059,7 +11032,7 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1228,
+  "entry_count": 1225,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
@@ -11068,9 +11041,9 @@
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 193,
+    "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 181,
+    "docs:runbook": 177,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,
@@ -11081,7 +11054,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1010,
+    "docs": 1007,
     "specs": 218
   }
 }

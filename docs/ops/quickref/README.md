@@ -22,11 +22,7 @@ Use this root when you need the shortest path to an operational answer. Quick re
 | [tutor-commands.md](./tutor-commands.md) | Tutor operations | Building images, config changes, local development |
 | [verification-scripts.md](./verification-scripts.md) | Automated testing | Running verifications, checking spec coverage |
 | [common-troubleshooting.md](./common-troubleshooting.md) | Troubleshooting | Site down, performance issues, config problems |
-| [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) | General operator quick reference bundle | You need the broad operator command set in one place |
 | [access-urls.md](./access-urls.md) | Service URLs and local access points | You need hostnames, ports, or local URLs quickly |
-| [local-access-info.md](./local-access-info.md) | Local environment entrypoints | You are checking local login, services, or ports |
-| [local-production-parity.md](./local-production-parity.md) | Local vs production parity expectations | You need to know whether local can prove a production claim |
-| [local-work-remaining.md](./local-work-remaining.md) | Known local-environment gaps | You need to understand remaining local debt |
 | [discovery-quickstart.md](./discovery-quickstart.md) | Discovery service quickstart | You need to work on Discovery without reading the full guide |
 | [checklists/doc-delivery-checklist.md](./checklists/doc-delivery-checklist.md) | Docs delivery checklist | You are shipping doc changes and need a final pass |
 | [checklists/spec-delivery-checklist.md](./checklists/spec-delivery-checklist.md) | Spec delivery checklist | You are shipping spec-driven work and need a final pass |
@@ -207,6 +203,8 @@ When adding new cards:
 - [Secrets Management Guide](../../guides/admin/SECRETS_MANAGEMENT_GUIDE.md) - Full secrets workflow
 - [Multi-Site Guide](../../guides/admin/MULTI_SITE_GUIDE.md) - Multi-tenancy operations
 - [Observability Guide](../../guides/admin/OBSERVABILITY_GUIDE.md) - Monitoring and alerting
+- [Local Setup](../../guides/onboarding/LOCAL_SETUP.md) - Full sandbox bootstrap
+- [Local Workflow](../../guides/onboarding/WORKFLOW_LOCAL.md) - Day-to-day local development cycle
 
 ### Other References
 
