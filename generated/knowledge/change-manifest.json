@@ -9,7 +9,7 @@
     "proposal_only",
     "reviewer_handoff_only"
   ],
-  "change_count": 389,
+  "change_count": 406,
   "changed_roots": [
     "docs",
     "specs"
@@ -1029,6 +1029,108 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "docs/archive/FRONTEND_PHASE_B_PROMPT.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/FRONTEND_PHASE_B_PROMPT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Frontend Phase B: Brand Foundation \u2014 Implementor Prompt"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/FRONTEND_PHASE_C_PROMPT.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/FRONTEND_PHASE_C_PROMPT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Frontend Phase C: Token Grounding + BEM Hardening \u2014 Implementor Prompt"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/FRONTEND_PHASE_D_PROMPT.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/FRONTEND_PHASE_D_PROMPT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Frontend Phase D: MFE Slot Branding Stabilization"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md"
       ],
       "lane": "archive",
@@ -1082,6 +1184,74 @@
       "root": "docs",
       "status": "",
       "title": "Mereka Academy \u2014 Platform Roadmap"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/superseded/runbooks/external-registration-runbook.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/superseded/runbooks/external-registration-runbook.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "External Registration via HubSpot Runbook"
+    },
+    {
+      "change_class": "archival_only_change",
+      "change_risk": "low",
+      "classification": "archival",
+      "description": "Changes archival surfaces only.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/archive/superseded/runbooks/proctoring-operations-runbook.md"
+      ],
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/superseded/runbooks/proctoring-operations-runbook.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "docs"
+        ],
+        "optional_reviewers": [],
+        "owner_team": "docs-program",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Proctoring Operations Runbook"
     },
     {
       "change_class": "docs_support_change",
@@ -3049,6 +3219,78 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "docs/meta/knowledge/CHANGE_CLASSES.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "CHANGE_CLASSES"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Change Runtime Closeout"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md"
       ],
       "lane": "other",
@@ -3070,6 +3312,42 @@
       "root": "docs",
       "status": "",
       "title": "Decision Runtime Model"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "EVIDENCE_OBLIGATIONS"
     },
     {
       "change_class": "docs_support_change",
@@ -3121,6 +3399,42 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "docs/meta/knowledge/OWNERSHIP_MAP.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "OWNERSHIP_MAP"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "docs/meta/knowledge/RECEIPT_CLASSES.yaml"
       ],
       "lane": "other",
@@ -3142,6 +3456,78 @@
       "root": "docs",
       "status": "",
       "title": "RECEIPT_CLASSES"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Review Handoff Model"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/knowledge/REVIEW_RULES.yaml"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/REVIEW_RULES.yaml",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "REVIEW_RULES"
     },
     {
       "change_class": "docs_support_change",
@@ -3610,6 +3996,42 @@
       "root": "docs",
       "status": "",
       "title": "Wave 14 Review Handoff"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs",
+          "architecture"
+        ]
+      },
+      "root": "docs",
+      "status": "",
+      "title": "Wave 5 Execution Tracker"
     },
     {
       "change_class": "docs_support_change",
@@ -5634,6 +6056,39 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "generated/knowledge/change-manifest.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/change-manifest.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "change-manifest"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "generated/knowledge/evidence-obligations.json"
       ],
       "lane": "other",
@@ -5898,6 +6353,39 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "generated/knowledge/review-bundle.md"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/review-bundle.md",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "Wave 5 Review Bundle"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "generated/knowledge/review-decision.json"
       ],
       "lane": "other",
@@ -6063,6 +6551,39 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "generated/knowledge/truth-impact-report.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/truth-impact-report.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "truth-impact-report"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "generated/knowledge/wave10-source-map.json"
       ],
       "lane": "other",
@@ -6081,6 +6602,39 @@
       "root": "other",
       "status": "",
       "title": "wave10-source-map"
+    },
+    {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "generated/knowledge/wrapper-retirement-report.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "generated/knowledge/wrapper-retirement-report.json",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "",
+        "required_reviewers": []
+      },
+      "root": "other",
+      "status": "",
+      "title": "wrapper-retirement-report"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -6782,6 +7336,47 @@
       "root": "other",
       "status": "",
       "title": "run-knowledge-integrity-gates"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "scripts/qa/run-knowledge-runtime-gates.sh",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "scripts/qa/run-knowledge-runtime-gates.sh",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "run-knowledge-runtime-gates"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -8682,6 +9277,41 @@
       "title": "Analytics Pipeline (Aspects/Panorama)"
     },
     {
+      "change_class": "generated_surface_refresh",
+      "change_risk": "low",
+      "classification": "supporting",
+      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
+      "evidence": {
+        "require_adr_update": false,
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": false,
+        "require_status_update": false,
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [
+          "architecture"
+        ],
+        "optional_reviewers": [
+          "docs",
+          "architecture"
+        ],
+        "owner_team": "architecture",
+        "required_reviewers": []
+      },
+      "root": "specs",
+      "status": "",
+      "title": "Human Summary"
+    },
+    {
       "change_class": "normative_contract_change",
       "change_risk": "high",
       "classification": "canonical",
@@ -9232,39 +9862,6 @@
       "title": "Enterprise Microservices Deployment"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/external-registration-hubspot_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/external-registration-hubspot_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "external-registration-hubspot_spec.md"
-    },
-    {
       "change_class": "normative_contract_change",
       "change_risk": "high",
       "classification": "canonical",
@@ -9540,72 +10137,6 @@
       "title": "MFE Plugin Slots: FPF Slot Activation Roadmap"
     },
     {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/mobile-apps-enterprise_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/mobile-apps-enterprise_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "mobile-apps-enterprise_spec.md"
-    },
-    {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/mobile-apps-secrets-management_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/mobile-apps-secrets-management_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "mobile-apps-secrets-management_spec.md"
-    },
-    {
       "change_class": "normative_contract_change",
       "change_risk": "high",
       "classification": "canonical",
@@ -9844,39 +10375,6 @@
       "root": "specs",
       "status": "draft",
       "title": "OEP-48 Brand Package (@edx/brand for Mereka Academy)"
-    },
-    {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/paragon-design-tokens-migration_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/paragon-design-tokens-migration_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "paragon-design-tokens-migration_spec.md"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -11404,39 +11902,6 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
-        "specs/proctoring-integration_spec.md"
-      ],
-      "lane": "other",
-      "owner": "",
-      "path": "specs/proctoring-integration_spec.md",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [],
-        "optional_reviewers": [
-          "docs",
-          "architecture"
-        ],
-        "owner_team": "",
-        "required_reviewers": []
-      },
-      "root": "other",
-      "status": "",
-      "title": "proctoring-integration_spec.md"
-    },
-    {
-      "change_class": "generated_surface_refresh",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Refreshes derived catalogs, graphs, indexes, or bundles.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": false,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": false,
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
         "specs/proposals/README.md"
       ],
       "lane": "other",
@@ -12126,78 +12591,6 @@
       "title": "Legacy Testmaps Retirement Plan"
     },
     {
-      "change_class": "evidence_only_change",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Changes evidence or proof surfaces without changing contract truth.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": true,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": "conditional",
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml"
-      ],
-      "lane": "evidence",
-      "owner": "",
-      "path": "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [
-          "platform"
-        ],
-        "optional_reviewers": [
-          "docs"
-        ],
-        "owner_team": "qa",
-        "required_reviewers": [
-          "platform"
-        ]
-      },
-      "root": "specs",
-      "status": "",
-      "title": "mobile-apps-enterprise_spec.testmap"
-    },
-    {
-      "change_class": "evidence_only_change",
-      "change_risk": "low",
-      "classification": "supporting",
-      "description": "Changes evidence or proof surfaces without changing contract truth.",
-      "evidence": {
-        "require_adr_update": false,
-        "require_evidence_pack": true,
-        "require_plan_refresh": false,
-        "require_runbook_update": false,
-        "require_status_update": "conditional",
-        "require_testplan_refresh": false
-      },
-      "impacted_truth_surfaces": [
-        "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml"
-      ],
-      "lane": "evidence",
-      "owner": "",
-      "path": "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
-      "review": {
-        "block_merge_without_all_required": false,
-        "lane_reviewer_roles": [
-          "platform"
-        ],
-        "optional_reviewers": [
-          "docs"
-        ],
-        "owner_team": "qa",
-        "required_reviewers": [
-          "platform"
-        ]
-      },
-      "root": "specs",
-      "status": "",
-      "title": "mobile-apps-secrets-management_spec.testmap"
-    },
-    {
       "change_class": "normative_contract_change",
       "change_risk": "high",
       "classification": "canonical",
@@ -12770,6 +13163,47 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/knowledge/build_change_manifest.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_change_manifest.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_change_manifest"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/knowledge/build_cross_repo_agent_packs.py",
         "generated/knowledge/change-manifest.json",
         "generated/knowledge/review-bundle.md",
@@ -13139,6 +13573,47 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/knowledge/build_review_bundle.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_review_bundle.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_review_bundle"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/knowledge/build_review_decision.py",
         "generated/knowledge/change-manifest.json",
         "generated/knowledge/review-bundle.md",
@@ -13303,6 +13778,47 @@
         "require_testplan_refresh": false
       },
       "impacted_truth_surfaces": [
+        "tools/knowledge/build_truth_impact_report.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_truth_impact_report.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_truth_impact_report"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
         "tools/knowledge/build_wave10_source_map.py",
         "generated/knowledge/change-manifest.json",
         "generated/knowledge/review-bundle.md",
@@ -13370,6 +13886,88 @@
       "root": "other",
       "status": "",
       "title": "build_wrapper_retirement_ledger"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/build_wrapper_retirement_report.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/build_wrapper_retirement_report.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "build_wrapper_retirement_report"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/change_runtime.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/change_runtime.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "change_runtime"
     },
     {
       "change_class": "docs_support_change",
@@ -13534,6 +14132,47 @@
       "root": "other",
       "status": "",
       "title": "verify_execution_proof_runtime"
+    },
+    {
+      "change_class": "docs_support_change",
+      "change_risk": "medium",
+      "classification": "supporting",
+      "description": "Changes runbooks, concepts, or reviewer-facing support docs.",
+      "evidence": {
+        "require_adr_update": "conditional",
+        "require_evidence_pack": false,
+        "require_plan_refresh": false,
+        "require_runbook_update": "conditional",
+        "require_status_update": "conditional",
+        "require_testplan_refresh": false
+      },
+      "impacted_truth_surfaces": [
+        "tools/knowledge/verify_knowledge_runtime.py",
+        "generated/knowledge/change-manifest.json",
+        "generated/knowledge/review-bundle.md",
+        "generated/knowledge/truth-impact-report.json",
+        "generated/knowledge/wrapper-retirement-report.json",
+        "generated/catalogs/knowledge-catalog.json",
+        "generated/graphs/knowledge-graph.json"
+      ],
+      "lane": "other",
+      "owner": "",
+      "path": "tools/knowledge/verify_knowledge_runtime.py",
+      "review": {
+        "block_merge_without_all_required": false,
+        "lane_reviewer_roles": [],
+        "optional_reviewers": [
+          "architecture",
+          "platform"
+        ],
+        "owner_team": "",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "root": "other",
+      "status": "",
+      "title": "verify_knowledge_runtime"
     },
     {
       "change_class": "generated_surface_refresh",
@@ -14257,8 +14896,13 @@
     "docs/adr/rfc/039-translations-and-internationalization-strategy.md",
     "docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md",
     "docs/adr/rfc/041-authorization-and-role-boundary-model.md",
+    "docs/archive/FRONTEND_PHASE_B_PROMPT.md",
+    "docs/archive/FRONTEND_PHASE_C_PROMPT.md",
+    "docs/archive/FRONTEND_PHASE_D_PROMPT.md",
     "docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md",
     "docs/archive/superseded/ROADMAP.md",
+    "docs/archive/superseded/runbooks/external-registration-runbook.md",
+    "docs/archive/superseded/runbooks/proctoring-operations-runbook.md",
     "docs/catalog.json",
     "docs/concepts/architecture/ARCHITECTURE_CHARTER.md",
     "docs/concepts/architecture/AUTHORIZATION_MODEL.md",
@@ -14308,9 +14952,15 @@
     "docs/meta/docs-program/metadata/doc-class-schema-map.yaml",
     "docs/meta/docs-program/metadata/frontmatter-schema.json",
     "docs/meta/docs-program/metadata/governs-taxonomy.yaml",
+    "docs/meta/knowledge/CHANGE_CLASSES.yaml",
+    "docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md",
     "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml",
     "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+    "docs/meta/knowledge/OWNERSHIP_MAP.yaml",
     "docs/meta/knowledge/RECEIPT_CLASSES.yaml",
+    "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+    "docs/meta/knowledge/REVIEW_RULES.yaml",
     "docs/meta/knowledge/WAVE10_CLOSEOUT.md",
     "docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md",
     "docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md",
@@ -14324,6 +14974,7 @@
     "docs/meta/knowledge/WAVE14_CLOSEOUT.md",
     "docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md",
     "docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md",
+    "docs/meta/knowledge/WAVE5_EXECUTION_TRACKER.md",
     "docs/meta/knowledge/schemas/approval-receipt.schema.json",
     "docs/meta/knowledge/schemas/evidence-obligations.schema.json",
     "docs/meta/knowledge/schemas/evidence-receipt.schema.json",
@@ -14419,6 +15070,7 @@
     "scripts/qa/run-decision-runtime-gates.sh",
     "scripts/qa/run-execution-proof-runtime-gates.sh",
     "scripts/qa/run-knowledge-integrity-gates.sh",
+    "scripts/qa/run-knowledge-runtime-gates.sh",
     "scripts/qa/run-skill-runtime-gates.sh",
     "scripts/qa/run-spec-integrity-gates.sh",
     "scripts/qa/run-team-handbook-gates.sh",
@@ -14475,6 +15127,7 @@
     "specs/_generated/testmaps/paragon-design-tokens-migration_spec.testmap.yml",
     "specs/advanced-assessment-xqueue_spec.md",
     "specs/analytics-pipeline_spec.md",
+    "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED",
     "specs/auth-sso-enterprise_spec.md",
     "specs/badges-credentials-enterprise_spec.md",
     "specs/brand-pack-schema.json",
@@ -14499,14 +15152,12 @@
     "specs/manual_verifications.yaml",
     "specs/mfe-plugin-slots_spec.md",
     "specs/mobile-apps-enterprise_spec.md",
-    "specs/mobile-apps-secrets-management_spec.md",
     "specs/mongodb-atlas-integration_spec.md",
     "specs/multi-site-domains_spec.md",
     "specs/multi-tenancy-architecture_spec.md",
     "specs/observability-stack_spec.md",
     "specs/observability-validation-requirements_spec.md",
     "specs/oep48-brand-package_spec.md",
-    "specs/paragon-design-tokens-migration_spec.md",
     "specs/plans/IMPLEMENTATION_ORDER.md",
     "specs/plans/README.md",
     "specs/plans/advanced-assessment-xqueue_plan.md",
@@ -14619,8 +15270,6 @@
     "specs/templates/proposal-template.md",
     "specs/templates/spec-template.md",
     "specs/testmaps/RETIREMENT_PLAN.md",
-    "specs/testmaps/mobile-apps-enterprise_spec.testmap.yml",
-    "specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml",
     "specs/tutor-configuration-resilience_spec.md",
     "specs/tutor-configuration_spec.md",
     "specs/verifiable-credentials-issuance_spec.md",
@@ -14636,6 +15285,7 @@
     "tools/docs/verify/verify-legacy-testmaps-frozen.py",
     "tools/docs/verify/verify_team_handbook.py",
     "tools/knowledge/build_approval_receipt.py",
+    "tools/knowledge/build_change_manifest.py",
     "tools/knowledge/build_cross_repo_agent_packs.py",
     "tools/knowledge/build_evidence_obligations.py",
     "tools/knowledge/build_evidence_receipt.py",
@@ -14645,16 +15295,21 @@
     "tools/knowledge/build_read_first_packs.py",
     "tools/knowledge/build_release_decision_receipt.py",
     "tools/knowledge/build_release_readiness.py",
+    "tools/knowledge/build_review_bundle.py",
     "tools/knowledge/build_review_decision.py",
     "tools/knowledge/build_reviewer_obligations.py",
     "tools/knowledge/build_runtime_evaluation.py",
     "tools/knowledge/build_runtime_proof_receipt.py",
+    "tools/knowledge/build_truth_impact_report.py",
     "tools/knowledge/build_wave10_source_map.py",
     "tools/knowledge/build_wrapper_retirement_ledger.py",
+    "tools/knowledge/build_wrapper_retirement_report.py",
+    "tools/knowledge/change_runtime.py",
     "tools/knowledge/knowledge_model.py",
     "tools/knowledge/report_knowledge_control_plane.py",
     "tools/knowledge/verify_decision_runtime.py",
     "tools/knowledge/verify_execution_proof_runtime.py",
+    "tools/knowledge/verify_knowledge_runtime.py",
     "tools/skills/build_command_registry.py",
     "tools/skills/build_pack_registry.py",
     "tools/skills/build_runtime_convergence_report.py",

@@ -1,16 +1,16 @@
 # Wave 5 Review Bundle
 
 - Range: `origin/main...HEAD`
-- Changes classified: `389`
+- Changes classified: `406`
 - Roots touched: `docs`, `specs`
 - Required reviewers: `architecture`, `docs`, `platform`
 
 ## What Changed
 
 ### Change Classes
-- `archival_only_change`: 2
-- `docs_support_change`: 146
-- `evidence_only_change`: 3
+- `archival_only_change`: 7
+- `docs_support_change`: 160
+- `evidence_only_change`: 1
 - `generated_surface_refresh`: 154
 - `normative_contract_change`: 39
 - `plan_only`: 36
@@ -19,13 +19,13 @@
 
 ### Lanes
 - `adr`: 21
-- `archive`: 2
+- `archive`: 7
 - `concept`: 36
-- `evidence`: 3
+- `evidence`: 1
 - `generated`: 8
 - `index`: 2
 - `normative`: 39
-- `other`: 204
+- `other`: 218
 - `plan`: 10
 - `proposal`: 4
 - `reference`: 9
@@ -51,21 +51,21 @@
 - `.github/workflows/ci.yml` [generated_surface_refresh]
 - `Makefile` [generated_surface_refresh]
 - `docs/_generated/bundles/60-docs-specs-contract.md` [generated_surface_refresh]
+- `docs/archive/FRONTEND_PHASE_B_PROMPT.md` [archival_only_change]
+- `docs/archive/FRONTEND_PHASE_C_PROMPT.md` [archival_only_change]
+- `docs/archive/FRONTEND_PHASE_D_PROMPT.md` [archival_only_change]
 - `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md` [archival_only_change]
 - `docs/archive/superseded/ROADMAP.md` [archival_only_change]
+- `docs/archive/superseded/runbooks/external-registration-runbook.md` [archival_only_change]
+- `docs/archive/superseded/runbooks/proctoring-operations-runbook.md` [archival_only_change]
 - `docs/meta/docs-program/WAVE3_CLOSEOUT.md` [reviewer_handoff_only]
 - `docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md` [reviewer_handoff_only]
-- `docs/meta/docs-program/WAVE4_CLOSEOUT.md` [reviewer_handoff_only]
-- `docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md` [reviewer_handoff_only]
-- `docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md` [reviewer_handoff_only]
-- `fixtures/decision-runtime/scenarios.json` [generated_surface_refresh]
-- `generated/adr-bundles/00-foundations.md` [generated_surface_refresh]
 
 ## Required Evidence And Follow-Up
-- status update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +225 more
-- evidence pack: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +75 more
-- runbook update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +218 more
-- ADR update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +186 more
+- status update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +237 more
+- evidence pack: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +73 more
+- runbook update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +232 more
+- ADR update: `.github/workflows/docs-policy.yml`, `docs/README.md`, `docs/adr/011-convention-based-spec-verification.md`, +200 more
 - plan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +76 more
 - testplan refresh: `specs/advanced-assessment-xqueue_spec.md`, `specs/analytics-pipeline_spec.md`, `specs/auth-sso-enterprise_spec.md`, +72 more
 
@@ -126,8 +126,13 @@
 - `... 1 more`
 
 ### archive
+- `docs/archive/FRONTEND_PHASE_B_PROMPT.md`
+- `docs/archive/FRONTEND_PHASE_C_PROMPT.md`
+- `docs/archive/FRONTEND_PHASE_D_PROMPT.md`
 - `docs/archive/evidence/operations/evidence/spec-dedupe-normalize-report.md`
 - `docs/archive/superseded/ROADMAP.md`
+- `docs/archive/superseded/runbooks/external-registration-runbook.md`
+- `docs/archive/superseded/runbooks/proctoring-operations-runbook.md`
 
 ### concept
 - `docs/concepts/architecture/ARCHITECTURE_CHARTER.md`
@@ -154,8 +159,6 @@
 
 ### evidence
 - `specs/testmaps/RETIREMENT_PLAN.md`
-- `specs/testmaps/mobile-apps-enterprise_spec.testmap.yml`
-- `specs/testmaps/mobile-apps-secrets-management_spec.testmap.yml`
 
 ### generated
 - `docs/_generated/bundles/60-docs-specs-contract.md`
@@ -198,9 +201,15 @@
 - `.github/workflows/ci.yml`
 - `.github/workflows/docs-policy.yml`
 - `Makefile`
+- `docs/meta/knowledge/CHANGE_CLASSES.yaml`
+- `docs/meta/knowledge/CHANGE_RUNTIME_CLOSEOUT.md`
 - `docs/meta/knowledge/DECISION_RUNTIME_MODEL.md`
+- `docs/meta/knowledge/EVIDENCE_OBLIGATIONS.yaml`
 - `docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md`
+- `docs/meta/knowledge/OWNERSHIP_MAP.yaml`
 - `docs/meta/knowledge/RECEIPT_CLASSES.yaml`
+- `docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md`
+- `docs/meta/knowledge/REVIEW_RULES.yaml`
 - `docs/meta/knowledge/WAVE10_CLOSEOUT.md`
 - `docs/meta/knowledge/WAVE10_EXECUTION_TRACKER.md`
 - `docs/meta/knowledge/WAVE10_REVIEW_HANDOFF.md`
@@ -209,13 +218,7 @@
 - `docs/meta/knowledge/WAVE12_EXECUTION_TRACKER.md`
 - `docs/meta/knowledge/WAVE12_REVIEW_HANDOFF.md`
 - `docs/meta/knowledge/WAVE13_CLOSEOUT.md`
-- `docs/meta/knowledge/WAVE13_EXECUTION_TRACKER.md`
-- `docs/meta/knowledge/WAVE13_REVIEW_HANDOFF.md`
-- `docs/meta/knowledge/WAVE14_CLOSEOUT.md`
-- `docs/meta/knowledge/WAVE14_EXECUTION_TRACKER.md`
-- `docs/meta/knowledge/WAVE14_REVIEW_HANDOFF.md`
-- `docs/meta/knowledge/schemas/approval-receipt.schema.json`
-- `... 184 more`
+- `... 198 more`
 
 ### plan
 - `specs/plans/ci-cd-pipeline_plan.md`
