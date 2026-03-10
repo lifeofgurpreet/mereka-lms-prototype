@@ -19,12 +19,10 @@ open https://studio.academyv2.mereka.io
 open https://discovery.academyv2.mereka.io/api/v1/courses/
 ```
 
-## Current Status
+## Core Endpoints
 
 - **Discovery URL**: https://discovery.academyv2.mereka.io
 - **Health Check**: https://discovery.academyv2.mereka.io/health/
-- **Courses in LMS**: 0 (as of 2026-02-03)
-- **Courses in Discovery**: 0 (as of 2026-02-03)
 
 ## Known Issues
 
@@ -47,13 +45,13 @@ on [openedx.modulestore.structures]
 ### Create a Demo Course
 
 1. Navigate to https://studio.academyv2.mereka.io
-2. Log in as a platform admin (e.g., `gurpreet@biji-biji.com` or `malasari@mereka.my`)
+2. Log in as a platform admin with Studio access
 3. Click "New Course"
 4. Fill in:
-   - Organization: `MerekaAcademy`
-   - Course Number: `DEMO101`
-   - Course Run: `2024_Q1`
-   - Course Name: `Mereka Academy Demo Course`
+   - Organization: your operator-approved org
+   - Course Number: a temporary demo identifier
+   - Course Run: the intended test run label
+   - Course Name: a clearly marked demo course title
 5. Add content (minimum):
    - Section: "Getting Started"
    - Subsection: "Welcome"
