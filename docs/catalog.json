@@ -5816,6 +5816,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_TRACKER.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_CLOSEOUT.md",
@@ -6071,6 +6080,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/root-collapse/docs-legacy-testmaps-collapse-map.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/root-collapse/docs-migrations-collapse-map.yaml",
     "status": "supporting",
     "type": "other"
   },
