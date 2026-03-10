@@ -51,7 +51,7 @@ If a transitional or archive path contradicts a winning root, the winning root g
 | --- | --- | --- | --- |
 | Living architecture / standards | `docs/concepts/architecture/**` | `docs/architecture/README.md` | `docs/archive/**` |
 | Operator procedures | `docs/ops/**` | `docs/operations/README.md`, `docs/runbooks/README.md` | `docs/archive/**` |
-| Human guidance / onboarding | `docs/guides/**` | `docs/onboarding/**`, `docs/guides/branding/README.md` | `docs/archive/**` |
+| Human guidance / onboarding | `docs/guides/**` | `docs/onboarding/**`, `docs/branding/README.md` | `docs/archive/**` |
 | Stable lookup / reference | `docs/reference/**` | none | `docs/archive/**` |
 | Durable rules / policy | `docs/policies/**` | none | `docs/archive/**` |
 | Docs-program internals / templates | `docs/meta/**` | none | `docs/archive/**` |

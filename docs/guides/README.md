@@ -20,8 +20,9 @@ Use this root when the question is instructional:
 
 Do not use these roots as the winning guidance surface:
 - `docs/onboarding/**`
-- `docs/guides/branding/README.md`
 - `docs/operations/README.md` tombstone only
+- `docs/runbooks/README.md` tombstone only
+- `docs/branding/README.md` tombstone only
 - `docs/archive/**`
 
 ## Main guide surfaces

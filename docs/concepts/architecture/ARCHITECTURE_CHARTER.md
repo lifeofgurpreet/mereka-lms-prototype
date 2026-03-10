@@ -125,15 +125,16 @@ Use the smallest path that matches the task:
 
 ## Transitional policy
 
-The following roots are transitional in Wave 2 and must converge toward stub-only compatibility:
+The following retained paths are tombstone-only compatibility surfaces:
 
-- `docs/operations/**`
-- `docs/onboarding/**`
-- `docs/guides/branding/README.md`
+- `docs/operations/README.md`
 - `docs/runbooks/README.md`
 - `docs/architecture/README.md`
+- `docs/branding/README.md`
+- `docs/ci-cd/README.md`
+- `docs/migrations/README.md`
 
-They MAY preserve compatibility notes and replacement pointers during migration. They MUST NOT continue to grow as competing active roots.
+They MAY preserve a minimal replacement pointer at the root. They MUST NOT continue to grow as competing active roots.
 
 ## Review test
 
