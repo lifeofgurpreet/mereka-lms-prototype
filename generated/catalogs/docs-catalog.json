@@ -6367,6 +6367,141 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/RECEIPT_CLASSES.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/WAVE12_CLOSEOUT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/WAVE12_EXECUTION_TRACKER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/WAVE12_REVIEW_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/WAVE13_EXECUTION_TRACKER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/schemas/evidence-obligations.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/schemas/read-first-packs.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/schemas/release-readiness.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/schemas/review-decision.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/schemas/reviewer-obligations.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/knowledge/schemas/runtime-evaluation.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/AGENT_PACK_ABI.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/REPO_DISCOVERY_MODEL.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "meta/skills/SKILL_RUNTIME_MODEL.yaml",
     "status": "supporting",
     "type": "other"
@@ -6385,7 +6520,106 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "meta/skills/WAVE11_CLOSEOUT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "meta/skills/WAVE11_EXECUTION_TRACKER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/WAVE11_REVIEW_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/command-registry.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/evidence-sufficiency-map.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/mixed-diff-arbitration.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/pack-registry.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/read-first.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/runtime-convergence-report.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/scenario-packs.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/skill-dependency-graph.schema.json",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/skills/schemas/skill-registry.schema.json",
     "status": "supporting",
     "type": "other"
   },
