@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 3684,
+  "edge_count": 3672,
   "edges": [
     {
       "edge_type": "classifies",
@@ -3510,11 +3510,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/ops/quickref/QUICK_REFERENCE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/ops/quickref/README.md"
     },
     {
@@ -3546,21 +3541,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/ops/quickref/kubectl-cheatsheet.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/quickref/local-access-info.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/quickref/local-production-parity.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/ops/quickref/local-work-remaining.md"
     },
     {
       "edge_type": "classifies",
@@ -4980,11 +4960,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/reference/operations/BUILD_CLOSURE_TRUTH.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md"
     },
     {
@@ -5291,6 +5266,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/status/active/INFRA_TEAM_ACTION_ITEMS.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/status/active/LOCAL_ENVIRONMENT_WORK_REMAINING_2026-03-06.md"
     },
     {
       "edge_type": "classifies",
@@ -9210,11 +9190,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/ops/quickref/QUICK_REFERENCE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/ops/quickref/README.md"
     },
     {
@@ -9246,21 +9221,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/ops/quickref/kubectl-cheatsheet.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/quickref/local-access-info.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/quickref/local-production-parity.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/ops/quickref/local-work-remaining.md"
     },
     {
       "edge_type": "contains",
@@ -10680,11 +10640,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/reference/operations/BUILD_CLOSURE_TRUTH.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md"
     },
     {
@@ -10996,6 +10951,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/status/active/INFRA_TEAM_ACTION_ITEMS.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/status/active/LOCAL_ENVIRONMENT_WORK_REMAINING_2026-03-06.md"
     },
     {
       "edge_type": "contains",
@@ -13650,11 +13610,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/reference/operations/BUILD_CLOSURE_TRUTH.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md"
     },
     {
@@ -14750,6 +14705,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:other",
+      "target": "docs/status/active/LOCAL_ENVIRONMENT_WORK_REMAINING_2026-03-06.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:other",
       "target": "docs/status/active/NEXT-PHASE-ROADMAP.md"
     },
     {
@@ -15375,11 +15335,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
-      "target": "docs/ops/quickref/QUICK_REFERENCE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
       "target": "docs/ops/quickref/README.md"
     },
     {
@@ -15411,21 +15366,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
       "target": "docs/ops/quickref/kubectl-cheatsheet.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/quickref/local-access-info.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/quickref/local-production-parity.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/quickref/local-work-remaining.md"
     },
     {
       "edge_type": "classifies",
@@ -18424,7 +18364,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1251,
+  "node_count": 1247,
   "nodes": [
     {
       "id": "classification:archival",
@@ -25201,17 +25141,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/ops/quickref/QUICK_REFERENCE.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/QUICK_REFERENCE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Quick Reference Card"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/ops/quickref/README.md",
       "lane": "runbook",
       "node_type": "docs:runbook",
@@ -25286,39 +25215,6 @@
       "root": "docs",
       "status": "",
       "title": "Kubectl Cheatsheet - Mereka LMS"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/quickref/local-access-info.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/local-access-info.md",
-      "root": "docs",
-      "status": "",
-      "title": "Local Development Access Information"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/quickref/local-production-parity.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/local-production-parity.md",
-      "root": "docs",
-      "status": "",
-      "title": "Local/Production Parity Strategy"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/ops/quickref/local-work-remaining.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/quickref/local-work-remaining.md",
-      "root": "docs",
-      "status": "",
-      "title": "Local Development Work Remaining"
     },
     {
       "classification": "supporting",
@@ -28435,17 +28331,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/reference/operations/BUILD_CLOSURE_TRUTH.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/reference/operations/BUILD_CLOSURE_TRUTH.md",
-      "root": "docs",
-      "status": "",
-      "title": "Build Closure Truth"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -29136,6 +29021,17 @@
       "root": "docs",
       "status": "",
       "title": "Infra Team Action Items (2026-03-05) (Archived)"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/status/active/LOCAL_ENVIRONMENT_WORK_REMAINING_2026-03-06.md",
+      "lane": "other",
+      "node_type": "docs:other",
+      "owner": "",
+      "path": "docs/status/active/LOCAL_ENVIRONMENT_WORK_REMAINING_2026-03-06.md",
+      "root": "docs",
+      "status": "",
+      "title": "Local Environment Work Remaining"
     },
     {
       "classification": "supporting",

@@ -3,7 +3,7 @@
     "archival": 298,
     "canonical": 44,
     "generated": 49,
-    "supporting": 834
+    "supporting": 833
   },
   "entries": [
     {
@@ -8137,15 +8137,6 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
-      "path": "docs/reference/operations/BUILD_CLOSURE_TRUTH.md",
-      "root": "docs",
-      "status": "",
-      "title": "Build Closure Truth"
-    },
-    {
-      "classification": "supporting",
-      "lane": "concept",
-      "owner": "",
       "path": "docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md",
       "root": "docs",
       "status": "",
@@ -11032,12 +11023,12 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1225,
+  "entry_count": 1224,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 194,
+    "docs:concept": 193,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
@@ -11054,7 +11045,7 @@
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 1007,
+    "docs": 1006,
     "specs": 218
   }
 }

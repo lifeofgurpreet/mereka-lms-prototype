@@ -8804,15 +8804,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-09",
-    "owner": "Platform Team",
-    "path": "reference/operations/BUILD_CLOSURE_TRUTH.md",
-    "status": "canonical",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reference/operations/CANONICAL_DEPLOY_CONTRACT.md",
