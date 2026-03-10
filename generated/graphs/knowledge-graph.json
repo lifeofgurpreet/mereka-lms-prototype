@@ -4255,11 +4255,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/ops/runbooks/migrations/mct/OPS_MCT_README.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/ops/runbooks/migrations/mct/README.md"
     },
     {
@@ -4861,6 +4856,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/reference/migrations/mct/OPENEDX_PROGRAMS_SETUP.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/migrations/mct/OPS_MCT_README.md"
     },
     {
       "edge_type": "classifies",
@@ -9925,11 +9925,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/ops/runbooks/migrations/mct/OPS_MCT_README.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/ops/runbooks/migrations/mct/README.md"
     },
     {
@@ -10531,6 +10526,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/reference/migrations/mct/OPENEDX_PROGRAMS_SETUP.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/migrations/mct/OPS_MCT_README.md"
     },
     {
       "edge_type": "contains",
@@ -13510,6 +13510,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/reference/migrations/mct/OPS_MCT_README.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/reference/migrations/mct/PROGRAMS_QUICK_REFERENCE.md"
     },
     {
@@ -16061,11 +16066,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:runbook",
       "target": "docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:runbook",
-      "target": "docs/ops/runbooks/migrations/mct/OPS_MCT_README.md"
     },
     {
       "edge_type": "classifies",
@@ -26750,17 +26750,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/ops/runbooks/migrations/mct/OPS_MCT_README.md",
-      "lane": "runbook",
-      "node_type": "docs:runbook",
-      "owner": "",
-      "path": "docs/ops/runbooks/migrations/mct/OPS_MCT_README.md",
-      "root": "docs",
-      "status": "",
-      "title": "Microsoft Community Training \u2192 Open edX Migration"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/ops/runbooks/migrations/mct/README.md",
       "lane": "runbook",
       "node_type": "docs:runbook",
@@ -28089,6 +28078,17 @@
       "root": "docs",
       "status": "",
       "title": "Open edX Programs Setup for Learning Paths"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/reference/migrations/mct/OPS_MCT_README.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/OPS_MCT_README.md",
+      "root": "docs",
+      "status": "",
+      "title": "Microsoft Community Training \u2192 Open edX Migration"
     },
     {
       "classification": "supporting",

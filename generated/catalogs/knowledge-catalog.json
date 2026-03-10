@@ -6868,15 +6868,6 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
-      "path": "docs/ops/runbooks/migrations/mct/OPS_MCT_README.md",
-      "root": "docs",
-      "status": "",
-      "title": "Microsoft Community Training \u2192 Open edX Migration"
-    },
-    {
-      "classification": "supporting",
-      "lane": "runbook",
-      "owner": "",
       "path": "docs/ops/runbooks/migrations/mct/README.md",
       "root": "docs",
       "status": "",
@@ -7961,6 +7952,15 @@
       "root": "docs",
       "status": "",
       "title": "Open edX Programs Setup for Learning Paths"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/migrations/mct/OPS_MCT_README.md",
+      "root": "docs",
+      "status": "",
+      "title": "Microsoft Community Training \u2192 Open edX Migration"
     },
     {
       "classification": "supporting",
@@ -11010,13 +11010,13 @@
   "lanes": {
     "docs:adr": 50,
     "docs:archive": 298,
-    "docs:concept": 194,
+    "docs:concept": 195,
     "docs:evidence": 9,
     "docs:generated": 1,
     "docs:index": 5,
     "docs:other": 194,
     "docs:review": 79,
-    "docs:runbook": 174,
+    "docs:runbook": 173,
     "specs:evidence": 43,
     "specs:generated": 48,
     "specs:normative": 39,

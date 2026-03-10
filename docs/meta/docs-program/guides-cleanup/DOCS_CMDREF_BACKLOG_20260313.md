@@ -37,7 +37,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/status/migrations/KAJABI_MIGRATION_STATUS.md | 11 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 9 | Platform Architecture | fix inline path references and missing commands |
 | docs/ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md | 8 | Unassigned (determine domain owner) | fix inline path references and missing commands |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 8 | Unassigned (determine domain owner) | fix inline path references and missing commands |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 8 | Unassigned (determine domain owner) | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_217_PACKET.md | 7 | Platform Architecture | fix inline path references and missing commands |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md | 7 | Platform Architecture | fix inline path references and missing commands |
 | docs/policies/architecture/OSCAR_DEPRECATION.md | 7 | Platform Architecture | fix inline path references and missing commands |
@@ -407,14 +407,14 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 264 | scripts/migrations/mct/import_courses_k8s.py |
 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 375 | scripts/migrations/mct/transform_data.py |
 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md | 396 | scripts/migrations/kajabi/ |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 100 | scripts/migrations/mct/openedx_bulk_import_mct.py |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 121 | scripts/migrations/mct/run_user_import_k8s.sh |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 122 | scripts/migrations/mct/test_user_import.sh |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 45 | scripts/migrations/mct/transform_data.py |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 55 | scripts/migrations/mct/build_course_packages.py |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 70 | scripts/migrations/mct/prepare_openedx_imports.py |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 77 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md |
-| docs/ops/runbooks/migrations/mct/OPS_MCT_README.md | 84 | scripts/migrations/mct/openedx_bulk_import_mct.py |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 100 | scripts/migrations/mct/openedx_bulk_import_mct.py |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 121 | scripts/migrations/mct/run_user_import_k8s.sh |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 122 | scripts/migrations/mct/test_user_import.sh |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 45 | scripts/migrations/mct/transform_data.py |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 55 | scripts/migrations/mct/build_course_packages.py |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 70 | scripts/migrations/mct/prepare_openedx_imports.py |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 77 | docs/ops/runbooks/migrations/mct/MIGRATION_PLAN.md |
+| docs/reference/migrations/mct/OPS_MCT_README.md | 84 | scripts/migrations/mct/openedx_bulk_import_mct.py |
 | docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 111 | docs/policies/operations/A11Y_EXCEPTIONS.md |
 | docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 134 | docs/policies/operations/A11Y_EXCEPTIONS.md |
 | docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md | 174 | docs/policies/operations/A11Y_EXCEPTIONS.md |
