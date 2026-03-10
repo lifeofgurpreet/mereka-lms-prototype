@@ -185,8 +185,8 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/policies/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md | 349 | scripts/qa/verify-accessibility.sh |
 | docs/policies/architecture/ANALYTICS_DECISION_GATE.md | 105 | docs/product/FEATURE_REQUESTS.md |
 | docs/policies/architecture/ANALYTICS_DECISION_GATE.md | 110 | docs/product/FEATURE_REQUESTS.md |
-| docs/policies/architecture/ANALYTICS_DECISION_GATE.md | 84 | docs/operations/INCIDENT_LOG.md |
-| docs/policies/architecture/ANALYTICS_DECISION_GATE.md | 91 | docs/operations/INCIDENT_LOG.md |
+| docs/policies/architecture/ANALYTICS_DECISION_GATE.md | 84 | docs/status/incidents/README.md |
+| docs/policies/architecture/ANALYTICS_DECISION_GATE.md | 91 | docs/status/incidents/README.md |
 | docs/reference/architecture/ASPECTS_DEPLOYMENT_READINESS.md | 263 | deploy/k8s/base/plugins/aspects/prometheusrule.yml |
 | reports/2026/closures/ASSESSMENT_EPIC_CLOSURE.md | 104 | docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md |
 | reports/2026/closures/ASSESSMENT_EPIC_CLOSURE.md | 68 | docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md |
@@ -227,7 +227,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md | 369 | scripts/tenants/apply-tenant-registry.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md | 465 | scripts/qa/verify-submodule-path-contract.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md | 52 | docs/archive/evidence/operations/evidence/router-smoke/prod-route-health-20260219-1214.md |
-| docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md | 79 | docs/operations/EVIDENCE_STORAGE_POLICY.md |
+| docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_IMPLEMENTOR_SPECS.md | 79 | docs/guides/standards/EVIDENCE_PACK_STANDARD.md |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md | 131 | docs/archive/evidence/operations/evidence/router-smoke/prod-route-health-20260219-1214.md |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_215_PACKET.md | 13 | docs/archive/evidence/operations/evidence/router-smoke/prod-route-health-20260219-1214.md |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_216_PACKET.md | 87 | docs/policies/operations/REPO_BOUNDARIES.md |
@@ -242,7 +242,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_218_PACKET.md | 41 | scripts/qa/verify-theme-artifacts-determinism.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_218_PACKET.md | 76 | scripts/qa/verify-theme-artifacts-determinism.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md | 32 | scripts/qa/verify-manifest.yml |
-| docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md | 36 | docs/operations/VERIFY_SUITE_OPERATING_MODEL.md |
+| docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md | 36 | verification/assurance/VERIFICATION_GOVERNANCE.md |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md | 67 | scripts/qa/run-lane-infra.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md | 68 | scripts/qa/run-lane-branding.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_219_PACKET.md | 69 | scripts/qa/run-lane-auth.sh |
@@ -251,7 +251,7 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 109 | scripts/qa/verify-tenant-registry-drift.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 134 | scripts/qa/verify-tenant-registry-drift.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 39 | scripts/tenants/validate-tenant-registry.sh |
-| docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 41 | docs/operations/TENANT_REGISTRY_CONTRACT.md |
+| docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 41 | docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 63 | scripts/tenants/validate-tenant-registry.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 74 | scripts/tenants/apply-tenant-registry.sh |
 | docs/meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_220_PACKET.md | 76 | scripts/tenants/render-tenant-configmap.sh |
