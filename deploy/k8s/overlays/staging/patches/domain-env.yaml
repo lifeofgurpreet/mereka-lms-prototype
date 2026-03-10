@@ -285,6 +285,21 @@ spec:
             - name: LMS_ROOT_URL
               value: https://staging.academyv2.mereka.io
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy
+spec:
+  template:
+    spec:
+      containers:
+        - name: caddy
+          env:
+            - name: ENTERPRISE_ADMIN_HOST
+              value: staging.admin.academyv2.mereka.io
+            - name: ENTERPRISE_LEARNER_HOST
+              value: staging.learner.academyv2.mereka.io
+---
 # MFE Caddy domain env vars for CSP header template interpolation.
 apiVersion: apps/v1
 kind: Deployment

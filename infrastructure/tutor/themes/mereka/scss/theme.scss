@@ -30,12 +30,220 @@
   background-color: var(--pgn-color-white);
 }
 
+// ---- Global header shell ----
+// The compiled lms-main-v1.scss only imports Mereka tokens; it does not pull in
+// the edx-platform base header partials.  Supply the missing layout rules here
+// so they are baked into the next image build.  The same rules live in
+// mereka-overrides.css as a runtime hotfix (no rebuild needed).
 .global-header,
 .wrapper-header,
 .nav-wrapper {
   background: var(--pgn-color-white);
   border-bottom: 1px solid rgba(26, 22, 35, 0.08);
   box-shadow: 0 10px 30px rgba(26, 22, 35, 0.05);
+}
+
+.global-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+// ---- Inner header row ----
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  height: 64px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ---- Logo ----
+.header-logo {
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+
+  .logo {
+    display: block;
+    height: 36px;
+    width: auto;
+  }
+}
+
+// ---- Nav links ----
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
+
+  .main {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-right: auto;
+  }
+
+  .secondary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+// ---- Individual nav items ----
+.nav-item,
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links .nav-item a {
+  display: inline-block;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--mereka-color-ink-700);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: color 150ms ease, background 150ms ease;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus {
+    color: var(--mereka-color-teal);
+    background: rgba(35, 112, 114, 0.06);
+    text-decoration: none;
+  }
+}
+
+// ---- CTA buttons in nav ----
+.nav-links .register-btn,
+.nav-links a.register-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pgn-color-white);
+  background: var(--mereka-color-magenta);
+  border: none;
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 8px 20px rgba(171, 59, 120, 0.25);
+
+  &:hover,
+  &:focus {
+    background: var(--mereka-color-magenta-dark);
+    color: var(--pgn-color-white);
+    text-decoration: none;
+    box-shadow: 0 10px 24px rgba(171, 59, 120, 0.35);
+  }
+}
+
+.nav-links .sign-in-btn,
+.nav-links a.sign-in-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mereka-color-teal);
+  background: transparent;
+  border: 1.5px solid var(--mereka-color-teal);
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+
+  &:hover,
+  &:focus {
+    background: var(--mereka-color-teal);
+    color: var(--pgn-color-white);
+    text-decoration: none;
+  }
+}
+
+// ---- Hamburger (mobile only) ----
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 4px;
+  transition: background 150ms ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(26, 22, 35, 0.06);
+  }
+
+  .line {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--mereka-color-ink-700);
+    border-radius: 2px;
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+
+  &[aria-expanded="true"] {
+    .line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .line:nth-child(2) { opacity: 0; }
+    .line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .line:nth-child(4) { opacity: 0; }
+  }
+}
+
+// ---- Mobile menu drawer ----
+.mobile-menu {
+  background: var(--pgn-color-white);
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 0.75rem 1.5rem 1rem;
+
+  &.hidden {
+    display: none;
+  }
+}
+
+// ---- Responsive breakpoints ----
+@media (max-width: 768px) {
+  .main-header {
+    padding: 0 1rem;
+    height: 56px;
+  }
+
+  .hamburger-menu {
+    display: flex;
+  }
+
+  .hidden-mobile {
+    display: none !important;
+  }
+
+  .nav-links {
+    display: none;
+  }
 }
 
 .mereka-navbar-brand {
@@ -209,6 +417,7 @@
 .course .course-image .cover-image {
   height: 180px;
   background: linear-gradient(135deg, rgba(35, 112, 114, 0.22), rgba(41, 92, 173, 0.25));
+  position: relative;
 }
 
 .course .course-image .cover-image img {
@@ -216,6 +425,18 @@
   width: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+/* .learn-more is rendered inside .cover-image by the template (aria-hidden overlay).
+   Position it as an absolute badge at the bottom of the image so it is always visible
+   and never clipped by the parent overflow:hidden. */
+.course .course-image .cover-image .learn-more {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  white-space: nowrap;
 }
 
 .course .course-info {

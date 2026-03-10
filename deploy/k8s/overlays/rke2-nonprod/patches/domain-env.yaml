@@ -274,6 +274,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: caddy
+spec:
+  template:
+    spec:
+      containers:
+        - name: caddy
+          env:
+            - name: ENTERPRISE_ADMIN_HOST
+              value: admin.academyv2.mereka.dev
+            - name: ENTERPRISE_LEARNER_HOST
+              value: learner.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: enterprise-access-worker
 spec:
   template:

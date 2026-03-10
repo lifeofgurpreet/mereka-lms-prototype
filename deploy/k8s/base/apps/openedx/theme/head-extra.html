@@ -140,4 +140,20 @@
     flex-direction: column;
     gap: 0.45rem;
   }
+
+  /* learn-more overlay: sits inside .cover-image (position:relative), centred over the image.
+     The element is aria-hidden so this is purely decorative; we make it always-visible
+     so users see "LEARN MORE" as an image badge rather than a hidden clipped element. */
+  .course .course-image .cover-image {
+    position: relative;
+  }
+
+  .course .course-image .cover-image .learn-more {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    white-space: nowrap;
+  }
 </style>
