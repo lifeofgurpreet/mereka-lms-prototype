@@ -1,4 +1,10 @@
 {
+  "canonical_inputs": [
+    "generated/skills/skill-registry.json",
+    "generated/skills/command-registry.json"
+  ],
+  "generated_by": "tools/skills/build_scenario_packs.py",
+  "pack_id": "scenario-packs",
   "scenarios": [
     {
       "applicable_repos": [
@@ -654,5 +660,6 @@
       "title": "What is the canonical recovery or runbook path?"
     }
   ],
-  "schema_version": 1
+  "schema_version": 1,
+  "source_range": null
 }

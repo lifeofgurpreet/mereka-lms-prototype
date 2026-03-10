@@ -1,0 +1,65 @@
+{
+  "canonical_inputs": [
+    "generated/skills/skill-registry.json",
+    "generated/skills/scenario-packs.json"
+  ],
+  "do_not_trust_first": [
+    "archive or transitional paths unless explicitly marked historical",
+    "duplicated freehand summaries when a contract, registry, or standing order exists",
+    "generated surfaces not referenced from the current skill registry"
+  ],
+  "entries": [
+    {
+      "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+      "repo": "mereka-lms"
+    },
+    {
+      "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+      "repo": "mereka-lms"
+    },
+    {
+      "path": "docs/meta/standing-orders/README.md",
+      "repo": "mereka-lms"
+    },
+    {
+      "path": "config/bootstrap-lane-topology.yaml",
+      "repo": "bbi-infrastructure"
+    },
+    {
+      "path": "config/domain-registry.yaml",
+      "repo": "bbi-infrastructure"
+    },
+    {
+      "path": "contracts/release-contracts.yaml",
+      "repo": "platform-control-plane"
+    },
+    {
+      "path": "contracts/service-identity-contract.yaml",
+      "repo": "platform-control-plane"
+    },
+    {
+      "path": "docs/ops/quickref/README.md",
+      "repo": "mereka-lms"
+    },
+    {
+      "path": "tools/docs/verify/report-nonstub-transitional-files.py",
+      "repo": "mereka-lms"
+    },
+    {
+      "path": "tools/docs/verify/run-docs-world-class-gates.sh",
+      "repo": "mereka-lms"
+    },
+    {
+      "path": "tools/docs/verify/scan-doc-catalog-residue.py",
+      "repo": "mereka-lms"
+    },
+    {
+      "path": "tools/docs/verify/verify-doc-catalog-governance.py",
+      "repo": "mereka-lms"
+    }
+  ],
+  "generated_by": "tools/skills/build_skill_dependency_graph.py",
+  "pack_id": "read-first",
+  "schema_version": 1,
+  "source_range": null
+}

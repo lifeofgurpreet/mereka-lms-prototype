@@ -1,4 +1,10 @@
 {
+  "canonical_inputs": [
+    "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+    "docs/meta/skills/SKILL_TAXONOMY.yaml"
+  ],
+  "generated_by": "tools/skills/build_skill_registry.py",
+  "pack_id": "skill-registry",
   "runtime_model": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
   "schema_version": 1,
   "skills": [
@@ -944,5 +950,6 @@
       "title": "Wrapper Retirement Assessment"
     }
   ],
+  "source_range": null,
   "taxonomy": "docs/meta/skills/SKILL_TAXONOMY.yaml"
 }

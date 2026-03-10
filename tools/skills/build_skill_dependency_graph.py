@@ -9,6 +9,7 @@ from typing import Any
 
 DEFAULT_GRAPH = Path("generated/skills/skill-dependency-graph.json")
 DEFAULT_READ_FIRST = Path("generated/skills/read-first.md")
+DEFAULT_READ_FIRST_JSON = Path("generated/skills/read-first.json")
 
 
 def parse_args() -> argparse.Namespace:
@@ -16,6 +17,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--graph-output", default=str(DEFAULT_GRAPH))
     parser.add_argument("--read-first-output", default=str(DEFAULT_READ_FIRST))
+    parser.add_argument("--read-first-json-output", default=str(DEFAULT_READ_FIRST_JSON))
     parser.add_argument("--check", action="store_true")
     return parser.parse_args()
 
@@ -46,7 +48,7 @@ def rank_source(path: str) -> tuple[int, str]:
     return (9, path)
 
 
-def build_read_first(skills: list[dict[str, Any]], max_docs: int = 12) -> tuple[list[dict[str, str]], str]:
+def build_read_first(skills: list[dict[str, Any]], max_docs: int = 12) -> tuple[list[dict[str, str]], str, dict[str, Any]]:
     seen: set[tuple[str, str]] = set()
     candidates: list[dict[str, str]] = []
     for skill in skills:
@@ -89,7 +91,23 @@ def build_read_first(skills: list[dict[str, Any]], max_docs: int = 12) -> tuple[
             "",
         ]
     )
-    return selected, "\n".join(lines) + "\n"
+    read_first_json = {
+        "pack_id": "read-first",
+        "generated_by": "tools/skills/build_skill_dependency_graph.py",
+        "source_range": None,
+        "canonical_inputs": [
+            "generated/skills/skill-registry.json",
+            "generated/skills/scenario-packs.json",
+        ],
+        "schema_version": 1,
+        "entries": selected,
+        "do_not_trust_first": [
+            "archive or transitional paths unless explicitly marked historical",
+            "duplicated freehand summaries when a contract, registry, or standing order exists",
+            "generated surfaces not referenced from the current skill registry",
+        ],
+    }
+    return selected, "\n".join(lines) + "\n", read_first_json
 
 
 def build_graph(skills: list[dict[str, Any]], commands: list[dict[str, Any]], scenarios: list[dict[str, Any]]) -> dict[str, Any]:
@@ -130,7 +148,19 @@ def build_graph(skills: list[dict[str, Any]], commands: list[dict[str, Any]], sc
             if command["command_id"] in command_ids:
                 edges.append({"from": scenario_node, "to": f"command:{command['command_id']}", "kind": "runs"})
 
-    return {"schema_version": 1, "nodes": sorted(nodes, key=lambda item: item["id"]), "edges": sorted(edges, key=lambda item: (item["from"], item["to"], item["kind"]))}
+    return {
+        "pack_id": "skill-dependency-graph",
+        "generated_by": "tools/skills/build_skill_dependency_graph.py",
+        "source_range": None,
+        "canonical_inputs": [
+            "generated/skills/skill-registry.json",
+            "generated/skills/command-registry.json",
+            "generated/skills/scenario-packs.json",
+        ],
+        "schema_version": 1,
+        "nodes": sorted(nodes, key=lambda item: item["id"]),
+        "edges": sorted(edges, key=lambda item: (item["from"], item["to"], item["kind"])),
+    }
 
 
 def write_or_check(path: Path, content: str, check: bool, ok_label: str) -> None:
@@ -153,15 +183,17 @@ def main() -> None:
     command_registry = load_json(repo_root / "generated/skills/command-registry.json")
     scenario_packs = load_json(repo_root / "generated/skills/scenario-packs.json")
 
-    selected, read_first_markdown = build_read_first(skill_registry["skills"])
+    selected, read_first_markdown, read_first_json = build_read_first(skill_registry["skills"])
     graph = build_graph(skill_registry["skills"], command_registry["commands"], scenario_packs["scenarios"])
     graph_serialized = json.dumps(graph, indent=2, sort_keys=True) + "\n"
+    read_first_json_serialized = json.dumps(read_first_json, indent=2, sort_keys=True) + "\n"
 
     if len(selected) > 12:
         raise SystemExit("Read-first pack exceeds 12 docs")
 
     write_or_check(Path(args.graph_output), graph_serialized, args.check, f"SKILL_DEP_GRAPH_OK nodes={len(graph['nodes'])} edges={len(graph['edges'])}")
     write_or_check(Path(args.read_first_output), read_first_markdown, args.check, f"SKILL_READ_FIRST_OK entries={len(selected)}")
+    write_or_check(Path(args.read_first_json_output), read_first_json_serialized, args.check, f"SKILL_READ_FIRST_JSON_OK entries={len(selected)}")
 
 
 if __name__ == "__main__":

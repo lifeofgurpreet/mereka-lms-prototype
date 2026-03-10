@@ -1,4 +1,9 @@
 {
+  "canonical_inputs": [
+    "generated/skills/skill-registry.json",
+    "generated/skills/command-registry.json",
+    "generated/skills/scenario-packs.json"
+  ],
   "edges": [
     {
       "from": "scenario:canonical-recovery-runbook",
@@ -471,6 +476,7 @@
       "to": "source:mereka-lms:tools/docs/verify/scan-doc-catalog-residue.py"
     }
   ],
+  "generated_by": "tools/skills/build_skill_dependency_graph.py",
   "nodes": [
     {
       "id": "command:docs-catalog-governance",
@@ -693,5 +699,7 @@
       "type": "source"
     }
   ],
-  "schema_version": 1
+  "pack_id": "skill-dependency-graph",
+  "schema_version": 1,
+  "source_range": null
 }

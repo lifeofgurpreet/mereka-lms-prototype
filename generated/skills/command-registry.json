@@ -1,4 +1,8 @@
 {
+  "canonical_inputs": [
+    "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+    "generated/skills/skill-registry.json"
+  ],
   "commands": [
     {
       "canonical_command": "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
@@ -230,7 +234,10 @@
       "validator": "python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue"
     }
   ],
+  "generated_by": "tools/skills/build_command_registry.py",
+  "pack_id": "command-registry",
   "repo_discovery_model": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
   "schema_version": 1,
+  "source_range": null,
   "source_skill_registry": "generated/skills/skill-registry.json"
 }

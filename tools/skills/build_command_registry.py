@@ -284,6 +284,13 @@ def main() -> None:
         commands.append(spec)
 
     payload = {
+        "pack_id": "command-registry",
+        "generated_by": "tools/skills/build_command_registry.py",
+        "source_range": None,
+        "canonical_inputs": [
+            "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+            "generated/skills/skill-registry.json",
+        ],
         "schema_version": 1,
         "repo_discovery_model": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
         "source_skill_registry": "generated/skills/skill-registry.json",

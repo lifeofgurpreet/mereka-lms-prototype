@@ -205,6 +205,13 @@ def build_registry(args: argparse.Namespace) -> dict[str, Any]:
         skills.append(registry_entry)
 
     output = {
+        "pack_id": "skill-registry",
+        "generated_by": "tools/skills/build_skill_registry.py",
+        "source_range": None,
+        "canonical_inputs": [
+            "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+            "docs/meta/skills/SKILL_TAXONOMY.yaml",
+        ],
         "schema_version": 1,
         "runtime_model": relative_to_root(
             repo_root / "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml", repo_root

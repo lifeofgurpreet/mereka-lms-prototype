@@ -187,7 +187,17 @@ def build_payload(repo_root: Path) -> dict[str, Any]:
             }
         )
 
-    return {"schema_version": 1, "scenarios": scenarios}
+    return {
+        "pack_id": "scenario-packs",
+        "generated_by": "tools/skills/build_scenario_packs.py",
+        "source_range": None,
+        "canonical_inputs": [
+            "generated/skills/skill-registry.json",
+            "generated/skills/command-registry.json",
+        ],
+        "schema_version": 1,
+        "scenarios": scenarios,
+    }
 
 
 def write_or_check(path: Path, payload: dict[str, Any], check: bool) -> None:

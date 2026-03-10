@@ -1,0 +1,40 @@
+schema_version: 1
+model_id: wave11-repo-discovery
+purpose: >
+  Portable discovery model for sibling repos consumed by the Wave 11 skill
+  runtime. Runtime tools must resolve repo roots from explicit overrides or
+  relative candidates and must never emit machine-local absolute paths in pack
+  payloads.
+repos:
+  mereka-lms:
+    env_var: MEREKA_LMS_ROOT
+    default_relative_candidates:
+      - .
+    required_markers:
+      - docs/README.md
+      - docs/meta/skills/SKILL_RUNTIME_MODEL.yaml
+  bbi-infrastructure:
+    env_var: BBI_INFRASTRUCTURE_ROOT
+    default_relative_candidates:
+      - ../bbi-infrastructure
+      - ../bbi-infrastructure-wt-wave11-skill-exports
+      - ../bbi-infrastructure-wt-wave10-contract-compiled-front-doors
+    required_markers:
+      - config/domain-registry.yaml
+      - scripts/promote.sh
+  platform-control-plane:
+    env_var: PLATFORM_CONTROL_PLANE_ROOT
+    default_relative_candidates:
+      - ../../platform-control-plane
+      - ../../platform-control-plane-wt-wave11-skill-exports
+      - ../../platform-control-plane-wt-wave10-contract-docsync
+    required_markers:
+      - contracts/release-contracts.yaml
+      - scripts/plan-all.sh
+resolver_rules:
+  precedence:
+    - explicit_cli_override
+    - environment_variable
+    - relative_candidate_scan
+  fail_if_missing: true
+  emit_repo_relative_paths_only: true
