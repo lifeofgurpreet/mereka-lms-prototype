@@ -51,10 +51,10 @@ Canonical standards and ownership references:
 - `scripts/qa/verify-sentry-wiring.sh` and `scripts/qa/verify-sentry-cli-contract.sh` (enforcement/audit contract)
 - `infrastructure/monitoring/README.md` (platform monitoring stack SoT)
 
-Historical references (deprecated workspace, read-only context):
-- `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-STANDARD.md`
-- `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-K8S-INTEGRATION.md`
-- `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-PROJECT-REGISTRY.md`
+Historical references (read-only context from the older observability workspace):
+- `SENTRY-STANDARD.md`
+- `SENTRY-K8S-INTEGRATION.md`
+- `SENTRY-PROJECT-REGISTRY.md`
 
 Current org/project contract:
 - Org: `biji-biji-non-profits`
