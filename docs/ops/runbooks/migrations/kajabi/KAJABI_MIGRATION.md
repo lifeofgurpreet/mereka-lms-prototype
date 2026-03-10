@@ -24,7 +24,7 @@ Outputs:
 - `users.csv`, `enrollments.csv`, `courses.csv`
 - `course_structure.json`, `course_summary.csv`
 
-Reference: [`KAJABI_MIGRATION_NOTES.md`](KAJABI_MIGRATION_NOTES.md) for column-level quirks.
+Reference: [`KAJABI_MIGRATION_NOTES.md`](../../../../migrations/kajabi/KAJABI_MIGRATION_NOTES.md) for column-level quirks.
 
 ## 3. Build Open edX Tarballs
 
@@ -67,7 +67,7 @@ tutor local run --volume="$(pwd)/scripts/migrations/kajabi/openedx_bulk_import.p
   lms python /tmp/openedx_bulk_import.py enrollments --csv /tmp/kajabi-enrollments.csv --settings=lms.envs.tutor.production
 ```
 
-Course content imports can be automated via `scripts/migrations/kajabi/import_courses.py` or done manually through Studio (`http://studio.localhost` → Import Course). Details live in [`KAJABI_MIGRATION_HANDOVER.md`](KAJABI_MIGRATION_HANDOVER.md).
+Course content imports can be automated via `scripts/migrations/kajabi/import_courses.py` or done manually through Studio (`http://studio.localhost` → Import Course). Details live in [`KAJABI_MIGRATION_HANDOVER.md`](../../../../../reports/2026/closures/KAJABI_MIGRATION_HANDOVER.md).
 
 ### Tutor K8s (production)
 
