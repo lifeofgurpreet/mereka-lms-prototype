@@ -19,16 +19,20 @@ fail() { echo "  FAIL: $1"; FAILURES=$((FAILURES + 1)); }
 echo "=== ConfigMap Hash Suffix Verification ==="
 echo ""
 
-# Check 1: local overlay should NOT have disableNameSuffixHash
-echo "[1/3] Checking local overlay for disableNameSuffixHash"
-kfile="${REPO_ROOT}/deploy/k8s/overlays/local/kustomization.yaml"
-if [[ ! -f "$kfile" ]]; then
-  fail "local overlay kustomization.yaml not found"
-elif grep -q 'disableNameSuffixHash.*true' "$kfile"; then
-  fail "local: disableNameSuffixHash is still true"
-else
-  pass "local: disableNameSuffixHash removed"
-fi
+# Check 1: NO overlay should have disableNameSuffixHash
+echo "[1/3] Checking all overlays for disableNameSuffixHash"
+for overlay in local rke2-nonprod staging; do
+  kfile="${REPO_ROOT}/deploy/k8s/overlays/${overlay}/kustomization.yaml"
+  if [[ ! -f "$kfile" ]]; then
+    pass "${overlay}: overlay not present (skip)"
+    continue
+  fi
+  if grep -q 'disableNameSuffixHash.*true' "$kfile"; then
+    fail "${overlay}: disableNameSuffixHash is still true"
+  else
+    pass "${overlay}: disableNameSuffixHash removed"
+  fi
+done
 
 # Check 2: kustomize render produces hashed ConfigMap names
 echo "[2/3] Checking local overlay ConfigMap hash suffixes via kustomize render"

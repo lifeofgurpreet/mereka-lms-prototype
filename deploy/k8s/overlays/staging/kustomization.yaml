@@ -76,8 +76,9 @@ images:
     newTag: "21.0.0"
     digest: sha256:11cad063c297761353b38df9255fdebfa244038f5ab90f660935bd9ecc39d138
 
-generatorOptions:
-  disableNameSuffixHash: true
+# generatorOptions.disableNameSuffixHash removed (stabilization):
+# Hash suffixes ensure pods restart when ConfigMap content changes.
+# See docs/stabilization/STABILIZATION_AUTHORITY_AND_ROLLOUT_PLAN.md
 
 configMapGenerator:
   - name: openedx-config
