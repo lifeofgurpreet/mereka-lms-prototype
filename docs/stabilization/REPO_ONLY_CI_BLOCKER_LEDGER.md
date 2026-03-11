@@ -38,6 +38,44 @@ reported 64 FAIL across 3 categories, all pre-existing on main.
 
 **After fix**: `lint-repo-conventions.sh` → 14 PASS, 0 FAIL, 27 warnings.
 
+### FIXED — shellcheck GitHub Action Fails on ARC Runners
+
+**Impact**: `ludeeus/action-shellcheck` GitHub Action downloads `.tar.xz` archives. ARC runners
+lack `xz-utils`, causing `tar: xz: Cannot exec: No such file or directory`. Shellcheck never ran.
+
+**Fix**: Replaced third-party action with direct binary download + Python `lzma` fallback for
+decompression. Runs `shellcheck --severity=error` on all `scripts/*.sh` files.
+
+### FIXED — Pre-existing shellcheck Errors (2 scripts)
+
+**Impact**: Never detected because shellcheck never ran on ARC runners (see above).
+
+| Script | Error | Fix |
+|--------|-------|-----|
+| `scripts/qa/verify-ci-runner-policy.sh` | SC1087: array expansion `$job_name[$i]` | `${job_name}[${i}]` |
+| `scripts/tenants/offboard-tenant.sh` | SC1072/SC1073: function call inside `[[ ]]` | Split into `[[ ]] && func` |
+
+### FIXED — kubeconform Validates Non-K8s YAML
+
+**Impact**: 3 data/registry files lack `kind` key, causing kubeconform to fail:
+- `deploy/k8s/migrations/registry.yaml`
+- `deploy/k8s/tenancy/tenant-registry.yaml`
+- `deploy/k8s/base/secrets/SECRET_CLASSIFICATION.yaml`
+
+**Fix**: Added `grep -v 'registry\.yaml'` and `grep -v 'SECRET_CLASSIFICATION'` to the find pipeline.
+
+### FIXED — lsb_release Missing on ARC Runners (Systemic, All 4 Jobs)
+
+**Impact**: `actions/setup-python` v5 calls `lsb_release -rs`/`-is` to build pip cache key.
+ARC runners lack `lsb-release` package and we cannot `apt-install` (no sudo). This caused
+**all 4 CI jobs** (Static Validation, Tutor Config Tests, Security Scans, Python test coverage)
+to fail on **every branch including main**. Python installed successfully but the cache step
+errored, skipping all subsequent steps.
+
+**Fix**: Added `lsb_release` stub script to `setup-python-env` composite action. Stub handles
+`-rs`, `-is`, `-ds`, `-cs`, `-a`, and combined flag forms. Installed to `$GITHUB_WORKSPACE/.cache/bin/`
+and added to `$GITHUB_PATH`.
+
 ### NOT FIXED — yamllint Warnings (Non-Blocking)
 
 These produce `[warning]` output but do NOT cause CI failure:
