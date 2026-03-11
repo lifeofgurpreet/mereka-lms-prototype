@@ -22,6 +22,22 @@ caused `Static Validation` to fail on **main**, which propagated to **every open
 
 **Prevention**: `.gitattributes` now enforces LF for `*.yaml`, `*.yml`, `*.sh`, `*.py`, `*.js`, `*.json`, `*.md`.
 
+### FIXED — lint-repo-conventions.sh Failures (64 total)
+
+**Impact**: The parallel script runner in Static Validation ran `lint-repo-conventions.sh` which
+reported 64 FAIL across 3 categories, all pre-existing on main.
+
+**Fixes applied**:
+
+| Category | Count | Fix |
+|----------|-------|-----|
+| Architectural boundaries: specs referencing `docs/ops/` | 60 | Excluded `docs/ops/` from deprecated-path grep (it's the canonical ops docs root) |
+| Glob-ability: wrong file names in `specs/plans/` | 2 | Excluded `_spec.md` files and `IMPLEMENTATION_ORDER.md` from plan-naming check |
+| Grep-ability: missing shebangs | 2 | Added `#!/usr/bin/env bash` to sourced library files |
+| Grep-ability: unpinned workflow action refs | 2 | Pinned `actions/checkout` and `actions/setup-python` in `adr-governance.yml` |
+
+**After fix**: `lint-repo-conventions.sh` → 14 PASS, 0 FAIL, 27 warnings.
+
 ### NOT FIXED — yamllint Warnings (Non-Blocking)
 
 These produce `[warning]` output but do NOT cause CI failure:
