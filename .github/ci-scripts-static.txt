@@ -171,6 +171,7 @@ scripts/qa/verify-cicd-tutor-plugin-test.sh
 scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/test-verify-ci-runner-policy.sh
 scripts/qa/verify-pr-handoff-guardrails.sh
+scripts/qa/verify-execution-invariants-pack.sh
 scripts/qa/verify-provision-mysql-app-dbs-guardrails.sh
 scripts/qa/verify-mysql-user-repair-guardrails.sh
 scripts/qa/verify-prune-gcp-snapshots-guardrails.sh
@@ -598,5 +599,6 @@ scripts/qa/verify-configmap-hash-suffixes.sh
 scripts/qa/verify-enterprise-auth-contract.sh
 scripts/qa/verify-redis-db-allocation.sh
 scripts/qa/verify-mfe-env-config-url-guard.sh
+scripts/qa/verify-enterprise-mfe-build-contract.sh
 scripts/qa/verify-agent-context-lock.sh --allow-main
 scripts/qa/verify-arc-runner-contract.sh

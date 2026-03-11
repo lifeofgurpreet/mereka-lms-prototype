@@ -7,13 +7,20 @@
 #
 # Build context: repo root (so Dockerfile can COPY brand assets from their canonical location).
 #
+# SOURCE_TAG is REQUIRED — must be a pinned tag (e.g. mereka-branded-6578c105) or digest.
+# "latest" is NOT a valid source — builds must use an explicit, existing tag.
+# The workflow resolves the latest available tag and passes it as a build-arg.
+#
 # Build (CI uses reusable workflow; local wrapper: scripts/infra/build-enterprise-mfe-clean.sh):
 #   docker build -f infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal \
-#     --build-arg SOURCE_TAG=latest \
-#     -t $REGISTRY/enterprise-learner-portal:mereka-branded-YYYYMMDD .
+#     --build-arg SOURCE_TAG=mereka-branded-6578c105 \
+#     -t $REGISTRY/enterprise-learner-portal:mereka-branded-$(git rev-parse --short HEAD) .
 
 ARG REGISTRY=ghcr.io/biji-biji-initiative/mereka-lms
-ARG SOURCE_TAG=latest
+# No default — SOURCE_TAG must be provided explicitly via --build-arg.
+# If omitted, Docker fails with "invalid reference format" on the empty tag.
+# The workflow's resolve-source job provides this automatically.
+ARG SOURCE_TAG
 FROM ${REGISTRY}/enterprise-learner-portal:${SOURCE_TAG}
 
 # Copy and run cleanup/patch scripts at build time

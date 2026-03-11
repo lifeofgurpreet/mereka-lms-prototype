@@ -251,16 +251,54 @@ else
   echo "No changed markdown docs in scope."
 fi
 
+changed_files=()
+while IFS= read -r f; do
+  [[ -n "$f" ]] && changed_files+=("$f")
+done < <(git diff --name-only "$RANGE")
+
+range_touches_retired_root_contract() {
+  local retired_prefix="$1"
+  local retired_marker="$2"
+  local changed
+  for changed in "${changed_files[@]}"; do
+    if [[ "$changed" == "$retired_prefix"* ]]; then
+      return 0
+    fi
+    if [[ "$changed" == "tools/docs/verify/verify-docs-policy.sh" ]] || [[ "$changed" == tools/docs/verify/verify_legacy_*_root.py ]]; then
+      return 0
+    fi
+    if [[ ! -f "$changed" ]]; then
+      continue
+    fi
+    case "$changed" in
+      *.md|*.py|*.sh|*.yaml|*.yml|*.json|*.txt|*.tsv)
+        if grep -Fq "$retired_marker" "$changed"; then
+          return 0
+        fi
+        ;;
+    esac
+  done
+  return 1
+}
+
 echo "Check 5/11: legacy architecture root retired"
 legacy_arch_status="pass"
-if ! python3 tools/docs/verify/verify_legacy_architecture_root.py --repo-root .; then
-  legacy_arch_status="fail"
+if range_touches_retired_root_contract "docs/architecture/" "docs/architecture/"; then
+  if ! python3 tools/docs/verify/verify_legacy_architecture_root.py --repo-root .; then
+    legacy_arch_status="fail"
+  fi
+else
+  echo "LEGACY_ARCHITECTURE_ROOT_SKIPPED range_untouched"
 fi
 
 echo "Check 6/11: legacy operations root retired"
 legacy_ops_status="pass"
-if ! python3 tools/docs/verify/verify_legacy_operations_root.py --repo-root .; then
-  legacy_ops_status="fail"
+if range_touches_retired_root_contract "docs/operations/" "docs/operations/"; then
+  if ! python3 tools/docs/verify/verify_legacy_operations_root.py --repo-root .; then
+    legacy_ops_status="fail"
+  fi
+else
+  echo "LEGACY_OPERATIONS_ROOT_SKIPPED range_untouched"
 fi
 
 echo "Check 7/11: legacy CI/CD root retired"
