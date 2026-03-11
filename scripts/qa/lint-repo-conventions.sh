@@ -81,8 +81,13 @@ check_glob_ability() {
       local basename
       basename="$(basename "$file")"
 
-      # Skip README
-      if [[ "$basename" == "README.md" ]]; then
+      # Skip README and meta-documents
+      if [[ "$basename" == "README.md" ]] || [[ "$basename" == "IMPLEMENTATION_ORDER.md" ]]; then
+        continue
+      fi
+
+      # Skip spec files that live alongside plans (combined spec+plan docs)
+      if [[ "$basename" =~ _spec\.md$ ]]; then
         continue
       fi
 
@@ -299,6 +304,7 @@ check_architectural_boundaries() {
       local violations
       violations=$(grep -n -E '(^|[[:space:]]|`|/)(tools|ops)/[a-zA-Z0-9_-]+' "$file" 2>/dev/null | \
                   grep -v -E '(services/[a-zA-Z0-9_-]*-tools/|team-skills.*tools/)' | \
+                  grep -v -E 'docs/ops/' | \
                   grep -v -i -E '(deprecated|moved to|migrated to|see scripts/)' || true)
 
       if [[ -n "$violations" ]]; then

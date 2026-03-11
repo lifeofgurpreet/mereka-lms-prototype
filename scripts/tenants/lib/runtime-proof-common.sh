@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # runtime-proof-common.sh — Shared runtime proof functions for tenant verification
 #
 # Sourced by verify-staging-runtime-proof.sh and verify-dev-runtime-proof.sh.
