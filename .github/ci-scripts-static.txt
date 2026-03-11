@@ -171,6 +171,7 @@ scripts/qa/verify-cicd-tutor-plugin-test.sh
 scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/test-verify-ci-runner-policy.sh
 scripts/qa/verify-pr-handoff-guardrails.sh
+scripts/qa/verify-execution-invariants-pack.sh
 scripts/qa/verify-provision-mysql-app-dbs-guardrails.sh
 scripts/qa/verify-mysql-user-repair-guardrails.sh
 scripts/qa/verify-prune-gcp-snapshots-guardrails.sh

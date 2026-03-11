@@ -1,0 +1,82 @@
+version: 1
+policy_doc: docs/policies/operations/AGENT_EXECUTION_INVARIANTS.md
+required_context_lock_keys:
+  - repo_name
+  - repo_path
+  - worktree_path
+  - branch
+  - baseline_ref
+  - lane
+  - task_or_pr
+  - target_environment
+  - mutation_class
+  - scope_statement
+  - evidence_plan
+  - live_mutation_allowed
+  - real_account_access
+allowed_mutation_classes:
+  - repo-only
+  - gitops-only
+  - live-proof-only
+  - live-mutation-exception
+preconditions_by_mutation_class:
+  repo-only:
+    - valid context lock captured
+    - clean working tree or lane-owned scoped diff only
+    - no unresolved stash state
+    - exact repo-side evidence captured before mutation
+  gitops-only:
+    - valid context lock captured
+    - owning GitOps repo identified
+    - repo boundary verified
+    - no live mutation in place of desired-state change
+  live-proof-only:
+    - valid context lock captured
+    - read-only evidence target named
+    - synthetic account or no-account path only
+    - no repair steps in the same transaction
+  live-mutation-exception:
+    - explicit human approval recorded
+    - valid context lock captured
+    - evidence before mutation captured
+    - revert path defined
+    - durable fix target identified
+prohibited_behaviors:
+  - mutate from dirty tree
+  - mutate from unresolved stash state
+  - switch mutation class without a new context lock
+  - mix proof and repair in one claim
+  - use real operator identities for browser proof
+  - change real passwords or credentials
+  - rely on latest as required build truth
+  - rely on hidden package rescue as normal operation
+  - perform live mutation without ledgering
+required_post_mutation_evidence_artifacts:
+  - narrowed verifier output
+  - changed file list
+  - reviewer summary or blocker note
+  - durable fix commit or PR reference
+allowed_final_status_enums:
+  - IN_PROGRESS
+  - READY_FOR_REVIEW
+  - COMPLETE
+required_update_sections:
+  - Lane / repo / worktree truth
+  - Current owned blocker
+  - What changed since last report
+  - Files created or modified
+  - Policy / control findings
+  - Decisions made
+  - Live-write actions intentionally NOT taken
+  - Remaining blockers with owners
+  - Final status
+  - Next action already in motion
+reference_docs:
+  - docs/reference/operations/EXECUTION_CONTEXT_LOCK.md
+  - docs/reference/operations/MUTATION_CLASS_MATRIX.md
+  - docs/reference/operations/PROOF_REPAIR_SEPARATION_PROTOCOL.md
+  - docs/reference/operations/REAL_ACCOUNT_AND_CREDENTIAL_BOUNDARY.md
+  - docs/reference/operations/LIVE_MUTATION_EXCEPTION_LEDGER_TEMPLATE.md
+  - docs/reference/operations/RUNNER_CAPABILITY_CONTRACT.md
+  - docs/reference/operations/BUILD_TRUTH_CONTRACT.md
+
