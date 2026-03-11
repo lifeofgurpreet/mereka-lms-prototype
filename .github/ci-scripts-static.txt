@@ -598,3 +598,5 @@ scripts/qa/verify-configmap-hash-suffixes.sh
 scripts/qa/verify-enterprise-auth-contract.sh
 scripts/qa/verify-redis-db-allocation.sh
 scripts/qa/verify-mfe-env-config-url-guard.sh
+scripts/qa/verify-agent-context-lock.sh --allow-main
+scripts/qa/verify-arc-runner-contract.sh
