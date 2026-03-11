@@ -7526,6 +7526,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-11",
+    "owner": "Platform Team",
+    "path": "policies/architecture/ENTERPRISE_FRONTEND_PARITY_POLICY.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "policies/architecture/GDPR_COMPLIANCE.md",
@@ -8174,6 +8183,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-11",
+    "owner": "Platform Team",
+    "path": "reference/architecture/ENTERPRISE_BROWSER_PROOF_PLAN.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-17",
     "owner": null,
     "path": "reference/architecture/FOOTER_V2_TO_LMS_MAPPING.md",
@@ -8385,6 +8403,24 @@
     "owner": null,
     "path": "reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md",
     "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-11",
+    "owner": "Platform Team",
+    "path": "reference/architecture/ROUTE_TRUTH_RECONCILIATION.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-11",
+    "owner": "Platform Team",
+    "path": "reference/architecture/SALVAGE_BRANCH_LEDGER.md",
+    "status": "canonical",
     "type": "other"
   },
   {

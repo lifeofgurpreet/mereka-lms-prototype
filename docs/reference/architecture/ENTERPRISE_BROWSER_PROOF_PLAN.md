@@ -78,7 +78,7 @@ Future runtime/browser lane should emit:
 
 This plan operationalizes:
 
-- `docs/architecture/ENTERPRISE_FRONTEND_PARITY_POLICY.md`
-- `docs/architecture/ROUTE_TRUTH_RECONCILIATION.md`
+- `docs/policies/architecture/ENTERPRISE_FRONTEND_PARITY_POLICY.md`
+- `docs/reference/architecture/ROUTE_TRUTH_RECONCILIATION.md`
 
 It does not replace them.
