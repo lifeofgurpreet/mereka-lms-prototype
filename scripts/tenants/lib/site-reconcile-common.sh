@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # site-reconcile-common.sh — Shared Site + SiteConfiguration seed/reconcile functions
 #
 # Sourced by seed-staging-sites.sh and seed-dev-sites.sh.

@@ -9,6 +9,12 @@ on:
       - "infrastructure/tutor/themes/mereka/mfe/theme/**"
       - ".github/workflows/build-enterprise-mfe.yml"
   workflow_dispatch:
+    inputs:
+      source_tag:
+        description: "Explicit source image tag to build from (default: auto-resolve latest from GHCR)"
+        type: string
+        required: false
+        default: ""
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,7 +23,59 @@ concurrency:
 permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 jobs:
+  resolve-source:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    outputs:
+      admin_source_tag: ${{ steps.resolve.outputs.admin_tag }}
+      learner_source_tag: ${{ steps.resolve.outputs.learner_tag }}
+    steps:
+      - name: Resolve source image tags
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPLICIT_TAG: ${{ inputs.source_tag }}
+        run: |
+          set -euo pipefail
+
+          resolve_tag() {
+            local pkg_name="$1"
+            local explicit="$2"
+
+            # If an explicit tag was provided via workflow_dispatch, use it
+            if [[ -n "${explicit}" ]]; then
+              echo "${explicit}"
+              return 0
+            fi
+
+            # Auto-resolve: find the latest mereka-branded-* tag from GHCR
+            # Uses the GitHub API (no docker pull needed)
+            local tag
+            tag=$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              "/orgs/biji-biji-initiative/packages/container/${pkg_name}/versions" \
+              --jq '[.[] | select(.metadata.container.tags | length > 0) | .metadata.container.tags[] | select(startswith("mereka-branded-"))] | first // empty' \
+              2>/dev/null) || true
+
+            if [[ -z "${tag}" ]]; then
+              echo "::error::No mereka-branded-* tag found for ${pkg_name}. Pass source_tag manually via workflow_dispatch."
+              return 1
+            fi
+
+            echo "${tag}"
+          }
+
+          ADMIN_TAG=$(resolve_tag "mereka-lms%2Fenterprise-admin-portal" "${EXPLICIT_TAG}")
+          LEARNER_TAG=$(resolve_tag "mereka-lms%2Fenterprise-learner-portal" "${EXPLICIT_TAG}")
+
+          echo "admin_tag=${ADMIN_TAG}" >> $GITHUB_OUTPUT
+          echo "learner_tag=${LEARNER_TAG}" >> $GITHUB_OUTPUT
+          echo "Resolved admin source: ${ADMIN_TAG}"
+          echo "Resolved learner source: ${LEARNER_TAG}"
+
   admin-portal:
+    needs: resolve-source
     # contents: read — checkout in reusable workflow
     # packages: write — push image to GHCR
     # id-token: write — OIDC for Workload Identity Federation (GCP auth)
@@ -25,13 +83,16 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@81adc56b7f0275283b842e0f8ff5845e4d42249d
     with:
       app_name: mereka-lms/enterprise-admin-portal
       dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal
       context: .
+      build_args: |
+        SOURCE_TAG=${{ needs.resolve-source.outputs.admin_source_tag }}
 
   learner-portal:
+    needs: resolve-source
     # contents: read — checkout in reusable workflow
     # packages: write — push image to GHCR
     # id-token: write — OIDC for Workload Identity Federation (GCP auth)
@@ -39,8 +100,10 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@81adc56b7f0275283b842e0f8ff5845e4d42249d
     with:
       app_name: mereka-lms/enterprise-learner-portal
       dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal
       context: .
+      build_args: |
+        SOURCE_TAG=${{ needs.resolve-source.outputs.learner_source_tag }}
