@@ -399,5 +399,152 @@ class TestSpecConsistency(unittest.TestCase):
             )
 
 
+class TestDryRunOutputStability(unittest.TestCase):
+    """Ensure dry-run output for production variants matches canonical fixtures."""
+
+    def test_shared_mereka_dryrun_matches_fixture(self):
+        """Dry-run of shared-mereka variant must match canonical fixture."""
+        spec_path = CONFIG_DIR / "dev.enterprise-tenants.shared-mereka.yaml"
+        fixture_path = FIXTURES_DIR / "expected-dryrun-shared-mereka.json"
+        if not spec_path.exists():
+            self.skipTest(f"{spec_path} not found")
+        if not fixture_path.exists():
+            self.skipTest(f"{fixture_path} not found")
+
+        spec = load_spec(spec_path)
+        results = simulate_dry_run(spec)
+        expected = json.loads(fixture_path.read_text())
+
+        self.assertEqual(len(results), expected["tenants_processed"])
+        for actual, exp in zip(results, expected["results"]):
+            self.assertEqual(actual["slug"], exp["slug"])
+            self.assertEqual(actual["errors"], exp["errors"])
+            self.assertEqual(
+                actual["actions"],
+                exp["actions"],
+                f"Action mismatch for {actual['slug']}",
+            )
+
+    def test_partner_isolated_dryrun_matches_fixture(self):
+        """Dry-run of partner-isolated variant must match canonical fixture."""
+        spec_path = CONFIG_DIR / "dev.enterprise-tenants.partner-isolated.yaml"
+        fixture_path = FIXTURES_DIR / "expected-dryrun-partner-isolated.json"
+        if not spec_path.exists():
+            self.skipTest(f"{spec_path} not found")
+        if not fixture_path.exists():
+            self.skipTest(f"{fixture_path} not found")
+
+        spec = load_spec(spec_path)
+        results = simulate_dry_run(spec)
+        expected = json.loads(fixture_path.read_text())
+
+        self.assertEqual(len(results), expected["tenants_processed"])
+        for actual, exp in zip(results, expected["results"]):
+            self.assertEqual(actual["slug"], exp["slug"])
+            self.assertEqual(actual["errors"], exp["errors"])
+            self.assertEqual(
+                actual["actions"],
+                exp["actions"],
+                f"Action mismatch for {actual['slug']}",
+            )
+
+
+class TestSlugConflictDecision(unittest.TestCase):
+    """Test that slug decision is consistent across all spec artifacts."""
+
+    def test_bijibiji_not_biji_biji_in_all_specs(self):
+        """All production specs must use 'bijibiji' (no hyphen), not 'biji-biji'."""
+        for path in CONFIG_DIR.glob("dev.enterprise-tenants*.yaml"):
+            spec = load_spec(path)
+            slugs = [t["slug"] for t in spec["tenants"]]
+            self.assertNotIn(
+                "biji-biji",
+                slugs,
+                f"{path.name} uses 'biji-biji' — must use 'bijibiji' per slug decision",
+            )
+            self.assertIn(
+                "bijibiji",
+                slugs,
+                f"{path.name} missing 'bijibiji' tenant",
+            )
+
+    def test_both_slug_forms_are_valid(self):
+        """Both bijibiji and biji-biji pass slug validation (decision is policy, not syntax)."""
+        self.assertEqual(validate_slug("bijibiji"), [])
+        self.assertEqual(validate_slug("biji-biji"), [])
+
+
+class TestVariantParityAssumptions(unittest.TestCase):
+    """Test that variant parity assumptions hold across all spec files."""
+
+    def test_variants_differ_only_in_org_filter(self):
+        """shared-mereka and partner-isolated must differ ONLY in catalog org_filter."""
+        shared_path = CONFIG_DIR / "dev.enterprise-tenants.shared-mereka.yaml"
+        isolated_path = CONFIG_DIR / "dev.enterprise-tenants.partner-isolated.yaml"
+        if not shared_path.exists() or not isolated_path.exists():
+            self.skipTest("Both variants required")
+
+        shared = load_spec(shared_path)
+        isolated = load_spec(isolated_path)
+
+        for s_tenant, i_tenant in zip(shared["tenants"], isolated["tenants"]):
+            # Same slug
+            self.assertEqual(s_tenant["slug"], i_tenant["slug"])
+            # Same name
+            self.assertEqual(s_tenant["name"], i_tenant["name"])
+            # Same domain
+            self.assertEqual(s_tenant["site"]["domain"], i_tenant["site"]["domain"])
+            # Same user links
+            self.assertEqual(s_tenant.get("user_links"), i_tenant.get("user_links"))
+            # Same waffle switches
+            self.assertEqual(
+                s_tenant.get("waffle_switches"), i_tenant.get("waffle_switches")
+            )
+            # Same catalog count
+            self.assertEqual(
+                len(s_tenant.get("catalogs", [])),
+                len(i_tenant.get("catalogs", [])),
+            )
+            # Same catalog titles
+            for s_cat, i_cat in zip(
+                s_tenant.get("catalogs", []), i_tenant.get("catalogs", [])
+            ):
+                self.assertEqual(s_cat["title"], i_cat["title"])
+
+    def test_shared_mereka_has_mereka_in_partner_org_filters(self):
+        """In shared-mereka, non-operator tenants must include MEREKA in org_filter."""
+        path = CONFIG_DIR / "dev.enterprise-tenants.shared-mereka.yaml"
+        if not path.exists():
+            self.skipTest(f"{path} not found")
+        spec = load_spec(path)
+        for tenant in spec["tenants"]:
+            if tenant.get("is_platform_operator"):
+                continue
+            for cat in tenant.get("catalogs", []):
+                org_filter = cat.get("catalog_query", {}).get("org_filter", [])
+                self.assertIn(
+                    "MEREKA",
+                    org_filter,
+                    f"shared-mereka variant: {tenant['slug']} catalog must include MEREKA",
+                )
+
+    def test_partner_isolated_excludes_mereka_from_partner_org_filters(self):
+        """In partner-isolated, non-operator tenants must NOT include MEREKA in org_filter."""
+        path = CONFIG_DIR / "dev.enterprise-tenants.partner-isolated.yaml"
+        if not path.exists():
+            self.skipTest(f"{path} not found")
+        spec = load_spec(path)
+        for tenant in spec["tenants"]:
+            if tenant.get("is_platform_operator"):
+                continue
+            for cat in tenant.get("catalogs", []):
+                org_filter = cat.get("catalog_query", {}).get("org_filter", [])
+                self.assertNotIn(
+                    "MEREKA",
+                    org_filter,
+                    f"partner-isolated variant: {tenant['slug']} catalog must NOT include MEREKA",
+                )
+
+
 if __name__ == "__main__":
     unittest.main()
