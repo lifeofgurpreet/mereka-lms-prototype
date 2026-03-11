@@ -25,6 +25,72 @@ This document is planning scaffolding only. It does **not** claim runtime proof 
 | Enterprise admin deep route | authenticated | default, empty/error or unauthorized as applicable |
 | Enterprise auth redirect chain | session-aware browser journey | redirect continuity, refresh continuity, no wrong-host bounce |
 
+## Execution Matrix
+
+This matrix is the minimum execution-grade plan for the runtime/browser lane.
+
+| Surface | Minimum route under test | Session requirement | Required states | Required evidence | Pass rule |
+|---|---|---|---|---|---|
+| Enterprise learner portal root | enterprise learner host `/` | unauthenticated and authenticated rerun | default, initial loading, broken-branding check | screenshot, final URL, host, visible tenant markers | lands on correct host, shell renders, branding is not obviously broken |
+| Enterprise learner deep route | one protected learner route that performs runtime API calls | authenticated | default plus one of: empty, error, or unauthorized | screenshot, final URL, route-state verdict, note on API-backed content presence | protected navigation succeeds and the state is handled coherently |
+| Enterprise admin portal root | enterprise admin host `/` | unauthenticated and authenticated rerun | default, initial loading, broken-branding check | screenshot, final URL, host, visible tenant markers | lands on correct host, shell renders, admin branding is not obviously broken |
+| Enterprise admin deep route | one protected admin route that exercises enterprise service fan-out | authenticated | default plus one of: empty, error, or unauthorized | screenshot, final URL, route-state verdict, note on service-backed content presence | protected navigation succeeds and no obvious wrong-host or malformed-runtime failure appears |
+| Enterprise auth redirect chain | enterprise entrypoint to authenticated landing route | session-aware | redirect continuity, refresh continuity, wrong-host detection | start URL, redirect chain summary, final URL, screenshot | no wrong-host bounce, no dead-end redirect loop, final route belongs to intended tenant/surface |
+
+## Evidence Contract
+
+Every recorded browser-proof case should emit the same minimum bundle:
+
+1. surface name
+2. route under test
+3. requested URL
+4. final landed URL
+5. host/domain used
+6. authentication state used
+7. state classification observed
+8. screenshot or equivalent browser artifact
+9. short verdict: `pass`, `fail`, or `indeterminate`
+10. short note explaining any indeterminate condition
+
+## State Coverage Rules
+
+The runtime/browser lane does not need to exhaust every state permutation. It does need to prove the most failure-prone state for each surface family.
+
+| Surface family | Required state beyond default | Why |
+|---|---|---|
+| Portal shell root | initial loading or hydration transition | catches blank shell / broken bundle / wrong runtime config earlier than default-only proof |
+| Protected learner route | one negative state: empty, error, or unauthorized | proves the route is not only happy-path renderable |
+| Protected admin route | one negative state: empty, error, or unauthorized | admin flows often fail on API fan-out, permissions, or table-state handling |
+| Auth redirect chain | redirect continuity and refresh continuity | catches wrong-host bounce, broken callback, and post-login dead-end failures |
+
+## Minimum Pass / Fail Semantics
+
+### Pass
+
+A surface may be marked `pass` only when:
+
+- the final URL belongs to the intended enterprise host or shared surface
+- no cross-tenant identity bleed is visible
+- no malformed runtime URLs or placeholder shell is visible
+- the tested state is handled coherently enough for release confidence
+
+### Fail
+
+A surface must be marked `fail` when any of the following occur:
+
+- wrong host after redirect
+- cross-tenant identity bleed
+- placeholder or blank shell after bundle load
+- malformed runtime links or obvious missing config
+- protected route cannot be reached after successful auth/session restore
+- tested negative state is visibly broken or unhandled
+
+### Indeterminate
+
+Use `indeterminate` only when the browser lane is blocked by missing credentials, unavailable runtime dependency, or another external precondition that prevents a meaningful route verdict.
+
+`indeterminate` is not a pass.
+
 ## Must-Capture Assertions
 
 Every browser proof pass should capture:
@@ -73,6 +139,35 @@ Future runtime/browser lane should emit:
 - screenshots
 - final URL evidence
 - short per-surface verdict
+- explicit `pass` / `fail` / `indeterminate` count
+
+## Required vs Deferred Coverage
+
+### Required in the first runtime/browser pass
+
+- enterprise learner portal root
+- enterprise learner protected route
+- enterprise admin portal root
+- enterprise admin protected route
+- enterprise auth redirect chain
+
+### Deferred unless the release specifically changes them
+
+- broader Studio/LMS deep-route coverage outside the enterprise journey
+- wide visual-regression baselines
+- cross-browser matrix expansion
+- performance benchmarking
+
+## Ownership Boundary
+
+This plan is owned by the repo as planning truth only.
+
+Execution remains outside this lane and belongs to the runtime/browser owners because the required proof depends on:
+
+- live hosts
+- live auth/session behavior
+- live runtime config
+- live tenant identity
 
 ## Relationship To Policy
 

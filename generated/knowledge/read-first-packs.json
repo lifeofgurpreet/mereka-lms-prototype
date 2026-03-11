@@ -1,18 +1,12 @@
 {
   "arbitration": {
-    "applied_rules": [
-      "documentation-cross-repo-impact"
-    ],
-    "blocking_release_checks": [
-      "required-reviewer-groups-present",
-      "required-evidence-obligations-present",
-      "runtime-convergence-not-failing"
-    ],
+    "applied_rules": [],
+    "blocking_release_checks": [],
     "evidence_merge_strategy": "union-evidence-classes",
     "primary_skill_order": [
-      "change-impact-triage"
+      "docs-truth-review"
     ],
-    "reviewer_merge_strategy": "union-reviewers-prioritize-docs-then-platform"
+    "reviewer_merge_strategy": "union-reviewers"
   },
   "canonical_inputs": [
     "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
@@ -28,38 +22,23 @@
   "ordered_packs": [
     {
       "pack_id": "pack-registry",
-      "priority": "high",
-      "reason": "required by change-impact-triage",
-      "source_skill": "change-impact-triage"
-    },
-    {
-      "pack_id": "runtime-convergence-report",
-      "priority": "high",
-      "reason": "required by change-impact-triage",
-      "source_skill": "change-impact-triage"
-    },
-    {
-      "pack_id": "mixed-diff-arbitration",
-      "priority": "high",
-      "reason": "required by change-impact-triage",
-      "source_skill": "change-impact-triage"
+      "priority": "medium",
+      "reason": "required by docs-truth-review",
+      "source_skill": "docs-truth-review"
     },
     {
       "pack_id": "read-first",
       "priority": "medium",
-      "reason": "required by control-plane-validation",
-      "source_skill": "control-plane-validation"
+      "reason": "required by docs-truth-review",
+      "source_skill": "docs-truth-review"
     }
   ],
   "pack_id": "read-first-packs",
   "priority_buckets": {
-    "high_risk": [
-      "pack-registry",
-      "runtime-convergence-report",
-      "mixed-diff-arbitration"
-    ],
+    "high_risk": [],
     "low_risk": [],
     "medium_risk": [
+      "pack-registry",
       "read-first"
     ]
   },
@@ -71,6 +50,14 @@
     },
     {
       "pack_id": "evidence-sufficiency-map",
+      "reason": "not required by selected skills or arbitration rules for this diff"
+    },
+    {
+      "pack_id": "mixed-diff-arbitration",
+      "reason": "not required by selected skills or arbitration rules for this diff"
+    },
+    {
+      "pack_id": "runtime-convergence-report",
       "reason": "not required by selected skills or arbitration rules for this diff"
     },
     {

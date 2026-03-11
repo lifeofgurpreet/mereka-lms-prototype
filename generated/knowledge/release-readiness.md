@@ -2,20 +2,18 @@
 # Release Readiness
 
 - Diff range: `origin/main...HEAD`
-- Release status: `advisory`
+- Release status: `ready`
 
 ## Why
-- review severity is high
+- review severity is medium
 - runtime convergence state is warning
-- required reviewer groups: docs, governance, platform
-- required evidence obligations: 4
-- read-first priority packs: pack-registry, runtime-convergence-report, mixed-diff-arbitration
+- required reviewer groups: docs, governance
+- required evidence obligations: 2
+- read-first priority packs: pack-registry, read-first
 
 ## Missing Evidence
 - `catalog_governance`
 - `docs_policy`
-- `source_of_truth_map`
-- `validation_run`
 
 ## Missing Reviewer Inputs
 - live reviewer approvals are unresolved input

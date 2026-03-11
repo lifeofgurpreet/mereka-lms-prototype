@@ -2,25 +2,20 @@
 # Review Decision
 
 - Diff range: `origin/main...HEAD`
-- Severity: `high`
+- Severity: `medium`
 - Blocking: `false`
 - Runtime convergence: `warning`
 
 ## Required Reviewers
 - `docs`
 - `governance`
-- `platform`
 
 ## Read-First Packs
-- `pack-registry`: required by change-impact-triage
-- `runtime-convergence-report`: required by change-impact-triage
-- `mixed-diff-arbitration`: required by change-impact-triage
-- `read-first`: required by control-plane-validation
+- `pack-registry`: required by docs-truth-review
+- `read-first`: required by docs-truth-review
 
 ## Change Classes
-- `cross-repo-impact`
 - `documentation-truth`
-- `review`
 
 ## Canonical Inputs
 - `docs/meta/knowledge/DECISION_RUNTIME_MODEL.md`

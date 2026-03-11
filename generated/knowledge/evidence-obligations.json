@@ -10,27 +10,7 @@
   "obligations": [
     {
       "advisory_note": "",
-      "blocking": true,
-      "evidence_class": "source_of_truth_map",
-      "obligation_type": "required_evidence_pack",
-      "source_rule": "all-required-reviewers-must-confirm-or-explicitly-delegate",
-      "triggered_by_skills": [
-        "change-impact-triage"
-      ]
-    },
-    {
-      "advisory_note": "",
-      "blocking": true,
-      "evidence_class": "validation_run",
-      "obligation_type": "required_evidence_pack",
-      "source_rule": "all-required-reviewers-must-confirm-or-explicitly-delegate",
-      "triggered_by_skills": [
-        "control-plane-validation"
-      ]
-    },
-    {
-      "advisory_note": "",
-      "blocking": true,
+      "blocking": false,
       "evidence_class": "docs_policy",
       "obligation_type": "required_status_update",
       "source_rule": "all-required-reviewers-must-confirm-or-explicitly-delegate",
@@ -40,7 +20,7 @@
     },
     {
       "advisory_note": "",
-      "blocking": true,
+      "blocking": false,
       "evidence_class": "catalog_governance",
       "obligation_type": "required_status_update",
       "source_rule": "all-required-reviewers-must-confirm-or-explicitly-delegate",
@@ -51,10 +31,7 @@
   ],
   "pack_id": "evidence-obligations",
   "required_adr_updates": [],
-  "required_evidence_packs": [
-    "source_of_truth_map",
-    "validation_run"
-  ],
+  "required_evidence_packs": [],
   "required_plan_testplan_refreshes": [],
   "required_runbook_updates": [],
   "required_status_updates": [
