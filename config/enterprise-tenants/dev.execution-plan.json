@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "environment": "dev",
+  "description": "Machine-readable execution plan for enterprise tenant bootstrap",
+
+  "chosen_variant": null,
+  "chosen_variant_options": ["shared-mereka", "partner-isolated"],
+  "recommended_variant": "shared-mereka",
+
+  "prerequisites": [
+    {
+      "id": "runtime-blocker",
+      "description": "Enterprise MFE build config fix merged and deployed",
+      "check_command": "curl -sI https://admin.academyv2.mereka.dev/ | head -1",
+      "expected": "HTTP/2 200 or HTTP/2 302",
+      "status": "pending"
+    },
+    {
+      "id": "lms-pod-running",
+      "description": "LMS pod is running in mereka-lms-dev namespace",
+      "check_command": "kubectl get pods -n mereka-lms-dev -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].status.phase}'",
+      "expected": "Running",
+      "status": "pending"
+    },
+    {
+      "id": "operator-slug-decision",
+      "description": "Operator has chosen tenant slug (bijibiji or biji-biji)",
+      "recommended": "bijibiji",
+      "status": "pending"
+    },
+    {
+      "id": "operator-variant-decision",
+      "description": "Operator has chosen variant (shared-mereka or partner-isolated)",
+      "recommended": "shared-mereka",
+      "status": "pending"
+    }
+  ],
+
+  "commands": {
+    "copy_variant": {
+      "shared-mereka": "cp config/enterprise-tenants/dev.enterprise-tenants.shared-mereka.yaml config/enterprise-tenants/dev.enterprise-tenants.yaml",
+      "partner-isolated": "cp config/enterprise-tenants/dev.enterprise-tenants.partner-isolated.yaml config/enterprise-tenants/dev.enterprise-tenants.yaml"
+    },
+    "copy_to_pod": [
+      "LMS_POD=$(kubectl get pods -n mereka-lms-dev -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}')",
+      "kubectl cp config/enterprise-tenants/dev.enterprise-tenants.yaml mereka-lms-dev/${LMS_POD}:/tmp/spec.yaml",
+      "kubectl cp scripts/tenants/bootstrap-enterprise-tenants.py mereka-lms-dev/${LMS_POD}:/tmp/bootstrap.py",
+      "kubectl cp scripts/tenants/validate-enterprise-tenants.py mereka-lms-dev/${LMS_POD}:/tmp/validate.py"
+    ],
+    "dry_run": "kubectl exec -n mereka-lms-dev deploy/lms -- python /tmp/bootstrap.py --env dev",
+    "apply": "kubectl exec -n mereka-lms-dev deploy/lms -- python /tmp/bootstrap.py --env dev --apply",
+    "validate": "kubectl exec -n mereka-lms-dev deploy/lms -- python /tmp/validate.py",
+    "validate_json": "kubectl exec -n mereka-lms-dev deploy/lms -- python /tmp/validate.py --json",
+    "rollback_shell": "kubectl exec -it -n mereka-lms-dev deploy/lms -- python manage.py lms shell"
+  },
+
+  "expected_proof_artifacts": [
+    {
+      "path": "var/proofs/enterprise-bootstrap-dev.json",
+      "description": "JSON output from validate-enterprise-tenants.py --json",
+      "type": "json"
+    },
+    {
+      "path": "var/proofs/enterprise-bootstrap-evidence-dev.md",
+      "description": "Filled evidence template with all verification outputs",
+      "type": "markdown"
+    },
+    {
+      "path": "var/proofs/enterprise-admin-portal-response.txt",
+      "description": "HTTP response from enterprise admin portal",
+      "type": "text"
+    },
+    {
+      "path": "var/proofs/enterprise-learner-portal-response.txt",
+      "description": "HTTP response from enterprise learner portal",
+      "type": "text"
+    },
+    {
+      "path": "assets/screenshots-of-issues/enterprise-admin-portal.png",
+      "description": "Screenshot of enterprise admin portal",
+      "type": "image"
+    },
+    {
+      "path": "assets/screenshots-of-issues/enterprise-learner-portal.png",
+      "description": "Screenshot of enterprise learner portal",
+      "type": "image"
+    }
+  ],
+
+  "expected_objects": {
+    "enterprise_customers": [
+      {"slug": "mereka", "name": "Mereka Academy", "domain": "academyv2.mereka.dev"},
+      {"slug": "bijibiji", "name": "Biji-Biji Academy", "domain": "academy.biji-biji.com"},
+      {"slug": "skillourfuture", "name": "Skill Our Future", "domain": "skillourfuture.academy.mereka.io"}
+    ],
+    "catalogs_per_customer": 1,
+    "user_links_per_customer": 1,
+    "waffle_switches_per_customer": 5,
+    "total_enterprise_customers": 3,
+    "total_catalogs": 3,
+    "total_user_links": 3,
+    "total_waffle_switches": 15,
+    "initial_enrollments": 0
+  },
+
+  "rollback": {
+    "strategy": "per-tenant-deletion",
+    "safe_in_dev": true,
+    "commands": [
+      "ec = EnterpriseCustomer.objects.get(slug='<slug>')",
+      "EnterpriseCustomerCatalog.objects.filter(enterprise_customer=ec).delete()",
+      "EnterpriseCustomerUser.objects.filter(enterprise_customer=ec).delete()",
+      "ec.delete()"
+    ],
+    "proof_artifact": "var/proofs/enterprise-bootstrap-rollback-dev.md"
+  }
+}
