@@ -111,4 +111,23 @@ replace_key "CUSTOMER_SUPPORT_NAME" "Mereka Support"
 replace_key "CUSTOMER_SUPPORT_EMAIL" "support@mereka.io"
 
 replace_remaining_placeholders
+
+# --- Null-safety patches for upstream bugs ---
+# Upstream code destructures `const { algolia } = bffResponse` then reads
+# `algolia.validUntil` without guarding for null/undefined. When Algolia is not
+# configured, BFF returns no algolia field and the page crashes with:
+#   TypeError: Cannot read properties of null (reading 'validUntil')
+# Fix: add null guard so the property access is skipped when algolia is absent.
+for js in "$DIST_DIR"/*.js; do
+  [ -f "$js" ] || continue
+  [ "$(basename "$js")" = "env.config.js" ] && continue
+  [ -w "$js" ] || continue
+  # Pattern: `if(X.validUntil)` → `if(X&&X.validUntil)` where X is a short var name
+  # The minified pattern is like: t.validUntil&&await
+  if grep -q '\.validUntil&&await' "$js"; then
+    sed -i 's/\b\([a-z]\)\.validUntil&&await/\1\&\&\1.validUntil\&\&await/g' "$js"
+    echo "[patch-env] OK: added null guard for algolia.validUntil access"
+  fi
+done
+
 echo "[patch-env] Completed placeholder patching in $DIST_DIR"
