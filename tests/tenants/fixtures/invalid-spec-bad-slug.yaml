@@ -1,0 +1,12 @@
+---
+version: "1.0"
+environment: test
+lms_domain: test.localhost
+
+tenants:
+  - slug: "has spaces and CAPS!"
+    name: Bad Slug Corp
+    org_code: BADSLUGS
+    active: true
+    site:
+      domain: badslugs.localhost

@@ -1,0 +1,135 @@
+# Variant: SHARED-MEREKA
+#
+# Partner tenants (bijibiji, skillourfuture) see ALL courses including MEREKA org.
+# This is the pragmatic choice when partner orgs have zero courses of their own.
+#
+# Slug policy: bijibiji (no hyphens — valid Python identifier, URL-safe)
+#
+# See: docs/architecture/ENTERPRISE_TENANT_VARIANTS.md
+---
+version: "1.0"
+environment: dev
+variant: shared-mereka
+lms_domain: academyv2.mereka.dev
+
+tenants:
+  - slug: mereka
+    name: Mereka Academy
+    org_code: MEREKA
+    active: true
+    contact_email: team@mereka.io
+    country: MY
+    is_platform_operator: true
+
+    site:
+      domain: academyv2.mereka.dev
+
+    enterprise_customer:
+      enable_data_sharing_consent: true
+      enforce_data_sharing_consent: at_enrollment
+      enable_audit_enrollment: false
+      enable_learner_portal: true
+      enable_portal_code_management: false
+      enable_analytics_screen: true
+
+    catalogs:
+      - title: "Mereka Academy Full Catalog"
+        catalog_query:
+          content_filter:
+            content_type: course
+            aggregation_key: ["courserun:*"]
+          org_filter:
+            - MEREKA
+
+    user_links:
+      - email: team@mereka.io
+        role: admin
+
+    waffle_switches:
+      enterprise.enable_learner_portal: true
+      enterprise.enable_analytics_screen: true
+      enterprise.enable_audit_enrollment: false
+      enterprise.enable_portal_code_management: false
+      enterprise.enable_integrated_learner_portal_search: true
+
+  - slug: bijibiji
+    name: Biji-Biji Academy
+    org_code: BIJIBIJI
+    active: true
+    contact_email: admin@biji-biji.com
+    country: MY
+    is_platform_operator: false
+
+    site:
+      domain: academy.biji-biji.com
+
+    enterprise_customer:
+      enable_data_sharing_consent: true
+      enforce_data_sharing_consent: at_enrollment
+      enable_audit_enrollment: false
+      enable_learner_portal: true
+      enable_portal_code_management: false
+      enable_analytics_screen: true
+
+    catalogs:
+      # SHARED: sees both BIJIBIJI and MEREKA courses
+      - title: "Biji-Biji Academy Catalog"
+        catalog_query:
+          content_filter:
+            content_type: course
+            aggregation_key: ["courserun:*"]
+          org_filter:
+            - BIJIBIJI
+            - MEREKA
+
+    user_links:
+      - email: admin@biji-biji.com
+        role: admin
+
+    waffle_switches:
+      enterprise.enable_learner_portal: true
+      enterprise.enable_analytics_screen: true
+      enterprise.enable_audit_enrollment: false
+      enterprise.enable_portal_code_management: false
+      enterprise.enable_integrated_learner_portal_search: true
+
+  - slug: skillourfuture
+    name: Skill Our Future
+    org_code: SKILLOURFUTURE
+    active: true
+    contact_email: admin@mereka.io
+    country: MY
+    is_platform_operator: false
+
+    site:
+      domain: skillourfuture.academy.mereka.io
+
+    enterprise_customer:
+      enable_data_sharing_consent: true
+      enforce_data_sharing_consent: at_enrollment
+      enable_audit_enrollment: false
+      enable_learner_portal: true
+      enable_portal_code_management: false
+      enable_analytics_screen: true
+
+    catalogs:
+      # SHARED: sees both SKILLOURFUTURE and MEREKA courses
+      - title: "Skill Our Future Catalog"
+        catalog_query:
+          content_filter:
+            content_type: course
+            aggregation_key: ["courserun:*"]
+          org_filter:
+            - SKILLOURFUTURE
+            - MEREKA
+
+    user_links:
+      - email: admin@mereka.io
+        role: admin
+
+    waffle_switches:
+      enterprise.enable_learner_portal: true
+      enterprise.enable_analytics_screen: true
+      enterprise.enable_audit_enrollment: false
+      enterprise.enable_portal_code_management: false
+      enterprise.enable_integrated_learner_portal_search: true

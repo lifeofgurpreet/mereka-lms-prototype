@@ -1,0 +1,19 @@
+---
+version: "1.0"
+environment: test
+lms_domain: test.localhost
+
+tenants:
+  - slug: acme
+    name: Acme Corp
+    org_code: ACME
+    active: true
+    site:
+      domain: acme.localhost
+
+  - slug: acme
+    name: Acme Duplicate
+    org_code: ACME2
+    active: true
+    site:
+      domain: acme2.localhost
