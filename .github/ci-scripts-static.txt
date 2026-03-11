@@ -595,3 +595,5 @@ scripts/qa/verify-canonical-entrypoints.sh
 scripts/qa/test-verify-canonical-entrypoints.sh
 scripts/qa/verify-tenant-specs.sh
 scripts/qa/verify-configmap-hash-suffixes.sh
+scripts/qa/verify-enterprise-auth-contract.sh
+scripts/qa/verify-redis-db-allocation.sh

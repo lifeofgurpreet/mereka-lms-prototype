@@ -50,7 +50,7 @@ spec:
                   'CACHES': {
                       'default': {
                           'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-                          'LOCATION': os.environ.get('CACHE_LOCATION', 'redis://redis:6379/12'),
+                          'LOCATION': os.environ.get('CACHE_LOCATION', 'redis://redis:6379/11'),
                           'KEY_PREFIX': 'license_manager',
                       }
                   },
@@ -91,7 +91,7 @@ spec:
             - name: DB_HOST
               value: mysql
             - name: CACHE_LOCATION
-              value: redis://redis:6379/12
+              value: redis://redis:6379/11
             - name: CELERY_BROKER_HOSTNAME
               value: "redis:6379"
             - name: CELERY_BROKER_VHOST
