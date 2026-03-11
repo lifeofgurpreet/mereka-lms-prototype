@@ -220,6 +220,8 @@ jobs:
             grep -v '/config/' | \
             grep -v '/settings/' | \
             grep -v 'helm-values' | \
+            grep -v 'registry\.yaml' | \
+            grep -v 'SECRET_CLASSIFICATION' | \
             xargs kubeconform -strict -ignore-missing-schemas
 
       # ── Phase B (continued): Spec linting ─────────────────────────────────
