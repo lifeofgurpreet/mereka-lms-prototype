@@ -5,6 +5,7 @@
 # Enterprise MFE build scripts
 !infrastructure/docker/enterprise-mfe-clean/strip-nreum.sh
 !infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh
+!infrastructure/docker/enterprise-mfe-clean/verify-no-baked-urls.sh
 
 # Brand package (logos, favicon)
 !infrastructure/tutor/brand-mereka/

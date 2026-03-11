@@ -17,6 +17,7 @@ window.ENV_CONFIG = {
   LOGOUT_URL: 'http://localhost/logout',
   REFRESH_ACCESS_TOKEN_ENDPOINT: 'http://localhost/login_refresh',
   ACCESS_TOKEN_COOKIE_NAME: 'edx-jwt-cookie-header-payload',
+  INTEGRATION_WARNING_DISMISSED_COOKIE_NAME: 'integration-warning-dismissed',
   CSRF_TOKEN_API_PATH: '/csrf/api/v1/token',
   ENTERPRISE_CATALOG_API_BASE_URL: 'http://admin.localhost/api/enterprise-catalog',
   ENTERPRISE_ACCESS_BASE_URL: 'http://admin.localhost/api/enterprise-access',

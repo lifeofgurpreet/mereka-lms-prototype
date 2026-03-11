@@ -19,11 +19,14 @@ FROM ${REGISTRY}/enterprise-learner-portal:${SOURCE_TAG}
 # Copy and run cleanup/patch scripts at build time
 COPY infrastructure/docker/enterprise-mfe-clean/strip-nreum.sh /tmp/strip-nreum.sh
 COPY infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh /tmp/patch-missing-env.sh
+COPY infrastructure/docker/enterprise-mfe-clean/verify-no-baked-urls.sh /tmp/verify-no-baked-urls.sh
 RUN chmod +x /tmp/strip-nreum.sh \
     && chmod +x /tmp/patch-missing-env.sh \
+    && chmod +x /tmp/verify-no-baked-urls.sh \
     && /tmp/strip-nreum.sh /openedx/dist/index.html \
     && /tmp/patch-missing-env.sh /openedx/dist \
-    && rm /tmp/strip-nreum.sh /tmp/patch-missing-env.sh
+    && /tmp/verify-no-baked-urls.sh /openedx/dist \
+    && rm /tmp/strip-nreum.sh /tmp/patch-missing-env.sh /tmp/verify-no-baked-urls.sh
 
 # --- Mereka branding overlay ---
 # Copy Paragon theme CSS (served at /theme/* by the MFE Caddy/nginx).

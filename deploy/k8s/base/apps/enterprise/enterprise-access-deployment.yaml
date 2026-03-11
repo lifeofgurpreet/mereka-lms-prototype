@@ -69,6 +69,19 @@ spec:
                   'LMS_ROOT_URL': os.environ.get('LMS_ROOT_URL', 'http://localhost'),
                   'ENTERPRISE_CATALOG_URL': 'http://enterprise-catalog:8000',
                   'ENTERPRISE_SUBSIDY_URL': 'http://enterprise-subsidy:8000',
+                  # Must match LMS CSRF_COOKIE_NAME ('csrftoken') so MFE frontend-platform
+                  # can read the shared cookie and send X-CSRFToken header for BFF POST requests.
+                  # Default enterprise-access value ('enterprise_access_csrftoken') causes 401 on
+                  # cookie-based JWT auth because enforce_csrf() can't find the CSRF cookie.
+                  'CSRF_COOKIE_NAME': 'csrftoken',
+                  # Enterprise MFE Caddy proxies BFF requests with Host=LMS_HOST, but
+                  # the browser Referer is the MFE origin. Django CSRF Referer check
+                  # requires the Referer origin to match Host or CSRF_TRUSTED_ORIGINS.
+                  'CSRF_TRUSTED_ORIGINS': [
+                      'https://' + os.environ.get('LMS_ROOT_URL', 'http://localhost').replace('http://', '').replace('https://', ''),
+                      'https://learner.' + os.environ.get('LMS_ROOT_URL', 'http://localhost').replace('http://', '').replace('https://', ''),
+                      'https://admin.' + os.environ.get('LMS_ROOT_URL', 'http://localhost').replace('http://', '').replace('https://', ''),
+                  ],
               }
               with open('/config/enterprise_access.yml', 'w') as f:
                   yaml.dump(config, f, default_flow_style=False)
