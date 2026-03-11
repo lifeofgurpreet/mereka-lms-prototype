@@ -127,7 +127,7 @@ jobs:
       - name: Verify docs policy
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -137,7 +137,7 @@ jobs:
       - name: Verify cross-repo agent packs
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -147,7 +147,7 @@ jobs:
       - name: Verify skill runtime
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -157,7 +157,7 @@ jobs:
       - name: Verify agent pack runtime
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -167,7 +167,7 @@ jobs:
       - name: Verify decision runtime
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -177,7 +177,7 @@ jobs:
       - name: Verify execution proof runtime
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -187,7 +187,7 @@ jobs:
       - name: Verify team handbook
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -197,7 +197,7 @@ jobs:
       - name: Verify unified knowledge control plane
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -207,7 +207,7 @@ jobs:
       - name: Verify change intelligence runtime
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export KNOWLEDGE_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export KNOWLEDGE_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export KNOWLEDGE_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -217,7 +217,7 @@ jobs:
       - name: Verify task runtime
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export TASK_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export TASK_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export TASK_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -227,7 +227,7 @@ jobs:
       - name: Verify cross-repo contract runtime
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export CONTRACT_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export CONTRACT_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export CONTRACT_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
@@ -237,7 +237,7 @@ jobs:
       - name: Verify agent consumption runtime
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            export AGENT_READINESS_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+            export AGENT_READINESS_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
           else
             export AGENT_READINESS_RANGE="${{ github.event.before }}...${{ github.sha }}"
           fi
