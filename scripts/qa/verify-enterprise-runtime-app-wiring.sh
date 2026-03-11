@@ -12,6 +12,9 @@
 # Usage:
 #   ./scripts/qa/verify-enterprise-runtime-app-wiring.sh --env prod --strict
 #   ./scripts/qa/verify-enterprise-runtime-app-wiring.sh --env dev --context kind-dev
+# Exit 0 = PASS
+# Exit 1 = FAIL
+# Exit 2 = INDETERMINATE (lane/runtime truth unavailable)
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -22,14 +25,17 @@ MODE="standard" # standard|strict
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
 NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
 NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
 CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
 CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-}}"
 KUBE_CONTEXT_OVERRIDE=""
 NAMESPACE_OVERRIDE=""
 
 PASS=0
 FAIL=0
 SKIP=0
+INDET=0
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -39,13 +45,14 @@ NC='\033[0m'
 pass() { echo -e "${GREEN}PASS${NC}  $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}FAIL${NC}  $1"; FAIL=$((FAIL + 1)); }
 skip() { echo -e "${YELLOW}SKIP${NC}  $1"; SKIP=$((SKIP + 1)); }
+indet() { echo -e "${YELLOW}INDETERMINATE${NC}  $1"; INDET=$((INDET + 1)); }
 
 usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
 
 Options:
-  --env {prod|dev}      Target environment (default: prod)
+  --env {prod|dev|staging}  Target environment (default: prod)
   --context NAME        Kubernetes context override
   -n, --namespace NS    Kubernetes namespace (default: $NAMESPACE)
   --strict              Enforce expanded app set in addition to core tenant wiring
@@ -69,27 +76,27 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV" != "prod" && "$ENV" != "dev" ]]; then
-  echo "Invalid --env: $ENV (expected prod|dev)" >&2
+if [[ "$ENV" != "prod" && "$ENV" != "dev" && "$ENV" != "staging" ]]; then
+  echo "Invalid --env: $ENV (expected prod|dev|staging)" >&2
   exit 1
 fi
 
 if [[ -n "$KUBE_CONTEXT_OVERRIDE" ]]; then
   KUBE_CTX="$KUBE_CONTEXT_OVERRIDE"
 else
-  if [[ "$ENV" == "prod" ]]; then
-    KUBE_CTX="$CONTEXT_PROD"
-  else
-    KUBE_CTX="$CONTEXT_DEV"
-  fi
+  case "$ENV" in
+    prod) KUBE_CTX="$CONTEXT_PROD" ;;
+    dev) KUBE_CTX="$CONTEXT_DEV" ;;
+    staging) KUBE_CTX="$CONTEXT_STAGING" ;;
+  esac
 fi
 
 if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
-  if [[ "$ENV" == "prod" ]]; then
-    NAMESPACE="$NAMESPACE_PROD"
-  else
-    NAMESPACE="$NAMESPACE_DEV"
-  fi
+  case "$ENV" in
+    prod) NAMESPACE="$NAMESPACE_PROD" ;;
+    dev) NAMESPACE="$NAMESPACE_DEV" ;;
+    staging) NAMESPACE="$NAMESPACE_STAGING" ;;
+  esac
 fi
 
 kube() { kubectl --context "$KUBE_CTX" "$@"; }
@@ -164,11 +171,18 @@ echo "=== Enterprise Runtime App Wiring Verification ==="
 echo "env=$ENV mode=$MODE namespace=$NAMESPACE context=$KUBE_CTX"
 echo ""
 
-if ! cluster_available; then
-  fail "kubectl context '$KUBE_CTX' unavailable"
+if [[ "$ENV" == "staging" && -z "$KUBE_CTX" ]]; then
+  indet "staging is a first-class lane but no authoritative staging context is configured in this repo (K8S_CONTEXT_STAGING unset)"
   echo ""
-  echo "Summary: PASS=$PASS FAIL=$FAIL SKIP=$SKIP"
-  exit 1
+  echo "Summary: PASS=$PASS FAIL=$FAIL SKIP=$SKIP INDETERMINATE=$INDET"
+  exit 2
+fi
+
+if ! cluster_available; then
+  indet "kubectl context '$KUBE_CTX' unavailable; runtime wiring truth is not locally provable"
+  echo ""
+  echo "Summary: PASS=$PASS FAIL=$FAIL SKIP=$SKIP INDETERMINATE=$INDET"
+  exit 2
 fi
 
 if kube -n "$NAMESPACE" get deploy lms &>/dev/null; then
@@ -203,8 +217,12 @@ check_commands_any_runtime "provision_tenant,offboard_tenant,apply_tenant_brandi
 
 echo ""
 echo "=== Summary ==="
-echo "PASS=$PASS FAIL=$FAIL SKIP=$SKIP"
+echo "PASS=$PASS FAIL=$FAIL SKIP=$SKIP INDETERMINATE=$INDET"
 
 if [[ "$FAIL" -gt 0 ]]; then
   exit 1
 fi
+if [[ "$INDET" -gt 0 ]]; then
+  exit 2
+fi
+exit 0

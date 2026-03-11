@@ -46,17 +46,17 @@ This table is the canonical decision reference for where branding changes belong
 | **CSS design tokens** (`mereka-design-tokens.css`) | Global | `sync-brand-assets.sh` + image rebuild | All tenants share the same base palette |
 | **LMS footer content/structure** | Global | LMS image rebuild | Single Mako template; tenant copy via `SiteConfiguration.PLATFORM_NAME` |
 | **Studio footer** | Global | LMS image rebuild | CMS Mako template (`widgets/footer.html`) |
-| **MFE footer copy/links/copyright** | Per-tenant | `SITE_VARIANTS` update in plugin → MFE image rebuild | Keyed by hostname in `infrastructure/tutor/plugins/mereka_lms.py` |
+| **MFE footer copy/links/copyright** | Per-tenant | `SITE_VARIANTS` update in plugin → MFE image rebuild | Keyed by hostname in `infrastructure/tutor/plugins/mereka_lms.py`; enterprise portals remain a parity-sensitive exception surface until explicitly brought under the same policy |
 | **Platform-level color tokens** | Global | LMS + MFE image rebuild | Defined in `common/static/css/mereka-design-tokens.css` + MFE SCSS |
 | **Tenant logo (LMS/Studio)** | Per-tenant | Runtime (no rebuild) | `LOGO_URL` in `TenantSiteConfiguration.mfe_config` or `/theming/asset/` |
 | **Tenant favicon** | Per-tenant | Runtime (no rebuild) | `FAVICON_URL` in `TenantSiteConfiguration.mfe_config` |
 | **Tenant primary domain** | Per-tenant | DNS + Caddy config | Caddy block + Django `Site` model must both be updated |
 | **`PLATFORM_NAME`** | Per-tenant | Runtime (Django admin) | `Sites` → `Site Configuration` → `PLATFORM_NAME` value |
-| **MFE `SITE_NAME`** | Per-tenant | MFE image rebuild | Set in `SITE_VARIANTS` map (currently requires plugin update) |
-| **MFE `SUPPORT_EMAIL`** | Per-tenant | MFE image rebuild | Set in `SITE_VARIANTS` map |
+| **MFE `SITE_NAME`** | Per-tenant | Runtime `SiteConfiguration.site_values["MFE_CONFIG"]` for portal/API truth; image rebuild only for plugin-owned footer fallback | Enterprise portal shell may bootstrap from `env.config.js`, but canonical runtime truth is split across env config, LMS global `MFE_CONFIG`, and per-site `SiteConfiguration` |
+| **MFE `SUPPORT_EMAIL`** | Per-tenant | Runtime `SiteConfiguration.site_values["MFE_CONFIG"]` or plugin-owned fallback rebuild | Do not assume base `enterprise-mfe-env.js` alone proves final runtime value |
 | **LMS SCSS/CSS overrides** | Global | LMS image rebuild | Theme-level; not per-tenant at runtime |
 | **Studio SCSS** | Global | LMS image rebuild | Same image as LMS theming |
-| **MFE CSS variables** | Global | MFE image rebuild | Compiled from `mfe/mereka.scss` |
+| **MFE CSS variables** | Global | MFE image rebuild | Compiled from `mfe/mereka.scss`; final enterprise portal theme also depends on runtime theme URLs / shell theme config |
 | **`--mereka-mfe-branding-rev`** | Global | MFE image rebuild | Version marker in `mfe/mereka.scss`; verified by `verify-public-branding.sh` |
 
 ### Non-Goals
@@ -67,7 +67,7 @@ The following are explicitly **not** supported by the tenant branding system:
 - **Per-tenant Mako templates**: LMS/CMS templates are compiled into the image; per-tenant template overrides are not supported at runtime.
 - **Tenant-controlled JavaScript**: Tenants cannot inject arbitrary JavaScript. All JS runs from the platform image.
 - **Sub-theme inheritance**: There is no "Biji-Biji theme" that inherits from "Mereka theme". All sites share one compiled theme.
-- **White-label MFE builds**: Enterprise portals (admin/learner) use the upstream Open edX default footer and are not wrapped in MerekaFooter (P4 backlog).
+- **White-label MFE builds**: Enterprise portals (admin/learner) are still parity-sensitive exception surfaces. They currently do not enjoy the same proof strength as the main MFE gateway and require explicit runtime proof before claiming parity.
 
 ---
 
@@ -173,6 +173,16 @@ The following are explicitly **not** supported by the tenant branding system:
 
 MFE-specific branding keys injected at runtime via `inject_mfe_branding()`.
 
+> Truth boundary: for enterprise admin/learner portals, these keys do not come
+> from a single place. Final runtime truth is split across:
+>
+> 1. lane-realized `enterprise-mfe-env.js` (authoritative lane overlay is in `bbi-infrastructure` for `dev`/`staging`/`prod`)
+> 2. LMS global `MFE_CONFIG` in `infrastructure/tutor/plugins/_mereka_lms/lms_settings.py`
+> 3. per-site `SiteConfiguration.site_values["MFE_CONFIG"]`
+>
+> Repo-only proof can validate the app-owned defaults and contracts, but it
+> cannot prove the final non-local lane value without infra and live runtime evidence.
+
 | Key | Type | Required | Fallback |
 |-----|------|----------|----------|
 | **LOGO_URL** | URL | ✅ REQUIRED | Platform default logo URL |
@@ -192,6 +202,19 @@ MFE-specific branding keys injected at runtime via `inject_mfe_branding()`.
 - URLs: Must be absolute URLs (http:// or https://)
 - SITE_NAME: Max 100 characters
 - SUPPORT_EMAIL: Valid email format
+
+### Enterprise Portal Truth Model
+
+Enterprise admin and learner portals are deep-route surfaces with split config
+truth. The verifier model for these portals MUST distinguish:
+
+- **app-owned truth**: base manifests, default env config, LMS global defaults
+- **infra-owned truth**: authoritative lane env realization in `bbi-infrastructure`
+- **runtime-only truth**: live `SiteConfiguration.site_values["MFE_CONFIG"]` and
+  `/api/mfe_config/v1` output
+
+This contract intentionally does **not** allow a reviewer to conclude `dev` or
+`staging` parity from `mereka-lms` alone when non-local overlays are infra-owned.
 
 ---
 

@@ -2,7 +2,7 @@
 _Last updated: 2026-02-27_
 
 > **Canonical version info**: [MFE_VERSIONS.md](MFE_VERSIONS.md)
-> **Related**: [FRONTEND_TRACKER.md](../../archive/superseded/FRONTEND_TRACKER.md), [MFE_FIRST_POLICY.md](MFE_FIRST_POLICY.md)
+> **Related**: [FRONTEND_TRACKER.md](../../archive/superseded/FRONTEND_TRACKER.md), [MFE_FIRST_POLICY.md](../../policies/architecture/MFE_FIRST_POLICY.md)
 
 ## Currently Configured MFEs (12)
 
@@ -23,16 +23,47 @@ All these MFEs are built into the `openedx-mfe` Docker image and routed via Cadd
 | 11 | **payment** | `/payment` | Payment forms and processing | SCSS overrides applied |
 | 12 | **ora-grading** | `/ora-grading` | Open Response Assessment grading | SCSS overrides applied |
 
-## Enterprise MFEs (Not Yet Configured)
+## Enterprise MFEs (Deployed In App Base, Runtime Truth Split)
 
-These MFEs exist in Open edX but are not yet deployed. They become relevant when enterprise microservices are activated:
+These MFEs are represented in the app repo base manifests and workload
+inventory. They are not "not deployed"; the stronger truth is:
+
+- `mereka-lms` owns the base deployments, services, and default env config
+  package for enterprise portals.
+- `bbi-infrastructure` owns the authoritative `dev`, `staging`, and `prod`
+  lane realization for non-local overlays.
+- Live runtime truth also depends on LMS `/api/mfe_config/v1` behavior and
+  `SiteConfiguration.site_values["MFE_CONFIG"]` for site-specific overrides.
+
+Repo-only review can therefore prove that enterprise MFEs are part of the app
+package, but it cannot by itself prove lane parity or runtime-valid branding
+for `dev`/`staging`/`prod`.
 
 | MFE | Purpose | Depends On | Status |
 |-----|---------|-----------|--------|
 | **frontend-app-enterprise-public-catalog** | Public course catalog browsing | Enterprise Catalog service | Not deployed |
-| **frontend-app-admin-portal** | Enterprise admin dashboard | Enterprise services stack | Not deployed |
-| **frontend-app-learner-portal-enterprise** | Enterprise learner portal | Enterprise services stack | Not deployed |
+| **frontend-app-admin-portal** | Enterprise admin dashboard | Enterprise services stack | Base deployment defined; lane/runtime proof split across app repo, infra repo, and live LMS config |
+| **frontend-app-learner-portal-enterprise** | Enterprise learner portal | Enterprise services stack | Base deployment defined; lane/runtime proof split across app repo, infra repo, and live LMS config |
 | **frontend-app-support-tools** | Support/admin tools | Staff access | Not deployed |
+
+### Enterprise Truth Boundaries
+
+Enterprise admin and learner portals are parity-sensitive deep-route surfaces.
+They should not be treated as "just another themed MFE" because their final
+runtime behavior depends on multiple truth sources:
+
+1. `deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js`
+   Base defaults owned by `mereka-lms`.
+2. `deploy/k8s/overlays/*/enterprise-mfe-env.js`
+   Deprecated reference overlays in this repo; authoritative lane overlays live
+   in `bbi-infrastructure/apps/mereka-lms/overlays/{dev,staging,prod}/`.
+3. `infrastructure/tutor/plugins/_mereka_lms/lms_settings.py`
+   LMS global `MFE_CONFIG` defaults returned by `/api/mfe_config/v1`.
+4. `SiteConfiguration.site_values["MFE_CONFIG"]`
+   Live per-site overrides provisioned at runtime.
+
+Until all four surfaces are consistent, repo-only proof must remain weaker than
+`runtime_validated`.
 
 ## Other Available MFEs (Upstream)
 
@@ -50,6 +81,11 @@ These MFEs exist in Open edX but are not yet deployed. They become relevant when
 - **PARAGON_THEME_URLS**: Runtime CDN theming supported (not yet enabled)
 
 ## Verification
+
+> Boundary note: the commands below check only part of the truth surface unless
+> they are paired with authoritative GitOps overlays and live `/api/mfe_config/v1`
+> evidence. For non-local lanes, repo-only checks are not sufficient to claim
+> `dev`/`staging` parity.
 
 **Check available MFEs:**
 ```bash

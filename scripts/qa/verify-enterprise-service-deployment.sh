@@ -3,19 +3,21 @@
 # @spec: enterprise-microservices_spec.md
 # verify-enterprise-service-deployment.sh
 # Covers: AC-001 through AC-008 (Service Deployment)
-# Exit 0 = all checks pass, exit 1 = failures
+# Exit 0 = PASS, exit 1 = FAIL, exit 2 = INDETERMINATE
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
-require_kubectl || exit 0
 
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
 NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
 NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
 CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
 CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-}}"
 PASS=0; FAIL=0
+INDET=0
 ALLOW_PARTIAL_READY="${ALLOW_PARTIAL_READY:-0}"
 ALLOW_PARKED_SERVICES="${ALLOW_PARKED_SERVICES:-0}"
 WAIT_FOR_STEADY_SECONDS="${WAIT_FOR_STEADY_SECONDS:-120}"
@@ -28,8 +30,18 @@ RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 pass() { echo -e "${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}✗${NC} $1"; FAIL=$((FAIL + 1)); }
 info() { echo -e "${YELLOW}ℹ${NC} $1"; }
+indet() { echo -e "${YELLOW}?${NC} $1"; INDET=$((INDET + 1)); }
 NODE_PRESSURE_REPORTED=0
 CPU_PRESSURE_DETECTED=0
+
+if ! require_kubectl; then
+  indet "kubectl is unavailable; enterprise deployment truth is not locally provable"
+  echo "=== Summary ==="
+  echo -e "${GREEN}PASS:${NC} $PASS"
+  echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
+  echo -e "${RED}FAIL:${NC} $FAIL"
+  exit 2
+fi
 
 pending_reason_summary() {
   local app_name="$1"
@@ -57,10 +69,10 @@ report_node_cpu_request_pressure() {
 
 usage() {
   cat <<'EOF'
-Usage: verify-enterprise-service-deployment.sh [--context <kubectl-context>] [--env <prod|dev>] [--skip-runtime-checks] [--allow-parked-services] [-h|--help]
+Usage: verify-enterprise-service-deployment.sh [--context <kubectl-context>] [--env <prod|dev|staging>] [--skip-runtime-checks] [--allow-parked-services] [-h|--help]
 
 Options:
-  --env <prod|dev>       Resolve kubectl context automatically.
+  --env <prod|dev|staging>  Resolve kubectl context automatically.
   --skip-runtime-checks  Skip all kubectl-dependent runtime checks and return early.
   --allow-parked-services  Treat an all-zero enterprise replica profile as an explicit parked state (exit 0).
 EOF
@@ -112,8 +124,12 @@ if [[ -n "$ENV_NAME" ]]; then
       KUBE_CONTEXT="$CONTEXT_DEV"
       NAMESPACE="$NAMESPACE_DEV"
       ;;
+    staging)
+      KUBE_CONTEXT="$CONTEXT_STAGING"
+      NAMESPACE="$NAMESPACE_STAGING"
+      ;;
     *)
-      echo "Invalid --env: $ENV_NAME (expected prod|dev)" >&2
+      echo "Invalid --env: $ENV_NAME (expected prod|dev|staging)" >&2
       exit 1
       ;;
   esac
@@ -141,8 +157,12 @@ if [[ "$SKIP_RUNTIME_CHECKS" -eq 1 ]]; then
   if [[ -n "$KUBE_CONTEXT" ]]; then
     echo "Context: $KUBE_CONTEXT"
   fi
-  echo -e "${YELLOW}SKIP:${NC} runtime checks suppressed by flag"
-  exit 0
+  indet "runtime checks suppressed by flag; enterprise deployment truth not proven"
+  echo "=== Summary ==="
+  echo -e "${GREEN}PASS:${NC} $PASS"
+  echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
+  echo -e "${RED}FAIL:${NC} $FAIL"
+  exit 2
 fi
 
 if [[ -n "$KUBE_CONTEXT" ]]; then
@@ -155,6 +175,15 @@ if [[ -n "$KUBE_CONTEXT" ]]; then
   kubectl config view --raw > "$TMP_KUBECONFIG"
   KUBECONFIG="$TMP_KUBECONFIG" kubectl config use-context "$KUBE_CONTEXT" >/dev/null
   export KUBECONFIG="$TMP_KUBECONFIG"
+fi
+
+if [[ "$ENV_NAME" == "staging" && -z "$KUBE_CONTEXT" ]]; then
+  indet "staging is a first-class lane but no authoritative staging context is configured in this repo (K8S_CONTEXT_STAGING unset)"
+  echo "=== Summary ==="
+  echo -e "${GREEN}PASS:${NC} $PASS"
+  echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
+  echo -e "${RED}FAIL:${NC} $FAIL"
+  exit 2
 fi
 
 # HTTP check via python3 urllib (curl not available in all enterprise containers)
@@ -441,6 +470,7 @@ fi
 echo
 echo "=== Summary ==="
 echo -e "${GREEN}PASS:${NC} $PASS"
+echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
 echo -e "${RED}FAIL:${NC} $FAIL"
 if [[ "$CPU_PRESSURE_DETECTED" -eq 1 ]]; then
   info "Detected scheduler CPU pressure. Suggested next steps:"
@@ -448,4 +478,10 @@ if [[ "$CPU_PRESSURE_DETECTED" -eq 1 ]]; then
   info "  - Reduce pod CPU requests (including init containers) where safe"
   info "  - Increase cluster allocatable CPU capacity if sustained load requires it"
 fi
-[[ $FAIL -eq 0 ]] && exit 0 || exit 1
+if [[ $FAIL -eq 0 && $INDET -eq 0 ]]; then
+  exit 0
+fi
+if [[ $FAIL -eq 0 && $INDET -gt 0 ]]; then
+  exit 2
+fi
+exit 1

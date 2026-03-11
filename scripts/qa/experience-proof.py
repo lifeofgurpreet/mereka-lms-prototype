@@ -24,7 +24,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 try:
-    from playwright.sync_api import TimeoutError as PwTimeout, sync_playwright
+    from playwright.sync_api import TimeoutError as PwTimeout
+    from playwright.sync_api import sync_playwright
 except ImportError:
     print("ERROR: playwright not installed. Run: pip install playwright && playwright install chromium")
     sys.exit(1)

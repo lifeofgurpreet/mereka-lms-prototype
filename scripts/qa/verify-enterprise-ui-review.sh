@@ -3,7 +3,9 @@
 # @spec: bead-115d13
 # verify-enterprise-ui-review.sh
 # Covers: AC-ENTUI-001 through AC-ENTUI-007 (Enterprise UI Review)
-# Exit 0 = all checks pass, exit 1 = failures
+# Exit 0 = all checks pass
+# Exit 1 = hard failure
+# Exit 2 = indeterminate (authoritative truth is infra-owned or runtime-only)
 
 set -euo pipefail
 
@@ -17,10 +19,34 @@ NC='\033[0m'
 PASS=0
 FAIL=0
 WARN=0
+INDET=0
+LANE="local"
+CONTRACT_YAML="$REPO_ROOT/docs/runtime-proof/enterprise-mfe-runtime-config-contract.v1.yaml"
 
 pass() { echo -e "${GREEN}[PASS]${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}[FAIL]${NC} $1"; FAIL=$((FAIL + 1)); }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
+indet() { echo -e "${YELLOW}[INDETERMINATE]${NC} $1"; INDET=$((INDET + 1)); }
+
+usage() {
+  cat <<EOF
+Usage: $0 [--lane local|dev|staging|prod]
+EOF
+  exit 0
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --lane) LANE="$2"; shift 2 ;;
+    -h|--help) usage ;;
+    *) echo "Unknown argument: $1" >&2; usage ;;
+  esac
+done
+
+if [[ ! "$LANE" =~ ^(local|dev|staging|prod)$ ]]; then
+  echo "Invalid --lane: $LANE (expected local|dev|staging|prod)" >&2
+  exit 1
+fi
 
 ENTERPRISE_MFE_DIR="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe"
 MFE_ENV_JS="$ENTERPRISE_MFE_DIR/enterprise-mfe-env.js"
@@ -31,10 +57,26 @@ BRAND_HTML="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/header/b
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 
 MEREKA_REGISTRY="ghcr.io/biji-biji-initiative/mereka-lms/"
-LMS_PROD_DOMAIN="academyv2.mereka.io"
-STUDIO_PROD_DOMAIN="studio.academyv2.mereka.io"
+contract_lane_result() {
+  local klass="$1"
+  python3 - "$CONTRACT_YAML" "$klass" "$LANE" <<'PY'
+import sys, yaml
+path, klass, lane = sys.argv[1:]
+with open(path) as f:
+    data = yaml.safe_load(f)
+print(data["config_classes"][klass]["repo_only_result_by_lane"][lane])
+PY
+}
+
+shell_bootstrap_repo_result="$(contract_lane_result shell_bootstrap)"
+branding_repo_result="$(contract_lane_result branding_runtime_visible)"
+lane_authoritative_env_available=false
+if [[ "$LANE" == "local" ]]; then
+  lane_authoritative_env_available=true
+fi
 
 echo "=== Enterprise UI Review Gate (AC-ENTUI-001..AC-ENTUI-007) ==="
+echo "lane=$LANE"
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -43,25 +85,22 @@ echo ""
 echo "[AC-ENTUI-001] Verifying enterprise MFE env config URLs..."
 if [[ ! -f "$MFE_ENV_JS" ]]; then
   fail "AC-ENTUI-001: enterprise-mfe-env.js not found at $MFE_ENV_JS"
+elif [[ "$lane_authoritative_env_available" != "true" ]]; then
+  indet "AC-ENTUI-001: authoritative ${LANE} env.config.js is infra-owned; repo-only result=${shell_bootstrap_repo_result}. Refusing to treat base defaults as lane truth."
 else
-  LMS_URL_OK=false
-  STUDIO_URL_OK=false
-
   LMS_URL_LINE=$(grep "LMS_BASE_URL" "$MFE_ENV_JS" || echo "")
   STUDIO_URL_LINE=$(grep "STUDIO_BASE_URL" "$MFE_ENV_JS" || echo "")
 
-  if echo "$LMS_URL_LINE" | grep -q "$LMS_PROD_DOMAIN"; then
-    LMS_URL_OK=true
-    pass "AC-ENTUI-001: LMS_BASE_URL references $LMS_PROD_DOMAIN"
+  if echo "$LMS_URL_LINE" | grep -q "http://localhost"; then
+    pass "AC-ENTUI-001: local base default LMS_BASE_URL is environment-neutral localhost"
   else
-    fail "AC-ENTUI-001: LMS_BASE_URL does not reference $LMS_PROD_DOMAIN (got: $LMS_URL_LINE)"
+    fail "AC-ENTUI-001: local base default LMS_BASE_URL is not environment-neutral (got: $LMS_URL_LINE)"
   fi
 
-  if echo "$STUDIO_URL_LINE" | grep -q "$STUDIO_PROD_DOMAIN"; then
-    STUDIO_URL_OK=true
-    pass "AC-ENTUI-001: STUDIO_BASE_URL references $STUDIO_PROD_DOMAIN"
+  if echo "$STUDIO_URL_LINE" | grep -q "http://studio.localhost"; then
+    pass "AC-ENTUI-001: local base default STUDIO_BASE_URL is environment-neutral localhost"
   else
-    fail "AC-ENTUI-001: STUDIO_BASE_URL does not reference $STUDIO_PROD_DOMAIN (got: $STUDIO_URL_LINE)"
+    fail "AC-ENTUI-001: local base default STUDIO_BASE_URL is not environment-neutral (got: $STUDIO_URL_LINE)"
   fi
 fi
 echo ""
@@ -244,6 +283,17 @@ fi
 if ! grep -qi "enterprise" "$MFE_SCSS" 2>/dev/null; then
   warn "AC-ENTUI-007: No enterprise-specific SCSS selectors in mereka.scss (portals inherit Paragon defaults)"
 fi
+
+echo ""
+echo "[TRUTH-CONTRACT] Verifying lane/result semantics..."
+if [[ ! -f "$CONTRACT_YAML" ]]; then
+  fail "TRUTH-CONTRACT: Missing contract fixture at $CONTRACT_YAML"
+else
+  pass "TRUTH-CONTRACT: Contract fixture present at $CONTRACT_YAML"
+  if [[ "$LANE" != "local" ]]; then
+    indet "TRUTH-CONTRACT: ${LANE} branding/runtime-visible result is ${branding_repo_result}; live /api/mfe_config/v1 and SiteConfiguration truth are not repo-provable."
+  fi
+fi
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -252,8 +302,16 @@ echo ""
 echo "=== Summary ==="
 echo -e "${GREEN}PASS:${NC} $PASS"
 echo -e "${YELLOW}WARN:${NC} $WARN"
+echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
 echo -e "${RED}FAIL:${NC} $FAIL"
 echo ""
-[[ $FAIL -eq 0 ]] && echo -e "${GREEN}Enterprise UI review gate PASSED${NC}" && exit 0
+if [[ $FAIL -eq 0 && $INDET -eq 0 ]]; then
+  echo -e "${GREEN}Enterprise UI review gate PASSED${NC}"
+  exit 0
+fi
+if [[ $FAIL -eq 0 && $INDET -gt 0 ]]; then
+  echo -e "${YELLOW}Enterprise UI review gate INDETERMINATE${NC}"
+  exit 2
+fi
 echo -e "${RED}Enterprise UI review gate FAILED ($FAIL failure(s))${NC}"
 exit 1

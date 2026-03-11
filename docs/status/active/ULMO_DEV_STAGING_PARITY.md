@@ -17,9 +17,15 @@ The goal of this document is to enumerate every gap that must be closed before
 rke2-nonprod can serve as a reliable dev environment for production-equivalent
 Ulmo testing. Dev is validated first, then production GKE is scaled back up.
 
-**GitOps source of truth**: `infrastructure` repo
-(`apps/mereka-lms/overlays/profiles/dev`). This document tracks what
-`mereka-lms` must contribute: images, Tutor config, secrets, and theme assets.
+**GitOps source of truth**: `bbi-infrastructure`
+(`apps/mereka-lms/overlays/{dev,staging,prod}/`). This document tracks what
+`mereka-lms` contributes: app-owned base manifests, Tutor/plugin logic,
+verification scripts, and reference overlays retained in this repo.
+
+> Repo-boundary truth note:
+> `mereka-lms` can prove app-owned contracts and reference overlay intent.
+> It cannot, by itself, prove final `dev`/`staging` lane parity for non-local
+> overlays or runtime-only state such as `SiteConfiguration.site_values["MFE_CONFIG"]`.
 
 ---
 
@@ -98,6 +104,24 @@ base sets. This means:
 3. Enterprise MFE images (`enterprise-admin-portal`, `enterprise-learner-portal`) are
    not pinned — they will fall back to whatever is in the enterprise deployment
    ConfigMap/Deployment, likely upstream defaults — **untested on rke2-nonprod**.
+
+## Enterprise Frontend Truth Boundary
+
+Enterprise admin and learner portals are not fully described by image parity
+alone. Their runtime truth is split across:
+
+1. lane-realized `enterprise-mfe-env.js`
+2. LMS global `MFE_CONFIG`
+3. live `SiteConfiguration.site_values["MFE_CONFIG"]`
+
+For `dev` and `staging`, the authoritative lane overlays are infra-owned in
+`bbi-infrastructure`. For branded/runtime portal values, the final truth exists
+only live. As a result:
+
+- repo-only parity conclusions for enterprise portals are incomplete
+- base/default env config checks are necessary but insufficient
+- runtime `/api/mfe_config/v1` evidence is required before claiming
+  enterprise frontend parity
 
 ---
 

@@ -8471,19 +8471,19 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2025-09-30",
+    "last_verified_or_updated": "2026-03-10",
     "owner": "Migration Squad",
     "path": "reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-10",
+    "owner": "Migration Squad",
     "path": "reference/migrations/kajabi/OPS_KAJABI_README.md",
-    "status": "supporting",
+    "status": "canonical",
     "type": "other"
   },
   {
@@ -9191,9 +9191,27 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-11",
+    "owner": "Platform Team",
+    "path": "runtime-proof/ENTERPRISE_MFE_RUNTIME_CONFIG_TRUTH_CONTRACT.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "runtime-proof/LMS_RUNTIME_PROOF_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "runtime-proof/enterprise-mfe-runtime-config-contract.v1.yaml",
     "status": "supporting",
     "type": "other"
   },

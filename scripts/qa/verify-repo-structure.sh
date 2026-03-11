@@ -264,6 +264,7 @@ spec_exceptions=(
   "IMPLEMENTATION_ORDER.md"
   "_TEMPLATE.md"
   "INDEX.md"
+  "README.md"
 )
 if [[ -d "specs" ]]; then
   while IFS= read -r -d '' p; do
