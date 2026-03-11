@@ -594,3 +594,4 @@ scripts/qa/verify-script-registry-completeness.sh
 scripts/qa/verify-canonical-entrypoints.sh
 scripts/qa/test-verify-canonical-entrypoints.sh
 scripts/qa/verify-tenant-specs.sh
+scripts/qa/verify-configmap-hash-suffixes.sh

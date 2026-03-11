@@ -10,8 +10,9 @@ resources:
   - ingress-openedx-mfe.yaml
   - ingress-openedx-studio.yaml
 
-generatorOptions:
-  disableNameSuffixHash: true
+# generatorOptions.disableNameSuffixHash removed (stabilization PR):
+# Hash suffixes ensure pods restart when ConfigMap content changes.
+# See docs/stabilization/STABILIZATION_AUTHORITY_AND_ROLLOUT_PLAN.md
 
 configMapGenerator:
   - name: enterprise-mfe-env
