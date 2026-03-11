@@ -38,12 +38,11 @@ def collect_data() -> dict:
     """Collect all enterprise-related data from the database."""
     from django.contrib.auth import get_user_model
     from django.contrib.sites.models import Site
-
     from enterprise.models import (
+        EnterpriseCourseEnrollment,
         EnterpriseCustomer,
         EnterpriseCustomerCatalog,
         EnterpriseCustomerUser,
-        EnterpriseCourseEnrollment,
     )
 
     User = get_user_model()
@@ -186,7 +185,7 @@ def print_report(data: dict, spec_issues: list | None = None):
 
     # Courses by org
     if data.get("courses_by_org"):
-        print(f"\nCourses by Organization:")
+        print("\nCourses by Organization:")
         for org, count in sorted(data["courses_by_org"].items()):
             print(f"  {org}: {count}")
 
@@ -210,9 +209,9 @@ def print_report(data: dict, spec_issues: list | None = None):
 
         # Warnings
         if ec["catalog_count"] == 0:
-            print(f"    *** WARNING: No catalogs — learner/admin portals will show empty content")
+            print("    *** WARNING: No catalogs — learner/admin portals will show empty content")
         if ec["user_count"] == 0:
-            print(f"    *** WARNING: No linked users — no one can access enterprise features")
+            print("    *** WARNING: No linked users — no one can access enterprise features")
 
     # Warnings
     if data["warnings"]:

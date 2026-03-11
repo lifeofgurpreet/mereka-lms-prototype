@@ -55,7 +55,6 @@ def load_spec(env: str) -> dict:
 def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
     """Bootstrap a single tenant. Returns a result dict."""
     from django.contrib.sites.models import Site
-
     from enterprise.models import (
         EnterpriseCustomer,
         EnterpriseCustomerCatalog,
@@ -310,7 +309,7 @@ def main():
     print(f"{'='*60}")
     print(f"Summary: {len(all_results)} tenants, {total_actions} actions, {creates} creates, {total_errors} errors")
     if dry_run:
-        print(f"\nThis was a DRY RUN. To apply changes, run with --apply")
+        print("\nThis was a DRY RUN. To apply changes, run with --apply")
     print(f"{'='*60}\n")
 
     sys.exit(1 if total_errors > 0 else 0)
