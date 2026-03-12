@@ -3,7 +3,7 @@
 > Lane F artifact. Tracks repo-local baseline debt that causes false-red CI on main
 > and propagates to every open PR via shared status checks.
 
-## Status: 2026-03-11
+## Status: 2026-03-12
 
 ### FIXED — CRLF Line Endings (Primary Blocker)
 
@@ -76,6 +76,18 @@ errored, skipping all subsequent steps.
 `-rs`, `-is`, `-ds`, `-cs`, `-a`, and combined flag forms. Installed to `$GITHUB_WORKSPACE/.cache/bin/`
 and added to `$GITHUB_PATH`.
 
+### FIXED — legacy-testmaps-frozen Shallow Fetch (Lane F2)
+
+**Impact**: `legacy-testmaps-frozen` spec integrity gate runs `git diff --name-only origin/main...HEAD`.
+The `static-validation` job checkout had no `fetch-depth` (defaults to 1), so `origin/main` was
+unresolvable. Failed with `RuntimeError: fatal: bad revision 'origin/main...HEAD'` on every
+`workflow_dispatch` run and shallow clones.
+
+**Fix** (PR #880):
+1. Added `fetch-depth: 0` to `static-validation` checkout in `ci.yml`
+2. Hardened `verify-legacy-testmaps-frozen.py` to verify refs exist before diffing — skips
+   gracefully with exit 0 if refs are unresolvable (defense-in-depth)
+
 ### NOT FIXED — yamllint Warnings (Non-Blocking)
 
 These produce `[warning]` output but do NOT cause CI failure:
@@ -96,20 +108,24 @@ These produce `[warning]` output but do NOT cause CI failure:
 | Tutor Configuration Tests (PRs #845, #848, #849, #855) | Separate investigation needed | May be baseline or branch-specific |
 | Plugin test failures (PR #856) | Branch-specific | MFE plugin lifecycle/OAuth tests |
 
-### OPEN PR FAILURE CLASSIFICATION
+### OPEN PR FAILURE CLASSIFICATION (Updated 2026-03-12)
 
-After CRLF fix merges, these PRs should automatically go green on `Static Validation`:
-- #823, #824, #825, #826 (dependabot bumps)
-- #833 (enterprise MFE)
-- #851 (JWT fix)
-- #852 (MFE routing)
-- #854 (enterprise MFE)
-- #858 (CORS whitelist)
-- #875 (eslint bump)
+**Unblocked by PR #876** (false-red cascade fix, merged 2026-03-12):
+CI re-runs triggered on all 9 open PRs. All had Static Validation as sole failure.
+- #823, #824, #826 (dependabot bumps) — GREEN_NOW
+- #833 (enterprise MFE) — GREEN_NOW
+- #851 (JWT fix) — GREEN_NOW
+- #852 (MFE routing) — GREEN_NOW
+- #854 (enterprise MFE) — GREEN_NOW
+- #858 (CORS whitelist) — GREEN_NOW
+- #875 (eslint bump) — GREEN_NOW
+- #825 (actions/checkout bump) — CLOSED
 
-These PRs have additional failures beyond CRLF:
+Full sweep: `docs/stabilization/PR_UNBLOCK_SWEEP_LEDGER.md`
+
+**Still blocked (not this lane)**:
 - #845, #848, #849: Tutor Configuration Tests + Security Scans
 - #855: Tutor Configuration Tests
 - #856: Plugin-specific test failures
-- #846, #847, #850: Docs compliance gates
-- #866: Docs compliance + Static Validation
+- #846, #847, #850: Docs compliance gates (Lane E)
+- #866: Docs compliance + Static Validation (Lane E)
