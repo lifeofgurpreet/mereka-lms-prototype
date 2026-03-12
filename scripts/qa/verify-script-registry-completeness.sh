@@ -15,6 +15,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 REGISTRY="${REPO_ROOT}/scripts/governance/script-registry.yaml"
 CI_LIST="${REPO_ROOT}/.github/ci-scripts-static.txt"
+CI_RUNTIME_LIST="${REPO_ROOT}/.github/ci-scripts-runtime.txt"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -69,6 +70,13 @@ while IFS= read -r line; do
   base_path="${line%% *}"
   CI_SET["${base_path}"]=1
 done < "${CI_LIST}"
+if [[ -f "${CI_RUNTIME_LIST}" ]]; then
+  while IFS= read -r line; do
+    [[ "$line" =~ ^#  || -z "${line// }" ]] && continue
+    base_path="${line%% *}"
+    CI_SET["${base_path}"]=1
+  done < "${CI_RUNTIME_LIST}"
+fi
 
 # ── Check 1: scripts/release/* must be registered ────────────────────────────
 echo "--- 1. scripts/release/ — all scripts registered ---"
@@ -114,7 +122,7 @@ else
     if [[ -n "${CI_SET["${path}"]:-}" ]]; then
       pass "${path}"
     else
-      fail "${path} — criticality: release-blocking but absent from ci-scripts-static.txt"
+      fail "${path} — criticality: release-blocking but absent from ci-scripts-static.txt and ci-scripts-runtime.txt"
     fi
   done
 fi

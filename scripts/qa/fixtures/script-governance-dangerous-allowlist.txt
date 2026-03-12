@@ -60,3 +60,6 @@ scripts/tenants/onboard-enterprise-tenant.sh
 scripts/tenants/provision-mfe-config.sh
 scripts/tenants/repair-enterprise-schema.sh
 scripts/tenants/sync-tenant-enterprise-mapping.sh
+scripts/qa/verify-retired-root-remediation.sh
+scripts/tenants/bootstrap-enterprise-tenants.py
+scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py

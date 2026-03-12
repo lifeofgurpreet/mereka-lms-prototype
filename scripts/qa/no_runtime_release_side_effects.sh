@@ -33,18 +33,18 @@ while IFS= read -r -d '' file; do
   fi
 
   # 1. Check for migrate commands in initContainers or lifecycle hooks.
-  if grep -Eq 'manage\.py.*(lms |cms )?migrate' "$file"; then
+  if grep -v '^\s*#' "$file" | grep -Eq 'manage\.py.*(lms |cms )?migrate'; then
     fail "$file: contains manage.py migrate — move to a Job in deploy/k8s/base/jobs/"
   fi
 
   # 2. Check for collectstatic in initContainers or lifecycle hooks.
-  if grep -q 'collectstatic' "$file"; then
+  if grep -v '^\s*#' "$file" | grep -q 'collectstatic'; then
     fail "$file: contains collectstatic — this belongs in the Docker image build, not pod startup"
   fi
 
   # 3. Check for || true error suppression in container commands.
   #    (Blanket suppression hides real failures; use specific error handling instead.)
-  if grep -q '|| true' "$file"; then
+  if grep -v '^\s*#' "$file" | grep -q '|| true'; then
     fail "$file: contains '|| true' error suppression — handle failures explicitly"
   fi
 

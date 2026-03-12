@@ -1,4 +1,5 @@
 # Enterprise Bootstrap Apply Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > Step-by-step guide to bootstrap enterprise tenant data in the dev environment.
 >

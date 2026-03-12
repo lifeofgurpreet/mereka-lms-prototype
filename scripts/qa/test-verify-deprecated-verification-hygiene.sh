@@ -11,7 +11,8 @@ trap 'rm -rf "$tmpdir"' EXIT
 mkdir -p \
   "$tmpdir/docs/archive/verification" \
   "$tmpdir/.github/workflows" \
-  "$tmpdir/scripts/qa/deprecated"
+  "$tmpdir/scripts/qa/deprecated" \
+  "$tmpdir/verification/manifests"
 
 SCRIPT_PATH="scripts/qa/deprecated/verify-legacy-smoke.sh"
 cat >"$tmpdir/$SCRIPT_PATH" <<'EOF'

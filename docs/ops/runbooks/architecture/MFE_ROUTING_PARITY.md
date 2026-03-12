@@ -1,4 +1,5 @@
 # MFE Routing Parity Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 Maintained by: Platform team
 Last reviewed: 2026-02-18

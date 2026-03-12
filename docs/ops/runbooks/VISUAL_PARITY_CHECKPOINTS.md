@@ -1,4 +1,5 @@
 # Visual Parity Checkpoints
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Bead**: mereka-lms-115d.23
 **Covers**: AC-UI-101, AC-UI-102, AC-UI-103, AC-UI-104, AC-UI-105, AC-UI-106

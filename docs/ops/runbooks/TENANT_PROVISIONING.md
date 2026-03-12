@@ -1,4 +1,5 @@
 # Tenant Provisioning Guide
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 This document describes how to provision new tenants in the Mereka Academy multi-tenant Open edX platform.
 

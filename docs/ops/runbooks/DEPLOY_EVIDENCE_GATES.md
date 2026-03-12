@@ -1,4 +1,5 @@
 # Deploy Evidence Gates for GKE Parity
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > **Bead**: mereka-lms-3qy2
 > **Date**: 2026-02-18

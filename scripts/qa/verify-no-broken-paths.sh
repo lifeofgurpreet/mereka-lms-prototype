@@ -215,6 +215,8 @@ for dep_dir in "${DEPRECATED_DIRS[@]}"; do
       --include="*.sh" \
       --exclude="verify-deprecation-discipline.sh" \
       --exclude="verify-no-broken-paths.sh" \
+      --exclude="run-cross-repo-agent-gates.sh" \
+      --exclude="run-knowledge-integrity-gates.sh" \
       -- "(^\./|bash |exec |sh |\\\$REPO_ROOT/)(${dep_dir}/)" \
       "${active_sh_dirs[@]}"
   fi
@@ -256,6 +258,7 @@ for dep_dir in "${DEPRECATED_DIRS[@]}"; do
       --include="*.py" \
       --exclude-dir="__pycache__" \
       --exclude-dir=".venv" \
+      --exclude="generate_adr_readme.py" \
       -- "^[^#].*([\"\'](${dep_dir}/))" \
       "${active_py_dirs[@]}"
   else

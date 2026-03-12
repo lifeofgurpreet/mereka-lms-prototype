@@ -1,4 +1,5 @@
 # Accessibility Regression Lane
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Bead:** 2dcy.3.1
 **ACs:** AC-FRONT-071, AC-FRONT-072, AC-FRONT-073, AC-FRONT-074, AC-FRONT-075

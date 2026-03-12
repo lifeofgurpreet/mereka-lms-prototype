@@ -1,4 +1,5 @@
 # MFE Footer / Slot Migration
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 _Audience: Platform Engineering_
 _Last updated: 2026-02-18 (bead 2dcy.6)_

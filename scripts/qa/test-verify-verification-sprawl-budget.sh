@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-verification-sprawl-budget.sh"
 tmpdir="$(mktemp -d -t verify-sprawl-budget.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/docs/archive/verification"
+mkdir -p "$tmpdir/docs/archive/verification" "$tmpdir/verification/catalogs" "$tmpdir/verification/manifests"
 
 CATALOG_JSON="$tmpdir/verification/catalogs/verification_catalog.json"
 BUDGET_JSON="$tmpdir/verification/manifests/verification_sprawl_budget.json"

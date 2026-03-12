@@ -1,4 +1,5 @@
 # Staging Activation Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Status**: Staging lane is NOT yet activated. This document describes the promotion path design and the steps required to activate it.
 

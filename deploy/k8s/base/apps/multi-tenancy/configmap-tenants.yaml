@@ -37,6 +37,14 @@ data:
       active: true
       alias_domains: []
 
+    # Mereka Academy (default tenant) — domain set by overlay.
+    - slug: mereka-academy
+      name: Mereka Academy
+      domain: localhost
+      enterprise_customer_uuid: "PLACEHOLDER-MEREKA-UUID"
+      active: true
+      alias_domains: []
+
     # Template for adding new tenants:
     # - slug: acme-corp
     #   name: Acme Corp

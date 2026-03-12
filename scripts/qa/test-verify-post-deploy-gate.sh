@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-post-deploy-gate.sh"
 tmpdir="$(mktemp -d -t verify-post-deploy-gate.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/.github/workflows" "$tmpdir/scripts/qa" "$tmpdir/docs/operations"
+mkdir -p "$tmpdir/.github/workflows" "$tmpdir/scripts/qa" "$tmpdir/docs/operations" "$tmpdir/docs/ops/runbooks"
 
 write_pass_fixtures() {
   cat >"$tmpdir/.github/workflows/post-deploy-e2e.yml" <<'EOF'

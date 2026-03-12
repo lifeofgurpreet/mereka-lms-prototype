@@ -10,7 +10,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$tmpdir/scripts/qa"
+mkdir -p "$tmpdir/scripts/qa" "$tmpdir/verification/manifests"
 cp "$SOURCE_SCRIPT" "$tmpdir/scripts/qa/verify-evidence-sprawl-budget.sh"
 chmod +x "$tmpdir/scripts/qa/verify-evidence-sprawl-budget.sh"
 

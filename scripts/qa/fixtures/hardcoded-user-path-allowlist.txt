@@ -37,3 +37,4 @@ scripts/qa/verify-secrets-infisical.sh
 scripts/qa/verify-staging-activation.sh
 scripts/tools/beads-post-sync-hook.sh
 scripts/tools/sync-beads-viewer.sh
+scripts/qa/run-cross-repo-agent-gates.sh

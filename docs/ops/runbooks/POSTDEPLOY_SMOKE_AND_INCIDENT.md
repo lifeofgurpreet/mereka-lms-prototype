@@ -1,4 +1,5 @@
 # Post-Deploy Smoke Matrix and Incident Playbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > **Beads**: mereka-lms-36va.3, mereka-lms-36va.3.1, mereka-lms-36va.4
 > **Date**: 2026-02-18

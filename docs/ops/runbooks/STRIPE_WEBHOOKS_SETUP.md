@@ -1,4 +1,5 @@
 # Stripe Webhooks (Ecommerce)
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 _Audience: Platform Eng • Last updated: 2026-02-17_
 
 > **DEPRECATED**: This document covers Stripe webhook integration for the legacy Oscar-based ecommerce service. The custom Purchase Gateway (`services/purchase-gateway/`) handles its own Stripe integration. See `specs/ecommerce-purchase-gateway_spec.md` for the migration plan and `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for the architectural decision. Retained for reference during the transition period.

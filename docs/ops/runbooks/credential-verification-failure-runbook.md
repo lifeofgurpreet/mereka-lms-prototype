@@ -1,4 +1,5 @@
 # Verifiable Credential Verification Failure Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Spec**: `specs/verifiable-credentials-verification_spec.md` (CRED-040)
 **Alerts**: `VCVerificationEndpointDown`, `VCDIDDocumentUnavailable`, `VCClaimTokenExpiryHigh`

@@ -1,8 +1,8 @@
 {
   "tracked_evidence_max_files": 133,
   "tracked_evidence_max_bytes": 1013702,
-  "tracked_archive_reports_max_files": 51,
+  "tracked_archive_reports_max_files": 60,
   "tracked_archive_reports_max_bytes": 450000,
-  "archive_reports_budget_reviewed_at": "2026-03-07",
-  "archive_reports_budget_rationale": "Increase by +1 to reflect current approved archived report inventory while retaining tight sprawl guardrails."
+  "archive_reports_budget_reviewed_at": "2026-03-12",
+  "archive_reports_budget_rationale": "Rebaseline from 51 to 60 to reflect Lane I/J/K convergence evidence and stabilization docs added since last review."
 }

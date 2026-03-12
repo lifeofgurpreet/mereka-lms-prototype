@@ -11,6 +11,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 mkdir -p \
   "$tmpdir/scripts/branding" \
   "$tmpdir/docs/concepts/architecture" \
+  "$tmpdir/docs/reference/architecture" \
   "$tmpdir/infrastructure/tutor/themes/mereka/scss" \
   "$tmpdir/infrastructure/tutor/themes/mereka/common/static/css" \
   "$tmpdir/infrastructure/tutor/themes/mereka/lms/static/css" \

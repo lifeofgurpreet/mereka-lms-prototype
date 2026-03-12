@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-openedx-audit-tracker-sync.sh"
 tmpdir="$(mktemp -d -t verify-openedx-audit-tracker-sync.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-DOC_DIR="$tmpdir/docs/concepts/architecture"
+DOC_DIR="$tmpdir/docs/meta/docs-program/openedx-repo-audit"
 mkdir -p "$DOC_DIR"
 
 TRACKER="$DOC_DIR/OPENEDX_REPO_ARCH_HYGIENE_AUDIT_TRACKER.md"

@@ -82,7 +82,11 @@ for dir in "${TARGET_DIRS[@]}"; do
   fi
 
   # POSIX workstation path literals.
-  if rg -n --color=never --glob '*.sh' --glob '!test-*.sh' '/(home|Users)/[^[:space:]"'"'"'`]+' "$dir" >>"$tmp_hits"; then
+  # Exclude scripts whose purpose is to detect hardcoded paths (they contain the pattern by design).
+  if rg -n --color=never --glob '*.sh' --glob '!test-*.sh' \
+       --glob '!verify-no-hardcoded-user-paths.sh' \
+       --glob '!verify-no-hardcoded-dev-paths.sh' \
+       '/(home|Users)/[^[:space:]"'"'"'`]+' "$dir" >>"$tmp_hits"; then
     :
   fi
   # Windows workstation path literals.

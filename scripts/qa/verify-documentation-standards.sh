@@ -111,6 +111,15 @@ check_adr_format() {
 
     local invalid_adr=()
     while IFS= read -r -d '' file; do
+        # Skip generated indices, RFC proposals, templates, and README files
+        # These are not decision records and follow different formats
+        local rel_path="${file#"${REPO_ROOT}/"}"
+        if [[ "$rel_path" == */rfc/* ]] || \
+           [[ "$rel_path" == */_generated/* ]] || \
+           [[ "$rel_path" == */templates/* ]] || \
+           [[ "$(basename "$file")" == "README.md" ]]; then
+            continue
+        fi
         # Check for required sections
         if ! grep -q "^## Context" "$file" || \
            ! grep -q "^## Decision" "$file" || \

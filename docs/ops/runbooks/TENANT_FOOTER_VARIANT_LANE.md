@@ -1,4 +1,5 @@
 # Tenant Footer Variant Lane
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > Operational guide for the tenant-first UI/UX footer variant selection lane.
 >

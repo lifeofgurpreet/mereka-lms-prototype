@@ -1,4 +1,5 @@
 # Credential Signing Key Rotation Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Spec**: `specs/verifiable-credentials-issuer_spec.md` (CRED-020)
 **Acceptance Criteria**: AC-CRED-013, AC-CRED-014

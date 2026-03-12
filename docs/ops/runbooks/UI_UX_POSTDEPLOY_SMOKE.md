@@ -1,4 +1,5 @@
 # UI/UX Post-Deploy Smoke Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Bead**: mereka-lms-115d.20
 **Covers**: AC-UVIS-301, AC-UVIS-302, AC-UVIS-303, AC-UVIS-304, AC-UVIS-305

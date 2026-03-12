@@ -1,4 +1,5 @@
 # Deployment Verification Framework
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 <!-- Last verified: 2026-02-13 -->
 

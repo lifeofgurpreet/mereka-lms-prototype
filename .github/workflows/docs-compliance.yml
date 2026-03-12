@@ -63,7 +63,7 @@ on:
 jobs:
   docs-compliance:
     name: Run docs compliance gates
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-runners
     steps:
       - name: Checkout PR head
         if: github.event_name == 'pull_request'

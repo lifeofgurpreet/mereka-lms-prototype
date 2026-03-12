@@ -1,4 +1,5 @@
 # A11y Contrast + Focus-Visible Gate
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Script**: `scripts/qa/verify-a11y-contrast-focus.sh`
 **AC coverage**: AC-A11Y-001, AC-A11Y-002, AC-A11Y-003, AC-A11Y-004

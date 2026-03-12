@@ -1,4 +1,5 @@
 # Secret Rotation Checklist
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 _Audience: Platform / Security responders • Last updated: 2026-02-10_
 
 Use this when a secret may have leaked or whenever scheduled credential rotation is due.

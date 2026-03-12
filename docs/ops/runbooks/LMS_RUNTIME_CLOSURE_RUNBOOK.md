@@ -1,4 +1,5 @@
 # LMS Runtime Closure Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 How to prove, close, and maintain LMS tenant runtime for staging and dev environments.
 

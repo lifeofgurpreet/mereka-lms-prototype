@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-critical-testmap-scope.sh"
 tmpdir="$(mktemp -d -t verify-critical-testmap-scope.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/specs/testmaps"
+mkdir -p "$tmpdir/specs/_generated/testmaps"
 
 create_testmaps() {
   for path in \
@@ -16,7 +16,7 @@ create_testmaps() {
     multi-tenancy-architecture_spec.testmap.yml \
     enterprise-microservices_spec.testmap.yml \
     data-migrations-kajabi-mct_spec.testmap.yml; do
-    cat >"$tmpdir/specs/testmaps/$path" <<'EOF'
+    cat >"$tmpdir/specs/_generated/testmaps/$path" <<'EOF'
 spec: sample
 tests:
   - scripts/qa/verify-auth-hardening.sh
@@ -47,7 +47,7 @@ run_expect_fail() {
 create_testmaps
 run_expect_pass "critical maps pass when no purchase-gateway mappings are present"
 
-cat >>"$tmpdir/specs/testmaps/enterprise-microservices_spec.testmap.yml" <<'EOF'
+cat >>"$tmpdir/specs/_generated/testmaps/enterprise-microservices_spec.testmap.yml" <<'EOF'
   - services/purchase-gateway/tests/unit/test_fulfillment.py
 EOF
 run_expect_fail "critical maps reject purchase-gateway coupling drift"

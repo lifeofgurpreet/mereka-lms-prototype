@@ -1,4 +1,5 @@
 # Observability Quickstart
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 _Audience: On-call / Operators • Last updated: 2026-02-07_
 
 Use this when you need a fast answer to: "Is Mereka LMS healthy right now?"

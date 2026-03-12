@@ -1,4 +1,5 @@
 # RKE2 Nonprod — Tenant Route Matrix
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 _Audience: Platform Engineering + Ops_
 _Last updated: 2026-02-24_

@@ -1,4 +1,5 @@
 # Enterprise SSO Guide
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > **Spec**: `specs/auth-sso-enterprise_spec.md`
 > **Status**: Runtime-ready baseline with deterministic tenant onboarding + readiness gates

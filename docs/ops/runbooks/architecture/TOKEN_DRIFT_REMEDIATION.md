@@ -1,4 +1,5 @@
 # Token Drift Remediation Guide
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 ## Overview
 

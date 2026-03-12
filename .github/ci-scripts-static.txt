@@ -58,7 +58,7 @@ scripts/qa/verify-qa-readonly-contract.sh
 scripts/qa/verify-evidence-tracking-policy.sh
 scripts/qa/verify-evidence-sprawl-budget.sh
 scripts/qa/test-verify-evidence-sprawl-budget.sh
-scripts/qa/verify-documentation-standards.sh
+# [RELOCATED:runtime] scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-architecture-doc-path-drift.sh
 scripts/qa/verify-deprecation-discipline.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
@@ -85,8 +85,8 @@ scripts/qa/test-verify-release-invocation-guardrail-wiring.sh
 scripts/qa/test-verify-release-gitops-guardrails.sh
 scripts/qa/test-verify-release-promotion-wiring.sh
 scripts/qa/test-verify-release-workflow-invocation.sh
-scripts/qa/test-verify-release-bundle.sh
-scripts/qa/test-verify-build-provenance.sh
+# [RELOCATED:runtime] scripts/qa/test-verify-release-bundle.sh
+# [RELOCATED:runtime] scripts/qa/test-verify-build-provenance.sh
 scripts/qa/test-verify-build-workflow-contract.sh
 scripts/qa/test-verify-rollback-dry-run.sh
 scripts/qa/test-verify-post-deploy-gate.sh
@@ -101,7 +101,7 @@ scripts/qa/verify-no-hardcoded-secrets.sh
 scripts/qa/verify-secrets-naming-convention.sh
 scripts/qa/verify-dev-prod-secret-separation.sh
 scripts/qa/verify-secrets-management.sh
-scripts/qa/verify-secret-inventory.sh
+# [RELOCATED:runtime] scripts/qa/verify-secret-inventory.sh
 scripts/qa/verify-secret-classification.sh
 scripts/qa/verify-secrets-inventory.sh
 scripts/qa/verify-infisical-env-validation-coverage.sh
@@ -127,7 +127,7 @@ scripts/qa/verify-k8s-secrets-hygiene.sh
 scripts/qa/verify-k8s-repo-boundaries.sh
 scripts/qa/verify-kustomize-no-deprecated-keys.sh
 scripts/qa/verify-kustomize-render.sh
-scripts/qa/verify-deployment-lanes.sh
+# [RELOCATED:runtime] scripts/qa/verify-deployment-lanes.sh
 scripts/qa/verify-lane-identity.sh
 scripts/qa/verify-topology-selectors.sh --offline
 scripts/qa/verify-authority-routing.sh
@@ -139,8 +139,8 @@ scripts/qa/verify-gitops-image-overrides.sh --skip-infra
 # scripts/qa/verify-deployment-gate.sh  # runtime-only: requires live cluster + GCP access (>120s)
 
 # ── Multisite & multi-tenancy ────────────────────────────────────────────────
-scripts/qa/verify-tutor-multisite-domains.sh
-scripts/qa/verify-tenant-contract-alignment.sh
+# [RELOCATED:runtime] scripts/qa/verify-tutor-multisite-domains.sh
+# [RELOCATED:runtime] scripts/qa/verify-tenant-contract-alignment.sh
 scripts/qa/verify-tenant-dns-inventory.sh
 scripts/qa/verify-tenant-lifecycle-guardrails.sh
 scripts/qa/verify-multisite-apply-guardrails.sh
@@ -170,7 +170,7 @@ scripts/qa/verify-cicd-ios-build.sh
 scripts/qa/verify-cicd-tutor-plugin-test.sh
 scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/test-verify-ci-runner-policy.sh
-scripts/qa/verify-pr-handoff-guardrails.sh
+# [RELOCATED:runtime] scripts/qa/verify-pr-handoff-guardrails.sh
 scripts/qa/verify-execution-invariants-pack.sh
 scripts/qa/verify-stabilization-control-board.sh
 scripts/qa/verify-convergence-evidence-bundle.sh
@@ -190,7 +190,7 @@ scripts/qa/verify-deprecated-verification-hygiene.sh
 scripts/qa/verify-post-deploy-health-gate-wiring.sh
 scripts/qa/verify-release-automation.sh
 scripts/qa/verify-release-gitops-guardrails.sh
-scripts/qa/verify-release-dry-run-contract.sh
+# [RELOCATED:runtime] scripts/qa/verify-release-dry-run-contract.sh
 scripts/qa/verify-release-deployment-choreography.sh
 scripts/qa/verify-release-invocation-guardrail-wiring.sh
 
@@ -214,9 +214,9 @@ scripts/qa/test-enterprise-mfe-patch-contract.sh
 
 # ── Auth & SSO ───────────────────────────────────────────────────────────────
 # scripts/qa/verify-auth-hardening.sh  # runtime-only: requires kubectl for internal checks
-scripts/qa/verify-oidc-provider-configs.sh
+# [RELOCATED:runtime] scripts/qa/verify-oidc-provider-configs.sh
 scripts/qa/verify-oidc-cookie-middleware-order.sh
-scripts/qa/verify-oidc-user-password-state.sh
+# [RELOCATED:runtime] scripts/qa/verify-oidc-user-password-state.sh
 scripts/qa/verify-jwt-uniqueness.sh
 
 # ── Branding & design tokens ─────────────────────────────────────────────────
@@ -230,11 +230,11 @@ scripts/qa/verify-theming-generated-artifacts.sh
 scripts/qa/verify-branding-token-integrity.sh
 scripts/qa/verify-branding-evidence-a11y-contract.sh
 scripts/qa/verify-branding-evidence-screenshot-contract.sh
-scripts/qa/verify-paragon-theme-urls.sh
-scripts/qa/verify-paragon-token-coverage.sh
+# [RELOCATED:runtime] scripts/qa/verify-paragon-theme-urls.sh
+# [RELOCATED:runtime] scripts/qa/verify-paragon-token-coverage.sh
 scripts/qa/verify-paragon-tokens.sh
 scripts/qa/verify-paragon-json-token-hierarchy.sh
-scripts/qa/verify-paragon-runtime.sh
+# [RELOCATED:runtime] scripts/qa/verify-paragon-runtime.sh
 scripts/qa/verify-font-loading.sh
 scripts/qa/verify-branding-asset-sync.sh
 scripts/qa/verify-branding-script-portability.sh
@@ -252,7 +252,7 @@ scripts/branding/validate-token-consumers.sh
 # ── Accessibility & WCAG ─────────────────────────────────────────────────────
 scripts/qa/verify-contrast-compliance.sh
 scripts/qa/verify-a11y-contrast-focus.sh
-scripts/qa/verify-a11y-authenticated-routes.sh
+# [RELOCATED:runtime] scripts/qa/verify-a11y-authenticated-routes.sh
 scripts/qa/verify-a11y-tenant-branding.sh
 
 # ── Forum & migrations ───────────────────────────────────────────────────────
@@ -268,12 +268,12 @@ scripts/qa/verify-tenant-branding-matrix.sh
 scripts/qa/verify-tenant-ui-smoke.sh
 scripts/qa/verify-tenant-footer-variant-lane.sh
 scripts/qa/verify-tenant-config-handoff.sh
-scripts/qa/run-tenant-branding-qa.sh
+# [RELOCATED:runtime] scripts/qa/run-tenant-branding-qa.sh
 scripts/qa/verify-multitenant-brand-platform.sh
 scripts/qa/verify-multi-tenant-branding-ops.sh
-scripts/qa/run-mfe-slot-gates.sh
+# [RELOCATED:runtime] scripts/qa/run-mfe-slot-gates.sh
 scripts/qa/verify-studio-customization.sh
-scripts/qa/verify-footer-variant-matrix.sh
+# [RELOCATED:runtime] scripts/qa/verify-footer-variant-matrix.sh
 scripts/qa/verify-footer-parity.sh
 scripts/qa/verify-footer-slot-only.sh
 scripts/qa/verify-no-dom-overrides.sh
@@ -289,26 +289,26 @@ scripts/qa/verify-slot-matrix.sh
 scripts/qa/verify-analytics-key.sh
 scripts/qa/verify-analytics-undefined-regression.sh
 scripts/qa/verify-analytics-key-elimination.sh
-scripts/qa/verify-selector-to-slot-migration.sh
-scripts/infra/verify-release-preflight.sh
+# [RELOCATED:runtime] scripts/qa/verify-selector-to-slot-migration.sh
+# [RELOCATED:runtime] scripts/infra/verify-release-preflight.sh
 
 # ── Enterprise ───────────────────────────────────────────────────────────────
-scripts/qa/verify-enterprise-service-deployment.sh
-scripts/qa/verify-enterprise-secrets.sh
-scripts/qa/verify-enterprise-catalog.sh
-scripts/qa/verify-enterprise-access-subsidy.sh
-scripts/qa/verify-enterprise-license-management.sh
-scripts/qa/verify-enterprise-tenant-isolation.sh
-scripts/qa/verify-enterprise-sso-readiness.sh --mode repo
+# [RELOCATED:runtime] scripts/qa/verify-enterprise-service-deployment.sh
+# [RELOCATED:runtime] scripts/qa/verify-enterprise-secrets.sh
+# [RELOCATED:runtime] scripts/qa/verify-enterprise-catalog.sh
+# [RELOCATED:runtime] scripts/qa/verify-enterprise-access-subsidy.sh
+# [RELOCATED:runtime] scripts/qa/verify-enterprise-license-management.sh
+# [RELOCATED:runtime] scripts/qa/verify-enterprise-tenant-isolation.sh
+# [RELOCATED:runtime] scripts/qa/verify-enterprise-sso-readiness.sh --mode repo
 scripts/qa/verify-enterprise-observability.sh
 
 # ── Tutor config verification (merged from ci-scripts-full.txt) ────────────
-scripts/qa/verify-tutor-patches.sh
+# [RELOCATED:runtime] scripts/qa/verify-tutor-patches.sh
 scripts/qa/verify-idempotency.sh
 
 # ── Live branding (requires built artifacts) ────────────────────────────────
-scripts/qa/verify-public-branding.sh
-scripts/qa/verify-studio-authoring-branding.sh
+# [RELOCATED:runtime] scripts/qa/verify-public-branding.sh
+# [RELOCATED:runtime] scripts/qa/verify-studio-authoring-branding.sh
 scripts/qa/verify-tutor-branding-render.sh
 scripts/qa/verify-mfe-image-branding.sh
 
@@ -338,7 +338,7 @@ scripts/qa/verify-k8s-secret-scan.sh
 scripts/qa/verify-mobile-secrets-inventory.sh
 scripts/qa/verify-mux-secrets.sh
 scripts/qa/verify-observability-pii-filtering.sh
-scripts/qa/verify-pii-inventory.sh
+# [RELOCATED:runtime] scripts/qa/verify-pii-inventory.sh
 scripts/qa/verify-pod-security-policies.sh
 scripts/qa/verify-precommit-secret-scan.sh
 scripts/qa/verify-purchase-gateway-resilience.sh
@@ -348,10 +348,10 @@ scripts/qa/verify-security-exceptions.sh
 scripts/qa/verify-sla-report-security.sh
 
 # ── K8s, infrastructure & GitOps (additional) ────────────────────────
-scripts/infra/check-atlas-allowlist.sh
+# [RELOCATED:runtime] scripts/infra/check-atlas-allowlist.sh
 scripts/infra/check-cert-sans.sh
 scripts/infra/check-cluster-status.sh
-scripts/infra/validate-telemetry-connectivity.sh
+# [RELOCATED:runtime] scripts/infra/validate-telemetry-connectivity.sh
 scripts/qa/check-atlas-translation-infra.sh
 scripts/qa/verify-kustomize-structure.sh
 scripts/qa/verify-operational-hardening.sh
@@ -371,19 +371,19 @@ scripts/qa/verify-tenant-isolation-evidence.sh
 scripts/qa/verify-tenant-isolation-gates.sh
 scripts/qa/verify-tenant-isolation-patterns.sh
 scripts/qa/verify-tenant-model.sh
-scripts/qa/verify-tenant-override-schema.sh
+# [RELOCATED:runtime] scripts/qa/verify-tenant-override-schema.sh
 scripts/qa/verify-tenant-pilot.sh
 scripts/qa/verify-tenant-provisioning-enhanced.sh
 scripts/qa/verify-tenant-provisioning.sh
-scripts/qa/verify-tenant-visual-contract.sh
+# [RELOCATED:runtime] scripts/qa/verify-tenant-visual-contract.sh
 
 # ── Observability & monitoring (additional) ──────────────────────────
-scripts/qa/audit-db-exporter-telemetry.sh
+# [RELOCATED:runtime] scripts/qa/audit-db-exporter-telemetry.sh
 scripts/qa/audit-grafana-dashboard.sh
 scripts/qa/audit-observability.sh
-scripts/qa/audit-velero-alert-pipeline.sh
+# [RELOCATED:runtime] scripts/qa/audit-velero-alert-pipeline.sh
 scripts/qa/audit-velero.sh
-scripts/qa/verify-grafana-runtime-readiness.sh
+# [RELOCATED:runtime] scripts/qa/verify-grafana-runtime-readiness.sh
 scripts/qa/verify-mux-alert-wiring.sh
 scripts/qa/verify-observability-loki-deployment.sh
 scripts/qa/verify-observability-loki-labels.sh
@@ -415,7 +415,7 @@ scripts/qa/verify-mfe-slot-nfr.sh
 scripts/qa/verify-mfe-ulmo-migration.sh
 scripts/qa/verify-phase7-dom-audit-contract.sh
 scripts/qa/verify-phase7-selector-list-coverage.sh
-scripts/qa/verify-selector-hardening.sh
+# [RELOCATED:runtime] scripts/qa/verify-selector-hardening.sh
 scripts/qa/verify-slot-migration-readiness.sh
 
 # ── Branding & design tokens (additional) ────────────────────────────
@@ -437,20 +437,20 @@ scripts/qa/verify-wcag-contrast-v2.sh
 
 # ── Enterprise & SSO (additional) ────────────────────────────────────
 scripts/qa/audit-authentik-policy-exceptions.sh
-scripts/qa/audit-enterprise-capacity-pressure.sh
+# [RELOCATED:runtime] scripts/qa/audit-enterprise-capacity-pressure.sh
 scripts/qa/verify-kajabi-sso.sh
 scripts/qa/verify-platform-admin-sso-isolation.sh
 scripts/qa/verify-session-persistence.sh
-scripts/qa/verify-studio-sso-flow.sh
+# [RELOCATED:runtime] scripts/qa/verify-studio-sso-flow.sh
 
 # ── CI/CD & release (additional) ─────────────────────────────────────
 scripts/ci/preflight-check.sh
-scripts/infra/check-worktree-freshness.sh
+# [RELOCATED:runtime] scripts/infra/check-worktree-freshness.sh
 scripts/qa/verify-migration-rollback.sh
 scripts/qa/verify-mobile-release.sh
 scripts/qa/verify-post-deploy-gate.sh
-scripts/qa/verify-build-provenance.sh
-scripts/qa/verify-release-bundle.sh
+# [RELOCATED:runtime] scripts/qa/verify-build-provenance.sh
+# [RELOCATED:runtime] scripts/qa/verify-release-bundle.sh
 scripts/qa/verify-release-promotion-wiring.sh
 scripts/qa/verify-release-workflow-invocation.sh
 scripts/qa/verify-rke2-rollout-readiness.sh
@@ -463,7 +463,7 @@ scripts/qa/verify-wif-readiness.sh
 # ── Video & Mux ──────────────────────────────────────────────────────
 scripts/migrations/mct/verify_video_mapping.sh
 scripts/qa/verify-no-mux-asset-ids.sh
-scripts/qa/verify-mux-upload-completeness.sh
+# [RELOCATED:runtime] scripts/qa/verify-mux-upload-completeness.sh
 scripts/qa/verify-mux-video-upload.sh
 scripts/qa/verify-video-content-protection.sh
 scripts/qa/verify-video-mct-migration.sh
@@ -496,7 +496,7 @@ scripts/qa/verify-libraries-scale.sh
 
 # ── Migration contracts (additional) ─────────────────────────────────
 scripts/qa/verify-incremental-sync.sh
-scripts/qa/verify-migration-completion-plan.sh
+# [RELOCATED:runtime] scripts/qa/verify-migration-completion-plan.sh
 scripts/qa/verify-olx-packages.sh
 
 # ── Other verification scripts ───────────────────────────────────────
@@ -505,18 +505,18 @@ scripts/qa/verify-lighthouse-budgets.sh
 scripts/qa/verify-no-broken-paths.sh
 scripts/qa/verify-no-latest-tags.sh
 scripts/qa/verify-operator-dashboards.sh
-scripts/qa/verify-org-role-ownership.sh
+# [RELOCATED:runtime] scripts/qa/verify-org-role-ownership.sh
 scripts/qa/verify-oscar-deprecation.sh
 scripts/qa/verify-phase2-smoke-evidence-contract.sh
-scripts/qa/verify-platform-middleware.sh
-scripts/qa/verify-preview-redirect.sh
+# [RELOCATED:runtime] scripts/qa/verify-platform-middleware.sh
+# [RELOCATED:runtime] scripts/qa/verify-preview-redirect.sh
 scripts/qa/verify-product-kpi.sh
 scripts/qa/verify-push-notifications.sh
 scripts/qa/verify-email-digests.sh
 scripts/qa/verify-email-gdpr-code.sh
 scripts/qa/verify-spec-coverage.sh
-scripts/qa/verify-studio-isolation.sh
-scripts/qa/verify-superset-runbook.sh
+# [RELOCATED:runtime] scripts/qa/verify-studio-isolation.sh
+# [RELOCATED:runtime] scripts/qa/verify-superset-runbook.sh
 scripts/qa/verify-translations.sh
 scripts/qa/verify-ttfs-onboarding.sh
 scripts/qa/verify-tutor-config-safety.sh
@@ -549,12 +549,12 @@ scripts/qa/verify-email-template-multilang.sh
 
 # ── Content libraries (additional) ───────────────────────────────────
 scripts/qa/verify-content-libraries-v2.sh
-scripts/qa/verify-content-libraries-v2-enterprise.sh
+# [RELOCATED:runtime] scripts/qa/verify-content-libraries-v2-enterprise.sh
 scripts/qa/verify-content-libraries-advanced.sh
 
 # ── Enterprise & SSO contracts (additional) ──────────────────────────
 scripts/qa/verify-enterprise-sso.sh
-scripts/qa/verify-cross-system-identity.sh
+# [RELOCATED:runtime] scripts/qa/verify-cross-system-identity.sh
 
 # ── Observability (additional static) ────────────────────────────────
 scripts/qa/verify-logging-pipeline.sh
@@ -573,7 +573,7 @@ scripts/qa/verify-authenticated-ui-smoke.sh
 scripts/qa/verify-admin-console.sh
 
 # ── Credentials & certificates (additional) ───────────────────────────
-scripts/qa/verify-certificate-issuance.sh
+# [RELOCATED:runtime] scripts/qa/verify-certificate-issuance.sh
 scripts/qa/verify-credentials-issuance.sh
 scripts/qa/verify-credentials-types.sh
 scripts/qa/verify-credentials-verification.sh
@@ -596,7 +596,7 @@ scripts/qa/verify-deployment-contract.sh
 scripts/release/release-gate.sh --skip-cluster
 scripts/governance/validate-registry.sh
 scripts/qa/scan-secrets-fast.sh
-scripts/qa/verify-release-readiness.sh --dry-run
+# [RELOCATED:runtime] scripts/qa/verify-release-readiness.sh --dry-run
 scripts/qa/verify-script-registry-completeness.sh
 scripts/qa/verify-canonical-entrypoints.sh
 scripts/qa/test-verify-canonical-entrypoints.sh

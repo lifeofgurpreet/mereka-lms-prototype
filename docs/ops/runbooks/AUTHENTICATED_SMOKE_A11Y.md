@@ -1,4 +1,5 @@
 # Authenticated Smoke & Accessibility Gates
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Bead:** 2dcy.3
 **ACs:** AC-FRONT-031, AC-FRONT-032, AC-FRONT-033, AC-FRONT-034

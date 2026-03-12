@@ -1,4 +1,5 @@
 # RKE2 BoldBadger Rollout Checklist
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > **Cluster**: `rke2-nonprod` (154.26.132.35, single-node RKE2 v1.34.3+rke2r3)
 > **Namespace**: `mereka-lms`

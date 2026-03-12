@@ -14,7 +14,8 @@ mkdir -p \
   "$tmpdir/infrastructure/k8s/velero" \
   "$tmpdir/.github/workflows" \
   "$tmpdir/scripts/infra" \
-  "$tmpdir/scripts/qa"
+  "$tmpdir/scripts/qa" \
+  "$tmpdir/docs/policies/operations"
 
 cat >"$tmpdir/docs/policies/operations/REPO_BOUNDARIES.md" <<'EOF'
 # Repo boundaries

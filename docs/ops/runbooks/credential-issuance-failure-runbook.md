@@ -1,4 +1,5 @@
 # Verifiable Credential Issuance Failure Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Spec**: `specs/verifiable-credentials-issuance_spec.md` (CRED-030)
 **Alerts**: `VCIssuanceLatencyHigh`, `VCIssuanceFailureSpike`

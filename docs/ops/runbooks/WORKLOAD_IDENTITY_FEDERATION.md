@@ -1,4 +1,5 @@
 # Workload Identity Federation (WIF) Migration Guide
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 ## Why WIF Instead of JSON SA Keys
 

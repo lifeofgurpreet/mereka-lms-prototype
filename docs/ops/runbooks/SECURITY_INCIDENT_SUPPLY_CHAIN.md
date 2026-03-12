@@ -1,4 +1,5 @@
 # Security Incident Runbook: Supply-Chain Attacks
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > **Owner**: platform-engineering
 > **Last Updated**: 2026-02-24

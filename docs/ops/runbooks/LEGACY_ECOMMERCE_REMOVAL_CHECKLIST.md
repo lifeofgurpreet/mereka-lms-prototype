@@ -1,4 +1,5 @@
 # Legacy Oscar Ecommerce Removal Checklist
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Status**: NOT YET EXECUTED — Planning document only
 

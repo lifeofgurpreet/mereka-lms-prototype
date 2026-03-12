@@ -1,4 +1,5 @@
 # Superset Deployment Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 <!-- @covers AC-SUPRT-001, AC-SUPRT-002 -->
 <!-- @spec: analytics-pipeline_spec.md -->

@@ -1,4 +1,5 @@
 # GDPR Compliance Operational Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > **Spec**: `specs/data-privacy-gdpr-compliance_spec.md`
 > **Related**: `docs/ops/runbooks/PRIVACY_RUNBOOK.md` (brief quick-reference)

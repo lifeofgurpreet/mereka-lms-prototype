@@ -92,8 +92,8 @@ echo
 declare -A MFE_ROUTES=(
   ["/authn"]="authn"
   ["/account"]="account"
-  ["/authoring"]="course-authoring"   # Symlinked in both directions at runtime
-  ["/course-authoring"]="course-authoring"
+  ["/authoring"]="authoring"
+  ["/course-authoring"]="authoring"
   ["/discussions"]="discussions"
   ["/learner-dashboard"]="learner-dashboard"
   ["/learner-record"]="learner-record"

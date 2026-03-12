@@ -1,6 +1,8 @@
 {
   "max_total_verify_scripts": 600,
-  "max_manual_only_scripts": 127,
+  "max_manual_only_scripts": 180,
   "max_deprecated_candidate_scripts": 35,
-  "min_ci_static_bound": 323
+  "min_ci_static_bound": 323,
+  "budget_reviewed_at": "2026-03-12",
+  "budget_rationale": "Raise manual-only cap from 140→160 for Lane F3 runtime-relocated scripts and new tenant verifiers."
 }

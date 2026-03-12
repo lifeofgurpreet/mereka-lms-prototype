@@ -685,6 +685,33 @@ scripts:
     criticality: release-blocking
     entrypoint_role: runtime-validation-post-migrate  # canonical-entrypoints.yaml workflow: runtime-validation-post-migrate
 
+  - path: scripts/release/emit-proof-envelope.sh
+    owner: platform-team
+    purpose: >
+      Emit a proof envelope artifact for release evidence tracking.
+    inputs: []
+    outputs:
+      - stdout (proof envelope)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/emit-proof-envelope.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  - path: scripts/release/smoke-by-service-wave.sh
+    owner: platform-team
+    purpose: >
+      Smoke-test services in deployment wave order after release.
+    inputs:
+      - "--namespace NS (default: mereka-lms)"
+    outputs:
+      - stdout (smoke results per wave)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/smoke-by-service-wave.sh --help 2>&1 || true"
+    criticality: release-supporting
+
   # ── Runtime Validation ───────────────────────────────────────────────────────
 
   - path: scripts/infra/verify-deployment.sh

@@ -9,7 +9,7 @@ set -euo pipefail
 # in compiled static files and grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/
 # returns zero results.
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

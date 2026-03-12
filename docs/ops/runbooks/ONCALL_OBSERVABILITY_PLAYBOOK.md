@@ -1,4 +1,5 @@
 # On-Call Observability Playbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 _Audience: Incident responders • Last updated: 2026-02-07_
 
 Use this sequence to understand platform health quickly.

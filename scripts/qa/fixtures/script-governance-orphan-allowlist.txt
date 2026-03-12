@@ -55,3 +55,16 @@ scripts/qa/validation-pack/smoke-tests.sh
 scripts/shared/create-demo-course.sh
 scripts/transform_mct_to_course_packages.py
 scripts/verify-mct-thumbnails.py
+scripts/qa/experience-proof.py
+scripts/qa/generate_adr_aux_maps.py
+scripts/qa/inventory_k8s_resources.sh
+scripts/qa/verify-clean-tree-before-mutation.sh
+scripts/qa/verify-mutation-scope.sh
+scripts/qa/verify-worktree-sanity.sh
+scripts/qa/verify_adr_aux_maps.py
+scripts/qa/verify_adr_generated_clean.sh
+scripts/qa/verify_adr_links.py
+scripts/qa/verify_adr_readme.py
+scripts/tenants/disable-sso-nonprod.sh
+scripts/tenants/seed-siteconfigs.sh
+scripts/tenants/verify-staging-tenant-proof.sh

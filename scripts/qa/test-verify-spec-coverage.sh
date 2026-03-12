@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-spec-coverage.sh"
 tmpdir="$(mktemp -d -t verify-spec-coverage.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/specs/testmaps" "$tmpdir/tests"
+mkdir -p "$tmpdir/specs/_generated/testmaps" "$tmpdir/tests"
 
 cat >"$tmpdir/specs/sample_spec.md" <<'EOF'
 # Sample Spec
@@ -38,7 +38,7 @@ run_expect_fail() {
   echo "PASS ${label}"
 }
 
-cat >"$tmpdir/specs/testmaps/sample_spec.testmap.yml" <<'EOF'
+cat >"$tmpdir/specs/_generated/testmaps/sample_spec.testmap.yml" <<'EOF'
 spec: specs/sample_spec.md
 acceptance_criteria:
   - id: AC-SAMPLE-001
@@ -52,7 +52,7 @@ acceptance_criteria:
 EOF
 run_expect_pass "coverage passes when all AC blocks are wired"
 
-cat >"$tmpdir/specs/testmaps/sample_spec.testmap.yml" <<'EOF'
+cat >"$tmpdir/specs/_generated/testmaps/sample_spec.testmap.yml" <<'EOF'
 spec: specs/sample_spec.md
 acceptance_criteria:
   - id: AC-SAMPLE-001

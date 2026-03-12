@@ -1,4 +1,5 @@
 # Verifiable Credential Backfill Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Spec**: `specs/verifiable-credentials-ops_spec.md` (CRED-050)
 **Use Case**: Issue VCs for learners who completed courses/programs before VC feature was enabled

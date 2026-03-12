@@ -1,4 +1,5 @@
 # Tenant Brand Onboarding Guide
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > Step-by-step guide for adding a new tenant brand to the Mereka Academy platform.
 >

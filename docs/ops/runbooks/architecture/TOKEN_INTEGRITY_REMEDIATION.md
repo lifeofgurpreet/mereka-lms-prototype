@@ -1,4 +1,5 @@
 # Token Integrity Remediation Guide
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > Reference: DR1 gap findings (P0/P1), bead mereka-lms-8jao.4
 

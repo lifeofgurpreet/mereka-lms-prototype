@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-wif-readiness.sh"
 tmpdir="$(mktemp -d -t verify-wif-readiness.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/.github/workflows" "$tmpdir/deploy/k8s/base/secrets" "$tmpdir/docs/operations"
+mkdir -p "$tmpdir/.github/workflows" "$tmpdir/deploy/k8s/base/secrets" "$tmpdir/docs/operations" "$tmpdir/docs/ops/runbooks"
 
 write_pass_fixtures() {
   cat >"$tmpdir/.github/workflows/build.yml" <<'EOF'

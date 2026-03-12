@@ -46,7 +46,8 @@
     "scripts/qa/verify-theming-generated-artifacts.sh",
     "scripts/qa/verify-token-generation-pipeline.sh",
     "scripts/qa/verify-token-reference-integrity.sh",
-    "scripts/qa/verify-ui-ux-hardening-bundle.sh"
+    "scripts/qa/verify-ui-ux-hardening-bundle.sh",
+    "scripts/qa/verify-retired-root-remediation.sh"
   ],
   "notes": "Baseline freeze for scripts still referencing legacy docs/architecture path."
 }

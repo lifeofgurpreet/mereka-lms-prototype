@@ -51,7 +51,7 @@ else
 fi
 
 # infrastructure/k8s must remain a tightly scoped support namespace.
-if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+if [[ -z "${REPO_ROOT_OVERRIDE:-}" ]] && git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   tracked_k8s_files_cmd=(git -C "$REPO_ROOT" ls-files infrastructure/k8s)
 else
   if [[ ! -d "$REPO_ROOT/infrastructure/k8s" ]]; then

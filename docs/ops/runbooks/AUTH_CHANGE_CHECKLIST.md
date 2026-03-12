@@ -1,4 +1,5 @@
 # Auth Change Checklist
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 - [ ] Confirmed if this repo is source-of-truth or capability-only for auth config
 - [ ] Updated canonical infra values (if environment behavior changed)

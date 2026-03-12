@@ -1,4 +1,5 @@
 # MFE OAuth Fix Deployment Guide
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 <!-- Last verified: 2026-02-27 -->
 <!-- Related: docs/reference/architecture/MFE_RUNTIME_CONFIG.md, specs/auth-sso-enterprise_spec.md -->

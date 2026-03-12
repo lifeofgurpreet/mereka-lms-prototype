@@ -1,4 +1,5 @@
 # Observability Parity Workflow Setup
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 Date: 2026-02-25
 

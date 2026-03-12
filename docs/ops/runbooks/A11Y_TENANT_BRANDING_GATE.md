@@ -1,4 +1,5 @@
 # A11y Tenant Branding Gate
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Bead**: mereka-lms-3vg9.3
 **Script**: `scripts/qa/verify-a11y-tenant-branding.sh`

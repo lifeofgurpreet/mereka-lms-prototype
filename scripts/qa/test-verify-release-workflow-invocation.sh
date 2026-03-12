@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-release-workflow-invocation.sh"
 tmpdir="$(mktemp -d -t verify-release-workflow-invocation.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/.github/workflows" "$tmpdir/scripts/infra" "$tmpdir/docs/operations"
+mkdir -p "$tmpdir/.github/workflows" "$tmpdir/scripts/infra" "$tmpdir/docs/operations" "$tmpdir/docs/reference/operations"
 
 write_pass_fixture() {
   cat >"$tmpdir/.github/workflows/release.yml" <<'EOF'
@@ -25,7 +25,19 @@ EOF
 set -euo pipefail
 echo "release helper"
 EOF
-  chmod +x "$tmpdir/scripts/infra/create-release.sh"
+  cat >"$tmpdir/scripts/infra/canonical-release.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "canonical release"
+EOF
+  cat >"$tmpdir/scripts/infra/release-openedx-gitops.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "gitops release"
+EOF
+  chmod +x "$tmpdir/scripts/infra/create-release.sh" \
+    "$tmpdir/scripts/infra/canonical-release.sh" \
+    "$tmpdir/scripts/infra/release-openedx-gitops.sh"
 
   cat >"$tmpdir/docs/reference/operations/RELEASE_PROCESS.md" <<'EOF'
 # Release Process

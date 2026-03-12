@@ -1,4 +1,5 @@
 # RKE2 Dev Readiness Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 > **Cluster**: `rke2-nonprod` (single-node, v1.34.3+rke2r3)
 > **Namespace**: `mereka-lms`

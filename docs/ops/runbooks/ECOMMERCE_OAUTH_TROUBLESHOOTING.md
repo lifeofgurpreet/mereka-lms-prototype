@@ -1,4 +1,5 @@
 # Ecommerce OAuth 500 Troubleshooting
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 _Audience: Platform Eng • Last updated: 2026-02-04_
 
 > **DEPRECATED**: This document covers the legacy Oscar-based ecommerce service (`overhangio/openedx-ecommerce`), which is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `specs/ecommerce-purchase-gateway_spec.md` for the migration plan. During the dual-stack transition period, these OAuth2 configurations remain active.

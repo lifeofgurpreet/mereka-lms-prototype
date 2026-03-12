@@ -4,8 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-BBI_ROOT="${WAVE10_BBI_ROOT:-/home/gurpreet/projects/k8s/bbi-infrastructure-wt-wave10-contract-compiled-front-doors}"
-PCP_ROOT="${WAVE10_PCP_ROOT:-/home/gurpreet/projects/platform-control-plane-wt-wave10-contract-docsync}"
+BBI_ROOT="${WAVE10_BBI_ROOT:-}"
+PCP_ROOT="${WAVE10_PCP_ROOT:-}"
 
 bbi_root_explicit=0
 pcp_root_explicit=0

@@ -1,4 +1,5 @@
 # Purchase Gateway Fulfillment Recovery
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 This runbook covers recovery for paid-but-unfulfilled orders after Stripe webhook acknowledgement.
 

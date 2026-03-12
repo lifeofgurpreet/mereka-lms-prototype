@@ -1,4 +1,5 @@
 # Visual Smoke Baseline
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Bead**: mereka-lms-115d.15
 **Covers**: AC-VIS-001, AC-VIS-002, AC-VIS-003, AC-VIS-004

@@ -1,4 +1,5 @@
 # Footer Slot Migration Contract
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Status**: Active Migration Path
 **Created**: 2026-02-17

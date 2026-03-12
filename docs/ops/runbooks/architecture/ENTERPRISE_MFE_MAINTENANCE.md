@@ -1,4 +1,5 @@
 # Enterprise MFE Dockerfile Maintenance
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 _Last updated: 2026-02-27_
 

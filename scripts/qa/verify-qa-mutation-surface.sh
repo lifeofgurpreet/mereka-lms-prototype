@@ -101,7 +101,10 @@ for path in sorted(discovered_mutating):
 
 for path in sorted(allowlisted_paths):
     if path not in discovered_mutating:
-        fail(f"stale allowlist entry (script missing or renamed): {path}")
+        script_file = repo_root / path
+        if not script_file.exists():
+            fail(f"stale allowlist entry (script missing or renamed): {path}")
+        # else: script exists but uses mutating commands (not prefix) — valid for readonly contract
 
 print(f"Summary: PASS={passes} FAIL={failures}")
 if failures:

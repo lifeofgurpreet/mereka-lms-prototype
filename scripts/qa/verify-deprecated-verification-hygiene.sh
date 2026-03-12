@@ -3,7 +3,7 @@
 # @spec: ci-cd-pipeline_spec.md
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 MANIFEST="$REPO_ROOT/verification/manifests/deprecated_verify_scripts.json"
 CI_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
 WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
@@ -55,7 +55,7 @@ for entry in scripts:
     replacement = entry.get("replacement_entrypoint", "")
     reason = entry.get("reason", "")
     rel = Path(path)
-    abs_path = Path.cwd() / rel
+    abs_path = manifest_path.parent.parent.parent / rel
 
     if not path.startswith("scripts/qa/deprecated/verify-"):
         fail(f"{path}: must live under scripts/qa/deprecated/")
