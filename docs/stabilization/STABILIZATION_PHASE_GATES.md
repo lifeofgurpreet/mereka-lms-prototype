@@ -84,3 +84,8 @@ The program remains in `Stabilization`.
 It may move to `Convergence` only when runtime/browser closure is recorded as durable,
 non-contradictory merged repo truth rather than local proof, manual mitigation, or
 temporary operational state.
+
+Current claim-lineage intake for that gate is tracked in:
+
+- `docs/stabilization/CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md`
+- `docs/reviews/DEV_RUNTIME_CONVERGENCE_EVIDENCE.md`

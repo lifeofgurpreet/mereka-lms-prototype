@@ -9355,6 +9355,24 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "reviews/CONVERGENCE_EVIDENCE_PROMOTION_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reviews/DEV_RUNTIME_CONVERGENCE_EVIDENCE.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "reviews/ENTERPRISE_BOOTSTRAP_DRYRUN_PARTNER_ISOLATED.md",
     "status": "supporting",
     "type": "other"
@@ -9524,6 +9542,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-11",
     "owner": "Platform Team",
     "path": "stabilization/DOCS_ROOT_AUTHORITY_CONTRACT.md",
@@ -9671,6 +9698,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "stabilization/STATIC_VALIDATION_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/dev-runtime-convergence-bundle.v1.yaml",
     "status": "supporting",
     "type": "other"
   },

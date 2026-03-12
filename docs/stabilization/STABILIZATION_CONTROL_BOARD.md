@@ -98,3 +98,5 @@ This board does not treat local proof files as authoritative closure.
 - `docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md`
 - `docs/stabilization/DOCS_ROOT_AUTHORITY_CONTRACT.md`
 - `docs/stabilization/RETIRED_ROOT_REMEDIATION_LEDGER.md`
+- `docs/stabilization/CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md`
+- `docs/reviews/DEV_RUNTIME_CONVERGENCE_EVIDENCE.md`

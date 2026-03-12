@@ -1,0 +1,117 @@
+version: v1
+phase: Stabilization
+next_allowed_phase: Convergence
+phase_gate_status: BLOCKED
+evidence_sources:
+  - id: lane-a-runtime-closure-local-proof
+    path: var/proofs/lane-a-runtime-closure.md
+    classification: local_proof_input
+    canonical: false
+    labels:
+      - external lane evidence
+      - local proof input
+      - not independently reverified by this lane
+  - id: lane-a-phase2-screenshots
+    path: assets/screenshots-of-issues/lane-a-phase2-proof/
+    classification: screenshot_bundle
+    canonical: false
+    labels:
+      - external lane evidence
+      - local proof input
+      - not independently reverified by this lane
+  - id: lane-a-phase3-screenshots
+    path: assets/screenshots-of-issues/lane-a-phase3-bff-closure/
+    classification: screenshot_bundle
+    canonical: false
+    labels:
+      - external lane evidence
+      - local proof input
+      - not independently reverified by this lane
+promoted_claims:
+  - id: stabilization-phase-remains-active
+    truth: CONFIRMED
+    state_class: DURABLE
+    summary: The program remains in Stabilization until runtime/browser closure becomes durable merged truth.
+  - id: build-truth-contract-is-durable
+    truth: CONFIRMED
+    state_class: DURABLE
+    summary: Enterprise MFE build truth is pinned at the contract layer and must not depend on latest.
+  - id: local-runtime-proof-is-non-canonical
+    truth: CONFIRMED
+    state_class: DURABLE
+    summary: Local proof files and screenshots are not canonical runtime closure by default.
+provisional_claims:
+  - id: admin-portal-dev-success
+    owner: Lane A
+    state_class: MANUAL_STATE
+    summary: Admin portal appears healthy in local phase 2 proof but is not yet promoted canonically.
+  - id: learner-primary-path-dev-success
+    owner: Lane A
+    state_class: MANUAL_STATE
+    summary: Learner dashboard path appears healthy in local proof but remains non-canonical.
+  - id: json-404-proxy-fix-landed
+    owner: Lane A
+    state_class: TEMPORARY_RUNTIME_MITIGATION
+    summary: Local proof indicates HTML 404 to JSON 404 conversion, but user-visible secondary-path closure is still unresolved.
+  - id: live-image-and-runtime-mapping
+    owner: Lane A
+    state_class: MANUAL_STATE
+    summary: Local proof names image tags and digests, but the tested runtime mapping is not durably promoted here.
+contradicted_claims:
+  - id: learner-blocker-is-bff-401
+    owner: Lane A
+    state_class: MANUAL_STATE
+    contradicted_by: later phase 3 section of var/proofs/lane-a-runtime-closure.md
+    summary: Later local proof shows BFF auth returns 200 and the blocker shifts to MFE handling of JSON 404s.
+  - id: learner-browser-proof-passes
+    owner: Lane A
+    state_class: MANUAL_STATE
+    contradicted_by: phase 3 screenshots and later phase 3 proof section
+    summary: Learner shell renders, but the error boundary still fires on the secondary path.
+blockers:
+  - id: no-canonical-runtime-bundle
+    owner: Lane A
+    blocker_type: evidence-promotion
+    truth: PROVISIONAL
+    state_class: MANUAL_STATE
+    summary: Runtime/browser evidence is still local proof input rather than merged canonical truth.
+  - id: learner-secondary-path-error-boundary
+    owner: Lane A
+    blocker_type: user-visible-runtime
+    truth: CONTRADICTED
+    state_class: MANUAL_STATE
+    summary: Later local proof still shows the learner secondary path failing at the user-visible layer.
+  - id: live-runtime-mapping-not-promoted
+    owner: Lane A plus external infra surface
+    blocker_type: release-truth
+    truth: PROVISIONAL
+    state_class: MANUAL_STATE
+    summary: Live image, GitOps, and runtime mapping are not yet promoted into tracked convergence truth.
+  - id: runner-throughput-effects
+    owner: External platform capacity
+    blocker_type: external-throughput
+    truth: EXTERNAL_BLOCKER
+    state_class: EXTERNAL_BLOCKER
+    summary: Runner saturation can delay proof freshness, but does not close the semantic gap.
+next_required_proof_artifacts:
+  - tracked runtime bundle covering admin portal, learner primary path, and learner secondary path
+  - secondary endpoint request matrix with allowed non-fatal 404 semantics
+  - proof that optional endpoint 404s no longer trigger an error boundary
+  - pinned image and deployment identity for the tested runtime
+  - explicit manual-state inventory and supersession note for the retired BFF-401 claim
+local_proof_policy:
+  canonical_default: false
+  required_labels:
+    - external lane evidence
+    - local proof input
+    - not independently reverified by this lane
+contradiction_policy:
+  later_evidence_overrides_earlier_root_cause_claims: true
+  contradictions_must_remain_open: true
+promotion_rules:
+  require_tracked_repo_artifact: true
+  require_named_owner: true
+  require_timestamp: true
+  require_scope_specificity: true
+  screenshots_alone_are_insufficient: true
+  admin_merge_is_not_runtime_proof: true
