@@ -7904,9 +7904,36 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "programs/frontend/ENTERPRISE_FRONTEND_DELIVERY_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-16",
     "owner": null,
     "path": "programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "programs/frontend/enterprise-frontend-config-consumption.v1.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "programs/frontend/enterprise-frontend-route-owner.v1.yaml",
     "status": "supporting",
     "type": "other"
   },

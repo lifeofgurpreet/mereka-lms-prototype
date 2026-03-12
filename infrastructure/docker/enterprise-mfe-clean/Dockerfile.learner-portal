@@ -31,7 +31,7 @@ RUN chmod +x /tmp/strip-nreum.sh \
     && chmod +x /tmp/patch-missing-env.sh \
     && chmod +x /tmp/verify-no-baked-urls.sh \
     && /tmp/strip-nreum.sh /openedx/dist/index.html \
-    && /tmp/patch-missing-env.sh /openedx/dist \
+    && /tmp/patch-missing-env.sh /openedx/dist learner \
     && /tmp/verify-no-baked-urls.sh /openedx/dist \
     && rm /tmp/strip-nreum.sh /tmp/patch-missing-env.sh /tmp/verify-no-baked-urls.sh
 

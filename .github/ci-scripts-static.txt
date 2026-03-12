@@ -207,7 +207,10 @@ scripts/qa/verify-mfe-reduced-motion.sh
 scripts/qa/verify-mfe-routing-parity.sh
 scripts/qa/verify-mfe-analytics-plugin-parity.sh
 scripts/qa/verify-mfe-slot-source-alignment.sh
+scripts/qa/verify-enterprise-frontend-route-contract.sh
+scripts/qa/verify-enterprise-frontend-config-contract.sh
 scripts/qa/test-enterprise-mfe-optional-endpoint-hardening.sh
+scripts/qa/test-enterprise-mfe-patch-contract.sh
 
 # ── Auth & SSO ───────────────────────────────────────────────────────────────
 # scripts/qa/verify-auth-hardening.sh  # runtime-only: requires kubectl for internal checks

@@ -1,0 +1,342 @@
+{
+  "contract_version": 1,
+  "contract_name": "enterprise_frontend_config_consumption",
+  "keys": [
+    {
+      "name": "BASE_URL",
+      "consumption_modes": ["build_patch_only", "dead_if_runtime_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": false
+    },
+    {
+      "name": "LMS_BASE_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "STUDIO_BASE_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": false
+    },
+    {
+      "name": "LOGIN_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "LOGOUT_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "REFRESH_ACCESS_TOKEN_ENDPOINT",
+      "consumption_modes": ["runtime_env", "patched_bundle_default"],
+      "owner_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "CSRF_TOKEN_API_PATH",
+      "consumption_modes": ["runtime_env", "patched_bundle_default"],
+      "owner_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "ACCESS_TOKEN_COOKIE_NAME",
+      "consumption_modes": ["runtime_env", "patched_bundle_default"],
+      "owner_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "INTEGRATION_WARNING_DISMISSED_COOKIE_NAME",
+      "consumption_modes": ["runtime_env", "patched_bundle_default"],
+      "owner_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "ENTERPRISE_ACCESS_BASE_URL",
+      "consumption_modes": ["runtime_env", "patched_bundle_default"],
+      "owner_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "ENTERPRISE_CATALOG_API_BASE_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "ENTERPRISE_CATALOG_BASE_URL",
+      "consumption_modes": ["build_patch_only", "dead_if_runtime_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "ENTERPRISE_SUBSIDY_BASE_URL",
+      "consumption_modes": ["runtime_env", "build_patch_only"],
+      "owner_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "LICENSE_MANAGER_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "LICENSE_MANAGER_BASE_URL",
+      "consumption_modes": ["build_patch_only", "dead_if_runtime_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "ENTERPRISE_LEARNER_PORTAL_URL",
+      "consumption_modes": ["build_patch_only", "dead_if_runtime_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": false
+    },
+    {
+      "name": "DATA_API_BASE_URL",
+      "consumption_modes": ["build_patch_only", "dead_if_runtime_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": false
+    },
+    {
+      "name": "ECOMMERCE_BASE_URL",
+      "consumption_modes": ["build_patch_only", "dead_if_runtime_only"],
+      "owner_files": [
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+        "deploy/k8s/base/apps/openedx/settings/lms/production.py"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "DISCOVERY_BASE_URL",
+      "consumption_modes": ["build_patch_only", "dead_if_runtime_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": false
+    },
+    {
+      "name": "USER_INFO_COOKIE_NAME",
+      "consumption_modes": ["build_patch_only", "dead_if_runtime_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": false
+    },
+    {
+      "name": "PLATFORM_NAME",
+      "consumption_modes": ["build_patch_only"],
+      "owner_files": [
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+        "deploy/k8s/base/apps/openedx/settings/lms/production.py"
+      ],
+      "parity_sensitive": false
+    },
+    {
+      "name": "CUSTOMER_SUPPORT_NAME",
+      "consumption_modes": ["build_patch_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": false
+    },
+    {
+      "name": "CUSTOMER_SUPPORT_EMAIL",
+      "consumption_modes": ["build_patch_only"],
+      "owner_files": ["infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"],
+      "parity_sensitive": false
+    },
+    {
+      "name": "PARAGON_THEME",
+      "consumption_modes": ["runtime_window_global"],
+      "owner_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal",
+        "infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "FEATURE_ENROLL_WITH_CODES",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "FEATURE_BROWSE_AND_REQUEST",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "LOGO_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "LOGO_WHITE_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "LOGO_TRADEMARK_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "FAVICON_URL",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "SITE_NAME",
+      "consumption_modes": ["runtime_env"],
+      "owner_files": ["deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"],
+      "parity_sensitive": true
+    },
+    {
+      "name": "MEREKA_PARAGON_THEME_ENABLED",
+      "consumption_modes": ["plugin_runtime_alignment"],
+      "owner_files": [
+        "infrastructure/tutor/plugins/_mereka_lms/config_defaults.py",
+        "infrastructure/tutor/plugins/_mereka_lms/lms_settings.py"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "MEREKA_PARAGON_THEME_CDN_BASE",
+      "consumption_modes": ["plugin_runtime_alignment"],
+      "owner_files": [
+        "infrastructure/tutor/plugins/_mereka_lms/config_defaults.py",
+        "infrastructure/tutor/plugins/_mereka_lms/lms_settings.py"
+      ],
+      "parity_sensitive": true
+    },
+    {
+      "name": "PARAGON_THEME_URLS",
+      "consumption_modes": ["plugin_runtime_alignment"],
+      "owner_files": [
+        "infrastructure/tutor/plugins/_mereka_lms/lms_settings.py"
+      ],
+      "parity_sensitive": true
+    }
+  ],
+  "patch_inventory": [
+    {
+      "id": "learner_optional_404_academies",
+      "role": "learner",
+      "category": "optional_endpoint_degradation",
+      "required": true,
+      "search_signature": "async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`,{results:l}=await s(c);return l}",
+      "success_fragment": "if(e.response&&404===e.response.status)return[];throw e"
+    },
+    {
+      "id": "learner_optional_404_curations",
+      "role": "learner",
+      "category": "optional_endpoint_degradation",
+      "required": true,
+      "search_signature": "async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`,u=await(0,i.bv)().get(s);return(0,o.il)(u.data).results[0]??null}",
+      "success_fragment": "if(e.response&&404===e.response.status)return null;throw e"
+    },
+    {
+      "id": "learner_optional_404_highlight_sets",
+      "role": "learner",
+      "category": "optional_endpoint_degradation",
+      "required": true,
+      "search_signature": "async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`,{results:c}=await s(o);return c}",
+      "success_fragment": "if(e.response&&404===e.response.status)return[];throw e"
+    },
+    {
+      "id": "learner_optional_404_customer_configurations",
+      "role": "learner",
+      "category": "optional_endpoint_degradation",
+      "required": true,
+      "search_signature": "async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`,t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}",
+      "success_fragment": "if(e.response&&404===e.response.status)return null;throw e"
+    },
+    {
+      "id": "learner_optional_404_ecommerce",
+      "role": "learner",
+      "category": "optional_endpoint_degradation",
+      "required": true,
+      "search_signature": "async function Re(e){const r=await Promise.all([De(e),_e(e)]),t=(0,we.v)(r[1]);return{couponsOverview:r[0],couponCodeAssignments:r[1],couponCodeRedemptionCount:t}}",
+      "success_fragment": "couponCodeRedemptionCount:0"
+    },
+    {
+      "id": "algolia_null_guard",
+      "role": "learner",
+      "category": "theming_or_runtime_alignment",
+      "required": true,
+      "search_signature": ".validUntil&&await",
+      "success_fragment": "&&await"
+    },
+    {
+      "id": "placeholder_fallback",
+      "role": "both",
+      "category": "missing_env_sentinel_repair",
+      "required": true,
+      "search_signature": "replace_remaining_placeholders",
+      "success_fragment": "replaced remaining placeholder signatures"
+    }
+  ],
+  "parity_checks": [
+    {
+      "id": "learner_docker_uses_role_aware_patch",
+      "file": "infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal",
+      "contains": [
+        "/tmp/patch-missing-env.sh /openedx/dist learner",
+        "COPY infrastructure/tutor/themes/mereka/mfe/theme /openedx/dist/theme",
+        "<script src=\"/env.config.js\"></script>"
+      ]
+    },
+    {
+      "id": "admin_docker_uses_role_aware_patch",
+      "file": "infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal",
+      "contains": [
+        "/tmp/patch-missing-env.sh /openedx/dist admin",
+        "COPY infrastructure/tutor/themes/mereka/mfe/theme /openedx/dist/theme",
+        "<script src=\"/env.config.js\"></script>"
+      ]
+    },
+    {
+      "id": "learner_deployment_mounts_enterprise_env",
+      "file": "deploy/k8s/base/apps/enterprise/mfe/learner-portal-deployment.yaml",
+      "contains": [
+        "name: enterprise-mfe-env",
+        "mountPath: /openedx/dist/env.config.js",
+        "subPath: env.config.js"
+      ]
+    },
+    {
+      "id": "admin_deployment_mounts_enterprise_env",
+      "file": "deploy/k8s/base/apps/enterprise/mfe/admin-portal-deployment.yaml",
+      "contains": [
+        "name: enterprise-mfe-env",
+        "mountPath: /openedx/dist/env.config.js",
+        "subPath: env.config.js"
+      ]
+    }
+  ]
+}

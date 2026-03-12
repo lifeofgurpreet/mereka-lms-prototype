@@ -1,0 +1,253 @@
+{
+  "contract_version": 1,
+  "contract_name": "enterprise_frontend_route_owner",
+  "route_families": [
+    {
+      "id": "enterprise_catalog_academies",
+      "route_family": "/api/v1/academies*",
+      "semantic_owner_service": "enterprise-catalog",
+      "expected_proxy_owner": "enterprise admin portal /api/enterprise-catalog/*",
+      "fatality": "optional_404_nonfatal",
+      "acceptable_404_behavior": "empty list without a global error boundary",
+      "unacceptable_behavior": "proxy to enterprise-access or promote 404 into fatal learner render state",
+      "source_files": [
+        "deploy/k8s/base/apps/caddy/Caddyfile",
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "repo_checks": [
+        {
+          "file": "deploy/k8s/base/apps/caddy/Caddyfile",
+          "contains": [
+            "handle /api/enterprise-catalog/* {",
+            "reverse_proxy enterprise-catalog:8160 {"
+          ]
+        },
+        {
+          "file": "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+          "contains": [
+            "ENTERPRISE_CATALOG_API_BASE_URL"
+          ]
+        },
+        {
+          "file": "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+          "contains": [
+            "/api/v1/academies?",
+            "learner academies optional 404 handling"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enterprise_catalog_curations",
+      "route_family": "/api/v1/enterprise-curations*",
+      "semantic_owner_service": "enterprise-catalog",
+      "expected_proxy_owner": "enterprise admin portal /api/enterprise-catalog/*",
+      "fatality": "optional_404_nonfatal",
+      "acceptable_404_behavior": "null result without a global error boundary",
+      "unacceptable_behavior": "proxy to enterprise-access or promote 404 into fatal learner render state",
+      "source_files": [
+        "deploy/k8s/base/apps/caddy/Caddyfile",
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "repo_checks": [
+        {
+          "file": "deploy/k8s/base/apps/caddy/Caddyfile",
+          "contains": [
+            "handle /api/enterprise-catalog/* {",
+            "reverse_proxy enterprise-catalog:8160 {"
+          ]
+        },
+        {
+          "file": "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+          "contains": [
+            "ENTERPRISE_CATALOG_API_BASE_URL"
+          ]
+        },
+        {
+          "file": "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+          "contains": [
+            "/api/v1/enterprise-curations/",
+            "learner enterprise-curations optional 404 handling"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enterprise_catalog_highlight_sets",
+      "route_family": "/api/v1/highlight-sets*",
+      "semantic_owner_service": "enterprise-catalog",
+      "expected_proxy_owner": "enterprise admin portal /api/enterprise-catalog/*",
+      "fatality": "optional_404_nonfatal",
+      "acceptable_404_behavior": "empty list without a global error boundary",
+      "unacceptable_behavior": "proxy to enterprise-access or promote 404 into fatal learner render state",
+      "source_files": [
+        "deploy/k8s/base/apps/caddy/Caddyfile",
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "repo_checks": [
+        {
+          "file": "deploy/k8s/base/apps/caddy/Caddyfile",
+          "contains": [
+            "handle /api/enterprise-catalog/* {",
+            "reverse_proxy enterprise-catalog:8160 {"
+          ]
+        },
+        {
+          "file": "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+          "contains": [
+            "ENTERPRISE_CATALOG_API_BASE_URL"
+          ]
+        },
+        {
+          "file": "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+          "contains": [
+            "/api/v1/highlight-sets/",
+            "learner highlight-sets optional 404 handling"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enterprise_access_customer_configurations",
+      "route_family": "/api/v1/customer-configurations/*",
+      "semantic_owner_service": "enterprise-access",
+      "expected_proxy_owner": "enterprise admin portal /api/enterprise-access/*",
+      "fatality": "optional_404_nonfatal",
+      "acceptable_404_behavior": "null customer configuration without a global error boundary",
+      "unacceptable_behavior": "treat absent customer configuration as a fatal learner render failure",
+      "source_files": [
+        "deploy/k8s/base/apps/caddy/Caddyfile",
+        "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "repo_checks": [
+        {
+          "file": "deploy/k8s/base/apps/caddy/Caddyfile",
+          "contains": [
+            "handle /api/enterprise-access/* {",
+            "reverse_proxy enterprise-access:18270 {"
+          ]
+        },
+        {
+          "file": "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+          "contains": [
+            "ENTERPRISE_ACCESS_BASE_URL"
+          ]
+        },
+        {
+          "file": "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+          "contains": [
+            "/api/v1/customer-configurations/",
+            "learner customer-configurations optional 404 handling"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enterprise_access_learner_bff",
+      "route_family": "/api/v1/bffs/* and enterprise learner BFF families",
+      "semantic_owner_service": "enterprise-access",
+      "expected_proxy_owner": "enterprise learner portal /api/v1/*",
+      "fatality": "fatal_required",
+      "acceptable_404_behavior": "none",
+      "unacceptable_behavior": "missing BFF/auth responses must not be downgraded by the learner optional 404 patch layer",
+      "source_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/learner-portal-Caddyfile",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "repo_checks": [
+        {
+          "file": "deploy/k8s/base/apps/enterprise/mfe/learner-portal-Caddyfile",
+          "contains": [
+            "handle /api/v1/* {",
+            "reverse_proxy enterprise-access:18270 {"
+          ]
+        },
+        {
+          "file": "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+          "contains": [
+            "Hardening rule:",
+            "non-404 / auth / server failures => rethrow"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enterprise_ecommerce_coupon_bundle",
+      "route_family": "ECOMMERCE coupon overview / assignment summary bundle",
+      "semantic_owner_service": "ecommerce bundle contract",
+      "expected_proxy_owner": "ECOMMERCE_BASE_URL consumer in built learner bundle",
+      "fatality": "optional_404_nonfatal",
+      "acceptable_404_behavior": "empty coupon overview payload without a global error boundary",
+      "unacceptable_behavior": "treat absent ecommerce data as fatal while routing/auth remain healthy",
+      "source_files": [
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "repo_checks": [
+        {
+          "file": "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+          "contains": [
+            "learner ecommerce optional 404 handling",
+            "couponCodeRedemptionCount:0"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enterprise_mfe_runtime_config",
+      "route_family": "/api/mfe_config/v1* and /login_refresh*",
+      "semantic_owner_service": "lms",
+      "expected_proxy_owner": "main caddy enterprise learner/admin host routing",
+      "fatality": "fatal_required",
+      "acceptable_404_behavior": "none",
+      "unacceptable_behavior": "missing MFE config or token refresh breaks auth/bootstrap and must stay fatal",
+      "source_files": [
+        "deploy/k8s/base/apps/caddy/Caddyfile"
+      ],
+      "repo_checks": [
+        {
+          "file": "deploy/k8s/base/apps/caddy/Caddyfile",
+          "contains": [
+            "reverse_proxy /api/mfe_config/v1* lms:8000 {",
+            "reverse_proxy /login_refresh* lms:8000 {"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enterprise_lms_auth_paths",
+      "route_family": "/csrf/*, /oauth2/*, /login, /consent/*, /enterprise/*",
+      "semantic_owner_service": "lms",
+      "expected_proxy_owner": "enterprise learner portal Caddy -> lms",
+      "fatality": "fatal_required",
+      "acceptable_404_behavior": "none",
+      "unacceptable_behavior": "authn, consent, csrf, or enterprise shell routes must not be degraded by bundle patches",
+      "source_files": [
+        "deploy/k8s/base/apps/enterprise/mfe/learner-portal-Caddyfile",
+        "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh"
+      ],
+      "repo_checks": [
+        {
+          "file": "deploy/k8s/base/apps/enterprise/mfe/learner-portal-Caddyfile",
+          "contains": [
+            "handle /enterprise/* {",
+            "handle /csrf/* {",
+            "handle /oauth2/* {",
+            "handle /login {",
+            "handle /consent/* {"
+          ]
+        },
+        {
+          "file": "infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh",
+          "contains": [
+            "Hardening rule:",
+            "non-404 / auth / server failures => rethrow"
+          ]
+        }
+      ]
+    }
+  ]
+}

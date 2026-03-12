@@ -13,17 +13,88 @@
 set -eu
 
 DIST_DIR="${1:-/openedx/dist}"
+PORTAL_ROLE="${2:-auto}"
 
 if [ ! -d "$DIST_DIR" ]; then
   echo "[patch-env] ERROR: dist dir not found: $DIST_DIR"
   exit 1
 fi
 
+case "$PORTAL_ROLE" in
+  learner|admin|auto) ;;
+  *)
+    echo "[patch-env] ERROR: unsupported portal role: $PORTAL_ROLE"
+    exit 1
+    ;;
+esac
+
+role_requires_patch() {
+  patch_role="$1"
+  case "$patch_role:$PORTAL_ROLE" in
+    both:*)
+      return 0
+      ;;
+    learner:learner|admin:admin)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+replace_literal_in_file() {
+  file_path="$1"
+  search="$2"
+  replacement="$3"
+  python3 - "$file_path" "$search" "$replacement" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+search = sys.argv[2]
+replacement = sys.argv[3]
+text = path.read_text(encoding="utf-8")
+count = text.count(search)
+if count:
+    path.write_text(text.replace(search, replacement), encoding="utf-8")
+print(count)
+PY
+}
+
+apply_exact_bundle_patch() {
+  label="$1"
+  patch_role="$2"
+  search="$3"
+  replacement="$4"
+  total_matches=0
+
+  for js in "$DIST_DIR"/*.js; do
+    [ -f "$js" ] || continue
+    [ "$(basename "$js")" = "env.config.js" ] && continue
+    [ -w "$js" ] || continue
+    count="$(replace_literal_in_file "$js" "$search" "$replacement")"
+    total_matches=$((total_matches + count))
+  done
+
+  if [ "$total_matches" -gt 0 ]; then
+    echo "[patch-env] OK: ${label} (${total_matches} occurrence(s))"
+    return 0
+  fi
+
+  if role_requires_patch "$patch_role"; then
+    echo "[patch-env] ERROR: expected ${label} signature missing for portal role ${PORTAL_ROLE}"
+    exit 1
+  fi
+
+  echo "[patch-env] INFO: ${label} not present for portal role ${PORTAL_ROLE}"
+}
+
 replace_key() {
   key="$1"
   value="$2"
   pattern="\"MISSING_ENV_VAR\"\\.${key}"
-  count_before=$(find "$DIST_DIR" -name '*.js' | xargs grep -o "$pattern" 2>/dev/null | wc -l | tr -d ' ')
+  count_before=$(find "$DIST_DIR" -name '*.js' ! -name 'env.config.js' -exec grep -o "$pattern" {} + 2>/dev/null | wc -l | tr -d ' ')
   if [ "${count_before:-0}" = "0" ]; then
     echo "[patch-env] INFO: $key not present in JS bundles"
     return 0
@@ -42,7 +113,7 @@ replace_key() {
     sed -i "s#\"MISSING_ENV_VAR\"\\.${key}#\"${value}\"#g" "$js"
   done
 
-  count_after=$(find "$DIST_DIR" -name '*.js' | xargs grep -o "$pattern" 2>/dev/null | wc -l | tr -d ' ')
+  count_after=$(find "$DIST_DIR" -name '*.js' ! -name 'env.config.js' -exec grep -o "$pattern" {} + 2>/dev/null | wc -l | tr -d ' ')
   if [ "${count_after:-0}" != "0" ]; then
     echo "[patch-env] ERROR: unresolved placeholder remains for $key"
     exit 1
@@ -56,7 +127,7 @@ replace_remaining_placeholders() {
   # mapped above, replace them with empty strings so runtime code does not try
   # to read properties off "MISSING_ENV_VAR" (which yields undefined endpoints).
   pattern='"MISSING_ENV_VAR"\.[A-Z0-9_]+'
-  count_before=$(find "$DIST_DIR" -name '*.js' | xargs grep -E -o "$pattern" 2>/dev/null | wc -l | tr -d ' ')
+  count_before=$(find "$DIST_DIR" -name '*.js' ! -name 'env.config.js' -exec grep -E -o "$pattern" {} + 2>/dev/null | wc -l | tr -d ' ')
   if [ "${count_before:-0}" = "0" ]; then
     echo "[patch-env] OK: no unresolved placeholder signatures remain"
     return 0
@@ -71,7 +142,7 @@ replace_remaining_placeholders() {
     sed -E -i 's/"MISSING_ENV_VAR"\.[A-Z0-9_]+/""/g' "$js"
   done
 
-  count_after=$(find "$DIST_DIR" -name '*.js' | xargs grep -E -o "$pattern" 2>/dev/null | wc -l | tr -d ' ')
+  count_after=$(find "$DIST_DIR" -name '*.js' ! -name 'env.config.js' -exec grep -E -o "$pattern" {} + 2>/dev/null | wc -l | tr -d ' ')
   if [ "${count_after:-0}" != "0" ]; then
     echo "[patch-env] ERROR: unresolved placeholder signatures remain after fallback patch (${count_after})"
     exit 1
@@ -118,17 +189,38 @@ replace_remaining_placeholders
 # configured, BFF returns no algolia field and the page crashes with:
 #   TypeError: Cannot read properties of null (reading 'validUntil')
 # Fix: add null guard so the property access is skipped when algolia is absent.
+algolia_matches=0
 for js in "$DIST_DIR"/*.js; do
   [ -f "$js" ] || continue
   [ "$(basename "$js")" = "env.config.js" ] && continue
   [ -w "$js" ] || continue
-  # Pattern: `if(X.validUntil)` → `if(X&&X.validUntil)` where X is a short var name
-  # The minified pattern is like: t.validUntil&&await
-  if grep -q '\.validUntil&&await' "$js"; then
-    sed -i 's/\b\([a-z]\)\.validUntil&&await/\1\&\&\1.validUntil\&\&await/g' "$js"
-    echo "[patch-env] OK: added null guard for algolia.validUntil access"
+  count_before="$(python3 - "$js" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+pattern = re.compile(r"\b([a-z])\.validUntil&&await")
+updated, count = pattern.subn(r"\1&&\1.validUntil&&await", text)
+if count:
+    path.write_text(updated, encoding="utf-8")
+print(count)
+PY
+)"
+  if [ "${count_before:-0}" != "0" ]; then
+    algolia_matches=$((algolia_matches + count_before))
   fi
 done
+
+if [ "$algolia_matches" -gt 0 ]; then
+  echo "[patch-env] OK: added null guard for algolia.validUntil access (${algolia_matches} occurrence(s))"
+elif role_requires_patch learner; then
+  echo "[patch-env] ERROR: expected algolia.validUntil learner signature missing for portal role ${PORTAL_ROLE}"
+  exit 1
+else
+  echo "[patch-env] INFO: algolia.validUntil learner signature not present for portal role ${PORTAL_ROLE}"
+fi
 
 # Optional enterprise enrichment endpoints may legitimately 404 in some
 # deployments even after routing is correct. The learner MFE currently mounts
@@ -146,35 +238,34 @@ done
 # - highlight sets
 # - browse-and-request customer configuration
 # - ecommerce coupon overview / assignment summary bundle
-for js in "$DIST_DIR"/*.js; do
-  [ -f "$js" ] || continue
-  [ "$(basename "$js")" = "env.config.js" ] && continue
-  [ -w "$js" ] || continue
+apply_exact_bundle_patch \
+  "learner academies optional 404 handling" \
+  learner \
+  'async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`,{results:l}=await s(c);return l}' \
+  'async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`;try{const{results:r}=await s(c);return r}catch(e){if(e.response&&404===e.response.status)return[];throw e}}'
 
-  if grep -Fq 'async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`,{results:l}=await s(c);return l}' "$js"; then
-    sed -i 's#async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`,{results:l}=await s(c);return l}#async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`;try{const{results:r}=await s(c);return r}catch(e){if(e.response\&\&404===e.response.status)return[];throw e}}#g' "$js"
-    echo "[patch-env] OK: hardened academies optional 404 handling"
-  fi
+apply_exact_bundle_patch \
+  "learner enterprise-curations optional 404 handling" \
+  learner \
+  'async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`,u=await(0,i.bv)().get(s);return(0,o.il)(u.data).results[0]??null}' \
+  'async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`;try{const e=await(0,i.bv)().get(s);return(0,o.il)(e.data).results[0]??null}catch(e){if(e.response&&404===e.response.status)return null;throw e}}'
 
-  if grep -Fq 'async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`,u=await(0,i.bv)().get(s);return(0,o.il)(u.data).results[0]??null}' "$js"; then
-    sed -i 's#async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`,u=await(0,i.bv)().get(s);return(0,o.il)(u.data).results[0]??null}#async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`;try{const e=await(0,i.bv)().get(s);return(0,o.il)(e.data).results[0]??null}catch(e){if(e.response\&\&404===e.response.status)return null;throw e}}#g' "$js"
-    echo "[patch-env] OK: hardened enterprise-curations optional 404 handling"
-  fi
+apply_exact_bundle_patch \
+  "learner highlight-sets optional 404 handling" \
+  learner \
+  'async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`,{results:c}=await s(o);return c}' \
+  'async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`;try{const{results:e}=await s(o);return e}catch(e){if(e.response&&404===e.response.status)return[];throw e}}'
 
-  if grep -Fq 'async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`,{results:c}=await s(o);return c}' "$js"; then
-    sed -i 's#async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`,{results:c}=await s(o);return c}#async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`;try{const{results:e}=await s(o);return e}catch(e){if(e.response\&\&404===e.response.status)return[];throw e}}#g' "$js"
-    echo "[patch-env] OK: hardened highlight-sets optional 404 handling"
-  fi
+apply_exact_bundle_patch \
+  "learner customer-configurations optional 404 handling" \
+  learner \
+  'async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`,t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}' \
+  'async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`;try{const t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}catch(e){if(e.response&&404===e.response.status)return null;throw e}}'
 
-  if grep -Fq 'async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`,t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}' "$js"; then
-    sed -i 's#async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`,t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}#async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`;try{const t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}catch(e){if(e.response\&\&404===e.response.status)return null;throw e}}#g' "$js"
-    echo "[patch-env] OK: hardened customer-configurations optional 404 handling"
-  fi
+apply_exact_bundle_patch \
+  "learner ecommerce optional 404 handling" \
+  learner \
+  'async function Re(e){const r=await Promise.all([De(e),_e(e)]),t=(0,we.v)(r[1]);return{couponsOverview:r[0],couponCodeAssignments:r[1],couponCodeRedemptionCount:t}}' \
+  'async function Re(e){try{const r=await Promise.all([De(e),_e(e)]),t=(0,we.v)(r[1]);return{couponsOverview:r[0],couponCodeAssignments:r[1],couponCodeRedemptionCount:t}}catch(r){if(r.response&&404===r.response.status)return{couponsOverview:[],couponCodeAssignments:[],couponCodeRedemptionCount:0};throw r}}'
 
-  if grep -Fq 'async function Re(e){const r=await Promise.all([De(e),_e(e)]),t=(0,we.v)(r[1]);return{couponsOverview:r[0],couponCodeAssignments:r[1],couponCodeRedemptionCount:t}}' "$js"; then
-    sed -i 's#async function Re(e){const r=await Promise.all(\[De(e),_e(e)\]),t=(0,we.v)(r\[1\]);return{couponsOverview:r\[0\],couponCodeAssignments:r\[1\],couponCodeRedemptionCount:t}}#async function Re(e){try{const r=await Promise.all([De(e),_e(e)]),t=(0,we.v)(r[1]);return{couponsOverview:r[0],couponCodeAssignments:r[1],couponCodeRedemptionCount:t}}catch(r){if(r.response\&\&404===r.response.status)return{couponsOverview:[],couponCodeAssignments:[],couponCodeRedemptionCount:0};throw r}}#g' "$js"
-    echo "[patch-env] OK: hardened ecommerce optional 404 handling"
-  fi
-done
-
-echo "[patch-env] Completed placeholder patching in $DIST_DIR"
+echo "[patch-env] Completed placeholder patching in $DIST_DIR for portal role ${PORTAL_ROLE}"
