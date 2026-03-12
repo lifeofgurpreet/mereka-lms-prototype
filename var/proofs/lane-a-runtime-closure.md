@@ -1,7 +1,7 @@
 # Lane A: Enterprise Auth Runtime Closure
 
-**Date**: 2026-03-12 (Phase 3 update)
-**Status**: IN_PROGRESS (was STABILIZED in Phase 2)
+**Date**: 2026-03-12 (Phase 3 complete)
+**Status**: PARTIAL — proxy fix merged, MFE error boundary still fires on JSON 404s
 **Environment**: mereka-lms-dev (rke2-nonprod)
 **Test identities**: `var/proofs/runtime-test-identities.md`
 
@@ -146,10 +146,66 @@ PR #1640 (bbi-infrastructure): Modify learner-portal Caddyfile to:
 
 Waffle flag `enterprise.learner_bff_enabled` set to `everyone=True` in LMS DB. This was NOT the primary fix (MFE still makes secondary requests regardless) but ensures BFF response includes the flag for any future MFE logic that checks it.
 
+### Post-fix verification (2026-03-12T00:10 UTC):
+
+PR #1640 **MERGED** → ArgoCD synced → learner-portal pod rolled with new Caddyfile.
+
+**Browser re-proof** (fresh session, `lanea-enterprise-learner`):
+
+| Step | URL | Result | Evidence |
+|------|-----|--------|----------|
+| LMS login | `apps.academyv2.mereka.dev/authn/login` | Success, redirected to dashboard | proof-04 |
+| LMS dashboard | `academyv2.mereka.dev/dashboard` | Enterprise banner: "Biji Biji Initiative" | proof-04 |
+| Learner portal | `learner.academyv2.mereka.dev/biji-biji` | Shell renders, enterprise name in header, error boundary fires | proof-05 |
+| Error details | — | `Axios Error (Response): 404` with `{"detail":"Not found."}` (JSON, not HTML) | proof-06 |
+
+**Fix confirmed working**:
+- HTML 404s are now converted to JSON 404s by Caddy `handle_response`
+- `/api/v2/enterprise/*` returns JSON 404 stub (ecommerce not deployed)
+- BFF returns 200 with full enterprise data
+- All auth/cookie endpoints return 200
+
+**Remaining issue**: MFE error handler treats ANY 404 (even JSON) from secondary endpoints as fatal → React error boundary. This is an **MFE code-level** issue (the upstream MFE doesn't gracefully handle missing optional endpoints), NOT a proxy/auth/config issue.
+
+### Updated classification:
+
+**Phase 3 root cause: D (confirmed and fixed)**
+- HTML → JSON 404 conversion: **FIXED** (PR #1640, merged)
+- MFE error boundary on JSON 404: **NEW blocker** — MFE code does not gracefully degrade when optional enterprise-access endpoints return 404
+
+### Remaining blockers (updated):
+
+| Blocker | Category | Root Cause | Priority |
+|---------|----------|------------|----------|
+| MFE error boundary fires on JSON 404 from optional endpoints | MFE code | Axios error handler throws on non-2xx instead of degrading gracefully | P1 |
+| Admin portal "null logo" | Cosmetic | Branding config | P3 |
+| "edX" branding in footers | Cosmetic | Branding | P3 |
+| Trivy CRITICAL CVEs in base image | Upstream | Open edX | P3 |
+
 ### Evidence files:
 
 | File | Content |
 |------|---------|
-| `/tmp/learner-login-result.png` | LMS dashboard after login (enterprise banner visible) |
-| `/tmp/learner-portal-bff.png` | Learner portal error boundary |
-| `/tmp/learner-error-details.png` | Axios Error 404 with HTML response |
+| `assets/screenshots-of-issues/lane-a-phase3-bff-closure/proof-04-lms-dashboard-post-fix.png` | LMS dashboard after login (enterprise banner) |
+| `assets/screenshots-of-issues/lane-a-phase3-bff-closure/proof-05-learner-portal-post-fix.png` | Learner portal shell renders, error boundary fires |
+| `assets/screenshots-of-issues/lane-a-phase3-bff-closure/proof-06-error-details-json-404.png` | Axios Error 404 with JSON response (fix confirmed) |
+
+### Caddy access log proof (post-fix):
+
+```
+200 /csrf/api/v1/token
+200 /api/v1/bffs/learner/dashboard/           ← BFF auth WORKS
+404 /api/v2/enterprise/offer_assignment_summary/  ← JSON stub (ecommerce)
+404 /api/v2/enterprise/coupons/.../overview/      ← JSON stub (ecommerce)
+200 /api/v1/coupon-code-requests/
+404 /api/v1/enterprise-curations/                 ← JSON 404 (unregistered URL)
+200 /api/v1/license-requests/
+404 /api/v1/academies                             ← JSON 404 (unregistered URL)
+200 /api/v1/policy-redemption/credits_available/
+404 /api/v1/customer-configurations/<uuid>/       ← JSON 404 (object not found)
+200 /api/v1/bffs/learner/search/              ← Search BFF WORKS
+200 /api/v1/learner-credit-requests/
+404 /api/v1/highlight-sets/                       ← JSON 404 (unregistered URL)
+```
+
+7 of 13 API calls return 200 (all auth-related). 6 return 404 (all now JSON, not HTML).
