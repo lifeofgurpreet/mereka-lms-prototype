@@ -9445,6 +9445,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "reviews/STABILIZATION_CONTROL_BOARD_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "runbooks/README.md",
     "status": "superseded",
     "type": "runbook"
@@ -9479,10 +9488,55 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/AGENT_OPERATING_MODEL.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/ARC_HEAVY_BUILDER_FAILURE_TAXONOMY.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/ARC_RUNNER_CAPABILITY_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/CI_FALSE_RED_PREVENTION.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-11",
     "owner": "Platform Team",
     "path": "stabilization/DOCS_ROOT_AUTHORITY_CONTRACT.md",
     "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/DURABLE_VS_MANUAL_STATE_MATRIX.md",
+    "status": "supporting",
     "type": "other"
   },
   {
@@ -9526,6 +9580,42 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "stabilization/EXECUTION_INVARIANTS.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/FAILURE_TAXONOMY.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/PR_UNBLOCK_SWEEP_LEDGER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/RELEASE_EVIDENCE_BUNDLE_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "stabilization/REPO_ONLY_CI_BLOCKER_LEDGER.md",
     "status": "supporting",
     "type": "other"
@@ -9553,6 +9643,24 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "stabilization/STABILIZATION_CONTROL_BOARD.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/STABILIZATION_PHASE_GATES.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "stabilization/STABLE_CONFIG_ROLLOUT_DEBT.md",
     "status": "supporting",
     "type": "other"
@@ -9562,7 +9670,25 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "stabilization/STATIC_VALIDATION_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "stabilization/retired-root-remediation-ledger.v1.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/stabilization-control-board.v1.yaml",
     "status": "supporting",
     "type": "other"
   },
