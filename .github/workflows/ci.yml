@@ -118,6 +118,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0  # Full history needed for origin/main...HEAD range in spec integrity gates
 
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
@@ -266,8 +268,9 @@ jobs:
 
       - name: Markdown linting
         run: |
-          npm install -g markdownlint-cli
-          markdownlint docs/ specs/ --ignore docs/archive/ || true
+          # Install locally — ARC runners lack write access to /usr/lib/node_modules/
+          npm install markdownlint-cli
+          npx markdownlint docs/ specs/ --ignore docs/archive/ || true
 
       # ── Phase C: Run all static verification scripts in parallel ──────────
       - name: Run static verification scripts
