@@ -1,0 +1,247 @@
+# Synthetic Runtime Proof Fixture Manifest — dev environment
+#
+# PURPOSE: Define the synthetic fixture state required for safe, repeatable
+#          enterprise runtime proof in the dev environment.
+#
+# THIS IS NOT a real tenant bootstrap spec. Do not use this file with
+# scripts/tenants/bootstrap-enterprise-tenants.py.
+#
+# Consumed by:
+#   - scripts/tenants/bootstrap-runtime-proof-fixtures.py  (plan / apply)
+#   - scripts/tenants/validate-runtime-proof-fixtures.py   (static validation)
+#   - scripts/qa/verify-runtime-proof-fixture-pack.sh      (CI static check)
+#
+# Default behavior: DRY RUN. --apply prints a warning and exits in the
+# current version of the bootstrap tool (mutation not yet wired).
+#
+# Naming conventions:
+#   User accounts   → username prefix: lanea-
+#   Emails          → domain: @synthetic.test  (unroutable, not a real TLD)
+#   Enterprise slug → proof- prefix when creating a synthetic-only customer;
+#                     biji-biji-initiative matches real tenant name but is
+#                     guarded against overwriting a real contact_email record.
+#
+# Contract: docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md
+---
+version: "1.0"
+environment: dev
+contract_ref: docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md
+
+# SAFETY INVARIANT: This flag must be true. The bootstrap tool will refuse
+# to run if it is absent or false.
+real_account_mutation_forbidden: true
+
+# LMS and MFE endpoints targeted by this fixture pack.
+target:
+  lms_domain: academyv2.mereka.dev
+  mfe_domain: apps.academyv2.mereka.dev
+  enterprise_catalog_domain: enterprise-catalog.academyv2.mereka.dev
+  namespace: mereka-lms-dev
+
+fixture_classes:
+
+  # ── 1. Synthetic Identities ────────────────────────────────────────────────
+  synthetic_identities:
+    required: true
+    description: >
+      Synthetic user accounts for proof flows. All emails use @synthetic.test —
+      an unroutable domain that cannot collide with real operator accounts.
+      Passwords are stored in Infisical dev env at path /runtime-proof/; they
+      are never committed to this repo.
+    users:
+      - username: lanea-platform-admin
+        email: lanea-platform-admin@synthetic.test
+        role: platform_admin
+        is_staff: true
+        is_superuser: true
+        password_secret_path: /runtime-proof/LANEA_PLATFORM_ADMIN_PASSWORD
+        purpose: >
+          LMS superuser for verifying admin surfaces. Not linked to any
+          enterprise customer — platform-level access only.
+
+      - username: lanea-enterprise-admin
+        email: lanea-enterprise-admin@synthetic.test
+        role: enterprise_admin
+        is_staff: false
+        is_superuser: false
+        password_secret_path: /runtime-proof/LANEA_ENTERPRISE_ADMIN_PASSWORD
+        enterprise_link:
+          customer_slug: biji-biji-initiative
+          enterprise_role: admin
+        purpose: >
+          Linked to the biji-biji-initiative enterprise customer with admin
+          role. Used to verify enterprise admin portal access.
+
+      - username: lanea-enterprise-learner
+        email: lanea-enterprise-learner@synthetic.test
+        role: enterprise_learner
+        is_staff: false
+        is_superuser: false
+        password_secret_path: /runtime-proof/LANEA_ENTERPRISE_LEARNER_PASSWORD
+        enterprise_link:
+          customer_slug: biji-biji-initiative
+          enterprise_role: learner
+        purpose: >
+          Linked to the biji-biji-initiative enterprise customer with learner
+          role. Primary identity for learner portal proof flow.
+
+      - username: lanea-unlinked-user
+        email: lanea-unlinked-user@synthetic.test
+        role: negative_case
+        is_staff: false
+        is_superuser: false
+        password_secret_path: /runtime-proof/LANEA_UNLINKED_USER_PASSWORD
+        enterprise_link: null
+        purpose: >
+          Valid LMS account with NO enterprise customer linkage. Used to verify
+          that the learner portal correctly rejects non-linked users.
+
+  # ── 2. LMS Enterprise Data ─────────────────────────────────────────────────
+  lms_enterprise_data:
+    required: true
+    description: >
+      LMS-side enterprise records (EnterpriseCustomer, EnterpriseCustomerCatalog,
+      EnterpriseCustomerUser). These are necessary but NOT sufficient for learner
+      portal content — the enterprise-catalog service must also be populated.
+      See fixture_classes.enterprise_catalog_service_data.
+    enterprise_customers:
+      - slug: biji-biji-initiative
+        name: Biji Biji Initiative
+        # contact_email uses @synthetic.test to distinguish from any real
+        # biji-biji-initiative record. If a real record exists with a different
+        # contact_email, the bootstrap tool will refuse to overwrite it.
+        contact_email: lanea-enterprise-admin@synthetic.test
+        country: MY
+        active: true
+        real_account_guard: true  # bootstrap tool checks contact_email is @synthetic.test
+        enterprise_customer_config:
+          enable_data_sharing_consent: true
+          enforce_data_sharing_consent: at_enrollment
+          enable_audit_enrollment: false
+          enable_learner_portal: true
+          enable_portal_code_management: false
+          enable_analytics_screen: true
+        site:
+          domain: academyv2.mereka.dev
+        catalogs:
+          - title: "Biji Biji Initiative Proof Catalog"
+            # This catalog title uses a descriptive name to distinguish it from
+            # any real catalog that may exist for this enterprise customer.
+            catalog_query:
+              content_filter:
+                content_type: course
+              # For proof purposes, include all available org content so the
+              # learner portal shows at least one result. Adjust if the dev
+              # environment has org-specific courses.
+              org_filter:
+                - BIJIBIJI
+                - MEREKA
+        # Enterprise user links are derived from synthetic_identities[].enterprise_link
+        # (the single authoritative source). The bootstrap tool reads enterprise_link
+        # per user and generates CREATE_OR_NOOP / ASSERT_ABSENT actions from there.
+        # lanea-unlinked-user has enterprise_link: null — the negative case depends
+        # on this omission.
+
+  # ── 3. Enterprise-Catalog Service Data ─────────────────────────────────────
+  enterprise_catalog_service_data:
+    required: true
+    description: >
+      Enterprise-catalog service records that mirror the LMS-side catalog.
+      This is the SECOND half of the required split — LMS-only data is
+      insufficient for the learner portal to serve content.
+      An LMS EnterpriseCustomerCatalog with no matching enterprise-catalog
+      EnterpriseCatalog will cause the learner portal to show zero courses.
+    catalogs:
+      - enterprise_customer_slug: biji-biji-initiative
+        title: "Biji Biji Initiative Proof Catalog"
+        # UUID should match the LMS-side catalog after bootstrap.
+        # The bootstrap tool prints the LMS catalog UUID for manual verification.
+        enterprise_catalog_uuid: null  # populated after LMS-side bootstrap
+        catalog_query:
+          # enterprise-catalog uses its own CatalogQuery model.
+          # content_filter must be JSON-serializable.
+          content_filter:
+            content_type: course
+          include_exec_ed_2u_course_types: false
+    verification:
+      # After bootstrap, verify via the enterprise-catalog API:
+      # GET /enterprise-catalog/api/v1/enterprise-catalogs/<uuid>/
+      # Expects HTTP 200 and at least one result in the course list.
+      expected_min_courses: 1
+      api_path_template: "/enterprise-catalog/api/v1/enterprise-catalogs/{catalog_uuid}/"
+
+  # ── 4. Waffle Flags ─────────────────────────────────────────────────────────
+  waffle_flags:
+    required: true
+    description: >
+      Platform-wide and tenant-scoped waffle flags required for enterprise
+      features to function. Missing flags cause silent failures — the learner
+      portal renders but shows errors or empty state.
+    platform_wide_flags:
+      # These are WaffleFlag objects (not WaffleSwitch). They apply globally.
+      - name: enterprise.learner_bff_enabled
+        active: true
+        note: >
+          Required for the learner BFF (Backend-for-Frontend) API to be routed
+          correctly. Without this flag, learner portal API calls return 404.
+
+    tenant_scoped_switches:
+      # These are WaffleSwitch objects scoped per enterprise slug.
+      # Naming pattern: <base>.<enterprise_slug>
+      - base: enterprise.enable_learner_portal
+        enterprise_slug: biji-biji-initiative
+        active: true
+
+      - base: enterprise.enable_integrated_learner_portal_search
+        enterprise_slug: biji-biji-initiative
+        active: true
+
+      - base: enterprise.enable_analytics_screen
+        enterprise_slug: biji-biji-initiative
+        active: true
+
+      - base: enterprise.enable_audit_enrollment
+        enterprise_slug: biji-biji-initiative
+        active: false
+
+      - base: enterprise.enable_portal_code_management
+        enterprise_slug: biji-biji-initiative
+        active: false
+
+  # ── 5. Negative Cases ───────────────────────────────────────────────────────
+  negative_cases:
+    required: false
+    description: >
+      Scenarios that must fail correctly. These are not bootstrapped records —
+      they are proof assertions. The proof agent verifies these after setup.
+    cases:
+      - id: NC-001
+        name: Non-linked user cannot access learner portal
+        identity: lanea-unlinked-user
+        target_url: /enterprise/{{ biji-biji-initiative-uuid }}/learner-portal/
+        expected_http_status: [403, 302]
+        expected_redirect_contains: null
+        note: >
+          A valid LMS user with no EnterpriseCustomerUser record must not be
+          able to access the learner portal. The platform should return 403 or
+          redirect to an error/unenrolled page.
+
+      - id: NC-002
+        name: Non-linked user cannot access enterprise admin portal
+        identity: lanea-unlinked-user
+        target_url: /admin/
+        expected_http_status: [302]
+        expected_redirect_contains: /login
+        note: >
+          lanea-unlinked-user is not staff and not superuser. Django admin
+          must redirect to login.
+
+      - id: NC-003
+        name: LMS-only catalog without enterprise-catalog record shows zero courses
+        description: >
+          If the enterprise-catalog service record is absent, the learner portal
+          must show zero available courses — not an error. This validates that
+          the two-sided catalog split is working as documented.
+        # This case is verified by the pre-browser-proof checklist,
+        # not by the bootstrap tool.
+        automated: false

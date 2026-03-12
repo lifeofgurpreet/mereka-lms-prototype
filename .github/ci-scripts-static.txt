@@ -605,3 +605,4 @@ scripts/qa/verify-enterprise-mfe-build-contract.sh
 scripts/qa/verify-agent-context-lock.sh --allow-main
 scripts/qa/verify-arc-runner-contract.sh
 scripts/qa/verify-ci-execution-contract.sh
+scripts/qa/verify-runtime-proof-fixture-pack.sh

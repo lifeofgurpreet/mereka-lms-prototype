@@ -1,0 +1,248 @@
+#!/usr/bin/env bash
+# @covers AC-MTA-001
+# @spec: multi-tenancy-architecture_spec.md
+#
+# verify-runtime-proof-fixture-pack.sh — CI-safe static verifier for the
+# synthetic runtime proof fixture pack.
+#
+# Checks that all required files exist, the manifest is valid YAML, the
+# bootstrap and validate tools are present and executable, and that key
+# safety invariants are present in the manifest.
+#
+# Does NOT connect to a live cluster. Safe to run in any CI environment.
+#
+# Usage:
+#   bash scripts/qa/verify-runtime-proof-fixture-pack.sh
+#
+# Exit codes:
+#   0  all checks passed
+#   1  one or more checks failed
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# ── Counters ──────────────────────────────────────────────────────────────────
+PASS=0
+FAIL=0
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+_pass() {
+  echo "  [PASS] $1"
+  PASS=$(( PASS + 1 ))
+}
+
+_fail() {
+  echo "  [FAIL] $1"
+  FAIL=$(( FAIL + 1 ))
+}
+
+_check_file_exists() {
+  local label="$1"
+  local path="$2"
+  if [[ -f "${REPO_ROOT}/${path}" ]]; then
+    _pass "${label}: ${path} exists"
+  else
+    _fail "${label}: ${path} NOT FOUND"
+  fi
+}
+
+_check_executable() {
+  local label="$1"
+  local path="$2"
+  if [[ -x "${REPO_ROOT}/${path}" ]]; then
+    _pass "${label}: ${path} is executable"
+  else
+    _fail "${label}: ${path} is NOT executable (chmod +x required)"
+  fi
+}
+
+_yaml_valid() {
+  local label="$1"
+  local path="$2"
+  # Use python3 yaml parsing — available in CI without extra deps.
+  if python3 -c "
+import sys, yaml
+try:
+    yaml.safe_load(open('${REPO_ROOT}/${path}', encoding='utf-8'))
+    sys.exit(0)
+except Exception as e:
+    print(str(e), file=sys.stderr)
+    sys.exit(1)
+" 2>/dev/null; then
+    _pass "${label}: ${path} is valid YAML"
+  else
+    _fail "${label}: ${path} failed YAML parse"
+  fi
+}
+
+_manifest_contains() {
+  local label="$1"
+  local path="$2"
+  local python_expr="$3"
+  if python3 -c "
+import sys, yaml
+m = yaml.safe_load(open('${REPO_ROOT}/${path}', encoding='utf-8'))
+result = (${python_expr})
+sys.exit(0 if result else 1)
+" 2>/dev/null; then
+    _pass "${label}"
+  else
+    _fail "${label}"
+  fi
+}
+
+# ── Header ────────────────────────────────────────────────────────────────────
+echo ""
+echo "========================================================================"
+echo "Synthetic Runtime Proof Fixture Pack — Static Verifier"
+echo "Repo root: ${REPO_ROOT}"
+echo "========================================================================"
+echo ""
+
+MANIFEST_REL="config/runtime-proof/dev.synthetic-proof-fixtures.yaml"
+
+# ── Section 1: Core documents ─────────────────────────────────────────────────
+echo "--- Section 1: Core documents ---"
+_check_file_exists \
+  "contract_doc" \
+  "docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md"
+
+_check_file_exists \
+  "manifest" \
+  "${MANIFEST_REL}"
+
+_check_file_exists \
+  "execution_packet" \
+  "docs/reviews/RUNTIME_PROOF_FIXTURE_EXECUTION_PACKET.md"
+
+_check_file_exists \
+  "rollback_packet" \
+  "docs/reviews/RUNTIME_PROOF_FIXTURE_ROLLBACK_PACKET.md"
+
+_check_file_exists \
+  "handoff_doc" \
+  "docs/reviews/RUNTIME_PROOF_FIXTURE_HANDOFF.md"
+
+echo ""
+
+# ── Section 2: Tooling ────────────────────────────────────────────────────────
+echo "--- Section 2: Tooling ---"
+_check_file_exists \
+  "bootstrap_tool" \
+  "scripts/tenants/bootstrap-runtime-proof-fixtures.py"
+
+_check_file_exists \
+  "validate_tool" \
+  "scripts/tenants/validate-runtime-proof-fixtures.py"
+
+_check_executable \
+  "bootstrap_tool_executable" \
+  "scripts/tenants/bootstrap-runtime-proof-fixtures.py"
+
+_check_executable \
+  "validate_tool_executable" \
+  "scripts/tenants/validate-runtime-proof-fixtures.py"
+
+echo ""
+
+# ── Section 3: Manifest YAML validity ─────────────────────────────────────────
+echo "--- Section 3: Manifest YAML validity ---"
+_yaml_valid "manifest_yaml" "${MANIFEST_REL}"
+
+echo ""
+
+# ── Section 4: Required fixture classes in manifest ───────────────────────────
+echo "--- Section 4: Required fixture classes ---"
+_manifest_contains \
+  "fixture_class:synthetic_identities" \
+  "${MANIFEST_REL}" \
+  "'synthetic_identities' in m.get('fixture_classes', {})"
+
+_manifest_contains \
+  "fixture_class:lms_enterprise_data" \
+  "${MANIFEST_REL}" \
+  "'lms_enterprise_data' in m.get('fixture_classes', {})"
+
+_manifest_contains \
+  "fixture_class:enterprise_catalog_service_data" \
+  "${MANIFEST_REL}" \
+  "'enterprise_catalog_service_data' in m.get('fixture_classes', {})"
+
+_manifest_contains \
+  "fixture_class:waffle_flags" \
+  "${MANIFEST_REL}" \
+  "'waffle_flags' in m.get('fixture_classes', {})"
+
+echo ""
+
+# ── Section 5: Safety invariant ───────────────────────────────────────────────
+echo "--- Section 5: Safety invariant ---"
+_manifest_contains \
+  "real_account_mutation_forbidden:true" \
+  "${MANIFEST_REL}" \
+  "m.get('real_account_mutation_forbidden') is True"
+
+echo ""
+
+# ── Section 6: LMS + enterprise-catalog split ─────────────────────────────────
+echo "--- Section 6: LMS + enterprise-catalog catalog split ---"
+
+# LMS side: lms_enterprise_data must have enterprise_customers with catalogs.
+_manifest_contains \
+  "lms_enterprise_data:has_catalogs" \
+  "${MANIFEST_REL}" \
+  "any(
+    ec.get('catalogs')
+    for ec in m.get('fixture_classes', {})
+               .get('lms_enterprise_data', {})
+               .get('enterprise_customers', [])
+  )"
+
+# Enterprise-catalog service side: enterprise_catalog_service_data must have catalogs.
+_manifest_contains \
+  "enterprise_catalog_service_data:has_catalogs" \
+  "${MANIFEST_REL}" \
+  "bool(
+    m.get('fixture_classes', {})
+     .get('enterprise_catalog_service_data', {})
+     .get('catalogs')
+  )"
+
+echo ""
+
+# ── Section 7: Python validate tool exit code ─────────────────────────────────
+echo "--- Section 7: validate tool runs clean ---"
+if python3 "${REPO_ROOT}/scripts/tenants/validate-runtime-proof-fixtures.py" \
+    --env dev --json > /dev/null 2>&1; then
+  _pass "validate_tool:exit_code_0 (manifest passes static validation)"
+else
+  _fail "validate_tool:non_zero_exit (manifest has validation errors — run validate tool for details)"
+fi
+
+echo ""
+
+# ── Section 8: Bootstrap dry-run exit code ────────────────────────────────────
+echo "--- Section 8: bootstrap dry-run runs clean ---"
+if python3 "${REPO_ROOT}/scripts/tenants/bootstrap-runtime-proof-fixtures.py" \
+    --env dev --json > /dev/null 2>&1; then
+  _pass "bootstrap_tool:dry_run_exit_code_0"
+else
+  _fail "bootstrap_tool:dry_run_non_zero_exit"
+fi
+
+echo ""
+
+# ── Summary ───────────────────────────────────────────────────────────────────
+echo "========================================================================"
+echo "Results: ${PASS} passed, ${FAIL} failed"
+echo "========================================================================"
+echo ""
+
+if [[ "${FAIL}" -gt 0 ]]; then
+  echo "VERDICT: FAIL — ${FAIL} check(s) did not pass."
+  exit 1
+else
+  echo "VERDICT: PASS — all checks passed."
+  exit 0
+fi

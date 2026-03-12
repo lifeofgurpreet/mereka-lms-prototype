@@ -9463,6 +9463,33 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "reviews/RUNTIME_PROOF_FIXTURE_EXECUTION_PACKET.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reviews/RUNTIME_PROOF_FIXTURE_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reviews/RUNTIME_PROOF_FIXTURE_ROLLBACK_PACKET.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "reviews/STABILIZATION_CONTROL_BOARD_HANDOFF.md",
     "status": "supporting",
     "type": "other"
@@ -9698,6 +9725,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "stabilization/STATIC_VALIDATION_CONTRACT.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md",
     "status": "supporting",
     "type": "other"
   },
