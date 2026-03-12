@@ -88,6 +88,14 @@ unresolvable. Failed with `RuntimeError: fatal: bad revision 'origin/main...HEAD
 2. Hardened `verify-legacy-testmaps-frozen.py` to verify refs exist before diffing — skips
    gracefully with exit 0 if refs are unresolvable (defense-in-depth)
 
+### FIXED — markdownlint Global Install on ARC Runners (Lane F2)
+
+**Impact**: `npm install -g markdownlint-cli` fails with `EACCES: permission denied, mkdir '/usr/lib/node_modules/markdownlint-cli'`
+on ARC runners. No sudo available. Step failure causes Static Validation to fail even though
+markdownlint results are non-blocking (`|| true`).
+
+**Fix** (PR #880): Install locally (`npm install markdownlint-cli`) and run via `npx` instead of global install.
+
 ### NOT FIXED — yamllint Warnings (Non-Blocking)
 
 These produce `[warning]` output but do NOT cause CI failure:
