@@ -18,7 +18,7 @@
 #   User accounts   → username prefix: lanea-
 #   Emails          → domain: @synthetic.test  (unroutable, not a real TLD)
 #   Enterprise slug → proof- prefix when creating a synthetic-only customer;
-#                     biji-biji-initiative matches real tenant name but is
+#                     biji-biji matches real tenant name but is
 #                     guarded against overwriting a real contact_email record.
 #
 # Contract: docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md
@@ -66,10 +66,10 @@ fixture_classes:
         is_superuser: false
         password_secret_path: /runtime-proof/LANEA_ENTERPRISE_ADMIN_PASSWORD
         enterprise_link:
-          customer_slug: biji-biji-initiative
+          customer_slug: biji-biji
           enterprise_role: admin
         purpose: >
-          Linked to the biji-biji-initiative enterprise customer with admin
+          Linked to the biji-biji enterprise customer with admin
           role. Used to verify enterprise admin portal access.
 
       - username: lanea-enterprise-learner
@@ -79,10 +79,10 @@ fixture_classes:
         is_superuser: false
         password_secret_path: /runtime-proof/LANEA_ENTERPRISE_LEARNER_PASSWORD
         enterprise_link:
-          customer_slug: biji-biji-initiative
+          customer_slug: biji-biji
           enterprise_role: learner
         purpose: >
-          Linked to the biji-biji-initiative enterprise customer with learner
+          Linked to the biji-biji enterprise customer with learner
           role. Primary identity for learner portal proof flow.
 
       - username: lanea-unlinked-user
@@ -105,10 +105,10 @@ fixture_classes:
       portal content — the enterprise-catalog service must also be populated.
       See fixture_classes.enterprise_catalog_service_data.
     enterprise_customers:
-      - slug: biji-biji-initiative
+      - slug: biji-biji
         name: Biji Biji Initiative
         # contact_email uses @synthetic.test to distinguish from any real
-        # biji-biji-initiative record. If a real record exists with a different
+        # biji-biji record. If a real record exists with a different
         # contact_email, the bootstrap tool will refuse to overwrite it.
         contact_email: lanea-enterprise-admin@synthetic.test
         country: MY
@@ -124,7 +124,7 @@ fixture_classes:
         site:
           domain: academyv2.mereka.dev
         catalogs:
-          - title: "Biji Biji Initiative Proof Catalog"
+          - title: "Biji Biji Default Catalog"
             # This catalog title uses a descriptive name to distinguish it from
             # any real catalog that may exist for this enterprise customer.
             catalog_query:
@@ -152,11 +152,10 @@ fixture_classes:
       An LMS EnterpriseCustomerCatalog with no matching enterprise-catalog
       EnterpriseCatalog will cause the learner portal to show zero courses.
     catalogs:
-      - enterprise_customer_slug: biji-biji-initiative
-        title: "Biji Biji Initiative Proof Catalog"
-        # UUID should match the LMS-side catalog after bootstrap.
-        # The bootstrap tool prints the LMS catalog UUID for manual verification.
-        enterprise_catalog_uuid: null  # populated after LMS-side bootstrap
+      - enterprise_customer_slug: biji-biji
+        title: "Biji Biji Default Catalog"
+        # UUID matches the LMS-side catalog AND enterprise-catalog service record.
+        enterprise_catalog_uuid: 57e324c2-e0d1-4e65-91ea-818f636c91aa
         catalog_query:
           # enterprise-catalog uses its own CatalogQuery model.
           # content_filter must be JSON-serializable.
@@ -189,23 +188,23 @@ fixture_classes:
       # These are WaffleSwitch objects scoped per enterprise slug.
       # Naming pattern: <base>.<enterprise_slug>
       - base: enterprise.enable_learner_portal
-        enterprise_slug: biji-biji-initiative
+        enterprise_slug: biji-biji
         active: true
 
       - base: enterprise.enable_integrated_learner_portal_search
-        enterprise_slug: biji-biji-initiative
+        enterprise_slug: biji-biji
         active: true
 
       - base: enterprise.enable_analytics_screen
-        enterprise_slug: biji-biji-initiative
+        enterprise_slug: biji-biji
         active: true
 
       - base: enterprise.enable_audit_enrollment
-        enterprise_slug: biji-biji-initiative
+        enterprise_slug: biji-biji
         active: false
 
       - base: enterprise.enable_portal_code_management
-        enterprise_slug: biji-biji-initiative
+        enterprise_slug: biji-biji
         active: false
 
   # ── 5. Negative Cases ───────────────────────────────────────────────────────
@@ -218,7 +217,7 @@ fixture_classes:
       - id: NC-001
         name: Non-linked user cannot access learner portal
         identity: lanea-unlinked-user
-        target_url: /enterprise/{{ biji-biji-initiative-uuid }}/learner-portal/
+        target_url: /enterprise/{{ biji-biji-uuid }}/learner-portal/
         expected_http_status: [403, 302]
         expected_redirect_contains: null
         note: >
