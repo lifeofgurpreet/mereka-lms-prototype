@@ -18,6 +18,7 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -45,10 +46,16 @@ from lib.proof_fixtures import (  # noqa: E402, I001
 
 
 def find_manifest(env: str) -> Path:
-    candidates = [
-        MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
-        Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
-    ]
+    candidates = []
+    manifest_dir_override = os.environ.get("RUNTIME_PROOF_MANIFEST_DIR")
+    if manifest_dir_override:
+        candidates.append(Path(manifest_dir_override) / f"{env}.synthetic-proof-fixtures.yaml")
+    candidates.extend(
+        [
+            MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
+            Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
+        ]
+    )
     for path in candidates:
         if path.exists():
             return path
@@ -217,8 +224,19 @@ def plan_synthetic_identities(fixture_classes: dict[str, Any]) -> list[Action]:
                     "role": user["role"],
                     "is_staff": user.get("is_staff", False),
                     "is_superuser": user.get("is_superuser", False),
+                    "ensure_user_profile": True,
                     "password_from": user.get("password_secret_path", "(not set)"),
                 },
+            )
+        )
+        actions.append(
+            Action(
+                category="lms_user_profile",
+                kind="CREATE_OR_NOOP",
+                description=(
+                    f"Ensure UserProfile exists for LMS user {user['username']!r}"
+                ),
+                detail={"username": user["username"]},
             )
         )
         link = user.get("enterprise_link")
@@ -473,6 +491,7 @@ def apply_synthetic_identities(
     """Apply synthetic identity users and enterprise user links via Django ORM."""
     # Deferred Django imports — only available inside LMS pod.
     try:
+        from common.djangoapps.student.models import UserProfile  # noqa: PLC0415
         from django.contrib.auth import get_user_model  # noqa: PLC0415
         from enterprise.models import EnterpriseCustomer, EnterpriseCustomerUser  # noqa: PLC0415
     except ImportError as exc:
@@ -484,6 +503,7 @@ def apply_synthetic_identities(
         ) from exc
 
     User = get_user_model()
+    ecu_user_field = "user_fk" if hasattr(EnterpriseCustomerUser, "user_fk_id") else "user"
     si = fixture_classes.get("synthetic_identities", {})
 
     for user_spec in si.get("users", []):
@@ -536,6 +556,26 @@ def apply_synthetic_identities(
             summary.reused += 1
             print(f"  [NOOP] User {username!r} already exists")
 
+        profile, profile_created = UserProfile.objects.get_or_create(
+            user=user,
+            defaults={"name": user.username or user.email},
+        )
+        profile_action = "CREATE" if profile_created else "NOOP"
+        rec = make_action(
+            profile_action,
+            "UserProfile",
+            username,
+            f"{'Created' if profile_created else 'Already exists'}: UserProfile for {username!r}",
+            dry_run,
+        )
+        summary.actions.append(rec)
+        if profile_created:
+            summary.created += 1
+            print(f"  [CREATE] UserProfile for {username!r}")
+        else:
+            summary.reused += 1
+            print(f"  [NOOP] UserProfile for {username!r} already exists")
+
         # Enterprise user link.
         link = user_spec.get("enterprise_link")
         if link:
@@ -559,7 +599,7 @@ def apply_synthetic_identities(
 
             ecu, ecu_created = EnterpriseCustomerUser.objects.get_or_create(
                 enterprise_customer=ec,
-                user=user,
+                **{ecu_user_field: user},
             )
             ecu_action = "CREATE" if ecu_created else "NOOP"
             ecu_rec = make_action(
@@ -579,7 +619,9 @@ def apply_synthetic_identities(
                 print(f"  [NOOP] EnterpriseCustomerUser: {username!r} -> {customer_slug!r} already linked")
         else:
             # Negative case: assert no enterprise link exists.
-            ecu_count = EnterpriseCustomerUser.objects.filter(user=user).count()
+            ecu_count = EnterpriseCustomerUser.objects.filter(
+                **{ecu_user_field: user}
+            ).count()
             if ecu_count > 0:
                 rec = make_action(
                     "ERROR",
@@ -769,7 +811,76 @@ def apply_waffle_flags(
             print(f"  [NOOP] WaffleSwitch: {switch_name!r} already exists")
 
 
-def run_apply(manifest: dict[str, Any], env: str, as_json: bool) -> int:
+def apply_passwords(
+    fixture_classes: dict[str, Any],
+    summary: ApplySummary,
+) -> None:
+    """Set passwords for synthetic users from environment variables.
+
+    For each user in synthetic_identities, reads the password from an env var
+    named after the password_secret_path basename (e.g. LANEA_PLATFORM_ADMIN_PASSWORD).
+    If the env var is not set, the user is skipped with a warning.
+    """
+    try:
+        from django.contrib.auth import get_user_model  # noqa: PLC0415
+    except ImportError as exc:
+        raise RuntimeError(
+            "Django not available — password setting requires LMS Django context"
+        ) from exc
+
+    User = get_user_model()
+    si = fixture_classes.get("synthetic_identities", {})
+
+    for user_spec in si.get("users", []):
+        username = user_spec["username"]
+        secret_path = user_spec.get("password_secret_path", "")
+        # Derive env var name from secret path: /runtime-proof/LANEA_X → LANEA_X
+        env_var = secret_path.rsplit("/", 1)[-1] if secret_path else ""
+
+        if not env_var:
+            print(f"  [SKIP] {username!r}: no password_secret_path in manifest")
+            summary.skipped += 1
+            continue
+
+        password = os.environ.get(env_var)
+        if not password:
+            print(
+                f"  [SKIP] {username!r}: env var {env_var!r} not set "
+                f"(source: {secret_path})"
+            )
+            summary.skipped += 1
+            continue
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            print(
+                f"  [SKIP] {username!r}: user does not exist in DB — "
+                "run bootstrap --apply first"
+            )
+            summary.skipped += 1
+            continue
+
+        user.set_password(password)
+        user.save(update_fields=["password"])
+        rec = make_action(
+            "UPDATE",
+            "User.password",
+            username,
+            f"Password set for {username!r} from env var {env_var!r}",
+            False,
+        )
+        summary.actions.append(rec)
+        summary.created += 1  # counts as a mutation
+        print(f"  [SET] Password for {username!r} from {env_var}")
+
+
+def run_apply(
+    manifest: dict[str, Any],
+    env: str,
+    as_json: bool,
+    set_passwords: bool = False,
+) -> int:
     """
     Execute the apply path. Guard chain runs first; all guards must pass before
     any ORM write. Requires Django context (LMS pod).
@@ -815,6 +926,11 @@ def run_apply(manifest: dict[str, Any], env: str, as_json: bool) -> int:
         apply_waffle_flags(fixture_classes, summary, dry_run=False)
         print()
 
+        if set_passwords:
+            print("--- Synthetic User Passwords ---")
+            apply_passwords(fixture_classes, summary)
+            print()
+
     except RuntimeError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -832,8 +948,9 @@ def run_apply(manifest: dict[str, Any], env: str, as_json: bool) -> int:
     print()
     print("NOTE: Enterprise-catalog service records are NOT handled by this tool.")
     print("      Run bootstrap-runtime-proof-fixtures-catalog.py for the catalog service step.")
-    print("NOTE: Synthetic user passwords are NOT set by this tool.")
-    print("      Set passwords from Infisical paths listed in the manifest.")
+    if not set_passwords:
+        print("NOTE: Synthetic user passwords were NOT set.")
+        print("      Use --set-passwords with env vars to set them.")
 
     if as_json:
         print(json.dumps(summary.to_dict(), indent=2))
@@ -871,6 +988,16 @@ def main() -> int:
         action="store_true",
         default=False,
         help="Output machine-readable JSON instead of human-readable plan.",
+    )
+    parser.add_argument(
+        "--set-passwords",
+        action="store_true",
+        default=False,
+        help=(
+            "Set passwords for all synthetic users. Reads from environment variables "
+            "matching the password_secret_path basename (e.g. LANEA_PLATFORM_ADMIN_PASSWORD). "
+            "Requires --apply and Django context."
+        ),
     )
     args = parser.parse_args()
 
@@ -913,7 +1040,9 @@ def main() -> int:
             print("=" * 70, file=sys.stderr)
             return 1
 
-        return run_apply(manifest, args.env, as_json=args.json)
+        return run_apply(
+            manifest, args.env, as_json=args.json, set_passwords=args.set_passwords
+        )
 
     # Dry-run path.
     actions = build_plan(manifest)

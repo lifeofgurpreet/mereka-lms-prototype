@@ -1,5 +1,6 @@
 """Shared safety library for synthetic runtime proof fixture tooling."""
 
+import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -66,10 +67,16 @@ MANIFEST_DIR = REPO_ROOT / "config" / "runtime-proof"
 
 
 def find_manifest(env: str) -> Path:
-    candidates = [
-        MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
-        Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
-    ]
+    candidates = []
+    manifest_dir_override = os.environ.get("RUNTIME_PROOF_MANIFEST_DIR")
+    if manifest_dir_override:
+        candidates.append(Path(manifest_dir_override) / f"{env}.synthetic-proof-fixtures.yaml")
+    candidates.extend(
+        [
+            MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
+            Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
+        ]
+    )
     for p in candidates:
         if p.exists():
             return p

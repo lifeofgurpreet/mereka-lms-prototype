@@ -46,7 +46,8 @@ fixture_classes:
     description: >
       Synthetic user accounts for proof flows. All emails use @synthetic.test —
       an unroutable domain that cannot collide with real operator accounts.
-      Passwords are stored in Infisical dev env at path /runtime-proof/; they
+      Passwords are stored in Infisical at path /k8s/mereka-lms/ in the active
+      environment; they
       are never committed to this repo.
     users:
       - username: lanea-platform-admin
@@ -54,7 +55,7 @@ fixture_classes:
         role: platform_admin
         is_staff: true
         is_superuser: true
-        password_secret_path: /runtime-proof/LANEA_PLATFORM_ADMIN_PASSWORD
+        password_secret_path: /k8s/mereka-lms/LANEA_PLATFORM_ADMIN_PASSWORD
         purpose: >
           LMS superuser for verifying admin surfaces. Not linked to any
           enterprise customer — platform-level access only.
@@ -64,7 +65,7 @@ fixture_classes:
         role: enterprise_admin
         is_staff: false
         is_superuser: false
-        password_secret_path: /runtime-proof/LANEA_ENTERPRISE_ADMIN_PASSWORD
+        password_secret_path: /k8s/mereka-lms/LANEA_ENTERPRISE_ADMIN_PASSWORD
         enterprise_link:
           customer_slug: biji-biji
           enterprise_role: admin
@@ -77,7 +78,7 @@ fixture_classes:
         role: enterprise_learner
         is_staff: false
         is_superuser: false
-        password_secret_path: /runtime-proof/LANEA_ENTERPRISE_LEARNER_PASSWORD
+        password_secret_path: /k8s/mereka-lms/LANEA_ENTERPRISE_LEARNER_PASSWORD
         enterprise_link:
           customer_slug: biji-biji
           enterprise_role: learner
@@ -90,7 +91,7 @@ fixture_classes:
         role: negative_case
         is_staff: false
         is_superuser: false
-        password_secret_path: /runtime-proof/LANEA_UNLINKED_USER_PASSWORD
+        password_secret_path: /k8s/mereka-lms/LANEA_UNLINKED_USER_PASSWORD
         enterprise_link: null
         purpose: >
           Valid LMS account with NO enterprise customer linkage. Used to verify

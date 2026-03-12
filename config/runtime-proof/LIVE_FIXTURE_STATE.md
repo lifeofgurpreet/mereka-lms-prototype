@@ -54,22 +54,39 @@
 
 ## Passwords
 
-Passwords are NOT stored in this file. For `lanea-unlinked-user`, a random
-password was generated at creation time. To set a known password:
+Passwords are stored in Infisical at `/k8s/mereka-lms/` in the active environment. To set all
+passwords deterministically from env vars:
 
 ```bash
-kubectl exec -n mereka-lms-dev <lms-pod> -- python manage.py lms changepassword lanea-unlinked-user
+# Pull from Infisical, then:
+LANEA_PLATFORM_ADMIN_PASSWORD=<pw> \
+LANEA_ENTERPRISE_ADMIN_PASSWORD=<pw> \
+LANEA_ENTERPRISE_LEARNER_PASSWORD=<pw> \
+LANEA_UNLINKED_USER_PASSWORD=<pw> \
+./scripts/tenants/apply-substrate-live.sh --env dev --set-passwords
 ```
 
-For other users, check Infisical dev env at `/runtime-proof/` or use:
+Or set individually via Django management command:
 ```bash
 kubectl exec -n mereka-lms-dev <lms-pod> -- python manage.py lms changepassword <username>
 ```
 
+## One-Command Live Validation
+
+```bash
+./scripts/tenants/validate-substrate-live.sh
+# or with JSON output:
+./scripts/tenants/validate-substrate-live.sh --json
+```
+
+Checks: users, user profiles, enterprise customers, enterprise links, catalogs,
+UUID drift, waffle flags, password usability, negative-case readiness.
+
 ## Idempotency
 
 All fixture operations are idempotent (get_or_create). Re-running the
-bootstrap tool produces 12/12 NOOP results.
+bootstrap tool produces 12/12 NOOP results. UUID drift detection now
+catches silent mismatches on NOOP paths.
 
 ## Rollback
 

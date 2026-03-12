@@ -23,6 +23,7 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -41,10 +42,16 @@ REQUIRED_FIXTURE_CLASSES = [
 
 
 def find_manifest(env: str) -> Path:
-    candidates = [
-        MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
-        Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
-    ]
+    candidates = []
+    manifest_dir_override = os.environ.get("RUNTIME_PROOF_MANIFEST_DIR")
+    if manifest_dir_override:
+        candidates.append(Path(manifest_dir_override) / f"{env}.synthetic-proof-fixtures.yaml")
+    candidates.extend(
+        [
+            MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
+            Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
+        ]
+    )
     for path in candidates:
         if path.exists():
             return path
@@ -329,6 +336,50 @@ def check_lms_enterprise_catalog_split(manifest: dict[str, Any]) -> CheckResult:
     )
 
 
+def check_catalog_uuid_format(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Validate that enterprise_catalog_uuid values are valid UUID format."""
+    import uuid as uuid_mod
+
+    results = []
+    ecsd = manifest.get("fixture_classes", {}).get("enterprise_catalog_service_data", {})
+    for cat in ecsd.get("catalogs", []):
+        cat_uuid = cat.get("enterprise_catalog_uuid")
+        slug = cat.get("enterprise_customer_slug", "?")
+        title = cat.get("title", "?")
+        if cat_uuid is None:
+            results.append(
+                CheckResult(
+                    f"catalog_uuid_format:{slug}:{title}",
+                    False,
+                    f"enterprise_catalog_uuid is null for {slug!r}/{title!r} — "
+                    "UUID drift cannot be detected",
+                    detail=(
+                        "Set enterprise_catalog_uuid to the live catalog UUID so "
+                        "bootstrap can detect drift."
+                    ),
+                )
+            )
+            continue
+        try:
+            uuid_mod.UUID(str(cat_uuid))
+            results.append(
+                CheckResult(
+                    f"catalog_uuid_format:{slug}:{title}",
+                    True,
+                    f"enterprise_catalog_uuid {cat_uuid!r} is valid UUID",
+                )
+            )
+        except ValueError:
+            results.append(
+                CheckResult(
+                    f"catalog_uuid_format:{slug}:{title}",
+                    False,
+                    f"enterprise_catalog_uuid {cat_uuid!r} is NOT valid UUID format",
+                )
+            )
+    return results
+
+
 def check_waffle_flags(manifest: dict[str, Any]) -> list[CheckResult]:
     results = []
     wf = manifest.get("fixture_classes", {}).get("waffle_flags", {})
@@ -400,6 +451,66 @@ def check_waffle_flags(manifest: dict[str, Any]) -> list[CheckResult]:
     return results
 
 
+def check_negative_cases_consistency(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Verify negative_cases reference valid identities with no enterprise links."""
+    results: list[CheckResult] = []
+    nc = manifest.get("fixture_classes", {}).get("negative_cases", {})
+    cases = nc.get("cases", [])
+    if not cases:
+        return results
+
+    si = manifest.get("fixture_classes", {}).get("synthetic_identities", {})
+    users_by_username = {u["username"]: u for u in si.get("users", [])}
+
+    for case in cases:
+        case_id = case.get("id", "?")
+        identity = case.get("identity")
+        if not identity:
+            continue
+
+        user = users_by_username.get(identity)
+        if not user:
+            results.append(
+                CheckResult(
+                    f"negative_case:identity_exists:{case_id}",
+                    False,
+                    f"Negative case {case_id} references identity {identity!r} "
+                    "which is not defined in synthetic_identities",
+                )
+            )
+            continue
+
+        results.append(
+            CheckResult(
+                f"negative_case:identity_exists:{case_id}",
+                True,
+                f"Negative case {case_id}: identity {identity!r} exists in manifest",
+            )
+        )
+
+        # For non-linked user cases, verify enterprise_link is null.
+        link = user.get("enterprise_link")
+        if link is not None:
+            results.append(
+                CheckResult(
+                    f"negative_case:no_enterprise_link:{case_id}",
+                    False,
+                    f"Negative case {case_id}: identity {identity!r} has "
+                    f"enterprise_link={link!r} — expected null for negative case",
+                )
+            )
+        else:
+            results.append(
+                CheckResult(
+                    f"negative_case:no_enterprise_link:{case_id}",
+                    True,
+                    f"Negative case {case_id}: identity {identity!r} has no enterprise link (correct)",
+                )
+            )
+
+    return results
+
+
 def run_all_checks(manifest: dict[str, Any]) -> list[CheckResult]:
     results: list[CheckResult] = []
     results.append(check_safety_invariant(manifest))
@@ -408,7 +519,9 @@ def run_all_checks(manifest: dict[str, Any]) -> list[CheckResult]:
     results.extend(check_synthetic_user_emails(manifest))
     results.extend(check_enterprise_customer_emails(manifest))
     results.append(check_lms_enterprise_catalog_split(manifest))
+    results.extend(check_catalog_uuid_format(manifest))
     results.extend(check_waffle_flags(manifest))
+    results.extend(check_negative_cases_consistency(manifest))
     return results
 
 
@@ -419,6 +532,7 @@ def check_live_users(manifest: dict[str, Any]) -> list[CheckResult]:
     """Read-only ORM check: verify synthetic user accounts exist in the DB."""
     results: list[CheckResult] = []
     try:
+        from common.djangoapps.student.models import UserProfile  # noqa: PLC0415
         from django.contrib.auth import get_user_model  # noqa: PLC0415
     except ImportError:
         results.append(
@@ -446,7 +560,8 @@ def check_live_users(manifest: dict[str, Any]) -> list[CheckResult]:
     for user_spec in si.get("users", []):
         username = user_spec["username"]
         email = user_spec["email"]
-        exists = User.objects.filter(username=username, email=email).exists()
+        user = User.objects.filter(username=username, email=email).first()
+        exists = user is not None
         results.append(
             CheckResult(
                 f"live:user_exists:{username}",
@@ -458,6 +573,19 @@ def check_live_users(manifest: dict[str, Any]) -> list[CheckResult]:
                 ),
             )
         )
+        if user is not None:
+            has_profile = UserProfile.objects.filter(user=user).exists()
+            results.append(
+                CheckResult(
+                    f"live:user_profile:{username}",
+                    has_profile,
+                    f"UserProfile for {username!r} is "
+                    f"{'present' if has_profile else 'MISSING'}",
+                    detail=None if has_profile else (
+                        "Synthetic proof users should have a UserProfile to avoid login/runtime gaps."
+                    ),
+                )
+            )
 
     return results
 
@@ -534,9 +662,12 @@ def check_live_enterprise_user_links(manifest: dict[str, Any]) -> list[CheckResu
 
         if link:
             customer_slug = link["customer_slug"]
+            user_field = "user_fk" if hasattr(EnterpriseCustomerUser, "user_fk_id") else "user"
             linked = EnterpriseCustomerUser.objects.filter(
-                user=user,
-                enterprise_customer__slug=customer_slug,
+                **{
+                    user_field: user,
+                    "enterprise_customer__slug": customer_slug,
+                }
             ).exists()
             results.append(
                 CheckResult(
@@ -548,7 +679,8 @@ def check_live_enterprise_user_links(manifest: dict[str, Any]) -> list[CheckResu
             )
         else:
             # Negative case: assert no links.
-            link_count = EnterpriseCustomerUser.objects.filter(user=user).count()
+            user_field = "user_fk" if hasattr(EnterpriseCustomerUser, "user_fk_id") else "user"
+            link_count = EnterpriseCustomerUser.objects.filter(**{user_field: user}).count()
             no_links = link_count == 0
             results.append(
                 CheckResult(
@@ -596,6 +728,56 @@ def check_live_enterprise_catalog(manifest: dict[str, Any]) -> list[CheckResult]
                 )
             )
 
+    return results
+
+
+def check_live_catalog_uuid_match(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Live check: verify enterprise catalog UUIDs match manifest."""
+    results: list[CheckResult] = []
+    try:
+        from enterprise.models import EnterpriseCustomerCatalog  # noqa: PLC0415
+    except ImportError:
+        # enterprise.models not available — silently skip (already reported by
+        # check_live_enterprise_catalog if needed).
+        return results
+
+    ecsd = manifest.get("fixture_classes", {}).get("enterprise_catalog_service_data", {})
+    for cat_spec in ecsd.get("catalogs", []):
+        expected_uuid = cat_spec.get("enterprise_catalog_uuid")
+        if not expected_uuid:
+            continue
+        slug = cat_spec["enterprise_customer_slug"]
+        title = cat_spec["title"]
+        try:
+            cat = EnterpriseCustomerCatalog.objects.get(
+                enterprise_customer__slug=slug,
+                title=title,
+            )
+            actual_uuid = str(cat.uuid)
+            expected_str = str(expected_uuid)
+            match = actual_uuid == expected_str
+            results.append(
+                CheckResult(
+                    f"live:catalog_uuid_match:{slug}:{title}",
+                    match,
+                    f"EnterpriseCustomerCatalog {title!r} UUID: "
+                    f"{'MATCH' if match else 'DRIFT'} "
+                    f"(expected={expected_str}, actual={actual_uuid})",
+                    detail=None if match else (
+                        f"UUID drift detected! Update manifest enterprise_catalog_uuid "
+                        f"to {actual_uuid!r} or investigate why the UUID changed."
+                    ),
+                )
+            )
+        except EnterpriseCustomerCatalog.DoesNotExist:
+            results.append(
+                CheckResult(
+                    f"live:catalog_uuid_match:{slug}:{title}",
+                    False,
+                    f"EnterpriseCustomerCatalog {title!r} for {slug!r} NOT FOUND — "
+                    "cannot check UUID",
+                )
+            )
     return results
 
 
@@ -670,6 +852,47 @@ def check_live_waffle_flags(manifest: dict[str, Any]) -> list[CheckResult]:
     return results
 
 
+def check_live_password_usable(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Read-only ORM check: verify synthetic users have usable passwords set."""
+    results: list[CheckResult] = []
+    try:
+        from django.contrib.auth import get_user_model  # noqa: PLC0415
+    except ImportError:
+        return results
+
+    User = get_user_model()
+    si = manifest.get("fixture_classes", {}).get("synthetic_identities", {})
+
+    for user_spec in si.get("users", []):
+        username = user_spec["username"]
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            results.append(
+                CheckResult(
+                    f"live:password_usable:{username}",
+                    False,
+                    f"Cannot check password for {username!r} — user does not exist",
+                )
+            )
+            continue
+
+        usable = user.has_usable_password()
+        results.append(
+            CheckResult(
+                f"live:password_usable:{username}",
+                usable,
+                f"User {username!r} has {'usable' if usable else 'UNUSABLE'} password",
+                detail=None if usable else (
+                    "Run bootstrap --apply --set-passwords with env vars to set a password. "
+                    f"Env var: {user_spec.get('password_secret_path', '').rsplit('/', 1)[-1]}"
+                ),
+            )
+        )
+
+    return results
+
+
 def run_live_readonly_checks(manifest: dict[str, Any]) -> list[CheckResult]:
     """Run all live-readonly ORM checks. All reads, no writes."""
     results: list[CheckResult] = []
@@ -677,7 +900,9 @@ def run_live_readonly_checks(manifest: dict[str, Any]) -> list[CheckResult]:
     results.extend(check_live_enterprise_customers(manifest))
     results.extend(check_live_enterprise_user_links(manifest))
     results.extend(check_live_enterprise_catalog(manifest))
+    results.extend(check_live_catalog_uuid_match(manifest))
     results.extend(check_live_waffle_flags(manifest))
+    results.extend(check_live_password_usable(manifest))
     return results
 
 

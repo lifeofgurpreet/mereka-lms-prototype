@@ -60,7 +60,7 @@ and all emails use the `@synthetic.test` domain, which is unroutable and unambig
 The `@synthetic.test` TLD is not a valid IANA TLD and cannot receive email.
 
 **Password discipline**: Passwords for synthetic accounts are stored in Infisical under the
-`dev` environment, path `/runtime-proof/`. They are never hardcoded in this repo.
+active environment at path `/k8s/mereka-lms/`. They are never hardcoded in this repo.
 
 ### 3.2 LMS Enterprise Data
 

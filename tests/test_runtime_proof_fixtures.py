@@ -123,6 +123,14 @@ class TestManifestParsing:
         fc = dev_manifest.get("fixture_classes")
         assert isinstance(fc, dict), "fixture_classes must be a YAML mapping"
 
+    def test_password_secret_paths_use_canonical_k8s_path(self, dev_manifest):
+        users = dev_manifest["fixture_classes"]["synthetic_identities"]["users"]
+        for user in users:
+            path = user.get("password_secret_path", "")
+            assert path.startswith("/k8s/mereka-lms/"), (
+                f"password_secret_path must use canonical /k8s/mereka-lms/ path, got {path!r}"
+            )
+
 
 # ── Required fixture classes ──────────────────────────────────────────────────
 
@@ -231,6 +239,7 @@ class TestBootstrapDryRun:
         categories = {a["category"] for a in output["actions"]}
         expected_categories = {
             "lms_user",
+            "lms_user_profile",
             "lms_enterprise_user_link",
             "lms_enterprise_customer",
             "lms_enterprise_catalog",
@@ -1076,4 +1085,80 @@ class TestEnterpriseLinksAuthoritative:
         for username in unlinked_users:
             assert username in assert_absent_usernames, (
                 f"User {username!r} has no enterprise_link but no ASSERT_ABSENT action found"
+            )
+
+
+# ── UUID drift detection ───────────────────────────────────────────────────────
+
+
+class TestCatalogUUIDValidation:
+    """Tests for UUID drift detection in catalog records."""
+
+    def test_valid_catalog_uuid_passes(self, validate_module):
+        """A manifest with valid UUID format passes the UUID format check."""
+        manifest = {
+            "fixture_classes": {
+                "enterprise_catalog_service_data": {
+                    "catalogs": [
+                        {
+                            "enterprise_customer_slug": "test",
+                            "title": "Test Catalog",
+                            "enterprise_catalog_uuid": "57e324c2-e0d1-4e65-91ea-818f636c91aa",
+                            "catalog_query": {"content_filter": {"content_type": "course"}},
+                        }
+                    ]
+                }
+            }
+        }
+        results = validate_module.check_catalog_uuid_format(manifest)
+        assert len(results) == 1
+        assert results[0].passed
+
+    def test_null_catalog_uuid_fails(self, validate_module):
+        """A manifest with null UUID fails the UUID format check."""
+        manifest = {
+            "fixture_classes": {
+                "enterprise_catalog_service_data": {
+                    "catalogs": [
+                        {
+                            "enterprise_customer_slug": "test",
+                            "title": "Test Catalog",
+                            "catalog_query": {"content_filter": {"content_type": "course"}},
+                        }
+                    ]
+                }
+            }
+        }
+        results = validate_module.check_catalog_uuid_format(manifest)
+        assert len(results) == 1
+        assert not results[0].passed
+        assert "null" in results[0].message.lower() or "drift" in results[0].message.lower()
+
+    def test_invalid_catalog_uuid_fails(self, validate_module):
+        """A manifest with invalid UUID format fails."""
+        manifest = {
+            "fixture_classes": {
+                "enterprise_catalog_service_data": {
+                    "catalogs": [
+                        {
+                            "enterprise_customer_slug": "test",
+                            "title": "Test Catalog",
+                            "enterprise_catalog_uuid": "not-a-uuid",
+                            "catalog_query": {},
+                        }
+                    ]
+                }
+            }
+        }
+        results = validate_module.check_catalog_uuid_format(manifest)
+        assert len(results) == 1
+        assert not results[0].passed
+
+    def test_dev_manifest_has_catalog_uuid(self, dev_manifest):
+        """The dev manifest must have enterprise_catalog_uuid set (not null)."""
+        ecsd = dev_manifest["fixture_classes"]["enterprise_catalog_service_data"]
+        for cat in ecsd["catalogs"]:
+            assert cat.get("enterprise_catalog_uuid"), (
+                f"Catalog {cat.get('title')!r} missing enterprise_catalog_uuid — "
+                "UUID drift detection requires this field"
             )

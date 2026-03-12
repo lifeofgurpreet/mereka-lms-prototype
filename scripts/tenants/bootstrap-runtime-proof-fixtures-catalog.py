@@ -60,10 +60,16 @@ def _ensure_django_settings() -> None:
 
 
 def find_manifest(env: str) -> Path:
-    candidates = [
-        MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
-        Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
-    ]
+    candidates = []
+    manifest_dir_override = os.environ.get("RUNTIME_PROOF_MANIFEST_DIR")
+    if manifest_dir_override:
+        candidates.append(Path(manifest_dir_override) / f"{env}.synthetic-proof-fixtures.yaml")
+    candidates.extend(
+        [
+            MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
+            Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
+        ]
+    )
     for path in candidates:
         if path.exists():
             return path
@@ -317,6 +323,29 @@ def apply_catalog_service_data(
                 **({"uuid": catalog_uuid} if catalog_uuid else {}),
             },
         )
+
+        # UUID drift detection: on NOOP, verify existing UUID matches manifest.
+        if not ec_catalog_created and catalog_uuid:
+            actual_uuid = str(ec_catalog.uuid)
+            expected_uuid = str(catalog_uuid)
+            if actual_uuid != expected_uuid:
+                summary.errors += 1
+                cat_rec = make_action(
+                    "DRIFT",
+                    "EnterpriseCatalog",
+                    f"{customer_slug}/{title}",
+                    f"UUID DRIFT: EnterpriseCatalog {title!r} for {customer_slug!r} "
+                    f"manifest={expected_uuid} actual={actual_uuid}",
+                    dry_run,
+                )
+                summary.actions.append(cat_rec)
+                print(
+                    f"  [DRIFT] EnterpriseCatalog UUID mismatch for {customer_slug!r}/{title!r}: "
+                    f"manifest={expected_uuid}, actual={actual_uuid}",
+                    file=sys.stderr,
+                )
+                continue  # Skip to next catalog — drift already recorded.
+
         cat_action = "CREATE" if ec_catalog_created else "NOOP"
         cat_rec = make_action(
             cat_action,
