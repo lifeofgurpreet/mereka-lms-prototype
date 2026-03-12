@@ -12,6 +12,11 @@ Covers:
   - Negative: LMS-only catalog flagged incomplete
   - Negative: enterprise-catalog-only catalog flagged incomplete
   - validate tool returns 0 on valid manifest
+  - Apply guards (environment, safety flag, email)
+  - Shared library (proof_fixtures) direct tests
+  - Catalog companion tool existence and behavior
+  - Idempotency model (ApplySummary)
+  - Enterprise link as single authoritative source
 """
 
 import json
@@ -26,6 +31,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_PATH = REPO_ROOT / "config" / "runtime-proof" / "dev.synthetic-proof-fixtures.yaml"
 BOOTSTRAP_TOOL = REPO_ROOT / "scripts" / "tenants" / "bootstrap-runtime-proof-fixtures.py"
 VALIDATE_TOOL = REPO_ROOT / "scripts" / "tenants" / "validate-runtime-proof-fixtures.py"
+CATALOG_TOOL = REPO_ROOT / "scripts" / "tenants" / "bootstrap-runtime-proof-fixtures-catalog.py"
 
 REQUIRED_FIXTURE_CLASSES = [
     "synthetic_identities",
@@ -238,8 +244,8 @@ class TestBootstrapDryRun:
             f"Got categories: {categories}"
         )
 
-    def test_apply_flag_exits_nonzero_with_warning(self):
-        """--apply must print a warning and exit non-zero (mutation not yet wired)."""
+    def test_apply_flag_exits_nonzero_without_django(self):
+        """--apply must exit non-zero when Django is not available (outside LMS pod)."""
         result = subprocess.run(
             [sys.executable, str(BOOTSTRAP_TOOL), "--env", "dev", "--apply"],
             capture_output=True,
@@ -247,10 +253,12 @@ class TestBootstrapDryRun:
             cwd=str(REPO_ROOT),
         )
         assert result.returncode != 0, (
-            "--apply should exit non-zero in this version (mutation not yet wired)"
+            "--apply should exit non-zero when Django is unavailable"
         )
-        assert "WARNING" in result.stderr or "warning" in result.stderr.lower(), (
-            "--apply should print a warning to stderr"
+        # Should print an informative error to stderr.
+        combined = result.stderr + result.stdout
+        assert "ERROR" in combined or "error" in combined.lower() or "Django" in combined, (
+            "--apply should print an error or Django-related message to stderr"
         )
 
 
@@ -317,7 +325,7 @@ class TestNegativeRealAccountRejection:
 
     def test_real_user_email_is_rejected(self, tmp_path: Path):
         """A user with a non-@synthetic.test email must fail validation."""
-        yaml = pytest.importorskip("yaml")
+        pytest.importorskip("yaml")
         import importlib.util
 
         spec = importlib.util.spec_from_file_location(
@@ -572,3 +580,500 @@ class TestValidateToolExitCodes:
         )
         output = json.loads(result.stdout)
         assert output.get("environment") == "dev"
+
+    def test_validate_json_includes_mode(self):
+        """JSON output must include the mode field."""
+        result = subprocess.run(
+            [sys.executable, str(VALIDATE_TOOL), "--env", "dev", "--json"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        output = json.loads(result.stdout)
+        assert output.get("mode") == "static"
+
+
+# ── Apply guards ──────────────────────────────────────────────────────────────
+
+
+class TestApplyGuards:
+    """Test that apply refuses unsafe configurations."""
+
+    def test_apply_refuses_production_env(self):
+        """--apply --env production must exit non-zero."""
+        result = subprocess.run(
+            [sys.executable, str(BOOTSTRAP_TOOL), "--env", "production", "--apply"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode != 0, (
+            "--apply with env=production should exit non-zero (guard rejects non-dev env)"
+        )
+
+    def test_apply_refuses_staging_env(self):
+        """--apply --env staging must exit non-zero."""
+        result = subprocess.run(
+            [sys.executable, str(BOOTSTRAP_TOOL), "--env", "staging", "--apply"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        # Either the manifest won't exist (FileNotFoundError → exit 1) or
+        # if it exists the guard will reject it — either way non-zero.
+        assert result.returncode != 0, (
+            "--apply with env=staging should exit non-zero"
+        )
+
+    def test_apply_refuses_non_synthetic_email(self):
+        """Manifest with real email must be rejected before any ORM write."""
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("validate_tool", VALIDATE_TOOL)
+        mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+
+        bad_manifest: dict[str, Any] = {
+            "version": "1.0",
+            "environment": "dev",
+            "contract_ref": "docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md",
+            "real_account_mutation_forbidden": True,
+            "fixture_classes": {
+                "synthetic_identities": {
+                    "users": [
+                        {
+                            "username": "real-user",
+                            "email": "real.user@mereka.io",  # Real domain — must be rejected.
+                            "role": "enterprise_learner",
+                        }
+                    ]
+                },
+                "lms_enterprise_data": {
+                    "enterprise_customers": [
+                        {
+                            "slug": "test",
+                            "name": "Test",
+                            "catalogs": [{"title": "t", "catalog_query": {}}],
+                        }
+                    ]
+                },
+                "enterprise_catalog_service_data": {
+                    "catalogs": [{"enterprise_customer_slug": "test", "title": "t"}]
+                },
+                "waffle_flags": {
+                    "platform_wide_flags": [
+                        {"name": "enterprise.learner_bff_enabled", "active": True}
+                    ]
+                },
+            },
+        }
+
+        results = mod.run_all_checks(bad_manifest)
+        failed = [r for r in results if not r.passed]
+        real_account_failures = [
+            r
+            for r in failed
+            if "email" in r.name or "REAL" in r.message.upper() or "real" in r.message.lower()
+        ]
+        assert real_account_failures, (
+            "Expected a validation failure for real-domain email @mereka.io"
+        )
+
+    def test_apply_refuses_missing_safety_flag(self):
+        """Manifest without real_account_mutation_forbidden must be rejected by guards."""
+        import importlib.util
+
+        sys.path.insert(0, str(REPO_ROOT / "scripts" / "tenants"))
+        spec = importlib.util.spec_from_file_location(
+            "proof_fixtures_lib",
+            REPO_ROOT / "scripts" / "tenants" / "lib" / "proof_fixtures.py",
+        )
+        mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+
+        bad_manifest: dict[str, Any] = {
+            "version": "1.0",
+            "environment": "dev",
+            # real_account_mutation_forbidden intentionally absent.
+            "fixture_classes": {},
+        }
+        with pytest.raises(mod.SyntheticSafetyViolation):
+            mod.run_all_guards(bad_manifest, "dev")
+
+
+# ── Shared library tests ───────────────────────────────────────────────────────
+
+
+class TestSharedLibrary:
+    """Test the shared safety library (scripts/tenants/lib/proof_fixtures.py) directly."""
+
+    @pytest.fixture(scope="class")
+    def lib(self):
+        import importlib.util
+        sys.path.insert(0, str(REPO_ROOT / "scripts" / "tenants"))
+        spec = importlib.util.spec_from_file_location(
+            "proof_fixtures_lib",
+            REPO_ROOT / "scripts" / "tenants" / "lib" / "proof_fixtures.py",
+        )
+        mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+        return mod
+
+    def test_validate_synthetic_email_accepts_synthetic(self, lib):
+        lib.validate_synthetic_email("test@synthetic.test")  # Should not raise.
+
+    def test_validate_synthetic_email_rejects_real(self, lib):
+        with pytest.raises(lib.SyntheticSafetyViolation):
+            lib.validate_synthetic_email("real@mereka.io")
+
+    def test_validate_synthetic_email_rejects_empty(self, lib):
+        with pytest.raises(lib.SyntheticSafetyViolation):
+            lib.validate_synthetic_email("")
+
+    def test_validate_environment_accepts_dev(self, lib):
+        lib.validate_environment("dev")  # Should not raise.
+
+    def test_validate_environment_rejects_production(self, lib):
+        with pytest.raises(lib.SyntheticSafetyViolation):
+            lib.validate_environment("production")
+
+    def test_validate_environment_rejects_staging(self, lib):
+        with pytest.raises(lib.SyntheticSafetyViolation):
+            lib.validate_environment("staging")
+
+    def test_validate_safety_flag_accepts_true(self, lib):
+        lib.validate_safety_flag({"real_account_mutation_forbidden": True})  # Should not raise.
+
+    def test_validate_safety_flag_rejects_false(self, lib):
+        with pytest.raises(lib.SyntheticSafetyViolation):
+            lib.validate_safety_flag({"real_account_mutation_forbidden": False})
+
+    def test_validate_safety_flag_rejects_missing(self, lib):
+        with pytest.raises(lib.SyntheticSafetyViolation):
+            lib.validate_safety_flag({})
+
+    def test_action_record_serialization(self, lib):
+        rec = lib.make_action("CREATE", "User", "test@synthetic.test", "created", dry_run=True)
+        d = rec.to_dict()
+        assert d["action"] == "CREATE"
+        assert d["model"] == "User"
+        assert d["identifier"] == "test@synthetic.test"
+        assert d["detail"] == "created"
+        assert d["dry_run"] is True
+        assert "timestamp" in d
+
+    def test_action_record_timestamp_is_iso_format(self, lib):
+        rec = lib.make_action("NOOP", "User", "x@synthetic.test", "exists", dry_run=False)
+        # Should be parseable as ISO 8601.
+        from datetime import datetime
+        datetime.fromisoformat(rec.timestamp)
+
+    def test_run_all_guards_passes_valid(self, lib):
+        valid_manifest: dict[str, Any] = {
+            "real_account_mutation_forbidden": True,
+            "fixture_classes": {
+                "synthetic_identities": {
+                    "users": [
+                        {"username": "lanea-test", "email": "lanea-test@synthetic.test", "role": "x"}
+                    ]
+                },
+                "lms_enterprise_data": {
+                    "enterprise_customers": [
+                        {
+                            "slug": "test",
+                            "name": "Test",
+                            "contact_email": "test@synthetic.test",
+                        }
+                    ]
+                },
+                "enterprise_catalog_service_data": {"catalogs": []},
+                "waffle_flags": {},
+            },
+        }
+        lib.run_all_guards(valid_manifest, "dev")  # Should not raise.
+
+    def test_run_all_guards_fails_on_real_email(self, lib):
+        bad_manifest: dict[str, Any] = {
+            "real_account_mutation_forbidden": True,
+            "fixture_classes": {
+                "synthetic_identities": {
+                    "users": [
+                        {"username": "bad-user", "email": "bad@mereka.io", "role": "x"}
+                    ]
+                },
+                "lms_enterprise_data": {"enterprise_customers": []},
+                "enterprise_catalog_service_data": {"catalogs": []},
+                "waffle_flags": {},
+            },
+        }
+        with pytest.raises(lib.SyntheticSafetyViolation):
+            lib.run_all_guards(bad_manifest, "dev")
+
+    def test_apply_summary_to_dict(self, lib):
+        rec = lib.make_action("CREATE", "User", "a@synthetic.test", "created", True)
+        summary = lib.ApplySummary(
+            environment="dev",
+            mode="dry_run",
+            real_account_mutation_forbidden=True,
+        )
+        summary.actions.append(rec)
+        summary.created = 1
+        d = summary.to_dict()
+        assert d["environment"] == "dev"
+        assert d["mode"] == "dry_run"
+        assert d["real_account_mutation_forbidden"] is True
+        assert len(d["actions"]) == 1
+        assert d["created"] == 1
+
+    def test_shared_library_file_exists(self):
+        lib_path = REPO_ROOT / "scripts" / "tenants" / "lib" / "proof_fixtures.py"
+        assert lib_path.exists(), f"Shared library not found: {lib_path}"
+
+    def test_shared_library_init_exists(self):
+        init_path = REPO_ROOT / "scripts" / "tenants" / "lib" / "__init__.py"
+        assert init_path.exists(), f"Shared library __init__.py not found: {init_path}"
+
+
+# ── Catalog companion tests ────────────────────────────────────────────────────
+
+
+class TestCatalogCompanion:
+    """Test the enterprise-catalog companion tool."""
+
+    def test_catalog_tool_exists(self):
+        assert CATALOG_TOOL.exists(), f"Catalog tool not found: {CATALOG_TOOL}"
+
+    def test_catalog_tool_is_executable(self):
+        assert CATALOG_TOOL.stat().st_mode & 0o111, (
+            f"Catalog tool {CATALOG_TOOL} is not executable"
+        )
+
+    def test_catalog_dry_run_exits_zero(self):
+        """Dry-run of catalog tool must succeed without Django."""
+        result = subprocess.run(
+            [sys.executable, str(CATALOG_TOOL), "--env", "dev"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0, (
+            f"Catalog tool dry-run exited {result.returncode}.\n"
+            f"stdout:\n{result.stdout}\n"
+            f"stderr:\n{result.stderr}"
+        )
+
+    def test_catalog_dry_run_json_exits_zero(self):
+        """Dry-run JSON mode of catalog tool must succeed."""
+        result = subprocess.run(
+            [sys.executable, str(CATALOG_TOOL), "--env", "dev", "--json"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output.get("mode") == "dry_run"
+        assert output.get("scope") == "enterprise_catalog_service_data"
+        assert isinstance(output.get("actions"), list)
+
+    def test_catalog_dry_run_produces_catalog_actions(self):
+        """Catalog tool dry-run must produce catalog-related actions."""
+        result = subprocess.run(
+            [sys.executable, str(CATALOG_TOOL), "--env", "dev", "--json"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        output = json.loads(result.stdout)
+        categories = {a["category"] for a in output["actions"]}
+        assert "enterprise_catalog" in categories or "catalog_query" in categories, (
+            f"Expected catalog-related action categories, got: {categories}"
+        )
+
+    def test_catalog_apply_refuses_production(self):
+        """--apply --env production must exit non-zero (guard rejects non-dev)."""
+        result = subprocess.run(
+            [sys.executable, str(CATALOG_TOOL), "--env", "production", "--apply"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode != 0, (
+            "Catalog tool --apply with env=production should exit non-zero"
+        )
+
+    def test_catalog_apply_exits_nonzero_without_django(self):
+        """--apply must exit non-zero when Django is not available."""
+        result = subprocess.run(
+            [sys.executable, str(CATALOG_TOOL), "--env", "dev", "--apply"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode != 0, (
+            "Catalog tool --apply should exit non-zero without Django"
+        )
+
+
+# ── Idempotency model ─────────────────────────────────────────────────────────
+
+
+class TestIdempotencyModel:
+    """Test that the action model supports idempotent semantics."""
+
+    @pytest.fixture(scope="class")
+    def lib(self):
+        import importlib.util
+        sys.path.insert(0, str(REPO_ROOT / "scripts" / "tenants"))
+        spec = importlib.util.spec_from_file_location(
+            "proof_fixtures_lib",
+            REPO_ROOT / "scripts" / "tenants" / "lib" / "proof_fixtures.py",
+        )
+        mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+        return mod
+
+    def test_apply_summary_counts(self, lib):
+        summary = lib.ApplySummary(
+            environment="dev",
+            mode="dry_run",
+            real_account_mutation_forbidden=True,
+        )
+        summary.actions.append(
+            lib.make_action("CREATE", "User", "a@synthetic.test", "created", True)
+        )
+        summary.actions.append(
+            lib.make_action("NOOP", "User", "b@synthetic.test", "exists", True)
+        )
+        summary.created = 1
+        summary.reused = 1
+        d = summary.to_dict()
+        assert d["created"] == 1
+        assert d["reused"] == 1
+        assert len(d["actions"]) == 2
+
+    def test_apply_summary_all_action_types(self, lib):
+        """ApplySummary must support all action types: CREATE, NOOP, SKIP, REFUSE, ERROR."""
+        summary = lib.ApplySummary(
+            environment="dev",
+            mode="apply",
+            real_account_mutation_forbidden=True,
+        )
+        for action_type in ("CREATE", "NOOP", "SKIP", "REFUSE", "ERROR"):
+            summary.actions.append(
+                lib.make_action(action_type, "User", f"id_{action_type}", "detail", False)
+            )
+        d = summary.to_dict()
+        action_types = {a["action"] for a in d["actions"]}
+        assert action_types == {"CREATE", "NOOP", "SKIP", "REFUSE", "ERROR"}
+
+    def test_apply_summary_serializes_to_json(self, lib):
+        """ApplySummary.to_dict() output must be JSON-serializable."""
+        summary = lib.ApplySummary(
+            environment="dev",
+            mode="apply",
+            real_account_mutation_forbidden=True,
+        )
+        summary.actions.append(
+            lib.make_action("CREATE", "User", "a@synthetic.test", "created", False)
+        )
+        summary.created = 1
+        d = summary.to_dict()
+        json_str = json.dumps(d)  # Should not raise.
+        parsed = json.loads(json_str)
+        assert parsed["environment"] == "dev"
+
+
+# ── Enterprise link as single authoritative source ────────────────────────────
+
+
+class TestEnterpriseLinksAuthoritative:
+    """Confirm enterprise_link remains the single authoritative source for user-enterprise linkage."""
+
+    def test_manifest_uses_enterprise_link_not_user_links_key(self, dev_manifest):
+        """The manifest must NOT use 'user_links' as a data key."""
+        fixture_classes = dev_manifest.get("fixture_classes", {})
+        # user_links must not appear as a key at any level of the manifest.
+        # The authoritative source is synthetic_identities[].enterprise_link.
+        def has_user_links_key(obj: Any) -> bool:
+            if isinstance(obj, dict):
+                if "user_links" in obj:
+                    return True
+                return any(has_user_links_key(v) for v in obj.values())
+            if isinstance(obj, list):
+                return any(has_user_links_key(item) for item in obj)
+            return False
+
+        assert not has_user_links_key(fixture_classes), (
+            "Manifest must not use 'user_links' as a data key. "
+            "enterprise_link in synthetic_identities[].users is the single authoritative source."
+        )
+
+    def test_bootstrap_reads_enterprise_link_not_user_links(self):
+        """The bootstrap tool plan uses enterprise_link from synthetic_identities, not user_links."""
+        result = subprocess.run(
+            [sys.executable, str(BOOTSTRAP_TOOL), "--env", "dev", "--json"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        # Every lms_enterprise_user_link action must come from the enterprise_link field
+        # on the user — the detail must have username and customer_slug or just username
+        # (for ASSERT_ABSENT). It must NOT have a 'user_links' key.
+        link_actions = [
+            a for a in output["actions"]
+            if a["category"] == "lms_enterprise_user_link"
+        ]
+        assert len(link_actions) > 0, "Must have at least one lms_enterprise_user_link action"
+        for action in link_actions:
+            assert "user_links" not in action.get("detail", {}), (
+                f"Action detail must not reference 'user_links': {action}"
+            )
+            assert "username" in action.get("detail", {}), (
+                f"Action detail must include 'username' (derived from enterprise_link): {action}"
+            )
+
+    def test_enterprise_link_is_source_for_all_user_actions(self, dev_manifest):
+        """Each user with enterprise_link must have a corresponding CREATE_OR_NOOP action."""
+        result = subprocess.run(
+            [sys.executable, str(BOOTSTRAP_TOOL), "--env", "dev", "--json"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+
+        users = (
+            dev_manifest.get("fixture_classes", {})
+            .get("synthetic_identities", {})
+            .get("users", [])
+        )
+        linked_users = [u["username"] for u in users if u.get("enterprise_link")]
+        unlinked_users = [u["username"] for u in users if not u.get("enterprise_link")]
+
+        link_actions = [
+            a for a in output["actions"]
+            if a["category"] == "lms_enterprise_user_link"
+        ]
+        create_or_noop_usernames = {
+            a["detail"].get("username")
+            for a in link_actions
+            if a["kind"] == "CREATE_OR_NOOP"
+        }
+        assert_absent_usernames = {
+            a["detail"].get("username")
+            for a in link_actions
+            if a["kind"] == "ASSERT_ABSENT"
+        }
+
+        for username in linked_users:
+            assert username in create_or_noop_usernames, (
+                f"User {username!r} has enterprise_link but no CREATE_OR_NOOP action found"
+            )
+        for username in unlinked_users:
+            assert username in assert_absent_usernames, (
+                f"User {username!r} has no enterprise_link but no ASSERT_ABSENT action found"
+            )

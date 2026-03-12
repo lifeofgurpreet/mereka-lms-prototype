@@ -136,6 +136,18 @@ _check_file_exists \
   "validate_tool" \
   "scripts/tenants/validate-runtime-proof-fixtures.py"
 
+_check_file_exists \
+  "shared_library" \
+  "scripts/tenants/lib/proof_fixtures.py"
+
+_check_file_exists \
+  "shared_library_init" \
+  "scripts/tenants/lib/__init__.py"
+
+_check_file_exists \
+  "catalog_companion_tool" \
+  "scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py"
+
 _check_executable \
   "bootstrap_tool_executable" \
   "scripts/tenants/bootstrap-runtime-proof-fixtures.py"
@@ -143,6 +155,10 @@ _check_executable \
 _check_executable \
   "validate_tool_executable" \
   "scripts/tenants/validate-runtime-proof-fixtures.py"
+
+_check_executable \
+  "catalog_companion_tool_executable" \
+  "scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py"
 
 echo ""
 
@@ -230,6 +246,47 @@ if python3 "${REPO_ROOT}/scripts/tenants/bootstrap-runtime-proof-fixtures.py" \
 else
   _fail "bootstrap_tool:dry_run_non_zero_exit"
 fi
+
+echo ""
+
+# ── Section 9: Catalog companion dry-run ──────────────────────────────────────
+echo "--- Section 9: catalog companion dry-run runs clean ---"
+if python3 "${REPO_ROOT}/scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py" \
+    --env dev --json > /dev/null 2>&1; then
+  _pass "catalog_companion_tool:dry_run_exit_code_0"
+else
+  _fail "catalog_companion_tool:dry_run_non_zero_exit"
+fi
+
+echo ""
+
+# ── Section 10: Enterprise link authoritative source ──────────────────────────
+echo "--- Section 10: enterprise_link is the single authoritative source ---"
+
+# The manifest must NOT use 'user_links' as a top-level data key.
+# enterprise_link in synthetic_identities[].users is authoritative.
+_manifest_contains \
+  "enterprise_link:no_user_links_key" \
+  "${MANIFEST_REL}" \
+  "not any(
+    'user_links' in (user if isinstance(user, dict) else {})
+    for user in
+      m.get('fixture_classes', {})
+       .get('synthetic_identities', {})
+       .get('users', [])
+  )"
+
+# Verify enterprise_link is used in at least one user record.
+_manifest_contains \
+  "enterprise_link:present_in_at_least_one_user" \
+  "${MANIFEST_REL}" \
+  "any(
+    'enterprise_link' in (user if isinstance(user, dict) else {})
+    for user in
+      m.get('fixture_classes', {})
+       .get('synthetic_identities', {})
+       .get('users', [])
+  )"
 
 echo ""
 

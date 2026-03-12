@@ -13,7 +13,7 @@
     "generated/knowledge/reviewer-obligations.json",
     "generated/skills/runtime-convergence-report.json"
   ],
-  "diff_range": "c5e9454b69d61636de8a0eacb4d2909b2de25eed...HEAD",
+  "diff_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD",
   "generated_by": "tools/knowledge/build_release_readiness.py",
   "missing_evidence": [
     "catalog_governance",
@@ -36,7 +36,7 @@
     "Assistant/runtime front doors remain subordinate to canonical contract surfaces"
   ],
   "schema_version": 1,
-  "source_range": "c5e9454b69d61636de8a0eacb4d2909b2de25eed...HEAD",
+  "source_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD",
   "why": [
     "review severity is high",
     "runtime convergence state is warning",

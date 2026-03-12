@@ -22,7 +22,7 @@
     "generated/skills/pack-registry.json",
     "generated/skills/skill-registry.json"
   ],
-  "diff_range": "c5e9454b69d61636de8a0eacb4d2909b2de25eed...HEAD",
+  "diff_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD",
   "generated_by": "tools/knowledge/build_read_first_packs.py",
   "ordered_packs": [
     {
@@ -82,5 +82,5 @@
       "reason": "not required by selected skills or arbitration rules for this diff"
     }
   ],
-  "source_range": "c5e9454b69d61636de8a0eacb4d2909b2de25eed...HEAD"
+  "source_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD"
 }

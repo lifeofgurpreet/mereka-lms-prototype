@@ -5,6 +5,10 @@ Read-only validation tool for synthetic runtime proof fixture manifests.
 Validates the manifest schema and consistency statically — no cluster access,
 no Django dependency. Designed to run in CI and locally before any bootstrap step.
 
+With --mode live-readonly: performs read-only ORM queries against a live Django
+environment to confirm that the expected records exist. Requires Django context
+(LMS pod). No writes are performed.
+
 Exit codes:
     0  manifest is valid
     1  one or more validation errors found
@@ -12,8 +16,9 @@ Exit codes:
 Usage:
     python scripts/tenants/validate-runtime-proof-fixtures.py --env dev
     python scripts/tenants/validate-runtime-proof-fixtures.py --env dev --json
+    python scripts/tenants/validate-runtime-proof-fixtures.py --env dev --mode live-readonly
     python scripts/tenants/validate-runtime-proof-fixtures.py --env dev --live
-      (--live is a placeholder; live cluster checks are not yet implemented)
+      (--live is a deprecated alias for --mode live-readonly)
 """
 
 import argparse
@@ -407,6 +412,275 @@ def run_all_checks(manifest: dict[str, Any]) -> list[CheckResult]:
     return results
 
 
+# ── Live-readonly checks (Django ORM, read-only) ──────────────────────────────
+
+
+def check_live_users(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Read-only ORM check: verify synthetic user accounts exist in the DB."""
+    results: list[CheckResult] = []
+    try:
+        from django.contrib.auth import get_user_model  # noqa: PLC0415
+    except ImportError:
+        results.append(
+            CheckResult(
+                "live:django_available",
+                False,
+                "Django is not available — live-readonly checks require LMS Django context",
+                detail=(
+                    "Run with --mode live-readonly from inside an LMS pod: "
+                    "kubectl exec -n mereka-lms-dev deploy/lms -- python "
+                    "/openedx/scripts/tenants/validate-runtime-proof-fixtures.py "
+                    "--env dev --mode live-readonly"
+                ),
+            )
+        )
+        return results
+
+    results.append(
+        CheckResult("live:django_available", True, "Django ORM is available")
+    )
+
+    User = get_user_model()
+    si = manifest.get("fixture_classes", {}).get("synthetic_identities", {})
+
+    for user_spec in si.get("users", []):
+        username = user_spec["username"]
+        email = user_spec["email"]
+        exists = User.objects.filter(username=username, email=email).exists()
+        results.append(
+            CheckResult(
+                f"live:user_exists:{username}",
+                exists,
+                f"User {username!r} ({email}) {'exists' if exists else 'NOT FOUND'} in DB",
+                detail=None if exists else (
+                    "Run bootstrap-runtime-proof-fixtures.py --env dev --apply "
+                    "to create this user."
+                ),
+            )
+        )
+
+    return results
+
+
+def check_live_enterprise_customers(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Read-only ORM check: verify enterprise customer records exist in the DB."""
+    results: list[CheckResult] = []
+    try:
+        from enterprise.models import EnterpriseCustomer  # noqa: PLC0415
+    except ImportError:
+        results.append(
+            CheckResult(
+                "live:enterprise_models_available",
+                False,
+                "enterprise.models not importable — skipping enterprise customer checks",
+            )
+        )
+        return results
+
+    led = manifest.get("fixture_classes", {}).get("lms_enterprise_data", {})
+
+    for ec_spec in led.get("enterprise_customers", []):
+        slug = ec_spec["slug"]
+        exists = EnterpriseCustomer.objects.filter(slug=slug).exists()
+        results.append(
+            CheckResult(
+                f"live:enterprise_customer_exists:{slug}",
+                exists,
+                f"EnterpriseCustomer {slug!r} {'exists' if exists else 'NOT FOUND'} in DB",
+                detail=None if exists else (
+                    "Run bootstrap-runtime-proof-fixtures.py --env dev --apply "
+                    "to create this enterprise customer."
+                ),
+            )
+        )
+
+    return results
+
+
+def check_live_enterprise_user_links(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Read-only ORM check: verify EnterpriseCustomerUser links exist (or are absent) in the DB."""
+    results: list[CheckResult] = []
+    try:
+        from django.contrib.auth import get_user_model  # noqa: PLC0415
+        from enterprise.models import EnterpriseCustomerUser  # noqa: PLC0415
+    except ImportError:
+        results.append(
+            CheckResult(
+                "live:enterprise_user_links_available",
+                False,
+                "enterprise.models not importable — skipping enterprise user link checks",
+            )
+        )
+        return results
+
+    User = get_user_model()
+    si = manifest.get("fixture_classes", {}).get("synthetic_identities", {})
+
+    for user_spec in si.get("users", []):
+        username = user_spec["username"]
+        link = user_spec.get("enterprise_link")
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            results.append(
+                CheckResult(
+                    f"live:enterprise_link:{username}",
+                    False,
+                    f"Cannot check enterprise link for {username!r} — user does not exist in DB",
+                )
+            )
+            continue
+
+        if link:
+            customer_slug = link["customer_slug"]
+            linked = EnterpriseCustomerUser.objects.filter(
+                user=user,
+                enterprise_customer__slug=customer_slug,
+            ).exists()
+            results.append(
+                CheckResult(
+                    f"live:enterprise_link:{username}:{customer_slug}",
+                    linked,
+                    f"EnterpriseCustomerUser link {username!r} -> {customer_slug!r} "
+                    f"{'exists' if linked else 'NOT FOUND'} in DB",
+                )
+            )
+        else:
+            # Negative case: assert no links.
+            link_count = EnterpriseCustomerUser.objects.filter(user=user).count()
+            no_links = link_count == 0
+            results.append(
+                CheckResult(
+                    f"live:enterprise_link:absent:{username}",
+                    no_links,
+                    f"Negative case: {username!r} has {link_count} enterprise link(s) "
+                    f"({'OK — no links' if no_links else 'FAIL — expected no links'})",
+                )
+            )
+
+    return results
+
+
+def check_live_enterprise_catalog(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Read-only ORM check: verify EnterpriseCustomerCatalog exists in the DB."""
+    results: list[CheckResult] = []
+    try:
+        from enterprise.models import EnterpriseCustomerCatalog  # noqa: PLC0415
+    except ImportError:
+        results.append(
+            CheckResult(
+                "live:enterprise_catalog_available",
+                False,
+                "enterprise.models not importable — skipping enterprise catalog checks",
+            )
+        )
+        return results
+
+    led = manifest.get("fixture_classes", {}).get("lms_enterprise_data", {})
+
+    for ec_spec in led.get("enterprise_customers", []):
+        slug = ec_spec["slug"]
+        for cat_spec in ec_spec.get("catalogs", []):
+            title = cat_spec["title"]
+            exists = EnterpriseCustomerCatalog.objects.filter(
+                enterprise_customer__slug=slug,
+                title=title,
+            ).exists()
+            results.append(
+                CheckResult(
+                    f"live:enterprise_customer_catalog:{slug}:{title}",
+                    exists,
+                    f"EnterpriseCustomerCatalog {title!r} for {slug!r} "
+                    f"{'exists' if exists else 'NOT FOUND'} in DB",
+                )
+            )
+
+    return results
+
+
+def check_live_waffle_flags(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Read-only ORM check: verify waffle flags and switches exist and have the expected state."""
+    results: list[CheckResult] = []
+    try:
+        from waffle.models import Flag, Switch  # noqa: PLC0415
+    except ImportError:
+        results.append(
+            CheckResult(
+                "live:waffle_available",
+                False,
+                "waffle.models not importable — skipping waffle flag checks",
+            )
+        )
+        return results
+
+    wf = manifest.get("fixture_classes", {}).get("waffle_flags", {})
+
+    for flag_spec in wf.get("platform_wide_flags", []):
+        name = flag_spec["name"]
+        expected_active = flag_spec.get("active", False)
+        try:
+            flag = Flag.objects.get(name=name)
+            actual_active = flag.everyone is True
+            ok = actual_active == expected_active
+            results.append(
+                CheckResult(
+                    f"live:waffle_flag:{name}",
+                    ok,
+                    f"WaffleFlag {name!r} exists, active={actual_active!r} "
+                    f"(expected {expected_active!r})",
+                    detail=None if ok else f"Expected active={expected_active}, got {actual_active}",
+                )
+            )
+        except Flag.DoesNotExist:
+            results.append(
+                CheckResult(
+                    f"live:waffle_flag:{name}",
+                    False,
+                    f"WaffleFlag {name!r} NOT FOUND in DB",
+                )
+            )
+
+    for switch_spec in wf.get("tenant_scoped_switches", []):
+        switch_name = f"{switch_spec['base']}.{switch_spec['enterprise_slug']}"
+        expected_active = switch_spec.get("active", False)
+        try:
+            switch = Switch.objects.get(name=switch_name)
+            ok = switch.active == expected_active
+            results.append(
+                CheckResult(
+                    f"live:waffle_switch:{switch_name}",
+                    ok,
+                    f"WaffleSwitch {switch_name!r} exists, active={switch.active!r} "
+                    f"(expected {expected_active!r})",
+                    detail=None if ok else (
+                        f"Expected active={expected_active}, got {switch.active}"
+                    ),
+                )
+            )
+        except Switch.DoesNotExist:
+            results.append(
+                CheckResult(
+                    f"live:waffle_switch:{switch_name}",
+                    False,
+                    f"WaffleSwitch {switch_name!r} NOT FOUND in DB",
+                )
+            )
+
+    return results
+
+
+def run_live_readonly_checks(manifest: dict[str, Any]) -> list[CheckResult]:
+    """Run all live-readonly ORM checks. All reads, no writes."""
+    results: list[CheckResult] = []
+    results.extend(check_live_users(manifest))
+    results.extend(check_live_enterprise_customers(manifest))
+    results.extend(check_live_enterprise_user_links(manifest))
+    results.extend(check_live_enterprise_catalog(manifest))
+    results.extend(check_live_waffle_flags(manifest))
+    return results
+
+
 # ── Output ────────────────────────────────────────────────────────────────────
 
 
@@ -414,21 +688,23 @@ def print_report_human(
     manifest: dict[str, Any],
     results: list[CheckResult],
     manifest_path: str,
-    live: bool,
+    mode: str,
 ) -> None:
     env = manifest.get("environment", "?")
     passed = [r for r in results if r.passed]
     failed = [r for r in results if not r.passed]
+
+    mode_label = {
+        "static": "Static (no cluster access)",
+        "live-readonly": "Live read-only (ORM queries, no writes)",
+    }.get(mode, mode)
 
     print()
     print("=" * 70)
     print("Synthetic Runtime Proof Fixture Validation")
     print(f"Environment : {env}")
     print(f"Manifest    : {manifest_path}")
-    if live:
-        print("Mode        : STATIC ONLY (--live placeholder, cluster checks not implemented)")
-    else:
-        print("Mode        : Static (no cluster access)")
+    print(f"Mode        : {mode_label}")
     print(f"Checks      : {len(results)} total, {len(passed)} pass, {len(failed)} fail")
     print("=" * 70)
 
@@ -463,12 +739,14 @@ def print_report_json(
     manifest: dict[str, Any],
     results: list[CheckResult],
     manifest_path: str,
+    mode: str,
 ) -> None:
     passed = [r for r in results if r.passed]
     failed = [r for r in results if not r.passed]
     output = {
         "environment": manifest.get("environment"),
         "manifest_path": manifest_path,
+        "mode": mode,
         "valid": len(failed) == 0,
         "total_checks": len(results),
         "passed": len(passed),
@@ -485,7 +763,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Read-only validation tool for synthetic runtime proof fixture manifests. "
-            "No Django dependency, no cluster access."
+            "Static mode: no Django dependency, no cluster access. "
+            "Live-readonly mode: read-only ORM queries, requires LMS Django context."
         )
     )
     parser.add_argument(
@@ -500,22 +779,29 @@ def main() -> int:
         help="Output machine-readable JSON.",
     )
     parser.add_argument(
+        "--mode",
+        choices=["static", "live-readonly"],
+        default="static",
+        help=(
+            "Validation mode. 'static' (default): schema and consistency checks only. "
+            "'live-readonly': also runs read-only ORM checks against a live LMS DB."
+        ),
+    )
+    parser.add_argument(
         "--live",
         action="store_true",
         default=False,
         help=(
-            "Placeholder for future live-cluster validation. "
-            "Currently falls back to static-only checks with a warning."
+            "Deprecated alias for --mode live-readonly. "
+            "Prefer --mode live-readonly for clarity."
         ),
     )
     args = parser.parse_args()
 
-    if args.live:
-        print(
-            "WARNING: --live is a placeholder. Live cluster checks are not yet implemented. "
-            "Running static checks only.",
-            file=sys.stderr,
-        )
+    # Resolve mode: --live is an alias for --mode live-readonly.
+    mode = args.mode
+    if args.live and mode == "static":
+        mode = "live-readonly"
 
     try:
         manifest, manifest_path = load_manifest(args.env)
@@ -526,13 +812,20 @@ def main() -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
+    # Always run static checks.
     results = run_all_checks(manifest)
+
+    # Optionally add live-readonly checks.
+    if mode == "live-readonly":
+        live_results = run_live_readonly_checks(manifest)
+        results.extend(live_results)
+
     failed = [r for r in results if not r.passed]
 
     if args.json:
-        print_report_json(manifest, results, manifest_path)
+        print_report_json(manifest, results, manifest_path, mode)
     else:
-        print_report_human(manifest, results, manifest_path, live=args.live)
+        print_report_human(manifest, results, manifest_path, mode)
 
     return 0 if not failed else 1
 

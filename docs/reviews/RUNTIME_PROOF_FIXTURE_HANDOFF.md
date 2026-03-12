@@ -1,15 +1,18 @@
 # Runtime Proof Fixture Handoff
 
-> **Lane**: lane-i (Runtime Proof Fixture Contract)
-> **Status**: Repo-only / tooling complete. Mutation not wired.
+> **Lane**: lane-i / lane-j (Runtime Proof Fixture Contract + Execution Bridge)
+> **Status**: Repo-only / tooling complete including execution bridge. Live mutation has NOT occurred.
 > **Date**: 2026-03-12
 
 ---
 
 ## What Was Codified in This Lane
 
-This lane delivered a complete **repo-only, tooling-only** synthetic runtime proof fixture pack.
-Nothing was mutated in any live cluster. All artifacts are static files in the repo.
+Lane-i delivered the contract, manifest, dry-run planner, static validator, CI verifier,
+and tests. Lane-j (this lane) delivered the **execution bridge**: the apply code paths,
+shared safety library, catalog companion tool, and live-readonly validation mode.
+
+Nothing was mutated in any live cluster in either lane. All artifacts are static files in the repo.
 
 ### Delivered artifacts
 
@@ -17,14 +20,19 @@ Nothing was mutated in any live cluster. All artifacts are static files in the r
 |----------|------|---------|
 | Contract document | `docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md` | Single source of truth for fixture intent, allowed/forbidden actions, naming conventions |
 | Dev manifest | `config/runtime-proof/dev.synthetic-proof-fixtures.yaml` | Machine-readable fixture spec (identities, enterprise data, catalog split, waffle flags, negative cases) |
-| Bootstrap planner | `scripts/tenants/bootstrap-runtime-proof-fixtures.py` | Dry-run capable planning tool; `--apply` is stubbed with warning |
-| Validation tool | `scripts/tenants/validate-runtime-proof-fixtures.py` | Read-only schema/consistency validator; exit 0 = valid |
-| CI static verifier | `scripts/qa/verify-runtime-proof-fixture-pack.sh` | CI-safe pack integrity check; runs in any environment |
-| Execution packet | `docs/reviews/RUNTIME_PROOF_FIXTURE_EXECUTION_PACKET.md` | When to run, exact commands, required evidence |
+| Shared safety library | `scripts/tenants/lib/proof_fixtures.py` | Guard functions, dataclasses, manifest loading — shared by all fixture tools |
+| Shared library init | `scripts/tenants/lib/__init__.py` | Package init for shared library |
+| Bootstrap tool (LMS) | `scripts/tenants/bootstrap-runtime-proof-fixtures.py` | Dry-run planner + `--apply` path (Django ORM, guard chain, idempotent creates) |
+| Catalog companion tool | `scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py` | enterprise-catalog service records (CatalogQuery, EnterpriseCatalog); separate Django context |
+| Validation tool | `scripts/tenants/validate-runtime-proof-fixtures.py` | Static validator + `--mode live-readonly` ORM checks; exit 0 = valid |
+| CI static verifier | `scripts/qa/verify-runtime-proof-fixture-pack.sh` | CI-safe pack integrity check; sections 1–10 including new tooling checks |
+| Execution packet | `docs/reviews/RUNTIME_PROOF_FIXTURE_EXECUTION_PACKET.md` | When to run, exact commands, required evidence, apply command docs |
 | Rollback packet | `docs/reviews/RUNTIME_PROOF_FIXTURE_ROLLBACK_PACKET.md` | Rollback scope, safe/unsafe objects, distinguishing synthetic from real |
-| Python tests | `tests/test_runtime_proof_fixtures.py` | pytest suite covering manifest parsing, fixture classes, dry-run stability, negatives |
+| Python tests | `tests/test_runtime_proof_fixtures.py` | 65-test pytest suite: manifest, dry-run, guards, shared library, catalog companion, idempotency, enterprise link |
 
-### What the bootstrap tool covers (dry-run plan only)
+### What the bootstrap tool covers
+
+**Dry-run plan** (no Django required):
 
 - 4 synthetic LMS user accounts with `lanea-` prefix and `@synthetic.test` emails
 - 1 EnterpriseCustomer (`biji-biji-initiative`) with `@synthetic.test` contact email (real-account guard)
@@ -34,6 +42,16 @@ Nothing was mutated in any live cluster. All artifacts are static files in the r
 - 1 enterprise-catalog service catalog (mirrors LMS-side; UUID is `null` until LMS bootstrap runs)
 - 1 platform-wide waffle flag (`enterprise.learner_bff_enabled`)
 - 5 tenant-scoped waffle switches for `biji-biji-initiative`
+
+**Apply path** (requires LMS Django context — code exists, live execution NOT performed):
+
+- Guard chain (all-or-nothing): environment check, safety flag, email domain, real-account collision
+- `User.objects.get_or_create` for each synthetic identity
+- `EnterpriseCustomer.objects.get_or_create` for each enterprise customer (real-account guard)
+- `EnterpriseCustomerCatalog.objects.get_or_create` for each catalog
+- `EnterpriseCustomerUser.objects.get_or_create` for each linked user
+- `Flag.objects.get_or_create` and `Switch.objects.get_or_create` for waffle state
+- `ApplySummary` with created/reused/refused/skipped/error counts
 
 ### What the validation tool checks (statically)
 
@@ -49,35 +67,45 @@ Nothing was mutated in any live cluster. All artifacts are static files in the r
 
 ## What Remains External / Runtime-Owned
 
-The following items are explicitly NOT codified in this lane and must be handled by a future
-runtime mutation lane (run from inside the cluster):
+The following items require live cluster execution and are NOT performed in lane-i or lane-j:
 
-| Item | Where it lives | Why not in this lane |
-|------|---------------|---------------------|
-| Actual DB writes (LMS users, EnterpriseCustomer records) | Live `mereka-lms-dev` MySQL | This is a repo-only lane; no kubectl, no Django ORM |
-| Synthetic user password creation | Infisical `/runtime-proof/` + LMS management command | Passwords must never be committed; require cluster access |
-| Enterprise-catalog service record creation | enterprise-catalog management API | Requires cluster access + post-LMS-bootstrap UUID |
-| Waffle flag creation in DB | LMS Django admin or management command | Requires cluster access |
-| Browser-based proof flow execution | Agent browser + live cluster | Requires live fixture state from the mutation step |
-| Post-apply validation (live) | `validate-runtime-proof-fixtures.py --live` (placeholder) | `--live` is a stub; cluster checks not yet wired |
+| Item | Where it lives | Why not in these lanes |
+|------|---------------|----------------------|
+| Actual DB writes (LMS users, EnterpriseCustomer records) | Live `mereka-lms-dev` MySQL | Code exists; live execution requires cluster access from inside LMS pod |
+| Synthetic user password creation | Infisical `/runtime-proof/` + LMS management command | Passwords must never be committed; setting them requires cluster access |
+| Enterprise-catalog service record creation | enterprise-catalog pod Django context | Code exists in catalog companion; live execution requires cluster access |
+| Browser-based proof flow execution | Agent browser + live cluster | Requires live fixture state from the apply step |
+| Post-apply live validation | `validate-runtime-proof-fixtures.py --mode live-readonly` | Code exists and is wired; execution requires LMS pod context |
 
 ---
 
 ## What the Future Runtime Lane Can Do
 
-A future lane (with cluster access) can build on this pack by:
+A future lane (with cluster access) has everything it needs — the code is written:
 
-1. Running `bootstrap-runtime-proof-fixtures.py --apply` from inside an LMS pod
-   (mutation must be wired in the apply path)
-2. Retrieving the LMS-assigned `EnterpriseCustomerCatalog` UUID and updating
-   `enterprise_catalog_uuid` in the manifest
-3. Running enterprise-catalog management command to create the service-side catalog
-4. Verifying the catalog via the enterprise-catalog API endpoint documented in the manifest
-5. Running the browser-based proof flow against `apps.academyv2.mereka.dev`
-6. Capturing evidence per the execution packet
+1. Run `bootstrap-runtime-proof-fixtures.py --apply` from inside the LMS pod:
+   ```bash
+   kubectl exec -n mereka-lms-dev deploy/lms -- python \
+     /openedx/scripts/tenants/bootstrap-runtime-proof-fixtures.py --env dev --apply
+   ```
+2. Retrieve the LMS-assigned `EnterpriseCustomerCatalog` UUID and update
+   `enterprise_catalog_uuid` in the manifest.
+3. Run the catalog companion from inside the enterprise-catalog pod:
+   ```bash
+   kubectl exec -n mereka-lms-dev deploy/enterprise-catalog -- python \
+     /openedx/scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py --env dev --apply
+   ```
+4. Validate live state (read-only) from inside the LMS pod:
+   ```bash
+   kubectl exec -n mereka-lms-dev deploy/lms -- python \
+     /openedx/scripts/tenants/validate-runtime-proof-fixtures.py \
+     --env dev --mode live-readonly
+   ```
+5. Run the browser-based proof flow against `apps.academyv2.mereka.dev`.
+6. Capture evidence per the execution packet.
 
-The static tooling and manifest in this lane serve as the **ground truth contract** that the
-runtime lane must satisfy before claiming enterprise proof.
+The runtime lane does NOT need to write any new code. All apply paths, guard chains,
+idempotency semantics, and live-readonly validation are already implemented.
 
 ---
 

@@ -1,8 +1,8 @@
 # Runtime Proof Fixture Rollback Packet
 
-> **Lane**: lane-i (Runtime Proof Fixture Contract)
+> **Lane**: lane-i / lane-j (Runtime Proof Fixture Contract + Execution Bridge)
 > **Environment**: dev
-> **Applies to**: future apply runs (mutation not yet wired in this lane)
+> **Applies to**: future apply runs (apply code now exists; live execution has NOT occurred in either lane)
 > **Contract**: `docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md`
 
 ---
@@ -108,10 +108,12 @@ for s in Switch.objects.filter(name__contains='biji-biji-initiative'):
 
 ---
 
-## Rollback Commands (Future Apply — Not Yet Wired)
+## Rollback Commands (Apply Code Exists — Live Execution Not Yet Performed)
 
-These commands would be used after a future apply run creates real DB records.
-Do not run these in the current lane (no mutation has occurred yet).
+These commands are used after an apply run creates real DB records.
+The apply code path is now implemented in `bootstrap-runtime-proof-fixtures.py`, but
+no live mutation has been executed in lane-i or lane-j. Run rollback only after an
+actual apply run has been confirmed.
 
 ```bash
 # Delete synthetic LMS users (ONLY after confirming they are lanea- prefixed)

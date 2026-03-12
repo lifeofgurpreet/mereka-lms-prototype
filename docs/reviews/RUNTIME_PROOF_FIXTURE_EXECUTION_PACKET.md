@@ -1,8 +1,8 @@
 # Runtime Proof Fixture Execution Packet
 
-> **Lane**: lane-i (Runtime Proof Fixture Contract)
+> **Lane**: lane-i / lane-j (Runtime Proof Fixture Contract + Execution Bridge)
 > **Environment**: dev
-> **Mutation status**: NO live mutation in this lane — this is a repo-only tooling lane.
+> **Mutation status**: NO live mutation in lane-i or lane-j — these are repo-only tooling lanes.
 > **Canonical manifest**: `config/runtime-proof/dev.synthetic-proof-fixtures.yaml`
 > **Contract**: `docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md`
 
@@ -104,22 +104,68 @@ bash scripts/qa/verify-runtime-proof-fixture-pack.sh
 
 Exit code 0 = all static checks pass. Exit code 1 = one or more checks failed.
 
-### 4. Future Apply Command (not yet wired)
+### 4. Apply Command (code exists — NOT executed in this lane)
+
+The apply command is now wired in `bootstrap-runtime-proof-fixtures.py`. The code exists
+and the guard chain is implemented. However, **no live mutation has been performed in
+lane-i or lane-j**. Execution against a live cluster is left to a future runtime lane.
 
 ```bash
-# NOT AVAILABLE IN THIS LANE.
-# When mutation is wired, this will be the command:
-python scripts/tenants/bootstrap-runtime-proof-fixtures.py --env dev --apply
-```
-
-Running `--apply` in the current version prints a warning and exits with code 1.
-
-For the future apply workflow (via kubectl exec from inside LMS pod):
-
-```bash
+# Code exists. Run from inside an LMS pod (NOT from workstation — requires Django):
 kubectl exec -n mereka-lms-dev deploy/lms -- python \
   /openedx/scripts/tenants/bootstrap-runtime-proof-fixtures.py --env dev --apply
 ```
+
+Running `--apply` outside an LMS pod (without Django) exits with a clear error and
+instructions. It does NOT silently fail or print a vague warning.
+
+Guard chain behavior: ALL of these checks must pass before any ORM write occurs:
+
+1. Environment must be `dev` (production and staging are rejected)
+2. `real_account_mutation_forbidden: true` must be in the manifest
+3. All emails must end in `@synthetic.test`
+4. Real-account collision check: if an existing LMS user or EnterpriseCustomer
+   has a non-synthetic email at the same username/slug, bootstrap REFUSES and aborts
+
+### 5. Enterprise-Catalog Companion Apply Command (code exists — NOT executed in this lane)
+
+A separate companion tool handles `enterprise_catalog_service_data` records in the
+enterprise-catalog service. Run from inside an enterprise-catalog pod:
+
+```bash
+kubectl exec -n mereka-lms-dev deploy/enterprise-catalog -- python \
+  /openedx/scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py --env dev --apply
+```
+
+**Prerequisite**: LMS-side bootstrap must run first to create the `EnterpriseCustomer`
+record whose UUID the catalog companion uses.
+
+Dry-run (no Django required):
+
+```bash
+python scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py --env dev
+python scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py --env dev --json
+```
+
+### 6. Live Read-Only Validation (after apply, from LMS pod)
+
+After running `--apply`, confirm fixture state with the live-readonly mode. This performs
+read-only ORM queries — no writes:
+
+```bash
+kubectl exec -n mereka-lms-dev deploy/lms -- python \
+  /openedx/scripts/tenants/validate-runtime-proof-fixtures.py \
+  --env dev --mode live-readonly
+```
+
+Checks performed:
+- User exists for each synthetic identity
+- EnterpriseCustomer exists for each enterprise customer
+- EnterpriseCustomerUser links exist (or are absent for the negative case user)
+- EnterpriseCustomerCatalog exists
+- Waffle flags and switches exist with the expected active state
+
+Exit code 0 = all live checks pass. Exit code 1 = one or more checks failed.
 
 ---
 

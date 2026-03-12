@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Bootstrap planner for synthetic runtime proof fixtures.
+Bootstrap planner and applier for synthetic runtime proof fixtures.
 
-Reads config/runtime-proof/<env>.synthetic-proof-fixtures.yaml and prints a
-structured plan of what would be created. Does NOT depend on Django — this is
-a standalone planning/documentation tool.
+Reads config/runtime-proof/<env>.synthetic-proof-fixtures.yaml and either prints a
+structured plan of what would be created (dry-run, default) or applies the changes
+via Django ORM (--apply, requires Django context).
 
-Default: DRY RUN (print-only).
---apply: prints a warning and exits. Mutation is not yet wired in this version.
+Default: DRY RUN (print-only, no Django required).
+--apply: runs Django ORM mutations if Django is available; prints an error and exits
+         if Django is not available (must be run from inside an LMS pod).
 
 Usage:
     python scripts/tenants/bootstrap-runtime-proof-fixtures.py --env dev
@@ -26,8 +27,21 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 MANIFEST_DIR = REPO_ROOT / "config" / "runtime-proof"
 
+# ── Shared library import ─────────────────────────────────────────────────────
 
-# ── Manifest loading ──────────────────────────────────────────────────────────
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "tenants"))
+
+from lib.proof_fixtures import (  # noqa: E402, I001
+    SYNTHETIC_EMAIL_DOMAIN,
+    ApplySummary,
+    RealAccountCollisionError,
+    SyntheticSafetyViolation,
+    make_action,
+    run_all_guards,
+)
+
+
+# ── Manifest loading ───────────────────────────────────────────────────────────
 
 
 def find_manifest(env: str) -> Path:
@@ -61,7 +75,7 @@ def load_manifest(env: str) -> dict[str, Any]:
     return manifest
 
 
-# ── Manifest validation ───────────────────────────────────────────────────────
+# ── Manifest validation ────────────────────────────────────────────────────────
 
 REQUIRED_FIXTURE_CLASSES = [
     "synthetic_identities",
@@ -158,7 +172,7 @@ def validate_manifest(manifest: dict[str, Any]) -> list[str]:
     return errors
 
 
-# ── Plan generation ───────────────────────────────────────────────────────────
+# ── Plan generation ────────────────────────────────────────────────────────────
 
 
 class Action:
@@ -423,7 +437,7 @@ def print_plan_human(manifest: dict[str, Any], actions: list[Action]) -> None:
     print("=" * 70)
     print("This was a DRY RUN. No changes were made.")
     print()
-    print("To apply changes (future — mutation not yet wired):")
+    print("To apply changes (run from inside an LMS pod with Django available):")
     print("  python scripts/tenants/bootstrap-runtime-proof-fixtures.py "
           f"--env {env} --apply")
     print()
@@ -431,6 +445,7 @@ def print_plan_human(manifest: dict[str, Any], actions: list[Action]) -> None:
     print("  enterprise_catalog_service) require a separate step via the")
     print("  enterprise-catalog management command or API after LMS bootstrap")
     print("  assigns catalog UUIDs. See the execution packet for details.")
+    print("  Use bootstrap-runtime-proof-fixtures-catalog.py for that step.")
     print("=" * 70)
     print()
 
@@ -447,14 +462,393 @@ def print_plan_json(manifest: dict[str, Any], actions: list[Action]) -> None:
     print(json.dumps(output, indent=2))
 
 
+# ── Apply path (Django ORM) ───────────────────────────────────────────────────
+
+
+def apply_synthetic_identities(
+    fixture_classes: dict[str, Any],
+    summary: ApplySummary,
+    dry_run: bool,
+) -> None:
+    """Apply synthetic identity users and enterprise user links via Django ORM."""
+    # Deferred Django imports — only available inside LMS pod.
+    try:
+        from django.contrib.auth import get_user_model  # noqa: PLC0415
+        from enterprise.models import EnterpriseCustomer, EnterpriseCustomerUser  # noqa: PLC0415
+    except ImportError as exc:
+        raise RuntimeError(
+            "Django ORM not available. Run --apply from inside an LMS pod: "
+            "kubectl exec -n mereka-lms-dev deploy/lms -- python "
+            "/openedx/scripts/tenants/bootstrap-runtime-proof-fixtures.py "
+            "--env dev --apply"
+        ) from exc
+
+    User = get_user_model()
+    si = fixture_classes.get("synthetic_identities", {})
+
+    for user_spec in si.get("users", []):
+        email = user_spec["email"]
+        username = user_spec["username"]
+
+        # Real-account collision guard: if a user exists with this username
+        # or email but a non-synthetic email, refuse.
+        existing_by_username = User.objects.filter(username=username).first()
+        if existing_by_username and not existing_by_username.email.endswith(SYNTHETIC_EMAIL_DOMAIN):
+            rec = make_action(
+                "REFUSE",
+                "User",
+                username,
+                f"Real account collision: existing user {username!r} has non-synthetic email "
+                f"{existing_by_username.email!r}. Refusing to overwrite.",
+                dry_run,
+            )
+            summary.actions.append(rec)
+            summary.refused += 1
+            print(f"  [REFUSE] {rec.detail}", file=sys.stderr)
+            raise RealAccountCollisionError(rec.detail)
+
+        user, created = User.objects.get_or_create(
+            username=username,
+            defaults={
+                "email": email,
+                "is_staff": user_spec.get("is_staff", False),
+                "is_superuser": user_spec.get("is_superuser", False),
+            },
+        )
+        action_label = "CREATE" if created else "NOOP"
+        rec = make_action(
+            action_label,
+            "User",
+            username,
+            f"{'Created' if created else 'Already exists'}: {username!r} ({email})",
+            dry_run,
+        )
+        summary.actions.append(rec)
+        if created:
+            summary.created += 1
+            # Note: password setting is deferred to runtime lane.
+            # The password_secret_path in the manifest documents where to find it.
+            print(
+                f"  [CREATE] User {username!r} — password must be set separately "
+                f"from Infisical path: {user_spec.get('password_secret_path', '(not set)')}"
+            )
+        else:
+            summary.reused += 1
+            print(f"  [NOOP] User {username!r} already exists")
+
+        # Enterprise user link.
+        link = user_spec.get("enterprise_link")
+        if link:
+            customer_slug = link["customer_slug"]
+            try:
+                ec = EnterpriseCustomer.objects.get(slug=customer_slug)
+            except EnterpriseCustomer.DoesNotExist:
+                rec = make_action(
+                    "SKIP",
+                    "EnterpriseCustomerUser",
+                    f"{username}@{customer_slug}",
+                    f"EnterpriseCustomer {customer_slug!r} does not exist yet — "
+                    "link skipped. Run LMS enterprise data apply first.",
+                    dry_run,
+                )
+                summary.actions.append(rec)
+                summary.skipped += 1
+                print(f"  [SKIP] EnterpriseCustomerUser link for {username!r}: "
+                      f"customer {customer_slug!r} not found")
+                continue
+
+            ecu, ecu_created = EnterpriseCustomerUser.objects.get_or_create(
+                enterprise_customer=ec,
+                user=user,
+            )
+            ecu_action = "CREATE" if ecu_created else "NOOP"
+            ecu_rec = make_action(
+                ecu_action,
+                "EnterpriseCustomerUser",
+                f"{username}@{customer_slug}",
+                f"{'Created' if ecu_created else 'Already exists'}: "
+                f"{username!r} linked to {customer_slug!r}",
+                dry_run,
+            )
+            summary.actions.append(ecu_rec)
+            if ecu_created:
+                summary.created += 1
+                print(f"  [CREATE] EnterpriseCustomerUser: {username!r} -> {customer_slug!r}")
+            else:
+                summary.reused += 1
+                print(f"  [NOOP] EnterpriseCustomerUser: {username!r} -> {customer_slug!r} already linked")
+        else:
+            # Negative case: assert no enterprise link exists.
+            ecu_count = EnterpriseCustomerUser.objects.filter(user=user).count()
+            if ecu_count > 0:
+                rec = make_action(
+                    "ERROR",
+                    "EnterpriseCustomerUser",
+                    username,
+                    f"Negative case violated: {username!r} is linked to "
+                    f"{ecu_count} enterprise customer(s) but enterprise_link is null in manifest.",
+                    dry_run,
+                )
+                summary.actions.append(rec)
+                summary.errors += 1
+                print(f"  [ERROR] {rec.detail}", file=sys.stderr)
+            else:
+                rec = make_action(
+                    "NOOP",
+                    "EnterpriseCustomerUser",
+                    username,
+                    f"Negative case confirmed: {username!r} has no enterprise links",
+                    dry_run,
+                )
+                summary.actions.append(rec)
+                summary.reused += 1
+                print(f"  [NOOP] Negative case OK: {username!r} has no enterprise links")
+
+
+def apply_lms_enterprise_data(
+    fixture_classes: dict[str, Any],
+    summary: ApplySummary,
+    dry_run: bool,
+) -> None:
+    """Apply LMS enterprise customer and catalog records via Django ORM."""
+    try:
+        from django.contrib.sites.models import Site  # noqa: PLC0415
+        from enterprise.models import (  # noqa: PLC0415
+            EnterpriseCustomer,
+            EnterpriseCustomerCatalog,
+        )
+    except ImportError as exc:
+        raise RuntimeError(
+            "Django ORM not available. Run --apply from inside an LMS pod."
+        ) from exc
+
+    led = fixture_classes.get("lms_enterprise_data", {})
+
+    for ec_spec in led.get("enterprise_customers", []):
+        slug = ec_spec["slug"]
+        contact_email = ec_spec.get("contact_email", "")
+
+        # Real-account guard: if an EnterpriseCustomer exists with this slug
+        # but a non-synthetic contact_email, refuse.
+        existing_ec = EnterpriseCustomer.objects.filter(slug=slug).first()
+        if existing_ec and existing_ec.contact_email and not existing_ec.contact_email.endswith(SYNTHETIC_EMAIL_DOMAIN):
+            rec = make_action(
+                "REFUSE",
+                "EnterpriseCustomer",
+                slug,
+                f"Real account collision: EnterpriseCustomer {slug!r} has "
+                f"non-synthetic contact_email {existing_ec.contact_email!r}. "
+                "Refusing to overwrite real tenant record.",
+                dry_run,
+            )
+            summary.actions.append(rec)
+            summary.refused += 1
+            print(f"  [REFUSE] {rec.detail}", file=sys.stderr)
+            raise RealAccountCollisionError(rec.detail)
+
+        # Resolve site for the enterprise customer.
+        site_domain = ec_spec.get("site", {}).get("domain")
+        site = None
+        if site_domain:
+            site = Site.objects.filter(domain=site_domain).first()
+            if not site:
+                site = Site.objects.first()  # fallback to default site
+
+        ec, ec_created = EnterpriseCustomer.objects.get_or_create(
+            slug=slug,
+            defaults={
+                "name": ec_spec["name"],
+                "contact_email": contact_email,
+                "country": ec_spec.get("country", ""),
+                "active": ec_spec.get("active", True),
+                **({"site": site} if site else {}),
+            },
+        )
+        ec_action = "CREATE" if ec_created else "NOOP"
+        ec_rec = make_action(
+            ec_action,
+            "EnterpriseCustomer",
+            slug,
+            f"{'Created' if ec_created else 'Already exists'}: {slug!r} ({ec_spec['name']})",
+            dry_run,
+        )
+        summary.actions.append(ec_rec)
+        if ec_created:
+            summary.created += 1
+            print(f"  [CREATE] EnterpriseCustomer: {slug!r}")
+        else:
+            summary.reused += 1
+            print(f"  [NOOP] EnterpriseCustomer: {slug!r} already exists")
+
+        # Create catalogs.
+        for cat_spec in ec_spec.get("catalogs", []):
+            title = cat_spec["title"]
+            cat, cat_created = EnterpriseCustomerCatalog.objects.get_or_create(
+                enterprise_customer=ec,
+                title=title,
+            )
+            cat_action = "CREATE" if cat_created else "NOOP"
+            cat_rec = make_action(
+                cat_action,
+                "EnterpriseCustomerCatalog",
+                f"{slug}/{title}",
+                f"{'Created' if cat_created else 'Already exists'}: catalog {title!r} "
+                f"for {slug!r}",
+                dry_run,
+            )
+            summary.actions.append(cat_rec)
+            if cat_created:
+                summary.created += 1
+                print(f"  [CREATE] EnterpriseCustomerCatalog: {title!r} for {slug!r}")
+            else:
+                summary.reused += 1
+                print(f"  [NOOP] EnterpriseCustomerCatalog: {title!r} for {slug!r} already exists")
+
+
+def apply_waffle_flags(
+    fixture_classes: dict[str, Any],
+    summary: ApplySummary,
+    dry_run: bool,
+) -> None:
+    """Apply waffle flags and switches via Django ORM."""
+    try:
+        from waffle.models import Flag, Switch  # noqa: PLC0415
+    except ImportError as exc:
+        raise RuntimeError(
+            "Django ORM (waffle) not available. Run --apply from inside an LMS pod."
+        ) from exc
+
+    wf = fixture_classes.get("waffle_flags", {})
+
+    for flag_spec in wf.get("platform_wide_flags", []):
+        name = flag_spec["name"]
+        active = flag_spec.get("active", False)
+        flag, flag_created = Flag.objects.get_or_create(
+            name=name,
+            defaults={"everyone": active},
+        )
+        flag_action = "CREATE" if flag_created else "NOOP"
+        flag_rec = make_action(
+            flag_action,
+            "WaffleFlag",
+            name,
+            f"{'Created' if flag_created else 'Already exists'}: WaffleFlag {name!r} "
+            f"active={active}",
+            dry_run,
+        )
+        summary.actions.append(flag_rec)
+        if flag_created:
+            summary.created += 1
+            print(f"  [CREATE] WaffleFlag: {name!r} active={active}")
+        else:
+            summary.reused += 1
+            print(f"  [NOOP] WaffleFlag: {name!r} already exists")
+
+    for switch_spec in wf.get("tenant_scoped_switches", []):
+        switch_name = f"{switch_spec['base']}.{switch_spec['enterprise_slug']}"
+        active = switch_spec.get("active", False)
+        switch, switch_created = Switch.objects.get_or_create(
+            name=switch_name,
+            defaults={"active": active},
+        )
+        switch_action = "CREATE" if switch_created else "NOOP"
+        switch_rec = make_action(
+            switch_action,
+            "WaffleSwitch",
+            switch_name,
+            f"{'Created' if switch_created else 'Already exists'}: WaffleSwitch "
+            f"{switch_name!r} active={active}",
+            dry_run,
+        )
+        summary.actions.append(switch_rec)
+        if switch_created:
+            summary.created += 1
+            print(f"  [CREATE] WaffleSwitch: {switch_name!r} active={active}")
+        else:
+            summary.reused += 1
+            print(f"  [NOOP] WaffleSwitch: {switch_name!r} already exists")
+
+
+def run_apply(manifest: dict[str, Any], env: str, as_json: bool) -> int:
+    """
+    Execute the apply path. Guard chain runs first; all guards must pass before
+    any ORM write. Requires Django context (LMS pod).
+
+    Returns exit code (0 = success, 1 = failure).
+    """
+    # Guard chain — all-or-nothing.
+    try:
+        run_all_guards(manifest, env)
+    except SyntheticSafetyViolation as exc:
+        print(f"ERROR: Guard chain failed — {exc}", file=sys.stderr)
+        print("No changes were made.", file=sys.stderr)
+        return 1
+
+    summary = ApplySummary(
+        environment=env,
+        mode="apply",
+        real_account_mutation_forbidden=manifest.get("real_account_mutation_forbidden", False),
+    )
+
+    fixture_classes = manifest.get("fixture_classes", {})
+
+    print()
+    print("=" * 70)
+    print("Synthetic Runtime Proof Fixture Bootstrap [APPLY]")
+    print(f"Environment : {env}")
+    print(f"Contract    : {manifest.get('contract_ref', '?')}")
+    print("=" * 70)
+    print()
+
+    # Apply in dependency order: enterprise data first, then users (which link to enterprise
+    # customers), then waffle flags.
+    try:
+        print("--- LMS Enterprise Data ---")
+        apply_lms_enterprise_data(fixture_classes, summary, dry_run=False)
+        print()
+
+        print("--- Synthetic Identities ---")
+        apply_synthetic_identities(fixture_classes, summary, dry_run=False)
+        print()
+
+        print("--- Waffle Flags ---")
+        apply_waffle_flags(fixture_classes, summary, dry_run=False)
+        print()
+
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    except RealAccountCollisionError as exc:
+        print(f"ERROR: Real account collision detected — {exc}", file=sys.stderr)
+        print("Bootstrap aborted. No further changes were made.", file=sys.stderr)
+        return 1
+
+    print("=" * 70)
+    print(
+        f"Apply complete: created={summary.created} reused={summary.reused} "
+        f"skipped={summary.skipped} refused={summary.refused} errors={summary.errors}"
+    )
+    print("=" * 70)
+    print()
+    print("NOTE: Enterprise-catalog service records are NOT handled by this tool.")
+    print("      Run bootstrap-runtime-proof-fixtures-catalog.py for the catalog service step.")
+    print("NOTE: Synthetic user passwords are NOT set by this tool.")
+    print("      Set passwords from Infisical paths listed in the manifest.")
+
+    if as_json:
+        print(json.dumps(summary.to_dict(), indent=2))
+
+    return 0 if summary.errors == 0 and summary.refused == 0 else 1
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Dry-run capable bootstrap planner for synthetic runtime proof fixtures. "
-            "Does NOT require Django or a live cluster."
+            "Bootstrap planner and applier for synthetic runtime proof fixtures. "
+            "Dry-run does NOT require Django. --apply requires LMS Django context."
         )
     )
     parser.add_argument(
@@ -467,8 +861,9 @@ def main() -> int:
         action="store_true",
         default=False,
         help=(
-            "Apply changes to the database. "
-            "In this version: prints a warning and exits — mutation is not yet wired."
+            "Apply changes to the database via Django ORM. "
+            "Requires running inside an LMS pod with Django available. "
+            "Guard chain runs before any write — all guards must pass."
         ),
     )
     parser.add_argument(
@@ -479,36 +874,6 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if args.apply:
-        print("=" * 70, file=sys.stderr)
-        print("WARNING: --apply was requested.", file=sys.stderr)
-        print(file=sys.stderr)
-        print(
-            "Mutation is not yet wired in this version of bootstrap-runtime-proof-fixtures.py.",
-            file=sys.stderr,
-        )
-        print(
-            "This tool is currently a dry-run planning tool only.",
-            file=sys.stderr,
-        )
-        print(file=sys.stderr)
-        print(
-            "To apply synthetic fixtures, run the bootstrap tool from inside an LMS pod:",
-            file=sys.stderr,
-        )
-        print(
-            "  kubectl exec -n mereka-lms-dev deploy/lms -- python "
-            "/openedx/scripts/tenants/bootstrap-runtime-proof-fixtures.py "
-            f"--env {args.env} --apply",
-            file=sys.stderr,
-        )
-        print(
-            "(When mutation is wired, the LMS pod version will have Django available.)",
-            file=sys.stderr,
-        )
-        print("=" * 70, file=sys.stderr)
-        return 1
-
     try:
         manifest = load_manifest(args.env)
     except FileNotFoundError as exc:
@@ -518,7 +883,7 @@ def main() -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    # Validate before planning.
+    # Validate before planning or applying.
     errors = validate_manifest(manifest)
     if errors:
         print("ERROR: Manifest validation failed:", file=sys.stderr)
@@ -526,6 +891,31 @@ def main() -> int:
             print(f"  - {err}", file=sys.stderr)
         return 1
 
+    if args.apply:
+        # Check Django availability before attempting apply.
+        try:
+            import django  # noqa: PLC0415, F401
+        except ImportError:
+            print("=" * 70, file=sys.stderr)
+            print("ERROR: --apply requires Django.", file=sys.stderr)
+            print(file=sys.stderr)
+            print(
+                "Django is not available in this environment. "
+                "Run --apply from inside an LMS pod:",
+                file=sys.stderr,
+            )
+            print(
+                "  kubectl exec -n mereka-lms-dev deploy/lms -- python "
+                "/openedx/scripts/tenants/bootstrap-runtime-proof-fixtures.py "
+                f"--env {args.env} --apply",
+                file=sys.stderr,
+            )
+            print("=" * 70, file=sys.stderr)
+            return 1
+
+        return run_apply(manifest, args.env, as_json=args.json)
+
+    # Dry-run path.
     actions = build_plan(manifest)
 
     if args.json:

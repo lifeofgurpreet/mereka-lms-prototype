@@ -21,7 +21,7 @@
     ],
     "severity": "high"
   },
-  "diff_range": "c5e9454b69d61636de8a0eacb4d2909b2de25eed...HEAD",
+  "diff_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD",
   "explanation": {
     "blocking_reasons": [],
     "evidence_summary": [
@@ -91,25 +91,11 @@
     "platform"
   ],
   "schema_version": 1,
-  "source_range": "c5e9454b69d61636de8a0eacb4d2909b2de25eed...HEAD",
+  "source_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD",
   "touched_files": [
-    ".gitignore",
-    "docs/architecture/SALVAGE_BRANCH_LEDGER.md",
-    "docs/catalog.json",
-    "docs/operations/ENTERPRISE_DATA_AUDIT.md",
-    "docs/ops/runbooks/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md",
-    "docs/reference/architecture/ADMIN_SURFACES_AND_ENTRYPOINTS.md",
-    "docs/reference/architecture/ENTERPRISE_TENANT_VARIANTS.md",
-    "docs/reference/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md",
-    "docs/reference/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md",
-    "docs/reference/architecture/TENANT_MODEL_RECOMMENDATION.md",
-    "docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md",
-    "docs/stabilization/DOCS_ROOT_AUTHORITY_CONTRACT.md",
-    "docs/stabilization/ENTERPRISE_DATA_MODEL_AUDIT.md",
-    "docs/stabilization/RETIRED_ROOT_REMEDIATION_LEDGER.md",
-    "docs/stabilization/STABLE_CONFIG_ROLLOUT_DEBT.md",
-    "docs/stabilization/retired-root-remediation-ledger.v1.yaml",
-    "generated/catalogs/docs-catalog.json",
+    "docs/reviews/RUNTIME_PROOF_FIXTURE_EXECUTION_PACKET.md",
+    "docs/reviews/RUNTIME_PROOF_FIXTURE_HANDOFF.md",
+    "docs/reviews/RUNTIME_PROOF_FIXTURE_ROLLBACK_PACKET.md",
     "generated/knowledge/evidence-obligations.json",
     "generated/knowledge/read-first-packs.json",
     "generated/knowledge/release-readiness.json",
@@ -117,15 +103,13 @@
     "generated/knowledge/review-decision.json",
     "generated/knowledge/review-decision.md",
     "generated/knowledge/reviewer-obligations.json",
-    "scripts/qa/run-adr-gates.sh",
-    "scripts/qa/test-verify-repo-hygiene-artifacts.sh",
-    "scripts/qa/verify-repo-hygiene-artifacts.sh",
-    "scripts/qa/verify-retired-root-remediation.sh",
-    "tools/docs/verify/verify_legacy_architecture_root.py",
-    "tools/docs/verify/verify_legacy_operations_root.py",
-    "tools/knowledge/build_review_decision.py",
-    "tools/knowledge/verify_decision_runtime.py",
-    "var/proofs/retired-root-remediation.md"
+    "scripts/qa/verify-runtime-proof-fixture-pack.sh",
+    "scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py",
+    "scripts/tenants/bootstrap-runtime-proof-fixtures.py",
+    "scripts/tenants/lib/__init__.py",
+    "scripts/tenants/lib/proof_fixtures.py",
+    "scripts/tenants/validate-runtime-proof-fixtures.py",
+    "tests/test_runtime_proof_fixtures.py"
   ],
   "touched_repos": [
     "bbi-infrastructure",
@@ -133,12 +117,10 @@
     "platform-control-plane"
   ],
   "touched_roots": [
-    ".gitignore",
     "docs",
     "generated",
-    "generated/catalogs",
+    "scripts",
     "scripts/qa",
-    "tools",
-    "var"
+    "tests"
   ]
 }
