@@ -268,8 +268,9 @@ jobs:
 
       - name: Markdown linting
         run: |
-          npm install -g markdownlint-cli
-          markdownlint docs/ specs/ --ignore docs/archive/ || true
+          # Install locally — ARC runners lack write access to /usr/lib/node_modules/
+          npm install markdownlint-cli
+          npx markdownlint docs/ specs/ --ignore docs/archive/ || true
 
       # ── Phase C: Run all static verification scripts in parallel ──────────
       - name: Run static verification scripts
