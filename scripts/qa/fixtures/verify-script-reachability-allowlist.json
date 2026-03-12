@@ -55,6 +55,7 @@
     "scripts/qa/verify-enterprise-all-acs.sh",
     "scripts/qa/verify-enterprise-catalog.sh",
     "scripts/qa/verify-enterprise-deployment.sh",
+    "scripts/qa/verify-enterprise-frontend-live-contract.sh",
     "scripts/qa/verify-enterprise-integrated-channels.sh",
     "scripts/qa/verify-enterprise-mfe-nreum-clean.sh",
     "scripts/qa/verify-enterprise-secrets.sh",

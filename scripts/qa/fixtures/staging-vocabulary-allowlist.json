@@ -53,6 +53,7 @@
     "scripts/qa/verify-auth-hardening.sh",
     "scripts/qa/verify-configmap-hash-suffixes.sh",
     "scripts/qa/verify-enterprise-auth-contract.sh",
+    "scripts/qa/verify-enterprise-frontend-config-contract.sh",
     "scripts/qa/verify-enterprise-runtime-app-wiring.sh",
     "scripts/qa/verify-enterprise-service-deployment.sh",
     "scripts/qa/verify-enterprise-ui-review.sh",

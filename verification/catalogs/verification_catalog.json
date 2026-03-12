@@ -5191,6 +5191,85 @@
       "tier": "exploratory_manual"
     },
     {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "nonprod",
+        "staging"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "multisite-governance",
+      "path": "scripts/qa/verify-enterprise-frontend-config-contract.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-ENTMFE-CFG-001"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "multisite-governance",
+      "path": "scripts/qa/verify-enterprise-frontend-live-contract.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster"
+      ],
+      "severity": "low",
+      "spec_ids": [],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "multisite-governance",
+      "path": "scripts/qa/verify-enterprise-frontend-route-contract.sh",
+      "reference_count": 2,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-ENTMFE-ROUTE-001"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
       "cadence": "on_demand",
       "canonical": true,
       "ci_binding": [],
@@ -17034,26 +17113,26 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 349,
+    "ci_static_bound": 351,
     "kinds": {
-      "verify": 566
+      "verify": 569
     },
     "mutability": {
       "destructive": 9,
       "mutating": 16,
-      "read-only": 541
+      "read-only": 544
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 390,
-      "manual_only": 176
+      "active": 392,
+      "manual_only": 177
     },
     "tiers": {
-      "exploratory_manual": 179,
+      "exploratory_manual": 180,
       "periodic_runtime": 16,
-      "release_blocking": 371
+      "release_blocking": 373
     },
-    "total_verify_scripts": 566,
+    "total_verify_scripts": 569,
     "workflow_direct_bound": 50
   },
   "version": "1"
