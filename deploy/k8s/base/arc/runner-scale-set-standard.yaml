@@ -24,7 +24,7 @@ metadata:
 spec:
   # GitHub App credentials — stored as a K8s Secret in arc-runners namespace.
   # Secret must be created manually before deploying (see CI_CD_RUNNERS.md).
-  githubConfigUrl: https://github.com/Biji-Biji-Initiative/mereka-lms
+  githubConfigUrl: https://github.com/Biji-Biji-Initiative
   githubConfigSecret: arc-github-app-secret
 
   # Scale bounds: 0 idle runners (no cost at rest), burst to 10 for parallel jobs.
