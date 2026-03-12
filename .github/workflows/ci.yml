@@ -189,10 +189,29 @@ jobs:
         run: ./scripts/qa/lint-repo-conventions.sh
 
       - name: Lint shell scripts (shellcheck)
-        uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca  # master
-        with:
-          scandir: './scripts'
-          severity: error
+        run: |
+          if ! command -v shellcheck &>/dev/null; then
+            SC_VERSION="v0.10.0"
+            SC_TARBALL="shellcheck-${SC_VERSION}.linux.x86_64.tar.xz"
+            SC_URL="https://github.com/koalaman/shellcheck/releases/download/${SC_VERSION}/${SC_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${SC_TARBALL}" "${SC_URL}"
+            # xz may not be available on ARC runners; use Python as fallback
+            if command -v xz &>/dev/null; then
+              tar xJf "${SC_TARBALL}"
+            else
+              python3 -c "
+          import lzma, tarfile, io, sys
+          with open('${SC_TARBALL}', 'rb') as f:
+              decompressed = lzma.decompress(f.read())
+          with tarfile.open(fileobj=io.BytesIO(decompressed)) as t:
+              t.extractall()
+          "
+            fi
+            install -m 0755 "shellcheck-${SC_VERSION}/shellcheck" "$GITHUB_WORKSPACE/.cache/bin/shellcheck"
+            rm -rf "${SC_TARBALL}" "shellcheck-${SC_VERSION}"
+          fi
+          find scripts/ -name '*.sh' -type f -print0 | xargs -0 shellcheck --severity=error
 
       - name: Validate Kubernetes manifests
         run: |
@@ -201,6 +220,8 @@ jobs:
             grep -v '/config/' | \
             grep -v '/settings/' | \
             grep -v 'helm-values' | \
+            grep -v 'registry\.yaml' | \
+            grep -v 'SECRET_CLASSIFICATION' | \
             xargs kubeconform -strict -ignore-missing-schemas
 
       # ── Phase B (continued): Spec linting ─────────────────────────────────

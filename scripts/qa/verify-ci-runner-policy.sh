@@ -180,7 +180,7 @@ for wf_path in "${workflow_files[@]}"; do
     label_index=0
     for label in "${labels[@]}"; do
       label_index=$((label_index + 1))
-      validate_runner_label "$wf_name" "$job_name[$label_index]" "$label"
+      validate_runner_label "$wf_name" "${job_name}[${label_index}]" "$label"
     done
   done <<<"$job_rows"
 done

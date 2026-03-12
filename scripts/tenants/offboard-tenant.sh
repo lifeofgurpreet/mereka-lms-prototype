@@ -174,12 +174,12 @@ fi
 
 # Detect execution context (K8s vs local Tutor).
 if command -v kubectl &>/dev/null && kubectl "${context_args[@]}" get namespace "$NAMESPACE" &>/dev/null 2>&1; then
-  if [[ "$DRY_RUN" -eq 0 && is_prod_like_context "$K8S_CONTEXT_EFFECTIVE" && "$ALLOW_PROD_OFFBOARD" != "1" ]]; then
+  if [[ "$DRY_RUN" -eq 0 ]] && is_prod_like_context "$K8S_CONTEXT_EFFECTIVE" && [[ "$ALLOW_PROD_OFFBOARD" != "1" ]]; then
     echo -e "${RED}ERROR${NC}: Refusing non-dry-run offboarding on prod-like context '$K8S_CONTEXT_EFFECTIVE' without ALLOW_PROD_OFFBOARD=1"
     exit 1
   fi
 
-  if [[ "$DRY_RUN" -eq 0 && is_prod_like_context "$K8S_CONTEXT_EFFECTIVE" ]]; then
+  if [[ "$DRY_RUN" -eq 0 ]] && is_prod_like_context "$K8S_CONTEXT_EFFECTIVE"; then
     if [[ "$CREATE_PREOP_BACKUP" == "1" ]]; then
       require_cmd velero
       backup_name="pre-op-${NAMESPACE}-offboard-${SLUG}-$(date -u +%Y%m%d-%H%M)"
