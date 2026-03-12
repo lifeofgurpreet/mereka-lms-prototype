@@ -42,14 +42,36 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text())
 
 
-def git_changed_files(repo_root: Path, diff_range: str) -> list[str]:
+def git_stdout(repo_root: Path, *args: str) -> str:
     result = subprocess.run(
-        ["git", "-C", str(repo_root), "diff", "--name-only", diff_range],
+        ["git", "-C", str(repo_root), *args],
         check=True,
         capture_output=True,
         text=True,
     )
-    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    return result.stdout.strip()
+
+
+def canonicalize_diff_range(repo_root: Path, diff_range: str) -> str:
+    current_head = git_stdout(repo_root, "rev-parse", "HEAD")
+    if "..." in diff_range:
+        left, right = diff_range.split("...", 1)
+        merge_base = git_stdout(repo_root, "merge-base", left, right)
+        resolved_right = git_stdout(repo_root, "rev-parse", right)
+        canonical_right = "HEAD" if resolved_right == current_head else resolved_right
+        return f"{merge_base}...{canonical_right}"
+    if ".." in diff_range:
+        left, right = diff_range.split("..", 1)
+        resolved_left = git_stdout(repo_root, "rev-parse", left)
+        resolved_right = git_stdout(repo_root, "rev-parse", right)
+        canonical_right = "HEAD" if resolved_right == current_head else resolved_right
+        return f"{resolved_left}..{canonical_right}"
+    return git_stdout(repo_root, "rev-parse", diff_range)
+
+
+def git_changed_files(repo_root: Path, diff_range: str) -> list[str]:
+    result = git_stdout(repo_root, "diff", "--name-only", diff_range)
+    return [line.strip() for line in result.splitlines() if line.strip()]
 
 
 def classify_file(path: str) -> tuple[set[str], str]:
@@ -138,6 +160,7 @@ def build_payload(
     arbitration: dict[str, Any],
     runtime_convergence: dict[str, Any],
 ) -> dict[str, Any]:
+    canonical_range = canonicalize_diff_range(repo_root, diff_range)
     changed_files = git_changed_files(repo_root, diff_range)
     if not changed_files:
         raise SystemExit(f"No changed files found for range: {diff_range}")
@@ -190,7 +213,7 @@ def build_payload(
     return {
         "pack_id": "review-decision",
         "generated_by": "tools/knowledge/build_review_decision.py",
-        "source_range": diff_range,
+        "source_range": canonical_range,
         "canonical_inputs": sorted(
             {
                 "generated/skills/pack-registry.json",
@@ -202,7 +225,7 @@ def build_payload(
             }
         ),
         "schema_version": 1,
-        "diff_range": diff_range,
+        "diff_range": canonical_range,
         "change_classes": sorted(classes),
         "touched_files": changed_files,
         "touched_repos": sorted(touched_repos),

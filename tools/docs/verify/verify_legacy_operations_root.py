@@ -28,6 +28,9 @@ EXEMPT_REFERENCERS = {
     "docs/guides/admin/DOCS_CMDREF_BACKLOG_20260313.md",
     "docs/guides/standards/DOCUMENTATION_STANDARDS.md",
     "docs/guides/standards/STYLE_GUIDE.md",
+    "docs/stabilization/RETIRED_ROOT_REMEDIATION_LEDGER.md",
+    "docs/stabilization/retired-root-remediation-ledger.v1.yaml",
+    "docs/stabilization/DOCS_ROOT_AUTHORITY_CONTRACT.md",
     "docs/concepts/architecture/ARCHITECTURE_CHARTER.md",
     "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
     "docs/meta/docs-program/REPO_TOPOLOGY_MOVE_LEDGER.md",
@@ -36,6 +39,8 @@ EXEMPT_REFERENCERS = {
     "docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_REVIEW_HANDOFF.md",
     "tools/docs/verify/verify_legacy_operations_root.py",
     "tools/docs/verify/verify-docs-policy.sh",
+    "scripts/qa/verify-retired-root-remediation.sh",
+    "var/proofs/retired-root-remediation.md",
 }
 SKIP_PREFIXES = (
     "docs/archive/",

@@ -41,12 +41,11 @@ Two operator decisions must be made before `--apply`:
 
 | File | Safe to merge? |
 |------|---------------|
-| `docs/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md` | Yes |
-| `docs/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md` | Yes |
-| `docs/architecture/TENANT_MODEL_RECOMMENDATION.md` | Yes |
-| `docs/architecture/ADMIN_SURFACES_AND_ENTRYPOINTS.md` | Yes |
-| `docs/operations/ENTERPRISE_DATA_MODEL_AUDIT.md` | Yes |
-| `docs/operations/ENTERPRISE_DATA_AUDIT.md` | Yes |
+| `docs/reference/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md` | Yes |
+| `docs/reference/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md` | Yes |
+| `docs/reference/architecture/TENANT_MODEL_RECOMMENDATION.md` | Yes |
+| `docs/reference/architecture/ADMIN_SURFACES_AND_ENTRYPOINTS.md` | Yes |
+| `docs/stabilization/ENTERPRISE_DATA_MODEL_AUDIT.md` | Yes |
 
 **Risk**: Zero. Documentation only. No code changes.
 
@@ -61,8 +60,8 @@ Two operator decisions must be made before `--apply`:
 | `scripts/tenants/validate-enterprise-tenants.py` | Yes (read-only) |
 | `tests/tenants/test_bootstrap_spec.py` | Yes |
 | `tests/tenants/fixtures/*` | Yes |
-| `docs/architecture/ENTERPRISE_TENANT_VARIANTS.md` | Yes |
-| `docs/operations/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md` | Yes |
+| `docs/reference/architecture/ENTERPRISE_TENANT_VARIANTS.md` | Yes |
+| `docs/ops/runbooks/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md` | Yes |
 
 **Risk**: Zero. Tooling defaults to dry-run. No live writes unless explicitly invoked with `--apply`. Tests are pure unit tests with no Django dependency.
 
@@ -70,8 +69,8 @@ Two operator decisions must be made before `--apply`:
 
 | File | Safe to merge? |
 |------|---------------|
-| `docs/architecture/SALVAGE_BRANCH_LEDGER.md` | Yes |
-| `docs/architecture/STABLE_CONFIG_ROLLOUT_DEBT.md` | Yes |
+| `docs/reference/architecture/SALVAGE_BRANCH_LEDGER.md` | Yes |
+| `docs/stabilization/STABLE_CONFIG_ROLLOUT_DEBT.md` | Yes |
 
 **Risk**: Zero. Documentation only.
 

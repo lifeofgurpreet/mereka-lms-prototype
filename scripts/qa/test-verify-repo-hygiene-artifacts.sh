@@ -13,6 +13,7 @@ git init -q "$tmpdir"
 mkdir -p "$tmpdir/scripts/migrations/kajabi/output"
 mkdir -p "$tmpdir/migrations/mct/logs"
 mkdir -p "$tmpdir/src"
+mkdir -p "$tmpdir/var/proofs"
 
 cat >"$tmpdir/src/main.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -25,10 +26,13 @@ EOF
 cat >"$tmpdir/migrations/mct/logs/run.log" <<'EOF'
 log
 EOF
+cat >"$tmpdir/var/proofs/retired-root-remediation.md" <<'EOF'
+# Proof
+EOF
 
 (
   cd "$tmpdir"
-  git add src/main.sh scripts/migrations/kajabi/output/users.csv migrations/mct/logs/run.log
+  git add src/main.sh scripts/migrations/kajabi/output/users.csv migrations/mct/logs/run.log var/proofs/retired-root-remediation.md
 )
 
 run_expect_fail() {
@@ -58,5 +62,6 @@ run_expect_fail "tracked migration output/log artifacts are rejected"
   git rm --cached -q scripts/migrations/kajabi/output/users.csv migrations/mct/logs/run.log
 )
 run_expect_pass "clean tracked tree passes"
+run_expect_pass "tracked reviewed proof markdown under var/proofs is allowed"
 
 echo "OK"

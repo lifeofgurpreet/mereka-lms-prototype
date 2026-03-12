@@ -32,6 +32,35 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text())
 
 
+def git_stdout(repo_root: Path, *args: str) -> str:
+    import subprocess
+
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+def canonicalize_diff_range(repo_root: Path, diff_range: str) -> str:
+    current_head = git_stdout(repo_root, "rev-parse", "HEAD")
+    if "..." in diff_range:
+        left, right = diff_range.split("...", 1)
+        merge_base = git_stdout(repo_root, "merge-base", left, right)
+        resolved_right = git_stdout(repo_root, "rev-parse", right)
+        canonical_right = "HEAD" if resolved_right == current_head else resolved_right
+        return f"{merge_base}...{canonical_right}"
+    if ".." in diff_range:
+        left, right = diff_range.split("..", 1)
+        resolved_left = git_stdout(repo_root, "rev-parse", left)
+        resolved_right = git_stdout(repo_root, "rev-parse", right)
+        canonical_right = "HEAD" if resolved_right == current_head else resolved_right
+        return f"{resolved_left}..{canonical_right}"
+    return git_stdout(repo_root, "rev-parse", diff_range)
+
+
 def ensure(condition: bool, message: str) -> None:
     if not condition:
         raise SystemExit(message)
@@ -51,6 +80,7 @@ def validate_schemas(repo_root: Path) -> None:
 def main() -> None:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
+    canonical_range = canonicalize_diff_range(repo_root, args.diff_range)
 
     validate_schemas(repo_root)
 
@@ -66,8 +96,8 @@ def main() -> None:
     skill_ids = {skill["skill_id"] for skill in skill_registry["skills"]}
     pack_ids = {pack_registry["pack_id"], *(pack["pack_id"] for pack in pack_registry["packs"])}
 
-    ensure(review_decision["source_range"] == args.diff_range, "Review decision diff range drift detected")
-    ensure(release_readiness["source_range"] == args.diff_range, "Release readiness diff range drift detected")
+    ensure(review_decision["source_range"] == canonical_range, "Review decision diff range drift detected")
+    ensure(release_readiness["source_range"] == canonical_range, "Release readiness diff range drift detected")
     ensure(review_decision["decision"]["selected_skills"], "Review decision selected no skills")
     for skill_id in review_decision["decision"]["selected_skills"]:
         ensure(skill_id in skill_ids, f"Review decision references unknown skill: {skill_id}")
@@ -103,7 +133,7 @@ def main() -> None:
 
     print(
         "DECISION_RUNTIME_OK "
-        f"range={args.diff_range} severity={severity} "
+        f"range={canonical_range} severity={severity} "
         f"reviewers={len(reviewer_obligations['required_reviewer_groups'])} "
         f"evidence_obligations={len(evidence_obligations['obligations'])} "
         f"fixture_failures={runtime_evaluation['fail_count']}"

@@ -36,7 +36,10 @@ infrastructure/tutor/brand-*/dist/**/*
 !infrastructure/tutor/brand-*/dist/**/.gitkeep
 
 # Runtime artifacts (new var/ structure)
-var/
+var/*
+!var/proofs/
+var/proofs/*
+!var/proofs/retired-root-remediation.md
 build_*.log
 *.log
 *.pid

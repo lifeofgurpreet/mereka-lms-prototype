@@ -13,6 +13,9 @@ EXEMPT_REFERENCERS = {
     "docs/CONTRIBUTING.md",
     "docs/DOCS_REMEDIATION_PLAN_AND_TRACKER.md",
     "docs/guides/standards/DOCUMENTATION_STANDARDS.md",
+    "docs/stabilization/RETIRED_ROOT_REMEDIATION_LEDGER.md",
+    "docs/stabilization/retired-root-remediation-ledger.v1.yaml",
+    "docs/stabilization/DOCS_ROOT_AUTHORITY_CONTRACT.md",
     "docs/meta/docs-program/REPO_TOPOLOGY_MOVE_LEDGER.md",
     "docs/concepts/architecture/README.md",
     "docs/concepts/architecture/ARCHITECTURE_CHARTER.md",
@@ -36,6 +39,8 @@ EXEMPT_REFERENCERS = {
     "tools/skills/verify_skill_runtime.py",
     "tools/skills/verify_agent_pack_runtime.py",
     "tools/skills/build_skill_dependency_graph.py",
+    "scripts/qa/verify-retired-root-remediation.sh",
+    "var/proofs/retired-root-remediation.md",
 }
 
 

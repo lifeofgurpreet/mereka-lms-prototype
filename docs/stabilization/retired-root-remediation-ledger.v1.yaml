@@ -1,0 +1,111 @@
+version: 1
+owner: Platform Team
+last_updated: "2026-03-11"
+retired_roots:
+  - root: docs/architecture
+    allowed_tombstones:
+      - docs/architecture/README.md
+  - root: docs/operations
+    allowed_tombstones:
+      - docs/operations/README.md
+allowed_classifications:
+  - ACTIVE
+  - SUPERSEDED
+  - DUPLICATE
+  - TOMBSTONE_CANDIDATE
+  - REFERENCE_ONLY
+allowed_final_status_enums:
+  - IN_PROGRESS
+  - READY_FOR_REVIEW
+  - COMPLETE
+entries:
+  - retired_path: docs/architecture/ADMIN_SURFACES_AND_ENTRYPOINTS.md
+    classification: ACTIVE
+    canonical_destination: docs/reference/architecture/ADMIN_SURFACES_AND_ENTRYPOINTS.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: migrated
+  - retired_path: docs/architecture/ENTERPRISE_TENANT_VARIANTS.md
+    classification: ACTIVE
+    canonical_destination: docs/reference/architecture/ENTERPRISE_TENANT_VARIANTS.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: migrated
+  - retired_path: docs/architecture/SALVAGE_BRANCH_LEDGER.md
+    classification: DUPLICATE
+    canonical_destination: docs/reference/architecture/SALVAGE_BRANCH_LEDGER.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: duplicate_removed
+  - retired_path: docs/architecture/STABLE_CONFIG_ROLLOUT_DEBT.md
+    classification: ACTIVE
+    canonical_destination: docs/stabilization/STABLE_CONFIG_ROLLOUT_DEBT.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: migrated
+  - retired_path: docs/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md
+    classification: ACTIVE
+    canonical_destination: docs/reference/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: migrated
+  - retired_path: docs/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md
+    classification: ACTIVE
+    canonical_destination: docs/reference/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: migrated
+  - retired_path: docs/architecture/TENANT_MODEL_RECOMMENDATION.md
+    classification: ACTIVE
+    canonical_destination: docs/reference/architecture/TENANT_MODEL_RECOMMENDATION.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: migrated
+  - retired_path: docs/operations/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md
+    classification: ACTIVE
+    canonical_destination: docs/ops/runbooks/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: migrated
+  - retired_path: docs/operations/ENTERPRISE_DATA_AUDIT.md
+    classification: DUPLICATE
+    canonical_destination: docs/stabilization/ENTERPRISE_DATA_MODEL_AUDIT.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: duplicate_removed
+  - retired_path: docs/operations/ENTERPRISE_DATA_MODEL_AUDIT.md
+    classification: ACTIVE
+    canonical_destination: docs/stabilization/ENTERPRISE_DATA_MODEL_AUDIT.md
+    inbound_references_before:
+      - docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md
+    inbound_references_after: []
+    resolution: migrated
+  - retired_path: docs/architecture/README.md
+    classification: REFERENCE_ONLY
+    canonical_destination: docs/concepts/architecture/README.md
+    inbound_references_before:
+      - docs/README.md
+      - docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md
+    inbound_references_after:
+      - docs/README.md
+      - docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md
+    resolution: retained_tombstone
+  - retired_path: docs/operations/README.md
+    classification: REFERENCE_ONLY
+    canonical_destination: docs/ops/README.md
+    inbound_references_before:
+      - docs/README.md
+      - docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md
+    inbound_references_after:
+      - docs/README.md
+      - docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md
+    resolution: retained_tombstone

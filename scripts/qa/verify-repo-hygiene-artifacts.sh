@@ -37,6 +37,9 @@ while IFS= read -r -d '' path; do
     exports/*)
       fail "$path is tracked under exports/ (raw export data must not be committed)"
       ;;
+    var/proofs/*.md)
+      pass
+      ;;
     var/*)
       fail "$path is tracked under var/ (runtime evidence/artifacts must not be committed)"
       ;;

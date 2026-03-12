@@ -1,9 +1,14 @@
 {
   "arbitration": {
     "applied_rules": [],
-    "blocking_release_checks": [],
+    "blocking_release_checks": [
+      "required-reviewer-groups-present",
+      "required-evidence-obligations-present",
+      "runtime-convergence-not-failing"
+    ],
     "evidence_merge_strategy": "union-evidence-classes",
     "primary_skill_order": [
+      "control-plane-validation",
       "docs-truth-review"
     ],
     "reviewer_merge_strategy": "union-reviewers"
@@ -17,28 +22,36 @@
     "generated/skills/pack-registry.json",
     "generated/skills/skill-registry.json"
   ],
-  "diff_range": "origin/main...HEAD",
+  "diff_range": "c5e9454b69d61636de8a0eacb4d2909b2de25eed...HEAD",
   "generated_by": "tools/knowledge/build_read_first_packs.py",
   "ordered_packs": [
     {
       "pack_id": "pack-registry",
-      "priority": "medium",
-      "reason": "required by docs-truth-review",
-      "source_skill": "docs-truth-review"
+      "priority": "high",
+      "reason": "required by control-plane-validation",
+      "source_skill": "control-plane-validation"
+    },
+    {
+      "pack_id": "runtime-convergence-report",
+      "priority": "high",
+      "reason": "required by control-plane-validation",
+      "source_skill": "control-plane-validation"
     },
     {
       "pack_id": "read-first",
       "priority": "medium",
-      "reason": "required by docs-truth-review",
-      "source_skill": "docs-truth-review"
+      "reason": "required by control-plane-validation",
+      "source_skill": "control-plane-validation"
     }
   ],
   "pack_id": "read-first-packs",
   "priority_buckets": {
-    "high_risk": [],
+    "high_risk": [
+      "pack-registry",
+      "runtime-convergence-report"
+    ],
     "low_risk": [],
     "medium_risk": [
-      "pack-registry",
       "read-first"
     ]
   },
@@ -57,10 +70,6 @@
       "reason": "not required by selected skills or arbitration rules for this diff"
     },
     {
-      "pack_id": "runtime-convergence-report",
-      "reason": "not required by selected skills or arbitration rules for this diff"
-    },
-    {
       "pack_id": "scenario-packs",
       "reason": "not required by selected skills or arbitration rules for this diff"
     },
@@ -73,5 +82,5 @@
       "reason": "not required by selected skills or arbitration rules for this diff"
     }
   ],
-  "source_range": "origin/main...HEAD"
+  "source_range": "c5e9454b69d61636de8a0eacb4d2909b2de25eed...HEAD"
 }
