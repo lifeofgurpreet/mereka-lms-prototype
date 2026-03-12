@@ -130,4 +130,51 @@ for js in "$DIST_DIR"/*.js; do
   fi
 done
 
+# Optional enterprise enrichment endpoints may legitimately 404 in some
+# deployments even after routing is correct. The learner MFE currently mounts
+# these through suspense hooks in dashboard/search surfaces, so a plain 404 can
+# escalate into the global error boundary before local empty-state UI runs.
+#
+# Hardening rule:
+# - 404 on optional enrichment endpoints => downgrade to empty/default state
+# - non-404 / auth / server failures => rethrow
+#
+# This is intentionally narrow and deterministic. It only targets the current
+# shipped learner bundle signatures for:
+# - academies list
+# - enterprise curations configuration
+# - highlight sets
+# - browse-and-request customer configuration
+# - ecommerce coupon overview / assignment summary bundle
+for js in "$DIST_DIR"/*.js; do
+  [ -f "$js" ] || continue
+  [ "$(basename "$js")" = "env.config.js" ] && continue
+  [ -w "$js" ] || continue
+
+  if grep -Fq 'async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`,{results:l}=await s(c);return l}' "$js"; then
+    sed -i 's#async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`,{results:l}=await s(c);return l}#async function p(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(a({enterprise_customer:e,lang:t},r)),{ENTERPRISE_CATALOG_API_BASE_URL:o}=(0,n.zj)(),c=`${o}/api/v1/academies?${i.toString()}`;try{const{results:r}=await s(c);return r}catch(e){if(e.response\&\&404===e.response.status)return[];throw e}}#g' "$js"
+    echo "[patch-env] OK: hardened academies optional 404 handling"
+  fi
+
+  if grep -Fq 'async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`,u=await(0,i.bv)().get(s);return(0,o.il)(u.data).results[0]??null}' "$js"; then
+    sed -i 's#async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`,u=await(0,i.bv)().get(s);return(0,o.il)(u.data).results[0]??null}#async function U(e,r={}){const t=new URLSearchParams(R({enterprise_customer:e},r)),s=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/enterprise-curations/?${t.toString()}`;try{const e=await(0,i.bv)().get(s);return(0,o.il)(e.data).results[0]??null}catch(e){if(e.response\&\&404===e.response.status)return null;throw e}}#g' "$js"
+    echo "[patch-env] OK: hardened enterprise-curations optional 404 handling"
+  fi
+
+  if grep -Fq 'async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`,{results:c}=await s(o);return c}' "$js"; then
+    sed -i 's#async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`,{results:c}=await s(o);return c}#async function L(e,r={}){const t=(0,u.n7)(),i=new URLSearchParams(R({enterprise_customer:e,page_size:_.AK.toString(),lang:t},r)),o=`${(0,n.zj)().ENTERPRISE_CATALOG_API_BASE_URL}/api/v1/highlight-sets/?${i.toString()}`;try{const{results:e}=await s(o);return e}catch(e){if(e.response\&\&404===e.response.status)return[];throw e}}#g' "$js"
+    echo "[patch-env] OK: hardened highlight-sets optional 404 handling"
+  fi
+
+  if grep -Fq 'async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`,t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}' "$js"; then
+    sed -i 's#async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`,t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}#async function ce(e){const r=`${(0,n.zj)().ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-configurations/${e}/`;try{const t=await(0,i.bv)().get(r);return(0,o.il)(t.data)}catch(e){if(e.response\&\&404===e.response.status)return null;throw e}}#g' "$js"
+    echo "[patch-env] OK: hardened customer-configurations optional 404 handling"
+  fi
+
+  if grep -Fq 'async function Re(e){const r=await Promise.all([De(e),_e(e)]),t=(0,we.v)(r[1]);return{couponsOverview:r[0],couponCodeAssignments:r[1],couponCodeRedemptionCount:t}}' "$js"; then
+    sed -i 's#async function Re(e){const r=await Promise.all(\[De(e),_e(e)\]),t=(0,we.v)(r\[1\]);return{couponsOverview:r\[0\],couponCodeAssignments:r\[1\],couponCodeRedemptionCount:t}}#async function Re(e){try{const r=await Promise.all([De(e),_e(e)]),t=(0,we.v)(r[1]);return{couponsOverview:r[0],couponCodeAssignments:r[1],couponCodeRedemptionCount:t}}catch(r){if(r.response\&\&404===r.response.status)return{couponsOverview:[],couponCodeAssignments:[],couponCodeRedemptionCount:0};throw r}}#g' "$js"
+    echo "[patch-env] OK: hardened ecommerce optional 404 handling"
+  fi
+done
+
 echo "[patch-env] Completed placeholder patching in $DIST_DIR"
