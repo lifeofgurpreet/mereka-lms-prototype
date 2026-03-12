@@ -35,6 +35,7 @@ scripts/infra/check-atlas-allowlist.sh          # LIVE_CLUSTER
 scripts/infra/validate-telemetry-connectivity.sh  # LIVE_CLUSTER
 scripts/qa/verify-grafana-runtime-readiness.sh  # LIVE_CLUSTER
 scripts/qa/verify-enterprise-service-deployment.sh  # LIVE_CLUSTER
+scripts/qa/verify-enterprise-frontend-live-contract.sh  # LIVE_CLUSTER
 
 # ── Live app required ────────────────────────────────────────────────────────
 scripts/qa/verify-tenant-visual-contract.sh     # LIVE_APP
