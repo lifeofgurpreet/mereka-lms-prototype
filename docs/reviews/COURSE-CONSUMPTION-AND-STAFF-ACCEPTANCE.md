@@ -8,8 +8,10 @@ Environment: `mereka-lms-dev`
 
 Status: `OPEN`
 
-The biggest remaining runtime blocker is no longer "route exists but unproven". It is a
-live learner course-render failure with a repo-owned root cause in Tutor MFE slot wiring.
+The first repo-owned blocker was fixed in `mereka-lms` PR `#897`, and that generic `mfe`
+fix is now live in dev. The next first blocker is a new repo-owned login redirect defect:
+successful authn MFE login returns the learner deep-route redirect on the LMS host
+(`academyv2.mereka.dev`) instead of the apps MFE host (`apps.academyv2.mereka.dev`).
 
 ## What Was Freshly Runtime-Proven
 
@@ -100,6 +102,10 @@ Prepared repo changes:
 - `scripts/qa/verify-mfe-header-branding.sh`
 - `.github/ci-scripts-static.txt`
 
+Repo PR:
+
+- `#897`
+
 ## Local Repo Verification For The Fix
 
 Passed locally on the fix branch:
@@ -109,6 +115,76 @@ Passed locally on the fix branch:
 - `bash scripts/qa/verify-mfe-plugin-slots.sh`
 - `bash scripts/qa/verify-ci-script-list.sh`
 - `bash scripts/qa/verify-new-ci-static-entries.sh --staged-only`
+
+## Post-#897 Live Convergence Check
+
+`#897` merged on `2026-03-13` as commit `6233c55b0c51ed5846d6b4b4c4746d9a80c857b3`.
+
+Live dev **has** now picked up that fix.
+
+Fresh runtime proof shows the currently deployed generic apps MFE is now:
+
+- deployment: `mfe`
+- live image: `ghcr.io/biji-biji-initiative/mereka-lms/mfe:6233c55b0c51ed5846d6b4b4c4746d9a80c857b3`
+
+Direct inspection of the live learning and authoring bundles no longer shows the old
+unsupported slot semantics. The `Replace`-style slot operations isolated earlier are gone
+from the live generic `mfe` payload.
+
+That means the original first blocker is cleared, and the next first blocker is now the
+post-auth redirect contract between LMS login_session and the apps MFE routes.
+
+## New First Blocker After Rollout
+
+Fresh browser proof now shows:
+
+- learner sign-in succeeds through authn MFE
+- LMS `POST /api/user/v2/account/login_session/` returns HTTP `200`
+- session + JWT cookies are set correctly
+- final browser location is still wrong:
+
+```text
+https://academyv2.mereka.dev/learning/course/course-v1:MEREKA+MEKA-2149245377+RUN-2149245377/home
+```
+
+Observed page result:
+
+```text
+Page Not Found | Mereka Academy Dev
+```
+
+This is no longer a bundle-crash problem. It is now a redirect-host normalization problem.
+
+First decisive live proof:
+
+- `login_session` succeeds on LMS origin
+- `redirect_url` resolves to an MFE-owned deep route (`/learning/...`)
+- but it is returned on the LMS host instead of the tenant apps host
+
+The route/config contract already says MFE-owned deep routes belong on:
+
+- `https://apps.academyv2.mereka.dev/learning`
+- `https://apps.academyv2.mereka.dev/course-authoring`
+
+So the current mismatch is:
+
+- repo intent for MFE deep-route host: correct
+- live login-session redirect host: wrong
+
+## Exact Repo-Owned Follow-Up Fix
+
+The smallest repo-owned fix is to extend the existing tenant-aware login redirect middleware
+in `deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py` so it also rewrites
+successful `login_session` JSON `redirect_url` values when they point at known MFE deep
+routes on the LMS host.
+
+That fix is intentionally narrow:
+
+- rewrite only known MFE path families such as `/learning` and `/authoring`
+- preserve LMS-owned redirects such as `/enterprise/...`
+- leave auth/session behavior unchanged
+
+It also adds focused unit coverage for successful `login_session` JSON redirect rewriting.
 
 ## What Remains Blocked
 
@@ -122,12 +198,15 @@ Still not freshly completion-proven in live dev:
 - gradebook
 - ORA grading
 
-These remain blocked behind the first repo-owned frontend render failure until the
-`Hide + Insert` slot-operation fix is merged, deployed, and re-proven live.
+These remain blocked behind the first live deployment blocker until the merged `Hide +
+Insert` slot-operation fix is followed by the login-session deep-route host fix and then
+re-proven live.
 
 ## Next Required Step
 
-1. Merge and deploy the Tutor plugin slot-operation compatibility fix from `mereka-lms`.
-2. Re-run learner course consumption proof on the same live course.
-3. Only after course render clears, continue into video, XBlock, gradebook, ORA, and
-   Studio authoring completion proof.
+1. Merge the narrow LMS-side login-session redirect host normalization fix.
+2. Promote/deploy that repo fix to dev.
+3. Re-run learner course consumption proof on the same live course.
+4. Re-run Studio authoring.
+5. Only after those render-path blockers clear, continue into video, XBlock, gradebook,
+   ORA, and certificate completion proof.

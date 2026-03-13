@@ -283,6 +283,18 @@ class TestCookieDomainMiddleware(unittest.TestCase):
 class TestLoginRedirectMiddleware(unittest.TestCase):
     """Test MerekaLoginRedirectMiddleware — per-tenant /login redirect."""
 
+    class _FakeJsonResponse:
+        def __init__(self, payload, status=200):
+            self.status_code = status
+            self.content = json.dumps(payload).encode("utf-8")
+            self.headers = {}
+
+        def get(self, key, default=None):
+            return self.headers.get(key, default)
+
+        def __setitem__(self, key, value):
+            self.headers[key] = value
+
     def _make_request(self, host, path="/login"):
         req = MagicMock()
         req.get_host.return_value = host
@@ -423,6 +435,65 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
         resp = mw(req)
 
         resp.__setitem__.assert_not_called()
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_rewrites_login_session_redirect_to_tenant_mfe(self, mock_mfe, mock_patch):
+        """login_session success JSON should point MFE routes at the tenant apps host."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        def get_response(request):
+            return self._FakeJsonResponse(
+                {
+                    "success": True,
+                    "redirect_url": (
+                        "https://staging.academy.biji-biji.com/learning/"
+                        "course/course-v1:TEST+COURSE+RUN/home"
+                    ),
+                }
+            )
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request(
+            "staging.academy.biji-biji.com",
+            path="/api/user/v2/account/login_session/",
+        )
+        resp = mw(req)
+
+        payload = json.loads(resp.content.decode("utf-8"))
+        self.assertEqual(
+            payload["redirect_url"],
+            "https://apps.staging.academy.biji-biji.com/learning/course/course-v1:TEST+COURSE+RUN/home",
+        )
+        self.assertEqual(resp.headers["Content-Length"], str(len(resp.content)))
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_login_session_keeps_non_mfe_redirects(self, mock_mfe, mock_patch):
+        """login_session should not rewrite LMS-owned post-login destinations."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        def get_response(request):
+            return self._FakeJsonResponse(
+                {
+                    "success": True,
+                    "redirect_url": "https://staging.academy.biji-biji.com/enterprise/select/active",
+                }
+            )
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request(
+            "staging.academy.biji-biji.com",
+            path="/api/user/v2/account/login_session/",
+        )
+        resp = mw(req)
+
+        payload = json.loads(resp.content.decode("utf-8"))
+        self.assertEqual(
+            payload["redirect_url"],
+            "https://staging.academy.biji-biji.com/enterprise/select/active",
+        )
+        self.assertEqual(resp.headers, {})
 
 
 class TestDomainFromEnvValue(unittest.TestCase):
