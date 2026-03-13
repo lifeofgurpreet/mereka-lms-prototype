@@ -62,13 +62,39 @@ Proven live matches:
 Residual note:
 
 - the currently live learner/admin image tags in dev still predate the merge SHAs
-  for PRs `#885` and `#890`, but the deployed artifacts themselves match the
-  merged route/config/patch contract. In other words, live parity is proven at
-  the file and bundle layer even though image provenance alone would have looked
-  stale.
+  for PRs `#885` and `#890`, but image provenance alone is not the governing
+  truth for live parity
+
+Lane M3 resolved that ambiguity from first principles:
+
+- route ownership is `RUNTIME_MOUNTED` via the live Caddy ConfigMaps mounted at
+  `/etc/caddy/Caddyfile`
+- runtime env keys and `window.PARAGON_THEME` are `RUNTIME_MOUNTED` via the
+  live `enterprise-mfe-env` ConfigMap mounted at `/openedx/dist/env.config.js`
+- learner optional-404 hardening and the Algolia null guard are `IMAGE_BUILT`
+  because the live learner bundle contains those markers while the live startup
+  command does not inject them and no runtime volume overlays the JS bundle
+- domain rewrites, empty-string cookie repair, and broad `MISSING_ENV_VAR`
+  sentinel fixes are `STARTUP_PATCHED` because the live learner/admin deployment
+  commands still run `sed` rewrites over `/openedx/dist/*.js` before `caddy`
+  starts
+
+The live enterprise frontend provenance in dev is therefore `MIXED`, not pure
+image provenance. Image tags are insufficient for closure because they do not
+capture runtime-mounted files or startup JS mutation.
 
 Runtime guardrail:
 
 - `scripts/qa/verify-enterprise-frontend-live-contract.sh` now checks the live
-  learner/admin env, Caddy routing, and bundle patch markers directly against
-  the contract.
+  learner/admin env, Caddy routing, startup-patch provenance markers, and
+  bundle patch markers directly against the contract
+- Lane M3 hardened that verifier so missing `--namespace` / `--context` values
+  fail cleanly and single-quote patterns are passed safely to `kubectl exec`
+  instead of being interpolated into a fragile remote shell
+
+Lane M3 verdict:
+
+- `CONDITIONALLY_CLOSED` until the verifier hardening lands on `main`
+- after that merge, the remaining ambiguity is removed: future investigation can
+  re-check live parity and provenance directly instead of inferring from image
+  tags

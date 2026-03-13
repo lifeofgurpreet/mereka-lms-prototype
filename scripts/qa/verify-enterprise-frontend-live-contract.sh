@@ -50,13 +50,25 @@ config, and patch contracts.
 EOF
 }
 
+require_option_value() {
+  local flag="$1"
+  local value="${2-}"
+  if [[ -z "$value" || "$value" == --* ]]; then
+    echo "Missing value for ${flag}" >&2
+    usage >&2
+    exit 1
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --namespace)
+      require_option_value "$1" "${2-}"
       NAMESPACE="${2:-}"
       shift 2
       ;;
     --context)
+      require_option_value "$1" "${2-}"
       KUBE_CONTEXT="${2:-}"
       shift 2
       ;;
@@ -98,19 +110,38 @@ if [[ -z "$LEARNER_POD" || -z "$ADMIN_POD" || -z "$CADDY_POD" ]]; then
   exit 2
 fi
 
+live_yes_no() {
+  local pod="$1" script="$2"
+  shift 2
+  kube exec -n "$NAMESPACE" "$pod" -- sh -lc "$script" sh "$@"
+}
+
 live_file_contains() {
   local pod="$1" file="$2" pattern="$3"
-  kube exec -n "$NAMESPACE" "$pod" -- sh -lc "grep -F -q -- '$pattern' '$file'"
+  [[ "$(live_yes_no "$pod" 'if grep -F -q -- "$1" "$2"; then printf yes; else printf no; fi' "$pattern" "$file")" == "yes" ]]
 }
 
 live_bundle_contains() {
   local pod="$1" pattern="$2"
-  [[ "$(kube exec -n "$NAMESPACE" "$pod" -- sh -lc "if grep -R -F -q -- '$pattern' /openedx/dist/*.js; then printf yes; else printf no; fi")" == "yes" ]]
+  [[ "$(live_yes_no "$pod" 'if grep -R -F -q -- "$1" /openedx/dist/*.js; then printf yes; else printf no; fi' "$pattern")" == "yes" ]]
 }
 
 live_bundle_not_contains() {
   local pod="$1" pattern="$2"
-  [[ "$(kube exec -n "$NAMESPACE" "$pod" -- sh -lc "if grep -R -F -q -- '$pattern' /openedx/dist/*.js; then printf yes; else printf no; fi")" == "no" ]]
+  [[ "$(live_yes_no "$pod" 'if grep -R -F -q -- "$1" /openedx/dist/*.js; then printf yes; else printf no; fi' "$pattern")" == "no" ]]
+}
+
+live_deploy_contains() {
+  local deploy="$1" pattern="$2"
+  kube get deploy -n "$NAMESPACE" "$deploy" -o yaml | grep -F -q -- "$pattern"
+}
+
+live_deploy_not_contains() {
+  local deploy="$1" pattern="$2"
+  if kube get deploy -n "$NAMESPACE" "$deploy" -o yaml | grep -F -q -- "$pattern"; then
+    return 1
+  fi
+  return 0
 }
 
 echo "=== Enterprise Frontend Live Contract Verification ==="
@@ -178,6 +209,44 @@ for pattern in \
     pass "main caddy contains: $pattern"
   else
     fail "main caddy missing: $pattern"
+  fi
+done
+
+# Live provenance split
+for pattern in \
+  "mountPath: /openedx/dist/env.config.js" \
+  "name: enterprise-mfe-env" \
+  "mountPath: /etc/caddy/" \
+  "Fixing empty-string config defaults in baked JS" \
+  "Fixing MISSING_ENV_VAR sentinels in baked JS" \
+  "Rewriting domains: \$BUILD_LMS_DOMAIN -> \$RUNTIME_LMS_DOMAIN"; do
+  if live_deploy_contains "enterprise-learner-portal" "$pattern"; then
+    pass "learner deployment contains provenance marker: $pattern"
+  else
+    fail "learner deployment missing provenance marker: $pattern"
+  fi
+done
+
+for pattern in \
+  "mountPath: /openedx/dist/env.config.js" \
+  "name: enterprise-mfe-env" \
+  "mountPath: /etc/caddy/" \
+  "Fixing MISSING_ENV_VAR sentinels in baked JS" \
+  "Rewriting domains: \$BUILD_LMS_DOMAIN -> \$RUNTIME_LMS_DOMAIN"; do
+  if live_deploy_contains "enterprise-admin-portal" "$pattern"; then
+    pass "admin deployment contains provenance marker: $pattern"
+  else
+    fail "admin deployment missing provenance marker: $pattern"
+  fi
+done
+
+for pattern in \
+  "couponCodeRedemptionCount:0" \
+  "t&&t.validUntil&&await"; do
+  if live_deploy_not_contains "enterprise-learner-portal" "$pattern"; then
+    pass "learner deployment omits image-built marker: $pattern"
+  else
+    fail "learner deployment unexpectedly contains image-built marker: $pattern"
   fi
 done
 
