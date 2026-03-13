@@ -1,6 +1,12 @@
 // LMS main entry point for Mereka theme
 // This file must exist for compile-sass --theme mereka to compile LMS styles.
 // Without it, only CMS (Studio) styles are compiled.
+//
+// Theme variables load first to override !default values in base SCSS.
+// Base imports provide ALL standard Open edX styles (.sr, .modal, layout, etc.).
+// Custom overrides apply Mereka-specific additions last.
 
 @import 'partials/variables';
+@import 'build-base-v1';
+@import 'build-lms-v1';
 @import 'partials/custom';
