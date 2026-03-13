@@ -55,17 +55,22 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+          startupProbe:
+            tcpSocket:
+              port: 8002
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 24
+            timeoutSeconds: 5
           livenessProbe:
             tcpSocket:
               port: 8002
-            initialDelaySeconds: 5
             periodSeconds: 10
             failureThreshold: 3
             timeoutSeconds: 5
           readinessProbe:
             tcpSocket:
               port: 8002
-            initialDelaySeconds: 5
             periodSeconds: 10
             failureThreshold: 3
             timeoutSeconds: 5
