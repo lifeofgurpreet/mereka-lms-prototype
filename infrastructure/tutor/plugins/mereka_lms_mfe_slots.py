@@ -4,10 +4,10 @@ Data-driven slot configuration. Each slot is declared as structured data
 and expanded into the JS config objects that tutormfe expects.
 
 Operation types:
-  - Insert:  Add a new widget to a slot (DIRECT_PLUGIN, priority 1)
-  - Replace: Replace the default widget entirely
-  - Modify:  Wrap the default widget with a higher-order function
-  - Custom:  Raw JS for slots that don't fit the above patterns
+  - Insert:      Add a new widget to a slot (DIRECT_PLUGIN, priority 1)
+  - Hide+Insert: Replace default content without relying on unsupported Replace op
+  - Modify:      Wrap the default widget with a higher-order function
+  - Custom:      Raw JS for slots that don't fit the above patterns
 """
 
 from __future__ import annotations
@@ -294,7 +294,10 @@ _INSERT_SLOTS: list[tuple[str, str, str]] = [
 ]
 
 # Each tuple: (slot_name, widget_id, RenderWidget, priority)
-_REPLACE_SLOTS: list[tuple[str, str, str, int]] = [
+# frontend-plugin-framework in shipped learning/dashboard MFEs does not support
+# a direct replace operation. These surfaces must hide default_contents and insert
+# the replacement widget instead.
+_HIDE_INSERT_SLOTS: list[tuple[str, str, str, int]] = [
     ("org.openedx.frontend.layout.header_logo.v1", "mereka_header_logo", "MerekaHeaderLogo", 1),
     (
         "org.openedx.frontend.learner_dashboard.no_courses_view.v1",
@@ -388,10 +391,14 @@ def _insert_js(widget_id: str, render_widget: str, priority: int = 1) -> str:
                 """
 
 
-def _replace_js(widget_id: str, render_widget: str, priority: int = 1) -> str:
+def _hide_insert_js(widget_id: str, render_widget: str, priority: int = 1) -> str:
     return f"""
                 {{
-                    op: PLUGIN_OPERATIONS.Replace,
+                    op: PLUGIN_OPERATIONS.Hide,
+                    widgetId: 'default_contents',
+                }},
+                {{
+                    op: PLUGIN_OPERATIONS.Insert,
                     widget: {{
                         id: '{widget_id}',
                         type: DIRECT_PLUGIN,
@@ -436,9 +443,9 @@ def register_mfe_plugin_slots() -> None:
     for slot_name, widget_id, render_widget in _INSERT_SLOTS:
         items.append(("all", slot_name, _insert_js(widget_id, render_widget)))
 
-    # Replace slots (3 slots)
-    for slot_name, widget_id, render_widget, priority in _REPLACE_SLOTS:
-        items.append(("all", slot_name, _replace_js(widget_id, render_widget, priority)))
+    # Hide+insert slots (3 slots)
+    for slot_name, widget_id, render_widget, priority in _HIDE_INSERT_SLOTS:
+        items.append(("all", slot_name, _hide_insert_js(widget_id, render_widget, priority)))
 
     # Simple Modify slots (11 slots)
     for slot_name, fn_name in _MODIFY_SLOTS:

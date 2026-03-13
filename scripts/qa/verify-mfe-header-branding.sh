@@ -72,11 +72,14 @@ else
   do_fail "Header logo widget ID missing: mereka_header_logo"
 fi
 
-# Slot must use PLUGIN_OPERATIONS.Replace (single slot handles both desktop + mobile viewports)
-if grep -qF "PLUGIN_OPERATIONS.Replace" "$PLUGIN_FILE"; then
-  do_pass "Slot uses PLUGIN_OPERATIONS.Replace (replaces default logo widget)"
+# Header logo replacement must use the supported Hide+Insert pattern.
+if grep -qF "org.openedx.frontend.layout.header_logo.v1" "$PLUGIN_FILE" && \
+   grep -qF "PLUGIN_OPERATIONS.Hide" "$PLUGIN_FILE" && \
+   grep -qF "widgetId: 'default_contents'" "$PLUGIN_FILE" && \
+   grep -qF "mereka_header_logo" "$PLUGIN_FILE"; then
+  do_pass "Header logo slot uses supported Hide+Insert replacement pattern"
 else
-  do_fail "PLUGIN_OPERATIONS.Replace missing — header logo slot must replace default widget"
+  do_fail "Header logo slot must use Hide+Insert replacement pattern"
 fi
 
 # PLUGIN_SLOTS API must be imported (AC-SLOT-016)

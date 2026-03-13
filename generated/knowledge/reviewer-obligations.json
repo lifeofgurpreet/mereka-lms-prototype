@@ -4,7 +4,7 @@
     "generated/knowledge/review-decision.json",
     "generated/skills/skill-registry.json"
   ],
-  "diff_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD",
+  "diff_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD",
   "escalation_reviewers": [
     "docs",
     "governance",
@@ -46,5 +46,5 @@
     }
   ],
   "schema_version": 1,
-  "source_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD"
+  "source_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD"
 }

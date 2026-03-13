@@ -21,7 +21,7 @@
     ],
     "severity": "high"
   },
-  "diff_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD",
+  "diff_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD",
   "explanation": {
     "blocking_reasons": [],
     "evidence_summary": [
@@ -91,25 +91,15 @@
     "platform"
   ],
   "schema_version": 1,
-  "source_range": "3aa40a42819d5108218c802b22346c63364317f9...HEAD",
+  "source_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD",
   "touched_files": [
-    "docs/reviews/RUNTIME_PROOF_FIXTURE_EXECUTION_PACKET.md",
-    "docs/reviews/RUNTIME_PROOF_FIXTURE_HANDOFF.md",
-    "docs/reviews/RUNTIME_PROOF_FIXTURE_ROLLBACK_PACKET.md",
-    "generated/knowledge/evidence-obligations.json",
-    "generated/knowledge/read-first-packs.json",
-    "generated/knowledge/release-readiness.json",
-    "generated/knowledge/release-readiness.md",
-    "generated/knowledge/review-decision.json",
-    "generated/knowledge/review-decision.md",
-    "generated/knowledge/reviewer-obligations.json",
-    "scripts/qa/verify-runtime-proof-fixture-pack.sh",
-    "scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py",
-    "scripts/tenants/bootstrap-runtime-proof-fixtures.py",
-    "scripts/tenants/lib/__init__.py",
-    "scripts/tenants/lib/proof_fixtures.py",
-    "scripts/tenants/validate-runtime-proof-fixtures.py",
-    "tests/test_runtime_proof_fixtures.py"
+    ".github/ci-scripts-static.txt",
+    "docs/archive/COURSE-CONSUMPTION-AND-STAFF-ACCEPTANCE.md",
+    "docs/catalog.json",
+    "generated/catalogs/docs-catalog.json",
+    "infrastructure/tutor/plugins/mereka_lms_mfe_slots.py",
+    "scripts/qa/test-mfe-slot-operation-compat.sh",
+    "scripts/qa/verify-mfe-header-branding.sh"
   ],
   "touched_repos": [
     "bbi-infrastructure",
@@ -117,10 +107,10 @@
     "platform-control-plane"
   ],
   "touched_roots": [
+    ".github",
     "docs",
-    "generated",
-    "scripts",
-    "scripts/qa",
-    "tests"
+    "generated/catalogs",
+    "infrastructure",
+    "scripts/qa"
   ]
 }

@@ -1,7 +1,7 @@
 <!-- Generated file. Do not hand-edit. -->
 # Release Readiness
 
-- Diff range: `3aa40a42819d5108218c802b22346c63364317f9...HEAD`
+- Diff range: `e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD`
 - Release status: `advisory`
 
 ## Why

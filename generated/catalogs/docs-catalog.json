@@ -697,6 +697,24 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "archive/LANE-A3-ENTERPRISE-RUNTIME-CLOSURE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/LANE-A4-ENTERPRISE-FINAL-ACCEPTANCE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "archive/LOGO_FIX_DEPLOYMENT_CHECKLIST.md",
     "status": "archive-candidate",
     "type": "other"
@@ -6122,8 +6140,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6131,8 +6149,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/A11Y_REGRESSION_LANE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6140,8 +6158,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/A11Y_TENANT_BRANDING_GATE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6158,8 +6176,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-06",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ALERT_TUNING_SOP.md",
     "status": "supporting",
     "type": "runbook"
@@ -6167,8 +6185,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md",
     "status": "supporting",
     "type": "runbook"
@@ -6185,8 +6203,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ARGOCD_DRIFT.md",
     "status": "supporting",
     "type": "runbook"
@@ -6194,8 +6212,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md",
     "status": "supporting",
     "type": "runbook"
@@ -6212,8 +6230,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ATLAS_HEALTH.md",
     "status": "supporting",
     "type": "runbook"
@@ -6221,8 +6239,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md",
     "status": "supporting",
     "type": "runbook"
@@ -6239,8 +6257,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/AUTH_CHANGE_CHECKLIST.md",
     "status": "supporting",
     "type": "runbook"
@@ -6275,8 +6293,8 @@
   {
     "canonical_conflict_group": "build-cache-pipeline-runbook",
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/BUILD_CACHE_PIPELINE_RUNBOOK.md",
     "status": "supporting",
     "type": "runbook"
@@ -6302,8 +6320,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md",
     "status": "supporting",
     "type": "runbook"
@@ -6356,8 +6374,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/DEPLOYMENT_VERIFICATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -6365,8 +6383,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/DEPLOY_EVIDENCE_GATES.md",
     "status": "supporting",
     "type": "runbook"
@@ -6392,8 +6410,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md",
     "status": "supporting",
     "type": "runbook"
@@ -6428,8 +6446,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-04",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md",
     "status": "supporting",
     "type": "runbook"
@@ -6437,8 +6455,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md",
     "status": "supporting",
     "type": "runbook"
@@ -6455,8 +6473,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md",
     "status": "supporting",
     "type": "runbook"
@@ -6473,8 +6491,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ENTERPRISE_SSO_GUIDE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6482,8 +6500,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ESO_ALERTING.md",
     "status": "supporting",
     "type": "runbook"
@@ -6491,8 +6509,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/FORUM_AUTH_E2E.md",
     "status": "supporting",
     "type": "runbook"
@@ -6518,8 +6536,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/FRONTEND_REGRESSION_CHECKLIST.md",
     "status": "supporting",
     "type": "runbook"
@@ -6527,8 +6545,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/GDPR_COMPLIANCE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6545,8 +6563,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/GKE_LOKI_FORWARDING.md",
     "status": "supporting",
     "type": "runbook"
@@ -6599,8 +6617,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md",
     "status": "supporting",
     "type": "runbook"
@@ -6608,8 +6626,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/LMS_RKE2_VALIDATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -6617,8 +6635,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md",
     "status": "supporting",
     "type": "runbook"
@@ -6689,8 +6707,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6707,8 +6725,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md",
     "status": "supporting",
     "type": "runbook"
@@ -6716,8 +6734,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-07",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/OBSERVABILITY_QUICKSTART.md",
     "status": "supporting",
     "type": "runbook"
@@ -6725,8 +6743,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-07",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md",
     "status": "supporting",
     "type": "runbook"
@@ -6752,8 +6770,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/POSTDEPLOY_SMOKE_AND_INCIDENT.md",
     "status": "supporting",
     "type": "runbook"
@@ -6761,8 +6779,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/POST_DEPLOY_GATE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6770,8 +6788,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/PREVIEW_REDIRECT.md",
     "status": "supporting",
     "type": "runbook"
@@ -6797,8 +6815,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md",
     "status": "supporting",
     "type": "runbook"
@@ -6806,8 +6824,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": "SRE | Status: Active",
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/PURCHASE_GATEWAY_K8S.md",
     "status": "supporting",
     "type": "runbook"
@@ -6824,8 +6842,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/RELEASE_CHECKLIST.md",
     "status": "supporting",
     "type": "runbook"
@@ -6860,8 +6878,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/RKE2_DEV_READINESS.md",
     "status": "supporting",
     "type": "runbook"
@@ -6869,8 +6887,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md",
     "status": "supporting",
     "type": "runbook"
@@ -6878,8 +6896,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/RKE2_TENANT_ROUTES.md",
     "status": "supporting",
     "type": "runbook"
@@ -6887,8 +6905,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/SECRET_ROTATION_CHECKLIST.md",
     "status": "supporting",
     "type": "runbook"
@@ -6896,8 +6914,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md",
     "status": "supporting",
     "type": "runbook"
@@ -6905,8 +6923,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/SLO_DASHBOARDS_SETUP.md",
     "status": "supporting",
     "type": "runbook"
@@ -6914,8 +6932,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/STAGING_ACTIVATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -6923,8 +6941,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-17",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/STRIPE_WEBHOOKS_SETUP.md",
     "status": "supporting",
     "type": "runbook"
@@ -6941,8 +6959,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-17",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md",
     "status": "supporting",
     "type": "runbook"
@@ -6950,8 +6968,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_BRAND_ONBOARDING_GUIDE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6959,8 +6977,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_DRIFT_INVESTIGATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -6968,8 +6986,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_FOOTER_VARIANT_LANE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6977,8 +6995,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md",
     "status": "supporting",
     "type": "runbook"
@@ -6986,8 +7004,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_PROVISIONING.md",
     "status": "supporting",
     "type": "runbook"
@@ -6995,8 +7013,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/THEME_DEPLOYMENT.md",
     "status": "supporting",
     "type": "runbook"
@@ -7040,8 +7058,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/UI_UX_POSTDEPLOY_SMOKE.md",
     "status": "supporting",
     "type": "runbook"
@@ -7058,8 +7076,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/VISUAL_PARITY_CHECKPOINTS.md",
     "status": "supporting",
     "type": "runbook"
@@ -7076,8 +7094,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/VISUAL_SMOKE_BASELINE.md",
     "status": "supporting",
     "type": "runbook"
@@ -7094,8 +7112,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -7112,8 +7130,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md",
     "status": "supporting",
     "type": "runbook"
@@ -7121,8 +7139,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/FOOTER_SLOT_MIGRATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -7130,8 +7148,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-18",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md",
     "status": "supporting",
     "type": "runbook"
@@ -7139,8 +7157,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-18",
-    "owner": "Mereka Frontend",
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/MFE_FOOTER_SLOT_MIGRATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -7148,8 +7166,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md",
     "status": "supporting",
     "type": "runbook"
@@ -7157,8 +7175,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/MFE_ROUTING_PARITY.md",
     "status": "supporting",
     "type": "runbook"
@@ -7175,8 +7193,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md",
     "status": "supporting",
     "type": "runbook"
@@ -7184,8 +7202,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -7193,8 +7211,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md",
     "status": "supporting",
     "type": "runbook"
@@ -7202,8 +7220,8 @@
   {
     "canonical_conflict_group": "credential-backfill-runbook",
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/credential-backfill-runbook.md",
     "status": "supporting",
     "type": "runbook"
@@ -7211,8 +7229,8 @@
   {
     "canonical_conflict_group": "credential-issuance-failure-runbook",
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/credential-issuance-failure-runbook.md",
     "status": "supporting",
     "type": "runbook"
@@ -7220,8 +7238,8 @@
   {
     "canonical_conflict_group": "credential-key-rotation-runbook",
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/credential-key-rotation-runbook.md",
     "status": "supporting",
     "type": "runbook"
@@ -7229,8 +7247,8 @@
   {
     "canonical_conflict_group": "credential-verification-failure-runbook",
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-12",
+    "owner": "Platform Team",
     "path": "ops/runbooks/credential-verification-failure-runbook.md",
     "status": "supporting",
     "type": "runbook"
@@ -9383,6 +9401,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reviews/CONVERGENCE_EVIDENCE_PROMOTION_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reviews/COURSE-CONSUMPTION-AND-STAFF-ACCEPTANCE.md",
     "status": "supporting",
     "type": "other"
   },
