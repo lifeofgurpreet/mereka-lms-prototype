@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - 'deploy/k8s/base/apps/openedx/**'
       - 'infrastructure/tutor/**'
       - 'assets/branding/**'
       - '.github/workflows/build-tutor-images.yml'

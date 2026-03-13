@@ -186,6 +186,37 @@ That fix is intentionally narrow:
 
 It also adds focused unit coverage for successful `login_session` JSON redirect rewriting.
 
+`#898` merged on `2026-03-13` as commit `d24010e06eab59e1e8c1e90697fa8d0507c2472a`.
+
+## Exact Post-Merge Publish Blocker
+
+The redirect fix is now merged in `mereka-lms`, but the current first blocker is no longer
+live route behavior inside the app. It is image-build trigger coverage.
+
+Fresh post-merge proof:
+
+- live LMS deployment is still:
+  - `ghcr.io/biji-biji-initiative/mereka-lms/openedx:3b79796f6aac0d5a2bb44fb4639ef2f8ec57b9d7`
+- the expected merged image tag does not exist yet:
+  - `ghcr.io/biji-biji-initiative/mereka-lms/openedx:d24010e06eab59e1e8c1e90697fa8d0507c2472a`
+- direct registry check returns:
+
+```text
+manifest unknown
+```
+
+The exact reason is now identified:
+
+- `.github/workflows/build-tutor-images.yml` only triggers on:
+  - `infrastructure/tutor/**`
+  - `assets/branding/**`
+  - the workflow file itself
+- the merged redirect fix lives under:
+  - `deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py`
+- so `#898` did not trigger an `openedx` image build at all
+
+This is a repo-owned publish gap, not a new runtime mystery.
+
 ## What Remains Blocked
 
 Still not freshly completion-proven in live dev:
@@ -198,15 +229,16 @@ Still not freshly completion-proven in live dev:
 - gradebook
 - ORA grading
 
-These remain blocked behind the first live deployment blocker until the merged `Hide +
-Insert` slot-operation fix is followed by the login-session deep-route host fix and then
-re-proven live.
+These remain blocked until the merged login-session redirect fix is actually built into a
+new `openedx` image, promoted to dev, and re-proven live.
 
 ## Next Required Step
 
-1. Merge the narrow LMS-side login-session redirect host normalization fix.
-2. Promote/deploy that repo fix to dev.
-3. Re-run learner course consumption proof on the same live course.
-4. Re-run Studio authoring.
-5. Only after those render-path blockers clear, continue into video, XBlock, gradebook,
+1. Merge the narrow build-trigger fix so `deploy/k8s/base/apps/openedx/**` changes publish
+   a new `openedx` image.
+2. Confirm `openedx:d24010e...` (or successor) is published.
+3. Promote/deploy that image to dev.
+4. Re-run learner course consumption proof on the same live course.
+5. Re-run Studio authoring.
+6. Only after those render-path blockers clear, continue into video, XBlock, gradebook,
    ORA, and certificate completion proof.
