@@ -32,10 +32,16 @@ spec:
             app.kubernetes.io/component: pod
         spec:
           restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
           containers:
             - name: reindex
               # Image is overridden by the kustomization images[] transformer.
               image: docker.io/overhangio/openedx
+              securityContext:
+                allowPrivilegeEscalation: false
               command:
                 - /bin/bash
                 - -c
