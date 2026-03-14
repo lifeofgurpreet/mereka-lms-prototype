@@ -54,5 +54,6 @@ resources:
   # prometheusrule-tenant-isolation.yaml — Depends on tenant_isolation_failures
   #                                        pushed via Pushgateway (not deployed).
   # ── CronJobs ─────────────────────────────────────────────────────────────
+  - cronjob-course-reindex.yaml
   - cronjob-library-export.yaml
   - cronjob-tenant-isolation.yaml
