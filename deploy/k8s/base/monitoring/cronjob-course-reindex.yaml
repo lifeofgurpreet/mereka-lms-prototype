@@ -48,11 +48,8 @@ spec:
                   python manage.py cms reindex_course --setup --all 2>&1
 
                   echo "[2/3] Verifying course_info doc count..."
-                  COUNT=$(python manage.py cms shell -c "
-                  import requests
-                  r = requests.get('http://elasticsearch:9200/course_info/_count', timeout=10)
-                  print(r.json().get('count', 0))
-                  " 2>/dev/null)
+                  COUNT=$(curl -sf http://elasticsearch:9200/course_info/_count \
+                    | python3 -c "import sys,json; print(json.load(sys.stdin).get('count',0))")
 
                   echo "course_info docs: ${COUNT}"
 
@@ -65,7 +62,7 @@ spec:
                   python manage.py cms shell -c "
                   from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
                   print(f'CourseOverview total: {CourseOverview.objects.count()}')
-                  " 2>/dev/null || echo "Could not verify CourseOverview count"
+                  " 2>&1 | tail -1 || echo "Could not verify CourseOverview count"
 
                   echo "Reindex complete."
               env:
