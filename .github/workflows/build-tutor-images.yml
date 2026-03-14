@@ -172,10 +172,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3
         with:
-          # Must use 'docker' driver: tutor defaults --output=type=docker to
-          # load images into the local daemon for downstream steps (branding
-          # verification, SBOM, push). The 'docker-container' driver can't
-          # load images back into the host daemon.
+          # Uses 'docker' driver: tutor defaults --output=type=docker to load
+          # images into the local daemon for downstream steps (branding
+          # verification, SBOM, Trivy, push).
+          # Cache strategy: BUILDKIT_INLINE_CACHE=1 embeds cache metadata in
+          # the built image. After push to GHCR, next build pulls metadata via
+          # --cache-from=type=registry and reuses matching layers.
           driver: docker
 
       - name: Fix DinD network MTU
@@ -200,16 +202,26 @@ jobs:
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
 
+      - name: Log in to GHCR (build cache)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Build OpenEdX image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
           export DOCKER_BUILDKIT=1
-          # Tutor v21 defaults:
-          #   --output=type=docker (loads image into local daemon)
-          #   --cache-from=type=registry (pulls cache — silently skips if unavailable)
-          # Registry cache-to is NOT used: requires docker-container driver
-          # which is incompatible with --output=type=docker.
-          # Layer caching relies on ARC runner persistent Docker volume.
+
+          # Cache strategy (D4 — build cache realization):
+          #   --no-registry-cache: skip upstream overhangio cache refs (can't push)
+          #   -d --cache-from:     pull our last GHCR image's inline cache metadata
+          #   -a BUILDKIT_INLINE_CACHE=1: embed cache metadata in built image
+          #
+          # On first run (bootstrap), cache-from silently misses. After push,
+          # subsequent builds reuse matching layers via inline cache metadata.
+          # Expected savings: ~25-35 min on cache hit (base+pip+npm+assets).
+          CACHE_REF="${{ env.REGISTRY }}/openedx:mereka-brand"
+
           (
             while true; do
               echo "[build-openedx-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
@@ -218,7 +230,10 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          if ! timeout 170m tutor images build openedx --no-registry-cache; then
+          if ! timeout 170m tutor images build openedx \
+            --no-registry-cache \
+            -d "--cache-from=type=registry,ref=${CACHE_REF}" \
+            -a BUILDKIT_INLINE_CACHE=1; then
             echo "OpenedX image build timed out or failed after timeout guard" >&2
             exit 1
           fi
@@ -226,8 +241,8 @@ jobs:
           trap - EXIT
 
           # Tutor 21 with buildx names images docker.io/overhangio/openedx:*
-          # instead of tutor_local/openedx:latest. Retag for downstream steps.
-          TUTOR_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'overhangio/openedx:.*indigo' | head -1)"
+          # Retag for downstream steps (branding verify, SBOM, Trivy, push).
+          TUTOR_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'overhangio/openedx:' | head -1)"
           if [[ -n "$TUTOR_IMAGE" && -z "$(docker images -q tutor_local/openedx:latest 2>/dev/null)" ]]; then
             echo "Retagging $TUTOR_IMAGE → tutor_local/openedx:latest"
             docker tag "$TUTOR_IMAGE" tutor_local/openedx:latest
@@ -487,12 +502,20 @@ jobs:
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
 
+      - name: Log in to GHCR (build cache)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Build MFE image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
           export DOCKER_BUILDKIT=1
           export NODE_OPTIONS="--max-old-space-size=6144"
-          # Same caching approach as OpenEdX build above.
+
+          # Cache strategy: same as openedx build (see D4 comments above).
+          CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand"
+
           (
             while true; do
               echo "[build-mfe-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
@@ -501,7 +524,10 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          if ! timeout 110m tutor images build mfe --no-registry-cache; then
+          if ! timeout 110m tutor images build mfe \
+            --no-registry-cache \
+            -d "--cache-from=type=registry,ref=${CACHE_REF}" \
+            -a BUILDKIT_INLINE_CACHE=1; then
             echo "MFE image build timed out or failed after timeout guard" >&2
             exit 1
           fi
@@ -510,7 +536,7 @@ jobs:
 
           # Tutor 21 with buildx names MFE images docker.io/overhangio/openedx-mfe:*
           # instead of tutor_local/openedx-mfe:latest. Retag for downstream steps.
-          TUTOR_MFE_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'overhangio/openedx-mfe:.*indigo' | head -1)"
+          TUTOR_MFE_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'overhangio/openedx-mfe:' | head -1)"
           if [[ -n "$TUTOR_MFE_IMAGE" && -z "$(docker images -q tutor_local/openedx-mfe:latest 2>/dev/null)" ]]; then
             echo "Retagging $TUTOR_MFE_IMAGE → tutor_local/openedx-mfe:latest"
             docker tag "$TUTOR_MFE_IMAGE" tutor_local/openedx-mfe:latest
