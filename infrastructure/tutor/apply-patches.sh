@@ -55,4 +55,11 @@ else
   echo "WARNING: Mereka theme source not found at $MEREKA_THEME_SRC"
 fi
 
+# Sync build-time helper patches into the Tutor MFE build context.
+TUTOR_MFE_BUILD_DIR="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/plugins/mfe/build/mfe"
+mkdir -p "$TUTOR_MFE_BUILD_DIR"
+cp "$PATCHES_DIR/patch-authn-deep-route-handoff.py" \
+  "$TUTOR_MFE_BUILD_DIR/patch-authn-deep-route-handoff.py"
+echo "Synced authn deep-route patch helper to build context: $TUTOR_MFE_BUILD_DIR"
+
 echo "Applied local Tutor patches."

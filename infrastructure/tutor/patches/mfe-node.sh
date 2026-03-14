@@ -19,6 +19,7 @@
 #   New Relic env           → template already has ARG ENABLE_NEW_RELIC
 #   Theme/brand copy       → mfe-dockerfile-pre-npm-install + mfe-dockerfile-post-npm-install
 #   Admin console Redux    → mfe-dockerfile-post-npm-install-admin-console
+#   Authn deep-route host  → authn production bundle post-build patch
 #   Course authoring fix   → dead code (Tutor app name is 'authoring', not 'course-authoring';
 #                            symlink paths never existed; original function was also a no-op)
 #   Ulmo source refs       → no-op (Tutor v21 template already uses Ulmo refs natively)
@@ -26,7 +27,8 @@
 #   Discussions webpack    → dead code (no-op function)
 #
 # Original purpose: MFE Node 24.11.0 base image, toolchain, cookie env, theme copy,
-#        npm resilience, plugin framework, admin-console redux, course-authoring fix,
+#        npm resilience, plugin framework, admin-console redux, authn deep-route host,
+#        course-authoring fix,
 #        new relic env, ulmo source refs, brand version, discussions webpack fix.
 
 apply_mfe_node_patch() {
@@ -363,6 +365,68 @@ for target in targets:
 
         return text
 
+    def ensure_mfe_authn_deep_route_handoff_patch(text):
+        helper_copy = "COPY patch-authn-deep-route-handoff.py /openedx/patch-authn-deep-route-handoff.py"
+        helper_run = "RUN python3 /openedx/patch-authn-deep-route-handoff.py /openedx/app/dist"
+
+        lines = text.splitlines()
+
+        authn_common_start = None
+        for idx, line in enumerate(lines):
+            if line.strip() == "FROM base AS authn-common":
+                authn_common_start = idx
+                break
+        if authn_common_start is None:
+            return text
+
+        authn_common_end = len(lines)
+        for idx in range(authn_common_start + 1, len(lines)):
+            stripped = lines[idx].strip()
+            if stripped.startswith("######## ") or stripped.startswith("FROM "):
+                authn_common_end = idx
+                break
+
+        if not any(line.strip() == helper_copy for line in lines[authn_common_start:authn_common_end]):
+            insert_at = None
+            for idx in range(authn_common_start, authn_common_end):
+                if lines[idx].strip() == "COPY --from=authn-src / /openedx/app":
+                    insert_at = idx + 1
+                    break
+            if insert_at is not None:
+                lines = lines[:insert_at] + [helper_copy] + lines[insert_at:]
+
+        authn_prod_start = None
+        for idx, line in enumerate(lines):
+            if line.strip() == "FROM authn-common AS authn-prod":
+                authn_prod_start = idx
+                break
+        if authn_prod_start is None:
+            rebuilt = "\n".join(lines)
+            if text.endswith("\n"):
+                rebuilt += "\n"
+            return rebuilt
+
+        authn_prod_end = len(lines)
+        for idx in range(authn_prod_start + 1, len(lines)):
+            stripped = lines[idx].strip()
+            if stripped.startswith("######## ") or stripped.startswith("FROM "):
+                authn_prod_end = idx
+                break
+
+        if not any(line.strip() == helper_run for line in lines[authn_prod_start:authn_prod_end]):
+            insert_at = None
+            for idx in range(authn_prod_start, authn_prod_end):
+                if lines[idx].strip() == "RUN npm run build":
+                    insert_at = idx + 1
+                    break
+            if insert_at is not None:
+                lines = lines[:insert_at] + [helper_run] + lines[insert_at:]
+
+        rebuilt = "\n".join(lines)
+        if text.endswith("\n"):
+            rebuilt += "\n"
+        return rebuilt
+
     def ensure_mfe_course_authoring_directory_fix(text):
         if "FROM base AS course-authoring-common" not in text:
             return text
@@ -535,6 +599,7 @@ for target in targets:
     updated = ensure_mfe_npm_resilience(updated)
     updated = ensure_mfe_plugin_framework_dependency(updated)
     updated = ensure_mfe_admin_console_redux_deps(updated)
+    updated = ensure_mfe_authn_deep_route_handoff_patch(updated)
     updated = ensure_mfe_course_authoring_directory_fix(updated)
     updated = ensure_mfe_new_relic_env(updated)
 

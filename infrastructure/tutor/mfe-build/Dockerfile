@@ -131,6 +131,7 @@ RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx
 COPY indigo/env.config.jsx /openedx/app/
 COPY indigo/mereka /openedx/app/mereka
 COPY --from=authn-src / /openedx/app
+COPY patch-authn-deep-route-handoff.py /openedx/patch-authn-deep-route-handoff.py
 
 # Remove external iframe-resizer dependency from authn shell to avoid
 # third-party script fetch/CSP variance causing client-side white screens.
@@ -811,6 +812,7 @@ RUN npm run build
 FROM authn-common AS authn-prod
 ENV NODE_ENV=production
 RUN npm run build
+RUN python3 /openedx/patch-authn-deep-route-handoff.py /openedx/app/dist
 
 
 
