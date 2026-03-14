@@ -34,14 +34,14 @@ mapfile -t allowlisted_dangerous < <(
 
 unexpected=()
 for path in "${current_dangerous[@]}"; do
-  if ! printf '%s\n' "${allowlisted_dangerous[@]}" | grep -Fxq "$path"; then
+  if ! (printf '%s\n' "${allowlisted_dangerous[@]}" || true) | grep -Fxq "$path"; then
     unexpected+=("$path")
   fi
 done
 
 stale=()
 for path in "${allowlisted_dangerous[@]}"; do
-  if ! printf '%s\n' "${current_dangerous[@]}" | grep -Fxq "$path"; then
+  if ! (printf '%s\n' "${current_dangerous[@]}" || true) | grep -Fxq "$path"; then
     stale+=("$path")
   fi
 done

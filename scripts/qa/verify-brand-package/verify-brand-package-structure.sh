@@ -211,8 +211,13 @@ if [[ -f "$BRAND_DIR/logo-white.svg" ]]; then
 fi
 
 # AC-BRAND-006 / 007 / 008 image/icon type checks
+# Use magic bytes via python3 as primary check — ARC runner `file` may lack
+# full magic db and grep on binary data is unreliable across implementations.
+is_png() { python3 -c "import sys; sys.exit(0 if open(sys.argv[1],'rb').read(8)[:4]==b'\\x89PNG' else 1)" "$1" 2>/dev/null || file "$1" | grep -qi 'PNG image data'; }
+is_ico() { python3 -c "import sys; sys.exit(0 if open(sys.argv[1],'rb').read(4)==b'\\x00\\x00\\x01\\x00' else 1)" "$1" 2>/dev/null || file "$1" | grep -Eqi 'icon|MS Windows icon'; }
+
 if [[ -f "$BRAND_DIR/logo.png" ]]; then
-  if file "$BRAND_DIR/logo.png" | grep -qi 'PNG image data'; then
+  if is_png "$BRAND_DIR/logo.png"; then
     pass "AC-BRAND-006 logo.png is valid PNG"
   else
     fail "AC-BRAND-006 logo.png is not valid PNG"
@@ -235,7 +240,7 @@ PY
 fi
 
 if [[ -f "$BRAND_DIR/logo-white.png" ]]; then
-  if file "$BRAND_DIR/logo-white.png" | grep -qi 'PNG image data'; then
+  if is_png "$BRAND_DIR/logo-white.png"; then
     pass "AC-BRAND-007 logo-white.png is valid PNG"
   else
     fail "AC-BRAND-007 logo-white.png is not valid PNG"
@@ -243,7 +248,7 @@ if [[ -f "$BRAND_DIR/logo-white.png" ]]; then
 fi
 
 if [[ -f "$BRAND_DIR/favicon.ico" ]]; then
-  if file "$BRAND_DIR/favicon.ico" | grep -Eqi 'icon|MS Windows icon resource'; then
+  if is_ico "$BRAND_DIR/favicon.ico"; then
     pass "AC-BRAND-008 favicon.ico is valid icon resource"
   else
     fail "AC-BRAND-008 favicon.ico is not recognized as icon resource"
@@ -318,12 +323,17 @@ if [[ -d "$BRAND_DIR/fonts" ]]; then
 fi
 
 # AC-BRAND-011: woff2 file type verification
+# Use magic bytes (wOF2) as primary check — `file` on minimal CI runners may
+# lack the WOFF2 magic database entry.
 for font in "${expected_fonts[@]}"; do
   f="$BRAND_DIR/fonts/$font"
-  if [[ -f "$f" ]] && file "$f" | grep -q 'Web Open Font Format'; then
+  if [[ ! -f "$f" ]]; then
+    fail "AC-BRAND-011 missing WOFF2 file: $font"
+  elif python3 -c "import sys; sys.exit(0 if open(sys.argv[1],'rb').read(4)==b'wOF2' else 1)" "$f" 2>/dev/null \
+       || file "$f" | grep -qi 'Web Open Font Format'; then
     pass "AC-BRAND-011 valid WOFF2 file: $font"
   else
-    fail "AC-BRAND-011 invalid/missing WOFF2 file: $font"
+    fail "AC-BRAND-011 invalid WOFF2 file: $font (no wOF2 magic)"
   fi
 done
 

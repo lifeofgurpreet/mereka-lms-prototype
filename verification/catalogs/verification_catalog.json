@@ -1933,7 +1933,7 @@
         "ci_static"
       ],
       "env_scope": [
-        "global"
+        "dev"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -2665,7 +2665,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ci-script-list.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3234,6 +3234,34 @@
       "severity": "high",
       "spec_ids": [
         "AC-007"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-course-catalog-durability.sh",
+      "reference_count": 2,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-CAT-001"
       ],
       "status": "active",
       "tier": "release_blocking"
@@ -5231,7 +5259,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-enterprise-frontend-live-contract.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -8319,7 +8347,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-header-branding.sh",
-      "reference_count": 2,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8414,7 +8442,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-plugin-slots.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9741,7 +9769,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-new-ci-static-entries.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13037,7 +13065,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-runtime-proof-fixture-pack.sh",
-      "reference_count": 7,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17113,26 +17141,26 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 351,
+    "ci_static_bound": 352,
     "kinds": {
-      "verify": 569
+      "verify": 570
     },
     "mutability": {
       "destructive": 9,
       "mutating": 16,
-      "read-only": 544
+      "read-only": 545
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 392,
+      "active": 393,
       "manual_only": 177
     },
     "tiers": {
       "exploratory_manual": 180,
       "periodic_runtime": 16,
-      "release_blocking": 373
+      "release_blocking": 374
     },
-    "total_verify_scripts": 569,
+    "total_verify_scripts": 570,
     "workflow_direct_bound": 50
   },
   "version": "1"

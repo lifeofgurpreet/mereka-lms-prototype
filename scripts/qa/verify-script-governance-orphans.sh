@@ -34,14 +34,14 @@ mapfile -t allowlisted_orphans < <(
 
 unexpected=()
 for path in "${current_orphans[@]}"; do
-  if ! printf '%s\n' "${allowlisted_orphans[@]}" | grep -Fxq "$path"; then
+  if ! (printf '%s\n' "${allowlisted_orphans[@]}" || true) | grep -Fxq "$path"; then
     unexpected+=("$path")
   fi
 done
 
 stale=()
 for path in "${allowlisted_orphans[@]}"; do
-  if ! printf '%s\n' "${current_orphans[@]}" | grep -Fxq "$path"; then
+  if ! (printf '%s\n' "${current_orphans[@]}" || true) | grep -Fxq "$path"; then
     stale+=("$path")
   fi
 done
