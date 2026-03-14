@@ -37,7 +37,7 @@ apply_mfe_node_patch() {
     "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
   )
 
-  python - "${targets[@]}" <<'PY'
+  "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
 from pathlib import Path
 import re
 import sys

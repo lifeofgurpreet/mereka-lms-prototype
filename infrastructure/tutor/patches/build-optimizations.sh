@@ -23,7 +23,7 @@ apply_build_optimizations_patch() {
     "$REPO_ROOT/tutor_env/env/apps/caddy/Caddyfile"
   )
 
-  python - "${targets[@]}" <<'PY'
+  "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
 from pathlib import Path
 import re
 import textwrap

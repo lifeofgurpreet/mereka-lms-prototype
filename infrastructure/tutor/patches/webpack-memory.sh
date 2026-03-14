@@ -11,7 +11,7 @@ apply_webpack_memory_patch() {
     "$REPO_ROOT/tutor_env/env/build/openedx/edx-platform/webpack.prod.config.js"
   )
 
-  python - "${targets[@]}" <<'PY'
+  "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
 from pathlib import Path
 import sys
 
