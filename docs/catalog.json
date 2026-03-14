@@ -560,6 +560,33 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/COURSE-CATALOG-DURABILITY-CLOSURE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/COURSE-CONSUMPTION-AND-STAFF-ACCEPTANCE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/COURSE-STUDIO-AUTH-RUNTIME-SEAM-CLOSURE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2025-11-12",
     "owner": null,
     "path": "archive/CRITICAL_FINDINGS.md",
@@ -652,6 +679,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "archive/GENERIC-MFE-INSTABILITY-ROOT-CAUSE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "archive/GITHUB_SECRETS_READY.md",
     "status": "archive-candidate",
     "type": "other"
@@ -662,6 +698,15 @@
     "last_verified_or_updated": "2026-02-04",
     "owner": null,
     "path": "archive/GKE_LOKI_SETUP_SUMMARY.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/IMAGE-PUBLISH-DEPLOY-CHAIN-BASELINE.md",
     "status": "archive-candidate",
     "type": "other"
   },
@@ -707,6 +752,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "archive/LANE-A4-ENTERPRISE-FINAL-ACCEPTANCE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/LIVE-LMS-APPS-REGRESSION-TRIAGE.md",
     "status": "archive-candidate",
     "type": "other"
   },

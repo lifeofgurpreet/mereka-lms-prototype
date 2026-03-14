@@ -43,8 +43,15 @@ python3 "${PATCH_SCRIPT}" "${DIST_DIR}" >/dev/null
 FIXTURE="${DIST_DIR}/app-fixture.js"
 
 assert_not_contains "${FIXTURE}" "old LMS_BASE_URL handoff removed" 'u=r&&!o.includes(r)?(0,s.zj)().LMS_BASE_URL+r:o'
-assert_contains "${FIXTURE}" "patch routes known MFE deep routes to current apps origin" 'window.location.origin+r:(0,s.zj)().LMS_BASE_URL+r'
+assert_contains "${FIXTURE}" "patch routes known MFE deep routes to current apps origin" '/^\/(?:authn|account|course-authoring|authoring|communications|discussions|gradebook|learner-dashboard|learner-record|learning|ora-grading|orders|payment|u)(?:\/|$)/.test(r)?window.location.origin+r:(0,s.zj)().LMS_BASE_URL+r'
 assert_contains "${FIXTURE}" "patch scopes only known MFE deep-route prefixes" 'authn|account|course-authoring|authoring|communications|discussions|gradebook|learner-dashboard|learner-record|learning|ora-grading|orders|payment|u'
+NODE_BIN="${NODE_BIN:-$(command -v node || true)}"
+if [[ -z "${NODE_BIN}" ]]; then
+  echo "[FAIL] node not found on PATH"
+  exit 1
+fi
+"${NODE_BIN}" --check "${FIXTURE}" >/dev/null
+echo "[PASS] patch emits syntactically valid JavaScript"
 
 BROKEN_DIR="${TMPDIR}/broken"
 mkdir -p "${BROKEN_DIR}"

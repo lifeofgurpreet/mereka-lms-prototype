@@ -14,7 +14,7 @@ from pathlib import Path
 SEARCH = "u=r&&!o.includes(r)?(0,s.zj)().LMS_BASE_URL+r:o"
 REPLACEMENT = (
     "u=r&&!o.includes(r)?"
-    "(^\\/(?:authn|account|course-authoring|authoring|communications|discussions|"
+    "(/^\\/(?:authn|account|course-authoring|authoring|communications|discussions|"
     "gradebook|learner-dashboard|learner-record|learning|ora-grading|orders|payment|u)"
     "(?:\\/|$)/.test(r)?window.location.origin+r:(0,s.zj)().LMS_BASE_URL+r):o"
 )
