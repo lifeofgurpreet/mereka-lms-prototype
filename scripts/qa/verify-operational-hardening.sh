@@ -26,7 +26,7 @@ SKIP_COUNT=0
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BASE_DIR="${REPO_ROOT}/deploy/k8s/base"
 OPERATIONAL_DIR="${BASE_DIR}/operational"
-YQ="${HOME}/.local/bin/yq"
+YQ="$(command -v yq 2>/dev/null || echo "${HOME}/.local/bin/yq")"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 pass() {

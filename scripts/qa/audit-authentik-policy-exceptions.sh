@@ -67,6 +67,10 @@ if ! command -v kubectl >/dev/null 2>&1; then
   echo "[SKIP] kubectl not available — skipping cluster checks"
   exit 0
 fi
+if ! kubectl --context "$CONTEXT" cluster-info &>/dev/null; then
+  echo "[SKIP] No reachable cluster at context '$CONTEXT' — skipping"
+  exit 0
+fi
 
 log_json="$(kubectl --context "$CONTEXT" -n "$NAMESPACE" logs deploy/"$DEPLOYMENT" --since="$SINCE" 2>/dev/null || true)"
 if [[ -z "$log_json" ]]; then

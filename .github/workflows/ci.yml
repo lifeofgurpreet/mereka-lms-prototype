@@ -154,6 +154,18 @@ jobs:
           rm "${TARBALL}"
           kubeconform -v
 
+      # ── Install kubectl (needed by kustomize-rendering verification scripts) ─
+      - name: Install kubectl
+        run: |
+          if ! command -v kubectl &>/dev/null; then
+            KUBECTL_VERSION="v1.32.5"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+            install -m 0755 kubectl "$GITHUB_WORKSPACE/.cache/bin/kubectl"
+            rm kubectl
+          fi
+          kubectl version --client
+
       # ── Install ripgrep (needed by verification scripts) ──────────────────
       - name: Install ripgrep
         run: |

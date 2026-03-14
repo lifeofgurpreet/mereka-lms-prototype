@@ -44,6 +44,10 @@ if ! command -v kubectl >/dev/null 2>&1; then
   echo "[SKIP] kubectl not available — skipping cluster checks"
   exit 0
 fi
+if ! kubectl --context "$K8S_CONTEXT" cluster-info &>/dev/null; then
+  echo "[SKIP] No reachable cluster at context '$K8S_CONTEXT' — skipping"
+  exit 0
+fi
 
 kubectl_json() {
   kubectl --context "$K8S_CONTEXT" -n "$1" get "$2" -o json 2>/dev/null || echo '{"items":[]}'
