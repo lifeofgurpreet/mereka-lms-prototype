@@ -125,3 +125,44 @@ Status: `OPEN`
 Learner moved past the old start-date authorization seam but is now blocked by a new
 course-metadata consent failure. Studio now has an exact browser-proven root cause:
 the authn bundle throws `SyntaxError: Unexpected token '^'` before hydration.
+
+## P3g Delivery Snapshot
+
+- `origin/main`: `509776440eddec633917f75f6ae4c3f364593f7e`
+- PR `#910` merged at `2026-03-14T12:07:59Z`
+- expected MFE image:
+  - `ghcr.io/biji-biji-initiative/mereka-lms/mfe:509776440eddec633917f75f6ae4c3f364593f7e`
+- GHCR publish truth before manual intervention:
+  - `manifest unknown`
+- live dev `mfe` image remained:
+  - `ghcr.io/biji-biji-initiative/mereka-lms/mfe:8a7f247641c5f8fb3e2600d73046670233d246b1`
+
+### Manual Build Path
+
+To unblock delivery, `build-tutor-images.yml` was re-enabled and dispatched manually for:
+
+- `build_openedx=false`
+- `build_mfe=true`
+- `image_tag=509776440eddec633917f75f6ae4c3f364593f7e`
+
+That produced run:
+
+- `Build Tutor Images` run `23096455263`
+
+### Next Exact Blocker
+
+The manual MFE build failed before any image was produced:
+
+- job: `Build MFE Image`
+- failing step: `Set up Tutor environment`
+- exact error:
+  - `/home/runner/_work/mereka-lms/mereka-lms/infrastructure/tutor/patches/_common.sh: line 33: python: command not found`
+
+### Tiny Repo-Owned Fix
+
+A follow-up repo fix is now justified:
+
+- update `infrastructure/tutor/patches/_common.sh` to resolve `python3` first and only fall back to `python`
+- fail clearly if neither interpreter exists
+
+This is a delivery blocker for Studio, not a new Studio runtime seam.
