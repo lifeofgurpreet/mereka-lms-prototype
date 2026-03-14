@@ -556,8 +556,13 @@ jobs:
 
       - name: Install Tutor
         run: |
-          python3 -m venv .venv
-          source .venv/bin/activate
+          if ! python3 -m venv .venv 2>/dev/null; then
+            python3 -m venv --without-pip .venv
+            source .venv/bin/activate
+            curl -sS https://bootstrap.pypa.io/get-pip.py | python3
+          else
+            source .venv/bin/activate
+          fi
           pip install -U pip
           pip install -r requirements-tutor.txt
 

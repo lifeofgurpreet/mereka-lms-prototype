@@ -22,12 +22,26 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Ensure pip cache directory exists
+    - name: Check system Python
+      id: check-python
       shell: bash
       run: |
-        # Some ARC/GitHub runners set HOME/.cache on a root-owned mount and
-        # disallow sudo via no_new_privs. Pick a writable pip cache path
-        # without privilege escalation and export it for setup-python + pip.
+        # ARC runner image (arc-runner-general) ships Python 3.12 + pip.
+        # Skip setup-python (7-18 min download) when system Python matches.
+        REQUIRED="${{ inputs.python-version }}"
+        SYSTEM_VER="$(python3 --version 2>/dev/null | sed 's/Python //' || echo 'missing')"
+        if [[ "$SYSTEM_VER" == "$REQUIRED"* ]]; then
+          echo "System Python $SYSTEM_VER satisfies $REQUIRED — skipping setup-python"
+          echo "skip_setup=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "::notice::System Python ($SYSTEM_VER) does not match $REQUIRED — will use setup-python"
+          echo "skip_setup=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Ensure pip cache directory exists
+      if: steps.check-python.outputs.skip_setup == 'false'
+      shell: bash
+      run: |
         choose_pip_cache_dir() {
           local candidate
           for candidate in "$HOME/.cache/pip" "${RUNNER_TEMP:-}/pip-cache" "/tmp/pip-cache"; do
@@ -40,25 +54,18 @@ runs:
           done
           return 1
         }
-
         PIP_CACHE_DIR="$(choose_pip_cache_dir)"
         echo "PIP_CACHE_DIR=$PIP_CACHE_DIR" >> "$GITHUB_ENV"
-        echo "Using pip cache dir: $PIP_CACHE_DIR"
 
     - name: Ensure lsb_release exists for setup-python pip cache
+      if: steps.check-python.outputs.skip_setup == 'false'
       shell: bash
       run: |
-        # actions/setup-python v5 calls `lsb_release -rs` and `lsb_release -is`
-        # to build the pip cache key. ARC runner images lack the lsb-release
-        # package and we cannot apt-install (no sudo). Provide a minimal stub.
         if ! command -v lsb_release &>/dev/null; then
           stub="$GITHUB_WORKSPACE/.cache/bin/lsb_release"
           mkdir -p "$(dirname "$stub")"
           cat > "$stub" <<'STUB'
         #!/bin/sh
-        # Minimal lsb_release stub for actions/setup-python pip cache.
-        # Handles: -r/-rs (release), -i/-is (id), -d/-ds (description),
-        #          -c/-cs (codename), -a (all), -s (short modifier).
         short=0; cmd=""
         for arg in "$@"; do
           case "$arg" in
@@ -85,24 +92,32 @@ runs:
         STUB
           chmod +x "$stub"
           echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
-          echo "Installed lsb_release stub at $stub"
         fi
 
     - name: Set up Python ${{ inputs.python-version }}
+      if: steps.check-python.outputs.skip_setup == 'false'
       uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
       with:
         python-version: ${{ inputs.python-version }}
         cache: 'pip'
         cache-dependency-path: ${{ inputs.requirements-file }}
 
+    - name: Add user site-packages bin to PATH
+      if: steps.check-python.outputs.skip_setup == 'true'
+      shell: bash
+      run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
     - name: Install dependencies from requirements file
       if: ${{ inputs.install-base-deps == 'true' }}
       shell: bash
       run: |
-        pip install -U pip
-        pip install -r ${{ inputs.requirements-file }}
+        pip install --break-system-packages -U pip 2>/dev/null || pip install -U pip
+        pip install --break-system-packages -r ${{ inputs.requirements-file }} 2>/dev/null \
+          || pip install -r ${{ inputs.requirements-file }}
 
     - name: Install extra dependencies
       if: ${{ inputs.extra-deps != '' }}
       shell: bash
-      run: pip install ${{ inputs.extra-deps }}
+      run: |
+        pip install --break-system-packages ${{ inputs.extra-deps }} 2>/dev/null \
+          || pip install ${{ inputs.extra-deps }}
