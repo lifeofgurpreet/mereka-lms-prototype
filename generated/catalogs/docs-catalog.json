@@ -6869,6 +6869,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-15",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/PROD_PARKED_MODE.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-12",
     "owner": "Platform Team",
     "path": "ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md",
