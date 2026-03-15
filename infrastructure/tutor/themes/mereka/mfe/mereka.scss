@@ -14,6 +14,7 @@ $mereka-font-path: "../fonts";
   --mereka-mfe-surface-muted: rgba(26, 22, 35, 0.04);
   --mereka-mfe-border: rgba(26, 22, 35, 0.10);
   --mereka-mfe-focus: rgba(35, 112, 114, 0.18);
+  --mereka-mfe-accent: var(--mereka-color-sky);
 }
 
 /* RISK: LOW — html element selector, cannot be renamed */

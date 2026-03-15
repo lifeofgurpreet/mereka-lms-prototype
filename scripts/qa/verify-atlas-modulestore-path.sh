@@ -99,7 +99,13 @@ import sys
 
 repo = pathlib.Path(".")
 
-deployments = (repo / "deploy/k8s/base/deployments.yml").read_text(encoding="utf-8")
+# Deployments are in individual files under deploy/k8s/base/apps/.
+deployment_paths = {
+    "lms": repo / "deploy/k8s/base/apps/lms/deployment.yaml",
+    "cms": repo / "deploy/k8s/base/apps/cms/deployment.yaml",
+    "lms-worker": repo / "deploy/k8s/base/apps/lms/worker-deployment.yaml",
+    "cms-worker": repo / "deploy/k8s/base/apps/cms/worker-deployment.yaml",
+}
 external_secrets = (repo / "deploy/k8s/base/secrets/external-secrets.yaml").read_text(encoding="utf-8")
 lms_settings = (repo / "deploy/k8s/base/apps/openedx/settings/lms/production.py").read_text(encoding="utf-8")
 cms_settings = (repo / "deploy/k8s/base/apps/openedx/settings/cms/production.py").read_text(encoding="utf-8")
@@ -108,29 +114,17 @@ prod_mongo_delete_patch = repo / "deploy/k8s/overlays/production/patches/remove-
 
 errors = []
 
-raw_docs = re.split(r"(?m)^---\s*$", deployments)
-docs = {}
-for doc in raw_docs:
-    if not re.search(r"(?m)^kind:\s*Deployment\s*$", doc):
-        continue
-    m = re.search(r"(?m)^metadata:\s*$([\s\S]*?)^spec:\s*$", doc)
-    if not m:
-        continue
-    name_match = re.search(r"(?m)^\s*name:\s*([a-zA-Z0-9-]+)\s*$", m.group(1))
-    if not name_match:
-        continue
-    docs[name_match.group(1)] = doc
-
 expected_deployments = ["lms", "cms", "lms-worker", "cms-worker"]
 pat = re.compile(
     r"-\s*name:\s*MONGODB_HOST\s+valueFrom:\s+secretKeyRef:\s+name:\s*openedx-secrets\s+key:\s*FORUM_MONGODB_HOST",
     re.S,
 )
 for dep in expected_deployments:
-    doc = docs.get(dep)
-    if not doc:
-        errors.append(f"Deployment '{dep}' missing from deploy/k8s/base/deployments.yml")
+    dep_path = deployment_paths.get(dep)
+    if not dep_path or not dep_path.exists():
+        errors.append(f"Deployment '{dep}' file missing: {dep_path}")
         continue
+    doc = dep_path.read_text(encoding="utf-8")
     if not pat.search(doc):
         errors.append(
             f"Deployment '{dep}' missing MONGODB_HOST -> openedx-secrets/FORUM_MONGODB_HOST contract"

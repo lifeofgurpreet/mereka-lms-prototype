@@ -512,7 +512,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-a11y-regression-lane.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -1572,7 +1572,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-authenticated-smoke-a11y.sh",
-      "reference_count": 7,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
