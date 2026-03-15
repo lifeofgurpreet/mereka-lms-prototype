@@ -126,9 +126,17 @@ PY
     return
   fi
 
+  # Fallback: use the tracked core.min.css already in the repo (CI has no
+  # node_modules and npm download may be blocked by network policy).
+  local tracked_core="$OUTPUT_DIR/core.min.css"
+  if [[ -s "$tracked_core" ]]; then
+    cp "$tracked_core" "$target"
+    return
+  fi
+
   cat > "$target" <<'CSS'
 :root {
-  /* fallback core theme */
+  /* fallback core theme — no node_modules, no npm, no tracked copy */
 }
 CSS
 }
