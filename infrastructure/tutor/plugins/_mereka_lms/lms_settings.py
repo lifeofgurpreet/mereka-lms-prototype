@@ -193,6 +193,11 @@ MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = int(
 
 # Enterprise integration
 FEATURES["ENABLE_ENTERPRISE_INTEGRATION"] = True
+# Enterprise catalog internal URL: default "enterprise.catalog.app:18160" doesn't resolve
+# in K8s. Override with the actual in-cluster service name.
+ENTERPRISE_CATALOG_INTERNAL_ROOT_URL = os.environ.get(
+    "ENTERPRISE_CATALOG_INTERNAL_ROOT_URL", "http://enterprise-catalog:8160"
+)
 
 # Force MFE-only discussions (greenfield - no legacy views needed)
 FEATURES["ENABLE_DISCUSSION_HOME_PANEL"] = False  # Disable legacy in-LMS panel

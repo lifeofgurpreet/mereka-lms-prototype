@@ -919,6 +919,12 @@ LMS_ROOT_URL = MEREKA_LMS_BASE_URL
 # route through the ingress (same as dev does).
 LMS_INTERNAL_ROOT_URL = LMS_ROOT_URL
 ENTERPRISE_API_URL = f"{LMS_ROOT_URL}/enterprise/api/v1/"
+# Enterprise catalog internal URL: the enterprise Django package defaults to
+# "enterprise.catalog.app:18160" (Tutor hostname), which doesn't resolve in K8s.
+# Point to the real in-cluster service so enterprise consent checks succeed.
+ENTERPRISE_CATALOG_INTERNAL_ROOT_URL = os.environ.get(
+    "ENTERPRISE_CATALOG_INTERNAL_ROOT_URL", "http://enterprise-catalog:8160"
+)
 CMS_BASE = MEREKA_STUDIO_DOMAIN
 CMS_ROOT_URL = MEREKA_STUDIO_BASE_URL
 
