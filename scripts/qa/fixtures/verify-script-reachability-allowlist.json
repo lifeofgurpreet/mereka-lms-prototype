@@ -119,6 +119,7 @@
     "scripts/qa/verify-plugin-surface-matrix.sh",
     "scripts/qa/verify-post-deploy-smoke.sh",
     "scripts/qa/verify-pr-handoff-guardrails.sh",
+    "scripts/qa/verify-prod-parked-state.sh",
     "scripts/qa/verify-preview-redirect.sh",
     "scripts/qa/verify-proctoring-advanced.sh",
     "scripts/qa/verify-regression-detection.sh",

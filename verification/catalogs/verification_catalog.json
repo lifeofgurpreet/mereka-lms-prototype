@@ -11888,6 +11888,29 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev",
+        "preview"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-prod-parked-state.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster"
+      ],
+      "severity": "low",
+      "spec_ids": [],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
@@ -16367,6 +16390,34 @@
         "ci_static"
       ],
       "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-vendored-settings-drift.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-DEP-204"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
         "global"
       ],
       "kind": "verify",
@@ -17141,26 +17192,26 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 352,
+    "ci_static_bound": 353,
     "kinds": {
-      "verify": 570
+      "verify": 572
     },
     "mutability": {
       "destructive": 9,
       "mutating": 16,
-      "read-only": 545
+      "read-only": 547
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 393,
-      "manual_only": 177
+      "active": 394,
+      "manual_only": 178
     },
     "tiers": {
-      "exploratory_manual": 180,
+      "exploratory_manual": 181,
       "periodic_runtime": 16,
-      "release_blocking": 374
+      "release_blocking": 375
     },
-    "total_verify_scripts": 570,
+    "total_verify_scripts": 572,
     "workflow_direct_bound": 50
   },
   "version": "1"
