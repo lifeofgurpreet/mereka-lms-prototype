@@ -29,6 +29,7 @@
     "scripts/qa/verify-deployment-lanes.sh",
     "scripts/qa/verify-domain-url-invariants.sh",
     "scripts/qa/verify-email-notifications-pipeline.sh",
+    "scripts/qa/verify-env-auth-parity.sh",
     "scripts/qa/verify-gitops-image-overrides.sh",
     "scripts/qa/verify-infisical-env-validation-coverage.sh",
     "scripts/qa/verify-migration-completion-plan.sh",

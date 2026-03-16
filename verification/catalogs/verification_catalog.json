@@ -5748,6 +5748,36 @@
         "ci_static"
       ],
       "env_scope": [
+        "dev",
+        "prod",
+        "staging"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "identity-access",
+      "path": "scripts/qa/verify-env-auth-parity.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-DEP-205"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
         "prod"
       ],
       "kind": "verify",
@@ -17192,26 +17222,26 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 353,
+    "ci_static_bound": 354,
     "kinds": {
-      "verify": 572
+      "verify": 573
     },
     "mutability": {
       "destructive": 9,
       "mutating": 16,
-      "read-only": 547
+      "read-only": 548
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 394,
+      "active": 395,
       "manual_only": 178
     },
     "tiers": {
       "exploratory_manual": 181,
       "periodic_runtime": 16,
-      "release_blocking": 375
+      "release_blocking": 376
     },
-    "total_verify_scripts": 572,
+    "total_verify_scripts": 573,
     "workflow_direct_bound": 50
   },
   "version": "1"

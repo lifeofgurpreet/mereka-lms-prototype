@@ -68,6 +68,14 @@ write_core_theme() {
     return
   fi
 
+  # Prefer the tracked core.min.css already in the repo — avoids slow/blocked
+  # npm downloads in CI where node_modules is absent.
+  local tracked_core="$OUTPUT_DIR/core.min.css"
+  if [[ -s "$tracked_core" && "$target" != "$tracked_core" ]]; then
+    cp "$tracked_core" "$target"
+    return
+  fi
+
   python3 - "$target" <<'PY'
 from pathlib import Path
 import io
