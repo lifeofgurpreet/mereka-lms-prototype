@@ -7,6 +7,7 @@ resources:
   - allow-namespace-internal.yaml
   # Ingress
   - allow-caddy-external.yaml
+  - allow-caddy-hostnetwork-ingress.yaml
   - allow-prometheus-scrape.yaml
   # Per-service external egress
   - allow-lms-external-egress.yaml
