@@ -1053,6 +1053,7 @@ if _SAMLConfiguration is not None and not getattr(_SAMLConfiguration, "_mereka_i
 # Some upstream defaults initialize these keys to False before this file runs;
 # use direct assignment to guarantee runtime behavior.
 FEATURES["ENABLE_THIRD_PARTY_AUTH"] = True
+FEATURES["ENABLE_OAUTH2_PROVIDER"] = True
 FEATURES["ENABLE_ENTERPRISE_INTEGRATION"] = True
 
 # SAML SP certificate and private key — injected from ExternalSecrets.
