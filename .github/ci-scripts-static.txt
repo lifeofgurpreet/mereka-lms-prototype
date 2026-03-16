@@ -615,3 +615,4 @@ scripts/qa/verify-ci-execution-contract.sh
 scripts/qa/verify-runtime-proof-fixture-pack.sh
 scripts/qa/verify-course-catalog-durability.sh
 scripts/qa/verify-vendored-settings-drift.sh
+scripts/qa/verify-env-auth-parity.sh
