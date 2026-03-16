@@ -337,6 +337,33 @@ http://{$ENTERPRISE_LEARNER_HOST} {
         header_up X-Request-ID {http.request.header.X-Request-ID}
         header_up traceparent {http.request.header.traceparent}
     }
+    # Enterprise learner BFF — served by enterprise-access
+    reverse_proxy /api/v1/bffs/* enterprise-access:18270 {
+        header_up Host {http.request.host}
+        header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+        header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        header_up X-Request-ID {http.request.header.X-Request-ID}
+        header_up traceparent {http.request.header.traceparent}
+    }
+    # Enterprise service APIs (same pattern as admin portal)
+    handle /api/enterprise-catalog/* {
+        uri strip_prefix /api/enterprise-catalog
+        reverse_proxy enterprise-catalog:8160 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+    handle /api/enterprise-access/* {
+        uri strip_prefix /api/enterprise-access
+        reverse_proxy enterprise-access:18270 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
     import proxy "enterprise-learner-portal:8002"
 }
 
