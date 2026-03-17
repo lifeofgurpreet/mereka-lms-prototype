@@ -326,6 +326,49 @@ Post-restore data integrity checks:
    - Discovery API returns catalog data
    - Microsites respond (`academy.biji-biji.com`, `skillourfuture.academy.mereka.io`)
 
+5. **Schema parity check (oel_publishing)**:
+
+   Migrations 0003–0010 of `oel_publishing` were fake-applied during a
+   2026-03-07 DB restore. If your restore source predates the manual
+   repair, these columns will be missing and Studio course editing will
+   return 500.
+
+   ```bash
+   # Check for missing columns
+   kubectl exec -n $NS deploy/lms -- python manage.py lms shell -c "
+   from django.db import connection
+   c = connection.cursor()
+   missing = []
+   for tbl, col in [
+       ('oel_publishing_publishableentity', 'can_stand_alone'),
+       ('oel_publishing_draft', 'draft_log_record_id'),
+       ('oel_publishing_publishlogrecord', 'dependencies_hash_digest'),
+   ]:
+       c.execute('SELECT COUNT(*) FROM information_schema.columns WHERE table_name=%s AND column_name=%s', [tbl, col])
+       if c.fetchone()[0] == 0:
+           missing.append(f'{tbl}.{col}')
+   print('MISSING: ' + ', '.join(missing) if missing else 'OK: all columns present')
+   "
+   ```
+
+   If any are missing, apply the repair:
+   ```sql
+   ALTER TABLE oel_publishing_publishableentity
+     ADD COLUMN can_stand_alone tinyint(1) NOT NULL DEFAULT 1;
+
+   ALTER TABLE oel_publishing_draft
+     ADD COLUMN draft_log_record_id bigint DEFAULT NULL;
+   ALTER TABLE oel_publishing_draft
+     ADD CONSTRAINT fk_draft_log_record
+     FOREIGN KEY (draft_log_record_id)
+     REFERENCES oel_publishing_draftchangelogrecord (id);
+
+   ALTER TABLE oel_publishing_publishlogrecord
+     ADD COLUMN dependencies_hash_digest varchar(8) NOT NULL DEFAULT '';
+   ```
+
+   Then restart CMS: `kubectl rollout restart deployment/cms -n $NS`
+
 ---
 
 ## Cross-Region Readiness Verification
