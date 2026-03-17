@@ -1,2 +1,27 @@
 // Custom LMS-only style overrides should remain minimal.
 // Keep additional overrides in theming files as needed.
+
+// ──────────────────────────────────────────────────────────────────────
+// Course grid: cancel stock float-based responsive layout
+//
+// build-lms-v1 imports stock Open edX CSS that applies float:left +
+// display:block + fixed percentage widths on .courses-listing-item at
+// various media breakpoints (.home, .find-courses, .university-profile
+// contexts). These rules break the CSS Grid layout defined in
+// mereka-overrides.css (.courses-listing { display: grid; ... }).
+//
+// Fix: override the float/display/width back to grid-friendly values
+// at the same or higher specificity.
+// ──────────────────────────────────────────────────────────────────────
+
+// Use the exact stock selector contexts to ensure specificity match.
+.home .courses-container .courses .courses-listing .courses-listing-item,
+.find-courses .courses-container .courses .courses-listing .courses-listing-item,
+.university-profile .courses-container .courses .courses-listing .courses-listing-item,
+.courses-container .courses:not(.no-course-discovery) .courses-listing .courses-listing-item,
+.courses-container .courses.no-course-discovery .courses-listing .courses-listing-item {
+  float: none !important;
+  display: flex !important;
+  width: 100% !important;
+  margin-right: 0 !important;
+}
