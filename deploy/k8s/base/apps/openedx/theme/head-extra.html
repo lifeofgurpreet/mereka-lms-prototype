@@ -141,26 +141,19 @@
     gap: 0.45rem;
   }
 
-  /* learn-more overlay: sits inside .cover-image (position:relative), centred over the image.
-     The element is aria-hidden so this is purely decorative; we make it always-visible
-     so users see "LEARN MORE" as an image badge rather than a hidden clipped element. */
+  /* learn-more overlay: .cover-image must be position:relative for absolute children */
   .course .course-image .cover-image {
     position: relative;
-  }
-
-  .course .course-image .cover-image .learn-more {
-    position: absolute;
-    bottom: 0.75rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    white-space: nowrap;
   }
   /* ── Header layout hotfix ─────────────────────────────────────
      mereka-overrides.css has the full header rules but the staticfiles
      volume is read-only at runtime. These essential rules are inlined
      here so they take effect via ConfigMap without an image rebuild. */
-  .global-header { position: sticky; top: 0; z-index: 1000; width: 100%; }
+  .global-header { position: sticky; top: 0; z-index: 1000; width: 100%;
+    /* build-lms-v1 sets overflow:hidden + position:relative on .global-header,
+       clipping the absolutely-positioned .dropdown-user-menu. Override: */
+    overflow: visible !important;
+  }
   .main-header {
     display: flex; align-items: center; justify-content: space-between;
     gap: 1rem; padding: 0 1.5rem; height: 64px; max-width: 1400px; margin: 0 auto;
@@ -226,5 +219,142 @@
     .hamburger-menu { display: flex; }
     .hidden-mobile { display: none !important; }
     .nav-links { display: none; }
+  }
+  /* ── build-lms-v1 specificity overrides (0,4,1) ────────────────────────
+     build-lms-v1 sets register-btn=outlined-teal and sign-in-btn=filled-magenta
+     (inverted). Correct treatment: register=filled-magenta, sign-in=outlined-teal.
+     The selectors below match build-lms-v1 specificity so later-in-cascade wins. */
+  .global-header .nav-links .secondary a.register-btn {
+    background: var(--mereka-color-magenta, #ab3b78); color: #fff;
+    border: none; border-radius: 999px; font-weight: 600;
+    padding: 0.55rem 1.1rem; box-shadow: 0 8px 20px rgba(171,59,120,0.25);
+    text-decoration: none;
+  }
+  .global-header .nav-links .secondary a.register-btn:hover,
+  .global-header .nav-links .secondary a.register-btn:focus {
+    background: var(--mereka-color-magenta-dark, #8a2f60); color: #fff;
+    text-decoration: none; box-shadow: 0 10px 24px rgba(171,59,120,0.35);
+  }
+  .global-header .nav-links .secondary a.sign-in-btn {
+    background: transparent; color: var(--mereka-color-teal, #237072);
+    border: 1.5px solid var(--mereka-color-teal, #237072);
+    border-radius: 999px; font-weight: 600; padding: 0.5rem 1.1rem; text-decoration: none;
+  }
+  .global-header .nav-links .secondary a.sign-in-btn:hover,
+  .global-header .nav-links .secondary a.sign-in-btn:focus {
+    background: var(--mereka-color-teal, #237072); color: #fff; text-decoration: none;
+  }
+  /* Cancel build-lms-v1 border-bottom separator on global header.
+     build-lms-v1 uses !important → must match with !important. */
+  .global-header { border-bottom: none !important; }
+  /* Cancel build-lms-v1 float override on .main nav (keeps Explore courses left-aligned) */
+  @media (min-width: 992px) {
+    .global-header .nav-links .main { float: none; margin: 0; margin-right: auto; }
+    .global-header .nav-links .secondary { float: none; margin: 0; }
+  }
+  /* Eyebrow: build-lms-v1 sets body:not(.courseware) .home>header .title>.heading-group p
+     at 0,4,3 → overrides our 0,2,0 rule. Force correct magenta colour. */
+  .mereka-hero .eyebrow { color: var(--mereka-color-magenta, #ab3b78) !important; }
+  /* learn-more overlay: runtime bridge fix (authoritative fix is in _custom.scss).
+     Stock lms-main-v1 (compiled into theme) sets at 0,6,0:
+       top: 55px; opacity: 0; width: 200px; height: 50px; border-radius: 3px
+     head-extra inline <style> is last in the document so equal-specificity wins.
+     TODO: remove this block once image is rebuilt with the _custom.scss fix. */
+  .courses-container .courses .course .course-image .cover-image .learn-more {
+    opacity: 1;
+    position: absolute;
+    top: auto;
+    bottom: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    white-space: nowrap;
+    width: auto;
+    height: auto;
+    border-radius: 999px;
+    box-sizing: border-box;
+  }
+
+  /* ── User dropdown: ensure menu is reachable ────────────────────────────────
+     .dropdown-user-menu is position:absolute; z-index:10 in the compiled theme.
+     With overflow:visible restored on .global-header (above), it will show.
+     Raise z-index above any page content that might sit at z-index:100+. */
+  .global-header .nav-links .secondary .dropdown-user-menu {
+    z-index: 1001;
+    position: absolute;
+    top: 55px;
+    right: 30px;
+  }
+
+  /* ── Dashboard logged-in shell: course image + card layout ─────────────────
+     build-lms-v1 hides .wrapper-course-image at specificity 0,6,0:
+       .dashboard .main-container .my-courses .course .details .wrapper-course-image { display:none }
+     The selectors below match that specificity. Since this inline <style> is the
+     LAST stylesheet in the document (after lms-main-v1.css link), equal-specificity
+     rules here win in cascade order — no !important needed. */
+
+  /* Show the course image column */
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image {
+    display: block;
+    float: none;
+    width: clamp(200px, 30%, 320px);
+    max-width: 320px;
+    max-height: none;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  /* Horizontal card layout: image left, details right */
+  .dashboard .main-container .my-courses .course .details {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  /* Course image fills its container */
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image a.fade-cover,
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image .cover {
+    display: block;
+    float: none;
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image a.fade-cover .course-image,
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image .cover .course-image {
+    width: 100%;
+    height: 100%;
+    min-height: 160px;
+    padding: 0;
+  }
+
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image a.fade-cover .course-image img,
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image .cover .course-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 160px;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* Details text panel: flex-grow to fill remaining space */
+  .dashboard .main-container .my-courses .course .details .wrapper-course-details {
+    flex: 1;
+    padding: 1.25rem;
+    min-width: 0;
+  }
+
+  /* On mobile: stack vertically */
+  @media (max-width: 768px) {
+    .dashboard .main-container .my-courses .course .details {
+      flex-direction: column;
+    }
+    .dashboard .main-container .my-courses .course .details .wrapper-course-image {
+      width: 100%;
+      max-width: none;
+    }
   }
 </style>
