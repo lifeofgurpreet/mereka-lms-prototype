@@ -63,7 +63,6 @@ scripts/infra/provision-atlas-cluster.sh
 scripts/infra/prune-gcp-snapshots.sh
 scripts/infra/purge-frontend-theme-cache.sh
 scripts/infra/rebuild-dev-openedx-db.sh
-scripts/infra/recover-stale-build-tutor-images.sh
 scripts/infra/refresh-i18n-static.sh
 scripts/infra/repair-gke-mysql-users.sh
 scripts/infra/repair-kind-mysql-users.sh
