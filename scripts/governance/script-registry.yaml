@@ -1,8 +1,10 @@
 # Script Governance Registry — Mereka LMS
 # Release-critical scripts must be registered here.
 # CI blocks new critical scripts that are not in this registry.
-# ci_static_inventory and ci_runtime_inventory below are the authoritative
-# sources for the generated CI inventory derivatives.
+# ci_static_inventory below is the authoritative execution inventory for the
+# offline static-validation CI runner.
+# ci_runtime_inventory below is the authoritative generated inventory for
+# manual/runtime validation paths; it is not itself an execution contract.
 #
 # Fields:
 #   path          - Repo-relative path (from repo root)
@@ -15,10 +17,10 @@
 #   lanes         - Which environments the script applies to
 #   proof_command - Command to verify the script is functional (read-only)
 #   criticality   - release-blocking | release-supporting | informational
-#   ci_static_inventory.entries[].script  - Repo-relative static-inventory entry
-#   ci_runtime_inventory.entries[].script - Repo-relative runtime-inventory entry
+#   ci_static_inventory.entries[].script  - Repo-relative static CI execution entry
+#   ci_runtime_inventory.entries[].script - Repo-relative manual/runtime inventory entry
 
-version: "1.2.0"
+version: "1.2.1"
 
 canonical_entrypoints:
   # Top-level release automation
@@ -1095,7 +1097,7 @@ scripts:
     dry_run: true  # --dry-run flag supported
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/verify-release-readiness.sh --dry-run 2>&1 | head -10"
-    criticality: release-blocking
+    criticality: release-supporting
 
   - path: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
     owner: platform-team

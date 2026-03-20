@@ -8,10 +8,11 @@
 #   4. ci_static_inventory entries exist and are executable
 #   5. ci_runtime_inventory entries exist and are executable
 #   6. Validates the governed orphan-script baseline
+#   7. Validates the governed active-but-unregistered critical-script baseline
 #
 # Usage:
 #   bash scripts/governance/validate-registry.sh
-#   WARN_UNREGISTERED=0 bash scripts/governance/validate-registry.sh  # skip orphan scan
+#   WARN_UNREGISTERED=0 bash scripts/governance/validate-registry.sh  # skip governed drift scans
 
 set -euo pipefail
 
@@ -19,8 +20,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REGISTRY="${SCRIPT_DIR}/script-registry.yaml"
 
-# Optional: skip the governed orphan-script validation
+# Optional: skip the governed orphan/registration drift validation
 WARN_UNREGISTERED="${WARN_UNREGISTERED:-1}"
+ACTIVE_UNREGISTERED_ALLOWLIST="${ACTIVE_UNREGISTERED_ALLOWLIST_OVERRIDE:-${REPO_ROOT}/scripts/qa/fixtures/script-governance-active-unregistered-allowlist.txt}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -286,6 +288,150 @@ else
       [[ -n "${line}" ]] && echo "  ${line}"
     done <<<"${orphan_output}"
   fi
+fi
+
+# ── 7. Validate governed active-but-unregistered baseline ────────────────────
+echo ""
+echo "--- 7. Governed active-but-unregistered baseline ---"
+
+if [[ "${WARN_UNREGISTERED}" != "1" ]]; then
+  echo "  (skipped — WARN_UNREGISTERED=0)"
+elif [[ ! -f "${ACTIVE_UNREGISTERED_ALLOWLIST}" ]]; then
+  fail "Active-unregistered allowlist missing: ${ACTIVE_UNREGISTERED_ALLOWLIST}"
+elif ! command -v python3 >/dev/null 2>&1; then
+  warn "python3 not found — skipping active-but-unregistered validation"
+else
+  active_output=""
+  if active_output="$(
+    python3 - "${REPO_ROOT}" "${REGISTRY}" "${ACTIVE_UNREGISTERED_ALLOWLIST}" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit("PyYAML is required to validate active-but-unregistered scripts") from exc
+
+repo_root = Path(sys.argv[1])
+registry_path = Path(sys.argv[2])
+allowlist_path = Path(sys.argv[3])
+generator = repo_root / "scripts/qa/generate-script-governance-catalog.py"
+
+if not generator.is_file():
+    raise SystemExit("catalog generator missing: scripts/qa/generate-script-governance-catalog.py")
+
+with tempfile.TemporaryDirectory(prefix="validate-registry-active-") as tmpdir:
+    catalog_path = Path(tmpdir) / "catalog.json"
+    summary_path = Path(tmpdir) / "summary.md"
+    subprocess.run(
+        [
+            "python3",
+            str(generator),
+            "--repo-root",
+            str(repo_root),
+            "--out",
+            str(catalog_path),
+            "--summary-out",
+            str(summary_path),
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+
+registry = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+registered: set[str] = set()
+
+for index, entry in enumerate(registry.get("scripts", []), start=1):
+    if not isinstance(entry, dict):
+        raise SystemExit(f"scripts[{index}] must be a mapping")
+    path = entry.get("path")
+    if isinstance(path, str) and path.strip():
+        registered.add(path)
+
+for inventory_key in ("ci_static_inventory", "ci_runtime_inventory"):
+    inventory = registry.get(inventory_key) or {}
+    for index, entry in enumerate(inventory.get("entries", []), start=1):
+        if not isinstance(entry, dict):
+            raise SystemExit(f"{inventory_key}.entries[{index}] must be a mapping")
+        script = entry.get("script")
+        if isinstance(script, str) and script.strip():
+            registered.add(script)
+
+critical_dirs = {
+    "scripts/infra",
+    "scripts/qa",
+    "scripts/ci",
+    "scripts/branding",
+    "scripts/migrations",
+    "scripts/tenants",
+}
+execution_caller_types = {"script", "makefile", "ci_workflow"}
+
+current: list[str] = []
+for entry in catalog.get("scripts", []):
+    if not isinstance(entry, dict):
+        continue
+    path = entry.get("path")
+    if not isinstance(path, str) or not path.endswith(".sh"):
+        continue
+    script_path = Path(path)
+    if script_path.parent.as_posix() not in critical_dirs:
+        continue
+    if path in registered:
+        continue
+    caller_types = {
+        item
+        for item in entry.get("caller_types", [])
+        if isinstance(item, str)
+    }
+    if caller_types & execution_caller_types:
+        current.append(path)
+
+allowlisted = [
+    line.split("#", 1)[0].strip()
+    for line in allowlist_path.read_text(encoding="utf-8").splitlines()
+]
+allowlisted = [line for line in allowlisted if line]
+
+current_set = set(sorted(current))
+allowlisted_set = set(allowlisted)
+unexpected = sorted(current_set - allowlisted_set)
+stale = sorted(allowlisted_set - current_set)
+
+if unexpected:
+    print("FAIL: new active-but-unregistered critical scripts detected.")
+    for path in unexpected:
+        print(f"  {path}")
+    raise SystemExit(1)
+
+if stale:
+    print("WARN: stale active-unregistered allowlist entries detected (safe to remove):")
+    for path in stale:
+        print(f"  {path}")
+
+print(
+    "PASS: active-but-unregistered critical scripts match allowlisted baseline "
+    f"({len(current_set)} paths)."
+)
+PY
+  )"; then
+    if grep -q '^WARN:' <<<"${active_output}"; then
+      warn "Active-but-unregistered critical script baseline matches, but the allowlist has stale entries"
+    else
+      pass "Active-but-unregistered critical script baseline matches the authoritative allowlist"
+    fi
+  else
+    fail "Active-but-unregistered critical script drift detected"
+  fi
+  while IFS= read -r line; do
+    [[ -n "${line}" ]] && echo "  ${line}"
+  done <<<"${active_output}"
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────

@@ -53,7 +53,7 @@ scripts:
   - path: scripts/qa/verify-static-pass.sh
     criticality: release-blocking
   - path: scripts/qa/verify-runtime-pass.sh
-    criticality: release-blocking
+    criticality: release-supporting
 EOF
 }
 
@@ -83,7 +83,7 @@ write_script "scripts/qa/verify-static-pass.sh"
 write_script "scripts/qa/verify-runtime-pass.sh"
 write_registry
 
-run_expect_pass "release-blocking scripts can be satisfied by static or runtime authority"
+run_expect_pass "release-blocking scripts require static authority while runtime inventory stays manual"
 
 cat >"$tmpdir/scripts/governance/script-registry.yaml" <<'EOF'
 version: "1.2.0"
@@ -114,7 +114,7 @@ scripts:
   - path: scripts/qa/verify-static-pass.sh
     criticality: release-blocking
   - path: scripts/qa/verify-runtime-pass.sh
-    criticality: release-blocking
+    criticality: release-supporting
 EOF
 run_expect_fail "overlap between static and runtime authority is rejected"
 
@@ -148,6 +148,6 @@ scripts:
   - path: scripts/qa/verify-runtime-pass.sh
     criticality: release-blocking
 EOF
-run_expect_fail "missing release-blocking runtime coverage is rejected"
+run_expect_fail "runtime inventory cannot satisfy release-blocking coverage"
 
 echo "OK"

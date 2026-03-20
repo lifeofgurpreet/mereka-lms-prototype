@@ -31,10 +31,10 @@ if "scripts/qa/verify-repo-structure.sh" not in paths:
 runtime_entry = scripts.get("scripts/qa/verify-dev-visual-correctness.sh")
 if not runtime_entry:
     raise SystemExit("expected verify-dev-visual-correctness.sh to be cataloged")
-if runtime_entry.get("status") != "active_authoritative":
-    raise SystemExit("expected verify-dev-visual-correctness.sh to be active_authoritative")
-if "ci_runtime_contract" not in set(runtime_entry.get("caller_types", [])):
-    raise SystemExit("expected verify-dev-visual-correctness.sh to be covered by ci_runtime_contract")
+if runtime_entry.get("status") != "inventory_authoritative":
+    raise SystemExit("expected verify-dev-visual-correctness.sh to be inventory_authoritative")
+if "ci_runtime_inventory" not in set(runtime_entry.get("caller_types", [])):
+    raise SystemExit("expected verify-dev-visual-correctness.sh to be covered by ci_runtime_inventory")
 PY
 
 echo "OK"

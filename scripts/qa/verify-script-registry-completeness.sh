@@ -7,9 +7,10 @@
 #   1. Every script in scripts/release/ is registered in script-registry.yaml
 #   2. Every scripts/infra/canonical-*.sh and scripts/infra/release-*.sh is registered
 #   3. Every release-blocking scripts/qa/* and scripts/ci/* script is in the
-#      static authority (script-registry.yaml ci_static_inventory) or the
-#      runtime authority (script-registry.yaml ci_runtime_inventory)
-#   4. No script may appear in both the static and runtime authorities
+#      static execution authority (script-registry.yaml ci_static_inventory)
+#   4. ci_runtime_inventory is inventory/manual truth only; it must not satisfy
+#      release-blocking coverage
+#   5. No script may appear in both the static and runtime authorities
 #
 # Usage:
 #   bash scripts/qa/verify-script-registry-completeness.sh
@@ -223,9 +224,9 @@ if [[ "${overlap_found}" -eq 0 ]]; then
   pass "static authority and runtime authority do not overlap"
 fi
 
-# ── Check 4: release-blocking qa/ci scripts must be inventoried ──────────────
+# ── Check 4: release-blocking qa/ci scripts must be statically enforced ──────
 echo ""
-echo "--- 4. release-blocking scripts/qa/ and scripts/ci/ — inventory coverage ---"
+echo "--- 4. release-blocking scripts/qa/ and scripts/ci/ — static execution coverage ---"
 if [[ "${#BLOCKING_VERIFICATION_SET[@]}" -eq 0 ]]; then
   info "No release-blocking scripts/qa/ or scripts/ci/ entries found in registry"
 else
@@ -233,9 +234,9 @@ else
     if [[ -n "${CI_STATIC_SET["${path}"]:-}" ]]; then
       pass "${path} — static authority via script-registry.yaml ci_static_inventory"
     elif [[ -n "${CI_RUNTIME_SET["${path}"]:-}" ]]; then
-      pass "${path} — runtime authority via script-registry.yaml ci_runtime_inventory"
+      fail "${path} — listed only in script-registry.yaml ci_runtime_inventory; runtime inventory is manual/runtime coverage, not release-blocking enforcement"
     else
-      fail "${path} — criticality: release-blocking but absent from script-registry.yaml ci_static_inventory and ci_runtime_inventory"
+      fail "${path} — criticality: release-blocking but absent from script-registry.yaml ci_static_inventory"
     fi
   done
 fi
@@ -248,7 +249,7 @@ echo "  FAIL: ${FAIL}"
 echo ""
 
 if [[ "${FAIL}" -gt 0 ]]; then
-  echo -e "${RED}RESULT: FAIL — ${FAIL} violation(s). Add entries to script-registry.yaml ci_static_inventory or ci_runtime_inventory.${NC}"
+  echo -e "${RED}RESULT: FAIL — ${FAIL} violation(s). Release-blocking qa/ci scripts must be in ci_static_inventory; use ci_runtime_inventory only for manual/runtime inventory paths.${NC}"
   exit 1
 fi
 

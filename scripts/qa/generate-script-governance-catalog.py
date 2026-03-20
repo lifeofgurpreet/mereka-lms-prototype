@@ -128,11 +128,11 @@ def load_inventory_contract_members(repo_root: Path) -> dict[str, set[str]]:
 
     contracts: dict[str, set[str]] = {
         "ci_static_contract": set(),
-        "ci_runtime_contract": set(),
+        "ci_runtime_inventory": set(),
     }
     for inventory_key, bucket in (
         ("ci_static_inventory", "ci_static_contract"),
-        ("ci_runtime_inventory", "ci_runtime_contract"),
+        ("ci_runtime_inventory", "ci_runtime_inventory"),
     ):
         inventory = payload.get(inventory_key)
         if not isinstance(inventory, dict):
@@ -231,7 +231,7 @@ def infer_callers(
     if script_path in ci_static_members:
         buckets["ci_static_contract"].append("scripts/governance/script-registry.yaml#ci_static_inventory")
     if script_path in ci_runtime_members:
-        buckets["ci_runtime_contract"].append("scripts/governance/script-registry.yaml#ci_runtime_inventory")
+        buckets["ci_runtime_inventory"].append("scripts/governance/script-registry.yaml#ci_runtime_inventory")
     return {key: sorted(set(value)) for key, value in buckets.items()}
 
 
@@ -241,8 +241,10 @@ def classify_status(script_path: str, callers: dict[str, list[str]]) -> str:
         return "supporting_library"
     if name.startswith("test-"):
         return "test_support"
-    if callers.get("ci_workflow") or callers.get("ci_static_contract") or callers.get("ci_runtime_contract"):
+    if callers.get("ci_workflow") or callers.get("ci_static_contract"):
         return "active_authoritative"
+    if callers.get("ci_runtime_inventory"):
+        return "inventory_authoritative"
     if callers:
         return "active_manual"
     return "orphan_candidate"
@@ -270,6 +272,7 @@ def render_summary_markdown(catalog: dict) -> str:
         f"- Generated at: `{catalog['generated_at']}`",
         f"- Total scripts: **{summary['total_scripts']}**",
         f"- Active authoritative: **{summary['statuses'].get('active_authoritative', 0)}**",
+        f"- Inventory authoritative: **{summary['statuses'].get('inventory_authoritative', 0)}**",
         f"- Active manual: **{summary['statuses'].get('active_manual', 0)}**",
         f"- Orphan candidates: **{summary['statuses'].get('orphan_candidate', 0)}**",
         f"- Dangerous (high/critical): **{summary['dangerous_scripts']}**",
@@ -303,7 +306,7 @@ def build_catalog(repo_root: Path) -> dict:
 
     inventory_contracts = load_inventory_contract_members(repo_root)
     ci_static_members = inventory_contracts["ci_static_contract"]
-    ci_runtime_members = inventory_contracts["ci_runtime_contract"]
+    ci_runtime_members = inventory_contracts["ci_runtime_inventory"]
 
     entries: list[dict] = []
     for script_path in scripts:

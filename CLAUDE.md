@@ -141,11 +141,12 @@ tutor_env/                # Generated Tutor state (gitignored)
   - `static-validation`: generated CI static inventory via `run-release-verification-gates.sh`
   - `tutor-config-tests`: Tutor rendering + idempotency checks
   - `security-scans`: TruffleHog (HEAD only) + pip-audit
-  - `test-coverage`: Python tests with coverage
+- `test-coverage`: Python tests with coverage
 - Static inventory authority lives in `scripts/governance/script-registry.yaml` under `ci_static_inventory`
-- Runtime inventory authority lives in `scripts/governance/script-registry.yaml` under `ci_runtime_inventory`
+- Runtime inventory authority lives in `scripts/governance/script-registry.yaml` under `ci_runtime_inventory` for manual/runtime validation paths
 - `.github/ci-scripts-static.txt` is a generated derivative
 - `.github/ci-scripts-runtime.txt` is a generated derivative
+- Only `ci_static_inventory` is executed by the offline static-validation CI runner
 - `.github/run-scripts-parallel.sh` runs scripts via `xargs -P` with PASS/FAIL/TIMEOUT tracking
 - 3 composite actions in `.github/actions/` eliminate boilerplate across workflows
 - `daily-infrastructure-audit.yml` merges observability + alert routing + parity checks
@@ -284,8 +285,8 @@ python3 scripts/governance/generate-ci-runtime-inventory.py --write
 
 # Adding a new verification script to CI:
 # 1. Add the entry in scripts/governance/script-registry.yaml ci_static_inventory
-#    or ci_runtime_inventory, depending on whether the script is offline-static
-#    or live-context-only
+#    for offline/static CI execution, or ci_runtime_inventory for source-owned
+#    manual/runtime inventory only
 # 2. Regenerate the corresponding .github/ci-scripts-*.txt derivative
 # 3. Scripts must exit 0 on success, non-zero on failure
 # 4. Scripts get 120s timeout by default
@@ -597,7 +598,7 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
 8. **Hardcoding secrets** → Use `os.environ.get()` and ExternalSecrets
    - **Note**: Pre-commit hook will block commits with hardcoded secrets
 9. **Adding verification scripts without updating CI** → Script exists but never runs in CI
-   - **Fix**: Update `scripts/governance/script-registry.yaml` `ci_static_inventory` or `ci_runtime_inventory`, then regenerate the corresponding `.github/ci-scripts-*.txt` derivative
+   - **Fix**: Add offline/static gates to `ci_static_inventory`; use `ci_runtime_inventory` only for manual/runtime inventory paths, then regenerate the corresponding `.github/ci-scripts-*.txt` derivative
 10. **Duplicating GCP auth / Python setup in workflows** → Use composite actions in `.github/actions/`
 11. **Including ARC manifests in rke2-nonprod overlay** → The overlay's `namespace: mereka-lms` transformer overrides ARC namespaces. Apply ARC separately: `kubectl apply -k deploy/k8s/base/arc/`
 
