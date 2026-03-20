@@ -49,6 +49,75 @@ env:
   DOCKER_BUILDKIT: 1
 
 jobs:
+  cancel-superseded-queued-main-builds:
+    name: Cancel Superseded Queued Main Builds
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 10
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Cancel older queued Build Tutor Images runs on main
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const currentRunId = context.runId;
+            const cancelled = [];
+
+            const runs = await github.paginate(
+              github.rest.actions.listWorkflowRuns,
+              {
+                owner,
+                repo,
+                workflow_id: 'build-tutor-images.yml',
+                branch: 'main',
+                event: 'push',
+                status: 'queued',
+                per_page: 100,
+              }
+            );
+
+            for (const run of runs) {
+              if (run.id === currentRunId || run.id > currentRunId) {
+                continue;
+              }
+
+              await github.rest.actions.cancelWorkflowRun({
+                owner,
+                repo,
+                run_id: run.id,
+              });
+              cancelled.push({
+                id: run.id,
+                createdAt: run.created_at,
+                url: run.html_url,
+              });
+            }
+
+            if (cancelled.length === 0) {
+              core.notice('No older queued Build Tutor Images runs found on main.');
+              return;
+            }
+
+            core.summary
+              .addHeading('Cancelled older queued Build Tutor Images runs on main')
+              .addTable([
+                [
+                  { data: 'Run ID', header: true },
+                  { data: 'Created At', header: true },
+                  { data: 'URL', header: true },
+                ],
+                ...cancelled.map((run) => [
+                  String(run.id),
+                  run.createdAt,
+                  run.url,
+                ]),
+              ]);
+            await core.summary.write();
+
   lint:
     name: Lint & Validate
     runs-on: mereka-k8s-runners
