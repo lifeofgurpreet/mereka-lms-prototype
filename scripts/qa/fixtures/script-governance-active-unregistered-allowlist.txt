@@ -155,7 +155,6 @@ scripts/qa/run-skill-runtime-gates.sh
 scripts/qa/run-spec-integrity-gates.sh
 scripts/qa/run-task-runtime-gates.sh
 scripts/qa/run-team-handbook-gates.sh
-scripts/qa/smoke-authenticated.sh
 scripts/qa/smoke-authn-mfe.sh
 scripts/qa/smoke-test-analytics.sh
 scripts/qa/smoke-test.sh

@@ -60,6 +60,7 @@ scripts/qa/verify-studio-isolation.sh  # LIVE_APP
 scripts/qa/verify-preview-redirect.sh  # LIVE_APP
 scripts/qa/verify-public-branding.sh  # LIVE_APP
 scripts/qa/verify-studio-authoring-branding.sh  # LIVE_APP
+scripts/qa/smoke-authenticated.sh  # LIVE_APP (requires SSO_USERNAME and SSO_PASSWORD for live authenticated smoke)
 scripts/qa/public-health-check.sh  # LIVE_APP (public endpoint smoke; optional kubectl diagnostics for dev forum failures)
 scripts/qa/run-mfe-slot-gates.sh  # LIVE_APP
 scripts/qa/run-tenant-branding-qa.sh  # LIVE_APP
