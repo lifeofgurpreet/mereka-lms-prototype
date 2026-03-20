@@ -242,12 +242,12 @@ class MerekaCookieDomainMiddleware:
         policy = _cookie_policy_for_host(getattr(request, "get_host", lambda: "")())
         if not policy.domain:
             # Host-only cookies.
-            for name in ("sessionid", "csrftoken", "edx-jwt-cookie-header-payload", "user-info"):
+            for name in ("sessionid", "csrftoken", "edx-jwt-cookie-header-payload", "edx-jwt-cookie-signature", "user-info"):
                 if name in response.cookies and "domain" in response.cookies[name]:
                     del response.cookies[name]["domain"]
             return response
 
-        for name in ("sessionid", "csrftoken", "edx-jwt-cookie-header-payload", "user-info"):
+        for name in ("sessionid", "csrftoken", "edx-jwt-cookie-header-payload", "edx-jwt-cookie-signature", "user-info"):
             if name in response.cookies:
                 response.cookies[name]["domain"] = policy.domain
 
