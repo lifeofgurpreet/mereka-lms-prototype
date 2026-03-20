@@ -3,11 +3,13 @@
 # service dependencies that live in the LMS and Discovery databases.
 #
 # Creates or updates:
-#   1. LMS OAuth apps for enterprise backend services (enterprise-catalog,
-#      enterprise-access, enterprise-subsidy, license-manager)
+#   1. LMS OAuth apps for enterprise backend services
 #   2. Discovery Partner record for course metadata sync
+#   3. Discovery ProgramType records for program metadata
+#   4. LMS audit enrollment modes for all courses without one
+#   5. Cleanup: disable stale prod-domain SiteConfigurations in dev
 #
-# Idempotent: safe to re-run. Uses update_or_create throughout.
+# Idempotent: safe to re-run. Uses update_or_create / get_or_create throughout.
 #
 # Usage:
 #   scripts/tenants/bootstrap-enterprise-service-deps.sh [--namespace NS] [--dry-run]
@@ -157,6 +159,108 @@ print(f'  Partner {partner.short_code}: {status} (site={partner.site.domain})')
 " 2>&1 | grep -E "^  Partner"
 
   echo "  OK: Discovery Partner 'mereka'"
+fi
+
+# ── 3. Discovery ProgramTypes ─────────────────────────────────────────────────
+echo ""
+echo "--- 3. Discovery ProgramTypes ---"
+
+if [[ -z "$DISCOVERY_POD" ]]; then
+  echo "  SKIPPED: No Discovery pod"
+elif [[ "$DRY_RUN" == "true" ]]; then
+  echo "  [DRY RUN] Would create/update Discovery ProgramTypes"
+else
+  kubectl exec -n "$NAMESPACE" "$DISCOVERY_POD" -c discovery -- \
+    python manage.py shell -c "
+from course_discovery.apps.course_metadata.models import ProgramType
+
+PROGRAM_TYPES = [
+    ('xseries', 'XSeries'),
+    ('micromasters', 'MicroMasters'),
+    ('microbachelors', 'MicroBachelors'),
+    ('professional-certificate', 'Professional Certificate'),
+    ('professional-program', 'Professional Program'),
+    ('masters', 'Masters'),
+]
+
+for slug, name in PROGRAM_TYPES:
+    pt, created = ProgramType.objects.get_or_create(
+        slug=slug,
+        defaults={'name_t': name}
+    )
+    status = 'created' if created else 'exists'
+    print(f'  {pt.slug}: {status}')
+" 2>&1 | grep -E "^  "
+
+  echo "  OK: ProgramTypes"
+fi
+
+# ── 4. LMS Audit Enrollment Modes ────────────────────────────────────────────
+echo ""
+echo "--- 4. LMS Audit Enrollment Modes ---"
+
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "  [DRY RUN] Would ensure audit mode on all courses"
+else
+  kubectl exec -n "$NAMESPACE" "$LMS_POD" -c lms -- \
+    python manage.py lms shell -c "
+from common.djangoapps.course_modes.models import CourseMode
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+
+total = CourseOverview.objects.count()
+created = 0
+for course in CourseOverview.objects.all():
+    _, was_created = CourseMode.objects.get_or_create(
+        course_id=course.id,
+        mode_slug='audit',
+        defaults={
+            'mode_display_name': 'Audit',
+            'min_price': 0,
+            'currency': 'usd',
+        }
+    )
+    if was_created:
+        created += 1
+
+print(f'  courses={total} created={created} already_existed={total - created}')
+" 2>&1 | grep -E "^  courses="
+
+  echo "  OK: Audit modes"
+fi
+
+# ── 5. Disable Stale Prod-Domain SiteConfigurations ──────────────────────────
+echo ""
+echo "--- 5. Stale Site Cleanup ---"
+
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "  [DRY RUN] Would disable stale prod-domain SiteConfigurations"
+else
+  kubectl exec -n "$NAMESPACE" "$LMS_POD" -c lms -- \
+    python manage.py lms shell -c "
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+
+# Prod domains that should not be active in a dev namespace
+STALE_DOMAINS = [
+    'academyv2.mereka.io',
+    'academy.biji-biji.com',
+    'skillourfuture.academy.mereka.io',
+    'lms-dev.mereka.dev',
+]
+
+for domain in STALE_DOMAINS:
+    try:
+        sc = SiteConfiguration.objects.get(site__domain=domain)
+        if sc.enabled:
+            sc.enabled = False
+            sc.save()
+            print(f'  {domain}: disabled')
+        else:
+            print(f'  {domain}: already disabled')
+    except SiteConfiguration.DoesNotExist:
+        print(f'  {domain}: no config (skip)')
+" 2>&1 | grep -E "^  "
+
+  echo "  OK: Stale sites"
 fi
 
 echo ""
