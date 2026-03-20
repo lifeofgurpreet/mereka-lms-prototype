@@ -62,7 +62,7 @@ else
 fi
 
 # 2. All concerns wired in the dispatch
-EXPECTED_CONCERNS="migrate proof release-gate smoke preflight topology"
+EXPECTED_CONCERNS="migrate inventory proof release-gate smoke preflight topology"
 for concern in $EXPECTED_CONCERNS; do
   if grep -q "^  ${concern})" "$LMS_OPS" 2>/dev/null; then
     pass "concern '$concern' wired in bin/lms-ops dispatch"
@@ -73,6 +73,7 @@ done
 
 # 3. bin/lms-ops delegates to underlying scripts (not reimplementing)
 declare -A DELEGATIONS=(
+  ["inventory"]="generate-ci-static-inventory.py"
   ["release-gate"]="release-gate.sh"
   ["smoke"]="smoke-after-migrate.sh"
   ["preflight"]="migration-preflight.sh"

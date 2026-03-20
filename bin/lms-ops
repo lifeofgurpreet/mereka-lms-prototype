@@ -12,6 +12,7 @@
 #   migrate plan     Show pending migrations per service (read-only)
 #   migrate apply    Run migration Jobs via kubectl apply (requires --lane)
 #   migrate verify   Verify zero pending migrations post-apply
+#   inventory ci-static  Show authoritative CI static-validation inventory
 #   proof            Emit GitOps-conformant evidence envelopes
 #   release-gate     Run the release gate (structural integrity checks)
 #   smoke [basic]     Post-migration/post-deploy runtime smoke
@@ -325,6 +326,23 @@ PYEOF
   esac
 }
 
+# ── Concern: inventory ─────────────────────────────────────────────────────
+do_inventory() {
+  local sub="${SUBCONCERN:-ci-static}"
+  case "$sub" in
+    ci-static)
+      local args=()
+      [[ "$FORMAT" == "json" ]] && args+=("--format" "json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec python3 "$REPO_ROOT/scripts/governance/generate-ci-static-inventory.py" "${args[@]}"
+      ;;
+    *)
+      echo "Unknown inventory subconcern: $sub (expected: ci-static)" >&2
+      exit 1
+      ;;
+  esac
+}
+
 # ── Concern: proof ────────────────────────────────────────────────────────
 do_proof() {
   local concern="${SUBCONCERN:-aggregate}"
@@ -386,6 +404,7 @@ do_topology() {
 # ── Dispatch ──────────────────────────────────────────────────────────────
 case "$CONCERN" in
   migrate)      do_migrate ;;
+  inventory)    do_inventory ;;
   proof)        do_proof ;;
   release-gate) do_release_gate ;;
   smoke)        do_smoke ;;
@@ -393,6 +412,6 @@ case "$CONCERN" in
   topology)     do_topology ;;
   *)
     echo "Unknown concern: $CONCERN" >&2
-    echo "Valid concerns: migrate, proof, release-gate, smoke, preflight, topology" >&2
+    echo "Valid concerns: migrate, inventory, proof, release-gate, smoke, preflight, topology" >&2
     exit 1 ;;
 esac

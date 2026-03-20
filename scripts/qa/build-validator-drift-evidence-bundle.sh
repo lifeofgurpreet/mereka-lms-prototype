@@ -100,7 +100,7 @@ active = [str(p) for p in scripts if "deprecated" not in p.parts]
 print(
     json.dumps(
         {
-            "canonical_hypothesis": "ci_static entries in .github/ci-scripts-static.txt are canonical release-blocking validators",
+            "canonical_hypothesis": "ci_static entries in script-registry.yaml ci_static_inventory, rendered to .github/ci-scripts-static.txt, are the authoritative static-validator inventory",
             "counts": {
                 "total_verify_scripts": len(scripts),
                 "active_verify_scripts": len(active),

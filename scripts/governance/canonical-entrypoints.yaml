@@ -25,6 +25,7 @@ version: "2.0.0"
 front_door:
   canonical: bin/lms-ops
   concerns:
+    - inventory   # harness inventory / generated CI static list report
     - migrate     # plan/apply/verify
     - proof       # evidence envelope emission
     - release-gate

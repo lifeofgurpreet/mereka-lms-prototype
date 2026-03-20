@@ -284,6 +284,9 @@ jobs:
           npm install markdownlint-cli
           npx markdownlint docs/ specs/ --ignore docs/archive/ || true
 
+      - name: Verify CI static inventory is generated and current
+        run: python3 scripts/governance/generate-ci-static-inventory.py --check
+
       # ── Phase C: Run all static verification scripts in parallel ──────────
       - name: Run static verification scripts
         run: PARALLELISM=4 TIMEOUT_SECS=120 ./scripts/qa/run-release-verification-gates.sh

@@ -6,15 +6,17 @@
 # Checks:
 #   1. Every script in scripts/release/ is registered in script-registry.yaml
 #   2. Every scripts/infra/canonical-*.sh and scripts/infra/release-*.sh is registered
-#   3. Every release-blocking scripts/qa/* and scripts/ci/* script is in ci-scripts-static.txt
+#   3. Every release-blocking scripts/qa/* and scripts/ci/* script is in the
+#      static authority (script-registry.yaml ci_static_inventory) or the
+#      runtime-only bridge (.github/ci-scripts-runtime.txt)
+#   4. No script may appear in both the static authority and the runtime bridge
 #
 # Usage:
 #   bash scripts/qa/verify-script-registry-completeness.sh
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 REGISTRY="${REPO_ROOT}/scripts/governance/script-registry.yaml"
-CI_LIST="${REPO_ROOT}/.github/ci-scripts-static.txt"
 CI_RUNTIME_LIST="${REPO_ROOT}/.github/ci-scripts-runtime.txt"
 
 GREEN='\033[0;32m'
@@ -24,6 +26,8 @@ NC='\033[0m'
 
 PASS=0
 FAIL=0
+TMPDIR="$(mktemp -d -t verify-script-registry-completeness.XXXXXX)"
+trap 'rm -rf "${TMPDIR}"' EXIT
 
 pass() { echo -e "${GREEN}[PASS]${NC} $*"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}[FAIL]${NC} $*"; FAIL=$((FAIL + 1)); }
@@ -32,49 +36,126 @@ info() { echo -e "${YELLOW}[INFO]${NC} $*"; }
 echo "=== Script Registry Completeness Check ==="
 echo ""
 
-# ── Build lookup: registered paths ───────────────────────────────────────────
-mapfile -t REGISTERED_PATHS < <(
-  grep -E '^\s+- path: ' "${REGISTRY}" | sed 's/^\s*- path: //' | tr -d ' '
+if [[ ! -f "${REGISTRY}" ]]; then
+  fail "script registry missing: ${REGISTRY}"
+  echo ""
+  echo "=== Summary ==="
+  echo "  PASS: ${PASS}"
+  echo "  FAIL: ${FAIL}"
+  echo ""
+  exit 1
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+  fail "python3 is required to parse ${REGISTRY}"
+  echo ""
+  echo "=== Summary ==="
+  echo "  PASS: ${PASS}"
+  echo "  FAIL: ${FAIL}"
+  echo ""
+  exit 1
+fi
+
+if ! python3 - "${REGISTRY}" "${TMPDIR}" <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit("PyYAML is required to parse script-registry.yaml") from exc
+
+registry_path = Path(sys.argv[1])
+tmpdir = Path(sys.argv[2])
+
+payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
+if not isinstance(payload, dict):
+    raise SystemExit("script-registry.yaml must load as a mapping")
+
+scripts = payload.get("scripts")
+if not isinstance(scripts, list):
+    raise SystemExit("script-registry.yaml missing scripts list")
+
+registered_paths: list[str] = []
+blocking_verification: list[str] = []
+for index, entry in enumerate(scripts, start=1):
+    if not isinstance(entry, dict):
+        raise SystemExit(f"scripts[{index}] must be a mapping")
+    path = entry.get("path")
+    if not isinstance(path, str) or not path.strip():
+        raise SystemExit(f"scripts[{index}] missing path")
+    registered_paths.append(path)
+    if (
+        entry.get("criticality") == "release-blocking"
+        and (path.startswith("scripts/qa/") or path.startswith("scripts/ci/"))
+    ):
+        blocking_verification.append(path)
+
+inventory = payload.get("ci_static_inventory")
+if not isinstance(inventory, dict):
+    raise SystemExit("script-registry.yaml missing ci_static_inventory mapping")
+entries = inventory.get("entries")
+if not isinstance(entries, list):
+    raise SystemExit("ci_static_inventory.entries must be a list")
+
+ci_static_paths: list[str] = []
+for index, entry in enumerate(entries, start=1):
+    if not isinstance(entry, dict):
+        raise SystemExit(f"ci_static_inventory.entries[{index}] must be a mapping")
+    script = entry.get("script")
+    if not isinstance(script, str) or not script.strip():
+        raise SystemExit(f"ci_static_inventory.entries[{index}] missing script")
+    ci_static_paths.append(script)
+
+(tmpdir / "registered-paths.txt").write_text(
+    "".join(f"{item}\n" for item in sorted(set(registered_paths))),
+    encoding="utf-8",
 )
+(tmpdir / "blocking-verification.txt").write_text(
+    "".join(f"{item}\n" for item in sorted(set(blocking_verification))),
+    encoding="utf-8",
+)
+(tmpdir / "ci-static-paths.txt").write_text(
+    "".join(f"{item}\n" for item in sorted(set(ci_static_paths))),
+    encoding="utf-8",
+)
+PY
+then
+  fail "unable to parse ${REGISTRY}"
+  echo ""
+  echo "=== Summary ==="
+  echo "  PASS: ${PASS}"
+  echo "  FAIL: ${FAIL}"
+  echo ""
+  exit 1
+fi
 
 declare -A REGISTERED_SET
-for p in "${REGISTERED_PATHS[@]}"; do
+while IFS= read -r p; do
+  [[ -z "$p" ]] && continue
   REGISTERED_SET["${p}"]=1
-done
+done < "${TMPDIR}/registered-paths.txt"
 
-# ── Build lookup: release-blocking qa/ci paths from registry ─────────────────
-# Scan consecutive lines: record path, emit if criticality: release-blocking
-# Scope to scripts/qa/ and scripts/ci/ — infra orchestration scripts are not
-# expected in ci-scripts-static.txt (they mutate cluster/registry).
 declare -A BLOCKING_VERIFICATION_SET
-current_path=""
-while IFS= read -r line; do
-  if [[ "$line" =~ ^[[:space:]]*-[[:space:]]path:[[:space:]](.+)$ ]]; then
-    current_path="${BASH_REMATCH[1]}"
-  elif [[ "$line" =~ criticality:[[:space:]]release-blocking && -n "$current_path" ]]; then
-    if [[ "$current_path" == scripts/qa/* || "$current_path" == scripts/ci/* ]]; then
-      BLOCKING_VERIFICATION_SET["${current_path}"]=1
-    fi
-    current_path=""
-  elif [[ "$line" =~ ^[[:space:]]*-[[:space:]]path: ]]; then
-    current_path=""
-  fi
-done < "${REGISTRY}"
+while IFS= read -r path; do
+  [[ -z "$path" ]] && continue
+  BLOCKING_VERIFICATION_SET["${path}"]=1
+done < "${TMPDIR}/blocking-verification.txt"
 
-# ── Build lookup: script base-paths in ci-scripts-static.txt ─────────────────
-# Entries may include arguments (e.g. "scripts/release/release-gate.sh --skip-cluster")
-# Strip arguments when building the lookup set.
-declare -A CI_SET
-while IFS= read -r line; do
-  [[ "$line" =~ ^#  || -z "${line// }" ]] && continue
-  base_path="${line%% *}"
-  CI_SET["${base_path}"]=1
-done < "${CI_LIST}"
+declare -A CI_STATIC_SET
+while IFS= read -r path; do
+  [[ -z "$path" ]] && continue
+  CI_STATIC_SET["${path}"]=1
+done < "${TMPDIR}/ci-static-paths.txt"
+
+declare -A CI_RUNTIME_SET
 if [[ -f "${CI_RUNTIME_LIST}" ]]; then
   while IFS= read -r line; do
     [[ "$line" =~ ^#  || -z "${line// }" ]] && continue
     base_path="${line%% *}"
-    CI_SET["${base_path}"]=1
+    CI_RUNTIME_SET["${base_path}"]=1
   done < "${CI_RUNTIME_LIST}"
 fi
 
@@ -112,17 +193,33 @@ done < <(find "${REPO_ROOT}/scripts/infra" -maxdepth 1 \
   \( -name 'canonical-*.sh' -o -name 'release-*.sh' \) -type f | sort)
 [[ "$found" -eq 0 ]] && info "No canonical-* or release-* scripts found in scripts/infra/"
 
-# ── Check 3: release-blocking qa/ci scripts must be in ci-scripts-static.txt ──
+# ── Check 3: static authority and runtime bridge must not overlap ────────────
 echo ""
-echo "--- 3. release-blocking scripts/qa/ and scripts/ci/ — in ci-scripts-static.txt ---"
+echo "--- 3. static authority vs runtime bridge — no overlap ---"
+overlap_found=0
+for path in $(printf '%s\n' "${!CI_STATIC_SET[@]}" | sort); do
+  if [[ -n "${CI_RUNTIME_SET["${path}"]:-}" ]]; then
+    fail "${path} — listed in both script-registry.yaml ci_static_inventory and .github/ci-scripts-runtime.txt"
+    overlap_found=1
+  fi
+done
+if [[ "${overlap_found}" -eq 0 ]]; then
+  pass "static authority and runtime bridge do not overlap"
+fi
+
+# ── Check 4: release-blocking qa/ci scripts must be inventoried ──────────────
+echo ""
+echo "--- 4. release-blocking scripts/qa/ and scripts/ci/ — inventory coverage ---"
 if [[ "${#BLOCKING_VERIFICATION_SET[@]}" -eq 0 ]]; then
   info "No release-blocking scripts/qa/ or scripts/ci/ entries found in registry"
 else
   for path in $(echo "${!BLOCKING_VERIFICATION_SET[@]}" | tr ' ' '\n' | sort); do
-    if [[ -n "${CI_SET["${path}"]:-}" ]]; then
-      pass "${path}"
+    if [[ -n "${CI_STATIC_SET["${path}"]:-}" ]]; then
+      pass "${path} — static authority via script-registry.yaml ci_static_inventory"
+    elif [[ -n "${CI_RUNTIME_SET["${path}"]:-}" ]]; then
+      pass "${path} — runtime bridge via .github/ci-scripts-runtime.txt"
     else
-      fail "${path} — criticality: release-blocking but absent from ci-scripts-static.txt and ci-scripts-runtime.txt"
+      fail "${path} — criticality: release-blocking but absent from script-registry.yaml ci_static_inventory and .github/ci-scripts-runtime.txt"
     fi
   done
 fi
@@ -135,7 +232,7 @@ echo "  FAIL: ${FAIL}"
 echo ""
 
 if [[ "${FAIL}" -gt 0 ]]; then
-  echo -e "${RED}RESULT: FAIL — ${FAIL} violation(s). Add missing entries to script-registry.yaml and/or ci-scripts-static.txt.${NC}"
+  echo -e "${RED}RESULT: FAIL — ${FAIL} violation(s). Add static entries to script-registry.yaml ci_static_inventory or runtime-only bridge entries to .github/ci-scripts-runtime.txt.${NC}"
   exit 1
 fi
 

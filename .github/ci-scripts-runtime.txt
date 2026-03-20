@@ -1,4 +1,9 @@
 # ── Verification scripts requiring runtime/live environment ──────────────────
+# TEMP_BRIDGE: runtime-only inventory remains hand-maintained until a
+# machine-readable authority owns it.
+# Owner: platform-team
+# Removal trigger: promote runtime-only CI inventory into script-registry.yaml
+# or an explicitly approved generated successor.
 # These scripts were relocated from ci-scripts-static.txt on 2026-03-12
 # because they require live cluster, running app, CI artifacts, or data files
 # that are not available in the offline static-validation CI job.

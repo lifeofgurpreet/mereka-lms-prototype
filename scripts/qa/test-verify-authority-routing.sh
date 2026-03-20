@@ -16,6 +16,7 @@ write_lms_ops_fixture() {
 source scripts/lib/lane-normalize.sh
 
 do_proof() { exec scripts/release/emit-proof-envelope.sh; }
+do_inventory() { exec python3 scripts/governance/generate-ci-static-inventory.py; }
 do_release_gate() { exec scripts/release/release-gate.sh; }
 do_smoke() { exec scripts/release/smoke-after-migrate.sh; }
 do_preflight() { exec scripts/release/migration-preflight.sh; }
@@ -23,6 +24,7 @@ do_topology() { exec scripts/qa/verify-topology-selectors.sh; }
 
 case "${1:-}" in
   migrate) ;;
+  inventory) do_inventory ;;
   proof) do_proof ;;
   release-gate) do_release_gate ;;
   smoke) do_smoke ;;
@@ -39,6 +41,7 @@ version: "2.0.0"
 front_door:
   canonical: bin/lms-ops
   concerns:
+    - inventory
     - migrate
     - proof
     - release-gate

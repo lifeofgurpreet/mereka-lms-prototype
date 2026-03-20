@@ -5,6 +5,7 @@
 # verify-ci-script-list.sh - Validate ci-scripts-static.txt integrity
 #
 # Ensures:
+#   0. Generated output matches the authoritative registry
 #   1. Every script listed actually exists on disk
 #   2. No duplicate entries
 #   3. Every script is executable
@@ -30,9 +31,20 @@ do_warn() { echo -e "${YELLOW}WARN${NC} $1"; WARNED=$((WARNED + 1)); }
 
 LIST_FILE="$REPO_ROOT/.github/ci-scripts-static.txt"
 CATALOG_JSON="$REPO_ROOT/verification/catalogs/verification_catalog.json"
+GENERATOR="$REPO_ROOT/scripts/governance/generate-ci-static-inventory.py"
 
 echo "=== CI Script List Validation ==="
 echo
+
+# --- Check 0: Generated output is current ---
+echo "--- Check 0: Generated output is current ---"
+if [[ ! -x "$GENERATOR" ]]; then
+  do_fail "generator missing or not executable: $GENERATOR"
+elif python3 "$GENERATOR" --check; then
+  do_pass "ci-scripts-static.txt matches script-registry.yaml ci_static_inventory"
+else
+  do_fail "ci-scripts-static.txt is stale relative to script-registry.yaml ci_static_inventory"
+fi
 
 if [[ ! -f "$LIST_FILE" ]]; then
   do_fail "ci-scripts-static.txt not found at $LIST_FILE"
