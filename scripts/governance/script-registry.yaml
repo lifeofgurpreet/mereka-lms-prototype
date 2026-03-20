@@ -554,6 +554,9 @@ ci_runtime_inventory:
       category: CI_ARTIFACT
     - script: scripts/infra/check-worktree-freshness.sh
       category: WORKTREE_CONTEXT
+    - script: scripts/qa/ops-preflight.sh
+      category: WORKTREE_CONTEXT
+      note: operator preflight for br+tutor+gitops before combined manual ops
     - script: scripts/qa/verify-enterprise-sso-readiness.sh
       category: LIVE_CLUSTER
       args: ["--mode", "repo"]
@@ -622,6 +625,9 @@ ci_runtime_inventory:
       category: LIVE_APP
     - script: scripts/qa/verify-studio-authoring-branding.sh
       category: LIVE_APP
+    - script: scripts/qa/public-health-check.sh
+      category: LIVE_APP
+      note: public endpoint smoke; optional kubectl diagnostics for dev forum failures
     - script: scripts/qa/verify-dev-visual-correctness.sh
       category: LIVE_CLUSTER
       note: optional browser layer

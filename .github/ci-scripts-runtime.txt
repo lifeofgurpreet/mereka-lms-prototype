@@ -26,6 +26,7 @@ scripts/qa/verify-release-dry-run-contract.sh  # CI_ARTIFACT
 
 # ── Worktree or branch context required ─────────────────────────────────────────────────────
 scripts/infra/check-worktree-freshness.sh  # WORKTREE_CONTEXT
+scripts/qa/ops-preflight.sh  # WORKTREE_CONTEXT (operator preflight for br+tutor+gitops before combined manual ops)
 
 # ── Live cluster required ─────────────────────────────────────────────────────
 scripts/qa/verify-enterprise-sso-readiness.sh --mode repo  # LIVE_CLUSTER
@@ -59,6 +60,7 @@ scripts/qa/verify-studio-isolation.sh  # LIVE_APP
 scripts/qa/verify-preview-redirect.sh  # LIVE_APP
 scripts/qa/verify-public-branding.sh  # LIVE_APP
 scripts/qa/verify-studio-authoring-branding.sh  # LIVE_APP
+scripts/qa/public-health-check.sh  # LIVE_APP (public endpoint smoke; optional kubectl diagnostics for dev forum failures)
 scripts/qa/run-mfe-slot-gates.sh  # LIVE_APP
 scripts/qa/run-tenant-branding-qa.sh  # LIVE_APP
 scripts/qa/verify-paragon-runtime.sh  # LIVE_APP (visual-regression prereqs)

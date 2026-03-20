@@ -131,9 +131,7 @@ scripts/qa/list-openedx-hostnames.sh
 scripts/qa/load-test-libraries.sh
 scripts/qa/load-test-tenants.sh
 scripts/qa/ops-confidence.sh
-scripts/qa/ops-preflight.sh
 scripts/qa/print-runtime-blocker-status.sh
-scripts/qa/public-health-check.sh
 scripts/qa/run-a11y-runtime-lane.sh
 scripts/qa/run-adr-gates.sh
 scripts/qa/run-agent-pack-runtime-gates.sh
