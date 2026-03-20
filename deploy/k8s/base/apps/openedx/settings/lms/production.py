@@ -701,8 +701,9 @@ ALLOWED_HOSTS = [
     f"studio.{MEREKA_BIJI_DOMAIN}",
     f"apps.{MEREKA_SKILLOURFUTURE_DOMAIN}",
     f"studio.{MEREKA_SKILLOURFUTURE_DOMAIN}",
-    # Enterprise admin portal
+    # Enterprise portals
     f"admin.{MEREKA_LMS_DOMAIN}",
+    f"learner.{MEREKA_LMS_DOMAIN}",
 ]
 for origin in [
     MEREKA_LMS_BASE_URL,
@@ -713,6 +714,7 @@ for origin in [
     f"{MEREKA_SCHEME}://{MEREKA_BIJI_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_DOMAIN}",
     f"{MEREKA_SCHEME}://admin.{MEREKA_LMS_DOMAIN}",
+    f"{MEREKA_SCHEME}://learner.{MEREKA_LMS_DOMAIN}",
 ]:
     if origin not in CORS_ORIGIN_WHITELIST:
         CORS_ORIGIN_WHITELIST.append(origin)
