@@ -38,10 +38,9 @@ on:
         required: false
 
 concurrency:
-  # Never cancel in-progress builds on main (prevents orphaned GHCR layers /
-  # corrupted GitOps commits). PRs and workflow_dispatch on other refs can still
-  # be superseded.
-  group: build-tutor-images-${{ github.event_name }}-${{ github.ref }}
+  # Main pushes use a unique workflow-level slot so the queued-run janitor can
+  # start immediately. Non-main refs stay supersedable at the workflow level.
+  group: build-tutor-images-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
@@ -51,7 +50,6 @@ env:
 jobs:
   cancel-superseded-queued-main-builds:
     name: Cancel Superseded Queued Main Builds
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: mereka-k8s-runners
     timeout-minutes: 10
     permissions:
@@ -62,6 +60,11 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
         with:
           script: |
+            if (context.eventName !== 'push' || context.ref !== 'refs/heads/main') {
+              core.notice('Skipping queued-build janitor outside push-to-main.');
+              return;
+            }
+
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const currentRunId = context.runId;
@@ -122,6 +125,7 @@ jobs:
     name: Lint & Validate
     runs-on: mereka-k8s-runners
     timeout-minutes: 10
+    needs: cancel-superseded-queued-main-builds
     permissions:
       contents: read
     steps:
@@ -152,6 +156,11 @@ jobs:
   build-openedx:
     name: Build OpenEdX Image
     runs-on: mereka-k8s-heavy-builders
+    concurrency:
+      # Never cancel an in-progress main build. Queue the newest run behind the
+      # active main build after the janitor clears older queued workflow runs.
+      group: build-openedx-${{ github.ref == 'refs/heads/main' && github.ref || github.run_id }}
+      cancel-in-progress: false
     # Keep outer timeout comfortably above inner image-build timeout (170m)
     # so pre/post-build checks and artifact upload have recovery headroom.
     timeout-minutes: 200
@@ -561,6 +570,11 @@ jobs:
   build-mfe:
     name: Build MFE Image
     runs-on: mereka-k8s-heavy-builders
+    concurrency:
+      # Never cancel an in-progress main build. Queue the newest run behind the
+      # active main build after the janitor clears older queued workflow runs.
+      group: build-mfe-${{ github.ref == 'refs/heads/main' && github.ref || github.run_id }}
+      cancel-in-progress: false
     timeout-minutes: 120
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_mfe }}
