@@ -43,6 +43,7 @@ scripts/qa/verify-enterprise-access-subsidy.sh  # LIVE_CLUSTER
 scripts/qa/verify-enterprise-catalog.sh  # LIVE_CLUSTER
 scripts/qa/verify-enterprise-license-management.sh  # LIVE_CLUSTER
 scripts/qa/verify-content-libraries-v2-enterprise.sh  # LIVE_CLUSTER
+scripts/tenants/bootstrap-enterprise-service-deps.sh  # LIVE_CLUSTER (idempotent manual bootstrap; use --dry-run first)
 scripts/qa/verify-oidc-provider-configs.sh  # LIVE_CLUSTER
 scripts/qa/verify-oidc-user-password-state.sh  # LIVE_CLUSTER
 scripts/qa/audit-enterprise-capacity-pressure.sh  # LIVE_CLUSTER

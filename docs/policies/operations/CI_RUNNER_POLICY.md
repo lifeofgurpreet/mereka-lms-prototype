@@ -10,8 +10,9 @@
 This document defines which runner class each workflow job type must use. It is the authoritative
 policy for `runs-on` label selection in `.github/workflows/*.yml`.
 
-The policy is enforced by `scripts/qa/verify-ci-runner-policy.sh`, which is registered in
-`.github/ci-scripts-static.txt` and runs on every PR.
+The policy is enforced by `scripts/qa/verify-ci-runner-policy.sh`. Static CI execution authority
+lives in `scripts/governance/script-registry.yaml` under `ci_static_inventory`; `.github/ci-scripts-static.txt`
+is the generated derivative consumed by the offline static-validation runner.
 
 ---
 
@@ -136,7 +137,7 @@ Legend:
 | `build-tutor-images.yml` | Build OpenEdX/MFE Image | `mereka-k8s-heavy-builders` | B | CONFORM |
 | `build-tutor-images.yml` | Lint, SLSA, Release, GitOps | `mereka-k8s-runners` | A | CONFORM |
 | `certificate-branding.yml` | all | `mereka-k8s-runners` | A | CONFORM |
-| `ci.yml` | all (4 jobs) | `mereka-k8s-runners` | A | CONFORM |
+| `ci.yml` | all (5 jobs) | `mereka-k8s-runners` | A | CONFORM |
 | `cloud-sql-backup.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `codeql.yml` | Analyze | `mereka-k8s-runners` | A | CONFORM |
 | `cross-browser-branding-smoke.yml` | all | `mereka-k8s-heavy-builders` | B | CONFORM |
@@ -219,7 +220,10 @@ When adding a new workflow:
 4. Enforces allowed labels only: `mereka-k8s-runners`, allowlisted `mereka-k8s-heavy-builders`, and macOS exceptions
 5. Fails on GitHub-hosted Linux labels (`ubuntu-*`) and any unknown runner labels
 
-The script runs as part of the `static-validation` job in `ci.yml` via `.github/ci-scripts-static.txt`.
+The script runs as part of the `static-validation` job in `ci.yml` through the generated
+`.github/ci-scripts-static.txt` derivative. The authoritative registration lives in
+`scripts/governance/script-registry.yaml` under `ci_static_inventory`, and inventory drift is
+blocked by `python3 scripts/governance/generate-ci-static-inventory.py --check`.
 It exits non-zero on violations so CI blocks merges.
 
 See [CI_CD_RUNNERS.md](CI_CD_RUNNERS.md) for ARC infrastructure setup and troubleshooting.

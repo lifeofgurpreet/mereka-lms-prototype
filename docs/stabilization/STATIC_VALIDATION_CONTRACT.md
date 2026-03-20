@@ -1,13 +1,15 @@
 # Static Validation Contract
 
-> **Authority**: This document is the canonical reference for what `static-validation` checks,
-> in what order, and what each failure means. CI source of truth: `.github/workflows/ci.yml`.
+> **Authority**: `.github/workflows/ci.yml` defines job order and execution steps.
+> `scripts/governance/script-registry.yaml` under `ci_static_inventory` defines the authoritative
+> static script inventory. `.github/ci-scripts-static.txt` is a generated derivative, not a
+> hand-maintained source of truth.
 
 ## Parallel Script Runner Mechanics
 
 | Parameter | Value | Override |
 |-----------|-------|----------|
-| Script list | `.github/ci-scripts-static.txt` (~201 entries) | — |
+| Script list | Generated `.github/ci-scripts-static.txt` from `scripts/governance/script-registry.yaml` `ci_static_inventory` | `python3 scripts/governance/generate-ci-static-inventory.py --write` |
 | Entrypoint | `scripts/qa/run-release-verification-gates.sh` | — |
 | Parallelism | `PARALLELISM=4` | env var |
 | Per-script timeout | `TIMEOUT_SECS=120` | env var |
@@ -80,16 +82,12 @@ local CRD schema files. `-strict` rejects unknown fields that upstream schemas d
 The `legacy-testmaps-frozen` sub-check compares current testmap state against `origin/main`
 using `git diff origin/main...HEAD`. This requires `fetch-depth: 0` (full history).
 
-The `static-validation` job uses the default checkout action **without** `fetch-depth: 0`.
-If the runner's git clone is shallow (depth=1), `origin/main` is unavailable and the sub-check
-fails with `fatal: ambiguous argument 'origin/main'`.
+This used to fail when the `static-validation` checkout was shallow. On current `main`,
+the checkout explicitly sets `fetch-depth: 0`, so `origin/main` is available to the gate.
 
-**Classification**: `CI_WORKFLOW_DEFECT` — fix by adding `fetch-depth: 0` to the checkout step
-or by converting the gate to compare against the merge-base SHA passed as an env var.
-
-**Current mitigation**: The job's `change-scope` predecessor uses `fetch-depth: 0`; the
-`static-validation` checkout does not. If this gate starts failing on shallow clones,
-add `fetch-depth: 0` to the `static-validation` checkout.
+**Classification**: historical `CI_WORKFLOW_DEFECT`, now fixed on current `main`. If this
+regresses, restore `fetch-depth: 0` on the `static-validation` checkout before treating the gate
+as a repo-content failure.
 
 ---
 
@@ -97,7 +95,7 @@ add `fetch-depth: 0` to the `static-validation` checkout.
 
 | # | Step name | Mechanics |
 |---|-----------|-----------|
-| 11 | Run static verification scripts | Parallel runner; ~201 scripts from `ci-scripts-static.txt`; PARALLELISM=4, TIMEOUT=120s |
+| 11 | Run static verification scripts | Parallel runner over the generated `.github/ci-scripts-static.txt` derivative; `PARALLELISM=4`, `TIMEOUT_SECS=120` |
 
 Each script in `.github/ci-scripts-static.txt`:
 - Must exit 0 on success, non-zero on failure
@@ -105,8 +103,13 @@ Each script in `.github/ci-scripts-static.txt`:
 - Gets `var/ci-results/<basename>.log` for stdout+stderr
 - Inline flags after the path are passed as extra args (`$extra_args`)
 
-Adding a new verification script: append its path (relative to repo root) to
-`.github/ci-scripts-static.txt`. Scripts not in this file are never run in CI.
+Adding a new static verification script:
+1. Add the script to `scripts/governance/script-registry.yaml` under `ci_static_inventory`
+2. Regenerate `.github/ci-scripts-static.txt` with `python3 scripts/governance/generate-ci-static-inventory.py --write`
+3. Re-run `python3 scripts/governance/generate-ci-static-inventory.py --check`
+
+Scripts listed only in `ci_runtime_inventory` are source-owned inventory for manual/runtime paths.
+They are not executed by the offline static-validation runner.
 
 ---
 
@@ -145,7 +148,7 @@ Adding a new verification script: append its path (relative to repo root) to
 
 | Sub-check | Fragility | Status |
 |-----------|-----------|--------|
-| `legacy-testmaps-frozen` (step 7) | Needs `fetch-depth: 0`; fails on shallow clone | Open — add fetch-depth to checkout or pass merge-base as env var |
+| `legacy-testmaps-frozen` (step 7) | Requires `fetch-depth: 0` on the `static-validation` checkout | Fixed on current `main`; regress only if checkout depth changes |
 | shellcheck install (step 5) | `xz` absent on some ARC images; Python lzma fallback | Mitigated |
 | kubeconform download (cached) | Network fetch on cache miss; SHA pinned to v0.6.4 | Mitigated by `actions/cache` |
 | ripgrep install | Verification scripts call `rg`; install step skipped if already in PATH | Mitigated |

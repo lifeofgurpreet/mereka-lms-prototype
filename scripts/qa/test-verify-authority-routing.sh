@@ -8,7 +8,8 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-authority-routing.sh"
 tmpdir="$(mktemp -d -t verify-authority-routing.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/bin" "$tmpdir/scripts/lib" "$tmpdir/scripts/governance" "$tmpdir/.github/workflows"
+mkdir -p "$tmpdir/bin" "$tmpdir/scripts/lib" "$tmpdir/scripts/governance" "$tmpdir/.github/workflows" \
+  "$tmpdir/docs/stabilization" "$tmpdir/docs/policies/operations"
 
 write_lms_ops_fixture() {
   cat >"$tmpdir/bin/lms-ops" <<'EOF'
@@ -85,6 +86,23 @@ jobs:
 EOF
 }
 
+write_authority_docs_fixture() {
+  cat >"$tmpdir/docs/stabilization/STATIC_VALIDATION_CONTRACT.md" <<'EOF'
+# Static Validation Contract
+
+Authority lives in scripts/governance/script-registry.yaml under ci_static_inventory.
+Regenerate with python3 scripts/governance/generate-ci-static-inventory.py --write.
+Current main uses fetch-depth: 0 on static-validation checkout.
+EOF
+
+  cat >"$tmpdir/docs/policies/operations/CI_RUNNER_POLICY.md" <<'EOF'
+# CI Runner Policy
+
+The generated derivative is .github/ci-scripts-static.txt.
+The authority lives in scripts/governance/script-registry.yaml under ci_static_inventory.
+EOF
+}
+
 run_expect_pass() {
   local label="$1"
   REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-authority-routing.out 2>&1
@@ -108,6 +126,7 @@ run_expect_fail() {
 write_lms_ops_fixture
 write_canonical_entrypoints_fixture
 write_pass_workflows_fixture
+write_authority_docs_fixture
 run_expect_pass "allowlisted transitional callers pass without app-owned bypasses"
 
 cat >"$tmpdir/.github/workflows/drift.yml" <<'EOF'
@@ -130,5 +149,25 @@ jobs:
       - run: ./scripts/infra/release-openedx-gitops.sh --target-env production
 EOF
 run_expect_fail "unallowlisted release-openedx-gitops workflow caller is rejected"
+rm -f "$tmpdir/.github/workflows/unallowlisted.yml"
+
+cat >"$tmpdir/docs/stabilization/STATIC_VALIDATION_CONTRACT.md" <<'EOF'
+# Static Validation Contract
+
+Authority lives in scripts/governance/script-registry.yaml under ci_static_inventory.
+Regenerate with python3 scripts/governance/generate-ci-static-inventory.py --write.
+Adding a new verification script: append its path (relative to repo root) to
+.github/ci-scripts-static.txt.
+EOF
+run_expect_fail "manual ci-scripts-static.txt edit guidance is rejected"
+
+write_authority_docs_fixture
+cat >"$tmpdir/docs/policies/operations/CI_RUNNER_POLICY.md" <<'EOF'
+# CI Runner Policy
+
+The policy is enforced by scripts/qa/verify-ci-runner-policy.sh, which is registered in
+.github/ci-scripts-static.txt and runs on every PR.
+EOF
+run_expect_fail "runner policy must describe generated static inventory authority"
 
 echo "OK"

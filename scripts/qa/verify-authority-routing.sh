@@ -47,6 +47,28 @@ normalize_repo_relative_path() {
   fi
 }
 
+require_doc_pattern() {
+  local doc_path="$1"
+  local pattern="$2"
+  local message="$3"
+  if rg -q --fixed-strings "$pattern" "$doc_path" 2>/dev/null; then
+    pass "$message"
+  else
+    fail "$message"
+  fi
+}
+
+forbid_doc_pattern() {
+  local doc_path="$1"
+  local pattern="$2"
+  local message="$3"
+  if rg -q --fixed-strings "$pattern" "$doc_path" 2>/dev/null; then
+    fail "$message"
+  else
+    pass "$message"
+  fi
+}
+
 echo "Authority Routing Verification"
 echo "=============================="
 
@@ -120,7 +142,35 @@ else
   fail "front_door section missing from canonical-entrypoints.yaml"
 fi
 
-# 7. CI workflows must not bypass lms-ops for app-owned concerns.
+# 7. Canonical docs must describe generated inventory authority honestly.
+STATIC_CONTRACT_DOC="$REPO_ROOT/docs/stabilization/STATIC_VALIDATION_CONTRACT.md"
+RUNNER_POLICY_DOC="$REPO_ROOT/docs/policies/operations/CI_RUNNER_POLICY.md"
+
+if [[ -f "$STATIC_CONTRACT_DOC" ]]; then
+  require_doc_pattern "$STATIC_CONTRACT_DOC" "ci_static_inventory" \
+    "STATIC_VALIDATION_CONTRACT.md references ci_static_inventory as authority"
+  require_doc_pattern "$STATIC_CONTRACT_DOC" "generate-ci-static-inventory.py --write" \
+    "STATIC_VALIDATION_CONTRACT.md documents generator-based regeneration"
+  forbid_doc_pattern "$STATIC_CONTRACT_DOC" "append its path (relative to repo root) to" \
+    "STATIC_VALIDATION_CONTRACT.md does not instruct manual edits to ci-scripts-static.txt"
+  forbid_doc_pattern "$STATIC_CONTRACT_DOC" 'static-validation` job uses the default checkout action **without** `fetch-depth: 0`.' \
+    "STATIC_VALIDATION_CONTRACT.md does not claim static-validation lacks fetch-depth: 0"
+else
+  fail "missing canonical doc: docs/stabilization/STATIC_VALIDATION_CONTRACT.md"
+fi
+
+if [[ -f "$RUNNER_POLICY_DOC" ]]; then
+  require_doc_pattern "$RUNNER_POLICY_DOC" "ci_static_inventory" \
+    "CI_RUNNER_POLICY.md references ci_static_inventory as authority"
+  require_doc_pattern "$RUNNER_POLICY_DOC" "generated derivative" \
+    "CI_RUNNER_POLICY.md calls ci-scripts-static.txt a generated derivative"
+  forbid_doc_pattern "$RUNNER_POLICY_DOC" "registered in" \
+    "CI_RUNNER_POLICY.md does not present ci-scripts-static.txt as the authoritative registration surface"
+else
+  fail "missing canonical doc: docs/policies/operations/CI_RUNNER_POLICY.md"
+fi
+
+# 8. CI workflows must not bypass lms-ops for app-owned concerns.
 if [[ ! -d "$WORKFLOWS_DIR" ]]; then
   warn "workflow directory missing: $WORKFLOWS_DIR (skipping CI routing checks)"
 else

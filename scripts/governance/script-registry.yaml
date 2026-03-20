@@ -609,6 +609,9 @@ ci_runtime_inventory:
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-content-libraries-v2-enterprise.sh
       category: LIVE_CLUSTER
+    - script: scripts/tenants/bootstrap-enterprise-service-deps.sh
+      category: LIVE_CLUSTER
+      note: idempotent manual bootstrap; use --dry-run first
     - script: scripts/qa/verify-oidc-provider-configs.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-oidc-user-password-state.sh
