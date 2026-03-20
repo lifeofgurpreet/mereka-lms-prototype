@@ -30,7 +30,9 @@ permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Keep only the newest run per ref, including main, so stale pushes do not
+  # consume runner capacity while the latest head waits in queue.
+  cancel-in-progress: true
 
 jobs:
   change-scope:
