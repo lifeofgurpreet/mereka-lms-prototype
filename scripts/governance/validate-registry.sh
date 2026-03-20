@@ -7,7 +7,7 @@
 #   3. Every registered critical script is executable
 #   4. ci_static_inventory entries exist and are executable
 #   5. ci_runtime_inventory entries exist and are executable
-#   6. Warns about unregistered scripts in critical directories
+#   6. Validates the governed orphan-script baseline
 #
 # Usage:
 #   bash scripts/governance/validate-registry.sh
@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REGISTRY="${SCRIPT_DIR}/script-registry.yaml"
 
-# Optional: skip the unregistered-script scan (e.g. in constrained CI envs)
+# Optional: skip the governed orphan-script validation
 WARN_UNREGISTERED="${WARN_UNREGISTERED:-1}"
 
 RED='\033[0;31m'
@@ -260,75 +260,31 @@ else
   warn "python3 not found — skipping ci_runtime_inventory validation"
 fi
 
-# ── 6. Scan for unregistered scripts in critical directories ──────────────────
+# ── 6. Validate governed orphan-script baseline ───────────────────────────────
 echo ""
-echo "--- 6. Unregistered scripts in critical directories ---"
+echo "--- 6. Governed orphan-script baseline ---"
 
 if [[ "${WARN_UNREGISTERED}" != "1" ]]; then
   echo "  (skipped — WARN_UNREGISTERED=0)"
 else
-  # Directories considered critical (release-path scripts live here)
-  CRITICAL_DIRS=(
-    "scripts/infra"
-    "scripts/qa"
-    "scripts/ci"
-    "scripts/branding"
-    "scripts/migrations"
-    "scripts/tenants"
-  )
+  ORPHAN_VERIFY_SCRIPT="${REPO_ROOT}/scripts/qa/verify-script-governance-orphans.sh"
 
-  # Build a lookup set of registered paths
-  declare -A REGISTERED_SET
-  for p in "${REGISTERED_PATHS[@]}"; do
-    REGISTERED_SET["${p}"]=1
-  done
-
-  if command -v python3 >/dev/null 2>&1; then
-    while IFS= read -r ci_path; do
-      [[ -n "$ci_path" ]] && REGISTERED_SET["${ci_path}"]=1
-    done < <(python3 - "$REGISTRY" <<'PY'
-from pathlib import Path
-import sys
-
-import yaml
-
-payload = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8")) or {}
-for inventory_key in ("ci_static_inventory", "ci_runtime_inventory"):
-    inventory = payload.get(inventory_key) or {}
-    for entry in inventory.get("entries", []):
-        if isinstance(entry, dict):
-            script = entry.get("script")
-            if isinstance(script, str) and script:
-                print(script)
-PY
-    )
-  fi
-
-  UNREGISTERED_CRITICAL=()
-
-  for dir in "${CRITICAL_DIRS[@]}"; do
-    abs_dir="${REPO_ROOT}/${dir}"
-    if [[ ! -d "${abs_dir}" ]]; then
-      continue
-    fi
-    while IFS= read -r abs_script; do
-      rel_script="${abs_script#"${REPO_ROOT}/"}"
-      if [[ -z "${REGISTERED_SET["${rel_script}"]:-}" ]]; then
-        UNREGISTERED_CRITICAL+=("${rel_script}")
-      fi
-    done < <(find "${abs_dir}" -maxdepth 1 -name '*.sh' -type f | sort)
-  done
-
-  if [[ ${#UNREGISTERED_CRITICAL[@]} -eq 0 ]]; then
-    pass "All scripts in critical directories are registered"
+  if [[ ! -f "${ORPHAN_VERIFY_SCRIPT}" ]]; then
+    fail "Governed orphan verifier missing: scripts/qa/verify-script-governance-orphans.sh"
   else
-    warn "${#UNREGISTERED_CRITICAL[@]} scripts in critical directories are NOT registered:"
-    for s in "${UNREGISTERED_CRITICAL[@]}"; do
-      echo "  - ${s}"
-    done
-    echo ""
-    echo "  Review these scripts and add release-critical ones to script-registry.yaml."
-    echo "  See scripts/governance/ORPHAN_SHORTLIST.md for a categorized list."
+    orphan_output=""
+    if orphan_output="$(bash "${ORPHAN_VERIFY_SCRIPT}" 2>&1)"; then
+      if grep -q '^WARN:' <<<"${orphan_output}"; then
+        warn "Governed orphan baseline matches, but the allowlist still has stale entries"
+      else
+        pass "Governed orphan baseline matches the authoritative allowlist"
+      fi
+    else
+      fail "Governed orphan baseline drift detected"
+    fi
+    while IFS= read -r line; do
+      [[ -n "${line}" ]] && echo "  ${line}"
+    done <<<"${orphan_output}"
   fi
 fi
 
