@@ -190,10 +190,12 @@ http://{$MFE_HOST} {
         max_size 2MB
     }
 
-    # Route MFE config API and login_refresh to LMS (not MFE container).
-    # Without this, /api/mfe_config/v1 returns 404 from the static MFE
-    # and auth keys (AUTHN_MICROFRONTEND_URL, cookie samesite) are missing.
-    handle /api/mfe_config/v1* {
+    # Route LMS API calls to LMS. MFE React apps call these as relative URLs
+    # (resolved against the apps.* origin). The ingress sends ALL MFE traffic
+    # to this Caddy instance because ingress-nginx (hostNetwork) cannot reach
+    # LMS pods on the control-plane node via pod CIDR. Caddy (on pod network)
+    # can reach LMS via K8s service DNS.
+    handle /api/* {
         reverse_proxy lms:8000 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
@@ -201,6 +203,27 @@ http://{$MFE_HOST} {
         }
     }
     handle /login_refresh* {
+        reverse_proxy lms:8000 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Forwarded-Host {http.request.host}
+        }
+    }
+    handle /csrf/* {
+        reverse_proxy lms:8000 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Forwarded-Host {http.request.host}
+        }
+    }
+    handle /oauth2/* {
+        reverse_proxy lms:8000 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Forwarded-Host {http.request.host}
+        }
+    }
+    handle /login {
         reverse_proxy lms:8000 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
@@ -271,12 +294,12 @@ http://{$ENTERPRISE_ADMIN_HOST} {
         max_size 2MB
     }
         reverse_proxy /api/mfe_config/v1* lms:8000 {
-            header_up Host {http.request.host}
+            header_up Host {$LMS_HOST}
             header_up X-Request-ID {http.request.header.X-Request-ID}
             header_up traceparent {http.request.header.traceparent}
         }
         reverse_proxy /login_refresh* lms:8000 {
-            header_up Host {http.request.host}
+            header_up Host {$LMS_HOST}
             header_up X-Request-ID {http.request.header.X-Request-ID}
             header_up traceparent {http.request.header.traceparent}
         }
@@ -328,12 +351,12 @@ http://{$ENTERPRISE_LEARNER_HOST} {
         max_size 2MB
     }
     reverse_proxy /api/mfe_config/v1* lms:8000 {
-        header_up Host {http.request.host}
+        header_up Host {$LMS_HOST}
         header_up X-Request-ID {http.request.header.X-Request-ID}
         header_up traceparent {http.request.header.traceparent}
     }
     reverse_proxy /login_refresh* lms:8000 {
-        header_up Host {http.request.host}
+        header_up Host {$LMS_HOST}
         header_up X-Request-ID {http.request.header.X-Request-ID}
         header_up traceparent {http.request.header.traceparent}
     }

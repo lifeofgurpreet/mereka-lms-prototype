@@ -71,11 +71,16 @@
 	}
 
 	# Profile API calls from the Profile MFE route through LMS domain routing.
+	# MUST be a handle block placed BEFORE handle @mfe_profile so Caddy's
+	# mutually-exclusive handle evaluation matches /profile/api/* first,
+	# instead of the SPA catch-all serving index.html for API requests.
 	@mfe_profile_api {
 		path /profile/api/*
 	}
-	reverse_proxy @mfe_profile_api lms:8000 {
-		header_up Host {http.request.host}
+	handle @mfe_profile_api {
+		reverse_proxy lms:8000 {
+			header_up Host {http.request.host}
+		}
 	}
 
 	reverse_proxy /api/mfe_config/v1* lms:8000 {
@@ -87,6 +92,22 @@
 	# MFEs use this endpoint to refresh the JWT cookie. Some frontends do not send cross-origin
 	# cookies by default, so we expose /login_refresh on the MFE origin and reverse-proxy to LMS.
 	reverse_proxy /login_refresh* lms:8000 {
+		header_up Host {http.request.host}
+	}
+
+	# LMS API/auth proxy: ingress sends ALL MFE traffic through Caddy (not
+	# directly to LMS) because hostNetwork ingress pods cannot reach pods on
+	# control-plane nodes.  Caddy, as a regular pod, has full pod-CIDR routing.
+	reverse_proxy /api/* lms:8000 {
+		header_up Host {http.request.host}
+	}
+	reverse_proxy /csrf/* lms:8000 {
+		header_up Host {http.request.host}
+	}
+	reverse_proxy /oauth2/* lms:8000 {
+		header_up Host {http.request.host}
+	}
+	reverse_proxy /login lms:8000 {
 		header_up Host {http.request.host}
 	}
 

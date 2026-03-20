@@ -12,45 +12,13 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  # All paths route through Caddy, which reverse-proxies API/auth paths to LMS.
+  # Direct ingress→LMS routing is broken because hostNetwork ingress pods cannot
+  # reach pods on control-plane nodes (cross-node pod CIDR routing failure).
   rules:
     - host: apps.academyv2.mereka.dev
       http:
         paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: lms
-                port:
-                  number: 8000
-          - path: /csrf
-            pathType: Prefix
-            backend:
-              service:
-                name: lms
-                port:
-                  number: 8000
-          - path: /login_refresh
-            pathType: Prefix
-            backend:
-              service:
-                name: lms
-                port:
-                  number: 8000
-          - path: /oauth2
-            pathType: Prefix
-            backend:
-              service:
-                name: lms
-                port:
-                  number: 8000
-          - path: /login
-            pathType: Prefix
-            backend:
-              service:
-                name: lms
-                port:
-                  number: 8000
           - path: /
             pathType: Prefix
             backend:
