@@ -46,7 +46,7 @@ jobs:
           ls -la /Applications | grep Xcode || true
 
       - name: Cache Ruby gems
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
         with:
           path: ios-app/vendor/bundle
           key: ${{ runner.os }}-gems-${{ hashFiles('ios-app/Gemfile.lock') }}
@@ -54,7 +54,7 @@ jobs:
             ${{ runner.os }}-gems-
 
       - name: Cache CocoaPods
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
         with:
           path: ios-app/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('ios-app/Podfile.lock') }}
