@@ -35,7 +35,7 @@ spec:
 
       containers:
       - name: grader
-        image: ghcr.io/biji-biji-initiative/mereka-lms/xqueue-graders:pin-required  # TODO: pin to a real image digest or version tag
+        image: ghcr.io/biji-biji-initiative/mereka-lms/xqueue-graders:pin-required
         imagePullPolicy: Always
 
         # AC-ASS-021: No secrets in environment variables (use ExternalSecrets mounted as files)
