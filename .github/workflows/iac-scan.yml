@@ -37,6 +37,7 @@ jobs:
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1  # v0.35.0
         continue-on-error: true
         with:
+          cache: false
           scan-type: config
           scan-ref: deploy/k8s/
           version: v0.69.3
@@ -65,6 +66,7 @@ jobs:
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1  # v0.35.0
         continue-on-error: true
         with:
+          cache: false
           scan-type: config
           scan-ref: infrastructure/terraform/
           version: v0.69.3
