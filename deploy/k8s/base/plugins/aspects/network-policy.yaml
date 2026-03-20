@@ -1,0 +1,21 @@
+# Allow external ingress to Superset (analytics dashboard).
+# Superset has its own Ingress resource that routes directly from nginx-ingress,
+# bypassing Caddy. Without this, default-deny-all blocks the traffic.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-superset-external-ingress
+  labels:
+    app.kubernetes.io/component: network-policy
+    app.kubernetes.io/part-of: aspects
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: superset
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8088

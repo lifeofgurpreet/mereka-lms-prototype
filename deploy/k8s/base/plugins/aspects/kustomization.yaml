@@ -11,6 +11,7 @@ resources:
   - jobs.yml
   - ingress.yml
   - prometheusrule.yml
+  - network-policy.yaml
 
 labels:
   - includeSelectors: true
