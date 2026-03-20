@@ -60,7 +60,7 @@ tenants:
       enterprise.enable_portal_code_management: false
       enterprise.enable_integrated_learner_portal_search: true
 
-  - slug: bijibiji
+  - slug: biji-biji
     name: Biji-Biji Academy
     org_code: BIJIBIJI
     active: true
@@ -69,9 +69,7 @@ tenants:
     is_platform_operator: false
 
     site:
-      domain: academy.biji-biji.com
-      # Dev: no biji-biji dev domain currently defined.
-      # This entry provisions the prod-like record for data model validation.
+      domain: biji-biji.academyv2.mereka.dev
 
     enterprise_customer:
       enable_data_sharing_consent: true
@@ -112,8 +110,7 @@ tenants:
     is_platform_operator: false
 
     site:
-      domain: skillourfuture.academy.mereka.io
-      # Dev: no skillourfuture dev domain currently defined.
+      domain: skillourfuture.academyv2.mereka.dev
 
     enterprise_customer:
       enable_data_sharing_consent: true
@@ -147,12 +144,15 @@ tenants:
 
 # Decisions requiring human input before bootstrap --apply:
 #
-# 1. Should bijibiji and skillourfuture catalogs include MEREKA org courses?
+# 1. Should biji-biji and skillourfuture catalogs include MEREKA org courses?
 #    Currently they only include their own org. If those orgs have zero courses,
 #    the catalogs will be empty.
 #
-# 2. What UUID should the Mereka EnterpriseCustomer use?
-#    If one already exists in the DB, provide it here to avoid duplicates.
+# 2. UUIDs: ECs already exist in dev DB with stable UUIDs:
+#    - mereka:         caee80bc-2e05-4b92-8ebe-d0ec045edaeb
+#    - biji-biji:      7ad11569-d027-4e9d-a08f-e65c57e27c8b
+#    - skillourfuture: ef9e4eff-4c5d-464b-a650-2000bad56c99
+#    bootstrap-enterprise-tenants.py looks up by slug, so existing ECs are reused.
 #
-# 3. Which admin users should be linked to each enterprise customer?
-#    The email addresses above are placeholders from tenant-contracts.yml.
+# 3. Admin users: gurpreet@biji-biji.com has enterprise_admin on all 3 ECs.
+#    The email addresses below are for bootstrap user_links (ECU records).

@@ -21,7 +21,7 @@
 #
 # Maintainer: app repo (mereka-lms). GitOps consumes, never modifies.
 ---
-version: "1.1.0"
+version: "1.2.0"
 
 # ============================================================================
 # TENANTS
@@ -621,6 +621,116 @@ domains:
     release_critical: false
     proof_priority: P1
     notes: "Dev Authentik OIDC provider"
+
+  # ==========================================================================
+  # DEV — Biji-Biji Academy (tenant-pattern)
+  # ==========================================================================
+  - domain: biji-biji.academyv2.mereka.dev
+    environment: dev
+    tenant: biji-biji
+    status: active
+    role: primary
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".biji-biji.academyv2.mereka.dev"
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P1
+    notes: "DEV tenant-pattern domain verified on live ingress 2026-03-20."
+
+  - domain: studio.biji-biji.academyv2.mereka.dev
+    environment: dev
+    tenant: biji-biji
+    status: active
+    role: studio
+    service: caddy
+    caddy_backend: "cms:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".biji-biji.academyv2.mereka.dev"
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P1
+
+  - domain: apps.biji-biji.academyv2.mereka.dev
+    environment: dev
+    tenant: biji-biji
+    status: active
+    role: mfe
+    service: caddy
+    caddy_backend: "mfe:8002"
+    auth_class: REDIRECT_TARGET
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: true
+    in_redirect_list: true
+    cookie_domain: ".biji-biji.academyv2.mereka.dev"
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P1
+
+  # ==========================================================================
+  # DEV — Skill Our Future (tenant-pattern)
+  # ==========================================================================
+  - domain: skillourfuture.academyv2.mereka.dev
+    environment: dev
+    tenant: skillourfuture
+    status: active
+    role: primary
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.dev"
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P1
+    notes: "DEV tenant-pattern domain verified on live ingress 2026-03-20."
+
+  - domain: studio.skillourfuture.academyv2.mereka.dev
+    environment: dev
+    tenant: skillourfuture
+    status: active
+    role: studio
+    service: caddy
+    caddy_backend: "cms:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.dev"
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P1
+
+  - domain: apps.skillourfuture.academyv2.mereka.dev
+    environment: dev
+    tenant: skillourfuture
+    status: active
+    role: mfe
+    service: caddy
+    caddy_backend: "mfe:8002"
+    auth_class: REDIRECT_TARGET
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: true
+    in_redirect_list: true
+    cookie_domain: ".skillourfuture.academyv2.mereka.dev"
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P1
 
   # ==========================================================================
   # PROFILES/DEV — alternate naming (*-dev.mereka.dev)

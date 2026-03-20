@@ -29,26 +29,21 @@ data:
   # YAML-formatted tenant registry.  One entry per tenant.
   # Infrastructure scripts can parse this with yq/jq.
   tenants.yaml: |
-    # Primary tenant (platform owner) — domain set by overlay.
-    - slug: primary
-      name: Primary Tenant
-      domain: localhost
-      enterprise_customer_uuid: "PLACEHOLDER-PRIMARY-UUID"
-      active: true
-      alias_domains: []
-
-    # Mereka Academy (default tenant) — domain set by overlay.
     - slug: mereka-academy
       name: Mereka Academy
-      domain: localhost
-      enterprise_customer_uuid: "PLACEHOLDER-MEREKA-UUID"
+      domain: academyv2.mereka.io
+      enterprise_customer_uuid: PLACEHOLDER-MEREKA-UUID
       active: true
       alias_domains: []
-
-    # Template for adding new tenants:
-    # - slug: acme-corp
-    #   name: Acme Corp
-    #   domain: acme.localhost
-    #   enterprise_customer_uuid: "uuid-here"
-    #   active: true
-    #   alias_domains: []
+    - slug: biji-biji
+      name: Biji-Biji Academy
+      domain: academy.biji-biji.com
+      enterprise_customer_uuid: PLACEHOLDER-BIJIBIJI-UUID
+      active: true
+      alias_domains: []
+    - slug: skillourfuture
+      name: Skill Our Future
+      domain: skillourfuture.academy.mereka.io
+      enterprise_customer_uuid: PLACEHOLDER-SKILLOURFUTURE-UUID
+      active: true
+      alias_domains: []

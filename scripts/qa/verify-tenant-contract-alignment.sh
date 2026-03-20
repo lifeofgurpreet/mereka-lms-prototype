@@ -163,12 +163,17 @@ for tenant in active_tenants:
             )
 
     # Caddy routing alignment
-    for host in (lms, studio, apps):
-        token = f"http://{host}"
+    # Base Caddyfile is environment-neutral; overlays inject actual hostnames.
+    required_caddy_tokens = {
+        "LMS": "http://{$LMS_HOST}",
+        "Studio": "http://{$STUDIO_HOST}",
+        "MFE": "http://{$MFE_HOST}",
+    }
+    for label, token in required_caddy_tokens.items():
         if token in caddy_text:
-            ok(f"{slug}: Caddyfile includes {token}")
+            ok(f"{slug}: Caddyfile keeps env-neutral {label} host token {token}")
         else:
-            fail(f"{slug}: Caddyfile missing {token}")
+            fail(f"{slug}: Caddyfile missing env-neutral {label} host token {token}")
 
     # Enterprise MFE runtime config alignment
     mfe_env_file = repo_root / tenant["mfe_env_file"]
@@ -183,17 +188,30 @@ for tenant in active_tenants:
         match = re.search(rf"\b{re.escape(key)}\s*:\s*'([^']+)'", mfe_text)
         return match.group(1) if match else None
 
-    expected_mfe = {
-        "LMS_BASE_URL": f"https://{lms}",
-        "STUDIO_BASE_URL": f"https://{studio}",
-        "LOGIN_URL": f"https://{lms}/login",
-        "LOGOUT_URL": f"https://{lms}/logout",
-        "REFRESH_ACCESS_TOKEN_ENDPOINT": f"https://{lms}/login_refresh",
-        "ENTERPRISE_CATALOG_API_BASE_URL": f"https://{admin}/api/enterprise-catalog",
-        "ENTERPRISE_ACCESS_BASE_URL": f"https://{admin}/api/enterprise-access",
-        "LICENSE_MANAGER_URL": f"https://{admin}/api/license-manager",
-        "ENTERPRISE_SUBSIDY_BASE_URL": f"https://{admin}/api/enterprise-subsidy",
-    }
+    if mfe_env_file.name == "enterprise-mfe-env.js":
+        expected_mfe = {
+            "LMS_BASE_URL": "http://localhost",
+            "STUDIO_BASE_URL": "http://studio.localhost",
+            "LOGIN_URL": "http://localhost/login",
+            "LOGOUT_URL": "http://localhost/logout",
+            "REFRESH_ACCESS_TOKEN_ENDPOINT": "http://localhost/login_refresh",
+            "ENTERPRISE_CATALOG_API_BASE_URL": "http://admin.localhost/api/enterprise-catalog",
+            "ENTERPRISE_ACCESS_BASE_URL": "http://admin.localhost/api/enterprise-access",
+            "LICENSE_MANAGER_URL": "http://admin.localhost/api/license-manager",
+            "ENTERPRISE_SUBSIDY_BASE_URL": "http://admin.localhost/api/enterprise-subsidy",
+        }
+    else:
+        expected_mfe = {
+            "LMS_BASE_URL": f"https://{lms}",
+            "STUDIO_BASE_URL": f"https://{studio}",
+            "LOGIN_URL": f"https://{lms}/login",
+            "LOGOUT_URL": f"https://{lms}/logout",
+            "REFRESH_ACCESS_TOKEN_ENDPOINT": f"https://{lms}/login_refresh",
+            "ENTERPRISE_CATALOG_API_BASE_URL": f"https://{admin}/api/enterprise-catalog",
+            "ENTERPRISE_ACCESS_BASE_URL": f"https://{admin}/api/enterprise-access",
+            "LICENSE_MANAGER_URL": f"https://{admin}/api/license-manager",
+            "ENTERPRISE_SUBSIDY_BASE_URL": f"https://{admin}/api/enterprise-subsidy",
+        }
     for key, expected in expected_mfe.items():
         actual = extract(key)
         if actual == expected:

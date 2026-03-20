@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# verify-domain-url-invariants.sh — Ensures ALL domain/URL references across
-# Django settings, CSP directives, Caddy configs, and K8s overlays are
-# consistent with the canonical domain registry in config.sh.
+# verify-domain-url-invariants.sh — Ensures domain/URL references across
+# Django settings, CSP directives, Caddy configs, and K8s overlays stay aligned
+# with the canonical tenant registry and the derived shell defaults.
 #
 # @covers AC-SEC-001, AC-SEC-003
 # @spec: specs/security-hardening_spec.md
 #
 # This is a static repo check — no running cluster required.
-# Catches: stale domains, missing auth/service URLs in CSP, env-specific
-# domain mismatches between overlays, and wildcard CSP sources.
+# Catches: drift between tenant-registry.yaml and scripts/shared/config.sh,
+# missing auth/service URLs in CSP, env-specific domain mismatches between
+# overlays, and wildcard CSP sources.
 #
 # Usage: ./scripts/qa/verify-domain-url-invariants.sh
 #   Set STRICT=1 to treat WARNs as FAILs.
@@ -53,6 +54,7 @@ CMS_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
 MFE_CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 NONPROD_DOMAIN_PATCH="$REPO_ROOT/deploy/k8s/overlays/rke2-nonprod/patches/domain-env.yaml"
 LOCAL_DOMAIN_PATCH="$REPO_ROOT/deploy/k8s/overlays/local/patches/domain-env.yaml"
+TENANT_REGISTRY="$REPO_ROOT/deploy/k8s/tenancy/tenant-registry.yaml"
 
 printf "${BLUE}=== Domain & URL Invariant Gate ===${NC}\n\n"
 
@@ -70,6 +72,9 @@ REQUIRED_DEV_DOMAINS=(
   DEV_LMS_DOMAIN DEV_STUDIO_DOMAIN DEV_MFE_DOMAIN DEV_AUTHENTIK_DOMAIN
   DEV_PREVIEW_DOMAIN DEV_DISCOVERY_DOMAIN DEV_NOTES_DOMAIN
   DEV_CREDENTIALS_DOMAIN DEV_FORUM_DOMAIN DEV_PURCHASE_GATEWAY_DOMAIN
+  DEV_ENTERPRISE_ADMIN_DOMAIN DEV_ENTERPRISE_PORTAL_DOMAIN
+  DEV_BIJI_DOMAIN DEV_BIJI_STUDIO_DOMAIN DEV_BIJI_MFE_DOMAIN
+  DEV_SKILLOURFUTURE_DOMAIN DEV_SKILLOURFUTURE_STUDIO_DOMAIN DEV_SKILLOURFUTURE_MFE_DOMAIN
 )
 
 for var in "${REQUIRED_PROD_DOMAINS[@]}" "${REQUIRED_DEV_DOMAINS[@]}"; do
@@ -79,6 +84,82 @@ for var in "${REQUIRED_PROD_DOMAINS[@]}" "${REQUIRED_DEV_DOMAINS[@]}"; do
     do_fail "config.sh missing or empty: $var"
   fi
 done
+
+# ── 1b. Tenant registry → config.sh alignment ─────────────────────────────
+printf "\n${BLUE}── 1b. Tenant registry alignment ──${NC}\n"
+
+if [[ -f "$TENANT_REGISTRY" ]]; then
+  while IFS=$'\t' read -r key expected; do
+    [[ -z "${key:-}" ]] && continue
+    actual="${!key:-}"
+    if [[ "$actual" == "$expected" ]]; then
+      do_pass "config.sh $key aligns with tenant-registry ($expected)"
+    else
+      do_fail "config.sh $key drift (expected $expected, got ${actual:-<unset>})"
+    fi
+  done < <(python3 - "$TENANT_REGISTRY" <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import yaml
+
+registry = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8"))
+domains = registry.get("domains", [])
+envs = registry.get("environments", {})
+
+
+def find_domain(environment: str, tenant: str, role: str) -> str:
+    for item in domains:
+        if (
+            item.get("environment") == environment
+            and item.get("tenant") == tenant
+            and item.get("role") == role
+            and item.get("status") == "active"
+        ):
+            return str(item["domain"])
+    raise SystemExit(
+        f"missing registry domain for environment={environment} tenant={tenant} role={role}"
+    )
+
+
+rows = [
+    ("LMS_DOMAIN", find_domain("production", "mereka", "primary")),
+    ("STUDIO_DOMAIN", find_domain("production", "mereka", "studio")),
+    ("MFE_DOMAIN", find_domain("production", "mereka", "mfe")),
+    ("AUTHENTIK_DOMAIN", str(envs["production"]["auth_host"])),
+    ("PREVIEW_DOMAIN", find_domain("production", "mereka", "preview")),
+    ("DISCOVERY_DOMAIN", find_domain("production", "mereka", "discovery")),
+    ("NOTES_DOMAIN", find_domain("production", "mereka", "notes")),
+    ("CREDENTIALS_DOMAIN", find_domain("production", "mereka", "credentials")),
+    ("ENTERPRISE_ADMIN_DOMAIN", find_domain("production", "mereka", "enterprise-admin")),
+    ("ENTERPRISE_PORTAL_DOMAIN", find_domain("production", "mereka", "enterprise-learner")),
+    ("DEV_LMS_DOMAIN", find_domain("dev", "mereka", "primary")),
+    ("DEV_STUDIO_DOMAIN", find_domain("dev", "mereka", "studio")),
+    ("DEV_MFE_DOMAIN", find_domain("dev", "mereka", "mfe")),
+    ("DEV_AUTHENTIK_DOMAIN", str(envs["dev"]["auth_host"])),
+    ("DEV_PREVIEW_DOMAIN", find_domain("dev", "mereka", "preview")),
+    ("DEV_DISCOVERY_DOMAIN", find_domain("dev", "mereka", "discovery")),
+    ("DEV_NOTES_DOMAIN", find_domain("dev", "mereka", "notes")),
+    ("DEV_CREDENTIALS_DOMAIN", find_domain("dev", "mereka", "credentials")),
+    ("DEV_ENTERPRISE_ADMIN_DOMAIN", find_domain("dev", "mereka", "enterprise-admin")),
+    ("DEV_ENTERPRISE_PORTAL_DOMAIN", find_domain("dev", "mereka", "enterprise-learner")),
+    ("DEV_BIJI_DOMAIN", find_domain("dev", "biji-biji", "primary")),
+    ("DEV_BIJI_STUDIO_DOMAIN", find_domain("dev", "biji-biji", "studio")),
+    ("DEV_BIJI_MFE_DOMAIN", find_domain("dev", "biji-biji", "mfe")),
+    ("DEV_SKILLOURFUTURE_DOMAIN", find_domain("dev", "skillourfuture", "primary")),
+    ("DEV_SKILLOURFUTURE_STUDIO_DOMAIN", find_domain("dev", "skillourfuture", "studio")),
+    ("DEV_SKILLOURFUTURE_MFE_DOMAIN", find_domain("dev", "skillourfuture", "mfe")),
+]
+
+for key, value in rows:
+    print(f"{key}\t{value}")
+PY
+)
+else
+  do_fail "tenant registry not found: $TENANT_REGISTRY"
+fi
 
 # ── 2. Production.py has all MEREKA_*_DOMAIN variables ───────────────────
 printf "\n${BLUE}── 2. Django production.py domain variables ──${NC}\n"

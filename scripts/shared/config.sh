@@ -33,6 +33,10 @@ export K8S_CLUSTER="${K8S_CLUSTER:-mereka-lms}"
 # =============================================================================
 # Domain Settings
 # =============================================================================
+# Canonical app-owned tenant/domain source lives in
+# deploy/k8s/tenancy/tenant-registry.yaml.
+# This file provides derived shell defaults for scripts and must stay aligned
+# with the tenant registry rather than becoming a second authority plane.
 # Production
 export LMS_DOMAIN="${LMS_DOMAIN:-academyv2.mereka.io}"
 export STUDIO_DOMAIN="${STUDIO_DOMAIN:-studio.${LMS_DOMAIN}}"
@@ -82,6 +86,14 @@ export DEV_FORUM_DOMAIN="${DEV_FORUM_DOMAIN:-forum.${DEV_LMS_DOMAIN}}"
 # Enterprise MFE domains (dev)
 export DEV_ENTERPRISE_ADMIN_DOMAIN="${DEV_ENTERPRISE_ADMIN_DOMAIN:-admin.${DEV_LMS_DOMAIN}}"
 export DEV_ENTERPRISE_PORTAL_DOMAIN="${DEV_ENTERPRISE_PORTAL_DOMAIN:-learner.${DEV_LMS_DOMAIN}}"
+
+# DEV tenant-pattern domains
+export DEV_BIJI_DOMAIN="${DEV_BIJI_DOMAIN:-biji-biji.academyv2.mereka.dev}"
+export DEV_BIJI_STUDIO_DOMAIN="${DEV_BIJI_STUDIO_DOMAIN:-studio.${DEV_BIJI_DOMAIN}}"
+export DEV_BIJI_MFE_DOMAIN="${DEV_BIJI_MFE_DOMAIN:-apps.${DEV_BIJI_DOMAIN}}"
+export DEV_SKILLOURFUTURE_DOMAIN="${DEV_SKILLOURFUTURE_DOMAIN:-skillourfuture.academyv2.mereka.dev}"
+export DEV_SKILLOURFUTURE_STUDIO_DOMAIN="${DEV_SKILLOURFUTURE_STUDIO_DOMAIN:-studio.${DEV_SKILLOURFUTURE_DOMAIN}}"
+export DEV_SKILLOURFUTURE_MFE_DOMAIN="${DEV_SKILLOURFUTURE_MFE_DOMAIN:-apps.${DEV_SKILLOURFUTURE_DOMAIN}}"
 
 # Purchase Gateway (canonical ecommerce replacement)
 export PURCHASE_GATEWAY_DOMAIN="${PURCHASE_GATEWAY_DOMAIN:-payments.${LMS_DOMAIN}}"
