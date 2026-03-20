@@ -1,8 +1,8 @@
 # Branch Protection Requirements
 
-_Audience: Platform Engineers • Owner: platform-team • Last verified: 2026-02-24 • Status: canonical_
+_Audience: Platform Engineers • Owner: platform-team • Last verified: 2026-03-20 • Status: canonical_
 
-<!-- Last verified: 2026-02-24 -->
+<!-- Last verified: 2026-03-20 -->
 
 This document specifies the required GitHub branch protection settings for the
 `main` branch and explains how they contribute to the repository's OpenSSF
@@ -18,7 +18,7 @@ Scorecard score.
 | Dismiss stale pull request approvals on new commits | Enabled | Ensures re-review after changes; Scorecard `Code-Review` check |
 | Require status checks to pass before merging | Enabled (see list below) | Gates on CI, IaC scan, and lint |
 | Require branches to be up to date before merging | Enabled | Prevents stale-branch merges bypassing checks |
-| Restrict who can push to matching branches | Enabled (no direct push) | Enforces PR workflow for all contributors |
+| Apply branch protection to admins | Enabled | Prevents admin bypass from silently weakening CI trust |
 | Allow force pushes | Disabled | Preserves audit trail; Scorecard `Branch-Protection` check |
 | Allow deletions | Disabled | Protects history |
 | Require signed commits | Optional now; escalate per T064 | Scorecard `Signed-Releases` / `Branch-Protection` partial credit |
@@ -29,18 +29,17 @@ These check names must match the job names reported by GitHub Actions:
 
 | Check Name | Workflow File | Purpose |
 |------------|--------------|---------|
-| `Spec Integrity Gates` | `ci.yml` | Spec lint, testmap validation, coverage |
-| `Generated Docs Are Up To Date` | `ci.yml` | Ensures generated docs are committed |
-| `Design Token Validation` | `ci.yml` | Token contract |
-| `Branding Preflight (Source)` | `ci.yml` | Branding gate |
-| `Monitoring Guardrails` | `ci.yml` | Alert routing lint |
-| `Lint` | `ci.yml` | Shell, Python, repo-structure lint |
+| `Static Validation` | `ci.yml` | Consolidated static gate: conventions, docs generation, spec integrity, token/branding checks, verification inventory, and source-only policy checks |
+| `Tutor Configuration Tests` | `ci.yml` | Tutor render/apply-patches/idempotency gate |
+| `Security Scans` | `ci.yml` | TruffleHog, hadolint, and pip-audit gate |
+| `Python test coverage` | `ci.yml` | Python test execution and coverage gate |
+| `Review dependencies` | `dependency-review.yml` | Dependency review gate on PR dependency changes |
 | `Trivy — K8s Manifests` | `iac-scan.yml` | K8s security scan |
 | `Trivy — Terraform` | `iac-scan.yml` | Terraform security scan |
 
-> **Note**: After enabling branch protection, trigger at least one PR so GitHub
-> learns each check name. Status check names in the UI are populated from real
-> runs, not workflow file names.
+> `Analyze (python)`, `Analyze (javascript-typescript)`, and `Seer Code Review`
+> currently run on PRs but are informational here; they are not part of the
+> required merge gate in this policy.
 
 ---
 
@@ -60,7 +59,7 @@ at 06:00 UTC.
 | `Pinned-Dependencies` | High | Enforced by `verify-actions-pinned.sh` in CI (not branch protection directly, but blocks merges that violate the policy) |
 | `Signed-Releases` | Medium | Require signed commits when escalated per T064 |
 | `Vulnerabilities` | High | Dependency Review workflow (`dependency-review.yml`) runs on PRs |
-| `SAST` | Medium | CodeQL (`codeql.yml`) runs on PRs and push to main |
+| `SAST` | Medium | CodeQL (`codeql.yml`) runs on PRs and push to main; currently informational, not branch-protection required |
 
 ### Checks Not Directly Tied to Branch Protection
 
@@ -121,12 +120,11 @@ gh api \
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "Spec Integrity Gates",
-      "Generated Docs Are Up To Date",
-      "Design Token Validation",
-      "Branding Preflight (Source)",
-      "Monitoring Guardrails",
-      "Lint",
+      "Static Validation",
+      "Tutor Configuration Tests",
+      "Security Scans",
+      "Python test coverage",
+      "Review dependencies",
       "Trivy — K8s Manifests",
       "Trivy — Terraform"
     ]
