@@ -201,9 +201,6 @@ jobs:
       - name: Lint YAML files
         run: yamllint -c .yamllint.yml infrastructure/ deploy/
 
-      - name: Enforce repo conventions (includes immutable workflow refs)
-        run: ./scripts/qa/lint-repo-conventions.sh
-
       - name: Lint shell scripts (shellcheck)
         run: |
           if ! command -v shellcheck &>/dev/null; then

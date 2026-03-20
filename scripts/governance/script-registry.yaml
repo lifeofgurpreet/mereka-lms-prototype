@@ -111,6 +111,7 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-script-portability.sh
     - script: scripts/qa/test-verify-qa-readonly-contract.sh
     - script: scripts/qa/test-verify-lms-ops-migrate-contract.sh
+    - script: scripts/qa/lint-repo-conventions.sh
     - script: scripts/qa/test-verify-secrets-isolation.sh
     - script: scripts/qa/test-verify-infisical-env-validation-coverage.sh
     - script: scripts/qa/test-verify-secrets-management.sh

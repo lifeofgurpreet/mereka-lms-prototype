@@ -69,6 +69,7 @@ scripts/qa/test-verify-secret-inventory.sh
 scripts/qa/test-verify-script-portability.sh
 scripts/qa/test-verify-qa-readonly-contract.sh
 scripts/qa/test-verify-lms-ops-migrate-contract.sh
+scripts/qa/lint-repo-conventions.sh
 scripts/qa/test-verify-secrets-isolation.sh
 scripts/qa/test-verify-infisical-env-validation-coverage.sh
 scripts/qa/test-verify-secrets-management.sh

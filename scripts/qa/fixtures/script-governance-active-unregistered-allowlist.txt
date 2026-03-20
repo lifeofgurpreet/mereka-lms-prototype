@@ -124,7 +124,6 @@ scripts/qa/generate-evidence-pack.sh
 scripts/qa/generate-runtime-blocker-infra-prompt.sh
 scripts/qa/generate-sla-report.sh
 scripts/qa/generate-synthetic-libraries.sh
-scripts/qa/lint-repo-conventions.sh
 scripts/qa/list-critical-backup-pvcs.sh
 scripts/qa/list-openedx-hostnames.sh
 scripts/qa/load-test-libraries.sh
