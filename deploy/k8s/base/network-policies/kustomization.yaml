@@ -17,3 +17,4 @@ resources:
   - allow-payments-external-egress.yaml
   - allow-smtp-external-egress.yaml
   - allow-discovery-external-egress.yaml
+  - allow-aspects-external-egress.yaml
