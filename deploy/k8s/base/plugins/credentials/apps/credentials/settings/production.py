@@ -147,24 +147,29 @@ VC_SIGNING_PRIVATE_KEY = os.environ.get("VC_SIGNING_PRIVATE_KEY", "")
 
 JWT_AUTH["JWT_ISSUER"] = f"{LMS_BASE_URL}/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
-JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_CREDENTIALS", "")
-JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
-    {
-        "keys": [
-            {
-                "kid": "openedx",
-                "kty": "RSA",
-                "e": "AQAB",
-                "n": "nyKlrWYvtK405Rrvzb9zbtdyUvKgMyhySpiRNIvkhi8AqbmhyGYobRU6oOtjWdNTPy4Lfbx1TfB4EPo1BT2HIVenhm6TtTNwiKubJELwSOZSHNgq92GPzsXO868e86GWSzI9sLu4IXs1Egz81Sp5669YYmxDostWYZgyljXt7wdjOGbl-HQUgOppQMY1zH263A2pkTZ65kunEBzZyM_RtVb6yBi4hcSmU7q6jFbBniGjxY236hp6J9kRggsM-rHIuV0qHLlkBi23wVE0r866g6TwUcTqnHRn717RN1ZfHf76A3GN3UvgOgT4mEwaLoTijL8hzhLie1pgqCb7P2L3Yw",
-            }
-        ]
-    }
-)
+# Credentials verifies JWT tokens signed by LMS, so it must use the LMS secret key.
+JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_LMS", os.environ.get("JWT_SECRET_KEY_CREDENTIALS", ""))
+# Derive the public JWK from the LMS private key so they never drift.
+_jwt_priv_jwk_raw = os.environ.get("JWT_PRIVATE_SIGNING_JWK", "")
+if _jwt_priv_jwk_raw:
+    try:
+        _priv_jwk = json.loads(_jwt_priv_jwk_raw) if isinstance(_jwt_priv_jwk_raw, str) else _jwt_priv_jwk_raw
+        _pub_jwk = {
+            "kid": _priv_jwk.get("kid", "openedx"),
+            "kty": "RSA",
+            "e": _priv_jwk["e"],
+            "n": _priv_jwk["n"],
+        }
+        JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps({"keys": [_pub_jwk]})
+    except Exception:
+        JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps({"keys": []})
+else:
+    JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps({"keys": []})
 JWT_AUTH["JWT_ISSUERS"] = [
     {
         "ISSUER": f"{LMS_BASE_URL}/oauth2",
         "AUDIENCE": "openedx",
-        "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_CREDENTIALS", ""),
+        "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_LMS", os.environ.get("JWT_SECRET_KEY_CREDENTIALS", "")),
     }
 ]
 

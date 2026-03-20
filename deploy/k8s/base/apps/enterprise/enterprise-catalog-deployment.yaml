@@ -68,6 +68,7 @@ spec:
                   'LMS_BASE_URL': 'http://lms:8000',
                   'LMS_ROOT_URL': os.environ.get('LMS_ROOT_URL', 'http://localhost'),
                   'DISCOVERY_SERVICE_URL': 'http://discovery:8000',
+                  'DISCOVERY_SERVICE_API_URL': 'http://discovery:8000/api/v1/',
                   'ENTERPRISE_CATALOG_SERVICE_URL': 'http://enterprise-catalog:8000',
               }
               with open('/config/enterprise_catalog.yml', 'w') as f:

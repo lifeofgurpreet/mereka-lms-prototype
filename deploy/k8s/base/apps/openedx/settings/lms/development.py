@@ -194,18 +194,22 @@ JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_LMS", "")
 # JWT_PRIVATE_SIGNING_JWK: loaded from env var injected by ExternalSecret (MEREKA_LMS_JWT_PRIVATE_SIGNING_JWK).
 # Never hardcode private key material here — even for development.
 JWT_AUTH["JWT_PRIVATE_SIGNING_JWK"] = os.environ.get("JWT_PRIVATE_SIGNING_JWK", "")
-JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
-    {
-        "keys": [
-            {
-                "kid": "openedx",
-                "kty": "RSA",
-                "e": "AQAB",
-                "n": "nyKlrWYvtK405Rrvzb9zbtdyUvKgMyhySpiRNIvkhi8AqbmhyGYobRU6oOtjWdNTPy4Lfbx1TfB4EPo1BT2HIVenhm6TtTNwiKubJELwSOZSHNgq92GPzsXO868e86GWSzI9sLu4IXs1Egz81Sp5669YYmxDostWYZgyljXt7wdjOGbl-HQUgOppQMY1zH263A2pkTZ65kunEBzZyM_RtVb6yBi4hcSmU7q6jFbBniGjxY236hp6J9kRggsM-rHIuV0qHLlkBi23wVE0r866g6TwUcTqnHRn717RN1ZfHf76A3GN3UvgOgT4mEwaLoTijL8hzhLie1pgqCb7P2L3Yw",
-            }
-        ]
-    }
-)
+# Derive the public JWK from the private key so they never drift.
+_jwt_priv_jwk_raw = JWT_AUTH["JWT_PRIVATE_SIGNING_JWK"]
+if _jwt_priv_jwk_raw:
+    try:
+        _priv_jwk = json.loads(_jwt_priv_jwk_raw) if isinstance(_jwt_priv_jwk_raw, str) else _jwt_priv_jwk_raw
+        _pub_jwk = {
+            "kid": _priv_jwk.get("kid", "openedx"),
+            "kty": "RSA",
+            "e": _priv_jwk["e"],
+            "n": _priv_jwk["n"],
+        }
+        JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps({"keys": [_pub_jwk]})
+    except Exception:
+        JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps({"keys": []})
+else:
+    JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps({"keys": []})
 JWT_AUTH["JWT_ISSUERS"] = [
     {
         "ISSUER": "http://localhost/oauth2",
