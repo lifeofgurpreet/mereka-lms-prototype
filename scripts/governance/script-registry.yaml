@@ -617,6 +617,9 @@ ci_runtime_inventory:
       category: LIVE_APP
     - script: scripts/qa/verify-studio-authoring-branding.sh
       category: LIVE_APP
+    - script: scripts/qa/verify-dev-visual-correctness.sh
+      category: LIVE_CLUSTER
+      note: optional browser layer
     - script: scripts/qa/run-mfe-slot-gates.sh
       category: LIVE_APP
     - script: scripts/qa/run-tenant-branding-qa.sh

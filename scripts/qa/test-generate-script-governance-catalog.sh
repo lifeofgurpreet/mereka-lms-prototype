@@ -23,9 +23,18 @@ payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 if payload.get("summary", {}).get("total_scripts", 0) <= 0:
     raise SystemExit("expected at least one script in governance catalog")
 
-paths = {entry["path"] for entry in payload.get("scripts", [])}
+scripts = {entry["path"]: entry for entry in payload.get("scripts", [])}
+paths = set(scripts)
 if "scripts/qa/verify-repo-structure.sh" not in paths:
     raise SystemExit("expected verify-repo-structure.sh to be cataloged")
+
+runtime_entry = scripts.get("scripts/qa/verify-dev-visual-correctness.sh")
+if not runtime_entry:
+    raise SystemExit("expected verify-dev-visual-correctness.sh to be cataloged")
+if runtime_entry.get("status") != "active_authoritative":
+    raise SystemExit("expected verify-dev-visual-correctness.sh to be active_authoritative")
+if "ci_runtime_contract" not in set(runtime_entry.get("caller_types", [])):
+    raise SystemExit("expected verify-dev-visual-correctness.sh to be covered by ci_runtime_contract")
 PY
 
 echo "OK"

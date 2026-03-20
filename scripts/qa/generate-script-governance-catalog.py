@@ -11,6 +11,11 @@ from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 
+try:
+    import yaml
+except ImportError as exc:  # pragma: no cover - surfaced as a hard failure
+    raise SystemExit("PyYAML is required to generate the script governance catalog") from exc
+
 SCRIPT_SUFFIXES = {".sh", ".py"}
 TEXT_SUFFIXES = {
     ".md",
@@ -115,6 +120,36 @@ def text_files_for_reference_scan(repo_root: Path) -> list[str]:
     return files
 
 
+def load_inventory_contract_members(repo_root: Path) -> dict[str, set[str]]:
+    registry_path = repo_root / "scripts/governance/script-registry.yaml"
+    payload = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        raise SystemExit("script-registry.yaml must load as a mapping")
+
+    contracts: dict[str, set[str]] = {
+        "ci_static_contract": set(),
+        "ci_runtime_contract": set(),
+    }
+    for inventory_key, bucket in (
+        ("ci_static_inventory", "ci_static_contract"),
+        ("ci_runtime_inventory", "ci_runtime_contract"),
+    ):
+        inventory = payload.get(inventory_key)
+        if not isinstance(inventory, dict):
+            raise SystemExit(f"script-registry.yaml missing {inventory_key}")
+        entries = inventory.get("entries")
+        if not isinstance(entries, list):
+            raise SystemExit(f"{inventory_key}.entries must be a list")
+        for index, entry in enumerate(entries, start=1):
+            if not isinstance(entry, dict):
+                raise SystemExit(f"{inventory_key}.entries[{index}] must be a mapping")
+            script = entry.get("script")
+            if not isinstance(script, str) or not script.strip():
+                raise SystemExit(f"{inventory_key}.entries[{index}] missing script")
+            contracts[bucket].add(script)
+    return contracts
+
+
 def classify_kind(script_path: str) -> str:
     name = Path(script_path).name.lower()
     for prefix, kind in (
@@ -171,7 +206,12 @@ def infer_runtime_dependencies(content: str) -> list[str]:
     return sorted(deps)
 
 
-def infer_callers(script_path: str, refs: list[str], ci_static_members: set[str]) -> dict[str, list[str]]:
+def infer_callers(
+    script_path: str,
+    refs: list[str],
+    ci_static_members: set[str],
+    ci_runtime_members: set[str],
+) -> dict[str, list[str]]:
     buckets: dict[str, list[str]] = defaultdict(list)
     for ref in refs:
         if ref.startswith(".github/workflows/"):
@@ -189,7 +229,9 @@ def infer_callers(script_path: str, refs: list[str], ci_static_members: set[str]
         else:
             buckets["other"].append(ref)
     if script_path in ci_static_members:
-        buckets["ci_static_contract"].append(".github/ci-scripts-static.txt")
+        buckets["ci_static_contract"].append("scripts/governance/script-registry.yaml#ci_static_inventory")
+    if script_path in ci_runtime_members:
+        buckets["ci_runtime_contract"].append("scripts/governance/script-registry.yaml#ci_runtime_inventory")
     return {key: sorted(set(value)) for key, value in buckets.items()}
 
 
@@ -199,7 +241,7 @@ def classify_status(script_path: str, callers: dict[str, list[str]]) -> str:
         return "supporting_library"
     if name.startswith("test-"):
         return "test_support"
-    if callers.get("ci_workflow") or callers.get("ci_static_contract"):
+    if callers.get("ci_workflow") or callers.get("ci_static_contract") or callers.get("ci_runtime_contract"):
         return "active_authoritative"
     if callers:
         return "active_manual"
@@ -259,14 +301,9 @@ def build_catalog(repo_root: Path) -> dict:
             if match in script_set and match != rel:
                 references[match].add(rel)
 
-    ci_static_members = set()
-    ci_static_path = repo_root / ".github/ci-scripts-static.txt"
-    if ci_static_path.exists():
-        for line in ci_static_path.read_text(encoding="utf-8").splitlines():
-            stripped = line.strip()
-            if not stripped or stripped.startswith("#"):
-                continue
-            ci_static_members.add(stripped.split()[0])
+    inventory_contracts = load_inventory_contract_members(repo_root)
+    ci_static_members = inventory_contracts["ci_static_contract"]
+    ci_runtime_members = inventory_contracts["ci_runtime_contract"]
 
     entries: list[dict] = []
     for script_path in scripts:
@@ -278,6 +315,7 @@ def build_catalog(repo_root: Path) -> dict:
             script_path=script_path,
             refs=sorted(references.get(script_path, set())),
             ci_static_members=ci_static_members,
+            ci_runtime_members=ci_runtime_members,
         )
         status = classify_status(script_path, callers)
         risk = classify_risk(mutability, env_scope, status)
