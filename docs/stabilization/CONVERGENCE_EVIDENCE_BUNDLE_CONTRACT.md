@@ -1,176 +1,160 @@
 # Convergence Evidence Bundle Contract
 
-> Canonical repo-side contract for promoting runtime/browser evidence into convergence truth.
+> Canonical contract for promoting runtime/browser evidence into merged repo truth.
+> This document defines the evidence classification system, promotion rules,
+> and required evidence for closing the Stabilization → Convergence gate.
 
 ## Purpose
 
-This contract defines what runtime evidence can be promoted into canonical repo truth, what
-must stay provisional/manual/external, and what exact evidence shape is required before the
-program may move from `Stabilization` to `Convergence`.
+This contract bridges local proof artifacts and canonical repo truth. The problem it solves is
+that runtime evidence is scattered, contradictory, and not systematically classified. Without a
+shared classification system, teams promote local observations as if they were durable closures,
+contradictions go unresolved, and phase gates get claimed prematurely. This contract defines
+exactly what counts as evidence, what can be promoted, and what must remain provisional.
 
-## Canonical classes
+## Evidence Classification
 
-### Truth classes
+### Claim Status Classes
 
-| Class | Meaning |
-|---|---|
-| `CONFIRMED` | Durable tracked evidence is merged and not contradicted by later canonical evidence. |
-| `PROVISIONAL` | Evidence exists, but it is local-only, partial, or not durable enough for promotion. |
-| `CONTRADICTED` | A later artifact overturns an earlier claim; the claim must remain open. |
-| `EXTERNAL_BLOCKER` | A blocker exists outside this repo-owned mutation surface. |
-| `PARKED` | Intentionally deferred; not valid for current phase closure. |
+| Class | Definition | Can Promote? |
+|-------|-----------|-------------|
+| `CONFIRMED` | Claim backed by merged repo truth, non-contradicted by later evidence, survives actor/session change | Yes |
+| `PROVISIONAL` | Claim backed by local proof or partial evidence, not yet contradicted but not yet durable | Not yet — requires promotion path |
+| `CONTRADICTED` | Claim disagreed with by later evidence from same or higher-authority source | No — must stay open until resolved |
+| `EXTERNAL_BLOCKER` | Claim blocked by dependency outside this repo's control (e.g., upstream service, external team) | No — record and park |
+| `PARKED` | Claim intentionally deferred; not blocking current phase gate | No — not evaluated |
 
-### State classes
+### State Durability Classes
 
-| Class | Meaning |
-|---|---|
-| `DURABLE` | Merged repo truth or pinned release evidence that survives session/operator change. |
-| `MANUAL_STATE` | Live runtime, browser, DB, or operator-held state that is not fully codified in tracked truth. |
-| `TEMPORARY_RUNTIME_MITIGATION` | A mitigation that reduces symptoms but is not convergence closure. |
+| Class | Definition | Examples |
+|-------|-----------|---------|
+| `DURABLE` | State that survives pod restart, actor change, session loss, and cluster reprovisioning | Merged PR, pinned image digest, GitOps overlay, ExternalSecret |
+| `MANUAL_STATE` | State created by operator action, not codified in repo or automation | kubectl exec, manual DB write, browser-set cookie |
+| `TEMPORARY_RUNTIME_MITIGATION` | Workaround that unblocks progress but is not semantic closure | Caddy handle_response rewrite, pod-local sed patch, hot-fix Job |
 
-## Promotion rules
+## Promotion Rules
 
-Runtime/browser evidence may be promoted into canonical repo truth only when all of the
-following are true:
+### What CAN be promoted to canonical repo truth
 
-1. the evidence is tracked in merged repo artifacts
-2. the claim has a named owner and timestamp
-3. the claim is scoped to a concrete path or surface
-4. later evidence does not contradict it
-5. manual runtime state is either absent or explicitly labeled
+1. **Merged PR fixing a root cause** — the PR itself is durable evidence
+2. **Pinned image digest** — immutable, verifiable, survives redeployment
+3. **GitOps overlay change** — declarative desired state, ArgoCD-synced
+4. **Browser proof backed by merged fix** — screenshot + merged PR = CONFIRMED
+5. **CI verification script** — machine-checkable, runs on every commit
 
-## Non-canonical local proof input
+### What CANNOT be promoted
 
-The following are not canonical truth by default:
+1. **Local proof file under var/proofs/** — input only, never canonical by default
+2. **Screenshot alone** — evidence of observation, not evidence of durability
+3. **curl-only proof** — does not prove user-visible success
+4. **kubectl exec result** — proves current state, not durable state
+5. **Manual DB write** — proves data exists now, not that it survives reprovisioning
+6. **Admin merge without semantic evidence** — proves merge happened, not that the fix works
+7. **Pod-local hot-patch** — proves runtime workaround, not architecture closure
 
-- `var/proofs/**`
-- screenshots under `assets/screenshots-of-issues/**`
-- local notes or browser observations
-- live console output not promoted into tracked artifacts
+### Promotion path for PROVISIONAL → CONFIRMED
 
-These must be labeled as:
+A provisional claim becomes confirmed when ALL of:
+1. The fix is merged to the appropriate repo (mereka-lms or bbi-infrastructure)
+2. The fix is deployed via GitOps (ArgoCD sync verified)
+3. Browser or API proof exists showing the fix works in the target environment
+4. No later evidence contradicts the claim
+5. The evidence is recorded in a tracked evidence bundle (this contract's format)
 
-- external lane evidence
-- local proof input
-- not independently reverified by this lane
+### Contradiction rules
 
-## Required evidence surfaces for convergence
+- Later evidence from same or higher-authority source supersedes earlier evidence
+- A contradiction does NOT erase the earlier claim — it marks it CONTRADICTED with a reference
+- Resolution requires new evidence that addresses both the original claim and the contradiction
+- A summary that smooths over contradictions is itself a contract violation
 
-### Admin portal
+## Required Evidence for Phase Gate Closure
 
-Required to close:
+### Stabilization → Convergence gate requires:
 
-- browser proof on the promoted path
-- pinned image truth for the rendered portal
-- release or deployment identity for the tested runtime
-- contradiction-free claim that the user-visible path succeeds
+#### Admin Portal
+| Evidence | Required? | What counts |
+|----------|----------|------------|
+| Admin portal renders without 500/error boundary | Required | Browser proof + merged routing fix |
+| Admin user can authenticate via SSO | Required | Browser proof of successful login |
+| Admin portal shows enterprise data | Required | Screenshot showing non-empty enterprise view |
 
-Insufficient alone:
+#### Learner Portal — Primary Path
+| Evidence | Required? | What counts |
+|----------|----------|------------|
+| Learner dashboard renders | Required | Browser proof + merged fixes for all root causes |
+| Learner can authenticate via SSO | Required | Browser proof of successful login flow |
+| Dashboard BFF returns 200 | Required | Access log or API proof showing BFF success |
+| Search page renders | Required | Browser proof showing search UI (content optional) |
 
-- screenshot without tracked claim lineage
-- shell/curl success without browser proof
+#### Learner Portal — Secondary Path
+| Evidence | Required? | What counts |
+|----------|----------|------------|
+| Secondary endpoints classified | Required | Request matrix with owner, route, status for each |
+| Misrouted endpoints identified and fixed | Required | Routing fix merged, not just mitigated |
+| Graceful degradation working | Required | Browser proof that failures don't trigger error boundary |
+| Temporary mitigations labeled | Required | Each mitigation explicitly marked as TEMPORARY_RUNTIME_MITIGATION |
 
-### Learner portal primary path
+#### Build Truth
+| Evidence | Required? | What counts |
+|----------|----------|------------|
+| MFE images built from explicit source tags | Required | Build contract verified, no :latest dependency |
+| Image digests pinned | Required | Immutable refs in deployment manifests or evidence bundle |
 
-Required to close:
+#### GitOps Truth
+| Evidence | Required? | What counts |
+|----------|----------|------------|
+| All runtime fixes deployed via ArgoCD | Required | ArgoCD sync status, not kubectl apply |
+| No manual patches required for basic function | Required | Pod restart produces working state without intervention |
 
-- browser proof for authenticated learner entry and dashboard path
-- tracked identity/scope of the test
-- pinned image or release identity
-- no later contradiction from the same promoted runtime slice
+#### Image Truth
+| Evidence | Required? | What counts |
+|----------|----------|------------|
+| All deployed images traceable to source | Required | Image ref → build workflow → source commit chain |
+| No floating tags in deployment manifests | Required | Pinned SHA or SHA-timestamp tags only |
 
-Insufficient alone:
+#### Data-Layer Truth
+| Evidence | Required? | What counts |
+|----------|----------|------------|
+| Synthetic test fixtures documented | Required | Fixture manifest + bootstrap tooling |
+| Fixture creation is reproducible | Required | Script-based, not manual kubectl exec |
+| Enterprise catalog both-sides populated | Required | LMS + enterprise-catalog service records exist |
 
-- login redirect proof without the main user-visible screen
-- screenshot set with no release identity
+## What Counts as Contradiction
 
-### Learner portal secondary path
+1. A later browser proof showing failure where earlier proof showed success
+2. A root cause analysis that reclassifies an earlier diagnosis
+3. A PR that was claimed sufficient but later found insufficient
+4. A fix path that was claimed durable but requires manual intervention after pod restart
+5. An endpoint that was claimed working but later found to be misrouted
 
-Required to close:
+## What Counts as Superseded Evidence
 
-- browser proof for the secondary learner path
-- request/response evidence for the optional or secondary endpoints used by the page
-- explicit rule for what 404s are acceptable and why they are non-fatal
-- proof that the UI degrades gracefully instead of throwing an error boundary
+Evidence is superseded when a later artifact from the same investigation:
+- Corrects a factual error in the earlier artifact
+- Provides a more accurate root cause
+- Identifies additional failure modes not covered by the earlier artifact
 
-Insufficient alone:
+The superseded artifact is NOT deleted — it is marked as superseded with a reference to the superseding artifact.
 
-- “shell renders” without stable user-visible success
-- proxy-only fix notes when the MFE still fails on JSON 404
-- screenshot of the shell plus an error boundary
+## Local Proof Input Policy
 
-### Build truth
+Files under `var/proofs/**` are:
+- Valid inputs for building evidence bundles
+- NOT canonical truth by default
+- NOT sufficient for closing any claim
+- Subject to contradiction by later evidence
+- Must be explicitly promoted through the rules above to become canonical
 
-Required to close:
+Screenshots under `assets/screenshots-of-issues/**` are:
+- Observational evidence of a point-in-time state
+- NOT durable closure by themselves
+- Valuable when paired with a merged fix and deployment verification
+- Must be referenced from a tracked evidence bundle to have canonical weight
 
-- immutable image refs
-- source tag or digest lineage
-- build contract compatibility with the tested runtime
+## Cross-References
 
-### GitOps truth
-
-Required to close:
-
-- pinned desired state identity
-- deployment mapping to the tested runtime
-
-Note: GitOps truth outside this repo remains external unless promoted into tracked repo evidence.
-
-### Image truth
-
-Required to close:
-
-- immutable tags or digests
-- proof that the tested runtime actually used those refs
-
-### Data-layer truth
-
-Required to close:
-
-- tracked description of required data assumptions
-- explicit labeling of any DB/manual state that remains outside durable source control
-
-DB or flag changes alone are `MANUAL_STATE`, not convergence closure.
-
-## Contradiction policy
-
-A claim is `CONTRADICTED` when:
-
-- a later artifact disproves the stated root cause
-- a later artifact shows the user-visible path still fails
-- a claim of closure relies on a mitigation that later evidence shows is insufficient
-
-Example:
-
-- Earlier claim: learner blocker is BFF 401 / JWT cookie propagation.
-- Later evidence: BFF returns 200 and the remaining blocker is the MFE error boundary on JSON 404.
-- Result: the earlier root-cause claim becomes `CONTRADICTED`.
-
-## Superseded evidence
-
-Evidence is superseded when a later artifact covers the same scope more precisely and changes the
-classification or root cause. Superseded evidence must stay visible in claim lineage; it must not
-be deleted from the history narrative.
-
-## What cannot be promoted
-
-- screenshots alone
-- merged PR state alone
-- admin merge alone
-- live DB writes alone
-- pod-local behavior alone
-- “looks fixed” language with unresolved contradiction
-
-## Exact next evidence shape required from Lane A
-
-Lane A must next produce one tracked, contradiction-aware runtime bundle that includes:
-
-1. admin portal browser proof
-2. learner portal primary-path browser proof
-3. learner portal secondary-path browser proof
-4. explicit request matrix for secondary endpoints, including which 404s are expected and non-fatal
-5. proof that the UI does not throw an error boundary on those non-fatal responses
-6. pinned image/build truth for the tested runtime
-7. explicit labeling of any remaining manual DB/runtime state
-
-Without that shape, `Stabilization -> Convergence` remains blocked.
+- Phase gate criteria: `docs/stabilization/STABILIZATION_PHASE_GATES.md`
+- Durable vs manual classification: `docs/stabilization/DURABLE_VS_MANUAL_STATE_MATRIX.md`
+- Release evidence format: `docs/stabilization/RELEASE_EVIDENCE_BUNDLE_CONTRACT.md`
+- Control board: `docs/stabilization/STABILIZATION_CONTROL_BOARD.md`

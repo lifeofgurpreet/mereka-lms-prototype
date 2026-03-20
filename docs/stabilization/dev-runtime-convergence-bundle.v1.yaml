@@ -1,117 +1,347 @@
-version: v1
+# Dev Runtime Convergence Evidence Bundle — Machine-Readable Manifest
+# Version: v1
+# Generated: 2026-03-12
+# Owner: Lane I (convergence evidence)
+---
+version: "1"
+environment: dev
+namespace: mereka-lms-dev
+cluster: rke2-nonprod
+bundle_date: "2026-03-12"
+owner: lane-i-convergence-evidence
+
 phase: Stabilization
 next_allowed_phase: Convergence
 phase_gate_status: BLOCKED
+phase_gate_ref: docs/stabilization/STABILIZATION_PHASE_GATES.md
+
+# ── Evidence Sources ──────────────────────────────────────────────────────────
 evidence_sources:
-  - id: lane-a-runtime-closure-local-proof
-    path: var/proofs/lane-a-runtime-closure.md
-    classification: local_proof_input
-    canonical: false
-    labels:
-      - external lane evidence
-      - local proof input
-      - not independently reverified by this lane
-  - id: lane-a-phase2-screenshots
-    path: assets/screenshots-of-issues/lane-a-phase2-proof/
-    classification: screenshot_bundle
-    canonical: false
-    labels:
-      - external lane evidence
-      - local proof input
-      - not independently reverified by this lane
-  - id: lane-a-phase3-screenshots
-    path: assets/screenshots-of-issues/lane-a-phase3-bff-closure/
-    classification: screenshot_bundle
-    canonical: false
-    labels:
-      - external lane evidence
-      - local proof input
-      - not independently reverified by this lane
+  repo_contracts:
+    - docs/stabilization/STABILIZATION_CONTROL_BOARD.md
+    - docs/stabilization/STABILIZATION_PHASE_GATES.md
+    - docs/stabilization/DURABLE_VS_MANUAL_STATE_MATRIX.md
+    - docs/stabilization/RELEASE_EVIDENCE_BUNDLE_CONTRACT.md
+    - docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md
+    - docs/stabilization/CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md
+  local_proof_inputs:
+    - var/proofs/runtime-stabilization-verdict.md
+    - var/proofs/runtime-drift-inventory.json
+    - var/proofs/lane-a-runtime-closure.md
+    - var/proofs/runtime-proof-seeded-contract.md
+    - var/proofs/runtime-test-identities.md
+    - var/proofs/enterprise-mfe-build-stabilization.md
+    - var/proofs/learner-secondary-request-matrix.md
+    - var/proofs/learner-endpoint-ownership-table.md
+    - var/proofs/learner-backend-version-contract.md
+    - var/proofs/phase4-enterprise-learner-secondary-endpoint-verdict.md
+    - var/proofs/LANE-A2-FINAL.md
+    - var/proofs/LANE-A3-RUNTIME-BUNDLE.md
+    - var/proofs/phase5-pr1643-sufficiency-verdict.md
+    - var/proofs/phase6-final-verdict.md
+  screenshot_dirs:
+    - assets/screenshots-of-issues/dev-closure-proof/
+    - assets/screenshots-of-issues/lane-a-seeded-proof/
+    - assets/screenshots-of-issues/lane-a-phase2-proof/
+    - assets/screenshots-of-issues/lane-a-phase3-bff-closure/
+    - assets/screenshots-of-issues/lane-a-phase4/
+    - assets/screenshots-of-issues/enterprise-auth-proof/
+    - assets/screenshots-of-issues/enterprise-mfe-fix/
+
+# ── Promoted Claims (CONFIRMED + DURABLE) ────────────────────────────────────
 promoted_claims:
-  - id: stabilization-phase-remains-active
-    truth: CONFIRMED
-    state_class: DURABLE
-    summary: The program remains in Stabilization until runtime/browser closure becomes durable merged truth.
-  - id: build-truth-contract-is-durable
-    truth: CONFIRMED
-    state_class: DURABLE
-    summary: Enterprise MFE build truth is pinned at the contract layer and must not depend on latest.
-  - id: local-runtime-proof-is-non-canonical
-    truth: CONFIRMED
-    state_class: DURABLE
-    summary: Local proof files and screenshots are not canonical runtime closure by default.
+  - id: A1
+    domain: admin_portal
+    claim: Admin portal renders without error boundary
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/LANE-A3-RUNTIME-BUNDLE.md
+
+  - id: A2
+    domain: admin_portal
+    claim: Admin SSO authentication works
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/runtime-stabilization-verdict.md
+
+  - id: L1
+    domain: learner_portal_primary
+    claim: Learner dashboard renders without error boundary
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/LANE-A3-RUNTIME-BUNDLE.md
+
+  - id: L2
+    domain: learner_portal_primary
+    claim: Learner SSO authentication works
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/phase6-final-verdict.md
+
+  - id: L3
+    domain: learner_portal_primary
+    claim: Dashboard BFF returns 200
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/learner-secondary-request-matrix.md
+
+  - id: L4
+    domain: learner_portal_primary
+    claim: Search page renders (graceful degradation)
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/LANE-A3-RUNTIME-BUNDLE.md
+
+  - id: S1
+    domain: learner_portal_secondary
+    claim: 13 secondary requests classified by owner and route
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/learner-secondary-request-matrix.md
+
+  - id: S2
+    domain: learner_portal_secondary
+    claim: 3 enterprise-catalog endpoints identified as misrouted
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/phase4-enterprise-learner-secondary-endpoint-verdict.md
+
+  - id: S3
+    domain: learner_portal_secondary
+    claim: Caddy routing fix for enterprise-catalog endpoints merged
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: "bbi-infrastructure PR #1643 (merged)"
+
+  - id: S7
+    domain: learner_portal_secondary
+    claim: Graceful degradation works (safeEnsureQueryData pattern)
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/phase5-pr1643-sufficiency-verdict.md
+
+  - id: B1
+    domain: build_truth
+    claim: MFE images built from explicit source tags
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md
+
+  - id: B2
+    domain: build_truth
+    claim: Build contract verified (12 checks)
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: scripts/qa/verify-enterprise-mfe-build-contract.sh
+
+  - id: B3
+    domain: build_truth
+    claim: "Image digests pinned (admin: sha256:65681d7d, learner: sha256:c394da77)"
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/runtime-stabilization-verdict.md
+
+  - id: G1
+    domain: gitops_truth
+    claim: JS hot-patches baked into MFE images
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/runtime-stabilization-verdict.md
+
+  - id: G2
+    domain: gitops_truth
+    claim: ArgoCD syncs enterprise MFE deployments
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: var/proofs/LANE-A3-RUNTIME-BUNDLE.md
+
+  - id: I1
+    domain: image_truth
+    claim: enterprise-admin-portal image traceable to source
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md
+
+  - id: I2
+    domain: image_truth
+    claim: enterprise-learner-portal image traceable to source
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md
+
+  - id: I3
+    domain: image_truth
+    claim: No floating tags in deployment manifests
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md
+
+  - id: D1
+    domain: data_layer_truth
+    claim: 4 synthetic test identities exist in DB
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: config/runtime-proof/LIVE_FIXTURE_STATE.md
+
+  - id: D2
+    domain: data_layer_truth
+    claim: Enterprise customer + catalog both-sides populated
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: config/runtime-proof/LIVE_FIXTURE_STATE.md
+
+  - id: D3
+    domain: data_layer_truth
+    claim: Fixture creation is scripted and reproducible
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: scripts/tenants/bootstrap-runtime-proof-fixtures.py
+
+  - id: D4
+    domain: data_layer_truth
+    claim: UUID drift detection implemented
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: scripts/tenants/validate-runtime-proof-fixtures.py
+
+  - id: D5
+    domain: data_layer_truth
+    claim: Waffle flags match manifest
+    status: CONFIRMED
+    durability: DURABLE
+    evidence: config/runtime-proof/LIVE_FIXTURE_STATE.md
+
+# ── Provisional Claims (awaiting promotion) ──────────────────────────────────
 provisional_claims:
-  - id: admin-portal-dev-success
-    owner: Lane A
-    state_class: MANUAL_STATE
-    summary: Admin portal appears healthy in local phase 2 proof but is not yet promoted canonically.
-  - id: learner-primary-path-dev-success
-    owner: Lane A
-    state_class: MANUAL_STATE
-    summary: Learner dashboard path appears healthy in local proof but remains non-canonical.
-  - id: json-404-proxy-fix-landed
-    owner: Lane A
-    state_class: TEMPORARY_RUNTIME_MITIGATION
-    summary: Local proof indicates HTML 404 to JSON 404 conversion, but user-visible secondary-path closure is still unresolved.
-  - id: live-image-and-runtime-mapping
-    owner: Lane A
-    state_class: MANUAL_STATE
-    summary: Local proof names image tags and digests, but the tested runtime mapping is not durably promoted here.
+  - id: S4
+    domain: learner_portal_secondary
+    claim: Cookie name sed patch
+    status: PROVISIONAL
+    durability: PENDING_MERGE
+    blocker: "bbi-infrastructure PR #1662 not yet merged"
+    owner: lane-a
+
+  - id: G3
+    domain: gitops_truth
+    claim: enterprise_worker init container on ArgoCD path
+    status: PROVISIONAL
+    durability: PENDING_MERGE
+    blocker: "bbi-infrastructure PR #1673 not yet merged"
+    owner: lane-a
+
+  - id: G4
+    domain: gitops_truth
+    claim: No manual patches required for basic portal function
+    status: PROVISIONAL
+    durability: PENDING_MERGE
+    blocker: "Depends on S4 and G3 merging"
+    owner: lane-a
+
+  - id: A3
+    domain: admin_portal
+    claim: Admin portal shows enterprise data
+    status: PROVISIONAL
+    durability: MANUAL_STATE
+    blocker: "Needs fresh browser verification"
+    owner: lane-a
+
+# ── Contradicted Claims (must stay open) ─────────────────────────────────────
 contradicted_claims:
-  - id: learner-blocker-is-bff-401
-    owner: Lane A
-    state_class: MANUAL_STATE
-    contradicted_by: later phase 3 section of var/proofs/lane-a-runtime-closure.md
-    summary: Later local proof shows BFF auth returns 200 and the blocker shifts to MFE handling of JSON 404s.
-  - id: learner-browser-proof-passes
-    owner: Lane A
-    state_class: MANUAL_STATE
-    contradicted_by: phase 3 screenshots and later phase 3 proof section
-    summary: Learner shell renders, but the error boundary still fires on the secondary path.
+  - id: C1
+    original_claim: LMS BFF 401 is JWT authentication failure
+    original_source: "Phase 2 proofs"
+    contradicted_by: var/proofs/lane-a-runtime-closure.md
+    correction: "HTML 404 from enterprise-access (wrong service routing), not auth failure"
+
+  - id: C2
+    original_claim: "PR #1640 handle_response is semantic fix"
+    original_source: "Phase 3 proofs"
+    contradicted_by: var/proofs/phase4-enterprise-learner-secondary-endpoint-verdict.md
+    correction: "TEMPORARY_RUNTIME_MITIGATION — masks routing error, does not fix it"
+
+  - id: C3
+    original_claim: "PR #1664 (Job) creates enterprise_worker durably"
+    original_source: var/proofs/LANE-A2-FINAL.md
+    contradicted_by: var/proofs/LANE-A3-RUNTIME-BUNDLE.md
+    correction: "Job not on render path; init container (PR #1673) is the real fix"
+
+  - id: C4
+    original_claim: "window.ENV_CONFIG provides config to getConfig()"
+    original_source: "PR #1643 analysis"
+    contradicted_by: var/proofs/LANE-A3-RUNTIME-BUNDLE.md
+    correction: "Webpack reads build-time config only; sed patch required for runtime"
+
+  - id: C5
+    original_claim: "Cookie name configurable via ConfigMap env.config.js"
+    original_source: "PR #1643 analysis"
+    contradicted_by: var/proofs/phase5-pr1643-sufficiency-verdict.md
+    correction: "getConfig() does not read runtime ConfigMap; needs sed in Dockerfile"
+
+# ── Blockers ─────────────────────────────────────────────────────────────────
 blockers:
-  - id: no-canonical-runtime-bundle
-    owner: Lane A
-    blocker_type: evidence-promotion
-    truth: PROVISIONAL
-    state_class: MANUAL_STATE
-    summary: Runtime/browser evidence is still local proof input rather than merged canonical truth.
-  - id: learner-secondary-path-error-boundary
-    owner: Lane A
-    blocker_type: user-visible-runtime
-    truth: CONTRADICTED
-    state_class: MANUAL_STATE
-    summary: Later local proof still shows the learner secondary path failing at the user-visible layer.
-  - id: live-runtime-mapping-not-promoted
-    owner: Lane A plus external infra surface
-    blocker_type: release-truth
-    truth: PROVISIONAL
-    state_class: MANUAL_STATE
-    summary: Live image, GitOps, and runtime mapping are not yet promoted into tracked convergence truth.
-  - id: runner-throughput-effects
-    owner: External platform capacity
-    blocker_type: external-throughput
-    truth: EXTERNAL_BLOCKER
-    state_class: EXTERNAL_BLOCKER
-    summary: Runner saturation can delay proof freshness, but does not close the semantic gap.
+  - id: BLK-1
+    description: "PR #1662 (cookie name sed) not yet merged"
+    owner: lane-a
+    unblocks: "S4 promotion, G4 promotion"
+    action: "Merge PR, verify ArgoCD sync, browser re-proof"
+
+  - id: BLK-2
+    description: "PR #1673 (enterprise_worker init container) not yet merged"
+    owner: lane-a
+    unblocks: "G3 promotion"
+    action: "Merge PR, verify init container fires on pod restart"
+
+  - id: BLK-3
+    description: "Admin portal enterprise data visibility unverified"
+    owner: lane-a
+    unblocks: "A3 promotion"
+    action: "Fresh browser proof showing non-empty enterprise view"
+
+  - id: BLK-4
+    description: "Post-merge full browser re-proof not yet done"
+    owner: lane-a
+    unblocks: "Phase gate closure"
+    action: "Pod-restart test + browser proof all 3 portals after BLK-1 and BLK-2 resolved"
+
+# ── Next Required Proof Artifacts ─────────────────────────────────────────────
 next_required_proof_artifacts:
-  - tracked runtime bundle covering admin portal, learner primary path, and learner secondary path
-  - secondary endpoint request matrix with allowed non-fatal 404 semantics
-  - proof that optional endpoint 404s no longer trigger an error boundary
-  - pinned image and deployment identity for the tested runtime
-  - explicit manual-state inventory and supersession note for the retired BFF-401 claim
+  - artifact: "Post-merge browser proof (all 3 portals)"
+    owner: lane-a
+    required_for: "Phase gate closure"
+    evidence_shape: "Browser screenshots + access log + ArgoCD sync proof"
+
+  - artifact: "Pod-restart durability test"
+    owner: lane-a
+    required_for: "G3, G4 promotion"
+    evidence_shape: "Delete pods, wait for restart, verify portals work without manual intervention"
+
+  - artifact: "enterprise_worker init container proof"
+    owner: lane-a
+    required_for: "G3 promotion"
+    evidence_shape: "Pod logs showing init container creating enterprise_worker user"
+
+  - artifact: "Admin portal enterprise data screenshot"
+    owner: lane-a
+    required_for: "A3 promotion"
+    evidence_shape: "Browser screenshot showing non-empty enterprise admin view"
+
+# ── Policies ──────────────────────────────────────────────────────────────────
 local_proof_policy:
-  canonical_default: false
-  required_labels:
-    - external lane evidence
-    - local proof input
-    - not independently reverified by this lane
+  rule: "Files under var/proofs/** are valid inputs but NOT canonical truth"
+  promotion: "Must satisfy all 5 promotion criteria in CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md"
+  ref: docs/stabilization/CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md
+
 contradiction_policy:
-  later_evidence_overrides_earlier_root_cause_claims: true
-  contradictions_must_remain_open: true
+  rule: "Later evidence supersedes earlier evidence; contradictions recorded, not erased"
+  resolution: "New evidence must address both original claim and contradiction"
+  ref: docs/stabilization/CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md
+
 promotion_rules:
-  require_tracked_repo_artifact: true
-  require_named_owner: true
-  require_timestamp: true
-  require_scope_specificity: true
-  screenshots_alone_are_insufficient: true
-  admin_merge_is_not_runtime_proof: true
+  - "Merged PR fixing root cause = DURABLE evidence"
+  - "Pinned image digest = DURABLE evidence"
+  - "GitOps overlay change = DURABLE evidence"
+  - "Browser proof + merged fix = CONFIRMED"
+  - "Local proof file alone = NOT promotable"
+  - "Screenshot alone = NOT promotable"
+  - "kubectl exec result = NOT promotable"
+  - "Manual DB write = NOT promotable"
