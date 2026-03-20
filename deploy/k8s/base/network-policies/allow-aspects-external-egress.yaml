@@ -5,6 +5,7 @@ kind: NetworkPolicy
 metadata:
   name: allow-aspects-external-egress
   labels:
+    app.kubernetes.io/name: allow-aspects-external-egress
     app.kubernetes.io/component: network-policy
 spec:
   podSelector:
