@@ -6,7 +6,8 @@
 #   2. Every registered critical-script path actually exists
 #   3. Every registered critical script is executable
 #   4. ci_static_inventory entries exist and are executable
-#   5. Warns about unregistered scripts in critical directories
+#   5. ci_runtime_inventory entries exist and are executable
+#   6. Warns about unregistered scripts in critical directories
 #
 # Usage:
 #   bash scripts/governance/validate-registry.sh
@@ -173,9 +174,95 @@ else
   warn "python3 not found — skipping ci_static_inventory validation"
 fi
 
-# ── 5. Scan for unregistered scripts in critical directories ──────────────────
+# ── 5. CI runtime inventory entries exist and are executable ──────────────────
 echo ""
-echo "--- 5. Unregistered scripts in critical directories ---"
+echo "--- 5. ci_runtime_inventory entries exist and are executable ---"
+
+if command -v python3 >/dev/null 2>&1; then
+  if runtime_summary="$(python3 - "$REGISTRY" "$REPO_ROOT" <<'PY'
+import os
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    print("PY_YAML_MISSING")
+    raise SystemExit(2)
+
+registry_path = Path(sys.argv[1])
+repo_root = Path(sys.argv[2])
+payload = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+inventory = payload.get("ci_runtime_inventory")
+if not isinstance(inventory, dict):
+    raise SystemExit("ci_runtime_inventory missing from script-registry.yaml")
+
+categories = inventory.get("categories")
+if not isinstance(categories, list) or not categories:
+    raise SystemExit("ci_runtime_inventory.categories must be a non-empty list")
+
+category_keys = set()
+for index, item in enumerate(categories, start=1):
+    if not isinstance(item, dict):
+        raise SystemExit(f"ci_runtime_inventory.categories[{index}] must be a mapping")
+    key = item.get("key")
+    if not isinstance(key, str) or not key.strip():
+        raise SystemExit(f"ci_runtime_inventory.categories[{index}] missing key")
+    category_keys.add(key)
+
+entries = inventory.get("entries")
+if not isinstance(entries, list):
+    raise SystemExit("ci_runtime_inventory.entries must be a list")
+
+seen = set()
+count = 0
+for index, entry in enumerate(entries, start=1):
+    if not isinstance(entry, dict):
+        raise SystemExit(f"ci_runtime_inventory.entries[{index}] must be a mapping")
+    script = entry.get("script")
+    if not isinstance(script, str) or not script.strip():
+        raise SystemExit(f"ci_runtime_inventory.entries[{index}] missing script")
+    category = entry.get("category")
+    if not isinstance(category, str) or not category.strip():
+        raise SystemExit(f"ci_runtime_inventory.entries[{index}] missing category")
+    if category not in category_keys:
+        raise SystemExit(
+            f"ci_runtime_inventory.entries[{index}] references unknown category: {category}"
+        )
+    args = entry.get("args", [])
+    if args is None:
+        args = []
+    if not isinstance(args, list) or any(not isinstance(arg, str) or not arg for arg in args):
+        raise SystemExit(f"ci_runtime_inventory.entries[{index}] args must be a list of non-empty strings")
+
+    key = " ".join([script, *args])
+    if key in seen:
+        raise SystemExit(f"duplicate ci_runtime_inventory entry: {key}")
+    seen.add(key)
+
+    script_path = repo_root / script
+    if not script_path.is_file():
+        raise SystemExit(f"ci_runtime_inventory entry not found on disk: {script}")
+    if not os.access(script_path, os.X_OK):
+        raise SystemExit(f"ci_runtime_inventory entry is not executable: {script}")
+    count += 1
+
+print(count)
+PY
+  )"; then
+    pass "ci_runtime_inventory validates ${runtime_summary} executable entries"
+  elif [[ $? -eq 2 ]]; then
+    warn "PyYAML not installed — skipping ci_runtime_inventory validation"
+  else
+    fail "ci_runtime_inventory validation failed"
+  fi
+else
+  warn "python3 not found — skipping ci_runtime_inventory validation"
+fi
+
+# ── 6. Scan for unregistered scripts in critical directories ──────────────────
+echo ""
+echo "--- 6. Unregistered scripts in critical directories ---"
 
 if [[ "${WARN_UNREGISTERED}" != "1" ]]; then
   echo "  (skipped — WARN_UNREGISTERED=0)"
@@ -206,12 +293,13 @@ import sys
 import yaml
 
 payload = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8")) or {}
-inventory = payload.get("ci_static_inventory") or {}
-for entry in inventory.get("entries", []):
-    if isinstance(entry, dict):
-        script = entry.get("script")
-        if isinstance(script, str) and script:
-            print(script)
+for inventory_key in ("ci_static_inventory", "ci_runtime_inventory"):
+    inventory = payload.get(inventory_key) or {}
+    for entry in inventory.get("entries", []):
+        if isinstance(entry, dict):
+            script = entry.get("script")
+            if isinstance(script, str) and script:
+                print(script)
 PY
     )
   fi

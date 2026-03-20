@@ -76,7 +76,8 @@ deploy/k8s/               # Kubernetes manifests
   │   └── setup-playwright/ # Node + Playwright + browser cache
   ├── workflows/          # GitHub Actions workflows
   ├── run-scripts-parallel.sh  # xargs -P parallel script runner
-  └── ci-scripts-static.txt    # Generated static-validation inventory (derivative)
+  ├── ci-scripts-static.txt    # Generated static-validation inventory (derivative)
+  └── ci-scripts-runtime.txt   # Generated runtime-validation inventory (derivative)
 
 infrastructure/           # Infrastructure-as-code
   ├── tutor/              # Tutor configs, patches, themes
@@ -142,7 +143,9 @@ tutor_env/                # Generated Tutor state (gitignored)
   - `security-scans`: TruffleHog (HEAD only) + pip-audit
   - `test-coverage`: Python tests with coverage
 - Static inventory authority lives in `scripts/governance/script-registry.yaml` under `ci_static_inventory`
+- Runtime inventory authority lives in `scripts/governance/script-registry.yaml` under `ci_runtime_inventory`
 - `.github/ci-scripts-static.txt` is a generated derivative
+- `.github/ci-scripts-runtime.txt` is a generated derivative
 - `.github/run-scripts-parallel.sh` runs scripts via `xargs -P` with PASS/FAIL/TIMEOUT tracking
 - 3 composite actions in `.github/actions/` eliminate boilerplate across workflows
 - `daily-infrastructure-audit.yml` merges observability + alert routing + parity checks
@@ -267,17 +270,25 @@ kubectl get pvc -n arc-runners                         # Cache PVCs
 # Inspect the authoritative CI static inventory
 bin/lms-ops inventory ci-static
 
+# Inspect the authoritative CI runtime inventory
+bin/lms-ops inventory ci-runtime
+
 # Regenerate the CI static inventory derivative
 python3 scripts/governance/generate-ci-static-inventory.py --write
+
+# Regenerate the CI runtime inventory derivative
+python3 scripts/governance/generate-ci-runtime-inventory.py --write
 
 # Run the parallel script runner locally (tests CI logic)
 .github/run-scripts-parallel.sh .github/ci-scripts-static.txt 4 120
 
 # Adding a new verification script to CI:
-# 1. Add or remove the entry in scripts/governance/script-registry.yaml ci_static_inventory
-# 2. Regenerate .github/ci-scripts-static.txt
-# 2. Scripts must exit 0 on success, non-zero on failure
-# 3. Scripts get 120s timeout by default
+# 1. Add the entry in scripts/governance/script-registry.yaml ci_static_inventory
+#    or ci_runtime_inventory, depending on whether the script is offline-static
+#    or live-context-only
+# 2. Regenerate the corresponding .github/ci-scripts-*.txt derivative
+# 3. Scripts must exit 0 on success, non-zero on failure
+# 4. Scripts get 120s timeout by default
 
 # Workflow changes — use composite actions, don't duplicate:
 #   GCP auth:    uses: ./.github/actions/gcp-gke-auth
@@ -586,7 +597,7 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
 8. **Hardcoding secrets** → Use `os.environ.get()` and ExternalSecrets
    - **Note**: Pre-commit hook will block commits with hardcoded secrets
 9. **Adding verification scripts without updating CI** → Script exists but never runs in CI
-   - **Fix**: Update `scripts/governance/script-registry.yaml` `ci_static_inventory`, then regenerate `.github/ci-scripts-static.txt`
+   - **Fix**: Update `scripts/governance/script-registry.yaml` `ci_static_inventory` or `ci_runtime_inventory`, then regenerate the corresponding `.github/ci-scripts-*.txt` derivative
 10. **Duplicating GCP auth / Python setup in workflows** → Use composite actions in `.github/actions/`
 11. **Including ARC manifests in rke2-nonprod overlay** → The overlay's `namespace: mereka-lms` transformer overrides ARC namespaces. Apply ARC separately: `kubectl apply -k deploy/k8s/base/arc/`
 

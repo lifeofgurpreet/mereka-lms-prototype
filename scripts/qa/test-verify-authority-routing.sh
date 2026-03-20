@@ -16,7 +16,12 @@ write_lms_ops_fixture() {
 source scripts/lib/lane-normalize.sh
 
 do_proof() { exec scripts/release/emit-proof-envelope.sh; }
-do_inventory() { exec python3 scripts/governance/generate-ci-static-inventory.py; }
+do_inventory() {
+  case "${2:-ci-static}" in
+    ci-static) exec python3 scripts/governance/generate-ci-static-inventory.py ;;
+    ci-runtime) exec python3 scripts/governance/generate-ci-runtime-inventory.py ;;
+  esac
+}
 do_release_gate() { exec scripts/release/release-gate.sh; }
 do_smoke() { exec scripts/release/smoke-after-migrate.sh; }
 do_preflight() { exec scripts/release/migration-preflight.sh; }

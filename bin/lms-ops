@@ -12,7 +12,8 @@
 #   migrate plan     Show pending migrations per service (read-only)
 #   migrate apply    Run migration Jobs via kubectl apply (requires --lane)
 #   migrate verify   Verify zero pending migrations post-apply
-#   inventory ci-static  Show authoritative CI static-validation inventory
+#   inventory ci-static   Show authoritative CI static-validation inventory
+#   inventory ci-runtime  Show authoritative CI runtime-validation inventory
 #   proof            Emit GitOps-conformant evidence envelopes
 #   release-gate     Run the release gate (structural integrity checks)
 #   smoke [basic]     Post-migration/post-deploy runtime smoke
@@ -336,8 +337,14 @@ do_inventory() {
       args+=("${PASSTHROUGH_ARGS[@]}")
       exec python3 "$REPO_ROOT/scripts/governance/generate-ci-static-inventory.py" "${args[@]}"
       ;;
+    ci-runtime)
+      local args=()
+      [[ "$FORMAT" == "json" ]] && args+=("--format" "json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec python3 "$REPO_ROOT/scripts/governance/generate-ci-runtime-inventory.py" "${args[@]}"
+      ;;
     *)
-      echo "Unknown inventory subconcern: $sub (expected: ci-static)" >&2
+      echo "Unknown inventory subconcern: $sub (expected: ci-static|ci-runtime)" >&2
       exit 1
       ;;
   esac

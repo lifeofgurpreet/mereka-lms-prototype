@@ -73,7 +73,8 @@ done
 
 # 3. bin/lms-ops delegates to underlying scripts (not reimplementing)
 declare -A DELEGATIONS=(
-  ["inventory"]="generate-ci-static-inventory.py"
+  ["inventory static"]="generate-ci-static-inventory.py"
+  ["inventory runtime"]="generate-ci-runtime-inventory.py"
   ["release-gate"]="release-gate.sh"
   ["smoke"]="smoke-after-migrate.sh"
   ["preflight"]="migration-preflight.sh"

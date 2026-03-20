@@ -8,8 +8,8 @@
 #   2. Every scripts/infra/canonical-*.sh and scripts/infra/release-*.sh is registered
 #   3. Every release-blocking scripts/qa/* and scripts/ci/* script is in the
 #      static authority (script-registry.yaml ci_static_inventory) or the
-#      runtime-only bridge (.github/ci-scripts-runtime.txt)
-#   4. No script may appear in both the static authority and the runtime bridge
+#      runtime authority (script-registry.yaml ci_runtime_inventory)
+#   4. No script may appear in both the static and runtime authorities
 #
 # Usage:
 #   bash scripts/qa/verify-script-registry-completeness.sh
@@ -17,7 +17,6 @@ set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 REGISTRY="${REPO_ROOT}/scripts/governance/script-registry.yaml"
-CI_RUNTIME_LIST="${REPO_ROOT}/.github/ci-scripts-runtime.txt"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -109,6 +108,22 @@ for index, entry in enumerate(entries, start=1):
         raise SystemExit(f"ci_static_inventory.entries[{index}] missing script")
     ci_static_paths.append(script)
 
+runtime_inventory = payload.get("ci_runtime_inventory")
+if not isinstance(runtime_inventory, dict):
+    raise SystemExit("script-registry.yaml missing ci_runtime_inventory mapping")
+runtime_entries = runtime_inventory.get("entries")
+if not isinstance(runtime_entries, list):
+    raise SystemExit("ci_runtime_inventory.entries must be a list")
+
+ci_runtime_paths: list[str] = []
+for index, entry in enumerate(runtime_entries, start=1):
+    if not isinstance(entry, dict):
+        raise SystemExit(f"ci_runtime_inventory.entries[{index}] must be a mapping")
+    script = entry.get("script")
+    if not isinstance(script, str) or not script.strip():
+        raise SystemExit(f"ci_runtime_inventory.entries[{index}] missing script")
+    ci_runtime_paths.append(script)
+
 (tmpdir / "registered-paths.txt").write_text(
     "".join(f"{item}\n" for item in sorted(set(registered_paths))),
     encoding="utf-8",
@@ -119,6 +134,10 @@ for index, entry in enumerate(entries, start=1):
 )
 (tmpdir / "ci-static-paths.txt").write_text(
     "".join(f"{item}\n" for item in sorted(set(ci_static_paths))),
+    encoding="utf-8",
+)
+(tmpdir / "ci-runtime-paths.txt").write_text(
+    "".join(f"{item}\n" for item in sorted(set(ci_runtime_paths))),
     encoding="utf-8",
 )
 PY
@@ -151,13 +170,10 @@ while IFS= read -r path; do
 done < "${TMPDIR}/ci-static-paths.txt"
 
 declare -A CI_RUNTIME_SET
-if [[ -f "${CI_RUNTIME_LIST}" ]]; then
-  while IFS= read -r line; do
-    [[ "$line" =~ ^#  || -z "${line// }" ]] && continue
-    base_path="${line%% *}"
-    CI_RUNTIME_SET["${base_path}"]=1
-  done < "${CI_RUNTIME_LIST}"
-fi
+while IFS= read -r path; do
+  [[ -z "$path" ]] && continue
+  CI_RUNTIME_SET["${path}"]=1
+done < "${TMPDIR}/ci-runtime-paths.txt"
 
 # ── Check 1: scripts/release/* must be registered ────────────────────────────
 echo "--- 1. scripts/release/ — all scripts registered ---"
@@ -193,18 +209,18 @@ done < <(find "${REPO_ROOT}/scripts/infra" -maxdepth 1 \
   \( -name 'canonical-*.sh' -o -name 'release-*.sh' \) -type f | sort)
 [[ "$found" -eq 0 ]] && info "No canonical-* or release-* scripts found in scripts/infra/"
 
-# ── Check 3: static authority and runtime bridge must not overlap ────────────
+# ── Check 3: static authority and runtime authority must not overlap ─────────
 echo ""
-echo "--- 3. static authority vs runtime bridge — no overlap ---"
+echo "--- 3. static authority vs runtime authority — no overlap ---"
 overlap_found=0
 for path in $(printf '%s\n' "${!CI_STATIC_SET[@]}" | sort); do
   if [[ -n "${CI_RUNTIME_SET["${path}"]:-}" ]]; then
-    fail "${path} — listed in both script-registry.yaml ci_static_inventory and .github/ci-scripts-runtime.txt"
+    fail "${path} — listed in both script-registry.yaml ci_static_inventory and ci_runtime_inventory"
     overlap_found=1
   fi
 done
 if [[ "${overlap_found}" -eq 0 ]]; then
-  pass "static authority and runtime bridge do not overlap"
+  pass "static authority and runtime authority do not overlap"
 fi
 
 # ── Check 4: release-blocking qa/ci scripts must be inventoried ──────────────
@@ -217,9 +233,9 @@ else
     if [[ -n "${CI_STATIC_SET["${path}"]:-}" ]]; then
       pass "${path} — static authority via script-registry.yaml ci_static_inventory"
     elif [[ -n "${CI_RUNTIME_SET["${path}"]:-}" ]]; then
-      pass "${path} — runtime bridge via .github/ci-scripts-runtime.txt"
+      pass "${path} — runtime authority via script-registry.yaml ci_runtime_inventory"
     else
-      fail "${path} — criticality: release-blocking but absent from script-registry.yaml ci_static_inventory and .github/ci-scripts-runtime.txt"
+      fail "${path} — criticality: release-blocking but absent from script-registry.yaml ci_static_inventory and ci_runtime_inventory"
     fi
   done
 fi
@@ -232,7 +248,7 @@ echo "  FAIL: ${FAIL}"
 echo ""
 
 if [[ "${FAIL}" -gt 0 ]]; then
-  echo -e "${RED}RESULT: FAIL — ${FAIL} violation(s). Add static entries to script-registry.yaml ci_static_inventory or runtime-only bridge entries to .github/ci-scripts-runtime.txt.${NC}"
+  echo -e "${RED}RESULT: FAIL — ${FAIL} violation(s). Add entries to script-registry.yaml ci_static_inventory or ci_runtime_inventory.${NC}"
   exit 1
 fi
 

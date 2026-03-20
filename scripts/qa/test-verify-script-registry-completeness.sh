@@ -27,13 +27,24 @@ EOF
 
 write_registry() {
   cat >"$tmpdir/scripts/governance/script-registry.yaml" <<'EOF'
-version: "1.1.1"
+version: "1.2.0"
 ci_static_inventory:
   generated_file: .github/ci-scripts-static.txt
   generator: scripts/governance/generate-ci-static-inventory.py
   owner: platform-team
   entries:
     - script: scripts/qa/verify-static-pass.sh
+ci_runtime_inventory:
+  generated_file: .github/ci-scripts-runtime.txt
+  generator: scripts/governance/generate-ci-runtime-inventory.py
+  owner: platform-team
+  categories:
+    - key: LIVE_CLUSTER
+      title: Live cluster required
+      description: needs kubectl access to a running cluster
+  entries:
+    - script: scripts/qa/verify-runtime-pass.sh
+      category: LIVE_CLUSTER
 scripts:
   - path: scripts/release/release-gate.sh
     criticality: release-supporting
@@ -43,13 +54,6 @@ scripts:
     criticality: release-blocking
   - path: scripts/qa/verify-runtime-pass.sh
     criticality: release-blocking
-EOF
-}
-
-write_runtime_inventory() {
-  cat >"$tmpdir/.github/ci-scripts-runtime.txt" <<'EOF'
-# TEMP_BRIDGE runtime inventory fixture
-scripts/qa/verify-runtime-pass.sh  # LIVE_CLUSTER
 EOF
 }
 
@@ -78,21 +82,71 @@ write_script "scripts/infra/canonical-release.sh"
 write_script "scripts/qa/verify-static-pass.sh"
 write_script "scripts/qa/verify-runtime-pass.sh"
 write_registry
-write_runtime_inventory
 
-run_expect_pass "release-blocking scripts can be satisfied by static authority or runtime bridge"
+run_expect_pass "release-blocking scripts can be satisfied by static or runtime authority"
 
-cat >"$tmpdir/.github/ci-scripts-runtime.txt" <<'EOF'
-# TEMP_BRIDGE runtime inventory fixture
-scripts/qa/verify-runtime-pass.sh  # LIVE_CLUSTER
-scripts/qa/verify-static-pass.sh   # DUPLICATE
+cat >"$tmpdir/scripts/governance/script-registry.yaml" <<'EOF'
+version: "1.2.0"
+ci_static_inventory:
+  generated_file: .github/ci-scripts-static.txt
+  generator: scripts/governance/generate-ci-static-inventory.py
+  owner: platform-team
+  entries:
+    - script: scripts/qa/verify-static-pass.sh
+ci_runtime_inventory:
+  generated_file: .github/ci-scripts-runtime.txt
+  generator: scripts/governance/generate-ci-runtime-inventory.py
+  owner: platform-team
+  categories:
+    - key: LIVE_CLUSTER
+      title: Live cluster required
+      description: needs kubectl access to a running cluster
+  entries:
+    - script: scripts/qa/verify-runtime-pass.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-static-pass.sh
+      category: LIVE_CLUSTER
+scripts:
+  - path: scripts/release/release-gate.sh
+    criticality: release-supporting
+  - path: scripts/infra/canonical-release.sh
+    criticality: release-supporting
+  - path: scripts/qa/verify-static-pass.sh
+    criticality: release-blocking
+  - path: scripts/qa/verify-runtime-pass.sh
+    criticality: release-blocking
 EOF
-run_expect_fail "overlap between static authority and runtime bridge is rejected"
+run_expect_fail "overlap between static and runtime authority is rejected"
 
-write_runtime_inventory
 cat >"$tmpdir/.github/ci-scripts-runtime.txt" <<'EOF'
-# TEMP_BRIDGE runtime inventory fixture
-# verify-runtime-pass intentionally removed
+# legacy generated file should not matter once authority lives in the registry
+EOF
+cat >"$tmpdir/scripts/governance/script-registry.yaml" <<'EOF'
+version: "1.2.0"
+ci_static_inventory:
+  generated_file: .github/ci-scripts-static.txt
+  generator: scripts/governance/generate-ci-static-inventory.py
+  owner: platform-team
+  entries:
+    - script: scripts/qa/verify-static-pass.sh
+ci_runtime_inventory:
+  generated_file: .github/ci-scripts-runtime.txt
+  generator: scripts/governance/generate-ci-runtime-inventory.py
+  owner: platform-team
+  categories:
+    - key: LIVE_CLUSTER
+      title: Live cluster required
+      description: needs kubectl access to a running cluster
+  entries: []
+scripts:
+  - path: scripts/release/release-gate.sh
+    criticality: release-supporting
+  - path: scripts/infra/canonical-release.sh
+    criticality: release-supporting
+  - path: scripts/qa/verify-static-pass.sh
+    criticality: release-blocking
+  - path: scripts/qa/verify-runtime-pass.sh
+    criticality: release-blocking
 EOF
 run_expect_fail "missing release-blocking runtime coverage is rejected"
 
