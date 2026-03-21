@@ -1094,7 +1094,13 @@ jobs:
       - name: Generate release bundle
         id: bundle
         run: |
-          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          _RAW_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          TARGET_ENV="${_RAW_ENV}"
+          # The workflow_dispatch default is "select-environment" (a placeholder).
+          # Treat it as production so the bundle step doesn't reject it.
+          if [[ "$TARGET_ENV" == "select-environment" ]]; then
+            TARGET_ENV="production"
+          fi
           ./scripts/infra/generate-release-bundle.sh \
             --output var/ci/release-bundle.json \
             --repo "${{ github.repository }}" \

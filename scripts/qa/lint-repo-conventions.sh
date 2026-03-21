@@ -7,7 +7,8 @@
 # 3. Architectural boundaries: Prevent cross-contamination
 # 4. Observability: Structured output patterns
 #
-# Fast (<15s), exit non-zero on errors.
+# Runtime: ~4-5 minutes on full repo. CI timeout budget: 300s.
+# Exit non-zero on errors.
 #
 # Usage:
 #   ./scripts/qa/lint-repo-conventions.sh

@@ -75,7 +75,7 @@ All checks are performed by `verify-rke2-tenant-routes.sh --online`.
 | `https://apps.academyv2.mereka.dev/authn/login` | 200 | MFE login page |
 | `https://apps.academyv2.mereka.dev/authn/register` | 200 | MFE registration page |
 | `https://discovery.academyv2.mereka.dev/health/` | 200 | Discovery health |
-| `https://notes.academyv2.mereka.dev/health` | 200 | Notes health |
+| `https://notes.academyv2.mereka.dev/heartbeat` | 200 | Notes health |
 | `https://credentials.academyv2.mereka.dev/health/` | 200 | Credentials health |
 
 ---

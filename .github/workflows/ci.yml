@@ -291,7 +291,7 @@ jobs:
 
       # ── Phase C: Run all static verification scripts in parallel ──────────
       - name: Run static verification scripts
-        run: PARALLELISM=4 TIMEOUT_SECS=120 ./scripts/qa/run-release-verification-gates.sh
+        run: PARALLELISM=4 TIMEOUT_SECS=300 ./scripts/qa/run-release-verification-gates.sh
 
       - name: Generate aggregate summary report
         if: always()
