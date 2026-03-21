@@ -184,8 +184,10 @@ if [[ -x "${VERIFY_OVERRIDES}" ]]; then
   if [[ "${RC}" -eq 0 ]]; then
     pass "GitOps image override contract satisfied"
   elif [[ "${CI:-}" == "true" ]]; then
-    # Cross-repo drift is a warning in CI (bbi-infrastructure may not be in sync)
-    warn "GitOps image override drift (cross-repo): $(echo "${OVERRIDE_OUT}" | head -3)"
+    # Cross-repo drift is a real failure even in CI. If the infra repo was not
+    # available, verify-gitops-image-overrides.sh --skip-infra would have passed.
+    # If we get here, infra was checked and drift was found.
+    fail "GitOps image override drift (cross-repo): $(echo "${OVERRIDE_OUT}" | head -3)"
   else
     fail "GitOps image override contract violated: $(echo "${OVERRIDE_OUT}" | head -5)"
   fi

@@ -1472,3 +1472,77 @@ scripts:
     proof_command: "bash scripts/infra/verify-deployment.sh --help 2>&1 | head -5"
     criticality: release-blocking
     entrypoint_role: runtime-validation  # canonical-entrypoints.yaml workflow: runtime-validation
+
+  # ── Tenant Lifecycle ────────────────────────────────────────────────────────
+
+  - path: scripts/tenants/configure-tenant-idp.sh
+    owner: platform-team
+    purpose: Configure identity provider for a tenant
+    criticality: release-supporting
+
+  - path: scripts/tenants/generate-saml-keypair.sh
+    owner: platform-team
+    purpose: Generate SAML keypair for tenant SSO integration
+    criticality: release-supporting
+
+  - path: scripts/tenants/offboard-tenant.sh
+    owner: platform-team
+    purpose: Remove tenant configuration and data
+    criticality: release-supporting
+
+  - path: scripts/tenants/onboard-enterprise-tenant.sh
+    owner: platform-team
+    purpose: Full onboarding flow for a new enterprise tenant
+    criticality: release-supporting
+
+  - path: scripts/tenants/provision-all-tenants.sh
+    owner: platform-team
+    purpose: Provision all tenants from declarative config
+    criticality: release-supporting
+
+  - path: scripts/tenants/provision-mfe-config.sh
+    owner: platform-team
+    purpose: Provision MFE configuration for tenants
+    criticality: release-supporting
+
+  - path: scripts/tenants/provision-tenant.sh
+    owner: platform-team
+    purpose: Provision a single tenant from declarative config
+    criticality: release-supporting
+
+  - path: scripts/tenants/repair-enterprise-schema.sh
+    owner: platform-team
+    purpose: Repair enterprise tenant database schema
+    criticality: release-supporting
+
+  - path: scripts/tenants/sync-tenant-branding.sh
+    owner: platform-team
+    purpose: Sync tenant branding assets to the theme
+    criticality: release-supporting
+
+  - path: scripts/tenants/sync-tenant-enterprise-mapping.sh
+    owner: platform-team
+    purpose: Sync tenant-to-enterprise-customer mappings
+    criticality: release-supporting
+
+  - path: scripts/tenants/sync-tenant-registry-configmap.sh
+    owner: platform-team
+    purpose: Sync tenant registry to Kubernetes ConfigMap
+    criticality: release-supporting
+
+  # ── Migrations ──────────────────────────────────────────────────────────────
+
+  - path: scripts/migrations/bootstrap-courses-from-enrollments.sh
+    owner: platform-team
+    purpose: Bootstrap course structures from enrollment data
+    criticality: release-supporting
+
+  - path: scripts/migrations/import-production-courses.sh
+    owner: platform-team
+    purpose: Import courses from production environment
+    criticality: release-supporting
+
+  - path: scripts/migrations/run-dry-run.sh
+    owner: platform-team
+    purpose: Execute migration dry-run for validation
+    criticality: release-supporting

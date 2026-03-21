@@ -69,9 +69,6 @@ scripts/infra/user-data-export.sh
 scripts/infra/verify-k8s-overrides.sh
 scripts/infra/verify-prometheus-integration.sh
 scripts/infra/verify-tutor-patches.sh
-scripts/migrations/bootstrap-courses-from-enrollments.sh
-scripts/migrations/import-production-courses.sh
-scripts/migrations/run-dry-run.sh
 scripts/qa/analyze-local-data.sh
 scripts/qa/audit-alert-noise-baseline.sh
 scripts/qa/audit-analytics-pii.sh
@@ -206,14 +203,3 @@ scripts/qa/verify_adr_suite.sh
 scripts/qa/visual-regression-auth.sh
 scripts/qa/visual-regression-branding.sh
 scripts/qa/visual-regression-test.sh
-scripts/tenants/configure-tenant-idp.sh
-scripts/tenants/generate-saml-keypair.sh
-scripts/tenants/offboard-tenant.sh
-scripts/tenants/onboard-enterprise-tenant.sh
-scripts/tenants/provision-all-tenants.sh
-scripts/tenants/provision-mfe-config.sh
-scripts/tenants/provision-tenant.sh
-scripts/tenants/repair-enterprise-schema.sh
-scripts/tenants/sync-tenant-branding.sh
-scripts/tenants/sync-tenant-enterprise-mapping.sh
-scripts/tenants/sync-tenant-registry-configmap.sh

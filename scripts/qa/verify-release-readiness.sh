@@ -107,7 +107,7 @@ fi
 if [[ -x "$REPO_ROOT/scripts/qa/verify-gitops-drift.sh" ]]; then
   OUTPUT=$("$REPO_ROOT/scripts/qa/verify-gitops-drift.sh" 2>&1) && RC=0 || RC=$?
   echo "$OUTPUT" > "$EVIDENCE_DIR/gitops-drift.log"
-  if [[ "$RC" -eq 0 ]]; then pass "No GitOps drift"; else warn "GitOps drift detected"; fi
+  if [[ "$RC" -eq 0 ]]; then pass "No GitOps drift"; else fail "GitOps drift detected (see gitops-drift.log)"; fi
 else
   warn "verify-gitops-drift.sh not found"
 fi
