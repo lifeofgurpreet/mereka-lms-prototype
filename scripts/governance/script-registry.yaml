@@ -517,8 +517,8 @@ ci_runtime_inventory:
       title: Worktree or branch context required
       description: needs a live worktree or branch context instead of detached CI state
     - key: LIVE_CLUSTER
-      title: Live cluster required
-      description: needs kubectl access to a running cluster
+      title: Live infrastructure required
+      description: needs live cluster, cloud control-plane, or network-edge access rather than repo-only state
     - key: LIVE_APP
       title: Live app required
       description: needs running HTTP endpoints or browser-visible app behavior
@@ -576,6 +576,9 @@ ci_runtime_inventory:
       category: LIVE_CLUSTER
     - script: scripts/infra/check-atlas-allowlist.sh
       category: LIVE_CLUSTER
+    - script: scripts/infra/check-atlas-allowlist-vps.sh
+      category: LIVE_CLUSTER
+      note: checks Atlas allowlist against current VPS egress IP; can refresh Atlas profile first
     - script: scripts/infra/validate-telemetry-connectivity.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-grafana-runtime-readiness.sh
