@@ -588,6 +588,12 @@ ci_runtime_inventory:
     - script: scripts/qa/audit-atlas-allowlist-monitor.sh
       category: LIVE_CLUSTER
       note: audits VPS Atlas allowlist monitor wiring, freshness, and optional webhook posture
+    - script: scripts/infra/ensure-atlas-allowlist-vps.sh
+      category: LIVE_CLUSTER
+      note: mutates Atlas allowlist for current VPS egress IP and refreshes Atlas profile from Infisical by default; no dry-run support
+    - script: scripts/infra/ensure-atlas-allowlist-gke-nodes.sh
+      category: LIVE_CLUSTER
+      note: mutates Atlas allowlist for current GKE node external IPs; supports --dry-run for planned changes
     - script: scripts/infra/validate-telemetry-connectivity.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-grafana-runtime-readiness.sh

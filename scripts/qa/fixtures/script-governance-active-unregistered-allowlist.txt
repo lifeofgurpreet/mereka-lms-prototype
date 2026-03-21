@@ -35,8 +35,6 @@ scripts/infra/decommission-legacy-ecommerce.sh
 scripts/infra/deploy-aspects-k8s.sh
 scripts/infra/docker-cleanup.sh
 scripts/infra/downgrade-mongodb-to-m0.sh
-scripts/infra/ensure-atlas-allowlist-gke-nodes.sh
-scripts/infra/ensure-atlas-allowlist-vps.sh
 scripts/infra/ensure-authentik-admin-mfa.sh
 scripts/infra/ensure-authentik-admin.sh
 scripts/infra/ensure-authentik-hardening.sh
