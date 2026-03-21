@@ -90,7 +90,6 @@ scripts/migrations/run-dry-run.sh
 scripts/qa/analyze-local-data.sh
 scripts/qa/audit-alert-noise-baseline.sh
 scripts/qa/audit-analytics-pii.sh
-scripts/qa/audit-atlas-allowlist-monitor.sh
 scripts/qa/audit-auth-access.sh
 scripts/qa/audit-authenticated-sso-canary-wiring.sh
 scripts/qa/build-alert-noise-runtime-sample.sh
