@@ -25,7 +25,6 @@ scripts/infra/backup-db.sh
 scripts/infra/build-credentials-image.sh
 scripts/infra/build-enterprise-mfe-clean.sh
 scripts/infra/check-atlas-allowlist-vps.sh
-scripts/infra/check-pr-handoff-discipline.sh
 scripts/infra/cleanup-stale-branches.sh
 scripts/infra/cloudflare-harden-zone.sh
 scripts/infra/cloudflare-sync.sh

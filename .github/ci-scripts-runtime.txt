@@ -26,6 +26,7 @@ scripts/qa/verify-release-dry-run-contract.sh  # CI_ARTIFACT
 
 # ── Worktree or branch context required ─────────────────────────────────────────────────────
 scripts/infra/check-worktree-freshness.sh  # WORKTREE_CONTEXT
+scripts/infra/check-pr-handoff-discipline.sh  # WORKTREE_CONTEXT (local pre-handoff git discipline guard; run before switching tasks or requesting review)
 scripts/infra/recover-stale-build-tutor-images.sh  # WORKTREE_CONTEXT (manual GitHub Actions recovery for stale build-tutor workflow_dispatch runs)
 scripts/qa/ops-preflight.sh  # WORKTREE_CONTEXT (operator preflight for br+tutor+gitops before combined manual ops)
 
