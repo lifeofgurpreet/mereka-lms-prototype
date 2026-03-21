@@ -31,7 +31,19 @@ spec:
           command: ["python3", "-c"]
           args:
             - |
-              import os, yaml
+              import os, yaml, json as _json
+              lms_root = os.environ.get('LMS_ROOT_URL', 'http://localhost')
+              jwt_secret = os.environ.get('JWT_SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', 'SET-ME-PLEASE'))
+              jwt_jwks = None
+              _priv_jwk = os.environ.get('JWT_PRIVATE_SIGNING_JWK', '')
+              if _priv_jwk:
+                  try:
+                      _priv = _json.loads(_priv_jwk)
+                      _pub = {k: _priv[k] for k in ('kid', 'kty', 'e', 'n') if k in _priv}
+                      _pub['alg'] = 'RS512'
+                      jwt_jwks = _json.dumps({'keys': [_pub]})
+                  except Exception as e:
+                      print(f'Warning: could not derive public JWK: {e}')
               config = {
                   'SECRET_KEY': os.environ['DJANGO_SECRET_KEY'],
                   'ALLOWED_HOSTS': ['*'],
@@ -69,6 +81,21 @@ spec:
                   'LMS_ROOT_URL': os.environ.get('LMS_ROOT_URL', 'http://localhost'),
                   'ENTERPRISE_CATALOG_URL': 'http://enterprise-catalog:8000',
                   'ENTERPRISE_SUBSIDY_URL': 'http://enterprise-subsidy:8000',
+                  'JWT_AUTH': {
+                      'JWT_ISSUER': lms_root + '/oauth2',
+                      'JWT_AUDIENCE': 'openedx',
+                      'JWT_SECRET_KEY': jwt_secret,
+                      'JWT_ALGORITHM': 'HS256',
+                      'JWT_SIGNING_ALGORITHM': 'RS512',
+                      'JWT_PUBLIC_SIGNING_JWK_SET': jwt_jwks if jwt_jwks else None,
+                      'JWT_ISSUERS': [
+                          {
+                              'ISSUER': lms_root + '/oauth2',
+                              'AUDIENCE': 'openedx',
+                              'SECRET_KEY': jwt_secret,
+                          }
+                      ],
+                  },
               }
               with open('/config/enterprise_access.yml', 'w') as f:
                   yaml.dump(config, f, default_flow_style=False)
@@ -113,6 +140,16 @@ spec:
             # Overlays override LMS_ROOT_URL with the environment-specific public URL.
             - name: LMS_ROOT_URL
               value: "http://localhost"
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: JWT_SECRET_KEY_LMS
+            - name: JWT_PRIVATE_SIGNING_JWK
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: JWT_PRIVATE_SIGNING_JWK
           resources:
             requests:
               cpu: 10m
