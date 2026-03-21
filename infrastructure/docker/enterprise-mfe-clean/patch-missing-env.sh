@@ -47,19 +47,22 @@ replace_literal_in_file() {
   file_path="$1"
   search="$2"
   replacement="$3"
-  python3 - "$file_path" "$search" "$replacement" <<'PY'
-from pathlib import Path
-import sys
-
-path = Path(sys.argv[1])
-search = sys.argv[2]
-replacement = sys.argv[3]
-text = path.read_text(encoding="utf-8")
-count = text.count(search)
-if count:
-    path.write_text(text.replace(search, replacement), encoding="utf-8")
-print(count)
-PY
+  # Pure shell implementation (no python3 in base image).
+  # Uses awk index() for LITERAL string matching (not regex) on minified JS.
+  count="$(awk -v s="$search" '{n=0; t=$0; while((p=index(t,s))>0){n++; t=substr(t,p+length(s))}; total+=n} END{print total+0}' "$file_path")"
+  count="${count:-0}"
+  if [ "$count" != "0" ]; then
+    awk -v s="$search" -v r="$replacement" '{
+      out = ""
+      rest = $0
+      while ((p = index(rest, s)) > 0) {
+        out = out substr(rest, 1, p-1) r
+        rest = substr(rest, p + length(s))
+      }
+      print out rest
+    }' "$file_path" > "${file_path}.tmp" && mv "${file_path}.tmp" "$file_path"
+  fi
+  echo "$count"
 }
 
 apply_exact_bundle_patch() {
@@ -194,21 +197,13 @@ for js in "$DIST_DIR"/*.js; do
   [ -f "$js" ] || continue
   [ "$(basename "$js")" = "env.config.js" ] && continue
   [ -w "$js" ] || continue
-  count_before="$(python3 - "$js" <<'PY'
-from pathlib import Path
-import re
-import sys
-
-path = Path(sys.argv[1])
-text = path.read_text(encoding="utf-8")
-pattern = re.compile(r"\b([a-z])\.validUntil&&await")
-updated, count = pattern.subn(r"\1&&\1.validUntil&&await", text)
-if count:
-    path.write_text(updated, encoding="utf-8")
-print(count)
-PY
-)"
-  if [ "${count_before:-0}" != "0" ]; then
+  # Count and patch algolia.validUntil null guard using sed (no python3 in base image).
+  # Use grep -a to force text mode on minified JS files that grep may detect as binary.
+  count_before="$(grep -caE '[a-z]\.validUntil&&await' "$js" 2>/dev/null || echo 0)"
+  count_before="${count_before##*[!0-9]}"  # strip any non-numeric prefix
+  count_before="${count_before:-0}"
+  if [ "$count_before" != "0" ]; then
+    sed -E -i 's/([a-z])\.validUntil&&await/\1\&\&\1.validUntil\&\&await/g' "$js"
     algolia_matches=$((algolia_matches + count_before))
   fi
 done
