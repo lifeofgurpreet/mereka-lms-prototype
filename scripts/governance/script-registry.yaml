@@ -558,6 +558,9 @@ ci_runtime_inventory:
     - script: scripts/infra/check-pr-handoff-discipline.sh
       category: WORKTREE_CONTEXT
       note: local pre-handoff git discipline guard; run before switching tasks or requesting review
+    - script: scripts/infra/cleanup-stale-branches.sh
+      category: WORKTREE_CONTEXT
+      note: local branch/worktree cleanup; start with --dry-run before using --remote
     - script: scripts/infra/recover-stale-build-tutor-images.sh
       category: WORKTREE_CONTEXT
       note: manual GitHub Actions recovery for stale build-tutor workflow_dispatch runs
