@@ -3,19 +3,6 @@
 # and registry/inventory membership. New entries indicate active caller wiring
 # without registration; stale entries are safe to remove.
 
-scripts/branding/build-tokens.sh
-scripts/branding/deploy-logo-fix.sh
-scripts/branding/fix-logo-static-files.sh
-scripts/branding/generate-tokens-from-canonical.sh
-scripts/branding/repair-mfe-authn-branding.sh
-scripts/branding/run-branding-gates.sh
-scripts/branding/setup-mfe-branding.sh
-scripts/branding/sync-brand-assets.sh
-scripts/branding/sync-brand-package.sh
-scripts/branding/sync-tokens-to-json.sh
-scripts/branding/update-token-provenance.sh
-scripts/branding/verify-branding-css.sh
-scripts/branding/verify-branding-health.sh
 scripts/infra/additional-cost-optimizations.sh
 scripts/infra/apply-monitoring-configs.sh
 scripts/infra/apply-multisite-config.sh

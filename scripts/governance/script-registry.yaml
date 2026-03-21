@@ -1284,6 +1284,71 @@ scripts:
     proof_command: "bash scripts/branding/deploy-branded-image.sh --help 2>&1 || true"
     criticality: release-supporting
 
+  - path: scripts/branding/build-tokens.sh
+    owner: platform-team
+    purpose: Build design token SCSS/CSS from canonical JSON source
+    criticality: release-supporting
+
+  - path: scripts/branding/deploy-logo-fix.sh
+    owner: platform-team
+    purpose: Deploy logo fix to live cluster (kubectl patch)
+    criticality: release-supporting
+
+  - path: scripts/branding/fix-logo-static-files.sh
+    owner: platform-team
+    purpose: Repair logo static file paths in live cluster
+    criticality: release-supporting
+
+  - path: scripts/branding/generate-tokens-from-canonical.sh
+    owner: platform-team
+    purpose: Generate design tokens from canonical brand JSON
+    criticality: release-supporting
+
+  - path: scripts/branding/repair-mfe-authn-branding.sh
+    owner: platform-team
+    purpose: Repair MFE authn branding configuration
+    criticality: release-supporting
+
+  - path: scripts/branding/run-branding-gates.sh
+    owner: platform-team
+    purpose: Run all branding verification gates as a batch
+    criticality: release-supporting
+
+  - path: scripts/branding/setup-mfe-branding.sh
+    owner: platform-team
+    purpose: Configure MFE branding for dev mode
+    criticality: release-supporting
+
+  - path: scripts/branding/sync-brand-assets.sh
+    owner: platform-team
+    purpose: Sync brand assets to Tutor themes directory
+    criticality: release-supporting
+
+  - path: scripts/branding/sync-brand-package.sh
+    owner: platform-team
+    purpose: Sync brand package to MFE build context
+    criticality: release-supporting
+
+  - path: scripts/branding/sync-tokens-to-json.sh
+    owner: platform-team
+    purpose: Sync design tokens to JSON output
+    criticality: release-supporting
+
+  - path: scripts/branding/update-token-provenance.sh
+    owner: platform-team
+    purpose: Update token provenance metadata
+    criticality: release-supporting
+
+  - path: scripts/branding/verify-branding-css.sh
+    owner: platform-team
+    purpose: Verify branding CSS compilation and content
+    criticality: release-supporting
+
+  - path: scripts/branding/verify-branding-health.sh
+    owner: platform-team
+    purpose: Verify branding health across LMS/MFE/Studio
+    criticality: release-supporting
+
   - path: scripts/release/release-gate.sh
     owner: platform-team
     purpose: >
