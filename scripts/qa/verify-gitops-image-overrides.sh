@@ -13,21 +13,30 @@ APP_MFE_CADDYFILE="${APP_MFE_CADDYFILE:-$REPO_ROOT/deploy/k8s/base/plugins/mfe/a
 INFRA_PROD_OVERLAY="${INFRA_PROD_OVERLAY:-}"
 CHECK_INFRA="${CHECK_INFRA:-auto}" # auto|1|0
 
+# Auto-detect infra repo prod overlay.
+# Supports BBI_INFRA_ROOT override for any checkout layout.
 if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
-  for candidate in \
-    "${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml" \
-    "${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml" \
-    "${HOME}/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml" \
-    "${HOME}/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"; do
-    if [[ -f "$candidate" ]]; then
-      INFRA_PROD_OVERLAY="$candidate"
-      break
-    fi
-  done
+  _BBI_ROOT="${BBI_INFRA_ROOT:-}"
+  if [[ -z "$_BBI_ROOT" ]]; then
+    for candidate in \
+      "${WORKSPACE_ROOT}/bbi-infrastructure" \
+      "${WORKSPACE_ROOT}/infrastructure/bbi-infrastructure" \
+      "${HOME}/projects/k8s/bbi-infrastructure" \
+      "${HOME}/projects/infrastructure/bbi-infrastructure" \
+      "${HOME}/bbi-infrastructure"; do
+      if [[ -d "$candidate/apps/mereka-lms" ]]; then
+        _BBI_ROOT="$candidate"
+        break
+      fi
+    done
+  fi
+  if [[ -n "$_BBI_ROOT" ]]; then
+    INFRA_PROD_OVERLAY="${_BBI_ROOT}/apps/mereka-lms/overlays/prod/kustomization.yaml"
+  fi
 fi
 
 if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
-  INFRA_PROD_OVERLAY="${WORKSPACE_ROOT}/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"
+  INFRA_PROD_OVERLAY="${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"
 fi
 
 usage() {

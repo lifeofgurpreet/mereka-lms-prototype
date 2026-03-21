@@ -30,17 +30,23 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Auto-detect bbi-infrastructure repo (matches pattern used in verify-gitops-image-overrides.sh)
-BBI_INFRA=""
-for candidate in \
-  "${WORKSPACE_ROOT}/bbi-infrastructure" \
-  "${WORKSPACE_ROOT}/infrastructure" \
-  "${HOME}/projects/k8s/bbi-infrastructure" \
-  "${HOME}/projects/k8s/infrastructure"; do
-  if [[ -d "$candidate" ]]; then
-    BBI_INFRA="$candidate"
-    break
-  fi
-done
+# Auto-detect bbi-infrastructure repo location.
+# Supports any checkout layout: sibling, nested, or custom BBI_INFRA_ROOT override.
+BBI_INFRA="${BBI_INFRA_ROOT:-}"
+if [[ -z "$BBI_INFRA" ]]; then
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure/bbi-infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
+    "${HOME}/projects/infrastructure/bbi-infrastructure" \
+    "${HOME}/bbi-infrastructure"; do
+    # Must contain the mereka-lms app dir to confirm it's the right repo
+    if [[ -d "$candidate/apps/mereka-lms" ]]; then
+      BBI_INFRA="$candidate"
+      break
+    fi
+  done
+fi
 
 PASS=0
 FAIL=0
