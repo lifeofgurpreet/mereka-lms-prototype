@@ -86,7 +86,6 @@ scripts/infra/tutor-config-rollback.sh
 scripts/infra/user-data-export.sh
 scripts/infra/verify-k8s-overrides.sh
 scripts/infra/verify-prometheus-integration.sh
-scripts/infra/verify-tutor-config.sh
 scripts/infra/verify-tutor-patches.sh
 scripts/migrations/bootstrap-courses-from-enrollments.sh
 scripts/migrations/import-production-courses.sh
