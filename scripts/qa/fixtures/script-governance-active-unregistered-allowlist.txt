@@ -50,7 +50,6 @@ scripts/infra/increase-gke-quota.sh
 scripts/infra/kind-load-openedx-image.sh
 scripts/infra/mongodb-atlas-cutover.sh
 scripts/infra/mongodb-to-atlas.sh
-scripts/infra/monitor-atlas-allowlist-vps.sh
 scripts/infra/normalize-mysql-secrets.sh
 scripts/infra/optimize-dev-costs.sh
 scripts/infra/optimize-pod-resources.sh

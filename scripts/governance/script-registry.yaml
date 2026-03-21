@@ -579,6 +579,9 @@ ci_runtime_inventory:
     - script: scripts/infra/check-atlas-allowlist-vps.sh
       category: LIVE_CLUSTER
       note: checks Atlas allowlist against current VPS egress IP; can refresh Atlas profile first
+    - script: scripts/infra/monitor-atlas-allowlist-vps.sh
+      category: LIVE_CLUSTER
+      note: cron-friendly drift monitor; writes status file and optionally sends webhook alert
     - script: scripts/infra/validate-telemetry-connectivity.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-grafana-runtime-readiness.sh
