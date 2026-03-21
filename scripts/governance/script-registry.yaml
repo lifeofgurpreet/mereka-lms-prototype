@@ -582,6 +582,9 @@ ci_runtime_inventory:
     - script: scripts/infra/monitor-atlas-allowlist-vps.sh
       category: LIVE_CLUSTER
       note: cron-friendly drift monitor; writes status file and optionally sends webhook alert
+    - script: scripts/infra/setup-vps-atlas-allowlist-cron.sh
+      category: LIVE_CLUSTER
+      note: installs the VPS cron entry for the Atlas allowlist drift monitor and replaces legacy Atlas cron lines
     - script: scripts/infra/validate-telemetry-connectivity.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-grafana-runtime-readiness.sh

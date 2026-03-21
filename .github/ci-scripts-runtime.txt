@@ -38,6 +38,7 @@ scripts/qa/audit-velero-alert-pipeline.sh  # LIVE_CLUSTER
 scripts/infra/check-atlas-allowlist.sh  # LIVE_CLUSTER
 scripts/infra/check-atlas-allowlist-vps.sh  # LIVE_CLUSTER (checks Atlas allowlist against current VPS egress IP; can refresh Atlas profile first)
 scripts/infra/monitor-atlas-allowlist-vps.sh  # LIVE_CLUSTER (cron-friendly drift monitor; writes status file and optionally sends webhook alert)
+scripts/infra/setup-vps-atlas-allowlist-cron.sh  # LIVE_CLUSTER (installs the VPS cron entry for the Atlas allowlist drift monitor and replaces legacy Atlas cron lines)
 scripts/infra/validate-telemetry-connectivity.sh  # LIVE_CLUSTER
 scripts/qa/verify-grafana-runtime-readiness.sh  # LIVE_CLUSTER
 scripts/qa/verify-enterprise-service-deployment.sh  # LIVE_CLUSTER

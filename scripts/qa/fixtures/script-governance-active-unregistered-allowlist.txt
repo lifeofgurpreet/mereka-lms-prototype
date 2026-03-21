@@ -71,7 +71,6 @@ scripts/infra/setup-github-repo-vars.sh
 scripts/infra/setup-google-oauth.sh
 scripts/infra/setup-k8s-overrides.sh
 scripts/infra/setup-mobile-api.sh
-scripts/infra/setup-vps-atlas-allowlist-cron.sh
 scripts/infra/setup-vps-branding-visual-regression-cron.sh
 scripts/infra/setup-vps-health-cron.sh
 scripts/infra/sync-github-authenticated-sso-canary-from-infisical.sh
