@@ -95,20 +95,51 @@ if _oidc_secret:
 # Forum runs in-process; no separate COMMENTS_SERVICE_URL needed.
 FORUM_SEARCH_BACKEND = "forum.search.meilisearch.MeilisearchBackend"
 FEATURES["ENABLE_DISCUSSION_SERVICE"] = True
+COMMENTS_SERVICE_URL = "http://localhost:8000/forum"
 
-# Forum MongoDB configuration (for platforms still using MongoDB backend).
-# MongoDB Atlas connection is configured via environment variables.
+# Forum MongoDB configuration.
+# Reuses the same Atlas-detection logic as DOC_STORE_CONFIG above.
+# For Atlas hosts (mongodb+srv:// or *.mongodb.net), auto-enables SSL and auth.
+# For in-cluster MongoDB, uses anonymous auth with no SSL.
 FORUM_MONGODB_DATABASE = "cs_comments_service"
+_forum_mongo_host = os.environ.get("FORUM_MONGODB_HOST") or MONGODB_HOST or "mongodb"
+_forum_mongo_host_lower = (_forum_mongo_host or "").lower()
+_forum_mongo_is_atlas = (
+    _forum_mongo_host_lower.startswith("mongodb+srv://")
+    or ".mongodb.net" in _forum_mongo_host_lower
+)
 FORUM_MONGODB_CLIENT_PARAMETERS = {
-    "host": os.environ.get("FORUM_MONGODB_HOST", "mongodb"),
-    "port": int(os.environ.get("FORUM_MONGODB_PORT", "27017")),
-    "username": os.environ.get("FORUM_MONGODB_USERNAME") or None,
-    "password": os.environ.get("FORUM_MONGODB_PASSWORD") or None,
-    "ssl": os.environ.get("FORUM_MONGODB_USE_SSL", "false").lower() == "true",
+    "host": _forum_mongo_host,
 }
-_forum_auth_source = os.environ.get("FORUM_MONGODB_AUTH_SOURCE")
-if _forum_auth_source:
-    FORUM_MONGODB_CLIENT_PARAMETERS["authSource"] = _forum_auth_source
+# SRV URIs resolve port via DNS; only set port for non-SRV connections.
+if not _forum_mongo_host_lower.startswith("mongodb+srv://"):
+    FORUM_MONGODB_CLIENT_PARAMETERS["port"] = int(
+        os.environ.get("FORUM_MONGODB_PORT", "27017")
+    )
+# Atlas requires SSL and auth; derive from env or fall back to modulestore creds.
+if _forum_mongo_is_atlas:
+    FORUM_MONGODB_CLIENT_PARAMETERS["ssl"] = True
+    _forum_username = os.environ.get("FORUM_MONGODB_USERNAME") or _mongodb_username
+    _forum_password = os.environ.get("FORUM_MONGODB_PASSWORD") or _mongodb_password
+    if _forum_username:
+        FORUM_MONGODB_CLIENT_PARAMETERS["username"] = _forum_username
+    if _forum_password:
+        FORUM_MONGODB_CLIENT_PARAMETERS["password"] = _forum_password
+    FORUM_MONGODB_CLIENT_PARAMETERS["authSource"] = os.environ.get(
+        "FORUM_MONGODB_AUTH_SOURCE", "admin"
+    )
+else:
+    _forum_ssl = os.environ.get("FORUM_MONGODB_USE_SSL", "false").lower() == "true"
+    FORUM_MONGODB_CLIENT_PARAMETERS["ssl"] = _forum_ssl
+    _fu = os.environ.get("FORUM_MONGODB_USERNAME") or None
+    _fp = os.environ.get("FORUM_MONGODB_PASSWORD") or None
+    if _fu:
+        FORUM_MONGODB_CLIENT_PARAMETERS["username"] = _fu
+    if _fp:
+        FORUM_MONGODB_CLIENT_PARAMETERS["password"] = _fp
+    _forum_auth_source = os.environ.get("FORUM_MONGODB_AUTH_SOURCE")
+    if _forum_auth_source:
+        FORUM_MONGODB_CLIENT_PARAMETERS["authSource"] = _forum_auth_source
 
 # Meilisearch configuration (replaces Elasticsearch for forum search).
 MEILISEARCH_ENABLED = True
