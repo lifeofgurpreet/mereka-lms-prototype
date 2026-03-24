@@ -1876,3 +1876,675 @@ scripts:
     owner: platform-team
     purpose: Verify Tutor Patches
     criticality: release-supporting
+
+  - path: scripts/qa/analyze-local-data.sh
+    owner: platform-team
+    purpose: Analyze Local Data
+    criticality: release-supporting
+
+  - path: scripts/qa/audit-alert-noise-baseline.sh
+    owner: platform-team
+    purpose: Audit Alert Noise Baseline
+    criticality: release-supporting
+
+  - path: scripts/qa/audit-analytics-pii.sh
+    owner: platform-team
+    purpose: Audit Analytics Pii
+    criticality: release-supporting
+
+  - path: scripts/qa/audit-auth-access.sh
+    owner: platform-team
+    purpose: Audit Auth Access
+    criticality: release-supporting
+
+  - path: scripts/qa/audit-authenticated-sso-canary-wiring.sh
+    owner: platform-team
+    purpose: Audit Authenticated Sso Canary Wiring
+    criticality: release-supporting
+
+  - path: scripts/qa/build-alert-noise-runtime-sample.sh
+    owner: platform-team
+    purpose: Build Alert Noise Runtime Sample
+    criticality: release-supporting
+
+  - path: scripts/qa/build-branding-before-after-report.sh
+    owner: platform-team
+    purpose: Build Branding Before After Report
+    criticality: release-supporting
+
+  - path: scripts/qa/build-dr-evidence-bundle.sh
+    owner: platform-team
+    purpose: Build Dr Evidence Bundle
+    criticality: release-supporting
+
+  - path: scripts/qa/build-observability-coverage-matrix.sh
+    owner: platform-team
+    purpose: Build Observability Coverage Matrix
+    criticality: release-supporting
+
+  - path: scripts/qa/build-observability-parity-delta.sh
+    owner: platform-team
+    purpose: Build Observability Parity Delta
+    criticality: release-supporting
+
+  - path: scripts/qa/build-observability-parity-review.sh
+    owner: platform-team
+    purpose: Build Observability Parity Review
+    criticality: release-supporting
+
+  - path: scripts/qa/build-observability-parity-rollup.sh
+    owner: platform-team
+    purpose: Build Observability Parity Rollup
+    criticality: release-supporting
+
+  - path: scripts/qa/build-runtime-blocker-handoff-bundle.sh
+    owner: platform-team
+    purpose: Build Runtime Blocker Handoff Bundle
+    criticality: release-supporting
+
+  - path: scripts/qa/build-script-governance-review-packet.sh
+    owner: platform-team
+    purpose: Build Script Governance Review Packet
+    criticality: release-supporting
+
+  - path: scripts/qa/build-validator-drift-evidence-bundle.sh
+    owner: platform-team
+    purpose: Build Validator Drift Evidence Bundle
+    criticality: release-supporting
+
+  - path: scripts/qa/build-validator-drift-review-packet.sh
+    owner: platform-team
+    purpose: Build Validator Drift Review Packet
+    criticality: release-supporting
+
+  - path: scripts/qa/capture-branding-screenshots.sh
+    owner: platform-team
+    purpose: Capture Branding Screenshots
+    criticality: release-supporting
+
+  - path: scripts/qa/check-forbidden-overrides.sh
+    owner: platform-team
+    purpose: Check Forbidden Overrides
+    criticality: release-supporting
+
+  - path: scripts/qa/check-parity.sh
+    owner: platform-team
+    purpose: Check Parity
+    criticality: release-supporting
+
+  - path: scripts/qa/clean-python-caches.sh
+    owner: platform-team
+    purpose: Clean Python Caches
+    criticality: release-supporting
+
+  - path: scripts/qa/collect-velero-evidence.sh
+    owner: platform-team
+    purpose: Collect Velero Evidence
+    criticality: release-supporting
+
+  - path: scripts/qa/comprehensive-test.sh
+    owner: platform-team
+    purpose: Comprehensive Test
+    criticality: release-supporting
+
+  - path: scripts/qa/course-data-sanity.sh
+    owner: platform-team
+    purpose: Course Data Sanity
+    criticality: release-supporting
+
+  - path: scripts/qa/diagnose-runtime-theme-drift.sh
+    owner: platform-team
+    purpose: Diagnose Runtime Theme Drift
+    criticality: release-supporting
+
+  - path: scripts/qa/fix-admin-login.sh
+    owner: platform-team
+    purpose: Fix Admin Login
+    criticality: release-supporting
+
+  - path: scripts/qa/fix-parity.sh
+    owner: platform-team
+    purpose: Fix Parity
+    criticality: release-supporting
+
+  - path: scripts/qa/generate-evidence-pack.sh
+    owner: platform-team
+    purpose: Generate Evidence Pack
+    criticality: release-supporting
+
+  - path: scripts/qa/generate-runtime-blocker-infra-prompt.sh
+    owner: platform-team
+    purpose: Generate Runtime Blocker Infra Prompt
+    criticality: release-supporting
+
+  - path: scripts/qa/generate-sla-report.sh
+    owner: platform-team
+    purpose: Generate Sla Report
+    criticality: release-supporting
+
+  - path: scripts/qa/generate-synthetic-libraries.sh
+    owner: platform-team
+    purpose: Generate Synthetic Libraries
+    criticality: release-supporting
+
+  - path: scripts/qa/list-critical-backup-pvcs.sh
+    owner: platform-team
+    purpose: List Critical Backup Pvcs
+    criticality: release-supporting
+
+  - path: scripts/qa/list-openedx-hostnames.sh
+    owner: platform-team
+    purpose: List Openedx Hostnames
+    criticality: release-supporting
+
+  - path: scripts/qa/load-test-libraries.sh
+    owner: platform-team
+    purpose: Load Test Libraries
+    criticality: release-supporting
+
+  - path: scripts/qa/load-test-tenants.sh
+    owner: platform-team
+    purpose: Load Test Tenants
+    criticality: release-supporting
+
+  - path: scripts/qa/ops-confidence.sh
+    owner: platform-team
+    purpose: Ops Confidence
+    criticality: release-supporting
+
+  - path: scripts/qa/print-runtime-blocker-status.sh
+    owner: platform-team
+    purpose: Print Runtime Blocker Status
+    criticality: release-supporting
+
+  - path: scripts/qa/run-a11y-runtime-lane.sh
+    owner: platform-team
+    purpose: Run A11Y Runtime Lane
+    criticality: release-supporting
+
+  - path: scripts/qa/run-adr-gates.sh
+    owner: platform-team
+    purpose: Run Adr Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-agent-pack-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Agent Pack Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-agent-readiness-gates.sh
+    owner: platform-team
+    purpose: Run Agent Readiness Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-branding-evidence-pipeline.sh
+    owner: platform-team
+    purpose: Run Branding Evidence Pipeline
+    criticality: release-supporting
+
+  - path: scripts/qa/run-cross-repo-agent-gates.sh
+    owner: platform-team
+    purpose: Run Cross Repo Agent Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-cross-repo-contract-gates.sh
+    owner: platform-team
+    purpose: Run Cross Repo Contract Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-decision-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Decision Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-execution-proof-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Execution Proof Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-frontend-runtime-blocker-sweep.sh
+    owner: platform-team
+    purpose: Run Frontend Runtime Blocker Sweep
+    criticality: release-supporting
+
+  - path: scripts/qa/run-knowledge-integrity-gates.sh
+    owner: platform-team
+    purpose: Run Knowledge Integrity Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-knowledge-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Knowledge Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-multisite-governance-gates.sh
+    owner: platform-team
+    purpose: Run Multisite Governance Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-observability-first-class.sh
+    owner: platform-team
+    purpose: Run Observability First Class
+    criticality: release-supporting
+
+  - path: scripts/qa/run-operations-gates.sh
+    owner: platform-team
+    purpose: Run Operations Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-phase7-dom-audit-full.sh
+    owner: platform-team
+    purpose: Run Phase7 Dom Audit Full
+    criticality: release-supporting
+
+  - path: scripts/qa/run-phase7-dom-audit.sh
+    owner: platform-team
+    purpose: Run Phase7 Dom Audit
+    criticality: release-supporting
+
+  - path: scripts/qa/run-release-verification-gates.sh
+    owner: platform-team
+    purpose: Run Release Verification Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-review-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Review Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-skill-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Skill Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-spec-integrity-gates.sh
+    owner: platform-team
+    purpose: Run Spec Integrity Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-task-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Task Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-team-handbook-gates.sh
+    owner: platform-team
+    purpose: Run Team Handbook Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/smoke-authn-mfe.sh
+    owner: platform-team
+    purpose: Smoke Authn Mfe
+    criticality: release-supporting
+
+  - path: scripts/qa/smoke-test-analytics.sh
+    owner: platform-team
+    purpose: Smoke Test Analytics
+    criticality: release-supporting
+
+  - path: scripts/qa/smoke-test.sh
+    owner: platform-team
+    purpose: Smoke Test
+    criticality: release-supporting
+
+  - path: scripts/qa/sync-openedx-audit-pr-status.sh
+    owner: platform-team
+    purpose: Sync Openedx Audit Pr Status
+    criticality: release-supporting
+
+  - path: scripts/qa/synthetic-alert-drill.sh
+    owner: platform-team
+    purpose: Synthetic Alert Drill
+    criticality: release-supporting
+
+  - path: scripts/qa/tenant-onboarding-dryrun.sh
+    owner: platform-team
+    purpose: Tenant Onboarding Dryrun
+    criticality: release-supporting
+
+  - path: scripts/qa/tenant-onboarding-evidence.sh
+    owner: platform-team
+    purpose: Tenant Onboarding Evidence
+    criticality: release-supporting
+
+  - path: scripts/qa/test-mfe-oauth-fix.sh
+    owner: platform-team
+    purpose: Test Mfe Oauth Fix
+    criticality: release-supporting
+
+  - path: scripts/qa/test-stripe-webhook-delivery.sh
+    owner: platform-team
+    purpose: Test Stripe Webhook Delivery
+    criticality: release-supporting
+
+  - path: scripts/qa/test-verify-script-basename-overlap.sh
+    owner: platform-team
+    purpose: Test Verify Script Basename Overlap
+    criticality: release-supporting
+
+  - path: scripts/qa/test-verify-verify-script-reachability.sh
+    owner: platform-team
+    purpose: Test Verify Verify Script Reachability
+    criticality: release-supporting
+
+  - path: scripts/qa/validate-multisite-config.sh
+    owner: platform-team
+    purpose: Validate Multisite Config
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-a11y-regression-lane.sh
+    owner: platform-team
+    purpose: Verify A11Y Regression Lane
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-accessibility.sh
+    owner: platform-team
+    purpose: Verify Accessibility
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-alert-routing.sh
+    owner: platform-team
+    purpose: Verify Alert Routing
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-argocd-drift.sh
+    owner: platform-team
+    purpose: Verify Argocd Drift
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-assessment-audit.sh
+    owner: platform-team
+    purpose: Verify Assessment Audit
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-assessment-bulk.sh
+    owner: platform-team
+    purpose: Verify Assessment Bulk
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-atlas-health.sh
+    owner: platform-team
+    purpose: Verify Atlas Health
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-atlas-modulestore-path.sh
+    owner: platform-team
+    purpose: Verify Atlas Modulestore Path
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-auth-hardening.sh
+    owner: platform-team
+    purpose: Verify Auth Hardening
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-auth-sso-enterprise.sh
+    owner: platform-team
+    purpose: Verify Auth Sso Enterprise
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-auth-surfaces.sh
+    owner: platform-team
+    purpose: Verify Auth Surfaces
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-authenticated-smoke-a11y.sh
+    owner: platform-team
+    purpose: Verify Authenticated Smoke A11Y
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-authenticated-sso-canary.sh
+    owner: platform-team
+    purpose: Verify Authenticated Sso Canary
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-cert-manager-readiness.sh
+    owner: platform-team
+    purpose: Verify Cert Manager Readiness
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-cms-oauth2-secret-present.sh
+    owner: platform-team
+    purpose: Verify Cms Oauth2 Secret Present
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-content-libraries-v2-baseline.sh
+    owner: platform-team
+    purpose: Verify Content Libraries V2 Baseline
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-credentials-notes-smoke.sh
+    owner: platform-team
+    purpose: Verify Credentials Notes Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-credentials-readiness.sh
+    owner: platform-team
+    purpose: Verify Credentials Readiness
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-cross-browser-branding-smoke.sh
+    owner: platform-team
+    purpose: Verify Cross Browser Branding Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-documentation-links.sh
+    owner: platform-team
+    purpose: Verify Documentation Links
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-enterprise-mfe-nreum-clean.sh
+    owner: platform-team
+    purpose: Verify Enterprise Mfe Nreum Clean
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-enterprise-readiness-integrity.sh
+    owner: platform-team
+    purpose: Verify Enterprise Readiness Integrity
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-enterprise-runtime-app-wiring.sh
+    owner: platform-team
+    purpose: Verify Enterprise Runtime App Wiring
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-footer-slot-migration.sh
+    owner: platform-team
+    purpose: Verify Footer Slot Migration
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-forum-smoke.sh
+    owner: platform-team
+    purpose: Verify Forum Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-fpf-slot-coverage.sh
+    owner: platform-team
+    purpose: Verify Fpf Slot Coverage
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-frontend-performance-spotcheck.sh
+    owner: platform-team
+    purpose: Verify Frontend Performance Spotcheck
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-gitops-drift.sh
+    owner: platform-team
+    purpose: Verify Gitops Drift
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-image-freshness.sh
+    owner: platform-team
+    purpose: Verify Image Freshness
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-libraries-core.sh
+    owner: platform-team
+    purpose: Verify Libraries Core
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-libraries-foundation.sh
+    owner: platform-team
+    purpose: Verify Libraries Foundation
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-branding.sh
+    owner: platform-team
+    purpose: Verify Mfe Branding
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-config-api.sh
+    owner: platform-team
+    purpose: Verify Mfe Config Api
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-config-contract.sh
+    owner: platform-team
+    purpose: Verify Mfe Config Contract
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-live-dom-audit.sh
+    owner: platform-team
+    purpose: Verify Mfe Live Dom Audit
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-route-contract.sh
+    owner: platform-team
+    purpose: Verify Mfe Route Contract
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mobile-secrets-runtime.sh
+    owner: platform-team
+    purpose: Verify Mobile Secrets Runtime
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-multisite-config.sh
+    owner: platform-team
+    purpose: Verify Multisite Config
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-multisite-ux-consistency.sh
+    owner: platform-team
+    purpose: Verify Multisite Ux Consistency
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mux-alerts.sh
+    owner: platform-team
+    purpose: Verify Mux Alerts
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-npm-start-mfe-smoke.sh
+    owner: platform-team
+    purpose: Verify Npm Start Mfe Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-observability-evidence-identity.sh
+    owner: platform-team
+    purpose: Verify Observability Evidence Identity
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-observability-parity-lane-contract.sh
+    owner: platform-team
+    purpose: Verify Observability Parity Lane Contract
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-observability-runtime.sh
+    owner: platform-team
+    purpose: Verify Observability Runtime
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-ora2-operations.sh
+    owner: platform-team
+    purpose: Verify Ora2 Operations
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-parity-rollup-stability.sh
+    owner: platform-team
+    purpose: Verify Parity Rollup Stability
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-platform-admin-env.sh
+    owner: platform-team
+    purpose: Verify Platform Admin Env
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-post-deploy-smoke.sh
+    owner: platform-team
+    purpose: Verify Post Deploy Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-proctoring-advanced.sh
+    owner: platform-team
+    purpose: Verify Proctoring Advanced
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-rke2-dev-readiness.sh
+    owner: platform-team
+    purpose: Verify Rke2 Dev Readiness
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-runtime-authority-map.sh
+    owner: platform-team
+    purpose: Verify Runtime Authority Map
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-tenant-isolation.sh
+    owner: platform-team
+    purpose: Verify Tenant Isolation
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-tenant-middleware.sh
+    owner: platform-team
+    purpose: Verify Tenant Middleware
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-tenant-offboarding.sh
+    owner: platform-team
+    purpose: Verify Tenant Offboarding
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-video-analytics.sh
+    owner: platform-team
+    purpose: Verify Video Analytics
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-video-observability.sh
+    owner: platform-team
+    purpose: Verify Video Observability
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-video-upload.sh
+    owner: platform-team
+    purpose: Verify Video Upload
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-xqueue-deployment.sh
+    owner: platform-team
+    purpose: Verify Xqueue Deployment
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-xqueue-graders.sh
+    owner: platform-team
+    purpose: Verify Xqueue Graders
+    criticality: release-supporting
+
+  - path: scripts/qa/verify_adr_suite.sh
+    owner: platform-team
+    purpose: Verify Adr Suite
+    criticality: release-supporting
+
+  - path: scripts/qa/visual-regression-auth.sh
+    owner: platform-team
+    purpose: Visual Regression Auth
+    criticality: release-supporting
+
+  - path: scripts/qa/visual-regression-branding.sh
+    owner: platform-team
+    purpose: Visual Regression Branding
+    criticality: release-supporting
+
+  - path: scripts/qa/visual-regression-test.sh
+    owner: platform-team
+    purpose: Visual Regression Test
+    criticality: release-supporting
+
+# 134 scripts registered
