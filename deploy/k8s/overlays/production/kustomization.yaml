@@ -40,20 +40,21 @@ patches:
   - path: patches/remove-legacy-mongodb-service.yaml
   - path: patches/resource-limits.yaml
 
-# Image tags for production (FROZEN — do not update until staging bake)
+# Image tags for production (REFERENCE ONLY — infra repo is authoritative)
+# Last synced from bbi-infrastructure/apps/mereka-lms/overlays/prod/ on 2026-03-24.
 images:
   - name: docker.io/overhangio/openedx
     newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: mereka-brand-hotfix-full-v3
-    digest: sha256:907951ebabff35f1843685c97c2fb0a0e5fa0c286adba54d34156ffee594dad4
+    newTag: e5c0c5081124dbdff0640039e63af2c598ad9479
+    digest: sha256:c08284cac50035feca46f08ced124df106cc3f9e3ae63acfc1a926613edf0e00
   - name: docker.io/overhangio/openedx-mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: 900d3d9d-20260301-142349
-    digest: sha256:6e940c493f8323a12159ee1d052992e909320ead68bf7456390724200fdb58fb
+    newTag: e5c0c5081124dbdff0640039e63af2c598ad9479
+    digest: sha256:e3ab451951cbe123981391047d2f55526c742983c8374e77f9f05bbc0ea89669
   - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: 900d3d9d-20260301-142349
-    digest: sha256:6e940c493f8323a12159ee1d052992e909320ead68bf7456390724200fdb58fb
+    newTag: e5c0c5081124dbdff0640039e63af2c598ad9479
+    digest: sha256:e3ab451951cbe123981391047d2f55526c742983c8374e77f9f05bbc0ea89669
   # Enterprise MFE: NREUM-clean + env placeholder patching (strip-nreum.sh + patch-missing-env.sh)
   # Rebuilt 2026-02-20 after script hardening (ae7b125): env.config.js wired, MISSING_ENV_VAR patched
   # NOTE: base manifests already use ghcr.io names — images transformer must match those.
