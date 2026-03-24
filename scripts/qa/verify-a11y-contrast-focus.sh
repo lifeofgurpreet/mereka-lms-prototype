@@ -40,6 +40,17 @@ MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 EXCEPTION_DOC="$REPO_ROOT/docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md"
 
+# Audit source-owned theme styles only. Generated minified bundles under
+# `mfe/theme/` are build outputs and can create false positives when they pack
+# vendor focus styles and overrides onto a single line.
+find_focus_audit_files() {
+  find "$THEME_DIR" \
+    -type f \
+    \( -name '*.scss' -o -name '*.css' \) \
+    -not -path '*/node_modules/*' \
+    -not -name '*.min.css'
+}
+
 echo -e "${BLUE}=== A11y Contrast + Focus-Visible Gate ===${NC}"
 echo "  Token source: assets/branding/tokens.css"
 echo "  Theme bridge: infrastructure/tutor/themes/mereka/scss/_tokens.scss"
@@ -212,7 +223,7 @@ else
 
   # ── Check 1: outline removal patterns ──────────────────────────────
   # Pattern: outline: none  or  outline: 0  on interactive contexts
-  # We scan all theme SCSS/CSS files.
+  # We scan source-owned theme SCSS/CSS files only.
   OUTLINE_NONE_BARE=0
   OUTLINE_ZERO_BARE=0
 
@@ -228,7 +239,7 @@ else
         fi
       done < <(grep -nE 'outline:\s*(none|0)' "$css_file" 2>/dev/null | cut -d: -f1 || true)
     fi
-  done < <(find "$THEME_DIR" \( -name '*.scss' -o -name '*.css' \) -not -path '*/node_modules/*' 2>/dev/null)
+  done < <(find_focus_audit_files 2>/dev/null)
 
   if [[ "$OUTLINE_NONE_BARE" -eq 0 ]]; then
     do_pass "AC-A11Y-002: No bare outline:none/0 without focus replacement in theme files"
@@ -248,7 +259,7 @@ else
         echo -e "  ${YELLOW}  box-shadow:none inside focus context at${NC} $(basename "$css_file"):${line_num}"
       fi
     done < <(grep -nE 'box-shadow:\s*none' "$css_file" 2>/dev/null | cut -d: -f1 || true)
-  done < <(find "$THEME_DIR" \( -name '*.scss' -o -name '*.css' \) -not -path '*/node_modules/*' 2>/dev/null)
+  done < <(find_focus_audit_files 2>/dev/null)
 
   if [[ "$SHADOW_NONE_ON_FOCUS" -eq 0 ]]; then
     do_pass "AC-A11Y-002: No box-shadow:none inside :focus selector contexts"
@@ -304,8 +315,7 @@ else
   FOCUS_VISIBLE_FILES=()
   while IFS= read -r f; do
     FOCUS_VISIBLE_FILES+=("$f")
-  done < <(grep -rl ':focus-visible' \
-    "$THEME_DIR" --include='*.scss' --include='*.css' 2>/dev/null || true)
+  done < <(find_focus_audit_files 2>/dev/null | xargs -r grep -l ':focus-visible' 2>/dev/null || true)
   FOCUS_VISIBLE_COUNT=${#FOCUS_VISIBLE_FILES[@]}
   if [[ "$FOCUS_VISIBLE_COUNT" -eq 0 ]]; then
     do_warn "AC-A11Y-002: No :focus-visible usage yet — modern keyboard-only focus ring not implemented (Q2 2026 gap)"

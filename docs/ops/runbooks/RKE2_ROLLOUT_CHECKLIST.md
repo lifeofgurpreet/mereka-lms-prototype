@@ -139,11 +139,11 @@ for pod in data['items']:
 
 ### 2.4 Rollout Strategy
 
-- [ ] `single-node-recreate-strategy.yaml` patch applied in rke2-nonprod overlay
-  (single-node cluster cannot do RollingUpdate with minAvailable=1)
-- [ ] Verify patch in overlay:
+- [ ] Base `deploy/k8s/base/apps/caddy/deployment.yaml` uses `strategy.type: Recreate`
+  for the RWO PVC workload
+- [ ] Verify rollout strategy in the base deployment:
   ```bash
-  grep -r 'Recreate\|strategy' deploy/k8s/overlays/rke2-nonprod/
+  grep -n 'type: Recreate' deploy/k8s/base/apps/caddy/deployment.yaml
   ```
 
 ### 2.5 Purchase Gateway (Oscar Replacement)

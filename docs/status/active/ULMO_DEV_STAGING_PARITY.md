@@ -36,44 +36,44 @@ verification scripts, and reference overlays retained in this repo.
 | Item | Status |
 |------|--------|
 | Platform | Tutor v21 / Open edX Ulmo / Indigo theme |
-| LMS | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand-hotfix-full-v3` |
-| MFE | `ghcr.io/biji-biji-initiative/mereka-lms/mfe:1c66529-20260220023917` |
+| LMS | Lane-realized GHCR pin is GitOps-owned in `bbi-infrastructure` |
+| MFE | Lane-realized GHCR pin is GitOps-owned in `bbi-infrastructure` |
 | Enterprise Admin MFE | `…/enterprise-admin-portal:nreum-clean-202602200416` |
 | Enterprise Learner MFE | `…/enterprise-learner-portal:nreum-clean-202602200416` |
 | Secret store | `gcp-secret-manager` ClusterSecretStore (Workload Identity, GCP project `bbi-k8`) |
 | Domain config | All URLs hardcoded to `academyv2.mereka.io` in `lms.env.yml` / `cms.env.yml` |
-| Replica count | LMS×2, lms-worker×2, CMS×1, cms-worker×1; all others scaled to 0 |
-| Cluster | GKE, scaled to 0 (cost saving) |
+| Replica count | Prelaunch cost mode: keep runtime replicas at 0 unless explicitly needed |
+| Cluster | GKE today, planned move to dedicated prod RKE2 cluster in May |
 
 ### rke2-nonprod (`academyv2.mereka.dev`)
 
 | Item | Status |
 |------|--------|
-| Platform | Deploys base images from `deploy/k8s/base/kustomization.yaml` (Ulmo versions `21.0.0-indigo`) |
-| LMS | `overhangio/openedx:21.0.0-indigo` (base, no custom Mereka build) |
-| MFE | `overhangio/openedx-mfe:21.0.0-indigo` (base, no custom Mereka build) |
-| Enterprise MFEs | No image override; inherits base image tags |
-| Secret store | `infisical-secret-store` ClusterSecretStore (patched via `patches/externalsecrets-infisical.yaml`) |
+| Platform | App repo ships Ulmo-era base manifests; final lane realization is GitOps-owned |
+| LMS | Base deployment uses `docker.io/overhangio/openedx:21.0.0-indigo`; base kustomization redirects to GHCR with `pin-required` sentinel |
+| MFE | Base deployment uses `docker.io/overhangio/openedx-mfe:21.0.0-indigo`; reference overlay carries explicit GHCR pins |
+| Enterprise MFEs | Reference overlay carries explicit GHCR tags; live dev/staging parity is infra-owned |
+| Secret store | `infisical-secret-store-dev` ClusterSecretStore (patched via `patches/externalsecrets-infisical.yaml`) |
 | Domain env | `patches/domain-env.yaml` overrides `MEREKA_LMS_DOMAIN`, `LMS_BASE_URL`, `MFE_BASE_URL` for LMS/CMS/workers/discovery/notes |
-| `lms.env.yml` / `cms.env.yml` | NOT patched — still hardcoded to `academyv2.mereka.io` |
-| Image pull | Requires `artifact-registry-key` imagePullSecret (manual prerequisite) |
+| `lms.env.yml` / `cms.env.yml` | rke2-nonprod overlay merges nonprod-specific config files for `.dev` runtime values |
+| Image pull | Requires `ghcr-registry` imagePullSecret (manual prerequisite) |
 | Replica count | 1 per service defined in kustomization; enterprise services set to 1 (images may be absent) |
-| Kustomize version annotation | `app.kubernetes.io/version: 18.2.2` (stale — base never updated) |
+| Kustomize version annotation | `app.kubernetes.io/version: 21.0.0` in base kustomization |
 
 ---
 
 ## Image Tag Inventory
 
-### Base (`deploy/k8s/base/kustomization.yaml`)
+### Base (`deploy/k8s/base/` + `deploy/k8s/base/kustomization.yaml`)
 
-The base layer sets upstream image tags and overrides the main OpenedX image to the
-Mereka-branded build at `mereka-brand-hotfix-full-v3`. Downstream overlays re-pin
-the MFE tag.
+The split base deployment manifests retain upstream Ulmo-era images. The base
+kustomization then redirects the core Open edX images to GHCR with a
+`pin-required` sentinel so every environment overlay must supply a real tag.
 
-| Service | Base image in `deployments.yml` | Override in `base/kustomization.yaml` |
+| Service | Base image in split deployment manifests | Override in `base/kustomization.yaml` |
 |---------|---------------------------------|---------------------------------------|
-| `lms` / `cms` / workers | `docker.io/overhangio/openedx:21.0.0-indigo` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand-hotfix-full-v3` |
-| `mfe` | `docker.io/overhangio/openedx-mfe:21.0.0-indigo` | `ghcr.io/biji-biji-initiative/mereka-lms/mfe:b732a7d-20260210161437` |
+| `lms` / `cms` / workers | `docker.io/overhangio/openedx:21.0.0-indigo` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:pin-required` |
+| `mfe` | `docker.io/overhangio/openedx-mfe:21.0.0-indigo` | `ghcr.io/biji-biji-initiative/mereka-lms/mfe:pin-required` |
 | `discovery` | `docker.io/overhangio/openedx-discovery:21.0.1` | (none) |
 | `ecommerce` | `docker.io/overhangio/openedx-ecommerce:19.0.0` | (none) |
 | `credentials` | `docker.io/overhangio/openedx-credentials:21.0.0` | (none) |
@@ -88,22 +88,22 @@ the MFE tag.
 
 | Service | Production tag |
 |---------|----------------|
-| `openedx` (lms/cms/workers) | `mereka-brand-hotfix-full-v3` (same as base) |
-| `openedx-mfe` | `1c66529-20260220023917` (more recent than base) |
+| `openedx` (lms/cms/workers) | lane-realized GHCR pin in `bbi-infrastructure` |
+| `openedx-mfe` | lane-realized GHCR pin in `bbi-infrastructure` |
 | `enterprise-admin-portal` | `nreum-clean-202602200416` |
 | `enterprise-learner-portal` | `nreum-clean-202602200416` |
 
-### rke2-nonprod overlay gaps
+### rke2-nonprod overlay truth
 
-The `rke2-nonprod` overlay has **no `images:` block**. It inherits whatever the
-base sets. This means:
+The repo-local `rke2-nonprod` overlay is reference-only and no longer the
+authoritative live dev overlay. It does still matter as app-owned intent:
 
-1. The LMS image is the Mereka-branded build (`mereka-brand-hotfix-full-v3`) — correct.
-2. The MFE image is `b732a7d-20260210161437` (base) instead of `1c66529-20260220023917`
-   (production) — **10-day lag**.
-3. Enterprise MFE images (`enterprise-admin-portal`, `enterprise-learner-portal`) are
-   not pinned — they will fall back to whatever is in the enterprise deployment
-   ConfigMap/Deployment, likely upstream defaults — **untested on rke2-nonprod**.
+1. it carries an explicit `images:` block
+2. it pins both canonical and transformed MFE image names to concrete tags
+3. it pins enterprise admin and learner portal GHCR tags explicitly
+
+Final live `dev` / `staging` image parity must be proved from
+`bbi-infrastructure`, not from this reference overlay alone.
 
 ## Enterprise Frontend Truth Boundary
 
@@ -187,17 +187,17 @@ and `.dev` OIDC issuer values for nonprod runtime.
 
 ### Gap 2 (RESOLVED 2026-02-28): MFE image tag parity in rke2-nonprod
 
-**Problem (historical)**: Base kustomization pinned MFE to
-`b732a7d-20260210161437`; production overlay re-pinned to
-`1c66529-20260220023917` (newer). rke2-nonprod previously lacked an explicit MFE
-override and inherited the stale base tag.
+**Problem (historical)**: The repo-local reference overlay previously lacked an
+explicit MFE pin, so it could drift away from the intended nonprod app-owned
+baseline.
 
 **Effect**: rke2-nonprod tests an older MFE build. NREUM-clean and
 `env.config.js` wiring applied in `nreum-clean-202602200416` will not be present in
 the rke2-nonprod MFE.
 
 **Fix implemented**: `deploy/k8s/overlays/rke2-nonprod/kustomization.yaml` now pins
-both canonical and transformed MFE image names to `1c66529-20260220023917`.
+both canonical and transformed MFE image names to a concrete GHCR tag. Final
+live dev/staging parity is still infra-owned.
 
 ---
 
@@ -248,15 +248,15 @@ contract.
 ### Gap 6 (RESOLVED 2026-02-28): Image pull prerequisite enforcement
 
 **Problem**: The rke2-nonprod `kustomization.yaml` documents three manual prerequisites:
-1. `infisical-secret-store` ClusterSecretStore
-2. `artifact-registry-key` Secret
+1. `infisical-secret-store-dev` ClusterSecretStore
+2. `ghcr-registry` Secret
 3. Default ServiceAccount `imagePullSecrets` or per-Deployment override
 
-If `artifact-registry-key` is absent, all pods fail to pull images from GCP Artifact
-Registry with `ImagePullBackOff`.
+If `ghcr-registry` is absent, all pods fail to pull images from GHCR with
+`ImagePullBackOff`.
 
 **Fix implemented**: `scripts/qa/verify-ulmo-parity.sh --online` verifies both
-`infisical-secret-store` and `artifact-registry-key` on the target context/namespace.
+`infisical-secret-store-dev` and `ghcr-registry` on the target context/namespace.
 
 ---
 
@@ -288,8 +288,8 @@ Items to complete before rke2-nonprod is production-equivalent for Ulmo testing.
 
 ### Infrastructure (infrastructure repo)
 
-- [ ] Confirm `infisical-secret-store` ClusterSecretStore is `Valid/Ready` on rke2-nonprod
-- [ ] Confirm `artifact-registry-key` Secret exists in `mereka-lms` namespace
+- [ ] Confirm `infisical-secret-store-dev` ClusterSecretStore is `Valid/Ready` on rke2-nonprod
+- [ ] Confirm `ghcr-registry` Secret exists in `mereka-lms` namespace
 - [ ] Confirm `cert-manager` and `letsencrypt-prod` ClusterIssuer are active
 
 ### mereka-lms repo

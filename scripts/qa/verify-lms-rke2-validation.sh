@@ -91,6 +91,18 @@ RKE2_KUST="$RKE2_OVERLAY/kustomization.yaml"
 LMS_INGRESS="$RKE2_OVERLAY/ingress-openedx-lms.yaml"
 STUDIO_INGRESS="$RKE2_OVERLAY/ingress-openedx-studio.yaml"
 MFE_INGRESS="$RKE2_OVERLAY/ingress-openedx-mfe.yaml"
+LMS_DEPLOYMENT="$BASE_DIR/apps/lms/deployment.yaml"
+CMS_DEPLOYMENT="$BASE_DIR/apps/cms/deployment.yaml"
+CADDY_DEPLOYMENT="$BASE_DIR/apps/caddy/deployment.yaml"
+LMS_SERVICE="$BASE_DIR/apps/lms/service.yaml"
+CMS_SERVICE="$BASE_DIR/apps/cms/service.yaml"
+CADDY_SERVICE="$BASE_DIR/apps/caddy/service.yaml"
+LMS_PRODUCTION_SETTINGS="$BASE_DIR/apps/openedx/settings/lms/production.py"
+TUTOR_MULTISITE_SITES="$REPO_ROOT/infrastructure/tutor/multisite-sites.yml"
+TUTOR_MULTISITE_SITES_DEV="$REPO_ROOT/infrastructure/tutor/multisite-sites.dev.yml"
+TUTOR_MULTISITE_SITES_STAGING="$REPO_ROOT/infrastructure/tutor/multisite-sites.staging.yml"
+TUTOR_MYSQL_PATCH="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/infrastructure.py"
+TUTOR_LMS_SETTINGS_PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/lms_settings.py"
 
 # Nonprod domains
 LMS_DOMAIN="academyv2.mereka.dev"
@@ -116,9 +128,12 @@ run_offline_checks() {
     "$MFE_INGRESS:MFE Ingress manifest"
     "$INFISICAL_PATCH:externalsecrets-infisical.yaml patch"
     "$RKE2_OVERLAY/patches/domain-env.yaml:domain-env.yaml patch"
-    "$RKE2_OVERLAY/patches/single-node-recreate-strategy.yaml:single-node-recreate-strategy.yaml patch"
-    "$BASE_DIR/deployments.yml:base deployments.yml"
-    "$BASE_DIR/services.yml:base services.yml"
+    "$LMS_DEPLOYMENT:base LMS deployment"
+    "$CMS_DEPLOYMENT:base CMS deployment"
+    "$CADDY_DEPLOYMENT:base Caddy deployment"
+    "$LMS_SERVICE:base LMS service"
+    "$CMS_SERVICE:base CMS service"
+    "$CADDY_SERVICE:base Caddy service"
     "$BASE_SECRETS:base external-secrets.yaml"
   )
 
@@ -132,26 +147,46 @@ run_offline_checks() {
     fi
   done
 
-  # Check base deployments contain LMS, CMS, Caddy
-  if [[ -f "$BASE_DIR/deployments.yml" ]]; then
-    for deploy_name in lms cms caddy; do
-      if grep -q "name: ${deploy_name}$" "$BASE_DIR/deployments.yml"; then
-        pass_check "base deployments.yml contains Deployment: $deploy_name"
+  local deployment_checks=(
+    "$LMS_DEPLOYMENT:lms"
+    "$CMS_DEPLOYMENT:cms"
+    "$CADDY_DEPLOYMENT:caddy"
+  )
+  for entry in "${deployment_checks[@]}"; do
+    local file="${entry%%:*}"
+    local deploy_name="${entry##*:}"
+    if [[ -f "$file" ]]; then
+      if grep -q "kind: Deployment" "$file" && grep -q "name: ${deploy_name}$" "$file"; then
+        pass_check "$(basename "$(dirname "$file")")/deployment.yaml defines Deployment: $deploy_name"
       else
-        fail_check "base deployments.yml missing Deployment: $deploy_name"
+        fail_check "$file does not define Deployment: $deploy_name"
       fi
-    done
-  fi
+    fi
+  done
 
-  # Check base services contain expected services
-  if [[ -f "$BASE_DIR/services.yml" ]]; then
-    for svc_name in lms cms caddy; do
-      if grep -q "name: ${svc_name}$" "$BASE_DIR/services.yml"; then
-        pass_check "base services.yml contains Service: $svc_name"
+  local service_checks=(
+    "$LMS_SERVICE:lms"
+    "$CMS_SERVICE:cms"
+    "$CADDY_SERVICE:caddy"
+  )
+  for entry in "${service_checks[@]}"; do
+    local file="${entry%%:*}"
+    local svc_name="${entry##*:}"
+    if [[ -f "$file" ]]; then
+      if grep -q "kind: Service" "$file" && grep -q "name: ${svc_name}$" "$file"; then
+        pass_check "$(basename "$(dirname "$file")")/service.yaml defines Service: $svc_name"
       else
-        fail_check "base services.yml missing Service: $svc_name"
+        fail_check "$file does not define Service: $svc_name"
       fi
-    done
+    fi
+  done
+
+  if [[ -f "$CADDY_DEPLOYMENT" ]]; then
+    if grep -q 'type: Recreate' "$CADDY_DEPLOYMENT"; then
+      pass_check "base Caddy deployment uses Recreate strategy for RWO safety"
+    else
+      fail_check "base Caddy deployment missing Recreate strategy"
+    fi
   fi
 
   echo ""
@@ -161,63 +196,54 @@ run_offline_checks() {
   # -----------------------------------------------------------------------
   echo "--- [2/7] LMS Settings Patches ---"
 
-  local lms_settings
-  lms_settings=$(find "$REPO_ROOT" \
-    -path "*/patches/*production*.py" \
-    -not -path "*/.git/*" \
-    -not -path "*worktrees/*" 2>/dev/null | head -3)
+  if [[ -f "$LMS_PRODUCTION_SETTINGS" ]]; then
+    pass_check "LMS production settings file exists in base"
 
-  if [[ -n "$lms_settings" ]]; then
-    pass_check "LMS production settings patch file(s) found"
-
-    # Check for required settings keys
-    while IFS= read -r settings_file; do
-      [[ -z "$settings_file" ]] && continue
-
-      local required_settings=(
-        "ENABLE_COMPREHENSIVE_THEMING"
-        "SESSION_COOKIE_SECURE"
-        "CSRF_TRUSTED_ORIGINS"
-      )
-      for setting in "${required_settings[@]}"; do
-        if grep -q "$setting" "$settings_file" 2>/dev/null; then
-          pass_check "production.py contains $setting"
-        else
-          skip_check "production.py: $setting not found in $(basename "$settings_file") (may be in overlay)"
-        fi
-      done
-    done <<< "$lms_settings"
+    for setting in "SESSION_COOKIE_SECURE" "CSRF_TRUSTED_ORIGINS"; do
+      if grep -q "$setting" "$LMS_PRODUCTION_SETTINGS" 2>/dev/null; then
+        pass_check "LMS production.py contains $setting"
+      else
+        fail_check "LMS production.py missing $setting"
+      fi
+    done
   else
-    skip_check "LMS production settings patch not found in repo (may be in bbi-infrastructure)"
+    fail_check "LMS production settings file missing: $LMS_PRODUCTION_SETTINGS"
   fi
 
-  # Check apply-patches.sh and its sourced patch scripts for critical configs
-  local apply_patches="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-  local patches_dir="$REPO_ROOT/infrastructure/tutor/patches"
-  if [[ -f "$apply_patches" ]]; then
-    # mysql_native_password lives in mereka_lms.py plugin (ENV_PATCHES mysql-docker-compose)
-    if grep -rq "mysql_native_password\|mysql-native-password" "$apply_patches" "$patches_dir" 2>/dev/null; then
-      pass_check "tutor patches contain mysql_native_password configuration"
-    else
-      fail_check "tutor patches missing mysql_native_password configuration"
+  local theming_sources=(
+    "$TUTOR_MULTISITE_SITES"
+    "$TUTOR_MULTISITE_SITES_DEV"
+    "$TUTOR_MULTISITE_SITES_STAGING"
+  )
+  local theming_found=0
+  local theming_source=""
+  for file in "${theming_sources[@]}"; do
+    if [[ -f "$file" ]] && grep -q "ENABLE_COMPREHENSIVE_THEMING" "$file" 2>/dev/null; then
+      theming_found=1
+      theming_source="$file"
+      break
     fi
-
-    # CSRF_TRUSTED_ORIGINS lives in mereka_lms.py plugin (ENV_PATCHES openedx-lms-production-settings)
-    if grep -rq "CSRF_TRUSTED_ORIGINS\|csrf.origins\|csrf-origins" "$apply_patches" "$patches_dir" 2>/dev/null; then
-      pass_check "tutor patches contain CSRF_TRUSTED_ORIGINS configuration"
-    else
-      fail_check "tutor patches missing CSRF_TRUSTED_ORIGINS configuration"
-    fi
-
-    # ENABLE_COMPREHENSIVE_THEMING lives in multisite config files
-    if grep -rq "ENABLE_COMPREHENSIVE_THEMING" \
-        "$REPO_ROOT/infrastructure/tutor/" 2>/dev/null; then
-      pass_check "tutor config contains ENABLE_COMPREHENSIVE_THEMING"
-    else
-      skip_check "ENABLE_COMPREHENSIVE_THEMING not found in tutor config (may be in bbi-infrastructure overlay)"
-    fi
+  done
+  if [[ "$theming_found" -eq 1 ]]; then
+    pass_check "Tenant branding source contains ENABLE_COMPREHENSIVE_THEMING ($(basename "$theming_source"))"
   else
-    skip_check "infrastructure/tutor/apply-patches.sh not found"
+    fail_check "ENABLE_COMPREHENSIVE_THEMING not found in tenant branding sources"
+  fi
+
+  if [[ -f "$TUTOR_MYSQL_PATCH" ]] && grep -q "default-authentication-plugin=mysql_native_password" "$TUTOR_MYSQL_PATCH" 2>/dev/null; then
+    pass_check "Tutor infrastructure plugin contains mysql_native_password configuration"
+  elif [[ -f "$BASE_DIR/apps/mysql/deployment.yaml" ]] && grep -q -- "--mysql-native-password=ON" "$BASE_DIR/apps/mysql/deployment.yaml" 2>/dev/null; then
+    pass_check "Base MySQL deployment contains mysql_native_password configuration"
+  else
+    fail_check "mysql_native_password configuration not found in Tutor plugin or base MySQL deployment"
+  fi
+
+  if [[ -f "$TUTOR_LMS_SETTINGS_PLUGIN" ]] && grep -q "CSRF_TRUSTED_ORIGINS" "$TUTOR_LMS_SETTINGS_PLUGIN" 2>/dev/null; then
+    pass_check "Tutor LMS settings plugin contains CSRF_TRUSTED_ORIGINS configuration"
+  elif [[ -f "$LMS_PRODUCTION_SETTINGS" ]] && grep -q "CSRF_TRUSTED_ORIGINS" "$LMS_PRODUCTION_SETTINGS" 2>/dev/null; then
+    pass_check "LMS production settings contain CSRF_TRUSTED_ORIGINS configuration"
+  else
+    fail_check "CSRF_TRUSTED_ORIGINS configuration not found in Tutor plugin or LMS production settings"
   fi
 
   echo ""
@@ -326,16 +352,16 @@ run_offline_checks() {
   fi
 
   if [[ -f "$INFISICAL_PATCH" ]]; then
-    # Verify infisical patch uses infisical-secret-store (not gcp-secret-manager)
+    # Verify infisical patch uses infisical-secret-store-dev (not gcp-secret-manager)
     local infisical_refs
     infisical_refs=$(grep -v '^\s*#' "$INFISICAL_PATCH" \
-      | grep -c 'infisical-secret-store' || true)
+      | grep -c 'infisical-secret-store-dev' || true)
     local gcp_refs
     gcp_refs=$(grep -v '^\s*#' "$INFISICAL_PATCH" \
       | grep -c 'gcp-secret-manager' || true)
 
     if [[ "$infisical_refs" -ge 1 && "$gcp_refs" -eq 0 ]]; then
-      pass_check "Infisical patch uses infisical-secret-store (no gcp-secret-manager refs)"
+      pass_check "Infisical patch uses infisical-secret-store-dev (no gcp-secret-manager refs)"
     else
       fail_check "Infisical patch: infisical_refs=$infisical_refs, gcp_refs=$gcp_refs (expected >=1 and 0)"
     fi
@@ -403,8 +429,8 @@ run_offline_checks() {
   fi
 
   # Check LMS deployment has resource block in base
-  if [[ -f "$BASE_DIR/deployments.yml" ]]; then
-    if grep -A 5 "name: lms$" "$BASE_DIR/deployments.yml" 2>/dev/null | grep -q 'resources:\|limits:\|requests:'; then
+  if [[ -f "$LMS_DEPLOYMENT" ]]; then
+    if grep -q 'resources:' "$LMS_DEPLOYMENT" && grep -q 'requests:' "$LMS_DEPLOYMENT" && grep -q 'limits:' "$LMS_DEPLOYMENT"; then
       pass_check "LMS deployment has resource requests/limits in base"
     else
       # May be in overlay patch

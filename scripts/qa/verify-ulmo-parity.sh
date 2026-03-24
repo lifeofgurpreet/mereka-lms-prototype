@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # verify-ulmo-parity.sh
 #
-# Verify that the rke2-nonprod overlay achieves production parity for the
-# Ulmo (Tutor v21 / Open edX Indigo) deployment.
+# Verify that app-owned Ulmo / Indigo contracts remain truthful for dev/staging
+# reference overlays without over-claiming lane-realized GitOps parity.
 #
 # Checks (offline unless --online is passed):
 #   - Base image versions reference Tutor v21 / Ulmo images
@@ -11,8 +11,8 @@
 #   - Design Tokens pipeline files exist (tokens.css + _tokens.scss)
 #   - rke2-nonprod overlay has domain-env patch
 #   - rke2-nonprod overlay has ExternalSecrets infisical patch
-#   - Production overlay pins MFE to a non-nightly tag
-#   - Caddy config handles both mereka.io and mereka.dev hosts
+#   - Reference overlays pin concrete GHCR tags where this repo still carries them
+#   - Caddy config routes environment-specific hosts via overlay-injected env vars
 #   - config.example.yml documents Tutor version
 #
 # Usage:
@@ -28,7 +28,6 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 KUSTOMIZATION_BASE="${REPO_ROOT}/deploy/k8s/base/kustomization.yaml"
 KUSTOMIZATION_PROD="${REPO_ROOT}/deploy/k8s/overlays/production/kustomization.yaml"
 KUSTOMIZATION_RKE2="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/kustomization.yaml"
-DEPLOYMENTS_BASE="${REPO_ROOT}/deploy/k8s/base/deployments.yml"
 MFE_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/mfe-build/Dockerfile"
 CADDYFILE="${REPO_ROOT}/deploy/k8s/base/apps/caddy/Caddyfile"
 MFE_CADDYFILE="${REPO_ROOT}/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
@@ -43,6 +42,10 @@ RKE2_LMS_ENV_YML="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/config/lms.env.y
 RKE2_CMS_ENV_YML="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/config/cms.env.yml"
 CI_WORKFLOW="${REPO_ROOT}/.github/workflows/ci.yml"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
+LMS_DEPLOYMENT="${REPO_ROOT}/deploy/k8s/base/apps/lms/deployment.yaml"
+CMS_DEPLOYMENT="${REPO_ROOT}/deploy/k8s/base/apps/cms/deployment.yaml"
+MFE_DEPLOYMENT="${REPO_ROOT}/deploy/k8s/base/apps/mfe/deployment.yaml"
+DISCOVERY_DEPLOYMENT="${REPO_ROOT}/deploy/k8s/base/apps/discovery/deployment.yaml"
 
 PASS=0
 FAIL=0
@@ -88,13 +91,12 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- Section 1: Base deployment image versions (Ulmo 21.x) ---"
 
-if [[ ! -f "$DEPLOYMENTS_BASE" ]]; then
-  fail "Base deployments.yml not found: $DEPLOYMENTS_BASE"
+if [[ ! -f "$LMS_DEPLOYMENT" || ! -f "$CMS_DEPLOYMENT" || ! -f "$MFE_DEPLOYMENT" || ! -f "$DISCOVERY_DEPLOYMENT" ]]; then
+  fail "One or more split base deployment manifests are missing"
 else
-  # Core platform (lms, cms, workers)
-  OPENEDX_TAG=$(grep "overhangio/openedx:" "$DEPLOYMENTS_BASE" | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+-.*" | head -1 || true)
+  OPENEDX_TAG=$(grep "image: .*overhangio/openedx:" "$LMS_DEPLOYMENT" "$CMS_DEPLOYMENT" 2>/dev/null | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+-.*" | head -1 || true)
   if [[ -z "$OPENEDX_TAG" ]]; then
-    fail "Cannot determine openedx image tag from deployments.yml"
+    fail "Cannot determine openedx image tag from split base deployments"
   elif echo "$OPENEDX_TAG" | grep -qE "^21\."; then
     pass "LMS/CMS base image is Ulmo-era (21.x): $OPENEDX_TAG"
   else
@@ -102,9 +104,9 @@ else
   fi
 
   # MFE
-  MFE_BASE_TAG=$(grep "overhangio/openedx-mfe:" "$DEPLOYMENTS_BASE" | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+-.*" | head -1 || true)
+  MFE_BASE_TAG=$(grep "image: .*overhangio/openedx-mfe:" "$MFE_DEPLOYMENT" 2>/dev/null | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+-.*" | head -1 || true)
   if [[ -z "$MFE_BASE_TAG" ]]; then
-    fail "Cannot determine openedx-mfe image tag from deployments.yml"
+    fail "Cannot determine openedx-mfe image tag from apps/mfe/deployment.yaml"
   elif echo "$MFE_BASE_TAG" | grep -qE "^21\."; then
     pass "MFE base image is Ulmo-era (21.x): $MFE_BASE_TAG"
   else
@@ -112,7 +114,7 @@ else
   fi
 
   # Discovery
-  DISCOVERY_TAG=$(grep "overhangio/openedx-discovery:" "$DEPLOYMENTS_BASE" | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | head -1 || true)
+  DISCOVERY_TAG=$(grep "image: .*overhangio/openedx-discovery:" "$DISCOVERY_DEPLOYMENT" 2>/dev/null | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | head -1 || true)
   if echo "$DISCOVERY_TAG" | grep -qE "^21\."; then
     pass "Discovery base image is Ulmo-era (21.x): $DISCOVERY_TAG"
   else
@@ -224,18 +226,19 @@ else
     fail "rke2-nonprod kustomization does not reference externalsecrets-infisical.yaml"
   fi
 
-  # Single-node recreate strategy patch referenced
-  if grep -q "single-node-recreate-strategy.yaml" "$KUSTOMIZATION_RKE2"; then
-    pass "rke2-nonprod kustomization references single-node-recreate-strategy.yaml"
+  # Caddy rollout strategy truth: Recreate is defined in the base deployment now.
+  if grep -q "type: Recreate" "$REPO_ROOT/deploy/k8s/base/apps/caddy/deployment.yaml" 2>/dev/null; then
+    pass "base Caddy deployment uses Recreate strategy for RWO safety"
   else
-    skip "rke2-nonprod kustomization: single-node-recreate-strategy.yaml not referenced"
+    fail "base Caddy deployment missing Recreate strategy"
   fi
 
-  # Gap 2 check: rke2-nonprod should have images block to match prod MFE tag
+  # Reference overlay should carry explicit non-placeholder pins even though
+  # final lane-realized dev/staging tags are infra-owned in bbi-infrastructure.
   if grep -q "images:" "$KUSTOMIZATION_RKE2"; then
-    pass "rke2-nonprod kustomization has images: block (MFE tag override present)"
+    pass "rke2-nonprod reference overlay has images: block"
   else
-    fail "rke2-nonprod kustomization has no images: block — MFE tag will lag behind production (Gap 2)"
+    fail "rke2-nonprod reference overlay has no images: block"
   fi
 
   PROD_MFE_CANONICAL_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "docker.io/overhangio/openedx-mfe")
@@ -249,16 +252,22 @@ else
     fail "rke2-nonprod must pin both canonical and transformed openedx-mfe image names"
   fi
 
-  if [[ -n "$PROD_MFE_CANONICAL_TAG" && -n "$RKE2_MFE_CANONICAL_TAG" && "$RKE2_MFE_CANONICAL_TAG" == "$PROD_MFE_CANONICAL_TAG" ]]; then
-    pass "rke2-nonprod canonical openedx-mfe tag matches production: $RKE2_MFE_CANONICAL_TAG"
+  if [[ -n "$RKE2_MFE_CANONICAL_TAG" && "$RKE2_MFE_CANONICAL_TAG" != "latest" && "$RKE2_MFE_CANONICAL_TAG" != "pin-required" ]]; then
+    pass "rke2-nonprod canonical openedx-mfe tag is concretely pinned: $RKE2_MFE_CANONICAL_TAG"
   else
-    fail "rke2-nonprod canonical openedx-mfe tag drift (prod=$PROD_MFE_CANONICAL_TAG, rke2=$RKE2_MFE_CANONICAL_TAG)"
+    fail "rke2-nonprod canonical openedx-mfe tag is missing or unpinned: $RKE2_MFE_CANONICAL_TAG"
   fi
 
-  if [[ -n "$PROD_MFE_TRANSFORMED_TAG" && -n "$RKE2_MFE_TRANSFORMED_TAG" && "$RKE2_MFE_TRANSFORMED_TAG" == "$PROD_MFE_TRANSFORMED_TAG" ]]; then
-    pass "rke2-nonprod transformed openedx-mfe tag matches production: $RKE2_MFE_TRANSFORMED_TAG"
+  if [[ -n "$RKE2_MFE_TRANSFORMED_TAG" && "$RKE2_MFE_TRANSFORMED_TAG" != "latest" && "$RKE2_MFE_TRANSFORMED_TAG" != "pin-required" ]]; then
+    pass "rke2-nonprod transformed openedx-mfe tag is concretely pinned: $RKE2_MFE_TRANSFORMED_TAG"
   else
-    fail "rke2-nonprod transformed openedx-mfe tag drift (prod=$PROD_MFE_TRANSFORMED_TAG, rke2=$RKE2_MFE_TRANSFORMED_TAG)"
+    fail "rke2-nonprod transformed openedx-mfe tag is missing or unpinned: $RKE2_MFE_TRANSFORMED_TAG"
+  fi
+
+  if [[ -n "$RKE2_MFE_CANONICAL_TAG" && -n "$RKE2_MFE_TRANSFORMED_TAG" && "$RKE2_MFE_CANONICAL_TAG" == "$RKE2_MFE_TRANSFORMED_TAG" ]]; then
+    pass "rke2-nonprod canonical and transformed openedx-mfe tags are internally aligned"
+  else
+    fail "rke2-nonprod canonical/transformed openedx-mfe tags diverge"
   fi
 
   PROD_ENTERPRISE_ADMIN_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal")
@@ -266,16 +275,20 @@ else
   RKE2_ENTERPRISE_ADMIN_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal")
   RKE2_ENTERPRISE_LEARNER_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal")
 
-  if [[ -n "$RKE2_ENTERPRISE_ADMIN_TAG" && "$RKE2_ENTERPRISE_ADMIN_TAG" == "$PROD_ENTERPRISE_ADMIN_TAG" ]]; then
-    pass "rke2-nonprod enterprise-admin-portal tag matches production: $RKE2_ENTERPRISE_ADMIN_TAG"
+  if [[ -n "$RKE2_ENTERPRISE_ADMIN_TAG" && "$RKE2_ENTERPRISE_ADMIN_TAG" != "latest" && "$RKE2_ENTERPRISE_ADMIN_TAG" != "pin-required" ]]; then
+    pass "rke2-nonprod enterprise-admin-portal tag is concretely pinned: $RKE2_ENTERPRISE_ADMIN_TAG"
   else
-    fail "rke2-nonprod enterprise-admin-portal tag drift (prod=$PROD_ENTERPRISE_ADMIN_TAG, rke2=$RKE2_ENTERPRISE_ADMIN_TAG)"
+    fail "rke2-nonprod enterprise-admin-portal tag is missing or unpinned: $RKE2_ENTERPRISE_ADMIN_TAG"
   fi
 
-  if [[ -n "$RKE2_ENTERPRISE_LEARNER_TAG" && "$RKE2_ENTERPRISE_LEARNER_TAG" == "$PROD_ENTERPRISE_LEARNER_TAG" ]]; then
-    pass "rke2-nonprod enterprise-learner-portal tag matches production: $RKE2_ENTERPRISE_LEARNER_TAG"
+  if [[ -n "$RKE2_ENTERPRISE_LEARNER_TAG" && "$RKE2_ENTERPRISE_LEARNER_TAG" != "latest" && "$RKE2_ENTERPRISE_LEARNER_TAG" != "pin-required" ]]; then
+    pass "rke2-nonprod enterprise-learner-portal tag is concretely pinned: $RKE2_ENTERPRISE_LEARNER_TAG"
   else
-    fail "rke2-nonprod enterprise-learner-portal tag drift (prod=$PROD_ENTERPRISE_LEARNER_TAG, rke2=$RKE2_ENTERPRISE_LEARNER_TAG)"
+    fail "rke2-nonprod enterprise-learner-portal tag is missing or unpinned: $RKE2_ENTERPRISE_LEARNER_TAG"
+  fi
+
+  if [[ -n "$PROD_MFE_CANONICAL_TAG" && -n "$RKE2_MFE_CANONICAL_TAG" && "$RKE2_MFE_CANONICAL_TAG" != "$PROD_MFE_CANONICAL_TAG" ]]; then
+    skip "Production vs rke2 MFE tag drift observed (prod=$PROD_MFE_CANONICAL_TAG, ref-rke2=$RKE2_MFE_CANONICAL_TAG); final lane parity is infra-owned"
   fi
 fi
 
@@ -489,27 +502,33 @@ echo ""
 # ---------------------------------------------------------------------------
 # Section 9: Caddy config hosts for mereka.dev
 # ---------------------------------------------------------------------------
-echo "--- Section 9: Caddy config covers academyv2.mereka.dev ---"
+echo "--- Section 9: Caddy config uses env-driven host routing ---"
 
 if [[ ! -f "$CADDYFILE" ]]; then
   fail "Caddyfile not found: $CADDYFILE"
 else
-  if grep -q "academyv2.mereka.dev" "$CADDYFILE"; then
-    pass "Caddyfile has route for academyv2.mereka.dev"
+  if grep -q 'http://{$LMS_HOST}' "$CADDYFILE"; then
+    pass "Caddyfile routes LMS traffic via \$LMS_HOST"
   else
-    fail "Caddyfile has no route for academyv2.mereka.dev (rke2-nonprod LMS unreachable)"
+    fail "Caddyfile missing env-driven LMS host route"
   fi
 
-  if grep -q "studio.academyv2.mereka.dev" "$CADDYFILE"; then
-    pass "Caddyfile has route for studio.academyv2.mereka.dev"
+  if grep -q 'http://{$STUDIO_HOST}' "$CADDYFILE"; then
+    pass "Caddyfile routes Studio traffic via \$STUDIO_HOST"
   else
-    fail "Caddyfile has no route for studio.academyv2.mereka.dev (Studio unreachable)"
+    fail "Caddyfile missing env-driven Studio host route"
   fi
 
-  if grep -q "apps.academyv2.mereka.dev" "$CADDYFILE"; then
-    pass "Caddyfile has route for apps.academyv2.mereka.dev (MFE)"
+  if grep -q 'http://{$MFE_HOST}' "$CADDYFILE"; then
+    pass "Caddyfile routes MFE traffic via \$MFE_HOST"
   else
-    fail "Caddyfile has no route for apps.academyv2.mereka.dev (MFE unreachable)"
+    fail "Caddyfile missing env-driven MFE host route"
+  fi
+
+  if [[ -f "$DOMAIN_ENV_PATCH" ]] && grep -q 'academyv2.mereka.dev' "$DOMAIN_ENV_PATCH"; then
+    pass "rke2 domain-env patch injects mereka.dev hostnames into Caddy env vars"
+  else
+    fail "rke2 domain-env patch does not inject mereka.dev hostnames"
   fi
 fi
 
@@ -563,10 +582,10 @@ echo "--- Section 12: ExternalSecrets infisical patch ---"
 if [[ ! -f "$INFISICAL_PATCH" ]]; then
   fail "externalsecrets-infisical.yaml not found: $INFISICAL_PATCH"
 else
-  if grep -q "infisical-secret-store" "$INFISICAL_PATCH"; then
-    pass "externalsecrets-infisical.yaml references infisical-secret-store"
+  if grep -q "infisical-secret-store-dev" "$INFISICAL_PATCH"; then
+    pass "externalsecrets-infisical.yaml references infisical-secret-store-dev"
   else
-    fail "externalsecrets-infisical.yaml does not reference infisical-secret-store"
+    fail "externalsecrets-infisical.yaml does not reference infisical-secret-store-dev"
   fi
 fi
 
@@ -588,23 +607,23 @@ if [[ "$MODE" == "online" ]]; then
     pass "kubectl accessible, namespace $NAMESPACE found on context $KUBE_CONTEXT"
 
     # Secret store
-    SECRET_STORE_STATUS=$(kubectl --context="$KUBE_CONTEXT" get clustersecretstore infisical-secret-store \
+    SECRET_STORE_STATUS=$(kubectl --context="$KUBE_CONTEXT" get clustersecretstore infisical-secret-store-dev \
       -o jsonpath='{.status.conditions[0].reason}' 2>/dev/null || echo "")
     if [[ "$SECRET_STORE_STATUS" == "Valid" ]]; then
-      pass "infisical-secret-store ClusterSecretStore is Valid"
+      pass "infisical-secret-store-dev ClusterSecretStore is Valid"
     elif [[ -n "$SECRET_STORE_STATUS" ]]; then
-      fail "infisical-secret-store status: $SECRET_STORE_STATUS (expected Valid)"
+      fail "infisical-secret-store-dev status: $SECRET_STORE_STATUS (expected Valid)"
     else
-      fail "infisical-secret-store ClusterSecretStore not found on rke2-nonprod"
+      fail "infisical-secret-store-dev ClusterSecretStore not found on rke2-nonprod"
     fi
 
     # imagePullSecret
-    PULL_SECRET=$(kubectl --context="$KUBE_CONTEXT" get secret artifact-registry-key \
+    PULL_SECRET=$(kubectl --context="$KUBE_CONTEXT" get secret ghcr-registry \
       -n "$NAMESPACE" -o name 2>/dev/null || echo "")
     if [[ -n "$PULL_SECRET" ]]; then
-      pass "artifact-registry-key secret exists in namespace $NAMESPACE"
+      pass "ghcr-registry secret exists in namespace $NAMESPACE"
     else
-      fail "artifact-registry-key secret not found in namespace $NAMESPACE (pods will fail to pull from GCR)"
+      fail "ghcr-registry secret not found in namespace $NAMESPACE (pods will fail to pull from GHCR)"
     fi
 
     # LMS pod image
@@ -618,7 +637,7 @@ if [[ "$MODE" == "online" ]]; then
     else
       LMS_IMAGE=$(kubectl --context="$KUBE_CONTEXT" get pod "$LMS_POD" -n "$NAMESPACE" \
         -o jsonpath='{.spec.containers[0].image}' 2>/dev/null || true)
-      if echo "$LMS_IMAGE" | grep -q "mereka-lms/openedx/openedx:"; then
+      if echo "$LMS_IMAGE" | grep -q "ghcr.io/biji-biji-initiative/mereka-lms/openedx:"; then
         pass "LMS pod running Mereka-branded image: $LMS_IMAGE"
       else
         fail "LMS pod NOT running Mereka-branded image: $LMS_IMAGE"

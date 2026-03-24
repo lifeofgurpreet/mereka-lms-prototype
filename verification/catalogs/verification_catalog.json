@@ -7703,13 +7703,14 @@
       "env_scope": [
         "dev",
         "nonprod",
-        "prod"
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-lms-rke2-validation.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -16218,13 +16219,14 @@
       "env_scope": [
         "dev",
         "nonprod",
-        "prod"
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ulmo-parity.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
