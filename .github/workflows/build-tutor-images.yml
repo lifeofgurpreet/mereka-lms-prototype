@@ -253,12 +253,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
-          # docker-container driver enables GHA cache (type=gha) which persists
-          # BuildKit layers across runner pod restarts. With mode=max, ALL layers
-          # (pip install, npm ci, webpack) are cached — not just final image layers.
-          # Tutor's --output=type=docker still works (exports via pipe to daemon).
-          # First build: same time + cache upload. Subsequent: ~30-60min vs ~170min.
-          driver: docker-container
+          # OpenEdX still needs a loadable local image for downstream branding,
+          # SBOM, Trivy, and retag/push steps. The docker-container + GHA cache
+          # path regressed on main with "failed to solve: DeadlineExceeded: no
+          # active session" during Tutor's final local-daemon export, so keep
+          # this job on the reliable docker driver until the build no longer
+          # depends on output=type=docker.
+          driver: docker
 
       - name: Fix DinD network MTU
         run: |
@@ -314,8 +315,6 @@ jobs:
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
           if ! timeout 170m tutor images build openedx \
             --no-registry-cache \
-            -d "--cache-from=type=gha" \
-            -d "--cache-to=type=gha,mode=max" \
             -d "--cache-from=type=registry,ref=${CACHE_REF}" \
             -a BUILDKIT_INLINE_CACHE=1 2>&1 | tee var/ci/build-openedx.log; then
             echo "OpenedX image build timed out or failed after timeout guard" >&2

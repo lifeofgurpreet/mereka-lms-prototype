@@ -29,6 +29,8 @@ do_pass() { echo -e "${GREEN}PASS${NC} $1"; PASSED=$((PASSED + 1)); }
 do_fail() { echo -e "${RED}FAIL${NC} $1"; FAILED=$((FAILED + 1)); }
 
 BUILD_WF="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
+OPENEDX_BLOCK="$(awk '/^  build-openedx:/{flag=1} /^  build-mfe:/{flag=0} flag' "$BUILD_WF")"
+MFE_BLOCK="$(awk '/^  build-mfe:/{flag=1} /^  slsa-provenance:/{flag=0} flag' "$BUILD_WF")"
 
 echo "=== Build Invariant Verification ==="
 echo "Workflow: $BUILD_WF"
@@ -52,14 +54,20 @@ else
   fi
 fi
 
-# --- Invariant 2: Buildx driver MUST be docker-container ---
-# The cache-first March 2026 rebuild design relies on BuildKit's docker-container
-# driver so we can use both GHA cache storage and registry-backed cache reuse
-# while still exporting loadable images through Tutor.
-if grep -q "driver: docker-container" "$BUILD_WF"; then
-  do_pass "INV-2: Buildx uses docker-container driver (required for first-class GHA + registry cache)"
+# --- Invariant 2: Each Tutor image job MUST use the right buildx driver ---
+# OpenEdX still depends on a loadable local-daemon image after the build, so it
+# stays on the docker driver until Tutor no longer exports output=type=docker.
+# MFE can use docker-container safely and gets first-class GHA cache reuse there.
+if grep -q "driver: docker$" <<<"$OPENEDX_BLOCK"; then
+  do_pass "INV-2a: OpenEdX build uses docker driver for reliable local image export"
 else
-  do_fail "INV-2: Buildx must use docker-container driver so Tutor builds can use first-class GHA and registry cache"
+  do_fail "INV-2a: OpenEdX build must use docker driver while Tutor still depends on local-daemon export"
+fi
+
+if grep -q "driver: docker-container$" <<<"$MFE_BLOCK"; then
+  do_pass "INV-2b: MFE build uses docker-container driver for first-class GHA cache"
+else
+  do_fail "INV-2b: MFE build must use docker-container driver for first-class GHA cache"
 fi
 
 # --- Invariant 3: Must NOT use deprecated --cache-to-registry flag ---
@@ -70,20 +78,33 @@ else
   do_pass "INV-3: No deprecated --cache-to-registry flag"
 fi
 
-# --- Invariant 4: GHA cache read/write MUST be wired ---
-# This is the primary warm-cache path across ephemeral runner lifecycles.
-if grep -q -- '--cache-from=type=gha' "$BUILD_WF" && grep -q -- '--cache-to=type=gha,mode=max' "$BUILD_WF"; then
-  do_pass "INV-4: GHA cache read/write flags are present"
+# --- Invariant 4: GHA cache read/write MUST stay scoped to the MFE build ---
+# The MFE build benefits from BuildKit's persistent GHA cache path. OpenEdX
+# currently must not use it because the docker-container export path regressed.
+if grep -q -- '--cache-from=type=gha' <<<"$MFE_BLOCK" && grep -q -- '--cache-to=type=gha,mode=max' <<<"$MFE_BLOCK"; then
+  do_pass "INV-4a: MFE build has GHA cache read/write flags"
 else
-  do_fail "INV-4: Missing GHA cache read/write flags (--cache-from=type=gha and --cache-to=type=gha,mode=max)"
+  do_fail "INV-4a: MFE build is missing GHA cache read/write flags"
 fi
 
-# --- Invariant 5: Registry cache reuse MUST be wired ---
-# Inline cache metadata in the last pushed image is our secondary warm path.
-if grep -q -- '--cache-from=type=registry' "$BUILD_WF"; then
-  do_pass "INV-5: Registry cache reuse is wired"
+if grep -q -- '--cache-from=type=gha' <<<"$OPENEDX_BLOCK" || grep -q -- '--cache-to=type=gha,mode=max' <<<"$OPENEDX_BLOCK"; then
+  do_fail "INV-4b: OpenEdX build must not use GHA cache exporters while local-daemon export is required"
 else
-  do_fail "INV-5: Missing registry cache reuse (--cache-from=type=registry)"
+  do_pass "INV-4b: OpenEdX build correctly avoids GHA cache exporters"
+fi
+
+# --- Invariant 5: Registry cache reuse MUST be wired for both image builds ---
+# Inline cache metadata in the last pushed image is the durable secondary warm path.
+if grep -q -- '--cache-from=type=registry' <<<"$OPENEDX_BLOCK"; then
+  do_pass "INV-5a: OpenEdX build has registry cache reuse wired"
+else
+  do_fail "INV-5a: OpenEdX build is missing registry cache reuse"
+fi
+
+if grep -q -- '--cache-from=type=registry' <<<"$MFE_BLOCK"; then
+  do_pass "INV-5b: MFE build has registry cache reuse wired"
+else
+  do_fail "INV-5b: MFE build is missing registry cache reuse"
 fi
 
 # --- Invariant 6: mereka-brand tag MUST be pushed on main ---
