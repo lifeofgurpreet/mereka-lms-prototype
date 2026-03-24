@@ -87,7 +87,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@b01867c40710aa3055c510dd8f7d5f7fa3dc4546
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@a77f05b1ba53665cb507667f83d6f34897e97fa7
     secrets: inherit
     with:
       app_name: mereka-lms/enterprise-admin-portal
@@ -105,7 +105,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@b01867c40710aa3055c510dd8f7d5f7fa3dc4546
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@a77f05b1ba53665cb507667f83d6f34897e97fa7
     secrets: inherit
     with:
       app_name: mereka-lms/enterprise-learner-portal
