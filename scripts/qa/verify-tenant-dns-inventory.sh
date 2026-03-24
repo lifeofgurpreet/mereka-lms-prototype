@@ -2,7 +2,10 @@
 # @covers AC-MTA-001, AC-MTA-002
 # @spec: multi-tenancy-architecture_spec.md
 #
-# Guardrail: keep tenant contract domains visible in Cloudflare inventory files.
+# Guardrail: keep tenant contract domains visible in the repo's Cloudflare
+# inventory snapshots. This is an inventory-visibility check only; canonical
+# domain/routing proof lives in deploy/k8s/tenancy/tenant-registry.yaml plus
+# the runtime-proof entrypoints that consume it.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

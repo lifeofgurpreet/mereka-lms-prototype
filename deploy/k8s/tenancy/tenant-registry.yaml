@@ -4,11 +4,12 @@
 # service participation, auth classification, and proof priority.
 #
 # This file is consumed by:
-#   - scripts/release/tenant-domain-audit.sh
-#   - scripts/release/tenant-routing-smoke.sh
-#   - scripts/release/tenant-auth-smoke.sh
-#   - scripts/release/tenant-mfe-config-proof.sh
-#   - scripts/release/siteconfig-proof.sh
+#   - scripts/tenants/verify-dev-runtime-proof.sh
+#   - scripts/tenants/verify-staging-runtime-proof.sh
+#   - scripts/tenants/verify-staging-tenant-proof.sh
+#   - scripts/tenants/lib/runtime-proof-common.sh
+#   - scripts/qa/verify-rke2-tenant-routes.sh
+#   - scripts/qa/verify-mfe-config-api.sh
 #   - deploy/k8s/contract.json (domain_registry section)
 #
 # Rules:
