@@ -246,21 +246,36 @@ echo ""
 # -----------------------------------------------------------------------
 echo "-- [8] Dockerfile Stripe + DB dependencies --"
 DOCKERFILE="$SVC_DIR/Dockerfile"
+PYPROJECT="$SVC_DIR/pyproject.toml"
 
-check_contains "$DOCKERFILE" "stripe>=" \
-  "Dockerfile installs stripe SDK"
-check_contains "$DOCKERFILE" "asyncpg>=" \
-  "Dockerfile installs asyncpg (async PostgreSQL driver)"
-check_contains "$DOCKERFILE" "psycopg2-binary>=" \
-  "Dockerfile installs psycopg2-binary (Alembic sync migrations)"
-check_contains "$DOCKERFILE" "alembic>=" \
-  "Dockerfile installs Alembic"
-check_contains "$DOCKERFILE" "structlog>=" \
-  "Dockerfile installs structlog"
-check_contains "$DOCKERFILE" "prometheus-client>=" \
-  "Dockerfile installs prometheus-client"
-check_contains "$DOCKERFILE" "redis>=" \
-  "Dockerfile installs redis client"
+check_contains "$PYPROJECT" "stripe>=" \
+  "pyproject declares stripe SDK"
+check_contains "$PYPROJECT" "asyncpg>=" \
+  "pyproject declares asyncpg (async PostgreSQL driver)"
+check_contains "$PYPROJECT" "psycopg2-binary>=" \
+  "pyproject declares psycopg2-binary (Alembic sync migrations)"
+check_contains "$PYPROJECT" "alembic>=" \
+  "pyproject declares Alembic"
+check_contains "$PYPROJECT" "structlog>=" \
+  "pyproject declares structlog"
+check_contains "$PYPROJECT" "prometheus-client>=" \
+  "pyproject declares prometheus-client"
+check_contains "$PYPROJECT" "redis>=" \
+  "pyproject declares redis client"
+check_contains "$PYPROJECT" "slowapi>=" \
+  "pyproject declares slowapi"
+check_contains "$PYPROJECT" "PyJWT>=" \
+  "pyproject declares PyJWT"
+check_contains "$PYPROJECT" "pydantic\\[email\\]>=" \
+  "pyproject declares pydantic email support"
+check_contains "$DOCKERFILE" 'COPY pyproject.toml \./' \
+  "Dockerfile copies pyproject.toml before dependency install"
+check_contains "$DOCKERFILE" 'tomllib' \
+  "Dockerfile derives requirements from pyproject via tomllib"
+check_contains "$DOCKERFILE" '\["project"\]\["dependencies"\]' \
+  "Dockerfile reads project.dependencies from pyproject"
+check_contains "$DOCKERFILE" 'pip install --no-cache-dir -r /tmp/requirements.txt' \
+  "Dockerfile installs runtime deps from generated requirements file"
 check_contains "$DOCKERFILE" "USER gateway" \
   "Dockerfile runs as non-root user (gateway)"
 

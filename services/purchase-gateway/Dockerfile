@@ -10,12 +10,14 @@ WORKDIR /app
 
 # Install dependencies first (layer caching)
 COPY pyproject.toml ./
-RUN pip install --no-cache-dir \
-    'fastapi>=0.115,<1' 'uvicorn[standard]>=0.34,<1' 'gunicorn>=23,<24' \
-    'sqlalchemy[asyncio]>=2.0,<3' 'asyncpg>=0.30,<1' 'psycopg2-binary>=2.9,<3' \
-    'alembic>=1.14,<2' \
-    'pydantic[email]>=2.10,<3' 'pydantic-settings>=2.7,<3' 'stripe>=12,<13' \
-    'redis>=5,<6' 'httpx>=0.28,<1' 'structlog>=24,<25' 'prometheus-client>=0.21,<1'
+RUN python - <<'PY' > /tmp/requirements.txt
+import pathlib
+import tomllib
+
+deps = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["dependencies"]
+print("\n".join(deps))
+PY
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Copy application source
 COPY alembic.ini ./
