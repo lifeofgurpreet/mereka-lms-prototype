@@ -52,7 +52,7 @@ tenants:
       enterprise.enable_portal_code_management: false
       enterprise.enable_integrated_learner_portal_search: true
 
-  - slug: bijibiji
+  - slug: biji-biji
     name: Biji-Biji Academy
     org_code: BIJIBIJI
     active: true
@@ -61,7 +61,7 @@ tenants:
     is_platform_operator: false
 
     site:
-      domain: academy.biji-biji.com
+      domain: biji-biji.academyv2.mereka.dev
 
     enterprise_customer:
       enable_data_sharing_consent: true
@@ -102,7 +102,7 @@ tenants:
     is_platform_operator: false
 
     site:
-      domain: skillourfuture.academy.mereka.io
+      domain: skillourfuture.academyv2.mereka.dev
 
     enterprise_customer:
       enable_data_sharing_consent: true

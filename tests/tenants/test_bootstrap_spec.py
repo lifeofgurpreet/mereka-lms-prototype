@@ -191,7 +191,7 @@ class TestSpecParsing(unittest.TestCase):
         spec = load_spec(path)
         self.assertEqual(len(spec["tenants"]), 3)
         # Partner tenants include MEREKA in org_filter
-        bijibiji = next(t for t in spec["tenants"] if t["slug"] == "bijibiji")
+        bijibiji = next(t for t in spec["tenants"] if t["slug"] == "biji-biji")
         org_filter = bijibiji["catalogs"][0]["catalog_query"]["org_filter"]
         self.assertIn("MEREKA", org_filter)
         self.assertIn("BIJIBIJI", org_filter)
@@ -201,7 +201,7 @@ class TestSpecParsing(unittest.TestCase):
         if not path.exists():
             self.skipTest(f"{path} not found")
         spec = load_spec(path)
-        bijibiji = next(t for t in spec["tenants"] if t["slug"] == "bijibiji")
+        bijibiji = next(t for t in spec["tenants"] if t["slug"] == "biji-biji")
         org_filter = bijibiji["catalogs"][0]["catalog_query"]["org_filter"]
         self.assertNotIn("MEREKA", org_filter)
         self.assertEqual(org_filter, ["BIJIBIJI"])
@@ -211,7 +211,7 @@ class TestSlugValidation(unittest.TestCase):
     """Test slug normalization and conflict handling."""
 
     def test_valid_slugs(self):
-        for slug in ["mereka", "bijibiji", "skillourfuture", "acme-corp", "test_123"]:
+        for slug in ["mereka", "biji-biji", "skillourfuture", "acme-corp", "test_123"]:
             self.assertEqual(validate_slug(slug), [], f"slug '{slug}' should be valid")
 
     def test_empty_slug(self):
@@ -308,7 +308,7 @@ class TestDryRunSimulation(unittest.TestCase):
         spec = load_spec(path)
         results = simulate_dry_run(spec)
 
-        bijibiji = next(r for r in results if r["slug"] == "bijibiji")
+        bijibiji = next(r for r in results if r["slug"] == "biji-biji")
         cq_actions = [a for a in bijibiji["actions"] if "CatalogQuery" in a]
         self.assertTrue(any("MEREKA" in a for a in cq_actions))
 
@@ -319,7 +319,7 @@ class TestDryRunSimulation(unittest.TestCase):
         spec = load_spec(path)
         results = simulate_dry_run(spec)
 
-        bijibiji = next(r for r in results if r["slug"] == "bijibiji")
+        bijibiji = next(r for r in results if r["slug"] == "biji-biji")
         cq_actions = [a for a in bijibiji["actions"] if "CatalogQuery" in a]
         self.assertFalse(any("MEREKA" in a for a in cq_actions))
 
@@ -452,20 +452,20 @@ class TestDryRunOutputStability(unittest.TestCase):
 class TestSlugConflictDecision(unittest.TestCase):
     """Test that slug decision is consistent across all spec artifacts."""
 
-    def test_bijibiji_not_biji_biji_in_all_specs(self):
-        """All production specs must use 'bijibiji' (no hyphen), not 'biji-biji'."""
+    def test_biji_biji_canonical_slug_in_all_specs(self):
+        """All specs must use 'biji-biji' (hyphenated), matching the live EC slug and domain."""
         for path in CONFIG_DIR.glob("dev.enterprise-tenants*.yaml"):
             spec = load_spec(path)
             slugs = [t["slug"] for t in spec["tenants"]]
             self.assertNotIn(
-                "biji-biji",
-                slugs,
-                f"{path.name} uses 'biji-biji' — must use 'bijibiji' per slug decision",
-            )
-            self.assertIn(
                 "bijibiji",
                 slugs,
-                f"{path.name} missing 'bijibiji' tenant",
+                f"{path.name} uses 'bijibiji' — must use 'biji-biji' per slug decision",
+            )
+            self.assertIn(
+                "biji-biji",
+                slugs,
+                f"{path.name} missing 'biji-biji' tenant",
             )
 
     def test_both_slug_forms_are_valid(self):
