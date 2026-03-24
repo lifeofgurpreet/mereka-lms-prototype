@@ -17,6 +17,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 
 # Colors
 RED='\033[0;31m'
@@ -34,6 +35,7 @@ do_warn() { echo -e "${YELLOW}WARN${NC} $1"; WARNED=$((WARNED + 1)); }
 
 MAX_AGE_HOURS="${MAX_AGE_HOURS:-24}"
 REGISTRY="ghcr.io/biji-biji-initiative/mereka-lms"
+BBI_INFRA_ROOT="${BBI_INFRA_ROOT:-${GITOPS_REPO_ROOT:-${INFRA_REPO:-}}}"
 
 echo "=== Image Freshness Verification ==="
 echo "Max age: ${MAX_AGE_HOURS} hours"
@@ -44,6 +46,167 @@ declare -A IMAGES=(
   ["openedx"]="mereka-brand"
   ["mfe"]="mereka-brand"
 )
+
+resolve_bbi_infra_root() {
+  if [[ -n "$BBI_INFRA_ROOT" && -d "$BBI_INFRA_ROOT" ]]; then
+    printf '%s\n' "$BBI_INFRA_ROOT"
+    return 0
+  fi
+
+  local candidate=""
+  for candidate in \
+    "${WORKSPACE_ROOT}/bbi-infrastructure" \
+    "${WORKSPACE_ROOT}/infrastructure/bbi-infrastructure" \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
+    "${HOME}/projects/infrastructure/bbi-infrastructure" \
+    "${HOME}/bbi-infrastructure"; do
+    if [[ -d "$candidate/apps/mereka-lms" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+extract_kustomize_new_tag() {
+  local kustomization="$1"
+  local image_name="$2"
+  python3 - "$kustomization" "$image_name" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+image_name = sys.argv[2]
+
+current_name = None
+found = False
+new_tag = ""
+
+for raw in path.read_text(encoding="utf-8").splitlines():
+    line = raw.rstrip()
+    name_match = re.match(r"^\s*-\s*name:\s*(\S+)\s*$", line)
+    if name_match:
+        if found:
+            break
+        current_name = name_match.group(1)
+        found = current_name == image_name
+        continue
+    if found:
+        tag_match = re.match(r"^\s*newTag:\s*(\S+)\s*$", line)
+        if tag_match:
+            new_tag = tag_match.group(1)
+            break
+
+if not found:
+    sys.exit(1)
+
+print(new_tag)
+PY
+}
+
+check_enterprise_dev_promotion_freshness() {
+  echo "=== Section 2: Enterprise Dev Promotion Freshness ==="
+  echo
+
+  if ! command -v gh &>/dev/null; then
+    do_warn "enterprise portal dev pin freshness — gh CLI unavailable"
+    echo
+    return
+  fi
+
+  local infra_root=""
+  if ! infra_root="$(resolve_bbi_infra_root)"; then
+    do_warn "enterprise portal dev pin freshness — bbi-infrastructure checkout not found (set BBI_INFRA_ROOT)"
+    echo
+    return
+  fi
+
+  local dev_overlay="${infra_root}/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml"
+  local overlay_source="${dev_overlay}"
+  local overlay_cleanup=""
+  if [[ ! -f "$dev_overlay" ]]; then
+    do_warn "enterprise portal dev pin freshness — missing dev overlay: ${dev_overlay}"
+    echo
+    return
+  fi
+
+  if git -C "$infra_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git -C "$infra_root" fetch --quiet origin main >/dev/null 2>&1 || true
+    if git -C "$infra_root" rev-parse --verify origin/main >/dev/null 2>&1; then
+      overlay_source="$(mktemp)"
+      overlay_cleanup="$overlay_source"
+      if ! git -C "$infra_root" show origin/main:apps/mereka-lms/overlays/profiles/dev/kustomization.yaml >"$overlay_source" 2>/dev/null; then
+        rm -f "$overlay_source"
+        overlay_source="$dev_overlay"
+        overlay_cleanup=""
+        do_warn "enterprise portal dev pin freshness — failed to read origin/main overlay, falling back to local checkout"
+      fi
+    fi
+  fi
+
+  local latest_sha=""
+  local latest_url=""
+  latest_sha="$(gh run list \
+    --repo Biji-Biji-Initiative/mereka-lms \
+    --workflow build-enterprise-mfe.yml \
+    --branch main \
+    --status completed \
+    --limit 10 \
+    --json conclusion,headSha \
+    --jq '[.[] | select(.conclusion=="success")][0].headSha // empty' \
+    2>/dev/null || true)"
+  latest_url="$(gh run list \
+    --repo Biji-Biji-Initiative/mereka-lms \
+    --workflow build-enterprise-mfe.yml \
+    --branch main \
+    --status completed \
+    --limit 10 \
+    --json conclusion,url \
+    --jq '[.[] | select(.conclusion=="success")][0].url // empty' \
+    2>/dev/null || true)"
+
+  if [[ -z "$latest_sha" ]]; then
+    do_warn "enterprise portal dev pin freshness — could not determine latest successful main enterprise build"
+    echo
+    return
+  fi
+
+  local admin_tag=""
+  local learner_tag=""
+  if ! admin_tag="$(extract_kustomize_new_tag "$overlay_source" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal" 2>/dev/null)"; then
+    do_fail "enterprise admin dev tag missing from ${overlay_source}"
+    [[ -n "$overlay_cleanup" ]] && rm -f "$overlay_cleanup"
+    echo
+    return
+  fi
+  if ! learner_tag="$(extract_kustomize_new_tag "$overlay_source" "ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal" 2>/dev/null)"; then
+    do_fail "enterprise learner dev tag missing from ${overlay_source}"
+    [[ -n "$overlay_cleanup" ]] && rm -f "$overlay_cleanup"
+    echo
+    return
+  fi
+
+  if [[ "$admin_tag" == "${latest_sha}-"* ]]; then
+    do_pass "enterprise-admin-portal dev tag tracks latest successful main enterprise build (${latest_sha})"
+  else
+    do_fail "enterprise-admin-portal dev tag is stale (${admin_tag}); expected prefix ${latest_sha}-"
+    [[ -n "$latest_url" ]] && echo "       Latest successful build: ${latest_url}"
+    echo "       Overlay: ${overlay_source}"
+  fi
+
+  if [[ "$learner_tag" == "${latest_sha}-"* ]]; then
+    do_pass "enterprise-learner-portal dev tag tracks latest successful main enterprise build (${latest_sha})"
+  else
+    do_fail "enterprise-learner-portal dev tag is stale (${learner_tag}); expected prefix ${latest_sha}-"
+    [[ -n "$latest_url" ]] && echo "       Latest successful build: ${latest_url}"
+    echo "       Overlay: ${overlay_source}"
+  fi
+
+  [[ -n "$overlay_cleanup" ]] && rm -f "$overlay_cleanup"
+  echo
+}
 
 check_image_freshness() {
   local image="$1"
@@ -122,8 +285,11 @@ done
 
 echo
 
-# --- Section 2: Recent build health ---
-echo "=== Section 2: Recent Build Health ==="
+# --- Section 2: Enterprise dev promotion freshness ---
+check_enterprise_dev_promotion_freshness
+
+# --- Section 3: Recent build health ---
+echo "=== Section 3: Recent Build Health ==="
 echo
 
 # Check if the last N builds succeeded
@@ -160,8 +326,8 @@ fi
 
 echo
 
-# --- Section 3: Build workflow file sanity ---
-echo "=== Section 3: Build Workflow Sanity ==="
+# --- Section 4: Build workflow file sanity ---
+echo "=== Section 4: Build Workflow Sanity ==="
 echo
 
 BUILD_WF="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
@@ -208,7 +374,7 @@ echo
 if [[ $FAILED -gt 0 ]]; then
   echo "Image freshness issues detected."
   echo "Stale images mean academyv2.mereka.dev runs unbranded Open edX."
-  echo "Fix: investigate build-tutor-images.yml failures and re-trigger."
+  echo "Fix: investigate broken build lanes or stale GitOps promotion paths and re-trigger."
   exit 1
 fi
 

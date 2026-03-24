@@ -208,9 +208,18 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
+      - name: Checkout bbi-infrastructure
+        if: ${{ secrets.GITOPS_PAT != '' }}
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          repository: Biji-Biji-Initiative/bbi-infrastructure
+          path: bbi-infrastructure
+          token: ${{ secrets.GITOPS_PAT }}
+
       - name: Check GHCR image freshness
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BBI_INFRA_ROOT: ${{ github.workspace }}/bbi-infrastructure
         run: |
           MAX_AGE_HOURS=24 ./scripts/qa/verify-image-freshness.sh
 
