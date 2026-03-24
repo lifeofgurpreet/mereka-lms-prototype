@@ -377,6 +377,9 @@ MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.merek
 # When empty or unset, Segment includes are skipped in footer template.
 SEGMENT_KEY = os.environ.get("MEREKA_SEGMENT_KEY", "")
 
+# Mobile API — enables /api/mobile/v1/ and /api/mobile/v3/ endpoints
+_safe_add_app('openedx_mobile_api')
+
 # Multi-Tenancy Integration (Tenancy Epic Phase 1)
 _safe_add_app('mereka_tenancy')
 
