@@ -47,7 +47,7 @@ Use for Docker image builds and Playwright E2E tests that require browser downlo
 benefit from the persistent BuildKit layer cache and npm/Playwright browser cache across runs,
 dropping image build times from 30+ min to ~5 min on warm cache.
 
-### Class C — GitHub-Hosted Linux (`ubuntu-*`) — FORBIDDEN
+### Class C — GitHub-Hosted Linux (`ubuntu-*`) — TEMPORARY EXCEPTIONS ONLY
 
 | Property | Value |
 |----------|-------|
@@ -57,8 +57,9 @@ dropping image build times from 30+ min to ~5 min on warm cache.
 | Cluster access | No (cannot reach rke2-nonprod) |
 | Cost | Per-minute billing |
 
-**FORBIDDEN**: GitHub-hosted Linux runners are not allowed in this repository. All Linux
-jobs MUST run on ARC runners (Class A or B). If ARC is unavailable, jobs fail by design.
+**Default rule**: GitHub-hosted Linux runners are not allowed in this repository. All Linux
+jobs MUST run on ARC runners (Class A or B) unless the policy document and verifier allowlist
+carry an explicit temporary exception with a tracked issue.
 
 ### Class D — GitHub-Hosted macOS (`macos-14`)
 
@@ -89,7 +90,8 @@ is determined by the called workflow. This applies to `build-enterprise-mfe.yml`
 | YAML / Markdown / shell syntax checks | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | Unit and integration tests (Python) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | Tutor config tests (offline rendering) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
-| CodeQL / Scorecard / Dependency Review | A — ARC lightweight | Security tooling is executed on ARC with least-privilege `GITHUB_TOKEN` |
+| CodeQL | C — GitHub-hosted Linux (temporary exception) | ARC runner bundle download is currently too slow for reliable completion; tracked in #1016 |
+| Scorecard / Dependency Review | A — ARC lightweight | Security tooling remains reliable on ARC with least-privilege `GITHUB_TOKEN` |
 | Release evidence assembly (offline) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | iOS / macOS builds | D — macOS | Apple platform requirement |
 | Reusable workflow call | E — no runs-on | Delegated to callee |
@@ -115,13 +117,14 @@ runs-on: mereka-k8s-heavy-builders  # Class B — Docker builds, Playwright
 
 ---
 
-## Current Audit — All Workflows (updated 2026-03-06)
+## Current Audit — All Workflows (updated 2026-03-24)
 
-All Linux workflows are migrated to ARC self-hosted runners. No GitHub-hosted Linux fallback expressions remain.
+All Linux workflows are ARC-first. `codeql.yml` is the only current GitHub-hosted Linux exception,
+because live ARC runs stall during CodeQL bundle initialization; see #1016.
 
 Legend:
 - `CONFORM` — uses correct ARC runner label
-- `EXCEPTION` — GitHub-hosted macOS, permitted only for Apple platform workflows
+- `EXCEPTION` — permitted hosted-runner exception with tracked rationale
 - `REUSABLE` — job delegates to reusable workflow (no `runs-on` set here)
 
 | Workflow file | Job(s) | `runs-on` | Policy class | Status |
@@ -139,7 +142,7 @@ Legend:
 | `certificate-branding.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `ci.yml` | all (5 jobs) | `mereka-k8s-runners` | A | CONFORM |
 | `cloud-sql-backup.yml` | all | `mereka-k8s-runners` | A | CONFORM |
-| `codeql.yml` | Analyze | `mereka-k8s-runners` | A | CONFORM |
+| `codeql.yml` | Analyze | `ubuntu-24.04` | C | EXCEPTION (#1016) |
 | `cross-browser-branding-smoke.yml` | all | `mereka-k8s-heavy-builders` | B | CONFORM |
 | `daily-infrastructure-audit.yml` | all (4 jobs) | `mereka-k8s-runners` | A | CONFORM |
 | `dependency-review.yml` | all | `mereka-k8s-runners` | A | CONFORM |
@@ -192,6 +195,7 @@ Legend:
 
 | Workflow | Exception | Rationale |
 |----------|-----------|-----------|
+| `codeql.yml` | GitHub-hosted (`ubuntu-24.04`) | Temporary exception while ARC CodeQL bundle initialization is too slow to complete reliably; tracked in #1016 |
 | `build-ios-app.yml` | GitHub-hosted (`macos-latest`) | Apple platform — no ARC macOS runners available |
 | `ios-testflight.yml` | GitHub-hosted (`macos-14`) | Apple platform — no ARC macOS runners available |
 
@@ -203,7 +207,7 @@ When adding a new workflow:
 
 1. Set `runs-on: mereka-k8s-runners` (Class A) by default
 2. Use `runs-on: mereka-k8s-heavy-builders` (Class B) only for Docker builds or Playwright E2E
-3. **NEVER** use `ubuntu-*` or `windows-*` runners
+3. Do not use `ubuntu-*` or `windows-*` runners unless the workflow is explicitly allowlisted as a temporary policy exception with a tracked issue
 4. Use `macos-*` only for Apple platform workflows (`build-ios-app.yml`, `ios-testflight.yml`)
 5. Run `scripts/qa/verify-ci-runner-policy.sh` to confirm compliance
 6. Update the audit table in this document
@@ -217,8 +221,8 @@ When adding a new workflow:
 1. Parses every `.github/workflows/*.yml` file structurally via `yq` (job-level `runs-on`)
 2. Fails if a non-reusable job omits `runs-on`
 3. Fails on expression-based `runs-on` values (including deprecated `USE_SELF_HOSTED_RUNNERS` fallbacks)
-4. Enforces allowed labels only: `mereka-k8s-runners`, allowlisted `mereka-k8s-heavy-builders`, and macOS exceptions
-5. Fails on GitHub-hosted Linux labels (`ubuntu-*`) and any unknown runner labels
+4. Enforces allowed labels only: `mereka-k8s-runners`, allowlisted `mereka-k8s-heavy-builders`, and documented hosted-runner exceptions
+5. Fails on non-allowlisted GitHub-hosted Linux labels (`ubuntu-*`) and any unknown runner labels
 
 The script runs as part of the `static-validation` job in `ci.yml` through the generated
 `.github/ci-scripts-static.txt` derivative. The authoritative registration lives in

@@ -29,6 +29,17 @@ jobs:
       - run: echo ok
 YAML
 
+cat > "$tmpdir/.github/workflows/codeql.yml" <<'YAML'
+name: CodeQL
+on: [push]
+jobs:
+  analyze:
+    # ci:allow-github-hosted -- tracked in #1016
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo codeql
+YAML
+
 cd "$tmpdir"
 
 if ./scripts/qa/verify-ci-runner-policy.sh >/tmp/test-runner-policy-pass.log 2>&1; then

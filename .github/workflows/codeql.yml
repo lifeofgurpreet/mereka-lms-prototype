@@ -42,7 +42,10 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: mereka-k8s-runners
+    # ci:allow-github-hosted -- CodeQL bundle init on ARC runners is too slow to
+    # complete reliably today; tracked in #1016 until the self-hosted bundle path
+    # is restored.
+    runs-on: ubuntu-24.04
     permissions:
       security-events: write
       contents: read

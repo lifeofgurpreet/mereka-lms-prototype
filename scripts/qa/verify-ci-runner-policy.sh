@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @covers AC-CI-014
 # @spec: ci-cd-pipeline_spec.md
-# verify-ci-runner-policy.sh — enforce ARC-first CI runner policy
+# verify-ci-runner-policy.sh — enforce ARC-first CI runner policy with explicit exceptions
 set -euo pipefail
 
 WORKFLOWS_DIR=".github/workflows"
@@ -11,6 +11,11 @@ POLICY_DOC="docs/policies/operations/CI_RUNNER_POLICY.md"
 MACOS_HOSTED_EXCEPTIONS=(
   "build-ios-app.yml"
   "ios-testflight.yml"
+)
+
+# Workflows permitted to use GitHub-hosted Linux runners (temporary Class C exceptions)
+LINUX_HOSTED_EXCEPTIONS=(
+  "codeql.yml"
 )
 
 # Workflows permitted to use mereka-k8s-heavy-builders (Class B)
@@ -75,7 +80,11 @@ validate_runner_label() {
   fi
 
   if [[ "$label" == *"ubuntu-"* ]]; then
-    error "$wf_name:$job_name uses GitHub-hosted Linux runner '$label'"
+    if [[ "$label" == "ubuntu-24.04" ]] && is_in_list "$wf_name" "${LINUX_HOSTED_EXCEPTIONS[@]}"; then
+      pass
+    else
+      error "$wf_name:$job_name uses GitHub-hosted Linux runner '$label' outside allowlist"
+    fi
     return
   fi
 
@@ -121,7 +130,7 @@ if [[ ! -d "$WORKFLOWS_DIR" ]]; then
   exit 1
 fi
 
-echo "=== CI Runner Policy Verification (ARC-first, strict) ==="
+echo "=== CI Runner Policy Verification (ARC-first, allowlisted exceptions only) ==="
 echo "Policy: $POLICY_DOC"
 echo ""
 
