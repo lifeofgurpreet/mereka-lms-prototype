@@ -116,9 +116,8 @@ check_registry_path() {
   # expected and only checked for registry path correctness, not tag immutability.
   local prod_files=("$PROD_KUSTOMIZATION")
   local base_files=("$BASE_KUSTOMIZATION")
-  # Registries to validate: GHCR (primary) and GCP Artifact Registry (enterprise)
+  # Registries to validate: GHCR only.
   local ghcr_registry="ghcr.io/biji-biji-initiative/mereka-lms/"
-  local gcp_registry="asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
   # Strict immutable release tags: YYYYMMDD-<descriptor>-<sha> or <sha>-YYYYMMDDHHMMSS
   local tag_pattern='^[0-9]{8}-[a-z0-9-]+-[a-f0-9]{7,64}$'
 
@@ -126,7 +125,7 @@ check_registry_path() {
   local checked=0
 
   local report
-  report="$(python3 - "$ghcr_registry" "$gcp_registry" "$tag_pattern" "$RELAXED_MODE" "${prod_files[@]}" "---BASE---" "${base_files[@]}" <<'PY'
+  report="$(python3 - "$ghcr_registry" "$tag_pattern" "$RELAXED_MODE" "${prod_files[@]}" "---BASE---" "${base_files[@]}" <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -138,10 +137,9 @@ except Exception:
     sys.exit(2)
 
 ghcr_registry = sys.argv[1]
-gcp_registry = sys.argv[2]
-tag_pattern = re.compile(sys.argv[3])
-relaxed_mode = sys.argv[4] == "1"
-args = sys.argv[5:]
+tag_pattern = re.compile(sys.argv[2])
+relaxed_mode = sys.argv[3] == "1"
+args = sys.argv[4:]
 
 # Split args into prod_files and base_files on the sentinel "---BASE---"
 sentinel = "---BASE---"
@@ -201,15 +199,9 @@ def check_file(path, strict_immutable):
                     print(f"PASS\t{new_name}:{tag} (mutable tag — acceptable in base/relaxed context)")
             else:
                 print(f"FAIL\t{new_name}:{tag} (unrecognised tag format for GHCR image)")
-        # Check GCP enterprise images
-        elif new_name.startswith(gcp_registry):
+        elif "docker.pkg.dev" in new_name:
             checked += 1
-            if digest:
-                print(f"PASS\t{new_name}:{tag}@{digest[:16]}... (digest pinned)")
-            elif enterprise_tag_pattern.match(tag) or tag_pattern.match(tag):
-                print(f"PASS\t{new_name}:{tag} (valid enterprise tag)")
-            else:
-                print(f"FAIL\t{new_name}:{tag} (invalid enterprise tag format)")
+            print(f"FAIL\t{new_name}:{tag} (legacy GAR registry ref found; GHCR is required)")
 
 for path in prod_files:
     check_file(path, strict_immutable=True)

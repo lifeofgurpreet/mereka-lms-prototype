@@ -370,15 +370,15 @@ run_offline_checks() {
       skip_check "rke2-nonprod overlay: no newTag entries in kustomization.yaml (using base tags)"
     fi
 
-    # Verify images reference GCP Artifact Registry
-    if grep -q 'docker.pkg.dev' "$RKE2_KUST"; then
-      pass_check "rke2-nonprod overlay references GCP Artifact Registry images"
+    # Verify images reference GHCR
+    if grep -q 'ghcr.io/biji-biji-initiative/mereka-lms' "$RKE2_KUST"; then
+      pass_check "rke2-nonprod overlay references GHCR images"
     else
       # May inherit from base
-      if [[ -f "$BASE_DIR/kustomization.yaml" ]] && grep -q 'docker.pkg.dev' "$BASE_DIR/kustomization.yaml"; then
-        pass_check "GCP Artifact Registry images defined in base (inherited by rke2-nonprod)"
+      if [[ -f "$BASE_DIR/kustomization.yaml" ]] && grep -q 'ghcr.io/biji-biji-initiative/mereka-lms' "$BASE_DIR/kustomization.yaml"; then
+        pass_check "GHCR images defined in base (inherited by rke2-nonprod)"
       else
-        skip_check "GCP Artifact Registry image refs not found in overlay or base"
+        skip_check "GHCR image refs not found in overlay or base"
       fi
     fi
   fi

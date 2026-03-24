@@ -269,26 +269,27 @@ echo ""
 
 # -----------------------------------------------------------------------
 # BLOCKER 3: Missing imagePullSecret on Default ServiceAccount
-# Images from asia-southeast1-docker.pkg.dev require credential secret
+# GHCR images require the shared ghcr-registry pull secret on non-GKE clusters.
 # -----------------------------------------------------------------------
-echo "B3: ImagePullSecret for GCP Artifact Registry"
+echo "B3: ImagePullSecret for GHCR"
 
-# Check 9: GCP AR images referenced somewhere in overlay chain (base or overlay)
-GAR_IN_OVERLAY=$(grep -c 'docker.pkg.dev' "$RKE2_KUST" 2>/dev/null || true)
-GAR_IN_BASE=$(grep -r 'docker.pkg.dev' "$REPO_ROOT/deploy/k8s/base" --include="*.yaml" -l 2>/dev/null | wc -l || true)
-if [[ "$GAR_IN_OVERLAY" -ge 1 ]]; then
-  pass_check "rke2-nonprod overlay explicitly pins GCP Artifact Registry images ($GAR_IN_OVERLAY refs)"
-elif [[ "$GAR_IN_BASE" -ge 1 ]]; then
-  pass_check "GCP Artifact Registry images defined in base ($GAR_IN_BASE files) — inherited by rke2-nonprod overlay (imagePullSecret still required)"
+# Check 9: GHCR images referenced somewhere in overlay chain (base or overlay)
+GHCR_PATTERN='ghcr.io/biji-biji-initiative/mereka-lms'
+GHCR_IN_OVERLAY=$(grep -c "$GHCR_PATTERN" "$RKE2_KUST" 2>/dev/null || true)
+GHCR_IN_BASE=$(grep -r "$GHCR_PATTERN" "$REPO_ROOT/deploy/k8s/base" --include="*.yaml" -l 2>/dev/null | wc -l || true)
+if [[ "$GHCR_IN_OVERLAY" -ge 1 ]]; then
+  pass_check "rke2-nonprod overlay explicitly pins GHCR images ($GHCR_IN_OVERLAY refs)"
+elif [[ "$GHCR_IN_BASE" -ge 1 ]]; then
+  pass_check "GHCR images defined in base ($GHCR_IN_BASE files) — inherited by rke2-nonprod overlay (imagePullSecret still required)"
 else
-  fail_check "No GCP Artifact Registry image refs found in overlay or base — cannot verify imagePullSecret requirement"
+  fail_check "No GHCR image refs found in overlay or base — cannot verify imagePullSecret requirement"
 fi
 
-# Check 10: Base image references require private GCP AR
+# Check 10: Base image references require private GHCR pull auth
 BASE_KUST="$REPO_ROOT/deploy/k8s/base/kustomization.yaml"
 if [[ -f "$BASE_KUST" ]]; then
-  if grep -q 'docker.pkg.dev' "$BASE_KUST"; then
-    pass_check "Base kustomization references asia-southeast1-docker.pkg.dev (private registry — imagePullSecret required on non-GKE)"
+  if grep -q "$GHCR_PATTERN" "$BASE_KUST"; then
+    pass_check "Base kustomization references GHCR (private registry — imagePullSecret required on non-GKE)"
   fi
 fi
 
@@ -319,7 +320,7 @@ if [[ "$MODE" == "live" ]]; then
     fi
   else
     fail_check "[live] Default ServiceAccount has no imagePullSecrets configured — pods cannot pull private images"
-    echo "    Fix: kubectl --context $KUBECONTEXT patch serviceaccount default -n $NS -p '{\"imagePullSecrets\": [{\"name\": \"dev-image-puller\"}]}'"
+    echo "    Fix: kubectl --context $KUBECONTEXT patch serviceaccount default -n $NS -p '{\"imagePullSecrets\": [{\"name\": \"ghcr-registry\"}]}'"
   fi
 
   # Spot-check pod image pull status
@@ -459,13 +460,10 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "  B2 (alias keys): Verify infisical-secret-store remoteRef.key paths match Infisical"
   echo "     Check: kubectl --context rke2-nonprod describe externalsecret openedx-secrets -n mereka-lms"
   echo ""
-  echo "  B3 (imagePullSecret):"
-  echo "     kubectl --context rke2-nonprod create secret docker-registry dev-image-puller \\"
-  echo "       -n mereka-lms --docker-server=asia-southeast1-docker.pkg.dev \\"
-  echo "       --docker-username=_json_key --docker-password=\"\$(cat /path/to/sa-key.json)\" \\"
-  echo "       --docker-email=ci@mereka.io"
+  echo "  B3 (imagePullSecret): ensure the shared GHCR pull secret exists and is attached"
+  echo "     kubectl --context rke2-nonprod get secret ghcr-registry -n mereka-lms"
   echo "     kubectl --context rke2-nonprod patch serviceaccount default -n mereka-lms \\"
-  echo "       -p '{\"imagePullSecrets\": [{\"name\": \"dev-image-puller\"}]}'"
+  echo "       -p '{\"imagePullSecrets\": [{\"name\": \"ghcr-registry\"}]}'"
   echo ""
   echo "  B4 (quota): kubectl --context rke2-nonprod describe nodes | grep -A 10 'Allocated resources'"
   echo ""

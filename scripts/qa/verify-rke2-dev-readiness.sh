@@ -183,15 +183,15 @@ run_offline_checks() {
     fi
   fi
 
-  # 4. default-serviceaccount.yaml references dev-image-puller
+  # 4. default-serviceaccount.yaml references ghcr-registry
   echo "--- ServiceAccount imagePullSecret ---"
   local sa_file="${PROFILES_DEV}/default-serviceaccount.yaml"
   if [[ ! -f "$sa_file" ]]; then
     fail "default-serviceaccount.yaml missing: ${sa_file}"
-  elif grep -q "dev-image-puller" "$sa_file"; then
-    pass "default-serviceaccount.yaml references dev-image-puller imagePullSecret"
+  elif grep -q "ghcr-registry" "$sa_file"; then
+    pass "default-serviceaccount.yaml references ghcr-registry imagePullSecret"
   else
-    fail "default-serviceaccount.yaml does not reference dev-image-puller"
+    fail "default-serviceaccount.yaml does not reference ghcr-registry"
   fi
 
   # 5. LimitRange and ResourceQuota files exist

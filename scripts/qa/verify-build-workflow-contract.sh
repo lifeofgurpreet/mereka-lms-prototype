@@ -4,7 +4,7 @@
 #
 # Verify build-tutor-images.yml contract:
 #   - Workflow exists and has required inputs
-#   - Image push targets Artifact Registry
+#   - Image push targets GHCR only
 #   - Digest pinning used in kustomization
 set -euo pipefail
 
@@ -33,11 +33,17 @@ else
   fail "target_environment input missing"
 fi
 
-# Check container registry push target (GHCR or Artifact Registry)
-if grep -q "ghcr.io" "$BUILD_WF" || grep -q "asia-southeast1-docker.pkg.dev" "$BUILD_WF"; then
-  pass "Container registry push target present"
+# Check container registry push target (GHCR only)
+if grep -q "ghcr.io" "$BUILD_WF"; then
+  pass "Container registry push target is GHCR"
 else
-  fail "Container registry push target missing (expected ghcr.io or asia-southeast1-docker.pkg.dev)"
+  fail "Container registry push target missing (expected ghcr.io)"
+fi
+
+if grep -q "asia-southeast1-docker.pkg.dev" "$BUILD_WF"; then
+  fail "Legacy GAR push target found (workflow must publish to GHCR only)"
+else
+  pass "No legacy GAR push targets remain"
 fi
 
 # Check permissions block

@@ -89,7 +89,7 @@ for pod in data['items']:
   ./scripts/qa/verify-no-latest-prod-tags.sh
   ```
 - [ ] Images sourced from `ghcr.io/biji-biji-initiative/mereka-lms/` (not Docker Hub)
-- [ ] `dev-image-puller` imagePullSecret exists and is attached to default ServiceAccount
+- [ ] `ghcr-registry` imagePullSecret exists and is attached to default ServiceAccount
 
 **Gate 1 Sign-off**: `[ ]` Security hardening complete — reviewer: _____ date: _____
 

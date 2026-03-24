@@ -21,7 +21,7 @@ infrastructure repo
           limitrange.yaml         # Container min/max/default
           resourcequota.yaml      # Namespace-level CPU/memory/pod caps
           runtime-secrets-placeholder.yaml
-          default-serviceaccount.yaml  # imagePullSecrets: dev-image-puller
+          default-serviceaccount.yaml  # imagePullSecrets: ghcr-registry
 ```
 
 The `profiles/dev` overlay layers on top of `overlays/dev`, adding resource governance and an explicit deployment replica policy appropriate for the single-node RKE2 cluster.
@@ -36,9 +36,9 @@ The `profiles/dev` overlay layers on top of `overlays/dev`, adding resource gove
 
 ### ImagePullBackOff (all pods)
 
-**Cause**: Images are hosted in GCP Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms/`). RKE2 nodes lack GCP Workload Identity, so they cannot pull without an explicit imagePullSecret.
+**Cause**: Images are hosted in GHCR (`ghcr.io/biji-biji-initiative/mereka-lms/`). RKE2 nodes still need an explicit imagePullSecret, and dev relies on the shared `ghcr-registry` pull secret instead of a GCP-specific registry secret.
 
-**Fix**: Create a `dev-image-puller` secret with a GCP service account key, and patch the default ServiceAccount (done by `profiles/dev/default-serviceaccount.yaml`).
+**Fix**: Ensure the `ghcr-registry` secret is synced into the namespace and patch the default ServiceAccount (done by `profiles/dev/default-serviceaccount.yaml`).
 
 ### CrashLoopBackOff (MySQL)
 
@@ -102,28 +102,17 @@ kubectl --context rke2-nonprod create secret generic ses-smtp-credentials \
 
 Or add it to the `profiles/dev/kustomization.yaml` as a `secretGenerator` entry (preferred, GitOps-compliant).
 
-### 4. Create dev-image-puller registry secret
+### 4. Ensure the ghcr-registry pull secret is present
 
-Generate a GCP SA key with Artifact Registry Reader permissions:
+The dev profile expects the shared GHCR pull secret to exist in the namespace:
 
 ```bash
-# Create key (one-time)
-gcloud iam service-accounts keys create /tmp/ar-key.json \
-  --iam-account=artifact-reader@mereka-lms.iam.gserviceaccount.com
-
-# Create K8s secret
-kubectl --context rke2-nonprod create secret docker-registry dev-image-puller \
-  -n mereka-lms \
-  --docker-server=asia-southeast1-docker.pkg.dev \
-  --docker-username=_json_key \
-  --docker-password="$(cat /tmp/ar-key.json)" \
-  --docker-email=artifact-reader@mereka-lms.iam.gserviceaccount.com
-
-# Clean up
-rm /tmp/ar-key.json
+kubectl --context rke2-nonprod get secret ghcr-registry -n mereka-lms
+kubectl --context rke2-nonprod get serviceaccount default -n mereka-lms \
+  -o jsonpath='{.imagePullSecrets[*].name}'
 ```
 
-The `profiles/dev/default-serviceaccount.yaml` patches the default ServiceAccount to reference this secret.
+If `ghcr-registry` is missing, fix the ESO / GitOps source of truth in `bbi-infrastructure` instead of creating an ad-hoc registry secret by hand. The `profiles/dev/default-serviceaccount.yaml` patch should reference `ghcr-registry`.
 
 ## Verification
 

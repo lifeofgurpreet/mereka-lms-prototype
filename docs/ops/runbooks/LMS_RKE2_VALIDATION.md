@@ -38,9 +38,9 @@ configuration.
   # Expected: READY=True
   ```
 
-- [ ] Docker registry pull secret `artifact-registry-key` exists in `mereka-lms` namespace
+- [ ] Docker registry pull secret `ghcr-registry` exists in `mereka-lms` namespace
   ```bash
-  kubectl --context rke2-nonprod get secret artifact-registry-key -n mereka-lms
+  kubectl --context rke2-nonprod get secret ghcr-registry -n mereka-lms
   # Type: kubernetes.io/dockerconfigjson
   ```
 
@@ -48,7 +48,7 @@ configuration.
   ```bash
   kubectl --context rke2-nonprod get serviceaccount default -n mereka-lms \
     -o jsonpath='{.imagePullSecrets}'
-  # Expected: [{"name":"artifact-registry-key"}]
+  # Expected: [{"name":"ghcr-registry"}]
   ```
 
 - [ ] cert-manager and ingress-nginx installed on cluster
@@ -259,20 +259,14 @@ ls -lh "$EVIDENCE_DIR"
 
 ```bash
 # Check pull secret
-kubectl --context rke2-nonprod get secret artifact-registry-key -n mereka-lms
-
-# Re-create pull secret if missing
-kubectl --context rke2-nonprod create secret docker-registry artifact-registry-key \
-  -n mereka-lms \
-  --docker-server=asia-southeast1-docker.pkg.dev \
-  --docker-username=_json_key \
-  --docker-password="$(cat /path/to/gcp-sa-key.json)" \
-  --docker-email=ci@mereka.io
+kubectl --context rke2-nonprod get secret ghcr-registry -n mereka-lms
 
 # Patch default ServiceAccount
 kubectl --context rke2-nonprod patch serviceaccount default -n mereka-lms \
-  -p '{"imagePullSecrets": [{"name": "artifact-registry-key"}]}'
+  -p '{"imagePullSecrets": [{"name": "ghcr-registry"}]}'
 ```
+
+If `ghcr-registry` is missing, fix the ExternalSecret / ClusterExternalSecret source in `bbi-infrastructure` instead of creating a manual registry secret in-cluster.
 
 ### ExternalSecrets not syncing
 
