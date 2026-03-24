@@ -28,6 +28,7 @@ inventory_paths = [
     repo_root / "infrastructure/cloudflare/records.biji-biji.com.json",
     repo_root / "infrastructure/cloudflare/records.mereka-dev.json",
 ]
+registry_path = repo_root / "deploy/k8s/tenancy/tenant-registry.yaml"
 
 failed = 0
 warned = 0
@@ -66,6 +67,20 @@ if not tenants:
     print(f"Summary: PASS={passed} WARN={warned} FAIL={failed}")
     raise SystemExit(1)
 ok(f"active tenant contracts loaded: {len(tenants)}")
+
+registry_status: dict[str, str] = {}
+if registry_path.exists():
+    registry = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+    for entry in registry.get("domains", []) or []:
+        if not isinstance(entry, dict):
+            continue
+        name = str(entry.get("domain") or "").strip().lower()
+        status = str(entry.get("status") or "").strip().lower()
+        if name and status:
+            registry_status[name] = status
+    ok(f"tenant registry readable: {registry_path.relative_to(repo_root)} ({len(registry_status)} domains)")
+else:
+    warn(f"tenant registry missing: {registry_path.relative_to(repo_root)}")
 
 inventory_sources: dict[str, list[str]] = defaultdict(list)
 for inv in inventory_paths:
@@ -114,7 +129,14 @@ for tenant in tenants:
         if host in inventory_sources:
             ok(f"{slug}: {label} domain present in inventory")
         else:
-            warn(f"{slug}: {label} domain '{host}' missing from inventory (onboarding drift risk)")
+            status = registry_status.get(host)
+            if status and status != "active":
+                warn(
+                    f"{slug}: {label} domain '{host}' missing from inventory "
+                    f"(tenant registry marks it {status})"
+                )
+            else:
+                warn(f"{slug}: {label} domain '{host}' missing from inventory (onboarding drift risk)")
 
     aliases = tenant.get("aliases") or []
     for alias in aliases:

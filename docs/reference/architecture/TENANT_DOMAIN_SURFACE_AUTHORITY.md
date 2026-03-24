@@ -135,4 +135,4 @@ The tenant registry uses `biji-biji` while `tenant-contracts.yml` uses `bijibiji
 
 5. **SkillOurFuture infrastructure incomplete**: Studio and MFE domains are `planned` — no TLS cert, no Ingress routing.
 
-6. **Enterprise portal domains for partner tenants**: MFE env files exist for biji-biji and skillourfuture enterprise portals, but no Ingress/Caddy routing exists for `admin.academy.biji-biji.com` or `admin.skillourfuture.academy.mereka.io`.
+6. **Enterprise partner admin surface is shared**: partner enterprise MFEs use tenant-specific LMS/Studio/apps hosts, but their enterprise admin APIs currently live behind the shared primary admin surface `admin.academyv2.mereka.io`. Dedicated partner admin domains are not part of the active routing contract.

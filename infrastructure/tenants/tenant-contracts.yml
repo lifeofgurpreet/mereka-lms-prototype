@@ -27,7 +27,7 @@ tenants:
       lms: academy.biji-biji.com
       studio: studio.academy.biji-biji.com
       apps: apps.academy.biji-biji.com
-      admin: admin.academy.biji-biji.com
+      admin: admin.academyv2.mereka.io
     aliases: []
     mfe_env_file: deploy/k8s/base/apps/enterprise/mfe/biji-biji-mfe-env.js
 
@@ -42,6 +42,6 @@ tenants:
       lms: skillourfuture.academy.mereka.io
       studio: studio.skillourfuture.academy.mereka.io
       apps: apps.skillourfuture.academy.mereka.io
-      admin: admin.skillourfuture.academy.mereka.io
+      admin: admin.academyv2.mereka.io
     aliases: []
     mfe_env_file: deploy/k8s/base/apps/enterprise/mfe/skillourfuture-mfe-env.js

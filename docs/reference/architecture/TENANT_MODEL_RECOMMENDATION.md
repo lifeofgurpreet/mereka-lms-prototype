@@ -43,12 +43,12 @@ Reasons NOT to elevate to separate infrastructure:
 | Tenant | Admin Portal | Learner Portal |
 |--------|-------------|----------------|
 | mereka | `admin.academyv2.mereka.io` | `learner.academyv2.mereka.io` |
-| biji-biji | `admin.academy.biji-biji.com` | `learner.academy.biji-biji.com` |
-| skillourfuture | `admin.skillourfuture.academy.mereka.io` | `learner.skillourfuture.academy.mereka.io` |
+| biji-biji | `admin.academyv2.mereka.io` | `learner.academyv2.mereka.io` |
+| skillourfuture | `admin.academyv2.mereka.io` | `learner.academyv2.mereka.io` |
 
-These domains are already defined in `tenant-contracts.yml` and have MFE env files. What's missing is:
-1. Ingress/Caddy routing for biji-biji and skillourfuture enterprise portals (runtime owner's scope)
-2. Enterprise data to populate them (this lane's scope)
+These domains are already the active shared enterprise surface. What's missing is:
+1. Enterprise data to populate partner tenant views
+2. A conscious product decision before adding dedicated partner enterprise hostnames
 
 ## Q4: What is the minimum clean target model for the current phase?
 

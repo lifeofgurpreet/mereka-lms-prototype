@@ -99,8 +99,8 @@
 | Tenant | Admin Portal | Learner Portal | MFE env file |
 |--------|-------------|----------------|--------------|
 | mereka | `admin.academyv2.mereka.io` | `learner.academyv2.mereka.io` | `enterprise-mfe-env.js` |
-| biji-biji | `admin.academy.biji-biji.com` | (not yet configured) | `biji-biji-mfe-env.js` |
-| skillourfuture | `admin.skillourfuture.academy.mereka.io` | (not yet configured) | `skillourfuture-mfe-env.js` |
+| biji-biji | `admin.academyv2.mereka.io` | `learner.academyv2.mereka.io` | `biji-biji-mfe-env.js` |
+| skillourfuture | `admin.academyv2.mereka.io` | `learner.academyv2.mereka.io` | `skillourfuture-mfe-env.js` |
 
 ## Ambiguities and Open Questions
 
@@ -110,6 +110,6 @@
 
 3. **SkillOurFuture Studio/MFE**: Domains are defined but status is `planned` - no TLS cert, not routable. Enterprise admin/learner portals for this tenant are not yet in prod Ingress.
 
-4. **Biji-Biji Learner Portal**: The `biji-biji-mfe-env.js` defines enterprise API URLs under `admin.academy.biji-biji.com` but no corresponding `learner.academy.biji-biji.com` domain exists in the registry.
+4. **Enterprise portals are shared today**: Partner tenant MFEs use the shared admin and learner portals until a dedicated partner portal rollout is explicitly designed and routed.
 
-5. **Enterprise portals per-tenant**: Currently enterprise admin/learner are only deployed as shared K8s services. Tenant-specific routing happens via ConfigMap swap, but the MFE containers are shared. The admin/learner domains for biji-biji and skillourfuture are defined in MFE env files but may not have Ingress/Caddy routing.
+5. **Dedicated partner enterprise hostnames remain future work**: If the product later wants `admin.*` or `learner.*` per tenant, that must be added as a new routing and contract batch instead of being implied by current env files.

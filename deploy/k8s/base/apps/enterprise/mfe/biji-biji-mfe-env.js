@@ -12,10 +12,11 @@ window.ENV_CONFIG = {
   REFRESH_ACCESS_TOKEN_ENDPOINT: 'https://academy.biji-biji.com/login_refresh',
   ACCESS_TOKEN_COOKIE_NAME: 'edx-jwt-cookie-header-payload',
   CSRF_TOKEN_API_PATH: '/csrf/api/v1/token',
-  ENTERPRISE_CATALOG_API_BASE_URL: 'https://admin.academy.biji-biji.com/api/enterprise-catalog',
-  ENTERPRISE_ACCESS_BASE_URL: 'https://admin.academy.biji-biji.com/api/enterprise-access',
-  LICENSE_MANAGER_URL: 'https://admin.academy.biji-biji.com/api/license-manager',
-  ENTERPRISE_SUBSIDY_BASE_URL: 'https://admin.academy.biji-biji.com/api/enterprise-subsidy',
+  // Enterprise admin services are currently shared on the primary admin surface.
+  ENTERPRISE_CATALOG_API_BASE_URL: 'https://admin.academyv2.mereka.io/api/enterprise-catalog',
+  ENTERPRISE_ACCESS_BASE_URL: 'https://admin.academyv2.mereka.io/api/enterprise-access',
+  LICENSE_MANAGER_URL: 'https://admin.academyv2.mereka.io/api/license-manager',
+  ENTERPRISE_SUBSIDY_BASE_URL: 'https://admin.academyv2.mereka.io/api/enterprise-subsidy',
   FEATURE_ENROLL_WITH_CODES: true,
   FEATURE_BROWSE_AND_REQUEST: true,
 
