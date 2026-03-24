@@ -83,7 +83,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@81adc56b7f0275283b842e0f8ff5845e4d42249d
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@619a832600e8f40ac1688765d0ad653f42367c66
     with:
       app_name: mereka-lms/enterprise-admin-portal
       dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal
@@ -100,7 +100,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@81adc56b7f0275283b842e0f8ff5845e4d42249d
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@619a832600e8f40ac1688765d0ad653f42367c66
     with:
       app_name: mereka-lms/enterprise-learner-portal
       dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal
