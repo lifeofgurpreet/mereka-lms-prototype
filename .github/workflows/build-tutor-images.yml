@@ -312,7 +312,6 @@ jobs:
           if ! timeout 170m tutor images build openedx \
             --no-registry-cache \
             -d "--cache-from=type=registry,ref=${CACHE_REF}" \
-            -d "--load" \
             -a BUILDKIT_INLINE_CACHE=1 2>&1 | tee var/ci/build-openedx.log; then
             echo "OpenedX image build timed out or failed after timeout guard" >&2
             exit 1
@@ -692,7 +691,6 @@ jobs:
           if ! timeout 110m tutor images build mfe \
             --no-registry-cache \
             -d "--cache-from=type=registry,ref=${CACHE_REF}" \
-            -d "--load" \
             -a BUILDKIT_INLINE_CACHE=1 2>&1 | tee var/ci/build-mfe.log; then
             echo "MFE image build timed out or failed after timeout guard" >&2
             exit 1
