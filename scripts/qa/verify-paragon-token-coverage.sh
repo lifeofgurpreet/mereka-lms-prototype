@@ -15,9 +15,9 @@ CORE_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css
 LIGHT_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/light.min.css"
 MEREKA_THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
 AUDIT_DOC="$REPO_ROOT/docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT.md"
-MISSING_TSV="$REPO_ROOT/docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv"
-DEFINES_TSV="$REPO_ROOT/docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv"
-DEFINED_TSV="$REPO_ROOT/docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv"
+MISSING_TSV="$REPO_ROOT/docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv"
+DEFINES_TSV="$REPO_ROOT/docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv"
+DEFINED_TSV="$REPO_ROOT/docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -25,6 +25,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 CORE_THEME_MAX_BYTES=600000
+LIGHT_THEME_MAX_BYTES="${LIGHT_THEME_MAX_BYTES:-262144}"
 
 PASS=0
 WARN=0
@@ -112,10 +113,10 @@ fi
 check_file "$LIGHT_THEME" "light.min.css"
 if [[ -f "$LIGHT_THEME" ]]; then
   LIGHT_SIZE=$(wc -c < "$LIGHT_THEME")
-  if [[ "$LIGHT_SIZE" -gt 64 && "$LIGHT_SIZE" -le 8192 ]]; then
-    pass "light.min.css exists (${LIGHT_SIZE} bytes) and is within light-delta budget (<=8192)"
-  elif [[ "$LIGHT_SIZE" -gt 8192 ]]; then
-    fail "light.min.css is bloated (${LIGHT_SIZE} bytes; expected <=8192 for light delta)"
+  if [[ "$LIGHT_SIZE" -gt 1024 && "$LIGHT_SIZE" -le "$LIGHT_THEME_MAX_BYTES" ]]; then
+    pass "light.min.css exists (${LIGHT_SIZE} bytes) and is within light-baseline budget (<=${LIGHT_THEME_MAX_BYTES})"
+  elif [[ "$LIGHT_SIZE" -gt "$LIGHT_THEME_MAX_BYTES" ]]; then
+    fail "light.min.css is bloated (${LIGHT_SIZE} bytes; expected <=${LIGHT_THEME_MAX_BYTES} for Paragon light baseline)"
   else
     fail "light.min.css is unexpectedly small (${LIGHT_SIZE} bytes)"
   fi
@@ -125,7 +126,7 @@ if [[ -f "$CORE_THEME" && -f "$LIGHT_THEME" ]]; then
   if cmp -s "$CORE_THEME" "$LIGHT_THEME"; then
     fail "light.min.css must differ from core.min.css (core/light payload collapse detected)"
   else
-    pass "light.min.css differs from core.min.css (delta contract preserved)"
+    pass "light.min.css differs from core.min.css (baseline contract preserved)"
   fi
 fi
 

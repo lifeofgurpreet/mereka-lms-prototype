@@ -18,6 +18,7 @@ THEME_FILES=(
   "mereka-brand.min.css"
   "mereka-brand-light.min.css"
 )
+LIGHT_THEME_MAX_BYTES="${LIGHT_THEME_MAX_BYTES:-262144}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -140,10 +141,10 @@ else
 fi
 
 light_size=$(wc -c < "$THEME_DIR/light.min.css")
-if [[ "$light_size" -gt 64 && "$light_size" -le 8192 ]]; then
-  pass "light.min.css size is ${light_size} bytes (light-delta budget <=8192)"
-elif [[ "$light_size" -gt 8192 ]]; then
-  fail "light.min.css is bloated (${light_size} bytes; expected <=8192 for light delta)"
+if [[ "$light_size" -gt 1024 && "$light_size" -le "$LIGHT_THEME_MAX_BYTES" ]]; then
+  pass "light.min.css size is ${light_size} bytes (light-baseline budget <=${LIGHT_THEME_MAX_BYTES})"
+elif [[ "$light_size" -gt "$LIGHT_THEME_MAX_BYTES" ]]; then
+  fail "light.min.css is bloated (${light_size} bytes; expected <=${LIGHT_THEME_MAX_BYTES} for Paragon light baseline)"
 else
   fail "light.min.css is unexpectedly small (${light_size} bytes)"
 fi
@@ -151,7 +152,7 @@ fi
 if cmp -s "$THEME_DIR/core.min.css" "$THEME_DIR/light.min.css"; then
   fail "light.min.css must differ from core.min.css (core/light payload collapse detected)"
 else
-  pass "light.min.css differs from core.min.css (delta contract preserved)"
+  pass "light.min.css differs from core.min.css (baseline contract preserved)"
 fi
 
 if cmp -s "$THEME_DIR/mereka-brand.min.css" "$THEME_DIR/mereka-brand-light.min.css"; then

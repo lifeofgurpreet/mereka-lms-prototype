@@ -53,6 +53,20 @@ verify_theme_tokens_sync() {
   fi
 }
 
+verify_runtime_theme_bundle_sync() {
+  local builder="$REPO_ROOT/scripts/branding/build-tokens.sh"
+  if [[ ! -x "$builder" ]]; then
+    fail "runtime theme bundle sync contract missing builder ($builder)"
+    return
+  fi
+
+  if "$builder" --check >/dev/null 2>&1; then
+    pass "runtime theme bundle sync"
+  else
+    fail "runtime theme bundle drift detected"
+  fi
+}
+
 FONTS=(
   Poppins-Regular.woff2
   Poppins-SemiBold.woff2
@@ -196,6 +210,7 @@ for target_dir in "${THEME_FONT_TARGETS[@]}"; do
 done
 
 verify_theme_tokens_sync
+verify_runtime_theme_bundle_sync
 
 compare_file \
   "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css" \
@@ -206,6 +221,23 @@ compare_file \
   "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css" \
   "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css" \
   "theme overrides sync (CMS)"
+
+for tenant in "biji-biji" "skillourfuture"; do
+  tenant_source="$REPO_ROOT/assets/branding/tenants/$tenant"
+  tenant_theme_dir="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/$tenant"
+  compare_file "$tenant_source/logo.svg" "$tenant_theme_dir/logo.svg" "tenant theme $tenant logo.svg"
+  compare_file "$tenant_source/logo.png" "$tenant_theme_dir/logo.png" "tenant theme $tenant logo.png"
+  compare_file "$tenant_source/logo.svg" "$tenant_theme_dir/logo-horizontal.svg" "tenant theme $tenant logo-horizontal.svg alias"
+  compare_file "$tenant_source/logo.png" "$tenant_theme_dir/logo-horizontal.png" "tenant theme $tenant logo-horizontal.png alias"
+  compare_file "$tenant_source/logo-white.svg" "$tenant_theme_dir/logo-white.svg" "tenant theme $tenant logo-white.svg"
+  compare_file "$tenant_source/logo-white.png" "$tenant_theme_dir/logo-white.png" "tenant theme $tenant logo-white.png"
+  compare_file "$tenant_source/logo-white.svg" "$tenant_theme_dir/logo-horizontal-white.svg" "tenant theme $tenant logo-horizontal-white.svg alias"
+  compare_file "$tenant_source/logo-white.png" "$tenant_theme_dir/logo-horizontal-white.png" "tenant theme $tenant logo-horizontal-white.png alias"
+  compare_file "$tenant_source/logo-trademark.svg" "$tenant_theme_dir/logo-trademark.svg" "tenant theme $tenant logo-trademark.svg"
+  compare_file "$tenant_source/logo-trademark.png" "$tenant_theme_dir/logo-trademark.png" "tenant theme $tenant logo-trademark.png"
+  compare_file "$tenant_source/favicon.ico" "$tenant_theme_dir/favicon.ico" "tenant theme $tenant favicon.ico"
+  compare_file "$tenant_source/favicon-256x256.png" "$tenant_theme_dir/favicon.png" "tenant theme $tenant favicon.png alias"
+done
 
 echo
 echo "Summary: PASS=${PASS} FAIL=${FAIL}"

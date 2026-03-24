@@ -9,6 +9,8 @@
 
 # Brand package (logos, favicon)
 !infrastructure/tutor/brand-mereka/
+!infrastructure/tutor/brand-biji-biji/
+!infrastructure/tutor/brand-skillourfuture/
 
 # MFE theme CSS
 !infrastructure/tutor/themes/mereka/mfe/theme/

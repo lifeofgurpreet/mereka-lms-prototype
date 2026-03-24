@@ -64,7 +64,13 @@ declare -A TENANT_MFE_URL=(
 declare -A TENANT_SITE_NAME=(
   [mereka]="Mereka Academy"
   [biji-biji]="Biji-Biji Academy"
-  [skillourfuture]="SkillOurFuture Academy"
+  [skillourfuture]="Skill Our Future Academy"
+)
+
+declare -A TENANT_BRAND_ASSET_DIR=(
+  [mereka]=""
+  [biji-biji]="biji-biji"
+  [skillourfuture]="skillourfuture"
 )
 
 # Paragon brand CSS filenames (served from /theme/ in the enterprise MFE container)
@@ -124,6 +130,11 @@ MFE_URL="${TENANT_MFE_URL[$TENANT]}"
 SITE_NAME="${TENANT_SITE_NAME[$TENANT]}"
 BRAND_CORE_CSS="${TENANT_BRAND_CORE_CSS[$TENANT]}"
 BRAND_LIGHT_CSS="${TENANT_BRAND_LIGHT_CSS[$TENANT]}"
+BRAND_ASSET_DIR="${TENANT_BRAND_ASSET_DIR[$TENANT]}"
+BRAND_ASSET_PREFIX="${MFE_URL}"
+if [[ -n "$BRAND_ASSET_DIR" ]]; then
+  BRAND_ASSET_PREFIX="${MFE_URL}/brands/${BRAND_ASSET_DIR}"
+fi
 
 # The MFE_CONFIG_API_TENANT_DOMAIN is the LMS domain (strips https://)
 LMS_DOMAIN="${LMS_URL#https://}"
@@ -182,10 +193,10 @@ mfe_overlay = {
     "STUDIO_BASE_URL": studio_url,
     "SITE_NAME": site_name,
     "PLATFORM_NAME": site_name,
-    "FAVICON_URL": f"{mfe_url}/favicon.ico",
-    "LOGO_URL": f"{mfe_url}/logo.svg",
-    "LOGO_WHITE_URL": f"{mfe_url}/logo-white.svg",
-    "LOGO_TRADEMARK_URL": f"{mfe_url}/logo-trademark.svg",
+    "FAVICON_URL": f"${BRAND_ASSET_PREFIX}/favicon.ico",
+    "LOGO_URL": f"${BRAND_ASSET_PREFIX}/logo.svg",
+    "LOGO_WHITE_URL": f"${BRAND_ASSET_PREFIX}/logo-white.svg",
+    "LOGO_TRADEMARK_URL": f"${BRAND_ASSET_PREFIX}/logo-trademark.svg",
     "PARAGON_THEME_URLS": {
         "core": {
             "urls": {
@@ -226,10 +237,10 @@ if [[ $DRY_RUN -eq 1 ]]; then
   echo "    STUDIO_BASE_URL:       ${STUDIO_URL}"
   echo "    SITE_NAME:             ${SITE_NAME}"
   echo "    PLATFORM_NAME:         ${SITE_NAME}"
-  echo "    FAVICON_URL:           ${MFE_URL}/favicon.ico"
-  echo "    LOGO_URL:              ${MFE_URL}/logo.svg"
-  echo "    LOGO_WHITE_URL:        ${MFE_URL}/logo-white.svg"
-  echo "    LOGO_TRADEMARK_URL:    ${MFE_URL}/logo-trademark.svg"
+  echo "    FAVICON_URL:           ${BRAND_ASSET_PREFIX}/favicon.ico"
+  echo "    LOGO_URL:              ${BRAND_ASSET_PREFIX}/logo.svg"
+  echo "    LOGO_WHITE_URL:        ${BRAND_ASSET_PREFIX}/logo-white.svg"
+  echo "    LOGO_TRADEMARK_URL:    ${BRAND_ASSET_PREFIX}/logo-trademark.svg"
   echo "    PARAGON_THEME_URLS:    {core, variants.light} -> ${MFE_URL}/theme/"
   echo "  }"
   echo ""

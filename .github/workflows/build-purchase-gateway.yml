@@ -23,7 +23,8 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@b01867c40710aa3055c510dd8f7d5f7fa3dc4546
+    secrets: inherit
     with:
       app_name: purchase-gateway
       dockerfile: services/purchase-gateway/Dockerfile

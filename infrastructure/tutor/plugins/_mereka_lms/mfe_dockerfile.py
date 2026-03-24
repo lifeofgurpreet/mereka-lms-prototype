@@ -114,7 +114,44 @@ theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
-updated = content[:match.start(1)] + json.dumps(theme, separators=(", ", ": ")) + content[match.end(1):]
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\\./, "");
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = [];
+  if (hostname) {
+    candidates.push(hostname);
+    const appsCandidate = hostname.replace(/^(?:staging\\.)?apps\\./, "");
+    const stagingCandidate = hostname.replace(/^staging\\./, "");
+    for (const candidate of [appsCandidate, stagingCandidate, appsCandidate.replace(/\\.mereka\\.dev$/, ".mereka.io"), stagingCandidate.replace(/\\.mereka\\.dev$/, ".mereka.io")]) {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+      }
+    }
+  }
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
 index_path.write_text(updated, encoding="utf-8")
 PY
 """,

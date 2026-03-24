@@ -10,6 +10,7 @@ THEME_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/font
 LMS_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts"
 CMS_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts"
 MFE_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/fonts"
+MFE_THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
 IMG_SRC_DIR="$REPO_ROOT/assets/branding"
 IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/images"
 MFE_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/images"
@@ -29,6 +30,7 @@ if [[ -z "$BRAND_REPO_TOKENS" && "$AUTO_BRAND_REPO_TOKENS" == "1" ]]; then
   fi
 fi
 BRAND_PACKAGE_SYNC="$REPO_ROOT/scripts/branding/sync-brand-package.sh"
+THEME_BUILDER="$REPO_ROOT/scripts/branding/build-tokens.sh"
 
 if [[ ! -d "$SRC_FONTS" ]]; then
   echo "Missing font source directory: $SRC_FONTS" >&2
@@ -62,6 +64,13 @@ fi
 "$TOKEN_GENERATOR"
 echo "  ✓ Regenerated token layers from canonical source"
 
+if [[ ! -x "$THEME_BUILDER" ]]; then
+  echo "Missing theme builder script: $THEME_BUILDER" >&2
+  exit 1
+fi
+"$THEME_BUILDER"
+echo "  ✓ Regenerated runtime theme bundles"
+
 # Keep runtime override CSS in sync across common + LMS so deploy checks are deterministic.
 if [[ -f "$OVERRIDES_SRC" ]]; then
   mkdir -p "$(dirname "$OVERRIDES_LMS_DEST")"
@@ -82,6 +91,37 @@ for asset in logo-horizontal.png logo-horizontal.svg logo-horizontal-white.png l
     echo "  ✓ Copied $asset"
   fi
 done
+
+sync_tenant_mfe_theme_assets() {
+  local tenant_slug="$1"
+  local source_dir="$REPO_ROOT/assets/branding/tenants/$tenant_slug"
+  local target_dir="$MFE_THEME_DIR/$tenant_slug"
+
+  if [[ ! -d "$source_dir" ]]; then
+    echo "Missing tenant branding source: $source_dir" >&2
+    exit 1
+  fi
+
+  mkdir -p "$target_dir"
+  cp "$source_dir/logo.svg" "$target_dir/logo.svg"
+  cp "$source_dir/logo.png" "$target_dir/logo.png"
+  cp "$source_dir/logo.svg" "$target_dir/logo-horizontal.svg"
+  cp "$source_dir/logo.png" "$target_dir/logo-horizontal.png"
+  cp "$source_dir/logo-white.svg" "$target_dir/logo-white.svg"
+  cp "$source_dir/logo-white.png" "$target_dir/logo-white.png"
+  cp "$source_dir/logo-white.svg" "$target_dir/logo-horizontal-white.svg"
+  cp "$source_dir/logo-white.png" "$target_dir/logo-horizontal-white.png"
+  cp "$source_dir/logo-trademark.svg" "$target_dir/logo-trademark.svg"
+  cp "$source_dir/logo-trademark.png" "$target_dir/logo-trademark.png"
+  cp "$source_dir/favicon.ico" "$target_dir/favicon.ico"
+  if [[ -f "$source_dir/favicon-256x256.png" ]]; then
+    cp "$source_dir/favicon-256x256.png" "$target_dir/favicon.png"
+  fi
+  echo "  ✓ Synced tenant MFE theme assets -> theme/${tenant_slug}/"
+}
+
+sync_tenant_mfe_theme_assets "biji-biji"
+sync_tenant_mfe_theme_assets "skillourfuture"
 
 # Keep OEP-48 local brand package asset bundle in sync as well.
 if [[ -x "$BRAND_PACKAGE_SYNC" ]]; then

@@ -1854,7 +1854,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-brand-asset-drift.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6183,7 +6183,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-variant-matrix.sh",
-      "reference_count": 17,
+      "reference_count": 18,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

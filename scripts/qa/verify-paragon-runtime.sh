@@ -23,7 +23,7 @@ THEME_DEFAULT_ENABLED=1
 RUNTIME_CURL_INSECURE="${PARAGON_RUNTIME_CURL_INSECURE:-auto}"
 MAX_CORE_THEME_BYTES="${MAX_CORE_THEME_BYTES:-614400}"
 MAX_BRAND_THEME_BYTES="${MAX_BRAND_THEME_BYTES:-51200}"
-MAX_LIGHT_THEME_BYTES="${MAX_LIGHT_THEME_BYTES:-4096}"
+MAX_LIGHT_THEME_BYTES="${MAX_LIGHT_THEME_BYTES:-262144}"
 CURL_FLAGS=()
 
 PASS=0
@@ -386,9 +386,9 @@ fi
 if [[ -f "$LIGHT_THEME_CSS" ]]; then
   light_size="$(wc -c < "$LIGHT_THEME_CSS" | tr -d ' ')"
   if [[ "$light_size" -le "$MAX_LIGHT_THEME_BYTES" ]]; then
-    pass "Light theme CSS size ${light_size}B is within budget (${MAX_LIGHT_THEME_BYTES}B)"
+    pass "Light theme CSS size ${light_size}B is within baseline budget (${MAX_LIGHT_THEME_BYTES}B)"
   else
-    fail "Light theme CSS size ${light_size}B exceeds delta budget (${MAX_LIGHT_THEME_BYTES}B)"
+    fail "Light theme CSS size ${light_size}B exceeds baseline budget (${MAX_LIGHT_THEME_BYTES}B)"
   fi
 else
   fail "Light theme CSS missing: ${LIGHT_THEME_CSS#$REPO_ROOT/}"

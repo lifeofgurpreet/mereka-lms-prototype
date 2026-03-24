@@ -8,6 +8,8 @@ const normalizeHostname = (hostname) => {
 const MEREKA_BASE_VARIANT = {
   logoUrl: '/theme/logo-horizontal.svg',
   mobileLogoUrl: '/theme/logo.svg',
+  themeBrandUrl: '../theme/mereka-brand.min.css',
+  themeBrandLightUrl: '../theme/mereka-brand-light.min.css',
   helpUrl: 'https://help.mereka.io/',
   whatsapp: '601135271981',
   privacyUrl: 'https://legal.mereka.io/privacy-policy/',
@@ -24,12 +26,20 @@ const MEREKA_SITE_VARIANTS = {
   },
   'academy.biji-biji.com': {
     ...MEREKA_BASE_VARIANT,
+    logoUrl: '/theme/biji-biji/logo-horizontal.svg',
+    mobileLogoUrl: '/theme/biji-biji/logo.svg',
+    themeBrandUrl: '../theme/biji-biji-brand.min.css',
+    themeBrandLightUrl: '../theme/biji-biji-brand-light.min.css',
     brand: 'Biji-Biji Academy',
     copyrightHolder: 'Biji-Biji Initiative',
     supportEmail: 'techadmin@biji-biji.com',
   },
   'skillourfuture.academy.mereka.io': {
     ...MEREKA_BASE_VARIANT,
+    logoUrl: '/theme/skillourfuture/logo-horizontal.svg',
+    mobileLogoUrl: '/theme/skillourfuture/logo.svg',
+    themeBrandUrl: '../theme/sof-brand.min.css',
+    themeBrandLightUrl: '../theme/sof-brand-light.min.css',
     brand: 'Skill Our Future Academy',
     copyrightHolder: 'MEREKA',
     supportEmail: 'support@mereka.io',
@@ -386,14 +396,16 @@ const MerekaAuthnLoginBranding = () => {
 const MerekaStudioFooter = () => {
   const config = getConfig();
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
-  const siteName = config.SITE_NAME || 'Mereka Studio';
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const siteName = config.SITE_NAME || variant.brand || 'Mereka Studio';
 
   return (
     <footer className="mereka-studio-footer" role="contentinfo">
       <div className="mereka-studio-footer__inner">
         <a href={baseUrl || '/'} className="mereka-studio-footer__logo-link">
           <img
-            src="/theme/logo-horizontal.svg"
+            src={baseUrl ? `${baseUrl}${variant.logoUrl}` : variant.logoUrl}
             alt={`${siteName} logo`}
             className="mereka-studio-footer__logo"
           />

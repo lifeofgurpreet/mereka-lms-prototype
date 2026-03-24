@@ -1,4 +1,4 @@
-// Runtime configuration for SkillOurFuture Enterprise MFEs
+// Runtime configuration for Skill Our Future Enterprise MFEs
 // Injected via ConfigMap at /openedx/dist/env.config.js
 //
 // Branding: LOGO_URL, FAVICON_URL, SITE_NAME configure @edx/frontend-platform.
@@ -19,12 +19,12 @@ window.ENV_CONFIG = {
   FEATURE_ENROLL_WITH_CODES: true,
   FEATURE_BROWSE_AND_REQUEST: true,
 
-  // SkillOurFuture branding — served from /theme/ and / in the MFE container
-  LOGO_URL: '/logo.svg',
-  LOGO_WHITE_URL: '/logo-white.svg',
-  LOGO_TRADEMARK_URL: '/logo-trademark.svg',
-  FAVICON_URL: '/favicon.ico',
-  SITE_NAME: 'SkillOurFuture Academy',
+  // Tenant branding assets — served from /brands/skillourfuture/ in the shared MFE image
+  LOGO_URL: '/brands/skillourfuture/logo.svg',
+  LOGO_WHITE_URL: '/brands/skillourfuture/logo-white.svg',
+  LOGO_TRADEMARK_URL: '/brands/skillourfuture/logo-trademark.svg',
+  FAVICON_URL: '/brands/skillourfuture/favicon.ico',
+  SITE_NAME: 'Skill Our Future Academy',
 };
 
 // Runtime Paragon theme — tells the MFE shell which CSS files to load.

@@ -55,7 +55,7 @@
 
 ## Consumed & Missing (High-Value Families)
 - Full list for actionability is in:
-  - `docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv`
+  - `docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv`
 - Family breakdown:
   - color
   - size
@@ -142,9 +142,9 @@
 - This is a **consumption audit only**. It intentionally does not infer tokens
   by scanning declaration names in `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css`.
 - Large full lists are stored in TSV artifacts to support diff-friendly reviews:
-  - `docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv`
-  - `docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv`
-  - `docs/concepts/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv`
+  - `docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv`
+  - `docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv`
+  - `docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv`
 
 ## Token Naming Gap Analysis (2026-02-28)
 

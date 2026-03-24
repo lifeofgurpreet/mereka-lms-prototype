@@ -27,6 +27,15 @@ ARG REGISTRY=ghcr.io/biji-biji-initiative/mereka-lms
 # If omitted, Docker fails with "invalid reference format" on the empty tag.
 # The workflow's resolve-source job provides this automatically.
 ARG SOURCE_TAG
+FROM caddy:2.11.2-builder AS caddy_builder
+# Official Caddy 2.11.2 currently embeds google.golang.org/grpc v1.79.1, which
+# fails our CRITICAL Trivy gate. Rebuild the same Caddy release with the patched
+# grpc dependency in an isolated stage so buildx can cache it independently of
+# the tenant asset overlay layers.
+RUN xcaddy build v2.11.2 \
+    --output /usr/bin/caddy-patched \
+    --replace google.golang.org/grpc=google.golang.org/grpc@v1.79.3
+
 FROM ${REGISTRY}/enterprise-admin-portal:${SOURCE_TAG}
 
 # Copy and run cleanup/patch scripts at build time
@@ -44,6 +53,14 @@ RUN chmod +x /tmp/strip-nreum.sh \
 # --- Mereka branding overlay ---
 # Copy Paragon theme CSS (served at /theme/* by the MFE Caddy/nginx).
 COPY infrastructure/tutor/themes/mereka/mfe/theme /openedx/dist/theme
+COPY --from=caddy_builder /usr/bin/caddy-patched /usr/bin/caddy
+COPY --from=caddy_builder /usr/bin/caddy-patched /openedx/dist/usr/bin/caddy
+
+# Ship all tenant asset bundles inside the shared portal image so env.config.js
+# can point each tenant at its own immutable /brands/<slug>/ path.
+COPY infrastructure/tutor/brand-mereka /openedx/dist/brands/mereka
+COPY infrastructure/tutor/brand-biji-biji /openedx/dist/brands/biji-biji
+COPY infrastructure/tutor/brand-skillourfuture /openedx/dist/brands/skillourfuture
 
 # Replace upstream brand assets (logos, favicon) with Mereka equivalents.
 COPY infrastructure/tutor/brand-mereka/logo.svg /openedx/dist/logo.svg

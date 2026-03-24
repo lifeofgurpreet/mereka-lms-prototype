@@ -140,18 +140,19 @@ warn() {
 }
 
 # Domain targets to check
-# All tenants currently share "Mereka Academy" as SITE_NAME (Phase 1)
-# Per-tenant SITE_NAME differentiation is Phase 2 scope
+# Runtime contract is tenant-specific: each production hostname must expose
+# its own SITE_NAME via /api/mfe_config/v1.
 declare -A DOMAIN_TARGETS=(
   ["academyv2.mereka.io"]="Mereka Academy"
-  ["academy.biji-biji.com"]="Mereka Academy"
-  ["skillourfuture.academy.mereka.io"]="Mereka Academy"
+  ["academy.biji-biji.com"]="Biji-Biji Academy"
+  ["skillourfuture.academy.mereka.io"]="Skill Our Future Academy"
 )
 
 # Check if runtime is available
 check_runtime_available() {
   local first_domain="academyv2.mereka.io"
   local test_url
+  local http_code
 
   if [[ "$ENV" == "local" ]]; then
     test_url="http://apps.localhost/api/mfe_config/v1"
@@ -161,15 +162,17 @@ check_runtime_available() {
 
   echo -e "${CYAN}Checking runtime availability...${NC}"
 
-  if curl -sf --max-time "$CURL_TIMEOUT" "$test_url" >/dev/null 2>&1; then
+  http_code="$(curl -skS -o /dev/null -w '%{http_code}' --max-time "$CURL_TIMEOUT" "$test_url" 2>/dev/null || true)"
+
+  if [[ "$http_code" =~ ^(200|301|302|307|308)$ ]]; then
     RUNTIME_AVAILABLE=1
-    pass "Runtime is available (MFE config endpoint reachable)"
+    pass "Runtime is available (MFE config endpoint reachable, HTTP ${http_code})"
   else
     RUNTIME_AVAILABLE=0
-    warn "Runtime not available — MFE config endpoint unreachable"
+    warn "Runtime not available — MFE config endpoint returned HTTP ${http_code:-000}"
     echo "  URL: $test_url"
-    echo "  This is expected if ENABLE_MULTI_TENANT_BRANDING=False"
-    echo "  All runtime checks will be marked as SKIP"
+    echo "  Runtime branding proof is unavailable from this environment."
+    echo "  All runtime checks will be marked as SKIP until the endpoint is reachable."
   fi
 
   echo ""
@@ -320,8 +323,8 @@ if [[ "$FAIL" -gt 0 ]]; then
   exit 1
 elif [[ "$RUNTIME_AVAILABLE" -eq 0 ]] && [[ "$SKIP" -gt 0 ]]; then
   echo -e "${YELLOW}SKIPPED:${NC} Runtime not available"
-  echo "This is expected when ENABLE_MULTI_TENANT_BRANDING=False"
-  echo "Run this script after enabling multi-tenant branding in production"
+  echo "Live MFE config endpoint was not reachable from this environment."
+  echo "Re-run once the relevant tenant /api/mfe_config/v1 endpoint is reachable."
   exit 0
 else
   echo -e "${GREEN}SUCCESS:${NC} All runtime checks passed"

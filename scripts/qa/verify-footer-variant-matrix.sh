@@ -233,13 +233,14 @@ echo ""
 echo "AC-FTVAR-004: Fallback variant for unknown hostnames"
 
 if [[ -f "$PLUGIN" ]]; then
-  # Current architecture uses getMerekaVariant() with explicit knownVariant guard.
-  if grep -q "const knownVariant = MEREKA_SITE_VARIANTS\\[normalizedHostname\\]" "$PLUGIN" \
-    && grep -q "if (knownVariant)" "$PLUGIN" \
+  # Current architecture resolves exact hostname match first, then stripped MFE hostnames,
+  # then falls back to a deterministic default shell.
+  if grep -q "const exactVariant = MEREKA_SITE_VARIANTS\\[normalizedHostname\\]" "$PLUGIN" \
+    && grep -q "const strippedVariant = MEREKA_SITE_VARIANTS\\[candidate\\] || MEREKA_SITE_VARIANTS\\[devCandidate\\]" "$PLUGIN" \
     && grep -q "Unknown host fallback" "$PLUGIN"; then
-    pass "Fallback variant exists in getMerekaVariant() (knownVariant guard + explicit return object)"
+    pass "Fallback variant exists in getMerekaVariant() (exact match + stripped host lookup + explicit fallback)"
   else
-    fail "Fallback variant missing — expected getMerekaVariant() knownVariant guard + fallback return object"
+    fail "Fallback variant missing — expected exactVariant/strippedVariant lookup with explicit fallback return object"
   fi
 
   # Confirm fallback references dynamic config values (SITE_NAME / PLATFORM_NAME).

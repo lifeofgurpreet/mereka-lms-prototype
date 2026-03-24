@@ -289,6 +289,7 @@ jobs:
 
       - name: Build OpenEdX image
         run: |
+          set -euo pipefail
           export TUTOR_ROOT=$(pwd)/tutor_env
           export DOCKER_BUILDKIT=1
           mkdir -p var/ci
@@ -328,11 +329,19 @@ jobs:
 
           # Tutor 21 with buildx names images docker.io/overhangio/openedx:*
           # Retag for downstream steps (branding verify, SBOM, Trivy, push).
-          TUTOR_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'overhangio/openedx:' | head -1)"
-          if [[ -n "$TUTOR_IMAGE" && -z "$(docker images -q tutor_local/openedx:latest 2>/dev/null)" ]]; then
-            echo "Retagging $TUTOR_IMAGE → tutor_local/openedx:latest"
-            docker tag "$TUTOR_IMAGE" tutor_local/openedx:latest
+          OPENEDX_LOCAL_IMAGE="tutor_local/openedx:latest"
+          TUTOR_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '(^|docker.io/)overhangio/openedx:' | head -1 || true)"
+          if [[ -n "$TUTOR_IMAGE" && -z "$(docker images -q "$OPENEDX_LOCAL_IMAGE" 2>/dev/null)" ]]; then
+            echo "Retagging $TUTOR_IMAGE → $OPENEDX_LOCAL_IMAGE"
+            docker tag "$TUTOR_IMAGE" "$OPENEDX_LOCAL_IMAGE"
           fi
+          if [[ -z "$(docker images -q "$OPENEDX_LOCAL_IMAGE" 2>/dev/null)" ]]; then
+            echo "::error::Tutor build completed without a loadable local OpenEdX image" >&2
+            echo "Available OpenEdX images after build:" >&2
+            docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'openedx' >&2 || true
+            exit 1
+          fi
+          echo "OPENEDX_LOCAL_IMAGE=$OPENEDX_LOCAL_IMAGE" >> "$GITHUB_ENV"
 
       - name: Verify OpenEdX build cache health
         if: always()
@@ -352,6 +361,13 @@ jobs:
             SUMMARY="${SUMMARY}\n✅ --cache-from=type=registry present in build command"
           else
             SUMMARY="${SUMMARY}\n❌ --cache-from NOT found in build command"
+            FAILURES=$((FAILURES + 1))
+          fi
+
+          if grep -q 'cache-from=type=gha' "$LOG" && grep -q 'cache-to=type=gha,mode=max' "$LOG"; then
+            SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
+          else
+            SUMMARY="${SUMMARY}\n❌ GHA cache read/write flags NOT found in build command"
             FAILURES=$((FAILURES + 1))
           fi
 
@@ -420,18 +436,18 @@ jobs:
           echo "Expected LMS branding rev: ${EXPECTED_LMS_BRANDING_REV:-<none>}"
 
           # Extract staticfiles.json from the built image to verify collectstatic ran
-          docker run --rm tutor_local/openedx:latest \
+          docker run --rm "${OPENEDX_LOCAL_IMAGE}" \
             python -c "import json; data=json.load(open('/openedx/staticfiles/staticfiles.json')); css=data['paths'].get('mereka/css/mereka-overrides.css','MISSING'); print(f'CSS hash: {css}')" \
             | tee var/ci/verify-openedx-image-branding.log
 
           # Verify the hashed CSS file actually exists in the image
-          HASHED_CSS="$(docker run --rm tutor_local/openedx:latest \
+          HASHED_CSS="$(docker run --rm "${OPENEDX_LOCAL_IMAGE}" \
             python -c "import json; data=json.load(open('/openedx/staticfiles/staticfiles.json')); print(data['paths'].get('mereka/css/mereka-overrides.css','MISSING'))")"
           if [[ "$HASHED_CSS" == "MISSING" ]]; then
             echo "FAIL: mereka-overrides.css not found in staticfiles.json" | tee -a var/ci/verify-openedx-image-branding.log
             exit 1
           fi
-          docker run --rm tutor_local/openedx:latest \
+          docker run --rm "${OPENEDX_LOCAL_IMAGE}" \
             test -f "/openedx/staticfiles/${HASHED_CSS}" \
             && echo "PASS: /openedx/staticfiles/${HASHED_CSS} exists" | tee -a var/ci/verify-openedx-image-branding.log \
             || { echo "FAIL: /openedx/staticfiles/${HASHED_CSS} missing" | tee -a var/ci/verify-openedx-image-branding.log; exit 1; }
@@ -450,7 +466,7 @@ jobs:
           rm /tmp/syft-install.sh
           # Use docker: source explicitly so syft reads from the local Docker daemon
           # (anchore/sbom-action fails on ARC DinD runners because it can't resolve local images)
-          "$HOME/.local/bin/syft" scan "docker:tutor_local/openedx:latest" \
+          "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" \
             -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
 
       - name: Upload OpenEdX SBOM
@@ -483,7 +499,7 @@ jobs:
             --output var/ci/trivy-openedx.json \
             --ignorefile .trivyignore \
             --severity CRITICAL,HIGH \
-            tutor_local/openedx:latest
+            "${OPENEDX_LOCAL_IMAGE}"
 
           # Fail the build if any CRITICAL vulns are present
           CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-openedx.json)
@@ -531,8 +547,8 @@ jobs:
           TAG="${{ inputs.image_tag || github.sha }}"
           SHORT_SHA="${GITHUB_SHA::8}"
 
-          docker tag tutor_local/openedx:latest ${{ env.REGISTRY }}/openedx:${TAG}
-          docker tag tutor_local/openedx:latest ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
+          docker tag "${OPENEDX_LOCAL_IMAGE}" ${{ env.REGISTRY }}/openedx:${TAG}
+          docker tag "${OPENEDX_LOCAL_IMAGE}" ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
 
           docker push ${{ env.REGISTRY }}/openedx:${TAG}
           docker push ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
@@ -540,7 +556,7 @@ jobs:
           # Push mutable mereka-brand tag so the dev overlay (rke2-nonprod)
           # auto-deploys via ArgoCD when a new image lands on main.
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            docker tag tutor_local/openedx:latest ${{ env.REGISTRY }}/openedx:mereka-brand
+            docker tag "${OPENEDX_LOCAL_IMAGE}" ${{ env.REGISTRY }}/openedx:mereka-brand
             docker push ${{ env.REGISTRY }}/openedx:mereka-brand
             echo "**Mutable tag:** \`mereka-brand\` (dev auto-deploy)" >> $GITHUB_STEP_SUMMARY
           fi
@@ -675,6 +691,7 @@ jobs:
 
       - name: Build MFE image
         run: |
+          set -euo pipefail
           export TUTOR_ROOT=$(pwd)/tutor_env
           export DOCKER_BUILDKIT=1
           export NODE_OPTIONS="--max-old-space-size=6144"
@@ -709,11 +726,19 @@ jobs:
 
           # Tutor 21 with buildx names MFE images docker.io/overhangio/openedx-mfe:*
           # instead of tutor_local/openedx-mfe:latest. Retag for downstream steps.
-          TUTOR_MFE_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'overhangio/openedx-mfe:' | head -1)"
-          if [[ -n "$TUTOR_MFE_IMAGE" && -z "$(docker images -q tutor_local/openedx-mfe:latest 2>/dev/null)" ]]; then
-            echo "Retagging $TUTOR_MFE_IMAGE → tutor_local/openedx-mfe:latest"
-            docker tag "$TUTOR_MFE_IMAGE" tutor_local/openedx-mfe:latest
+          MFE_LOCAL_IMAGE="tutor_local/openedx-mfe:latest"
+          TUTOR_MFE_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '(^|docker.io/)overhangio/openedx-mfe:' | head -1 || true)"
+          if [[ -n "$TUTOR_MFE_IMAGE" && -z "$(docker images -q "$MFE_LOCAL_IMAGE" 2>/dev/null)" ]]; then
+            echo "Retagging $TUTOR_MFE_IMAGE → $MFE_LOCAL_IMAGE"
+            docker tag "$TUTOR_MFE_IMAGE" "$MFE_LOCAL_IMAGE"
           fi
+          if [[ -z "$(docker images -q "$MFE_LOCAL_IMAGE" 2>/dev/null)" ]]; then
+            echo "::error::Tutor build completed without a loadable local MFE image" >&2
+            echo "Available MFE images after build:" >&2
+            docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'openedx-mfe' >&2 || true
+            exit 1
+          fi
+          echo "MFE_LOCAL_IMAGE=$MFE_LOCAL_IMAGE" >> "$GITHUB_ENV"
 
       - name: Verify MFE build cache health
         if: always()
@@ -733,6 +758,13 @@ jobs:
             SUMMARY="${SUMMARY}\n✅ --cache-from=type=registry present in build command"
           else
             SUMMARY="${SUMMARY}\n❌ --cache-from NOT found in build command"
+            FAILURES=$((FAILURES + 1))
+          fi
+
+          if grep -q 'cache-from=type=gha' "$LOG" && grep -q 'cache-to=type=gha,mode=max' "$LOG"; then
+            SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for MFE build"
+          else
+            SUMMARY="${SUMMARY}\n❌ GHA cache read/write flags NOT found in build command"
             FAILURES=$((FAILURES + 1))
           fi
 
@@ -795,7 +827,7 @@ jobs:
         run: |
           mkdir -p var/ci
           EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' infrastructure/tutor/themes/mereka/mfe/mereka.scss | head -n 1)"
-          scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest "${EXPECTED_MFE_BRANDING_REV}" \
+          scripts/qa/verify-mfe-image-branding.sh "${MFE_LOCAL_IMAGE}" "${EXPECTED_MFE_BRANDING_REV}" \
             | tee var/ci/verify-mfe-image-branding.log
 
       - name: Generate SBOM for MFE image
@@ -811,7 +843,7 @@ jobs:
           sh /tmp/syft-install.sh -b "$HOME/.local/bin"
           rm /tmp/syft-install.sh
           # Use docker: source explicitly so syft reads from the local Docker daemon
-          "$HOME/.local/bin/syft" scan "docker:tutor_local/openedx-mfe:latest" \
+          "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" \
             -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
 
       - name: Upload MFE SBOM
@@ -844,7 +876,7 @@ jobs:
             --output var/ci/trivy-mfe.json \
             --ignorefile .trivyignore \
             --severity CRITICAL,HIGH \
-            tutor_local/openedx-mfe:latest
+            "${MFE_LOCAL_IMAGE}"
 
           # Fail the build if any CRITICAL vulns are present
           CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-mfe.json)
@@ -891,8 +923,8 @@ jobs:
           TAG="${{ inputs.image_tag || github.sha }}"
           SHORT_SHA="${GITHUB_SHA::8}"
 
-          docker tag tutor_local/openedx-mfe:latest ${{ env.REGISTRY }}/mfe:${TAG}
-          docker tag tutor_local/openedx-mfe:latest ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
+          docker tag "${MFE_LOCAL_IMAGE}" ${{ env.REGISTRY }}/mfe:${TAG}
+          docker tag "${MFE_LOCAL_IMAGE}" ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
 
           docker push ${{ env.REGISTRY }}/mfe:${TAG}
           docker push ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
@@ -900,7 +932,7 @@ jobs:
           # Push mutable mereka-brand tag so the dev overlay (rke2-nonprod)
           # auto-deploys via ArgoCD when a new image lands on main.
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            docker tag tutor_local/openedx-mfe:latest ${{ env.REGISTRY }}/mfe:mereka-brand
+            docker tag "${MFE_LOCAL_IMAGE}" ${{ env.REGISTRY }}/mfe:mereka-brand
             docker push ${{ env.REGISTRY }}/mfe:mereka-brand
             echo "**Mutable tag:** \`mereka-brand\` (dev auto-deploy)" >> $GITHUB_STEP_SUMMARY
           fi

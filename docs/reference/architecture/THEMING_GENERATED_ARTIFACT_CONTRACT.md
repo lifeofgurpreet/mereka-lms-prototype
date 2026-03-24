@@ -14,7 +14,7 @@ This contract removes ambiguity around which files are source-of-truth, which ar
 | Runtime token CSS | `infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css` | **Generated** | `scripts/branding/generate-tokens-from-canonical.sh` | **Disallowed** |
 | Runtime overrides CSS | `infrastructure/tutor/themes/mereka/{common,lms,cms}/static/css/mereka-overrides.css` | **Generated (token block) + curated selectors** | `scripts/branding/generate-tokens-from-canonical.sh` + `sync-brand-assets.sh` | Allowed only outside generated block |
 | MFE runtime theme delta | `infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css` | **Generated** | `scripts/branding/build-tokens.sh` | **Disallowed** |
-| MFE runtime light delta | `infrastructure/tutor/themes/mereka/mfe/theme/light.min.css` | **Generated** | `scripts/branding/build-tokens.sh` | **Disallowed** |
+| MFE runtime light baseline | `infrastructure/tutor/themes/mereka/mfe/theme/light.min.css` | **Generated** | `scripts/branding/build-tokens.sh` | **Disallowed** |
 | MFE runtime brand-light delta | `infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand-light.min.css` | **Generated** | `scripts/branding/build-tokens.sh` | **Disallowed** |
 | MFE Paragon baseline | `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css` | **Vendored baseline artifact** | `scripts/branding/build-tokens.sh` | Disallowed unless refreshed via script |
 
@@ -50,4 +50,3 @@ The transitional stack can be simplified only after all criteria are met:
 2. LMS/CMS theming no longer depends on generated SCSS bridge tokens.
 3. Brand package responsibilities are fully covered by a single upstream runtime-compatible theming contract.
 4. CI contracts are updated to remove obsolete generated outputs and enforce the new pipeline.
-

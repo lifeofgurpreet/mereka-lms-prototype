@@ -1,30 +1,29 @@
 # brand-skillourfuture
 
-OEP-48 brand package for the SkillOurFuture tenant (`skillourfuture.academy.mereka.io`).
+OEP-48 brand package for the Skill Our Future tenant (`skillourfuture.academy.mereka.io`).
 
-## Logo Placeholder Notice
+## Asset provenance
 
-The logo files in this directory (`logo.svg`, `logo.png`, `logo-white.svg`, `logo-white.png`,
-`logo_white.svg`, `logo_white.png`, `logo-trademark.svg`, `logo-trademark.png`, `favicon.ico`,
-`favicon.png`) are **copies of the Mereka Academy logos used as placeholders**.
-
-They must be replaced with official SkillOurFuture brand assets before this tenant goes live.
+- Primary mark and wordmark colors are derived from the public Skill Our Future site at `https://www.skillourfuture.org/`.
+- `logo-trademark.*` includes a UNDP lockup sourced from the public UNDP logo asset published on Wikimedia Commons.
+- Canonical source assets live under `assets/branding/tenants/skillourfuture/`; this package is a synced derivative.
 
 ## Expected file names (do not rename)
 
 | File | Purpose |
 |------|---------|
-| `logo.svg` | Primary logo (dark background variant), SVG |
-| `logo.png` | Primary logo (dark background variant), PNG |
+| `logo.svg` | Primary logo, SVG wrapper |
+| `logo.png` | Primary logo, PNG |
 | `logo-white.svg` / `logo_white.svg` | White/light variant, SVG (both names required) |
 | `logo-white.png` / `logo_white.png` | White/light variant, PNG (both names required) |
-| `logo-trademark.svg` / `logo-trademark.png` | Elaborated / wordmark variant |
+| `logo-trademark.svg` / `logo-trademark.png` | SOF + UNDP lockup |
 | `favicon.ico` | Browser favicon (ICO) |
-| `favicon.png` | Browser favicon (PNG, 32x32) |
+| `favicon.png` | Browser favicon (PNG alias from 256x256 source) |
 
 ## Brand tokens
 
-- Primary: `#1a3c6e` (navy)
-- Secondary: `#f5a623` (gold)
-- Accent / Danger: `#e8460e` (orange-red)
-- Font: Nunito (400, 600, 700) via Google Fonts
+- Primary: `#450B7F` (SOF purple)
+- Secondary: `#82C3C7` (SOF teal)
+- Accent / Warning: `#F7CD56` (SOF gold)
+- Informational: `#0063AC` (UNDP blue)
+- Font: Poppins (400, 600, 700)

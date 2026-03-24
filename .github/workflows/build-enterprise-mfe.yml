@@ -6,7 +6,10 @@ on:
     paths:
       - "infrastructure/docker/enterprise-mfe-clean/**"
       - "infrastructure/tutor/brand-mereka/**"
+      - "infrastructure/tutor/brand-biji-biji/**"
+      - "infrastructure/tutor/brand-skillourfuture/**"
       - "infrastructure/tutor/themes/mereka/mfe/theme/**"
+      - "assets/branding/tenants/**"
       - ".github/workflows/build-enterprise-mfe.yml"
   workflow_dispatch:
     inputs:
@@ -53,10 +56,11 @@ jobs:
             # Uses the GitHub API (no docker pull needed)
             local tag
             tag=$(gh api \
+              --paginate \
               -H "Accept: application/vnd.github+json" \
-              "/orgs/biji-biji-initiative/packages/container/${pkg_name}/versions" \
-              --jq '[.[] | select(.metadata.container.tags | length > 0) | .metadata.container.tags[] | select(startswith("mereka-branded-"))] | first // empty' \
-              2>/dev/null) || true
+              "/orgs/biji-biji-initiative/packages/container/${pkg_name}/versions?per_page=100" \
+              --jq '.[] | select(.metadata.container.tags | length > 0) | .metadata.container.tags[] | select(startswith("mereka-branded-"))' \
+              2>/dev/null | awk 'NR==1 { print; exit }') || true
 
             if [[ -z "${tag}" ]]; then
               echo "::error::No mereka-branded-* tag found for ${pkg_name}. Pass source_tag manually via workflow_dispatch."
@@ -83,7 +87,8 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@619a832600e8f40ac1688765d0ad653f42367c66
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@b01867c40710aa3055c510dd8f7d5f7fa3dc4546
+    secrets: inherit
     with:
       app_name: mereka-lms/enterprise-admin-portal
       dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal
@@ -100,7 +105,8 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@619a832600e8f40ac1688765d0ad653f42367c66
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@b01867c40710aa3055c510dd8f7d5f7fa3dc4546
+    secrets: inherit
     with:
       app_name: mereka-lms/enterprise-learner-portal
       dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal

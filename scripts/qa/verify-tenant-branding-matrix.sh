@@ -163,8 +163,11 @@ if [[ -f "$PLUGIN" ]]; then
   BASE_VARIANT_BLOCK=$(awk '/const MEREKA_BASE_VARIANT = \{/,/^\s*\};/' "$PLUGIN" || true)
 
   for domain in "${PRODUCTION_DOMAINS[@]}"; do
-    # Extract the multi-line block for this domain (from 'domain': { to next },)
-    DOMAIN_BLOCK=$(awk "/'${domain}'/"'{found=1} found; /\},/{if(found) exit}' "$PLUGIN" || true)
+    # Extract the multi-line block for this domain from the SITE_VARIANTS block only.
+    # The bundled plugin contract also contains unrelated references to tenant domains
+    # (for example default env values and MUX audience settings); scanning the full
+    # bundle gives false negatives when awk stops before the actual variant map.
+    DOMAIN_BLOCK=$(printf '%s\n' "$VARIANTS_BLOCK" | awk "/'${domain}'/"'{found=1} found; /^[[:space:]]*},?$/ {if(found) exit}' || true)
 
     if [[ -z "$DOMAIN_BLOCK" ]]; then
       fail "Domain '${domain}' not found in SITE_VARIANTS"

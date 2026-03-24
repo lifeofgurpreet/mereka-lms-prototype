@@ -19,11 +19,11 @@ window.ENV_CONFIG = {
   FEATURE_ENROLL_WITH_CODES: true,
   FEATURE_BROWSE_AND_REQUEST: true,
 
-  // Biji-Biji branding — served from /theme/ and / in the MFE container
-  LOGO_URL: '/logo.svg',
-  LOGO_WHITE_URL: '/logo-white.svg',
-  LOGO_TRADEMARK_URL: '/logo-trademark.svg',
-  FAVICON_URL: '/favicon.ico',
+  // Tenant branding assets — served from /brands/biji-biji/ in the shared MFE image
+  LOGO_URL: '/brands/biji-biji/logo.svg',
+  LOGO_WHITE_URL: '/brands/biji-biji/logo-white.svg',
+  LOGO_TRADEMARK_URL: '/brands/biji-biji/logo-trademark.svg',
+  FAVICON_URL: '/brands/biji-biji/favicon.ico',
   SITE_NAME: 'Biji-Biji Academy',
 };
 
