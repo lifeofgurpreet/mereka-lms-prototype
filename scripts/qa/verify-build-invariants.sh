@@ -29,15 +29,24 @@ do_pass() { echo -e "${GREEN}PASS${NC} $1"; PASSED=$((PASSED + 1)); }
 do_fail() { echo -e "${RED}FAIL${NC} $1"; FAILED=$((FAILED + 1)); }
 
 BUILD_WF="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
+ENTERPRISE_WF="$REPO_ROOT/.github/workflows/build-enterprise-mfe.yml"
 OPENEDX_BLOCK="$(awk '/^  build-openedx:/{flag=1} /^  build-mfe:/{flag=0} flag' "$BUILD_WF")"
 MFE_BLOCK="$(awk '/^  build-mfe:/{flag=1} /^  slsa-provenance:/{flag=0} flag' "$BUILD_WF")"
+ENTERPRISE_ADMIN_UPDATE_BLOCK="$(awk '/^  update-dev-admin-portal:/{flag=1} /^  learner-portal:/{flag=0} flag' "$ENTERPRISE_WF" 2>/dev/null || true)"
+ENTERPRISE_LEARNER_UPDATE_BLOCK="$(awk '/^  update-dev-learner-portal:/{flag=1} flag' "$ENTERPRISE_WF" 2>/dev/null || true)"
 
 echo "=== Build Invariant Verification ==="
 echo "Workflow: $BUILD_WF"
+echo "Enterprise Workflow: $ENTERPRISE_WF"
 echo
 
 if [[ ! -f "$BUILD_WF" ]]; then
   do_fail "Build workflow not found"
+  exit 1
+fi
+
+if [[ ! -f "$ENTERPRISE_WF" ]]; then
+  do_fail "Enterprise build workflow not found"
   exit 1
 fi
 
@@ -171,6 +180,43 @@ if [[ -f "$ES_FILE" ]]; then
   else
     do_pass "INV-10: ExternalSecrets use v1 apiVersion"
   fi
+fi
+
+# --- Invariant 11: Enterprise MFE builds MUST promote dev GitOps pins ---
+# The enterprise portals are consumed from bbi-infrastructure overlay pins, not
+# directly from the build output. A successful main build without an update-dev
+# step leaves dev green on stale portal images.
+if grep -q '^  update-dev-admin-portal:$' "$ENTERPRISE_WF" && grep -q '^  update-dev-learner-portal:$' "$ENTERPRISE_WF"; then
+  do_pass "INV-11a: Enterprise workflow defines update-dev jobs for both portals"
+else
+  do_fail "INV-11a: Enterprise workflow must define update-dev jobs for admin and learner portals"
+fi
+
+if grep -q 'reusable-update-dev-tag.yml' <<<"$ENTERPRISE_ADMIN_UPDATE_BLOCK" \
+  && grep -q 'reusable-update-dev-tag.yml' <<<"$ENTERPRISE_LEARNER_UPDATE_BLOCK"; then
+  do_pass "INV-11b: Enterprise update-dev jobs use the reusable GitOps tag updater"
+else
+  do_fail "INV-11b: Enterprise update-dev jobs must use reusable-update-dev-tag.yml"
+fi
+
+if grep -q 'apps/mereka-lms/overlays/profiles/dev/kustomization.yaml' <<<"$ENTERPRISE_ADMIN_UPDATE_BLOCK" \
+  && grep -q 'apps/mereka-lms/overlays/profiles/dev/kustomization.yaml' <<<"$ENTERPRISE_LEARNER_UPDATE_BLOCK"; then
+  do_pass "INV-11c: Enterprise update-dev jobs target the dev profile overlay"
+else
+  do_fail "INV-11c: Enterprise update-dev jobs must write back to apps/mereka-lms/overlays/profiles/dev/kustomization.yaml"
+fi
+
+if grep -q 'enterprise-admin-portal' <<<"$ENTERPRISE_ADMIN_UPDATE_BLOCK" \
+  && grep -q 'enterprise-learner-portal' <<<"$ENTERPRISE_LEARNER_UPDATE_BLOCK"; then
+  do_pass "INV-11d: Enterprise update-dev jobs target the correct portal image names"
+else
+  do_fail "INV-11d: Enterprise update-dev jobs must target the admin and learner portal image names explicitly"
+fi
+
+if grep -q 'update-dev-admin-portal' <<<"$ENTERPRISE_LEARNER_UPDATE_BLOCK"; then
+  do_pass "INV-11e: Enterprise learner update waits for admin update to avoid GitOps push races"
+else
+  do_fail "INV-11e: Enterprise learner update must depend on update-dev-admin-portal to serialize GitOps writes"
 fi
 
 echo

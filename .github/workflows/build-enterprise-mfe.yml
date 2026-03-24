@@ -96,6 +96,25 @@ jobs:
       build_args: |
         SOURCE_TAG=${{ needs.resolve-source.outputs.admin_source_tag }}
 
+  update-dev-admin-portal:
+    needs: admin-portal
+    if: github.ref == 'refs/heads/main'
+    # contents: write — reusable workflow commits the updated dev image ref back to infra
+    # id-token: write — OIDC for Workload Identity Federation used by reusable workflow
+    permissions:
+      contents: write
+      id-token: write
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@8c9ec0149a4f1910f6dfc3246b87046f0c0a43c8
+    with:
+      app_name: mereka-lms
+      image_tag: ${{ needs.admin-portal.outputs.image_tag }}
+      image_digest: ${{ needs.admin-portal.outputs.image_digest }}
+      image_repository: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal
+      kustomization_file: apps/mereka-lms/overlays/profiles/dev/kustomization.yaml
+      kustomize_image_name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal
+    secrets:
+      GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+
   learner-portal:
     needs: resolve-source
     # contents: read — checkout in reusable workflow
@@ -113,3 +132,24 @@ jobs:
       context: .
       build_args: |
         SOURCE_TAG=${{ needs.resolve-source.outputs.learner_source_tag }}
+
+  update-dev-learner-portal:
+    needs:
+      - learner-portal
+      - update-dev-admin-portal
+    if: github.ref == 'refs/heads/main'
+    # contents: write — reusable workflow commits the updated dev image ref back to infra
+    # id-token: write — OIDC for Workload Identity Federation used by reusable workflow
+    permissions:
+      contents: write
+      id-token: write
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@8c9ec0149a4f1910f6dfc3246b87046f0c0a43c8
+    with:
+      app_name: mereka-lms
+      image_tag: ${{ needs.learner-portal.outputs.image_tag }}
+      image_digest: ${{ needs.learner-portal.outputs.image_digest }}
+      image_repository: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal
+      kustomization_file: apps/mereka-lms/overlays/profiles/dev/kustomization.yaml
+      kustomize_image_name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal
+    secrets:
+      GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
