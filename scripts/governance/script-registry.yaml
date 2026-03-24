@@ -1546,3 +1546,333 @@ scripts:
     owner: platform-team
     purpose: Execute migration dry-run for validation
     criticality: release-supporting
+
+  - path: scripts/infra/additional-cost-optimizations.sh
+    owner: platform-team
+    purpose: Additional Cost Optimizations
+    criticality: release-supporting
+
+  - path: scripts/infra/apply-monitoring-configs.sh
+    owner: platform-team
+    purpose: Apply Monitoring Configs
+    criticality: release-supporting
+
+  - path: scripts/infra/apply-multisite-config.sh
+    owner: platform-team
+    purpose: Apply Multisite Config
+    criticality: release-supporting
+
+  - path: scripts/infra/argocd-refresh.sh
+    owner: platform-team
+    purpose: Argocd Refresh
+    criticality: release-supporting
+
+  - path: scripts/infra/atlas-config-from-infisical.sh
+    owner: platform-team
+    purpose: Atlas Config From Infisical
+    criticality: release-supporting
+
+  - path: scripts/infra/backup-db.sh
+    owner: platform-team
+    purpose: Backup Db
+    criticality: release-supporting
+
+  - path: scripts/infra/build-credentials-image.sh
+    owner: platform-team
+    purpose: Build Credentials Image
+    criticality: release-supporting
+
+  - path: scripts/infra/build-enterprise-mfe-clean.sh
+    owner: platform-team
+    purpose: Build Enterprise Mfe Clean
+    criticality: release-supporting
+
+  - path: scripts/infra/cloudflare-harden-zone.sh
+    owner: platform-team
+    purpose: Cloudflare Harden Zone
+    criticality: release-supporting
+
+  - path: scripts/infra/cloudflare-sync.sh
+    owner: platform-team
+    purpose: Cloudflare Sync
+    criticality: release-supporting
+
+  - path: scripts/infra/configure-github-authenticated-sso-canary.sh
+    owner: platform-team
+    purpose: Configure Github Authenticated Sso Canary
+    criticality: release-supporting
+
+  - path: scripts/infra/create-atlas-m10-cluster.sh
+    owner: platform-team
+    purpose: Create Atlas M10 Cluster
+    criticality: release-supporting
+
+  - path: scripts/infra/cron-branding-visual-regression.sh
+    owner: platform-team
+    purpose: Cron Branding Visual Regression
+    criticality: release-supporting
+
+  - path: scripts/infra/cron-public-health-check.sh
+    owner: platform-team
+    purpose: Cron Public Health Check
+    criticality: release-supporting
+
+  - path: scripts/infra/data-retention-jobs.sh
+    owner: platform-team
+    purpose: Data Retention Jobs
+    criticality: release-supporting
+
+  - path: scripts/infra/decommission-legacy-ecommerce.sh
+    owner: platform-team
+    purpose: Decommission Legacy Ecommerce
+    criticality: release-supporting
+
+  - path: scripts/infra/deploy-aspects-k8s.sh
+    owner: platform-team
+    purpose: Deploy Aspects K8S
+    criticality: release-supporting
+
+  - path: scripts/infra/docker-cleanup.sh
+    owner: platform-team
+    purpose: Docker Cleanup
+    criticality: release-supporting
+
+  - path: scripts/infra/downgrade-mongodb-to-m0.sh
+    owner: platform-team
+    purpose: Downgrade Mongodb To M0
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-authentik-admin-mfa.sh
+    owner: platform-team
+    purpose: Ensure Authentik Admin Mfa
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-authentik-admin.sh
+    owner: platform-team
+    purpose: Ensure Authentik Admin
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-authentik-hardening.sh
+    owner: platform-team
+    purpose: Ensure Authentik Hardening
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-authentik-oidc-redirect-uris.sh
+    owner: platform-team
+    purpose: Ensure Authentik Oidc Redirect Uris
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-platform-admins.sh
+    owner: platform-team
+    purpose: Ensure Platform Admins
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-studio-sso-canary.sh
+    owner: platform-team
+    purpose: Ensure Studio Sso Canary
+    criticality: release-supporting
+
+  - path: scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
+    owner: platform-team
+    purpose: Fix Mfe Refresh Endpoint Site Config
+    criticality: release-supporting
+
+  - path: scripts/infra/fix-service-selectors.sh
+    owner: platform-team
+    purpose: Fix Service Selectors
+    criticality: release-supporting
+
+  - path: scripts/infra/fix-velero-restore-test.sh
+    owner: platform-team
+    purpose: Fix Velero Restore Test
+    criticality: release-supporting
+
+  - path: scripts/infra/increase-gke-quota.sh
+    owner: platform-team
+    purpose: Increase Gke Quota
+    criticality: release-supporting
+
+  - path: scripts/infra/kind-load-openedx-image.sh
+    owner: platform-team
+    purpose: Kind Load Openedx Image
+    criticality: release-supporting
+
+  - path: scripts/infra/mongodb-atlas-cutover.sh
+    owner: platform-team
+    purpose: Mongodb Atlas Cutover
+    criticality: release-supporting
+
+  - path: scripts/infra/mongodb-to-atlas.sh
+    owner: platform-team
+    purpose: Mongodb To Atlas
+    criticality: release-supporting
+
+  - path: scripts/infra/normalize-mysql-secrets.sh
+    owner: platform-team
+    purpose: Normalize Mysql Secrets
+    criticality: release-supporting
+
+  - path: scripts/infra/optimize-dev-costs.sh
+    owner: platform-team
+    purpose: Optimize Dev Costs
+    criticality: release-supporting
+
+  - path: scripts/infra/optimize-pod-resources.sh
+    owner: platform-team
+    purpose: Optimize Pod Resources
+    criticality: release-supporting
+
+  - path: scripts/infra/prepare-bbi-infra-ref-bump.sh
+    owner: platform-team
+    purpose: Prepare Bbi Infra Ref Bump
+    criticality: release-supporting
+
+  - path: scripts/infra/provision-admin-api-key.sh
+    owner: platform-team
+    purpose: Provision Admin Api Key
+    criticality: release-supporting
+
+  - path: scripts/infra/provision-atlas-cluster.sh
+    owner: platform-team
+    purpose: Provision Atlas Cluster
+    criticality: release-supporting
+
+  - path: scripts/infra/prune-gcp-snapshots.sh
+    owner: platform-team
+    purpose: Prune Gcp Snapshots
+    criticality: release-supporting
+
+  - path: scripts/infra/purge-frontend-theme-cache.sh
+    owner: platform-team
+    purpose: Purge Frontend Theme Cache
+    criticality: release-supporting
+
+  - path: scripts/infra/rebuild-dev-openedx-db.sh
+    owner: platform-team
+    purpose: Rebuild Dev Openedx Db
+    criticality: release-supporting
+
+  - path: scripts/infra/refresh-i18n-static.sh
+    owner: platform-team
+    purpose: Refresh I18N Static
+    criticality: release-supporting
+
+  - path: scripts/infra/repair-gke-mysql-users.sh
+    owner: platform-team
+    purpose: Repair Gke Mysql Users
+    criticality: release-supporting
+
+  - path: scripts/infra/repair-kind-mysql-users.sh
+    owner: platform-team
+    purpose: Repair Kind Mysql Users
+    criticality: release-supporting
+
+  - path: scripts/infra/repair-routing.sh
+    owner: platform-team
+    purpose: Repair Routing
+    criticality: release-supporting
+
+  - path: scripts/infra/repair-staging-routing.sh
+    owner: platform-team
+    purpose: Repair Staging Routing
+    criticality: release-supporting
+
+  - path: scripts/infra/retire-legacy-mongodb.sh
+    owner: platform-team
+    purpose: Retire Legacy Mongodb
+    criticality: release-supporting
+
+  - path: scripts/infra/run-authenticated-sso-canary-from-infisical.sh
+    owner: platform-team
+    purpose: Run Authenticated Sso Canary From Infisical
+    criticality: release-supporting
+
+  - path: scripts/infra/seed-mongo-dev.sh
+    owner: platform-team
+    purpose: Seed Mongo Dev
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-github-repo-vars.sh
+    owner: platform-team
+    purpose: Setup Github Repo Vars
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-google-oauth.sh
+    owner: platform-team
+    purpose: Setup Google Oauth
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-k8s-overrides.sh
+    owner: platform-team
+    purpose: Setup K8S Overrides
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-mobile-api.sh
+    owner: platform-team
+    purpose: Setup Mobile Api
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-vps-branding-visual-regression-cron.sh
+    owner: platform-team
+    purpose: Setup Vps Branding Visual Regression Cron
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-vps-health-cron.sh
+    owner: platform-team
+    purpose: Setup Vps Health Cron
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-github-authenticated-sso-canary-from-infisical.sh
+    owner: platform-team
+    purpose: Sync Github Authenticated Sso Canary From Infisical
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-grafana-oidc-secret.sh
+    owner: platform-team
+    purpose: Sync Grafana Oidc Secret
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-mongodb-from-production.sh
+    owner: platform-team
+    purpose: Sync Mongodb From Production
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-production-config.sh
+    owner: platform-team
+    purpose: Sync Production Config
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-translations.sh
+    owner: platform-team
+    purpose: Sync Translations
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-vendored-mfe-caddyfile.sh
+    owner: platform-team
+    purpose: Sync Vendored Mfe Caddyfile
+    criticality: release-supporting
+
+  - path: scripts/infra/tutor-config-rollback.sh
+    owner: platform-team
+    purpose: Tutor Config Rollback
+    criticality: release-supporting
+
+  - path: scripts/infra/user-data-export.sh
+    owner: platform-team
+    purpose: User Data Export
+    criticality: release-supporting
+
+  - path: scripts/infra/verify-k8s-overrides.sh
+    owner: platform-team
+    purpose: Verify K8S Overrides
+    criticality: release-supporting
+
+  - path: scripts/infra/verify-prometheus-integration.sh
+    owner: platform-team
+    purpose: Verify Prometheus Integration
+    criticality: release-supporting
+
+  - path: scripts/infra/verify-tutor-patches.sh
+    owner: platform-team
+    purpose: Verify Tutor Patches
+    criticality: release-supporting
