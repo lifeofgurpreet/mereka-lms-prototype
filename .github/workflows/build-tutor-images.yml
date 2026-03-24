@@ -1,6 +1,9 @@
 name: Build Tutor Images
 
-permissions: {}
+permissions:
+  contents: read
+  packages: write
+  id-token: write
 on:
   push:
     branches:
@@ -282,7 +285,7 @@ jobs:
 
       - name: Log in to GHCR (build cache)
         env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build OpenEdX image
@@ -519,7 +522,7 @@ jobs:
 
       - name: Log in to GHCR
         env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Tag and push image
@@ -666,7 +669,7 @@ jobs:
 
       - name: Log in to GHCR (build cache)
         env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build MFE image
@@ -877,7 +880,7 @@ jobs:
 
       - name: Log in to GHCR
         env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Tag and push image
@@ -943,7 +946,7 @@ jobs:
 
       - name: Log in to GHCR
         env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Generate provenance for OpenEdX image
