@@ -27,7 +27,7 @@ spec:
         runAsGroup: 1000
       initContainers:
         - name: migrate
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:0.1.1
+          image: ghcr.io/biji-biji-initiative/purchase-gateway:0.1.1
           command: ["python", "-m", "alembic", "upgrade", "head"]
           env:
             - name: DATABASE_URL
@@ -46,7 +46,7 @@ spec:
             allowPrivilegeEscalation: false
       containers:
         - name: payments-gateway
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:0.1.1
+          image: ghcr.io/biji-biji-initiative/purchase-gateway:0.1.1
           ports:
             - containerPort: 8080
           env:

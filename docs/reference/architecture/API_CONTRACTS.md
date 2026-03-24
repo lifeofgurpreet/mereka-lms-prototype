@@ -7,7 +7,7 @@ Custom API surfaces for Mereka Academy. Standard Open edX REST APIs are not docu
 
 ## 1. Purchase Gateway (FastAPI)
 
-**Base URL**: `https://payments.academyv2.mereka.io`
+**Base URL**: `https://academyv2.mereka.io/payments`
 **OpenAPI docs**: `GET /docs` (enabled when `DEBUG=true` — staging only; disabled in production)
 **OpenAPI schema**: `GET /openapi.json` (always available, regardless of DEBUG)
 **Auth**: Admin endpoints require `X-API-Key` header (HMAC-compared against `ADMIN_API_KEY` secret).

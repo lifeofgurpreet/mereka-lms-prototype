@@ -23,7 +23,7 @@ This file is a reference projection of the current domain surface. Runtime state
 | Enterprise Admin | `admin.academyv2.mereka.io` | `admin.academyv2.mereka.dev` | `admin.staging.academyv2.mereka.io` |
 | Enterprise Learner | `learner.academyv2.mereka.io` | `learner.academyv2.mereka.dev` | `learner.staging.academyv2.mereka.io` |
 | Legacy Ecommerce | `ecommerce.academyv2.mereka.io` | `ecommerce.academyv2.mereka.dev` | `ecommerce.staging.academyv2.mereka.io` |
-| Payments Gateway | `payments.academyv2.mereka.io` | `payments.academyv2.mereka.dev` | `payments.staging.academyv2.mereka.io` |
+| Payments Gateway (path-routed) | `academyv2.mereka.io/payments/*` | `academyv2.mereka.dev/payments/*` | `staging.academyv2.mereka.io/payments/*` |
 
 ## DEV Tenant-Pattern Domains
 

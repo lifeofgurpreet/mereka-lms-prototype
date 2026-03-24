@@ -170,13 +170,12 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 3. **Studio** - https://studio.academyv2.mereka.dev
 4. **MFE Hub** - https://apps.academyv2.mereka.dev
 
-**Shared Services** (6):
+**Shared Services** (5):
 5. **Discovery** - https://discovery.academyv2.mereka.dev
-6. **Ecommerce** - https://ecommerce.academyv2.mereka.dev
-   > **Note**: Legacy Oscar ecommerce, being replaced by Purchase Gateway. See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md`.
-7. **Credentials** - https://credentials.academyv2.mereka.dev
-8. **Forum** - https://forum.academyv2.mereka.dev
-9. **Notes API** - https://notes.academyv2.mereka.dev
+6. **Credentials** - https://credentials.academyv2.mereka.dev
+7. **Forum** - https://forum.academyv2.mereka.dev
+8. **Notes API** - https://notes.academyv2.mereka.dev
+9. **Purchase flows** - routed through LMS `/payments/*` in DEV (no dedicated `ecommerce.academyv2.mereka.dev` host)
 10. **XQueue** - (Internal only)
 
 ---

@@ -38,11 +38,13 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@ca61f1f34ca7010d1a1275e6123de5a6ad0ba8a4
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@8c9ec0149a4f1910f6dfc3246b87046f0c0a43c8
     with:
       app_name: mereka-lms
       image_tag: ${{ needs.build.outputs.image_tag }}
       image_digest: ${{ needs.build.outputs.image_digest }}
       image_repository: ghcr.io/biji-biji-initiative/purchase-gateway
+      kustomization_file: apps/mereka-lms/overlays/profiles/dev/kustomization.yaml
+      kustomize_image_name: ghcr.io/biji-biji-initiative/purchase-gateway
     secrets:
       GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}

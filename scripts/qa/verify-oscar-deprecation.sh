@@ -239,7 +239,7 @@ if [[ -f "$CADDYFILE" ]]; then
     pass "Caddyfile: Purchase Gateway route present"
   else
     migrate "Caddyfile: no Purchase Gateway route yet — add webhook route (AC-027)"
-    detail "Add: http://payments.academyv2.mereka.{io,dev} -> payments-gateway:8080"
+    detail "Add: https://academyv2.mereka.{io,dev}/payments/* -> payments-gateway:8080"
   fi
 else
   fail "Caddyfile not found at $CADDYFILE"
@@ -384,7 +384,7 @@ if [[ -f "$CADDYFILE" ]]; then
 fi
 if [[ "$PG_CADDY_ROUTE" -eq 0 ]]; then
   migrate "Caddyfile: no route for Purchase Gateway webhook external access"
-  detail "Add: http://payments.academyv2.mereka.{io,dev} -> payments-gateway:8080/webhooks/stripe/"
+  detail "Add: https://academyv2.mereka.{io,dev}/payments/webhooks/stripe/ -> payments-gateway:8080/webhooks/stripe/"
 fi
 
 # ══════════════════════════════════════════════════════════════════════════

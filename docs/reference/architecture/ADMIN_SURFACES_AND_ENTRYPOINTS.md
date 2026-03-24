@@ -97,7 +97,7 @@ admin.* → /*                       → enterprise-admin-portal:8002
 
 | Property | Value |
 |----------|-------|
-| **URL** | `https://payments.academyv2.mereka.io/admin/*` (API only, no UI) |
+| **URL** | `https://academyv2.mereka.io/payments/api/v1/admin/*` (API only, no UI) |
 | **What it is** | REST API for payment/ecommerce administration |
 | **What it does** | Manage offerings, entitlements, bulk assignment, orders, refunds |
 | **What it is NOT** | A web UI. Not a Django admin. Requires programmatic access. |

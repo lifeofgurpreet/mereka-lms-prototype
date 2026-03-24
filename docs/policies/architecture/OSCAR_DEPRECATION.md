@@ -65,7 +65,7 @@ Pre-requisites before any cutover:
 - [ ] Migration routing middleware implemented (`services/purchase-gateway/app/middleware/migration.py`)
   — new purchases go to gateway; in-flight Oscar orders complete on Oscar (AC-027)
 - [ ] Caddy route added for Purchase Gateway external webhook access
-  — `http://payments.academyv2.mereka.{io,dev}` → `payments-gateway:8080`
+  — `https://academyv2.mereka.{io,dev}/payments/*` → `payments-gateway:8080`
 - [ ] Stripe live keys set in GCP Secret Manager (`bbi-k8` project):
   - `MEREKA_LMS_PAYMENTS_STRIPE_SECRET_KEY`
   - `MEREKA_LMS_PAYMENTS_STRIPE_WEBHOOK_SECRET`

@@ -49,8 +49,10 @@ KUBE_CONTEXT=kind-mereka ./scripts/qa/verify-rke2-tenant-routes.sh --offline
 > `academyv2.mereka.dev`. The `forum.academyv2.mereka.dev` ingress rule routes to the same
 > caddy → lms:8000 path as the main LMS domain.
 
-> **Oscar ecommerce is deprecated.** Purchase Gateway handles payments. The
-> `ecommerce.academyv2.mereka.dev` hostname is not probed by the verification script.
+> **Oscar ecommerce is deprecated.** Purchase Gateway handles payments through
+> the LMS-hosted `/payments/*` route. The retired
+> `ecommerce.academyv2.mereka.dev` hostname is intentionally not probed by the
+> verification script and may return `404`.
 
 ---
 

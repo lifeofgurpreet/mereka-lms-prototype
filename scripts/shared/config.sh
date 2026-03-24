@@ -95,9 +95,8 @@ export DEV_SKILLOURFUTURE_DOMAIN="${DEV_SKILLOURFUTURE_DOMAIN:-skillourfuture.ac
 export DEV_SKILLOURFUTURE_STUDIO_DOMAIN="${DEV_SKILLOURFUTURE_STUDIO_DOMAIN:-studio.${DEV_SKILLOURFUTURE_DOMAIN}}"
 export DEV_SKILLOURFUTURE_MFE_DOMAIN="${DEV_SKILLOURFUTURE_MFE_DOMAIN:-apps.${DEV_SKILLOURFUTURE_DOMAIN}}"
 
-# Purchase Gateway (canonical ecommerce replacement)
-export PURCHASE_GATEWAY_DOMAIN="${PURCHASE_GATEWAY_DOMAIN:-payments.${LMS_DOMAIN}}"
-export DEV_PURCHASE_GATEWAY_DOMAIN="${DEV_PURCHASE_GATEWAY_DOMAIN:-payments.${DEV_LMS_DOMAIN}}"
+# Purchase Gateway is path-routed under the LMS host via /payments/*.
+# There is no standalone payments.<domain> hostname in the active platform contract.
 
 # Staging (optional future-ready environment)
 export STAGING_LMS_DOMAIN="${STAGING_LMS_DOMAIN:-staging.academyv2.mereka.io}"
@@ -118,7 +117,6 @@ export STAGING_ENTERPRISE_ADMIN_DOMAIN="${STAGING_ENTERPRISE_ADMIN_DOMAIN:-admin
 export STAGING_ENTERPRISE_PORTAL_DOMAIN="${STAGING_ENTERPRISE_PORTAL_DOMAIN:-learner.staging.academyv2.mereka.io}"
 
 # Purchase Gateway (staging)
-export STAGING_PURCHASE_GATEWAY_DOMAIN="${STAGING_PURCHASE_GATEWAY_DOMAIN:-payments.staging.academyv2.mereka.io}"
 
 # =============================================================================
 # Container Registry

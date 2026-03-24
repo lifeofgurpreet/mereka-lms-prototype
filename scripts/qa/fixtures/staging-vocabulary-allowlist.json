@@ -44,6 +44,7 @@
     "scripts/qa/verify-gitops-image-overrides.sh",
     "scripts/qa/verify-infisical-env-validation-coverage.sh",
     "scripts/qa/verify-lane-identity.sh",
+    "scripts/qa/verify-mfe-config-api.sh",
     "scripts/qa/verify-mfe-env-config-url-guard.sh",
     "scripts/qa/verify-migration-completion-plan.sh",
     "scripts/qa/verify-multisite-config.sh",

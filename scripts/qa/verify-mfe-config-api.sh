@@ -16,10 +16,13 @@
 #
 # Usage:
 #   ./scripts/qa/verify-mfe-config-api.sh
-#   ./scripts/qa/verify-mfe-config-api.sh --live   # force live checks
+#   ./scripts/qa/verify-mfe-config-api.sh --live
+#   ./scripts/qa/verify-mfe-config-api.sh --live --env dev
+#   ./scripts/qa/verify-mfe-config-api.sh --live --env production
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+USER_K8S_NAMESPACE="${K8S_NAMESPACE-}"
 source "${REPO_ROOT}/scripts/shared/config.sh" 2>/dev/null || true
 
 # Colors
@@ -32,12 +35,18 @@ PASS=0
 FAIL=0
 SKIP=0
 LIVE_MODE=0
+TARGET_ENV=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --live) LIVE_MODE=1; shift ;;
+    --env)
+      [[ $# -lt 2 ]] && { echo "--env requires a value" >&2; exit 1; }
+      TARGET_ENV="$2"
+      shift 2
+      ;;
     -h|--help)
-      echo "Usage: $0 [--live]"
+      echo "Usage: $0 [--live] [--env production|dev|profiles-dev|staging]"
       exit 0
       ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
@@ -47,6 +56,56 @@ done
 pass() { echo -e "${GREEN}PASS${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}FAIL${NC} $1"; FAIL=$((FAIL + 1)); }
 skip() { echo -e "${YELLOW}SKIP${NC} $1"; SKIP=$((SKIP + 1)); }
+
+resolve_live_environment() {
+  if [[ -n "$TARGET_ENV" ]]; then
+    case "$TARGET_ENV" in
+      production|dev|profiles-dev|staging)
+        printf '%s\n' "$TARGET_ENV"
+        return 0
+        ;;
+      *)
+        echo "Unsupported --env value: $TARGET_ENV" >&2
+        return 1
+        ;;
+    esac
+  fi
+
+  case "$(resolve_live_namespace)" in
+    mereka-lms-dev) printf '%s\n' "dev" ;;
+    stg-mereka-lms) printf '%s\n' "staging" ;;
+    mereka-lms) printf '%s\n' "production" ;;
+    *)
+      echo "Unknown live namespace '${K8S_NAMESPACE:-}'; defaulting live checks to production" >&2
+      printf '%s\n' "production"
+      ;;
+  esac
+}
+
+resolve_live_namespace() {
+  local configured_namespace="${K8S_NAMESPACE:-mereka-lms}"
+
+  if [[ -n "$USER_K8S_NAMESPACE" ]]; then
+    printf '%s\n' "$USER_K8S_NAMESPACE"
+    return 0
+  fi
+
+  if command -v kubectl &>/dev/null; then
+    if kubectl get namespace "$configured_namespace" >/dev/null 2>&1; then
+      printf '%s\n' "$configured_namespace"
+      return 0
+    fi
+
+    for candidate in mereka-lms-dev stg-mereka-lms mereka-lms; do
+      if kubectl get namespace "$candidate" >/dev/null 2>&1; then
+        printf '%s\n' "$candidate"
+        return 0
+      fi
+    done
+  fi
+
+  printf '%s\n' "$configured_namespace"
+}
 
 echo "=== MFE Config API Verification ==="
 echo "Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -179,16 +238,40 @@ if [[ $KUBECTL_LIVE -eq 0 ]]; then
   skip "Live checks skipped (kubectl not available or --live not specified)"
   skip "Re-run with --live flag when cluster is accessible"
 else
-  NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
+  NAMESPACE="$(resolve_live_namespace)"
+  LIVE_ENV="$(resolve_live_environment)"
+  echo "  Resolved live environment: ${LIVE_ENV} (namespace: ${NAMESPACE})"
 
   # Map tenant → expected LMS domain for the live check
-  declare -A LIVE_TENANTS=(
-    [mereka]="${LMS_DOMAIN:-academyv2.mereka.io}"
-    [biji-biji]="${BIJI_DOMAIN:-academy.biji-biji.com}"
-    [skillourfuture]="${SKILLOURFUTURE_DOMAIN:-skillourfuture.academy.mereka.io}"
-  )
+  declare -A LIVE_TENANTS=()
+  declare -a LIVE_TENANT_LIST=()
+  case "$LIVE_ENV" in
+    production)
+      LIVE_TENANTS=(
+        [mereka]="${LMS_DOMAIN:-academyv2.mereka.io}"
+        [biji-biji]="${BIJI_DOMAIN:-academy.biji-biji.com}"
+        [skillourfuture]="${SKILLOURFUTURE_DOMAIN:-skillourfuture.academy.mereka.io}"
+      )
+      LIVE_TENANT_LIST=(mereka biji-biji skillourfuture)
+      ;;
+    dev|profiles-dev)
+      LIVE_TENANTS=(
+        [mereka]="${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
+        [biji-biji]="${DEV_BIJI_DOMAIN:-biji-biji.academyv2.mereka.dev}"
+        [skillourfuture]="${DEV_SKILLOURFUTURE_DOMAIN:-skillourfuture.academyv2.mereka.dev}"
+      )
+      LIVE_TENANT_LIST=(mereka biji-biji skillourfuture)
+      ;;
+    staging)
+      LIVE_TENANTS=(
+        [mereka]="${STAGING_LMS_DOMAIN:-staging.academyv2.mereka.io}"
+      )
+      LIVE_TENANT_LIST=(mereka)
+      skip "Staging tenant-specific alternate domains are not defined in scripts/shared/config.sh; limiting live checks to the primary tenant"
+      ;;
+  esac
 
-  for tenant in mereka biji-biji skillourfuture; do
+  for tenant in "${LIVE_TENANT_LIST[@]}"; do
     domain="${LIVE_TENANTS[$tenant]}"
     url="https://${domain}/api/mfe_config/v1"
     echo "  Checking $url ..."

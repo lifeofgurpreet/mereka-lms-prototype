@@ -165,12 +165,8 @@ Platform admins are enforced separately (see `docs/guides/admin/ADMIN_LOGIN_GUID
 
 **Other Services (Dev)**
 - **Discovery:** https://discovery.academyv2.mereka.dev
-- **Ecommerce:** https://ecommerce.academyv2.mereka.dev
-  > **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. This section is retained for reference during the transition period.
-  - **Service Landing:** https://ecommerce.academyv2.mereka.dev/ (branded root)
-  - **Dashboard:** https://ecommerce.academyv2.mereka.dev/dashboard/
-  - **Basket:** https://ecommerce.academyv2.mereka.dev/basket/
-  - **Checkout:** https://ecommerce.academyv2.mereka.dev/checkout/
+- **Purchase Gateway:** `https://academyv2.mereka.dev/payments/*` (path-routed API under the LMS host)
+  > **Note**: There is no standalone `payments.academyv2.mereka.dev` or active user-facing `ecommerce.academyv2.mereka.dev` contract in current DEV. Legacy Oscar ecommerce is being retired in favor of the custom Purchase Gateway (`services/purchase-gateway/`).
 - **Credentials:** https://credentials.academyv2.mereka.dev (API-first, has Django admin)
   - **Admin:** https://credentials.academyv2.mereka.dev/admin/
   - **Health:** https://credentials.academyv2.mereka.dev/health/

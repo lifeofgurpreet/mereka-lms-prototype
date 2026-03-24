@@ -54,7 +54,6 @@ Public dev hostnames:
 - `studio.academyv2.mereka.dev`
 - `apps.academyv2.mereka.dev`
 - `discovery.academyv2.mereka.dev`
-- `ecommerce.academyv2.mereka.dev`
 - `credentials.academyv2.mereka.dev`
 - `notes.academyv2.mereka.dev`
 - `forum.academyv2.mereka.dev`
