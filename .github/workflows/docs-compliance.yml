@@ -234,17 +234,9 @@ jobs:
           python3 tools/docs/verify/verify-stub-only-transitional-dirs.py \
             --range "$DOCS_POLICY_RANGE" \
             --summary-file "$TRANSITIONAL_STUB_SUMMARY"
-          python3 - "$TRANSITIONAL_STUB_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
-          import json, sys
-          with open(sys.argv[1], "r", encoding="utf-8") as fp:
-              payload = json.load(fp)
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Transitional Root Stub Policy\n")
-              fp.write(f"- status={payload.get('status', 'unknown')}\n")
-              fp.write(f"- range={payload.get('range', 'n/a')}\n")
-              fp.write(f"- files_checked={payload.get('files_checked', 'n/a')}\n")
-              fp.write(f"- errors={len(payload.get('errors', []))}\n")
-          PY
+          python3 docs/qa/helpers/summarize-transitional-stub.py \
+            "$TRANSITIONAL_STUB_SUMMARY" \
+            "$GITHUB_STEP_SUMMARY"
 
       - name: Verify archive write protection
         run: |
@@ -253,16 +245,9 @@ jobs:
           python3 tools/docs/verify/verify-archive-write-protection.py \
             --range "$DOCS_POLICY_RANGE" \
             --summary-file "$ARCHIVE_WRITE_SUMMARY"
-          python3 - "$ARCHIVE_WRITE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
-          import json, sys
-          with open(sys.argv[1], "r", encoding="utf-8") as fp:
-              payload = json.load(fp)
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Archive Write Protection\n")
-              fp.write(f"- status={payload.get('status', 'unknown')}\n")
-              fp.write(f"- authorized={str(payload.get('authorized', False)).lower()}\n")
-              fp.write(f"- archive_changes={len(payload.get('archive_changes', []))}\n")
-          PY
+          python3 docs/qa/helpers/summarize-archive-write.py \
+            "$ARCHIVE_WRITE_SUMMARY" \
+            "$GITHUB_STEP_SUMMARY"
 
       - name: Verify evidence and status winning roots
         run: |
@@ -271,18 +256,9 @@ jobs:
           python3 tools/docs/verify/verify-evidence-status-root-policy.py \
             --range "$DOCS_POLICY_RANGE" \
             --summary-file "$EVIDENCE_STATUS_ROOT_SUMMARY"
-          python3 - "$EVIDENCE_STATUS_ROOT_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
-          import json, sys
-          with open(sys.argv[1], "r", encoding="utf-8") as fp:
-              payload = json.load(fp)
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Evidence and Status Root Policy\n")
-              fp.write(f"- status={payload.get('status', 'unknown')}\n")
-              fp.write(f"- evidence_checked={payload.get('evidence_checked', 'n/a')}\n")
-              fp.write(f"- status_checked={payload.get('status_checked', 'n/a')}\n")
-              fp.write(f"- losing_checked={payload.get('losing_checked', 'n/a')}\n")
-              fp.write(f"- errors={len(payload.get('errors', []))}\n")
-          PY
+          python3 docs/qa/helpers/summarize-evidence-status-root.py \
+            "$EVIDENCE_STATUS_ROOT_SUMMARY" \
+            "$GITHUB_STEP_SUMMARY"
 
       - name: Verify docs catalog governance
         run: |
@@ -291,17 +267,9 @@ jobs:
           python3 tools/docs/verify/verify-doc-catalog-governance.py \
             --range "$DOCS_POLICY_RANGE" \
             --summary-file "$DOCS_CATALOG_GOVERNANCE_SUMMARY"
-          python3 - "$DOCS_CATALOG_GOVERNANCE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
-          import json, sys
-          with open(sys.argv[1], "r", encoding="utf-8") as fp:
-              payload = json.load(fp)
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Docs Catalog Governance\n")
-              fp.write(f"- status={payload.get('status', 'unknown')}\n")
-              fp.write(f"- changed_docs_checked={payload.get('changed_docs_checked', 'n/a')}\n")
-              fp.write(f"- duplicate_groups={len(payload.get('duplicate_canonical_groups', {}))}\n")
-              fp.write(f"- uncovered_changed_docs={len(payload.get('uncovered_changed_docs', []))}\n")
-          PY
+          python3 docs/qa/helpers/summarize-doc-catalog-governance.py \
+            "$DOCS_CATALOG_GOVERNANCE_SUMMARY" \
+            "$GITHUB_STEP_SUMMARY"
 
 
       - name: Verify generated docs banners
@@ -392,16 +360,9 @@ jobs:
           python3 tools/docs/verify/scan-doc-catalog-residue.py \
             --fail-on-residue \
             --summary-file "$DOCS_CATALOG_RESIDUE_SUMMARY"
-          python3 - "$DOCS_CATALOG_RESIDUE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
-          import json, sys
-          with open(sys.argv[1], "r", encoding="utf-8") as fp:
-              payload = json.load(fp)
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Docs Catalog Residue (Advisory)\n")
-              fp.write(f"- uncataloged_winning_docs={payload.get('uncataloged_winning_docs_count', 'n/a')}\n")
-              fp.write(f"- stale_catalog_entries={payload.get('stale_catalog_entries_count', 'n/a')}\n")
-              fp.write(f"- duplicate_canonical_groups={payload.get('duplicate_canonical_groups_count', 'n/a')}\n")
-          PY
+          python3 docs/qa/helpers/summarize-doc-catalog-residue.py \
+            "$DOCS_CATALOG_RESIDUE_SUMMARY" \
+            "$GITHUB_STEP_SUMMARY"
 
       - name: Scan docs orphan candidates
         run: |
@@ -409,15 +370,9 @@ jobs:
           DOC_ORPHAN_SUMMARY="${RUNNER_TEMP}/docs-orphan-summary.json"
           python3 tools/docs/verify/scan-doc-orphans.py \
             --summary-file "$DOC_ORPHAN_SUMMARY"
-          python3 - "$DOC_ORPHAN_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
-          import json, sys
-          with open(sys.argv[1], "r", encoding="utf-8") as fp:
-              payload = json.load(fp)
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Docs Orphan Scan\n")
-              fp.write(f"- candidates_checked={payload.get('candidates_checked', 'n/a')}\n")
-              fp.write(f"- orphan_docs={payload.get('orphan_docs_count', 'n/a')}\n")
-          PY
+          python3 docs/qa/helpers/summarize-doc-orphans.py \
+            "$DOC_ORPHAN_SUMMARY" \
+            "$GITHUB_STEP_SUMMARY"
 
       - name: Report non-stub transitional files
         run: |
@@ -426,19 +381,9 @@ jobs:
           python3 tools/docs/verify/report-nonstub-transitional-files.py \
             --fail-on-nonstub \
             --summary-file "$NONSTUB_TRANSITIONAL_SUMMARY"
-          python3 - "$NONSTUB_TRANSITIONAL_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
-          import json, sys
-          with open(sys.argv[1], "r", encoding="utf-8") as fp:
-              payload = json.load(fp)
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Transitional Roots Non-Stub Inventory\n")
-              fp.write(f"- total_nonstub_files={payload.get('total_nonstub_files_count', 'n/a')}\n")
-              for root in payload.get('transitional_roots', []):
-                  fp.write(
-                      f"- {root.get('root')}: nonstub_files={root.get('nonstub_files_count', 'n/a')} "
-                      f"stub_files={root.get('stub_files_count', 'n/a')}\n"
-                  )
-          PY
+          python3 docs/qa/helpers/summarize-nonstub-transitional.py \
+            "$NONSTUB_TRANSITIONAL_SUMMARY" \
+            "$GITHUB_STEP_SUMMARY"
 
       - name: Verify legacy testmaps stay frozen
         run: |
@@ -447,16 +392,9 @@ jobs:
           python3 tools/docs/verify/verify-legacy-testmaps-frozen.py \
             --range "$DOCS_POLICY_RANGE" \
             --summary-file "$LEGACY_TESTMAP_FREEZE_SUMMARY"
-          python3 - "$LEGACY_TESTMAP_FREEZE_SUMMARY" "$GITHUB_STEP_SUMMARY" <<'PY'
-          import json, sys
-          with open(sys.argv[1], "r", encoding="utf-8") as fp:
-              payload = json.load(fp)
-          with open(sys.argv[2], "a", encoding="utf-8") as fp:
-              fp.write("### Legacy Testmap Freeze\n")
-              fp.write(f"- status={payload.get('status', 'unknown')}\n")
-              fp.write(f"- changed_count={payload.get('changed_count', 'n/a')}\n")
-              fp.write(f"- frozen_root={payload.get('frozen_root', 'n/a')}\n")
-          PY
+          python3 docs/qa/helpers/summarize-legacy-testmaps-freeze.py \
+            "$LEGACY_TESTMAP_FREEZE_SUMMARY" \
+            "$GITHUB_STEP_SUMMARY"
 
       - name: Upload docs catalog health scorecard
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0

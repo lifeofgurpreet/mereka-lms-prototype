@@ -148,9 +148,8 @@ for wf_path in "${workflow_files[@]}"; do
   wf_name="$(basename "$wf_path")"
   jobs_json=""
   if ! jobs_json="$(yq -o=json '.jobs // {}' "$wf_path" 2>&1)"; then
-    # yq cannot parse heredoc Python blocks (<<'PY') in run: blocks — GitHub
-    # Actions handles them fine.  Warn instead of failing.
-    echo "  WARN: $wf_name skipped — yq parse limitation (heredoc in run block?)"
+    parse_error="$(head -n1 <<<"$jobs_json")"
+    error "$wf_name could not be parsed by yq: ${parse_error}"
     continue
   fi
 

@@ -67,7 +67,8 @@ for s in d.get('internal_services', []):
 
   while IFS= read -r svc; do
     [[ -z "$svc" ]] && continue
-    if echo "$contract_workloads" | grep -qx "$svc"; then
+    # Avoid pipefail false negatives when grep exits early on a successful match.
+    if grep -Fqx -- "$svc" <<< "$contract_workloads"; then
       pass "service '$svc' in contract.json workloads"
     else
       fail "service '$svc' in lane-identity but NOT in contract.json workloads"
@@ -76,7 +77,7 @@ for s in d.get('internal_services', []):
 
   while IFS= read -r wl; do
     [[ -z "$wl" ]] && continue
-    if ! echo "$identity_services" | grep -qx "$wl"; then
+    if ! grep -Fqx -- "$wl" <<< "$identity_services"; then
       case "$wl" in
         mysql|redis|elasticsearch|meilisearch|smtp|postgresql-payments)
           pass "workload '$wl' is infrastructure (not in internal_services)" ;;
