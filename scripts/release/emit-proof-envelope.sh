@@ -234,8 +234,9 @@ run_aggregate() {
 
   if [[ "$SKIP_CLUSTER" == "true" ]]; then
     [[ "$FORMAT" != "json" ]] && echo "Skipping migration-proof and runtime-smoke (--skip-cluster)"
-    emit_envelope "migration-proof" "pass" '{"skipped": true, "reason": "skip-cluster"}' 0
-    emit_envelope "runtime-smoke" "pass" '{"skipped": true, "reason": "skip-cluster"}' 0
+    [[ "$FORMAT" != "json" ]] && echo "WARNING: closure_level=static — this is NOT canonical runtime proof"
+    emit_envelope "migration-proof" "skip" '{"skipped": true, "reason": "skip-cluster", "closure_level": "static"}' 0
+    emit_envelope "runtime-smoke" "skip" '{"skipped": true, "reason": "skip-cluster", "closure_level": "static"}' 0
   else
     run_migration_proof
     [[ "$FORMAT" != "json" ]] && echo ""
@@ -246,15 +247,22 @@ run_aggregate() {
 
   # Build aggregate summary
   local total_result="pass"
+  local has_skip=false
   for f in "$OUTPUT_DIR"/release-gate.json "$OUTPUT_DIR"/migration-proof.json "$OUTPUT_DIR"/runtime-smoke.json; do
     if [[ -f "$f" ]]; then
       local r
       r="$(python3 -c "import json; print(json.load(open('$f'))['result'])" 2>/dev/null || echo "unknown")"
       if [[ "$r" == "fail" ]]; then
         total_result="fail"
+      elif [[ "$r" == "skip" ]]; then
+        has_skip=true
       fi
     fi
   done
+  # closure_level: "runtime" only when ALL concerns ran without skip.
+  # "static" means some concerns were skipped — NOT canonical closure.
+  local aggregate_closure="runtime"
+  [[ "$has_skip" == "true" || "$SKIP_CLUSTER" == "true" ]] && aggregate_closure="static"
 
   local aggregate_details
   aggregate_details="$(python3 -c "
@@ -270,13 +278,14 @@ for fname in ('release-gate.json', 'migration-proof.json', 'runtime-smoke.json')
             'result': data['result'],
             'duration_ms': data['duration_ms']
         }
-print(json.dumps({'concerns': concerns}))
+print(json.dumps({'concerns': concerns, 'closure_level': '$aggregate_closure'}))
 ")"
 
   emit_envelope "aggregate" "$total_result" "$aggregate_details" 0
 
   if [[ "$FORMAT" != "json" ]]; then
-    echo "Aggregate result: $total_result"
+    echo "Aggregate result: $total_result (closure_level: $aggregate_closure)"
+    [[ "$aggregate_closure" == "static" ]] && echo "WARNING: Static-only proof. Not canonical runtime closure."
     echo "Proof artifacts in: $OUTPUT_DIR/"
     ls -la "$OUTPUT_DIR"/*.json 2>/dev/null
   fi

@@ -38,7 +38,7 @@ The following runtime checks still have open findings:
 | Repo contract truth | **strong** | static contracts and lane guards pass; 10/10 PASS |
 | Staging runtime truth | **CLOSED** | live staging tenant proof is `9/9` (fixed 2026-03-25T08:21:00Z) |
 | Staging auth/cookie truth | **fix applied, pending deploy** | root cause: Django default `False` + missing explicit `True` in staging overlay. Fix in PR #2125. After merge+deploy, cookies will work correctly (T-02) |
-| Release / evidence truth | blocked | workflows can still emit evidence with `--skip-cluster`, which is not canonical runtime closure |
+| Release / evidence truth | **fix applied** | proof artifacts now emit `closure_level: static\|runtime`; `--skip-cluster` no longer masquerades as canonical (T-03) |
 | GitOps / ownership truth | mixed | deprecated overlay surfaces and dual-repo promotion behavior still exist |
 | Topology / cutover truth | blocked by infra | dedicated staging cluster is not yet the active runtime target |
 | DEV runtime residual truth | open but secondary | known parked defects remain, but they are lower leverage than staging truth + cutover |
@@ -90,21 +90,16 @@ Done when:
 - cookie-proof.json reports `SESSION_COOKIE_SECURE = true`
 - staging sign-in flow succeeds in browser (SameSite=None + Secure=True = cookies accepted)
 
-### T-03 — Make runtime evidence canonical
+### T-03 — Make runtime evidence canonical — **FIX APPLIED 2026-03-25**
 
-Priority: `P0`  
+Priority: `P0`
 Owner surface: `mereka-lms`
 
-Verified fact:
+**Fix applied**: `release-gate.sh` and `emit-proof-envelope.sh` now emit `closure_level: runtime|static`. Skipped cluster checks emit `result: skip` (not `pass`). Aggregate proof includes `closure_level`. Downstream gates can refuse to advance on `closure_level: static`.
 
-- release/evidence workflows still support `--skip-cluster`
-- the control board explicitly refuses to treat local proof under `var/proof/**` as closure by itself
+Done when (remaining):
 
-Done when:
-
-- the canonical release/evidence path for dev/staging requires real cluster/runtime proof
-- browser/runtime closure is promoted into tracked repo truth
-- convergence is no longer blocked by “local-only or manual evidence”
+- browser/runtime closure is promoted into tracked repo truth — requires actual browser test after T-02 cookie fix deploys
 
 ### T-04 — Provision dedicated staging cluster and register it in ArgoCD
 

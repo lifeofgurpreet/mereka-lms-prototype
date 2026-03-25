@@ -288,12 +288,18 @@ PROOF_DIR="$REPO_ROOT/var/proof"
 mkdir -p "$PROOF_DIR"
 VERDICT="pass"
 [[ $FAIL -gt 0 ]] && VERDICT="fail"
+# Closure level: "runtime" when cluster checks ran, "static" when skipped.
+# Convergence gates MUST require closure_level=runtime for canonical closure.
+# A "pass" with closure_level=static is NOT canonical runtime proof.
+CLOSURE_LEVEL="runtime"
+[[ "$SKIP_CLUSTER" == "true" ]] && CLOSURE_LEVEL="static"
 cat > "$PROOF_DIR/release-gate.json" <<PROOF
 {
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "sha": "$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo "unknown")",
   "overlay": "$OVERLAY",
   "skip_cluster": $SKIP_CLUSTER,
+  "closure_level": "$CLOSURE_LEVEL",
   "gates_pass": $PASS,
   "gates_fail": $FAIL,
   "gates_warn": $WARN,
