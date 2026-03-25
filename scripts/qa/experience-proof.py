@@ -65,13 +65,13 @@ SURFACES = {
         ],
         "studio": [
             {"host": "staging.studio.academyv2.mereka.io", "tenant": "mereka"},
-            {"host": "staging.studio.academy.biji-biji.com", "tenant": "biji-biji"},
-            {"host": "staging.studio.skillourfuture.academy.mereka.io", "tenant": "skillourfuture"},
+            {"host": "studio.staging.academy.biji-biji.com", "tenant": "biji-biji"},
+            {"host": "studio.staging.skillourfuture.academy.mereka.io", "tenant": "skillourfuture"},
         ],
         "mfe": [
             {"host": "staging.apps.academyv2.mereka.io", "tenant": "mereka"},
-            {"host": "staging.apps.academy.biji-biji.com", "tenant": "biji-biji"},
-            {"host": "staging.apps.skillourfuture.academy.mereka.io", "tenant": "skillourfuture"},
+            {"host": "apps.staging.academy.biji-biji.com", "tenant": "biji-biji"},
+            {"host": "apps.staging.skillourfuture.academy.mereka.io", "tenant": "skillourfuture"},
         ],
         "enterprise": [
             {"host": "staging.admin.academyv2.mereka.io", "role": "enterprise-admin"},

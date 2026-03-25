@@ -55,6 +55,7 @@ MFE_CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 NONPROD_DOMAIN_PATCH="$REPO_ROOT/deploy/k8s/overlays/rke2-nonprod/patches/domain-env.yaml"
 LOCAL_DOMAIN_PATCH="$REPO_ROOT/deploy/k8s/overlays/local/patches/domain-env.yaml"
 TENANT_REGISTRY="$REPO_ROOT/deploy/k8s/tenancy/tenant-registry.yaml"
+STAGING_ENV_FILE="$REPO_ROOT/scripts/tenants/env/staging.env"
 
 printf "${BLUE}=== Domain & URL Invariant Gate ===${NC}\n\n"
 
@@ -159,6 +160,100 @@ PY
 )
 else
   do_fail "tenant registry not found: $TENANT_REGISTRY"
+fi
+
+# ── 1c. Staging tenant toolkit alignment ───────────────────────────────────
+printf "\n${BLUE}── 1c. Staging tenant toolkit alignment ──${NC}\n"
+
+if [[ -f "$TENANT_REGISTRY" && -f "$STAGING_ENV_FILE" ]]; then
+  while IFS=$'\t' read -r key actual expected; do
+    [[ -z "${key:-}" ]] && continue
+    if [[ "$actual" == "$expected" ]]; then
+      do_pass "staging.env $key aligns with tenant-registry ($expected)"
+    else
+      do_fail "staging.env $key drift (expected $expected, got ${actual:-<unset>})"
+    fi
+  done < <(python3 - "$TENANT_REGISTRY" "$STAGING_ENV_FILE" <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+import yaml
+
+registry = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8"))
+staging_env = Path(sys.argv[2]).read_text(encoding="utf-8")
+domains = registry.get("domains", [])
+
+
+def find_domain(environment: str, tenant: str, role: str) -> tuple[str, str]:
+    for item in domains:
+        if (
+            item.get("environment") == environment
+            and item.get("tenant") == tenant
+            and item.get("role") == role
+            and item.get("status") == "active"
+        ):
+            return str(item["domain"]), str(item.get("cookie_domain", ""))
+    raise SystemExit(
+        f"missing registry domain for environment={environment} tenant={tenant} role={role}"
+    )
+
+
+tenant_rows = {}
+for match in re.finditer(r'"(?P<slug>[^:"]+):(?P<primary>[^:"]+):(?P<studio>[^:"]+):(?P<mfe>[^:"]+):(?P<cookie>[^"]+)"', staging_env):
+    tenant_rows[match.group("slug")] = (
+        match.group("primary"),
+        match.group("studio"),
+        match.group("mfe"),
+        match.group("cookie"),
+    )
+
+tenant_defs = {}
+for match in re.finditer(
+    r"'(?P<slug>[^|']+)\|(?P<domain>[^|']+)\|(?P<name>[^|']+)\|(?P<lms_url>[^|']+)\|(?P<mfe_url>[^|']+)\|(?P<org_filter>[^|']+)\|(?P<theme>[^']*)'",
+    staging_env,
+):
+    tenant_defs[match.group("slug")] = (
+        match.group("domain"),
+        match.group("lms_url"),
+        match.group("mfe_url"),
+    )
+
+cms_urls = {}
+for match in re.finditer(r'(?P<slug>[a-z0-9-]+)\)\s+echo "(?P<url>[^"]+)"', staging_env):
+    cms_urls[match.group("slug")] = match.group("url")
+
+for slug in ("mereka", "biji-biji", "skillourfuture"):
+    primary, cookie = find_domain("staging", slug, "primary")
+    studio, _ = find_domain("staging", slug, "studio")
+    mfe, _ = find_domain("staging", slug, "mfe")
+
+    tenant_primary, tenant_studio, tenant_mfe, tenant_cookie = tenant_rows[slug]
+    yield_rows = [
+        (f"TENANTS[{slug}].primary", tenant_primary, primary),
+        (f"TENANTS[{slug}].studio", tenant_studio, studio),
+        (f"TENANTS[{slug}].mfe", tenant_mfe, mfe),
+        (f"TENANTS[{slug}].cookie_domain", tenant_cookie, cookie),
+    ]
+
+    def_domain, def_lms_url, def_mfe_url = tenant_defs[slug]
+    yield_rows.extend(
+        [
+            (f"TENANT_DEFS[{slug}].domain", def_domain, primary),
+            (f"TENANT_DEFS[{slug}].lms_url", def_lms_url, f"https://{primary}"),
+            (f"TENANT_DEFS[{slug}].mfe_url", def_mfe_url, f"https://{mfe}"),
+            (f"CMS_URL[{slug}]", cms_urls[slug], f"https://{studio}"),
+        ]
+    )
+
+    for row in yield_rows:
+        print("\t".join(row))
+PY
+)
+else
+  do_fail "staging tenant toolkit sources missing (need tenant-registry + scripts/tenants/env/staging.env)"
 fi
 
 # ── 2. Production.py has all MEREKA_*_DOMAIN variables ───────────────────

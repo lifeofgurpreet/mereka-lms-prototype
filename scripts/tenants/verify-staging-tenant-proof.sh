@@ -29,6 +29,7 @@ done
 
 cd "$REPO_ROOT"
 mkdir -p "$OUTPUT_DIR"
+source "$REPO_ROOT/scripts/tenants/env/staging.env"
 
 # Find ready LMS pod
 _POD_LIST=$(kubectl get pods -n "$NAMESPACE" \
@@ -45,11 +46,13 @@ CADDY_POD=$(kubectl get pods -n "$NAMESPACE" \
   -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
 [[ -z "$CADDY_POD" ]] && { echo "WARN: no caddy pod, skipping HTTP probes" >&2; }
 
-STAGING_TENANTS=(
-  "staging.academyv2.mereka.io"
-  "staging.academy.biji-biji.com"
-  "staging.skillourfuture.academy.mereka.io"
-)
+STAGING_TENANTS=()
+ALL_HOSTS=()
+for tenant_def in "${TENANTS[@]}"; do
+  IFS=: read -r _slug lms_host studio_host mfe_host _cookie_domain <<<"$tenant_def"
+  STAGING_TENANTS+=("$lms_host")
+  ALL_HOSTS+=("$lms_host" "$studio_host" "$mfe_host")
+done
 
 echo "=== verify-staging-tenant-proof: ns=$NAMESPACE lms=$LMS_POD caddy=${CADDY_POD:-none} ===" >&2
 
@@ -117,18 +120,6 @@ echo "  wrote siteconfig-proof.json" >&2
 # ──────────────────────────────────────────────────────────────
 echo "" >&2
 echo "--- Host acceptance proof ---" >&2
-
-ALL_HOSTS=(
-  "staging.academyv2.mereka.io"
-  "staging.academy.biji-biji.com"
-  "staging.skillourfuture.academy.mereka.io"
-  "staging.studio.academyv2.mereka.io"
-  "staging.studio.academy.biji-biji.com"
-  "staging.studio.skillourfuture.academy.mereka.io"
-  "staging.apps.academyv2.mereka.io"
-  "staging.apps.academy.biji-biji.com"
-  "staging.apps.skillourfuture.academy.mereka.io"
-)
 
 HA_RESULTS="["
 FIRST=true

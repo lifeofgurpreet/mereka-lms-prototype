@@ -67,7 +67,7 @@ def _candidate_site_domains(host: str) -> list[str]:
 
     Handles environment-prefixed domains:
       staging.apps.academyv2.mereka.io  → staging.academyv2.mereka.io
-      staging.studio.academy.biji-biji.com → staging.academy.biji-biji.com
+      studio.staging.academy.biji-biji.com → staging.academy.biji-biji.com
     """
     host = _strip_port(host.lower())
     candidates = [host]
@@ -258,7 +258,7 @@ def _mfe_base_url_for_host(host: str) -> Optional[str]:
     """
     Resolve the tenant's MFE base URL from SiteConfiguration.
 
-    Returns the full MFE_BASE_URL (e.g. https://staging.apps.academy.biji-biji.com)
+    Returns the full MFE_BASE_URL (e.g. https://apps.staging.academy.biji-biji.com)
     or None if no SiteConfiguration override exists.
     """
     from django.contrib.sites.models import Site

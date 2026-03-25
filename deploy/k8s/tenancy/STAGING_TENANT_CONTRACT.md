@@ -7,9 +7,14 @@
 
 ## Decision
 
-Staging uses explicit staging-prefixed tenant domains. Production tenant domains
-are never admitted into staging settings. This is enforced by the staging
-activation gate policy in bbi-infrastructure.
+Staging uses explicit staging-prefixed tenant domains, but the public hostname
+shape is tenant-specific:
+
+- Primary tenant uses `staging.{service}.academyv2.mereka.io`
+- Secondary tenants use `{service}.staging.<tenant-domain>`
+
+Production tenant domains are never admitted into staging settings. This is
+enforced by the staging activation gate policy in bbi-infrastructure.
 
 ---
 
@@ -35,16 +40,16 @@ activation gate policy in bbi-infrastructure.
 | Role | Domain | Required | Proof Priority |
 |------|--------|----------|----------------|
 | primary | `staging.academy.biji-biji.com` | now | P0 |
-| studio | `staging.studio.academy.biji-biji.com` | now | P0 |
-| mfe | `staging.apps.academy.biji-biji.com` | now | P0 |
+| studio | `studio.staging.academy.biji-biji.com` | now | P0 |
+| mfe | `apps.staging.academy.biji-biji.com` | now | P0 |
 
 ### Skill Our Future (tenant)
 
 | Role | Domain | Required | Proof Priority |
 |------|--------|----------|----------------|
 | primary | `staging.skillourfuture.academy.mereka.io` | now | P0 |
-| studio | `staging.studio.skillourfuture.academy.mereka.io` | now | P0 |
-| mfe | `staging.apps.skillourfuture.academy.mereka.io` | now | P0 |
+| studio | `studio.staging.skillourfuture.academy.mereka.io` | now | P0 |
+| mfe | `apps.staging.skillourfuture.academy.mereka.io` | now | P0 |
 
 ### Enterprise tenant-specific surfaces
 
@@ -79,12 +84,12 @@ Site.domain:              staging.academy.biji-biji.com
 SiteConfiguration:
   enabled:                true
   LMS_ROOT_URL:           https://staging.academy.biji-biji.com
-  CMS_ROOT_URL:           https://staging.studio.academy.biji-biji.com
-  MFE_BASE_URL:           https://staging.apps.academy.biji-biji.com
+  CMS_ROOT_URL:           https://studio.staging.academy.biji-biji.com
+  MFE_BASE_URL:           https://apps.staging.academy.biji-biji.com
   THEME_NAME:             mereka
   course_org_filter:      ["BIJIBIJI"]
   MFE_CONFIG.LMS_BASE_URL:    https://staging.academy.biji-biji.com
-  MFE_CONFIG.STUDIO_BASE_URL: https://staging.studio.academy.biji-biji.com
+  MFE_CONFIG.STUDIO_BASE_URL: https://studio.staging.academy.biji-biji.com
 ```
 
 ### Skill Our Future
@@ -94,12 +99,12 @@ Site.domain:              staging.skillourfuture.academy.mereka.io
 SiteConfiguration:
   enabled:                true
   LMS_ROOT_URL:           https://staging.skillourfuture.academy.mereka.io
-  CMS_ROOT_URL:           https://staging.studio.skillourfuture.academy.mereka.io
-  MFE_BASE_URL:           https://staging.apps.skillourfuture.academy.mereka.io
+  CMS_ROOT_URL:           https://studio.staging.skillourfuture.academy.mereka.io
+  MFE_BASE_URL:           https://apps.staging.skillourfuture.academy.mereka.io
   THEME_NAME:             mereka
   course_org_filter:      ["SKILLOURFUTURE"]
   MFE_CONFIG.LMS_BASE_URL:    https://staging.skillourfuture.academy.mereka.io
-  MFE_CONFIG.STUDIO_BASE_URL: https://staging.studio.skillourfuture.academy.mereka.io
+  MFE_CONFIG.STUDIO_BASE_URL: https://studio.staging.skillourfuture.academy.mereka.io
 ```
 
 ---
@@ -122,26 +127,27 @@ ALLOWED_HOSTS = [
     "staging.learner.academyv2.mereka.io",
     # Staging Biji-Biji tenant (NEW)
     "staging.academy.biji-biji.com",
-    "staging.studio.academy.biji-biji.com",
-    "staging.apps.academy.biji-biji.com",
+    "studio.staging.academy.biji-biji.com",
+    "apps.staging.academy.biji-biji.com",
     # Staging SkilloFuture tenant (NEW)
     "staging.skillourfuture.academy.mereka.io",
-    "staging.studio.skillourfuture.academy.mereka.io",
-    "staging.apps.skillourfuture.academy.mereka.io",
+    "studio.staging.skillourfuture.academy.mereka.io",
+    "apps.staging.skillourfuture.academy.mereka.io",
     # Internal
     "lms",
 ]
 ```
 
-**Policy note**: `staging.academy.biji-biji.com` uses `staging.` prefix, NOT the
-bare production domain. The staging activation gate policy allows this pattern
-because it does not match `^.*\.mereka\.io$` (it's on biji-biji.com) but the
-`require_no_pattern` check for `academy\.biji-biji\.com` must be updated to
-allow `staging.academy.biji-biji.com` specifically.
+**Policy note**: `staging.academy.biji-biji.com` uses a staging-prefixed LMS
+domain, while `studio.staging.academy.biji-biji.com` and
+`apps.staging.academy.biji-biji.com` use service-prefixed staging domains. The
+staging activation gate must continue to distinguish these from bare production
+hosts.
 
-GitOps must update the staging gate script to distinguish:
+GitOps must distinguish:
 - BLOCKED: `academy.biji-biji.com` (bare production domain)
 - ALLOWED: `staging.academy.biji-biji.com` (staging-prefixed)
+- ALLOWED: `studio.staging.academy.biji-biji.com` / `apps.staging.academy.biji-biji.com`
 
 ---
 
@@ -152,8 +158,8 @@ The proof script must verify `/api/mfe_config/v1` returns correct values per Hos
 | Host Header | Expected LMS_BASE_URL | Expected STUDIO_BASE_URL |
 |-------------|----------------------|--------------------------|
 | staging.academyv2.mereka.io | https://staging.academyv2.mereka.io | https://staging.studio.academyv2.mereka.io |
-| staging.academy.biji-biji.com | https://staging.academy.biji-biji.com | https://staging.studio.academy.biji-biji.com |
-| staging.skillourfuture.academy.mereka.io | https://staging.skillourfuture.academy.mereka.io | https://staging.studio.skillourfuture.academy.mereka.io |
+| staging.academy.biji-biji.com | https://staging.academy.biji-biji.com | https://studio.staging.academy.biji-biji.com |
+| staging.skillourfuture.academy.mereka.io | https://staging.skillourfuture.academy.mereka.io | https://studio.staging.skillourfuture.academy.mereka.io |
 
 ---
 
@@ -161,26 +167,20 @@ The proof script must verify `/api/mfe_config/v1` returns correct values per Hos
 
 | Host | Expected Cookie Domain |
 |------|----------------------|
-| staging.academyv2.mereka.io | `.staging.academyv2.mereka.io` |
-| staging.studio.academyv2.mereka.io | `.staging.academyv2.mereka.io` |
-| staging.apps.academyv2.mereka.io | `.staging.academyv2.mereka.io` |
-| staging.academy.biji-biji.com | `.staging.academy.biji-biji.com` |
-| staging.studio.academy.biji-biji.com | `.staging.academy.biji-biji.com` |
-| staging.apps.academy.biji-biji.com | `.staging.academy.biji-biji.com` |
-| staging.skillourfuture.academy.mereka.io | `.staging.skillourfuture.academy.mereka.io` |
-| staging.studio.skillourfuture.academy.mereka.io | `.staging.skillourfuture.academy.mereka.io` |
-| staging.apps.skillourfuture.academy.mereka.io | `.staging.skillourfuture.academy.mereka.io` |
+| staging.academyv2.mereka.io | `.academyv2.mereka.io` |
+| staging.studio.academyv2.mereka.io | `.academyv2.mereka.io` |
+| staging.apps.academyv2.mereka.io | `.academyv2.mereka.io` |
+| staging.academy.biji-biji.com | `.academy.biji-biji.com` |
+| studio.staging.academy.biji-biji.com | `.academy.biji-biji.com` |
+| apps.staging.academy.biji-biji.com | `.academy.biji-biji.com` |
+| staging.skillourfuture.academy.mereka.io | `.skillourfuture.academy.mereka.io` |
+| studio.staging.skillourfuture.academy.mereka.io | `.skillourfuture.academy.mereka.io` |
+| apps.staging.skillourfuture.academy.mereka.io | `.skillourfuture.academy.mereka.io` |
 
-**MerekaCookieDomainMiddleware update needed**: The `_cookie_domain_for_host` function
-must recognize `staging.academy.biji-biji.com` and return `.staging.academy.biji-biji.com`
-(not `.biji-biji.com`). The current logic strips prefixes (`apps.`, `studio.`) then
-checks `endswith("biji-biji.com")` → returns `.biji-biji.com`. With staging domains, the
-base after prefix stripping is `staging.academy.biji-biji.com` which still ends with
-`biji-biji.com`, so the current logic would return `.biji-biji.com` (too broad for staging).
-
-Fix: the biji-biji special case should return the full candidate domain with leading dot,
-not hardcode `.biji-biji.com`. Or: add `staging.academy.biji-biji.com` as an explicit
-cookie domain root before the generic biji-biji fallback.
+**Cookie domain note**: staging cookies intentionally broaden to the tenant base
+domain, not the env-prefixed LMS host. This matches the multisite middleware
+and allows LMS, Studio, and MFE to share cookies even when the staging surface
+mixes `staging.<tenant>` and `<service>.staging.<tenant>` host shapes.
 
 ---
 
@@ -192,7 +192,7 @@ All staging tenants use `staging.auth0.mereka.io` as the OIDC provider.
 |--------|---------------------|
 | Mereka | staging.academyv2.mereka.io → LMS → staging.auth0.mereka.io → LMS → redirect back |
 | Biji-Biji | staging.academy.biji-biji.com → LMS → staging.auth0.mereka.io → LMS → redirect back |
-| SkilloFuture | staging.skillourfuture.academy.mereka.io → LMS → staging.auth0.mereka.io → LMS → redirect back |
+| SkillOurFuture | staging.skillourfuture.academy.mereka.io → LMS → staging.auth0.mereka.io → LMS → redirect back |
 
 `LOGIN_REDIRECT_WHITELIST` must include all staging MFE and studio domains
 so OAuth2 redirects complete correctly.
@@ -209,7 +209,7 @@ Once this contract is accepted, bbi-infrastructure must:
 |------|---------------|-----------|-------|
 | ALLOWED_HOSTS | `production-staging.py` | All 16 staging domains | See section 3 |
 | CSRF/CORS origins | `production-staging.py` | All `https://` origins for staging domains | Mirror MEREKA_SITE_ORIGINS pattern |
-| Cookie middleware | `production-staging.py` | Fix `_cookie_domain_for_host` for staging.*.biji-biji.com | See section 5 |
+| Cookie middleware | `production-staging.py` | Confirm runtime cookie scoping matches section 5 | See section 5 |
 | Ingress TLS | staging ingress manifest | All 9 P0 staging domains | cert-manager Certificates |
 | Caddy routing | staging Caddyfile patch | Tenant domains → same backends (lms:8000, cms:8000, mfe:8002) | Host-based routing |
 | DNS records | Cloudflare | All 16 staging domains → staging ingress IP | A/CNAME records |
@@ -237,11 +237,11 @@ Once this contract is accepted, bbi-infrastructure must:
 |----------------|-------------|--------|
 | `staging.*.mereka.io` | Cloudflare proxy (orange cloud) | Covered by `*.mereka.io` wildcard |
 | `staging.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain, not covered by wildcard |
-| `staging.studio.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain |
-| `staging.apps.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain |
+| `studio.staging.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain |
+| `apps.staging.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain |
 | `staging.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
-| `staging.studio.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
-| `staging.apps.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
+| `studio.staging.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
+| `apps.staging.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
 
 ### DNS Expectations
 

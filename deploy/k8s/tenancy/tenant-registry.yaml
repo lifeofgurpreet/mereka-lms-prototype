@@ -907,7 +907,7 @@ domains:
     in_cors: true
     in_csrf: true
     in_redirect_list: false
-    cookie_domain: ".staging.academyv2.mereka.io"
+    cookie_domain: ".academyv2.mereka.io"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
@@ -924,7 +924,7 @@ domains:
     in_cors: false
     in_csrf: true
     in_redirect_list: true
-    cookie_domain: ".staging.academyv2.mereka.io"
+    cookie_domain: ".academyv2.mereka.io"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
@@ -941,7 +941,7 @@ domains:
     in_cors: true
     in_csrf: true
     in_redirect_list: true
-    cookie_domain: ".staging.academyv2.mereka.io"
+    cookie_domain: ".academyv2.mereka.io"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
@@ -958,7 +958,7 @@ domains:
     in_cors: false
     in_csrf: true
     in_redirect_list: false
-    cookie_domain: ".staging.academyv2.mereka.io"
+    cookie_domain: ".academyv2.mereka.io"
     ingress_tls: true
     release_critical: false
     proof_priority: P1
@@ -1029,7 +1029,7 @@ domains:
     in_cors: true
     in_csrf: false
     in_redirect_list: false
-    cookie_domain: ".staging.academyv2.mereka.io"
+    cookie_domain: ".academyv2.mereka.io"
     ingress_tls: true
     release_critical: false
     proof_priority: P1
@@ -1047,7 +1047,7 @@ domains:
     in_cors: false
     in_csrf: false
     in_redirect_list: false
-    cookie_domain: ".staging.academyv2.mereka.io"
+    cookie_domain: ".academyv2.mereka.io"
     ingress_tls: true
     release_critical: false
     proof_priority: P2
@@ -1086,13 +1086,13 @@ domains:
     in_cors: true
     in_csrf: true
     in_redirect_list: false
-    cookie_domain: ".staging.academy.biji-biji.com"
+    cookie_domain: ".academy.biji-biji.com"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
     notes: "Staging uses staging. prefix. TLS via Let's Encrypt (multi-level subdomain)."
 
-  - domain: staging.studio.academy.biji-biji.com
+  - domain: studio.staging.academy.biji-biji.com
     environment: staging
     tenant: biji-biji
     status: active
@@ -1104,12 +1104,12 @@ domains:
     in_cors: false
     in_csrf: true
     in_redirect_list: false
-    cookie_domain: ".staging.academy.biji-biji.com"
+    cookie_domain: ".academy.biji-biji.com"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
 
-  - domain: staging.apps.academy.biji-biji.com
+  - domain: apps.staging.academy.biji-biji.com
     environment: staging
     tenant: biji-biji
     status: active
@@ -1121,7 +1121,7 @@ domains:
     in_cors: true
     in_csrf: true
     in_redirect_list: true
-    cookie_domain: ".staging.academy.biji-biji.com"
+    cookie_domain: ".academy.biji-biji.com"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
@@ -1141,13 +1141,13 @@ domains:
     in_cors: true
     in_csrf: true
     in_redirect_list: false
-    cookie_domain: ".staging.skillourfuture.academy.mereka.io"
+    cookie_domain: ".skillourfuture.academy.mereka.io"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
     notes: "Staging uses staging. prefix. TLS via Let's Encrypt (multi-level subdomain)."
 
-  - domain: staging.studio.skillourfuture.academy.mereka.io
+  - domain: studio.staging.skillourfuture.academy.mereka.io
     environment: staging
     tenant: skillourfuture
     status: active
@@ -1159,12 +1159,12 @@ domains:
     in_cors: false
     in_csrf: true
     in_redirect_list: false
-    cookie_domain: ".staging.skillourfuture.academy.mereka.io"
+    cookie_domain: ".skillourfuture.academy.mereka.io"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
 
-  - domain: staging.apps.skillourfuture.academy.mereka.io
+  - domain: apps.staging.skillourfuture.academy.mereka.io
     environment: staging
     tenant: skillourfuture
     status: active
@@ -1176,7 +1176,7 @@ domains:
     in_cors: true
     in_csrf: true
     in_redirect_list: true
-    cookie_domain: ".staging.skillourfuture.academy.mereka.io"
+    cookie_domain: ".skillourfuture.academy.mereka.io"
     ingress_tls: true
     release_critical: true
     proof_priority: P0
