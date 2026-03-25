@@ -209,12 +209,12 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Checkout bbi-infrastructure
-        if: ${{ secrets.GITOPS_PAT != '' }}
+        if: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE != '' }}
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           repository: Biji-Biji-Initiative/bbi-infrastructure
           path: bbi-infrastructure
-          token: ${{ secrets.GITOPS_PAT }}
+          token: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
 
       - name: Check GHCR image freshness
         env:

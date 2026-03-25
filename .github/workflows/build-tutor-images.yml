@@ -978,15 +978,11 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            # ARC runners run as root — no sudo needed.
-            # Fallback: download static binary if apt-get unavailable.
-            if command -v apt-get &>/dev/null; then
-              apt-get update -qq && apt-get install -y -qq gettext-base
-            else
-              curl -fsSL -o /usr/local/bin/envsubst \
-                "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-                && chmod +x /usr/local/bin/envsubst
-            fi
+            # Static binary — works on all runner types (ARC, GitHub-hosted, self-hosted).
+            # apt-get is unreliable on ARC runners (exit 100 even as root).
+            curl -fsSL -o /usr/local/bin/envsubst \
+              "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
+              && chmod +x /usr/local/bin/envsubst
           fi
 
       - name: Install cosign
@@ -1143,13 +1139,11 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            if command -v apt-get &>/dev/null; then
-              apt-get update -qq && apt-get install -y -qq gettext-base
-            else
-              curl -fsSL -o /usr/local/bin/envsubst \
-                "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-                && chmod +x /usr/local/bin/envsubst
-            fi
+            # Static binary — works on all runner types (ARC, GitHub-hosted, self-hosted).
+            # apt-get is unreliable on ARC runners (exit 100 even as root).
+            curl -fsSL -o /usr/local/bin/envsubst \
+              "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
+              && chmod +x /usr/local/bin/envsubst
           fi
 
       - name: Install cosign
@@ -1242,10 +1236,10 @@ jobs:
 
       - name: Validate GitOps token
         env:
-          GITOPS_PAT: ${{ secrets.GITOPS_PAT }}
+          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
         run: |
-          if [[ -z "${GITOPS_PAT}" ]]; then
-            echo "GITOPS_PAT secret is required to update bbi-infrastructure." >&2
+          if [[ -z "${GITOPS_TOKEN}" ]]; then
+            echo "GITOPS_TOKEN_BBI_KUBERNATE secret is required to update bbi-infrastructure." >&2
             exit 1
           fi
 
@@ -1254,7 +1248,7 @@ jobs:
         with:
           repository: Biji-Biji-Initiative/bbi-infrastructure
           path: bbi-infrastructure
-          token: ${{ secrets.GITOPS_PAT }}
+          token: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
 
       - name: Download release bundle artifact
         continue-on-error: true  # Bundle may not exist if SLSA/release-bundle failed
@@ -1266,13 +1260,11 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            if command -v apt-get &>/dev/null; then
-              apt-get update -qq && apt-get install -y -qq gettext-base
-            else
-              curl -fsSL -o /usr/local/bin/envsubst \
-                "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-                && chmod +x /usr/local/bin/envsubst
-            fi
+            # Static binary — works on all runner types (ARC, GitHub-hosted, self-hosted).
+            # apt-get is unreliable on ARC runners (exit 100 even as root).
+            curl -fsSL -o /usr/local/bin/envsubst \
+              "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
+              && chmod +x /usr/local/bin/envsubst
           fi
 
       - name: Install cosign

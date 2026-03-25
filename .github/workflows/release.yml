@@ -263,15 +263,15 @@ jobs:
         with:
           repository: Biji-Biji-Initiative/bbi-infrastructure
           path: bbi-infrastructure
-          token: ${{ secrets.GITOPS_PAT }}
+          token: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
 
       - name: Validate GitOps token
         env:
-          GITOPS_PAT: ${{ secrets.GITOPS_PAT }}
+          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
         run: |
           set -euo pipefail
-          if [[ -z "${GITOPS_PAT}" ]]; then
-            echo "GITOPS_PAT secret is required to update bbi-infrastructure." >&2
+          if [[ -z "${GITOPS_TOKEN}" ]]; then
+            echo "GITOPS_TOKEN_BBI_KUBERNATE secret is required to update bbi-infrastructure." >&2
             exit 1
           fi
 

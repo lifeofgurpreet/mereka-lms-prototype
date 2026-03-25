@@ -320,11 +320,13 @@ check_gitops() {
     fail "[AC-014] Missing digest flags in GitOps invocation"
   fi
 
-  # AC-014: GITOPS_PAT validation
-  if grep -q 'GITOPS_PAT' "$BUILD_WF"; then
-    pass "[AC-014] GITOPS_PAT secret referenced in GitOps update"
+  # AC-014: GitOps token validation
+  if grep -q 'GITOPS_TOKEN_BBI_KUBERNATE' "$BUILD_WF"; then
+    pass "[AC-014] GITOPS_TOKEN_BBI_KUBERNATE secret referenced in GitOps update"
+  elif grep -q 'GITOPS_PAT' "$BUILD_WF"; then
+    pass "[AC-014] GITOPS_PAT secret referenced in GitOps update (legacy name)"
   else
-    fail "[AC-014] GITOPS_PAT secret not referenced"
+    fail "[AC-014] GitOps token secret not referenced in build workflow"
   fi
 
   # AC-014: Git identity configured for bot commits

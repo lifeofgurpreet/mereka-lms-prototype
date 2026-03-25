@@ -28,7 +28,7 @@ jobs:
         with:
           repository: Biji-Biji-Initiative/bbi-infrastructure
       - run: |
-          export GITOPS_PAT=${{ secrets.GITOPS_PAT }}
+          export GITOPS_TOKEN=${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
           ./scripts/infra/release-openedx-gitops.sh \
             --target-env production \
             --require-digests \
@@ -71,7 +71,7 @@ jobs:
       contents: write
     steps:
       - run: |
-          export GITOPS_PAT=${{ secrets.GITOPS_PAT }}
+          export GITOPS_TOKEN=${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
           ./scripts/infra/release-openedx-gitops.sh \
             --target-env production \
             --apply --commit --push

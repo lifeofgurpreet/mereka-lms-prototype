@@ -96,11 +96,13 @@ else
   fail "release.yml missing bbi-infrastructure checkout (GitOps repo required for promotion)"
 fi
 
-# GITOPS_PAT secret used for cross-repo write
-if grep -q "GITOPS_PAT" "$RELEASE_WF"; then
-  pass "release.yml uses GITOPS_PAT secret for cross-repo write"
+# GitOps token secret used for cross-repo write
+if grep -q "GITOPS_TOKEN_BBI_KUBERNATE" "$RELEASE_WF"; then
+  pass "release.yml uses GITOPS_TOKEN_BBI_KUBERNATE secret for cross-repo write"
+elif grep -q "GITOPS_PAT" "$RELEASE_WF"; then
+  pass "release.yml uses GITOPS_PAT secret for cross-repo write (legacy name)"
 else
-  fail "release.yml missing GITOPS_PAT secret (required for bbi-infrastructure write access)"
+  fail "release.yml missing GitOps token secret (required for bbi-infrastructure write access)"
 fi
 
 # contents: write permission in promotion job scope
