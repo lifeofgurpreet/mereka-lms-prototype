@@ -4036,7 +4036,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-deployment-contract.sh",
-      "reference_count": 4,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -7407,7 +7407,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-lane-identity.sh",
-      "reference_count": 3,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13120,7 +13120,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-runtime-authority-map.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17238,7 +17238,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-staging-tenant-proof.sh",
-      "reference_count": 3,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"

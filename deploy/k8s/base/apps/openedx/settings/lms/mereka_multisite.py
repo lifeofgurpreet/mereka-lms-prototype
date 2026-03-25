@@ -258,7 +258,7 @@ def _mfe_base_url_for_host(host: str) -> Optional[str]:
     """
     Resolve the tenant's MFE base URL from SiteConfiguration.
 
-    Returns the full MFE_BASE_URL (e.g. https://apps.staging.academy.biji-biji.com)
+    Returns the full MFE_BASE_URL (e.g. https://staging.apps.academy.biji-biji.com)
     or None if no SiteConfiguration override exists.
     """
     from django.contrib.sites.models import Site

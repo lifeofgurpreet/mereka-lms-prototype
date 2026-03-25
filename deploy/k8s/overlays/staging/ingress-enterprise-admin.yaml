@@ -15,7 +15,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: admin.staging.academyv2.mereka.io
+    - host: staging.admin.academyv2.mereka.io
       http:
         paths:
           # Backend API proxies — route to respective enterprise services
@@ -93,5 +93,5 @@ spec:
                   number: 8002
   tls:
     - hosts:
-        - admin.staging.academyv2.mereka.io
+        - staging.admin.academyv2.mereka.io
       secretName: staging-enterprise-admin-portal-tls

@@ -20,14 +20,14 @@ activation gate policy in bbi-infrastructure.
 | Role | Domain | Required | Proof Priority |
 |------|--------|----------|----------------|
 | primary | `staging.academyv2.mereka.io` | now | P0 |
-| studio | `studio.staging.academyv2.mereka.io` | now | P0 |
-| mfe | `apps.staging.academyv2.mereka.io` | now | P0 |
-| preview | `preview.staging.academyv2.mereka.io` | now | P1 |
-| discovery | `discovery.staging.academyv2.mereka.io` | now | P1 |
-| notes | `notes.staging.academyv2.mereka.io` | now | P2 |
-| credentials | `credentials.staging.academyv2.mereka.io` | now | P2 |
-| enterprise-admin | `admin.staging.academyv2.mereka.io` | now | P1 |
-| enterprise-learner | `learner.staging.academyv2.mereka.io` | deferred | P2 |
+| studio | `staging.studio.academyv2.mereka.io` | now | P0 |
+| mfe | `staging.apps.academyv2.mereka.io` | now | P0 |
+| preview | `staging.preview.academyv2.mereka.io` | now | P1 |
+| discovery | `staging.discovery.academyv2.mereka.io` | now | P1 |
+| notes | `staging.notes.academyv2.mereka.io` | now | P2 |
+| credentials | `staging.credentials.academyv2.mereka.io` | now | P2 |
+| enterprise-admin | `staging.admin.academyv2.mereka.io` | now | P1 |
+| enterprise-learner | `staging.learner.academyv2.mereka.io` | deferred | P2 |
 | auth | `staging.auth0.mereka.io` | now | P0 |
 
 ### Biji-Biji Academy (tenant)
@@ -35,16 +35,16 @@ activation gate policy in bbi-infrastructure.
 | Role | Domain | Required | Proof Priority |
 |------|--------|----------|----------------|
 | primary | `staging.academy.biji-biji.com` | now | P0 |
-| studio | `studio.staging.academy.biji-biji.com` | now | P0 |
-| mfe | `apps.staging.academy.biji-biji.com` | now | P0 |
+| studio | `staging.studio.academy.biji-biji.com` | now | P0 |
+| mfe | `staging.apps.academy.biji-biji.com` | now | P0 |
 
 ### Skill Our Future (tenant)
 
 | Role | Domain | Required | Proof Priority |
 |------|--------|----------|----------------|
 | primary | `staging.skillourfuture.academy.mereka.io` | now | P0 |
-| studio | `studio.staging.skillourfuture.academy.mereka.io` | now | P0 |
-| mfe | `apps.staging.skillourfuture.academy.mereka.io` | now | P0 |
+| studio | `staging.studio.skillourfuture.academy.mereka.io` | now | P0 |
+| mfe | `staging.apps.skillourfuture.academy.mereka.io` | now | P0 |
 
 ### Enterprise tenant-specific surfaces
 
@@ -64,12 +64,12 @@ Site.domain:              staging.academyv2.mereka.io
 SiteConfiguration:
   enabled:                true
   LMS_ROOT_URL:           https://staging.academyv2.mereka.io
-  CMS_ROOT_URL:           https://studio.staging.academyv2.mereka.io
-  MFE_BASE_URL:           https://apps.staging.academyv2.mereka.io
+  CMS_ROOT_URL:           https://staging.studio.academyv2.mereka.io
+  MFE_BASE_URL:           https://staging.apps.academyv2.mereka.io
   THEME_NAME:             mereka
   course_org_filter:      ["MEREKA"]
   MFE_CONFIG.LMS_BASE_URL:    https://staging.academyv2.mereka.io
-  MFE_CONFIG.STUDIO_BASE_URL: https://studio.staging.academyv2.mereka.io
+  MFE_CONFIG.STUDIO_BASE_URL: https://staging.studio.academyv2.mereka.io
 ```
 
 ### Biji-Biji Academy
@@ -79,12 +79,12 @@ Site.domain:              staging.academy.biji-biji.com
 SiteConfiguration:
   enabled:                true
   LMS_ROOT_URL:           https://staging.academy.biji-biji.com
-  CMS_ROOT_URL:           https://studio.staging.academy.biji-biji.com
-  MFE_BASE_URL:           https://apps.staging.academy.biji-biji.com
+  CMS_ROOT_URL:           https://staging.studio.academy.biji-biji.com
+  MFE_BASE_URL:           https://staging.apps.academy.biji-biji.com
   THEME_NAME:             mereka
   course_org_filter:      ["BIJIBIJI"]
   MFE_CONFIG.LMS_BASE_URL:    https://staging.academy.biji-biji.com
-  MFE_CONFIG.STUDIO_BASE_URL: https://studio.staging.academy.biji-biji.com
+  MFE_CONFIG.STUDIO_BASE_URL: https://staging.studio.academy.biji-biji.com
 ```
 
 ### Skill Our Future
@@ -94,12 +94,12 @@ Site.domain:              staging.skillourfuture.academy.mereka.io
 SiteConfiguration:
   enabled:                true
   LMS_ROOT_URL:           https://staging.skillourfuture.academy.mereka.io
-  CMS_ROOT_URL:           https://studio.staging.skillourfuture.academy.mereka.io
-  MFE_BASE_URL:           https://apps.staging.skillourfuture.academy.mereka.io
+  CMS_ROOT_URL:           https://staging.studio.skillourfuture.academy.mereka.io
+  MFE_BASE_URL:           https://staging.apps.skillourfuture.academy.mereka.io
   THEME_NAME:             mereka
   course_org_filter:      ["SKILLOURFUTURE"]
   MFE_CONFIG.LMS_BASE_URL:    https://staging.skillourfuture.academy.mereka.io
-  MFE_CONFIG.STUDIO_BASE_URL: https://studio.staging.skillourfuture.academy.mereka.io
+  MFE_CONFIG.STUDIO_BASE_URL: https://staging.studio.skillourfuture.academy.mereka.io
 ```
 
 ---
@@ -112,22 +112,22 @@ All domains below must appear in staging production.py `ALLOWED_HOSTS`:
 ALLOWED_HOSTS = [
     # Existing staging Mereka domains (already present)
     "staging.academyv2.mereka.io",
-    "studio.staging.academyv2.mereka.io",
-    "apps.staging.academyv2.mereka.io",
-    "preview.staging.academyv2.mereka.io",
-    "discovery.staging.academyv2.mereka.io",
-    "notes.staging.academyv2.mereka.io",
-    "credentials.staging.academyv2.mereka.io",
-    "admin.staging.academyv2.mereka.io",
-    "learner.staging.academyv2.mereka.io",
+    "staging.studio.academyv2.mereka.io",
+    "staging.apps.academyv2.mereka.io",
+    "staging.preview.academyv2.mereka.io",
+    "staging.discovery.academyv2.mereka.io",
+    "staging.notes.academyv2.mereka.io",
+    "staging.credentials.academyv2.mereka.io",
+    "staging.admin.academyv2.mereka.io",
+    "staging.learner.academyv2.mereka.io",
     # Staging Biji-Biji tenant (NEW)
     "staging.academy.biji-biji.com",
-    "studio.staging.academy.biji-biji.com",
-    "apps.staging.academy.biji-biji.com",
+    "staging.studio.academy.biji-biji.com",
+    "staging.apps.academy.biji-biji.com",
     # Staging SkilloFuture tenant (NEW)
     "staging.skillourfuture.academy.mereka.io",
-    "studio.staging.skillourfuture.academy.mereka.io",
-    "apps.staging.skillourfuture.academy.mereka.io",
+    "staging.studio.skillourfuture.academy.mereka.io",
+    "staging.apps.skillourfuture.academy.mereka.io",
     # Internal
     "lms",
 ]
@@ -151,9 +151,9 @@ The proof script must verify `/api/mfe_config/v1` returns correct values per Hos
 
 | Host Header | Expected LMS_BASE_URL | Expected STUDIO_BASE_URL |
 |-------------|----------------------|--------------------------|
-| staging.academyv2.mereka.io | https://staging.academyv2.mereka.io | https://studio.staging.academyv2.mereka.io |
-| staging.academy.biji-biji.com | https://staging.academy.biji-biji.com | https://studio.staging.academy.biji-biji.com |
-| staging.skillourfuture.academy.mereka.io | https://staging.skillourfuture.academy.mereka.io | https://studio.staging.skillourfuture.academy.mereka.io |
+| staging.academyv2.mereka.io | https://staging.academyv2.mereka.io | https://staging.studio.academyv2.mereka.io |
+| staging.academy.biji-biji.com | https://staging.academy.biji-biji.com | https://staging.studio.academy.biji-biji.com |
+| staging.skillourfuture.academy.mereka.io | https://staging.skillourfuture.academy.mereka.io | https://staging.studio.skillourfuture.academy.mereka.io |
 
 ---
 
@@ -162,14 +162,14 @@ The proof script must verify `/api/mfe_config/v1` returns correct values per Hos
 | Host | Expected Cookie Domain |
 |------|----------------------|
 | staging.academyv2.mereka.io | `.staging.academyv2.mereka.io` |
-| studio.staging.academyv2.mereka.io | `.staging.academyv2.mereka.io` |
-| apps.staging.academyv2.mereka.io | `.staging.academyv2.mereka.io` |
+| staging.studio.academyv2.mereka.io | `.staging.academyv2.mereka.io` |
+| staging.apps.academyv2.mereka.io | `.staging.academyv2.mereka.io` |
 | staging.academy.biji-biji.com | `.staging.academy.biji-biji.com` |
-| studio.staging.academy.biji-biji.com | `.staging.academy.biji-biji.com` |
-| apps.staging.academy.biji-biji.com | `.staging.academy.biji-biji.com` |
+| staging.studio.academy.biji-biji.com | `.staging.academy.biji-biji.com` |
+| staging.apps.academy.biji-biji.com | `.staging.academy.biji-biji.com` |
 | staging.skillourfuture.academy.mereka.io | `.staging.skillourfuture.academy.mereka.io` |
-| studio.staging.skillourfuture.academy.mereka.io | `.staging.skillourfuture.academy.mereka.io` |
-| apps.staging.skillourfuture.academy.mereka.io | `.staging.skillourfuture.academy.mereka.io` |
+| staging.studio.skillourfuture.academy.mereka.io | `.staging.skillourfuture.academy.mereka.io` |
+| staging.apps.skillourfuture.academy.mereka.io | `.staging.skillourfuture.academy.mereka.io` |
 
 **MerekaCookieDomainMiddleware update needed**: The `_cookie_domain_for_host` function
 must recognize `staging.academy.biji-biji.com` and return `.staging.academy.biji-biji.com`
@@ -219,17 +219,17 @@ Once this contract is accepted, bbi-infrastructure must:
 
 | Item | Notes |
 |------|-------|
-| `preview.staging.academyv2.mereka.io` in Ingress | Preview LMS for staging |
-| `discovery.staging.academyv2.mereka.io` in Ingress | Discovery satellite |
-| `admin.staging.academyv2.mereka.io` in Ingress | Enterprise admin portal |
+| `staging.preview.academyv2.mereka.io` in Ingress | Preview LMS for staging |
+| `staging.discovery.academyv2.mereka.io` in Ingress | Discovery satellite |
+| `staging.admin.academyv2.mereka.io` in Ingress | Enterprise admin portal |
 
 ### Deferred (P2)
 
 | Item | Notes |
 |------|-------|
-| `learner.staging.academyv2.mereka.io` | Enterprise learner portal — low priority |
-| `notes.staging.academyv2.mereka.io` | Notes satellite — low priority |
-| `credentials.staging.academyv2.mereka.io` | Credentials satellite — low priority |
+| `staging.learner.academyv2.mereka.io` | Enterprise learner portal — low priority |
+| `staging.notes.academyv2.mereka.io` | Notes satellite — low priority |
+| `staging.credentials.academyv2.mereka.io` | Credentials satellite — low priority |
 
 ### TLS Expectations
 
@@ -237,11 +237,11 @@ Once this contract is accepted, bbi-infrastructure must:
 |----------------|-------------|--------|
 | `staging.*.mereka.io` | Cloudflare proxy (orange cloud) | Covered by `*.mereka.io` wildcard |
 | `staging.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain, not covered by wildcard |
-| `studio.staging.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain |
-| `apps.staging.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain |
+| `staging.studio.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain |
+| `staging.apps.skillourfuture.academy.mereka.io` | Let's Encrypt via cert-manager | Multi-level subdomain |
 | `staging.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
-| `studio.staging.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
-| `apps.staging.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
+| `staging.studio.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
+| `staging.apps.academy.biji-biji.com` | Let's Encrypt via cert-manager | Third-party domain |
 
 ### DNS Expectations
 
@@ -279,7 +279,7 @@ All of the following must be true:
 7. **SiteConfiguration**: seeded via `seed-siteconfigs.sh --environment staging`
 8. **MFE config proof**: 3/3 staging tenants return correct LMS_BASE_URL and STUDIO_BASE_URL
 9. **Cookie proof**: 3/3 staging tenants get correct cookie domain
-10. **Enterprise**: admin.staging.academyv2.mereka.io returns valid MFE config (primary tenant only)
+10. **Enterprise**: staging.admin.academyv2.mereka.io returns valid MFE config (primary tenant only)
 
 Items 1 is delivered by this commit. Items 2-6 require GitOps. Item 7 requires
 seed script execution after items 2-6 are deployed. Items 8-10 are the proof gate.

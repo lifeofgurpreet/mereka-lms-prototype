@@ -123,11 +123,11 @@ ALL_HOSTS=(
   "staging.academy.biji-biji.com"
   "staging.skillourfuture.academy.mereka.io"
   "staging.studio.academyv2.mereka.io"
-  "studio.staging.academy.biji-biji.com"
-  "studio.staging.skillourfuture.academy.mereka.io"
+  "staging.studio.academy.biji-biji.com"
+  "staging.studio.skillourfuture.academy.mereka.io"
   "staging.apps.academyv2.mereka.io"
-  "apps.staging.academy.biji-biji.com"
-  "apps.staging.skillourfuture.academy.mereka.io"
+  "staging.apps.academy.biji-biji.com"
+  "staging.apps.skillourfuture.academy.mereka.io"
 )
 
 HA_RESULTS="["

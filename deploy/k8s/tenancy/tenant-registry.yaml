@@ -912,7 +912,7 @@ domains:
     release_critical: true
     proof_priority: P0
 
-  - domain: studio.staging.academyv2.mereka.io
+  - domain: staging.studio.academyv2.mereka.io
     environment: staging
     tenant: mereka
     status: active
@@ -929,7 +929,7 @@ domains:
     release_critical: true
     proof_priority: P0
 
-  - domain: apps.staging.academyv2.mereka.io
+  - domain: staging.apps.academyv2.mereka.io
     environment: staging
     tenant: mereka
     status: active
@@ -946,7 +946,7 @@ domains:
     release_critical: true
     proof_priority: P0
 
-  - domain: preview.staging.academyv2.mereka.io
+  - domain: staging.preview.academyv2.mereka.io
     environment: staging
     tenant: mereka
     status: active
@@ -963,7 +963,7 @@ domains:
     release_critical: false
     proof_priority: P1
 
-  - domain: discovery.staging.academyv2.mereka.io
+  - domain: staging.discovery.academyv2.mereka.io
     environment: staging
     tenant: mereka
     status: active
@@ -981,7 +981,7 @@ domains:
     proof_priority: P1
     notes: "Discovery has own ALLOWED_HOSTS via satellite config"
 
-  - domain: notes.staging.academyv2.mereka.io
+  - domain: staging.notes.academyv2.mereka.io
     environment: staging
     tenant: mereka
     status: active
@@ -999,7 +999,7 @@ domains:
     proof_priority: P2
     notes: "Notes has own ALLOWED_HOSTS via satellite config"
 
-  - domain: credentials.staging.academyv2.mereka.io
+  - domain: staging.credentials.academyv2.mereka.io
     environment: staging
     tenant: mereka
     status: active
@@ -1017,7 +1017,7 @@ domains:
     proof_priority: P2
     notes: "Credentials has own ALLOWED_HOSTS/CORS via satellite config"
 
-  - domain: admin.staging.academyv2.mereka.io
+  - domain: staging.admin.academyv2.mereka.io
     environment: staging
     tenant: mereka
     status: active
@@ -1035,7 +1035,7 @@ domains:
     proof_priority: P1
     notes: "Enterprise admin portal MFE"
 
-  - domain: learner.staging.academyv2.mereka.io
+  - domain: staging.learner.academyv2.mereka.io
     environment: staging
     tenant: mereka
     status: active
@@ -1092,7 +1092,7 @@ domains:
     proof_priority: P0
     notes: "Staging uses staging. prefix. TLS via Let's Encrypt (multi-level subdomain)."
 
-  - domain: studio.staging.academy.biji-biji.com
+  - domain: staging.studio.academy.biji-biji.com
     environment: staging
     tenant: biji-biji
     status: active
@@ -1109,7 +1109,7 @@ domains:
     release_critical: true
     proof_priority: P0
 
-  - domain: apps.staging.academy.biji-biji.com
+  - domain: staging.apps.academy.biji-biji.com
     environment: staging
     tenant: biji-biji
     status: active
@@ -1147,7 +1147,7 @@ domains:
     proof_priority: P0
     notes: "Staging uses staging. prefix. TLS via Let's Encrypt (multi-level subdomain)."
 
-  - domain: studio.staging.skillourfuture.academy.mereka.io
+  - domain: staging.studio.skillourfuture.academy.mereka.io
     environment: staging
     tenant: skillourfuture
     status: active
@@ -1164,7 +1164,7 @@ domains:
     release_critical: true
     proof_priority: P0
 
-  - domain: apps.staging.skillourfuture.academy.mereka.io
+  - domain: staging.apps.skillourfuture.academy.mereka.io
     environment: staging
     tenant: skillourfuture
     status: active

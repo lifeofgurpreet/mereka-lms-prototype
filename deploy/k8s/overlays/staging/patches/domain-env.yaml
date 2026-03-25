@@ -26,7 +26,7 @@ spec:
             - name: MEREKA_AUTH_DOMAIN
               value: staging.auth0.mereka.io
             - name: MEREKA_CREDENTIALS_DOMAIN
-              value: credentials.staging.academyv2.mereka.io
+              value: staging.credentials.academyv2.mereka.io
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -51,7 +51,7 @@ spec:
             - name: MEREKA_AUTH_DOMAIN
               value: staging.auth0.mereka.io
             - name: MEREKA_CREDENTIALS_DOMAIN
-              value: credentials.staging.academyv2.mereka.io
+              value: staging.credentials.academyv2.mereka.io
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -76,7 +76,7 @@ spec:
             - name: MEREKA_AUTH_DOMAIN
               value: staging.auth0.mereka.io
             - name: MEREKA_CREDENTIALS_DOMAIN
-              value: credentials.staging.academyv2.mereka.io
+              value: staging.credentials.academyv2.mereka.io
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -101,7 +101,7 @@ spec:
             - name: MEREKA_AUTH_DOMAIN
               value: staging.auth0.mereka.io
             - name: MEREKA_CREDENTIALS_DOMAIN
-              value: credentials.staging.academyv2.mereka.io
+              value: staging.credentials.academyv2.mereka.io
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -114,7 +114,7 @@ spec:
         - name: credentials
           env:
             - name: MEREKA_CREDENTIALS_DOMAIN
-              value: credentials.staging.academyv2.mereka.io
+              value: staging.credentials.academyv2.mereka.io
             - name: MEREKA_LMS_DOMAIN
               value: staging.academyv2.mereka.io
             - name: MEREKA_SCHEME
@@ -139,9 +139,9 @@ spec:
             - name: LMS_BASE_URL
               value: https://staging.academyv2.mereka.io
             - name: DISCOVERY_DOMAIN
-              value: discovery.staging.academyv2.mereka.io
+              value: staging.discovery.academyv2.mereka.io
             - name: DISCOVERY_BASE_URL
-              value: https://discovery.staging.academyv2.mereka.io
+              value: https://staging.discovery.academyv2.mereka.io
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -156,7 +156,7 @@ spec:
             - name: MEREKA_LMS_DOMAIN
               value: staging.academyv2.mereka.io
             - name: NOTES_DOMAIN
-              value: notes.staging.academyv2.mereka.io
+              value: staging.notes.academyv2.mereka.io
 ---
 # CronJob domain overrides
 apiVersion: batch/v1
@@ -175,7 +175,7 @@ spec:
                 - name: LMS_URL
                   value: https://staging.academyv2.mereka.io
                 - name: DISCOVERY_URL
-                  value: https://discovery.staging.academyv2.mereka.io
+                  value: https://staging.discovery.academyv2.mereka.io
 ---
 apiVersion: apps/v1
 kind: Deployment

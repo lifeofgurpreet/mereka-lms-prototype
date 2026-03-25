@@ -16,7 +16,7 @@ spec:
   # Direct ingress→LMS routing is broken because hostNetwork ingress pods cannot
   # reach pods on control-plane nodes (cross-node pod CIDR routing failure).
   rules:
-    - host: apps.staging.academyv2.mereka.io
+    - host: staging.apps.academyv2.mereka.io
       http:
         paths:
           - path: /
@@ -28,5 +28,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - apps.staging.academyv2.mereka.io
+        - staging.apps.academyv2.mereka.io
       secretName: staging-openedx-mfe-tls

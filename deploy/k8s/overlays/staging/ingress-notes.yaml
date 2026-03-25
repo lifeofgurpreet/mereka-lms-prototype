@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: notes.staging.academyv2.mereka.io
+    - host: staging.notes.academyv2.mereka.io
       http:
         paths:
           - path: /
@@ -25,5 +25,5 @@ spec:
                   number: 8000
   tls:
     - hosts:
-        - notes.staging.academyv2.mereka.io
+        - staging.notes.academyv2.mereka.io
       secretName: staging-notes-tls

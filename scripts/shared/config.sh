@@ -104,17 +104,17 @@ export STAGING_STUDIO_DOMAIN="${STAGING_STUDIO_DOMAIN:-staging.studio.academyv2.
 export STAGING_MFE_DOMAIN="${STAGING_MFE_DOMAIN:-staging.apps.academyv2.mereka.io}"
 export STAGING_AUTHENTIK_DOMAIN="${STAGING_AUTHENTIK_DOMAIN:-staging.auth0.mereka.io}"
 export STAGING_PREVIEW_DOMAIN="${STAGING_PREVIEW_DOMAIN:-staging.preview.academyv2.mereka.io}"
-export STAGING_DISCOVERY_DOMAIN="${STAGING_DISCOVERY_DOMAIN:-discovery.staging.academyv2.mereka.io}"
+export STAGING_DISCOVERY_DOMAIN="${STAGING_DISCOVERY_DOMAIN:-staging.discovery.academyv2.mereka.io}"
 # Legacy Oscar ecommerce (deprecated — being replaced by purchase-gateway)
 # Kept during dual-stack transition period; will be removed after AC-027/AC-028 close
-export STAGING_ECOMMERCE_DOMAIN="${STAGING_ECOMMERCE_DOMAIN:-ecommerce.staging.academyv2.mereka.io}"
-export STAGING_NOTES_DOMAIN="${STAGING_NOTES_DOMAIN:-notes.staging.academyv2.mereka.io}"
-export STAGING_CREDENTIALS_DOMAIN="${STAGING_CREDENTIALS_DOMAIN:-credentials.staging.academyv2.mereka.io}"
-export STAGING_FORUM_DOMAIN="${STAGING_FORUM_DOMAIN:-forum.staging.academyv2.mereka.io}"
+export STAGING_ECOMMERCE_DOMAIN="${STAGING_ECOMMERCE_DOMAIN:-staging.ecommerce.academyv2.mereka.io}"
+export STAGING_NOTES_DOMAIN="${STAGING_NOTES_DOMAIN:-staging.notes.academyv2.mereka.io}"
+export STAGING_CREDENTIALS_DOMAIN="${STAGING_CREDENTIALS_DOMAIN:-staging.credentials.academyv2.mereka.io}"
+export STAGING_FORUM_DOMAIN="${STAGING_FORUM_DOMAIN:-staging.forum.academyv2.mereka.io}"
 
 # Enterprise MFE domains (staging)
-export STAGING_ENTERPRISE_ADMIN_DOMAIN="${STAGING_ENTERPRISE_ADMIN_DOMAIN:-admin.staging.academyv2.mereka.io}"
-export STAGING_ENTERPRISE_PORTAL_DOMAIN="${STAGING_ENTERPRISE_PORTAL_DOMAIN:-learner.staging.academyv2.mereka.io}"
+export STAGING_ENTERPRISE_ADMIN_DOMAIN="${STAGING_ENTERPRISE_ADMIN_DOMAIN:-staging.admin.academyv2.mereka.io}"
+export STAGING_ENTERPRISE_PORTAL_DOMAIN="${STAGING_ENTERPRISE_PORTAL_DOMAIN:-staging.learner.academyv2.mereka.io}"
 
 # Purchase Gateway (staging)
 

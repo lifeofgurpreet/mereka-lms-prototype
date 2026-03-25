@@ -38,6 +38,8 @@ Do not create new active status docs under legacy `reports/**` paths.
 | [BACKUP_TOOLING_STATUS.md](BACKUP_TOOLING_STATUS.md) | You need the current backup-tooling status. |
 | [CI_OPTIMIZATION_TRACKER.md](CI_OPTIMIZATION_TRACKER.md) | You need current CI optimization work tracking. |
 | [DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md](DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md) | You need the current docs control-plane closure state. |
+| [DEV_STAGING_TRUTH_TRACKER_2026-03-25.md](DEV_STAGING_TRUTH_TRACKER_2026-03-25.md) | You need the current cross-repo truth tracker for DEV/staging operational closure. |
+| [DEV_STAGING_TRUTH_TAKEOVER_PROMPT_2026-03-25.md](DEV_STAGING_TRUTH_TAKEOVER_PROMPT_2026-03-25.md) | You need a direct handoff brief for the next agent working the DEV/staging truth lane. |
 | [FOLLOW_UPS_2026-01-20.md](FOLLOW_UPS_2026-01-20.md) | You need outstanding follow-up items still considered active. |
 | [FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md](FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md) | You need active CI simplification work for frontend. |
 | [FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md](FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md) | You need the frontend closure status matrix. |

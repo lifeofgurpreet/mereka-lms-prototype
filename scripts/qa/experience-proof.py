@@ -65,17 +65,17 @@ SURFACES = {
         ],
         "studio": [
             {"host": "staging.studio.academyv2.mereka.io", "tenant": "mereka"},
-            {"host": "studio.staging.academy.biji-biji.com", "tenant": "biji-biji"},
-            {"host": "studio.staging.skillourfuture.academy.mereka.io", "tenant": "skillourfuture"},
+            {"host": "staging.studio.academy.biji-biji.com", "tenant": "biji-biji"},
+            {"host": "staging.studio.skillourfuture.academy.mereka.io", "tenant": "skillourfuture"},
         ],
         "mfe": [
             {"host": "staging.apps.academyv2.mereka.io", "tenant": "mereka"},
-            {"host": "apps.staging.academy.biji-biji.com", "tenant": "biji-biji"},
-            {"host": "apps.staging.skillourfuture.academy.mereka.io", "tenant": "skillourfuture"},
+            {"host": "staging.apps.academy.biji-biji.com", "tenant": "biji-biji"},
+            {"host": "staging.apps.skillourfuture.academy.mereka.io", "tenant": "skillourfuture"},
         ],
         "enterprise": [
-            {"host": "admin.staging.academyv2.mereka.io", "role": "enterprise-admin"},
-            {"host": "learner.staging.academyv2.mereka.io", "role": "enterprise-learner"},
+            {"host": "staging.admin.academyv2.mereka.io", "role": "enterprise-admin"},
+            {"host": "staging.learner.academyv2.mereka.io", "role": "enterprise-learner"},
         ],
     },
 }
