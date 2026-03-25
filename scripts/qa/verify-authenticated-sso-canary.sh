@@ -14,31 +14,33 @@
 # Usage:
 #   ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
 #   ./scripts/qa/verify-authenticated-sso-canary.sh --env dev
+#   ./scripts/qa/verify-authenticated-sso-canary.sh --env staging
 #   REQUIRE_SECRETS=0 ./scripts/qa/verify-authenticated-sso-canary.sh --env both
+#   REQUIRE_SECRETS=0 ./scripts/qa/verify-authenticated-sso-canary.sh --env all
 #
 # Env:
-#   REQUIRE_SECRETS=1                        Fail when primary creds are missing (default: 1)
-#   REQUIRE_STUDIO_CANARY=0                  Fail when Studio staff creds are missing (default: 0)
-#   RUN_OIDC_CANARY=1                        Run primary OIDC canary flow (default: 1)
-#   RUN_STUDIO_CANARY=1                      Run Studio OIDC canary flow (default: 1)
-#   RUN_LOCAL_LOGIN_CANARY=0                 Also run native /authn/login credential canary (default: 0)
-#   REQUIRE_LOCAL_CANARY=0                   Fail when local-login creds are missing (default: 0)
-#   SSO_CANARY_TIMEOUT_SECONDS=180           Per-run timeout
-#   SSO_CANARY_EMAIL[_PROD|_DEV]             Primary canary email
-#   SSO_CANARY_PASSWORD[_PROD|_DEV]          Primary canary password
-#   SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV]      Optional Studio-access canary email (staff)
-#   SSO_CANARY_STUDIO_PASSWORD[_PROD|_DEV]   Optional Studio-access canary password
-#   LOCAL_CANARY_EMAIL[_PROD|_DEV]           Optional native authn canary email/user
-#   LOCAL_CANARY_PASSWORD[_PROD|_DEV]        Optional native authn canary password
-#   SSO_CANARY_DEBUG=1                       Emit extra diagnostics
-#   SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1  TLS mode (default: auto; dev=1, prod=0)
+#   REQUIRE_SECRETS=1                           Fail when primary creds are missing (default: 1)
+#   REQUIRE_STUDIO_CANARY=0                     Fail when Studio staff creds are missing (default: 0)
+#   RUN_OIDC_CANARY=1                           Run primary OIDC canary flow (default: 1)
+#   RUN_STUDIO_CANARY=1                         Run Studio OIDC canary flow (default: 1)
+#   RUN_LOCAL_LOGIN_CANARY=0                    Also run native /authn/login credential canary (default: 0)
+#   REQUIRE_LOCAL_CANARY=0                      Fail when local-login creds are missing (default: 0)
+#   SSO_CANARY_TIMEOUT_SECONDS=180              Per-run timeout
+#   SSO_CANARY_EMAIL[_PROD|_DEV|_STAGING]      Primary canary email
+#   SSO_CANARY_PASSWORD[_PROD|_DEV|_STAGING]   Primary canary password
+#   SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV|_STAGING]    Optional Studio-access canary email (staff)
+#   SSO_CANARY_STUDIO_PASSWORD[_PROD|_DEV|_STAGING] Optional Studio-access canary password
+#   LOCAL_CANARY_EMAIL[_PROD|_DEV|_STAGING]    Optional native authn canary email/user
+#   LOCAL_CANARY_PASSWORD[_PROD|_DEV|_STAGING] Optional native authn canary password
+#   SSO_CANARY_DEBUG=1                          Emit extra diagnostics
+#   SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1     TLS mode (default: auto; dev=1, prod/staging=0)
 #
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-ENV_SCOPE="prod" # prod|dev|both
+ENV_SCOPE="prod" # prod|dev|staging|both|all
 REQUIRE_SECRETS="${REQUIRE_SECRETS:-1}"
 REQUIRE_STUDIO_CANARY="${REQUIRE_STUDIO_CANARY:-0}"
 RUN_OIDC_CANARY="${RUN_OIDC_CANARY:-1}"
@@ -52,24 +54,24 @@ mkdir -p "$OUT_DIR"
 
 usage() {
   cat <<'USAGE_EOF'
-Usage: ./scripts/qa/verify-authenticated-sso-canary.sh [--env prod|dev|both]
+Usage: ./scripts/qa/verify-authenticated-sso-canary.sh [--env prod|dev|staging|both|all]
 
 Env:
-  REQUIRE_SECRETS=1                        Fail when primary creds are missing (default: 1)
-  REQUIRE_STUDIO_CANARY=0                  Fail when Studio staff creds are missing (default: 0)
-  RUN_OIDC_CANARY=1                        Run primary OIDC canary flow (default: 1)
-  RUN_STUDIO_CANARY=1                      Run Studio OIDC canary flow (default: 1)
-  RUN_LOCAL_LOGIN_CANARY=0                 Also run native /authn/login credential canary (default: 0)
-  REQUIRE_LOCAL_CANARY=0                   Fail when local-login creds are missing (default: 0)
-  SSO_CANARY_TIMEOUT_SECONDS=180           Per-run timeout (seconds)
-  SSO_CANARY_EMAIL[_PROD|_DEV]             Primary canary email
-  SSO_CANARY_PASSWORD[_PROD|_DEV]          Primary canary password
-  SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV]      Optional Studio-access canary email (staff)
-  SSO_CANARY_STUDIO_PASSWORD[_PROD|_DEV]   Optional Studio-access canary password
-  LOCAL_CANARY_EMAIL[_PROD|_DEV]           Optional native authn canary email/user
-  LOCAL_CANARY_PASSWORD[_PROD|_DEV]        Optional native authn canary password
-  SSO_CANARY_DEBUG=1                       Enable debug logging
-  SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1  TLS mode (default: auto; dev=1, prod=0)
+  REQUIRE_SECRETS=1                            Fail when primary creds are missing (default: 1)
+  REQUIRE_STUDIO_CANARY=0                      Fail when Studio staff creds are missing (default: 0)
+  RUN_OIDC_CANARY=1                            Run primary OIDC canary flow (default: 1)
+  RUN_STUDIO_CANARY=1                          Run Studio OIDC canary flow (default: 1)
+  RUN_LOCAL_LOGIN_CANARY=0                     Also run native /authn/login credential canary (default: 0)
+  REQUIRE_LOCAL_CANARY=0                       Fail when local-login creds are missing (default: 0)
+  SSO_CANARY_TIMEOUT_SECONDS=180               Per-run timeout (seconds)
+  SSO_CANARY_EMAIL[_PROD|_DEV|_STAGING]       Primary canary email
+  SSO_CANARY_PASSWORD[_PROD|_DEV|_STAGING]    Primary canary password
+  SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV|_STAGING]     Optional Studio-access canary email (staff)
+  SSO_CANARY_STUDIO_PASSWORD[_PROD|_DEV|_STAGING]  Optional Studio-access canary password
+  LOCAL_CANARY_EMAIL[_PROD|_DEV|_STAGING]     Optional native authn canary email/user
+  LOCAL_CANARY_PASSWORD[_PROD|_DEV|_STAGING]  Optional native authn canary password
+  SSO_CANARY_DEBUG=1                           Enable debug logging
+  SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1      TLS mode (default: auto; dev=1, prod/staging=0)
 USAGE_EOF
 }
 
@@ -87,7 +89,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" && "$ENV_SCOPE" != "all" ]]; then
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
@@ -690,6 +692,12 @@ run_primary_env() {
     mfe_domain="$MFE_DOMAIN"
     email="${SSO_CANARY_EMAIL_PROD:-${SSO_CANARY_EMAIL:-}}"
     password="${SSO_CANARY_PASSWORD_PROD:-${SSO_CANARY_PASSWORD:-}}"
+  elif [[ "$env_name" == "staging" ]]; then
+    lms_domain="$STAGING_LMS_DOMAIN"
+    studio_domain="$STAGING_STUDIO_DOMAIN"
+    mfe_domain="$STAGING_MFE_DOMAIN"
+    email="${SSO_CANARY_EMAIL_STAGING:-${SSO_CANARY_EMAIL:-}}"
+    password="${SSO_CANARY_PASSWORD_STAGING:-${SSO_CANARY_PASSWORD:-}}"
   else
     lms_domain="$DEV_LMS_DOMAIN"
     studio_domain="$DEV_STUDIO_DOMAIN"
@@ -730,6 +738,12 @@ run_studio_env() {
     mfe_domain="$MFE_DOMAIN"
     email="${SSO_CANARY_STUDIO_EMAIL_PROD:-${SSO_CANARY_STUDIO_EMAIL:-}}"
     password="${SSO_CANARY_STUDIO_PASSWORD_PROD:-${SSO_CANARY_STUDIO_PASSWORD:-}}"
+  elif [[ "$env_name" == "staging" ]]; then
+    lms_domain="$STAGING_LMS_DOMAIN"
+    studio_domain="$STAGING_STUDIO_DOMAIN"
+    mfe_domain="$STAGING_MFE_DOMAIN"
+    email="${SSO_CANARY_STUDIO_EMAIL_STAGING:-${SSO_CANARY_STUDIO_EMAIL:-}}"
+    password="${SSO_CANARY_STUDIO_PASSWORD_STAGING:-${SSO_CANARY_STUDIO_PASSWORD:-}}"
   else
     lms_domain="$DEV_LMS_DOMAIN"
     studio_domain="$DEV_STUDIO_DOMAIN"
@@ -770,6 +784,12 @@ run_local_login_env() {
     mfe_domain="$MFE_DOMAIN"
     email="${LOCAL_CANARY_EMAIL_PROD:-${LOCAL_CANARY_EMAIL:-${SSO_CANARY_EMAIL_PROD:-${SSO_CANARY_EMAIL:-}}}}"
     password="${LOCAL_CANARY_PASSWORD_PROD:-${LOCAL_CANARY_PASSWORD:-${SSO_CANARY_PASSWORD_PROD:-${SSO_CANARY_PASSWORD:-}}}}"
+  elif [[ "$env_name" == "staging" ]]; then
+    lms_domain="$STAGING_LMS_DOMAIN"
+    studio_domain="$STAGING_STUDIO_DOMAIN"
+    mfe_domain="$STAGING_MFE_DOMAIN"
+    email="${LOCAL_CANARY_EMAIL_STAGING:-${LOCAL_CANARY_EMAIL:-${SSO_CANARY_EMAIL_STAGING:-${SSO_CANARY_EMAIL:-}}}}"
+    password="${LOCAL_CANARY_PASSWORD_STAGING:-${LOCAL_CANARY_PASSWORD:-${SSO_CANARY_PASSWORD_STAGING:-${SSO_CANARY_PASSWORD:-}}}}"
   else
     lms_domain="$DEV_LMS_DOMAIN"
     studio_domain="$DEV_STUDIO_DOMAIN"
@@ -800,7 +820,7 @@ run_local_login_env() {
     "local"
 }
 
-if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   if [[ "$RUN_OIDC_CANARY" == "1" ]]; then
     run_primary_env "prod"
   fi
@@ -812,7 +832,7 @@ if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
   fi
 fi
 
-if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   if [[ "$RUN_OIDC_CANARY" == "1" ]]; then
     run_primary_env "dev"
   fi
@@ -821,6 +841,18 @@ if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
   fi
   if [[ "$RUN_LOCAL_LOGIN_CANARY" == "1" ]]; then
     run_local_login_env "dev"
+  fi
+fi
+
+if [[ "$ENV_SCOPE" == "staging" || "$ENV_SCOPE" == "all" ]]; then
+  if [[ "$RUN_OIDC_CANARY" == "1" ]]; then
+    run_primary_env "staging"
+  fi
+  if [[ "$RUN_STUDIO_CANARY" == "1" ]]; then
+    run_studio_env "staging"
+  fi
+  if [[ "$RUN_LOCAL_LOGIN_CANARY" == "1" ]]; then
+    run_local_login_env "staging"
   fi
 fi
 

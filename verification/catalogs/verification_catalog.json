@@ -1600,13 +1600,14 @@
       ],
       "env_scope": [
         "dev",
-        "prod"
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-authenticated-sso-canary.sh",
-      "reference_count": 25,
+      "reference_count": 26,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

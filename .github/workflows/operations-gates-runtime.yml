@@ -14,7 +14,9 @@ on:
         options:
           - prod
           - dev
+          - staging
           - both
+          - all
       strict_runtime:
         description: "Fail when runtime dependencies are unavailable"
         required: false
@@ -79,10 +81,14 @@ jobs:
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
           SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
           SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
           SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
           SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
           SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_EMAIL_STAGING: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
           REQUIRE_SECRETS: "1"
           REQUIRE_STUDIO_CANARY: "0"
           SSO_CANARY_TIMEOUT_SECONDS: "180"
@@ -145,10 +151,14 @@ jobs:
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
           SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
           SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
           SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
           SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
           SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_EMAIL_STAGING: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
           SSO_CANARY_EMAIL: ${{ secrets.SSO_CANARY_EMAIL }}
           SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
         run: |
@@ -178,13 +188,18 @@ jobs:
             export AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1
             # Optional: only require Studio staff canary when secrets are present.
             require_studio=1
-            if [[ "$INPUT_ENV_SCOPE" == "prod" || "$INPUT_ENV_SCOPE" == "both" ]]; then
+            if [[ "$INPUT_ENV_SCOPE" == "prod" || "$INPUT_ENV_SCOPE" == "both" || "$INPUT_ENV_SCOPE" == "all" ]]; then
               if [[ -z "${SSO_CANARY_STUDIO_EMAIL_PROD:-}" || -z "${SSO_CANARY_STUDIO_PASSWORD_PROD:-}" ]]; then
                 require_studio=0
               fi
             fi
-            if [[ "$INPUT_ENV_SCOPE" == "dev" || "$INPUT_ENV_SCOPE" == "both" ]]; then
+            if [[ "$INPUT_ENV_SCOPE" == "dev" || "$INPUT_ENV_SCOPE" == "both" || "$INPUT_ENV_SCOPE" == "all" ]]; then
               if [[ -z "${SSO_CANARY_STUDIO_EMAIL_DEV:-}" || -z "${SSO_CANARY_STUDIO_PASSWORD_DEV:-}" ]]; then
+                require_studio=0
+              fi
+            fi
+            if [[ "$INPUT_ENV_SCOPE" == "staging" || "$INPUT_ENV_SCOPE" == "all" ]]; then
+              if [[ -z "${SSO_CANARY_STUDIO_EMAIL_STAGING:-}" || -z "${SSO_CANARY_STUDIO_PASSWORD_STAGING:-}" ]]; then
                 require_studio=0
               fi
             fi
@@ -207,8 +222,10 @@ jobs:
         env:
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
           SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
           SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
           SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
         run: |
           set -euo pipefail
@@ -217,7 +234,7 @@ jobs:
           # Remove Playwright traces (contain full network payloads with credentials)
           find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
           # Redact known passwords from text logs using perl (safe with special chars)
-          for secret_var in SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_PASSWORD_DEV SSO_CANARY_PASSWORD; do
+          for secret_var in SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_PASSWORD_STAGING SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_PASSWORD_DEV SSO_CANARY_STUDIO_PASSWORD_STAGING SSO_CANARY_PASSWORD; do
             secret_val="${!secret_var:-}"
             if [[ -n "$secret_val" ]]; then
               find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \

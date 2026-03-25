@@ -17,7 +17,9 @@ on:
         options:
           - prod
           - dev
+          - staging
           - both
+          - all
 
 permissions: {}
 
@@ -119,10 +121,14 @@ jobs:
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
           SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
           SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
           SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
           SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
           SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_EMAIL_STAGING: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
           SSO_CANARY_EMAIL: ${{ secrets.SSO_CANARY_EMAIL }}
           SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
           REQUIRE_SECRETS: '1'
@@ -135,8 +141,10 @@ jobs:
         env:
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
           SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
           SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
           SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
         run: |
           set -euo pipefail
@@ -145,7 +153,7 @@ jobs:
           # Remove Playwright traces (contain full network payloads with credentials)
           find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
           # Redact known passwords from text logs using perl (safe with special chars)
-          for secret_var in SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_PASSWORD_DEV SSO_CANARY_PASSWORD; do
+          for secret_var in SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_PASSWORD_STAGING SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_PASSWORD_DEV SSO_CANARY_STUDIO_PASSWORD_STAGING SSO_CANARY_PASSWORD; do
             secret_val="${!secret_var:-}"
             if [[ -n "$secret_val" ]]; then
               find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
