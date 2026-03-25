@@ -1700,4 +1700,11 @@ table thead th {
     align-items: flex-start;
     gap: 0.5rem;
   }
+
+  /* Mobile tap target accessibility (WCAG 2.5.8 — 44px minimum) */
+  .mereka-footer a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
 }

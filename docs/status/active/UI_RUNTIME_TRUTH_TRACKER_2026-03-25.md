@@ -61,7 +61,7 @@ Those changes should be treated as the current candidate fix set, not as closure
 | Desktop parity truth | **CLOSED** | dev LMS, staging LMS, authn/login all screenshotted at 1280x800. Footer shell matches source. |
 | Mobile responsive truth | **CLOSED** | dev LMS, staging LMS, authn/login all screenshotted at 375x812. Footer stacks cleanly, login page stacks branding panel above form. |
 | Enterprise footer truth | **accepted exception** | `verify-footer-parity.sh` WARN-001: enterprise MFE portals use default Open edX footer (P4 backlog, no MerekaFooter wiring). Explicitly classified as accepted scope debt. |
-| Accessibility interaction truth | open | focus order, tap targets, and footer/header keyboard behavior not yet re-audited |
+| Accessibility interaction truth | partial — tap targets fixed, keyboard reach deferred | 10 footer links were 23px (below WCAG 2.5.8 44px minimum) — fixed. Skip-nav link present. Keyboard reach to footer deferred. |
 | Known defect: authn logo 404 | **open** | MFE login page shows "Mereka Academy logo" alt text instead of actual image. Known issue (memory: mfe-header-logo-404). |
 
 ## Highest-leverage work queue
@@ -112,22 +112,28 @@ Screenshots: `var/ui-audit/lms-home-mobile.png`, `lms-login-mobile.png`, `stagin
 
 **Owner**: app-repo (mereka-lms), deferred until plugin slot infrastructure exists.
 
-### UI-05 — Re-audit accessibility basics on the corrected shell
+### UI-05 — Re-audit accessibility basics on the corrected shell — **PARTIAL 2026-03-25**
 
 Priority: `P1`
 Owner surface: `mereka-lms`
 
-Minimum checklist:
+**Audit findings (2026-03-25)**:
 
-- keyboard reachability for footer links
-- visible focus states
-- mobile tap target sanity
-- logo/home navigation accessibility
-- no broken skip-nav or trapped mobile menu behavior
+- Mobile tap targets: all 10 footer links measured at 23px height on mobile — below the WCAG 2.5.8 44px minimum touch target size. **FIXED**: `min-height: 44px; display: inline-flex; align-items: center` added to `.mereka-footer a` in the `@media (max-width: 768px)` block across all three CSS copies (lms/cms/common).
+- Skip-nav link: present in source. Not re-audited for visibility/styling.
+- Footer links: 10 links confirmed, all have `href` and `tabindex`.
+- Keyboard reach to footer: not re-audited. Deferred — requires authenticated browser session with focus tracking.
+
+**Remaining checklist**:
+
+- keyboard reachability for footer links (deferred — needs browser session)
+- visible focus states (not yet re-audited)
+- logo/home navigation accessibility (not yet re-audited)
+- no broken skip-nav or trapped mobile menu behavior (not yet re-audited)
 
 Done when:
 
-- blockers are either fixed or explicitly documented
+- remaining keyboard/focus items are either fixed or explicitly documented
 - this tracker records the audited surfaces and outcomes
 
 ### UI-06 — Turn runtime proof into durable tracked truth
