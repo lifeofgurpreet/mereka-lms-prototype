@@ -166,10 +166,13 @@ else
 fi
 
 # 4. Node version check
-if head -5 "$MFE_DF" | grep -q "node:2[0-9]"; then
-  pass "MFE uses Node 20+ ($(head -1 "$MFE_DF" | grep -oP 'node:[^ ]+'))"
+MFE_HEADER="$(head -5 "$MFE_DF")"
+MFE_FIRST_LINE="$(head -1 "$MFE_DF")"
+MFE_NODE_IMAGE="$(grep -oP 'node:[^ ]+' <<< "$MFE_FIRST_LINE" || true)"
+if grep -q "node:2[0-9]" <<< "$MFE_HEADER"; then
+  pass "MFE uses Node 20+ (${MFE_NODE_IMAGE:-$MFE_FIRST_LINE})"
 else
-  fail "MFE not using Node 20+ (found: $(head -1 "$MFE_DF"))"
+  fail "MFE not using Node 20+ (found: $MFE_FIRST_LINE)"
 fi
 
 # 5. Brand-mereka local package (not npm registry)
@@ -186,7 +189,7 @@ fi
 # 6. mereka theme assets present for authn
 authn_block_check=$(stage_block "$MFE_DF" "authn-common") || true
 if [[ -n "$authn_block_check" ]]; then
-  if echo "$authn_block_check" | grep -q "mereka"; then
+  if grep -q "mereka" <<< "$authn_block_check"; then
     pass "authn-common has mereka theme assets"
   else
     fail "authn-common MISSING mereka theme assets"

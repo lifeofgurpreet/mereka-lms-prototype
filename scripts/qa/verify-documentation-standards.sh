@@ -42,6 +42,8 @@ check_runbook_metadata() {
     echo "=== Checking Runbook Metadata ==="
 
     local runbooks_dir="docs/ops/runbooks"
+    local header10=""
+    local header5=""
     if [[ ! -d "$runbooks_dir" ]]; then
         warn "Runbooks directory not found: $runbooks_dir"
         return
@@ -49,12 +51,14 @@ check_runbook_metadata() {
 
     local missing_metadata=()
     while IFS= read -r -d '' file; do
+        header10="$(head -10 "$file")"
+        header5="$(head -5 "$file")"
         # Skip superseded stubs (YAML frontmatter with status: superseded)
-        if head -10 "$file" | grep -qE '^status:\s*superseded'; then
+        if grep -qE '^status:\s*superseded' <<< "$header10"; then
             continue
         fi
         # Check for metadata line (starts with underscore)
-        if ! head -5 "$file" | grep -qE "^_.*Audience.*•.*Owner.*•.*Last (verified|updated):"; then
+        if ! grep -qE "^_.*Audience.*•.*Owner.*•.*Last (verified|updated):" <<< "$header5"; then
             missing_metadata+=("$(basename "$file")")
         fi
     done < <(find "$runbooks_dir" -name "*.md" -print0)
@@ -72,6 +76,7 @@ check_spec_frontmatter() {
     echo "=== Checking Spec Frontmatter ==="
 
     local specs_dir="specs"
+    local header5=""
     if [[ ! -d "$specs_dir" ]]; then
         warn "Specs directory not found: $specs_dir"
         return
@@ -86,7 +91,8 @@ check_spec_frontmatter() {
         fi
 
         # Check for YAML frontmatter
-        if ! head -5 "$file" | grep -q "^---$"; then
+        header5="$(head -5 "$file")"
+        if ! grep -q "^---$" <<< "$header5"; then
             missing_frontmatter+=("$(basename "$file")")
         fi
     done < <(find "$specs_dir" -maxdepth 1 -name "*_spec.md" -print0)
@@ -141,6 +147,7 @@ check_verification_scripts() {
     echo "=== Checking Verification Scripts ==="
 
     local scripts_dir="scripts/qa"
+    local header10=""
     if [[ ! -d "$scripts_dir" ]]; then
         warn "QA scripts directory not found: $scripts_dir"
         return
@@ -149,7 +156,8 @@ check_verification_scripts() {
     local missing_annotations=()
     while IFS= read -r -d '' file; do
         # Check for @covers annotation
-        if ! head -10 "$file" | grep -qE "^# @covers"; then
+        header10="$(head -10 "$file")"
+        if ! grep -qE "^# @covers" <<< "$header10"; then
             missing_annotations+=("$(basename "$file")")
         fi
     done < <(find "$scripts_dir" -name "verify-*.sh" -print0)
@@ -200,14 +208,16 @@ check_hardcoded_secrets() {
     local files_with_secrets=()
     for pattern in "${secret_patterns[@]}"; do
         while IFS= read -r file; do
+            local pattern_hits=""
             # Ignore:
             # - Example values (example, placeholder, changeme, CHANGE_ME)
             # - Environment variable references (os.environ, process.env, ${})
             # - Empty strings ("")
             # - Documentation examples (migration guides, setup guides)
             # - Archive directory (historical docs)
-            if grep -E "$pattern" "$file" | \
-               grep -qvE '(os\.environ|process\.env|\$\{|\"\"|changeme|CHANGE_ME|example|placeholder|Example|EXAMPLE|your-|<your|DOCUMENTATION_STANDARDS)' && \
+            pattern_hits="$(grep -E "$pattern" "$file" || true)"
+            if [[ -n "$pattern_hits" ]] && \
+               grep -qvE '(os\.environ|process\.env|\$\{|\"\"|changeme|CHANGE_ME|example|placeholder|Example|EXAMPLE|your-|<your|DOCUMENTATION_STANDARDS)' <<< "$pattern_hits" && \
                [[ ! "$file" =~ (archive|migrations|integrations|TASK3) ]]; then
                 files_with_secrets+=("$file")
             fi

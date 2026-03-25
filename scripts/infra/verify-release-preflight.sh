@@ -110,7 +110,7 @@ else
 fi
 
 # Check patch script has not drifted from committed state
-if git -C "${REPO_ROOT}" diff --name-only HEAD -- infrastructure/tutor/apply-patches.sh 2>/dev/null | grep -q .; then
+if ! git -C "${REPO_ROOT}" diff --quiet HEAD -- infrastructure/tutor/apply-patches.sh 2>/dev/null; then
   fail "apply-patches.sh has uncommitted changes — commit or stash before deploy"
 else
   pass "apply-patches.sh is clean (no uncommitted changes)"

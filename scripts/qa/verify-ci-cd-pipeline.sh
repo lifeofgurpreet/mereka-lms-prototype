@@ -549,7 +549,9 @@ check_security() {
   # AC-028: No set -x near secret usage
   local debug_leak=0
   for wf in "$WORKFLOWS_DIR"/*.yml; do
-    if grep -B5 'secrets\.' "$wf" 2>/dev/null | grep -q 'set -x'; then
+    local secret_context=""
+    secret_context="$(grep -B5 'secrets\.' "$wf" 2>/dev/null || true)"
+    if [[ -n "$secret_context" ]] && grep -q 'set -x' <<< "$secret_context"; then
       fail "[AC-028] $(basename "$wf"): set -x near secret usage (may leak)"
       debug_leak=$((debug_leak + 1))
     fi
