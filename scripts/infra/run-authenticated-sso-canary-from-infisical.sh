@@ -9,6 +9,7 @@
 #
 # Usage:
 #   ./scripts/infra/run-authenticated-sso-canary-from-infisical.sh --env prod
+#   ./scripts/infra/run-authenticated-sso-canary-from-infisical.sh --env staging
 #
 set -euo pipefail
 
@@ -23,13 +24,13 @@ INFISICAL_DIR="${INFISICAL_DIR:-}"
 INFISICAL_PROJECT_ID="${INFISICAL_PROJECT_ID:-}"
 INFISICAL_TOKEN="${INFISICAL_TOKEN:-}"
 
-ENV_SCOPE="prod" # prod|dev|both
+ENV_SCOPE="prod" # prod|dev|staging|both|all
 REQUIRE_STUDIO_CANARY="${REQUIRE_STUDIO_CANARY:-0}"
 REQUIRE_SECRETS="${REQUIRE_SECRETS:-1}"
 
 usage() {
   cat <<'EOF' >&2
-Usage: ./scripts/infra/run-authenticated-sso-canary-from-infisical.sh [--env prod|dev|both]
+Usage: ./scripts/infra/run-authenticated-sso-canary-from-infisical.sh [--env prod|dev|staging|both|all]
 
 Env:
   INFISICAL_DOMAIN=https://secrets.mereka.io/api
@@ -56,7 +57,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" && "$ENV_SCOPE" != "all" ]]; then
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
@@ -134,21 +135,39 @@ fetch_plain_optional() {
   fetch_plain "$key" 2>/dev/null || true
 }
 
-# Use the shared admin test creds as the canary identity. Do not print.
-SSO_CANARY_EMAIL_PROD="$(fetch_plain GOOGLE_IMPERSONATE_EMAIL)"
-SSO_CANARY_PASSWORD_PROD="$(fetch_plain GOOGLE_IMPERSONATE_PASSWORD)"
+# Use the shared prod canary identity from Infisical when explicit prod overrides are absent.
+SSO_CANARY_EMAIL_PROD="${SSO_CANARY_EMAIL_PROD:-$(fetch_plain GOOGLE_IMPERSONATE_EMAIL)}"
+SSO_CANARY_PASSWORD_PROD="${SSO_CANARY_PASSWORD_PROD:-$(fetch_plain GOOGLE_IMPERSONATE_PASSWORD)}"
+
+# Non-prod canary creds are optional and should be explicitly provisioned per environment.
+SSO_CANARY_EMAIL_DEV="${SSO_CANARY_EMAIL_DEV:-$(fetch_plain_optional SSO_CANARY_EMAIL_DEV)}"
+SSO_CANARY_PASSWORD_DEV="${SSO_CANARY_PASSWORD_DEV:-$(fetch_plain_optional SSO_CANARY_PASSWORD_DEV)}"
+SSO_CANARY_EMAIL_STAGING="${SSO_CANARY_EMAIL_STAGING:-$(fetch_plain_optional SSO_CANARY_EMAIL_STAGING)}"
+SSO_CANARY_PASSWORD_STAGING="${SSO_CANARY_PASSWORD_STAGING:-$(fetch_plain_optional SSO_CANARY_PASSWORD_STAGING)}"
 
 # Studio canary creds MUST be explicit and should belong to a Studio-access (staff) account.
 # Do NOT default to the primary canary identity, because a non-staff user can get stuck in
 # a /home -> /login -> oauth2 loop (and this would produce noisy false-negative failures).
 SSO_CANARY_STUDIO_EMAIL_PROD="${SSO_CANARY_STUDIO_EMAIL_PROD:-$(fetch_plain_optional SSO_CANARY_STUDIO_EMAIL_PROD)}"
 SSO_CANARY_STUDIO_PASSWORD_PROD="${SSO_CANARY_STUDIO_PASSWORD_PROD:-$(fetch_plain_optional SSO_CANARY_STUDIO_PASSWORD_PROD)}"
+SSO_CANARY_STUDIO_EMAIL_DEV="${SSO_CANARY_STUDIO_EMAIL_DEV:-$(fetch_plain_optional SSO_CANARY_STUDIO_EMAIL_DEV)}"
+SSO_CANARY_STUDIO_PASSWORD_DEV="${SSO_CANARY_STUDIO_PASSWORD_DEV:-$(fetch_plain_optional SSO_CANARY_STUDIO_PASSWORD_DEV)}"
+SSO_CANARY_STUDIO_EMAIL_STAGING="${SSO_CANARY_STUDIO_EMAIL_STAGING:-$(fetch_plain_optional SSO_CANARY_STUDIO_EMAIL_STAGING)}"
+SSO_CANARY_STUDIO_PASSWORD_STAGING="${SSO_CANARY_STUDIO_PASSWORD_STAGING:-$(fetch_plain_optional SSO_CANARY_STUDIO_PASSWORD_STAGING)}"
 
 exec env \
   REQUIRE_SECRETS="$REQUIRE_SECRETS" \
   REQUIRE_STUDIO_CANARY="$REQUIRE_STUDIO_CANARY" \
   SSO_CANARY_EMAIL_PROD="$SSO_CANARY_EMAIL_PROD" \
   SSO_CANARY_PASSWORD_PROD="$SSO_CANARY_PASSWORD_PROD" \
+  SSO_CANARY_EMAIL_DEV="$SSO_CANARY_EMAIL_DEV" \
+  SSO_CANARY_PASSWORD_DEV="$SSO_CANARY_PASSWORD_DEV" \
+  SSO_CANARY_EMAIL_STAGING="$SSO_CANARY_EMAIL_STAGING" \
+  SSO_CANARY_PASSWORD_STAGING="$SSO_CANARY_PASSWORD_STAGING" \
   SSO_CANARY_STUDIO_EMAIL_PROD="$SSO_CANARY_STUDIO_EMAIL_PROD" \
   SSO_CANARY_STUDIO_PASSWORD_PROD="$SSO_CANARY_STUDIO_PASSWORD_PROD" \
+  SSO_CANARY_STUDIO_EMAIL_DEV="$SSO_CANARY_STUDIO_EMAIL_DEV" \
+  SSO_CANARY_STUDIO_PASSWORD_DEV="$SSO_CANARY_STUDIO_PASSWORD_DEV" \
+  SSO_CANARY_STUDIO_EMAIL_STAGING="$SSO_CANARY_STUDIO_EMAIL_STAGING" \
+  SSO_CANARY_STUDIO_PASSWORD_STAGING="$SSO_CANARY_STUDIO_PASSWORD_STAGING" \
   "$REPO_ROOT/scripts/qa/verify-authenticated-sso-canary.sh" --env "$ENV_SCOPE"

@@ -267,14 +267,14 @@ The platform currently has workflows that evolved organically -- CI, image build
 - The `dr-evidence-bundle.yml` workflow MUST run monthly (1st of each month at 02:30 UTC) and MUST upload DR evidence with 120-day retention.
 - The `cloud-sql-backup.yml` workflow MUST only execute when repository variable `ENABLE_CLOUD_SQL_BACKUPS=true` is set.
 
-#### Authenticated SSO Canary (authenticated-sso-canary.yml)
+#### Authenticated SSO Canary (`sso-canary` job in `smoke-authenticated.yml`)
 
 - The SSO canary workflow MUST run every 6 hours on schedule and MUST support `workflow_dispatch`.
-- The SSO canary workflow MUST support `env_scope` input with options: `prod`, `dev`, `both` (default: `prod`).
+- The SSO canary workflow MUST support `env_scope` input with options: `prod`, `dev`, `staging`, `both`, `all` (default: `prod`).
 - The SSO canary workflow MUST install Playwright with Chromium for browser automation.
 - The SSO canary workflow MUST run `verify-authenticated-sso-canary.sh` with environment-scoped credentials.
-- The SSO canary workflow MUST support environment-specific secrets: `SSO_CANARY_EMAIL_PROD`, `SSO_CANARY_PASSWORD_PROD`, `SSO_CANARY_EMAIL_DEV`, `SSO_CANARY_PASSWORD_DEV`.
-- The SSO canary workflow SHOULD support optional Studio staff canary credentials: `SSO_CANARY_STUDIO_EMAIL_PROD`, `SSO_CANARY_STUDIO_PASSWORD_PROD`, `SSO_CANARY_STUDIO_EMAIL_DEV`, `SSO_CANARY_STUDIO_PASSWORD_DEV`.
+- The SSO canary workflow MUST support environment-specific secrets: `SSO_CANARY_EMAIL_PROD`, `SSO_CANARY_PASSWORD_PROD`, `SSO_CANARY_EMAIL_DEV`, `SSO_CANARY_PASSWORD_DEV`, `SSO_CANARY_EMAIL_STAGING`, `SSO_CANARY_PASSWORD_STAGING`.
+- The SSO canary workflow SHOULD support optional Studio staff canary credentials: `SSO_CANARY_STUDIO_EMAIL_PROD`, `SSO_CANARY_STUDIO_PASSWORD_PROD`, `SSO_CANARY_STUDIO_EMAIL_DEV`, `SSO_CANARY_STUDIO_PASSWORD_DEV`, `SSO_CANARY_STUDIO_EMAIL_STAGING`, `SSO_CANARY_STUDIO_PASSWORD_STAGING`.
 - The SSO canary workflow MUST upload artifacts (screenshots, logs) from `var/auth-sso-canary/` with 30-day retention.
 - The SSO canary workflow MUST upload artifacts even on failure (`if: always()`) for debugging.
 - The SSO canary workflow MUST set `REQUIRE_SECRETS=1` to fail loudly if required secrets are missing.

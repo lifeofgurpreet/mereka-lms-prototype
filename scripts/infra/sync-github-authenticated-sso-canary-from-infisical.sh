@@ -32,20 +32,28 @@ INFISICAL_TOKEN="${INFISICAL_TOKEN:-}"
 
 REPO_SLUG="${REPO_SLUG:-Biji-Biji-Initiative/mereka-lms}"
 REQUIRE_DEV="${REQUIRE_DEV:-0}"
+REQUIRE_STAGING="${REQUIRE_STAGING:-0}"
 REQUIRE_STUDIO="${REQUIRE_STUDIO:-0}"
 ENABLE_RUNTIME_GATE=0
 
 usage() {
   cat <<EOF_USAGE
-Usage: $0 [--repo owner/repo] [--require-dev] [--require-studio] [--enable-runtime-gate]
+Usage: $0 [--repo owner/repo] [--require-dev] [--require-staging] [--require-studio] [--enable-runtime-gate]
 
 This syncs Infisical /shared/oauth into GitHub secrets:
   GOOGLE_IMPERSONATE_EMAIL     -> SSO_CANARY_EMAIL_PROD
   GOOGLE_IMPERSONATE_PASSWORD  -> SSO_CANARY_PASSWORD_PROD
+  SSO_CANARY_EMAIL_DEV         -> SSO_CANARY_EMAIL_DEV         (optional)
+  SSO_CANARY_PASSWORD_DEV      -> SSO_CANARY_PASSWORD_DEV      (optional)
+  SSO_CANARY_EMAIL_STAGING     -> SSO_CANARY_EMAIL_STAGING     (optional)
+  SSO_CANARY_PASSWORD_STAGING  -> SSO_CANARY_PASSWORD_STAGING  (optional)
+  SSO_CANARY_STUDIO_EMAIL_*    -> same-named GitHub secret     (optional)
+  SSO_CANARY_STUDIO_PASSWORD_* -> same-named GitHub secret     (optional)
 
 Options:
   --repo owner/repo      GitHub repo slug (default: $REPO_SLUG)
   --require-dev          Require dev canary secrets too (default: $REQUIRE_DEV)
+  --require-staging      Require staging canary secrets too (default: $REQUIRE_STAGING)
   --require-studio       Require Studio canary secrets too (default: $REQUIRE_STUDIO)
   --enable-runtime-gate  Set repo variable RUN_AUTHENTICATED_SSO_CANARY=true
   -h, --help             Show help
@@ -61,6 +69,8 @@ while [[ $# -gt 0 ]]; do
       REPO_SLUG="${2:-}"; shift 2 ;;
     --require-dev)
       REQUIRE_DEV=1; shift ;;
+    --require-staging)
+      REQUIRE_STAGING=1; shift ;;
     --require-studio)
       REQUIRE_STUDIO=1; shift ;;
     --enable-runtime-gate)
@@ -159,16 +169,26 @@ export SSO_CANARY_PASSWORD_PROD
 SSO_CANARY_EMAIL_PROD="$(fetch_plain GOOGLE_IMPERSONATE_EMAIL)"
 SSO_CANARY_PASSWORD_PROD="$(fetch_plain GOOGLE_IMPERSONATE_PASSWORD)"
 
+export SSO_CANARY_EMAIL_DEV="${SSO_CANARY_EMAIL_DEV:-$(fetch_plain_optional SSO_CANARY_EMAIL_DEV)}"
+export SSO_CANARY_PASSWORD_DEV="${SSO_CANARY_PASSWORD_DEV:-$(fetch_plain_optional SSO_CANARY_PASSWORD_DEV)}"
+export SSO_CANARY_EMAIL_STAGING="${SSO_CANARY_EMAIL_STAGING:-$(fetch_plain_optional SSO_CANARY_EMAIL_STAGING)}"
+export SSO_CANARY_PASSWORD_STAGING="${SSO_CANARY_PASSWORD_STAGING:-$(fetch_plain_optional SSO_CANARY_PASSWORD_STAGING)}"
+
 # Studio canary creds MUST be explicit and should belong to a Studio-access (staff) account.
 # Do NOT default to the primary canary identity, otherwise non-staff users can get stuck
 # in a /home -> /login -> oauth2 loop and the gate becomes noisy.
 export SSO_CANARY_STUDIO_EMAIL_PROD="${SSO_CANARY_STUDIO_EMAIL_PROD:-$(fetch_plain_optional SSO_CANARY_STUDIO_EMAIL_PROD)}"
 export SSO_CANARY_STUDIO_PASSWORD_PROD="${SSO_CANARY_STUDIO_PASSWORD_PROD:-$(fetch_plain_optional SSO_CANARY_STUDIO_PASSWORD_PROD)}"
+export SSO_CANARY_STUDIO_EMAIL_DEV="${SSO_CANARY_STUDIO_EMAIL_DEV:-$(fetch_plain_optional SSO_CANARY_STUDIO_EMAIL_DEV)}"
+export SSO_CANARY_STUDIO_PASSWORD_DEV="${SSO_CANARY_STUDIO_PASSWORD_DEV:-$(fetch_plain_optional SSO_CANARY_STUDIO_PASSWORD_DEV)}"
+export SSO_CANARY_STUDIO_EMAIL_STAGING="${SSO_CANARY_STUDIO_EMAIL_STAGING:-$(fetch_plain_optional SSO_CANARY_STUDIO_EMAIL_STAGING)}"
+export SSO_CANARY_STUDIO_PASSWORD_STAGING="${SSO_CANARY_STUDIO_PASSWORD_STAGING:-$(fetch_plain_optional SSO_CANARY_STUDIO_PASSWORD_STAGING)}"
 
 # Delegate GitHub secret creation to the existing helper.
 exec env \
   REPO_SLUG="$REPO_SLUG" \
   REQUIRE_DEV="$REQUIRE_DEV" \
+  REQUIRE_STAGING="$REQUIRE_STAGING" \
   REQUIRE_STUDIO="$REQUIRE_STUDIO" \
   "$REPO_ROOT/scripts/infra/configure-github-authenticated-sso-canary.sh" \
   --repo "$REPO_SLUG" \

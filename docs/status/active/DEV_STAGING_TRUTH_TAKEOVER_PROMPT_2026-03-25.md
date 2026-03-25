@@ -4,10 +4,11 @@ You are taking over DEV/staging truth closure for `mereka-lms` and `bbi-infrastr
 
 Start by reading:
 
-1. `docs/status/active/DEV_STAGING_TRUTH_TRACKER_2026-03-25.md`
-2. `docs/stabilization/STABILIZATION_CONTROL_BOARD.md`
-3. `deploy/k8s/tenancy/tenant-registry.yaml`
-4. `deploy/k8s/tenancy/STAGING_TENANT_CONTRACT.md`
+1. `docs/status/active/TODAY_WORKLOAD_TRACKER_2026-03-25.md`
+2. `docs/status/active/DEV_STAGING_TRUTH_TRACKER_2026-03-25.md`
+3. `docs/stabilization/STABILIZATION_CONTROL_BOARD.md`
+4. `deploy/k8s/tenancy/tenant-registry.yaml`
+5. `deploy/k8s/tenancy/STAGING_TENANT_CONTRACT.md`
 
 Then work from the tracker in order. Do not re-invent the queue.
 
@@ -26,16 +27,15 @@ The objective is not “more green.” The objective is “no false closure.”
 
 ## Immediate first task
 
-Start with `T-01` from the tracker: resolve the staging hostname contract split.
+Start with `W-01` from the daily tracker and then `T-01` from the deeper tracker.
 
-Current contradiction:
+Current blocker:
 
-- canonical tenant contract says `studio.staging...` / `apps.staging...`
-- staging env seed data and staging Python settings still use `staging.studio...` / `staging.apps...`
-- GitOps staging ingress/certs route the canonical `studio.staging...` / `apps.staging...` shape
-- live staging proof on 2026-03-25 returned `5/9`
+- staging canary secrets now exist
+- the clean tracked staging-proof lane is still blocked because `.github/workflows/operations-gates-runtime.yml` is `disabled_manually`
+- when manually enabled for a dispatch probe, GitHub rejects it with `HTTP 422` because the workflow currently defines top-level `permissions` twice
 
-Your first job is to choose and enforce one hostname convention, then rerun staging proof until it reaches `9/9`.
+Your first job is to work from a clean branch/worktree off `origin/main`, repair the proof lane, and only then run a fresh tracked staging proof. Do not start by reopening dedicated staging cluster planning.
 
 ## Files to inspect immediately
 
@@ -46,6 +46,8 @@ Your first job is to choose and enforce one hostname convention, then rerun stag
 - `scripts/tenants/env/staging.env`
 - `scripts/tenants/verify-staging-tenant-proof.sh`
 - `deploy/k8s/overlays/staging/patches/production-staging.py`
+- `.github/workflows/operations-gates-runtime.yml`
+- `.github/workflows/smoke-authenticated.yml`
 
 ### Infra repo
 
@@ -53,15 +55,15 @@ Your first job is to choose and enforce one hostname convention, then rerun stag
 - `apps/mereka-lms/overlays/staging/patches/certificates.yaml`
 - `apps/mereka-lms/overlays/staging/patches/caddy-env-patch.yaml`
 - `config/nonprod-execution-state.yaml`
-- `docs/reference/staging-cluster-provisioning-pack.md`
 
 ## Non-negotiable rules
 
 - Do not treat local `var/proof/**` as canonical closure by itself.
-- Do not claim staging is “ready” while host acceptance is below `9/9`.
+- Do not claim staging is “ready” without a fresh tracked runtime/browser proof run.
 - Do not flip `ready_for_execution: false` early.
 - Do not paper over boundary contradictions by updating only docs or only runtime.
 - Do not optimize repo-only QA while runtime truth is still contradictory.
+- Do not restart dedicated staging cluster work before `2026-05-01`; that is explicitly deferred by operator decision.
 
 ## Required rerun commands
 
@@ -76,8 +78,6 @@ Your first job is to choose and enforce one hostname convention, then rerun stag
 
 - `bash scripts/qa/verify-nonprod-gate-readiness.sh`
 - `ENABLE_STAGING_CHECKS=1 bash scripts/qa/verify-staging-activation-gate.sh`
-- `bash scripts/qa/verify-staging-cutover-prereqs.sh --no-color`
-- `bash scripts/ops/staging-cutover-preflight.sh`
 
 ## Deliverables
 
@@ -92,7 +92,7 @@ Before stopping, leave behind all of the following:
 
 Minimum acceptable success for the next tranche:
 
-- staging hostname contract split is resolved across app repo, GitOps, and live proof
-- staging tenant proof becomes `9/9`
+- `operations-gates-runtime.yml` is syntax-valid and no longer parse-blocked
+- at least one fresh tracked staging runtime/browser proof attempt exists
 - cookie/browser behavior is either fixed or explicitly proven safe
 - tracker is updated so the next handoff does not have to rediscover the state

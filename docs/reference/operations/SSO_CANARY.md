@@ -20,10 +20,26 @@ and verifies:
 The `sso-canary` job is in `.github/workflows/smoke-authenticated.yml`. It runs:
 
 - Every 6 hours via schedule
-- On manual `workflow_dispatch` with `env_scope` input (`prod` / `dev` / `both`)
+- On manual `workflow_dispatch` with `env_scope` input (`prod` / `dev` / `staging` / `both` / `all`)
 
 The `operations-gates-runtime.yml` workflow also runs the canary as an optional credentialed
 gate when `run_authenticated_sso_canary=true` is set.
+
+## Account policy
+
+Use dedicated canary identities. Do **not** use a real operator mailbox such as
+`team@mereka.io` for runtime proof.
+
+Recommended identities:
+
+- learner canary: `sso-canary` or an equivalent dedicated learner account
+- Studio staff canary: `sso-canary-studio@mereka.io`
+
+Why:
+
+- real operator accounts carry real business context and permissions
+- password rotation for proof should not disrupt human operators
+- repo policy already forbids mutating real operator accounts for synthetic/runtime proof
 
 ## Secrets
 
@@ -37,6 +53,8 @@ All secrets are GitHub repository secrets. Never hardcode credentials.
 | `SSO_CANARY_PASSWORD_PROD` | Canary learner password for production | Yes (if running prod) |
 | `SSO_CANARY_EMAIL_DEV` | Canary learner email for dev | Yes (if running dev) |
 | `SSO_CANARY_PASSWORD_DEV` | Canary learner password for dev | Yes (if running dev) |
+| `SSO_CANARY_EMAIL_STAGING` | Canary learner email for staging | Yes (if running staging) |
+| `SSO_CANARY_PASSWORD_STAGING` | Canary learner password for staging | Yes (if running staging) |
 | `SSO_CANARY_EMAIL` | Fallback canary email (either env) | Optional |
 | `SSO_CANARY_PASSWORD` | Fallback canary password (either env) | Optional |
 
@@ -48,6 +66,8 @@ All secrets are GitHub repository secrets. Never hardcode credentials.
 | `SSO_CANARY_STUDIO_PASSWORD_PROD` | Studio staff password for production | Optional |
 | `SSO_CANARY_STUDIO_EMAIL_DEV` | Studio staff email for dev | Optional |
 | `SSO_CANARY_STUDIO_PASSWORD_DEV` | Studio staff password for dev | Optional |
+| `SSO_CANARY_STUDIO_EMAIL_STAGING` | Studio staff email for staging | Optional |
+| `SSO_CANARY_STUDIO_PASSWORD_STAGING` | Studio staff password for staging | Optional |
 
 The Studio canary is **non-blocking**: if the secrets are absent the run logs
 `SKIP <env>: missing Studio SSO canary credentials (REQUIRE_STUDIO_CANARY=0)` and
@@ -100,14 +120,14 @@ Add each secret individually:
 - `SSO_CANARY_STUDIO_EMAIL_PROD` = the email address
 - `SSO_CANARY_STUDIO_PASSWORD_PROD` = the Authentik password
 
-Repeat for `_DEV` variants if you have a dev environment.
+Repeat for `_DEV` and `_STAGING` variants if you want non-prod Studio proof in CI.
 
 ### 4. Verify in CI
 
 Trigger the workflow manually:
 
 ```
-Actions → "Authenticated Smoke Tests" → Run workflow → env_scope: prod
+Actions → "Authenticated Smoke Tests" → Run workflow → env_scope: prod|dev|staging
 ```
 
 Look for `OK authenticated session validated` in the `sso-canary` job output.
@@ -132,7 +152,8 @@ The canary script `scripts/qa/verify-authenticated-sso-canary.sh` reads these en
 ### `SKIP <env>: missing Studio SSO canary credentials`
 
 The Studio secrets are not set in GitHub. Add `SSO_CANARY_STUDIO_EMAIL_PROD` /
-`SSO_CANARY_STUDIO_PASSWORD_PROD` per the setup steps above.
+`SSO_CANARY_STUDIO_PASSWORD_PROD` (and `_DEV` / `_STAGING` variants for non-prod)
+per the setup steps above.
 
 ### `studio_access_required_but_not_authenticated`
 

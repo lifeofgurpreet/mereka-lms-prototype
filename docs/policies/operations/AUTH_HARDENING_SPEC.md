@@ -148,7 +148,7 @@ It aggregates:
 
 ### 3.3) Credentialed callback/session verification (browser canary)
 
-- `scripts/qa/verify-authenticated-sso-canary.sh --env prod|dev|both`
+- `scripts/qa/verify-authenticated-sso-canary.sh --env prod|dev|staging|both|all`
   - Runs a real browser OIDC login flow:
     - `/auth/login/oidc/` -> Authentik login form -> `/auth/complete/oidc/` callback
   - Verifies the post-login browser session can access `/api/user/v1/me` (expects HTTP 200).
@@ -158,8 +158,11 @@ It aggregates:
     - `https://studio.<domain>/` must not 500 during `/complete/edx-oauth2/` (catches Studio oauth client secret/config drift).
   - Writes failure screenshots to `var/auth-sso-canary/`.
   - Uses env-only secrets (never CLI args):
-    - `SSO_CANARY_EMAIL[_PROD|_DEV]`
-    - `SSO_CANARY_PASSWORD[_PROD|_DEV]`
+    - `SSO_CANARY_EMAIL[_PROD|_DEV|_STAGING]`
+    - `SSO_CANARY_PASSWORD[_PROD|_DEV|_STAGING]`
+    - optional Studio staff variants:
+      - `SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV|_STAGING]`
+      - `SSO_CANARY_STUDIO_PASSWORD[_PROD|_DEV|_STAGING]`
   - Integration flags:
     - `RUN_AUTHENTICATED_SSO_CANARY=1`
     - `AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1`

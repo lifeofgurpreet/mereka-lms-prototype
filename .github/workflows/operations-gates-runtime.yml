@@ -43,8 +43,6 @@ on:
         default: "mereka"
         type: string
 
-permissions: {}
-
 jobs:
   operations-gates:
     name: Run Operations Gates (Runtime)

@@ -15,7 +15,7 @@ This reference records the current CI/CD workflows, required secrets, and enviro
 | `build-ios-app.yml` | Manual | Build iOS app for TestFlight |
 | `cloud-sql-backup.yml` | Legacy, gated | Cloud SQL exports (only relevant if/when MySQL runs in Cloud SQL). Enable by setting repo variable `ENABLE_CLOUD_SQL_BACKUPS=true`. |
 | `daily-infrastructure-audit.yml` | Daily schedule, manual | Consolidated observability + alert routing + env parity audits (merged from `observability-audit.yml`, `alert-routing-audit.yml`, `observability-parity-runtime.yml` in Phase 6.4). |
-| `authenticated-sso-canary.yml` | Every 6h, manual | Credentialed OIDC login + post-login session checks (LMS, MFEs, Studio). |
+| `smoke-authenticated.yml` (`sso-canary` job) | Every 6h, manual | Credentialed OIDC login + post-login session checks (LMS, MFEs, Studio). |
 
 ## Required Secrets
 
@@ -33,6 +33,14 @@ Configure these in GitHub Settings → Secrets and variables → Actions:
 | `SSO_CANARY_PASSWORD_PROD` | **Prod** canary user password for Authentik SSO | Infisical (`/shared/oauth`) |
 | `SSO_CANARY_STUDIO_EMAIL_PROD` | **Optional (recommended)**: Prod Studio-access canary (staff) email | Infisical (`/shared/oauth`) |
 | `SSO_CANARY_STUDIO_PASSWORD_PROD` | **Optional (recommended)**: Prod Studio-access canary (staff) password | Infisical (`/shared/oauth`) |
+| `SSO_CANARY_EMAIL_DEV` | **Optional**: Dev canary user email for Authentik SSO | Infisical or operator-managed secret |
+| `SSO_CANARY_PASSWORD_DEV` | **Optional**: Dev canary user password for Authentik SSO | Infisical or operator-managed secret |
+| `SSO_CANARY_STUDIO_EMAIL_DEV` | **Optional**: Dev Studio-access canary (staff) email | Infisical or operator-managed secret |
+| `SSO_CANARY_STUDIO_PASSWORD_DEV` | **Optional**: Dev Studio-access canary (staff) password | Infisical or operator-managed secret |
+| `SSO_CANARY_EMAIL_STAGING` | **Optional**: Staging canary user email for Authentik SSO | Infisical or operator-managed secret |
+| `SSO_CANARY_PASSWORD_STAGING` | **Optional**: Staging canary user password for Authentik SSO | Infisical or operator-managed secret |
+| `SSO_CANARY_STUDIO_EMAIL_STAGING` | **Optional**: Staging Studio-access canary (staff) email | Infisical or operator-managed secret |
+| `SSO_CANARY_STUDIO_PASSWORD_STAGING` | **Optional**: Staging Studio-access canary (staff) password | Infisical or operator-managed secret |
 
 ### Creating GCP Service Account Key
 
@@ -227,6 +235,10 @@ SSO_CANARY_EMAIL_PROD='user@example.com' \
 SSO_CANARY_PASSWORD_PROD='***' \
 SSO_CANARY_STUDIO_EMAIL_PROD='staff@example.com' \
 SSO_CANARY_STUDIO_PASSWORD_PROD='***' \
+SSO_CANARY_EMAIL_STAGING='staging-user@example.com' \
+SSO_CANARY_PASSWORD_STAGING='***' \
+SSO_CANARY_STUDIO_EMAIL_STAGING='staging-staff@example.com' \
+SSO_CANARY_STUDIO_PASSWORD_STAGING='***' \
 ./scripts/infra/configure-github-authenticated-sso-canary.sh --enable-runtime-gate
 ```
 
