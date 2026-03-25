@@ -737,7 +737,10 @@ jobs:
         run: pip-audit --desc --fix --dry-run 2>&1 || true
 
       - name: Run pip-audit (strict)
-        run: pip-audit --desc
+        run: |
+          # CVE-2026-4539: Pygments ≤2.19.2 ReDoS in AdlLexer (local-only, no fix released).
+          # Suppress until upstream releases a patched version.
+          pip-audit --desc --ignore-vuln CVE-2026-4539
 
   # ============================================================================
   # Job 4: test-coverage

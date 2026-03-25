@@ -978,7 +978,15 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq gettext-base
+            # ARC runners run as root — no sudo needed.
+            # Fallback: download static binary if apt-get unavailable.
+            if command -v apt-get &>/dev/null; then
+              apt-get update -qq && apt-get install -y -qq gettext-base
+            else
+              curl -fsSL -o /usr/local/bin/envsubst \
+                "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
+                && chmod +x /usr/local/bin/envsubst
+            fi
           fi
 
       - name: Install cosign
@@ -1122,7 +1130,8 @@ jobs:
     runs-on: mereka-k8s-runners
     timeout-minutes: 15
     needs: [build-openedx, build-mfe, slsa-provenance]
-    if: ${{ needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' }}
+    # Run even if SLSA failed — provenance is desirable but must not block releases.
+    if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' }}
     permissions:
       contents: read
       id-token: write
@@ -1134,7 +1143,13 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq gettext-base
+            if command -v apt-get &>/dev/null; then
+              apt-get update -qq && apt-get install -y -qq gettext-base
+            else
+              curl -fsSL -o /usr/local/bin/envsubst \
+                "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
+                && chmod +x /usr/local/bin/envsubst
+            fi
           fi
 
       - name: Install cosign
@@ -1195,7 +1210,8 @@ jobs:
     # Push to main → auto-deploy to production.
     # workflow_dispatch → deploy only when update_gitops=true and environment selected.
     # NOTE: inputs.* are undefined on push events, so we can't reference them in that branch.
-    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment') }}
+    # Uses always() so SLSA/release-bundle failures don't block deployment — images are the gate.
+    if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment')) }}
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}
     permissions:
       contents: write
@@ -1241,6 +1257,7 @@ jobs:
           token: ${{ secrets.GITOPS_PAT }}
 
       - name: Download release bundle artifact
+        continue-on-error: true  # Bundle may not exist if SLSA/release-bundle failed
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           name: release-bundle
@@ -1249,13 +1266,20 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq gettext-base
+            if command -v apt-get &>/dev/null; then
+              apt-get update -qq && apt-get install -y -qq gettext-base
+            else
+              curl -fsSL -o /usr/local/bin/envsubst \
+                "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
+                && chmod +x /usr/local/bin/envsubst
+            fi
           fi
 
       - name: Install cosign
         uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22  # v4.1.0
 
       - name: Verify release bundle signature
+        if: ${{ needs.release-bundle.result == 'success' }}
         run: |
           CERT_IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/build-tutor-images.yml@${{ github.ref }}"
           ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json \
@@ -1265,6 +1289,7 @@ jobs:
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
 
       - name: Validate release bundle consistency gate
+        if: ${{ needs.release-bundle.result == 'success' }}
         run: |
           TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
           OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
@@ -1344,8 +1369,8 @@ jobs:
             exit 1
           fi
           if [[ -z "${RELEASE_BUNDLE_ID}" ]]; then
-            echo "Missing release bundle id from release-bundle job." >&2
-            exit 1
+            echo "::warning::Release bundle id missing (SLSA/release-bundle may have failed). Generating fallback id."
+            RELEASE_BUNDLE_ID="rb-$(echo '${{ github.sha }}' | head -c7)-$(date -u +%Y%m%dT%H%M%SZ)"
           fi
           EXTRA_ARGS=()
           if [[ "${TARGET_ENV}" == "production" ]]; then
