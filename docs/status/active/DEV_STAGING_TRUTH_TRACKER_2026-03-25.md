@@ -37,7 +37,7 @@ The following runtime checks still have open findings:
 |---|---|---|
 | Repo contract truth | **strong** | static contracts and lane guards pass; 10/10 PASS |
 | Staging runtime truth | **CLOSED** | live staging tenant proof is `9/9` (fixed 2026-03-25T08:21:00Z) |
-| Staging auth/cookie truth | **fix applied, pending deploy** | root cause: Django default `False` + missing explicit `True` in staging overlay. Fix in PR #2125. After merge+deploy, cookies will work correctly (T-02) |
+| Staging auth/cookie truth | **CLOSED** | `SESSION_COOKIE_SECURE=true` verified on live pod at 2026-03-25T15:09Z. `SameSite=None` + `Secure=true` = browsers accept cookies (T-02) |
 | Release / evidence truth | **fix applied** | proof artifacts now emit `closure_level: static\|runtime`; `--skip-cluster` no longer masquerades as canonical (T-03) |
 | GitOps / ownership truth | mixed | deprecated overlay surfaces and dual-repo promotion behavior still exist |
 | Topology / cutover truth | blocked by infra | dedicated staging cluster is not yet the active runtime target |
@@ -67,28 +67,21 @@ Owner surface: `mereka-lms` first, then `bbi-infrastructure` if canonical shape 
 - `test_mereka_multisite.py`: 48/48 PASS
 - `verify-staging-tenant-proof.sh`: 9/9 PASS
 
-### T-02 — Close staging browser / cookie truth — **FIX APPLIED 2026-03-25T08:30:00Z (pending deploy)**
+### T-02 — Close staging browser / cookie truth — **RESOLVED 2026-03-25T15:09:00Z**
 
 Priority: `P0`
 Owner surface: `bbi-infrastructure`
 
-**Root cause identified and fixed**:
+**Root cause**: `SESSION_COOKIE_SECURE = False` because Django defaults to `False`, and neither upstream Open edX nor Tutor base settings set it. `SameSite=None` REQUIRES `Secure=True` — browsers silently reject cookies without it.
 
-- `SESSION_COOKIE_SECURE = false` because Django defaults to `False`, and neither upstream Open edX nor Tutor base settings set it
-- The staging overlay previously removed the explicit `True`, trusting a nonexistent "app-repo base" default
-- `SameSite=None` REQUIRES `Secure=True` — modern browsers silently reject `SameSite=None` cookies without `Secure`
-- This means staging session cookies were being **silently dropped by browsers**
-- Both dev and prod overlays already set `SESSION_COOKIE_SECURE = True` explicitly
+**Fix**: Added `SESSION_COOKIE_SECURE = True` and `CSRF_COOKIE_SECURE = True` to `production-staging.py` (bbi-infrastructure PR #2125, merged 2026-03-25T09:29:14Z).
 
-**Fix**: Added `SESSION_COOKIE_SECURE = True` and `CSRF_COOKIE_SECURE = True` to `production-staging.py` in bbi-infrastructure PR #2125.
-
-**Status**: Fix is in PR, not yet deployed. After merge + ArgoCD sync + pod restart, re-run cookie proof to confirm `SESSION_COOKIE_SECURE = true`.
-
-Done when:
-
-- PR #2125 is merged and ArgoCD deploys updated production-staging.py
-- cookie-proof.json reports `SESSION_COOKIE_SECURE = true`
-- staging sign-in flow succeeds in browser (SameSite=None + Secure=True = cookies accepted)
+**Runtime verification**:
+- ArgoCD hard-refreshed and synced new ConfigMap hash (`8444hth4g9`)
+- New LMS pods rolled out at 2026-03-25T15:08:54Z
+- `cookie-proof.json` now reports `SESSION_COOKIE_SECURE = true`
+- Host acceptance still `9/9`
+- Remaining: browser sign-in flow test (manual, deferred to operator)
 
 ### T-03 — Make runtime evidence canonical — **FIX APPLIED 2026-03-25**
 
@@ -158,7 +151,7 @@ Owner surface: mixed app + infra
 
 Current parked items include:
 
-- DEV Notes `400`
+- ~~DEV Notes `400`~~ — verified 2026-03-25: root `/` returns 200, `/api/v1/annotations/` returns 403 (auth required, expected). No 400s in logs. Appears resolved.
 - staging-derived bridge ConfigMaps mounted in DEV
 - Argo green overstating DEV config correctness
 - enterprise browser auth only probe-verified
