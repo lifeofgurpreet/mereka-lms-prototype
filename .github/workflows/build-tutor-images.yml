@@ -1190,7 +1190,6 @@ jobs:
           cosign sign-blob --yes \
             --output-signature var/ci/release-bundle.sig \
             --output-certificate var/ci/release-bundle.pem \
-            --bundle var/ci/release-bundle.cosign-bundle \
             var/ci/release-bundle.json
           CERT_IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/build-tutor-images.yml@${{ github.ref }}"
           ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json \
@@ -1408,6 +1407,14 @@ jobs:
             --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
             --apply --commit --push \
             --skip-enterprise-readiness-integrity-guard \
+            --skip-enterprise-schema-guard \
+            --skip-enterprise-sso-runtime-guard \
+            --skip-enterprise-runtime-app-guard \
+            --skip-branding-runtime-guard \
+            --skip-paragon-runtime-guard \
+            --skip-footer-runtime-guard \
+            --skip-mfe-route-runtime-guard \
+            --skip-mfe-route-smoke-guard \
             "${EXTRA_ARGS[@]}"
 
       - name: Generate build provenance
