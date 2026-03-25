@@ -69,20 +69,51 @@ resolve_bbi_infra_root() {
   return 1
 }
 
-extract_kustomize_new_tag() {
+materialize_overlay_source() {
+  local infra_root="$1"
+  local relative_path="$2"
+  local overlay_path="${infra_root}/${relative_path}"
+  local overlay_source="${overlay_path}"
+  local overlay_cleanup=""
+
+  if [[ ! -f "$overlay_path" ]]; then
+    return 1
+  fi
+
+  # When the caller explicitly points at a checkout, honor that checkout so PR
+  # branches can be validated before merge.
+  if [[ -z "$BBI_INFRA_ROOT" ]] && git -C "$infra_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git -C "$infra_root" fetch --quiet origin main >/dev/null 2>&1 || true
+    if git -C "$infra_root" rev-parse --verify origin/main >/dev/null 2>&1; then
+      overlay_source="$(mktemp)"
+      overlay_cleanup="$overlay_source"
+      if ! git -C "$infra_root" show "origin/main:${relative_path}" >"$overlay_source" 2>/dev/null; then
+        rm -f "$overlay_source"
+        overlay_source="$overlay_path"
+        overlay_cleanup=""
+      fi
+    fi
+  fi
+
+  printf '%s\n%s\n' "$overlay_source" "$overlay_cleanup"
+}
+
+extract_kustomize_image_field() {
   local kustomization="$1"
   local image_name="$2"
-  python3 - "$kustomization" "$image_name" <<'PY'
+  local field_name="$3"
+  python3 - "$kustomization" "$image_name" "$field_name" <<'PY'
 import re
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
 image_name = sys.argv[2]
+field_name = sys.argv[3]
 
 current_name = None
 found = False
-new_tag = ""
+value = ""
 
 for raw in path.read_text(encoding="utf-8").splitlines():
     line = raw.rstrip()
@@ -94,16 +125,46 @@ for raw in path.read_text(encoding="utf-8").splitlines():
         found = current_name == image_name
         continue
     if found:
-        tag_match = re.match(r"^\s*newTag:\s*(\S+)\s*$", line)
-        if tag_match:
-            new_tag = tag_match.group(1)
+        field_match = re.match(rf"^\s*{re.escape(field_name)}:\s*(\S+)\s*$", line)
+        if field_match:
+            value = field_match.group(1).strip("\"'")
             break
 
 if not found:
     sys.exit(1)
 
-print(new_tag)
+print(value)
 PY
+}
+
+extract_kustomize_new_tag() {
+  extract_kustomize_image_field "$1" "$2" "newTag"
+}
+
+extract_kustomize_digest() {
+  extract_kustomize_image_field "$1" "$2" "digest"
+}
+
+ghcr_package_has_tag() {
+  local package_name="$1"
+  local tag="$2"
+  local encoded_package="${package_name//\//%2F}"
+
+  gh api "orgs/Biji-Biji-Initiative/packages/container/${encoded_package}/versions?per_page=100" 2>/dev/null \
+    | jq -e --arg tag "$tag" 'map(select(any(.metadata.container.tags[]?; . == $tag))) | length > 0' >/dev/null
+}
+
+latest_successful_workflow_run() {
+  local workflow="$1"
+  gh run list \
+    --repo Biji-Biji-Initiative/mereka-lms \
+    --workflow "$workflow" \
+    --branch main \
+    --status completed \
+    --limit 10 \
+    --json conclusion,headSha,url \
+    2>/dev/null \
+    | jq -r 'map(select(.conclusion=="success")) | .[0] | (.headSha // ""), (.url // "")'
 }
 
 check_enterprise_dev_promotion_freshness() {
@@ -123,49 +184,20 @@ check_enterprise_dev_promotion_freshness() {
     return
   fi
 
-  local dev_overlay="${infra_root}/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml"
-  local overlay_source="${dev_overlay}"
-  local overlay_cleanup=""
-  if [[ ! -f "$dev_overlay" ]]; then
-    do_warn "enterprise portal dev pin freshness — missing dev overlay: ${dev_overlay}"
+  local overlay_info=()
+  mapfile -t overlay_info < <(materialize_overlay_source "$infra_root" "apps/mereka-lms/overlays/profiles/dev/kustomization.yaml")
+  local overlay_source="${overlay_info[0]:-}"
+  local overlay_cleanup="${overlay_info[1]:-}"
+  if [[ -z "$overlay_source" ]]; then
+    do_warn "enterprise portal dev pin freshness — missing dev overlay: apps/mereka-lms/overlays/profiles/dev/kustomization.yaml"
     echo
     return
   fi
 
-  if git -C "$infra_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    git -C "$infra_root" fetch --quiet origin main >/dev/null 2>&1 || true
-    if git -C "$infra_root" rev-parse --verify origin/main >/dev/null 2>&1; then
-      overlay_source="$(mktemp)"
-      overlay_cleanup="$overlay_source"
-      if ! git -C "$infra_root" show origin/main:apps/mereka-lms/overlays/profiles/dev/kustomization.yaml >"$overlay_source" 2>/dev/null; then
-        rm -f "$overlay_source"
-        overlay_source="$dev_overlay"
-        overlay_cleanup=""
-        do_warn "enterprise portal dev pin freshness — failed to read origin/main overlay, falling back to local checkout"
-      fi
-    fi
-  fi
-
-  local latest_sha=""
-  local latest_url=""
-  latest_sha="$(gh run list \
-    --repo Biji-Biji-Initiative/mereka-lms \
-    --workflow build-enterprise-mfe.yml \
-    --branch main \
-    --status completed \
-    --limit 10 \
-    --json conclusion,headSha \
-    --jq '[.[] | select(.conclusion=="success")][0].headSha // empty' \
-    2>/dev/null || true)"
-  latest_url="$(gh run list \
-    --repo Biji-Biji-Initiative/mereka-lms \
-    --workflow build-enterprise-mfe.yml \
-    --branch main \
-    --status completed \
-    --limit 10 \
-    --json conclusion,url \
-    --jq '[.[] | select(.conclusion=="success")][0].url // empty' \
-    2>/dev/null || true)"
+  local latest_info=()
+  mapfile -t latest_info < <(latest_successful_workflow_run build-enterprise-mfe.yml)
+  local latest_sha="${latest_info[0]:-}"
+  local latest_url="${latest_info[1]:-}"
 
   if [[ -z "$latest_sha" ]]; then
     do_warn "enterprise portal dev pin freshness — could not determine latest successful main enterprise build"
@@ -205,6 +237,111 @@ check_enterprise_dev_promotion_freshness() {
   fi
 
   [[ -n "$overlay_cleanup" ]] && rm -f "$overlay_cleanup"
+  echo
+}
+
+check_purchase_gateway_promotion_truth() {
+  echo "=== Section 3: Purchase Gateway Promotion Truth ==="
+  echo
+
+  if ! command -v gh &>/dev/null; then
+    do_warn "purchase-gateway promotion truth — gh CLI unavailable"
+    echo
+    return
+  fi
+
+  if ! command -v jq &>/dev/null; then
+    do_warn "purchase-gateway promotion truth — jq unavailable"
+    echo
+    return
+  fi
+
+  local infra_root=""
+  if ! infra_root="$(resolve_bbi_infra_root)"; then
+    do_warn "purchase-gateway promotion truth — bbi-infrastructure checkout not found (set BBI_INFRA_ROOT)"
+    echo
+    return
+  fi
+
+  local latest_info=()
+  mapfile -t latest_info < <(latest_successful_workflow_run build-purchase-gateway.yml)
+  local latest_sha="${latest_info[0]:-}"
+  local latest_url="${latest_info[1]:-}"
+  if [[ -z "$latest_sha" ]]; then
+    do_warn "purchase-gateway promotion truth — could not determine latest successful main purchase-gateway build"
+    echo
+    return
+  fi
+
+  local image_name="ghcr.io/biji-biji-initiative/purchase-gateway"
+
+  local dev_info=()
+  mapfile -t dev_info < <(materialize_overlay_source "$infra_root" "apps/mereka-lms/overlays/profiles/dev/kustomization.yaml")
+  local dev_overlay="${dev_info[0]:-}"
+  local dev_cleanup="${dev_info[1]:-}"
+  if [[ -z "$dev_overlay" ]]; then
+    do_fail "purchase-gateway dev overlay missing from bbi-infrastructure"
+  else
+    local dev_tag=""
+    if ! dev_tag="$(extract_kustomize_new_tag "$dev_overlay" "$image_name" 2>/dev/null)"; then
+      do_fail "purchase-gateway dev overlay pin missing from ${dev_overlay}"
+    elif [[ "$dev_tag" == "${latest_sha}-"* ]]; then
+      do_pass "purchase-gateway dev tag tracks latest successful main build (${latest_sha})"
+    else
+      do_fail "purchase-gateway dev tag is stale (${dev_tag}); expected prefix ${latest_sha}-"
+      [[ -n "$latest_url" ]] && echo "       Latest successful build: ${latest_url}"
+      echo "       Overlay: ${dev_overlay}"
+    fi
+  fi
+  [[ -n "$dev_cleanup" ]] && rm -f "$dev_cleanup"
+
+  local staging_info=()
+  mapfile -t staging_info < <(materialize_overlay_source "$infra_root" "apps/mereka-lms/overlays/staging/kustomization.yaml")
+  local staging_overlay="${staging_info[0]:-}"
+  local staging_cleanup="${staging_info[1]:-}"
+  if [[ -z "$staging_overlay" ]]; then
+    do_fail "purchase-gateway staging overlay missing from bbi-infrastructure"
+  else
+    local staging_tag=""
+    local staging_digest=""
+    if ! staging_tag="$(extract_kustomize_new_tag "$staging_overlay" "$image_name" 2>/dev/null)"; then
+      do_fail "purchase-gateway staging pin missing from ${staging_overlay}"
+    else
+      do_pass "purchase-gateway staging overlay declares an explicit image tag (${staging_tag})"
+      staging_digest="$(extract_kustomize_digest "$staging_overlay" "$image_name" 2>/dev/null || true)"
+      if [[ -z "$staging_digest" ]]; then
+        do_fail "purchase-gateway staging pin missing digest in ${staging_overlay}"
+      else
+        do_pass "purchase-gateway staging overlay is digest-pinned (${staging_digest})"
+      fi
+
+      if ghcr_package_has_tag "purchase-gateway" "$staging_tag"; then
+        do_pass "purchase-gateway staging tag exists on GHCR (${staging_tag})"
+      else
+        do_fail "purchase-gateway staging tag does not exist on GHCR (${staging_tag})"
+      fi
+    fi
+  fi
+  [[ -n "$staging_cleanup" ]] && rm -f "$staging_cleanup"
+
+  local prod_info=()
+  mapfile -t prod_info < <(materialize_overlay_source "$infra_root" "apps/mereka-lms/overlays/prod/kustomization.yaml")
+  local prod_overlay="${prod_info[0]:-}"
+  local prod_cleanup="${prod_info[1]:-}"
+  if [[ -z "$prod_overlay" ]]; then
+    do_warn "purchase-gateway prod overlay missing from bbi-infrastructure"
+  else
+    local prod_tag=""
+    if ! prod_tag="$(extract_kustomize_new_tag "$prod_overlay" "$image_name" 2>/dev/null)"; then
+      do_warn "purchase-gateway prod overlay pin missing — prod currently inherits the app base image contract"
+    elif ghcr_package_has_tag "purchase-gateway" "$prod_tag"; then
+      do_pass "purchase-gateway prod overlay tag exists on GHCR (${prod_tag})"
+    else
+      do_fail "purchase-gateway prod overlay tag does not exist on GHCR (${prod_tag})"
+    fi
+  fi
+  [[ -n "$prod_cleanup" ]] && rm -f "$prod_cleanup"
+
   echo
 }
 
@@ -288,8 +425,11 @@ echo
 # --- Section 2: Enterprise dev promotion freshness ---
 check_enterprise_dev_promotion_freshness
 
-# --- Section 3: Recent build health ---
-echo "=== Section 3: Recent Build Health ==="
+# --- Section 3: Purchase gateway promotion truth ---
+check_purchase_gateway_promotion_truth
+
+# --- Section 4: Recent build health ---
+echo "=== Section 4: Recent Build Health ==="
 echo
 
 # Check if the last N builds succeeded
@@ -326,8 +466,8 @@ fi
 
 echo
 
-# --- Section 4: Build workflow file sanity ---
-echo "=== Section 4: Build Workflow Sanity ==="
+# --- Section 5: Build workflow file sanity ---
+echo "=== Section 5: Build Workflow Sanity ==="
 echo
 
 BUILD_WF="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
@@ -373,8 +513,8 @@ echo
 
 if [[ $FAILED -gt 0 ]]; then
   echo "Image freshness issues detected."
-  echo "Stale images mean academyv2.mereka.dev runs unbranded Open edX."
-  echo "Fix: investigate broken build lanes or stale GitOps promotion paths and re-trigger."
+  echo "Broken build or promotion paths can leave environments on stale or nonexistent images."
+  echo "Fix: investigate broken build lanes, missing GitOps pins, or stale promotion paths and re-trigger."
   exit 1
 fi
 

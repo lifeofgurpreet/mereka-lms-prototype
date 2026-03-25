@@ -6769,13 +6769,15 @@
         "workflow_direct"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-image-freshness.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
