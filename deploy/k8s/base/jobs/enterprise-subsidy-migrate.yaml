@@ -7,10 +7,15 @@
 #   1. kubectl apply -f deploy/k8s/base/jobs/enterprise-subsidy-migrate.yaml
 #   2. kubectl wait --for=condition=complete job/enterprise-subsidy-migrate -n mereka-lms --timeout=300s
 #   3. kubectl apply -k deploy/k8s/base   (or the relevant overlay)
+#
+# GitOps note: ArgoCD must delete/recreate this named Job when the pod template changes,
+# because Kubernetes Jobs do not allow in-place template mutation.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: enterprise-subsidy-migrate
+  annotations:
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
   labels:
     app.kubernetes.io/name: enterprise-subsidy-migrate
     app.kubernetes.io/component: migration
