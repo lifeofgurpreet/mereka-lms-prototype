@@ -978,11 +978,19 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            # Static binary — works on all runner types (ARC, GitHub-hosted, self-hosted).
-            # apt-get is unreliable on ARC runners (exit 100 even as root).
-            curl -fsSL -o /usr/local/bin/envsubst \
+            # Static binary — works on all runner types.
+            # /usr/local/bin may be read-only on ARC runners; fall back to $HOME/bin.
+            INSTALL_DIR="/usr/local/bin"
+            if ! touch "$INSTALL_DIR/.write-test" 2>/dev/null; then
+              INSTALL_DIR="$HOME/bin"
+              mkdir -p "$INSTALL_DIR"
+              echo "$INSTALL_DIR" >> "$GITHUB_PATH"
+            else
+              rm -f "$INSTALL_DIR/.write-test"
+            fi
+            curl -fsSL -o "$INSTALL_DIR/envsubst" \
               "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-              && chmod +x /usr/local/bin/envsubst
+              && chmod +x "$INSTALL_DIR/envsubst"
           fi
 
       - name: Install cosign
@@ -1139,11 +1147,19 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            # Static binary — works on all runner types (ARC, GitHub-hosted, self-hosted).
-            # apt-get is unreliable on ARC runners (exit 100 even as root).
-            curl -fsSL -o /usr/local/bin/envsubst \
+            # Static binary — works on all runner types.
+            # /usr/local/bin may be read-only on ARC runners; fall back to $HOME/bin.
+            INSTALL_DIR="/usr/local/bin"
+            if ! touch "$INSTALL_DIR/.write-test" 2>/dev/null; then
+              INSTALL_DIR="$HOME/bin"
+              mkdir -p "$INSTALL_DIR"
+              echo "$INSTALL_DIR" >> "$GITHUB_PATH"
+            else
+              rm -f "$INSTALL_DIR/.write-test"
+            fi
+            curl -fsSL -o "$INSTALL_DIR/envsubst" \
               "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-              && chmod +x /usr/local/bin/envsubst
+              && chmod +x "$INSTALL_DIR/envsubst"
           fi
 
       - name: Install cosign
@@ -1260,11 +1276,19 @@ jobs:
       - name: Install envsubst (required by cosign-installer)
         run: |
           if ! command -v envsubst &>/dev/null; then
-            # Static binary — works on all runner types (ARC, GitHub-hosted, self-hosted).
-            # apt-get is unreliable on ARC runners (exit 100 even as root).
-            curl -fsSL -o /usr/local/bin/envsubst \
+            # Static binary — works on all runner types.
+            # /usr/local/bin may be read-only on ARC runners; fall back to $HOME/bin.
+            INSTALL_DIR="/usr/local/bin"
+            if ! touch "$INSTALL_DIR/.write-test" 2>/dev/null; then
+              INSTALL_DIR="$HOME/bin"
+              mkdir -p "$INSTALL_DIR"
+              echo "$INSTALL_DIR" >> "$GITHUB_PATH"
+            else
+              rm -f "$INSTALL_DIR/.write-test"
+            fi
+            curl -fsSL -o "$INSTALL_DIR/envsubst" \
               "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-              && chmod +x /usr/local/bin/envsubst
+              && chmod +x "$INSTALL_DIR/envsubst"
           fi
 
       - name: Install cosign
