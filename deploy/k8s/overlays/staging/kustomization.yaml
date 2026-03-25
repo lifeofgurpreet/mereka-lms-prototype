@@ -40,6 +40,9 @@ labels:
     pairs:
       environment: staging
 
+# MANAGED-BY: bbi-infrastructure — do not edit image pins here.
+# These values are overridden by the GitOps overlay in bbi-infrastructure.
+# They remain only for image-tag contract checks and historical reference.
 # Immutable SHA-pinned image tags (promote from dev after validation).
 images:
   # Keep canonical (docker.io) + transformed (GHCR) names aligned to avoid post-transform drift.

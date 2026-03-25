@@ -35,6 +35,8 @@ bbi-infrastructure/apps/mereka-lms/overlays/{dev,staging,prod}/
 ArgoCD deploys Mereka LMS from `bbi-infrastructure`, NOT from this repo's overlay directories.
 The non-local overlays here (`rke2-nonprod/`, `staging/`, `production/`) are **deprecated** —
 they are not consumed by ArgoCD and must not be modified.
+If those frozen overlays still contain `images:` blocks, the tags are **reference-only** for
+contract checks; the live deployment authority remains `bbi-infrastructure`.
 
 ---
 
@@ -44,6 +46,7 @@ they are not consumed by ArgoCD and must not be modified.
 2. If `base/` and an overlay disagree on Caddy routing: **base wins**. Overlays may patch hosts/TLS only.
 3. If `contract.json` and a deprecated overlay disagree: **contract.json wins**. The overlay is frozen.
 4. If `bbi-infrastructure` and `base/` disagree on an image: **bbi-infrastructure wins** (image pinning is a GitOps override).
+   Deprecated overlay image pins in this repo never override GitOps.
 5. If a new cluster-scoped resource is needed: **it goes to platform-control-plane**, not here.
 
 ---

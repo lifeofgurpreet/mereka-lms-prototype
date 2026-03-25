@@ -40,6 +40,9 @@ patches:
   - path: patches/remove-legacy-mongodb-service.yaml
   - path: patches/resource-limits.yaml
 
+# MANAGED-BY: bbi-infrastructure — do not edit image pins here.
+# These values are overridden by the GitOps overlay in bbi-infrastructure.
+# They remain only for image-tag contract checks and historical reference.
 # Image tags for production (REFERENCE ONLY — infra repo is authoritative)
 # Last synced from bbi-infrastructure/apps/mereka-lms/overlays/prod/ on 2026-03-24.
 images:

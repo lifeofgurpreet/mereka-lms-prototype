@@ -52,6 +52,9 @@ resources:
   # Apply ARC separately: kubectl apply -k deploy/k8s/base/arc/
   # See: docs/ops/ci-cd/CI_CD_RUNNERS.md for the full deploy sequence.
 
+# MANAGED-BY: bbi-infrastructure — do not edit image pins here.
+# These values are overridden by the GitOps overlay in bbi-infrastructure.
+# They remain only for image-tag contract checks and historical reference.
 # Immutable SHA-pinned image tags (no mutable mereka-brand tag).
 # Image Updater will manage these tags once enrolled.
 images:

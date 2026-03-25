@@ -11,7 +11,8 @@
 #   4. contract.json version matches VERSION file
 #   5. No new kustomization.yaml files added to deprecated overlays
 #   6. Deprecated overlay kustomizations contain DEPRECATED marker
-#   7. Base kustomization uses only pin-required sentinel tags (or no newTag at all)
+#   7. Deprecated overlay image blocks carry non-authoritative sentinel comments
+#   8. Base kustomization uses only pin-required sentinel tags (or no newTag at all)
 #
 # Usage:
 #   bash scripts/qa/verify-runtime-authority-map.sh
@@ -196,9 +197,62 @@ check_deprecated_marker "rke2-nonprod" "overlays/rke2-nonprod"
 check_deprecated_marker "staging"      "overlays/staging"
 check_deprecated_marker "production"   "overlays/production"
 
-# ─── Check 7: Base kustomization uses only pin-required sentinel tags ─────────
+# ─── Check 7: Deprecated overlay image blocks carry sentinel comments ─────────
 
-section "Check 7: Base kustomization uses only pin-required or absent newTag for images"
+section "Check 7: Deprecated overlay image blocks carry non-authoritative sentinel comments"
+
+check_overlay_image_sentinel() {
+    local overlay_path="$1"
+    local label="$2"
+    local kustomization_file="${K8S_DIR}/overlays/${overlay_path}/kustomization.yaml"
+
+    if [ ! -f "${kustomization_file}" ]; then
+        fail "${label}: kustomization.yaml not found"
+        return
+    fi
+
+    local images_line
+    images_line=$(grep -nE '^[[:space:]]*images:' "${kustomization_file}" | head -n1 | cut -d: -f1 || true)
+
+    if [ -z "${images_line}" ]; then
+        pass "${label}: no images block present"
+        return
+    fi
+
+    local start_line=1
+    if [ "${images_line}" -gt 6 ]; then
+        start_line=$((images_line - 6))
+    fi
+
+    local sentinel_block
+    sentinel_block=$(sed -n "${start_line},$((images_line - 1))p" "${kustomization_file}")
+
+    local missing=0
+    if ! grep -q "MANAGED-BY: bbi-infrastructure" <<< "${sentinel_block}"; then
+        fail "${label}: images block missing 'MANAGED-BY: bbi-infrastructure' sentinel"
+        missing=1
+    fi
+    if ! grep -q "do not edit image pins here" <<< "${sentinel_block}"; then
+        fail "${label}: images block missing 'do not edit image pins here' sentinel"
+        missing=1
+    fi
+    if ! grep -q "overridden by the GitOps overlay in bbi-infrastructure" <<< "${sentinel_block}"; then
+        fail "${label}: images block missing GitOps override sentinel"
+        missing=1
+    fi
+
+    if [ "${missing}" -eq 0 ]; then
+        pass "${label}: images block is explicitly marked non-authoritative"
+    fi
+}
+
+check_overlay_image_sentinel "rke2-nonprod" "overlays/rke2-nonprod"
+check_overlay_image_sentinel "staging"      "overlays/staging"
+check_overlay_image_sentinel "production"   "overlays/production"
+
+# ─── Check 8: Base kustomization uses only pin-required sentinel tags ─────────
+
+section "Check 8: Base kustomization uses only pin-required or absent newTag for images"
 
 BASE_KUSTOMIZATION="${K8S_DIR}/base/kustomization.yaml"
 
