@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # verify-topology-selectors.sh — Verify that expected workloads exist per lane.
+# Uses direct string matching instead of echo|grep to avoid pipefail false negatives.
 #
 # Cross-references config/lane-identity.yaml internal_services against
 # the live cluster to detect deployment_not_found issues before they
