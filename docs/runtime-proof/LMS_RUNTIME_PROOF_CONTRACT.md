@@ -89,7 +89,7 @@ The `images` object captures the deployed container image tag for LMS, CMS, and 
 Uses `/csrf/api/v1/token` endpoint (reliably triggers CsrfViewMiddleware to set csrftoken cookie). The proof extracts the `Domain=` attribute from the `Set-Cookie: csrftoken=...` header.
 
 Valid states:
-- **Exact match**: `Domain=.staging.academyv2.mereka.io` matches expected `.staging.academyv2.mereka.io`
+- **Exact match**: `Domain=.academyv2.mereka.io` matches expected `.academyv2.mereka.io`
 - **Host-only**: No `Domain=` attribute (cookie scoped to exact host). Accepted when middleware ordering fix is not yet deployed.
 
 Invalid states:

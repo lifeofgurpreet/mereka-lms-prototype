@@ -12,17 +12,17 @@ This file is a reference projection of the current domain surface. Runtime state
 | Service | Production | Dev | Staging |
 |---|---|---|---|
 | LMS | `academyv2.mereka.io` | `academyv2.mereka.dev` | `staging.academyv2.mereka.io` |
-| Studio | `studio.academyv2.mereka.io` | `studio.academyv2.mereka.dev` | `studio.staging.academyv2.mereka.io` |
-| MFE | `apps.academyv2.mereka.io` | `apps.academyv2.mereka.dev` | `apps.staging.academyv2.mereka.io` |
+| Studio | `studio.academyv2.mereka.io` | `studio.academyv2.mereka.dev` | `staging.studio.academyv2.mereka.io` |
+| MFE | `apps.academyv2.mereka.io` | `apps.academyv2.mereka.dev` | `staging.apps.academyv2.mereka.io` |
 | Auth | `auth0.mereka.io` | `auth0.mereka.dev` | `staging.auth0.mereka.io` |
-| Preview | `preview.academyv2.mereka.io` | `preview.academyv2.mereka.dev` | `preview.staging.academyv2.mereka.io` |
-| Discovery | `discovery.academyv2.mereka.io` | `discovery.academyv2.mereka.dev` | `discovery.staging.academyv2.mereka.io` |
-| Notes | `notes.academyv2.mereka.io` | `notes.academyv2.mereka.dev` | `notes.staging.academyv2.mereka.io` |
-| Credentials | `credentials.academyv2.mereka.io` | `credentials.academyv2.mereka.dev` | `credentials.staging.academyv2.mereka.io` |
-| Forum | `forum.academyv2.mereka.io` | `forum.academyv2.mereka.dev` | `forum.staging.academyv2.mereka.io` |
-| Enterprise Admin | `admin.academyv2.mereka.io` | `admin.academyv2.mereka.dev` | `admin.staging.academyv2.mereka.io` |
-| Enterprise Learner | `learner.academyv2.mereka.io` | `learner.academyv2.mereka.dev` | `learner.staging.academyv2.mereka.io` |
-| Legacy Ecommerce | `ecommerce.academyv2.mereka.io` | `ecommerce.academyv2.mereka.dev` | `ecommerce.staging.academyv2.mereka.io` |
+| Preview | `preview.academyv2.mereka.io` | `preview.academyv2.mereka.dev` | `staging.preview.academyv2.mereka.io` |
+| Discovery | `discovery.academyv2.mereka.io` | `discovery.academyv2.mereka.dev` | `staging.discovery.academyv2.mereka.io` |
+| Notes | `notes.academyv2.mereka.io` | `notes.academyv2.mereka.dev` | `staging.notes.academyv2.mereka.io` |
+| Credentials | `credentials.academyv2.mereka.io` | `credentials.academyv2.mereka.dev` | `staging.credentials.academyv2.mereka.io` |
+| Forum | `forum.academyv2.mereka.io` | `forum.academyv2.mereka.dev` | `staging.forum.academyv2.mereka.io` |
+| Enterprise Admin | `admin.academyv2.mereka.io` | `admin.academyv2.mereka.dev` | `staging.admin.academyv2.mereka.io` |
+| Enterprise Learner | `learner.academyv2.mereka.io` | `learner.academyv2.mereka.dev` | `staging.learner.academyv2.mereka.io` |
+| Legacy Ecommerce | `ecommerce.academyv2.mereka.io` | `ecommerce.academyv2.mereka.dev` | `staging.ecommerce.academyv2.mereka.io` |
 | Payments Gateway (path-routed) | `academyv2.mereka.io/payments/*` | `academyv2.mereka.dev/payments/*` | `staging.academyv2.mereka.io/payments/*` |
 
 ## DEV Tenant-Pattern Domains

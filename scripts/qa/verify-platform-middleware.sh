@@ -151,6 +151,15 @@ def _candidate_site_domains(host):
         if host.startswith(prefix):
             candidates.append(host[len(prefix):])
             break
+    else:
+        for env_prefix in ("staging.", "dev."):
+            if host.startswith(env_prefix):
+                remainder = host[len(env_prefix):]
+                for svc_prefix in ("apps.", "studio.", "preview.", "admin."):
+                    if remainder.startswith(svc_prefix):
+                        candidates.append(env_prefix + remainder[len(svc_prefix):])
+                        break
+                break
     seen = set()
     out = []
     for c in candidates:
@@ -172,6 +181,10 @@ def _cookie_policy_for_host(host):
     tenant = _candidate_site_domains(host)[-1]
     if not tenant:
         return _CookiePolicy(domain=None)
+    for env_prefix in ("staging.", "dev."):
+        if tenant.startswith(env_prefix):
+            tenant = tenant[len(env_prefix):]
+            break
     return _CookiePolicy(domain=f".{tenant}")
 """, "<test>", "exec"), ns)
 
@@ -181,10 +194,10 @@ tests = [
     ("apps.academy.biji-biji.com", ".academy.biji-biji.com", "AC-006"),
     ("localhost:8000", None, "AC-007"),
     ("localhost", None, "AC-007"),
-    ("staging.academy.biji-biji.com", ".staging.academy.biji-biji.com", "AC-005"),
-    ("apps.staging.academy.biji-biji.com", ".staging.academy.biji-biji.com", "AC-006"),
-    ("studio.staging.academy.biji-biji.com", ".staging.academy.biji-biji.com", "AC-006"),
-    ("admin.staging.academyv2.mereka.io", ".staging.academyv2.mereka.io", "AC-004"),
+    ("staging.academy.biji-biji.com", ".academy.biji-biji.com", "AC-005"),
+    ("apps.staging.academy.biji-biji.com", ".academy.biji-biji.com", "AC-006"),
+    ("studio.staging.academy.biji-biji.com", ".academy.biji-biji.com", "AC-006"),
+    ("admin.staging.academyv2.mereka.io", ".academyv2.mereka.io", "AC-004"),
 ]
 ok = True
 for host, expected, ac in tests:
@@ -253,6 +266,15 @@ def _candidate_site_domains(host):
         if host.startswith(prefix):
             candidates.append(host[len(prefix):])
             break
+    else:
+        for env_prefix in ("staging.", "dev."):
+            if host.startswith(env_prefix):
+                remainder = host[len(env_prefix):]
+                for svc_prefix in ("apps.", "studio.", "preview.", "admin."):
+                    if remainder.startswith(svc_prefix):
+                        candidates.append(env_prefix + remainder[len(svc_prefix):])
+                        break
+                break
     seen = set()
     out = []
     for c in candidates:
@@ -604,8 +626,10 @@ else
   fail_ "Middleware order: ForwardedHeaders not inserted at position 0"
 fi
 
-# Check: CookieDomain ordering relative to SessionMiddleware
-if [ -f "$LMS_SETTINGS" ] && grep -q 'cookie_index > session_index' "$LMS_SETTINGS"; then
+# Check: CookieDomain ordering relative to SessionMiddleware/CsrfViewMiddleware.
+# Accept the current _cookie_idx/_earliest implementation and the older
+# cookie_index/session_index naming if encountered in historical branches.
+if [ -f "$LMS_SETTINGS" ] && grep -Eq '_cookie_idx > _earliest|cookie_index > session_index' "$LMS_SETTINGS"; then
   pass_ "Middleware order: CookieDomain positioned before SessionMiddleware"
 else
   fail_ "Middleware order: Missing CookieDomain/SessionMiddleware ordering logic"

@@ -182,11 +182,19 @@ expected_cookie_domain_for_host() {
     fi
   done
 
-  # Cookie domain scopes to the tenant root, not the bare second-level domain.
+  # Cookie domain scopes to the tenant root used by the multisite middleware.
   # Prefixes (apps., studio., preview., admin.) are stripped first.
-  # e.g. admin.academyv2.mereka.io       → .academyv2.mereka.io
-  #      staging.academy.biji-biji.com   → .staging.academy.biji-biji.com
-  #      academy.biji-biji.com           → .academy.biji-biji.com
+  # Staging/dev roots are then broadened to the shared tenant base.
+  # e.g. admin.academyv2.mereka.io            → .academyv2.mereka.io
+  #      staging.academy.biji-biji.com        → .academy.biji-biji.com
+  #      apps.staging.academy.biji-biji.com   → .academy.biji-biji.com
+  for env_prefix in staging. dev.; do
+    if [[ "$tenant" == "$env_prefix"* ]]; then
+      tenant="${tenant#"$env_prefix"}"
+      break
+    fi
+  done
+
   printf ".%s\n" "$tenant"
 }
 

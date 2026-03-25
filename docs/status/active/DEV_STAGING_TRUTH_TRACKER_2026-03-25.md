@@ -1,5 +1,5 @@
 # DEV / Staging Truth Tracker
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-25T08:21:00Z • Status: active_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-25T15:24:29Z • Status: active_
 
 This is the current control tracker for making DEV and staging operational in a way that is truthful across runtime, GitOps, release evidence, and docs. The goal is not “more green”; the goal is “no false closure.”
 
@@ -16,56 +16,80 @@ The following repo-side guardrails were re-run on 2026-03-25 and passed:
 
 These are no longer the bottleneck.
 
-The following live/runtime checks have been updated:
+The following live/runtime checks were re-verified in this tranche:
 
+- `bash scripts/qa/verify-tenant-contract-alignment.sh`
+  - `PASS` after repo-side hostname contract repair
+- `bash scripts/qa/verify-domain-url-invariants.sh`
+  - `PASS` after adding a new staging toolkit drift check (`1c. Staging tenant toolkit alignment`)
+- corrected live host-admission probes against the current public and in-cluster host matrix
+  - in-cluster Caddy path currently accepts only `5/9`
+  - accepted: `staging.academyv2.mereka.io`, `staging.academy.biji-biji.com`, `staging.skillourfuture.academy.mereka.io`, `staging.studio.academyv2.mereka.io`, `staging.apps.academyv2.mereka.io`
+  - rejected with `400`: `studio.staging.academy.biji-biji.com`, `studio.staging.skillourfuture.academy.mereka.io`, `apps.staging.academy.biji-biji.com`, `apps.staging.skillourfuture.academy.mereka.io`
 - `bash scripts/tenants/verify-staging-tenant-proof.sh --namespace stg-mereka-lms`
-  - first run: 2026-03-25T05:27:16Z → `host acceptance: 5/9` (4 failures: Convention B hostnames not in ALLOWED_HOSTS)
-  - **fix applied**: aligned all staging hostnames to Convention A (`staging.{role}.{domain}`) across 18 files in app repo + 1 file in infra repo
-  - **re-run: 2026-03-25T08:21:00Z → `host acceptance: 9/9`** — all staging hosts accepted by Django
-  - proof artifacts: `var/proof/siteconfig-proof.json`, `var/proof/host-acceptance-proof.json`, `var/proof/cookie-proof.json`, `var/proof/staging-proof-summary.json`
+  - fresh run at `2026-03-25T15:28:49Z`
+  - writes updated `var/proof/siteconfig-proof.json`, `var/proof/host-acceptance-proof.json`, `var/proof/cookie-proof.json`, `var/proof/staging-proof-summary.json`
+  - result: `host acceptance: 5/9` on the corrected host matrix
+- infra rollout patch prepared as `bbi-infrastructure#2127`
+  - branch: `fix/staging-secondary-host-runtime-truth`
+  - commit: `e9bbc317990ba82d481e9510048cc1e905fdf6ed`
+  - scope: align staging `production-staging.py` allowlists/origins/redirects and `caddy-config-staging.yaml` host matchers/map entries to the verified secondary host contract
+- direct LMS SiteConfiguration inspection still shows stale secondary tenant URLs
+  - `staging.academy.biji-biji.com` still points at `https://staging.studio.academy.biji-biji.com` / `https://staging.apps.academy.biji-biji.com`
+  - `staging.skillourfuture.academy.mereka.io` still points at `https://staging.studio.skillourfuture.academy.mereka.io` / `https://staging.apps.skillourfuture.academy.mereka.io`
+- cookie/runtime proof is only partially healthy
+  - `SESSION_COOKIE_SECURE = true` is now live
+  - `CSRF_TRUSTED_ORIGINS` still lists the stale secondary Studio/MFE hostnames (`staging.studio...` / `staging.apps...`)
 - `config/nonprod-execution-state.yaml` in `bbi-infrastructure` still says `ready_for_execution: false`
 - LMS stabilization control board still says `Stabilization` is active and `Convergence` is blocked by non-canonical runtime/browser proof
 
-The following runtime checks still have open findings:
+The following stale claims should NOT be trusted without re-running live proof:
 
-- cookie-proof.json reports `SESSION_COOKIE_SAMESITE = "None"` with `SESSION_COOKIE_SECURE = false` — this is a T-02 issue, not T-01
-- 48 multisite middleware unit tests pass (both Convention A and Convention B inputs handled correctly)
+- any prior `9/9` staging tenant proof based on the old secondary host list
+- any tracker statement that marks staging runtime truth as closed before the corrected host matrix is admitted live
 
 ## Non-negotiable truth dimensions
 
 | Dimension | Current state | Why still open |
 |---|---|---|
 | Repo contract truth | **strong** | static contracts and lane guards pass; 10/10 PASS |
-| Staging runtime truth | **CLOSED** | live staging tenant proof is `9/9` (fixed 2026-03-25T08:21:00Z) |
-| Staging auth/cookie truth | **CLOSED** | `SESSION_COOKIE_SECURE=true` verified on live pod at 2026-03-25T15:09Z. `SameSite=None` + `Secure=true` = browsers accept cookies (T-02) |
-| Release / evidence truth | **fix applied** | proof artifacts now emit `closure_level: static\|runtime`; `--skip-cluster` no longer masquerades as canonical (T-03) |
+| Staging runtime truth | **open** | repo-side contract is repaired, but live secondary Studio/MFE hosts still fail `400` and secondary SiteConfiguration rows are still stale |
+| Staging auth/cookie truth | **open** | `SESSION_COOKIE_SECURE=true` is live, but CSRF/CORS origin lists still encode stale secondary hosts and no fresh browser-auth proof exists on the corrected host matrix |
+| Release / evidence truth | **not re-verified in this tranche** | no new canonical runtime closure was produced from the corrected host matrix |
 | GitOps / ownership truth | mixed | deprecated overlay surfaces and dual-repo promotion behavior still exist |
 | Topology / cutover truth | blocked by infra | dedicated staging cluster is not yet the active runtime target |
 | DEV runtime residual truth | open but secondary | known parked defects remain, but they are lower leverage than staging truth + cutover |
 
 ## Highest-leverage work queue
 
-### T-01 — Resolve staging hostname contract split — **RESOLVED 2026-03-25T08:21:00Z**
+### T-01 — Resolve staging hostname contract split — **repo repaired, runtime still pending**
 
 Priority: `P0`
 Owner surface: `mereka-lms` first, then `bbi-infrastructure` if canonical shape must change
 
-**Decision**: Convention A (`staging.{role}.{domain}`) is canonical. It matches live DNS, TLS, ingress, ALLOWED_HOSTS, and Caddy in the infra repo. Convention B (`{role}.staging.{domain}`) was aspirational but never deployed to live infrastructure. The multisite middleware handles both conventions (48 unit tests pass).
+**Decision from live verification**: the public staging contract is mixed, not uniform:
+- primary tenant uses `staging.{role}.academyv2.mereka.io`
+- secondary tenants use `{role}.staging.<tenant-domain>`
 
-**Root cause of 5/9**: The proof script tested Convention B hostnames for biji-biji/skillourfuture tenants (`studio.staging.X`, `apps.staging.X`), but Django ALLOWED_HOSTS only had Convention A (`staging.studio.X`, `staging.apps.X`). Those 4 hosts returned HTTP 400.
+That is what the live ingress, live DNS, and current public probes actually show. Repo-side sources that still encoded `staging.studio.X` / `staging.apps.X` for secondary tenants were wrong.
 
-**Fix applied**: Aligned all staging hostnames to Convention A across both repos:
-- App repo: 18 files changed (tenant-registry, contract doc, staging.env, proof scripts, overlay manifests, config.sh, experience-proof.py)
-- Infra repo: 1 file changed (caddy-config-staging.yaml — biji-biji/skillourfuture matchers)
+**Repo-side fixes applied in this tranche**:
+- app repo: repaired `tenant-registry.yaml`, `STAGING_TENANT_CONTRACT.md`, `scripts/tenants/env/staging.env`, `verify-staging-tenant-proof.sh`, `experience-proof.py`, `mereka_multisite.py` comments, and `verify-domain-url-invariants.sh`
+- infra repo: repaired `production-staging.py` and `caddy-config-staging.yaml`
 
-**Result**: `bash scripts/tenants/verify-staging-tenant-proof.sh --namespace stg-mereka-lms` → `host acceptance: 9/9`
+**What the new checks prove**:
+- static contract alignment is now clean
+- the staging proof harness itself no longer tests the stale secondary hosts
 
-**Verification suite (all PASS)**:
-- `verify-deployment-contract.sh`: 10/10 PASS
-- `verify-runtime-authority-map.sh`: ALL CHECKS PASSED
-- `verify-lane-identity.sh`: 33/33 PASS
-- `test_mereka_multisite.py`: 48/48 PASS
-- `verify-staging-tenant-proof.sh`: 9/9 PASS
+**What is still failing live**:
+- in-cluster Caddy still returns `400` for all four secondary Studio/MFE hosts on the corrected matrix
+- live SiteConfiguration rows for biji-biji and SkillOurFuture still point at the old secondary Studio/MFE URLs
+
+**Done when**:
+- GitOps picks up the repaired staging runtime config (`bbi-infrastructure#2127`)
+- live Caddy admits all `9/9` hosts on the corrected matrix
+- live SiteConfiguration rows for secondary tenants use `studio.staging...` / `apps.staging...`
+- only then may T-01 be reclassified as closed
 
 ### T-02 — Close staging browser / cookie truth — **RESOLVED 2026-03-25T15:09:00Z**
 
@@ -163,8 +187,8 @@ Done when:
 ## Recommended execution order
 
 1. `T-01` staging hostname contract split
-2. `T-02` staging browser/cookie truth
-3. `T-03` canonical runtime evidence
+2. `T-03` canonical runtime evidence
+3. `T-02` staging browser/cookie truth
 4. `T-04` dedicated staging cluster + Argo registration
 5. `T-05` cutover / bridge retirement
 6. `T-06` boundary and docs cleanup
@@ -190,7 +214,7 @@ Done when:
 
 ## Do not claim closure until all of these are true
 
-- staging tenant proof is `9/9`
+- staging tenant proof is `9/9` on the corrected secondary host matrix (`studio.staging...` / `apps.staging...`)
 - staging browser auth is proven with real authenticated flow
 - runtime evidence is canonical, not only local `var/proof/**`
 - dedicated staging cluster exists and is the real target
