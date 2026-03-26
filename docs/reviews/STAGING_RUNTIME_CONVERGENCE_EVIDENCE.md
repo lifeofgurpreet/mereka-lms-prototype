@@ -4,7 +4,7 @@
 > Bundle version: v1
 > Generated: 2026-03-26
 > Owner: Platform Team (convergence evidence)
-> Status: PARTIALLY SATISFIED -- several gate dimensions are CONFIRMED, but key dimensions remain PROVISIONAL or PARKED
+> Status: SUBSTANTIALLY SATISFIED -- primary path and enterprise services CONFIRMED; remaining gaps are CSP multi-tenant, admin portal authenticated proof, and MFE Config BASE_URL alignment
 
 ## Executive Classification
 
@@ -12,7 +12,7 @@ The staging runtime environment is **materially stabilized for the primary tenan
 
 **What works**: SSO authentication via Authentik (browser-proven by CI canary), host acceptance for all 3 tenants across all 3 surfaces (9/9), SiteConfiguration seeded and verified, MFE Config API returning correct per-tenant URLs, cookie middleware active with correct domain resolution, Studio OAuth2 flow operational, ArgoCD sync healthy, TLS certificates valid for all tenants including Biji-Biji staging.
 
-**What is still open**: Enterprise services are not fully deployed to staging (admin portal enterprise data not verified, learner portal secondary enterprise paths not explicitly tested), synthetic test fixtures have not been provisioned on staging, image digest pinning uses mutable tags (same images as dev), CSP for secondary tenants blocks cross-origin MFE requests to their own LMS backends, and the MFE Config API BASE_URL for the Mereka primary tenant has a Convention A/B mismatch warning.
+**What is still open**: Enterprise services are deployed and healthy (all 4 backends return OK, both MFE portals return HTTP 200, 4 migration Jobs completed), but authenticated enterprise portal sessions have not been browser-tested end-to-end. Synthetic test fixtures have not been provisioned on staging. CSP for secondary tenants blocks cross-origin MFE requests to their own LMS backends. The MFE Config API BASE_URL for the Mereka primary tenant has a Convention A/B mismatch warning. Third-party vendor images (caddy, credentials, discovery, ecommerce, elasticsearch) lack SHA256 digest pins; all first-party images are pinned.
 
 **What was contradicted**: Earlier experience-proof runs showed critical failures (CSP violations, brand wiring empty, homepage layout degraded) that were superseded by later runs showing the same surfaces passing. The contradictions are recorded below.
 
@@ -91,7 +91,7 @@ The mixed convention is the deployed reality across DNS, TLS, ingress, ALLOWED_H
 |---|-------|----------------|--------|-----------|----------------|-------------|
 | AP1 | Enterprise admin portal renders (HTTP 200) at `admin.staging.academyv2.mereka.io` | `var/proof/staging-experience-proof.json` (SEC-enterprise-admin: PASS, HTTP 200) | CONFIRMED | DURABLE | -- | Yes |
 | AP2 | Admin user can authenticate via SSO | BA1 + BA2 (SSO canary proves OIDC round-trip on staging). However, admin portal authenticated session is not independently verified -- SSO canary tests LMS, not admin portal. | PROVISIONAL | MANUAL_STATE | SSO canary proves LMS login, not enterprise admin portal login specifically. | No -- needs admin-portal-specific authenticated browser proof |
-| AP3 | Admin portal shows enterprise data | NOT VERIFIED on staging. Enterprise services are not fully deployed to staging. | PARKED | -- | -- | No -- enterprise services not deployed |
+| AP3 | Admin portal shows enterprise data | NOT VERIFIED via authenticated browser session. Enterprise backend services are deployed and healthy (catalog/access/subsidy/license-manager all return `{"overall_status":"OK"}`), but enterprise data visibility requires an authenticated admin portal session which has not been run. | PROVISIONAL | MANUAL_STATE | Services are up but authenticated enterprise data path is untested in browser. | No -- needs authenticated admin portal browser proof |
 
 ### Learner Portal -- Primary Path
 
@@ -107,29 +107,29 @@ The mixed convention is the deployed reality across DNS, TLS, ingress, ALLOWED_H
 | # | Claim | Source Artifact | Status | Durability | Contradicted By | Promotable? |
 |---|-------|----------------|--------|-----------|----------------|-------------|
 | LS1 | Enterprise learner portal renders (HTTP 200) at `learner.staging.academyv2.mereka.io` | `var/proof/staging-experience-proof.json` (SEC-enterprise-learner: PASS, HTTP 200) | CONFIRMED | DURABLE | -- | Yes (non-critical check -- enterprise content not verified) |
-| LS2 | Learner portal authenticated enterprise paths | NOT VERIFIED on staging. Enterprise services not fully deployed. | PARKED | -- | -- | No -- enterprise services not deployed |
+| LS2 | Learner portal authenticated enterprise paths | Enterprise backend services are deployed and healthy. Enterprise learner portal returns HTTP 200. Authenticated enterprise paths (enrollment, course catalog with enterprise license) have not been browser-tested with a real enterprise license. | PROVISIONAL | MANUAL_STATE | Services deployed and reachable; end-to-end authenticated learner enterprise path not yet browser-verified. | No -- needs authenticated enterprise learner path browser proof |
 
 ### Build Truth
 
 | # | Claim | Source Artifact | Status | Durability | Contradicted By | Promotable? |
 |---|-------|----------------|--------|-----------|----------------|-------------|
-| BT1 | Staging uses same images as dev (mutable tags, not pinned digests) | User attestation; `DEV_STAGING_TRUTH_TRACKER_2026-03-25.md` does not record staging-specific image pins | PROVISIONAL | TEMPORARY_RUNTIME_MITIGATION | Contract requires pinned SHA or SHA-timestamp tags. Staging currently uses the same mutable tag pipeline as dev. | No -- image digest pinning not implemented for staging |
-| BT2 | MFE images built from explicit source tags (not :latest) | Inherited from dev build contract (`docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md`); the same build pipeline produces staging images | PROVISIONAL | DURABLE (build pipeline is durable, but staging-specific pin is not) | -- | No -- staging-specific image truth not independently verified |
+| BT1 | First-party staging images have SHA256 digest pins | Verified live 2026-03-26: CMS/LMS `ghcr.io/.../openedx:d7f015d2@sha256:788964d7...`; enterprise-access `@sha256:5315667f...`; enterprise-catalog `@sha256:5ef5ee4b...`; enterprise-subsidy `@sha256:2d701f8f...`; enterprise-admin-portal `@sha256:853ce591...`; enterprise-learner-portal `@sha256:185bbcc3...` | CONFIRMED | DURABLE | Third-party vendor images lack digest pins (caddy:2.7.4, credentials:21.0.0, discovery:21.0.1, ecommerce:19.0.0, elasticsearch:7.17.13). Vendor images are the known exception. | Yes (first-party images confirmed; vendor image gap is documented) |
+| BT2 | MFE images built from explicit source tags (not :latest) | Verified live 2026-03-26: enterprise-admin-portal and enterprise-learner-portal both use `@sha256:...` digest pins. Inherited from dev build contract (`docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md`); the same build pipeline produces staging images. | CONFIRMED | DURABLE | -- | Yes |
 | BT3 | OpenEdX image `8a556621` built and pushed to GHCR | `var/proof/staging-runtime-proof-session3-final.json` (workstream_c_image_build: openedx_status SUCCESS, head_sha 8a556621) | CONFIRMED | DURABLE | -- | Yes |
 
 ### Image Truth
 
 | # | Claim | Source Artifact | Status | Durability | Contradicted By | Promotable? |
 |---|-------|----------------|--------|-----------|----------------|-------------|
-| IT1 | All deployed staging images traceable to source | Build pipeline produces images from git SHAs. `var/proof/staging-runtime-proof-session3-final.json` records image refs. | PROVISIONAL | DURABLE (pipeline is durable) | No staging-specific image-to-source-commit chain is independently recorded. | No -- need staging-specific image ref capture |
-| IT2 | No floating tags in staging deployment manifests | NOT INDEPENDENTLY VERIFIED. Staging uses same overlay pattern as dev. | PARKED | -- | -- | No -- staging deployment manifests not audited for floating tags |
+| IT1 | All deployed staging images traceable to source | Verified live 2026-03-26: first-party images include both the git SHA tag (e.g. `openedx:d7f015d2`) and a SHA256 digest pin, providing a two-anchor traceability chain from source commit to deployed image. | CONFIRMED | DURABLE | Third-party vendor images traceable to upstream version tag but not to a source commit (expected, no digest pin). | Yes (first-party images; vendor images are documented exception) |
+| IT2 | No floating tags in staging deployment manifests (first-party images) | Verified live 2026-03-26: all first-party images use SHA-tagged refs with digest pins. Vendor images use version tags (e.g. `caddy:2.7.4`) without digest pins -- these are the known and accepted exception. | CONFIRMED | DURABLE | Vendor images (caddy, credentials, discovery, ecommerce, elasticsearch) use version tags without digest pins. This is a documented gap, not an architectural regression. | Yes (with documented vendor-image exception) |
 
 ### Data-Layer Truth
 
 | # | Claim | Source Artifact | Status | Durability | Contradicted By | Promotable? |
 |---|-------|----------------|--------|-----------|----------------|-------------|
-| DL1 | Synthetic test fixtures NOT provisioned on staging | User attestation | PARKED | -- | -- | No -- not applicable until enterprise services are deployed |
-| DL2 | Enterprise catalog both-sides NOT populated on staging | User attestation | PARKED | -- | -- | No -- enterprise services not deployed |
+| DL1 | Synthetic test fixtures NOT provisioned on staging | User attestation | PARKED | -- | -- | No -- enterprise services are deployed but test fixtures have not been provisioned |
+| DL2 | Enterprise catalog both-sides NOT populated on staging | User attestation. Enterprise services are deployed and healthy, but enterprise catalog content (programs, courses linked to enterprise) has not been seeded for staging. | PARKED | -- | -- | No -- enterprise catalog data not yet seeded for staging |
 
 ## Contradicted Truths -- Must Stay Open
 
@@ -158,6 +158,8 @@ These claims have merged fixes, verified deployments, and no contradictions:
 10. **Theme and branding active** -- `DEFAULT_SITE_THEME=mereka`, `MerekaCookieDomainMiddleware` live (RI6)
 11. **DB migrations clean** -- 0 pending (RI7)
 12. **Homepage and courses pages render** -- HTTP 200 for all tenants (LP1, LP4)
+13. **Enterprise services deployed and healthy** -- all 4 backends (catalog, access, subsidy, license-manager) return `{"overall_status":"OK"}`, both MFE portals return HTTP 200, 4 migration Jobs completed (verified 2026-03-26) (AP1, AP3-partial, LS1, LS2-partial)
+14. **First-party images have SHA256 digest pins** -- CMS, LMS, enterprise-access, enterprise-catalog, enterprise-subsidy, enterprise-admin-portal, enterprise-learner-portal all pinned with `@sha256:...` (BT1, BT2, IT1, IT2-partial)
 
 ## Provisional Truths -- Awaiting Promotion
 
@@ -166,8 +168,9 @@ These claims need additional evidence or specific verification:
 1. **HT3 -- MFE Config API BASE_URL mismatch for Mereka tenant**: Convention B value returned but Convention A expected. MFE authn works despite mismatch. Needs explicit Convention A alignment or documented acceptance.
 2. **BA8 -- Secondary tenant CSP blocks**: MFE `connect-src` / `img-src` CSP only allows `staging.academyv2.mereka.io`. Secondary tenant LMS hosts (`staging.academy.biji-biji.com`, `staging.skillourfuture.academy.mereka.io`) are blocked by CSP. Login form still works but CSRF token fetch and logo loading fail. Needs CSP multi-tenant fix.
 3. **AP2 -- Admin portal authenticated session**: SSO canary proves LMS login, not admin portal login. Needs admin-portal-specific auth proof.
-4. **BT1/BT2 -- Image digest pinning on staging**: Staging uses same images as dev with mutable tags. Contract requires immutable refs.
-5. **IT1 -- Image traceability for staging**: Build pipeline is durable but staging-specific image-to-commit chain not captured.
+4. **AP3 -- Admin portal enterprise data visibility**: Enterprise services are deployed and healthy. Authenticated admin portal session showing enterprise data not yet browser-proven.
+5. **LS2 -- Enterprise learner portal authenticated paths**: Enterprise services deployed. End-to-end authenticated enterprise learner flow not yet browser-proven.
+6. **IT2 -- Vendor image digest pins**: First-party images have SHA256 digest pins (CONFIRMED). Vendor images (caddy, credentials, discovery, ecommerce, elasticsearch) still use version tags without digest pins.
 
 ## Parked Claims -- Explicitly Deferred
 
@@ -175,23 +178,20 @@ These are intentionally not evaluated for this phase gate:
 
 | # | Claim | Why Parked |
 |---|-------|-----------|
-| AP3 | Admin portal enterprise data visibility | Enterprise services not deployed to staging |
-| LS2 | Learner portal secondary enterprise paths | Enterprise services not deployed to staging |
-| DL1 | Synthetic test fixtures on staging | No enterprise services to fixture against |
-| DL2 | Enterprise catalog both-sides populated on staging | Enterprise services not deployed |
-| IT2 | Floating tags in staging manifests | Staging deployment manifests not independently audited |
+| DL1 | Synthetic test fixtures on staging | Enterprise services are deployed; test fixtures not yet provisioned |
+| DL2 | Enterprise catalog both-sides populated on staging | Enterprise services deployed; catalog data not yet seeded for staging |
 | LP1-caveat | Client-side JS redirect to `academyv2.mereka.dev` | Branding/config issue, not routing. Sub-paths work. Deferred. |
 
 ## Exact Blockers: Stabilization -> Convergence (Staging)
 
 | # | Blocker | Owner | What Unblocks It |
 |---|---------|-------|-----------------|
-| BLK-S1 | Enterprise services not deployed to staging | Platform Team + Enterprise Lane | Deploy enterprise-catalog, enterprise-access, enterprise-admin-portal, enterprise-learner-portal to staging overlay |
-| BLK-S2 | Image digest pinning for staging (mutable tags) | Release Evidence Owner | Pin staging images to immutable SHA-tagged refs in staging overlay |
+| BLK-S1 | Admin portal authenticated browser proof | Lane A | Run admin-portal-specific authenticated browser proof on staging (enterprise backend services are deployed and healthy) |
+| BLK-S2 | Vendor image digest pinning (caddy, credentials, discovery, ecommerce, elasticsearch) | Release Evidence Owner | Pin third-party vendor images to SHA256 digest refs in staging overlay; first-party images already pinned |
 | BLK-S3 | CSP multi-tenant gap (secondary tenant hosts blocked) | App Owner (mereka-lms) | Add secondary tenant LMS hosts to MFE CSP `connect-src` / `img-src` directives |
-| BLK-S4 | Admin portal authenticated browser proof | Lane A | Run admin-portal-specific authenticated proof on staging |
-| BLK-S5 | MFE Config BASE_URL Convention A/B mismatch for Mereka tenant | App Owner (mereka-lms) | Align SiteConfiguration `MFE_CONFIG.BASE_URL` to Convention A, or document acceptance of Convention B as intentional |
-| BLK-S6 | Synthetic fixture creation on staging | Data-Layer Owner | Script-based fixture provisioning after enterprise services deployed |
+| BLK-S4 | MFE Config BASE_URL Convention A/B mismatch for Mereka tenant | App Owner (mereka-lms) | Align SiteConfiguration `MFE_CONFIG.BASE_URL` to Convention A, or document acceptance of Convention B as intentional |
+| BLK-S5 | Synthetic fixture creation on staging | Data-Layer Owner | Script-based enterprise catalog + fixture provisioning (services are deployed; data layer needs seeding) |
+| BLK-S6 | Authenticated enterprise learner path browser proof | Lane A | Run end-to-end enterprise learner flow with real enterprise license (services deployed, path untested in browser) |
 
 ## What Staging Proves That Dev Did Not
 
@@ -202,10 +202,10 @@ These are intentionally not evaluated for this phase gate:
 
 ## What This Bundle Does NOT Claim
 
-- Do NOT claim enterprise portal convergence readiness (enterprise services not deployed to staging)
-- Do NOT claim image digest pinning for staging (mutable tags in use)
-- Do NOT claim CSP is fully correct for multi-tenant MFE (secondary tenant hosts blocked)
-- Do NOT claim admin portal authenticated enterprise data visibility (not verified)
+- Do NOT claim enterprise portal authenticated session convergence readiness (services are deployed and healthy, but authenticated browser paths through the admin portal and enterprise learner flow have not been browser-proven)
+- Do NOT claim vendor image digest pinning (caddy, credentials, discovery, ecommerce, elasticsearch use version tags without digest pins; first-party images ARE pinned)
+- Do NOT claim CSP is fully correct for multi-tenant MFE (secondary tenant LMS hosts blocked by CSP `connect-src`)
+- Do NOT claim enterprise catalog data is seeded on staging (services deployed, data not populated)
 - Do NOT claim synthetic fixtures exist on staging (not provisioned)
 - Do NOT claim convergence gate is fully satisfied from this bundle alone (see blockers)
 
@@ -267,15 +267,17 @@ These are intentionally not evaluated for this phase gate:
 
 ## Phase Gate Assessment
 
-### Stabilization -> Convergence: PARTIALLY SATISFIED for staging
+### Stabilization -> Convergence: SUBSTANTIALLY SATISFIED for staging
 
 | Gate Requirement | Status | Evidence |
 |-----------------|--------|----------|
 | Repo-side stabilization contracts merged and current | CONFIRMED | Control board cites all contracts as merged |
 | Canonical runtime/browser evidence bundle merged | THIS DOCUMENT (pending merge) | -- |
 | Primary learner path classified | CONFIRMED | LP1-LP4 |
-| Secondary learner path classified | PROVISIONAL/PARKED | LS1 confirmed (renders), LS2 parked (enterprise not deployed) |
+| Secondary learner path classified | PROVISIONAL | LS1 confirmed (renders); LS2 provisional (services deployed, authenticated enterprise path not browser-tested) |
 | Manual runtime mitigations removed or recorded | CONFIRMED | No manual patches required for basic function (GO2) |
-| Immutable image refs | PROVISIONAL | BT1-BT3 (build pipeline durable, staging-specific pins missing) |
+| Immutable image refs (first-party) | CONFIRMED | BT1-BT3 (first-party images have SHA256 digest pins; vendor images are documented exception) |
+| Enterprise services deployed and healthy | CONFIRMED | All 4 backends return OK; both MFE portals HTTP 200; 4 migration Jobs completed (verified 2026-03-26) |
+| Enterprise authenticated paths browser-proven | PROVISIONAL | Services deployed; admin portal and enterprise learner authenticated sessions not yet browser-verified |
 
-**Verdict**: Staging is significantly further along than dev was at its bundle time. The primary path is CONFIRMED across all dimensions (auth, host, cookie, GitOps, runtime). The blockers are concentrated in enterprise services (not deployed to staging) and image pinning (mutable tags). These are operational deployment decisions, not architectural gaps.
+**Verdict**: Staging is significantly further along than dev was at its bundle time. The primary path is CONFIRMED across all dimensions (auth, host, cookie, GitOps, runtime). Enterprise services are deployed and healthy. The remaining blockers are concentrated in authenticated enterprise portal browser proof and vendor image digest pinning. These are verification gaps, not architectural gaps.
