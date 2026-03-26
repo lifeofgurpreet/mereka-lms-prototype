@@ -132,14 +132,14 @@ echo "--- Logo Click Navigation (AC-SLOT-003) ---"
 if grep -qF "getLogoHref" "$PLUGIN_FILE"; then
   do_pass "getLogoHref helper used for logo click href (AC-SLOT-003)"
 else
-  do_fail "getLogoHref helper missing — logo must navigate to /dashboard (AC-SLOT-003)"
+  do_fail "getLogoHref helper missing — logo must navigate to /learner-dashboard/ (AC-SLOT-003)"
 fi
 
-if grep -q "baseUrl.*\\/dashboard.*\\/dashboard" "$PLUGIN_FILE" || \
-   grep -qF "return baseUrl ? \`\${baseUrl}/dashboard\` : '/dashboard'" "$PLUGIN_FILE"; then
-  do_pass "Dashboard href resolves with LMS_BASE_URL prefix"
+if grep -qF "const getLearnerHomeHref = () => '/learner-dashboard/';" "$PLUGIN_FILE" || \
+   grep -qF "return '/learner-dashboard/';" "$PLUGIN_FILE"; then
+  do_pass "Logo href resolves to canonical learner home"
 else
-  do_fail "Dashboard href resolution logic missing — expected baseUrl-aware /dashboard"
+  do_fail "Learner-home href resolution logic missing — expected canonical /learner-dashboard/"
 fi
 
 if grep -qF "aria-label=" "$PLUGIN_FILE"; then
@@ -246,10 +246,10 @@ else
   do_fail "Menu wiring: Dashboard link missing (AC-SLOT-005)"
 fi
 
-if grep -qF "content: 'Discover Courses'" "$PLUGIN_FILE"; then
-  do_pass "Menu wiring: Discover Courses link present (AC-SLOT-005)"
+if grep -qF "content: 'Course Catalog'" "$PLUGIN_FILE"; then
+  do_pass "Menu wiring: Course Catalog link present (AC-SLOT-005)"
 else
-  do_fail "Menu wiring: Discover Courses link missing (AC-SLOT-005)"
+  do_fail "Menu wiring: Course Catalog link missing (AC-SLOT-005)"
 fi
 
 if grep -qF "content: 'Support'" "$PLUGIN_FILE"; then

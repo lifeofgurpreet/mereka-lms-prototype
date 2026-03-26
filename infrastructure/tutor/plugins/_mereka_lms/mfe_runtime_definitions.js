@@ -108,9 +108,13 @@ const getMerekaVariant = (hostname, config) => {
   };
 };
 
-const getLogoHref = (baseUrl) => {
-  return baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
+const getLearnerHomeHref = () => '/learner-dashboard/';
+
+const getCatalogHref = (baseUrl) => {
+  return baseUrl ? `${baseUrl}/courses` : '/courses';
 };
+
+const getLogoHref = () => getLearnerHomeHref();
 
 const withMerekaMenuItems = (widget, menuItems = []) => {
   const widgetProps = (widget && widget.RenderWidget && widget.RenderWidget.props) || {};
@@ -167,10 +171,11 @@ const withMerekaLearningLoggedOutItems = (widget) => {
   const existingHrefs = new Set(defaultButtons.map((item) => (item && item.href ? item.href : '')));
   const nextButtons = [...defaultButtons];
 
-  if (!existingHrefs.has('/dashboard/courses')) {
+  const catalogHref = getCatalogHref((config.LMS_BASE_URL || '').replace(/\/$/, ''));
+  if (!existingHrefs.has(catalogHref)) {
     nextButtons.push({
-      href: '/dashboard/courses',
-      message: 'Discover Courses',
+      href: catalogHref,
+      message: 'Course Catalog',
     });
   }
 
@@ -374,7 +379,7 @@ const MerekaHeaderLogo = () => {
   const selectedLogo = isMobileViewport && variant.mobileLogoUrl ? variant.mobileLogoUrl : variant.logoUrl;
 
   return (
-    <a href={getLogoHref(baseUrl)} aria-label={`${variant.brand} dashboard`} className="mereka-header-logo">
+    <a href={getLogoHref()} aria-label={`${variant.brand} learning home`} className="mereka-header-logo">
       <img src={baseUrl ? `${baseUrl}${selectedLogo}` : selectedLogo} alt={`${variant.brand} logo`} />
     </a>
   );
@@ -604,15 +609,15 @@ const MerekaLearnerSidebarWidget = () => {
   const config = getConfig();
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
-  const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
-  const coursesPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
+  const learnerHomePath = getLearnerHomeHref();
+  const coursesPath = getCatalogHref(baseUrl);
   const helpPath = variant.helpUrl || '/help/';
 
   return (
     <div className="mereka-learner-sidebar-widget">
       <p className="h5 mb-2">{variant.brand} quick links</p>
-      <a href={dashboardPath} className="d-block mb-1">Dashboard</a>
-      <a href={coursesPath} className="d-block mb-1">My Courses</a>
+      <a href={learnerHomePath} className="d-block mb-1">Learning home</a>
+      <a href={coursesPath} className="d-block mb-1">Course catalog</a>
       <a href={helpPath} className="d-block">Support</a>
     </div>
   );
@@ -623,8 +628,8 @@ const MerekaLearnerSidebarWidget = () => {
 const MerekaNoCoursesView = () => {
   const config = getConfig();
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
-  const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
-  const discoverPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
+  const discoverPath = getCatalogHref(baseUrl);
+  const helpPath = variant.helpUrl || '/help/';
 
   return (
     <div className="mereka-no-courses-view p-4 text-center">
@@ -633,8 +638,8 @@ const MerekaNoCoursesView = () => {
         Your dashboard is ready, but you are not enrolled in any courses yet.
       </p>
       <div className="mereka-no-courses-view__actions">
-        <a href={discoverPath} className="btn btn-brand me-2 mb-2">Discover courses</a>
-        <a href={dashboardPath} className="btn btn-outline-primary mb-2">Back to dashboard</a>
+        <a href={discoverPath} className="btn btn-brand me-2 mb-2">Browse course catalog</a>
+        <a href={helpPath} className="btn btn-outline-primary mb-2">Get support</a>
       </div>
     </div>
   );
@@ -984,10 +989,11 @@ const MerekaLearningNotificationsDiscussionsSidebarHint = () => {
 // Wired into org.openedx.frontend.learning.course_exit_view_courses.v1.
 const MerekaLearningCourseExitViewCoursesHint = () => {
   const config = getConfig();
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   return (
     <div className="mereka-learning-course-exit-view-courses-hint mb-2">
-      <a href="/dashboard/courses" className="small">Browse more courses from {variant.brand}.</a>
+      <a href={getCatalogHref(baseUrl)} className="small">Browse more courses from {variant.brand}.</a>
     </div>
   );
 };
@@ -997,7 +1003,7 @@ const MerekaLearningCourseExitViewCoursesHint = () => {
 const MerekaLearningCourseExitDashboardFootnoteLinkHint = () => {
   return (
     <div className="mereka-learning-course-exit-dashboard-footnote-link-hint mb-2">
-      <a href="/dashboard" className="small">Return to your dashboard for next actions.</a>
+      <a href={getLearnerHomeHref()} className="small">Return to your learning home for next actions.</a>
     </div>
   );
 };

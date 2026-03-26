@@ -354,13 +354,13 @@ _MODIFY_SLOTS: list[tuple[str, str]] = [
 _LOGGED_IN_MENU_ITEMS = """[
                             {
                                 type: 'item',
-                                href: '/dashboard',
+                                href: '/learner-dashboard/',
                                 content: 'Dashboard',
                             },
                             {
                                 type: 'item',
-                                href: '/dashboard/courses',
-                                content: 'Discover Courses',
+                                href: '/courses',
+                                content: 'Course Catalog',
                             },
                         ]"""
 
@@ -368,8 +368,8 @@ _LOGGED_IN_MENU_ITEMS = """[
 _LOGGED_OUT_MENU_ITEMS = """[
                             {
                                 type: 'item',
-                                href: '/dashboard/courses',
-                                content: 'Discover Courses',
+                                href: '/courses',
+                                content: 'Course Catalog',
                             },
                         ]"""
 

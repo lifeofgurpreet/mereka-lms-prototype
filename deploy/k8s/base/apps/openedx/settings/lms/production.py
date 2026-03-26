@@ -1495,7 +1495,9 @@ if KAJABI_SSO_ENABLED and KAJABI_OAUTH2_KEY and KAJABI_OAUTH2_SECRET:
     SOCIAL_AUTH_KAJABI_SCOPE = ["read:user", "read:email"]
 
     # Redirect URLs
-    LOGIN_REDIRECT_URL = os.environ.get("LOGIN_REDIRECT_URL", "/dashboard")
+    LOGIN_REDIRECT_URL = os.environ.get(
+        "LOGIN_REDIRECT_URL", LEARNER_HOME_MICROFRONTEND_URL
+    )
     SOCIAL_AUTH_LOGIN_REDIRECT_URL = LOGIN_REDIRECT_URL
 
 # SSO fallback to email/password (AC-SSO-003)

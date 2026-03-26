@@ -221,11 +221,10 @@ else
   fail "Source contract: mobile header logo selection markers missing"
 fi
 
-if rg -q "/dashboard" "$PLUGIN_FILE" \
-  && rg -q "baseUrl \\? .*\\/dashboard.*: '/dashboard'" "$PLUGIN_FILE"; then
-  pass "Source contract: dashboard href resolution includes baseUrl-aware /dashboard path"
+if rg -qF "const getLearnerHomeHref = () => '/learner-dashboard/';" "$PLUGIN_FILE"; then
+  pass "Source contract: learner-home href resolves to canonical /learner-dashboard/ path"
 else
-  fail "Source contract: dashboard href resolution markers missing"
+  fail "Source contract: learner-home href resolution markers missing"
 fi
 
 if rg -qF "'academy.biji-biji.com': {" "$PLUGIN_FILE" \
@@ -236,10 +235,10 @@ else
   fail "Source contract: expected tenant hostnames missing from SITE_VARIANTS map"
 fi
 
-if rg -qF "content: 'Discover Courses'" "$PLUGIN_FILE" \
+if rg -qF "content: 'Course Catalog'" "$PLUGIN_FILE" \
   && rg -qF "content: 'Support'" "$PLUGIN_FILE" \
-  && rg -qF "href: '/dashboard'" "$PLUGIN_FILE"; then
-  pass "Source contract: menu wiring contains Dashboard, Discover Courses, and Support markers"
+  && rg -qF "href: '/learner-dashboard/'" "$PLUGIN_FILE"; then
+  pass "Source contract: menu wiring contains learner home, course catalog, and support markers"
 else
   fail "Source contract: required menu content markers missing"
 fi

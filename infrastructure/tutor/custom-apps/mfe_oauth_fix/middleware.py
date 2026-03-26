@@ -10,8 +10,10 @@ and ensures OAuth providers are properly included.
 
 import json
 import logging
-from django.utils.deprecation import MiddlewareMixin
 from django.contrib.sites.shortcuts import get_current_site
+from django.utils.deprecation import MiddlewareMixin
+
+from mfe_oauth_fix.redirects import learner_home_next_path
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +108,8 @@ class MFEOAuthFixMiddleware(MiddlewareMixin):
 
                     logger.info(f"Found {oauth_providers.count()} OAuth providers for site {site_id}")
 
-                    # Build provider data for MFE
+                    # Keep provider callbacks aligned with the configured learner-home.
+                    learner_home_next = learner_home_next_path()
                     fixed_providers = []
                     for provider in oauth_providers:
                         # Get the backend name (e.g., 'oauth2-authentik')
@@ -123,8 +126,8 @@ class MFEOAuthFixMiddleware(MiddlewareMixin):
                         provider_data = {
                             'id': f"oa2-{provider.slug}" if provider.slug else f"oa2-{provider.name.lower().replace(' ', '-')}",
                             'name': display_name,
-                            'loginUrl': f"/auth/login/{backend_name}/?auth_entry=login&next=/dashboard",
-                            'registerUrl': f"/auth/login/{backend_name}/?auth_entry=register&next=/dashboard",
+                            'loginUrl': f"/auth/login/{backend_name}/?auth_entry=login&next={learner_home_next}",
+                            'registerUrl': f"/auth/login/{backend_name}/?auth_entry=register&next={learner_home_next}",
                         }
 
                         # Add icon information if available

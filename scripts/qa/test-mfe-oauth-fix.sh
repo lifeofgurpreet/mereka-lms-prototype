@@ -91,19 +91,35 @@ if [ -n "$MEREKA_PROVIDER" ]; then
   echo -e "${GREEN}✓ Mereka provider found${NC}"
   PROVIDER_ID=$(echo "$MEREKA_PROVIDER" | jq -r '.id')
   PROVIDER_LOGIN_URL=$(echo "$MEREKA_PROVIDER" | jq -r '.loginUrl')
+  PROVIDER_REGISTER_URL=$(echo "$MEREKA_PROVIDER" | jq -r '.registerUrl')
   echo "  ID: $PROVIDER_ID"
   echo "  Login URL: $PROVIDER_LOGIN_URL"
+  echo "  Register URL: $PROVIDER_REGISTER_URL"
 else
   AUTHENTIK_PROVIDER=$(echo "$PROVIDERS" | jq -r '.[] | select(.name == "Authentik")')
   if [ -n "$AUTHENTIK_PROVIDER" ]; then
     echo -e "${YELLOW}⚠ Authentik provider found (display name not updated)${NC}"
     PROVIDER_ID=$(echo "$AUTHENTIK_PROVIDER" | jq -r '.id')
     PROVIDER_LOGIN_URL=$(echo "$AUTHENTIK_PROVIDER" | jq -r '.loginUrl')
+    PROVIDER_REGISTER_URL=$(echo "$AUTHENTIK_PROVIDER" | jq -r '.registerUrl')
     echo "  ID: $PROVIDER_ID"
     echo "  Login URL: $PROVIDER_LOGIN_URL"
+    echo "  Register URL: $PROVIDER_REGISTER_URL"
   else
     echo -e "${YELLOW}⚠ Branded OAuth provider not found${NC}"
   fi
+fi
+
+if [[ "${PROVIDER_LOGIN_URL:-}" == *"next=/learner-dashboard/"* ]] && [[ "${PROVIDER_REGISTER_URL:-}" == *"next=/learner-dashboard/"* ]]; then
+  echo -e "${GREEN}✓ Learner-home redirect target is /learner-dashboard/${NC}"
+else
+  echo -e "${RED}✗ FAIL: provider URLs do not target /learner-dashboard/${NC}"
+  exit 1
+fi
+
+if [[ "${PROVIDER_LOGIN_URL:-}" == *"next=/dashboard"* ]] || [[ "${PROVIDER_REGISTER_URL:-}" == *"next=/dashboard"* ]]; then
+  echo -e "${RED}✗ FAIL: provider URLs still target legacy /dashboard${NC}"
+  exit 1
 fi
 
 echo ""

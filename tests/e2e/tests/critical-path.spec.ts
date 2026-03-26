@@ -142,17 +142,15 @@ test.describe('Critical path — Mereka Academy', () => {
     await loginViaSso(page, USERNAME, PASSWORD);
     await assertAuthenticated(page);
 
-    // Navigate explicitly to the learner dashboard (MFE or legacy)
+    // Navigate explicitly to the canonical learner dashboard MFE.
     const mfeBase = getMfeBaseUrl(baseURL!);
     await page.goto(`${mfeBase}/learner-dashboard/`, { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle').catch(() => {});
 
-    // Accept either the MFE dashboard or the legacy LMS dashboard URL
+    // The canonical learner home is the learner-dashboard MFE.
     const dashUrl = page.url();
     expect(
-      dashUrl.includes('/learner-dashboard') ||
-      dashUrl.includes('/dashboard') ||
-      dashUrl.includes('/home'),
+      dashUrl.includes('/learner-dashboard'),
       `Expected to land on learner dashboard, got: ${dashUrl}`
     ).toBe(true);
 

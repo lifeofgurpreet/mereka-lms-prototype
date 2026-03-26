@@ -11,12 +11,13 @@ returns OAuth providers for the current site.
 # @spec auth-sso-enterprise: Support OAuth provider visibility for MFE login pages
 
 import logging
-from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import JsonResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+
+from mfe_oauth_fix.redirects import learner_home_next_path
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,8 @@ class MFEContextView(View):
 
                 logger.info(f"Found {providers.count()} OAuth providers for site {site_id}")
 
-                # Build provider data for MFE
+                # Keep provider callbacks aligned with the configured learner-home.
+                learner_home_next = learner_home_next_path()
                 provider_list = []
                 for provider in providers:
                     # Get the backend name (e.g., 'oauth2-authentik')
@@ -85,8 +87,8 @@ class MFEContextView(View):
                     provider_data = {
                         'id': f"oa2-{provider.slug}" if provider.slug else f"oa2-{provider.name.lower()}",
                         'name': display_name,
-                        'loginUrl': f"/auth/login/{backend_name}/?auth_entry=login&next=/dashboard",
-                        'registerUrl': f"/auth/login/{backend_name}/?auth_entry=register&next=/dashboard",
+                        'loginUrl': f"/auth/login/{backend_name}/?auth_entry=login&next={learner_home_next}",
+                        'registerUrl': f"/auth/login/{backend_name}/?auth_entry=register&next={learner_home_next}",
                     }
 
                     # Add icon URL if available

@@ -23,6 +23,9 @@ CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 PRODUCTION_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 BRANDING_VERIFIER="$REPO_ROOT/scripts/qa/verify-mfe-branding.sh"
 CONTRACT_DOC="$REPO_ROOT/docs/reference/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md"
+MFE_OAUTH_REDIRECTS="$REPO_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix/redirects.py"
+MFE_OAUTH_FIX_MIDDLEWARE="$REPO_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py"
+MFE_OAUTH_FIX_VIEW="$REPO_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix/views.py"
 
 PASS=0
 FAIL=0
@@ -226,6 +229,50 @@ if [ "$LMS_API_COUNT" -ge 10 ]; then
 else
   do_warn "Only $LMS_API_COUNT MFE entries in MFE_CONFIG_API_URLS (expected >= 10)"
 fi
+
+echo ""
+
+# =============================================================================
+# Section 4.5: MFE OAuth learner-home redirect contract
+# =============================================================================
+echo "--- MFE OAuth learner-home redirect contract ---"
+
+if [[ ! -f "$MFE_OAUTH_REDIRECTS" ]]; then
+  do_fail "MFE OAuth redirect helper missing at ${MFE_OAUTH_REDIRECTS#$REPO_ROOT/}"
+else
+  do_pass "MFE OAuth redirect helper exists"
+  if grep -q "LEARNER_HOME_MICROFRONTEND_URL" "$MFE_OAUTH_REDIRECTS"; then
+    do_pass "MFE OAuth redirect helper references LEARNER_HOME_MICROFRONTEND_URL"
+  else
+    do_fail "MFE OAuth redirect helper does not reference LEARNER_HOME_MICROFRONTEND_URL"
+  fi
+fi
+
+for file in "$MFE_OAUTH_FIX_MIDDLEWARE" "$MFE_OAUTH_FIX_VIEW"; do
+  rel="${file#$REPO_ROOT/}"
+  if [[ ! -f "$file" ]]; then
+    do_warn "MFE OAuth fix source missing: $rel"
+    continue
+  fi
+
+  if grep -q "learner_home_next_path" "$file"; then
+    do_pass "Custom app consumes learner-home redirect helper in $rel"
+  else
+    do_fail "Custom app does not consume learner-home redirect helper in $rel"
+  fi
+
+  if grep -q "next=/dashboard" "$file"; then
+    do_fail "Custom app still hardcodes legacy next=/dashboard in $rel"
+  else
+    do_pass "Custom app no longer hardcodes next=/dashboard in $rel"
+  fi
+
+  if grep -q "next={learner_home_next}" "$file"; then
+    do_pass "Custom app uses learner_home_next in provider URLs in $rel"
+  else
+    do_fail "Custom app provider URLs do not use learner_home_next in $rel"
+  fi
+done
 
 echo ""
 
