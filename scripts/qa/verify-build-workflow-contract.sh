@@ -33,6 +33,13 @@ else
   fail "target_environment input missing"
 fi
 
+# Manual dispatches must not silently treat the placeholder environment as production.
+if grep -q "target_environment must be explicitly selected before generating a release bundle" "$BUILD_WF"; then
+  pass "workflow_dispatch release bundle requires explicit target_environment"
+else
+  fail "workflow_dispatch release bundle missing explicit target_environment guard"
+fi
+
 # Check container registry push target (GHCR only)
 if grep -q "ghcr.io" "$BUILD_WF"; then
   pass "Container registry push target is GHCR"

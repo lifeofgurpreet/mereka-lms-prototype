@@ -25,6 +25,11 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.target_environment }}" == "select-environment" ]]; then
+            echo "target_environment must be explicitly selected before generating a release bundle." >&2
+            exit 1
+          fi
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
       - uses: actions/upload-artifact@v4
@@ -75,6 +80,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
+      - run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TARGET_ENV="${{ inputs.target_environment }}"
+            if [[ "$TARGET_ENV" == "select-environment" ]]; then
+              TARGET_ENV="production"
+            fi
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: build-provenance

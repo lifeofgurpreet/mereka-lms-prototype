@@ -315,10 +315,10 @@ if [[ -f "${BUILD_WORKFLOW}" ]]; then
     fail "build-tutor-images.yml missing target_environment input"
   fi
 
-  if grep -q "default:.*select-environment" "${BUILD_WORKFLOW}"; then
-    pass "build-tutor-images.yml target_environment defaults to select-environment"
+  if grep -q "target_environment must be explicitly selected before generating a release bundle" "${BUILD_WORKFLOW}"; then
+    pass "build-tutor-images.yml requires explicit target_environment before release bundle generation"
   else
-    fail "build-tutor-images.yml target_environment default is not select-environment"
+    fail "build-tutor-images.yml missing explicit target_environment guard before release bundle generation"
   fi
 fi
 
