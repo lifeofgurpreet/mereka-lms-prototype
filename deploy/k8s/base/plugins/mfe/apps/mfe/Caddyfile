@@ -56,7 +56,17 @@
 		file_server
 	}
 
-	# Runtime PARAGON theme assets are now emitted to /theme/*.min.css in MFE image.
+	# Runtime PARAGON theme assets are served from /theme/* in the MFE image.
+	# This path serves two categories of files:
+	#   1. CSS bundles: core.min.css, mereka-brand.min.css, light.min.css, etc.
+	#      (copied from indigo/theme/ at Docker build time)
+	#   2. Brand logo images: logo-horizontal.png, logo-horizontal-white.png, logo.png,
+	#      favicon.ico, and their SVG variants.
+	#      (copied from indigo/brand-mereka/ at Docker build time via `cp -f` in Dockerfile)
+	# Do NOT force Content-Type here — file_server auto-detects the correct MIME type
+	# for each file (text/css for .css, image/png for .png, image/svg+xml for .svg,
+	# image/x-icon for .ico). Overriding it breaks logos: browsers reject a PNG served
+	# as text/css and fall back to the alt text ("Mereka Academy logo").
 	@mfe_theme_assets {
 		path /theme/*
 	}
@@ -66,7 +76,6 @@
 		# Runtime minified bundles are copied to /openedx/dist/theme/*.min.css.
 		# Check /theme first, then fall back to per-MFE paths for compatibility.
 		try_files /theme{path} /account{path} /authn{path} /communications{path} /authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
-		header Content-Type "text/css; charset=utf-8"
 		header Cache-Control "public, max-age=300"
 		file_server
 	}
