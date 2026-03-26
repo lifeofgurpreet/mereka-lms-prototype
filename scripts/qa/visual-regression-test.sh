@@ -8,7 +8,7 @@
 # Uses Playwright for screenshot capture and comparison
 #
 # Usage:
-#   ./scripts/qa/visual-regression-test.sh [--update-baseline] [--env local|production] [--viewport desktop|mobile]
+#   ./scripts/qa/visual-regression-test.sh [--update-baseline] [--env local|production|prod|dev|staging] [--viewport desktop|mobile]
 #
 # Commands:
 #   --update-baseline: Capture new baseline screenshots (run after confirmed good UI state)
@@ -30,6 +30,7 @@ ENV="local"
 VIEWPORT="desktop"
 DIFF_THRESHOLD=0.05  # 5% pixel difference threshold
 AUTHENTICATED=false
+PLAYWRIGHT_IMPORT_SPEC_RESOLVED="${PLAYWRIGHT_IMPORT_SPEC:-}"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -75,15 +76,32 @@ CURRENT_DIR="$SCREENSHOTS_DIR/current"
 DIFF_DIR="$SCREENSHOTS_DIR/diff"
 
 # Base URLs
-if [[ "$ENV" == "production" ]]; then
-    LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
-    STUDIO_URL="https://${STUDIO_DOMAIN:-studio.academyv2.mereka.io}"
-    MFE_URL="https://${MFE_DOMAIN:-apps.academyv2.mereka.io}"
-else
-    LMS_URL="http://localhost"
-    STUDIO_URL="http://studio.localhost"
-    MFE_URL="http://apps.localhost"
-fi
+case "$ENV" in
+    production|prod)
+        LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
+        STUDIO_URL="https://${STUDIO_DOMAIN:-studio.academyv2.mereka.io}"
+        MFE_URL="https://${MFE_DOMAIN:-apps.academyv2.mereka.io}"
+        ;;
+    dev)
+        LMS_URL="https://${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
+        STUDIO_URL="https://${DEV_STUDIO_DOMAIN:-studio.${DEV_LMS_DOMAIN:-academyv2.mereka.dev}}"
+        MFE_URL="https://${DEV_MFE_DOMAIN:-apps.${DEV_LMS_DOMAIN:-academyv2.mereka.dev}}"
+        ;;
+    staging)
+        LMS_URL="https://${STAGING_LMS_DOMAIN:-staging.academyv2.mereka.io}"
+        STUDIO_URL="https://${STAGING_STUDIO_DOMAIN:-staging.studio.academyv2.mereka.io}"
+        MFE_URL="https://${STAGING_MFE_DOMAIN:-staging.apps.academyv2.mereka.io}"
+        ;;
+    local)
+        LMS_URL="http://localhost"
+        STUDIO_URL="http://studio.localhost"
+        MFE_URL="http://apps.localhost"
+        ;;
+    *)
+        echo "Unsupported --env value: $ENV (expected local|production|prod|dev|staging)"
+        exit 1
+        ;;
+esac
 
 # Viewport configuration (AC-UIQ-001)
 if [[ "$VIEWPORT" == "mobile" ]]; then
@@ -151,14 +169,36 @@ log_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
+resolve_playwright_import_spec() {
+    if [[ -n "${PLAYWRIGHT_IMPORT_SPEC:-}" ]]; then
+        printf '%s' "${PLAYWRIGHT_IMPORT_SPEC}"
+        return 0
+    fi
+
+    local repo_playwright="${PROJECT_ROOT}/tests/e2e/node_modules/playwright/index.mjs"
+    if [[ -f "$repo_playwright" ]]; then
+        printf 'file://%s' "$repo_playwright"
+        return 0
+    fi
+
+    printf 'playwright'
+}
+
 check_dependencies() {
     log_info "Checking dependencies..."
 
-    # Check if Playwright is available
-    if ! command -v playwright &> /dev/null; then
-        log_error "Playwright not found. Installing..."
-        npm install -g playwright
-        playwright install chromium
+    if ! command -v node &> /dev/null; then
+        log_error "Node.js not found"
+        exit 1
+    fi
+
+    PLAYWRIGHT_IMPORT_SPEC_RESOLVED="$(resolve_playwright_import_spec)"
+
+    if PLAYWRIGHT_IMPORT_SPEC="$PLAYWRIGHT_IMPORT_SPEC_RESOLVED" node -e "import(process.env.PLAYWRIGHT_IMPORT_SPEC || 'playwright').then(() => process.exit(0)).catch(() => process.exit(1))"; then
+        log_success "Playwright runtime available"
+    else
+        log_error "Playwright runtime not available. Set PLAYWRIGHT_IMPORT_SPEC or install tests/e2e dependencies."
+        exit 1
     fi
 
     # Check if ImageMagick is available for comparison
@@ -197,11 +237,10 @@ capture_screenshot() {
     local filename="${page_name}${VIEWPORT_SUFFIX}.png"
 
     # Create Playwright script
-    local script="$SCREENSHOTS_DIR/capture_${page_name}.js"
+    local script="$SCREENSHOTS_DIR/capture_${page_name}.mjs"
     cat > "$script" <<EOF
-const { chromium } = require('playwright');
-
 (async () => {
+  const { chromium } = await import(process.env.PLAYWRIGHT_IMPORT_SPEC || 'playwright');
   const browser = await chromium.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -236,7 +275,7 @@ const { chromium } = require('playwright');
 EOF
 
     # Execute Playwright script
-    if node "$script"; then
+    if PLAYWRIGHT_IMPORT_SPEC="$PLAYWRIGHT_IMPORT_SPEC_RESOLVED" node "$script"; then
         log_success "Screenshot captured: $page_name"
         rm "$script"
         return 0
@@ -268,11 +307,10 @@ capture_authenticated_screenshot() {
     fi
 
     # Create Playwright script with authentication
-    local script="$SCREENSHOTS_DIR/capture_auth_${page_name}.js"
+    local script="$SCREENSHOTS_DIR/capture_auth_${page_name}.mjs"
     cat > "$script" <<EOF
-const { chromium } = require('playwright');
-
 (async () => {
+  const { chromium } = await import(process.env.PLAYWRIGHT_IMPORT_SPEC || 'playwright');
   const browser = await chromium.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -285,23 +323,26 @@ const { chromium } = require('playwright');
   const page = await context.newPage();
 
   try {
-    // Navigate to login page
-    const loginUrl = '$MFE_URL/authn/login';
-    await page.goto(loginUrl, { waitUntil: 'networkidle', timeout: 30000 });
+    const loginEntryUrl = '$LMS_URL/auth/login/oidc/';
+    await page.goto(loginEntryUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
 
-    // Wait for SSO redirect
-    await page.waitForTimeout(2000);
-
-    // Try to fill username
-    const usernameSelectors = ['#id_uid_field', 'input[name="uidField"]', 'input[name="username"]', 'input[type="email"]'];
+    const usernameSelectors = [
+      'input[placeholder="Email or Username"]',
+      '#id_uid_field',
+      'input[name="uidField"]',
+      'input[name="username"]',
+      'input[type="email"]'
+    ];
     let filled = false;
     for (const sel of usernameSelectors) {
-      const el = await page.\$(sel);
-      if (el) {
-        await el.fill('$sso_username');
+      const locator = page.locator(sel).first();
+      try {
+        await locator.waitFor({ state: 'visible', timeout: 10000 });
+        await locator.fill('$sso_username', { timeout: 10000 });
         filled = true;
         break;
-      }
+      } catch (_) {}
     }
 
     if (!filled) {
@@ -309,21 +350,41 @@ const { chromium } = require('playwright');
       process.exit(1);
     }
 
-    // Submit username (Authentik has 2-step login)
-    const submitBtn = await page.\$('button[type="submit"]');
-    if (submitBtn) await submitBtn.click();
-    await page.waitForTimeout(2000);
+    const clickPrimaryAction = async () => {
+      const labels = [/log in/i, /sign in/i, /continue/i, /next/i];
+      for (const label of labels) {
+        try {
+          await page.getByRole('button', { name: label }).first().click({ timeout: 10000 });
+          return;
+        } catch (_) {}
+      }
+      const submitBtn = await page.\$('button[type="submit"]');
+      if (submitBtn) {
+        await submitBtn.click();
+        return;
+      }
+      await page.keyboard.press('Enter');
+    };
 
-    // Fill password
-    const passwordSelectors = ['#id_password', 'input[name="password"]', 'input[type="password"]'];
+    await clickPrimaryAction();
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(1500);
+
+    const passwordSelectors = [
+      'input[placeholder="Password"]',
+      '#id_password',
+      'input[name="password"]',
+      'input[type="password"]'
+    ];
     filled = false;
     for (const sel of passwordSelectors) {
-      const el = await page.\$(sel);
-      if (el) {
-        await el.fill('$sso_password');
+      const locator = page.locator(sel).first();
+      try {
+        await locator.waitFor({ state: 'visible', timeout: 10000 });
+        await locator.fill('$sso_password', { timeout: 10000 });
         filled = true;
         break;
-      }
+      } catch (_) {}
     }
 
     if (!filled) {
@@ -331,9 +392,11 @@ const { chromium } = require('playwright');
       process.exit(1);
     }
 
-    // Submit login
-    const loginBtn = await page.\$('button[type="submit"]');
-    if (loginBtn) await loginBtn.click();
+    await clickPrimaryAction();
+    await page.waitForURL(
+      url => !/auth0|authentik|\\/if\\/flow\\/|\\/auth\\/login\\/oidc|\\/authn\\/login|\\/login\\b/i.test(url),
+      { timeout: 60000 }
+    ).catch(() => {});
     await page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
 
@@ -360,7 +423,7 @@ const { chromium } = require('playwright');
 EOF
 
     # Execute Playwright script
-    if node "$script"; then
+    if PLAYWRIGHT_IMPORT_SPEC="$PLAYWRIGHT_IMPORT_SPEC_RESOLVED" node "$script"; then
         log_success "Screenshot captured: $page_name"
         rm "$script"
         return 0
@@ -462,16 +525,16 @@ for page_name in "${!CRITICAL_PAGES[@]}"; do
     if [[ "$UPDATE_BASELINE" == "true" ]]; then
         # Capture baseline
         if capture_screenshot "$page_name" "$url" "$BASELINE_DIR"; then
-            ((CAPTURED++))
+            ((CAPTURED++)) || true
         else
-            ((FAILED_CAPTURE++))
+            ((FAILED_CAPTURE++)) || true
         fi
     else
         # Capture current
         if capture_screenshot "$page_name" "$url" "$CURRENT_DIR"; then
-            ((CAPTURED++))
+            ((CAPTURED++)) || true
         else
-            ((FAILED_CAPTURE++))
+            ((FAILED_CAPTURE++)) || true
         fi
     fi
 done
@@ -494,18 +557,18 @@ if [[ "$AUTHENTICATED" == "true" ]]; then
             result=0
             capture_authenticated_screenshot "$page_name" "$url" "$BASELINE_DIR" || result=$?
             case $result in
-                0) ((AUTH_CAPTURED++)) ;;
-                1) ((AUTH_FAILED++)) ;;
-                2) ((AUTH_SKIPPED++)) ;;
+                0) ((AUTH_CAPTURED++)) || true ;;
+                1) ((AUTH_FAILED++)) || true ;;
+                2) ((AUTH_SKIPPED++)) || true ;;
             esac
         else
             # Capture current
             result=0
             capture_authenticated_screenshot "$page_name" "$url" "$CURRENT_DIR" || result=$?
             case $result in
-                0) ((AUTH_CAPTURED++)) ;;
-                1) ((AUTH_FAILED++)) ;;
-                2) ((AUTH_SKIPPED++)) ;;
+                0) ((AUTH_CAPTURED++)) || true ;;
+                1) ((AUTH_FAILED++)) || true ;;
+                2) ((AUTH_SKIPPED++)) || true ;;
             esac
         fi
     done
@@ -552,13 +615,13 @@ else
 
         case $result in
             0)
-                ((PASSED++))
+                ((PASSED++)) || true
                 ;;
             1)
-                ((REGRESSIONS++))
+                ((REGRESSIONS++)) || true
                 ;;
             2)
-                ((SKIPPED++))
+                ((SKIPPED++)) || true
                 ;;
         esac
     done
@@ -574,13 +637,13 @@ else
 
             case $result in
                 0)
-                    ((PASSED++))
+                    ((PASSED++)) || true
                     ;;
                 1)
-                    ((REGRESSIONS++))
+                    ((REGRESSIONS++)) || true
                     ;;
                 2)
-                    ((SKIPPED++))
+                    ((SKIPPED++)) || true
                     ;;
             esac
         done
@@ -594,12 +657,16 @@ else
     echo "========================================="
     echo ""
     echo "Total pages:     $TOTAL_PAGES"
+    echo -e "${RED}Capture failed:${NC}  $FAILED_CAPTURE"
     echo -e "${GREEN}Passed:${NC}          $PASSED"
     echo -e "${RED}Regressions:${NC}     $REGRESSIONS"
     echo -e "${YELLOW}Skipped:${NC}         $SKIPPED"
     echo ""
 
-    if [[ $REGRESSIONS -eq 0 ]]; then
+    if [[ $FAILED_CAPTURE -gt 0 ]]; then
+        log_error "$FAILED_CAPTURE screenshot capture(s) failed!"
+        exit 1
+    elif [[ $REGRESSIONS -eq 0 ]]; then
         log_success "No visual regressions detected!"
         echo ""
         echo "AC-UIQ-001 verified: Visual regression suite captures and compares screenshots"

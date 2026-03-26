@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Target URL to test'
+        description: 'Optional target URL override; leave empty to use the env default'
         required: false
-        default: 'https://academyv2.mereka.io'
+        default: ''
       env_scope:
         description: 'SSO canary environment scope'
         required: false
@@ -26,7 +26,7 @@ permissions: {}
 jobs:
   smoke-authenticated:
     runs-on: mereka-k8s-runners
-    timeout-minutes: 10
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -54,11 +54,12 @@ jobs:
           set -euo pipefail
 
           scope="${INPUT_ENV_SCOPE:-prod}"
+          requested_target="${INPUT_TARGET:-}"
           run_smoke=1
 
           case "$scope" in
             ""|prod)
-              target="${INPUT_TARGET:-https://academyv2.mereka.io}"
+              default_target="https://academyv2.mereka.io"
               username="${SMOKE_SSO_USERNAME:-${SSO_CANARY_EMAIL_PROD:-}}"
               password="${SMOKE_SSO_PASSWORD:-${SSO_CANARY_PASSWORD_PROD:-}}"
               lms_domain="academyv2.mereka.io"
@@ -66,7 +67,7 @@ jobs:
               mfe_domain="apps.academyv2.mereka.io"
               ;;
             dev)
-              target="${INPUT_TARGET:-https://academyv2.mereka.dev}"
+              default_target="https://academyv2.mereka.dev"
               username="${SSO_CANARY_EMAIL_DEV:-}"
               password="${SSO_CANARY_PASSWORD_DEV:-}"
               lms_domain="academyv2.mereka.dev"
@@ -74,7 +75,7 @@ jobs:
               mfe_domain="apps.academyv2.mereka.dev"
               ;;
             staging)
-              target="${INPUT_TARGET:-https://staging.academyv2.mereka.io}"
+              default_target="https://staging.academyv2.mereka.io"
               username="${SSO_CANARY_EMAIL_STAGING:-}"
               password="${SSO_CANARY_PASSWORD_STAGING:-}"
               lms_domain="staging.academyv2.mereka.io"
@@ -95,6 +96,8 @@ jobs:
               exit 1
               ;;
           esac
+
+          target="${requested_target:-${default_target:-}}"
 
           {
             echo "run_smoke=$run_smoke"
@@ -127,9 +130,10 @@ jobs:
         if: ${{ steps.resolve-smoke.outputs.run_smoke == '1' }}
         env:
           SMOKE_TARGET: ${{ steps.resolve-smoke.outputs.smoke_target }}
+          SMOKE_MFE_BASE_URL: https://${{ steps.resolve-smoke.outputs.mfe_domain }}
           SSO_USERNAME: ${{ steps.resolve-smoke.outputs.sso_username }}
           SSO_PASSWORD: ${{ steps.resolve-smoke.outputs.sso_password }}
-        run: ./scripts/qa/smoke-authenticated.sh --target "$SMOKE_TARGET"
+        run: ./scripts/qa/smoke-authenticated.sh --target "$SMOKE_TARGET" --mfe-base-url "$SMOKE_MFE_BASE_URL"
 
       - name: Skip multi-environment authenticated smoke
         if: ${{ steps.resolve-smoke.outputs.run_smoke != '1' }}
@@ -143,7 +147,14 @@ jobs:
           LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
           STUDIO_DOMAIN: ${{ steps.resolve-smoke.outputs.studio_domain }}
           MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
-        run: ./scripts/qa/visual-regression-test.sh --env production --authenticated || true
+          DEV_LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
+          DEV_STUDIO_DOMAIN: ${{ steps.resolve-smoke.outputs.studio_domain }}
+          DEV_MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
+          STAGING_LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
+          STAGING_STUDIO_DOMAIN: ${{ steps.resolve-smoke.outputs.studio_domain }}
+          STAGING_MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
+          ENV_SCOPE: ${{ inputs.env_scope }}
+        run: ./scripts/qa/visual-regression-test.sh --env "${ENV_SCOPE}" --authenticated
 
       - name: Sanitize smoke test artifacts
         if: always()
@@ -177,7 +188,7 @@ jobs:
           done
 
       - name: Upload screenshots and logs
-        if: failure()
+        if: ${{ always() && steps.resolve-smoke.outputs.run_smoke == '1' }}
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: smoke-authenticated-artifacts

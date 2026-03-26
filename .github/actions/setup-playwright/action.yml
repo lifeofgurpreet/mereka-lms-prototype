@@ -25,6 +25,19 @@ runs:
         cache: ${{ inputs.npm-cache-dependency-path != '' && 'npm' || '' }}
         cache-dependency-path: ${{ inputs.npm-cache-dependency-path }}
 
+    - name: Install Playwright runtime package
+      shell: bash
+      run: |
+        set -euo pipefail
+        PLAYWRIGHT_NODE_DIR="${RUNNER_TEMP}/playwright-node"
+        rm -rf "$PLAYWRIGHT_NODE_DIR"
+        mkdir -p "$PLAYWRIGHT_NODE_DIR"
+        cd "$PLAYWRIGHT_NODE_DIR"
+        npm init -y >/dev/null 2>&1
+        npm install --no-save "playwright@${{ inputs.playwright-version }}"
+        echo "PLAYWRIGHT_NODE_PATH=$PLAYWRIGHT_NODE_DIR/node_modules" >> "$GITHUB_ENV"
+        echo "PLAYWRIGHT_IMPORT_SPEC=file://$PLAYWRIGHT_NODE_DIR/node_modules/playwright/index.mjs" >> "$GITHUB_ENV"
+
     - name: Cache Playwright browsers
       id: playwright-cache
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4
@@ -35,4 +48,7 @@ runs:
     - name: Install Playwright Chromium
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       shell: bash
-      run: npx playwright@${{ inputs.playwright-version }} install chromium
+      run: |
+        set -euo pipefail
+        cd "${RUNNER_TEMP}/playwright-node"
+        npx playwright install chromium

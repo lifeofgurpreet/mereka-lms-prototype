@@ -24,17 +24,58 @@ FAIL_COUNT=0
 WARN_COUNT=0
 
 TARGET="${SMOKE_TARGET:-https://academyv2.mereka.io}"
+SMOKE_MFE_BASE_URL="${SMOKE_MFE_BASE_URL:-}"
+
+resolve_playwright_import_spec() {
+  if [[ -n "${PLAYWRIGHT_IMPORT_SPEC:-}" ]]; then
+    printf '%s' "${PLAYWRIGHT_IMPORT_SPEC}"
+    return 0
+  fi
+
+  local repo_playwright="${REPO_ROOT}/tests/e2e/node_modules/playwright/index.mjs"
+  if [[ -f "$repo_playwright" ]]; then
+    printf 'file://%s' "$repo_playwright"
+    return 0
+  fi
+
+  printf 'playwright'
+}
+
+PLAYWRIGHT_IMPORT_SPEC_RESOLVED="$(resolve_playwright_import_spec)"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target) TARGET="$2"; shift 2 ;;
+    --mfe-base-url) SMOKE_MFE_BASE_URL="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
 
+target_origin="${TARGET%/}"
+target_host="${target_origin#*://}"
+target_host="${target_host%%/*}"
+
+if [[ -z "$SMOKE_MFE_BASE_URL" ]]; then
+  case "$target_host" in
+    academyv2.mereka.io) SMOKE_MFE_BASE_URL="https://apps.academyv2.mereka.io" ;;
+    academyv2.mereka.dev) SMOKE_MFE_BASE_URL="https://apps.academyv2.mereka.dev" ;;
+    staging.academyv2.mereka.io) SMOKE_MFE_BASE_URL="https://staging.apps.academyv2.mereka.io" ;;
+  esac
+fi
+
+LOGIN_PAGE_URL="${target_origin}/login"
+OIDC_LOGIN_URL="${target_origin}/auth/login/oidc/"
+MFE_BASE_URL="${SMOKE_MFE_BASE_URL%/}"
+LEARNER_DASHBOARD_URL="${MFE_BASE_URL:-$target_origin}/learner-dashboard"
+ACCOUNT_SETTINGS_URL="${MFE_BASE_URL:-$target_origin}/account/"
+LEARNING_URL="${MFE_BASE_URL:-$target_origin}/learning"
+
 echo -e "${BLUE}=== Authenticated Smoke Tests ===${NC}"
-echo -e "Target: ${TARGET}"
+echo -e "Target: ${target_origin}"
+if [[ -n "$MFE_BASE_URL" ]]; then
+  echo -e "MFE base: ${MFE_BASE_URL}"
+fi
 echo ""
 
 pass() {
@@ -74,11 +115,19 @@ else
   pass "SSO_PASSWORD configured"
 fi
 
-# Check playwright available
-if command -v npx &>/dev/null; then
-  pass "npx available"
+# Check node available
+if command -v node &>/dev/null; then
+  pass "node available"
 else
-  fail "npx not found — Playwright needs Node.js"
+  fail "node not found — Playwright needs Node.js"
+  exit 1
+fi
+
+# Check Playwright import is resolvable before running the temp script
+if PLAYWRIGHT_IMPORT_SPEC="$PLAYWRIGHT_IMPORT_SPEC_RESOLVED" node -e "import(process.env.PLAYWRIGHT_IMPORT_SPEC || 'playwright').then(() => process.exit(0)).catch(() => process.exit(1))"; then
+  pass "Playwright runtime available"
+else
+  fail "Playwright runtime not available (set PLAYWRIGHT_IMPORT_SPEC or install tests/e2e dependencies)"
   exit 1
 fi
 
@@ -91,7 +140,7 @@ echo ""
 echo -e "${BLUE}## Unauthenticated Health Checks${NC}"
 
 # LMS responds
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${TARGET}/" 2>/dev/null || echo "000")
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${target_origin}/" 2>/dev/null || echo "000")
 if [[ "$HTTP_STATUS" =~ ^(200|301|302)$ ]]; then
   pass "LMS responds (HTTP ${HTTP_STATUS})"
 else
@@ -99,7 +148,7 @@ else
 fi
 
 # Login page accessible
-LOGIN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${TARGET}/authn/login" 2>/dev/null || echo "000")
+LOGIN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${LOGIN_PAGE_URL}" 2>/dev/null || echo "000")
 if [[ "$LOGIN_STATUS" =~ ^(200|301|302)$ ]]; then
   pass "Login page accessible (HTTP ${LOGIN_STATUS})"
 else
@@ -127,92 +176,139 @@ PLAYWRIGHT_SCRIPT=$(mktemp /tmp/smoke-auth-XXXXXX.mjs)
 trap 'rm -f "$PLAYWRIGHT_SCRIPT"' EXIT
 
 cat > "$PLAYWRIGHT_SCRIPT" << 'PLAYWRIGHT_EOF'
-import { chromium } from 'playwright';
-
-const TARGET = process.env.SMOKE_TARGET || 'https://academyv2.mereka.io';
+const TARGET = (process.env.SMOKE_TARGET || 'https://academyv2.mereka.io').replace(/\/$/, '');
 const SSO_USERNAME = process.env.SSO_USERNAME;
 const SSO_PASSWORD = process.env.SSO_PASSWORD;
+const MFE_BASE_URL = (process.env.SMOKE_MFE_BASE_URL || '').replace(/\/$/, '');
+const playwrightImportSpec = process.env.PLAYWRIGHT_IMPORT_SPEC || 'playwright';
+const LOGIN_PAGE_URL = `${TARGET}/login`;
+const OIDC_LOGIN_URL = `${TARGET}/auth/login/oidc/`;
+const LEARNER_DASHBOARD_URL = `${MFE_BASE_URL || TARGET}/learner-dashboard`;
+const ACCOUNT_SETTINGS_URL = `${MFE_BASE_URL || TARGET}/account/`;
+const LEARNING_URL = `${MFE_BASE_URL || TARGET}/learning`;
 
 const results = [];
 
 function pass(msg) { results.push({ status: 'PASS', msg }); }
 function fail(msg) { results.push({ status: 'FAIL', msg }); }
 
+async function clickPrimaryAction(page, fallbackLabel) {
+  const buttonLabels = [/log in/i, /sign in/i, /continue/i, /next/i];
+  for (const label of buttonLabels) {
+    try {
+      await page.getByRole('button', { name: label }).first().click({ timeout: 10000 });
+      return;
+    } catch (_) {}
+  }
+
+  const submitButton = await page.$('button[type="submit"]');
+  if (submitButton) {
+    await submitButton.click();
+    return;
+  }
+
+  await page.keyboard.press('Enter');
+  if (fallbackLabel) {
+    pass(`${fallbackLabel} submitted via Enter`);
+  }
+}
+
+async function fillFirstVisible(page, selectors, value, label) {
+  for (const sel of selectors) {
+    const locator = page.locator(sel).first();
+    try {
+      await locator.waitFor({ state: 'visible', timeout: 10000 });
+      await locator.fill(value, { timeout: 10000 });
+      pass(`${label} field found and filled`);
+      return true;
+    } catch (_) {}
+  }
+  fail(`Could not find ${label.toLowerCase()} field`);
+  return false;
+}
+
 async function main() {
+  const { chromium } = await import(playwrightImportSpec);
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ ignoreHTTPSErrors: true });
   const page = await context.newPage();
 
   try {
-    // Step 1: Navigate to login
-    await page.goto(`${TARGET}/authn/login`, { waitUntil: 'networkidle', timeout: 30000 });
+    const loginPageResponse = await page.goto(LOGIN_PAGE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const loginPageUrl = page.url();
+    if (loginPageResponse && loginPageResponse.status() < 500 && loginPageUrl.includes('/authn/login')) {
+      pass('LMS login entrypoint redirects to authn MFE');
+    } else {
+      fail(`Unexpected LMS login entrypoint result: status=${loginPageResponse ? loginPageResponse.status() : 'none'} url=${loginPageUrl}`);
+    }
 
-    // Step 2: Check if redirected to SSO/Authentik
+    await page.goto(OIDC_LOGIN_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+
     const loginUrl = page.url();
-    if (loginUrl.includes('authentik') || loginUrl.includes('auth') || loginUrl.includes('login')) {
+    if (
+      loginUrl.includes('auth0') ||
+      loginUrl.includes('authentik') ||
+      loginUrl.includes('/if/flow/') ||
+      loginUrl.includes('/auth/login/oidc') ||
+      loginUrl.includes('login')
+    ) {
       pass('Redirected to SSO login');
     } else {
       fail(`Unexpected login URL: ${loginUrl}`);
     }
 
-    // Step 3: Fill credentials
-    // Try common SSO login selectors
-    const usernameSelectors = ['#id_uid_field', 'input[name="uidField"]', 'input[name="username"]', 'input[type="email"]'];
-    let filled = false;
-    for (const sel of usernameSelectors) {
-      const el = await page.$(sel);
-      if (el) {
-        await el.fill(SSO_USERNAME);
-        filled = true;
-        break;
-      }
-    }
-    if (filled) {
-      pass('Username field found and filled');
-    } else {
-      fail('Could not find username field');
-      throw new Error('Login form not found');
+    const usernameReady = await fillFirstVisible(
+      page,
+      [
+        'input[placeholder="Email or Username"]',
+        '#id_uid_field',
+        'input[name="uidField"]',
+        'input[name="username"]',
+        'input[type="email"]',
+      ],
+      SSO_USERNAME,
+      'Username',
+    );
+    if (!usernameReady) {
+      throw new Error('SSO username field not found');
     }
 
-    // Submit username (Authentik has 2-step login)
-    const submitBtn = await page.$('button[type="submit"]');
-    if (submitBtn) await submitBtn.click();
-    await page.waitForTimeout(2000);
+    await clickPrimaryAction(page);
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(1500);
 
-    // Fill password
-    const passwordSelectors = ['#id_password', 'input[name="password"]', 'input[type="password"]'];
-    filled = false;
-    for (const sel of passwordSelectors) {
-      const el = await page.$(sel);
-      if (el) {
-        await el.fill(SSO_PASSWORD);
-        filled = true;
-        break;
-      }
-    }
-    if (filled) {
-      pass('Password field found and filled');
-    } else {
-      fail('Could not find password field');
-      throw new Error('Password field not found');
+    const passwordReady = await fillFirstVisible(
+      page,
+      [
+        'input[placeholder="Password"]',
+        '#id_password',
+        'input[name="password"]',
+        'input[type="password"]',
+      ],
+      SSO_PASSWORD,
+      'Password',
+    );
+    if (!passwordReady) {
+      throw new Error('SSO password field not found');
     }
 
-    // Submit login
-    const loginBtn = await page.$('button[type="submit"]');
-    if (loginBtn) await loginBtn.click();
+    await clickPrimaryAction(page);
+    await page.waitForURL(
+      url => !/auth0|authentik|\/if\/flow\/|\/auth\/login\/oidc|\/authn\/login|\/login\b/i.test(url),
+      { timeout: 60000 },
+    ).catch(() => {});
     await page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
 
-    // Step 4: Verify authenticated
     const postLoginUrl = page.url();
-    if (!postLoginUrl.includes('authentik') && !postLoginUrl.includes('login')) {
+    if (!/auth0|authentik|\/if\/flow\/|\/auth\/login\/oidc|\/authn\/login|\/login\b/i.test(postLoginUrl)) {
       pass('Login completed — no longer on auth page');
     } else {
       fail(`Still on login page after auth: ${postLoginUrl}`);
     }
 
-    // Step 5: Check dashboard
-    await page.goto(`${TARGET}/learner-dashboard/`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(LEARNER_DASHBOARD_URL, { waitUntil: 'networkidle', timeout: 30000 });
     const dashStatus = page.url();
     if (!dashStatus.includes('login') && !dashStatus.includes('authn')) {
       pass('Learner dashboard accessible (authenticated)');
@@ -220,8 +316,7 @@ async function main() {
       fail('Learner dashboard redirected to login');
     }
 
-    // Step 6: Check account settings
-    await page.goto(`${TARGET}/account/`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(ACCOUNT_SETTINGS_URL, { waitUntil: 'networkidle', timeout: 30000 });
     const accountStatus = page.url();
     if (!accountStatus.includes('login') && !accountStatus.includes('authn')) {
       pass('Account settings accessible (authenticated)');
@@ -229,8 +324,7 @@ async function main() {
       fail('Account settings redirected to login');
     }
 
-    // Step 7: Check course player (just verify it doesn't 500)
-    const courseResponse = await page.goto(`${TARGET}/learning/`, { waitUntil: 'networkidle', timeout: 30000 });
+    const courseResponse = await page.goto(LEARNING_URL, { waitUntil: 'networkidle', timeout: 30000 });
     if (courseResponse && courseResponse.status() < 500) {
       pass(`Course player responds (HTTP ${courseResponse.status()})`);
     } else {
@@ -243,21 +337,24 @@ async function main() {
     await browser.close();
   }
 
-  // Output results as JSON
   console.log(JSON.stringify(results));
 }
 
 main().catch(err => {
   console.log(JSON.stringify([{ status: 'FAIL', msg: `Fatal: ${err.message}` }]));
-  process.exit(0); // Don't fail process — let bash handle
+  process.exit(0);
 });
 PLAYWRIGHT_EOF
 
 # Run Playwright
-PLAYWRIGHT_OUTPUT=$(SMOKE_TARGET="${TARGET}" SSO_USERNAME="${SSO_USERNAME}" SSO_PASSWORD="${SSO_PASSWORD}" \
-  npx playwright test --config=/dev/null "$PLAYWRIGHT_SCRIPT" 2>/dev/null || \
-  node "$PLAYWRIGHT_SCRIPT" 2>/dev/null || \
-  echo '[]')
+PLAYWRIGHT_OUTPUT=$(
+  SMOKE_TARGET="${TARGET}" \
+  SMOKE_MFE_BASE_URL="${MFE_BASE_URL}" \
+  SSO_USERNAME="${SSO_USERNAME}" \
+  SSO_PASSWORD="${SSO_PASSWORD}" \
+  PLAYWRIGHT_IMPORT_SPEC="${PLAYWRIGHT_IMPORT_SPEC_RESOLVED}" \
+  node "$PLAYWRIGHT_SCRIPT" 2>/dev/null || true
+)
 
 # Parse results
 if echo "$PLAYWRIGHT_OUTPUT" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
@@ -278,7 +375,8 @@ for r in results:
   PASS_COUNT=$((PASS_COUNT + PW_PASS))
   FAIL_COUNT=$((FAIL_COUNT + PW_FAIL))
 else
-  warn "Playwright output not parseable — skipping authenticated checks"
+  fail "Playwright output not parseable — authenticated checks did not produce structured results"
+  FAIL_COUNT=$((FAIL_COUNT + 1))
 fi
 
 echo ""
