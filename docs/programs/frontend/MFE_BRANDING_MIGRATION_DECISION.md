@@ -500,8 +500,9 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
 1. Discover slot    → check MFE source for <PluginSlot> components
                       or run: grep -r "PluginSlot" node_modules/@openedx/*/src/
 2. Inject config    → add PLUGIN_SLOTS entry in Tutor plugin (mereka_lms.py)
-3. Rebuild image    → tutor images build mfe
-4. Deploy           → tutor k8s restart mfe (or kubectl rollout restart)
+3. Local parity     → tutor images build mfe
+4. Shared env       → publish via .github/workflows/build-tutor-images.yml
+                      then promote with release-openedx-gitops.sh --require-digests
 5. Verify           → curl the MFE route, confirm component renders
 ```
 

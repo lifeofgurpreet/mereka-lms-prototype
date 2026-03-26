@@ -211,9 +211,10 @@ grep -oE "url\(['\"]?[^)'\"]+\.(woff2?|ttf|eot|otf)['\"]?\)" \
 Any relative reference that does not resolve within the theme directory is
 flagged as a broken asset reference.
 
-### Production Build Guard
+### Build-Time Guard
 
-After `tutor images build openedx`, run:
+For local parity after `tutor images build openedx`, or in the shared-image build
+context before promotion, run:
 
 ```bash
 # Verify static asset collection succeeded (no SuspiciousFileOperation):

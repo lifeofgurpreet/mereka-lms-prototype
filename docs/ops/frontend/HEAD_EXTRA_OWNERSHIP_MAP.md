@@ -173,9 +173,10 @@ Not in `_custom.scss`. Required for the logged-in learner dashboard.
 
 ---
 
-## Cleanup Checklist (After Next Image Build)
+## Cleanup Checklist (After Next Governed Open edX Publish + Rollout)
 
-After `tutor images build openedx` + deploy:
+After the next governed Open edX image publish and runtime rollout
+(`.github/workflows/build-tutor-images.yml` plus GitOps promotion):
 
 - [ ] Remove Block 3 (nav buttons — `DUPE_SCSS`)
 - [ ] Remove Block 4 (border-bottom — `DUPE_SCSS`)
