@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import json
 import logging
 import os
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urlsplit
 
 _log = logging.getLogger(__name__)
@@ -47,6 +47,9 @@ _FALLBACK_MFE_PATH_PREFIXES = (
 _LOGIN_SESSION_PATHS = (
     "/api/user/v1/account/login_session/",
     "/api/user/v2/account/login_session/",
+)
+_MFE_CONFIG_PATHS = (
+    "/api/mfe_config/v1",
 )
 
 
@@ -335,6 +338,30 @@ def _rewrite_redirect_url_to_tenant_mfe(host: str, redirect_url: str) -> str:
     return rewritten
 
 
+def _rewrite_mfe_config_value_to_tenant_mfe(host: str, value: Any) -> Any:
+    """
+    Rewrite a single MFE-config value onto the tenant's MFE origin when needed.
+
+    Only absolute MFE-owned URLs should move. Host-only values like BASE_URL and
+    non-MFE service URLs such as discovery remain unchanged.
+    """
+    if not isinstance(value, str) or not value:
+        return value
+    if "://" not in value:
+        return value
+    return _rewrite_redirect_url_to_tenant_mfe(host, value)
+
+
+def _rewrite_mfe_config_payload_to_tenant_mfe(host: str, payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Rewrite MFE-owned URLs in /api/mfe_config/v1 responses for branded tenants.
+    """
+    rewritten = dict(payload)
+    for key, value in payload.items():
+        rewritten[key] = _rewrite_mfe_config_value_to_tenant_mfe(host, value)
+    return rewritten
+
+
 class MerekaLoginRedirectMiddleware:
     """
     Rewrite LMS auth redirects to the tenant's MFE surface.
@@ -350,6 +377,8 @@ class MerekaLoginRedirectMiddleware:
     - successful login_session JSON responses and rewrites redirect_url when
       Open edX returns an MFE deep route on the LMS host instead of the
       tenant's apps host.
+    - successful /api/mfe_config/v1 JSON responses and rewrites MFE-owned URLs
+      when they still point at the global apps host instead of the tenant host.
     """
 
     def __init__(self, get_response):
@@ -364,6 +393,9 @@ class MerekaLoginRedirectMiddleware:
 
         if path in _LOGIN_SESSION_PATHS:
             return self._rewrite_login_session_response(host, response)
+
+        if path in _MFE_CONFIG_PATHS:
+            return self._rewrite_mfe_config_response(host, response)
 
         if path != "/login":
             return response
@@ -411,4 +443,27 @@ class MerekaLoginRedirectMiddleware:
         if hasattr(response, "__setitem__"):
             response["Content-Length"] = str(len(response.content))
         _log.info("MerekaLoginSessionRedirect: %s -> %s (host=%s)", redirect_url, new_redirect, host)
+        return response
+
+    def _rewrite_mfe_config_response(self, host: str, response):
+        if getattr(response, "status_code", 0) != 200:
+            return response
+        if not hasattr(response, "content"):
+            return response
+
+        try:
+            payload = json.loads(response.content.decode("utf-8"))
+        except Exception:
+            return response
+        if not isinstance(payload, dict):
+            return response
+
+        rewritten = _rewrite_mfe_config_payload_to_tenant_mfe(host, payload)
+        if rewritten == payload:
+            return response
+
+        response.content = json.dumps(rewritten).encode("utf-8")
+        if hasattr(response, "__setitem__"):
+            response["Content-Length"] = str(len(response.content))
+        _log.info("MerekaMFEConfigRewrite: host=%s", host)
         return response

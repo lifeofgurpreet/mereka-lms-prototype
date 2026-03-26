@@ -495,6 +495,84 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
         )
         self.assertEqual(resp.headers, {})
 
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_rewrites_mfe_config_urls_to_tenant_mfe(self, mock_mfe, mock_patch):
+        """MFE config deep routes should follow the branded tenant apps host."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        def get_response(request):
+            return self._FakeJsonResponse(
+                {
+                    "BASE_URL": "apps.staging.academy.biji-biji.com",
+                    "AUTHN_MICROFRONTEND_URL": "https://staging.apps.academyv2.mereka.io/authn",
+                    "COURSE_AUTHORING_MICROFRONTEND_URL": "https://staging.apps.academyv2.mereka.io/authoring",
+                    "LEARNING_BASE_URL": "https://staging.apps.academyv2.mereka.io/learning",
+                    "ACCOUNT_PROFILE_URL": "https://staging.apps.academyv2.mereka.io/u/",
+                    "DISCOVERY_API_BASE_URL": "https://staging.discovery.academyv2.mereka.io",
+                    "CREDENTIALS_BASE_URL": "",
+                }
+            )
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request(
+            "apps.staging.academy.biji-biji.com",
+            path="/api/mfe_config/v1",
+        )
+        resp = mw(req)
+
+        payload = json.loads(resp.content.decode("utf-8"))
+        self.assertEqual(payload["BASE_URL"], "apps.staging.academy.biji-biji.com")
+        self.assertEqual(
+            payload["AUTHN_MICROFRONTEND_URL"],
+            "https://apps.staging.academy.biji-biji.com/authn",
+        )
+        self.assertEqual(
+            payload["COURSE_AUTHORING_MICROFRONTEND_URL"],
+            "https://apps.staging.academy.biji-biji.com/authoring",
+        )
+        self.assertEqual(
+            payload["LEARNING_BASE_URL"],
+            "https://apps.staging.academy.biji-biji.com/learning",
+        )
+        self.assertEqual(
+            payload["ACCOUNT_PROFILE_URL"],
+            "https://apps.staging.academy.biji-biji.com/u/",
+        )
+        self.assertEqual(
+            payload["DISCOVERY_API_BASE_URL"],
+            "https://staging.discovery.academyv2.mereka.io",
+        )
+        self.assertEqual(payload["CREDENTIALS_BASE_URL"], "")
+        self.assertEqual(resp.headers["Content-Length"], str(len(resp.content)))
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_mfe_config_keeps_already_tenant_correct_urls(self, mock_mfe, mock_patch):
+        """Tenant-correct MFE config values should not be touched."""
+        mock_mfe.return_value = "https://apps.staging.skillourfuture.academy.mereka.io"
+        original_payload = {
+            "AUTHN_MICROFRONTEND_URL": "https://apps.staging.skillourfuture.academy.mereka.io/authn",
+            "COURSE_AUTHORING_MICROFRONTEND_URL": "https://apps.staging.skillourfuture.academy.mereka.io/authoring",
+            "LEARNING_BASE_URL": "https://apps.staging.skillourfuture.academy.mereka.io/learning",
+            "ACCOUNT_PROFILE_URL": "https://apps.staging.skillourfuture.academy.mereka.io/u/",
+            "DISCOVERY_API_BASE_URL": "https://staging.discovery.academyv2.mereka.io",
+        }
+
+        def get_response(request):
+            return self._FakeJsonResponse(original_payload)
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request(
+            "apps.staging.skillourfuture.academy.mereka.io",
+            path="/api/mfe_config/v1",
+        )
+        resp = mw(req)
+
+        payload = json.loads(resp.content.decode("utf-8"))
+        self.assertEqual(payload, original_payload)
+        self.assertEqual(resp.headers, {})
+
 
 class TestDomainFromEnvValue(unittest.TestCase):
     def test_plain_domain(self):
