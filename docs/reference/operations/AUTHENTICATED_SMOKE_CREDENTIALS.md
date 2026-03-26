@@ -1,5 +1,5 @@
 # Authenticated Smoke Credentials Reference
-_Audience: Platform Operators • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Platform Operators • Owner: Platform Team • Last verified: 2026-03-26 • Status: canonical_
 
 This reference records how authenticated smoke credentials are handled.
 
@@ -17,6 +17,7 @@ This reference records how authenticated smoke credentials are handled.
 - authenticated visual smoke and screenshot capture
 - SSO canary verification
 - post-login regression checks for learner and operator surfaces
+- canonical staging proof lanes wire `env_scope=staging` through `.github/workflows/smoke-authenticated.yml` while keeping credentials env-injected
 
 ## Read next
 

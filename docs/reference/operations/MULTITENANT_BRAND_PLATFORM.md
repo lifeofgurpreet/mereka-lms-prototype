@@ -1,8 +1,10 @@
 # Multitenant Brand Platform
 
-_Audience: Platform Engineering + Tenant Operations • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Platform Engineering + Tenant Operations • Owner: Platform Team • Last verified: 2026-03-26 • Status: canonical_
 
 This document is the operational reference for the Mereka LMS multi-tenant brand platform. It covers the brand config model, runtime fallback rules, per-tenant smoke paths, contract test strategy, the SkillOurFuture migration guide, and governance policy.
+
+Current runtime note: live staging still shows the deployment lag from the merged app/runtime work, so `/api/mfe_config/v1` leakage and tenant CSS mismatch remain live until promotion catches up. That is a deployment-state issue, not a contract-model issue.
 
 ---
 

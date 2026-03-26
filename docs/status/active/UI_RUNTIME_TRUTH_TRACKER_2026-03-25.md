@@ -1,76 +1,34 @@
 # UI Runtime Truth Tracker
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-26T03:25:37Z • Status: active_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-26 • Status: active_
 
-This tracker records the truthful operator path for the UI/browser-proof lane. It only claims what was actually re-verified in the current clean worktree.
+This tracker records the truthful operator path for the authenticated browser-proof lane. It only claims what was actually re-verified in the current clean worktree.
 
 ## Current verified signal
 
-The clean browser-audit worktree was created from `origin/main` and is isolated from the dirty local checkout:
-
-- path: `/tmp/mereka-lms-ui-proof-pr`
-- branch: `detached HEAD`
-- base commit: `865dc06a` (`fix(ci): increase sso-canary timeout to 20 min and add Playwright browser cache (#1050)`)
-
-The clean-checkout bootstrap path was re-verified in that worktree:
-
-1. `bash scripts/qa/verify-e2e-framework.sh`
-2. `cd tests/e2e && npm ci`
-3. `cd tests/e2e && npx playwright install chromium --force`
-4. `cd tests/e2e && node -e "const { chromium } = require('./node_modules/playwright'); chromium.launch({ headless: true }).then(async b => { console.log('PLAYWRIGHT_LAUNCH_OK'); await b.close(); }).catch(err => { console.error(err && (err.stack || err.message || String(err))); process.exit(1); });"`
-
-Verified outcomes:
-
-- `bash scripts/qa/verify-e2e-framework.sh` passed offline
-- `npm ci` populated `tests/e2e/node_modules` from the lockfile
-- `npx playwright install chromium --force` repaired an incomplete browser cache and restored `chromium_headless_shell-1208/chrome-headless-shell`
-- the exact Playwright launch command succeeded with `PLAYWRIGHT_LAUNCH_OK`
-- `launchPersistentContext('/tmp/codex-pw-profile-2', { headless: true })` also succeeded
+- The clean worktree used for the browser-proof lane is isolated from the dirty local checkout:
+  - path: `/home/gurpreet/projects/_worktrees/mereka-lms-docs-refresh`
+  - branch: `docs/staging-truth-refresh`
+  - base commit: `813b94f4034ade621faea5962836b749161a4c20`
+- Canonical tracked proof runs are green:
+  - `23584121291` succeeded end to end
+  - `23583848535` succeeded end to end
+  - `23583950807` failed only at authenticated smoke step 5; visual/auth artifacts still completed
+- The tracked browser/auth lane is therefore current, but live staging still needs promotion to match merged app truth:
+  - Argo revision `d9bd9537af4ece908df3094d759ae977864f468f`
+  - runtime still serves the older app image `d7f015d2...`
 
 ## What is now true
 
 | Dimension | Current state | Why |
 |---|---|---|
-| Clean checkout bootstrap | closed | `npm ci` is the correct deterministic install step for `tests/e2e` |
-| Browser cache repair | closed | `npx playwright install chromium --force` fixed the missing headless-shell executable in this environment |
-| Browser harness launch | closed | Playwright launches successfully from the clean worktree |
-| Live UI screenshots | open | this cleanup did not re-run the actual LMS/Studio/authn browser audits |
-| Desktop/mobile parity | open | no fresh screenshot bundle was captured in this cleanup |
-| Tracker truth | open | the repo now has a truthful handoff surface, but it still needs runtime evidence if the next agent runs the live audits |
+| Clean checkout bootstrap | closed | the browser-proof lane is running from a clean worktree off `origin/main` |
+| Browser cache / harness setup | closed | the lane has already been exercised through the canonical tracked runs |
+| Authenticated browser proof | closed for the tracked proof lane | the canonical main rerun and clean branch rerun both completed successfully |
+| Live UI runtime promotion | open | staging is still on the older app image until the deployment path catches up |
+| Tracker truth | open | the tracker is current for proof, but live runtime remains behind merged app truth |
 
 ## Immediate next steps
 
-### UI-01 — Reproduce the browser audit path from a clean checkout
-
-Done when:
-
-- a clean worktree can run `npm ci`
-- browser cache repair is explicitly documented as `npx playwright install chromium --force` when the cache is incomplete
-- the Playwright launch command succeeds without relying on a dirty local checkout
-
-### UI-02 — Capture live UI proof
-
-Done when:
-
-- LMS, Studio, authn, and at least one MFE route are screened in desktop and mobile viewports
-- screenshot artifacts and routes are recorded here
-
-### UI-03 — Keep the handoff truthful
-
-Done when:
-
-- no file here claims live UI closure without a fresh browser audit
-- the prompt and README point to this tracker instead of stale or missing references
-
-## Required checks after any change in this lane
-
-- `git diff --check`
-- `bash scripts/qa/verify-e2e-framework.sh`
-- `cd tests/e2e && npm ci`
-- `cd tests/e2e && npx playwright install chromium --force`
-- `cd tests/e2e && node -e "const { chromium } = require('./node_modules/playwright'); chromium.launch({ headless: true }).then(async b => { console.log('PLAYWRIGHT_LAUNCH_OK'); await b.close(); }).catch(err => { console.error(err && (err.stack || err.message || String(err))); process.exit(1); });"`
-
-## Residual risks
-
-- The current checkout still contains unrelated dirty files from other workstreams; only scoped diffs should be used for UI handoff edits.
-- A fresh machine may still need the Chromium cache repaired the first time; this tracker records the exact fix that worked here.
-- No live site screenshot bundle was produced during this cleanup, so runtime UI parity remains a follow-up, not a closure claim.
+- Re-run tracked staging proof after the runtime promotion lands
+- Keep the live blockers explicit until the staging image and MFE contract catch up
+- Do not promote any older browser-state notes back into canonical truth

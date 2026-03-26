@@ -1,5 +1,5 @@
 # Visual Smoke Baseline
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-26 • Status: active_
 
 **Bead**: mereka-lms-115d.15
 **Covers**: AC-VIS-001, AC-VIS-002, AC-VIS-003, AC-VIS-004
@@ -13,6 +13,8 @@ contract for the 5 critical MFE flows in Mereka Academy. It extends the
 existing unauthenticated visual regression infrastructure (described in
 `VISUAL_REGRESSION_RUNBOOK.md`) to cover post-login pages that require a
 valid session cookie.
+
+> Current proof status: canonical tracked staging proof runs `23584121291` and `23583848535` both succeeded end to end; the earlier `23583950807` failure was a target wiring issue, not a baseline contract failure.
 
 ## 5 Critical MFE Routes (AC-VIS-002)
 

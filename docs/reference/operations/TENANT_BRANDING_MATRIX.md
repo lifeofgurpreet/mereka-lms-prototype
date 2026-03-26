@@ -1,7 +1,7 @@
 # Tenant Branding Matrix
 
 > **Bead**: mereka-lms-115d.9
-> **Last updated**: 2026-02-18
+> **Last updated**: 2026-03-26
 > **Canonical code**: `infrastructure/tutor/plugins/mereka_lms.py` — `SITE_VARIANTS` map (~line 671)
 
 ---
@@ -20,6 +20,9 @@
 - WhatsApp number is currently identical for all domains — update per-domain if required.
 - Per-domain CSS token override is a planned Phase 3 enhancement (see Override Inheritance Model below).
 - The fallback row applies to any hostname not listed above (localhost, staging, unknown domains).
+
+**Current runtime note**:
+- Live staging still serves the older app image until promotion catches up, so tenant authn can still show default `mereka-brand*.css` on the staging surface even though the matrix itself is correct.
 
 ---
 

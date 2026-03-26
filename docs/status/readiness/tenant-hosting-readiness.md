@@ -1,9 +1,11 @@
 # Tenant Hosting Readiness
 
 > **Bead**: mereka-lms-jptf
-> **Date**: 2026-02-18
+> **Date**: 2026-03-26
 > **Cluster**: gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
 > **Spec**: AC-OPS-201..205
+>
+> **Current staging truth**: staging now uses the canonical `staging.<service>.academyv2.mereka.io` host family in live runtime, but the app image is still behind merged truth until promotion catches up.
 
 ## 1. Authoritative Domain and Contract Map (AC-OPS-201)
 
@@ -23,7 +25,7 @@
 | Biji-Biji | `studio.academy.biji-biji.com` | CMS/Studio | GKE prod | ✅ Active | Let's Encrypt |
 | Biji-Biji | `apps.academy.biji-biji.com` | MFE | GKE prod | ✅ Active | Let's Encrypt |
 | **Skill of Future** (sub-tenant) | `skillourfuture.academy.mereka.io` | LMS | GKE prod | ✅ Active | Let's Encrypt |
-| **Staging** (RKE2) | `*.staging.mereka.dev` (planned) | All | RKE2 nonprod | 🔴 NOT DEPLOYED | Pending DNS |
+| **Staging** (RKE2) | `staging.<service>.academyv2.mereka.io` | All | RKE2 nonprod | ⚠️ Live runtime, public DNS publication pending | Pending external DNS/TLS publication |
 | **Dev** (Kind) | `*.localhost` | All | Kind | ✅ Active (local only) | Self-signed |
 
 ### Service Behaviour by Domain
@@ -33,7 +35,7 @@
 | `academyv2.mereka.io` | Primary | `studio.academyv2.mereka.io` | `apps.academyv2.mereka.io` | ✅ Included | ✅ Included |
 | `academy.biji-biji.com` | Alt (same LMS pod) | `studio.academy.biji-biji.com` | `apps.academy.biji-biji.com` | ✅ Included | ✅ Included |
 | `skillourfuture.academy.mereka.io` | Sub-tenant (same LMS pod) | Shared Studio | Shared MFE | ✅ Included | ✅ Included |
-| `*.staging.mereka.dev` | TBD (RKE2) | TBD | TBD | ⬜ Not yet added | ⬜ Not yet added |
+| `staging.<service>.academyv2.mereka.io` | Live staging runtime | `staging.studio.academyv2.mereka.io` | `staging.apps.academyv2.mereka.io` | ✅ Included | ✅ Included |
 
 ### Multi-Site Architecture
 
@@ -47,6 +49,15 @@ All domains route to same LMS pod (single-cluster multi-site):
 ```
 
 Django `django.contrib.sites` + `SiteConfiguration` resolves per-domain branding.
+
+### Current Staging Truth
+
+- Argo revision: `d9bd9537af4ece908df3094d759ae977864f468f`
+- runtime image: `d7f015d2...` is still serving the live staging deployment
+- live blockers remain:
+  - branded `/api/mfe_config/v1` deep-link leakage
+  - tenant authn still loading default `mereka-brand*.css`
+  - public `staging.discovery.academyv2.mereka.io`, `staging.notes.academyv2.mereka.io`, `staging.credentials.academyv2.mereka.io`, `staging.admin.academyv2.mereka.io`, and `staging.learner.academyv2.mereka.io` unresolved from this environment
 
 ---
 
@@ -200,7 +211,7 @@ curl -sI https://studio.academyv2.mereka.io | head -1
 | Authentik OIDC | ✅ Running | No action needed |
 | GCP Secret Manager | ✅ Synced | No action needed |
 | Cloudflare DNS | ✅ Active | No action needed |
-| RKE2 staging cluster | ⚠️ Platform ready, LMS not deployed | Optional pre-prod gate |
+| RKE2 staging cluster | ⚠️ Live staging runtime exists; public DNS/TLS publication still pending for the satellite hosts | Optional pre-prod gate |
 
 ---
 

@@ -2,6 +2,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "BASELINE-TRUTH.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
     "owner": "Platform Team",
     "path": "CONTRIBUTING.md",
@@ -20,11 +29,29 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "OPEN-BLOCKERS.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Infra Team",
     "path": "README.md",
     "status": "canonical",
     "type": "index"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "TEMPORARY-PATCHES.md",
+    "status": "supporting",
+    "type": "other"
   },
   {
     "canonical_conflict_group": null,
@@ -488,10 +515,46 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "architecture/AUTHORITY_MATRIX.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "architecture/CONFIGMAP_ROLLOUT_DESIGN.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "architecture/README.md",
     "status": "superseded",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "architecture/SALVAGE_BRANCH_LEDGER.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "architecture/SETTINGS-OWNERSHIP-CONSOLIDATION.md",
+    "status": "supporting",
     "type": "concept"
   },
   {
@@ -617,6 +680,24 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "archive/DEPRECATED_TOOLS_README.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/DURABILITY-CLOSEOUT-D1.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/ENV-PARITY-AUTH-RECURRENCE-ERADICATION.md",
     "status": "archive-candidate",
     "type": "other"
   },
@@ -760,6 +841,33 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "archive/LANE-P1-COLD-STANDBY-CLOSURE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/LANE-P1-FINAL-CLOSURE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/LANE-P2-PROD-WAKE-REHEARSAL.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "archive/LIVE-LMS-APPS-REGRESSION-TRIAGE.md",
     "status": "archive-candidate",
     "type": "other"
@@ -850,6 +958,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "archive/PRE-AUDIT-READINESS-DECISION.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "archive/PRODUCTION_INFRASTRUCTURE_PLAN_LEGACY.md",
     "status": "archive-candidate",
     "type": "other"
@@ -886,6 +1003,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "archive/STUDIO-AUTH-JWT-CLOSURE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "archive/STUDIO_BRANDING_FIX_VERIFIED.md",
     "status": "archive-candidate",
     "type": "other"
@@ -914,6 +1040,33 @@
     "last_verified_or_updated": null,
     "owner": "Infra",
     "path": "archive/TASK3_SES_SETUP_COMPLETE.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/WAVE1-MULTISITE-CANONICALIZATION.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/WAVE2A-OVERLAY-DECOMPOSITION.md",
+    "status": "archive-candidate",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "archive/WAVE2B-AUTH-OVERLAY-DECOMPOSITION.md",
     "status": "archive-candidate",
     "type": "other"
   },
@@ -4043,6 +4196,24 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "evidence/operations/a11y-regression-lane-report.md",
+    "status": "supporting",
+    "type": "evidence"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "evidence/operations/authenticated-smoke-a11y-report.md",
+    "status": "supporting",
+    "type": "evidence"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-05",
     "owner": "Branding Team",
     "path": "evidence/operations/branding-audit-2026-02-05/README.md",
@@ -6122,6 +6293,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/frontend/HEAD_EXTRA_OWNERSHIP_MAP.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "ops/monitoring/README.md",
@@ -6441,6 +6621,15 @@
     "owner": "Platform Team",
     "path": "ops/runbooks/DEPLOY_EVIDENCE_GATES.md",
     "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-20",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/DEV_CONVERGENCE_PROOF_CHECKLIST.md",
+    "status": "canonical",
     "type": "runbook"
   },
   {
@@ -6872,7 +7061,7 @@
     "last_verified_or_updated": "2026-03-15",
     "owner": "Platform Team",
     "path": "ops/runbooks/PROD_PARKED_MODE.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "runbook"
   },
   {
@@ -7157,7 +7346,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "ops/runbooks/VISUAL_SMOKE_BASELINE.md",
     "status": "supporting",
@@ -7787,7 +7976,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-24",
+    "last_verified_or_updated": "2026-03-20",
     "owner": "platform-team",
     "path": "policies/operations/BRANCH_PROTECTION.md",
     "status": "canonical",
@@ -8113,6 +8302,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "qa/helpers/summarize-archive-write.py",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "qa/helpers/summarize-catalog-health-fields.py",
     "status": "supporting",
     "type": "other"
@@ -8149,7 +8347,43 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "qa/helpers/summarize-doc-catalog-governance.py",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "qa/helpers/summarize-doc-catalog-residue.py",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "qa/helpers/summarize-doc-orphans.py",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "qa/helpers/summarize-docs-policy.py",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "qa/helpers/summarize-evidence-status-root.py",
     "status": "supporting",
     "type": "other"
   },
@@ -8167,7 +8401,25 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "qa/helpers/summarize-legacy-testmaps-freeze.py",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "qa/helpers/summarize-link-integrity.py",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "qa/helpers/summarize-nonstub-transitional.py",
     "status": "supporting",
     "type": "other"
   },
@@ -8231,6 +8483,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "qa/helpers/summarize-scorecard-trend.py",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "qa/helpers/summarize-transitional-stub.py",
     "status": "supporting",
     "type": "other"
   },
@@ -8903,7 +9164,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md",
     "status": "canonical",
@@ -9002,8 +9263,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-20",
+    "owner": "Platform Team",
     "path": "reference/operations/DOMAIN_MATRIX.md",
     "status": "supporting",
     "type": "other"
@@ -9200,7 +9461,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "reference/operations/MULTITENANT_BRAND_PLATFORM.md",
     "status": "canonical",
@@ -9389,7 +9650,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-27",
+    "last_verified_or_updated": "2026-03-24",
     "owner": null,
     "path": "reference/operations/TENANT_BRANDING_SURFACE_MATRIX.md",
     "status": "supporting",
@@ -9608,6 +9869,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reviews/STABILIZATION_CONTROL_BOARD_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reviews/STAGING_RUNTIME_CONVERGENCE_EVIDENCE.md",
     "status": "supporting",
     "type": "other"
   },
@@ -9929,6 +10199,60 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "Platform Team | Last verified: 2026-03-20 | Status: active",
+    "path": "status/active/DEV_CONVERGENCE_CONTROL.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-20",
+    "owner": "Platform Team",
+    "path": "status/active/DEV_CONVERGENCE_LEDGER.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-20",
+    "owner": "Platform Team",
+    "path": "status/active/DEV_CONVERGENCE_PARKED_ISSUES.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-20",
+    "owner": "Platform Team",
+    "path": "status/active/DEV_CONVERGENCE_RESUME.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/DEV_STAGING_TRUTH_TAKEOVER_PROMPT_2026-03-25.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-26",
+    "owner": "Platform Team",
+    "path": "status/active/DEV_STAGING_TRUTH_TRACKER_2026-03-25.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-08",
     "owner": "Platform Team",
     "path": "status/active/DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md",
@@ -10059,6 +10383,33 @@
     "owner": "Platform Team",
     "path": "status/active/README.md",
     "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-26",
+    "owner": "Platform Team",
+    "path": "status/active/TODAY_WORKLOAD_TRACKER_2026-03-25.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/UI_RUNTIME_TRUTH_TAKEOVER_PROMPT_2026-03-25.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-26",
+    "owner": "Platform Team",
+    "path": "status/active/UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md",
+    "status": "supporting",
     "type": "status"
   },
   {
