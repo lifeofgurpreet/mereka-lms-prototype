@@ -110,6 +110,8 @@ Before enabling Aspects, the following conditions MUST be satisfied:
 
 Execute these steps in order when prerequisites are satisfied:
 
+> Production truth boundary: this document still contains legacy Tutor build/tag/push/apply commands for Aspects. Those commands are useful for local parity and emergency recovery, but they are not the normal production front door. `scripts/infra/deploy-aspects-k8s.sh` is already deprecated and disabled by default, and direct `kubectl apply` should not be treated as the steady-state operator path.
+
 ### Phase 1: Image Build (Local Validation)
 
 **Estimated Time**: 30-45 minutes
@@ -146,7 +148,7 @@ Execute these steps in order when prerequisites are satisfied:
    tutor local stop
    ```
 
-### Phase 2: Production Image Build and Push
+### Phase 2: Legacy Manual Image Path (Debug / Emergency Only)
 
 **Estimated Time**: 45-60 minutes
 
@@ -182,7 +184,7 @@ Execute these steps in order when prerequisites are satisfied:
        newTag: <GIT_SHA>
    ```
 
-### Phase 3: Kubernetes Deployment
+### Phase 3: Legacy Kubernetes Apply Path (Debug / Emergency Only)
 
 **Estimated Time**: 15-30 minutes
 
@@ -200,7 +202,7 @@ Execute these steps in order when prerequisites are satisfied:
    ```
    **Expected Output**: ClickHouse schema initialized, Superset database initialized
 
-3. **Apply K8s manifests** (if not using ArgoCD):
+3. **Apply K8s manifests** (legacy recovery only; not the normal production release path):
    ```bash
    kubectl apply -k deploy/k8s/overlays/production/
    ```
@@ -322,7 +324,7 @@ ls deploy/k8s/base/plugins/aspects/
 - xAPI transformation logic
 - Python dependencies for event processing
 
-**Build Command**:
+**Build Command** (local parity / legacy debug):
 ```bash
 tutor images build aspects
 ```
@@ -339,7 +341,7 @@ tutor images build aspects
 - Open edX SSO integration
 - Python dependencies for visualization
 
-**Build Command**:
+**Build Command** (local parity / legacy debug):
 ```bash
 tutor images build aspects-superset
 ```
@@ -408,7 +410,7 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=ralph --tail=100 -f
 
 ## Rollback Procedure
 
-If issues arise after deployment, execute these steps to disable Aspects:
+If issues arise after deployment, execute these steps to disable Aspects. Treat the commands below as break-glass recovery for the current legacy lane, then reconcile the repo/GitOps state afterward so runtime truth is not left drifting.
 
 ### Immediate Rollback (Emergency)
 
@@ -428,7 +430,7 @@ If issues arise after deployment, execute these steps to disable Aspects:
    ```
    **Expected Output**: No running pods
 
-3. **Disable event routing** (prevents event backlog):
+3. **Disable event routing** (prevents event backlog; legacy emergency path):
    ```bash
    # In tutor_env/config.yml
    # Comment out or remove Aspects event routing config
@@ -442,7 +444,7 @@ If issues arise after deployment, execute these steps to disable Aspects:
 
 1. **Execute immediate rollback steps** (above)
 
-2. **Remove Aspects from plugins**:
+2. **Remove Aspects from plugins** (legacy manual cleanup; follow with repo/GitOps reconciliation):
    ```bash
    # In tutor_env/config.yml
    # Remove 'aspects' from PLUGINS list
