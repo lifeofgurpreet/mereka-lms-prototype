@@ -27,6 +27,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - run: echo "Resolve E2E credential source via SSO_CANARY_EMAIL_PROD and SSO_CANARY_PASSWORD_PROD"
       - run: echo "set should_run output"
       - run: echo "post commit status to /statuses/"
       - run: echo "critical login enroll video forum certificate paths"
@@ -83,6 +84,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - run: echo "Resolve E2E credential source via SSO_CANARY_EMAIL_PROD and SSO_CANARY_PASSWORD_PROD"
       - run: echo "set should_run output"
       - run: echo "post commit status to /statuses/"
       - run: echo "critical login enroll video forum paths"

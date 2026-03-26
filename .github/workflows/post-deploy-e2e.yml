@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       target_url:
-        description: "LMS base URL to test against"
+        description: "LMS base URL to test against (leave blank to use the canonical URL for the selected environment)"
         required: false
-        default: "https://academyv2.mereka.io"
+        default: ""
         type: string
       environment:
         description: "Target environment"
@@ -49,6 +49,13 @@ jobs:
         id: check
         run: |
           set -euo pipefail
+          environment="${{ github.event.inputs.environment || 'production' }}"
+          target_url_input="${{ github.event.inputs.target_url || '' }}"
+          default_target_url="https://academyv2.mereka.io"
+
+          if [[ "$environment" == "staging" ]]; then
+            default_target_url="https://staging.academyv2.mereka.io"
+          fi
 
           # For workflow_run: only run if the triggering workflow succeeded
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
@@ -60,8 +67,9 @@ jobs:
             fi
           fi
 
+          target_url="${target_url_input:-$default_target_url}"
           echo "should_run=true" >> "$GITHUB_OUTPUT"
-          echo "target_url=${{ github.event.inputs.target_url || 'https://academyv2.mereka.io' }}" >> "$GITHUB_OUTPUT"
+          echo "target_url=$target_url" >> "$GITHUB_OUTPUT"
 
   e2e-critical-paths:
     name: E2E Critical Path Tests
@@ -74,9 +82,14 @@ jobs:
       statuses: write
     env:
       BASE_URL: ${{ needs.gate-check.outputs.target_url }}
+      GATE_ENVIRONMENT: ${{ github.event.inputs.environment || 'production' }}
       E2E_USERNAME: ${{ secrets.E2E_TEST_USERNAME }}
       E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_COURSE_ID: ${{ secrets.E2E_TEST_COURSE_ID || vars.E2E_TEST_COURSE_ID }}
+      SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+      SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+      SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+      SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
       PLAYWRIGHT_RETRIES: "1"
     steps:
       - name: Checkout
@@ -92,23 +105,59 @@ jobs:
           set -euo pipefail
           cd tests/e2e && npm ci
 
+      - name: Resolve E2E credential source
+        run: |
+          set -euo pipefail
+          username="${E2E_USERNAME:-}"
+          password="${E2E_PASSWORD:-}"
+          source_label="E2E_TEST_* override"
+
+          if [[ -z "$username" || -z "$password" ]]; then
+            case "${GATE_ENVIRONMENT:-production}" in
+              staging)
+                username="${username:-${SSO_CANARY_EMAIL_STAGING:-}}"
+                password="${password:-${SSO_CANARY_PASSWORD_STAGING:-}}"
+                source_label="SSO_CANARY_*_STAGING fallback"
+                ;;
+              *)
+                username="${username:-${SSO_CANARY_EMAIL_PROD:-}}"
+                password="${password:-${SSO_CANARY_PASSWORD_PROD:-}}"
+                source_label="SSO_CANARY_*_PROD fallback"
+                ;;
+            esac
+          fi
+
+          if [[ -n "$password" ]]; then
+            echo "::add-mask::$password"
+          fi
+
+          {
+            echo "E2E_USERNAME<<EOF"
+            echo "$username"
+            echo "EOF"
+            echo "E2E_PASSWORD<<EOF"
+            echo "$password"
+            echo "EOF"
+            echo "E2E_SECRET_SOURCE=$source_label"
+          } >> "$GITHUB_ENV"
+
       - name: Verify E2E secrets are present
         run: |
           set -euo pipefail
           missing=0
           if [[ -z "${E2E_USERNAME:-}" ]]; then
-            echo "ERROR: E2E_TEST_USERNAME secret not set" >&2
+            echo "ERROR: No E2E username available from E2E_TEST_USERNAME or the selected environment canary fallback" >&2
             missing=1
           fi
           if [[ -z "${E2E_PASSWORD:-}" ]]; then
-            echo "ERROR: E2E_TEST_PASSWORD secret not set" >&2
+            echo "ERROR: No E2E password available from E2E_TEST_PASSWORD or the selected environment canary fallback" >&2
             missing=1
           fi
           if [[ "$missing" -eq 1 ]]; then
-            echo "Set E2E_TEST_USERNAME and E2E_TEST_PASSWORD as repository secrets." >&2
+            echo "Set E2E_TEST_USERNAME/E2E_TEST_PASSWORD overrides or the matching SSO_CANARY_* credentials for the selected environment." >&2
             exit 1
           fi
-          echo "E2E credentials present."
+          echo "E2E credentials present via ${E2E_SECRET_SOURCE:-unknown source}."
 
       - name: Wait for LMS to be healthy
         run: |
@@ -168,6 +217,8 @@ jobs:
             echo "| Field | Value |"
             echo "|-------|-------|"
             echo "| Target URL | $BASE_URL |"
+            echo "| Environment | ${GATE_ENVIRONMENT:-production} |"
+            echo "| Credential Source | ${E2E_SECRET_SOURCE:-unknown} |"
             echo "| Run ID | ${{ github.run_id }} |"
             echo "| Triggered by | ${{ github.event_name }} |"
             echo "| Timestamp | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
@@ -207,8 +258,6 @@ jobs:
 
       - name: Sanitize E2E artifacts
         if: always()
-        env:
-          E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
         run: |
           set -euo pipefail
           for ARTIFACT_DIR in var/e2e-results tests/e2e/test-results; do
@@ -216,7 +265,7 @@ jobs:
             # Remove Playwright traces (contain full network payloads with credentials)
             find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
             # Redact known passwords from text logs using perl (safe with special chars)
-            for secret_var in E2E_PASSWORD; do
+            for secret_var in E2E_PASSWORD SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_STAGING; do
               secret_val="${!secret_var:-}"
               if [[ -n "$secret_val" ]]; then
                 find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \

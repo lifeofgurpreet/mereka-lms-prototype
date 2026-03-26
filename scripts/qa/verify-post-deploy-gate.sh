@@ -87,6 +87,15 @@ else
   fail "Missing concurrency configuration — parallel gate runs risk false results"
 fi
 
+# Gate must resolve credentials from canonical secret sources
+if grep -q "Resolve E2E credential source" "$WORKFLOW_FILE" \
+  && grep -q "SSO_CANARY_EMAIL_PROD" "$WORKFLOW_FILE" \
+  && grep -q "SSO_CANARY_PASSWORD_PROD" "$WORKFLOW_FILE"; then
+  pass "Workflow resolves E2E credentials from override and canary secret sources"
+else
+  fail "Workflow missing canonical E2E credential fallback wiring"
+fi
+
 # ── Section 3: Blocking Gate Structure ───────────────────────────────────────
 
 echo ""

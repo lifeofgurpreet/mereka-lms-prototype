@@ -72,12 +72,51 @@ jobs:
         working-directory: tests/e2e
         run: npm install
 
-      - name: Run E2E critical path tests
-        working-directory: tests/e2e
+      - name: Resolve E2E credential source
         env:
           BASE_URL: ${{ github.event.inputs.target || 'https://academyv2.mereka.io' }}
           E2E_USERNAME: ${{ secrets.E2E_TEST_USERNAME }}
           E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+          SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+        run: |
+          set -euo pipefail
+          username="${E2E_USERNAME:-}"
+          password="${E2E_PASSWORD:-}"
+          source_label="E2E_TEST_* override"
+
+          if [[ -z "$username" || -z "$password" ]]; then
+            if [[ "$BASE_URL" == *"staging."* ]]; then
+              username="${username:-${SSO_CANARY_EMAIL_STAGING:-}}"
+              password="${password:-${SSO_CANARY_PASSWORD_STAGING:-}}"
+              source_label="SSO_CANARY_*_STAGING fallback"
+            else
+              username="${username:-${SSO_CANARY_EMAIL_PROD:-}}"
+              password="${password:-${SSO_CANARY_PASSWORD_PROD:-}}"
+              source_label="SSO_CANARY_*_PROD fallback"
+            fi
+          fi
+
+          if [[ -n "$password" ]]; then
+            echo "::add-mask::$password"
+          fi
+
+          {
+            echo "E2E_USERNAME<<EOF"
+            echo "$username"
+            echo "EOF"
+            echo "E2E_PASSWORD<<EOF"
+            echo "$password"
+            echo "EOF"
+            echo "E2E_SECRET_SOURCE=$source_label"
+          } >> "$GITHUB_ENV"
+
+      - name: Run E2E critical path tests
+        working-directory: tests/e2e
+        env:
+          BASE_URL: ${{ github.event.inputs.target || 'https://academyv2.mereka.io' }}
           E2E_COURSE_ID: ${{ github.event.inputs.course_id || secrets.E2E_TEST_COURSE_ID }}
           E2E_CERT_URL: ${{ secrets.E2E_TEST_CERT_URL }}
           CI: 'true'
@@ -85,8 +124,6 @@ jobs:
 
       - name: Sanitize test artifacts
         if: always()
-        env:
-          E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
         run: |
           set -euo pipefail
           for ARTIFACT_DIR in var/e2e-report var/e2e-artifacts; do
@@ -94,7 +131,7 @@ jobs:
             # Remove Playwright traces (contain full network payloads with credentials)
             find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
             # Redact known passwords from text logs using perl (safe with special chars)
-            for secret_var in E2E_PASSWORD; do
+            for secret_var in E2E_PASSWORD SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_STAGING; do
               secret_val="${!secret_var:-}"
               if [[ -n "$secret_val" ]]; then
                 find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
@@ -141,8 +178,9 @@ jobs:
             echo "| 5 | Certificate | Certificate page renders |"
             echo ""
             echo "### Notes"
-            echo "- Authenticated tests skipped if \`E2E_USERNAME\`/\`E2E_PASSWORD\` secrets not set"
-            echo "- Set \`E2E_COURSE_ID\` secret for enroll/video/forum tests"
+            echo "- Authenticated tests use \`E2E_TEST_*\` overrides first, then fall back to the matching \`SSO_CANARY_*\` credentials"
+            echo "- Credential source: \`${E2E_SECRET_SOURCE:-not resolved}\`"
+            echo "- Set \`E2E_COURSE_ID\` secret or manual input for enroll/video/forum tests"
             echo "- Set \`E2E_CERT_URL\` secret for certificate test"
             echo "- Report artifact: \`playwright-report\`"
           } >> "$GITHUB_STEP_SUMMARY"

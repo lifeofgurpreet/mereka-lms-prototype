@@ -38,15 +38,23 @@ Oscar ecommerce is **deprecated** and is not included in the critical path suite
 
 ## Required Secrets
 
-Set these as GitHub repository secrets before the gate can run:
+The gate resolves credentials from the following sources, in order:
+
+1. `E2E_TEST_*` repository secrets when you want a dedicated override account
+2. the matching authenticated canary credentials for the selected environment
+   (`SSO_CANARY_*_PROD` or `SSO_CANARY_*_STAGING`)
+
+Set at least one complete source before the gate can run:
 
 | Secret | Description |
 |--------|-------------|
-| `E2E_TEST_USERNAME` | Test learner account email |
-| `E2E_TEST_PASSWORD` | Test learner account password |
+| `E2E_TEST_USERNAME` | Optional dedicated test learner account email override |
+| `E2E_TEST_PASSWORD` | Optional dedicated test learner account password override |
 | `E2E_TEST_COURSE_ID` | Course ID to use for enrollment / video / forum / certificate tests (can also be a repository variable) |
+| `SSO_CANARY_EMAIL_PROD` / `SSO_CANARY_PASSWORD_PROD` | Canonical production learner fallback used when `E2E_TEST_*` overrides are absent |
+| `SSO_CANARY_EMAIL_STAGING` / `SSO_CANARY_PASSWORD_STAGING` | Canonical staging learner fallback used when `E2E_TEST_*` overrides are absent |
 
-The test account must be enrolled in the test course and must have completed it (for certificate tests). Create a dedicated `e2e-learner@mereka.io` account in the LMS with a completed course run.
+The effective test account must be enrolled in the test course and must have completed it (for certificate tests). If you do not maintain a dedicated `E2E_TEST_*` learner, keep the canary learner in that state instead.
 
 ---
 
@@ -76,10 +84,13 @@ The workflow posts a commit status (`post-deploy-e2e/critical-paths`) visible on
 ## Running the Gate Manually
 
 ```bash
-# Via GitHub CLI (targets production)
+# Via GitHub CLI (targets the canonical production URL)
 gh workflow run post-deploy-e2e.yml \
-  -f target_url=https://academyv2.mereka.io \
   -f environment=production
+
+# Staging uses the canonical staging URL when target_url is left blank
+gh workflow run post-deploy-e2e.yml \
+  -f environment=staging
 
 # Via GitHub UI
 # Go to Actions → Post-Deploy E2E Gate → Run workflow
@@ -141,7 +152,7 @@ npx playwright test --headed --debug
 
 ### 4. Check for SSO issues
 
-Login failures are most commonly caused by SSO session problems. Check:
+Login failures are most commonly caused by SSO session problems or missing credential sources. Check:
 
 ```bash
 # Verify Authentik is healthy
@@ -150,6 +161,11 @@ curl -I https://auth0.mereka.io/api/v3/
 # Check SSO canary
 ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
 ```
+
+If the gate fails before Playwright starts, verify that either:
+
+- `E2E_TEST_USERNAME` and `E2E_TEST_PASSWORD` are set, or
+- the matching `SSO_CANARY_*` credentials exist for the selected environment
 
 ---
 
@@ -170,7 +186,7 @@ If the gate fails and the failure is a known flake (not a real regression), docu
 - **Gate skips if deploy failed**: If the upstream `Build and Push Tutor Images` workflow fails, the E2E gate skips automatically (no point testing a broken deploy).
 - **Concurrency**: Only one gate run per environment at a time. If a gate is already running, a new trigger waits; it does not cancel the in-progress run.
 - **No Playwright config yet**: If `tests/e2e/` does not exist (T049 not yet merged), the gate falls back to running `verify-post-deploy-gate.sh --mode offline`, which verifies wiring only. This is a graceful degradation — not a bypass.
-- **Missing secrets**: If `E2E_TEST_USERNAME` or `E2E_TEST_PASSWORD` are not set, the gate fails with a clear error before attempting any browser tests.
+- **Missing credentials**: If neither `E2E_TEST_*` overrides nor the selected environment's `SSO_CANARY_*` credentials are available, the gate fails with a clear error before attempting any browser tests.
 
 ---
 
