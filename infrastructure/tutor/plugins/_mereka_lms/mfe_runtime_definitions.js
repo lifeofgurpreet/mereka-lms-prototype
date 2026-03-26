@@ -46,6 +46,36 @@ const MEREKA_SITE_VARIANTS = {
   },
 };
 
+const deriveVariantCandidates = (hostname) => {
+  const normalizedHostname = normalizeHostname(hostname);
+  if (!normalizedHostname) {
+    return [];
+  }
+
+  const candidates = [];
+  const queue = [normalizedHostname];
+  const enqueue = (candidate) => {
+    if (candidate && !candidates.includes(candidate)) {
+      candidates.push(candidate);
+      queue.push(candidate);
+    }
+  };
+
+  while (queue.length > 0) {
+    const candidate = queue.shift();
+    if (!candidate) {
+      continue;
+    }
+
+    enqueue(candidate.replace(/^(?:staging\.)?apps\./, ''));
+    enqueue(candidate.replace(/^apps\./, ''));
+    enqueue(candidate.replace(/^staging\./, ''));
+    enqueue(candidate.replace(/\.mereka\.dev$/, '.mereka.io'));
+  }
+
+  return candidates;
+};
+
 const getMerekaVariant = (hostname, config) => {
   const normalizedHostname = normalizeHostname(hostname);
   const fallbackBrand = (typeof config !== 'undefined' && config.SITE_NAME) || 'Mereka Academy';
@@ -57,22 +87,14 @@ const getMerekaVariant = (hostname, config) => {
     return exactVariant;
   }
 
-  // 2. MFE prefix stripping — MFEs are served from apps.{domain} or
-  //    staging.apps.{domain} but branding is keyed by the LMS domain.
-  //    Also handle staging.{domain} and dev-suffixed domains (.mereka.dev → .mereka.io).
-  const MFE_PREFIX_RE = /^(?:staging\.)?apps\./;
-  const STAGING_PREFIX_RE = /^staging\./;
-  let candidate = normalizedHostname;
-  if (MFE_PREFIX_RE.test(candidate)) {
-    candidate = candidate.replace(MFE_PREFIX_RE, '');
-  } else if (STAGING_PREFIX_RE.test(candidate)) {
-    candidate = candidate.replace(STAGING_PREFIX_RE, '');
-  }
-  // Map dev TLD to production TLD for variant lookup (e.g., .mereka.dev → .mereka.io).
-  const devCandidate = candidate.replace(/\.mereka\.dev$/, '.mereka.io');
-  const strippedVariant = MEREKA_SITE_VARIANTS[candidate] || MEREKA_SITE_VARIANTS[devCandidate];
-  if (strippedVariant) {
-    return strippedVariant;
+  // 2. MFE/staging prefix stripping — MFEs are served from apps.{domain},
+  //    apps.staging.{domain}, or staging.apps.{domain}, while branding is keyed
+  //    by the canonical LMS domain.
+  for (const candidate of deriveVariantCandidates(normalizedHostname)) {
+    const variant = MEREKA_SITE_VARIANTS[candidate];
+    if (variant) {
+      return variant;
+    }
   }
 
   // 3. Unknown host fallback: keep shell rendering deterministic for new tenants.

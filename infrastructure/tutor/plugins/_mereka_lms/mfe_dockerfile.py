@@ -128,19 +128,34 @@ variant_theme_map = {
 runtime_theme = '''(() => {
   const theme = __THEME_JSON__;
   const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\\./, "");
-  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
-  const variantThemeMap = __VARIANT_THEME_MAP__;
-  const candidates = [];
-  if (hostname) {
-    candidates.push(hostname);
-    const appsCandidate = hostname.replace(/^(?:staging\\.)?apps\\./, "");
-    const stagingCandidate = hostname.replace(/^staging\\./, "");
-    for (const candidate of [appsCandidate, stagingCandidate, appsCandidate.replace(/\\.mereka\\.dev$/, ".mereka.io"), stagingCandidate.replace(/\\.mereka\\.dev$/, ".mereka.io")]) {
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
       if (candidate && !candidates.includes(candidate)) {
         candidates.push(candidate);
+        queue.push(candidate);
       }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\\.)?apps\\./, ""));
+      enqueue(candidate.replace(/^apps\\./, ""));
+      enqueue(candidate.replace(/^staging\\./, ""));
+      enqueue(candidate.replace(/\\.mereka\\.dev$/, ".mereka.io"));
     }
-  }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
   const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
   if (selected) {
     theme.brand.themeUrls.core.fileName = selected.core;

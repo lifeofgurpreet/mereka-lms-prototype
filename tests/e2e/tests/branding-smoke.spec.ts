@@ -46,6 +46,66 @@ function getMfeBaseUrl(lmsBaseUrl: string): string {
   return `${parsed.protocol}//${host}${port}`;
 }
 
+function normalizeHostname(hostname: string): string {
+  return hostname.toLowerCase().replace(/^www\./, '');
+}
+
+function deriveVariantCandidates(hostname: string): string[] {
+  const normalizedHostname = normalizeHostname(hostname);
+  if (!normalizedHostname) {
+    return [];
+  }
+
+  const candidates: string[] = [];
+  const queue = [normalizedHostname];
+  const enqueue = (candidate: string) => {
+    if (candidate && !candidates.includes(candidate)) {
+      candidates.push(candidate);
+      queue.push(candidate);
+    }
+  };
+
+  while (queue.length > 0) {
+    const candidate = queue.shift();
+    if (!candidate) {
+      continue;
+    }
+
+    enqueue(candidate.replace(/^(?:staging\.)?apps\./, ''));
+    enqueue(candidate.replace(/^apps\./, ''));
+    enqueue(candidate.replace(/^staging\./, ''));
+    enqueue(candidate.replace(/\.mereka\.dev$/, '.mereka.io'));
+  }
+
+  return candidates;
+}
+
+function getExpectedThemeCss(mfeBaseUrl: string): { brandCore: string; brandLight: string } {
+  const hostname = new URL(mfeBaseUrl).hostname;
+  const variantThemeMap: Record<string, { brandCore: string; brandLight: string }> = {
+    'academy.biji-biji.com': {
+      brandCore: '/theme/biji-biji-brand.min.css',
+      brandLight: '/theme/biji-biji-brand-light.min.css',
+    },
+    'skillourfuture.academy.mereka.io': {
+      brandCore: '/theme/sof-brand.min.css',
+      brandLight: '/theme/sof-brand-light.min.css',
+    },
+  };
+
+  for (const candidate of deriveVariantCandidates(hostname)) {
+    const variant = variantThemeMap[candidate];
+    if (variant) {
+      return variant;
+    }
+  }
+
+  return {
+    brandCore: '/theme/mereka-brand.min.css',
+    brandLight: '/theme/mereka-brand-light.min.css',
+  };
+}
+
 type ThemeContractMode = 'runtime-theme-urls' | 'embedded-theme-files';
 
 const BRANDING_MARKER_SELECTORS = {
@@ -96,6 +156,8 @@ async function detectThemeContractMode(page: Page, mfeBaseUrl: string): Promise<
     return cachedThemeMode;
   }
 
+  const expectedThemeCss = getExpectedThemeCss(mfeBaseUrl);
+
   // Prefer the rendered authn shell as the source of truth for theme loading mode.
   // /api/mfe_config/v1 payload shape can vary across Open edX releases.
   const authnShellResponse = await page.request.get(`${mfeBaseUrl}/authn/login`);
@@ -103,9 +165,10 @@ async function detectThemeContractMode(page: Page, mfeBaseUrl: string): Promise<
   if (authnShellStatus >= 200 && authnShellStatus < 500) {
     const authnShellHtml = await authnShellResponse.text();
     const runtimeThemeFromHtml = authnShellHtml.includes('/theme/core.min.css')
-      && authnShellHtml.includes('/theme/mereka-brand.min.css');
+      && authnShellHtml.includes(expectedThemeCss.brandCore)
+      && authnShellHtml.includes(expectedThemeCss.brandLight);
     if (runtimeThemeFromHtml) {
-      for (const cssPath of ['/theme/core.min.css', '/theme/mereka-brand.min.css']) {
+      for (const cssPath of ['/theme/core.min.css', expectedThemeCss.brandCore, expectedThemeCss.brandLight]) {
         const cssResponse = await page.request.get(`${mfeBaseUrl}${cssPath}`);
         expect(cssResponse.status()).toBeGreaterThanOrEqual(200);
         expect(cssResponse.status()).toBeLessThan(400);
@@ -146,7 +209,8 @@ async function detectThemeContractMode(page: Page, mfeBaseUrl: string): Promise<
 
   const runtimeThemeEnabled = mfeConfigBody.includes('PARAGON_THEME_URLS')
     && mfeConfigBody.includes('/theme/core.min.css')
-    && mfeConfigBody.includes('/theme/mereka-brand.min.css');
+    && mfeConfigBody.includes(expectedThemeCss.brandCore)
+    && mfeConfigBody.includes(expectedThemeCss.brandLight);
 
   if (!runtimeThemeEnabled) {
     // If mfe_config stayed unavailable (>=500/timeout), default to embedded mode in non-strict smoke.
@@ -154,7 +218,7 @@ async function detectThemeContractMode(page: Page, mfeBaseUrl: string): Promise<
     return cachedThemeMode;
   }
 
-  for (const cssPath of ['/theme/core.min.css', '/theme/mereka-brand.min.css']) {
+  for (const cssPath of ['/theme/core.min.css', expectedThemeCss.brandCore, expectedThemeCss.brandLight]) {
     const cssResponse = await page.request.get(`${mfeBaseUrl}${cssPath}`);
     expect(cssResponse.status()).toBeGreaterThanOrEqual(200);
     expect(cssResponse.status()).toBeLessThan(400);
@@ -187,8 +251,10 @@ test.describe('Branding smoke', () => {
         expect(html).toMatch(/paragon-theme-core\.[a-z0-9]+\.css/i);
         expect(html).toMatch(/brand-theme-core\.[a-z0-9]+\.css/i);
       } else {
+        const expectedThemeCss = getExpectedThemeCss(mfeBaseUrl);
         expect(html).toContain('/theme/core.min.css');
-        expect(html).toContain('/theme/mereka-brand.min.css');
+        expect(html).toContain(expectedThemeCss.brandCore);
+        expect(html).toContain(expectedThemeCss.brandLight);
       }
 
       let markerCounts = await getBrandingMarkerCounts(page);
