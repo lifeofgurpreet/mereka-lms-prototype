@@ -8702,6 +8702,39 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "frontend-platform",
+      "path": "scripts/qa/verify-mfe-runtime-contract.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-SLOT-007",
+        "AC-SLOT-011",
+        "AC-SLOT-015",
+        "AC-SLOT-022",
+        "AC-UI-006",
+        "AC-UI-008"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
         "ci_static",
         "workflow_direct"
       ],
@@ -17260,25 +17293,25 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 354,
     "kinds": {
-      "verify": 574
+      "verify": 575
     },
     "mutability": {
       "destructive": 9,
       "mutating": 17,
-      "read-only": 548
+      "read-only": 549
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 395,
+      "active": 396,
       "manual_only": 179
     },
     "tiers": {
       "exploratory_manual": 182,
       "periodic_runtime": 16,
-      "release_blocking": 376
+      "release_blocking": 377
     },
-    "total_verify_scripts": 574,
-    "workflow_direct_bound": 50
+    "total_verify_scripts": 575,
+    "workflow_direct_bound": 51
   },
   "version": "1"
 }

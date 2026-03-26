@@ -21,6 +21,7 @@ source "$PATCHES_DIR/mfe-node.sh"
 source "$PATCHES_DIR/brand-package.sh"
 source "$PATCHES_DIR/webpack-memory.sh"
 source "$PATCHES_DIR/footer-component.sh"
+source "$PATCHES_DIR/mfe-slot-ownership.sh"
 source "$PATCHES_DIR/build-optimizations.sh"
 
 # Apply patches in dependency order
@@ -39,6 +40,7 @@ apply_patch apply_mfe_node_patch
 apply_patch apply_brand_package_patch
 apply_patch apply_webpack_memory_patch
 apply_patch apply_footer_component_patch
+apply_patch apply_mfe_slot_ownership_patch
 apply_patch apply_build_optimizations_patch
 
 # Sync Mereka theme into Tutor build context.

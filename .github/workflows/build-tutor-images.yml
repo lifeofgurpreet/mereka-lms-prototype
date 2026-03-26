@@ -822,12 +822,17 @@ jobs:
           fi
 
       - name: Verify MFE image branding contract
-        continue-on-error: true  # Non-blocking until branding pipeline is fully verified
         run: |
           mkdir -p var/ci
           EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' infrastructure/tutor/themes/mereka/mfe/mereka.scss | head -n 1)"
           scripts/qa/verify-mfe-image-branding.sh "${MFE_LOCAL_IMAGE}" "${EXPECTED_MFE_BRANDING_REV}" \
             | tee var/ci/verify-mfe-image-branding.log
+
+      - name: Verify MFE runtime contract (image)
+        run: |
+          mkdir -p var/ci
+          scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_LOCAL_IMAGE}" \
+            | tee var/ci/verify-mfe-runtime-contract.log
 
       - name: Generate SBOM for MFE image
         continue-on-error: true  # Non-blocking: SBOM is informational, should not block image push
@@ -960,6 +965,14 @@ jobs:
         with:
           name: mfe-branding-contract-log
           path: var/ci/verify-mfe-image-branding.log
+          retention-days: 3
+
+      - name: Upload MFE runtime contract log
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: mfe-runtime-contract-log
+          path: var/ci/verify-mfe-runtime-contract.log
           retention-days: 3
 
   slsa-provenance:
