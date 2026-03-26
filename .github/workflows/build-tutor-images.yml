@@ -1187,7 +1187,9 @@ jobs:
             --openedx-digest "${{ needs.build-openedx.outputs.image_digest }}" \
             --mfe-image "${{ env.REGISTRY }}/mfe" \
             --mfe-digest "${{ needs.build-mfe.outputs.image_digest }}"
-          cosign sign-blob --yes \
+          # cosign v3 defaults to the new bundle format, which ignores the legacy
+          # signature/certificate outputs that this workflow uploads and verifies.
+          cosign sign-blob --yes --new-bundle-format=false \
             --output-signature var/ci/release-bundle.sig \
             --output-certificate var/ci/release-bundle.pem \
             var/ci/release-bundle.json
