@@ -97,7 +97,7 @@ jobs:
   sso-canary:
     name: SSO Canary
     runs-on: mereka-k8s-runners
-    timeout-minutes: 10
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
@@ -107,6 +107,12 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: '3.11'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-py-1.50.0-${{ runner.os }}
 
       - name: Install Playwright (Chromium)
         run: |
