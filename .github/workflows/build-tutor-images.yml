@@ -1202,9 +1202,13 @@ jobs:
             --openedx-digest "${{ needs.build-openedx.outputs.image_digest }}" \
             --mfe-image "${{ env.REGISTRY }}/mfe" \
             --mfe-digest "${{ needs.build-mfe.outputs.image_digest }}"
-          # cosign v3 defaults to the new bundle format, which ignores the legacy
-          # signature/certificate outputs that this workflow uploads and verifies.
-          cosign sign-blob --yes --new-bundle-format=false \
+          # cosign v3 defaults to both the new bundle format and
+          # --use-signing-config=true. The release-bundle lane still verifies
+          # legacy .sig/.pem outputs, so disable both defaults instead of
+          # switching this job to the new bundle artifact contract.
+          cosign sign-blob --yes \
+            --use-signing-config=false \
+            --new-bundle-format=false \
             --output-signature var/ci/release-bundle.sig \
             --output-certificate var/ci/release-bundle.pem \
             var/ci/release-bundle.json
