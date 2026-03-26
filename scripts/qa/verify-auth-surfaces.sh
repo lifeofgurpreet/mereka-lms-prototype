@@ -330,24 +330,24 @@ check_studio_home_next_scheme() {
   return 0
 }
 
-check_admin_login_redirect() {
-  local svc="$1"
-  local base="$2"
-  local url="https://${svc}.${base}/admin/login/?next=/admin/"
+check_admin_login_redirect_host() {
+  local host="$1"
+  local label="$2"
+  local url="https://${host}/admin/login/?next=/admin/"
   local code loc
   read -r code loc < <(curl_loc "$url" "GET")
 
   if [[ "$code" == "302" && "$loc" == /login/* ]]; then
-    log_ok "${svc}: /admin/login redirects to SSO (/login)"
+    log_ok "${label}: /admin/login redirects to SSO (/login)"
     return 0
   fi
 
   if [[ "$STRICT_ADMIN_LOGIN_REDIRECT" == "1" ]]; then
-    log_fail "${svc}: /admin/login does not redirect to /login (code=$code loc=$loc) url=$url $(http_diag "$url" "GET")"
+    log_fail "${label}: /admin/login does not redirect to /login (code=$code loc=$loc) url=$url $(http_diag "$url" "GET")"
     return 1
   fi
 
-  log_warn "${svc}: /admin/login does not redirect to /login yet (code=$code loc=$loc). This is OK if hardening not deployed. $(http_diag "$url" "GET")"
+  log_warn "${label}: /admin/login does not redirect to /login yet (code=$code loc=$loc). This is OK if hardening not deployed. $(http_diag "$url" "GET")"
   return 0
 }
 
@@ -356,6 +356,8 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
   LMS_ALIAS_DOMAINS=("$PREVIEW_DOMAIN")
   STUDIO_HOSTS=("studio.${LMS_DOMAIN}" "$BIJI_STUDIO_DOMAIN")
   MFE_HOSTS=("apps.${LMS_DOMAIN}" "$BIJI_MFE_DOMAIN")
+  PRIMARY_LMS_HOST="$LMS_DOMAIN"
+  PRIMARY_MFE_HOST="apps.${LMS_DOMAIN}"
   ECOSYSTEM_BASE="$LMS_DOMAIN"
   AUTHENTIK_DOMAIN_FOR_ENV="$AUTHENTIK_DOMAIN"
   ALLOW_HOST_ONLY_SESSION_COOKIE="${ALLOW_HOST_ONLY_SESSION_COOKIE:-0}"
@@ -364,6 +366,8 @@ elif [[ "$ENVIRONMENT" == "staging" ]]; then
   LMS_ALIAS_DOMAINS=()
   STUDIO_HOSTS=("$STAGING_STUDIO_DOMAIN")
   MFE_HOSTS=("$STAGING_MFE_DOMAIN")
+  PRIMARY_LMS_HOST="$STAGING_LMS_DOMAIN"
+  PRIMARY_MFE_HOST="$STAGING_MFE_DOMAIN"
   ECOSYSTEM_BASE="$STAGING_LMS_DOMAIN"
   AUTHENTIK_DOMAIN_FOR_ENV="$STAGING_AUTHENTIK_DOMAIN"
   ALLOW_HOST_ONLY_SESSION_COOKIE="${ALLOW_HOST_ONLY_SESSION_COOKIE:-1}"
@@ -373,6 +377,8 @@ else
   LMS_ALIAS_DOMAINS=("$DEV_PREVIEW_DOMAIN")
   STUDIO_HOSTS=("studio.${DEV_LMS_DOMAIN}")
   MFE_HOSTS=("apps.${DEV_LMS_DOMAIN}")
+  PRIMARY_LMS_HOST="$DEV_LMS_DOMAIN"
+  PRIMARY_MFE_HOST="apps.${DEV_LMS_DOMAIN}"
   ECOSYSTEM_BASE="$DEV_LMS_DOMAIN"
   AUTHENTIK_DOMAIN_FOR_ENV="$DEV_AUTHENTIK_DOMAIN"
   ALLOW_HOST_ONLY_SESSION_COOKIE="${ALLOW_HOST_ONLY_SESSION_COOKIE:-1}"
@@ -385,6 +391,45 @@ fi
 
 echo "Environment: $ENVIRONMENT"
 echo "LMS domains: ${LMS_DOMAINS[*]}"
+
+service_host_for_env() {
+  local svc="$1"
+  if [[ "$ENVIRONMENT" == "staging" ]]; then
+    case "$svc" in
+      discovery) printf "%s\n" "$STAGING_DISCOVERY_DOMAIN" ;;
+      credentials) printf "%s\n" "$STAGING_CREDENTIALS_DOMAIN" ;;
+      notes) printf "%s\n" "$STAGING_NOTES_DOMAIN" ;;
+      forum) printf "%s\n" "$STAGING_FORUM_DOMAIN" ;;
+      ecommerce) printf "%s\n" "$STAGING_ECOMMERCE_DOMAIN" ;;
+      admin) printf "%s\n" "$STAGING_ENTERPRISE_ADMIN_DOMAIN" ;;
+      learner) printf "%s\n" "$STAGING_ENTERPRISE_PORTAL_DOMAIN" ;;
+      preview) printf "%s\n" "$STAGING_PREVIEW_DOMAIN" ;;
+      studio) printf "%s\n" "$STAGING_STUDIO_DOMAIN" ;;
+      mfe) printf "%s\n" "$STAGING_MFE_DOMAIN" ;;
+      *) printf "%s.%s\n" "$svc" "$ECOSYSTEM_BASE" ;;
+    esac
+    return
+  fi
+
+  case "$svc" in
+    studio) printf "%s\n" "${STUDIO_HOSTS[0]}" ;;
+    mfe) printf "%s\n" "${MFE_HOSTS[0]}" ;;
+    *) printf "%s.%s\n" "$svc" "$ECOSYSTEM_BASE" ;;
+  esac
+}
+
+staging_compatibility_alias_for_host() {
+  local host="$1"
+  case "$host" in
+    "$STAGING_DISCOVERY_DOMAIN") printf "discovery.%s\n" "$STAGING_LMS_DOMAIN" ;;
+    "$STAGING_CREDENTIALS_DOMAIN") printf "credentials.%s\n" "$STAGING_LMS_DOMAIN" ;;
+    "$STAGING_NOTES_DOMAIN") printf "notes.%s\n" "$STAGING_LMS_DOMAIN" ;;
+    "$STAGING_ENTERPRISE_ADMIN_DOMAIN") printf "admin.%s\n" "$STAGING_LMS_DOMAIN" ;;
+    "$STAGING_ENTERPRISE_PORTAL_DOMAIN") printf "learner.%s\n" "$STAGING_LMS_DOMAIN" ;;
+    "$STAGING_ECOMMERCE_DOMAIN") printf "staging.ecommerce.mereka.io\n" ;;
+    *) return 1 ;;
+  esac
+}
 
 # Probe whether the OIDC entrypoint redirects at all.  Returns 0 if the response
 # is a 302/301/303, 1 otherwise.
@@ -550,27 +595,27 @@ for mfe in "${MFE_HOSTS[@]}"; do
 done
 
 # MFE config must be site-correct (prevents SSO/login drift across microsites).
-if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "apps.${ECOSYSTEM_BASE}"; then
-  log_warn "optional primary MFE host unresolved: apps.${ECOSYSTEM_BASE} (skipping MFE config checks)"
+if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "$PRIMARY_MFE_HOST"; then
+  log_warn "optional primary MFE host unresolved: ${PRIMARY_MFE_HOST} (skipping MFE config checks)"
 else
   require_body_contains \
-    "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" \
+    "https://${PRIMARY_MFE_HOST}/api/mfe_config/v1" \
     "Primary MFE config LMS_BASE_URL" \
-    "\"LMS_BASE_URL\": \"https://${ECOSYSTEM_BASE}\""
+    "\"LMS_BASE_URL\": \"https://${PRIMARY_LMS_HOST}\""
 
-  primary_mfe_config="$(curl_with_tls -fsSL "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1")" || primary_mfe_config=""
-  if rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://apps.${ECOSYSTEM_BASE}/login_refresh\"" <<<"$primary_mfe_config" \
+  primary_mfe_config="$(curl_with_tls -fsSL "https://${PRIMARY_MFE_HOST}/api/mfe_config/v1")" || primary_mfe_config=""
+  if rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://${PRIMARY_MFE_HOST}/login_refresh\"" <<<"$primary_mfe_config" \
     || rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"/login_refresh\"" <<<"$primary_mfe_config"; then
     echo "✓ Primary MFE config refresh endpoint is same-origin (absolute or relative)"
   else
-    echo "✗ Primary MFE config refresh endpoint is same-origin (prevents 401 login_refresh) (expected REFRESH_ACCESS_TOKEN_ENDPOINT to be https://apps.${ECOSYSTEM_BASE}/login_refresh OR /login_refresh) url=https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" >&2
+    echo "✗ Primary MFE config refresh endpoint is same-origin (prevents 401 login_refresh) (expected REFRESH_ACCESS_TOKEN_ENDPOINT to be https://${PRIMARY_MFE_HOST}/login_refresh OR /login_refresh) url=https://${PRIMARY_MFE_HOST}/api/mfe_config/v1" >&2
     failures=$((failures + 1))
   fi
 
   # Sanity-check the reverse-proxy exists: unauthenticated HEAD should return 405 (POST only),
   # not 404/500. We do not require 401 here because the endpoint can be hit without session.
   require_status \
-    "https://apps.${ECOSYSTEM_BASE}/login_refresh" \
+    "https://${PRIMARY_MFE_HOST}/login_refresh" \
     "Primary MFE host exposes /login_refresh" \
     "405"
 fi
@@ -601,36 +646,52 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
 fi
 
 for svc in discovery credentials ecommerce; do
-  if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "${svc}.${ECOSYSTEM_BASE}"; then
-    log_warn "optional service host unresolved: ${svc}.${ECOSYSTEM_BASE} (skipping auth entrypoint checks)"
+  svc_host="$(service_host_for_env "$svc")"
+  if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "$svc_host"; then
+    if [[ "$ENVIRONMENT" == "staging" ]]; then
+      compat_alias="$(staging_compatibility_alias_for_host "$svc_host" || true)"
+      if [[ -n "${compat_alias:-}" ]]; then
+        if host_resolves "$compat_alias"; then
+          log_warn "canonical service host unresolved: ${svc_host}; compatibility alias still resolves: ${compat_alias} (skipping canonical auth entrypoint checks)"
+        else
+          log_warn "optional service host unresolved: ${svc_host} (skipping auth entrypoint checks)"
+        fi
+      else
+        log_warn "optional service host unresolved: ${svc_host} (skipping auth entrypoint checks)"
+      fi
+    else
+      log_warn "optional service host unresolved: ${svc_host} (skipping auth entrypoint checks)"
+    fi
     continue
   fi
   require_302_location_is \
-    "https://${svc}.${ECOSYSTEM_BASE}/login/" \
+    "https://${svc_host}/login/" \
     "${svc}: /login SSO entrypoint" \
     "/login/edx-oauth2/"
 
   # Verify OAuth handshake starts towards the LMS (which itself uses Authentik OIDC).
   require_302_location_contains \
-    "https://${svc}.${ECOSYSTEM_BASE}/login/edx-oauth2/" \
+    "https://${svc_host}/login/edx-oauth2/" \
     "${svc}: /login/edx-oauth2 redirects to LMS oauth2/authorize" \
-    "https://${ECOSYSTEM_BASE}/oauth2/authorize"
+    "https://${PRIMARY_LMS_HOST}/oauth2/authorize"
 done
 
 for svc in discovery credentials ecommerce; do
-  if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "${svc}.${ECOSYSTEM_BASE}"; then
+  svc_host="$(service_host_for_env "$svc")"
+  if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "$svc_host"; then
     continue
   fi
-  check_admin_login_redirect "$svc" "$ECOSYSTEM_BASE"
+  check_admin_login_redirect_host "$svc_host" "$svc"
 done
 
 # Notes and forum are API-first. They do not have their own SSO entrypoints.
 # We still verify they are reachable so operators don't misdiagnose outages as "SSO missing".
-if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "notes.${ECOSYSTEM_BASE}"; then
-  log_warn "optional service host unresolved: notes.${ECOSYSTEM_BASE} (skipping)"
+notes_host="$(service_host_for_env notes)"
+if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "$notes_host"; then
+  log_warn "optional service host unresolved: ${notes_host} (skipping)"
 else
   require_body_contains_one_of \
-    "https://notes.${ECOSYSTEM_BASE}/" \
+    "https://${notes_host}/" \
     "notes: service banner" \
     "Mereka Notes Service" \
     "edX Notes API"
@@ -638,15 +699,16 @@ fi
 
 # Forum has had multiple deployment architectures over time.
 # Current production contract requires /heartbeat=200. Non-prod accepts /healthz fallback.
-if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "forum.${ECOSYSTEM_BASE}"; then
-  log_warn "optional service host unresolved: forum.${ECOSYSTEM_BASE} (skipping)"
+forum_host="$(service_host_for_env forum)"
+if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "$forum_host"; then
+  log_warn "optional service host unresolved: ${forum_host} (skipping)"
 else
   require_status_one_of \
-    "https://forum.${ECOSYSTEM_BASE}/" \
+    "https://${forum_host}/" \
     "forum: reachable" \
     "200" "401" "404"
 
-  check_forum_health_contract "forum.${ECOSYSTEM_BASE}"
+  check_forum_health_contract "$forum_host"
 fi
 
 if [[ "$failures" -gt 0 ]]; then

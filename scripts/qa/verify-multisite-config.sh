@@ -56,10 +56,10 @@ if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
   if [[ "$ENVIRONMENT" == "prod" ]]; then
     K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
   elif [[ "$ENVIRONMENT" == "staging" ]]; then
-    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT_STAGING:-${K8S_CONTEXT:-$DEFAULT_STAGING_CTX}}"
+    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT_STAGING:-$DEFAULT_STAGING_CTX}"
     NAMESPACE="${K8S_NAMESPACE_STAGING:-stg-mereka-lms}"
   else
-    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-$DEFAULT_DEV_CTX}}"
+    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT_DEV:-$DEFAULT_DEV_CTX}"
   fi
 fi
 
@@ -153,7 +153,7 @@ expected = {
     "LMS_ROOT_URL": f"https://{staging}",
     "CMS_ROOT_URL": f"https://{staging_studio}",
     "MFE_BASE_URL": f"https://{staging_mfe}",
-    "COURSE_ORG_FILTER": ["BBI", "Mereka"],
+    "COURSE_ORG_FILTER": ["MEREKA"],
   },
 }
 
@@ -188,7 +188,23 @@ if [[ "$_cluster_reachable" -eq 0 ]]; then
   exit 0
 fi
 
-kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env DOMAINS="${DOMAINS_CSV}" STRICT="${STRICT}" EXPECTED_JSON="${EXPECTED_JSON}" REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING}" python - <<'PY'
+# Exec against a concrete ready pod rather than deploy/lms. The deployment
+# indirection is flaky during rolling updates and can terminate the check
+# mid-stream even when the underlying multisite config is correct.
+LMS_POD="$(
+  kubectl "${CONTEXT_ARGS[@]}" get pods -n "${NAMESPACE}" -l app.kubernetes.io/name=lms \
+    --field-selector=status.phase=Running \
+    --sort-by=.metadata.creationTimestamp \
+    -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' \
+    | tail -n 1
+)"
+
+if [[ -z "${LMS_POD:-}" ]]; then
+  echo "FAIL: no running LMS pod found in namespace=${NAMESPACE}" >&2
+  exit 1
+fi
+
+kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" "${LMS_POD}" -- env DOMAINS="${DOMAINS_CSV}" STRICT="${STRICT}" EXPECTED_JSON="${EXPECTED_JSON}" REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING}" python - <<'PY'
 import os
 import sys
 import json

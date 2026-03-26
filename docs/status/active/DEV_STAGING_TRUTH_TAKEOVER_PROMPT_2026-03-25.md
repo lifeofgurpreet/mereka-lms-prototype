@@ -1,6 +1,6 @@
 # DEV / Staging Truth Takeover Prompt
 
-You are taking over DEV/staging truth closure for `mereka-lms` and `bbi-infrastructure`.
+You are taking over DEV/staging truth closure for `mereka-lms`, `bbi-infrastructure`, and `platform-control-plane`.
 
 Start by reading:
 
@@ -29,13 +29,25 @@ The objective is not “more green.” The objective is “no false closure.”
 
 Start with `W-01` from the daily tracker and then `T-01` from the deeper tracker.
 
-Current blocker:
+Current blocker chain:
 
 - staging canary secrets now exist
-- the clean tracked staging-proof lane is still blocked because `.github/workflows/operations-gates-runtime.yml` is `disabled_manually`
-- when manually enabled for a dispatch probe, GitHub rejects it with `HTTP 422` because the workflow currently defines top-level `permissions` twice
+- the workflow-parse defect on `operations-gates-runtime.yml` is already fixed on `origin/main`
+- the app-side repair tranche is already published as `mereka-lms#1048`
+- the control-plane host-contract repair is already merged as `platform-control-plane#65`
+- the GitOps host-realization repair is already merged as `bbi-infrastructure#2128`
+- the active-owner cert-manager repair is now also merged as `bbi-infrastructure#2131`
+- the Biji-Biji staging TLS lane is live:
+  - `letsencrypt-bijibiji-staging` is `Ready=True`
+  - `openedx-biji-biji-lms-tls`, `openedx-biji-biji-mfe-tls`, and `openedx-biji-biji-studio-tls` are all `Ready=True`
+- scoped staging governance/auth/config gates now pass from the clean worktree
+- the remaining open work is narrower:
+  - merge or explicitly classify `mereka-lms#1048`
+  - produce fresh tracked staging browser/runtime proof
+  - classify any residual Argo health state after the tracked proof rather than treating cert-manager as the active blocker
+  - keep the control-plane “pending external dependency” posture distinct from runtime/app truth
 
-Your first job is to work from a clean branch/worktree off `origin/main`, repair the proof lane, and only then run a fresh tracked staging proof. Do not start by reopening dedicated staging cluster planning.
+Your first job is to work from a clean branch/worktree off `origin/main`, then shepherd `mereka-lms#1048` through merge and run a fresh tracked staging proof. Do not start by reopening dedicated staging cluster planning.
 
 ## Files to inspect immediately
 
@@ -44,17 +56,30 @@ Your first job is to work from a clean branch/worktree off `origin/main`, repair
 - `deploy/k8s/tenancy/tenant-registry.yaml`
 - `deploy/k8s/tenancy/STAGING_TENANT_CONTRACT.md`
 - `scripts/tenants/env/staging.env`
+- `scripts/qa/run-operations-gates.sh`
+- `scripts/qa/audit-auth-access.sh`
+- `scripts/qa/run-multisite-governance-gates.sh`
+- `scripts/qa/verify-mfe-config-contract.sh`
 - `scripts/tenants/verify-staging-tenant-proof.sh`
-- `deploy/k8s/overlays/staging/patches/production-staging.py`
+- `scripts/shared/multisite_bootstrap.py`
+- `scripts/shared/multisite_bootstrap_django.py`
+- `scripts/tenants/lib/site-reconcile-common.sh`
+- `scripts/tenants/provision-mfe-config.sh`
 - `.github/workflows/operations-gates-runtime.yml`
 - `.github/workflows/smoke-authenticated.yml`
 
 ### Infra repo
 
-- `apps/mereka-lms/overlays/staging/patches/ingress.yaml`
+- `apps/mereka-lms/overlays/staging/patches/caddy-config-staging.yaml`
 - `apps/mereka-lms/overlays/staging/patches/certificates.yaml`
-- `apps/mereka-lms/overlays/staging/patches/caddy-env-patch.yaml`
+- `config/domain-registry.yaml`
 - `config/nonprod-execution-state.yaml`
+
+### Control-plane repo
+
+- `contracts/staging-dns-cert-readiness.yaml`
+- `scripts/guardrails/verify-staging-dns-cert-readiness.sh`
+- `scripts/guardrails/verify-control-plane-merge-safety.sh`
 
 ## Non-negotiable rules
 
@@ -62,7 +87,7 @@ Your first job is to work from a clean branch/worktree off `origin/main`, repair
 - Do not claim staging is “ready” without a fresh tracked runtime/browser proof run.
 - Do not flip `ready_for_execution: false` early.
 - Do not paper over boundary contradictions by updating only docs or only runtime.
-- Do not optimize repo-only QA while runtime truth is still contradictory.
+- Do not stop at repo-only QA while runtime host realization is still contradictory.
 - Do not restart dedicated staging cluster work before `2026-05-01`; that is explicitly deferred by operator decision.
 
 ## Required rerun commands
@@ -72,12 +97,23 @@ Your first job is to work from a clean branch/worktree off `origin/main`, repair
 - `bash scripts/qa/verify-deployment-contract.sh`
 - `bash scripts/qa/verify-runtime-authority-map.sh`
 - `bash scripts/qa/verify-lane-identity.sh`
+- `bash scripts/qa/verify-staging-vocabulary-drift.sh`
+- `bash scripts/qa/verify-mfe-config-contract.sh --env staging`
+- `bash scripts/qa/audit-auth-access.sh --env staging --mode public`
+- `bash scripts/qa/run-multisite-governance-gates.sh --env staging`
 - `bash scripts/tenants/verify-staging-tenant-proof.sh --namespace stg-mereka-lms`
 
 ### Infra repo
 
 - `bash scripts/qa/verify-nonprod-gate-readiness.sh`
 - `ENABLE_STAGING_CHECKS=1 bash scripts/qa/verify-staging-activation-gate.sh`
+- `make verify`
+
+### Control-plane repo
+
+- `./scripts/guardrails/verify-staging-dns-cert-readiness.sh`
+- `./scripts/guardrails/verify-control-plane-merge-safety.sh`
+- `./scripts/plan-all.sh --validate-only`
 
 ## Deliverables
 
@@ -87,12 +123,14 @@ Before stopping, leave behind all of the following:
 2. updated `DEV_STAGING_TRUTH_TRACKER_2026-03-25.md`
 3. exact command outputs summarized in the tracker
 4. explicit statement of which truth dimensions are now closed vs still open
+5. clear classification of whether the remaining blocker is app-owned, GitOps-owned, or workflow-owned
 
 ## What counts as success
 
 Minimum acceptable success for the next tranche:
 
-- `operations-gates-runtime.yml` is syntax-valid and no longer parse-blocked
-- at least one fresh tracked staging runtime/browser proof attempt exists
-- cookie/browser behavior is either fixed or explicitly proven safe
+- `mereka-lms#1048` is merged or explicitly classified by blocker, and `platform-control-plane#65` plus `bbi-infrastructure#2128` are verified as merged/applied or explicitly blocked at runtime
+- the remaining hostname blocker is either fixed live or explicitly proven to still be live after the PR chain
+- the old Biji-Biji cert-manager blocker is not restated as current if live runtime already shows it closed
+- at least one fresh tracked staging runtime/browser proof attempt exists once the contract stops contradicting itself
 - tracker is updated so the next handoff does not have to rediscover the state

@@ -141,7 +141,12 @@ def upsert_sites(connection, definitions: list[SiteDefinition], dry_run: bool) -
                     "LOGIN_URL": f"{lms_root}/login",
                     "LOGOUT_URL": f"{lms_root}/logout",
                     "MARKETING_SITE_BASE_URL": lms_root,
-                    "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{lms_root}/login_refresh",
+                    "REFRESH_ACCESS_TOKEN_ENDPOINT": "/login_refresh",
+                    "DISABLE_ENTERPRISE_LOGIN": True,
+                    "ACCESS_TOKEN_COOKIE_NAME": "edx-jwt-cookie-header-payload",
+                    "USER_INFO_COOKIE_NAME": "user-info",
+                    "SESSION_COOKIE_SAMESITE": "None",
+                    "CSRF_COOKIE_SAMESITE": "None",
                     "FAVICON_URL": f"{lms_root}/theming/asset/mereka/images/favicon.ico",
                     "LOGO_URL": f"{lms_root}/theming/asset/mereka/images/logo-horizontal.png",
                     "LOGO_WHITE_URL": f"{lms_root}/theming/asset/mereka/images/logo-horizontal-white.png",
@@ -152,6 +157,7 @@ def upsert_sites(connection, definitions: list[SiteDefinition], dry_run: bool) -
                 if mfe_host:
                     overrides["BASE_URL"] = mfe_host
                     overrides["AUTHN_MICROFRONTEND_URL"] = f"https://{mfe_host}/authn"
+                    overrides["AUTHN_MICROFRONTEND_DOMAIN"] = mfe_host
                 rendered_values["MFE_CONFIG"] = overrides
 
             site_values = json.dumps(rendered_values, sort_keys=True)

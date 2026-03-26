@@ -23,10 +23,12 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 STRICT="${STRICT:-0}"
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
-ENV_SCOPE="both" # prod|dev|both
+ENV_SCOPE="both" # prod|dev|staging|both|all
 
 CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
 CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
+NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
 
 require_bool_01() {
   local var_name="$1"
@@ -44,7 +46,7 @@ log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
 
 usage() {
   cat <<EOF >&2
-Usage: $0 [--env prod|dev|both]
+Usage: $0 [--env prod|dev|staging|both|all]
 
 Env:
   STRICT=1  Fail when deployed hosts differ from expected set
@@ -65,7 +67,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" && "$ENV_SCOPE" != "all" ]]; then
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
@@ -124,6 +126,28 @@ print_expected() {
     return
   fi
 
+  if [[ "$env" == "staging" ]]; then
+    # Keep this aligned with the active staging entries in tenant-registry.yaml.
+    printf "%s\n" \
+      "$STAGING_LMS_DOMAIN" \
+      "$STAGING_PREVIEW_DOMAIN" \
+      "$STAGING_STUDIO_DOMAIN" \
+      "$STAGING_MFE_DOMAIN" \
+      "$STAGING_DISCOVERY_DOMAIN" \
+      "$STAGING_NOTES_DOMAIN" \
+      "$STAGING_CREDENTIALS_DOMAIN" \
+      "$STAGING_ENTERPRISE_ADMIN_DOMAIN" \
+      "$STAGING_ENTERPRISE_PORTAL_DOMAIN" \
+      "staging.academy.biji-biji.com" \
+      "studio.staging.academy.biji-biji.com" \
+      "apps.staging.academy.biji-biji.com" \
+      "staging.skillourfuture.academy.mereka.io" \
+      "studio.staging.skillourfuture.academy.mereka.io" \
+      "apps.staging.skillourfuture.academy.mereka.io" \
+      | awk 'NF{print}' | sort -u
+    return
+  fi
+
   echo "Unknown env: $env" >&2
   return 2
 }
@@ -132,10 +156,18 @@ diff_sets() {
   local expected="$1"
   local deployed="$2"
   local label="$3"
+  local allowed_extra="${4:-}"
 
-  local missing extra
+  local missing extra filtered_extra compatibility_extra
   missing="$(comm -23 <(printf "%s\n" "$expected") <(printf "%s\n" "$deployed") || true)"
   extra="$(comm -13 <(printf "%s\n" "$expected") <(printf "%s\n" "$deployed") || true)"
+  if [[ -n "$allowed_extra" ]]; then
+    filtered_extra="$(comm -23 <(printf "%s\n" "$extra") <(printf "%s\n" "$allowed_extra") || true)"
+    compatibility_extra="$(comm -12 <(printf "%s\n" "$extra") <(printf "%s\n" "$allowed_extra") || true)"
+  else
+    filtered_extra="$extra"
+    compatibility_extra=""
+  fi
 
   echo ""
   echo "== $label =="
@@ -148,22 +180,46 @@ diff_sets() {
     echo "Missing from deployed:"
     printf "%s\n" "$missing" | sed 's/^/  - /'
   fi
-  if [[ -n "$extra" ]]; then
+  if [[ -n "$filtered_extra" ]]; then
     echo "Extra in deployed (not in expected list):"
-    printf "%s\n" "$extra" | sed 's/^/  - /'
+    printf "%s\n" "$filtered_extra" | sed 's/^/  - /'
+  fi
+  if [[ -n "$compatibility_extra" ]]; then
+    echo "Compatibility extras currently allowed during staging migration window:"
+    printf "%s\n" "$compatibility_extra" | sed 's/^/  - /'
   fi
 
-  if [[ "$STRICT" == "1" && ( -n "$missing" || -n "$extra" ) ]]; then
+  if [[ "$STRICT" == "1" && ( -n "$missing" || -n "$filtered_extra" ) ]]; then
     return 1
   fi
   return 0
+}
+
+allowed_extra_hosts() {
+  local env="$1"
+  if [[ "$env" == "staging" ]]; then
+    printf "%s\n" \
+      "admin.staging.academyv2.mereka.io" \
+      "credentials.staging.academyv2.mereka.io" \
+      "discovery.staging.academyv2.mereka.io" \
+      "learner.staging.academyv2.mereka.io" \
+      "notes.staging.academyv2.mereka.io" \
+      "staging.credentials.mereka.io" \
+      "staging.discovery.mereka.io" \
+      "staging.ecommerce.mereka.io" \
+      "staging.notes.mereka.io" \
+      | awk 'NF{print}' | sort -u
+    return
+  fi
+
+  printf ""
 }
 
 rc=0
 
 log "Collecting Open edX hostnames from cluster ingresses (env=$ENV_SCOPE)"
 
-if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   expected_prod="$(print_expected prod)"
   deployed_prod="$(
     collect_ingress_hosts "$CONTEXT_PROD" \
@@ -175,7 +231,7 @@ if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
   diff_sets "$expected_prod" "$deployed_prod" "prod ($CONTEXT_PROD)" || rc=1
 fi
 
-if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   expected_dev="$(print_expected dev)"
   deployed_dev_public="$(
     collect_ingress_hosts "$CONTEXT_DEV" \
@@ -198,6 +254,19 @@ if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
     echo "== dev (kind-local hostnames) ($CONTEXT_DEV) =="
     printf "%s\n" "$deployed_dev_local" | sed 's/^/  - /'
   fi
+fi
+
+if [[ "$ENV_SCOPE" == "staging" || "$ENV_SCOPE" == "all" ]]; then
+  NAMESPACE="$NAMESPACE_STAGING"
+  expected_staging="$(print_expected staging)"
+  allowed_extra_staging="$(allowed_extra_hosts staging)"
+  deployed_staging="$(
+    collect_ingress_hosts "$CONTEXT_STAGING" \
+      | tr -d '\r' \
+      | sed 's/[[:space:]]*$//' \
+      || true
+  )"
+  diff_sets "$expected_staging" "$deployed_staging" "staging ($CONTEXT_STAGING)" "$allowed_extra_staging" || rc=1
 fi
 
 if [[ "$rc" -ne 0 ]]; then

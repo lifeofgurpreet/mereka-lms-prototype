@@ -25,6 +25,11 @@ The `sso-canary` job is in `.github/workflows/smoke-authenticated.yml`. It runs:
 The `operations-gates-runtime.yml` workflow also runs the canary as an optional credentialed
 gate when `run_authenticated_sso_canary=true` is set.
 
+For non-dispatch runs, `operations-gates-runtime.yml` resolves its environment scope from the
+GitHub repository variable `OPERATIONS_GATES_RUNTIME_ENV_SCOPE` and falls back to `both` if the
+variable is unset. For the current staging-proof lane, set this variable to `staging` before
+re-enabling the workflow so the optional canary does not also require DEV secrets.
+
 ## Account policy
 
 Use dedicated canary identities. Do **not** use a real operator mailbox such as

@@ -190,13 +190,24 @@ values = dict(site_config.site_values or {})
 # These override the global MFE_CONFIG set in LMS production settings.
 mfe_overlay = {
     "LMS_BASE_URL": lms_url,
+    "LOGIN_URL": f"{lms_url}/login",
+    "LOGOUT_URL": f"{lms_url}/logout",
+    "MARKETING_SITE_BASE_URL": lms_url,
+    "REFRESH_ACCESS_TOKEN_ENDPOINT": "/login_refresh",
     "STUDIO_BASE_URL": studio_url,
     "SITE_NAME": site_name,
     "PLATFORM_NAME": site_name,
+    "DISABLE_ENTERPRISE_LOGIN": True,
+    "ACCESS_TOKEN_COOKIE_NAME": "edx-jwt-cookie-header-payload",
+    "USER_INFO_COOKIE_NAME": "user-info",
+    "SESSION_COOKIE_SAMESITE": "None",
+    "CSRF_COOKIE_SAMESITE": "None",
     "FAVICON_URL": f"${BRAND_ASSET_PREFIX}/favicon.ico",
     "LOGO_URL": f"${BRAND_ASSET_PREFIX}/logo.svg",
     "LOGO_WHITE_URL": f"${BRAND_ASSET_PREFIX}/logo-white.svg",
     "LOGO_TRADEMARK_URL": f"${BRAND_ASSET_PREFIX}/logo-trademark.svg",
+    "AUTHN_MICROFRONTEND_URL": f"{mfe_url}/authn",
+    "AUTHN_MICROFRONTEND_DOMAIN": mfe_url.replace("https://", "").replace("http://", ""),
     "PARAGON_THEME_URLS": {
         "core": {
             "urls": {

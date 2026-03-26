@@ -81,6 +81,7 @@ fi
 check_workflow_pattern "$WORKFLOW_FILE" "run_authenticated_sso_canary:" "dispatch input run_authenticated_sso_canary"
 check_workflow_pattern "$WORKFLOW_FILE" "RUN_AUTHENTICATED_SSO_CANARY=1" "runtime gate enable export"
 check_workflow_pattern "$WORKFLOW_FILE" "AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1" "strict secret requirement export"
+check_workflow_pattern "$WORKFLOW_FILE" "OPERATIONS_GATES_RUNTIME_ENV_SCOPE" "runtime workflow env-scope variable wiring"
 check_workflow_regex "$WORKFLOW_FILE" '^[[:space:]]+- staging$' "dispatch input includes staging scope"
 check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_EMAIL_PROD" "prod canary email secret wiring"
 check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_PASSWORD_PROD" "prod canary password secret wiring"
@@ -155,6 +156,14 @@ if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
       echo "WARN github variable RUN_AUTHENTICATED_SSO_CANARY=true is not set (non-strict warning)"
       warnings=$((warnings + 1))
     fi
+  fi
+
+  runtime_scope_value="$(awk '$1=="OPERATIONS_GATES_RUNTIME_ENV_SCOPE"{print tolower($2); exit}' <<<"$variable_rows")"
+  if [[ -n "$runtime_scope_value" ]]; then
+    echo "OK github variable OPERATIONS_GATES_RUNTIME_ENV_SCOPE=$runtime_scope_value"
+  else
+    echo "WARN github variable OPERATIONS_GATES_RUNTIME_ENV_SCOPE is not set (workflow falls back to 'both')"
+    warnings=$((warnings + 1))
   fi
 else
   if [[ "$STRICT" == "1" ]]; then

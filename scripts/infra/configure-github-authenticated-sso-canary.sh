@@ -23,6 +23,7 @@ REQUIRE_DEV="${REQUIRE_DEV:-0}"
 REQUIRE_STAGING="${REQUIRE_STAGING:-0}"
 REQUIRE_STUDIO="${REQUIRE_STUDIO:-0}"
 ENABLE_RUNTIME_GATE=0
+RUNTIME_ENV_SCOPE="${RUNTIME_ENV_SCOPE:-}"
 
 usage() {
   cat <<EOF_USAGE
@@ -58,6 +59,7 @@ Options:
   --require-staging      Require staging secrets too (or set REQUIRE_STAGING=1)
   --require-studio       Require Studio staff canary secrets too (or set REQUIRE_STUDIO=1)
   --enable-runtime-gate  Set repo variable RUN_AUTHENTICATED_SSO_CANARY=true
+  --runtime-env-scope X  Set OPERATIONS_GATES_RUNTIME_ENV_SCOPE to prod|dev|staging|both|all
   -h, --help             Show help
 EOF_USAGE
 }
@@ -74,6 +76,8 @@ while [[ $# -gt 0 ]]; do
       REQUIRE_STUDIO=1; shift ;;
     --enable-runtime-gate)
       ENABLE_RUNTIME_GATE=1; shift ;;
+    --runtime-env-scope)
+      RUNTIME_ENV_SCOPE="${2:-}"; shift 2 ;;
     -h|--help)
       usage
       exit 0 ;;
@@ -87,6 +91,17 @@ done
 if [[ -z "$REPO_SLUG" ]]; then
   echo "Repository slug is required" >&2
   exit 1
+fi
+
+if [[ -n "$RUNTIME_ENV_SCOPE" ]]; then
+  case "$RUNTIME_ENV_SCOPE" in
+    prod|dev|staging|both|all) ;;
+    *)
+      echo "Invalid --runtime-env-scope: $RUNTIME_ENV_SCOPE" >&2
+      usage
+      exit 1
+      ;;
+  esac
 fi
 
 if ! command -v gh >/dev/null 2>&1; then
@@ -203,6 +218,10 @@ if [[ "$ENABLE_RUNTIME_GATE" == "1" ]]; then
   gh variable set RUN_AUTHENTICATED_SSO_CANARY --repo "$REPO_SLUG" --body "true" >/dev/null
 fi
 
+if [[ -n "$RUNTIME_ENV_SCOPE" ]]; then
+  gh variable set OPERATIONS_GATES_RUNTIME_ENV_SCOPE --repo "$REPO_SLUG" --body "$RUNTIME_ENV_SCOPE" >/dev/null
+fi
+
 echo "Configured GitHub authenticated SSO canary wiring for $REPO_SLUG"
 echo "  prod secrets: set"
 if [[ "$studio_prod_email_set" == "1" && "$studio_prod_password_set" == "1" ]]; then
@@ -219,5 +238,10 @@ if [[ "$staging_email_set" == "1" && "$staging_password_set" == "1" && "$staging
   echo "  staging secrets: set"
 else
   echo "  staging secrets: not fully set (optional unless --require-staging)"
+fi
+if [[ -n "$RUNTIME_ENV_SCOPE" ]]; then
+  echo "  runtime workflow env scope: $RUNTIME_ENV_SCOPE"
+else
+  echo "  runtime workflow env scope: unchanged"
 fi
 echo "  runtime gate variable: $([[ "$ENABLE_RUNTIME_GATE" == "1" ]] && echo "set to true" || echo "unchanged")"

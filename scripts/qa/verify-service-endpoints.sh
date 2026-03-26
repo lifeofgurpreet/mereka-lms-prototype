@@ -9,24 +9,27 @@
 #   ./scripts/qa/verify-service-endpoints.sh
 #   ./scripts/qa/verify-service-endpoints.sh --env prod
 #   ./scripts/qa/verify-service-endpoints.sh --env dev
-#   STRICT=1 ./scripts/qa/verify-service-endpoints.sh --env prod
+#   ./scripts/qa/verify-service-endpoints.sh --env staging
+#   STRICT=1 ./scripts/qa/verify-service-endpoints.sh --env all
 #
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-ENV_SCOPE="both" # prod|dev|both
+ENV_SCOPE="both" # prod|dev|staging|both|all
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
 NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
 NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
 CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
 CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 STRICT="${STRICT:-0}"
 
 usage() {
   cat <<'EOF' >&2
-Usage: ./scripts/qa/verify-service-endpoints.sh [--env prod|dev|both] [--namespace NAMESPACE]
+Usage: ./scripts/qa/verify-service-endpoints.sh [--env prod|dev|staging|both|all] [--namespace NAMESPACE]
 EOF
 }
 
@@ -39,7 +42,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" && "$ENV_SCOPE" != "all" ]]; then
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
@@ -106,11 +109,14 @@ check_context() {
 }
 
 rc=0
-if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   check_context "$CONTEXT_PROD" "$NAMESPACE_PROD" || rc=1
 fi
-if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   check_context "$CONTEXT_DEV" "$NAMESPACE_DEV" || rc=1
+fi
+if [[ "$ENV_SCOPE" == "staging" || "$ENV_SCOPE" == "all" ]]; then
+  check_context "$CONTEXT_STAGING" "$NAMESPACE_STAGING" || rc=1
 fi
 
 exit "$rc"

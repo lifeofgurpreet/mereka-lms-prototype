@@ -1544,7 +1544,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-auth-surfaces.sh",
-      "reference_count": 39,
+      "reference_count": 41,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8147,13 +8147,14 @@
       "ci_entrypoints": [],
       "env_scope": [
         "dev",
-        "prod"
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-config-contract.sh",
-      "reference_count": 16,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9519,7 +9520,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-multisite-config.sh",
-      "reference_count": 28,
+      "reference_count": 30,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -11393,13 +11394,15 @@
       "ci_entrypoints": [],
       "env_scope": [
         "dev",
-        "prod"
+        "nonprod",
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-platform-admin-env.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -13810,13 +13813,15 @@
       ],
       "env_scope": [
         "dev",
-        "prod"
+        "nonprod",
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-service-endpoints.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -14425,7 +14430,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-staging-vocabulary-drift.sh",
-      "reference_count": 4,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

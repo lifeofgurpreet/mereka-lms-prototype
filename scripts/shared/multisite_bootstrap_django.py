@@ -420,7 +420,7 @@ def upsert_sites(
                 overrides["BASE_URL"] = mfe_host
                 authn_url = f"https://{mfe_host}/authn"
                 overrides["AUTHN_MICROFRONTEND_URL"] = authn_url
-                overrides["AUTHN_MICROFRONTEND_DOMAIN"] = authn_url
+                overrides["AUTHN_MICROFRONTEND_DOMAIN"] = mfe_host
             else:
                 authn_url = default_cfg.get("AUTHN_MICROFRONTEND_URL")
                 authn_domain = default_cfg.get("AUTHN_MICROFRONTEND_DOMAIN")

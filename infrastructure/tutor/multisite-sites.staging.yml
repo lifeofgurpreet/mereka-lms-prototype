@@ -24,8 +24,7 @@ sites:
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
-        - BBI
-        - Mereka
+        - MEREKA
       logo_image: https://staging.academyv2.mereka.io/static/mereka/images/logo-horizontal.png
       logo_url: /
       favicon_path: mereka/images/favicon.ico
@@ -45,8 +44,7 @@ sites:
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
-        - BBI
-        - Mereka
+        - MEREKA
       logo_image: https://staging.preview.academyv2.mereka.io/static/mereka/images/logo-horizontal.png
       logo_url: /
       favicon_path: mereka/images/favicon.ico

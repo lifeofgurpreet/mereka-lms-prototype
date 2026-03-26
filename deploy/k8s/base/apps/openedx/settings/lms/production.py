@@ -187,6 +187,7 @@ FORUM_SPAM_CHECK_BACKEND = os.environ.get(
 ####### Settings common to LMS and CMS
 import json
 import os
+from urllib.parse import urlparse
 
 from xmodule.modulestore.modulestore_settings import update_module_store_settings
 
@@ -199,8 +200,21 @@ MEREKA_SKILLOURFUTURE_DOMAIN = os.environ.get(
     "skillourfuture.academy.mereka.io",
 )
 
+def _domain_from_base_url(raw_url: str) -> str:
+    raw_url = (raw_url or "").strip()
+    if not raw_url:
+        return ""
+    parsed = urlparse(raw_url if "://" in raw_url else f"https://{raw_url}")
+    return (parsed.netloc or parsed.path or "").strip().rstrip("/")
+
+
 MEREKA_STUDIO_DOMAIN = os.environ.get("MEREKA_STUDIO_DOMAIN", f"studio.{MEREKA_LMS_DOMAIN}")
-MEREKA_MFE_DOMAIN = os.environ.get("MEREKA_MFE_DOMAIN", f"apps.{MEREKA_LMS_DOMAIN}")
+_MEREKA_MFE_BASE_URL_OVERRIDE = (os.environ.get("MFE_BASE_URL") or "").strip().rstrip("/")
+MEREKA_MFE_DOMAIN = (
+    os.environ.get("MEREKA_MFE_DOMAIN")
+    or _domain_from_base_url(_MEREKA_MFE_BASE_URL_OVERRIDE)
+    or f"apps.{MEREKA_LMS_DOMAIN}"
+)
 MEREKA_DISCOVERY_DOMAIN = os.environ.get(
     "MEREKA_DISCOVERY_DOMAIN",
     f"discovery.{MEREKA_LMS_DOMAIN}",
@@ -245,7 +259,7 @@ MEREKA_COOKIE_DOMAIN = os.environ.get("MEREKA_COOKIE_DOMAIN", f".{MEREKA_LMS_DOM
 
 MEREKA_LMS_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}"
 MEREKA_STUDIO_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_STUDIO_DOMAIN}"
-MEREKA_MFE_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_MFE_DOMAIN}"
+MEREKA_MFE_BASE_URL = _MEREKA_MFE_BASE_URL_OVERRIDE or f"{MEREKA_SCHEME}://{MEREKA_MFE_DOMAIN}"
 MEREKA_DISCOVERY_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_DISCOVERY_DOMAIN}"
 MEREKA_ECOMMERCE_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_ECOMMERCE_DOMAIN}"
 MEREKA_NOTES_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_NOTES_DOMAIN}"

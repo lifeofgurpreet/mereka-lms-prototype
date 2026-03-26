@@ -4,7 +4,8 @@
 # Usage:
 #   ./scripts/qa/run-operations-gates.sh
 #   ./scripts/qa/run-operations-gates.sh --env prod
-#   RUN_ATLAS_ALLOWLIST_AUDIT=1 ./scripts/qa/run-operations-gates.sh --env both
+#   ./scripts/qa/run-operations-gates.sh --env staging
+#   RUN_ATLAS_ALLOWLIST_AUDIT=1 ./scripts/qa/run-operations-gates.sh --env all
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -13,8 +14,10 @@ cd "$REPO_ROOT"
 ENV_SCOPE="${ENV_SCOPE:-both}"
 K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 K8S_CONTEXT_DEV="${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}"
+K8S_CONTEXT_STAGING="${K8S_CONTEXT_STAGING:-rke2-nonprod}"
 K8S_NAMESPACE="${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}"
 K8S_NAMESPACE_DEV="${K8S_NAMESPACE_DEV:-${K8S_NAMESPACE:-mereka-lms}}"
+K8S_NAMESPACE_STAGING="${K8S_NAMESPACE_STAGING:-stg-mereka-lms}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 FAIL_ON_LEGACY_MONGODB="${FAIL_ON_LEGACY_MONGODB:-1}"
 FAIL_ON_LEGACY_MONGODB_SERVICE="${FAIL_ON_LEGACY_MONGODB_SERVICE:-0}"
@@ -42,7 +45,7 @@ mkdir -p "$ARTIFACT_DIR"
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/qa/run-operations-gates.sh [--env prod|dev|both]
+Usage: ./scripts/qa/run-operations-gates.sh [--env prod|dev|staging|both|all]
 Env:
   STRICT_RUNTIME=1               Enforce strict runtime checks for observability/Velero
   FAIL_ON_LEGACY_MONGODB=1       Fail atlas gate if legacy mongodb Deployment exists
@@ -80,7 +83,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" && "$ENV_SCOPE" != "all" ]]; then
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
@@ -118,6 +121,8 @@ OBS_DISPATCH_PROFILE="custom"
 if [[ "$ENV_SCOPE" == "prod" ]]; then
   OBS_DISPATCH_PROFILE="prod"
 elif [[ "$ENV_SCOPE" == "dev" ]]; then
+  OBS_DISPATCH_PROFILE="nonprod"
+elif [[ "$ENV_SCOPE" == "staging" ]]; then
   OBS_DISPATCH_PROFILE="nonprod"
 fi
 
@@ -241,6 +246,8 @@ PY
 echo "Operations gates"
 echo "  env: $ENV_SCOPE"
 echo "  strict_runtime: $STRICT_RUNTIME"
+echo "  k8s_context_staging: $K8S_CONTEXT_STAGING"
+echo "  k8s_namespace_staging: $K8S_NAMESPACE_STAGING"
 echo "  fail_on_legacy_mongodb: $FAIL_ON_LEGACY_MONGODB"
 echo "  fail_on_legacy_mongodb_service: $FAIL_ON_LEGACY_MONGODB_SERVICE"
 echo "  run_atlas_allowlist_audit: $RUN_ATLAS_ALLOWLIST_AUDIT"
@@ -271,8 +278,8 @@ fi
 if [[ "$RUN_MULTISITE_GOVERNANCE_AUDIT" == "1" ]]; then
   run_check "multisite governance gate" \
     env STRICT=1 CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" \
-    PROD_CONTEXT="$K8S_CONTEXT" DEV_CONTEXT="$K8S_CONTEXT_DEV" \
-    PROD_NAMESPACE="$K8S_NAMESPACE" DEV_NAMESPACE="$K8S_NAMESPACE_DEV" \
+    PROD_CONTEXT="$K8S_CONTEXT" DEV_CONTEXT="$K8S_CONTEXT_DEV" STAGING_CONTEXT="$K8S_CONTEXT_STAGING" \
+    PROD_NAMESPACE="$K8S_NAMESPACE" DEV_NAMESPACE="$K8S_NAMESPACE_DEV" STAGING_NAMESPACE="$K8S_NAMESPACE_STAGING" \
     ./scripts/qa/run-multisite-governance-gates.sh --env "$ENV_SCOPE"
 fi
 
@@ -282,7 +289,7 @@ if [[ "$RUN_DB_EXPORTER_TELEMETRY_AUDIT" == "1" ]]; then
     ./scripts/qa/audit-db-exporter-telemetry.sh --mode "$DB_EXPORTER_AUDIT_MODE"
 fi
 
-if [[ "$RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ) ]]; then
+if [[ "$RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ) ]]; then
   run_check "authentik policy exception audit" \
     env K8S_CONTEXT="$K8S_CONTEXT" \
     ./scripts/qa/audit-authentik-policy-exceptions.sh --since 6h
@@ -301,9 +308,12 @@ if [[ "$RUN_AUTHENTICATED_SSO_CANARY" == "1" ]]; then
 fi
 
 run_check "auth + permissions + multisite audit" \
-  env CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
+  env CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" \
+    CONTEXT_PROD="$K8S_CONTEXT" CONTEXT_DEV="$K8S_CONTEXT_DEV" CONTEXT_STAGING="$K8S_CONTEXT_STAGING" \
+    NAMESPACE_PROD="$K8S_NAMESPACE" NAMESPACE_DEV="$K8S_NAMESPACE_DEV" NAMESPACE_STAGING="$K8S_NAMESPACE_STAGING" \
+    ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
 
-if [[ "$RUN_ENTERPRISE_RUNTIME_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ) ]]; then
+if [[ "$RUN_ENTERPRISE_RUNTIME_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ) ]]; then
   run_check "enterprise service deployment (prod)" \
     ./scripts/qa/verify-enterprise-service-deployment.sh
 
@@ -311,7 +321,7 @@ if [[ "$RUN_ENTERPRISE_RUNTIME_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$EN
     ./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --mode cluster --tenant "$ENTERPRISE_READINESS_TENANT"
 fi
 
-if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   run_check "cert-manager readiness (prod)" \
     env K8S_CONTEXT="$K8S_CONTEXT" K8S_NAMESPACE="$K8S_NAMESPACE" \
     ./scripts/qa/verify-cert-manager-readiness.sh prod

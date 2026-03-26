@@ -37,24 +37,121 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Run authenticated smoke tests
+      - name: Resolve authenticated smoke target and credentials
+        id: resolve-smoke
         env:
-          SMOKE_TARGET: ${{ github.event.inputs.target || 'https://academyv2.mereka.io' }}
-          SSO_USERNAME: ${{ secrets.SMOKE_SSO_USERNAME }}
-          SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'prod' }}
+          INPUT_TARGET: ${{ github.event.inputs.target || '' }}
+          SMOKE_SSO_USERNAME: ${{ secrets.SMOKE_SSO_USERNAME }}
+          SMOKE_SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+          SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+        run: |
+          set -euo pipefail
+
+          scope="${INPUT_ENV_SCOPE:-prod}"
+          run_smoke=1
+
+          case "$scope" in
+            ""|prod)
+              target="${INPUT_TARGET:-https://academyv2.mereka.io}"
+              username="${SMOKE_SSO_USERNAME:-${SSO_CANARY_EMAIL_PROD:-}}"
+              password="${SMOKE_SSO_PASSWORD:-${SSO_CANARY_PASSWORD_PROD:-}}"
+              lms_domain="academyv2.mereka.io"
+              studio_domain="studio.academyv2.mereka.io"
+              mfe_domain="apps.academyv2.mereka.io"
+              ;;
+            dev)
+              target="${INPUT_TARGET:-https://academyv2.mereka.dev}"
+              username="${SSO_CANARY_EMAIL_DEV:-}"
+              password="${SSO_CANARY_PASSWORD_DEV:-}"
+              lms_domain="academyv2.mereka.dev"
+              studio_domain="studio.academyv2.mereka.dev"
+              mfe_domain="apps.academyv2.mereka.dev"
+              ;;
+            staging)
+              target="${INPUT_TARGET:-https://staging.academyv2.mereka.io}"
+              username="${SSO_CANARY_EMAIL_STAGING:-}"
+              password="${SSO_CANARY_PASSWORD_STAGING:-}"
+              lms_domain="staging.academyv2.mereka.io"
+              studio_domain="staging.studio.academyv2.mereka.io"
+              mfe_domain="staging.apps.academyv2.mereka.io"
+              ;;
+            both|all)
+              run_smoke=0
+              target=""
+              username=""
+              password=""
+              lms_domain=""
+              studio_domain=""
+              mfe_domain=""
+              ;;
+            *)
+              echo "::error::Unsupported env_scope=${scope}"
+              exit 1
+              ;;
+          esac
+
+          {
+            echo "run_smoke=$run_smoke"
+            echo "smoke_target=$target"
+            echo "lms_domain=$lms_domain"
+            echo "studio_domain=$studio_domain"
+            echo "mfe_domain=$mfe_domain"
+          } >> "$GITHUB_OUTPUT"
+
+          if [[ "$run_smoke" != "1" ]]; then
+            echo "skip_reason=env_scope=${scope} is covered by the multi-environment sso-canary job" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ -z "$username" || -z "$password" ]]; then
+            echo "::error::No authenticated smoke credentials resolved for env_scope=${scope}"
+            exit 1
+          fi
+
+          {
+            echo "sso_username<<EOF"
+            echo "$username"
+            echo "EOF"
+            echo "sso_password<<EOF"
+            echo "$password"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run authenticated smoke tests
+        if: ${{ steps.resolve-smoke.outputs.run_smoke == '1' }}
+        env:
+          SMOKE_TARGET: ${{ steps.resolve-smoke.outputs.smoke_target }}
+          SSO_USERNAME: ${{ steps.resolve-smoke.outputs.sso_username }}
+          SSO_PASSWORD: ${{ steps.resolve-smoke.outputs.sso_password }}
         run: ./scripts/qa/smoke-authenticated.sh --target "$SMOKE_TARGET"
 
+      - name: Skip multi-environment authenticated smoke
+        if: ${{ steps.resolve-smoke.outputs.run_smoke != '1' }}
+        run: echo "Skipping smoke-authenticated job because ${{ steps.resolve-smoke.outputs.skip_reason }}"
+
       - name: Run visual regression tests (authenticated)
-        if: success() || failure()
+        if: ${{ always() && steps.resolve-smoke.outputs.run_smoke == '1' }}
         env:
-          SSO_USERNAME: ${{ secrets.SMOKE_SSO_USERNAME }}
-          SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+          SSO_USERNAME: ${{ steps.resolve-smoke.outputs.sso_username }}
+          SSO_PASSWORD: ${{ steps.resolve-smoke.outputs.sso_password }}
+          LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
+          STUDIO_DOMAIN: ${{ steps.resolve-smoke.outputs.studio_domain }}
+          MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
         run: ./scripts/qa/visual-regression-test.sh --env production --authenticated || true
 
       - name: Sanitize smoke test artifacts
         if: always()
         env:
-          SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+          SMOKE_SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
         run: |
           set -euo pipefail
           for ARTIFACT_DIR in var/screenshots; do
@@ -62,7 +159,7 @@ jobs:
             # Remove Playwright traces (contain full network payloads with credentials)
             find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
             # Redact known passwords from text logs using perl (safe with special chars)
-            for secret_var in SSO_PASSWORD; do
+            for secret_var in SMOKE_SSO_PASSWORD SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_PASSWORD_STAGING; do
               secret_val="${!secret_var:-}"
               if [[ -n "$secret_val" ]]; then
                 find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
@@ -71,7 +168,7 @@ jobs:
             done
           done
           # Redact from loose log files in workspace root
-          for secret_var in SSO_PASSWORD; do
+          for secret_var in SMOKE_SSO_PASSWORD SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_PASSWORD_STAGING; do
             secret_val="${!secret_var:-}"
             if [[ -n "$secret_val" ]]; then
               find . -maxdepth 1 -type f -name "*.log" \

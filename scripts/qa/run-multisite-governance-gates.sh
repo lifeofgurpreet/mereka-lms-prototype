@@ -18,14 +18,19 @@ SKIP_DEV_ON_BOTH="${SKIP_DEV_ON_BOTH:-0}"
 ALLOW_SHARED_HOSTS_FILE="${ALLOW_SHARED_HOSTS_FILE:-infrastructure/tutor/multisite-shared-host-allowlist.txt}"
 PROD_CONTEXT="${PROD_CONTEXT:-${K8S_CONTEXT_PROD:-}}"
 DEV_CONTEXT="${DEV_CONTEXT:-${K8S_CONTEXT_DEV:-}}"
+STAGING_CONTEXT="${STAGING_CONTEXT:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 PROD_NAMESPACE="${PROD_NAMESPACE:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 DEV_NAMESPACE="${DEV_NAMESPACE:-${K8S_NAMESPACE_DEV:-${K8S_NAMESPACE:-mereka-lms}}}"
+STAGING_NAMESPACE="${STAGING_NAMESPACE:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
 PROD_ALLOW_CREDENTIALS_500="${PROD_ALLOW_CREDENTIALS_500:-0}"
 DEV_ALLOW_CREDENTIALS_500="${DEV_ALLOW_CREDENTIALS_500:-0}"
+STAGING_ALLOW_CREDENTIALS_500="${STAGING_ALLOW_CREDENTIALS_500:-0}"
 PROD_NOTES_BANNER_NEEDLE="${PROD_NOTES_BANNER_NEEDLE:-edX Notes API}"
 DEV_NOTES_BANNER_NEEDLE="${DEV_NOTES_BANNER_NEEDLE:-edX Notes API}"
+STAGING_NOTES_BANNER_NEEDLE="${STAGING_NOTES_BANNER_NEEDLE:-edX Notes API}"
 PROD_ALLOW_FORUM_HEARTBEAT_404="${PROD_ALLOW_FORUM_HEARTBEAT_404:-0}"
 DEV_ALLOW_FORUM_HEARTBEAT_404="${DEV_ALLOW_FORUM_HEARTBEAT_404:-0}"
+STAGING_ALLOW_FORUM_HEARTBEAT_404="${STAGING_ALLOW_FORUM_HEARTBEAT_404:-0}"
 # Explicit ack required before any prod auth-surface relaxation is allowed.
 ALLOW_PROD_AUTH_SURFACE_TOLERANCES="${ALLOW_PROD_AUTH_SURFACE_TOLERANCES:-0}"
 # Short timeout (seconds) for cluster reachability probes.  Prevents hangs when
@@ -39,7 +44,7 @@ mkdir -p "$ARTIFACT_DIR"
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/qa/run-multisite-governance-gates.sh [--env prod|dev|both]
+Usage: ./scripts/qa/run-multisite-governance-gates.sh [--env prod|dev|staging|both|all]
 Env:
   STRICT=1                  Enforce strict validation mode
   CHECK_TIMEOUT_SECONDS=900 Per-check timeout in seconds
@@ -48,14 +53,19 @@ Env:
   ALLOW_SHARED_HOSTS_FILE=... Optional newline allowlist file for temporary shared hosts
   PROD_CONTEXT=...          Optional kubectl context override for prod checks
   DEV_CONTEXT=...           Optional kubectl context override for dev checks
+  STAGING_CONTEXT=...       Optional kubectl context override for staging checks
   PROD_NAMESPACE=...        Optional namespace override for prod checks (default: mereka-lms)
   DEV_NAMESPACE=...         Optional namespace override for dev checks (default: mereka-lms)
+  STAGING_NAMESPACE=...     Optional namespace override for staging checks (default: stg-mereka-lms)
   PROD_ALLOW_CREDENTIALS_500=0|1   Optional auth-surface tolerance for prod credentials /login
   DEV_ALLOW_CREDENTIALS_500=0|1    Optional auth-surface tolerance for dev credentials /login
+  STAGING_ALLOW_CREDENTIALS_500=0|1 Optional auth-surface tolerance for staging credentials /login
   PROD_NOTES_BANNER_NEEDLE=...     Optional expected notes root banner text for prod
   DEV_NOTES_BANNER_NEEDLE=...      Optional expected notes root banner text for dev
+  STAGING_NOTES_BANNER_NEEDLE=...  Optional expected notes root banner text for staging
   PROD_ALLOW_FORUM_HEARTBEAT_404=0|1 Optional auth-surface tolerance for prod forum heartbeat
   DEV_ALLOW_FORUM_HEARTBEAT_404=0|1  Optional auth-surface tolerance for dev forum heartbeat
+  STAGING_ALLOW_FORUM_HEARTBEAT_404=0|1 Optional auth-surface tolerance for staging forum heartbeat
   ALLOW_PROD_AUTH_SURFACE_TOLERANCES=1 Required to permit any prod auth-surface relaxations
   CLUSTER_CHECK_TIMEOUT=20          Seconds to wait for cluster reachability probe (default: 20)
   DEV_SKIP_OIDC_ON_NON_REDIRECT=1   Skip dev OIDC checks when endpoint returns non-302 (default: 1)
@@ -87,7 +97,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "staging" && "$ENV_SCOPE" != "both" && "$ENV_SCOPE" != "all" ]]; then
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
@@ -95,8 +105,10 @@ fi
 
 require_bool_01 "PROD_ALLOW_CREDENTIALS_500" "$PROD_ALLOW_CREDENTIALS_500"
 require_bool_01 "DEV_ALLOW_CREDENTIALS_500" "$DEV_ALLOW_CREDENTIALS_500"
+require_bool_01 "STAGING_ALLOW_CREDENTIALS_500" "$STAGING_ALLOW_CREDENTIALS_500"
 require_bool_01 "PROD_ALLOW_FORUM_HEARTBEAT_404" "$PROD_ALLOW_FORUM_HEARTBEAT_404"
 require_bool_01 "DEV_ALLOW_FORUM_HEARTBEAT_404" "$DEV_ALLOW_FORUM_HEARTBEAT_404"
+require_bool_01 "STAGING_ALLOW_FORUM_HEARTBEAT_404" "$STAGING_ALLOW_FORUM_HEARTBEAT_404"
 require_bool_01 "ALLOW_PROD_AUTH_SURFACE_TOLERANCES" "$ALLOW_PROD_AUTH_SURFACE_TOLERANCES"
 require_bool_01 "STRICT" "$STRICT"
 require_bool_01 "SKIP_DEV_ON_BOTH" "$SKIP_DEV_ON_BOTH"
@@ -166,16 +178,21 @@ echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  skip_dev_on_both: $SKIP_DEV_ON_BOTH"
 echo "  prod_context: ${PROD_CONTEXT:-default}"
 echo "  dev_context: ${DEV_CONTEXT:-default}"
+echo "  staging_context: ${STAGING_CONTEXT:-default}"
 echo "  prod_namespace: ${PROD_NAMESPACE:-mereka-lms}"
 echo "  dev_namespace: ${DEV_NAMESPACE:-mereka-lms}"
+echo "  staging_namespace: ${STAGING_NAMESPACE:-stg-mereka-lms}"
 echo "  allow_shared_hosts: ${ALLOW_SHARED_HOSTS:-}"
 echo "  allow_shared_hosts_file: ${ALLOW_SHARED_HOSTS_FILE:-}"
 echo "  prod_allow_credentials_500: ${PROD_ALLOW_CREDENTIALS_500}"
 echo "  dev_allow_credentials_500: ${DEV_ALLOW_CREDENTIALS_500}"
+echo "  staging_allow_credentials_500: ${STAGING_ALLOW_CREDENTIALS_500}"
 echo "  prod_notes_banner_needle: ${PROD_NOTES_BANNER_NEEDLE}"
 echo "  dev_notes_banner_needle: ${DEV_NOTES_BANNER_NEEDLE}"
+echo "  staging_notes_banner_needle: ${STAGING_NOTES_BANNER_NEEDLE}"
 echo "  prod_allow_forum_heartbeat_404: ${PROD_ALLOW_FORUM_HEARTBEAT_404}"
 echo "  dev_allow_forum_heartbeat_404: ${DEV_ALLOW_FORUM_HEARTBEAT_404}"
+echo "  staging_allow_forum_heartbeat_404: ${STAGING_ALLOW_FORUM_HEARTBEAT_404}"
 echo "  allow_prod_auth_surface_tolerances: ${ALLOW_PROD_AUTH_SURFACE_TOLERANCES}"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
@@ -192,7 +209,7 @@ run_check "tenant config safety audit (repo)" \
 run_check "tenant override schema (repo)" \
   env STRICT="$STRICT" ./scripts/qa/verify-tenant-override-schema.sh
 
-if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   prod_args=()
   [[ -n "${PROD_CONTEXT:-}" ]] && prod_args+=(--context "$PROD_CONTEXT")
   [[ -n "${PROD_NAMESPACE:-}" ]] && prod_args+=(--namespace "$PROD_NAMESPACE")
@@ -208,7 +225,7 @@ if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
       ./scripts/qa/verify-auth-surfaces.sh prod
 fi
 
-if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   dev_args=()
   [[ -n "${DEV_CONTEXT:-}" ]] && dev_args+=(--context "$DEV_CONTEXT")
   [[ -n "${DEV_NAMESPACE:-}" ]] && dev_args+=(--namespace "$DEV_NAMESPACE")
@@ -227,7 +244,25 @@ if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
       ./scripts/qa/verify-auth-surfaces.sh dev
 fi
 
-if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "staging" || "$ENV_SCOPE" == "all" ]]; then
+  staging_args=()
+  [[ -n "${STAGING_CONTEXT:-}" ]] && staging_args+=(--context "$STAGING_CONTEXT")
+  [[ -n "${STAGING_NAMESPACE:-}" ]] && staging_args+=(--namespace "$STAGING_NAMESPACE")
+  run_check "multisite config (staging)" \
+    env STRICT="$STRICT" CLUSTER_CHECK_TIMEOUT="$CLUSTER_CHECK_TIMEOUT" \
+      ./scripts/qa/verify-multisite-config.sh staging "${staging_args[@]}"
+  run_check "org role ownership (staging)" \
+    env STRICT="$STRICT" CLUSTER_CHECK_TIMEOUT="$CLUSTER_CHECK_TIMEOUT" \
+      ./scripts/qa/verify-org-role-ownership.sh staging "${staging_args[@]}"
+  run_check "auth surfaces (staging)" \
+    env \
+      ALLOW_CREDENTIALS_500="$STAGING_ALLOW_CREDENTIALS_500" \
+      NOTES_BANNER_NEEDLE="$STAGING_NOTES_BANNER_NEEDLE" \
+      ALLOW_FORUM_HEARTBEAT_404="$STAGING_ALLOW_FORUM_HEARTBEAT_404" \
+      ./scripts/qa/verify-auth-surfaces.sh staging
+fi
+
+if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   run_check "hostname registry drift (prod)" \
     env \
       STRICT="$STRICT" \
@@ -236,13 +271,22 @@ if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
       ./scripts/qa/list-openedx-hostnames.sh --env prod
 fi
 
-if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
+if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then
   run_check "hostname registry drift (dev)" \
     env \
       STRICT="$STRICT" \
       NAMESPACE="$DEV_NAMESPACE" \
       CONTEXT_DEV="$DEV_CONTEXT" \
       ./scripts/qa/list-openedx-hostnames.sh --env dev
+fi
+
+if [[ "$ENV_SCOPE" == "staging" || "$ENV_SCOPE" == "all" ]]; then
+  run_check "hostname registry drift (staging)" \
+    env \
+      STRICT="$STRICT" \
+      NAMESPACE="$STAGING_NAMESPACE" \
+      CONTEXT_STAGING="$STAGING_CONTEXT" \
+      ./scripts/qa/list-openedx-hostnames.sh --env staging
 fi
 
 # AC-TBR-104: Runtime tenant branding verification
