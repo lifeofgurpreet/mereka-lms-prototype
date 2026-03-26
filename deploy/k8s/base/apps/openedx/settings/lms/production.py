@@ -1934,4 +1934,19 @@ MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = int(os.environ.get("MAX_FAILED_LOGIN_ATTEMPT
 MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = int(
     os.environ.get("MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS", "300")  # 5 minutes
 )
+# ── Sync MFE_CONFIG to FEATURES for the MFE config API ──────────────────────
+# The MFE config API view (lms/djangoapps/mfe_config_api/views.py) reads
+# from FEATURES['MFE_CONFIG'], not the top-level MFE_CONFIG dict.
+# Without this sync, the API returns null for all configured MFE URLs.
+FEATURES['ENABLE_MFE_CONFIG_API'] = True
+FEATURES['MFE_CONFIG'] = MFE_CONFIG
+
+# Add MICROFRONTEND_URL keys that are defined as top-level settings but
+# missing from the MFE_CONFIG dict. The MFE config API only serves keys
+# that are in FEATURES['MFE_CONFIG'].
+MFE_CONFIG.setdefault("LEARNER_HOME_MICROFRONTEND_URL", LEARNER_HOME_MICROFRONTEND_URL)
+MFE_CONFIG.setdefault("ACCOUNT_MICROFRONTEND_URL", ACCOUNT_MICROFRONTEND_URL)
+MFE_CONFIG.setdefault("DISCUSSIONS_MICROFRONTEND_URL", DISCUSSIONS_MICROFRONTEND_URL)
+# PROFILE_MICROFRONTEND_URL is already in MFE_CONFIG (added earlier)
+
 # ── End Security Hardening ───────────────────────────────────────────────────
