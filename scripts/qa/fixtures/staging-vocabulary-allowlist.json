@@ -47,6 +47,7 @@
     "scripts/qa/verify-domain-url-invariants.sh",
     "scripts/qa/verify-email-notifications-pipeline.sh",
     "scripts/qa/verify-enterprise-auth-contract.sh",
+    "scripts/qa/verify-auth-sso-enterprise.sh",
     "scripts/qa/verify-enterprise-frontend-config-contract.sh",
     "scripts/qa/verify-enterprise-runtime-app-wiring.sh",
     "scripts/qa/verify-enterprise-service-deployment.sh",

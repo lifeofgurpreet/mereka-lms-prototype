@@ -5,7 +5,7 @@ _Generated from ADR frontmatter. Do not hand-edit._
 These ADRs carry decision history but are not current law.
 
 | ADR | Title | Historical reason | Path |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | ADR-001 | MongoDB Atlas vs Local MongoDB | Pre-launch simplification: durable history retained, active law absorbed by current platform/runtime governance. | [../historical/001-mongodb-atlas.md](../historical/001-mongodb-atlas.md) |
 | ADR-002 | Multisite Architecture | Superseded in practice by ADR-029 and ADR-033 for current tenancy and identity law. | [../historical/002-multisite-architecture.md](../historical/002-multisite-architecture.md) |
 | ADR-003 | Image Build Pipeline | Superseded by newer control-plane and methodology ADRs for current build/deploy law. | [../historical/003-image-build-pipeline.md](../historical/003-image-build-pipeline.md) |

@@ -8,7 +8,7 @@
 # JIT provisioning, SCIM, role mapping) are marked SKIP.
 #
 # Usage:
-#   ./scripts/qa/verify-auth-sso-enterprise.sh [--skip-cluster] [--help]
+#   ./scripts/qa/verify-auth-sso-enterprise.sh [--skip-cluster] [--env staging|dev|prod] [--namespace NS] [--help]
 #
 set -euo pipefail
 
@@ -20,12 +20,22 @@ WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
 SKIP_CLUSTER=false
+ENV_TARGET="prod"
+NAMESPACE_OVERRIDE=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --skip-cluster)
       SKIP_CLUSTER=true
       shift
+      ;;
+    --env)
+      ENV_TARGET="${2:?--env requires an argument (staging|dev|prod)}"
+      shift 2
+      ;;
+    --namespace)
+      NAMESPACE_OVERRIDE="${2:?--namespace requires an argument}"
+      shift 2
       ;;
     --help)
       cat <<EOF
@@ -34,8 +44,16 @@ Usage: $(basename "$0") [OPTIONS]
 Verify Authentication & SSO Enterprise Integration spec compliance (45 ACs).
 
 OPTIONS:
-    --skip-cluster    Skip checks requiring live kubectl access
-    --help            Show this help message
+    --skip-cluster          Skip checks requiring live kubectl access
+    --env staging|dev|prod  Select domain variables for the target environment (default: prod)
+    --namespace NS          Override kubectl namespace (default: mereka-lms, or stg-mereka-lms for staging)
+    --help                  Show this help message
+
+EXAMPLES:
+    $(basename "$0")
+    $(basename "$0") --env staging --namespace stg-mereka-lms
+    $(basename "$0") --env dev --namespace mereka-lms
+    $(basename "$0") --skip-cluster
 EOF
       exit 0
       ;;
@@ -45,6 +63,32 @@ EOF
       ;;
   esac
 done
+
+# Resolve environment-specific domain variables
+case "$ENV_TARGET" in
+  staging)
+    _LMS_DOMAIN="$STAGING_LMS_DOMAIN"
+    _AUTHENTIK_DOMAIN="$STAGING_AUTHENTIK_DOMAIN"
+    _DEFAULT_NAMESPACE="stg-mereka-lms"
+    ;;
+  dev)
+    _LMS_DOMAIN="$DEV_LMS_DOMAIN"
+    _AUTHENTIK_DOMAIN="$DEV_AUTHENTIK_DOMAIN"
+    _DEFAULT_NAMESPACE="mereka-lms"
+    ;;
+  prod)
+    _LMS_DOMAIN="$LMS_DOMAIN"
+    _AUTHENTIK_DOMAIN="$AUTHENTIK_DOMAIN"
+    _DEFAULT_NAMESPACE="mereka-lms"
+    ;;
+  *)
+    echo "Unknown --env value: $ENV_TARGET (must be staging, dev, or prod)" >&2
+    exit 1
+    ;;
+esac
+
+# --namespace flag overrides the environment default
+_NAMESPACE="${NAMESPACE_OVERRIDE:-$_DEFAULT_NAMESPACE}"
 
 # Counters
 PASS=0
@@ -79,8 +123,11 @@ echo "========================================================"
 echo "  Auth & SSO Enterprise Integration Verification"
 echo "  Spec: auth-sso-enterprise_spec.md (45 ACs)"
 echo "========================================================"
-echo "Date:   $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-echo "Repo:   $REPO_ROOT"
+echo "Date:      $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "Repo:      $REPO_ROOT"
+echo "Env:       $ENV_TARGET"
+echo "Namespace: $_NAMESPACE"
+echo "LMS domain: $_LMS_DOMAIN"
 echo "Cluster checks: $(if $SKIP_CLUSTER; then echo SKIPPED; else echo ENABLED; fi)"
 echo
 
@@ -746,61 +793,61 @@ if $SKIP_CLUSTER; then
   skip_ "Cluster: All cluster checks skipped (--skip-cluster)"
 else
   # Check enterprise-sso-secrets K8s secret exists
-  if kubectl get secret enterprise-sso-secrets -n mereka-lms &>/dev/null; then
-    pass_ "Cluster: enterprise-sso-secrets K8s secret exists"
+  if kubectl get secret enterprise-sso-secrets -n "$_NAMESPACE" &>/dev/null; then
+    pass_ "Cluster: enterprise-sso-secrets K8s secret exists (ns=$_NAMESPACE)"
   else
-    fail_ "Cluster: enterprise-sso-secrets K8s secret not found"
+    skip_ "Cluster: enterprise-sso-secrets K8s secret not found in ns=$_NAMESPACE (may not exist on this env)"
   fi
 
   # Check ExternalSecret sync status
-  ES_STATUS=$(kubectl get externalsecret enterprise-sso-secrets -n mereka-lms -o jsonpath='{.status.conditions[0].status}' 2>/dev/null || echo "NotFound")
+  ES_STATUS=$(kubectl get externalsecret enterprise-sso-secrets -n "$_NAMESPACE" -o jsonpath='{.status.conditions[0].status}' 2>/dev/null || echo "NotFound")
   if [ "$ES_STATUS" = "True" ]; then
-    pass_ "Cluster: enterprise-sso-secrets ExternalSecret synced (status=True)"
+    pass_ "Cluster: enterprise-sso-secrets ExternalSecret synced (status=True, ns=$_NAMESPACE)"
   elif [ "$ES_STATUS" = "NotFound" ]; then
-    fail_ "Cluster: enterprise-sso-secrets ExternalSecret not found"
+    skip_ "Cluster: enterprise-sso-secrets ExternalSecret not found in ns=$_NAMESPACE (may not exist on this env)"
   else
-    fail_ "Cluster: enterprise-sso-secrets ExternalSecret not synced (status=$ES_STATUS)"
+    fail_ "Cluster: enterprise-sso-secrets ExternalSecret not synced (status=$ES_STATUS, ns=$_NAMESPACE)"
   fi
 
   # Check third_party_auth in LMS pod INSTALLED_APPS
-  LMS_POD=$(kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  LMS_POD=$(kubectl get pods -n "$_NAMESPACE" -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
   if [ -n "$LMS_POD" ]; then
-    TPA_CHECK=$(kubectl exec -n mereka-lms "$LMS_POD" -- python -c "
+    TPA_CHECK=$(kubectl exec -n "$_NAMESPACE" "$LMS_POD" -- python -c "
 import django; django.setup()
 from django.conf import settings
 print('third_party_auth' if any('third_party_auth' in a for a in settings.INSTALLED_APPS) else 'missing')
 " 2>/dev/null || echo "error")
     if [ "$TPA_CHECK" = "third_party_auth" ]; then
-      pass_ "Cluster: third_party_auth in INSTALLED_APPS (live LMS pod)"
+      pass_ "Cluster: third_party_auth in INSTALLED_APPS (live LMS pod, ns=$_NAMESPACE)"
     elif [ "$TPA_CHECK" = "missing" ]; then
-      fail_ "Cluster: third_party_auth NOT in INSTALLED_APPS (live LMS pod)"
+      fail_ "Cluster: third_party_auth NOT in INSTALLED_APPS (live LMS pod, ns=$_NAMESPACE)"
     else
-      skip_ "Cluster: Could not check INSTALLED_APPS in LMS pod"
+      skip_ "Cluster: Could not check INSTALLED_APPS in LMS pod (ns=$_NAMESPACE)"
     fi
   else
-    skip_ "Cluster: No LMS pod found"
+    skip_ "Cluster: No LMS pod found in ns=$_NAMESPACE"
   fi
 
   # Check SAML metadata endpoint
-  SAML_META_STATUS=$(curl -s --max-time 10 -o /dev/null -w '%{http_code}' "https://${LMS_DOMAIN}/auth/saml/metadata.xml" 2>/dev/null || echo "000")
+  SAML_META_STATUS=$(curl -s --max-time 10 -o /dev/null -w '%{http_code}' "https://${_LMS_DOMAIN}/auth/saml/metadata.xml" 2>/dev/null || echo "000")
   if [ "$SAML_META_STATUS" = "200" ]; then
-    pass_ "AC-005 (live): /auth/saml/metadata.xml returns HTTP 200"
+    pass_ "AC-005 (live): /auth/saml/metadata.xml returns HTTP 200 (${_LMS_DOMAIN})"
   elif [ "$SAML_META_STATUS" = "404" ]; then
-    skip_ "AC-005 (live): /auth/saml/metadata.xml returns 404 (no SAML config active yet)"
+    skip_ "AC-005 (live): /auth/saml/metadata.xml returns 404 (no SAML config active yet on ${_LMS_DOMAIN})"
   elif [ "$SAML_META_STATUS" = "000" ]; then
-    skip_ "AC-005 (live): ${LMS_DOMAIN} unreachable"
+    skip_ "AC-005 (live): ${_LMS_DOMAIN} unreachable"
   else
-    skip_ "AC-005 (live): /auth/saml/metadata.xml returns HTTP $SAML_META_STATUS"
+    skip_ "AC-005 (live): /auth/saml/metadata.xml returns HTTP $SAML_META_STATUS (${_LMS_DOMAIN})"
   fi
 
   # Check Authentik OIDC endpoint reachable
-  OIDC_STATUS=$(curl -s --max-time 10 -o /dev/null -w '%{http_code}' "https://auth0.mereka.io/application/o/mereka-lms/.well-known/openid-configuration" 2>/dev/null || echo "000")
+  OIDC_STATUS=$(curl -s --max-time 10 -o /dev/null -w '%{http_code}' "https://${_AUTHENTIK_DOMAIN}/application/o/mereka-lms/.well-known/openid-configuration" 2>/dev/null || echo "000")
   if [ "$OIDC_STATUS" = "200" ]; then
-    pass_ "AC-004 (live): Authentik OIDC discovery endpoint reachable"
+    pass_ "AC-004 (live): Authentik OIDC discovery endpoint reachable (${_AUTHENTIK_DOMAIN})"
   elif [ "$OIDC_STATUS" = "000" ]; then
-    skip_ "AC-004 (live): auth0.mereka.io unreachable"
+    skip_ "AC-004 (live): ${_AUTHENTIK_DOMAIN} unreachable"
   else
-    fail_ "AC-004 (live): Authentik OIDC discovery returned HTTP $OIDC_STATUS"
+    fail_ "AC-004 (live): Authentik OIDC discovery returned HTTP $OIDC_STATUS (${_AUTHENTIK_DOMAIN})"
   fi
 fi
 

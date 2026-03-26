@@ -288,7 +288,7 @@ def render_history_map(docs: list[LedgerDoc]) -> str:
         "These ADRs carry decision history but are not current law.",
         "",
         "| ADR | Title | Historical reason | Path |",
-        "|---|---|---|---|",
+        "| --- | --- | --- | --- |",
     ]
     for doc in historical:
         reason = doc.meta.get("historical_reason") or doc.meta.get("removal_condition") or "historical"
