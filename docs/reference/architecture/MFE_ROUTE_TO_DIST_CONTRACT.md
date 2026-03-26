@@ -246,20 +246,21 @@ declare -A MFE_ROUTES=(
 )
 ```
 
-### Step 4: Rebuild and Deploy
+### Step 4: Publish and Promote
 
 ```bash
-# Rebuild MFE image with new MFE included
-tutor images build mfe
-
-# Push to registry
-tutor images push mfe
-
-# Update Kustomize overlay image tag
-# deploy/k8s/overlays/production/kustomization.yaml
-
-# Apply to cluster
-kubectl apply -k deploy/k8s/overlays/production
+# 1. Commit the route/settings/verifier change in git
+# 2. Publish the new MFE image through the governed build lane
+#    (.github/workflows/build-tutor-images.yml)
+# 3. Promote the resulting digests through the canonical GitOps front door
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag <openedx_tag> \
+  --mfe-tag <mfe_tag> \
+  --openedx-digest sha256:<openedx_digest> \
+  --mfe-digest sha256:<mfe_digest> \
+  --require-digests \
+  --apply --commit --push --verify-runtime
 ```
 
 ### Step 5: Verify Contract
@@ -351,7 +352,7 @@ grep -oP '\["/[a-z0-9_-]+"\]="[a-z0-9_-]+"' \
 1. **Add new route** in Caddyfile (serve same directory)
 2. **Add new setting** in production.py
 3. **Add both to branding verifier** (temporarily)
-4. **Deploy and test**
+4. **Publish and promote through the governed release path**
 5. **Update all hardcoded links** in codebase
 6. **Wait 2 release cycles**
 7. **Remove old route** from all 3 layers
@@ -376,9 +377,15 @@ kubectl exec -n mereka-lms "$MFE_POD" -- ls -la /openedx/dist/
 # 3. Verify Caddyfile route
 kubectl exec -n mereka-lms -l app.kubernetes.io/name=caddy -- cat /etc/caddy/Caddyfile | grep -A5 "@mfe_<name>"
 
-# 4. Roll back to previous image tag
-kubectl set image deployment/mfe -n mereka-lms mfe=<previous-image-tag>
-kubectl rollout status deployment/mfe -n mereka-lms
+# 4. Roll back through the canonical GitOps front door with the prior known-good tag/digest set
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag <current_openedx_tag> \
+  --mfe-tag <previous_good_mfe_tag> \
+  --openedx-digest sha256:<current_openedx_digest> \
+  --mfe-digest sha256:<previous_good_mfe_digest> \
+  --require-digests \
+  --apply --commit --push --verify-runtime
 ```
 
 ### If LMS Can't Generate MFE URLs
@@ -392,11 +399,8 @@ kubectl rollout status deployment/mfe -n mereka-lms
 kubectl exec -n mereka-lms -l app.kubernetes.io/name=lms -- \
   python -c "from lms.envs.production import *; print(NEWMFE_MICROFRONTEND_URL)"
 
-# 2. If missing, add to ConfigMap and restart
-kubectl edit configmap openedx-settings-lms-patched -n mereka-lms
-# Add: NEWMFE_MICROFRONTEND_URL = ...
-
-kubectl rollout restart deployment/lms -n mereka-lms
+# 2. If missing, repair the repo-owned LMS setting and publish/promote it via
+#    .github/workflows/build-tutor-images.yml + release-openedx-gitops.sh
 ```
 
 ## Success Criteria

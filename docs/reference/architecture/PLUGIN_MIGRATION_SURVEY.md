@@ -175,8 +175,8 @@ See full details in `MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`.
 The script can be retired (or reduced to asset-sync only) when:
 
 1. All Section C items are migrated to `mereka_lms.py` plugin hooks
-2. A plugin-only build (`tutor images build openedx` + `mfe`) succeeds without `apply-patches.sh`
-3. All verification gates pass on the plugin-only build
+2. Local parity remains reproducible without `apply-patches.sh` (`tutor images build openedx` + `mfe` may still be used as a debug/local check)
+3. The governed publish lane (`.github/workflows/build-tutor-images.yml`) ships the same plugin-only sources without `apply-patches.sh`, and all verification gates pass there
 4. Section D items are verified as redundant (plugin handles them)
 
 **Target**: 2026-Q3 for script-only patches; 2026-Q4 for full retirement to asset-sync stub.

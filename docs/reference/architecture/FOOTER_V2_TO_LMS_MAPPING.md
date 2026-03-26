@@ -60,8 +60,8 @@ To update footer content:
 1. Edit the `MerekaFooter` JSX in `infrastructure/tutor/plugins/mereka_lms.py`
 2. Copy identical JSX to `infrastructure/tutor/apply-patches.sh` (the `footer_component` variable)
 3. Run verification: `./scripts/qa/verify-mfe-footer-slot.sh`
-4. Rebuild MFE image: `tutor images build mfe`
-5. Restart: `tutor local restart` or `tutor k8s restart`
+4. For local parity only, rebuild MFE with `tutor images build mfe`
+5. For shared environments, publish via `.github/workflows/build-tutor-images.yml` and promote with `./scripts/infra/release-openedx-gitops.sh --require-digests`
 
 **IMPORTANT**: Both files MUST contain identical JSX. The verifier checks for sync.
 
