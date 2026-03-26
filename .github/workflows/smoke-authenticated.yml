@@ -21,6 +21,10 @@ on:
           - both
           - all
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.env_scope || 'prod' }}
+  cancel-in-progress: false
+
 permissions: {}
 
 jobs:
