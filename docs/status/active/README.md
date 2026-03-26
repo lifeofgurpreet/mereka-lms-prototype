@@ -7,6 +7,7 @@ This directory is the active status surface for open operational, program, and r
 
 | If you need to... | Read this first | Then go deeper in |
 |---|---|---|
+| Check the UI/browser-proof reproducibility lane | [UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md](UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md) | [UI_RUNTIME_TRUTH_TAKEOVER_PROMPT_2026-03-25.md](UI_RUNTIME_TRUTH_TAKEOVER_PROMPT_2026-03-25.md) |
 | Check today’s highest-leverage execution queue | [TODAY_WORKLOAD_TRACKER_2026-03-25.md](TODAY_WORKLOAD_TRACKER_2026-03-25.md) | [DEV_STAGING_TRUTH_TRACKER_2026-03-25.md](DEV_STAGING_TRUTH_TRACKER_2026-03-25.md) |
 | Check the current docs-control-plane posture | [DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md](DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md) | [`../../meta/docs-program/README.md`](../../meta/docs-program/README.md) |
 | Check active frontend/platform follow-up work | [FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md](FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md) | [FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md](FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md) |
@@ -41,6 +42,8 @@ Do not create new active status docs under legacy `reports/**` paths.
 | [DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md](DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md) | You need the current docs control-plane closure state. |
 | [DEV_STAGING_TRUTH_TRACKER_2026-03-25.md](DEV_STAGING_TRUTH_TRACKER_2026-03-25.md) | You need the current cross-repo truth tracker for DEV/staging operational closure. |
 | [DEV_STAGING_TRUTH_TAKEOVER_PROMPT_2026-03-25.md](DEV_STAGING_TRUTH_TAKEOVER_PROMPT_2026-03-25.md) | You need a direct handoff brief for the next agent working the DEV/staging truth lane. |
+| [UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md](UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md) | You need the current UI/browser-proof reproducibility tracker. |
+| [UI_RUNTIME_TRUTH_TAKEOVER_PROMPT_2026-03-25.md](UI_RUNTIME_TRUTH_TAKEOVER_PROMPT_2026-03-25.md) | You need a direct handoff brief for the next agent working the UI/browser-proof lane. |
 | [FOLLOW_UPS_2026-01-20.md](FOLLOW_UPS_2026-01-20.md) | You need outstanding follow-up items still considered active. |
 | [FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md](FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md) | You need active CI simplification work for frontend. |
 | [FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md](FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md) | You need the frontend closure status matrix. |

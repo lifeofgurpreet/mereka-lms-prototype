@@ -297,7 +297,7 @@ else
       pw_ver=$(node -e "console.log(require('${E2E_DIR}/node_modules/@playwright/test/package.json').version)" 2>/dev/null || echo "unknown")
       pass "Playwright installed in node_modules: ${pw_ver}"
     else
-      fail "Playwright not installed — run: cd tests/e2e && npm install"
+      fail "Playwright not installed — run: cd tests/e2e && npm ci"
     fi
   fi
 
@@ -324,10 +324,10 @@ try {
     elif command -v "${E2E_DIR}/node_modules/.bin/playwright" >/dev/null 2>&1; then
       pass "Playwright CLI available (browser install status unknown in dry-run)"
     else
-      skip "Cannot verify browser installation without node_modules — run: cd tests/e2e && npm install && npx playwright install chromium"
+      skip "Cannot verify browser installation without node_modules — run: cd tests/e2e && npm ci && npx playwright install chromium --force"
     fi
   else
-    skip "node_modules not installed — run: cd tests/e2e && npm install"
+    skip "node_modules not installed — run: cd tests/e2e && npm ci"
   fi
 
   # ---------------------------------------------------------------------------
@@ -338,7 +338,7 @@ try {
 
   if [[ ! -d "${E2E_DIR}/node_modules" ]]; then
     skip "node_modules not installed — cannot run tests"
-    echo "  To install: cd tests/e2e && npm install && npx playwright install chromium"
+    echo "  To install: cd tests/e2e && npm ci && npx playwright install chromium --force"
   else
     echo "Running: cd tests/e2e && BASE_URL=${BASE_URL} npx playwright test"
     echo ""
@@ -380,8 +380,8 @@ if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo ""
   echo "Remediation:"
   echo "  1. Ensure tests/e2e/ directory exists with the three required files"
-  echo "  2. Run: cd tests/e2e && npm install"
-  echo "  3. Install browser: npx playwright install chromium"
+  echo "  2. Run: cd tests/e2e && npm ci"
+  echo "  3. Install browser: npx playwright install chromium --force"
   echo "  4. Set E2E_USERNAME, E2E_PASSWORD, E2E_COURSE_ID, E2E_CERT_URL for authenticated tests"
   echo "  5. See docs/guides/admin/ or docs/ops/runbooks/ for the current E2E setup guide"
   echo ""
