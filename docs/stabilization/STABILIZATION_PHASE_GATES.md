@@ -79,13 +79,30 @@
 
 ## Current Gate Decision
 
-The program remains in `Stabilization`.
+**Updated: 2026-03-26**
 
-It may move to `Convergence` only when runtime/browser closure is recorded as durable,
-non-contradictory merged repo truth rather than local proof, manual mitigation, or
-temporary operational state.
+The program remains in `Stabilization`, but the gate is now `PARTIALLY SATISFIED`.
+
+### What is now satisfied (merged repo truth)
+
+1. Repo-side stabilization contracts: **COMPLETE** (Lanes F, G, H all CONFIRMED/DURABLE)
+2. Canonical runtime/browser evidence bundle: **MERGED** (`docs/reviews/STAGING_RUNTIME_CONVERGENCE_EVIDENCE.md`, PR #1061)
+3. Evidence bundle classifies paths: **YES** — 28 CONFIRMED, 6 PROVISIONAL, 2 PARKED, no open CONTRADICTED
+4. SSO browser proof: **TRACKED** — GitHub Actions run 23584121291, both SSO Canary and smoke-authenticated GREEN on main
+
+### What remains for full gate satisfaction
+
+1. Enterprise service deployment to staging: **PROVISIONAL** — enterprise-catalog, enterprise-access, enterprise-subsidy not fully deployed
+2. Image digest pinning: **PROVISIONAL** — staging uses mutable SHA-timestamp tags, not immutable digests
+3. Synthetic test fixtures: **PARKED** — not provisioned on staging
+
+### The gate may advance when
+
+- Enterprise services are deployed and verified on staging, OR
+- Enterprise paths are explicitly reclassified as out-of-scope for this gate with an owner and reason
 
 Current claim-lineage intake for that gate is tracked in:
 
 - `docs/stabilization/CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md`
 - `docs/reviews/DEV_RUNTIME_CONVERGENCE_EVIDENCE.md`
+- `docs/reviews/STAGING_RUNTIME_CONVERGENCE_EVIDENCE.md`
