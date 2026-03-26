@@ -9,6 +9,8 @@ cd "$REPO_ROOT"
 
 APPLY_PATCH_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
+SLOT_OWNERSHIP_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-slot-ownership.sh"
+SLOT_OWNERSHIP_HELPER="$REPO_ROOT/infrastructure/tutor/patches/mfe_slot_ownership.py"
 GENERATED_MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 GENERATED_MFE_BUILD_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe"
 GENERATED_MFE_INDIGO_DIR="$GENERATED_MFE_BUILD_DIR/indigo"
@@ -75,13 +77,48 @@ check_contains_any_file() {
   failures=1
 }
 
+check_jsx_parse() {
+  local label="$1"
+  local path="$2"
+  if [[ ! -f "$path" ]]; then
+    echo "  ✗ $label (missing file: $path)"
+    failures=1
+    return
+  fi
+
+  if [[ ! -d "$REPO_ROOT/node_modules/acorn" || ! -d "$REPO_ROOT/node_modules/acorn-jsx" ]]; then
+    echo "  ! $label (acorn parser unavailable locally; skipped)"
+    return
+  fi
+
+  if node - "$path" <<'NODE'
+const fs = require('fs');
+const acorn = require('./node_modules/acorn');
+const jsx = require('./node_modules/acorn-jsx');
+const Parser = acorn.Parser.extend(jsx());
+const path = process.argv[2];
+const src = fs.readFileSync(path, 'utf8');
+Parser.parse(src, { ecmaVersion: 'latest', sourceType: 'module' });
+NODE
+  then
+    echo "  ✓ $label"
+  else
+    echo "  ✗ $label (syntax parse failed: $path)"
+    failures=1
+  fi
+}
+
 echo "Verifying MFE build prerequisites..."
 echo ""
 
 echo "1. Patch source contract..."
 check_contains "apply-patches sources MFE patch module" "$APPLY_PATCH_SCRIPT" "source \"\$PATCHES_DIR/mfe-node.sh\""
 check_contains "apply-patches applies MFE node patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_node_patch"
+check_contains "apply-patches sources MFE slot ownership patch" "$APPLY_PATCH_SCRIPT" "source \"\$PATCHES_DIR/mfe-slot-ownership.sh\""
+check_contains "apply-patches applies MFE slot ownership patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_slot_ownership_patch"
 check_contains "mfe-node patch defines plugin dependency helper" "$PATCH_MODULE" "def ensure_mfe_plugin_framework_dependency(text):"
+check_contains "slot ownership shell delegates to Python helper" "$SLOT_OWNERSHIP_PATCH" "mfe_slot_ownership.py"
+check_contains "slot ownership helper defines strip_slot_ownership" "$SLOT_OWNERSHIP_HELPER" "def strip_slot_ownership("
 check_contains_any_file "mfe-node patch injects legacy-to-legacy-peer line" "$LEGACY_PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
 check_contains_any_file "mfe-node patch injects plugin dependency line" "$PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
 check_contains_any_file "mfe-node patch invokes plugin dependency helper" "updated = ensure_mfe_plugin_framework_dependency(updated)" "$PATCH_MODULE" "$APPLY_PATCH_SCRIPT"
@@ -127,6 +164,9 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
     echo "  ✗ generated indigo/mereka theme directory missing: $GENERATED_MFE_INDIGO_THEME_DIR"
     failures=1
   fi
+
+  check_jsx_parse "generated env.config.jsx parses as JSX" "$GENERATED_MFE_BUILD_DIR/env.config.jsx"
+  check_jsx_parse "generated indigo/env.config.jsx parses as JSX" "$GENERATED_MFE_INDIGO_ENV"
 else
   if [[ "$REQUIRE_GENERATED_DOCKERFILE" == "1" ]]; then
     echo "  ✗ generated Dockerfile missing: $GENERATED_MFE_DOCKERFILE"
