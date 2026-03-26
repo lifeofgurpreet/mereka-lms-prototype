@@ -1,5 +1,5 @@
 # Active Status Reports
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-26 • Status: canonical_
 
 This directory is the active status surface for open operational, program, and remediation tracking that is still relevant to current work. Start here when the question is “what is in flight right now?” rather than “are we ready?” or “what proof do we have?”
 
@@ -8,7 +8,7 @@ This directory is the active status surface for open operational, program, and r
 | If you need to... | Read this first | Then go deeper in |
 |---|---|---|
 | Check the UI/browser-proof reproducibility lane | [UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md](UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md) | [UI_RUNTIME_TRUTH_TAKEOVER_PROMPT_2026-03-25.md](UI_RUNTIME_TRUTH_TAKEOVER_PROMPT_2026-03-25.md) |
-| Check today’s highest-leverage execution queue | [TODAY_WORKLOAD_TRACKER_2026-03-25.md](TODAY_WORKLOAD_TRACKER_2026-03-25.md) | [DEV_STAGING_TRUTH_TRACKER_2026-03-25.md](DEV_STAGING_TRUTH_TRACKER_2026-03-25.md) |
+| Check today’s highest-leverage execution queue | [TODAY_WORKLOAD_TRACKER_2026-03-26.md](TODAY_WORKLOAD_TRACKER_2026-03-26.md) | [DEV_STAGING_TRUTH_TRACKER_2026-03-25.md](DEV_STAGING_TRUTH_TRACKER_2026-03-25.md) |
 | Check the current docs-control-plane posture | [DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md](DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md) | [`../../meta/docs-program/README.md`](../../meta/docs-program/README.md) |
 | Check active frontend/platform follow-up work | [FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md](FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md) | [FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md](FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md) |
 | Check observability work still in flight | [OBSERVABILITY_REMAINING_WORK_2026-02-27.md](OBSERVABILITY_REMAINING_WORK_2026-02-27.md) | [OBSERVABILITY_ROADMAP_MEREKA_LMS.md](OBSERVABILITY_ROADMAP_MEREKA_LMS.md) |
@@ -55,7 +55,8 @@ Do not create new active status docs under legacy `reports/**` paths.
 | [OBSERVABILITY_REVIEW_AND_FIRST_CLASS_WORKPLAN_2026-02-25.md](OBSERVABILITY_REVIEW_AND_FIRST_CLASS_WORKPLAN_2026-02-25.md) | You need the active observability review/workplan. |
 | [OBSERVABILITY_ROADMAP_MEREKA_LMS.md](OBSERVABILITY_ROADMAP_MEREKA_LMS.md) | You need the broader active observability roadmap. |
 | [PLUGIN_SPLIT_STATUS_2026-03-02.md](PLUGIN_SPLIT_STATUS_2026-03-02.md) | You need plugin-split progress state. |
-| [TODAY_WORKLOAD_TRACKER_2026-03-25.md](TODAY_WORKLOAD_TRACKER_2026-03-25.md) | You need the current highest-leverage execution queue for March 25, 2026. |
+| [TODAY_WORKLOAD_TRACKER_2026-03-25.md](TODAY_WORKLOAD_TRACKER_2026-03-25.md) | You need the archived highest-leverage execution queue for March 25, 2026. |
+| [TODAY_WORKLOAD_TRACKER_2026-03-26.md](TODAY_WORKLOAD_TRACKER_2026-03-26.md) | You need the current highest-leverage execution queue for March 26, 2026. |
 | [ULMO_DEV_STAGING_PARITY.md](ULMO_DEV_STAGING_PARITY.md) | You need parity tracking for the Ulmo/dev-staging surface. |
 | [blocked-epics.md](blocked-epics.md) | You need the current blocked-epics view. |
 

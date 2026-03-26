@@ -10379,7 +10379,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-09",
+    "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "status/active/README.md",
     "status": "canonical",
@@ -10391,6 +10391,15 @@
     "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "status/active/TODAY_WORKLOAD_TRACKER_2026-03-25.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-26T10:45:00Z",
+    "owner": "Platform Team",
+    "path": "status/active/TODAY_WORKLOAD_TRACKER_2026-03-26.md",
     "status": "supporting",
     "type": "status"
   },
