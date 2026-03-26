@@ -208,9 +208,6 @@ cp scripts/tenants/acme-branding.json /tmp/acme-branding.example.json
 
 # Sync tenant branding assets from canonical tenant sources
 ./scripts/tenants/sync-tenant-branding.sh --tenant acme-corp
-
-# Optional: repo-wide asset sync after tenant update
-./scripts/branding/sync-brand-assets.sh
 ```
 
 **Asset Requirements**:
@@ -252,53 +249,45 @@ cp scripts/tenants/acme-branding.json /tmp/acme-branding.example.json
 
 ---
 
-### Step 4: Apply Branding
+### Step 4: Publish Branding Through the Canonical Release Path
 
 ```bash
-# Option A: Sync to static directory (local development)
+# Local parity only (optional)
 tutor local run lms python manage.py lms collectstatic --noinput --clear --link
 
-# Option B: Sync to Kubernetes pods (production)
-kubectl exec -n mereka-lms deployment/lms -- \
-  python manage.py lms collectstatic --noinput --clear --link
-
-# Option C: Use branding sync script (recommended)
-./scripts/branding/sync-brand-assets.sh
+# Production/shared environments
+# 1. Commit brand-pack + theme changes
+# 2. Publish via .github/workflows/build-tutor-images.yml
+# 3. Promote the resulting digests through:
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag <openedx_tag> \
+  --mfe-tag <mfe_tag> \
+  --openedx-digest sha256:<openedx_digest> \
+  --mfe-digest sha256:<mfe_digest> \
+  --require-digests \
+  --apply --commit --push --verify-runtime
 ```
 
 **What happens**:
-- Brand pack assets copied to `/static/themes/mereka/tenants/<slug>/`
-- Assets served via Caddy/Nginx reverse proxy
-- No image rebuild required
+- Brand-pack assets and MFE theme files are published in the image built from git.
+- GitOps promotes the verified digests into the cluster.
+- Runtime tenant config remains aligned through `apply-multisite-config.sh`.
 
 ---
 
-### Step 5: Update Database Configuration
+### Step 5: Reconcile Runtime Tenant Configuration
 
 ```bash
-# Update tenant configuration in database (optional, if not set during provisioning)
-tutor local run lms python manage.py lms shell << 'EOF'
-from openedx_tenant_cache.models import TenantSiteMapping
-
-tenant = TenantSiteMapping.get_by_slug('acme-corp')
-config = tenant.site_config
-
-# Update colors
-config.values['primary_color'] = '#FF5733'
-
-# Update MFE logo URLs
-config.mfe_config['LOGO_URL'] = '/static/themes/mereka/tenants/acme-corp/logos/logo.png'
-config.mfe_config['FAVICON_URL'] = '/static/themes/mereka/tenants/acme-corp/favicons/favicon.ico'
-
-config.save()
-EOF
+# Re-apply canonical tenant runtime config from git after provisioning/branding updates
+./scripts/infra/apply-multisite-config.sh --apply
 ```
 
-**Why**: Database config overrides file-based config at runtime.
+**Why**: `Site` / `SiteConfiguration` truth must come from the canonical multisite source, not ad-hoc shell edits.
 
 ---
 
-### Step 6: Invalidate Cache
+### Step 6: Invalidate Cache (only if stale data persists after canonical reconcile)
 
 ```bash
 # Clear Redis cache for tenant (ensures immediate visibility)
@@ -341,9 +330,9 @@ curl -H "Host: acme.academyv2.mereka.io" \
 # https://acme.academyv2.mereka.io
 ```
 
-**Downtime**: Zero (static files served from existing pods, cache invalidation is instant)
+**Downtime**: Zero if the canonical publish + GitOps rollout completes normally.
 
-**Rollback**: Revert file upload, re-run collectstatic, invalidate cache again.
+**Rollback**: Revert the repo change, publish a new artifact, promote it through `release-openedx-gitops.sh`, then invalidate cache if stale branding persists.
 
 ---
 
@@ -354,8 +343,8 @@ curl -H "Host: acme.academyv2.mereka.io" \
 | 1. Create brand pack | `cp -r _template/ acme-corp/ && vim branding.json` | 5 min |
 | 2. Add assets | `cp logo.png favicons/favicon.ico` | 2 min |
 | 3. Validate | `./scripts/tenants/validate-tenant-brand-pack.sh --slug acme-corp` | 1 min |
-| 4. Apply branding | `tutor local run lms collectstatic` | 2 min |
-| 5. Update DB config | `python manage.py lms shell` | 2 min |
+| 4. Publish branding | `build-tutor-images.yml` + `release-openedx-gitops.sh` | CI/runtime dependent |
+| 5. Reconcile runtime config | `./scripts/infra/apply-multisite-config.sh --apply` | 2 min |
 | 6. Invalidate cache | `tenant_cache_clear(uuid)` | 1 min |
 | 7. Verify | `curl /api/v1/mfe_config` | 1 min |
 | **Total** | | **~15 min** |
@@ -410,14 +399,9 @@ The provisioning command performs **11 steps** idempotently:
 - Placeholder for Degreed, Cornerstone, SAP SuccessFactors, etc.
 - Configure manually via admin after provisioning
 
-### Step 10: Branding Directory
-- Creates directory structure for tenant assets:
-  ```
-  themes/mereka/tenants/<slug>/
-    logos/
-    favicons/
-    styles/
-  ```
+### Step 10: Branding Assets and Runtime References
+- Tenant brand assets live in the repo-owned theme/brand-pack paths and are published through the image/release pipeline.
+- Runtime tenant references are reconciled via `apply-multisite-config.sh`.
 
 ### Step 11: Summary
 - Prints provisioning summary with UUIDs and status for each step
@@ -543,18 +527,14 @@ kubectl get svc caddy -n mereka-lms -o jsonpath='{.status.loadBalancer.ingress[0
 acme.academyv2.mereka.io → <load-balancer-ip>
 ```
 
-### 2. Update LMS Settings
+### 2. Reconcile Canonical LMS Runtime Settings
 
-Add tenant domain to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`:
+Do not patch `ALLOWED_HOSTS` / `CSRF_TRUSTED_ORIGINS` directly on the VPS. Add the tenant domain to the repo-owned multisite source of truth, then reconcile runtime state through the canonical writer:
 
 ```bash
-# Edit Tutor config
-tutor config save --set "ALLOWED_HOSTS=['academyv2.mereka.io', 'acme.academyv2.mereka.io']"
-tutor config save --set "CSRF_TRUSTED_ORIGINS=['https://academyv2.mereka.io', 'https://acme.academyv2.mereka.io']"
-
-# Apply patches and restart
-./infrastructure/tutor/apply-patches.sh
-tutor k8s restart
+# 1. Update scripts/tenants/multisite-sites.yml with the tenant domain
+# 2. Reconcile Site/SiteConfiguration truth from git
+./scripts/infra/apply-multisite-config.sh --apply
 ```
 
 ### 3. Configure SSO (If Applicable)
@@ -566,17 +546,17 @@ tutor k8s restart
   --metadata-url https://idp.acme.com/metadata
 ```
 
-### 4. Upload Branding Assets
+### 4. Publish Branding Assets Through the Release Path
+
+Commit tenant branding assets in the repo-owned theme paths, then publish and promote them through the governed release flow:
 
 ```bash
-# Upload logo
-cp acme-logo.png themes/mereka/tenants/acme-corp/logos/logo.png
+# Example asset locations
+cp acme-logo.png infrastructure/tutor/themes/mereka/mfe/theme/acme-corp/logo-horizontal.svg
+cp acme-favicon.ico infrastructure/tutor/themes/mereka/mfe/theme/acme-corp/favicon.ico
 
-# Upload favicon
-cp acme-favicon.ico themes/mereka/tenants/acme-corp/favicons/favicon.ico
-
-# Sync to Tutor
-./scripts/branding/sync-brand-assets.sh
+# Publish with .github/workflows/build-tutor-images.yml, then promote with
+# ./scripts/infra/release-openedx-gitops.sh --require-digests
 ```
 
 ### 5. Create Enterprise Catalog
@@ -627,8 +607,9 @@ Via Django admin (`/admin/subscriptions/subscriptionplan/`) or license-manager A
 **Cause**: Django Site with the same domain already exists.
 
 **Fix**:
-- If this is intentional (re-provisioning), the command will reuse the existing Site
-- If the domain is wrong, delete the Site: `python manage.py lms shell -c "from django.contrib.sites.models import Site; Site.objects.filter(domain='X').delete()"`
+- If this is intentional (re-provisioning), the command will reuse the existing Site.
+- If the domain is wrong, correct the repo-owned tenant source (`scripts/tenants/multisite-sites.yml`) and re-run `./scripts/infra/apply-multisite-config.sh --apply`.
+- Treat direct Django-shell deletion as break-glass only; the canonical path is to repair the source and reconcile forward.
 
 ---
 
@@ -663,7 +644,7 @@ Via Django admin (`/admin/subscriptions/subscriptionplan/`) or license-manager A
 
 ## Rollback/Offboarding
 
-To deactivate a tenant (without deleting data):
+For normal offboarding, update the repo-owned tenant source and reconcile with `./scripts/infra/apply-multisite-config.sh --apply`. Use the direct model mutations below only as break-glass actions when you need an immediate disable before the canonical repo change lands.
 
 ### 1. Mark Tenant as Inactive
 
@@ -687,12 +668,12 @@ ec.save()
 
 Delete the A record for the tenant domain.
 
-### 4. Remove from ALLOWED_HOSTS
+### 4. Remove runtime host access via canonical reconcile
 
 ```bash
-tutor config save --set "ALLOWED_HOSTS=['academyv2.mereka.io']"
-./infrastructure/tutor/apply-patches.sh
-tutor k8s restart
+# Remove the tenant domain from scripts/tenants/multisite-sites.yml,
+# then reconcile runtime Site/SiteConfiguration state:
+./scripts/infra/apply-multisite-config.sh --apply
 ```
 
 ---

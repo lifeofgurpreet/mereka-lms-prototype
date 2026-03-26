@@ -123,13 +123,12 @@ kubectl exec -n mereka-lms -it deploy/lms -- \
 ```
 
 **Fix**:
-```bash
-export TUTOR_ROOT="$(pwd)/tutor_env"
-./scripts/infra/tutor-config-save.sh \
-  --set ENABLE_MULTI_TENANT_BRANDING=True
-./infrastructure/tutor/apply-patches.sh
-tutor k8s restart
-```
+1. Update the canonical tenant source in `scripts/tenants/multisite-sites.yml` if the domain or tenant metadata is missing there.
+2. Reconcile live `Site` / `SiteConfiguration` state through the canonical writer:
+   ```bash
+   ./scripts/infra/apply-multisite-config.sh --apply
+   ```
+3. If the issue also involves plugin/theme code or runtime assets, publish a new image through `.github/workflows/build-tutor-images.yml` and promote it with `./scripts/infra/release-openedx-gitops.sh --require-digests` instead of patching Tutor config directly on the VPS.
 
 ---
 
@@ -148,7 +147,7 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=caddy --tail=50 | \
   grep newclient.academy.mereka.io
 ```
 
-**Fix**: Add domain to LMS Caddyfile template at `infrastructure/tutor/templates/apps/openedx/config/caddy/Caddyfile`:
+**Fix**: Add the domain to the repo-owned Caddy template at `infrastructure/tutor/templates/apps/openedx/config/caddy/Caddyfile`:
 
 ```caddyfile
 academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io, newclient.academy.mereka.io {
@@ -156,11 +155,20 @@ academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io, ne
 }
 ```
 
-Then rebuild and restart:
+Then publish and promote through the governed release path:
+
 ```bash
-tutor config save
-./infrastructure/tutor/apply-patches.sh
-tutor k8s restart caddy
+# 1. Commit the Caddy/template change in git
+# 2. Publish images via .github/workflows/build-tutor-images.yml
+# 3. Promote the resulting digests via the canonical GitOps front door
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag <openedx_tag> \
+  --mfe-tag <mfe_tag> \
+  --openedx-digest sha256:<openedx_digest> \
+  --mfe-digest sha256:<mfe_digest> \
+  --require-digests \
+  --apply --commit --push --verify-runtime
 ```
 
 ---
@@ -212,15 +220,15 @@ kubectl exec -n mereka-lms -it deploy/lms -- \
 
 **Expected**: Only one `SiteConfiguration` per `Site`, with `values={}` (empty) if using multi-tenant branding.
 
-**Fix**: Delete conflicting `SiteConfiguration`:
+**Fix**:
+1. Repair the canonical tenant definition in `scripts/tenants/multisite-sites.yml`.
+2. Reconcile runtime state through:
+   ```bash
+   ./scripts/infra/apply-multisite-config.sh --apply
+   ```
+3. Only use direct database deletion as break-glass after capturing before/after evidence, because the canonical multisite apply flow is the long-term owner of `SiteConfiguration` truth.
 
-```bash
-kubectl exec -n mereka-lms -it deploy/lms -- \
-  python manage.py shell -c "from openedx.core.djangoapps.site_configuration.models import SiteConfiguration; \
-  SiteConfiguration.objects.filter(site__domain='academy.biji-biji.com').delete()"
-```
-
-**Note**: `TenantResolutionMiddleware` runs AFTER `CurrentSiteMiddleware`, so tenant mapping should take precedence. If it doesn't, check middleware order in `production.py`.
+**Note**: `TenantResolutionMiddleware` runs AFTER `CurrentSiteMiddleware`, so tenant mapping should take precedence. If it doesn't, check middleware order in `production.py` and fix the source, not just the row.
 
 ---
 
@@ -264,11 +272,20 @@ grep -A 20 "SITE_VARIANTS" infrastructure/tutor/plugins/mereka_lms.py
 # 'skillourfuture.academy.mereka.io': { 'name': 'Skill Our Future Academy', ... }
 ```
 
-**Fix**: Update `SITE_VARIANTS` in `infrastructure/tutor/plugins/mereka_lms.py` and rebuild MFE image:
+**Fix**: Update `SITE_VARIANTS` in `infrastructure/tutor/plugins/mereka_lms.py`, then publish and promote the MFE through the canonical release path:
 
 ```bash
-tutor images build mfe
-tutor k8s restart mfe
+# 1. Commit the plugin/runtime change
+# 2. Publish via .github/workflows/build-tutor-images.yml
+# 3. Promote the verified tag/digest set
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag <openedx_tag> \
+  --mfe-tag <mfe_tag> \
+  --openedx-digest sha256:<openedx_digest> \
+  --mfe-digest sha256:<mfe_digest> \
+  --require-digests \
+  --apply --commit --push --verify-runtime
 ```
 
 **Note**: Footer variant resolution uses `window.location.hostname` at runtime, NOT server-side domain mapping.
@@ -346,19 +363,15 @@ kubectl exec -n mereka-lms -it deploy/lms -- \
   print(cfg.logo_url)"
 ```
 
-**Fix**: Upload tenant logo and update configuration:
+**Fix**: Repair the repo-owned tenant assets and canonical tenant config, then publish through the release path:
 
-1. Upload logo to theme assets: `infrastructure/tutor/themes/mereka/tenants/<slug>/assets/logo.png`
-2. Run `./scripts/branding/sync-brand-assets.sh`
-3. Update `TenantSiteConfiguration`:
-
-```bash
-kubectl exec -n mereka-lms -it deploy/lms -- \
-  python manage.py shell -c "from openedx_tenant_cache.models import TenantSiteConfiguration; \
-  cfg = TenantSiteConfiguration.objects.get(domain='academyv2.mereka.io'); \
-  cfg.logo_url = 'https://academyv2.mereka.io/static/mereka/tenants/mereka/assets/logo.png'; \
-  cfg.save()"
-```
+1. Add the correct logo/favicon files under `infrastructure/tutor/themes/mereka/mfe/theme/<tenant-variant>/`.
+2. If the tenant brand pack is repo-owned, refresh it through `./scripts/tenants/sync-tenant-branding.sh --tenant <slug>`.
+3. Reconcile runtime tenant config with:
+   ```bash
+   ./scripts/infra/apply-multisite-config.sh --apply
+   ```
+4. If the asset or plugin surface changed, publish via `.github/workflows/build-tutor-images.yml` and promote with `./scripts/infra/release-openedx-gitops.sh --require-digests`.
 
 ---
 
@@ -377,7 +390,7 @@ kubectl exec -n mereka-lms -it deploy/lms -- \
 # Should return: True
 ```
 
-**Fix**: Provision tenant using the provisioning script:
+**Fix**: Provision the tenant from the canonical repo-owned sources, then reconcile runtime state:
 
 ```bash
 # Create tenant environment file
@@ -392,8 +405,11 @@ BRAND_PRIMARY=#1a73e8
 BRAND_SECONDARY=#34a853
 EOF
 
-# Provision tenant
+# Bootstrap tenant records
 ./scripts/tenants/provision-tenant.sh --from-env scripts/tenants/newclient-tenant.env
+
+# Reconcile Site/SiteConfiguration truth from git
+./scripts/infra/apply-multisite-config.sh --apply
 ```
 
 **See**: `docs/ops/runbooks/TENANT_PROVISIONING.md` for full provisioning workflow.
