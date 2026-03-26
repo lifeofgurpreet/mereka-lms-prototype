@@ -32,7 +32,7 @@ runs:
         path: ~/.cache/ms-playwright
         key: playwright-${{ inputs.playwright-version }}-${{ runner.os }}
 
-    - name: Install Playwright Chromium (with system deps)
+    - name: Install Playwright Chromium
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       shell: bash
-      run: npx playwright@${{ inputs.playwright-version }} install --with-deps chromium
+      run: npx playwright@${{ inputs.playwright-version }} install chromium
