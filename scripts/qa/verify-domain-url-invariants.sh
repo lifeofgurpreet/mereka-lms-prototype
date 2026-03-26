@@ -548,6 +548,26 @@ if [[ -f "$PROD_PY" ]]; then
   fi
 fi
 
+if [[ -f "$CMS_PY" ]]; then
+  if grep -qF "MEREKA_SOF_STUDIO_DOMAIN" "$CMS_PY"; then
+    do_pass "CMS production.py defines MEREKA_SOF_STUDIO_DOMAIN"
+  else
+    do_fail "CMS production.py missing MEREKA_SOF_STUDIO_DOMAIN"
+  fi
+
+  if grep -qF "MEREKA_SOF_STUDIO_DOMAIN," "$CMS_PY"; then
+    do_pass "CMS ALLOWED_HOSTS includes MEREKA_SOF_STUDIO_DOMAIN"
+  else
+    do_fail "CMS ALLOWED_HOSTS missing MEREKA_SOF_STUDIO_DOMAIN"
+  fi
+
+  if grep -qF 'f"{MEREKA_SCHEME}://{MEREKA_SOF_STUDIO_DOMAIN}"' "$CMS_PY"; then
+    do_pass "CMS CORS/CSRF origins include MEREKA_SOF_STUDIO_DOMAIN"
+  else
+    do_fail "CMS CORS/CSRF origins missing MEREKA_SOF_STUDIO_DOMAIN"
+  fi
+fi
+
 # ── 10. Kustomize overlays render cleanly ────────────────────────────────
 printf "\n${BLUE}── 10. Kustomize overlay rendering ──${NC}\n"
 

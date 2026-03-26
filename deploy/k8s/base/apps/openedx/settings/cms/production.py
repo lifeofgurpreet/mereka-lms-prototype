@@ -96,6 +96,10 @@ MEREKA_BIJI_STUDIO_DOMAIN = os.environ.get(
     "MEREKA_BIJI_STUDIO_DOMAIN",
     "studio.academy.biji-biji.com",
 )
+MEREKA_SOF_STUDIO_DOMAIN = os.environ.get(
+    "MEREKA_SOF_STUDIO_DOMAIN",
+    "studio.skillourfuture.academy.mereka.io",
+)
 
 def _domain_from_base_url(raw_url: str) -> str:
     raw_url = (raw_url or "").strip()
@@ -474,11 +478,18 @@ ALLOWED_HOSTS = [
     "cms",
     MEREKA_STUDIO_DOMAIN,
     MEREKA_BIJI_STUDIO_DOMAIN,
+    MEREKA_SOF_STUDIO_DOMAIN,
     MEREKA_DEV_STUDIO_DOMAIN,
 ]
-for origin in [MEREKA_STUDIO_BASE_URL, f"{MEREKA_SCHEME}://{MEREKA_BIJI_STUDIO_DOMAIN}"]:
+for origin in [
+    MEREKA_STUDIO_BASE_URL,
+    f"{MEREKA_SCHEME}://{MEREKA_BIJI_STUDIO_DOMAIN}",
+    f"{MEREKA_SCHEME}://{MEREKA_SOF_STUDIO_DOMAIN}",
+]:
     if origin not in CORS_ORIGIN_WHITELIST:
         CORS_ORIGIN_WHITELIST.append(origin)
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 # Secure cookies for HTTPS + shared auth on academyv2.mereka.io
 SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"
