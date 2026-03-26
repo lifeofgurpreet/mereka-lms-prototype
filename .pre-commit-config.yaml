@@ -8,6 +8,24 @@ repos:
         pass_filenames: false
         files: ^(docs/adr/|docs/architecture/|docs/evidence/|docs/runbooks/|scripts/qa/verify_adr_|scripts/qa/build_decision_graph\.py|scripts/qa/resolve_adr_impact\.py)
 
+      - id: verification-catalog-regen
+        name: Regenerate verification catalog
+        entry: scripts/qa/regen-verification-catalog.sh
+        language: system
+        pass_filenames: false
+        files: >-
+          (?x)^(
+            scripts/.*/verify-[^/]+\.sh|
+            \.github/ci-scripts-static\.txt|
+            \.github/workflows/[^/]+\.ya?ml|
+            scripts/qa/run-release-verification-gates\.sh|
+            scripts/qa/run-operations-gates\.sh|
+            scripts/qa/run-multisite-governance-gates\.sh|
+            verification/manifests/deprecated_verify_scripts\.json|
+            verification/catalogs/verification_status_overrides\.json|
+            scripts/qa/fixtures/script-basename-overlap-allowlist\.json
+          )$
+
   # Python formatting and linting
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.7.0
