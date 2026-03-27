@@ -481,6 +481,12 @@ for idx, line in enumerate(lines):
         current_name = name_match.group(2)
         continue
 
+    # Track newName values so kustomize image renames count as "seen"
+    new_name_match = re.match(r"^\s*newName:\s*(\S+)\s*$", line_no_eol)
+    if new_name_match:
+        seen_names.add(new_name_match.group(1))
+        continue
+
     tag_match = re.match(r"^(\s*newTag:\s*)(\S+)(\s*)$", line_no_eol)
     if not tag_match or not current_name:
         continue
