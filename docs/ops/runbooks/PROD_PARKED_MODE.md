@@ -70,3 +70,7 @@ kubectl scale deployment lms cms mfe lms-worker cms-worker \
 
 Use `scripts/qa/verify-prod-parked-state.sh` to confirm the
 parked state is intentional and not degraded.
+
+The current post-build runtime workflow uses this verifier instead of browser
+E2E while production remains parked. See `config/runtime-proof-policy.env` and
+`docs/ops/runbooks/POST_DEPLOY_GATE.md`.

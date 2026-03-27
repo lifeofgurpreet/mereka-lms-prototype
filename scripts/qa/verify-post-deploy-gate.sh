@@ -44,6 +44,7 @@ fail() { FAIL=$((FAIL + 1)); echo "FAIL: $1"; }
 skip() { SKIP=$((SKIP + 1)); echo "SKIP: $1"; }
 
 WORKFLOW_FILE="$REPO_ROOT/.github/workflows/post-deploy-e2e.yml"
+POLICY_FILE="$REPO_ROOT/config/runtime-proof-policy.env"
 
 # ── Section 1: Workflow File Existence ───────────────────────────────────────
 
@@ -59,6 +60,12 @@ else
   echo ""
   echo "RESULT: FAIL — post-deploy E2E gate workflow not found"
   exit 1
+fi
+
+if [[ -f "$POLICY_FILE" ]]; then
+  pass "Runtime proof policy exists: config/runtime-proof-policy.env"
+else
+  fail "Runtime proof policy missing: config/runtime-proof-policy.env"
 fi
 
 # ── Section 2: Trigger Configuration ─────────────────────────────────────────
@@ -88,7 +95,8 @@ else
 fi
 
 if grep -q 'default: "staging"' "$WORKFLOW_FILE" \
-  && grep -q 'https://staging.academyv2.mereka.io' "$WORKFLOW_FILE"; then
+  && grep -q '^POST_DEPLOY_MANUAL_DEFAULT_ENV=staging$' "$POLICY_FILE" \
+  && grep -q '^STAGING_RUNTIME_BASE_URL=https://staging.academyv2.mereka.io$' "$POLICY_FILE"; then
   pass "Workflow defaults to the canonical staging lane while prod is explicit"
 else
   fail "Workflow missing staging-first default target resolution"
@@ -101,6 +109,18 @@ if grep -q "Resolve E2E credential source" "$WORKFLOW_FILE" \
   pass "Workflow resolves E2E credentials from override and canary secret sources"
 else
   fail "Workflow missing canonical E2E credential fallback wiring"
+fi
+
+# Runtime policy must codify staging authority and parked prod posture
+if [[ -f "$POLICY_FILE" ]] \
+  && grep -q '^AUTHORITATIVE_RUNTIME_PROOF_ENV=staging$' "$POLICY_FILE" \
+  && grep -q '^POST_DEPLOY_WORKFLOW_RUN_ENV=production$' "$POLICY_FILE" \
+  && grep -q '^PROD_RUNTIME_MODE=parked$' "$POLICY_FILE" \
+  && grep -q '^PROD_PARKED_STATUS_CONTEXT=post-deploy/production-parked-state$' "$POLICY_FILE" \
+  && grep -q '^PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh$' "$POLICY_FILE"; then
+  pass "Runtime proof policy codifies staging authority and parked production verification"
+else
+  fail "Runtime proof policy missing staging/prod parked contract entries"
 fi
 
 # ── Section 3: Blocking Gate Structure ───────────────────────────────────────
@@ -117,10 +137,10 @@ fi
 
 # Must post a commit status
 if grep -q "statuses.*write\|post.*status\|commit.*status\|\/statuses\/" "$WORKFLOW_FILE" \
-  && grep -q 'post-deploy-e2e/critical-paths-${GATE_ENVIRONMENT}' "$WORKFLOW_FILE"; then
-  pass "Workflow posts environment-scoped deployment status to commit"
+  && grep -q "needs.gate-check.outputs.status_context" "$WORKFLOW_FILE"; then
+  pass "Workflow posts deployment status to commit via dynamic lane context"
 else
-  fail "Workflow does not post environment-scoped commit status — gate results not visible truthfully on PRs"
+  fail "Workflow does not post dynamic lane-aware commit status — gate results not visible truthfully on PRs"
 fi
 
 # Artifacts must be uploaded for debugging
@@ -128,6 +148,12 @@ if grep -q "upload-artifact" "$WORKFLOW_FILE"; then
   pass "E2E artifacts uploaded for debugging"
 else
   fail "No artifact upload — failures will be undebuggable"
+fi
+
+if grep -q "verify-prod-parked-state.sh" "$WORKFLOW_FILE"; then
+  pass "Workflow includes production parked-state verification path"
+else
+  fail "Workflow missing production parked-state verification path"
 fi
 
 # Must have timeout to prevent hanging

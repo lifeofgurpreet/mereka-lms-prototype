@@ -122,7 +122,6 @@
     "scripts/qa/verify-pr-handoff-guardrails.sh",
     "scripts/qa/verify-preview-redirect.sh",
     "scripts/qa/verify-proctoring-advanced.sh",
-    "scripts/qa/verify-prod-parked-state.sh",
     "scripts/qa/verify-regression-detection.sh",
     "scripts/qa/verify-release-readiness.sh",
     "scripts/qa/verify-restore-drill.sh",

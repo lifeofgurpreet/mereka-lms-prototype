@@ -11695,7 +11695,7 @@
         "ci_static"
       ],
       "env_scope": [
-        "global"
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -11994,10 +11994,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
       "env_scope": [
         "dev",
         "preview"
@@ -12006,15 +12010,15 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-prod-parked-state.sh",
-      "reference_count": 4,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -17312,16 +17316,16 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 396,
-      "manual_only": 179
+      "active": 397,
+      "manual_only": 178
     },
     "tiers": {
-      "exploratory_manual": 182,
+      "exploratory_manual": 181,
       "periodic_runtime": 16,
-      "release_blocking": 377
+      "release_blocking": 378
     },
     "total_verify_scripts": 575,
-    "workflow_direct_bound": 51
+    "workflow_direct_bound": 52
   },
   "version": "1"
 }

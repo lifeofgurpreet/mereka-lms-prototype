@@ -681,6 +681,9 @@ ci_runtime_inventory:
       note: legacy manual Tutor env verifier; CI patch authority remains scripts/qa/verify-tutor-patches.sh
     - script: scripts/qa/verify-deployment-lanes.sh
       category: LIVE_CLUSTER
+    - script: scripts/qa/verify-prod-parked-state.sh
+      category: LIVE_CLUSTER
+      note: validates the parked production zero-replica profile against the live cluster
     - script: scripts/qa/verify-pii-inventory.sh
       category: DOC_GAP
     - script: scripts/qa/verify-pr-handoff-guardrails.sh

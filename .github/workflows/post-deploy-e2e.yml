@@ -14,7 +14,7 @@ on:
         default: ""
         type: string
       environment:
-        description: "Target environment (staging is the active automated gate lane while production stays parked)"
+        description: "Target environment (manual browser proof defaults to staging while production stays parked)"
         required: false
         default: "staging"
         type: choice
@@ -31,7 +31,7 @@ permissions: {}
 
 # Only one post-deploy gate per environment at a time
 concurrency:
-  group: post-deploy-e2e-${{ github.event.inputs.environment || 'staging' }}
+  group: post-deploy-e2e-${{ github.event.inputs.environment || 'production' }}
   cancel-in-progress: false
 
 jobs:
@@ -44,18 +44,56 @@ jobs:
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       target_url: ${{ steps.check.outputs.target_url }}
+      environment: ${{ steps.check.outputs.environment }}
+      run_mode: ${{ steps.check.outputs.run_mode }}
+      status_context: ${{ steps.check.outputs.status_context }}
+      status_description: ${{ steps.check.outputs.status_description }}
     steps:
       - name: Determine run conditions
         id: check
         run: |
           set -euo pipefail
-          environment="${{ github.event.inputs.environment || 'staging' }}"
-          target_url_input="${{ github.event.inputs.target_url || '' }}"
-          default_target_url="https://staging.academyv2.mereka.io"
-
-          if [[ "$environment" == "production" ]]; then
-            default_target_url="https://academyv2.mereka.io"
+          policy_file="config/runtime-proof-policy.env"
+          if [[ ! -f "$policy_file" ]]; then
+            echo "Missing runtime proof policy: $policy_file" >&2
+            exit 1
           fi
+
+          set -a
+          source "$policy_file"
+          set +a
+
+          environment=""
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            environment="${POST_DEPLOY_WORKFLOW_RUN_ENV:-production}"
+          else
+            environment="${{ github.event.inputs.environment || '' }}"
+            environment="${environment:-${POST_DEPLOY_MANUAL_DEFAULT_ENV:-staging}}"
+          fi
+
+          target_url_input="${{ github.event.inputs.target_url || '' }}"
+          run_mode="e2e"
+          status_context="post-deploy-e2e/critical-paths/${environment}"
+          status_description="Post-deploy ${environment} E2E gate"
+          default_target_url=""
+
+          case "$environment" in
+            production)
+              default_target_url="${PROD_RUNTIME_BASE_URL:-https://academyv2.mereka.io}"
+              if [[ "${PROD_RUNTIME_MODE:-active}" == "parked" ]]; then
+                run_mode="prod-parked"
+                status_context="${PROD_PARKED_STATUS_CONTEXT:-post-deploy/production-parked-state}"
+                status_description="Production parked-state verification"
+              fi
+              ;;
+            staging)
+              default_target_url="${STAGING_RUNTIME_BASE_URL:-https://staging.academyv2.mereka.io}"
+              ;;
+            *)
+              echo "Unsupported post-deploy environment: $environment" >&2
+              exit 1
+              ;;
+          esac
 
           # For workflow_run: only run if the triggering workflow succeeded
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
@@ -63,18 +101,30 @@ jobs:
               echo "Triggering workflow did not succeed (${{ github.event.workflow_run.conclusion }}); skipping E2E gate."
               echo "should_run=false" >> "$GITHUB_OUTPUT"
               echo "target_url=" >> "$GITHUB_OUTPUT"
+              echo "environment=$environment" >> "$GITHUB_OUTPUT"
+              echo "run_mode=$run_mode" >> "$GITHUB_OUTPUT"
+              echo "status_context=$status_context" >> "$GITHUB_OUTPUT"
+              echo "status_description=$status_description" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           fi
 
-          target_url="${target_url_input:-$default_target_url}"
+          target_url=""
+          if [[ "$run_mode" == "e2e" ]]; then
+            target_url="${target_url_input:-$default_target_url}"
+          fi
+
           echo "should_run=true" >> "$GITHUB_OUTPUT"
           echo "target_url=$target_url" >> "$GITHUB_OUTPUT"
+          echo "environment=$environment" >> "$GITHUB_OUTPUT"
+          echo "run_mode=$run_mode" >> "$GITHUB_OUTPUT"
+          echo "status_context=$status_context" >> "$GITHUB_OUTPUT"
+          echo "status_description=$status_description" >> "$GITHUB_OUTPUT"
 
   e2e-critical-paths:
     name: E2E Critical Path Tests
     needs: gate-check
-    if: needs.gate-check.outputs.should_run == 'true'
+    if: needs.gate-check.outputs.should_run == 'true' && needs.gate-check.outputs.run_mode == 'e2e'
     runs-on: mereka-k8s-runners
     timeout-minutes: 30
     permissions:
@@ -82,7 +132,7 @@ jobs:
       statuses: write
     env:
       BASE_URL: ${{ needs.gate-check.outputs.target_url }}
-      GATE_ENVIRONMENT: ${{ github.event.inputs.environment || 'staging' }}
+      GATE_ENVIRONMENT: ${{ needs.gate-check.outputs.environment }}
       E2E_USERNAME: ${{ secrets.E2E_TEST_USERNAME }}
       E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_COURSE_ID: ${{ secrets.E2E_TEST_COURSE_ID || vars.E2E_TEST_COURSE_ID }}
@@ -249,15 +299,14 @@ jobs:
           TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           set -euo pipefail
-          context="post-deploy-e2e/critical-paths-${GATE_ENVIRONMENT}"
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
             "/repos/${{ github.repository }}/statuses/$TARGET_SHA" \
             -f state="$GATE_STATUS" \
             -f target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            -f description="Post-deploy E2E gate (${GATE_ENVIRONMENT}): $GATE_STATUS" \
-            -f context="$context" \
+            -f description="${{ needs.gate-check.outputs.status_description }}: $GATE_STATUS" \
+            -f context="${{ needs.gate-check.outputs.status_context }}" \
           || echo "WARN: Could not post commit status (non-fatal)"
 
       - name: Sanitize E2E artifacts
@@ -293,13 +342,101 @@ jobs:
           retention-days: 3
           if-no-files-found: warn
 
+  prod-parked-state:
+    name: Verify Production Parked State
+    needs: gate-check
+    if: needs.gate-check.outputs.should_run == 'true' && needs.gate-check.outputs.run_mode == 'prod-parked'
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      statuses: write
+    env:
+      GATE_ENVIRONMENT: ${{ needs.gate-check.outputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Authenticate to GCP and get GKE credentials
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          wif_service_account: ${{ vars.GCP_WIF_SA }}
+          auth_mode: auto
+          gcloud_project: mereka-lms
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          strict_runtime: 'true'
+
+      - name: Assert runtime access for parked-state verification
+        run: |
+          set -euo pipefail
+          if [[ "${CAN_RUN_RUNTIME:-false}" != "true" ]]; then
+            echo "ERROR: GKE runtime access unavailable; cannot verify parked production state" >&2
+            exit 1
+          fi
+
+      - name: Verify production parked state
+        id: parked
+        run: |
+          set -euo pipefail
+          bash scripts/qa/verify-prod-parked-state.sh
+
+      - name: Generate gate summary
+        if: always()
+        run: |
+          set -euo pipefail
+          GATE_STATUS="PASS"
+          if [[ "${{ steps.parked.outcome }}" != "success" ]]; then
+            GATE_STATUS="FAIL"
+          fi
+
+          {
+            echo "## Post-Deploy Runtime Gate: $GATE_STATUS"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Environment | ${GATE_ENVIRONMENT:-production} |"
+            echo "| Mode | parked-state verification |"
+            echo "| Status Context | ${{ needs.gate-check.outputs.status_context }} |"
+            echo "| Run ID | ${{ github.run_id }} |"
+            echo "| Triggered by | ${{ github.event_name }} |"
+            echo "| Timestamp | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
+            echo ""
+            echo "- Production is intentionally parked at zero replicas."
+            echo "- This gate verifies the parked-state contract instead of browser E2E."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post deployment status
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GATE_STATUS: ${{ steps.parked.outcome == 'success' && 'success' || 'failure' }}
+          TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/statuses/$TARGET_SHA" \
+            -f state="$GATE_STATUS" \
+            -f target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -f description="${{ needs.gate-check.outputs.status_description }}: $GATE_STATUS" \
+            -f context="${{ needs.gate-check.outputs.status_context }}" \
+          || echo "WARN: Could not post commit status (non-fatal)"
+
   notify-on-failure:
     name: Notify Gate Failure
-    needs: [gate-check, e2e-critical-paths]
+    needs: [gate-check, e2e-critical-paths, prod-parked-state]
     if: |
       always() &&
       needs.gate-check.outputs.should_run == 'true' &&
-      needs.e2e-critical-paths.result == 'failure'
+      (
+        needs.e2e-critical-paths.result == 'failure' ||
+        needs.prod-parked-state.result == 'failure'
+      )
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
@@ -307,18 +444,19 @@ jobs:
       - name: Emit failure summary
         run: |
           {
-            echo "## Post-Deploy E2E Gate FAILED"
+            echo "## Post-Deploy Runtime Gate FAILED"
             echo ""
-            echo "**Action required**: The post-deploy E2E gate has failed."
+            echo "**Action required**: The post-deploy runtime gate has failed."
             echo "The release MUST NOT be marked complete until this is resolved."
             echo ""
             echo "**Run**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             echo ""
             echo "### Resolution Steps"
-            echo "1. Review test artifacts from the e2e-critical-paths job"
-            echo "2. Check LMS logs: \`kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=100\`"
-            echo "3. Run locally: \`./scripts/qa/verify-post-deploy-gate.sh --mode online\`"
-            echo "4. Fix the issue and re-run this workflow"
+            echo "1. Review the failed job for the active run mode"
+            echo "2. For staging E2E failures, inspect uploaded artifacts and LMS logs"
+            echo "3. For production parked-state failures, run \`./scripts/qa/verify-prod-parked-state.sh\`"
+            echo "4. Run locally: \`./scripts/qa/verify-post-deploy-gate.sh --mode online\`"
+            echo "5. Fix the issue and re-run this workflow"
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "ERROR: Post-deploy E2E gate FAILED. Release is blocked." >&2
+          echo "ERROR: Post-deploy runtime gate FAILED. Release is blocked." >&2
           exit 1

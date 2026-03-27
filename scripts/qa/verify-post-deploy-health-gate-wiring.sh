@@ -10,6 +10,7 @@ REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && 
 POST_DEPLOY_WORKFLOW="$REPO_ROOT/.github/workflows/post-deploy-e2e.yml"
 OPERATIONS_GATES_WORKFLOW="$REPO_ROOT/.github/workflows/operations-gates-runtime.yml"
 BUILD_WORKFLOW="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
+RUNTIME_PROOF_POLICY="$REPO_ROOT/config/runtime-proof-policy.env"
 
 PASS=0
 FAIL=0
@@ -47,6 +48,7 @@ require_pattern() {
 require_file "$POST_DEPLOY_WORKFLOW"
 require_file "$OPERATIONS_GATES_WORKFLOW"
 require_file "$BUILD_WORKFLOW"
+require_file "$RUNTIME_PROOF_POLICY"
 
 if [[ -f "$POST_DEPLOY_WORKFLOW" ]]; then
   require_pattern \
@@ -55,8 +57,12 @@ if [[ -f "$POST_DEPLOY_WORKFLOW" ]]; then
     "post-deploy workflow includes structural gate fallback"
   require_pattern \
     "$POST_DEPLOY_WORKFLOW" \
-    "context=\"post-deploy-e2e/critical-paths-\${GATE_ENVIRONMENT}\"" \
-    "post-deploy workflow publishes environment-scoped commit status context"
+    "needs.gate-check.outputs.status_context" \
+    "post-deploy workflow publishes dynamic commit status context"
+  require_pattern \
+    "$POST_DEPLOY_WORKFLOW" \
+    "verify-prod-parked-state.sh" \
+    "post-deploy workflow verifies parked production state"
 fi
 
 if [[ -f "$OPERATIONS_GATES_WORKFLOW" ]]; then

@@ -1,7 +1,7 @@
 # Stabilization Control Board
 
 > Canonical repo-side board for phase truth, lane status, and anti-false-closure decisions.
-> Status date: 2026-03-26
+> Status date: 2026-03-27
 
 ## Current Phase
 
@@ -26,6 +26,7 @@ runtime/browser closure is not yet canonically closed in merged repo truth.
 | `Lane F` | Repo-only CI stabilization | `COMPLETE` | `CONFIRMED` | `DURABLE` | Repo-side CI false-red prevention and runner-capability guardrails are merged repo truth. See `CI_FALSE_RED_PREVENTION.md`, `ARC_RUNNER_CAPABILITY_CONTRACT.md`, and `REPO_ONLY_CI_BLOCKER_LEDGER.md`. |
 | `Lane G` | Retired-root remediation / docs-governance closure | `COMPLETE` | `CONFIRMED` | `DURABLE` | Canonical docs roots and retired-root governance are merged repo truth. See `DOCS_ROOT_AUTHORITY_CONTRACT.md` and `RETIRED_ROOT_REMEDIATION_LEDGER.md`. |
 | `Lane H` | Stabilization control board / release truth | `ACTIVE` | `CONFIRMED` | `DURABLE` | This lane defines program control truth and anti-false-closure phase gates. |
+| `GKE prod runtime posture` | Production runtime truth | `PARKED` | `CONFIRMED` | `DURABLE` | GKE production is intentionally parked at zero replicas to control cost. Parked-state verification is valid proof; browser/runtime closure does not currently gate releases there. |
 | `Enterprise MFE build contract` | Image/build truth contract | `COMPLETE` | `CONFIRMED` | `DURABLE` | Build truth is pinned at the contract layer, but runtime promotion/use is still phase-gated. See `ENTERPRISE_MFE_BUILD_CONTRACT.md`. |
 | `Architecture hardening wave` | Post-convergence infra/runtime hardening | `PARKED` | `PARKED` | `TEMPORARY_RUNTIME_MITIGATION` | Not allowed to expand yet. This work stays parked until the convergence gate is satisfied. |
 
@@ -61,6 +62,7 @@ runtime/browser closure is not yet canonically closed in merged repo truth.
 | Learner portal end-to-end closure (enterprise/secondary paths) | `PROVISIONAL` | Enterprise services not fully deployed to staging; secondary learner paths not explicitly tested. Recorded in evidence bundle as PROVISIONAL. |
 | Full convergence of manual runtime state into codified truth | `CONFIRMED` (staging), `PROVISIONAL` (enterprise) | All staging runtime fixes deployed via ArgoCD (not manual). Enterprise services remain partially manual. |
 | Staging proof | `CONFIRMED` | 9/9 host acceptance, SSO canary green, evidence bundle merged. No longer parked. |
+| GKE production browser/runtime proof | `PARKED` | Production is intentionally zero-replica. Parked-state verification is the truthful contract until reactivation. |
 | Architecture hardening / infra patch wave | `PARKED` | Blocked until stabilization exits cleanly and convergence truth is durable. |
 | Runner saturation / ARC queue effects | `EXTERNAL_BLOCKER` | Throughput can delay proof/build jobs, but it is not semantic closure. |
 | Image digest pinning | `PROVISIONAL` | Staging uses mutable tags (same images as dev). Documented in evidence bundle. |

@@ -3,7 +3,7 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 
 <!-- Last verified: 2026-02-24 -->
 
-The post-deploy E2E gate blocks release completion if any of the five critical user paths fail after a deployment. It runs automatically after each successful build-and-push and can be re-run manually. The current automated lane is `staging`; `production` remains an explicit manual target while that lane is still parked.
+The post-deploy runtime gate enforces the current runtime-proof contract. In the present topology, manual browser proof defaults to staging, while automatic post-build runs verify that production remains intentionally parked at zero replicas.
 
 ---
 
@@ -14,7 +14,8 @@ The post-deploy E2E gate blocks release completion if any of the five critical u
 | **Workflow** | `.github/workflows/post-deploy-e2e.yml` |
 | **Verification script** | `scripts/qa/verify-post-deploy-gate.sh` |
 | **Trigger** | Automatic after `Build Tutor Images` succeeds; manual dispatch |
-| **Default target** | `https://staging.academyv2.mereka.io` |
+| **Runtime policy** | `config/runtime-proof-policy.env` |
+| **Manual default target** | `https://staging.academyv2.mereka.io` |
 | **Timeout** | 30 minutes |
 | **Artifacts** | 30-day retention in `post-deploy-e2e-<run_id>` |
 
@@ -22,7 +23,7 @@ The post-deploy E2E gate blocks release completion if any of the five critical u
 
 ## Critical Paths Tested
 
-These five paths are verified on every deployment. A failure in any one blocks the release.
+These five paths are verified when the gate runs in browser-E2E mode. A failure in any one blocks the release for that environment.
 
 | # | Path | What is tested |
 |---|------|----------------|
@@ -68,27 +69,36 @@ Build Tutor Images (success)
         │
         ├─ gate-check (skip if triggering workflow failed)
         │
-        ├─ e2e-critical-paths
+        ├─ production parked?
+        │   ├─ yes → verify-prod-parked-state.sh
+        │   └─ no  → continue to browser E2E
+        │
+        ├─ e2e-critical-paths (staging/manual authoritative lane today)
         │   ├─ Wait for LMS heartbeat (up to 3 min)
         │   ├─ Run Playwright tests (tests/e2e/)
-        │   ├─ Post commit status to GitHub
+        │   ├─ Post environment-specific commit status to GitHub
         │   └─ Upload artifacts (screenshots, logs)
         │
         └─ notify-on-failure (if e2e job failed)
 ```
 
-The workflow posts an environment-scoped commit status (`post-deploy-e2e/critical-paths-staging` or `post-deploy-e2e/critical-paths-production`) visible on pull requests and the commit page. A `failure` status means the release is blocked for that lane.
+The workflow posts an environment-specific commit status:
+
+- `post-deploy-e2e/critical-paths/staging` for staging browser proof
+- `post-deploy/production-parked-state` for automatic production parked-state verification
+
+A `failure` status means the active runtime contract for that lane is blocked.
 
 ---
 
 ## Running the Gate Manually
 
 ```bash
-# Via GitHub CLI (defaults to the active staging lane)
+# Via GitHub CLI (manual proof defaults to staging)
 gh workflow run post-deploy-e2e.yml \
   -f environment=staging
 
-# Production is explicit while parked
+# Production stays on parked-state verification while parked
 gh workflow run post-deploy-e2e.yml \
   -f environment=production
 
@@ -126,13 +136,13 @@ gh run download --name "post-deploy-e2e-<run_id>"
 ### 2. Check LMS health
 
 ```bash
-# Are pods running?
-kubectl get pods -n mereka-lms
+# Staging pods
+kubectl get pods -n stg-mereka-lms
 
-# LMS logs (last 100 lines)
-kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=100
+# Staging LMS logs (last 100 lines)
+kubectl logs -n stg-mereka-lms -l app.kubernetes.io/name=lms --tail=100
 
-# Endpoint health (staging default lane)
+# Staging endpoint health
 curl -I https://staging.academyv2.mereka.io/heartbeat
 ```
 
@@ -150,6 +160,12 @@ E2E_PASSWORD=<password> \
 npx playwright test --headed --debug
 ```
 
+For parked production verification, run:
+
+```bash
+./scripts/qa/verify-prod-parked-state.sh
+```
+
 ### 4. Check for SSO issues
 
 Login failures are most commonly caused by SSO session problems or missing credential sources. Check:
@@ -158,8 +174,8 @@ Login failures are most commonly caused by SSO session problems or missing crede
 # Verify Authentik is healthy
 curl -I https://auth0.mereka.io/api/v3/
 
-# Check SSO canary
-./scripts/qa/verify-authenticated-sso-canary.sh --env prod
+# Check staging SSO canary
+./scripts/qa/verify-authenticated-sso-canary.sh --env staging
 ```
 
 If the gate fails before Playwright starts, verify that either:
@@ -169,17 +185,18 @@ If the gate fails before Playwright starts, verify that either:
 
 The shared `.github/actions/setup-playwright` action resolves the Playwright version from `tests/e2e/package-lock.json` and reinstalls Chromium if a restored cache is stale or incomplete. A browser-launch failure after that usually indicates runner image drift rather than the old stale-cache bug.
 
-If the gate fails on `production` heartbeat while `staging` passes, that currently indicates the parked prod lane was targeted explicitly. Re-run against `staging` unless you are intentionally validating the parked prod path.
+If the gate fails in `production` parked-state mode, inspect the zero-replica and GitOps parked-state contract instead of trying to run browser E2E against prod.
 
 ---
 
 ## Marking a Release Complete
 
-A release may only be marked complete after:
+A release may only be marked complete after the relevant runtime lane proof passes:
 
-1. The post-deploy E2E gate shows `success` on the deployment commit
-2. `./scripts/qa/verify-post-deploy-gate.sh --mode online` returns `PASS`
-3. No P0 incidents are open in the operations runbook
+1. staging browser proof shows `success` on the deployment commit when staging is the active runtime lane
+2. production parked-state verification shows `success` when prod remains intentionally parked
+3. `./scripts/qa/verify-post-deploy-gate.sh --mode online` returns `PASS`
+4. No P0 incidents are open in the operations runbook
 
 If the gate fails and the failure is a known flake (not a real regression), document the exception in a PR comment and get sign-off from a second engineer before proceeding.
 
@@ -190,6 +207,7 @@ If the gate fails and the failure is a known flake (not a real regression), docu
 - **Gate skips if deploy failed**: If the upstream `Build Tutor Images` workflow fails, the E2E gate skips automatically (no point testing a broken deploy).
 - **Concurrency**: Only one gate run per environment at a time. If a gate is already running, a new trigger waits; it does not cancel the in-progress run.
 - **No Playwright config yet**: If `tests/e2e/` does not exist (T049 not yet merged), the gate falls back to running `verify-post-deploy-gate.sh --mode offline`, which verifies wiring only. This is a graceful degradation — not a bypass.
+- **Parked production**: Automatic post-build runs verify `scripts/qa/verify-prod-parked-state.sh` instead of browser E2E while production is intentionally parked.
 - **Missing credentials**: If neither `E2E_TEST_*` overrides nor the selected environment's `SSO_CANARY_*` credentials are available, the gate fails with a clear error before attempting any browser tests.
 
 ---

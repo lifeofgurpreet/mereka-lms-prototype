@@ -8,9 +8,19 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-post-deploy-health-gate-wiring.sh"
 tmpdir="$(mktemp -d -t verify-post-deploy-health-gate-wiring.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/.github/workflows"
+mkdir -p "$tmpdir/.github/workflows" "$tmpdir/config"
 
 write_pass_fixtures() {
+  cat >"$tmpdir/config/runtime-proof-policy.env" <<'EOF'
+AUTHORITATIVE_RUNTIME_PROOF_ENV=staging
+POST_DEPLOY_WORKFLOW_RUN_ENV=production
+POST_DEPLOY_MANUAL_DEFAULT_ENV=staging
+STAGING_RUNTIME_BASE_URL=https://staging.academyv2.mereka.io
+PROD_RUNTIME_MODE=parked
+PROD_PARKED_STATUS_CONTEXT=post-deploy/production-parked-state
+PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh
+EOF
+
   cat >"$tmpdir/.github/workflows/post-deploy-e2e.yml" <<'EOF'
 name: post-deploy-e2e
 jobs:
@@ -18,7 +28,8 @@ jobs:
     steps:
       - run: scripts/qa/verify-post-deploy-gate.sh --mode offline
       - run: |
-          context="post-deploy-e2e/critical-paths-${GATE_ENVIRONMENT}"
+          context="${{ needs.gate-check.outputs.status_context }}"
+      - run: verify-prod-parked-state.sh
 EOF
 
   cat >"$tmpdir/.github/workflows/operations-gates-runtime.yml" <<'EOF'
