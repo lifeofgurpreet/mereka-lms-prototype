@@ -64,8 +64,10 @@ ci_static_inventory:
     - script: scripts/qa/verify-script-governance-census.sh
     - script: scripts/qa/verify-script-governance-dangerous.sh
     - script: scripts/qa/verify-script-governance-orphans.sh
+    - script: scripts/qa/verify-siteconfig-authority.sh
     - script: scripts/qa/test-verify-script-governance-dangerous.sh
     - script: scripts/qa/test-verify-script-governance-orphans.sh
+    - script: scripts/qa/test-verify-siteconfig-authority.sh
     - script: scripts/qa/test-generate-script-governance-catalog.sh
     - script: scripts/qa/test-build-script-governance-review-packet.sh
     - script: scripts/qa/test-verify-authn-submodule-path-contract.sh
@@ -2511,6 +2513,11 @@ scripts:
   - path: scripts/qa/verify-runtime-authority-map.sh
     owner: platform-team
     purpose: Verify Runtime Authority Map
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-siteconfig-authority.sh
+    owner: platform-team
+    purpose: Verify Siteconfig Authority
     criticality: release-supporting
 
   - path: scripts/qa/verify-tenant-isolation.sh

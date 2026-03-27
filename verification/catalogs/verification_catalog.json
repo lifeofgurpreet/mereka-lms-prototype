@@ -400,7 +400,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
-      "reference_count": 35,
+      "reference_count": 34,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -5517,7 +5517,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-enterprise-runtime-app-wiring.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -9535,7 +9535,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-multisite-apply-guardrails.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13972,6 +13972,34 @@
         "ci_static"
       ],
       "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "mutating",
+      "owner": "identity-access",
+      "path": "scripts/qa/verify-siteconfig-authority.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-MTA-014"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
         "dev"
       ],
       "kind": "verify",
@@ -14831,7 +14859,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-branding-runtime.sh",
-      "reference_count": 21,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14949,7 +14977,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-contract-alignment.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14980,7 +15008,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-dns-inventory.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15009,7 +15037,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-enterprise-mutation-guardrails.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17307,26 +17335,26 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 354,
+    "ci_static_bound": 355,
     "kinds": {
-      "verify": 575
+      "verify": 576
     },
     "mutability": {
       "destructive": 9,
-      "mutating": 17,
+      "mutating": 18,
       "read-only": 549
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 397,
+      "active": 398,
       "manual_only": 178
     },
     "tiers": {
       "exploratory_manual": 181,
       "periodic_runtime": 16,
-      "release_blocking": 378
+      "release_blocking": 379
     },
-    "total_verify_scripts": 575,
+    "total_verify_scripts": 576,
     "workflow_direct_bound": 52
   },
   "version": "1"

@@ -22,8 +22,10 @@ scripts/qa/test-verify-workflow-script-references.sh
 scripts/qa/verify-script-governance-census.sh
 scripts/qa/verify-script-governance-dangerous.sh
 scripts/qa/verify-script-governance-orphans.sh
+scripts/qa/verify-siteconfig-authority.sh
 scripts/qa/test-verify-script-governance-dangerous.sh
 scripts/qa/test-verify-script-governance-orphans.sh
+scripts/qa/test-verify-siteconfig-authority.sh
 scripts/qa/test-generate-script-governance-catalog.sh
 scripts/qa/test-build-script-governance-review-packet.sh
 scripts/qa/test-verify-authn-submodule-path-contract.sh

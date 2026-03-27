@@ -8,8 +8,9 @@
 #      (FAVICON_URL, LOGO_URL, LOGO_WHITE_URL, LOGO_TRADEMARK_URL)
 #   2. The Caddy MFE config proxies /api/mfe_config/v1* to lms:8000
 #   3. The canonical multisite apply script exists and is executable
-#   4. The canonical apply flow delegates to multisite_bootstrap_django.py and
-#      the production multisite registry covers the three known tenant domains
+#   4. The canonical apply flow delegates to multisite_bootstrap_django.py,
+#      the helper exists on disk, and the multisite registry covers the known
+#      tenant domains including MFE_BASE_URL entries
 #
 # Optional live-cluster checks (run when kubectl is available):
 #   5. /api/mfe_config/v1 returns JSON on each tenant LMS domain
@@ -184,6 +185,7 @@ echo ""
 echo "--- Check 3: Canonical multisite apply script ---"
 
 APPLY_SCRIPT="${REPO_ROOT}/scripts/infra/apply-multisite-config.sh"
+DJANGO_BOOTSTRAP="${REPO_ROOT}/scripts/shared/multisite_bootstrap_django.py"
 MULTISITE_REGISTRY="${REPO_ROOT}/infrastructure/tutor/multisite-sites.yml"
 
 if [[ -f "$APPLY_SCRIPT" ]]; then
@@ -196,6 +198,12 @@ if [[ -f "$APPLY_SCRIPT" ]]; then
   fi
 else
   fail "apply-multisite-config.sh not found at $APPLY_SCRIPT"
+fi
+
+if [[ -f "$DJANGO_BOOTSTRAP" ]]; then
+  pass "multisite_bootstrap_django.py exists"
+else
+  fail "multisite_bootstrap_django.py not found at $DJANGO_BOOTSTRAP"
 fi
 
 echo ""
@@ -230,6 +238,12 @@ if [[ -f "$MULTISITE_REGISTRY" ]]; then
       fail "Tenant '$tenant' or domain '$domain' missing from multisite-sites.yml"
     fi
   done
+
+  if grep -q "MFE_BASE_URL" "$MULTISITE_REGISTRY"; then
+    pass "multisite-sites.yml includes MFE_BASE_URL entries"
+  else
+    fail "multisite-sites.yml does not include MFE_BASE_URL entries"
+  fi
 else
   fail "multisite-sites.yml not found at $MULTISITE_REGISTRY"
 fi
@@ -307,8 +321,9 @@ sys.exit(1)
 " 2>/dev/null; then
         pass "Tenant '$tenant': LMS_BASE_URL=https://${domain}"
       else
-        fail "Tenant '$tenant': LMS_BASE_URL mismatch or SiteConfiguration not provisioned"
-        echo "       Reconcile via: ./scripts/infra/apply-multisite-config.sh --env $([[ \"$LIVE_ENV\" == \"production\" ]] && echo prod || echo \"$LIVE_ENV\") --apply"
+        fail "Tenant '$tenant': LMS_BASE_URL mismatch or canonical multisite config not applied"
+        echo "       Inspect: ./scripts/infra/apply-multisite-config.sh --env $([[ \"$LIVE_ENV\" == \"production\" ]] && echo prod || echo \"$LIVE_ENV\") --dry-run"
+        echo "       Then apply through the canonical multisite path with the required confirmation guards."
       fi
     elif [[ "$HTTP_STATUS" == "000" ]]; then
       skip "Tenant '$tenant': $url unreachable (network/DNS)"
@@ -325,9 +340,9 @@ echo ""
 
 if [[ $FAIL -gt 0 ]]; then
   echo "To reconcile canonical MFE config for a live cluster:"
-  echo "  CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \\"
-  echo "  ALLOW_PROD_APPLY=1 \\"
-  echo "  ./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --apply"
+  echo "  ./scripts/infra/apply-multisite-config.sh --env prod --dry-run"
+  echo "  ./scripts/infra/apply-multisite-config.sh --env dev --dry-run"
+  echo "  ./scripts/infra/apply-multisite-config.sh --env staging --dry-run"
   exit 1
 fi
 exit 0
