@@ -69,6 +69,7 @@
     "scripts/qa/verify-overlay-ownership.sh",
     "scripts/qa/verify-platform-admin-env.sh",
     "scripts/qa/verify-platform-middleware.sh",
+    "scripts/qa/verify-post-deploy-gate.sh",
     "scripts/qa/verify-proctoring-environment.sh",
     "scripts/qa/verify-release-bundle.sh",
     "scripts/qa/verify-release-dry-run-contract.sh",

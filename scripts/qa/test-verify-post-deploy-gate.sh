@@ -18,8 +18,11 @@ on:
     workflows: ["deploy"]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      environment:
+        default: "staging"
 concurrency:
-  group: post-deploy-e2e
+  group: post-deploy-e2e-${{ github.event.inputs.environment || 'staging' }}
 permissions:
   statuses: write
 jobs:
@@ -27,9 +30,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - run: echo "https://staging.academyv2.mereka.io"
       - run: echo "Resolve E2E credential source via SSO_CANARY_EMAIL_PROD and SSO_CANARY_PASSWORD_PROD"
+      - run: echo "npm-cache-dependency-path: tests/e2e/package-lock.json"
       - run: echo "set should_run output"
-      - run: echo "post commit status to /statuses/"
+      - run: echo 'post commit status to /statuses/ with post-deploy-e2e/critical-paths-${GATE_ENVIRONMENT}'
       - run: echo "critical login enroll video forum certificate paths"
       - uses: actions/upload-artifact@v4
 EOF
@@ -76,7 +81,7 @@ on:
     workflows: ["deploy"]
     types: [completed]
 concurrency:
-  group: post-deploy-e2e
+  group: post-deploy-e2e-${{ github.event.inputs.environment || 'staging' }}
 permissions:
   statuses: write
 jobs:
@@ -84,9 +89,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - run: echo "https://staging.academyv2.mereka.io"
       - run: echo "Resolve E2E credential source via SSO_CANARY_EMAIL_PROD and SSO_CANARY_PASSWORD_PROD"
+      - run: echo "npm-cache-dependency-path: tests/e2e/package-lock.json"
       - run: echo "set should_run output"
-      - run: echo "post commit status to /statuses/"
+      - run: echo 'post commit status to /statuses/ with post-deploy-e2e/critical-paths-${GATE_ENVIRONMENT}'
       - run: echo "critical login enroll video forum paths"
       - uses: actions/upload-artifact@v4
 EOF

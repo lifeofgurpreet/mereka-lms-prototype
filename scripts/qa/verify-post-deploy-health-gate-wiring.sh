@@ -55,8 +55,8 @@ if [[ -f "$POST_DEPLOY_WORKFLOW" ]]; then
     "post-deploy workflow includes structural gate fallback"
   require_pattern \
     "$POST_DEPLOY_WORKFLOW" \
-    "context=\"post-deploy-e2e/critical-paths\"" \
-    "post-deploy workflow publishes commit status context"
+    "context=\"post-deploy-e2e/critical-paths-\${GATE_ENVIRONMENT}\"" \
+    "post-deploy workflow publishes environment-scoped commit status context"
 fi
 
 if [[ -f "$OPERATIONS_GATES_WORKFLOW" ]]; then
@@ -77,4 +77,3 @@ echo "Summary: PASS=$PASS FAIL=$FAIL"
 if [[ "$FAIL" -gt 0 ]]; then
   exit 1
 fi
-

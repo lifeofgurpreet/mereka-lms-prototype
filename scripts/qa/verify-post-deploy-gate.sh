@@ -87,6 +87,13 @@ else
   fail "Missing concurrency configuration — parallel gate runs risk false results"
 fi
 
+if grep -q 'default: "staging"' "$WORKFLOW_FILE" \
+  && grep -q 'https://staging.academyv2.mereka.io' "$WORKFLOW_FILE"; then
+  pass "Workflow defaults to the canonical staging lane while prod is explicit"
+else
+  fail "Workflow missing staging-first default target resolution"
+fi
+
 # Gate must resolve credentials from canonical secret sources
 if grep -q "Resolve E2E credential source" "$WORKFLOW_FILE" \
   && grep -q "SSO_CANARY_EMAIL_PROD" "$WORKFLOW_FILE" \
@@ -109,10 +116,11 @@ else
 fi
 
 # Must post a commit status
-if grep -q "statuses.*write\|post.*status\|commit.*status\|\/statuses\/" "$WORKFLOW_FILE"; then
-  pass "Workflow posts deployment status to commit"
+if grep -q "statuses.*write\|post.*status\|commit.*status\|\/statuses\/" "$WORKFLOW_FILE" \
+  && grep -q 'post-deploy-e2e/critical-paths-${GATE_ENVIRONMENT}' "$WORKFLOW_FILE"; then
+  pass "Workflow posts environment-scoped deployment status to commit"
 else
-  fail "Workflow does not post commit status — gate results not visible on PRs"
+  fail "Workflow does not post environment-scoped commit status — gate results not visible truthfully on PRs"
 fi
 
 # Artifacts must be uploaded for debugging
@@ -127,6 +135,12 @@ if grep -q "timeout-minutes" "$WORKFLOW_FILE"; then
   pass "Timeout configured on E2E job"
 else
   fail "No timeout on E2E job — hung test could block releases indefinitely"
+fi
+
+if grep -q "npm-cache-dependency-path: tests/e2e/package-lock.json" "$WORKFLOW_FILE"; then
+  pass "Workflow keys Playwright/npm setup off tests/e2e/package-lock.json"
+else
+  fail "Workflow missing package-lock keyed Playwright setup"
 fi
 
 # ── Section 4: Critical Path Coverage ────────────────────────────────────────

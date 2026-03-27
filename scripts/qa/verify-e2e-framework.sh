@@ -16,6 +16,7 @@
 #     8.  Forum test references /api/discussion/v2/ (Forum v2 in-process with LMS)
 #     9.  Oscar ecommerce NOT referenced (deprecated — Purchase Gateway handles payments)
 #     10. package.json engine constraint specifies node >= 18
+#     11. shared setup-playwright action resolves local version and repairs stale browser caches
 #
 #   Online mode (--online):
 #     11. Node.js >= 18 is available
@@ -81,6 +82,7 @@ BASE_URL="${BASE_URL:-https://academyv2.mereka.io}"
 CONFIG_FILE="${E2E_DIR}/playwright.config.ts"
 PACKAGE_FILE="${E2E_DIR}/package.json"
 SPEC_FILE="${E2E_DIR}/tests/critical-path.spec.ts"
+SETUP_ACTION_FILE="${REPO_ROOT}/.github/actions/setup-playwright/action.yml"
 
 echo -e "${BLUE}=== E2E Framework Verification ===${NC}"
 echo "Mode     : ${MODE}"
@@ -255,6 +257,21 @@ sys.exit(1)
   pass "package.json node engine requirement: ${node_req}"
 else
   fail "package.json engines.node should require >= 18 (Open edX MFEs require Node 18)"
+fi
+
+# ---------------------------------------------------------------------------
+# 11. Shared Playwright setup action resolves local version + repairs stale caches
+# ---------------------------------------------------------------------------
+echo "--- 11. setup-playwright action resolves local Playwright version ---"
+if [[ ! -f "$SETUP_ACTION_FILE" ]]; then
+  fail "setup-playwright action missing: ${SETUP_ACTION_FILE}"
+elif grep -Fq "default: ''" "$SETUP_ACTION_FILE" \
+  && grep -Fq "Resolved Playwright version" "$SETUP_ACTION_FILE" \
+  && grep -Fq "chromium.executablePath()" "$SETUP_ACTION_FILE" \
+  && grep -Fq "npx playwright install chromium" "$SETUP_ACTION_FILE"; then
+  pass "setup-playwright action resolves local version and repairs stale browser cache"
+else
+  fail "setup-playwright action does not prove local version resolution + browser repair contract"
 fi
 
 echo ""

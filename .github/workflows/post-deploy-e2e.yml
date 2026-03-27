@@ -14,13 +14,13 @@ on:
         default: ""
         type: string
       environment:
-        description: "Target environment"
+        description: "Target environment (staging is the active automated gate lane while production stays parked)"
         required: false
-        default: "production"
+        default: "staging"
         type: choice
         options:
-          - production
           - staging
+          - production
       fail_on_flaky:
         description: "Fail gate on non-critical test failures"
         required: false
@@ -31,7 +31,7 @@ permissions: {}
 
 # Only one post-deploy gate per environment at a time
 concurrency:
-  group: post-deploy-e2e-${{ github.event.inputs.environment || 'production' }}
+  group: post-deploy-e2e-${{ github.event.inputs.environment || 'staging' }}
   cancel-in-progress: false
 
 jobs:
@@ -49,12 +49,12 @@ jobs:
         id: check
         run: |
           set -euo pipefail
-          environment="${{ github.event.inputs.environment || 'production' }}"
+          environment="${{ github.event.inputs.environment || 'staging' }}"
           target_url_input="${{ github.event.inputs.target_url || '' }}"
-          default_target_url="https://academyv2.mereka.io"
+          default_target_url="https://staging.academyv2.mereka.io"
 
-          if [[ "$environment" == "staging" ]]; then
-            default_target_url="https://staging.academyv2.mereka.io"
+          if [[ "$environment" == "production" ]]; then
+            default_target_url="https://academyv2.mereka.io"
           fi
 
           # For workflow_run: only run if the triggering workflow succeeded
@@ -82,7 +82,7 @@ jobs:
       statuses: write
     env:
       BASE_URL: ${{ needs.gate-check.outputs.target_url }}
-      GATE_ENVIRONMENT: ${{ github.event.inputs.environment || 'production' }}
+      GATE_ENVIRONMENT: ${{ github.event.inputs.environment || 'staging' }}
       E2E_USERNAME: ${{ secrets.E2E_TEST_USERNAME }}
       E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_COURSE_ID: ${{ secrets.E2E_TEST_COURSE_ID || vars.E2E_TEST_COURSE_ID }}
@@ -99,6 +99,7 @@ jobs:
         uses: ./.github/actions/setup-playwright
         with:
           node-version: '18'
+          npm-cache-dependency-path: tests/e2e/package-lock.json
 
       - name: Install npm dependencies
         run: |
@@ -217,11 +218,13 @@ jobs:
             echo "| Field | Value |"
             echo "|-------|-------|"
             echo "| Target URL | $BASE_URL |"
-            echo "| Environment | ${GATE_ENVIRONMENT:-production} |"
+            echo "| Environment | ${GATE_ENVIRONMENT:-staging} |"
             echo "| Credential Source | ${E2E_SECRET_SOURCE:-unknown} |"
             echo "| Run ID | ${{ github.run_id }} |"
             echo "| Triggered by | ${{ github.event_name }} |"
             echo "| Timestamp | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
+            echo ""
+            echo "> Current automated default: \`staging\`. Production runs are explicit while the prod lane remains parked."
             echo ""
             echo "### Critical Paths Tested"
             echo "- Login (authenticated session)"
@@ -246,18 +249,23 @@ jobs:
           TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           set -euo pipefail
+          context="post-deploy-e2e/critical-paths-${GATE_ENVIRONMENT}"
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
             "/repos/${{ github.repository }}/statuses/$TARGET_SHA" \
             -f state="$GATE_STATUS" \
             -f target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            -f description="Post-deploy E2E gate: $GATE_STATUS" \
-            -f context="post-deploy-e2e/critical-paths" \
+            -f description="Post-deploy E2E gate (${GATE_ENVIRONMENT}): $GATE_STATUS" \
+            -f context="$context" \
           || echo "WARN: Could not post commit status (non-fatal)"
 
       - name: Sanitize E2E artifacts
         if: always()
+        env:
+          E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
         run: |
           set -euo pipefail
           for ARTIFACT_DIR in var/e2e-results tests/e2e/test-results; do

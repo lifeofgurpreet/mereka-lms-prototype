@@ -11653,13 +11653,15 @@
         "workflow_direct"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-gate.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

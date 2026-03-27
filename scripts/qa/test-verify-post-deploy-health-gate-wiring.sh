@@ -18,7 +18,7 @@ jobs:
     steps:
       - run: scripts/qa/verify-post-deploy-gate.sh --mode offline
       - run: |
-          context="post-deploy-e2e/critical-paths"
+          context="post-deploy-e2e/critical-paths-${GATE_ENVIRONMENT}"
 EOF
 
   cat >"$tmpdir/.github/workflows/operations-gates-runtime.yml" <<'EOF'
