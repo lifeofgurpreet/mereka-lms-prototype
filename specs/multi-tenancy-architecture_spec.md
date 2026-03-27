@@ -63,7 +63,7 @@ The system extends across all platform layers: the LMS and CMS (via Django Sites
 
 ## Why it matters
 
-Mereka Academy's business model requires onboarding multiple corporate clients, each expecting a private, branded learning environment without cross-contamination of data or learner experiences. Today, supporting a new client means ad-hoc Django admin configuration, manual branding patches, and no formal isolation guarantees. This spec establishes the architectural contract that every other spec and implementation must respect: the definition of a tenant, how tenants are isolated, how tenants are provisioned, and what guarantees the platform makes about cross-tenant data leakage.
+Mereka Academy's business model requires onboarding multiple corporate clients, each expecting a private, branded learning environment without cross-contamination of data or learner experiences. Historically, supporting a new client meant ad-hoc Django admin configuration, manual branding patches, and no formal isolation guarantees. This spec establishes the architectural contract that every other spec and implementation must respect: the definition of a tenant, how tenants are isolated, how tenants are provisioned, and what guarantees the platform makes about cross-tenant data leakage.
 
 Without this spec, the branding system has no framework for per-tenant themes, the enterprise services have no formal isolation verification strategy, the analytics pipeline has no tenant-scoping contract, and the secrets management system has no per-tenant credential segregation model. This is the foundational spec that makes "many clients" work.
 
@@ -113,7 +113,7 @@ Without this spec, the branding system has no framework for per-tenant themes, t
 - Supporting tenant-specified data residency regions (all data resides in GCP `asia-southeast1`; regional isolation is a future enhancement)
 - Implementing tenant-level rate limiting distinct from the enterprise API rate limits defined in `specs/enterprise-microservices_spec.md`
 - Supporting per-tenant Open edX version pinning (all tenants run the same platform version)
-- Building a tenant management API (tenants are managed via Django admin and provisioning scripts for v1)
+- Building a tenant management API (tenants are managed via governed provisioning and reconciliation scripts for v1; Django admin is break-glass and inspection-only, not the canonical mutation path)
 - White-labeling the Open edX admin (Studio/CMS) per tenant (Studio is shared; enterprise admins use the admin portal MFE)
 
 ## Assumptions
@@ -226,20 +226,16 @@ Without this spec, the branding system has no framework for per-tenant themes, t
 
 - The system MUST support a documented, repeatable tenant provisioning workflow that creates all required records for a new tenant
 - Tenant provisioning MUST include the following steps (order matters):
-  1. Create Django `Site` record with the tenant's primary domain
-  2. Create `SiteConfiguration` record with tenant-specific settings (theme, features, branding JSON)
-  3. Create `EnterpriseCustomer` record linked to the Django Site, with all enterprise feature flags configured
-  4. Create enterprise catalogs with appropriate content filters
-  5. Create subscription plans and/or subsidy records
-  6. Create access policies linking catalogs to subscriptions/subsidies
-  7. Configure SAML/OIDC identity provider (if applicable)
-  8. Configure integrated channel connections (if applicable)
-  9. Deploy tenant-specific branding assets (logos, favicon) to the theme directory
-  10. Run `collectstatic` to publish tenant assets
-  11. Add tenant domain to Caddy configuration and `ALLOWED_HOSTS`
-  12. Verify tenant isolation by running the cross-tenant isolation test suite
-- The system MUST provide a provisioning script (`scripts/tenants/provision-tenant.sh`) that automates steps 1-6 via Django management commands or direct API calls
-- The provisioning script MUST be idempotent: running it twice for the same tenant MUST NOT create duplicate records
+  1. Declare or update the tenant in the repo-owned tenancy sources (`deploy/k8s/tenancy/tenant-registry.yaml` and the multisite site data consumed by the Tutor config)
+  2. Run `scripts/infra/apply-multisite-config.sh` to reconcile the runtime Django `Site` and `SiteConfiguration` records from those declared sources
+  3. Run `scripts/tenants/provision-tenant.sh` to create or update the tenant's enterprise bootstrap records (`EnterpriseCustomer`, catalogs, subscriptions, access policies)
+  4. Run `scripts/tenants/sync-tenant-enterprise-mapping.sh` to align enterprise/runtime linkage in tenant-facing config
+  5. Configure SAML/OIDC identity provider with `scripts/tenants/configure-tenant-idp.sh` when tenant-specific IdP setup is required
+  6. Land tenant branding assets/config in the repo-owned theme/runtime sources and publish them through the governed image/build flow
+  7. Verify tenant isolation by running the cross-tenant isolation test suite
+- The system MUST provide a canonical provisioning surface composed of `scripts/infra/apply-multisite-config.sh`, `scripts/tenants/provision-tenant.sh`, `scripts/tenants/sync-tenant-enterprise-mapping.sh`, and `scripts/tenants/configure-tenant-idp.sh` (as applicable to the tenant)
+- Direct Django-admin mutation of `Site`, `SiteConfiguration`, or ad-hoc one-off wrapper scripts MUST NOT be the normal tenant provisioning path
+- The canonical provisioning surface MUST be idempotent: rerunning the same tenant apply/provision/linkage steps MUST NOT create duplicate records
 - The system MUST validate all provisioning inputs before creating any records (fail-fast on invalid slug, duplicate domain, etc.)
 
 #### Tenant Offboarding
@@ -403,7 +399,7 @@ This section defines canonical terms used throughout the multi-tenancy architect
 
 ### Provisioning and Offboarding
 
-- [ ] AC-MTA-021: Given valid provisioning inputs, when `scripts/tenants/provision-tenant.sh` runs, then all required records (Site, SiteConfiguration, EnterpriseCustomer, catalogs, subscriptions, access policies) are created within 15 minutes
+- [ ] AC-MTA-021: Given valid provisioning inputs, when the canonical tenant provisioning flow (`scripts/infra/apply-multisite-config.sh` plus `scripts/tenants/provision-tenant.sh` and linkage helpers as needed) runs, then all required records (Site, SiteConfiguration, EnterpriseCustomer, catalogs, subscriptions, access policies) are created within 15 minutes
 - [ ] AC-MTA-022: Given tenant "Acme Corp" is offboarded, when the offboarding script completes data deletion, then `SELECT count(*) FROM enterprise_catalog WHERE enterprise_customer_uuid = '{acme_uuid}'` returns 0 across all enterprise service databases
 - [ ] AC-MTA-023: Given tenant "Acme Corp" is offboarded, when ClickHouse is queried, then zero events with Acme's UUID exist
 - [ ] AC-MTA-024: Given a tenant offboarding action, when it completes, then an audit log entry exists with: tenant UUID, action "offboarded", actor, timestamp
@@ -580,7 +576,7 @@ This section defines canonical terms used throughout the multi-tenancy architect
 - The existing Mereka Academy branding (per `specs/branding-system_spec.md`) MUST remain the default for users not associated with any enterprise customer
 - The existing multi-site domain configuration (per `specs/multi-site-domains_spec.md`) MUST continue to work; tenant domains are additive
 - All existing specs' acceptance criteria MUST continue to pass after multi-tenancy is enabled
-- Existing Django admin workflows for managing `EnterpriseCustomer` records MUST continue to work alongside the provisioning script
+- Django admin MUST remain usable for inspection and constrained break-glass recovery, but it MUST NOT be treated as the canonical tenant provisioning path
 
 ### Rollback Steps
 
