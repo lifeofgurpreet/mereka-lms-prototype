@@ -2312,7 +2312,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-provenance.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12644,7 +12644,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-bundle.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

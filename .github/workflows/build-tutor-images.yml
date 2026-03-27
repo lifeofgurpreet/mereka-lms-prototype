@@ -12,6 +12,10 @@ on:
       - 'deploy/k8s/base/apps/openedx/**'
       - 'infrastructure/tutor/**'
       - 'assets/branding/**'
+      - 'scripts/infra/**'
+      - 'scripts/lib/**'
+      - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-release-bundle.sh'
       - '.github/workflows/build-tutor-images.yml'
   workflow_dispatch:
     inputs:

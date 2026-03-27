@@ -75,6 +75,21 @@ else
   fail "permissions block missing"
 fi
 
+# Workflow path filter must include release/build scripts it executes.
+required_trigger_paths=(
+  "scripts/infra/**"
+  "scripts/lib/**"
+  "scripts/qa/verify-build-provenance.sh"
+  "scripts/qa/verify-release-bundle.sh"
+)
+for trigger_path in "${required_trigger_paths[@]}"; do
+  if grep -qF -- "$trigger_path" "$BUILD_WF"; then
+    pass "workflow path filter includes $trigger_path"
+  else
+    fail "workflow path filter missing $trigger_path"
+  fi
+done
+
 # App-owned proof must route through lms-ops in build workflow
 if grep -qE '\./bin/lms-ops[[:space:]]+proof' "$BUILD_WF"; then
   pass "build workflow emits app proof via bin/lms-ops"

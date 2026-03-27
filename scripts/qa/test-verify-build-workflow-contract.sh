@@ -14,6 +14,17 @@ write_pass_fixture() {
   cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
 name: build-tutor-images
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/k8s/base/apps/openedx/**'
+      - 'infrastructure/tutor/**'
+      - 'assets/branding/**'
+      - 'scripts/infra/**'
+      - 'scripts/lib/**'
+      - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-release-bundle.sh'
+      - '.github/workflows/build-tutor-images.yml'
   workflow_dispatch:
     inputs:
       target_environment:
@@ -97,6 +108,17 @@ run_expect_fail "missing canonical target_environment normalization is rejected"
 cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
 name: build-tutor-images
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/k8s/base/apps/openedx/**'
+      - 'infrastructure/tutor/**'
+      - 'assets/branding/**'
+      - 'scripts/infra/**'
+      - 'scripts/lib/**'
+      - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-release-bundle.sh'
+      - '.github/workflows/build-tutor-images.yml'
   workflow_dispatch:
     inputs:
       target_environment:
@@ -160,5 +182,17 @@ jobs:
           path: var/ci/build-provenance.json
 EOF
 run_expect_fail "missing lms-ops proof emission is rejected"
+
+# Remove script trigger coverage => must fail
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace("      - 'scripts/infra/**'\n", "")
+p.write_text(text)
+PY
+run_expect_fail "missing script trigger path coverage is rejected"
 
 echo "OK"
