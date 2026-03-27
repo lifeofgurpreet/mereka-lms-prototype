@@ -1,307 +1,145 @@
-# Staging Activation Runbook
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+# Staging Lane Runbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-27 • Status: active_
 
-**Status**: Staging lane is NOT yet activated. This document describes the promotion path design and the steps required to activate it.
+This file keeps the legacy `STAGING_ACTIVATION.md` path, but the contract it
+documents is the current live staging lane, not a future activation plan.
 
-**Audience**: Platform engineers and on-call operators.
+## Current Topology
 
----
+| Lane | Cluster | Argo resource | GitOps path | Namespace | Runtime status |
+|------|---------|---------------|-------------|-----------|----------------|
+| dev | shared nonprod RKE2 | `argocd/applicationsets/mereka-lms-dev.yaml` | `apps/mereka-lms/overlays/profiles/dev` | `mereka-lms-dev` | live |
+| staging | shared nonprod RKE2 | `argocd/applications/mereka-lms-staging.yaml` | `apps/mereka-lms/overlays/staging` | `stg-mereka-lms` | live |
+| prod | GKE | `argocd/applications/mereka-lms-prod.yaml` | `apps/mereka-lms/overlays/prod` | `mereka-lms` | parked |
 
-## Promotion Path Design
+Important truth boundaries:
 
-```
-┌──────────────────────┐     image promotion     ┌──────────────────────┐     image promotion     ┌──────────────────────┐
-│   rke2-nonprod       │ ──────────────────────► │   staging            │ ──────────────────────► │   production (GKE)   │
-│                      │                         │                      │                         │                      │
-│  Cluster: RKE2 VPS   │                         │  Cluster: GKE        │                         │  Cluster: GKE        │
-│  Domain: .mereka.dev │                         │  Domain: staging.*   │                         │  Domain: .mereka.io  │
-│  ArgoCD app:         │                         │  ArgoCD app:         │                         │  ArgoCD app:         │
-│  mereka-lms-dev      │                         │  mereka-lms-staging  │                         │  mereka-lms-prod     │
-│  (ApplicationSet)    │                         │  (ApplicationSet)    │                         │  (standalone App)    │
-└──────────────────────┘                         └──────────────────────┘                         └──────────────────────┘
-         │                                                  │                                                 │
-         │ Overlay source                                   │ Overlay source                                  │ Overlay source
-         ▼                                                  ▼                                                 ▼
-  infrastructure                               infrastructure                               infrastructure
-  apps/mereka-lms/                                 apps/mereka-lms/                                 apps/mereka-lms/
-  overlays/profiles/dev                            overlays/staging                                 overlays/prod
-```
-
-### Key Principles
-
-1. **GitOps only** — image tags and config flow through git. Never patch clusters directly.
-2. **Forward-only promotion** — an image tag is promoted by updating the overlay in infrastructure and merging to main.
-3. **ArgoCD reconciles** — after a PR merges, ArgoCD detects the change within ~3 minutes and applies it automatically.
-4. **Cross-repo structure** — `mereka-lms` (this repo) owns base manifests; `infrastructure` owns environment overlays and ArgoCD Application definitions.
-
----
+- Dev and staging are the active runtime lanes to validate on now.
+- Production is intentionally parked at zero replicas to control cost.
+- Production proof currently means `verify-prod-parked-state.sh`, not browser E2E.
+- `deploy/k8s/overlays/staging` in this repo is a historical producer-side artifact.
+  It is not the live staging overlay consumed by ArgoCD.
 
 ## Repository Roles
 
-| Repo | What it owns |
-|------|-------------|
-| `mereka-lms` (this repo) | `deploy/k8s/base/` — shared base Kustomize manifests, staging/production overlay skeletons |
-| `infrastructure` | `apps/mereka-lms/overlays/{dev,staging,prod}/` — environment-specific patches, image tags, secrets wiring |
-| `infrastructure` | `applicationsets/kustomize-apps.yaml` — ApplicationSet that generates dev (and staging, when activated) ArgoCD apps |
-| `infrastructure` | `applicationsets/mereka-lms-prod.yaml` — standalone ArgoCD Application for production |
+| Repo | Owns |
+|------|------|
+| `mereka-lms` | app runtime base, QA verifiers, policy docs, historical producer overlays |
+| `bbi-infrastructure` | live environment overlays, ArgoCD Applications/ApplicationSets, bootstrap ownership |
 
----
+## Canonical Verification
 
-## ArgoCD Application Structure
-
-### Production (active)
-
-```yaml
-# https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/applicationsets/mereka-lms-prod.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: mereka-lms-prod
-spec:
-  source:
-    repoURL: https://github.com/Biji-Biji-Initiative/infrastructure.git
-    path: apps/mereka-lms/overlays/prod
-  destination:
-    namespace: mereka-lms
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-```
-
-### Dev/Nonprod (active — via ApplicationSet)
-
-Generated by `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/applicationsets/kustomize-apps.yaml`:
-
-```yaml
-# env element in the ApplicationSet list generator
-- env: dev
-  overlay: profiles/dev
-  cluster: https://kubernetes.default.svc
-  domain: mereka.dev
-  project: nonprod-dev
-```
-
-This generates an ArgoCD Application named `mereka-lms-dev` pointing at `apps/mereka-lms/overlays/profiles/dev`.
-
-### Staging (not yet active — see activation steps below)
-
-When activated, staging will be generated by the same ApplicationSet:
-
-```yaml
-# Uncomment in https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/applicationsets/kustomize-apps.yaml
-- env: staging
-  overlay: staging
-  cluster: https://kubernetes.default.svc
-  domain: mereka.io        # or staging.academyv2.mereka.io
-  project: nonprod-dev     # or a dedicated staging project
-```
-
----
-
-## Image Promotion Workflow
-
-### Step 1: Build and tag the image
-
-CI builds images on merge to main and tags them with the git SHA:
-
-```bash
-# Example tag format (CI output)
-ghcr.io/biji-biji-initiative/mereka-lms/openedx:20260224-feature-abc-1a2b3c4
-```
-
-### Step 2: Validate on nonprod (rke2-nonprod)
-
-The image is deployed to nonprod via the `mereka-lms-dev` ArgoCD app. Verify it is healthy:
-
-```bash
-# Check nonprod ArgoCD app
-kubectl --context rke2-nonprod get application mereka-lms-dev -n argocd
-
-# Run the promotion verification gate
-./scripts/qa/verify-staging-activation.sh --online --context rke2-nonprod
-
-# Run smoke tests
-./scripts/qa/smoke-test.sh
-```
-
-### Step 3: Promote to staging
-
-Update the image tag in the **infrastructure** staging overlay:
-
-```bash
-# Edit https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/staging/kustomization.yaml
-# Update newTag values to the SHA being promoted:
-
-images:
-  - name: docker.io/overhangio/openedx
-    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: 20260224-feature-abc-1a2b3c4   # ← update this
-```
-
-Raise a PR to `infrastructure`, merge it. ArgoCD deploys to staging within ~3 minutes.
-
-### Step 4: Validate on staging
-
-```bash
-# Verify staging ArgoCD app is healthy
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
-  get application mereka-lms-staging -n argocd
-
-# Run the verification gate against staging
-./scripts/qa/verify-staging-activation.sh --online \
-  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
-
-# Run post-deploy smoke tests
-./scripts/qa/post-deploy-verify.sh
-```
-
-### Step 5: Promote to production
-
-Update the image tag in the **infrastructure** production overlay:
-
-```bash
-# Edit https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/prod/kustomization.yaml
-# Update newTag values to the same SHA that passed staging:
-
-images:
-  - name: docker.io/overhangio/openedx
-    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: 20260224-feature-abc-1a2b3c4   # ← same tag as staging
-```
-
-Raise a PR to `infrastructure`, get a second reviewer, merge it.
-
-### Step 6: Validate production
-
-```bash
-./scripts/qa/verify-staging-activation.sh --online \
-  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
-
-./scripts/qa/post-deploy-verify.sh
-./scripts/qa/smoke-test.sh
-```
-
----
-
-## Rollback Procedures
-
-### Rollback nonprod (rke2-nonprod)
-
-Revert the image tag in `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/profiles/dev/kustomization.yaml` to the previous known-good tag, raise a PR, and merge. ArgoCD rolls back automatically.
-
-**Emergency (cluster inaccessible via GitOps):**
-```bash
-# Last resort — document and raise PR immediately after
-kubectl --context rke2-nonprod set image deployment/lms \
-  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:<previous-tag> \
-  -n mereka-lms
-# Then raise PR within 5 minutes to bring git in sync with cluster state
-```
-
-### Rollback staging
-
-Revert the image tag in `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/staging/kustomization.yaml` to the previously deployed tag, merge to main. ArgoCD reconciles within ~3 minutes.
-
-```bash
-# Verify after rollback
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
-  get application mereka-lms-staging -n argocd -o jsonpath='{.status.sync.status}'
-```
-
-### Rollback production
-
-**This requires a second reviewer on the rollback PR.**
-
-Revert the image tag in `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/prod/kustomization.yaml` to the last known-good tag. Merge to main. ArgoCD reconciles.
-
-```bash
-# Verify production after rollback
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
-  get application mereka-lms-prod -n argocd
-```
-
-**If production is actively down and ArgoCD sync is taking too long:**
-```bash
-# Force an immediate sync
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
-  annotate application mereka-lms-prod -n argocd \
-  argocd.argoproj.io/refresh=hard
-```
-
-Do **not** patch resources directly — ArgoCD will revert the manual change on next sync.
-
----
-
-## Prerequisites for Staging Activation
-
-The following items must be completed before staging can be activated. Run the verification script to check current status:
+### Offline contract check
 
 ```bash
 ./scripts/qa/verify-staging-activation.sh --offline
 ```
 
-### Checklist
+This verifies:
 
-- [ ] `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/staging/kustomization.yaml` created with:
-  - Image tag overrides (pinned SHA, not `latest`)
-  - Reference to `../../base`
-  - Ingress configuration for the staging domain
-  - Staging-specific Django settings via `configMapGenerator`
-  - Resource caps appropriate for staging (lower than production)
+- the historical app-repo staging overlay remains explicitly non-authoritative
+- live GitOps dev/staging/prod manifests exist in `bbi-infrastructure`
+- staging bootstrap wiring includes `mereka-lms-staging`
+- documentation for the live lane contract still exists
 
-- [ ] `https://github.com/Biji-Biji-Initiative/BBI-K8/tree/main/apps/mereka-lms/overlays/staging/patches` created with:
-  - `ingress.yaml` — routes staging domain traffic
-  - `production-staging.py` — Django settings for staging (staging domains, OIDC, Atlas)
-  - `lms-runtime-secrets.yaml` / `cms-runtime-secrets.yaml` — staging secret mounts
+### Online dev/staging check
 
-- [ ] Staging domain DNS configured (e.g., `staging.academyv2.mereka.io`)
+```bash
+./scripts/qa/verify-staging-activation.sh --online --context rke2-nonprod
+```
 
-- [ ] Staging TLS certificate configured (cert-manager or Cloudflare)
+This verifies on the shared nonprod RKE2 cluster:
 
-- [ ] Staging secrets provisioned in Infisical and GCP Secret Manager (separate from production):
-  - `MEREKA_LMS_STAGING_SECRET_KEY`
-  - `MEREKA_LMS_STAGING_JWT_PRIVATE_SIGNING_KEY`
-  - `MEREKA_LMS_STAGING_MONGODB_PASSWORD`
+- `mereka-lms-dev` exists and is `Synced/Healthy`
+- `mereka-lms-staging` exists and is `Synced/Healthy`
+- core staging workloads (`lms`, `cms`, `caddy`) are ready in `stg-mereka-lms`
+- staging has no CrashLoopBackOff pods
+- staging `ExternalSecret` resources are ready
 
-- [ ] `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/applicationsets/kustomize-apps.yaml`: uncomment the staging entry:
-  ```yaml
-  - env: staging
-    overlay: staging
-    cluster: https://kubernetes.default.svc
-    domain: mereka.io
-    project: nonprod-dev
-    targetRevision: main
-  ```
+### Production parked-state check
 
-- [ ] [Staging overlay](https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/staging/) updated (remove `DEPRECATED` comment, ensure image tags are pinned)
+```bash
+./scripts/qa/verify-prod-parked-state.sh
+```
 
-- [ ] ArgoCD Project `nonprod-dev` (or a new `staging` project) permits the staging destination namespace
+Run this separately. It is the truthful production runtime check while GKE prod
+remains parked.
 
-- [ ] Oscar ecommerce confirmed excluded from staging (deprecated, replaced by purchase-gateway)
+## Promotion Model
 
----
+The current truthful promotion model is:
 
-## Staging Environment Specification
+```text
+local development
+  -> dev on shared RKE2
+  -> staging on shared RKE2
+  -> prod overlay update only when deliberate reactivation work is approved
+```
 
-| Property | Value |
-|----------|-------|
-| Target cluster | GKE (`bbi-k8`) |
-| Namespace | `mereka-lms` (shared with production on same cluster) or `mereka-lms-staging` (preferred isolation) |
-| ArgoCD app name | `mereka-lms-staging` |
-| LMS URL | `https://staging.academyv2.mereka.io` (proposed) |
-| Studio URL | `https://studio.staging.academyv2.mereka.io` (proposed) |
-| MFE URL | `https://apps.staging.academyv2.mereka.io` (proposed) |
-| Replica counts | 1 per service (cost-optimised, same as dev) |
-| MongoDB | Atlas (same cluster as production, separate database prefix) |
-| Image tag strategy | Pinned SHA — same image promoted from nonprod |
+That means:
 
----
+1. CI/build output may update dev and staging GitOps overlays.
+2. Runtime/browser proof should be taken against staging.
+3. Production does not become a default proof target while it is parked.
 
-## Related Documentation
+## GitOps Paths
 
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — site-down diagnostics
-- [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) — pre-release gate checklist
-- [DEPLOYMENT_ISSUES_AND_ROADMAP.md](DEPLOYMENT_ISSUES_AND_ROADMAP.md) — known issues
-- [RKE2_ROLLOUT_MATRIX.md](RKE2_ROLLOUT_MATRIX.md) — nonprod rollout matrix
-- Verification script: `scripts/qa/verify-staging-activation.sh`
+### Dev
+
+```text
+bbi-infrastructure/argocd/applicationsets/mereka-lms-dev.yaml
+bbi-infrastructure/apps/mereka-lms/overlays/profiles/dev
+```
+
+### Staging
+
+```text
+bbi-infrastructure/argocd/applications/mereka-lms-staging.yaml
+bbi-infrastructure/bootstrap/applicationsets/overlays/staging/kustomization.yaml
+bbi-infrastructure/apps/mereka-lms/overlays/staging
+```
+
+### Prod
+
+```text
+bbi-infrastructure/argocd/applications/mereka-lms-prod.yaml
+bbi-infrastructure/apps/mereka-lms/overlays/prod
+```
+
+## Rollback
+
+### Staging
+
+Rollback is GitOps-only:
+
+1. Revert the staging overlay/image change in `bbi-infrastructure`.
+2. Merge the rollback PR.
+3. Wait for ArgoCD to reconcile.
+4. Re-run:
+
+```bash
+./scripts/qa/verify-staging-activation.sh --online --context rke2-nonprod
+```
+
+### Prod
+
+If prod is still parked, rollback is usually unnecessary because runtime is not
+active. If prod is being reactivated in a future tranche, use a dedicated prod
+runbook plus `verify-prod-parked-state.sh` or its eventual replacement.
+
+## Do Not Do
+
+- Do not treat `deploy/k8s/overlays/staging` in this repo as the live staging source.
+- Do not patch Argo Applications in-cluster to “fix” drift.
+- Do not treat parked production as a failing browser-proof lane.
+- Do not assume staging is on GKE; today it lives on shared RKE2.
+
+## Related Commands
+
+```bash
+./scripts/qa/verify-staging-activation.sh --offline
+./scripts/qa/verify-staging-activation.sh --online --context rke2-nonprod
+./scripts/qa/verify-argocd-drift.sh --app mereka-lms-staging --offline
+./scripts/qa/verify-argocd-drift.sh --app mereka-lms-staging --online
+./scripts/qa/verify-prod-parked-state.sh
+```

@@ -1,95 +1,78 @@
 # ArgoCD Drift Detection Runbook
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-27 • Status: active_
 
 ## Overview
 
-ArgoCD can report "Synced" while the in-cluster Application spec has been manually modified. This is the "Synced but wrong" scenario: the rendered resources match git, but the Application itself (source path, repo URL, sync policy) was patched directly.
+This runbook covers “Synced but wrong” drift for the live Mereka LMS GitOps
+resources.
 
-**Real incident**: An agent manually patched the ApplicationSet in-cluster. ArgoCD showed Synced because the destination resources hadn't changed, but the source path was wrong and the next git change would have deployed from the wrong overlay.
+The current authoritative app set is:
 
-## Quick Diagnostic
+| App | Kind | GitOps manifest | Overlay path | Namespace |
+|-----|------|-----------------|--------------|-----------|
+| `mereka-lms-dev` | `ApplicationSet` | `argocd/applicationsets/mereka-lms-dev.yaml` | `apps/mereka-lms/overlays/profiles/dev` | `mereka-lms-dev` |
+| `mereka-lms-staging` | `Application` | `argocd/applications/mereka-lms-staging.yaml` | `apps/mereka-lms/overlays/staging` | `stg-mereka-lms` |
+| `mereka-lms-prod` | `Application` | `argocd/applications/mereka-lms-prod.yaml` | `apps/mereka-lms/overlays/prod` | `mereka-lms` |
+
+Production remains parked. Drift detection still matters there, but runtime
+health for prod is not interpreted the same way as the active dev/staging lanes.
+
+## Quick Commands
 
 ```bash
-# Offline only (no cluster access)
+./scripts/qa/verify-argocd-drift.sh --app mereka-lms-dev --offline
+./scripts/qa/verify-argocd-drift.sh --app mereka-lms-staging --offline
+./scripts/qa/verify-argocd-drift.sh --app mereka-lms-staging --online
 ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-prod --offline
-
-# Live cluster
-./scripts/qa/verify-argocd-drift.sh --app mereka-lms-prod --online
-
-# Both
-./scripts/qa/verify-argocd-drift.sh --app mereka-lms-prod --online --offline
 ```
 
-## What the Script Checks
+Use `--online` only when your kube context targets the cluster that actually
+hosts the selected app.
 
-### Offline (git manifests)
+## What The Script Checks
 
-| Check | What it verifies |
-|-------|-----------------|
-| Overlay path exists | `infrastructure/apps/mereka-lms/overlays/{overlay}` is a real directory |
-| kustomization.yaml present | The overlay has a valid kustomization entry point |
-| Application manifest matches | Git-defined source.path and repoURL are correct |
-| ApplicationSet integrity (dev) | mereka-lms entry exists with correct overlay reference |
-| Warm-park status (prod) | Whether warm-park-mode.yaml is active |
+### Offline
 
-### Online (live cluster)
+- the expected GitOps overlay path exists
+- the overlay has a `kustomization.yaml`
+- the authoritative Argo manifest exists at the current path
+- `source.path`, `source.repoURL`, and `destination.namespace` match the live contract
+- prod overlay warm-park mode is still surfaced as an informational signal
 
-| Check | What it verifies |
-|-------|-----------------|
-| Sync status | Application reports `Synced` |
-| Health status | Application reports `Healthy` |
-| Source path drift | In-cluster `spec.source.path` matches git-defined value |
-| Repo URL drift | In-cluster `spec.source.repoURL` matches git-defined value |
-| Manual refresh annotations | Detects `argocd.argoproj.io/refresh` annotations from manual overrides |
-| Last sync initiator | Whether last sync was automated or manual |
-| Resource health | Finds Degraded, Missing, or Unknown child resources |
-| Sync policy | Confirms automated prune and selfHeal are enabled |
-| ApplicationSet drift (dev) | Compares in-cluster ApplicationSet template against expected pattern |
+### Online
 
-## Known App Configurations
+- the Argo Application exists
+- sync status is `Synced`
+- health status is `Healthy`
+- in-cluster `source.path`, `source.repoURL`, and `destination.namespace` match git
+- manual refresh annotations are surfaced
+- degraded managed resources are enumerated
+- automated sync settings remain enabled
+- for dev, the owning `ApplicationSet` template still matches the git contract
 
-| App Name | Source Path | Repo |
-|----------|------------|------|
-| `mereka-lms-dev` | `apps/mereka-lms/overlays/profiles/dev` | `infrastructure.git` |
-| `mereka-lms-prod` | `apps/mereka-lms/overlays/prod` | `infrastructure.git` |
+## Resolution Rules
 
-## Resolution Steps
+1. Do not patch the Application or ApplicationSet in-cluster.
+2. Fix the source manifest in `bbi-infrastructure`.
+3. Let ArgoCD reconcile from git.
+4. Re-run the drift checker.
 
-### Drift in Application spec (source path, repoURL, namespace)
+If the cluster object is wrong while git is correct, delete only the child
+Application and let the owning Application or ApplicationSet recreate it.
 
-1. **Do NOT** `kubectl patch` the Application. ArgoCD manages it from git.
-2. Verify the correct values in the GitOps [`applicationsets`](https://github.com/Biji-Biji-Initiative/BBI-K8/tree/main/infrastructure/applicationsets):
-   - `mereka-lms-prod.yaml` (standalone Application)
-   - `kustomize-apps.yaml` (ApplicationSet for dev)
-3. If the git values are correct and the cluster is wrong, delete the Application and let ArgoCD recreate it:
-   ```bash
-   # ArgoCD will recreate from the ApplicationSet or from the manifest in git
-   kubectl delete application mereka-lms-dev -n argocd
-   ```
-4. Wait 3 minutes for ArgoCD to reconcile.
+## Workflow Coverage
 
-### Automated sync disabled
+`.github/workflows/argocd-drift-check.yml` runs the offline drift checker for:
 
-Someone may have disabled `automated.prune` or `automated.selfHeal` while debugging.
+- `mereka-lms-dev`
+- `mereka-lms-staging`
+- `mereka-lms-prod`
 
-1. Check if there's an active incident requiring manual sync control.
-2. If not, restore the sync policy by reapplying the Application from git:
-   ```bash
-    kubectl apply -f https://raw.githubusercontent.com/Biji-Biji-Initiative/BBI-K8/main/infrastructure/applicationsets/mereka-lms-prod.yaml
-   ```
+The workflow’s online coverage is intentionally narrower than local/manual
+checks until the runtime auth path for each live cluster is explicit and proven.
 
-### Degraded child resources
+## Related Runbooks
 
-1. Check pod logs: `kubectl logs -n mereka-lms -l app.kubernetes.io/name=<resource>`
-2. Check events: `kubectl get events -n mereka-lms --sort-by=.lastTimestamp | tail -20`
-3. Common causes: image pull errors, CrashLoopBackOff, missing secrets.
-
-## Automation
-
-The drift check runs every 6 hours via `.github/workflows/argocd-drift-check.yml`. On failure, it creates a GitHub issue labeled `argocd-drift`. Subsequent failures comment on the existing issue to avoid duplicates.
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `BBI_INFRA` | `<path-to-bbi-infrastructure>` | Path to infrastructure repo clone |
+- `docs/ops/runbooks/STAGING_ACTIVATION.md`
+- `docs/ops/runbooks/POST_DEPLOY_GATE.md`
+- `docs/ops/runbooks/PROD_PARKED_MODE.md`

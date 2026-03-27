@@ -18,6 +18,7 @@ on:
         options:
           - all
           - mereka-lms-dev
+          - mereka-lms-staging
           - mereka-lms-prod
 
 permissions: {}
@@ -44,6 +45,13 @@ jobs:
           BBI_INFRA: ${{ github.workspace }}/bbi-infrastructure
         run: |
           ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-dev --offline | tee var-drift-dev-offline.log
+
+      - name: Run offline drift check (staging)
+        if: ${{ github.event.inputs.app == 'all' || github.event.inputs.app == 'mereka-lms-staging' || github.event_name == 'schedule' }}
+        env:
+          BBI_INFRA: ${{ github.workspace }}/bbi-infrastructure
+        run: |
+          ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-staging --offline | tee var-drift-staging-offline.log
 
       - name: Run offline drift check (prod)
         if: ${{ github.event.inputs.app == 'all' || github.event.inputs.app == 'mereka-lms-prod' || github.event_name == 'schedule' }}

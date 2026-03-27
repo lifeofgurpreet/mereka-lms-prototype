@@ -10,8 +10,9 @@
 #
 # Usage:
 #   ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-dev --offline
+#   ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-staging --offline
 #   ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-prod --online
-#   ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-prod --online --offline
+#   ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-staging --online --offline
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -40,20 +41,29 @@ ARGOCD_NAMESPACE="argocd"
 # Known-good source paths per app (git is the source of truth)
 declare -A EXPECTED_SOURCE_PATH=(
   [mereka-lms-dev]="apps/mereka-lms/overlays/profiles/dev"
+  [mereka-lms-staging]="apps/mereka-lms/overlays/staging"
   [mereka-lms-prod]="apps/mereka-lms/overlays/prod"
 )
 declare -A EXPECTED_REPO_URL=(
   [mereka-lms-dev]="https://github.com/Biji-Biji-Initiative/bbi-infrastructure.git"
+  [mereka-lms-staging]="https://github.com/Biji-Biji-Initiative/bbi-infrastructure.git"
   [mereka-lms-prod]="https://github.com/Biji-Biji-Initiative/bbi-infrastructure.git"
 )
 declare -A EXPECTED_DEST_NAMESPACE=(
-  [mereka-lms-dev]="mereka-lms"
+  [mereka-lms-dev]="mereka-lms-dev"
+  [mereka-lms-staging]="stg-mereka-lms"
   [mereka-lms-prod]="mereka-lms"
 )
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+declare -A EXPECTED_MANIFEST_PATH=(
+  [mereka-lms-dev]="argocd/applicationsets/mereka-lms-dev.yaml"
+  [mereka-lms-staging]="argocd/applications/mereka-lms-staging.yaml"
+  [mereka-lms-prod]="argocd/applications/mereka-lms-prod.yaml"
+)
+declare -A EXPECTED_OWNER_KIND=(
+  [mereka-lms-dev]="ApplicationSet"
+  [mereka-lms-staging]="Application"
+  [mereka-lms-prod]="Application"
+)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -67,6 +77,42 @@ pass() { echo -e "${GREEN}PASS${NC}  $1"; PASS_COUNT=$((PASS_COUNT + 1)); }
 fail() { echo -e "${RED}FAIL${NC}  $1"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
 warn() { echo -e "${YELLOW}WARN${NC}  $1"; WARN_COUNT=$((WARN_COUNT + 1)); }
 
+read_manifest_contract() {
+  local manifest_path="$1"
+  local owner_kind="$2"
+
+  python3 - "$manifest_path" "$owner_kind" <<'PY'
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import sys
+
+import yaml
+
+
+path = Path(sys.argv[1])
+owner_kind = sys.argv[2]
+doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+spec = doc.get("spec") or {}
+if owner_kind == "ApplicationSet":
+    spec = (spec.get("template") or {}).get("spec") or {}
+
+source = spec.get("source") or {}
+destination = spec.get("destination") or {}
+sync_policy = spec.get("syncPolicy") or {}
+automated = sync_policy.get("automated") or {}
+sync_options = sorted(sync_policy.get("syncOptions") or [])
+
+print(source.get("path", ""))
+print(source.get("repoURL", ""))
+print(destination.get("namespace", ""))
+print(str(automated.get("prune", "")).lower())
+print(str(automated.get("selfHeal", "")).lower())
+print(json.dumps(sync_options))
+PY
+}
+
 # ---------------------------------------------------------------------------
 # Argument parsing
 # ---------------------------------------------------------------------------
@@ -79,15 +125,16 @@ print_usage() {
 Usage: $(basename "$0") --app <name> [--offline] [--online]
 
 OPTIONS:
-    --app <name>    ArgoCD Application name (mereka-lms-dev or mereka-lms-prod)
+    --app <name>    ArgoCD Application name (mereka-lms-dev, mereka-lms-staging, or mereka-lms-prod)
     --offline       Validate git manifests (no cluster access)
     --online        Live cluster checks via kubectl
     --help          Show this help
 
 EXAMPLES:
     $(basename "$0") --app mereka-lms-dev --offline
+    $(basename "$0") --app mereka-lms-staging --offline
     $(basename "$0") --app mereka-lms-prod --online
-    $(basename "$0") --app mereka-lms-prod --online --offline
+    $(basename "$0") --app mereka-lms-staging --online --offline
 EOF
 }
 
@@ -160,52 +207,56 @@ if [[ "$RUN_OFFLINE" == true ]]; then
   fi
 
   # 4. Check the git-defined Application/ApplicationSet spec matches expectations
-  if [[ "$APP_NAME" == "mereka-lms-prod" ]]; then
-    app_manifest="${BBI_INFRA}/applicationsets/mereka-lms-prod.yaml"
-    if [[ -f "$app_manifest" ]]; then
-      pass "Application manifest exists: ${app_manifest}"
+  app_manifest="${BBI_INFRA}/${EXPECTED_MANIFEST_PATH[$APP_NAME]}"
+  owner_kind="${EXPECTED_OWNER_KIND[$APP_NAME]}"
+  if [[ -f "$app_manifest" ]]; then
+    pass "${owner_kind} manifest exists: ${app_manifest}"
 
-      # Verify source path in manifest
-      manifest_path=$(grep -A5 "source:" "$app_manifest" | grep "path:" | head -1 | awk '{print $2}' || echo "")
-      if [[ "$manifest_path" == "$expected_path" ]]; then
-        pass "manifest source.path matches expected: ${expected_path}"
-      else
-        fail "manifest source.path '${manifest_path}' != expected '${expected_path}'"
-      fi
+    mapfile -t manifest_contract < <(read_manifest_contract "$app_manifest" "$owner_kind")
+    manifest_path="${manifest_contract[0]:-}"
+    manifest_repo="${manifest_contract[1]:-}"
+    manifest_namespace="${manifest_contract[2]:-}"
+    manifest_prune="${manifest_contract[3]:-}"
+    manifest_selfheal="${manifest_contract[4]:-}"
+    manifest_sync_options_json="${manifest_contract[5]:-[]}"
 
-      # Verify repo URL
-      manifest_repo=$(grep -A5 "source:" "$app_manifest" | grep "repoURL:" | head -1 | awk '{print $2}' || echo "")
-      if [[ "$manifest_repo" == "$expected_repo" ]]; then
-        pass "manifest source.repoURL matches expected"
-      else
-        fail "manifest source.repoURL '${manifest_repo}' != expected '${expected_repo}'"
-      fi
+    if [[ "$manifest_path" == "$expected_path" ]]; then
+      pass "manifest source.path matches expected: ${expected_path}"
     else
-      fail "Application manifest not found: ${app_manifest}"
+      fail "manifest source.path '${manifest_path}' != expected '${expected_path}'"
     fi
-  fi
 
-  if [[ "$APP_NAME" == "mereka-lms-dev" ]]; then
-    appset_manifest="${BBI_INFRA}/applicationsets/kustomize-apps.yaml"
-    if [[ -f "$appset_manifest" ]]; then
-      pass "ApplicationSet manifest exists: ${appset_manifest}"
-
-      # Verify mereka-lms entry exists
-      if grep -q "app: mereka-lms" "$appset_manifest"; then
-        pass "mereka-lms entry present in ApplicationSet"
-      else
-        fail "mereka-lms entry missing from ApplicationSet"
-      fi
-
-      # Verify dev overlay reference
-      if grep -q "overlay: profiles/dev" "$appset_manifest"; then
-        pass "dev overlay 'profiles/dev' referenced in ApplicationSet"
-      else
-        fail "dev overlay 'profiles/dev' not found in ApplicationSet"
-      fi
+    if [[ "$manifest_repo" == "$expected_repo" ]]; then
+      pass "manifest source.repoURL matches expected"
     else
-      fail "ApplicationSet manifest not found: ${appset_manifest}"
+      fail "manifest source.repoURL '${manifest_repo}' != expected '${expected_repo}'"
     fi
+
+    if [[ "$manifest_namespace" == "${EXPECTED_DEST_NAMESPACE[$APP_NAME]}" ]]; then
+      pass "manifest destination.namespace matches expected: ${EXPECTED_DEST_NAMESPACE[$APP_NAME]}"
+    else
+      fail "manifest destination.namespace '${manifest_namespace}' != expected '${EXPECTED_DEST_NAMESPACE[$APP_NAME]}'"
+    fi
+
+    if [[ "$manifest_prune" == "true" || "$manifest_prune" == "false" ]]; then
+      pass "manifest automated prune declared: ${manifest_prune}"
+    else
+      fail "manifest automated prune missing or invalid"
+    fi
+
+    if [[ "$manifest_selfheal" == "true" || "$manifest_selfheal" == "false" ]]; then
+      pass "manifest automated selfHeal declared: ${manifest_selfheal}"
+    else
+      fail "manifest automated selfHeal missing or invalid"
+    fi
+
+    if [[ "$manifest_sync_options_json" == "[]" ]]; then
+      warn "manifest syncOptions list is empty"
+    else
+      pass "manifest syncOptions declared"
+    fi
+  else
+    fail "${owner_kind} manifest not found: ${app_manifest}"
   fi
 
   # 5. Verify no warm-park-mode active (prod only)
@@ -356,16 +407,16 @@ for item in degraded:
         done <<< "$degraded_resources"
       fi
 
-      # 5. ApplicationSet drift detection (dev only, generated from ApplicationSet)
+      # 5. ApplicationSet drift detection (dev only, generated from a dedicated ApplicationSet)
       if [[ "$APP_NAME" == "mereka-lms-dev" ]]; then
         echo ""
         echo "--- ApplicationSet drift detection ---"
 
-        appset_json=$(kubectl get applicationset bbi-kustomize-apps -n "$ARGOCD_NAMESPACE" -o json 2>/dev/null || echo "")
+        appset_json=$(kubectl get applicationset mereka-lms-dev -n "$ARGOCD_NAMESPACE" -o json 2>/dev/null || echo "")
         if [[ -z "$appset_json" ]]; then
-          warn "ApplicationSet 'bbi-kustomize-apps' not found (may not be deployed to this cluster)"
+          warn "ApplicationSet 'mereka-lms-dev' not found (may not be deployed to this cluster)"
         else
-          pass "ApplicationSet 'bbi-kustomize-apps' found in cluster"
+          pass "ApplicationSet 'mereka-lms-dev' found in cluster"
 
           # Compare the in-cluster ApplicationSet template path
           live_template_path=$(echo "$appset_json" | python3 -c "
@@ -375,11 +426,23 @@ tmpl = d.get('spec',{}).get('template',{}).get('spec',{}).get('source',{})
 print(tmpl.get('path',''))
 " 2>/dev/null || echo "")
 
-          # The template uses Go templating, so check it contains the expected pattern
-          if echo "$live_template_path" | grep -q 'apps/.*overlays'; then
-            pass "ApplicationSet template path pattern is correct: ${live_template_path}"
+          if [[ "$live_template_path" == "${EXPECTED_SOURCE_PATH[$APP_NAME]}" ]]; then
+            pass "ApplicationSet template path matches git: ${live_template_path}"
           else
             fail "ApplicationSet template path unexpected: ${live_template_path}"
+          fi
+
+          live_template_ns=$(echo "$appset_json" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+tmpl = d.get('spec',{}).get('template',{}).get('spec',{}).get('destination',{})
+print(tmpl.get('namespace',''))
+" 2>/dev/null || echo "")
+
+          if [[ "$live_template_ns" == "${EXPECTED_DEST_NAMESPACE[$APP_NAME]}" ]]; then
+            pass "ApplicationSet template namespace matches git: ${live_template_ns}"
+          else
+            fail "ApplicationSet template namespace unexpected: ${live_template_ns}"
           fi
 
           # Compare generation to detect if AppSet was modified in-cluster
@@ -401,28 +464,52 @@ print(d.get('metadata',{}).get('resourceVersion',''))
       # 6. Check sync policy is still automated (not manually disabled)
       echo ""
       echo "--- Sync policy validation ---"
-      automated_prune=$(echo "$app_json" | python3 -c "
+      app_manifest="${BBI_INFRA}/${EXPECTED_MANIFEST_PATH[$APP_NAME]}"
+      owner_kind="${EXPECTED_OWNER_KIND[$APP_NAME]}"
+      if [[ ! -f "$app_manifest" ]]; then
+        warn "cannot compare sync policy to git: manifest missing at ${app_manifest}"
+      else
+        mapfile -t manifest_contract < <(read_manifest_contract "$app_manifest" "$owner_kind")
+        manifest_prune="${manifest_contract[3]:-}"
+        manifest_selfheal="${manifest_contract[4]:-}"
+        manifest_sync_options_json="${manifest_contract[5]:-[]}"
+
+        automated_prune=$(echo "$app_json" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
 sp = d.get('spec',{}).get('syncPolicy',{}).get('automated',{})
 prune = sp.get('prune', False)
 selfHeal = sp.get('selfHeal', False)
-print(f'{prune},{selfHeal}')
+print(f'{str(prune).lower()},{str(selfHeal).lower()}')
 " 2>/dev/null || echo "False,False")
 
-      prune_val="${automated_prune%%,*}"
-      selfheal_val="${automated_prune##*,}"
+        live_sync_options_json=$(echo "$app_json" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+sync_options = sorted(d.get('spec',{}).get('syncPolicy',{}).get('syncOptions',[]))
+print(json.dumps(sync_options))
+" 2>/dev/null || echo "[]")
 
-      if [[ "$prune_val" == "True" ]]; then
-        pass "automated prune is enabled"
-      else
-        fail "DRIFT: automated prune is DISABLED (should be True)"
-      fi
+        prune_val="${automated_prune%%,*}"
+        selfheal_val="${automated_prune##*,}"
 
-      if [[ "$selfheal_val" == "True" ]]; then
-        pass "automated selfHeal is enabled"
-      else
-        fail "DRIFT: automated selfHeal is DISABLED (should be True)"
+        if [[ "$prune_val" == "$manifest_prune" ]]; then
+          pass "automated prune matches git: ${manifest_prune}"
+        else
+          fail "DRIFT: automated prune '${prune_val}' != git '${manifest_prune}'"
+        fi
+
+        if [[ "$selfheal_val" == "$manifest_selfheal" ]]; then
+          pass "automated selfHeal matches git: ${manifest_selfheal}"
+        else
+          fail "DRIFT: automated selfHeal '${selfheal_val}' != git '${manifest_selfheal}'"
+        fi
+
+        if [[ "$live_sync_options_json" == "$manifest_sync_options_json" ]]; then
+          pass "syncOptions match git"
+        else
+          fail "DRIFT: syncOptions ${live_sync_options_json} != git ${manifest_sync_options_json}"
+        fi
       fi
     fi
   fi

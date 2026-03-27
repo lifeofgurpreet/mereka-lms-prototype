@@ -36,6 +36,7 @@
     "scripts/qa/run-multisite-governance-gates.sh",
     "scripts/qa/run-operations-gates.sh",
     "scripts/qa/smoke-authenticated.sh",
+    "scripts/qa/verify-argocd-drift.sh",
     "scripts/qa/verify-auth-hardening.sh",
     "scripts/qa/verify-auth-surfaces.sh",
     "scripts/qa/verify-authenticated-sso-canary.sh",

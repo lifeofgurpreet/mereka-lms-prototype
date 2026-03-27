@@ -2,26 +2,32 @@
 # @covers AC-DEP-001, AC-DEP-002, AC-DEP-003, AC-DEP-004
 # @spec: k8s-deployment_spec.md
 #
-# verify-staging-activation.sh — Verify the nonprod → staging → production promotion path.
+# verify-staging-activation.sh — Verify the live dev/staging lane contract.
 #
-# This script documents and verifies the staging activation prerequisites.
-# Staging is NOT yet a live environment; it is a formalized promotion lane
-# that sits between rke2-nonprod (RKE2 on VPS) and production (GKE).
+# Staging is an active runtime lane on the shared RKE2 nonprod cluster.
+# Production remains on GKE, but that lane is intentionally parked and is
+# verified separately via scripts/qa/verify-prod-parked-state.sh.
 #
 # Modes:
 #   --offline  Check source manifests only (no cluster access). Default.
 #   --online   Live cluster checks via kubectl (requires cluster access and --context).
-#   --context  kubectl context to use for online checks (default: gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster)
+#   --context  kubectl context to use for online checks (default: rke2-nonprod)
 #
 # Usage:
 #   ./scripts/qa/verify-staging-activation.sh --offline
-#   ./scripts/qa/verify-staging-activation.sh --online --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   ./scripts/qa/verify-staging-activation.sh --online --context rke2-nonprod
 #   ./scripts/qa/verify-staging-activation.sh --offline --online --context rke2-nonprod
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+POLICY_FILE="${REPO_ROOT}/config/runtime-proof-policy.env"
+
+if [[ -f "$POLICY_FILE" ]]; then
+  # shellcheck disable=SC1090
+  source "$POLICY_FILE"
+fi
 
 # ── Colors ────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -41,8 +47,9 @@ skip_check() { echo -e "  ${YELLOW}SKIP${NC}: $1"; SKIP=$((SKIP + 1)); }
 # ── Argument parsing ──────────────────────────────────────────────────────────
 MODE_OFFLINE=false
 MODE_ONLINE=false
-KUBECONTEXT="${KUBECONTEXT:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
-NS="${NS:-mereka-lms}"
+KUBECONTEXT="${KUBECONTEXT:-${K8S_CONTEXT_STAGING:-${K8S_CONTEXT_NONPROD:-rke2-nonprod}}}"
+NS="${NS:-stg-mereka-lms}"
+DEV_NS="${DEV_NS:-mereka-lms-dev}"
 ARGOCD_NS="${ARGOCD_NS:-argocd}"
 
 while [[ $# -gt 0 ]]; do
@@ -66,8 +73,8 @@ fi
 KC() { kubectl --context "$KUBECONTEXT" "$@"; }
 
 echo "========================================================"
-echo "Staging Activation Path Verifier"
-echo "  offline=${MODE_OFFLINE}  online=${MODE_ONLINE}  context=${KUBECONTEXT}  ns=${NS}"
+echo "Staging Lane Truth Verifier"
+echo "  offline=${MODE_OFFLINE}  online=${MODE_ONLINE}  context=${KUBECONTEXT}  staging-ns=${NS}  dev-ns=${DEV_NS}"
 echo "========================================================"
 echo ""
 
@@ -117,11 +124,12 @@ if [[ "$MODE_OFFLINE" == true ]]; then
       fail_check "staging overlay does not reference ../../base"
     fi
 
-    # Check it is NOT still marked deprecated-only
+    # The app-repo staging overlay is a historical producer-side artifact.
+    # Live staging is realized from bbi-infrastructure/apps/mereka-lms/overlays/staging.
     if grep -q 'DEPRECATED' "$STAGING_OVERLAY/kustomization.yaml" 2>/dev/null; then
-      skip_check "staging/kustomization.yaml has DEPRECATED comment — staging not yet activated (expected until staging is formalized)"
+      pass_check "staging/kustomization.yaml is explicitly marked as a non-authoritative historical overlay"
     else
-      pass_check "staging overlay is not marked deprecated"
+      fail_check "staging/kustomization.yaml should stay marked DEPRECATED to prevent app-repo overlay drift"
     fi
   else
     fail_check "staging kustomization.yaml missing"
@@ -185,10 +193,58 @@ if [[ "$MODE_OFFLINE" == true ]]; then
       skip_check "bbi-infrastructure: staging kustomization.yaml not present (required for ArgoCD activation)"
     fi
 
-    # Production ArgoCD Application definition
-    PROD_APP_MANIFEST="$BBI_INFRA/applicationsets/mereka-lms-prod.yaml"
+    # Dedicated live Argo resources in bbi-infrastructure
+    DEV_APPSET_MANIFEST="$BBI_INFRA/argocd/applicationsets/mereka-lms-dev.yaml"
+    STAGING_APP_MANIFEST="$BBI_INFRA/argocd/applications/mereka-lms-staging.yaml"
+    PROD_APP_MANIFEST="$BBI_INFRA/argocd/applications/mereka-lms-prod.yaml"
+    STAGING_BOOTSTRAP_OVERLAY="$BBI_INFRA/bootstrap/applicationsets/overlays/staging/kustomization.yaml"
+
+    if [[ -f "$DEV_APPSET_MANIFEST" ]]; then
+      pass_check "ArgoCD ApplicationSet manifest exists: argocd/applicationsets/mereka-lms-dev.yaml"
+      if grep -q "apps/mereka-lms/overlays/profiles/dev" "$DEV_APPSET_MANIFEST" 2>/dev/null; then
+        pass_check "dev ArgoCD appset source path: apps/mereka-lms/overlays/profiles/dev"
+      else
+        fail_check "dev ArgoCD appset source path does not reference overlays/profiles/dev"
+      fi
+      if grep -q "namespace: mereka-lms-dev" "$DEV_APPSET_MANIFEST" 2>/dev/null; then
+        pass_check "dev ArgoCD appset destination namespace: mereka-lms-dev"
+      else
+        fail_check "dev ArgoCD appset destination namespace is not mereka-lms-dev"
+      fi
+    else
+      fail_check "dev ArgoCD ApplicationSet manifest missing: ${DEV_APPSET_MANIFEST}"
+    fi
+
+    if [[ -f "$STAGING_APP_MANIFEST" ]]; then
+      pass_check "ArgoCD Application manifest exists: argocd/applications/mereka-lms-staging.yaml"
+      if grep -q "apps/mereka-lms/overlays/staging" "$STAGING_APP_MANIFEST" 2>/dev/null; then
+        pass_check "staging ArgoCD app source path: apps/mereka-lms/overlays/staging"
+      else
+        fail_check "staging ArgoCD app source path does not reference overlays/staging"
+      fi
+      if grep -q "namespace: stg-mereka-lms" "$STAGING_APP_MANIFEST" 2>/dev/null; then
+        pass_check "staging ArgoCD app destination namespace: stg-mereka-lms"
+      else
+        fail_check "staging ArgoCD app destination namespace is not stg-mereka-lms"
+      fi
+    else
+      fail_check "staging ArgoCD Application manifest missing: ${STAGING_APP_MANIFEST}"
+    fi
+
+    if [[ -f "$STAGING_BOOTSTRAP_OVERLAY" ]]; then
+      pass_check "staging bootstrap overlay exists: bootstrap/applicationsets/overlays/staging/kustomization.yaml"
+      if grep -q "argocd/applications/mereka-lms-staging.yaml" "$STAGING_BOOTSTRAP_OVERLAY" 2>/dev/null; then
+        pass_check "staging bootstrap overlay includes mereka-lms-staging application"
+      else
+        fail_check "staging bootstrap overlay does not include argocd/applications/mereka-lms-staging.yaml"
+      fi
+    else
+      fail_check "staging bootstrap overlay missing: ${STAGING_BOOTSTRAP_OVERLAY}"
+    fi
+
+    # Production ArgoCD Application definition (parked lane on GKE)
     if [[ -f "$PROD_APP_MANIFEST" ]]; then
-      pass_check "ArgoCD Application manifest exists: applicationsets/mereka-lms-prod.yaml"
+      pass_check "ArgoCD Application manifest exists: argocd/applications/mereka-lms-prod.yaml"
 
       # Verify prod source path
       if grep -q "apps/mereka-lms/overlays/prod" "$PROD_APP_MANIFEST" 2>/dev/null; then
@@ -218,35 +274,6 @@ if [[ "$MODE_OFFLINE" == true ]]; then
       fi
     else
       fail_check "production ArgoCD Application manifest missing: ${PROD_APP_MANIFEST}"
-    fi
-
-    # ApplicationSet with staging entry (mereka-lms staging not yet activated)
-    APPSET_MANIFEST="$BBI_INFRA/applicationsets/kustomize-apps.yaml"
-    if [[ -f "$APPSET_MANIFEST" ]]; then
-      pass_check "ApplicationSet manifest exists: applicationsets/kustomize-apps.yaml"
-
-      if grep -q "app: mereka-lms" "$APPSET_MANIFEST" 2>/dev/null; then
-        pass_check "ApplicationSet includes mereka-lms entry"
-      else
-        fail_check "ApplicationSet missing mereka-lms entry"
-      fi
-
-      # Staging entry may be commented out — that is expected pre-activation
-      if grep -q "env: staging" "$APPSET_MANIFEST" 2>/dev/null; then
-        pass_check "ApplicationSet: staging environment entry is active"
-      elif grep -q "staging" "$APPSET_MANIFEST" 2>/dev/null; then
-        skip_check "ApplicationSet: staging entry exists but is commented out (uncomment to activate)"
-      else
-        skip_check "ApplicationSet: no staging entry found — add staging block to activate promotion lane"
-      fi
-
-      if grep -q "env: dev" "$APPSET_MANIFEST" 2>/dev/null; then
-        pass_check "ApplicationSet: dev/nonprod environment entry is active"
-      else
-        fail_check "ApplicationSet: dev/nonprod environment entry missing"
-      fi
-    else
-      fail_check "ApplicationSet manifest missing: ${APPSET_MANIFEST}"
     fi
 
     # Verify prod overlay in bbi-infrastructure
@@ -329,62 +356,59 @@ if [[ "$MODE_ONLINE" == true ]]; then
   else
     pass_check "kubectl reachable: context=${KUBECONTEXT}"
 
-    # ── 2a. Production ArgoCD Application health ────────────────────────────
-    echo "  -- Production ArgoCD Application --"
-    PROD_APP_JSON=$(KC get application mereka-lms-prod -n "$ARGOCD_NS" -o json 2>/dev/null || echo "")
-    if [[ -z "$PROD_APP_JSON" ]]; then
-      skip_check "[live] ArgoCD Application 'mereka-lms-prod' not found in ${ARGOCD_NS} — production may not be on this cluster"
-    else
-      pass_check "[live] ArgoCD Application 'mereka-lms-prod' found"
+    check_live_app() {
+      local app_name="$1"
+      local label="$2"
+      local expected_ns="$3"
+      local app_json
 
-      sync_status=$(echo "$PROD_APP_JSON" | python3 -c \
+      app_json=$(KC get application "$app_name" -n "$ARGOCD_NS" -o json 2>/dev/null || echo "")
+      if [[ -z "$app_json" ]]; then
+        fail_check "[live] ArgoCD Application '${app_name}' not found in ${ARGOCD_NS}"
+        return
+      fi
+
+      pass_check "[live] ArgoCD Application '${app_name}' found"
+
+      local sync_status health_status live_ns
+      sync_status=$(echo "$app_json" | python3 -c \
         "import sys,json; d=json.load(sys.stdin); print(d.get('status',{}).get('sync',{}).get('status','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
-      health_status=$(echo "$PROD_APP_JSON" | python3 -c \
+      health_status=$(echo "$app_json" | python3 -c \
         "import sys,json; d=json.load(sys.stdin); print(d.get('status',{}).get('health',{}).get('status','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
+      live_ns=$(echo "$app_json" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('spec',{}).get('destination',{}).get('namespace','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
 
       if [[ "$sync_status" == "Synced" ]]; then
-        pass_check "[live] production sync status: Synced"
+        pass_check "[live] ${label} sync status: Synced"
       else
-        fail_check "[live] production sync status: ${sync_status} (expected Synced)"
+        fail_check "[live] ${label} sync status: ${sync_status}"
       fi
 
       if [[ "$health_status" == "Healthy" ]]; then
-        pass_check "[live] production health status: Healthy"
+        pass_check "[live] ${label} health status: Healthy"
       else
-        fail_check "[live] production health status: ${health_status} (expected Healthy)"
+        fail_check "[live] ${label} health status: ${health_status}"
       fi
-    fi
 
-    # ── 2b. Staging ArgoCD Application (not yet active — expect SKIP) ───────
+      if [[ "$live_ns" == "$expected_ns" ]]; then
+        pass_check "[live] ${label} destination namespace: ${expected_ns}"
+      else
+        fail_check "[live] ${label} destination namespace ${live_ns} != ${expected_ns}"
+      fi
+    }
+
+    # ── 2a. Dev ArgoCD Application ──────────────────────────────────────────
+    echo "  -- Dev ArgoCD Application --"
+    check_live_app "mereka-lms-dev" "dev" "$DEV_NS"
+
+    # ── 2b. Staging ArgoCD Application ──────────────────────────────────────
     echo ""
     echo "  -- Staging ArgoCD Application --"
-    STAGING_APP_JSON=$(KC get application mereka-lms-staging -n "$ARGOCD_NS" -o json 2>/dev/null || echo "")
-    if [[ -z "$STAGING_APP_JSON" ]]; then
-      skip_check "[live] ArgoCD Application 'mereka-lms-staging' not found — staging not yet activated (expected)"
-    else
-      pass_check "[live] ArgoCD Application 'mereka-lms-staging' found — staging is active"
+    check_live_app "mereka-lms-staging" "staging" "$NS"
 
-      staging_sync=$(echo "$STAGING_APP_JSON" | python3 -c \
-        "import sys,json; d=json.load(sys.stdin); print(d.get('status',{}).get('sync',{}).get('status','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
-      staging_health=$(echo "$STAGING_APP_JSON" | python3 -c \
-        "import sys,json; d=json.load(sys.stdin); print(d.get('status',{}).get('health',{}).get('status','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
-
-      if [[ "$staging_sync" == "Synced" ]]; then
-        pass_check "[live] staging sync status: Synced"
-      else
-        fail_check "[live] staging sync status: ${staging_sync}"
-      fi
-
-      if [[ "$staging_health" == "Healthy" ]]; then
-        pass_check "[live] staging health status: Healthy"
-      else
-        fail_check "[live] staging health status: ${staging_health}"
-      fi
-    fi
-
-    # ── 2c. Core workload readiness in production namespace ─────────────────
+    # ── 2c. Core workload readiness in staging namespace ────────────────────
     echo ""
-    echo "  -- Core workload readiness (production namespace) --"
+    echo "  -- Core workload readiness (staging namespace) --"
     CORE_WORKLOADS=("lms" "cms" "caddy")
     for workload in "${CORE_WORKLOADS[@]}"; do
       READY=$(KC get deployment "$workload" -n "$NS" \
@@ -392,7 +416,7 @@ if [[ "$MODE_ONLINE" == true ]]; then
       DESIRED=$(KC get deployment "$workload" -n "$NS" \
         -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "")
       if [[ -z "$READY" ]]; then
-        skip_check "[live] deployment ${workload} not found in namespace ${NS}"
+        fail_check "[live] deployment ${workload} not found in namespace ${NS}"
       elif [[ "$READY" == "$DESIRED" && "$READY" != "0" ]]; then
         pass_check "[live] deployment ${workload}: ${READY}/${DESIRED} replicas ready"
       else
@@ -400,9 +424,9 @@ if [[ "$MODE_ONLINE" == true ]]; then
       fi
     done
 
-    # ── 2d. Check for CrashLoopBackOff in production ────────────────────────
+    # ── 2d. Check for CrashLoopBackOff in staging ───────────────────────────
     echo ""
-    echo "  -- CrashLoopBackOff check (production namespace) --"
+    echo "  -- CrashLoopBackOff check (staging namespace) --"
     CRASH_PODS=$(KC get pods -n "$NS" \
       -o jsonpath='{range .items[*]}{.metadata.name}={range .status.containerStatuses[*]}{.state.waiting.reason}{end}{"\n"}{end}' 2>/dev/null \
       | grep 'CrashLoopBackOff' || true)
@@ -432,34 +456,35 @@ if [[ "$MODE_ONLINE" == true ]]; then
     else
       skip_check "[live] ExternalSecret CRD not available or no ExternalSecrets in ${NS}"
     fi
+
+    # ── 2f. Production lane contract note ───────────────────────────────────
+    echo ""
+    echo "  -- Production lane contract --"
+    skip_check "[live] Production runtime is intentionally parked on GKE; verify it separately with ${PROD_PARKED_VERIFIER:-scripts/qa/verify-prod-parked-state.sh}"
   fi
 
   echo ""
 fi
 
 # =============================================================================
-# S3: Promotion path prerequisite summary
+# S3: Lane integrity summary
 # =============================================================================
 if [[ "$MODE_OFFLINE" == true ]]; then
-  echo "S3: Promotion Path Prerequisite Summary"
+  echo "S3: Lane Integrity Summary"
   echo ""
 
-  PREREQS_MET=true
-
-  # Checklist of conditions required before staging can be activated
   check_prereq() {
     local description="$1"
     local check_result="$2"  # "pass", "fail", or "skip"
     case "$check_result" in
-      pass) pass_check "PREREQ OK: ${description}" ;;
-      skip) skip_check "PREREQ PENDING: ${description}" ;;
-      fail) fail_check "PREREQ MISSING: ${description}"; PREREQS_MET=false ;;
+      pass) pass_check "LANE OK: ${description}" ;;
+      skip) skip_check "LANE NOTE: ${description}" ;;
+      fail) fail_check "LANE MISSING: ${description}" ;;
     esac
   }
 
-  # These are evaluated against what we discovered above
   if [[ -d "$REPO_ROOT/deploy/k8s/overlays/staging" ]]; then
-    check_prereq "mereka-lms staging overlay exists" "pass"
+    check_prereq "app-repo historical staging overlay remains present and non-authoritative" "pass"
   else
     check_prereq "mereka-lms staging overlay exists (deploy/k8s/overlays/staging/)" "fail"
   fi
@@ -467,19 +492,25 @@ if [[ "$MODE_OFFLINE" == true ]]; then
   if [[ -n "$BBI_INFRA" && -d "$BBI_INFRA/apps/mereka-lms/overlays/staging" ]]; then
     check_prereq "bbi-infrastructure staging overlay exists" "pass"
   else
-    check_prereq "bbi-infrastructure staging overlay exists (apps/mereka-lms/overlays/staging/)" "skip"
+    check_prereq "bbi-infrastructure staging overlay exists (apps/mereka-lms/overlays/staging/)" "fail"
   fi
 
-  if [[ -n "$BBI_INFRA" ]] && grep -q "env: staging" "$BBI_INFRA/applicationsets/kustomize-apps.yaml" 2>/dev/null; then
-    check_prereq "ApplicationSet staging entry is uncommented" "pass"
+  if [[ -n "$BBI_INFRA" && -f "$BBI_INFRA/argocd/applicationsets/mereka-lms-dev.yaml" ]]; then
+    check_prereq "dev lane is realized by argocd/applicationsets/mereka-lms-dev.yaml" "pass"
   else
-    check_prereq "ApplicationSet staging entry is uncommented in kustomize-apps.yaml" "skip"
+    check_prereq "dev lane ApplicationSet manifest exists" "fail"
+  fi
+
+  if [[ -n "$BBI_INFRA" && -f "$BBI_INFRA/argocd/applications/mereka-lms-staging.yaml" ]]; then
+    check_prereq "staging lane is realized by argocd/applications/mereka-lms-staging.yaml" "pass"
+  else
+    check_prereq "staging lane Application manifest exists" "fail"
   fi
 
   if [[ -f "$REPO_ROOT/docs/ops/runbooks/STAGING_ACTIVATION.md" ]]; then
-    check_prereq "staging activation runbook exists" "pass"
+    check_prereq "staging lane runbook exists" "pass"
   else
-    check_prereq "staging activation runbook exists (docs/ops/runbooks/STAGING_ACTIVATION.md)" "fail"
+    check_prereq "staging lane runbook exists (docs/ops/runbooks/STAGING_ACTIVATION.md)" "fail"
   fi
 
   echo ""
@@ -495,20 +526,20 @@ echo "========================================================"
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Remediation hints:"
-  echo "  S1 (manifests):  Check deploy/k8s/overlays/staging/ in this repo"
-  echo "  S1 (gitops):     Check bbi-infrastructure/apps/mereka-lms/overlays/staging/"
-  echo "  S1 (argocd):     Uncomment staging block in bbi-infrastructure/applicationsets/kustomize-apps.yaml"
-  echo "  S1 (docs):       See docs/ops/runbooks/STAGING_ACTIVATION.md for activation steps"
-  echo "  S2 (live):       Run with --online after fixing offline failures"
+  echo "  S1 (app repo):   Check deploy/k8s/overlays/staging/ stays explicitly non-authoritative"
+  echo "  S1 (gitops):     Check bbi-infrastructure argocd/applications{,ets}/mereka-lms-{dev,staging,prod}.yaml"
+  echo "  S1 (bootstrap):  Check bootstrap/applicationsets/overlays/staging/kustomization.yaml"
+  echo "  S1 (docs):       See docs/ops/runbooks/STAGING_ACTIVATION.md for the live lane contract"
+  echo "  S2 (live):       Run with --online against rke2-nonprod after fixing offline failures"
   echo ""
-  echo "See docs/ops/runbooks/STAGING_ACTIVATION.md for the full promotion path."
+  echo "See docs/ops/runbooks/STAGING_ACTIVATION.md for the live dev/staging lane contract."
   exit 1
 fi
 
 if [[ "$SKIP" -gt 0 && "$PASS" -gt 0 ]]; then
   echo ""
-  echo "Note: SKIP items indicate staging is not yet activated (expected for pre-activation state)."
-  echo "Follow docs/ops/runbooks/STAGING_ACTIVATION.md to complete staging setup."
+  echo "Note: SKIP items document adjacent lanes that are intentionally verified elsewhere."
+  echo "Use docs/ops/runbooks/STAGING_ACTIVATION.md for the live dev/staging lane contract."
 fi
 
 exit 0

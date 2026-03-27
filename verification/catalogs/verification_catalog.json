@@ -1052,13 +1052,14 @@
       ],
       "env_scope": [
         "dev",
-        "prod"
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-argocd-drift.sh",
-      "reference_count": 5,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -12010,7 +12011,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-prod-parked-state.sh",
-      "reference_count": 10,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -14445,7 +14446,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-staging-activation.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
