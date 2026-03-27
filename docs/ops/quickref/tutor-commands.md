@@ -125,6 +125,11 @@ Patches applied:
 
 ### Build Commands
 
+These `tutor images build ...` commands are for local development, parity
+checks, and debugging. Production releases must publish through
+`.github/workflows/build-tutor-images.yml` and promote with
+`./scripts/infra/release-openedx-gitops.sh --require-digests`.
+
 ```bash
 # Build Open edX platform (LMS/CMS/workers)
 # Requires: 12GB+ RAM, 30-45 min
@@ -156,12 +161,15 @@ tutor images build openedx mfe discovery
 
 ### Push to Registry
 
+These commands are for local experimentation only. Do not use `tutor images push`
+or manual `docker push` as the normal production release path.
+
 ```bash
-# Push to Artifact Registry
+# Push from a local/dev environment
 tutor images push openedx
 tutor images push mfe
 
-# Tag and push manually
+# Tag and push manually for local/debug workflows
 docker tag openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
 docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
 ```
@@ -336,6 +344,7 @@ tutor local run lms ./manage.py lms import_users /tmp/users.csv
 
 ### Apply Theme
 
+Local theme workflow:
 ```bash
 # Sync assets to Tutor themes
 make branding-sync
@@ -347,8 +356,13 @@ tutor images build openedx
 tutor local restart lms cms
 ```
 
+Production theme rollout:
+- publish updated Open edX / MFE images through `.github/workflows/build-tutor-images.yml`
+- promote the resulting digests with `./scripts/infra/release-openedx-gitops.sh --require-digests`
+
 ### MFE Branding
 
+Local MFE workflow:
 ```bash
 # Set up MFE branding for dev mode
 ./scripts/branding/setup-mfe-branding.sh
@@ -357,6 +371,10 @@ tutor local restart lms cms
 tutor images build mfe
 tutor local restart mfe
 ```
+
+Production MFE branding rollout:
+- publish the updated MFE image through `.github/workflows/build-tutor-images.yml`
+- promote the resulting digests with `./scripts/infra/release-openedx-gitops.sh --require-digests`
 
 ---
 

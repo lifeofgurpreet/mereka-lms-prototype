@@ -7,6 +7,12 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 > strategy, triggering builds, post-build GitOps, and a troubleshooting tree for
 > every failure mode we have hit.
 >
+> Production release authority is the governed workflow
+> `.github/workflows/build-tutor-images.yml` followed by
+> `./scripts/infra/release-openedx-gitops.sh --require-digests`. Any `docker push`
+> examples in this runbook describe workflow internals or local debugging, not the
+> normal production operator path.
+>
 > AC-OPS-211, AC-OPS-212, AC-OPS-213, AC-OPS-214
 
 ---
@@ -508,6 +514,9 @@ python3 -c "content = \"\"\"line one\"\"\"; ..."
 
 For local iterative development, build images directly with Tutor. The CI pipeline
 is not required for local testing.
+
+These commands are for local reproduction, cache diagnosis, and parity checks.
+Do not use them as a substitute for the governed production publish path.
 
 ### When to do a full local build
 
