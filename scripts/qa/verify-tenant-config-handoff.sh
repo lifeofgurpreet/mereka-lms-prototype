@@ -64,25 +64,25 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- AC-UI-601: Per-Tenant Asset and Config Precedence ---"
 
-if echo "$content" | grep -qi "precedence"; then
+if grep -qi "precedence" <<<"$content"; then
   pass_check "AC-UI-601: document contains 'precedence' section"
 else
   fail_check "AC-UI-601: document does not contain 'precedence' section"
 fi
 
-if echo "$content" | grep -qi "SITE_VARIANTS"; then
+if grep -qi "SITE_VARIANTS" <<<"$content"; then
   pass_check "AC-UI-601: document references SITE_VARIANTS"
 else
   fail_check "AC-UI-601: document does not reference SITE_VARIANTS"
 fi
 
-if echo "$content" | grep -qi "_tokens.scss\|design token"; then
+if grep -qi "_tokens.scss\|design token" <<<"$content"; then
   pass_check "AC-UI-601: document references _tokens.scss or design tokens"
 else
   fail_check "AC-UI-601: document does not reference _tokens.scss or design tokens"
 fi
 
-if echo "$content" | grep -qi "mereka_lms.py"; then
+if grep -qi "mereka_lms.py" <<<"$content"; then
   pass_check "AC-UI-601: document references mereka_lms.py"
 else
   fail_check "AC-UI-601: document does not reference mereka_lms.py"
@@ -95,19 +95,19 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- AC-UI-602: New Tenant Onboarding Checklist ---"
 
-if echo "$content" | grep -qi "checklist\|onboarding"; then
+if grep -qi "checklist\|onboarding" <<<"$content"; then
   pass_check "AC-UI-602: document contains 'checklist' or 'onboarding' section"
 else
   fail_check "AC-UI-602: document does not contain 'checklist' or 'onboarding' section"
 fi
 
-if echo "$content" | grep -qi "dns\|hostname"; then
+if grep -qi "dns\|hostname" <<<"$content"; then
   pass_check "AC-UI-602: document mentions DNS/hostname steps"
 else
   fail_check "AC-UI-602: document does not mention DNS/hostname steps"
 fi
 
-if echo "$content" | grep -qi "domain mapping\|verify domain"; then
+if grep -qi "domain mapping\|verify domain" <<<"$content"; then
   pass_check "AC-UI-602: document mentions domain mapping verification"
 else
   fail_check "AC-UI-602: document does not mention domain mapping verification"
@@ -120,7 +120,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- AC-UI-603: Validation Commands ---"
 
-if echo "$content" | grep -qi "validation\|validate"; then
+if grep -qi "validation\|validate" <<<"$content"; then
   pass_check "AC-UI-603: document contains 'validation' or 'validate' section"
 else
   fail_check "AC-UI-603: document does not contain a validation section"
@@ -141,13 +141,13 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- AC-UI-604: Rollback and Recovery ---"
 
-if echo "$content" | grep -qi "rollback"; then
+if grep -qi "rollback" <<<"$content"; then
   pass_check "AC-UI-604: document contains 'rollback' section"
 else
   fail_check "AC-UI-604: document does not contain a rollback section"
 fi
 
-if echo "$content" | grep -qi "git revert\|kubectl rollout"; then
+if grep -qi "git revert\|kubectl rollout" <<<"$content"; then
   pass_check "AC-UI-604: document mentions git revert or kubectl rollout"
 else
   fail_check "AC-UI-604: document does not mention git revert or kubectl rollout"
@@ -160,13 +160,13 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- AC-UI-605: Enterprise Host and Subsystem Mappings ---"
 
-if echo "$content" | grep -qi "MULTI_TENANT_BRANDING_OPS\|MULTITENANT_BRAND_PLATFORM\|BRANDING_OPERATING_MODEL"; then
+if grep -qi "MULTI_TENANT_BRANDING_OPS\|MULTITENANT_BRAND_PLATFORM\|BRANDING_OPERATING_MODEL" <<<"$content"; then
   pass_check "AC-UI-605: document references MULTI_TENANT_BRANDING_OPS or BRANDING_OPERATING_MODEL"
 else
   fail_check "AC-UI-605: document does not reference MULTI_TENANT_BRANDING_OPS or BRANDING_OPERATING_MODEL"
 fi
 
-if echo "$content" | grep -qi "mereka_lms.py"; then
+if grep -qi "mereka_lms.py" <<<"$content"; then
   pass_check "AC-UI-605: document references mereka_lms.py in subsystem mappings"
 else
   fail_check "AC-UI-605: document does not reference mereka_lms.py in subsystem mappings"
