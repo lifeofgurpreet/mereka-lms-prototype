@@ -6554,7 +6554,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-gitops-image-overrides.sh",
-      "reference_count": 24,
+      "reference_count": 25,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

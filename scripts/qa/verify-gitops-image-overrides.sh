@@ -51,7 +51,8 @@ Checks:
   2) Production overlay uses canonical names.
   3) Production overlay includes transformed-name override parity for openedx-mfe.
   4) Staging overlay uses canonical docker.io names (no bare openedx/openedx-mfe names).
-  5) Optional infra overlay parity check in active GitOps checkout (when available).
+  5) Optional infra overlay parity check in active GitOps checkout (when available),
+     matching the real overlay shape for that lane.
   6) Optional tag/digest parity check between this repo's production overlay and infra production overlay.
   7) Optional vendored MFE Caddyfile parity check in infra checkout (when vendored base exists).
 
@@ -215,22 +216,11 @@ if check_infra == "1":
         errors.append(f"infra check requested but file missing: {INFRA_PROD}")
     else:
         infra_images = parse_images(INFRA_PROD)
+        # Infra prod overlays pin the canonical docker.io image names and rewrite
+        # them via newName -> GHCR. They do not carry the app repo's extra
+        # transformed-name parity entry for openedx-mfe.
         infra_openedx = ensure_mapping(infra_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(INFRA_PROD), errors)
         infra_mfe_source = ensure_mapping(infra_images, SOURCE_MFE, TARGET_MFE, str(INFRA_PROD), errors)
-        infra_mfe_transformed = ensure_mapping(infra_images, TARGET_MFE, TARGET_MFE, str(INFRA_PROD), errors)
-        if infra_mfe_source and infra_mfe_transformed:
-            if infra_mfe_source["newTag"] != infra_mfe_transformed["newTag"]:
-                errors.append(
-                    f"{INFRA_PROD}: openedx-mfe tag mismatch between canonical and transformed entries "
-                    f"('{infra_mfe_source['newTag']}' vs '{infra_mfe_transformed['newTag']}')"
-                )
-            if (infra_mfe_source["digest"] or infra_mfe_transformed["digest"]) and (
-                infra_mfe_source["digest"] != infra_mfe_transformed["digest"]
-            ):
-                errors.append(
-                    f"{INFRA_PROD}: openedx-mfe digest mismatch between canonical and transformed entries "
-                    f"('{infra_mfe_source['digest']}' vs '{infra_mfe_transformed['digest']}')"
-                )
         if prod_openedx and infra_openedx and prod_openedx["newTag"] and infra_openedx["newTag"]:
             if prod_openedx["newTag"] != infra_openedx["newTag"]:
                 errors.append(

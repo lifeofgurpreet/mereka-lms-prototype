@@ -6,6 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
+VERIFY_OVERRIDES="$REPO_ROOT/scripts/qa/verify-gitops-image-overrides.sh"
 
 source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
 require_command rg || exit 0
@@ -14,6 +15,11 @@ echo "Checking release dry-run contract..."
 
 if [[ ! -x "$RELEASE_SCRIPT" ]]; then
   echo "❌ Missing executable release script: ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
+  exit 1
+fi
+
+if [[ ! -x "$VERIFY_OVERRIDES" ]]; then
+  echo "❌ Missing executable image override verifier: ${VERIFY_OVERRIDES#"$REPO_ROOT"/}"
   exit 1
 fi
 
@@ -53,8 +59,9 @@ images:
     newTag: fixture-tag
 YAML
 
-# Fixture guard: release-openedx-gitops.sh expects infra overlay to include the
-# already-transformed openedx image name entry as well.
+# Match the current GitOps prod overlay truth: prod pins the canonical docker.io
+# names and rewrites them to GHCR via newName. Do not synthesize extra
+# post-transform ghcr.io image name entries in the temp infra fixture.
 python3 - "$TMP_INFRA/apps/mereka-lms/overlays/prod/kustomization.yaml" <<'PY'
 import sys
 from pathlib import Path
@@ -64,21 +71,13 @@ import yaml
 path = Path(sys.argv[1])
 doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 images = doc.setdefault("images", [])
-required_name = "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
-
-if not any((item or {}).get("name") == required_name for item in images):
-    openedx_tag = next(
-        ((item or {}).get("newTag") for item in images if (item or {}).get("name") == "docker.io/overhangio/openedx"),
-        "fixture-openedx-tag",
-    )
-    images.append(
-        {
-            "name": required_name,
-            "newName": required_name,
-            "newTag": openedx_tag,
-        }
-    )
-    path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+drop_names = {
+    "ghcr.io/biji-biji-initiative/mereka-lms/openedx",
+    "ghcr.io/biji-biji-initiative/mereka-lms/mfe",
+}
+images = [item for item in images if (item or {}).get("name") not in drop_names]
+doc["images"] = images
+path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
 PY
 
 git -C "$TMP_INFRA" init -q
@@ -111,6 +110,8 @@ if [[ "$INFRA_PROD_BEFORE" != "$INFRA_PROD_AFTER" ]]; then
   echo "❌ Dry-run modified infra production overlay unexpectedly"
   exit 1
 fi
+
+"$VERIFY_OVERRIDES" --check-infra --infra-file "$INFRA_PROD_FILE" >/tmp/release-verify-overrides.log
 
 if "$RELEASE_SCRIPT" \
   --target-env production \

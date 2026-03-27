@@ -409,7 +409,7 @@ detect_infra_repo() {
 
 require_git_repo() {
   local repo="$1"
-  if [[ ! -d "$repo/.git" ]]; then
+  if ! git -C "$repo" rev-parse --git-dir >/dev/null 2>&1; then
     echo "Not a git repo: $repo" >&2
     exit 1
   fi
@@ -795,9 +795,10 @@ UPDATE_BASE_REF_DEFAULT=0
 APP_OVERLAY_REL="$APP_PROD_REL"
 INFRA_OVERLAY_REL="$INFRA_PROD_REL"
 APP_REQUIRED_NAMES="docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe,ghcr.io/biji-biji-initiative/mereka-lms/mfe"
-# bbi-infrastructure overlay has an extra "double-override" entry for the already-transformed
-# openedx image name (added to prevent kustomize base-image drift, ref fc34418)
-INFRA_REQUIRED_NAMES="$APP_REQUIRED_NAMES,ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+# Production infra overlay matches the canonical docker.io image names and rewrites
+# them via newName -> GHCR. It does not carry separate post-transform ghcr.io image
+# entries for Open edX / MFE.
+INFRA_REQUIRED_NAMES="docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe"
 
 if [[ "$TARGET_ENV" == "production" ]]; then
   UPDATE_APP_BASE=1
@@ -809,8 +810,8 @@ elif [[ "$TARGET_ENV" == "staging" ]]; then
   UPDATE_BASE_REF_DEFAULT=0
   APP_OVERLAY_REL="$APP_STAGING_REL"
   INFRA_OVERLAY_REL="$INFRA_STAGING_REL"
-  # Staging overlay may not include the production-only double-override image entry.
-  INFRA_REQUIRED_NAMES="$APP_REQUIRED_NAMES"
+  # Staging infra overlay matches on the already-transformed GHCR image names.
+  INFRA_REQUIRED_NAMES="ghcr.io/biji-biji-initiative/mereka-lms/openedx,ghcr.io/biji-biji-initiative/mereka-lms/mfe"
 fi
 
 UPDATE_BASE_REF="$UPDATE_BASE_REF_DEFAULT"
