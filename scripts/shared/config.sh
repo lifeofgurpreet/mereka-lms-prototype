@@ -98,7 +98,7 @@ export DEV_SKILLOURFUTURE_MFE_DOMAIN="${DEV_SKILLOURFUTURE_MFE_DOMAIN:-apps.${DE
 # Purchase Gateway is path-routed under the LMS host via /payments/*.
 # There is no standalone payments.<domain> hostname in the active platform contract.
 
-# Staging (optional future-ready environment)
+# Staging (active non-prod lane on shared rke2-nonprod today)
 export STAGING_LMS_DOMAIN="${STAGING_LMS_DOMAIN:-staging.academyv2.mereka.io}"
 export STAGING_STUDIO_DOMAIN="${STAGING_STUDIO_DOMAIN:-staging.studio.academyv2.mereka.io}"
 export STAGING_MFE_DOMAIN="${STAGING_MFE_DOMAIN:-staging.apps.academyv2.mereka.io}"
@@ -158,6 +158,111 @@ validate_config() {
 # =============================================================================
 # Helper Functions
 # =============================================================================
+
+mereka_lms_normalize_env() {
+    local raw_env="${1:-prod}"
+    case "$raw_env" in
+        prod|production) echo "prod" ;;
+        dev|development) echo "dev" ;;
+        staging) echo "staging" ;;
+        *)
+            echo "unsupported environment: $raw_env" >&2
+            return 1
+            ;;
+    esac
+}
+
+mereka_lms_registry_env_name() {
+    local normalized_env
+    normalized_env="$(mereka_lms_normalize_env "${1:-prod}")" || return 1
+    case "$normalized_env" in
+        prod) echo "production" ;;
+        dev) echo "dev" ;;
+        staging) echo "staging" ;;
+    esac
+}
+
+mereka_lms_default_namespace_for_env() {
+    local normalized_env
+    normalized_env="$(mereka_lms_normalize_env "${1:-prod}")" || return 1
+    case "$normalized_env" in
+        prod) echo "${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}" ;;
+        dev) echo "${K8S_NAMESPACE_DEV:-mereka-lms-dev}" ;;
+        staging) echo "${K8S_NAMESPACE_STAGING:-stg-mereka-lms}" ;;
+    esac
+}
+
+mereka_lms_default_context_for_env() {
+    local normalized_env
+    normalized_env="$(mereka_lms_normalize_env "${1:-prod}")" || return 1
+    case "$normalized_env" in
+        prod) echo "${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}" ;;
+        dev|staging) echo "${K8S_CONTEXT_NONPROD:-rke2-nonprod}" ;;
+    esac
+}
+
+mereka_lms_lms_base_url_for_env() {
+    local normalized_env
+    normalized_env="$(mereka_lms_normalize_env "${1:-prod}")" || return 1
+    case "$normalized_env" in
+        prod) echo "https://${LMS_DOMAIN:-academyv2.mereka.io}" ;;
+        dev) echo "https://${DEV_LMS_DOMAIN:-academyv2.mereka.dev}" ;;
+        staging) echo "https://${STAGING_LMS_DOMAIN:-staging.academyv2.mereka.io}" ;;
+    esac
+}
+
+mereka_lms_canonical_domain_map_json() {
+    local normalized_env registry_env repo_root
+    normalized_env="$(mereka_lms_normalize_env "${1:-prod}")" || return 1
+    registry_env="$(mereka_lms_registry_env_name "$normalized_env")" || return 1
+    repo_root="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+
+    python3 - "$repo_root" "$registry_env" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+import yaml
+
+repo_root = Path(sys.argv[1])
+registry_env = sys.argv[2]
+registry_path = repo_root / "deploy" / "k8s" / "tenancy" / "tenant-registry.yaml"
+tenant_contracts_path = repo_root / "infrastructure" / "tenants" / "tenant-contracts.yml"
+
+registry = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+runtime_contracts = {}
+if tenant_contracts_path.exists():
+    tenant_contract_payload = yaml.safe_load(tenant_contracts_path.read_text(encoding="utf-8")) or {}
+    for tenant in tenant_contract_payload.get("tenants", []):
+        slug = tenant.get("slug")
+        if slug:
+            runtime_contracts[slug] = tenant.get("registry_slug") or slug
+
+registry_domains = {}
+for domain_entry in registry.get("domains", []):
+    if (
+        domain_entry.get("environment") == registry_env
+        and domain_entry.get("role") == "primary"
+        and domain_entry.get("status") == "active"
+    ):
+        tenant_slug = domain_entry.get("tenant")
+        domain = domain_entry.get("domain")
+        if tenant_slug and domain:
+            registry_domains[tenant_slug] = domain
+
+result = {}
+for runtime_slug, registry_slug in runtime_contracts.items():
+    domain = registry_domains.get(registry_slug) or registry_domains.get(runtime_slug)
+    if domain:
+        result[runtime_slug] = domain
+
+if not result:
+    for registry_slug, domain in registry_domains.items():
+        result[registry_slug] = domain
+
+print(json.dumps(result, sort_keys=True))
+PY
+}
 
 # Get the script directory (useful for relative paths)
 get_script_dir() {

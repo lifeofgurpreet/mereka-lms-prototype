@@ -13,6 +13,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=../shared/config.sh
+source "${REPO_ROOT}/scripts/shared/config.sh"
 
 SLUG=""
 NAME=""
@@ -21,7 +23,7 @@ CONTACT_EMAIL=""
 COUNTRY=""
 ENVIRONMENT="prod"
 CONTEXT_OVERRIDE=""
-NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
+NAMESPACE="${K8S_NAMESPACE:-}"
 
 IDP_TYPE=""
 IDP_SLUG=""
@@ -58,8 +60,9 @@ Required:
 Optional tenant fields:
   --contact-email <email>
   --country <iso2>
-  --env prod|dev
+  --env prod|dev|staging
   --context <kube-context>
+  --namespace <ns>                   Default is environment-specific lane
 
 Optional IdP fields:
   --idp-slug <slug>
@@ -122,6 +125,7 @@ while [[ $# -gt 0 ]]; do
     --country) COUNTRY="$2"; shift 2 ;;
     --env) ENVIRONMENT="$2"; shift 2 ;;
     --context) CONTEXT_OVERRIDE="$2"; shift 2 ;;
+    --namespace) NAMESPACE="$2"; shift 2 ;;
 
     --idp-type) IDP_TYPE="$2"; shift 2 ;;
     --idp-slug) IDP_SLUG="$2"; shift 2 ;;
@@ -157,22 +161,20 @@ if [[ "$IDP_TYPE" != "saml" && "$IDP_TYPE" != "oidc" ]]; then
   exit 1
 fi
 
-if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "--env must be prod|dev" >&2
+if ! ENVIRONMENT="$(mereka_lms_normalize_env "$ENVIRONMENT")"; then
+  echo "--env must be prod|dev|staging" >&2
   exit 1
 fi
 require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
 require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
 
-DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
-DEFAULT_DEV_CTX="kind-dev"
+if [[ -z "$NAMESPACE" ]]; then
+  NAMESPACE="$(mereka_lms_default_namespace_for_env "$ENVIRONMENT")"
+fi
+
 K8S_CONTEXT_EFFECTIVE="$CONTEXT_OVERRIDE"
 if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
-  if [[ "$ENVIRONMENT" == "prod" ]]; then
-    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
-  else
-    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_DEV_CTX}"
-  fi
+  K8S_CONTEXT_EFFECTIVE="$(mereka_lms_default_context_for_env "$ENVIRONMENT")"
 fi
 
 if [[ "$DRY_RUN" -eq 0 ]]; then
@@ -223,13 +225,18 @@ mapping_cmd=(
   "$REPO_ROOT/scripts/tenants/sync-tenant-enterprise-mapping.sh"
   --env "$ENVIRONMENT"
   --context "$K8S_CONTEXT_EFFECTIVE"
+  --namespace "$NAMESPACE"
 )
+if [[ "$ENVIRONMENT" == "staging" ]]; then
+  mapping_cmd+=(--canonical-domains)
+fi
 [[ "$DRY_RUN" -eq 1 ]] && mapping_cmd+=(--dry-run) || mapping_cmd+=(--apply)
 
 idp_cmd=(
   "$REPO_ROOT/scripts/tenants/configure-tenant-idp.sh"
   --env "$ENVIRONMENT"
   --context "$K8S_CONTEXT_EFFECTIVE"
+  --namespace "$NAMESPACE"
   --tenant-slug "$SLUG"
   --idp-type "$IDP_TYPE"
 )
@@ -299,14 +306,14 @@ if [[ "$RUN_RUNTIME_GATES" -eq 1 ]]; then
   echo "[6/6] Run runtime readiness gates"
   if [[ "$DRY_RUN" -eq 1 ]]; then
     if [[ "$RUN_SCHEMA_GUARD" -eq 1 ]]; then
-      echo "DRY-RUN: would run scripts/tenants/repair-enterprise-schema.sh --env $ENVIRONMENT"
+      echo "DRY-RUN: would run scripts/tenants/repair-enterprise-schema.sh --env $ENVIRONMENT --context $K8S_CONTEXT_EFFECTIVE --namespace $NAMESPACE"
     fi
     echo "DRY-RUN: would run scripts/qa/verify-enterprise-runtime-app-wiring.sh --env $ENVIRONMENT --context $K8S_CONTEXT_EFFECTIVE --strict"
     echo "DRY-RUN: would run scripts/qa/verify-enterprise-sso-readiness.sh --env $ENVIRONMENT --tenant $SLUG"
     echo "DRY-RUN: would run scripts/qa/verify-multisite-config.sh $ENVIRONMENT"
   else
     if [[ "$RUN_SCHEMA_GUARD" -eq 1 ]]; then
-      "$REPO_ROOT/scripts/tenants/repair-enterprise-schema.sh" --env "$ENVIRONMENT"
+      "$REPO_ROOT/scripts/tenants/repair-enterprise-schema.sh" --env "$ENVIRONMENT" --context "$K8S_CONTEXT_EFFECTIVE" --namespace "$NAMESPACE"
     fi
     "$REPO_ROOT/scripts/qa/verify-enterprise-runtime-app-wiring.sh" \
       --env "$ENVIRONMENT" \

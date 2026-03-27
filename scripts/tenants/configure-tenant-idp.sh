@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "${REPO_ROOT}/scripts/shared/config.sh" 2>/dev/null || true
 
 ENVIRONMENT="prod"
-NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
+NAMESPACE="${K8S_NAMESPACE:-}"
 CONTEXT_OVERRIDE=""
 TENANT_SLUG=""
 IDP_TYPE=""
@@ -38,8 +38,8 @@ usage() {
 Usage: configure-tenant-idp.sh --tenant-slug <slug> --idp-type saml|oidc [options]
 
 Common options:
-  --env prod|dev
-  --namespace <ns>
+  --env prod|dev|staging
+  --namespace <ns>                  Default is environment-specific lane
   --context <ctx>
   --tenant-slug <slug>
   --idp-type saml|oidc
@@ -130,13 +130,17 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "Invalid --env '$ENVIRONMENT' (expected prod|dev)" >&2
+if ! ENVIRONMENT="$(mereka_lms_normalize_env "$ENVIRONMENT")"; then
+  echo "Invalid --env '$ENVIRONMENT' (expected prod|dev|staging)" >&2
   exit 1
 fi
 require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
 require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
 require_cmd kubectl
+
+if [[ -z "$NAMESPACE" ]]; then
+  NAMESPACE="$(mereka_lms_default_namespace_for_env "$ENVIRONMENT")"
+fi
 
 if [[ -z "$TENANT_SLUG" || -z "$IDP_TYPE" ]]; then
   echo "--tenant-slug and --idp-type are required" >&2
@@ -178,15 +182,9 @@ if [[ "$IDP_TYPE" == "oidc" ]]; then
   fi
 fi
 
-DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
-DEFAULT_DEV_CTX="kind-dev"
 K8S_CONTEXT_EFFECTIVE="${CONTEXT_OVERRIDE}"
 if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
-  if [[ "$ENVIRONMENT" == "prod" ]]; then
-    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
-  else
-    K8S_CONTEXT_EFFECTIVE="$DEFAULT_DEV_CTX"
-  fi
+  K8S_CONTEXT_EFFECTIVE="$(mereka_lms_default_context_for_env "$ENVIRONMENT")"
 fi
 
 context_args=()
@@ -217,11 +215,7 @@ if [[ "$DRY_RUN" -eq 0 ]]; then
   fi
 fi
 
-if [[ "$ENVIRONMENT" == "prod" ]]; then
-  LMS_BASE_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
-else
-  LMS_BASE_URL="https://${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
-fi
+LMS_BASE_URL="$(mereka_lms_lms_base_url_for_env "$ENVIRONMENT")"
 
 echo "=== Configure Tenant IdP ==="
 echo "env=${ENVIRONMENT} context=${K8S_CONTEXT_EFFECTIVE} namespace=${NAMESPACE}"

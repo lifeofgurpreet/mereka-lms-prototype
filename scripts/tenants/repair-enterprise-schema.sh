@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "${REPO_ROOT}/scripts/shared/config.sh" 2>/dev/null || true
 
 ENVIRONMENT="prod"
-NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
+NAMESPACE="${K8S_NAMESPACE:-}"
 CONTEXT_OVERRIDE=""
 APPLY=0
 ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
@@ -18,7 +18,7 @@ CONFIRM_TOKEN="REPAIR_ENTERPRISE_SCHEMA"
 
 usage() {
   cat <<'USAGE'
-Usage: repair-enterprise-schema.sh [--env prod|dev] [--apply] [--namespace NS] [--context CTX]
+Usage: repair-enterprise-schema.sh [--env prod|dev|staging] [--apply] [--namespace NS] [--context CTX]
 
 Default mode is read-only validation. Use --apply to run migrations.
 
@@ -40,8 +40,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "Invalid --env '$ENVIRONMENT'" >&2
+if ! ENVIRONMENT="$(mereka_lms_normalize_env "$ENVIRONMENT")"; then
+  echo "Invalid --env '$ENVIRONMENT' (expected prod|dev|staging)" >&2
   exit 1
 fi
 
@@ -69,15 +69,13 @@ require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
 require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
 require_cmd kubectl
 
-DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
-DEFAULT_DEV_CTX="kind-dev"
+if [[ -z "$NAMESPACE" ]]; then
+  NAMESPACE="$(mereka_lms_default_namespace_for_env "$ENVIRONMENT")"
+fi
+
 K8S_CONTEXT_EFFECTIVE="${CONTEXT_OVERRIDE}"
 if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
-  if [[ "$ENVIRONMENT" == "prod" ]]; then
-    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
-  else
-    K8S_CONTEXT_EFFECTIVE="$DEFAULT_DEV_CTX"
-  fi
+  K8S_CONTEXT_EFFECTIVE="$(mereka_lms_default_context_for_env "$ENVIRONMENT")"
 fi
 
 context_args=()

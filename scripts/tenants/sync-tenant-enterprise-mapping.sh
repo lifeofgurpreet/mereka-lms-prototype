@@ -9,7 +9,7 @@
 #   2) Optionally reconciles canonical tenant slug->domain site links.
 #
 # Usage:
-#   ./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --dry-run
+#   ./scripts/tenants/sync-tenant-enterprise-mapping.sh --env staging --canonical-domains --dry-run
 #   ./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --canonical-domains --apply
 #
 set -euo pipefail
@@ -18,7 +18,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "${REPO_ROOT}/scripts/shared/config.sh" 2>/dev/null || true
 
 ENVIRONMENT="prod"
-NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
+NAMESPACE="${K8S_NAMESPACE:-}"
 CONTEXT_OVERRIDE=""
 CANONICAL_DOMAINS=0
 DRY_RUN=1
@@ -32,8 +32,8 @@ usage() {
 Usage: sync-tenant-enterprise-mapping.sh [OPTIONS]
 
 Options:
-  --env prod|dev          Target environment (default: prod)
-  --namespace <ns>        Kubernetes namespace (default: mereka-lms)
+  --env prod|dev|staging  Target environment (default: prod)
+  --namespace <ns>        Kubernetes namespace (default: env-specific lane)
   --context <ctx>         Override kubectl context
   --canonical-domains     Reconcile known tenant slugs to canonical domains first
   --apply                 Apply changes (default: dry-run)
@@ -110,24 +110,30 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "Invalid --env '$ENVIRONMENT' (expected prod|dev)" >&2
+if ! ENVIRONMENT="$(mereka_lms_normalize_env "$ENVIRONMENT")"; then
+  echo "Invalid --env '$ENVIRONMENT' (expected prod|dev|staging)" >&2
   exit 1
 fi
 
 require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
 require_bool_01 "CREATE_PREOP_BACKUP" "$CREATE_PREOP_BACKUP"
 require_cmd kubectl
+if [[ "$CANONICAL_DOMAINS" -eq 1 ]]; then
+  require_cmd python3
+fi
 
-DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
-DEFAULT_DEV_CTX="kind-dev"
+if [[ -z "$NAMESPACE" ]]; then
+  NAMESPACE="$(mereka_lms_default_namespace_for_env "$ENVIRONMENT")"
+fi
+
 K8S_CONTEXT_EFFECTIVE="${CONTEXT_OVERRIDE}"
 if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
-  if [[ "$ENVIRONMENT" == "prod" ]]; then
-    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
-  else
-    K8S_CONTEXT_EFFECTIVE="$DEFAULT_DEV_CTX"
-  fi
+  K8S_CONTEXT_EFFECTIVE="$(mereka_lms_default_context_for_env "$ENVIRONMENT")"
+fi
+
+CANONICAL_DOMAIN_MAP="{}"
+if [[ "$CANONICAL_DOMAINS" -eq 1 ]]; then
+  CANONICAL_DOMAIN_MAP="$(mereka_lms_canonical_domain_map_json "$ENVIRONMENT")"
 fi
 
 context_args=()
@@ -169,7 +175,7 @@ if ! kubectl "${context_args[@]}" get deploy lms -n "$NAMESPACE" >/dev/null 2>&1
 fi
 
 kubectl "${context_args[@]}" exec -i -n "$NAMESPACE" deploy/lms -- \
-  env ENVIRONMENT="$ENVIRONMENT" CANONICAL_DOMAINS="$CANONICAL_DOMAINS" DRY_RUN="$DRY_RUN" python - <<'PY'
+  env ENVIRONMENT="$ENVIRONMENT" CANONICAL_DOMAINS="$CANONICAL_DOMAINS" CANONICAL_DOMAIN_MAP="$CANONICAL_DOMAIN_MAP" DRY_RUN="$DRY_RUN" python - <<'PY'
 import os
 import json
 import django
@@ -183,22 +189,12 @@ from enterprise.models import EnterpriseCustomer
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "prod")
 DRY_RUN = os.environ.get("DRY_RUN", "1") == "1"
 CANONICAL_DOMAINS = os.environ.get("CANONICAL_DOMAINS", "0") == "1"
-
-canonical = {}
-if ENVIRONMENT == "prod":
-    canonical = {
-        "mereka": os.environ.get("LMS_DOMAIN", "academyv2.mereka.io"),
-        "bijibiji": os.environ.get("BIJI_DOMAIN", "academy.biji-biji.com"),
-        "skillourfuture": os.environ.get("SKILLOURFUTURE_DOMAIN", "skillourfuture.academy.mereka.io"),
-    }
-else:
-    canonical = {
-        "mereka": os.environ.get("DEV_LMS_DOMAIN", "academyv2.mereka.dev"),
-    }
+canonical = json.loads(os.environ.get("CANONICAL_DOMAIN_MAP", "{}"))
 
 changed_site_links = 0
 changed_site_configs = 0
 warnings = 0
+pending_sites = {}
 
 if CANONICAL_DOMAINS:
     print("Reconciling canonical tenant slug -> domain site links...")
@@ -224,19 +220,22 @@ if CANONICAL_DOMAINS:
             if not DRY_RUN:
                 ec.site = site
                 ec.save(update_fields=["site"])
+            else:
+                pending_sites[ec.pk] = site
             changed_site_links += 1
         else:
             print(f"OK: {slug} already linked to {domain}")
 
 print("Syncing SiteConfiguration ENTERPRISE_CUSTOMER_UUID values...")
 for ec in EnterpriseCustomer.objects.select_related("site").all().order_by("slug"):
-    if ec.site_id is None:
+    target_site = pending_sites.get(ec.pk) or ec.site
+    if target_site is None:
         warnings += 1
         print(f"WARN: {ec.slug} has no site_id")
         continue
 
     cfg, created = SiteConfiguration.objects.get_or_create(
-        site=ec.site,
+        site=target_site,
         defaults={"enabled": True, "site_values": {}},
     )
     values = cfg.site_values or {}
@@ -244,7 +243,7 @@ for ec in EnterpriseCustomer.objects.select_related("site").all().order_by("slug
     desired_uuid = str(ec.uuid)
     if current_uuid != desired_uuid:
         print(
-            f"SYNC: domain={ec.site.domain} slug={ec.slug} "
+            f"SYNC: domain={target_site.domain} slug={ec.slug} "
             f"ENTERPRISE_CUSTOMER_UUID {current_uuid or 'unset'} -> {desired_uuid}"
         )
         if not DRY_RUN:
@@ -254,7 +253,7 @@ for ec in EnterpriseCustomer.objects.select_related("site").all().order_by("slug
             cfg.save(update_fields=["site_values", "enabled"])
         changed_site_configs += 1
     else:
-        print(f"OK: domain={ec.site.domain} slug={ec.slug} uuid={desired_uuid}")
+        print(f"OK: domain={target_site.domain} slug={ec.slug} uuid={desired_uuid}")
 
 summary = {
     "dry_run": DRY_RUN,

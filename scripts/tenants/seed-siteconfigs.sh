@@ -6,6 +6,8 @@ set -euo pipefail
 # Reads deploy/k8s/tenancy/tenant-registry.yaml and ensures each tenant has:
 #   - A Site row (domain matching site_domain)
 #   - A SiteConfiguration row with correct LMS/CMS/MFE URLs, org filter, theme
+#   - Preserved ENTERPRISE_CUSTOMER_UUID when the site is already linked to an
+#     EnterpriseCustomer
 #
 # This is a repeatable provisioning path. Running it twice is safe (idempotent).
 #
@@ -105,9 +107,14 @@ for SLUG in "${SLUGS[@]}"; do
   # Build the Python script as a tempfile to avoid shell quoting issues
   PY_SCRIPT=$(mktemp /tmp/seed_sc_XXXXXX.py)
   cat > "$PY_SCRIPT" <<PYEOF
+import json
 from django.contrib.sites.models import Site
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-import json
+
+try:
+    from enterprise.models import EnterpriseCustomer
+except Exception:  # pragma: no cover - enterprise app should exist in real lanes
+    EnterpriseCustomer = None
 
 domain = "${SITE_DOMAIN}"
 name = "${TENANT_NAME}"
@@ -124,6 +131,14 @@ site, created = Site.objects.get_or_create(
 if not created:
     site.name = name
     site.save()
+
+existing_site_config = SiteConfiguration.objects.filter(site=site).first()
+existing_values = dict(existing_site_config.site_values or {}) if existing_site_config else {}
+enterprise_customer_uuid = str(existing_values.get("ENTERPRISE_CUSTOMER_UUID", "")).strip()
+if not enterprise_customer_uuid and EnterpriseCustomer is not None:
+    enterprise_customer = EnterpriseCustomer.objects.filter(site=site).first()
+    if enterprise_customer is not None:
+        enterprise_customer_uuid = str(enterprise_customer.uuid)
 
 site_values = {
     "domain": domain,
@@ -160,6 +175,8 @@ site_values = {
         "AUTHN_MICROFRONTEND_DOMAIN": mfe_url.replace("https://", "").replace("http://", ""),
     },
 }
+if enterprise_customer_uuid:
+    site_values["ENTERPRISE_CUSTOMER_UUID"] = enterprise_customer_uuid
 
 sc, sc_created = SiteConfiguration.objects.update_or_create(
     site=site,
