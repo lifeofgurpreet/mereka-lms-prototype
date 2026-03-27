@@ -27,6 +27,9 @@ on:
       - '.github/workflows/build-tutor-images.yml'
   workflow_dispatch:
     inputs:
+      update_gitops:
+        type: boolean
+        default: false
       target_environment:
         type: choice
         options: [select-environment, production, staging]
@@ -35,8 +38,9 @@ permissions:
 jobs:
   release-bundle:
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
-  update:
+  update-gitops:
     runs-on: ubuntu-latest
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
     steps:
       - run: |
           source ./scripts/lib/lane-normalize.sh
@@ -82,6 +86,9 @@ name: build-tutor-images
 on:
   workflow_dispatch:
     inputs:
+      update_gitops:
+        type: boolean
+        default: false
       target_environment:
         type: choice
         options: [select-environment, production, staging]
@@ -90,8 +97,9 @@ permissions:
 jobs:
   release-bundle:
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
-  update:
+  update-gitops:
     runs-on: ubuntu-latest
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
     steps:
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
@@ -104,7 +112,7 @@ jobs:
 EOF
 run_expect_fail "missing canonical target_environment normalization is rejected"
 
-# Remove lms-ops call => must fail
+# Force release-bundle to hard-fail on placeholder env => must fail
 cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
 name: build-tutor-images
 on:
@@ -121,6 +129,9 @@ on:
       - '.github/workflows/build-tutor-images.yml'
   workflow_dispatch:
     inputs:
+      update_gitops:
+        type: boolean
+        default: false
       target_environment:
         type: choice
         options: [select-environment, production, staging]
@@ -137,8 +148,9 @@ jobs:
               exit 1
             fi
           fi
-  update:
+  update-gitops:
     runs-on: ubuntu-latest
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
     steps:
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - run: |
@@ -153,12 +165,15 @@ jobs:
 EOF
 run_expect_fail "release bundle must skip placeholder manual environment instead of failing inside the job"
 
-# Remove lms-ops call => must fail
+# Reintroduce push-to-main auto-deploy => must fail
 cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
 name: build-tutor-images
 on:
   workflow_dispatch:
     inputs:
+      update_gitops:
+        type: boolean
+        default: false
       target_environment:
         type: choice
         options: [select-environment, production, staging]
@@ -167,8 +182,46 @@ permissions:
 jobs:
   release-bundle:
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
-  update:
+  update-gitops:
     runs-on: ubuntu-latest
+    if: ${{ always() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment')) }}
+    steps:
+      - run: |
+          source ./scripts/lib/lane-normalize.sh
+          TARGET_ENV_RAW="${{ inputs.target_environment }}"
+          TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV_RAW}")"
+          test -n "$TARGET_ENV"
+      - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
+      - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-provenance
+          path: |
+            var/ci/build-provenance.json
+            var/ci/release-gate-envelope.json
+EOF
+run_expect_fail "update-gitops must not auto-run on push to main"
+
+# Remove lms-ops call => must fail
+cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
+name: build-tutor-images
+on:
+  workflow_dispatch:
+    inputs:
+      update_gitops:
+        type: boolean
+        default: false
+      target_environment:
+        type: choice
+        options: [select-environment, production, staging]
+permissions:
+  contents: write
+jobs:
+  release-bundle:
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+  update-gitops:
+    runs-on: ubuntu-latest
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
     steps:
       - run: |
           source ./scripts/lib/lane-normalize.sh

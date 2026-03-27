@@ -1237,12 +1237,10 @@ jobs:
     name: Update GitOps
     runs-on: mereka-k8s-runners
     needs: [build-openedx, build-mfe, release-bundle]
-    # Push to main → auto-deploy to production.
-    # workflow_dispatch → deploy only when update_gitops=true and environment selected.
-    # NOTE: inputs.* are undefined on push events, so we can't reference them in that branch.
-    # Uses always() so SLSA/release-bundle failures don't block deployment — images are the gate.
-    if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment')) }}
-    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}
+    # Push to main builds images and proof only.
+    # GitOps mutation is explicit/manual so parked prod never advances implicitly.
+    if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
+    environment: ${{ inputs.target_environment }}
     permissions:
       contents: write
     env:

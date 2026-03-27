@@ -12,6 +12,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$REPO_ROOT}"
 BUILD_WF="${BUILD_WF_OVERRIDE:-$REPO_ROOT/.github/workflows/build-tutor-images.yml}"
 RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUILD_WF")"
+UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
 
 PASS=0 FAIL=0
 
@@ -34,25 +35,43 @@ else
   fail "target_environment input missing"
 fi
 
+if grep -q "update_gitops" "$BUILD_WF"; then
+  pass "update_gitops input defined"
+else
+  fail "update_gitops input missing"
+fi
+
 # Manual build-proof dispatches must skip release-bundle generation when the
 # placeholder environment is still selected.
-if echo "$RELEASE_BUNDLE_BLOCK" | grep -q "inputs.target_environment != 'select-environment'"; then
+if [[ "$RELEASE_BUNDLE_BLOCK" == *"inputs.target_environment != 'select-environment'"* ]]; then
   pass "release bundle job skips placeholder manual environment"
 else
   fail "release bundle job missing placeholder-environment skip gate"
 fi
 
-if echo "$RELEASE_BUNDLE_BLOCK" | grep -q "target_environment must be explicitly selected before generating a release bundle"; then
+if [[ "$RELEASE_BUNDLE_BLOCK" == *"target_environment must be explicitly selected before generating a release bundle"* ]]; then
   fail "release bundle job still hard-fails on placeholder manual environment"
 else
   pass "release bundle job no longer hard-fails on placeholder manual environment"
 fi
 
-# Release-bundle consistency must compare canonical lane names, not raw workflow aliases.
+# Workflow consistency must compare canonical lane names, not raw workflow aliases.
 if grep -q "normalize_lane_to_canonical" "$BUILD_WF" && grep -q "scripts/lib/lane-normalize.sh" "$BUILD_WF"; then
-  pass "release bundle consistency gate normalizes target_environment to canonical lane"
+  pass "workflow normalizes target_environment to canonical lane"
 else
-  fail "release bundle consistency gate missing canonical target_environment normalization"
+  fail "workflow missing canonical target_environment normalization"
+fi
+
+if [[ "$UPDATE_GITOPS_BLOCK" == *"github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment'"* ]]; then
+  pass "update-gitops job is gated on explicit manual dispatch inputs"
+else
+  fail "update-gitops job missing explicit manual-dispatch gating"
+fi
+
+if [[ "$UPDATE_GITOPS_BLOCK" == *"github.event_name == 'push' && github.ref == 'refs/heads/main'"* ]]; then
+  fail "update-gitops job still auto-runs on push to main"
+else
+  pass "update-gitops job no longer auto-runs on push to main"
 fi
 
 # Check container registry push target (GHCR only)
