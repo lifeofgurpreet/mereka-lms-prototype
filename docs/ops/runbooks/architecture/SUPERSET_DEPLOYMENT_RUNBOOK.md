@@ -11,7 +11,11 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 
 This runbook documents the deployment, configuration, and operational procedures for Apache Superset as part of the Aspects analytics stack. **This deployment is currently DEFERRED** — see ADR-017 for decision rationale.
 
-When analytics deployment is approved, this runbook provides the canonical procedures for Superset setup, authentication integration, dashboard configuration, and operational maintenance.
+When analytics deployment is approved, this runbook provides the setup,
+authentication, dashboard, and operational checklist. It does **not** currently
+imply that a governed shared-environment analytics release lane exists. Until
+that front door is defined, any Tutor or `kubectl apply` rollout remains a
+legacy/manual bootstrap path rather than the canonical production operator path.
 
 ## Prerequisites
 
@@ -22,6 +26,9 @@ Before deploying Superset, ensure:
 3. **Team capacity**: Bandwidth for ClickHouse/Superset operations
 4. **Analytics spec approved**: `specs/analytics-pipeline_spec.md` status changed to "approved"
 5. **ADR-017 status updated**: Change from "Deferred" to "Accepted"
+6. **Shared-environment release authority defined**: Prefer a governed publish
+   + promotion lane; if absent, explicitly classify any Tutor/`kubectl`
+   sequence as legacy/manual bootstrap with rollback and evidence requirements
 
 ## Infrastructure Components
 
@@ -480,6 +487,7 @@ kubectl exec -n mereka-lms deploy/superset -- \
 **Backup ClickHouse data**:
 
 ```bash
+# Legacy/manual trigger only until a governed analytics operations lane exists.
 # Daily Parquet export to GCS (automated via CronJob)
 kubectl apply -f deploy/k8s/base/plugins/aspects/jobs.yml
 ```
@@ -498,18 +506,24 @@ kubectl apply -f deploy/k8s/base/plugins/aspects/jobs.yml
    image: apache/superset:3.1.0  # Update version
    ```
 
-2. Apply changes:
+2. Choose the rollout path truthfully:
+   - Preferred: use the future governed analytics release front door once it
+     exists.
+   - Until then, treat any direct manifest apply as a temporary
+     legacy/manual bootstrap step and capture explicit rollback evidence.
+
+3. Legacy/manual bootstrap apply (only if explicitly approved):
    ```bash
    kubectl apply -k deploy/k8s/base/plugins/aspects/
    kubectl rollout status deployment/superset -n mereka-lms
    ```
 
-3. Run database migrations:
+4. Run database migrations:
    ```bash
    kubectl exec -n mereka-lms deploy/superset -- superset db upgrade
    ```
 
-4. Verify dashboards load correctly
+5. Verify dashboards load correctly
 
 ### 6. Monitor Analytics Pipeline Health
 
