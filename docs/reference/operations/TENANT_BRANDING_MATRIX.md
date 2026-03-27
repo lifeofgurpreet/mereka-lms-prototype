@@ -97,11 +97,15 @@ Follow this checklist when onboarding a new branded domain:
   ./scripts/tenants/provision-tenant.sh newdomain.example.com "Brand Name"
   ```
 
-- [ ] **8. Rebuild and redeploy MFE** (SITE_VARIANTS is embedded in MFE bundle):
-  ```bash
-  tutor images build mfe
-  tutor local restart mfe
-  ```
+- [ ] **8. Publish updated tenant branding** (SITE_VARIANTS is embedded in the MFE bundle):
+  - Local verification:
+    ```bash
+    tutor images build mfe
+    tutor local restart mfe
+    ```
+  - Production:
+    - publish the updated MFE image through `.github/workflows/build-tutor-images.yml`
+    - promote the resulting digests with `./scripts/infra/release-openedx-gitops.sh --require-digests`
 
 - [ ] **9. Run verification**:
   ```bash
@@ -123,11 +127,14 @@ If a domain mapping is misconfigured or a new tenant domain causes issues:
 1. **Automatic fallback**: If a domain key is missing or typo'd in `SITE_VARIANTS`, the fallback
    variant (Mereka Academy / MEREKA branding) is used automatically. No site outage occurs.
 
-2. **Remove a tenant**: Delete the domain entry from `SITE_VARIANTS` in `mereka_lms.py`,
-   rebuild and redeploy the MFE:
-   ```bash
-   tutor images build mfe && tutor local restart mfe
-   ```
+2. **Remove a tenant**: Delete the domain entry from `SITE_VARIANTS` in `mereka_lms.py`.
+   - Local reproduction / verification:
+     ```bash
+     tutor images build mfe && tutor local restart mfe
+     ```
+   - Production:
+     - publish the corrected MFE image through `.github/workflows/build-tutor-images.yml`
+     - promote the corrected digests with `./scripts/infra/release-openedx-gitops.sh --require-digests`
    No data loss — SITE_VARIANTS is config-only, no database rows are affected.
 
 3. **Emergency force-fallback**: To force all tenants to use default Mereka branding
@@ -141,10 +148,10 @@ If a domain mapping is misconfigured or a new tenant domain causes issues:
 
 If `TenantResolutionMiddleware` maps a request to the wrong tenant:
 
-1. Check `TenantConfig` records via Django admin (`/admin/multi_tenancy/tenantconfig/`).
-2. Correct the `domain` field for the misconfigured record.
+1. Check the tenant source data and verify the current mapping with `./scripts/tenants/provision-tenant.sh --verify newdomain.example.com`.
+2. Correct the source data for the misconfigured record and run `./scripts/infra/apply-multisite-config.sh`.
 3. Flush Redis cache: `tutor local run lms ./manage.py lms shell -c "from django.core.cache import cache; cache.clear()"`
-4. Verify with `./scripts/tenants/provision-tenant.sh --verify newdomain.example.com`.
+4. Verify again with `./scripts/tenants/provision-tenant.sh --verify newdomain.example.com`.
 
 ### Existing Tenants — Migration Note
 

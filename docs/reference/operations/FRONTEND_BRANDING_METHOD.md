@@ -83,6 +83,8 @@ make branding-sync
 ```
 
 ### 3. Rebuild & Deploy
+
+**Local reproduction / design review**
 ```bash
 # Rebuild LMS/Studio images
 tutor images build openedx
@@ -90,10 +92,14 @@ tutor images build openedx
 # Rebuild MFE images
 tutor images build mfe
 
-# Deploy
-tutor local restart  # Local
-tutor k8s restart    # Production
+# Deploy locally
+tutor local restart
 ```
+
+**Production**
+- Publish the updated Open edX / MFE images through `.github/workflows/build-tutor-images.yml`
+- Promote the resulting digests with `./scripts/infra/release-openedx-gitops.sh --require-digests`
+- Do not use `tutor k8s restart` as the normal production rollout path
 
 ### 4. Verify
 ```bash

@@ -189,19 +189,21 @@ Checks:
          secretName: newdomain-tls
    ```
 
-5. **Apply and restart**:
-   ```bash
-   kubectl apply -k deploy/k8s/overlays/production
-   kubectl rollout restart deployment/lms deployment/cms deployment/caddy -n mereka-lms
-   ```
+5. **Commit and reconcile**:
+   - Commit the ingress / domain contract change and let GitOps reconcile production.
+   - Do not use `kubectl apply -k` or `kubectl rollout restart` as the normal production path.
+   - Watch the rollout after reconciliation:
+     ```bash
+     kubectl rollout status deployment/lms -n mereka-lms
+     kubectl rollout status deployment/cms -n mereka-lms
+     kubectl rollout status deployment/caddy -n mereka-lms
+     ```
 
-6. **Create SiteConfiguration** (Django admin):
-   - Login: https://academyv2.mereka.io/admin
-   - Navigate: Sites → Add Site
-   - Domain: `newdomain.example.com`
-   - Display name: `New Domain`
-   - Navigate: Site Configuration → Add
-   - Select site, enable, save
+6. **Reconcile Site + SiteConfiguration** (canonical path):
+   - Record the new tenant in the multisite source data.
+   - Run `./scripts/tenants/provision-tenant.sh newdomain.example.com "New Domain"` if the tenant bootstrap record does not exist yet.
+   - Run `./scripts/infra/apply-multisite-config.sh` to reconcile `Site` and `SiteConfiguration`.
+   - Do not create `Site` / `SiteConfiguration` manually in Django admin for the normal path.
 
 7. **Verify**:
    ```bash
@@ -237,9 +239,10 @@ Checks:
    - Remove host from ingress rules
    - Remove from TLS section
 
-5. **Deactivate SiteConfiguration** (Django admin):
-   - Don't delete (preserves historical data)
-   - Set `enabled = false`
+5. **Reconcile Site + SiteConfiguration removal** (canonical path):
+   - Remove or disable the tenant in the multisite source data
+   - Run `./scripts/infra/apply-multisite-config.sh`
+   - Do not disable `SiteConfiguration` manually in Django admin for the normal path
 
 6. **Update DNS** (last step):
    - Remove A/CNAME record (prevents access)
@@ -447,4 +450,4 @@ Must pass all 3 checks:
 
 **Branding**:
 - `docs/guides/branding/BRANDING.md` - Theme system overview
-- Domain-specific branding via SiteConfiguration in Django admin
+- Domain-specific branding via canonical multisite config plus governed MFE publish
