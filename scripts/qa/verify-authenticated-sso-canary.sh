@@ -7,6 +7,7 @@
 # - Authentik login form flow actually completes
 # - LMS callback (/auth/complete/oidc/) results in a real logged-in browser session
 # - Session can access a logged-in API endpoint
+# - Learner dashboard resolves to the branded MFE shell, not an unbranded or broken fallback
 #
 # Secrets are read from environment variables only (never CLI args), to avoid leaking
 # credentials in process lists or logs.
@@ -275,6 +276,100 @@ def probe_login_refresh_status(request_context, app_base_url: str) -> str:
         except Exception:
             probes.append(f"{method}:err")
     return ",".join(probes)
+
+DASHBOARD_MARKER_SELECTORS = {
+    "header_logo": ".mereka-header-logo",
+    "footer": ".mereka-footer",
+    "dashboard_header": ".mereka-dashboard-header-slot",
+    "no_courses": ".mereka-no-courses-view",
+    "course_card_accent": ".mereka-course-card-accent",
+}
+COURSE_CARD_SELECTOR = ".course-card, .discovery-card, [class*='CourseCard']"
+
+def safe_locator_count(page, selector: str) -> int:
+    try:
+        return page.locator(selector).count()
+    except Exception:
+        return 0
+
+def boxes_overlap(a, b) -> bool:
+    if not a or not b:
+        return False
+    return (
+        a["x"] < (b["x"] + b["width"] - 1)
+        and (a["x"] + a["width"] - 1) > b["x"]
+        and a["y"] < (b["y"] + b["height"] - 1)
+        and (a["y"] + a["height"] - 1) > b["y"]
+    )
+
+def assert_dashboard_branding(page, phase: str) -> None:
+    try:
+        page.wait_for_load_state("networkidle", timeout=15000)
+    except Exception:
+        pass
+
+    counts = {}
+    for _ in range(8):
+        counts = {
+            key: safe_locator_count(page, selector)
+            for key, selector in DASHBOARD_MARKER_SELECTORS.items()
+        }
+        if (
+            counts["header_logo"] > 0
+            and counts["footer"] > 0
+            and (
+                counts["dashboard_header"] > 0
+                or counts["no_courses"] > 0
+                or counts["course_card_accent"] > 0
+            )
+        ):
+            break
+        page.wait_for_timeout(500)
+
+    if counts.get("header_logo", 0) <= 0:
+        fail(f"{phase}: learner dashboard missing branded header logo marker counts={counts}", page=page)
+    if counts.get("footer", 0) <= 0:
+        fail(f"{phase}: learner dashboard missing branded footer marker counts={counts}", page=page)
+    if (
+        counts.get("dashboard_header", 0) <= 0
+        and counts.get("no_courses", 0) <= 0
+        and counts.get("course_card_accent", 0) <= 0
+    ):
+        fail(
+            f"{phase}: learner dashboard missing branded post-login surface markers counts={counts}",
+            page=page,
+        )
+
+    cards = page.locator(COURSE_CARD_SELECTOR)
+    card_count = cards.count()
+    if card_count >= 2:
+        boxes = []
+        widths = []
+        for idx in range(min(card_count, 5)):
+            try:
+                box = cards.nth(idx).bounding_box()
+            except Exception:
+                box = None
+            if not box:
+                continue
+            boxes.append(box)
+            widths.append(round(box.get("width", 0), 2))
+
+        narrow = [width for width in widths if width < 220]
+        if narrow:
+            fail(
+                f"{phase}: learner dashboard course cards render too narrow widths={widths}",
+                page=page,
+            )
+
+        for idx, box in enumerate(boxes):
+            for other_idx in range(idx + 1, len(boxes)):
+                other = boxes[other_idx]
+                if boxes_overlap(box, other):
+                    fail(
+                        f"{phase}: learner dashboard course cards overlap box{idx}={box} box{other_idx}={other}",
+                        page=page,
+                    )
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
@@ -552,6 +647,7 @@ with sync_playwright() as p:
                     page=page,
                 )
             assert_not_auth_error_page(page, "local_mfe_learner_dashboard")
+            assert_dashboard_branding(page, "local_mfe_learner_dashboard")
             log("OK local authn session validated")
             raise SystemExit(0)
 
@@ -631,6 +727,7 @@ with sync_playwright() as p:
                 page=page,
             )
         assert_not_auth_error_page(page, "mfe_learner_dashboard")
+        assert_dashboard_branding(page, "mfe_learner_dashboard")
 
         if debug:
             log(f"goto={studio_url}")
