@@ -2,11 +2,11 @@
 _Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
 **Status**: Active
-**Last Updated**: 2026-02-18
+**Last Updated**: 2026-03-26
 
 ## Overview
 
-This playbook covers adding a new tenant subsite to Mereka Academy. A tenant gets its own domain, SiteConfiguration, organization, course catalog filter, and footer branding variant — all sharing the same Open edX LMS instance.
+This playbook covers adding a new tenant subsite to Mereka Academy. A tenant gets its own domain, organization, course catalog filter, and footer branding variant while sharing the same Open edX LMS instance. The canonical source of truth for runtime Site + SiteConfiguration state is the multisite registry in `infrastructure/tutor/multisite-sites*.yml`, reconciled via `./scripts/infra/apply-multisite-config.sh`.
 
 ## Prerequisites
 
@@ -133,11 +133,30 @@ const SITE_VARIANTS = {
 };
 ```
 
-## Step 6: Provision Tenant
+## Step 6: Bootstrap tenant records and reconcile multisite config
 
-Run the provisioning script:
+Preview the tenant bootstrap first:
 
 ```bash
+./scripts/tenants/provision-tenant.sh \
+  --slug newclient \
+  --name "New Client Academy" \
+  --domain newclient.academy.mereka.io \
+  --contact-email admin@newclient.com \
+  --country MY \
+  --dry-run
+```
+
+Preview the canonical multisite reconciliation:
+
+```bash
+./scripts/infra/apply-multisite-config.sh --env prod --dry-run
+```
+
+Apply the tenant bootstrap when ready:
+
+```bash
+CONFIRM_PROVISION_TENANT=PROVISION_TENANT \
 ./scripts/tenants/provision-tenant.sh \
   --slug newclient \
   --name "New Client Academy" \
@@ -146,20 +165,38 @@ Run the provisioning script:
   --country MY
 ```
 
-Or dry-run first:
+Then reconcile the authoritative Site + SiteConfiguration state from the multisite registry:
+
 ```bash
-./scripts/tenants/provision-tenant.sh \
-  --slug newclient \
-  --name "New Client Academy" \
-  --domain newclient.academy.mereka.io \
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+```
+
+If this tenant needs enterprise SSO, reconcile the enterprise mapping before configuring the IdP:
+
+```bash
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --dry-run
+CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING=SYNC_TENANT_ENTERPRISE_MAPPING \
+ALLOW_PROD_APPLY=1 \
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --apply
+```
+
+Then configure the tenant IdP with the canonical helper:
+
+```bash
+./scripts/tenants/configure-tenant-idp.sh \
+  --tenant-slug newclient \
+  --idp-type saml \
+  --metadata-url https://idp.newclient.com/metadata \
   --dry-run
 ```
 
-This creates:
-- Django Site + SiteConfiguration
-- Organization (if not exists)
-- EnterpriseCustomer record
-- TenantConfig record (multi-tenancy plugin)
+This flow gives you:
+- Tenant/enterprise bootstrap records from `provision-tenant.sh`
+- Canonical Site + SiteConfiguration reconciliation from `apply-multisite-config.sh`
+- EnterpriseCustomer linkage into SiteConfiguration from `sync-tenant-enterprise-mapping.sh`
+- IdP setup from `configure-tenant-idp.sh`
 
 ## Pre-Deploy Checklist (AC-EG-003)
 
@@ -199,7 +236,8 @@ This creates:
   # Verify in Authentik admin: Application → Providers → openedx-lms → Redirect URIs
   # Add: https://<new-domain>/auth/complete/authentik-oidc/
   ```
-- [ ] If enterprise SSO (SAML): tenant-specific IdP metadata registered in `third_party_auth` via Django admin
+- [ ] If enterprise SSO (SAML/OIDC): `sync-tenant-enterprise-mapping.sh` has been applied before IdP setup
+- [ ] If enterprise SSO (SAML/OIDC): tenant IdP configured via `configure-tenant-idp.sh` or `onboard-enterprise-tenant.sh`
 - [ ] If no SSO: confirm `DISABLE_ENTERPRISE_LOGIN` is `true` for this tenant's SiteConfiguration
 
 ### K8s / infrastructure
@@ -272,35 +310,47 @@ curl -s https://newclient.academy.mereka.io/api/mfe_config/v1 | python3 -m json.
 
 If the new tenant breaks existing domains:
 
-### Quick rollback (< 5 min)
+### Canonical rollback
+
+Do not normalize direct Django shell or Django admin edits here. The safe rollback path is:
 
 ```bash
-# 1. Disable SiteConfiguration in Django admin
-kubectl exec -n mereka-lms deploy/lms -- \
-  python manage.py lms shell -c "
-from django.contrib.sites.models import Site
-from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-site = Site.objects.get(domain='newclient.academy.mereka.io')
-sc = SiteConfiguration.objects.get(site=site)
-sc.enabled = False
-sc.save()
-print('Disabled SiteConfiguration for newclient.academy.mereka.io')
-"
+# 1. Create a rollback branch from current main
+git checkout -b rollback/tenant-newclient
 
-# 2. Verify existing domains still work
+# 2. Revert the tenant source-of-truth change
+git revert <tenant-onboarding-commit> --no-edit
+git push -u origin HEAD
+
+# 3. Open and merge the rollback PR under the merge-first protocol
+gh pr create --title "rollback(tenancy): remove newclient" --body "Rollback tenant onboarding source-of-truth"
+
+# 4. Reconcile runtime Site + SiteConfiguration from source of truth after merge
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+
+# 5. Verify existing domains still work
 for domain in academyv2.mereka.io academy.biji-biji.com skillourfuture.academy.mereka.io; do
   echo "$domain: $(curl -so /dev/null -w '%{http_code}' https://$domain/api/mfe_config/v1)"
 done
 ```
 
+If you need faster emergency containment than source reconciliation provides, escalate to the incident runbook rather than teaching ad-hoc DB mutation here.
+
 ### Full rollback (revert code changes)
 
 ```bash
-# 1. Revert the commit
-git revert HEAD
-git push
+# 1. Revert the relevant tenant source-of-truth commits on a rollback branch
+git checkout -b rollback/tenant-newclient-full
+git revert <tenant-onboarding-commit> --no-edit
+git push -u origin HEAD
 
-# 2. ArgoCD auto-syncs the revert
+# 2. Merge the rollback PR, then reconcile runtime Site + SiteConfiguration
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+
 # 3. Verify all domains
 ./scripts/qa/verify-tenant-branding-runtime.sh
 ```
@@ -373,9 +423,10 @@ for sc in SiteConfiguration.objects.filter(enabled=True):
     print(f'{sc.site.domain}: {sc.site_values.get(\"SITE_NAME\", \"UNSET\")}')
 "
 
-# Repair: re-provision the tenant
-./scripts/tenants/provision-tenant.sh \
-  --slug <slug> --name "<name>" --domain <domain>
+# Repair: reconcile source-of-truth and re-apply canonical multisite config
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
 ```
 
 **Owner**: Platform team. **Evidence**: Before/after output of SiteConfiguration query.
@@ -470,7 +521,7 @@ Copy this template for each tenant onboarding. Fill in results and attach to the
 | Gate | Result | Notes |
 |------|--------|-------|
 | DNS resolves | PASS/FAIL | `dig +short <domain>` |
-| SiteConfiguration created | PASS/FAIL | provision-tenant.sh output |
+| SiteConfiguration reconciled | PASS/FAIL | apply-multisite-config.sh output |
 | ALLOWED_HOSTS includes domain | PASS/FAIL | grep from production.py |
 | CSRF_TRUSTED_ORIGINS includes domain | PASS/FAIL | grep from production.py |
 | SITE_VARIANTS includes domain | PASS/FAIL | grep from env.config.js |
@@ -495,7 +546,7 @@ Copy this template for each tenant onboarding. Fill in results and attach to the
 
 ## Rollback Plan
 
-- [ ] Quick rollback tested (disable SiteConfiguration)
+- [ ] Quick rollback tested (source-of-truth revert + apply-multisite-config)
 - [ ] Full rollback path documented (git revert)
 
 ## Sign-off
@@ -562,7 +613,7 @@ When a verification gate fails, use this triage map to identify root cause and r
 | MerekaFooter SITE_VARIANTS | `kubectl exec -n mereka-lms deploy/mfe -- grep -o "'[a-z.]*.mereka.io'" /openedx/env.config.js` | All tenant domains listed |
 | multisite-sites.yml | `grep "domain:" infrastructure/tutor/multisite-sites.yml` | All tenant domains present |
 
-**Repair**: Re-provision tenant (`provision-tenant.sh`) or rebuild MFE image (if SITE_VARIANTS missing).
+**Repair**: Fix the tenant source definitions, rerun `apply-multisite-config.sh --env prod --apply`, and rebuild the MFE image only if `SITE_VARIANTS` is missing from the runtime bundle.
 
 ### Class 2: Route Drift
 
@@ -591,23 +642,21 @@ When a verification gate fails, use this triage map to identify root cause and r
 
 ---
 
-## One-Command Rollback Procedure (AC-ONB-204)
+## Canonical Rollback Procedure (AC-ONB-204)
 
-### Quick rollback: Disable tenant SiteConfiguration
+### Rollback: Reconcile runtime state from reverted source
 
 ```bash
-# One command — disables the tenant without image rebuild
-TENANT_DOMAIN="newclient.academy.mereka.io"
-kubectl exec -n mereka-lms deploy/lms -- \
-  python manage.py lms shell -c "
-from django.contrib.sites.models import Site
-from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-site = Site.objects.get(domain='${TENANT_DOMAIN}')
-sc = SiteConfiguration.objects.get(site=site)
-sc.enabled = False
-sc.save()
-print(f'DISABLED SiteConfiguration for {site.domain}')
-"
+# 1. Revert the tenant source-of-truth change on a rollback branch
+git checkout -b rollback/tenant-newclient
+git revert <tenant-onboarding-commit> --no-edit
+git push -u origin HEAD
+gh pr create --title "rollback(tenancy): remove newclient" --body "Rollback tenant onboarding source-of-truth"
+
+# 2. After merge, reconcile runtime Site + SiteConfiguration
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
 ```
 
 ### Post-rollback verification (one command)
@@ -621,8 +670,10 @@ print(f'DISABLED SiteConfiguration for {site.domain}')
 ### Full rollback: Revert code changes
 
 ```bash
-# One command — revert last commit and push (ArgoCD auto-syncs)
-git revert HEAD --no-edit && git push origin main
+# Revert the relevant source-of-truth commit(s) on a rollback branch and merge the PR
+git checkout -b rollback/tenant-newclient-full
+git revert <tenant-onboarding-commit> --no-edit
+git push -u origin HEAD
 ```
 
 ### Rollback checklist output
@@ -667,21 +718,26 @@ vim infrastructure/tutor/multisite-sites.yml
 vim deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml
 ```
 
-### Step 3: Configure SiteConfiguration (plugin-first)
+### Step 3: Reconcile canonical SiteConfiguration (plugin-first)
 
 ```bash
-# Use provision-tenant.sh — this creates Site + SiteConfiguration
+# First bootstrap tenant records if needed
+CONFIRM_PROVISION_TENANT=PROVISION_TENANT \
 ./scripts/tenants/provision-tenant.sh \
   --slug skillourfuture \
   --name "Skill Our Future Academy" \
   --domain "skillourfuture.academy.mereka.io"
+
+# Then reconcile Site + SiteConfiguration from the multisite registry
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
 ```
 
-The provisioning script sets:
-- `SITE_NAME` from `--name`
-- `PLATFORM_NAME` from `--name`
-- `LMS_BASE_URL`, `LOGO_URL`, `FAVICON_URL` from domain + brand pack
-- Footer variant via `mereka_tenancy.TenantConfig`
+The canonical multisite apply flow sets:
+- `SITE_NAME` and `PLATFORM_NAME` from `multisite-sites.yml`
+- `LMS_BASE_URL`, `LOGO_URL`, `FAVICON_URL` from the tenant domain + brand pack
+- footer/runtime branding inputs consumed by `MerekaFooter` and related plugin surfaces
 
 ### Step 4: Customization rules for new tenants
 
