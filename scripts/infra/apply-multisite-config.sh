@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # @covers AC-001
 # @spec: multi-site-domains_spec.md
-# Apply multisite configuration to production/dev LMS database.
-# This script runs the multisite_bootstrap.py script from within an LMS pod
-# to configure Django site entries and SiteConfiguration for all domains.
+# Apply multisite configuration to production/dev/staging LMS database.
+# This script runs the canonical Django multisite bootstrap helper inside an
+# LMS or CMS pod to reconcile django_site and SiteConfiguration rows from the
+# repo-owned multisite definitions.
 
 set -euo pipefail
 
@@ -65,8 +66,8 @@ EXAMPLES:
 
 REQUIREMENTS:
   - kubectl configured with access to target cluster
-  - PyMySQL installed in LMS pod (already included in Open edX)
-  - Database credentials in lms.env.yml
+  - LMS or CMS pod running in the target namespace
+  - Django runtime in the target pod (already included in Open edX)
 EOF
   exit 1
 }
