@@ -18,9 +18,11 @@
 #   proof_command - Command to verify the script is functional (read-only)
 #   criticality   - release-blocking | release-supporting | informational
 #   ci_static_inventory.entries[].script  - Repo-relative static CI execution entry
+#   ci_static_inventory.shard_files[]    - Repo-relative generated shard manifests
+#   ci_static_inventory.precheck_files[] - Repo-relative static scripts that must run serially before shard fan-out
 #   ci_runtime_inventory.entries[].script - Repo-relative manual/runtime inventory entry
 
-version: "1.2.1"
+version: "1.2.2"
 
 canonical_entrypoints:
   # Top-level release automation
@@ -41,6 +43,13 @@ canonical_entrypoints:
 
 ci_static_inventory:
   generated_file: .github/ci-scripts-static.txt
+  shard_files:
+    - .github/ci-scripts-static-shard-01.txt
+    - .github/ci-scripts-static-shard-02.txt
+    - .github/ci-scripts-static-shard-03.txt
+  precheck_files:
+    - scripts/qa/verify-verification-catalog.sh
+    - scripts/qa/verify-new-ci-static-entries.sh
   generator: scripts/governance/generate-ci-static-inventory.py
   owner: platform-team
   entries:

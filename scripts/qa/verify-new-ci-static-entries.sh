@@ -2,13 +2,13 @@
 # @covers AC-CI-014
 # @spec: ci-cd-pipeline_spec.md
 #
-# Enforce quality contract for newly added entries in .github/ci-scripts-static.txt.
+# Enforce quality contract for newly added static CI inventory entries.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-LIST_FILE=".github/ci-scripts-static.txt"
+REGISTRY_FILE="scripts/governance/script-registry.yaml"
 STAGED_ONLY=0
 STRICT="${STRICT:-1}"
 
@@ -17,7 +17,7 @@ usage() {
 Usage: scripts/qa/verify-new-ci-static-entries.sh [--staged-only]
 
 Options:
-  --staged-only   Inspect newly added static-list entries in staged index only.
+  --staged-only   Inspect newly added static-inventory entries in staged index only.
 
 Environment:
   STRICT=1        Fail on violations (default).
@@ -66,14 +66,14 @@ trim() {
   printf '%s' "$value"
 }
 
-find_diff_range() {
+find_base_commit() {
   local base_ref="${GITHUB_BASE_REF:-main}"
   local merge_base=""
 
   if git rev-parse --verify -q "refs/remotes/origin/$base_ref" >/dev/null 2>&1; then
     merge_base="$(git merge-base HEAD "refs/remotes/origin/$base_ref" 2>/dev/null || true)"
     if [[ -n "$merge_base" ]]; then
-      printf '%s..HEAD\n' "$merge_base"
+      printf '%s\n' "$merge_base"
       return 0
     fi
   fi
@@ -82,13 +82,13 @@ find_diff_range() {
   if git rev-parse --verify -q "refs/remotes/origin/$base_ref" >/dev/null 2>&1; then
     merge_base="$(git merge-base HEAD "refs/remotes/origin/$base_ref" 2>/dev/null || true)"
     if [[ -n "$merge_base" ]]; then
-      printf '%s..HEAD\n' "$merge_base"
+      printf '%s\n' "$merge_base"
       return 0
     fi
   fi
 
   if git rev-parse --verify -q HEAD^ >/dev/null 2>&1; then
-    printf 'HEAD^..HEAD\n'
+    printf 'HEAD^\n'
     return 0
   fi
 
@@ -96,24 +96,120 @@ find_diff_range() {
 }
 
 collect_added_entries() {
-  if [[ "$STAGED_ONLY" -eq 1 ]]; then
-    git diff --cached -U0 -- "$LIST_FILE" \
-      | awk '/^\+[^+]/ { print substr($0,2) }'
+  if ! command -v python3 >/dev/null 2>&1; then
+    if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+      do_fail "python3 required for static-inventory entry contract check"
+    else
+      do_warn "python3 not available; skipping new static-entry checks"
+    fi
     return
   fi
 
-  local diff_range
-  if ! diff_range="$(find_diff_range)"; then
+  if [[ "$STAGED_ONLY" -eq 1 ]]; then
+    local head_spec=""
+    if git rev-parse --verify -q HEAD >/dev/null 2>&1; then
+      head_spec="HEAD:$REGISTRY_FILE"
+    fi
+
+    BASE_SPEC="$head_spec" CURRENT_SPEC=":$REGISTRY_FILE" python3 - <<'PY'
+import os
+import subprocess
+import sys
+
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit(f"PyYAML required for {os.environ['CURRENT_SPEC']}: {exc}")
+
+
+def read_blob(spec: str) -> str:
+    if not spec:
+        return ""
+    proc = subprocess.run(
+        ["git", "show", spec],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return proc.stdout if proc.returncode == 0 else ""
+
+
+def read_entries(raw: str) -> set[str]:
+    if not raw.strip():
+        return set()
+    payload = yaml.safe_load(raw) or {}
+    inventory = payload.get("ci_static_inventory") or {}
+    entries = inventory.get("entries") or []
+    result: set[str] = set()
+    for item in entries:
+        if not isinstance(item, dict):
+            continue
+        script = item.get("script")
+        if isinstance(script, str) and script.strip():
+            result.add(script.strip())
+    return result
+
+
+base_entries = read_entries(read_blob(os.environ.get("BASE_SPEC", "")))
+current_entries = read_entries(read_blob(os.environ["CURRENT_SPEC"]))
+for script in sorted(current_entries - base_entries):
+    print(script)
+PY
+    return
+  fi
+
+  local base_commit
+  if ! base_commit="$(find_base_commit)"; then
     if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
-      do_fail "could not determine git diff range for static-list entry contract check"
+      do_fail "could not determine git base for static-inventory entry contract check"
       return
     fi
-    do_warn "could not determine git diff range; skipping new static-entry checks"
+    do_warn "could not determine git base; skipping new static-entry checks"
     return
   fi
 
-  git diff -U0 "$diff_range" -- "$LIST_FILE" \
-    | awk '/^\+[^+]/ { print substr($0,2) }'
+  BASE_SPEC="$base_commit:$REGISTRY_FILE" CURRENT_FILE="$REGISTRY_FILE" python3 - <<'PY'
+import os
+import subprocess
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit(f"PyYAML required for {os.environ['CURRENT_FILE']}: {exc}")
+
+
+def read_entries(raw: str) -> set[str]:
+    if not raw.strip():
+        return set()
+    payload = yaml.safe_load(raw) or {}
+    inventory = payload.get("ci_static_inventory") or {}
+    entries = inventory.get("entries") or []
+    result: set[str] = set()
+    for item in entries:
+        if not isinstance(item, dict):
+            continue
+        script = item.get("script")
+        if isinstance(script, str) and script.strip():
+            result.add(script.strip())
+    return result
+
+
+current_path = Path(os.environ["CURRENT_FILE"])
+proc = subprocess.run(
+    ["git", "show", os.environ["BASE_SPEC"]],
+    check=False,
+    capture_output=True,
+    text=True,
+)
+base_raw = proc.stdout if proc.returncode == 0 else ""
+current_raw = current_path.read_text(encoding="utf-8")
+
+base_entries = read_entries(base_raw)
+current_entries = read_entries(current_raw)
+for script in sorted(current_entries - base_entries):
+    print(script)
+PY
 }
 
 validate_verify_script_contract() {
@@ -144,8 +240,8 @@ validate_verify_script_contract() {
   fi
 }
 
-if [[ ! -f "$LIST_FILE" ]]; then
-  do_fail "$LIST_FILE not found"
+if [[ ! -f "$REGISTRY_FILE" ]]; then
+  do_fail "$REGISTRY_FILE not found"
   echo "Summary: PASS=$PASS FAIL=$FAIL WARN=$WARN"
   exit 1
 fi
@@ -163,14 +259,14 @@ for line in "${raw_added[@]}"; do
 done
 
 if [[ "${#added_paths[@]}" -eq 0 ]]; then
-  do_pass "no newly added ci static-list entries detected"
+  do_pass "no newly added static-inventory entries detected"
   echo "Summary: PASS=$PASS FAIL=$FAIL WARN=$WARN"
   exit 0
 fi
 
 for path in "${added_paths[@]}"; do
   if [[ ! -f "$path" ]]; then
-    do_fail "$path: added static-list entry target file missing"
+    do_fail "$path: added static-inventory entry target file missing"
     continue
   fi
   do_pass "$path: target file exists"

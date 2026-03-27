@@ -77,10 +77,69 @@ def normalize_entries(payload: dict, repo_root: Path) -> list[dict[str, object]]
     return normalized
 
 
+def normalize_shard_files(payload: dict) -> list[str]:
+    inventory = payload.get("ci_static_inventory")
+    if not isinstance(inventory, dict):
+        raise SystemExit("script-registry.yaml missing ci_static_inventory mapping")
+
+    raw = inventory.get("shard_files", [])
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise SystemExit("ci_static_inventory.shard_files must be a list when present")
+
+    shard_files: list[str] = []
+    seen: set[str] = set()
+    for index, item in enumerate(raw, start=1):
+        if not isinstance(item, str) or not item.strip():
+            raise SystemExit(f"ci_static_inventory.shard_files[{index}] must be a non-empty string")
+        if item in seen:
+            raise SystemExit(f"duplicate ci_static_inventory shard file: {item}")
+        seen.add(item)
+        shard_files.append(item)
+    return shard_files
+
+
+def normalize_precheck_files(payload: dict) -> list[str]:
+    inventory = payload.get("ci_static_inventory")
+    if not isinstance(inventory, dict):
+        raise SystemExit("script-registry.yaml missing ci_static_inventory mapping")
+
+    raw = inventory.get("precheck_files", [])
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise SystemExit("ci_static_inventory.precheck_files must be a list when present")
+
+    precheck_files: list[str] = []
+    seen: set[str] = set()
+    for index, item in enumerate(raw, start=1):
+        if not isinstance(item, str) or not item.strip():
+            raise SystemExit(
+                f"ci_static_inventory.precheck_files[{index}] must be a non-empty string"
+            )
+        if item in seen:
+            raise SystemExit(f"duplicate ci_static_inventory precheck file: {item}")
+        seen.add(item)
+        precheck_files.append(item)
+    return precheck_files
+
+
+def shard_entries(entries: list[dict[str, object]], shard_count: int) -> list[list[dict[str, object]]]:
+    if shard_count <= 0:
+        return []
+    shards: list[list[dict[str, object]]] = [[] for _ in range(shard_count)]
+    for index, entry in enumerate(entries):
+        shards[index % shard_count].append(entry)
+    return shards
+
+
 def render_inventory(
     entries: list[dict[str, object]],
     registry_path: Path,
     generator_path: Path,
+    *,
+    shard_label: str | None = None,
 ) -> str:
     lines = [
         "# AUTO-GENERATED FILE. DO NOT EDIT.",
@@ -88,6 +147,8 @@ def render_inventory(
         f"# Regenerate: python3 {generator_path.as_posix()} --write",
         "",
     ]
+    if shard_label is not None:
+        lines.insert(3, f"# Shard: {shard_label}")
     for entry in entries:
         script = str(entry["script"])
         args = [str(item) for item in entry["args"]]
@@ -100,6 +161,8 @@ def build_report(
     entries: list[dict[str, object]],
     registry_path: Path,
     output_path: Path,
+    shard_paths: list[Path],
+    precheck_files: list[str],
 ) -> dict[str, object]:
     prefix_counts = Counter()
     entries_with_args = 0
@@ -113,13 +176,25 @@ def build_report(
             entries_with_args += 1
         rendered_entries.append(" ".join([script, *args]).rstrip())
 
+    precheck_set = set(precheck_files)
+    sharded_entries = [entry for entry in entries if str(entry["script"]) not in precheck_set]
+
     return {
         "authority": registry_path.as_posix(),
         "generated_file": output_path.as_posix(),
         "entries_total": len(entries),
         "entries_with_args": entries_with_args,
+        "precheck_total": len(precheck_files),
+        "precheck_files": precheck_files,
+        "sharded_entries_total": len(sharded_entries),
         "prefix_counts": dict(sorted(prefix_counts.items())),
         "entries": rendered_entries,
+        "shards": [
+            {"generated_file": path.as_posix(), "entries_total": len(shard)}
+            for path, shard in zip(
+                shard_paths, shard_entries(sharded_entries, len(shard_paths)), strict=True
+            )
+        ],
     }
 
 
@@ -132,6 +207,15 @@ def print_report(report: dict[str, object], fmt: str, show_entries: bool) -> Non
     print(f"Generated file: {report['generated_file']}")
     print(f"Entries: {report['entries_total']}")
     print(f"Entries with args: {report['entries_with_args']}")
+    print(f"Serial precheck entries: {report['precheck_total']}")
+    if report["precheck_files"]:
+        print("Precheck files:")
+        for entry in report["precheck_files"]:
+            print(f"  {entry}")
+    if report["shards"]:
+        print("Shards:")
+        for shard in report["shards"]:
+            print(f"  {shard['generated_file']}: {shard['entries_total']}")
     print("Entry prefixes:")
     for prefix, count in report["prefix_counts"].items():
         print(f"  {prefix}: {count}")
@@ -161,6 +245,42 @@ def check_current(expected: str, output_path: Path) -> int:
     print("\n".join(diff), file=sys.stderr)
     print(f"FAIL: {output_path} is stale; regenerate it", file=sys.stderr)
     return 1
+
+
+def resolve_static_targets(
+    *,
+    repo_root: Path,
+    registry_path: Path,
+    generator_path: Path,
+    output_path: Path,
+    entries: list[dict[str, object]],
+    shard_files: list[str],
+    precheck_files: list[str],
+    include_shards: bool,
+) -> list[tuple[Path, str]]:
+    targets: list[tuple[Path, str]] = [
+        (
+            output_path,
+            render_inventory(entries, registry_path.relative_to(repo_root), generator_path.relative_to(repo_root)),
+        )
+    ]
+    if include_shards and shard_files:
+        precheck_set = set(precheck_files)
+        sharded_entries = [entry for entry in entries if str(entry["script"]) not in precheck_set]
+        shards = shard_entries(sharded_entries, len(shard_files))
+        for index, shard_file in enumerate(shard_files, start=1):
+            targets.append(
+                (
+                    (repo_root / shard_file).resolve(),
+                    render_inventory(
+                        shards[index - 1],
+                        registry_path.relative_to(repo_root),
+                        generator_path.relative_to(repo_root),
+                        shard_label=f"{index}/{len(shard_files)}",
+                    ),
+                )
+            )
+    return targets
 
 
 def main() -> int:
@@ -213,20 +333,47 @@ def main() -> int:
     generated_file = inventory.get("generated_file")
     if not isinstance(generated_file, str) or not generated_file:
         raise SystemExit("ci_static_inventory.generated_file must be a non-empty string")
+    shard_files = normalize_shard_files(payload)
+    precheck_files = normalize_precheck_files(payload)
 
     output_path = (repo_root / generated_file).resolve() if args.out is None else args.out.resolve()
     entries = normalize_entries(payload, repo_root)
-    rendered = render_inventory(entries, registry_path.relative_to(repo_root), default_generator.relative_to(repo_root))
+    entry_scripts = {str(entry["script"]) for entry in entries}
+    for script in precheck_files:
+        if script not in entry_scripts:
+            raise SystemExit(
+                f"ci_static_inventory.precheck_files entry is not registered in entries: {script}"
+            )
+    targets = resolve_static_targets(
+        repo_root=repo_root,
+        registry_path=registry_path,
+        generator_path=default_generator,
+        output_path=output_path,
+        entries=entries,
+        shard_files=shard_files,
+        precheck_files=precheck_files,
+        include_shards=args.out is None,
+    )
 
     if args.write:
-        output_path.write_text(rendered, encoding="utf-8")
-        print(f"WROTE: {output_path}")
+        for path, rendered in targets:
+            path.write_text(rendered, encoding="utf-8")
+            print(f"WROTE: {path}")
         return 0
 
     if args.check:
-        return check_current(rendered, output_path)
+        failures = 0
+        for path, rendered in targets:
+            failures |= check_current(rendered, path)
+        return failures
 
-    report = build_report(entries, registry_path.relative_to(repo_root), output_path.relative_to(repo_root))
+    report = build_report(
+        entries,
+        registry_path.relative_to(repo_root),
+        output_path.relative_to(repo_root),
+        [(repo_root / shard_file).resolve().relative_to(repo_root) for shard_file in shard_files] if args.out is None else [],
+        precheck_files,
+    )
     print_report(report, args.format, args.show_entries)
     return 0
 

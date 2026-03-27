@@ -83,8 +83,16 @@ jobs:
           echo "docs_only=${docs_only}" >> "$GITHUB_OUTPUT"
 
   # ============================================================================
-  # Job 1: static-validation
-  # Runs on every PR and push. Replaces 65+ micro-jobs:
+  # Job 1a-1d: static-validation split graph
+  # Runs on every PR and push. Keeps the same overall contracts as the old
+  # consolidated Static Validation job, but splits the opaque Phase C script
+  # batch into generated shards:
+  #   1a. precheck   — setup, lint, manifests, spec/inventory gates
+  #   1b. shards     — generated ci_static_inventory shard manifests in parallel
+  #   1c. postchecks — sequential static follow-up checks that do not depend on shards
+  #   1d. aggregate  — final branch-protection surface named "Static Validation"
+  #
+  # The overall surface still replaces 65+ micro-jobs:
   #   spec-lint, generated-docs, design-token-validation, branding-preflight,
   #   monitoring-guardrails, atlas-modulestore-guardrails, tenant-branding-contract,
   #   brand-pack-schema, gitops-image-contract, prod-tag-guard, lint, validate-k8s,
@@ -109,19 +117,18 @@ jobs:
   #   multi-tenant-branding-ops, analytics-hardening, tenant-config-handoff,
   #   translation-validation, and verify-specs.yml fast-verification.
   # ============================================================================
-  static-validation:
-    name: Static Validation
+  static-validation-precheck:
+    name: Static Validation Precheck
     needs: change-scope
     if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
-      pull-requests: write
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
-          fetch-depth: 0  # Full history needed for origin/main...HEAD range in spec integrity gates
+          fetch-depth: 0
 
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
@@ -133,7 +140,6 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
           echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
 
-      # ── Install kubeconform (cached) ──────────────────────────────────────
       - name: Cache kubeconform
         id: cache-kubeconform
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
@@ -144,7 +150,6 @@ jobs:
       - name: Install kubeconform
         if: steps.cache-kubeconform.outputs.cache-hit != 'true'
         run: |
-          # kubeconform v0.6.4 — checksum computed 2026-03-05
           EXPECTED_SHA="2b4ebeaa4d5ac4843cf8f7b7e66a8874252b6b71bc7cbfc4ef1cbf85acec7c07"
           TARBALL="kubeconform-linux-amd64.tar.gz"
           KUBECONFORM_URL="https://github.com/yannh/kubeconform/releases/download/v0.6.4/${TARBALL}"
@@ -156,7 +161,6 @@ jobs:
           rm "${TARBALL}"
           kubeconform -v
 
-      # ── Install kubectl (needed by kustomize-rendering verification scripts) ─
       - name: Install kubectl
         run: |
           if ! command -v kubectl &>/dev/null; then
@@ -168,7 +172,6 @@ jobs:
           fi
           kubectl version --client
 
-      # ── Install ripgrep (needed by verification scripts) ──────────────────
       - name: Install ripgrep
         run: |
           if ! command -v rg &>/dev/null; then
@@ -186,7 +189,6 @@ jobs:
             rm -rf "${RG_TARBALL}" "${RG_TARBALL}.sha256" "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl"
           fi
 
-      # ── Phase A: Shell script syntax check (all scripts in parallel) ───────
       - name: Syntax check all shell scripts
         run: |
           find scripts/ -name '*.sh' -type f | xargs -P8 bash -n
@@ -194,7 +196,6 @@ jobs:
           bash -n infrastructure/tutor/apply-patches.sh
           echo "All shell script syntax checks passed"
 
-      # ── Phase B: Linting ──────────────────────────────────────────────────
       - name: Lint Python files
         run: ruff check scripts/ services/
 
@@ -209,7 +210,6 @@ jobs:
             SC_URL="https://github.com/koalaman/shellcheck/releases/download/${SC_VERSION}/${SC_TARBALL}"
             curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
               --output "${SC_TARBALL}" "${SC_URL}"
-            # xz may not be available on ARC runners; use Python as fallback
             if command -v xz &>/dev/null; then
               tar xJf "${SC_TARBALL}"
             else
@@ -237,7 +237,6 @@ jobs:
             grep -v 'SECRET_CLASSIFICATION' | \
             xargs kubeconform -strict -ignore-missing-schemas
 
-      # ── Phase B (continued): Spec linting ─────────────────────────────────
       - name: Run spec integrity gates
         run: bash scripts/qa/run-spec-integrity-gates.sh
 
@@ -256,7 +255,6 @@ jobs:
           path: var/spec-coverage.md
           retention-days: 3
 
-      # ── Phase B (continued): PR spec coverage report (fast-verification) ──
       - name: Spec coverage report for PR
         if: github.event_name == 'pull_request'
         run: |
@@ -279,81 +277,135 @@ jobs:
 
       - name: Markdown linting
         run: |
-          # Install locally — ARC runners lack write access to /usr/lib/node_modules/
           npm install markdownlint-cli
           npx markdownlint docs/ specs/ --ignore docs/archive/ || true
 
       - name: Verify CI static inventory is generated and current
         run: python3 scripts/governance/generate-ci-static-inventory.py --check
 
+      - name: Verify verification catalog is generated and current
+        run: bash scripts/qa/verify-verification-catalog.sh
+
       - name: Verify CI runtime inventory is generated and current
         run: python3 scripts/governance/generate-ci-runtime-inventory.py --check
 
-      # ── Phase C: Run all static verification scripts in parallel ──────────
-      - name: Run static verification scripts
-        run: PARALLELISM=4 TIMEOUT_SECS=300 ./scripts/qa/run-release-verification-gates.sh
+  static-validation-shards:
+    name: Static Validation Scripts (${{ matrix.shard.key }})
+    needs:
+      - change-scope
+      - static-validation-precheck
+    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        shard:
+          - key: shard-01
+            file: .github/ci-scripts-static-shard-01.txt
+          - key: shard-02
+            file: .github/ci-scripts-static-shard-02.txt
+          - key: shard-03
+            file: .github/ci-scripts-static-shard-03.txt
 
-      - name: Generate aggregate summary report
-        if: always()
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+
+      - name: Prepare local tool cache
         run: |
-          mkdir -p var
-          SUMMARY_FILE="var/verification-summary.md"
-          echo "# Verification Summary" > "$SUMMARY_FILE"
-          echo "" >> "$SUMMARY_FILE"
-          echo "**Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> "$SUMMARY_FILE"
-          echo "**Commit**: ${{ github.sha }}" >> "$SUMMARY_FILE"
-          echo "**Branch**: ${{ github.ref_name }}" >> "$SUMMARY_FILE"
-          echo "" >> "$SUMMARY_FILE"
-          echo "## Script Results" >> "$SUMMARY_FILE"
-          echo "" >> "$SUMMARY_FILE"
-          if [[ -f var/ci-results/summary.txt ]]; then
-            PASS=$(grep -c "^PASS"    var/ci-results/summary.txt || true)
-            FAIL=$(grep -c "^FAIL"    var/ci-results/summary.txt || true)
-            TIMEOUTS=$(grep -c "^TIMEOUT" var/ci-results/summary.txt || true)
-            SKIPS=$(grep -c "^SKIP"   var/ci-results/summary.txt || true)
-            TOTAL=$((PASS + FAIL + TIMEOUTS + SKIPS))
-            echo "| Metric | Count |" >> "$SUMMARY_FILE"
-            echo "|--------|-------|" >> "$SUMMARY_FILE"
-            echo "| Passed | $PASS |" >> "$SUMMARY_FILE"
-            echo "| Failed | $FAIL |" >> "$SUMMARY_FILE"
-            echo "| Timeout | $TIMEOUTS |" >> "$SUMMARY_FILE"
-            echo "| Skipped | $SKIPS |" >> "$SUMMARY_FILE"
-            echo "| Total | $TOTAL |" >> "$SUMMARY_FILE"
-            echo "" >> "$SUMMARY_FILE"
-            if [[ $((PASS + FAIL + TIMEOUTS)) -gt 0 ]]; then
-              SUCCESS_RATE=$(awk "BEGIN {printf \"%.1f\", ($PASS / ($PASS + $FAIL + $TIMEOUTS)) * 100}")
-              echo "**Success Rate**: ${SUCCESS_RATE}% (${PASS}/$((PASS + FAIL + TIMEOUTS)))" >> "$SUMMARY_FILE"
-            fi
-            echo "" >> "$SUMMARY_FILE"
-            echo "## Per-Script Results" >> "$SUMMARY_FILE"
-            echo '```' >> "$SUMMARY_FILE"
-            cat var/ci-results/summary.txt >> "$SUMMARY_FILE"
-            echo '```' >> "$SUMMARY_FILE"
-          else
-            echo "_No results file found_" >> "$SUMMARY_FILE"
+          mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install kubectl
+        run: |
+          if ! command -v kubectl &>/dev/null; then
+            KUBECTL_VERSION="v1.32.5"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+            install -m 0755 kubectl "$GITHUB_WORKSPACE/.cache/bin/kubectl"
+            rm kubectl
           fi
-          echo "" >> "$SUMMARY_FILE"
-          echo "---" >> "$SUMMARY_FILE"
-          echo "*Generated by ci.yml static-validation job*" >> "$SUMMARY_FILE"
-          cat "$SUMMARY_FILE"
+          kubectl version --client
+
+      - name: Install ripgrep
+        run: |
+          if ! command -v rg &>/dev/null; then
+            RG_VERSION="15.1.0"
+            RG_TARBALL="ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+            RG_BASE_URL="https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}" "${RG_BASE_URL}/${RG_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}.sha256" "${RG_BASE_URL}/${RG_TARBALL}.sha256"
+            sha256sum -c "${RG_TARBALL}.sha256"
+            tar xzf "${RG_TARBALL}"
+            install -m 0755 "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl/rg" \
+              "$GITHUB_WORKSPACE/.cache/bin/rg"
+            rm -rf "${RG_TARBALL}" "${RG_TARBALL}.sha256" "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl"
+          fi
+
+      - name: Run static verification scripts
+        run: |
+          SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=2 TIMEOUT_SECS=300 \
+            ./scripts/qa/run-release-verification-gates.sh
 
       - name: Upload CI results artifact
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
-          name: ci-results
+          name: ci-results-${{ matrix.shard.key }}
           path: var/ci-results/
           retention-days: 3
 
-      - name: Upload verification summary artifact
-        if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
-        with:
-          name: verification-summary
-          path: var/verification-summary.md
-          retention-days: 90
+  static-validation-postchecks:
+    name: Static Validation Postchecks
+    needs:
+      - change-scope
+      - static-validation-precheck
+    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
 
-      # ── Phase D: A11y sequential chain (R5 dependency preserved) ──────────
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+
+      - name: Prepare local tool cache
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install ripgrep
+        run: |
+          if ! command -v rg &>/dev/null; then
+            RG_VERSION="15.1.0"
+            RG_TARBALL="ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+            RG_BASE_URL="https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}" "${RG_BASE_URL}/${RG_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}.sha256" "${RG_BASE_URL}/${RG_TARBALL}.sha256"
+            sha256sum -c "${RG_TARBALL}.sha256"
+            tar xzf "${RG_TARBALL}"
+            install -m 0755 "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl/rg" \
+              "$GITHUB_WORKSPACE/.cache/bin/rg"
+            rm -rf "${RG_TARBALL}" "${RG_TARBALL}.sha256" "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl"
+          fi
+
       - name: Verify authenticated smoke + WCAG AA contrast gates
         run: |
           bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
@@ -364,7 +416,6 @@ jobs:
           bash -n scripts/qa/verify-a11y-regression-lane.sh
           ./scripts/qa/verify-a11y-regression-lane.sh
 
-      # ── Phase E: Validation checks (extracted scripts) ────────────────────
       - name: Validate design token syntax
         run: python3 scripts/qa/check-design-token-syntax.py
 
@@ -435,7 +486,6 @@ jobs:
       - name: Run Atlas modulestore contract check
         run: ./scripts/qa/verify-atlas-modulestore-path.sh --mode local
 
-      # ── Phase F: Infisical validation (conditional) ────────────────────────
       - name: Validate Infisical secrets
         if: ${{ vars.HAS_INFISICAL == 'true' }}
         env:
@@ -453,7 +503,6 @@ jobs:
             echo "Staging Infisical validation skipped (ENABLE_STAGING_ENV != true)"
           fi
 
-      # ── Phase G: Translation validation ───────────────────────────────────
       - name: Verify atlas.yml and translation infrastructure
         run: bash scripts/qa/check-atlas-translation-infra.sh
 
@@ -483,7 +532,66 @@ jobs:
           if-no-files-found: warn
           retention-days: 3
 
-      # ── PR comment: spec verification summary ─────────────────────────────
+  static-validation:
+    name: Static Validation
+    needs:
+      - change-scope
+      - static-validation-precheck
+      - static-validation-shards
+      - static-validation-postchecks
+    if: ${{ always() && (github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true') }}
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Download PR coverage artifact
+        if: ${{ github.event_name == 'pull_request' && needs.static-validation-precheck.result == 'success' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: spec-coverage-pr
+          path: var/spec-coverage-pr
+
+      - name: Generate aggregate summary report
+        if: always()
+        run: |
+          mkdir -p var
+          SUMMARY_FILE="var/verification-summary.md"
+          cat > "$SUMMARY_FILE" <<EOF
+          # Verification Summary
+
+          **Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Commit**: ${{ github.sha }}
+          **Branch**: ${{ github.ref_name }}
+
+          ## Job Results
+
+          | Lane | Result |
+          |------|--------|
+          | Static Validation Precheck | ${{ needs.static-validation-precheck.result }} |
+          | Static Validation Scripts | ${{ needs.static-validation-shards.result }} |
+          | Static Validation Postchecks | ${{ needs.static-validation-postchecks.result }} |
+
+          ## Execution Model
+
+          - Static script inventory is still authoritative via \`script-registry.yaml#ci_static_inventory\`.
+          - Phase C now runs as three generated shards instead of one opaque monolith.
+          - Branch protection still keys off this final \`Static Validation\` aggregate.
+
+          ---
+          *Generated by ci.yml static-validation aggregate job*
+          EOF
+          cat "$SUMMARY_FILE"
+
+      - name: Upload verification summary artifact
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: verification-summary
+          path: var/verification-summary.md
+          retention-days: 90
+
       - name: Post PR comment with spec verification summary
         if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
@@ -492,20 +600,31 @@ jobs:
             const fs = require('fs');
             let coverageContent = '';
             try {
-              coverageContent = fs.readFileSync('var/spec-coverage-pr.md', 'utf8');
+              coverageContent = fs.readFileSync('var/spec-coverage-pr/spec-coverage-pr.md', 'utf8');
             } catch (error) {
               coverageContent = '_Coverage report not available_';
             }
-            // Sanitize: truncate and escape HTML to prevent injection
             if (coverageContent.length > 5000) {
               coverageContent = coverageContent.substring(0, 5000) + '\n\n..._[Truncated to 5000 chars]_';
             }
             coverageContent = coverageContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const jobResult = '${{ job.status }}';
+            const dependencyResults = {
+              precheck: '${{ needs.static-validation-precheck.result }}',
+              shards: '${{ needs.static-validation-shards.result }}',
+              postchecks: '${{ needs.static-validation-postchecks.result }}',
+            };
+            const dependencyFailure = Object.values(dependencyResults).some(result => result !== 'success');
+            const jobResult = dependencyFailure ? 'failure' : 'success';
             const statusEmoji = jobResult === 'success' ? '✅' : '❌';
             const body = `## ${statusEmoji} CI Static Validation
 
-            **Job result**: ${jobResult}
+            **Aggregate result**: ${jobResult}
+
+            ### Lane Results
+
+            - Static Validation Precheck: ${dependencyResults.precheck}
+            - Static Validation Scripts: ${dependencyResults.shards}
+            - Static Validation Postchecks: ${dependencyResults.postchecks}
 
             ### Spec Coverage
 
@@ -520,10 +639,10 @@ jobs:
 
             ${jobResult === 'success'
               ? '- ✅ Static validation passed\n- Full verification will run on merge to main'
-              : '- ❌ Some checks failed — review workflow logs\n- Fix issues before merging'}
+              : '- ❌ One or more static validation lanes failed\n- Review the failing lane instead of one monolithic job'}
 
             ---
-            *Automated by ci.yml static-validation job*
+            *Automated by ci.yml static-validation aggregate job*
             `;
             const { data: comments } = await github.rest.issues.listComments({
               issue_number: context.issue.number,
@@ -548,6 +667,12 @@ jobs:
                 body: body
               });
             }
+
+      - name: Fail if any static validation dependency failed
+        if: ${{ needs.static-validation-precheck.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success' }}
+        run: |
+          echo "::error::Static validation aggregate failed because one or more lanes failed"
+          exit 1
 
   # ============================================================================
   # Job 2: tutor-config-tests

@@ -133,11 +133,40 @@ inventory = payload.get("ci_static_inventory")
 if not isinstance(inventory, dict):
     raise SystemExit("ci_static_inventory missing from script-registry.yaml")
 
+shard_files = inventory.get("shard_files", [])
+if shard_files is None:
+    shard_files = []
+if not isinstance(shard_files, list):
+    raise SystemExit("ci_static_inventory.shard_files must be a list when present")
+
+seen_shards = set()
+for index, shard_file in enumerate(shard_files, start=1):
+    if not isinstance(shard_file, str) or not shard_file.strip():
+        raise SystemExit(f"ci_static_inventory.shard_files[{index}] must be a non-empty string")
+    if shard_file in seen_shards:
+        raise SystemExit(f"duplicate ci_static_inventory shard file: {shard_file}")
+    seen_shards.add(shard_file)
+
+precheck_files = inventory.get("precheck_files", [])
+if precheck_files is None:
+    precheck_files = []
+if not isinstance(precheck_files, list):
+    raise SystemExit("ci_static_inventory.precheck_files must be a list when present")
+
+seen_precheck = set()
+for index, precheck_file in enumerate(precheck_files, start=1):
+    if not isinstance(precheck_file, str) or not precheck_file.strip():
+        raise SystemExit(f"ci_static_inventory.precheck_files[{index}] must be a non-empty string")
+    if precheck_file in seen_precheck:
+        raise SystemExit(f"duplicate ci_static_inventory precheck file: {precheck_file}")
+    seen_precheck.add(precheck_file)
+
 entries = inventory.get("entries")
 if not isinstance(entries, list) or not entries:
     raise SystemExit("ci_static_inventory.entries must be a non-empty list")
 
 seen = set()
+seen_scripts = set()
 count = 0
 for index, entry in enumerate(entries, start=1):
     if not isinstance(entry, dict):
@@ -161,9 +190,19 @@ for index, entry in enumerate(entries, start=1):
         raise SystemExit(f"ci_static_inventory entry not found on disk: {script}")
     if not os.access(script_path, os.X_OK):
         raise SystemExit(f"ci_static_inventory entry is not executable: {script}")
+    seen_scripts.add(script)
     count += 1
 
-print(count)
+for precheck_file in precheck_files:
+    if precheck_file not in seen_scripts:
+        raise SystemExit(
+            f"ci_static_inventory.precheck_files entry is not registered in entries: {precheck_file}"
+        )
+
+print(
+    f"{count} executable entries; {len(shard_files)} shard manifest(s); "
+    f"{len(precheck_files)} serial precheck file(s)"
+)
 PY
   )"; then
     pass "ci_static_inventory validates ${inventory_summary} executable entries"
