@@ -22,6 +22,8 @@ ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
 echo "Refusing --apply without explicit confirmation token"
 echo "Refusing --push without explicit confirmation token"
 echo "Refusing production --apply without ALLOW_PROD_APPLY=1"
+echo "Push rejected for $repo; rebasing onto origin/main before retry."
+git rebase --autostash origin/main
 EOF
   chmod +x "$tmpdir/scripts/infra/release-openedx-gitops.sh"
 }
@@ -59,6 +61,6 @@ CONFIRM_PUSH_TOKEN="PUSH_RELEASE_OPENEDX_GITOPS"
 echo "Refusing --apply without explicit confirmation token"
 echo "Refusing --push without explicit confirmation token"
 EOF
-run_expect_fail "missing ALLOW_PROD_APPLY variable is rejected"
+run_expect_fail "missing ALLOW_PROD_APPLY and push retry guardrails are rejected"
 
 echo "OK"

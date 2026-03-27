@@ -625,11 +625,41 @@ commit_if_needed() {
 
 push_with_rebase_if_needed() {
   local repo="$1"
+  local upstream_ref remote_name remote_branch dirty_tracked=0
   if git -C "$repo" push; then
     return
   fi
-  git -C "$repo" pull --rebase
-  git -C "$repo" push
+
+  upstream_ref="$(git -C "$repo" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+  if [[ -n "$upstream_ref" ]]; then
+    remote_name="${upstream_ref%%/*}"
+    remote_branch="${upstream_ref#*/}"
+  else
+    remote_name="origin"
+    remote_branch="$(git -C "$repo" branch --show-current)"
+  fi
+
+  if [[ -z "$remote_branch" ]]; then
+    echo "Unable to determine upstream branch for $repo after push rejection." >&2
+    return 1
+  fi
+
+  echo "Push rejected for $repo; rebasing onto ${remote_name}/${remote_branch} before retry."
+  git -C "$repo" fetch "$remote_name" "$remote_branch"
+
+  if ! git -C "$repo" diff --quiet || ! git -C "$repo" diff --cached --quiet; then
+    dirty_tracked=1
+    echo "Tracked worktree is dirty before retry; using rebase --autostash for $repo."
+    git -C "$repo" status --short --untracked-files=no
+  fi
+
+  if [[ "$dirty_tracked" -eq 1 ]]; then
+    git -C "$repo" rebase --autostash "${remote_name}/${remote_branch}"
+  else
+    git -C "$repo" rebase "${remote_name}/${remote_branch}"
+  fi
+
+  git -C "$repo" push "$remote_name" "HEAD:${remote_branch}"
 }
 
 verify_runtime_convergence() {

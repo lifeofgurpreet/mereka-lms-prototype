@@ -54,6 +54,8 @@ if [[ -f "$TARGET_SCRIPT" ]]; then
   require_pattern "$TARGET_SCRIPT" 'Refusing --apply without explicit confirmation token' 'release-openedx-gitops blocks apply without confirmation token'
   require_pattern "$TARGET_SCRIPT" 'Refusing --push without explicit confirmation token' 'release-openedx-gitops blocks push without confirmation token'
   require_pattern "$TARGET_SCRIPT" 'Refusing production --apply without ALLOW_PROD_APPLY=1' 'release-openedx-gitops blocks production apply without explicit override'
+  require_pattern "$TARGET_SCRIPT" 'Push rejected for \$repo; rebasing onto' 'release-openedx-gitops logs push-retry rebase path'
+  require_pattern "$TARGET_SCRIPT" 'rebase --autostash' 'release-openedx-gitops uses autostash when retrying dirty push state'
 fi
 
 echo
