@@ -1,358 +1,250 @@
 # Tenancy Epic Deployment Runbook
 
-**Epic**: mereka-lms-1gcr — Complete Multi-Tenant Architecture (28 ACs)
+**Epic**: `mereka-lms-1gcr`
 **Spec**: `specs/multi-tenancy-architecture_spec.md`
-**Status**: Ready for deployment (patches verified, code ready)
+**Status**: Canonical operator runbook
 
 ## Overview
 
-This runbook deploys the complete multi-tenancy system with:
-- `mereka_tenancy` module baked into LMS Docker image
-- `TenantResolutionMiddleware` active in MIDDLEWARE stack
-- EnterpriseCustomer records for 3 tenants (MEREKA, BIJIBIJI, SKILLOURFUTURE)
-- Full tenant isolation with X-Tenant-ID header propagation
+This runbook is the deployment front door for the multi-tenant architecture.
+It is intentionally narrower than the historical version:
 
-**Time estimate**: 60-75 minutes (45 min image build + 15 min deploy + 15 min provisioning)
+- image rollout happens through the governed release and GitOps flow
+- Django `Site` and `SiteConfiguration` state reconciles from the multisite
+  registry
+- enterprise linkage reconciles through its own bounded script
+- IdP setup is a separate bounded step, not part of the core tenancy rollout
+
+This runbook does **not** allow:
+
+- local `tutor images build openedx` as the production release path
+- direct `kubectl set image` rollout
+- `provision-all-tenants.sh` or `provision-tenant.sh` as the deployment
+  front door for live `SiteConfiguration` state
+- Django admin or ad hoc shell edits as a recovery path
 
 ## Prerequisites
 
-- [ ] Access to GKE cluster (`kubectl` configured for mereka-lms namespace)
-- [ ] Access to Artifact Registry (push permission for `ghcr.io/biji-biji-initiative/mereka-lms`)
-- [ ] Tutor environment configured (`TUTOR_ROOT` set)
-- [ ] Docker with ≥12 GB RAM allocated
-- [ ] Current LMS image tag noted for rollback
+- [ ] Tenant source of truth is merged on `main`
+  - `infrastructure/tutor/multisite-sites.yml`
+  - tenant registry / brand assets / runtime config changes
+- [ ] Required repo checks are green
+- [ ] You have access to:
+  - GitHub Actions for `mereka-lms`
+  - the GitOps promotion path
+  - `kubectl` for the target cluster
+  - `velero` for prod-like applies
+- [ ] The release owner has the target image tags or the completed
+  `build-tutor-images.yml` run that produced them
 
-## Step 1: Apply Patches
+## Step 1: Verify Source-of-Truth Inputs
 
-```bash
-# Set Tutor environment
-export TUTOR_ROOT="$(pwd)/tutor_env"
-
-# Apply patches (includes mereka_tenancy installation)
-./infrastructure/tutor/apply-patches.sh
-
-# Verify patches applied
-./scripts/infra/verify-tutor-config.sh
-```
-
-**Expected output**:
-```
-✓ MySQL 8 authentication plugin configured
-✓ MFE Node 18 build toolchain present
-✓ Mereka tenancy module configured
-✓ All required patches verified successfully!
-```
-
-## Step 2: Rebuild LMS Image
+Before any rollout, prove the repo still describes one coherent tenancy model.
 
 ```bash
-# Build Open edX image with mereka_tenancy baked in
-tutor images build openedx
-
-# This takes 30-45 minutes
-# Verify build completed successfully
-docker images | grep openedx
+bash scripts/qa/verify-tenant-contract-alignment.sh
+bash scripts/qa/verify-tenant-dns-inventory.sh
+bash scripts/qa/verify-multisite-apply-guardrails.sh
+bash scripts/qa/verify-tenant-enterprise-mutation-guardrails.sh
 ```
 
-**Expected output**:
-```
-<registry>/openedx   latest   <image-id>   <timestamp>   <size>GB
-```
+Expected result:
 
-## Step 3: Tag and Push Image
+- all commands exit `0`
+- no script recommends Django admin or direct `SiteConfiguration` mutation
+
+## Step 2: Produce the Release Artifact
+
+Use the governed image build workflow. Do not build or tag production images by
+hand on an operator laptop.
+
+Manual workflow:
+
+- `.github/workflows/build-tutor-images.yml`
+
+Required inputs:
+
+- `target_environment=production`
+- `update_gitops=false`
+- `image_tag=<release-tag>`
+- `build_openedx=true` when backend / Tutor / Django runtime changed
+- `build_mfe=true` when MFE / branding / footer / learner shell changed
+
+Keep the release bundle and provenance from that run. They are the proof that
+the app artifact exists before GitOps promotion.
+
+## Step 3: Roll Out Through GitOps
+
+Use the canonical release path from the
+[`RELEASE_CHECKLIST.md`](../../ops/runbooks/RELEASE_CHECKLIST.md) runbook.
+
+The normal production front door is:
 
 ```bash
-# Get current git SHA for tagging
-GIT_SHA=$(git rev-parse --short HEAD)
-
-# Tag image
-docker tag openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:${GIT_SHA}
-docker tag openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
-
-# Push to Artifact Registry
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${GIT_SHA}
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${OPENEDX_TAG}" \
+  --mfe-tag "${MFE_TAG}" \
+  --apply --commit --push --verify-runtime
 ```
 
-## Step 4: Deploy to GKE Cluster
+Do not replace this with direct `kubectl` image mutation.
+
+## Step 4: Reconcile Django Site and SiteConfiguration State
+
+After the new image is promoted, reconcile the tenant runtime state from the
+multisite registry.
 
 ```bash
-# Update deployment image
-kubectl set image -n mereka-lms deployment/lms \
-  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:${GIT_SHA}
-
-# Watch rollout
-kubectl rollout status -n mereka-lms deployment/lms --timeout=10m
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
 ```
 
-**Expected output**:
-```
-deployment "lms" successfully rolled out
-```
+What this step owns:
 
-## Step 5: Verify mereka_tenancy Module Installed
+- Django `Site` rows
+- `SiteConfiguration` rows
+- learner-facing MFE URL completeness
+- domain-to-site alignment from `multisite-sites.yml`
+
+What this step does **not** own:
+
+- enterprise customer to tenant linkage
+- IdP configuration
+
+## Step 5: Reconcile Enterprise Mapping
+
+If the rollout includes new tenants or tenant-domain changes, reconcile the
+enterprise mapping explicitly after multisite apply.
 
 ```bash
-# Verify module is importable
-kubectl exec -n mereka-lms deploy/lms -- python -c "import mereka_tenancy; print(f'mereka_tenancy version: {mereka_tenancy.__version__}')"
+CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING=SYNC_TENANT_ENTERPRISE_MAPPING \
+ALLOW_PROD_APPLY=1 \
+./scripts/tenants/sync-tenant-enterprise-mapping.sh \
+  --env prod \
+  --canonical-domains \
+  --apply
 ```
 
-**Expected output**:
-```
-mereka_tenancy version: 1.0.0
-```
+This is the canonical owner for:
 
-## Step 6: Verify TenantResolutionMiddleware Active
+- `EnterpriseCustomer` to `SiteConfiguration` linkage
+- canonical tenant slug to domain mapping
+
+## Step 6: Configure IdP Only If the Change Requires It
+
+IdP setup is not part of the base deployment path. Run it only when the change
+actually affects SAML or OIDC configuration.
+
+Example:
 
 ```bash
-# Check middleware is in MIDDLEWARE list
-kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "
-from django.conf import settings
-middleware_list = [m for m in settings.MIDDLEWARE]
-tenant_mw = 'mereka_tenancy.middleware.TenantResolutionMiddleware'
-if tenant_mw in middleware_list:
-    idx = middleware_list.index(tenant_mw)
-    print(f'✓ TenantResolutionMiddleware at position {idx}')
-    print(f'✓ Middleware: {middleware_list[idx-1:idx+2]}')
-else:
-    print('✗ TenantResolutionMiddleware NOT FOUND')
-    exit(1)
-"
+CONFIRM_CONFIGURE_TENANT_IDP=CONFIGURE_TENANT_IDP \
+ALLOW_PROD_APPLY=1 \
+./scripts/tenants/configure-tenant-idp.sh \
+  --tenant-slug skillourfuture \
+  --idp-type saml \
+  --metadata-url https://idp.example.com/metadata \
+  --apply
 ```
 
-**Expected output**:
-```
-✓ TenantResolutionMiddleware at position XX
-✓ Middleware: ['django.contrib.sites.middleware.CurrentSiteMiddleware', 'mereka_tenancy.middleware.TenantResolutionMiddleware', ...]
-```
+## Step 7: Post-Deployment Verification
 
-## Step 7: Provision 3 Tenants
+Validate the live system, not just repo intent.
+
+### Rollout and Runtime Health
 
 ```bash
-# Run batch provisioning script
-./scripts/tenants/provision-all-tenants.sh
-
-# OR provision individually:
-
-# 1. MEREKA tenant
-./scripts/tenants/provision-tenant.sh \
-  --slug mereka \
-  --name "Mereka Academy" \
-  --domain academyv2.mereka.io \
-  --contact-email team@mereka.io \
-  --country MY
-
-# 2. BIJIBIJI tenant
-./scripts/tenants/provision-tenant.sh \
-  --slug bijibiji \
-  --name "Biji-Biji Initiative" \
-  --domain academy.biji-biji.com \
-  --contact-email admin@biji-biji.com \
-  --country MY
-
-# 3. SKILLOURFUTURE tenant
-./scripts/tenants/provision-tenant.sh \
-  --slug skillourfuture \
-  --name "Skill Our Future" \
-  --domain skillourfuture.academy.mereka.io \
-  --contact-email admin@mereka.io \
-  --country MY
+kubectl -n argocd get application mereka-lms-local
+kubectl -n mereka-lms rollout status deployment/lms
+kubectl -n mereka-lms rollout status deployment/cms
+kubectl -n mereka-lms rollout status deployment/mfe
 ```
 
-**Expected output** (per tenant):
-```
-[1/11] Validating tenant slug...
-[2/11] Creating or retrieving Django Site...
-[3/11] Creating or retrieving SiteConfiguration...
-[4/11] Creating or retrieving EnterpriseCustomer...
-[5/11] Creating or retrieving TenantConfig...
-...
-✓ Tenant provisioned successfully
-  EnterpriseCustomer UUID: <uuid>
-  Domain: <domain>
-```
-
-## Step 8: Verify EnterpriseCustomer Records
+### Tenancy Verification
 
 ```bash
-# Count EnterpriseCustomer records
-kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "
-from enterprise.models import EnterpriseCustomer
-count = EnterpriseCustomer.objects.count()
-print(f'EnterpriseCustomer count: {count}')
-for ec in EnterpriseCustomer.objects.all():
-    print(f'  - {ec.name} ({ec.uuid})')
-"
-```
-
-**Expected output**:
-```
-EnterpriseCustomer count: 3
-  - Mereka Academy (<uuid>)
-  - Biji-Biji Initiative (<uuid>)
-  - Skill Our Future (<uuid>)
-```
-
-## Step 9: Run Full Verification
-
-```bash
-# Run tenant isolation verification script
 bash scripts/qa/verify-tenant-isolation.sh
+bash scripts/qa/verify-tenant-contract-alignment.sh
+bash scripts/qa/verify-enterprise-runtime-app-wiring.sh
 ```
 
-**Expected output** (target: 10/10 PASS):
-```
-=== Tenant Isolation Verification ===
-
-Section 1: Management Command Structure
-✓ provision_tenant.py exists
-✓ backfill_xapi_enterprise_uuid.py exists
-...
-
-=== Summary ===
-PASS: 10
-FAIL: 0
-SKIP: 0
-
-✓ Verification PASSED
-```
-
-## Step 10: Test X-Tenant-ID Header
+### Domain and MFE Contract Checks
 
 ```bash
-# Test MEREKA tenant
-curl -I https://academyv2.mereka.io/courses | grep X-Tenant-ID
-
-# Test BIJIBIJI tenant
-curl -I https://academy.biji-biji.com/courses | grep X-Tenant-ID
-
-# Test SKILLOURFUTURE tenant
-curl -I https://skillourfuture.academy.mereka.io/courses | grep X-Tenant-ID
-```
-
-**Expected output** (each domain should have X-Tenant-ID header):
-```
-X-Tenant-ID: <tenant-uuid>
-```
-
-## Rollback Procedure
-
-If deployment fails or causes issues:
-
-```bash
-# 1. Revert to previous image
-PREVIOUS_TAG="<previous-git-sha>"  # Note this before deployment
-kubectl set image -n mereka-lms deployment/lms \
-  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:${PREVIOUS_TAG}
-
-# 2. Watch rollback
-kubectl rollout status -n mereka-lms deployment/lms
-
-# 3. Verify service restored
-kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms
 curl -I https://academyv2.mereka.io/courses
+curl -I https://academy.biji-biji.com/courses
+curl -I https://skillourfuture.academy.mereka.io/courses
+
+curl -fsS https://academyv2.mereka.io/api/mfe_config/v1 | jq .
 ```
 
-**Rollback notes**:
-- Sites and SiteConfiguration records remain (dormant, no code to use them)
-- EnterpriseCustomer records remain (safe, no side effects)
-- No data loss — all changes are additive
+Success looks like:
 
-## Post-Deployment Validation
-
-- [ ] All 3 domains accessible (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io)
-- [ ] X-Tenant-ID header present on all requests
-- [ ] Course org filter working (each tenant sees only its org courses)
-- [ ] Cookie domain scoping correct (.mereka.io vs .biji-biji.com)
-- [ ] No 500 errors in LMS logs
-- [ ] verify-tenant-isolation.sh shows 10/10 PASS
-
-## Monitoring
-
-After deployment, monitor:
-
-```bash
-# Watch LMS logs for errors
-kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=100 -f | grep -i "tenant\|error"
-
-# Check pod health
-kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms
-
-# Verify endpoints
-kubectl get endpoints -n mereka-lms lms
-```
+- all expected domains respond
+- learner-facing MFE URLs are present in `/api/mfe_config/v1`
+- enterprise/runtime verification exits `0`
+- no unexplained `5xx` spikes or rollout failures
 
 ## Troubleshooting
 
-### Issue: mereka_tenancy module not found
+### GitOps rollout failed
 
-**Symptoms**: `ImportError: No module named 'mereka_tenancy'`
+Use the rollback path in the
+[`RELEASE_CHECKLIST.md`](../../ops/runbooks/RELEASE_CHECKLIST.md) runbook.
+Do **not** recover with `kubectl set image`.
 
-**Fix**:
+### Site or SiteConfiguration drift
+
+Re-run the canonical multisite reconciliation:
+
 ```bash
-# Verify image was built with plugin
-docker run --rm <image> python -c "import mereka_tenancy; print(mereka_tenancy.__version__)"
-
-# If fails, rebuild image with apply-patches.sh
-./infrastructure/tutor/apply-patches.sh
-tutor images build openedx
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
 ```
 
-### Issue: TenantResolutionMiddleware not in MIDDLEWARE
+Do **not** recover with `provision-all-tenants.sh`, Django admin, or direct SQL.
 
-**Symptoms**: No X-Tenant-ID header on responses
+### Enterprise mapping drift
 
-**Fix**:
+Re-run the enterprise mapping reconciliation:
+
 ```bash
-# Re-apply patches
-./infrastructure/tutor/apply-patches.sh
-
-# Rebuild image
-tutor images build openedx
-
-# Redeploy
-kubectl set image -n mereka-lms deployment/lms lms=<new-image>
+CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING=SYNC_TENANT_ENTERPRISE_MAPPING \
+ALLOW_PROD_APPLY=1 \
+./scripts/tenants/sync-tenant-enterprise-mapping.sh \
+  --env prod \
+  --canonical-domains \
+  --apply
 ```
 
-### Issue: EnterpriseCustomer provisioning fails
+### IdP drift
 
-**Symptoms**: `provision_tenant.py` command errors
-
-**Fix**:
-```bash
-# Check if Site already exists
-kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "
-from django.contrib.sites.models import Site
-print(Site.objects.filter(domain='academyv2.mereka.io').exists())
-"
-
-# If exists, use --dry-run to check what would be created
-./scripts/tenants/provision-tenant.sh --slug mereka --name "Mereka" --domain academyv2.mereka.io --dry-run
-```
+Use `configure-tenant-idp.sh` for the affected tenant. Do not patch live DB
+state by hand.
 
 ## Success Criteria
 
-Deployment is successful when:
+Deployment is complete only when:
 
-1. ✅ mereka_tenancy module importable in LMS pod
-2. ✅ TenantResolutionMiddleware in MIDDLEWARE list
-3. ✅ 3 EnterpriseCustomer records exist
-4. ✅ X-Tenant-ID header on all domain responses
-5. ✅ verify-tenant-isolation.sh shows 10/10 PASS
-6. ✅ No 500 errors in logs
-7. ✅ All 3 domains accessible and rendering correctly
-
-## Documentation Updates
-
-After successful deployment, update:
-
-- [ ] `docs/ops/runbooks/TENANT_PROVISIONING.md` — Architecture overview
-- [ ] `scripts/tenants/provision-tenant.sh` — Tenant provisioning guide
-- [ ] `CHANGELOG.md` — Add entry for tenancy epic completion
+1. The promoted image is live through GitOps.
+2. `apply-multisite-config.sh` has reconciled the target environment.
+3. `sync-tenant-enterprise-mapping.sh` has reconciled enterprise linkage when
+   needed.
+4. Runtime verification passes on live domains.
+5. No recovery step required a side door or manual DB mutation.
 
 ## Related
 
 - Epic bead: `mereka-lms-1gcr`
 - Spec: `specs/multi-tenancy-architecture_spec.md`
-- Verification script: `scripts/qa/verify-tenant-isolation.sh`
-- Provisioning script: `scripts/tenants/provision-tenant.sh`
+- Release runbook:
+  [`RELEASE_CHECKLIST.md`](../../ops/runbooks/RELEASE_CHECKLIST.md)
+- Canonical Site / SiteConfiguration apply:
+  `scripts/infra/apply-multisite-config.sh`
+- Canonical enterprise mapping sync:
+  `scripts/tenants/sync-tenant-enterprise-mapping.sh`
+- IdP setup:
+  `scripts/tenants/configure-tenant-idp.sh`
