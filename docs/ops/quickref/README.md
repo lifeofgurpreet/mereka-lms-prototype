@@ -109,28 +109,30 @@ Use this root when you need the shortest path to an operational answer. Quick re
 ### Deploy New Image to Production
 
 ```bash
-# 1. Build image locally
-tutor images build openedx
+# 1. Publish the merged SHA through the governed workflow
+APP_SHA="$(git rev-parse origin/main)"
+gh workflow run build-tutor-images.yml --ref main \
+  -f build_openedx=true -f build_mfe=true \
+  -f update_gitops=false -f target_environment=production \
+  -f image_tag="${APP_SHA}"
 
-# 2. Tag with date-SHA
-docker tag openedx:latest \
-  ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
+# 2. Wait for the run and download release artifacts
+RUN_ID="<build-tutor-images run id>"
+gh run watch "${RUN_ID}"
 
-# 3. Push to registry
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
+# 3. Promote those exact coordinates through GitOps
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag "${APP_SHA}" \
+  --mfe-tag "${APP_SHA}" \
+  --openedx-digest "sha256:<openedx_digest>" \
+  --mfe-digest "sha256:<mfe_digest>" \
+  --require-digests --apply --commit --push --verify-runtime
 
-# 4. Update kustomization
-# Edit deploy/k8s/overlays/production/kustomization.yaml
-
-# 5. Apply to cluster
-kubectl apply -k deploy/k8s/overlays/production
-
-# 6. Watch rollout
-kubectl rollout status deployment/lms -n mereka-lms
-
-# 7. CRITICAL: Check endpoints
+# 4. CRITICAL: Check endpoints
 kubectl get endpoints -n mereka-lms
 ```
+
+Local `tutor images build ...`, `docker push`, and direct `kubectl apply` remain valid for local/dev workflows and debugging, not as the normal production deployment contract.
 
 ### Update Configuration
 

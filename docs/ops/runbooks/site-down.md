@@ -296,18 +296,30 @@ echo | openssl s_client -servername academyv2.mereka.io -connect academyv2.merek
 # 1) Ensure build patches install pymongo SRV extras
 rg -n "pymongo\\[srv\\]" infrastructure/tutor/apply-patches.sh
 
-# 2) Re-apply patches and rebuild image
-./infrastructure/tutor/apply-patches.sh
-source .venv/bin/activate
-export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor images build openedx
+# 2) Publish a corrected Open edX image through the governed workflow
+APP_SHA="$(git rev-parse origin/main)"
+gh workflow run build-tutor-images.yml \
+  --ref main \
+  -f build_openedx=true \
+  -f build_mfe=false \
+  -f update_gitops=false \
+  -f target_environment=production \
+  -f image_tag="${APP_SHA}"
 
-# 3) Push + update deployments (GKE)
-docker tag tutor_local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
-kubectl set image deployment/cms cms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG -n mereka-lms
-kubectl rollout status deployment/cms -n mereka-lms
+# 3) Wait for the run and use the release-bundle / build-provenance output
+RUN_ID="<build-tutor-images run id>"
+gh run watch "${RUN_ID}"
+
+# 4) Promote the published image through GitOps
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag "${APP_SHA}" \
+  --mfe-tag "<current_mfe_tag>" \
+  --openedx-digest "sha256:<openedx_digest>" \
+  --mfe-digest "sha256:<current_mfe_digest>" \
+  --require-digests --apply --commit --push --verify-runtime
 ```
+
+For local reproduction only, you may still rebuild `tutor_local/openedx:latest`, but do not treat local `docker push` + `kubectl set image` as the normal production repair path.
 
 **See Also**: [Database Issues Runbook](database-issues.md) - MongoDB connection troubleshooting
 
@@ -339,11 +351,10 @@ PY
   - `deploy/k8s/base/apps/openedx/settings/lms/production.py`
   - `deploy/k8s/base/apps/openedx/settings/cms/production.py`
 
-Apply the overlay and restart LMS/CMS so the updated settings configmaps are mounted:
-```bash
-kubectl apply -k deploy/k8s/overlays/production
-kubectl rollout restart -n mereka-lms deploy/lms deploy/lms-worker deploy/cms deploy/cms-worker
-```
+Promote the settings change through GitOps so Argo mounts the updated configmaps and rolls the affected workloads.
+- Commit/push the source change in `mereka-lms`.
+- Reconcile the production app through the governed release/GitOps path (use the current production image coordinates if no image rebuild is needed).
+- Verify the restarted LMS/CMS workloads pick up the corrected settings.
 
 **Follow-up (recommended):**
 - Normalize the upstream secret values to remove trailing newlines so other services don't hit the same edge case.
