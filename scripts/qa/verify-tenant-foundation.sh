@@ -496,7 +496,8 @@ if [ -f "$LMS_PRODUCTION_PY" ]; then
   fi
 
   # Check env var patterns (settings may span multiple lines)
-  if grep -A1 'os\.environ\.get' "$LMS_PRODUCTION_PY" | grep -q 'MULTI_TENANT\|TENANT_ANALYTICS\|SITE_MAPPING'; then
+  settings_env_refs="$(grep -A1 'os\.environ\.get' "$LMS_PRODUCTION_PY" || true)"
+  if grep -Eq 'MULTI_TENANT|TENANT_ANALYTICS|SITE_MAPPING' <<<"$settings_env_refs"; then
     pass_ "Settings use env var pattern (os.environ.get)"
   else
     fail_ "Settings missing env var pattern"

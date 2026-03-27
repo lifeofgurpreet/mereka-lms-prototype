@@ -32,16 +32,28 @@ mapfile -t allowlisted_dangerous < <(
   sed -e 's/[[:space:]]*#.*$//' -e '/^[[:space:]]*$/d' "$ALLOWLIST_FILE"
 )
 
+contains_path() {
+  local needle="$1"
+  shift || true
+  local candidate
+  for candidate in "$@"; do
+    if [[ "$candidate" == "$needle" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 unexpected=()
 for path in "${current_dangerous[@]}"; do
-  if ! (printf '%s\n' "${allowlisted_dangerous[@]}" || true) | grep -Fxq "$path"; then
+  if ! contains_path "$path" "${allowlisted_dangerous[@]}"; then
     unexpected+=("$path")
   fi
 done
 
 stale=()
 for path in "${allowlisted_dangerous[@]}"; do
-  if ! (printf '%s\n' "${current_dangerous[@]}" || true) | grep -Fxq "$path"; then
+  if ! contains_path "$path" "${current_dangerous[@]}"; then
     stale+=("$path")
   fi
 done
