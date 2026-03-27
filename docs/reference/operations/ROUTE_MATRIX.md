@@ -129,7 +129,7 @@ The `mereka_tenancy` Django app adds tenant management to the LMS Django admin:
 
 **Current state**: Source patches correct (`apply-patches.sh` + `mereka_lms.py`).
 Live pod returns 404 because current image was built before patches were applied.
-**Fix**: `tutor images build openedx` → push → rolling restart (WhiteCliff lane).
+**Fix**: publish a new Open edX image through `build-tutor-images.yml`, then promote it through `release-openedx-gitops.sh` so Argo rolls the corrected LMS/CMS image (WhiteCliff lane).
 
 **Source verification**:
 ```bash
@@ -161,8 +161,8 @@ Each application surface uses a different mechanism for footer rendering.
 | **MFEs** (authn, learning, account…) | `infrastructure/tutor/plugins/mereka_lms.py` → `MerekaFooter` | Tutor MFE plugin + FPF `footer_slot` Replace | `SITE_VARIANTS` map keyed by hostname; 4 domains configured |
 | **Enterprise portals** (admin, learner) | Open edX default footer (no `MerekaFooter` wiring) | N/A — enterprise portals unthemed | P4 backlog (WARN in `verify-footer-parity.sh`) |
 
-**Update trigger**: LMS/CMS footer changes require `tutor images build openedx` + rolling restart.
-MFE footer changes require `tutor images build mfe` + rolling restart.
+**Update trigger**: LMS/CMS footer changes require a governed Open edX image publish plus GitOps promotion.
+MFE footer changes require a governed MFE image publish plus GitOps promotion.
 
 **Source verification** (CI-safe, no live network required):
 ```bash

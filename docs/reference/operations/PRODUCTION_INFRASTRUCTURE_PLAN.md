@@ -47,16 +47,18 @@ Canonical path for this stack: `/k8s/mereka-lms` (prod + dev).
 
 ## Build & deploy
 
-1. Build Tutor images locally on the VPS (`tutor images build openedx` / `mfe`).
-2. Push to Artifact Registry:
-   `ghcr.io/biji-biji-initiative/mereka-lms`.
-3. Update K8s deployments (LMS/CMS/workers/MFE) to new tags.
-4. If production is pinned through GitOps (`BBI-K8`, legacy `infrastructure` naming), bump the pinned `?ref=<sha>` there so Argo can reconcile this repo’s latest manifests.
-   - Recommended helper in this repo:
-     `./scripts/infra/prepare-bbi-infra-ref-bump.sh --apply`
-5. Verify rollouts (`kubectl rollout status ...`).
+1. Publish the merged target SHA through `.github/workflows/build-tutor-images.yml`.
+   - Prefer the automatic push-to-`main` run.
+   - Use `workflow_dispatch` only for deterministic rebuilds with an explicit `image_tag`.
+2. Treat the workflow-emitted immutable tags/digests plus the `release-bundle` and `build-provenance` artifacts as the release inputs.
+3. Promote those exact coordinates through `./scripts/infra/release-openedx-gitops.sh --require-digests --apply --commit --push --verify-runtime`.
+4. Let ArgoCD reconcile the GitOps change and verify runtime convergence.
+5. Use local Tutor builds only for dev parity, bootstrap, or debugging. They are not the canonical production source of truth.
 
-See `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md` for the full, step-by-step flow.
+See:
+- `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md`
+- `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md`
+- `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md`
 
 ## Monitoring & health checks
 

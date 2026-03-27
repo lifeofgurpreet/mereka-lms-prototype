@@ -358,13 +358,13 @@ curl -I https://academyv2.mereka.io/static/mereka-theme/images/logo.png
 # Sync branding assets
 make branding-sync
 
-# Rebuild Open edX image
-tutor images build openedx
+# Production: publish a new openedx image through build-tutor-images.yml
+# and promote it with release-openedx-gitops.sh using the workflow-emitted
+# release-bundle / build-provenance coordinates.
+# Exact sequence: docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md
 
-# Push and deploy
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
-kubectl rollout restart deployment/lms -n mereka-lms
-kubectl rollout restart deployment/cms -n mereka-lms
+# Local reproduction only:
+tutor images build openedx
 ```
 
 ### MFE Branding Not Applied
@@ -381,13 +381,13 @@ kubectl exec -n mereka-lms deployment/mfe -- \
 
 **Fix**:
 ```bash
-# Rebuild MFE with branding
-./scripts/branding/setup-mfe-branding.sh
-tutor images build mfe
+# Production: publish a new MFE image through build-tutor-images.yml
+# and promote it with release-openedx-gitops.sh using the workflow-emitted
+# release-bundle / build-provenance coordinates.
+# Exact sequence: docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md
 
-# Push and deploy
-docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:latest
-kubectl rollout restart deployment/mfe -n mereka-lms
+# Local reproduction only:
+tutor images build mfe
 ```
 
 ---
