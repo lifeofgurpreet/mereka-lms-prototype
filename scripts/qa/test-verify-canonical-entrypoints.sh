@@ -31,7 +31,7 @@ run_expect_pass() {
   REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/tce.out 2>&1
   local rc=$?
   set -e
-  if [[ $rc -eq 0 ]]; then
+  if [[ $rc -eq 0 ]] && ! grep -q "Broken pipe" /tmp/tce.out; then
     echo "PASS ${label}"
     PASS=$((PASS + 1))
   else

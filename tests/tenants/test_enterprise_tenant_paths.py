@@ -10,6 +10,8 @@ SHARED_CONFIG = REPO_ROOT / "scripts" / "shared" / "config.sh"
 SYNC_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "sync-tenant-enterprise-mapping.sh"
 ONBOARD_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "onboard-enterprise-tenant.sh"
 SEED_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "seed-siteconfigs.sh"
+SITE_RECONCILE_COMMON = REPO_ROOT / "scripts" / "tenants" / "lib" / "site-reconcile-common.sh"
+MULTISITE_BOOTSTRAP_DJANGO = REPO_ROOT / "scripts" / "shared" / "multisite_bootstrap_django.py"
 
 
 def bash_eval(command: str) -> str:
@@ -70,3 +72,12 @@ def test_seed_siteconfigs_preserves_enterprise_uuid_mapping() -> None:
     assert 'existing_values.get("ENTERPRISE_CUSTOMER_UUID", "")' in text
     assert "EnterpriseCustomer.objects.filter(site=site).first()" in text
     assert 'site_values["ENTERPRISE_CUSTOMER_UUID"] = enterprise_customer_uuid' in text
+
+
+def test_siteconfig_seed_paths_enable_learner_home_mfe() -> None:
+    seed_text = SEED_SCRIPT.read_text(encoding="utf-8")
+    reconcile_text = SITE_RECONCILE_COMMON.read_text(encoding="utf-8")
+    bootstrap_text = MULTISITE_BOOTSTRAP_DJANGO.read_text(encoding="utf-8")
+    assert '"ENABLE_LEARNER_HOME_MFE": True' in seed_text
+    assert '"ENABLE_LEARNER_HOME_MFE": True' in reconcile_text
+    assert 'rendered_values["ENABLE_LEARNER_HOME_MFE"] = True' in bootstrap_text

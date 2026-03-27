@@ -430,6 +430,7 @@ def upsert_sites(
         rendered_values = dict(definition.site_values)
         if "course_org_filter" not in rendered_values:
             rendered_values["course_org_filter"] = definition.orgs
+        rendered_values["ENABLE_LEARNER_HOME_MFE"] = True
         existing_site_config = SiteConfiguration.objects.filter(site=site).order_by("-id").first()
         existing_values = dict(existing_site_config.site_values or {}) if existing_site_config else {}
         enterprise_uuid = str(existing_values.get("ENTERPRISE_CUSTOMER_UUID") or "").strip()

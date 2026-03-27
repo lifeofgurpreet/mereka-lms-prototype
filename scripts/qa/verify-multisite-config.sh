@@ -117,7 +117,7 @@ staging = os.environ.get("STAGING_LMS_DOMAIN", "staging.academyv2.mereka.io")
 staging_studio = os.environ.get("STAGING_STUDIO_DOMAIN", f"studio.{staging}")
 staging_mfe = os.environ.get("STAGING_MFE_DOMAIN", f"apps.{staging}")
 
-base = {"THEME_NAME": "mereka"}
+base = {"THEME_NAME": "mereka", "ENABLE_LEARNER_HOME_MFE": True}
 
 expected = {
   lms: {
@@ -246,6 +246,7 @@ for domain in domains:
     values = cfg.site_values or {}
     enabled = bool(getattr(cfg, "enabled", False))
     theme = values.get("THEME_NAME", "unset")
+    learner_home_mfe = values.get("ENABLE_LEARNER_HOME_MFE")
     lms_root = values.get("LMS_ROOT_URL") or "unset"
     cms_root = values.get("CMS_ROOT_URL") or "unset"
     mfe_base = values.get("MFE_BASE_URL") or "unset"
@@ -257,6 +258,7 @@ for domain in domains:
     org_filter_norm = sorted(str(x).strip() for x in org_filter if str(x).strip())
     print(
         f"{domain}: enabled={enabled} theme={theme} "
+        f"learner_home_mfe={learner_home_mfe} "
         f"lms_root={lms_root} cms_root={cms_root} mfe_base={mfe_base} "
         f"org_filter={','.join(org_filter_norm) if org_filter_norm else 'unset'}"
     )
@@ -266,8 +268,12 @@ for domain in domains:
     exp_cms = exp.get("CMS_ROOT_URL")
     exp_mfe = exp.get("MFE_BASE_URL")
     exp_theme = exp.get("THEME_NAME")
+    exp_learner_home_mfe = exp.get("ENABLE_LEARNER_HOME_MFE")
     exp_orgs = sorted((exp.get("COURSE_ORG_FILTER") or []))
     site_domain = values.get("domain")
+    learner_home_mfe_norm = learner_home_mfe
+    if not isinstance(learner_home_mfe_norm, bool):
+        learner_home_mfe_norm = str(learner_home_mfe_norm).strip().lower() in {"1", "true", "yes", "on"}
     if not enabled:
         bad.append(f"{domain}: SiteConfiguration enabled=false")
     if site_domain and site_domain != domain:
@@ -298,6 +304,11 @@ for domain in domains:
             )
     if exp_theme and theme != exp_theme:
         bad.append(f"{domain}: THEME_NAME expected={exp_theme} got={theme}")
+    if exp_learner_home_mfe is not None and learner_home_mfe_norm != bool(exp_learner_home_mfe):
+        bad.append(
+            f"{domain}: ENABLE_LEARNER_HOME_MFE expected={bool(exp_learner_home_mfe)} "
+            f"got={learner_home_mfe}"
+        )
     if exp_orgs and org_filter_norm != exp_orgs:
         bad.append(
             f"{domain}: course_org_filter expected={','.join(exp_orgs)} "

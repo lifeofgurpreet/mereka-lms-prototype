@@ -100,6 +100,7 @@ site_values = {
     "MFE_BASE_URL": mfe_url,
     "AUTHN_MICROFRONTEND_URL": authn_mfe_url,
     "THEME_NAME": theme_name,
+    "ENABLE_LEARNER_HOME_MFE": True,
     "ENABLE_COMPREHENSIVE_THEMING": True,
     "course_org_filter": course_org_filter,
     "logo_image": logo_img,

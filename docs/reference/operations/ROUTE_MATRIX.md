@@ -71,7 +71,7 @@ This is **intentional Caddy configuration**, not a bug.
 
 | Domain | `/dashboard` behavior | Reason |
 |--------|-----------------------|--------|
-| `academyv2.mereka.io/dashboard` | LMS native (requires session) | Main site — learner dashboard |
+| `academyv2.mereka.io/dashboard` | 302 → authn when anonymous; apps-domain MFE handoff after login | Main site — authenticated users with a profile land on learner-home MFE; profile-less users are sent to account MFE first |
 | `preview.academyv2.mereka.io/dashboard` | 302 → authn (login required) | Preview domain — no persistent session expected |
 | `ecommerce.academyv2.mereka.io/dashboard` | Rewritten → `/authn/login` on MFE | Ecommerce service has no learner dashboard |
 | `credentials.academyv2.mereka.io/admin/login` | Rewritten → `/authn/login` on MFE | Credentials service uses platform authn |

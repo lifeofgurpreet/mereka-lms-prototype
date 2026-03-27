@@ -99,7 +99,7 @@ for ep in d.get('entrypoints', []):
 ")
 
 for wid in $REQUIRED_IDS; do
-  if echo "$DECLARED_IDS" | grep -qxF "$wid"; then
+  if grep -qxF "$wid" <<< "$DECLARED_IDS"; then
     pass "workflow_id '$wid' declared"
   else
     fail "workflow_id '$wid' is MISSING from entrypoints"
@@ -172,7 +172,7 @@ while IFS= read -r status_line; do
   [[ -z "$status_line" ]] && continue
   wid="${status_line%%:*}"
   status="${status_line#*:}"
-  if echo "$VALID_STATUSES" | grep -qwF "$status"; then
+  if grep -qwF "$status" <<< "$VALID_STATUSES"; then
     pass "${wid}: status='${status}' is valid"
   else
     fail "${wid}: status='${status}' is not one of: ${VALID_STATUSES}"

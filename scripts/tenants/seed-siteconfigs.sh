@@ -149,6 +149,7 @@ site_values = {
     "MFE_BASE_URL": mfe_url,
     "AUTHN_MICROFRONTEND_URL": f"{mfe_url}/authn",
     "THEME_NAME": theme,
+    "ENABLE_LEARNER_HOME_MFE": True,
     "ENABLE_COMPREHENSIVE_THEMING": True,
     "course_org_filter": org_filter,
     "logo_image": f"{lms_url}/static/{theme}/images/logo-horizontal.png",
