@@ -269,6 +269,104 @@ def select_shared_mfe_host_owners(
     return selected
 
 
+def build_site_mfe_config_overrides(
+    *,
+    rendered_values: dict[str, object],
+    default_cfg: dict[str, object],
+) -> dict[str, object]:
+    """
+    Build a complete, tenant-safe SiteConfiguration.MFE_CONFIG payload.
+
+    SiteConfiguration.MFE_CONFIG can behave as authoritative at runtime, so a
+    partial dict is unsafe: missing learner-facing keys can shadow otherwise
+    correct LMS settings and silently route users back onto legacy surfaces.
+    """
+    lms_root = (rendered_values.get("LMS_ROOT_URL") or "").rstrip("/")
+    cms_root = (rendered_values.get("CMS_ROOT_URL") or "").rstrip("/")
+    mfe_base = (rendered_values.get("MFE_BASE_URL") or "").rstrip("/")
+    theme_name = (
+        rendered_values.get("THEME_NAME")
+        or rendered_values.get("DEFAULT_SITE_THEME")
+        or "mereka"
+    )
+
+    overrides = dict(default_cfg or {})
+    if not lms_root:
+        return overrides
+
+    overrides["LMS_BASE_URL"] = lms_root
+    overrides["LOGIN_URL"] = f"{lms_root}/login"
+    overrides["LOGOUT_URL"] = f"{lms_root}/logout"
+    overrides["MARKETING_SITE_BASE_URL"] = lms_root
+    overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = "/login_refresh"
+    overrides["DISABLE_ENTERPRISE_LOGIN"] = default_cfg.get("DISABLE_ENTERPRISE_LOGIN", True)
+    overrides["ACCESS_TOKEN_COOKIE_NAME"] = (
+        default_cfg.get("ACCESS_TOKEN_COOKIE_NAME")
+        or "edx-jwt-cookie-header-payload"
+    )
+    overrides["USER_INFO_COOKIE_NAME"] = default_cfg.get("USER_INFO_COOKIE_NAME") or "user-info"
+    overrides["SESSION_COOKIE_SAMESITE"] = default_cfg.get("SESSION_COOKIE_SAMESITE") or "None"
+    overrides["CSRF_COOKIE_SAMESITE"] = default_cfg.get("CSRF_COOKIE_SAMESITE") or "None"
+    for domain_key in ("SESSION_COOKIE_DOMAIN", "CSRF_COOKIE_DOMAIN"):
+        domain_value = default_cfg.get(domain_key)
+        if domain_value:
+            overrides[domain_key] = domain_value
+
+    if mfe_base:
+        parsed = urlparse(mfe_base)
+        mfe_host = parsed.netloc or ""
+        mfe_scheme = parsed.scheme or "https"
+        mfe_origin = f"{mfe_scheme}://{mfe_host}" if mfe_host else mfe_base
+
+        overrides["FAVICON_URL"] = f"{mfe_origin}/static/images/favicon.ico"
+        overrides["LOGO_URL"] = f"{mfe_origin}/static/images/logo-horizontal.png"
+        overrides["LOGO_WHITE_URL"] = f"{mfe_origin}/static/images/logo-horizontal-white.png"
+        overrides["LOGO_TRADEMARK_URL"] = f"{mfe_origin}/static/images/logo.png"
+
+        if mfe_host:
+            overrides["BASE_URL"] = mfe_host
+            overrides["AUTHN_MICROFRONTEND_DOMAIN"] = mfe_host
+
+        route_map = {
+            "AUTHN_MICROFRONTEND_URL": "/authn",
+            "ACCOUNT_MICROFRONTEND_URL": "/account/",
+            "ACCOUNT_SETTINGS_URL": "/account/",
+            "COURSE_AUTHORING_MICROFRONTEND_URL": "/authoring",
+            "COMMUNICATIONS_MICROFRONTEND_URL": "/communications",
+            "DISCUSSIONS_MICROFRONTEND_URL": "/discussions",
+            "DISCUSSIONS_MFE_BASE_URL": "/discussions",
+            "WRITABLE_GRADEBOOK_URL": "/gradebook",
+            "LEARNER_HOME_MICROFRONTEND_URL": "/learner-dashboard/",
+            "LEARNER_RECORD_MICROFRONTEND_URL": "/learner-record",
+            "LEARNING_MICROFRONTEND_URL": "/learning",
+            "LEARNING_BASE_URL": "/learning",
+            "ORA_GRADING_MICROFRONTEND_URL": "/ora-grading",
+            "PROFILE_MICROFRONTEND_URL": "/u/",
+            "ACCOUNT_PROFILE_URL": "/u/",
+            "LOGIN_REDIRECT_URL": "/learner-dashboard/",
+        }
+        for key, suffix in route_map.items():
+            overrides[key] = f"{mfe_origin}{suffix}"
+    else:
+        overrides["FAVICON_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/favicon.ico"
+        overrides["LOGO_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal.png"
+        overrides["LOGO_WHITE_URL"] = (
+            f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal-white.png"
+        )
+        overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo.png"
+        authn_url = default_cfg.get("AUTHN_MICROFRONTEND_URL")
+        authn_domain = default_cfg.get("AUTHN_MICROFRONTEND_DOMAIN")
+        if authn_url:
+            overrides["AUTHN_MICROFRONTEND_URL"] = authn_url
+        if authn_domain:
+            overrides["AUTHN_MICROFRONTEND_DOMAIN"] = authn_domain
+
+    if cms_root:
+        overrides["STUDIO_BASE_URL"] = cms_root
+
+    return overrides
+
+
 def setup_django():
     """Initialize Django environment."""
     # In K8s we run with Tutor settings, which include OIDC settings and other overrides.
@@ -353,82 +451,14 @@ def upsert_sites(
         # must override tenant-specific URLs (LMS/STUDIO/MFE base) so MFEs don't
         # drift back to the primary LMS domain.
         lms_root = (rendered_values.get("LMS_ROOT_URL") or "").rstrip("/")
-        cms_root = (rendered_values.get("CMS_ROOT_URL") or "").rstrip("/")
         mfe_base = (rendered_values.get("MFE_BASE_URL") or "").rstrip("/")
         overrides: dict[str, object] = {}
         if lms_root:
-            mfe_host = ""
-            if mfe_base:
-                try:
-                    parsed = urlparse(mfe_base)
-                    mfe_host = parsed.netloc or ""
-                except Exception:
-                    mfe_host = ""
-
             default_cfg = dict(getattr(settings, "MFE_CONFIG", {}) or {})
-            # Some deployments treat SiteConfiguration.MFE_CONFIG as authoritative and
-            # do not reliably merge missing keys from settings.MFE_CONFIG. Keep the
-            # auth/session contract explicit here so runtime behavior stays deterministic.
-            overrides["LMS_BASE_URL"] = lms_root
-            overrides["LOGIN_URL"] = f"{lms_root}/login"
-            overrides["LOGOUT_URL"] = f"{lms_root}/logout"
-            overrides["MARKETING_SITE_BASE_URL"] = lms_root
-            overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = "/login_refresh"
-            overrides["DISABLE_ENTERPRISE_LOGIN"] = default_cfg.get("DISABLE_ENTERPRISE_LOGIN", True)
-            overrides["ACCESS_TOKEN_COOKIE_NAME"] = (
-                default_cfg.get("ACCESS_TOKEN_COOKIE_NAME")
-                or "edx-jwt-cookie-header-payload"
+            overrides = build_site_mfe_config_overrides(
+                rendered_values=rendered_values,
+                default_cfg=default_cfg,
             )
-            overrides["USER_INFO_COOKIE_NAME"] = (
-                default_cfg.get("USER_INFO_COOKIE_NAME")
-                or "user-info"
-            )
-            overrides["SESSION_COOKIE_SAMESITE"] = (
-                default_cfg.get("SESSION_COOKIE_SAMESITE")
-                or "None"
-            )
-            overrides["CSRF_COOKIE_SAMESITE"] = (
-                default_cfg.get("CSRF_COOKIE_SAMESITE")
-                or "None"
-            )
-            for domain_key in ("SESSION_COOKIE_DOMAIN", "CSRF_COOKIE_DOMAIN"):
-                domain_value = default_cfg.get(domain_key)
-                if domain_value:
-                    overrides[domain_key] = domain_value
-            theme_name = (
-                rendered_values.get("THEME_NAME")
-                or rendered_values.get("DEFAULT_SITE_THEME")
-                or "mereka"
-            )
-            if mfe_base:
-                # Prefer MFE-static branding assets when available. In dev/staging, LMS
-                # themed-asset redirects for logo-horizontal*.png can resolve to unhashed
-                # static paths that 404, while apps host serves stable /static/images/*.
-                overrides["FAVICON_URL"] = f"{mfe_base}/static/images/favicon.ico"
-                overrides["LOGO_URL"] = f"{mfe_base}/static/images/logo-horizontal.png"
-                overrides["LOGO_WHITE_URL"] = f"{mfe_base}/static/images/logo-horizontal-white.png"
-                overrides["LOGO_TRADEMARK_URL"] = f"{mfe_base}/static/images/logo.png"
-            else:
-                # Fallback path when no MFE base URL is configured.
-                overrides["FAVICON_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/favicon.ico"
-                overrides["LOGO_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal.png"
-                overrides["LOGO_WHITE_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal-white.png"
-                overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo.png"
-            if cms_root:
-                overrides["STUDIO_BASE_URL"] = cms_root
-            if mfe_host:
-                overrides["BASE_URL"] = mfe_host
-                authn_url = f"https://{mfe_host}/authn"
-                overrides["AUTHN_MICROFRONTEND_URL"] = authn_url
-                overrides["AUTHN_MICROFRONTEND_DOMAIN"] = mfe_host
-            else:
-                authn_url = default_cfg.get("AUTHN_MICROFRONTEND_URL")
-                authn_domain = default_cfg.get("AUTHN_MICROFRONTEND_DOMAIN")
-                if authn_url:
-                    overrides["AUTHN_MICROFRONTEND_URL"] = authn_url
-                if authn_domain:
-                    overrides["AUTHN_MICROFRONTEND_DOMAIN"] = authn_domain
-
             # Store explicit contract keys so runtime does not depend on merge behavior.
             rendered_values["MFE_CONFIG"] = overrides
 

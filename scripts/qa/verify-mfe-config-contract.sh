@@ -72,7 +72,7 @@ run_env() {
   expected_authn_domain_legacy="${expected_authn_url}"
 
   echo "Environment: ${env_name}"
-  echo "Checking: https://${mfe_domain}/api/mfe_config/v1"
+  echo "Checking: https://${mfe_domain}/api/mfe_config/v1?mfe=authn"
 
   if ! python3 - "$env_name" "$lms_domain" "$studio_domain" "$expected_authn_url" "$expected_authn_domain" "$expected_authn_domain_legacy" "$mfe_domain" <<'PY'
 import json
@@ -85,7 +85,7 @@ def fail(msg: str) -> None:
     print(f"[{env_name}] FAIL {msg}", file=sys.stderr)
     raise SystemExit(1)
 
-url = f"https://{mfe_domain}/api/mfe_config/v1"
+url = f"https://{mfe_domain}/api/mfe_config/v1?mfe=authn"
 try:
     with urllib.request.urlopen(url, timeout=30) as resp:
         raw = resp.read()
@@ -136,6 +136,29 @@ require_one_of("AUTHN_MICROFRONTEND_DOMAIN", [expected_authn_domain, expected_au
 # Cookie posture SHOULD be explicit for cross-site SSO flows.
 require_eq("SESSION_COOKIE_SAMESITE", "None")
 require_eq("CSRF_COOKIE_SAMESITE", "None")
+
+# Learner-facing MFE URLs must stay complete. A partial SiteConfiguration.MFE_CONFIG
+# can shadow otherwise-correct LMS settings and silently route users back to
+# legacy LMS surfaces after login.
+expected_urls = {
+    "ACCOUNT_MICROFRONTEND_URL": f"https://{mfe_domain}/account/",
+    "ACCOUNT_SETTINGS_URL": f"https://{mfe_domain}/account/",
+    "DISCUSSIONS_MICROFRONTEND_URL": f"https://{mfe_domain}/discussions",
+    "DISCUSSIONS_MFE_BASE_URL": f"https://{mfe_domain}/discussions",
+    "WRITABLE_GRADEBOOK_URL": f"https://{mfe_domain}/gradebook",
+    "LEARNER_HOME_MICROFRONTEND_URL": f"https://{mfe_domain}/learner-dashboard/",
+    "LEARNER_RECORD_MICROFRONTEND_URL": f"https://{mfe_domain}/learner-record",
+    "LEARNING_MICROFRONTEND_URL": f"https://{mfe_domain}/learning",
+    "LEARNING_BASE_URL": f"https://{mfe_domain}/learning",
+    "ORA_GRADING_MICROFRONTEND_URL": f"https://{mfe_domain}/ora-grading",
+    "PROFILE_MICROFRONTEND_URL": f"https://{mfe_domain}/u/",
+    "ACCOUNT_PROFILE_URL": f"https://{mfe_domain}/u/",
+    "COMMUNICATIONS_MICROFRONTEND_URL": f"https://{mfe_domain}/communications",
+}
+for key, expected in expected_urls.items():
+    require_eq(key, expected)
+
+require_eq("LOGIN_REDIRECT_URL", f"https://{mfe_domain}/learner-dashboard/")
 
 # Sanity markers
 require_truthy("ACCESS_TOKEN_COOKIE_NAME")
