@@ -2,8 +2,8 @@
 # Verify Phase 7 runtime DOM audit contract:
 # - canonical selector lists exist and are non-empty
 # - strict/full wrappers exist and delegate to verify script
-# - verify script exposes phase7_strict + phase7_full profiles + selector-file support
-# - workflows expose strict profile option for operator entry points
+# - verify script exposes phase7_strict + phase7_full profiles + selector-file + authenticated support
+# - workflows expose strict profile option plus authenticated controls for operator entry points
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -91,6 +91,12 @@ else
   else
     fail "Verifier missing selector file support"
   fi
+  if rg -n -- '--authenticated|--context|--namespace' "$VERIFY_SCRIPT" >/dev/null \
+    && rg -n 'SafeCookieData\.create' "$VERIFY_SCRIPT" >/dev/null; then
+    pass "Verifier supports authenticated learner-mode storage state minting"
+  else
+    fail "Verifier missing authenticated learner-mode support"
+  fi
 fi
 
 for wf in "$LIVE_DOM_WORKFLOW" "$CLOSURE_WORKFLOW" "$RELEASE_WORKFLOW"; do
@@ -105,6 +111,14 @@ for wf in "$LIVE_DOM_WORKFLOW" "$CLOSURE_WORKFLOW" "$RELEASE_WORKFLOW"; do
     fail "$rel missing phase7_strict or phase7_full profile option"
   fi
 done
+
+if rg -n 'authenticated:' "$LIVE_DOM_WORKFLOW" >/dev/null \
+  && rg -n 'kube_context:' "$LIVE_DOM_WORKFLOW" >/dev/null \
+  && rg -n 'namespace:' "$LIVE_DOM_WORKFLOW" >/dev/null; then
+  pass "Live DOM workflow exposes authenticated mode inputs"
+else
+  fail "Live DOM workflow missing authenticated mode inputs"
+fi
 
 if [[ ! -f "$MAKEFILE" ]]; then
   fail "Missing Makefile for operator target checks"
@@ -135,6 +149,13 @@ else
     pass "Makefile exposes qa-phase7-dom-audit-full-dev target"
   else
     fail "Makefile missing qa-phase7-dom-audit-full-dev target wiring"
+  fi
+
+  if rg -n '^qa-phase7-dom-audit-full-dev-auth:' "$MAKEFILE" >/dev/null \
+    && rg -n 'run-phase7-dom-audit-full\.sh --env dev --authenticated --context rke2-nonprod --namespace mereka-lms-dev' "$MAKEFILE" >/dev/null; then
+    pass "Makefile exposes authenticated dev DOM audit target"
+  else
+    fail "Makefile missing authenticated dev DOM audit target wiring"
   fi
 
   if rg -n '^qa-phase7-selector-coverage:' "$MAKEFILE" >/dev/null \

@@ -98,6 +98,9 @@ qa-phase7-dom-audit-full: ## Run expanded Phase 7 runtime DOM selector audit (pr
 qa-phase7-dom-audit-full-dev: ## Run expanded Phase 7 runtime DOM selector audit (dev)
 	./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium
 
+qa-phase7-dom-audit-full-dev-auth: ## Run expanded Phase 7 authenticated learner-dashboard DOM audit (dev)
+	./scripts/qa/run-phase7-dom-audit-full.sh --env dev --authenticated --context rke2-nonprod --namespace mereka-lms-dev --project chromium
+
 qa-phase7-dom-audit-full-strict: ## Run expanded Phase 7 runtime DOM selector audit (prod, runtime theme required)
 	./scripts/qa/run-phase7-dom-audit-full.sh --env prod --project chromium --require-runtime-theme
 

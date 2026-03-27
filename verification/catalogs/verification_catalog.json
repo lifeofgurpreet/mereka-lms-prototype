@@ -8499,7 +8499,7 @@
       "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
-        "none"
+        "cluster"
       ],
       "severity": "high",
       "spec_ids": [],
@@ -11371,6 +11371,7 @@
       ],
       "env_scope": [
         "dev",
+        "nonprod",
         "prod"
       ],
       "kind": "verify",

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# verify-mfe-live-dom-audit.sh — Runtime selector/marker audit on authn MFE surface.
+# verify-mfe-live-dom-audit.sh — Runtime selector/marker audit on configured MFE surfaces.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -19,6 +19,10 @@ MIN_TRACKED_SELECTOR_HITS="${MIN_TRACKED_SELECTOR_HITS:-3}"
 MIN_CUSTOM_SELECTOR_HITS="${MIN_CUSTOM_SELECTOR_HITS:-0}"
 REQUIRE_RUNTIME_THEME=0
 REQUIRE_BRANDING_MARKERS="${REQUIRE_BRANDING_MARKERS:-1}"
+AUTHENTICATED=0
+KUBE_CONTEXT="${KUBE_CONTEXT:-}"
+NAMESPACE="${NAMESPACE:-}"
+AUTH_STATE_FILE=""
 
 usage() {
   cat <<'EOF'
@@ -38,6 +42,9 @@ Options:
   --require-runtime-theme           Require runtime /theme/*.css mode in authn shell
   --require-branding-markers        Require branded markers in runtime DOM (default)
   --allow-unbranded-shell           Allow selector audit without marker assertions
+  --authenticated                   Mint a live safe-session cookie and audit authenticated learner surfaces
+  --context <kubectl-context>       kubectl context for authenticated mode
+  --namespace <namespace>           namespace containing deploy/lms for authenticated mode
   -h, --help                        Show this help
 EOF
 }
@@ -106,6 +113,20 @@ while [[ $# -gt 0 ]]; do
       REQUIRE_BRANDING_MARKERS=0
       shift
       ;;
+    --authenticated)
+      AUTHENTICATED=1
+      shift
+      ;;
+    --context)
+      [[ $# -lt 2 ]] && { echo "ERROR: --context requires a value" >&2; exit 2; }
+      KUBE_CONTEXT="$2"
+      shift 2
+      ;;
+    --namespace)
+      [[ $# -lt 2 ]] && { echo "ERROR: --namespace requires a value" >&2; exit 2; }
+      NAMESPACE="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -142,6 +163,19 @@ fi
 if [[ "$REQUIRE_BRANDING_MARKERS" != "0" && "$REQUIRE_BRANDING_MARKERS" != "1" ]]; then
   echo "ERROR: REQUIRE_BRANDING_MARKERS must be 0 or 1 (got: $REQUIRE_BRANDING_MARKERS)" >&2
   exit 2
+fi
+
+if [[ "$AUTHENTICATED" == "1" ]]; then
+  if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
+    SELECTOR_AUDIT_PATH="/learner-dashboard/"
+    SELECTOR_AUDIT_ROUTES="/learner-dashboard/"
+  fi
+  if [[ -z "$SELECTOR_AUDIT_SELECTORS" && -z "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
+    SELECTOR_AUDIT_SELECTORS=".mereka-footer"
+  fi
+  if [[ "$MIN_CUSTOM_SELECTOR_HITS" == "0" ]]; then
+    MIN_CUSTOM_SELECTOR_HITS="1"
+  fi
 fi
 
 case "$AUDIT_PROFILE" in
@@ -258,35 +292,154 @@ if [[ -z "$MFE_ORIGIN" ]]; then
   exit 2
 fi
 
+cleanup() {
+  if [[ -n "$AUTH_STATE_FILE" && -f "$AUTH_STATE_FILE" ]]; then
+    rm -f "$AUTH_STATE_FILE"
+  fi
+}
+trap cleanup EXIT
+
+if [[ "$AUTHENTICATED" == "1" ]]; then
+  if ! command -v kubectl >/dev/null 2>&1; then
+    echo "ERROR: kubectl is required for --authenticated mode" >&2
+    exit 2
+  fi
+  if [[ -z "$KUBE_CONTEXT" || -z "$NAMESPACE" ]]; then
+    echo "ERROR: --authenticated requires both --context and --namespace" >&2
+    exit 2
+  fi
+
+  LMS_HOST="$(python3 - "$BASE_URL" <<'PY'
+import sys
+from urllib.parse import urlparse
+
+raw = (sys.argv[1] or "").strip()
+if "://" not in raw:
+    raw = f"https://{raw}"
+parsed = urlparse(raw)
+print(parsed.hostname or "")
+PY
+)"
+  if [[ -z "$LMS_HOST" ]]; then
+    echo "ERROR: could not derive LMS host from BASE_URL=$BASE_URL" >&2
+    exit 2
+  fi
+
+  set +e
+  AUTH_PAYLOAD="$(
+    kubectl --context "$KUBE_CONTEXT" -n "$NAMESPACE" exec -i deploy/lms -- python - <<'PY'
+import json
+import sys
+
+import django
+
+django.setup()
+
+from common.djangoapps.student.models import UserProfile
+from django.contrib.auth import BACKEND_SESSION_KEY, HASH_SESSION_KEY, SESSION_KEY
+from django.contrib.sessions.backends.cache import SessionStore
+from openedx.core.djangoapps.safe_sessions.middleware import SafeCookieData
+
+user_profile = (
+    UserProfile.objects.select_related("user")
+    .exclude(user__is_staff=True)
+    .order_by("user__id")
+    .first()
+)
+if user_profile is None:
+    raise SystemExit(3)
+
+user = user_profile.user
+session = SessionStore()
+session[SESSION_KEY] = str(user.pk)
+session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+session.save()
+
+print(json.dumps({
+    "safe_cookie": str(SafeCookieData.create(session.session_key, user.pk)),
+    "username": user.username,
+}))
+PY
+  )"
+  AUTH_STATUS=$?
+  set -e
+  if [[ "$AUTH_STATUS" -eq 3 ]]; then
+    echo "ERROR: no non-staff learner with a profile exists for --authenticated mode" >&2
+    exit 1
+  elif [[ "$AUTH_STATUS" -ne 0 ]]; then
+    echo "ERROR: failed to mint authenticated safe-session cookie via deploy/lms" >&2
+    exit 1
+  fi
+
+  AUTH_STATE_FILE="$(mktemp -t mereka-e2e-auth-state.XXXXXX.json)"
+  python3 - "$AUTH_PAYLOAD" "$LMS_HOST" "$MFE_ORIGIN" >"$AUTH_STATE_FILE" <<'PY'
+import json
+import sys
+from urllib.parse import urlparse
+
+payload = json.loads(sys.argv[1])
+lms_host = sys.argv[2]
+mfe_origin = sys.argv[3]
+mfe_host = urlparse(mfe_origin).hostname or ""
+
+domains = []
+for candidate in (lms_host, f".{lms_host}", mfe_host):
+    candidate = (candidate or "").strip()
+    if candidate and candidate not in domains:
+        domains.append(candidate)
+
+cookie_records = [
+    {
+        "name": "sessionid",
+        "value": payload["safe_cookie"],
+        "domain": domain,
+        "path": "/",
+        "expires": -1,
+        "httpOnly": True,
+        "secure": True,
+        "sameSite": "Lax",
+    }
+    for domain in domains
+]
+
+print(json.dumps({"cookies": cookie_records, "origins": []}))
+PY
+fi
+
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 artifact="$ARTIFACT_DIR/mfe-live-dom-audit-${ENVIRONMENT}-${timestamp}.log"
 : > "$artifact"
 
-authn_shell_url="${MFE_ORIGIN}/authn/login"
-authn_shell_file="$(mktemp -t mereka-live-dom-authn-shell.XXXXXX)"
-authn_shell_status="$(curl -ksSL -o "$authn_shell_file" -w '%{http_code}' "$authn_shell_url" || true)"
-if [[ "$authn_shell_status" != "200" ]]; then
-  echo "ERROR: authn shell preflight failed (${authn_shell_url} returned HTTP ${authn_shell_status:-unknown})." | tee -a "$artifact" >&2
-  rm -f "$authn_shell_file"
+preflight_path="${SELECTOR_AUDIT_ROUTES%%,*}"
+if [[ -z "$preflight_path" ]]; then
+  preflight_path="$SELECTOR_AUDIT_PATH"
+fi
+preflight_url="${MFE_ORIGIN}${preflight_path}"
+preflight_file="$(mktemp -t mereka-live-dom-preflight.XXXXXX)"
+preflight_status="$(curl -ksSL -o "$preflight_file" -w '%{http_code}' "$preflight_url" || true)"
+if [[ "$preflight_status" != "200" ]]; then
+  echo "ERROR: DOM audit preflight failed (${preflight_url} returned HTTP ${preflight_status:-unknown})." | tee -a "$artifact" >&2
+  rm -f "$preflight_file"
   exit 1
 fi
 
-if ! grep -q 'PARAGON_THEME' "$authn_shell_file"; then
-  echo "ERROR: authn shell preflight returned non-MFE HTML (missing PARAGON_THEME): $authn_shell_url" | tee -a "$artifact" >&2
-  rm -f "$authn_shell_file"
+if ! grep -q 'PARAGON_THEME' "$preflight_file"; then
+  echo "ERROR: DOM audit preflight returned non-MFE HTML (missing PARAGON_THEME): $preflight_url" | tee -a "$artifact" >&2
+  rm -f "$preflight_file"
   exit 1
 fi
 
 theme_mode="unknown"
-if grep -q '/theme/core.min.css' "$authn_shell_file" && grep -q '/theme/mereka-brand.min.css' "$authn_shell_file"; then
+if grep -q '/theme/core.min.css' "$preflight_file" && grep -q '/theme/mereka-brand.min.css' "$preflight_file"; then
   theme_mode="runtime-theme-urls"
-elif grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' "$authn_shell_file" \
-  && grep -Eq 'brand-theme-core\.[A-Za-z0-9]+\.css' "$authn_shell_file"; then
+elif grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' "$preflight_file" \
+  && grep -Eq 'brand-theme-core\.[A-Za-z0-9]+\.css' "$preflight_file"; then
   theme_mode="embedded-theme-files"
 fi
-rm -f "$authn_shell_file"
+rm -f "$preflight_file"
 
-echo "Theme-mode preflight (${authn_shell_url}): ${theme_mode}" | tee -a "$artifact"
+echo "Theme-mode preflight (${preflight_url}): ${theme_mode}" | tee -a "$artifact"
 if [[ "$REQUIRE_RUNTIME_THEME" == "1" && "$theme_mode" != "runtime-theme-urls" ]]; then
   echo "ERROR: runtime theme mode required, but detected '${theme_mode}'." | tee -a "$artifact" >&2
   exit 1
@@ -318,17 +471,32 @@ case "$PROJECT" in
 esac
 
 echo "Running runtime selector DOM audit (base_url=$BASE_URL, mfe_origin=$MFE_ORIGIN, project=$PROJECT, audit_profile=$AUDIT_PROFILE, selector_audit_path=$SELECTOR_AUDIT_PATH, selector_audit_routes=$SELECTOR_AUDIT_ROUTES, min_selector_hits=$MIN_TRACKED_SELECTOR_HITS, min_custom_selector_hits=$MIN_CUSTOM_SELECTOR_HITS)" | tee -a "$artifact"
+if [[ "$AUTHENTICATED" == "1" ]]; then
+  auth_username="$(python3 - "$AUTH_PAYLOAD" <<'PY'
+import json
+import sys
+print(json.loads(sys.argv[1]).get("username", "unknown"))
+PY
+)"
+  echo "Authenticated mode: enabled (context=$KUBE_CONTEXT namespace=$NAMESPACE learner=${auth_username})" | tee -a "$artifact"
+fi
 set -o pipefail
-PW_CROSS_BROWSER=0 \
-PW_ENABLE_WEBKIT=0 \
-BASE_URL="$BASE_URL" \
-REQUIRE_BRANDING_MARKERS="$REQUIRE_BRANDING_MARKERS" \
-MIN_TRACKED_SELECTOR_HITS="$MIN_TRACKED_SELECTOR_HITS" \
-SELECTOR_AUDIT_PATH="$SELECTOR_AUDIT_PATH" \
-SELECTOR_AUDIT_ROUTES="$SELECTOR_AUDIT_ROUTES" \
-SELECTOR_AUDIT_SELECTORS="$SELECTOR_AUDIT_SELECTORS" \
-MIN_CUSTOM_SELECTOR_HITS="$MIN_CUSTOM_SELECTOR_HITS" \
-npx playwright test tests/selector-dom-audit.spec.ts --project="$PROJECT" --reporter=list | tee -a "$artifact"
+PLAYWRIGHT_ENV=(
+  PW_CROSS_BROWSER=0
+  PW_ENABLE_WEBKIT=0
+  BASE_URL="$BASE_URL"
+  REQUIRE_BRANDING_MARKERS="$REQUIRE_BRANDING_MARKERS"
+  MIN_TRACKED_SELECTOR_HITS="$MIN_TRACKED_SELECTOR_HITS"
+  SELECTOR_AUDIT_PATH="$SELECTOR_AUDIT_PATH"
+  SELECTOR_AUDIT_ROUTES="$SELECTOR_AUDIT_ROUTES"
+  SELECTOR_AUDIT_SELECTORS="$SELECTOR_AUDIT_SELECTORS"
+  MIN_CUSTOM_SELECTOR_HITS="$MIN_CUSTOM_SELECTOR_HITS"
+)
+if [[ -n "$AUTH_STATE_FILE" ]]; then
+  PLAYWRIGHT_ENV+=(E2E_AUTH_STATE="$AUTH_STATE_FILE")
+fi
+env "${PLAYWRIGHT_ENV[@]}" \
+  npx playwright test tests/selector-dom-audit.spec.ts --project="$PROJECT" --reporter=list | tee -a "$artifact"
 
 echo "Log: $artifact"
 echo "Screenshots/artifacts: var/e2e-artifacts and var/e2e-report"
