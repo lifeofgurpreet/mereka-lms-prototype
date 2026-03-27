@@ -12,7 +12,12 @@ This runbook covers operational procedures for the analytics pipeline.
 >
 > **Infrastructure monitoring** (Prometheus/Grafana): OPERATIONAL - but this is separate from learning analytics
 >
-> **To deploy Aspects**: Follow `docs/concepts/analytics/ASPECTS_TARGET_STATE.md`
+> **Future-state deployment boundary**: Review
+> `docs/concepts/analytics/ASPECTS_TARGET_STATE.md` together with
+> `docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md` and
+> `docs/policies/architecture/ANALYTICS_DECISION_GATE.md`. Those documents
+> describe target-state prerequisites and rollout boundaries; they do not mean
+> a governed shared-environment analytics release front door exists today.
 >
 > **Spec**: `specs/analytics-pipeline_spec.md`
 > **Testmap**: `specs/testmaps/analytics-pipeline_spec.testmap.yml`
@@ -21,6 +26,10 @@ This runbook covers operational procedures for the analytics pipeline.
 
 ## Prerequisites
 
+- Acknowledge that Aspects/Superset is still deferred in shared environments
+- Treat any Tutor or direct `kubectl` rollout sequence as legacy/manual
+  bootstrap unless and until the analytics release authority is explicitly
+  defined
 - Access to production GKE cluster
 - Access to Grafana dashboards
 - ClickHouse client (if direct access needed)

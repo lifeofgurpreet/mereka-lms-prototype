@@ -8,6 +8,10 @@ This document describes the target-state architecture and deployment posture for
 - Aspects remains the preferred future-state path for platform-wide learning analytics.
 - Production deployment stays gated by the analytics deployment policy and readiness checks.
 - Any installation or access instructions below are target-state or local-only, not statements about current production.
+- No governed shared-environment analytics publish or promotion lane exists
+  today. Until one is defined, any Tutor or direct `kubectl` rollout sequence
+  must be treated as legacy/manual bootstrap rather than the canonical
+  production operator path.
 
 ## Target architecture
 
@@ -25,17 +29,21 @@ This document describes the target-state architecture and deployment posture for
 
 ## Deployment shape
 
-1. Enable and configure the Tutor plugin.
-2. Build required images.
-3. Apply environment and secret configuration.
-4. Deploy services.
-5. Validate service health and dashboard availability.
-6. Establish a supported access path and run smoke tests.
+1. Define the shared-environment release authority truthfully.
+2. Enable and configure the Tutor plugin.
+3. Build required images.
+4. Apply environment and secret configuration.
+5. Deploy services.
+6. Validate service health and dashboard availability.
+7. Establish a supported access path and run smoke tests.
 
 ## Local-only or future-state access
 
 - Local access uses port forwarding or local Tutor service URLs during development.
 - Production access does not exist until the readiness gate is satisfied.
+- Shared-environment release claims require more than readiness intent: they
+  require an approved rollout front door, or an explicitly documented
+  legacy/manual bootstrap exception.
 
 ## Related docs
 
