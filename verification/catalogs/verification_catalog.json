@@ -8130,6 +8130,7 @@
       "ci_entrypoints": [],
       "env_scope": [
         "dev",
+        "prod",
         "staging"
       ],
       "kind": "verify",

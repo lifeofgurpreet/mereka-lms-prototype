@@ -62,7 +62,7 @@ Verified against `argocd/mereka-lms-dev`, `kubectl` on namespace `mereka-lms-dev
 |---|---|---|
 | Tenant/domain registry | app repo | `deploy/k8s/tenancy/tenant-registry.yaml` |
 | Derived shell defaults | app repo | `scripts/shared/config.sh` |
-| Django Site and SiteConfiguration apply path | app repo | `scripts/tenants/seed-siteconfigs.sh` |
+| Django Site and SiteConfiguration apply path | app repo | `scripts/infra/apply-multisite-config.sh` |
 | Runtime/package authority split | app repo | `deploy/k8s/RUNTIME_AUTHORITY_MAP.md` |
 | DNS, ingress controller realization, TLS certs, Argo applications | infra repo | environment overlays in `bbi-infrastructure` |
 

@@ -10,6 +10,18 @@ if [[ ! -f "$ALLOWLIST_FILE" ]]; then
   exit 1
 fi
 
+contains_path() {
+  local needle="$1"
+  shift || true
+  local candidate
+  for candidate in "$@"; do
+    if [[ "$candidate" == "$needle" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -34,14 +46,14 @@ mapfile -t allowlisted_orphans < <(
 
 unexpected=()
 for path in "${current_orphans[@]}"; do
-  if ! (printf '%s\n' "${allowlisted_orphans[@]}" || true) | grep -Fxq "$path"; then
+  if ! contains_path "$path" "${allowlisted_orphans[@]}"; then
     unexpected+=("$path")
   fi
 done
 
 stale=()
 for path in "${allowlisted_orphans[@]}"; do
-  if ! (printf '%s\n' "${current_orphans[@]}" || true) | grep -Fxq "$path"; then
+  if ! contains_path "$path" "${current_orphans[@]}"; then
     stale+=("$path")
   fi
 done

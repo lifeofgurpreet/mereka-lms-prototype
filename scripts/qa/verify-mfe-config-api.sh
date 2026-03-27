@@ -7,8 +7,9 @@
 #   1. LMS settings include MFE_CONFIG with required baseline keys
 #      (FAVICON_URL, LOGO_URL, LOGO_WHITE_URL, LOGO_TRADEMARK_URL)
 #   2. The Caddy MFE config proxies /api/mfe_config/v1* to lms:8000
-#   3. The per-tenant provisioning script exists and is executable
-#   4. The provisioning script covers all three known tenants
+#   3. The canonical multisite apply script exists and is executable
+#   4. The canonical apply flow delegates to multisite_bootstrap_django.py and
+#      the production multisite registry covers the three known tenant domains
 #
 # Optional live-cluster checks (run when kubectl is available):
 #   5. /api/mfe_config/v1 returns JSON on each tenant LMS domain
@@ -179,27 +180,28 @@ fi
 
 echo ""
 
-# ─── Check 3: Provisioning script exists and is executable ───────────────────
-echo "--- Check 3: Tenant MFE config provisioning script ---"
+# ─── Check 3: Canonical apply script exists and is executable ────────────────
+echo "--- Check 3: Canonical multisite apply script ---"
 
-PROVISION_SCRIPT="${REPO_ROOT}/scripts/tenants/provision-mfe-config.sh"
+APPLY_SCRIPT="${REPO_ROOT}/scripts/infra/apply-multisite-config.sh"
+MULTISITE_REGISTRY="${REPO_ROOT}/infrastructure/tutor/multisite-sites.yml"
 
-if [[ -f "$PROVISION_SCRIPT" ]]; then
-  pass "provision-mfe-config.sh exists"
+if [[ -f "$APPLY_SCRIPT" ]]; then
+  pass "apply-multisite-config.sh exists"
 
-  if [[ -x "$PROVISION_SCRIPT" ]]; then
-    pass "provision-mfe-config.sh is executable"
+  if [[ -x "$APPLY_SCRIPT" ]]; then
+    pass "apply-multisite-config.sh is executable"
   else
-    fail "provision-mfe-config.sh is not executable (run: chmod +x $PROVISION_SCRIPT)"
+    fail "apply-multisite-config.sh is not executable (run: chmod +x $APPLY_SCRIPT)"
   fi
 else
-  fail "provision-mfe-config.sh not found at $PROVISION_SCRIPT"
+  fail "apply-multisite-config.sh not found at $APPLY_SCRIPT"
 fi
 
 echo ""
 
-# ─── Check 4: Provisioning script covers all three tenants ────────────────────
-echo "--- Check 4: All three tenants referenced in provisioning script ---"
+# ─── Check 4: Canonical apply flow covers the known tenant domains ───────────
+echo "--- Check 4: Canonical apply flow and multisite registry coverage ---"
 
 EXPECTED_TENANTS=(mereka biji-biji skillourfuture)
 EXPECTED_DOMAINS=(
@@ -208,18 +210,28 @@ EXPECTED_DOMAINS=(
   "skillourfuture.academy.mereka.io"
 )
 
-if [[ -f "$PROVISION_SCRIPT" ]]; then
+if [[ -f "$APPLY_SCRIPT" ]]; then
+  if grep -q "multisite_bootstrap_django.py" "$APPLY_SCRIPT"; then
+    pass "apply-multisite-config.sh delegates to multisite_bootstrap_django.py"
+  else
+    fail "apply-multisite-config.sh does not reference multisite_bootstrap_django.py"
+  fi
+else
+  skip "Canonical apply script not found, skipping bootstrap delegation check"
+fi
+
+if [[ -f "$MULTISITE_REGISTRY" ]]; then
   for i in "${!EXPECTED_TENANTS[@]}"; do
     tenant="${EXPECTED_TENANTS[$i]}"
     domain="${EXPECTED_DOMAINS[$i]}"
-    if grep -q "$tenant" "$PROVISION_SCRIPT" && grep -q "$domain" "$PROVISION_SCRIPT"; then
-      pass "Tenant '$tenant' (domain: $domain) defined in provisioning script"
+    if grep -q "$tenant" "$MULTISITE_REGISTRY" && grep -q "$domain" "$MULTISITE_REGISTRY"; then
+      pass "Tenant '$tenant' (domain: $domain) defined in multisite-sites.yml"
     else
-      fail "Tenant '$tenant' or domain '$domain' missing from provisioning script"
+      fail "Tenant '$tenant' or domain '$domain' missing from multisite-sites.yml"
     fi
   done
 else
-  skip "Provisioning script not found, skipping tenant coverage checks"
+  fail "multisite-sites.yml not found at $MULTISITE_REGISTRY"
 fi
 
 echo ""
@@ -296,7 +308,7 @@ sys.exit(1)
         pass "Tenant '$tenant': LMS_BASE_URL=https://${domain}"
       else
         fail "Tenant '$tenant': LMS_BASE_URL mismatch or SiteConfiguration not provisioned"
-        echo "       Run: ./scripts/tenants/provision-mfe-config.sh --tenant $tenant"
+        echo "       Reconcile via: ./scripts/infra/apply-multisite-config.sh --env $([[ \"$LIVE_ENV\" == \"production\" ]] && echo prod || echo \"$LIVE_ENV\") --apply"
       fi
     elif [[ "$HTTP_STATUS" == "000" ]]; then
       skip "Tenant '$tenant': $url unreachable (network/DNS)"
@@ -312,10 +324,10 @@ echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC}
 echo ""
 
 if [[ $FAIL -gt 0 ]]; then
-  echo "To provision per-tenant MFE config for a live cluster:"
-  echo "  ./scripts/tenants/provision-mfe-config.sh --tenant mereka"
-  echo "  ./scripts/tenants/provision-mfe-config.sh --tenant biji-biji"
-  echo "  ./scripts/tenants/provision-mfe-config.sh --tenant skillourfuture"
+  echo "To reconcile canonical MFE config for a live cluster:"
+  echo "  CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \\"
+  echo "  ALLOW_PROD_APPLY=1 \\"
+  echo "  ./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --apply"
   exit 1
 fi
 exit 0

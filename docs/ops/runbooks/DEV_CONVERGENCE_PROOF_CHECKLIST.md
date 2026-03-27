@@ -38,7 +38,7 @@ kubectl get application mereka-lms-dev -n argocd -o yaml
 kubectl get deploy,pods,svc,ingress -n mereka-lms-dev
 bash scripts/qa/verify-domain-url-invariants.sh
 bash scripts/qa/verify-tenant-contract-alignment.sh
-bash scripts/tenants/seed-siteconfigs.sh --namespace mereka-lms-dev --environment dev --dry-run
+bash scripts/infra/apply-multisite-config.sh --namespace mereka-lms-dev --env dev --dry-run
 ```
 
 ## Browser and Runtime Rules

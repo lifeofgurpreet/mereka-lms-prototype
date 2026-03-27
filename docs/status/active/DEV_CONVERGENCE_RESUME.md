@@ -15,7 +15,7 @@ This is the single canonical resume and handoff doc for the current DEV converge
 - App-owned operational concerns: `bin/lms-ops`
 - Domain and tenant truth: `deploy/k8s/tenancy/tenant-registry.yaml`
 - Static domain drift gate: `scripts/qa/verify-domain-url-invariants.sh`
-- Repeatable Site/SiteConfiguration apply path: `scripts/tenants/seed-siteconfigs.sh`
+- Repeatable Site/SiteConfiguration apply path: `scripts/infra/apply-multisite-config.sh`
 - Live DEV GitOps consumer: `bbi-infrastructure/apps/mereka-lms/overlays/profiles/dev`
 - DEV Notes host-domain correction path: `bbi-infrastructure/apps/mereka-lms/overlays/dev/patches/satellite-services-domain.yaml`
 - Live DEV drift-suppression policy: `kubectl get application mereka-lms-dev -n argocd -o yaml`
