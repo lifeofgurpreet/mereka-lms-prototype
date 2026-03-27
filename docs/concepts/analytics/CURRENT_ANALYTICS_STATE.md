@@ -20,11 +20,17 @@ This document records the analytics surfaces that are live now. It is the curren
 - Use Grafana and Prometheus for service health, request rates, and cluster metrics.
 - Use the LMS instructor dashboard for per-course enrollment, progress, and grade exports.
 - Use migration reference docs under `docs/reference/analytics/**` only for reconciliation or migration analysis, not as the steady-state analytics front door.
+- Do not treat target-state analytics runbooks or setup references as a
+  shared-environment release front door; no governed analytics publish or
+  promotion lane exists today.
 
 ## Current access rules
 
 - There is no supported production access flow for Superset because Superset is not deployed.
 - Any local-only experimentation with Aspects stays local and does not change production truth.
+- Any direct Tutor or `kubectl` rollout in a shared environment would be a
+  documented legacy/manual bootstrap exception, not the canonical operator
+  path.
 
 ## Related docs
 
