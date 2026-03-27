@@ -372,7 +372,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 1. Inventory: grep all Dockerfiles, `apply-patches.sh`, and `mfe-build/Dockerfile` for MFE git refs (branch names, tags, commit SHAs)
 2. Cross-reference against Open edX Ulmo release tags for each MFE (learning, authn, discussions, profile, account, gradebook, etc.)
 3. Update refs to `release/ulmo.1` (or latest Ulmo-compatible tag)
-4. Build locally: `tutor images build mfe` and confirm all MFEs compile
+4. Dispatch `.github/workflows/build-tutor-images.yml` with `build_mfe=true` on the candidate ref and confirm the workflow produces the MFE image for that SHA
 5. Run `verify-mfe-ulmo-migration.sh` (already exists) to confirm
 6. Update `infrastructure/tutor/mfe-build/README.md` with the ref table
 

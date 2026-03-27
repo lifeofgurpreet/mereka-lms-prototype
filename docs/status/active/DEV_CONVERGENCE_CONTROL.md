@@ -73,7 +73,7 @@ These require the user's visual review to decide priority. Each has exact CSS co
 
 | Issue | Current State | Blocker | Next Action |
 |-------|--------------|---------|-------------|
-| head-extra.html 360 lines | ~100 lines duplicate compiled theme, ~260 unique | Requires openedx rebuild to reduce | Move rules to _custom.scss, rebuild, then strip head-extra |
+| head-extra.html 360 lines | ~100 lines duplicate compiled theme, ~260 unique | Requires governed openedx image rebuild + rollout to reduce | Move rules to _custom.scss, publish via build workflow, then strip head-extra |
 | apply-dev-tenant-state.sh not on main | On branch fix/libsass-css4-rgb-compat | PR merge needed | Merge branch or cherry-pick script |
 | course_org_filter for dev tenants | TEMP_RUNTIME (set via kubectl) | Script not on main | Add to apply script, merge |
 | MEREKA reporting flag | TEMP_RUNTIME | Script not on main | Add to apply script, merge |
@@ -95,6 +95,6 @@ These require the user's visual review to decide priority. Each has exact CSS co
 2. Check `deploy/k8s/tenancy/tenant-registry.yaml` for domain truth
 3. Check `docs/reference/operations/DOMAIN_MATRIX.md` for operational status
 4. All visual CSS tuning starts at the control points documented above
-5. Any openedx image change requires rebuilding via `tutor images build openedx`
-6. Any MFE change requires rebuilding via `tutor images build mfe`
-7. head-extra debt reduction requires: move rules to _custom.scss + rebuild + strip head-extra
+5. Any openedx image change requires a governed `.github/workflows/build-tutor-images.yml` run with `build_openedx=true`, then GitOps promotion before closure claims
+6. Any MFE change requires a governed `.github/workflows/build-tutor-images.yml` run with `build_mfe=true`, then GitOps promotion before closure claims
+7. head-extra debt reduction requires: move rules to `_custom.scss` + governed openedx build/promotion + strip `head-extra`
