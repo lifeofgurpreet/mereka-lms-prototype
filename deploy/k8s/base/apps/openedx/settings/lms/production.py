@@ -601,7 +601,6 @@ JWT_AUTH["JWT_ISSUERS"] = [
 ]
 
 # Enable/Disable some features globally
-FEATURES["ENABLE_DISCUSSION_SERVICE"] = False
 FEATURES["PREVENT_CONCURRENT_LOGINS"] = False
 FEATURES["ENABLE_CORS_HEADERS"] = True
 
@@ -622,6 +621,8 @@ FEATURES["ENABLE_PROGRAM_CERTIFICATES"] = os.environ.get(
 # CORS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
+# Base Tutor/container flows still use direct non-TLS access in some local and
+# bootstrap paths. Environment-owned overlays must harden this for live lanes.
 CORS_ALLOW_INSECURE = True
 # Note: CORS_ALLOW_HEADERS is intentionally not defined here, because it should
 # be consistent across deployments, and is therefore set in edx-platform.
@@ -667,7 +668,9 @@ PROFILE_IMAGE_BACKEND["options"]["location"] = os.path.join(
 COURSE_CATALOG_VISIBILITY_PERMISSION = "see_in_catalog"
 COURSE_ABOUT_VISIBILITY_PERMISSION = "see_about_page"
 
-# Allow insecure oauth2 for local interaction with local containers
+# Base Tutor/container flows may still exercise non-TLS internal OAuth redirects
+# during direct/local use. Environment-owned overlays must harden this for live
+# lanes.
 OAUTH_ENFORCE_SECURE = False
 
 # Email settings
