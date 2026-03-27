@@ -14,13 +14,12 @@ MACOS_HOSTED_EXCEPTIONS=(
 )
 
 # Workflows permitted to use GitHub-hosted Linux runners (temporary Class C exceptions)
-LINUX_HOSTED_EXCEPTIONS=(
-  "codeql.yml"
-)
+LINUX_HOSTED_EXCEPTIONS=()
 
 # Workflows permitted to use mereka-k8s-heavy-builders (Class B)
 HEAVY_BUILDER_ALLOWED=(
   "build-tutor-images.yml"
+  "codeql.yml"
   "test-arc-runners.yml"
   "cross-browser-branding-smoke.yml"
   "frontend-branding-closure.yml"

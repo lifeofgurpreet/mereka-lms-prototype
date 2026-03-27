@@ -33,3 +33,10 @@ jobs:
           echo "Memory: $(free -h | grep Mem | awk '{print $2}')"
           echo "Disk: $(df -h / | tail -1 | awk '{print $4}')"
           echo "SUCCESS: Heavy builder runner works!"
+      - name: Verify CodeQL bundle contract
+        run: |
+          bundle_path="${CODEQL_BUNDLE_PATH:-/opt/codeql/codeql-bundle-linux64.tar.zst}"
+          echo "Bundle path: ${bundle_path}"
+          test -r "${bundle_path}"
+          ls -lh "${bundle_path}"
+          echo "SUCCESS: Heavy runner exposes CodeQL bundle path"

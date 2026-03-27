@@ -34,8 +34,7 @@ name: CodeQL
 on: [push]
 jobs:
   analyze:
-    # ci:allow-github-hosted -- tracked in #1016
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-heavy-builders
     steps:
       - run: echo codeql
 YAML
@@ -73,5 +72,27 @@ if ! rg -q "GitHub-hosted Linux runner" /tmp/test-runner-policy-fail.log; then
 fi
 
 rm -f ".github/workflows/fail-linux.yml"
+
+cat > ".github/workflows/codeql.yml" <<'YAML'
+name: CodeQL
+on: [push]
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo codeql
+YAML
+
+if ./scripts/qa/verify-ci-runner-policy.sh >/tmp/test-runner-policy-codeql-fail.log 2>&1; then
+  echo "Expected hosted CodeQL policy violation to fail, but verifier passed."
+  cat /tmp/test-runner-policy-codeql-fail.log
+  exit 1
+fi
+
+if ! rg -q "codeql.yml:analyze\\[1\\] uses GitHub-hosted Linux runner" /tmp/test-runner-policy-codeql-fail.log; then
+  echo "Expected failure log to mention hosted CodeQL runner violation."
+  cat /tmp/test-runner-policy-codeql-fail.log
+  exit 1
+fi
 
 echo "PASS test-verify-ci-runner-policy"

@@ -90,7 +90,7 @@ is determined by the called workflow. This applies to `build-enterprise-mfe.yml`
 | YAML / Markdown / shell syntax checks | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | Unit and integration tests (Python) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | Tutor config tests (offline rendering) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
-| CodeQL | C — GitHub-hosted Linux (temporary exception) | ARC runner bundle download is currently too slow for reliable completion; tracked in #1016 |
+| CodeQL | B — ARC heavy | Heavy runner image carries the pre-bundled CodeQL archive and `CODEQL_BUNDLE_PATH` runtime contract |
 | Scorecard / Dependency Review | A — ARC lightweight | Security tooling remains reliable on ARC with least-privilege `GITHUB_TOKEN` |
 | Release evidence assembly (offline) | A — ARC lightweight | ARC-only policy — no GitHub-hosted fallback |
 | iOS / macOS builds | D — macOS | Apple platform requirement |
@@ -117,10 +117,10 @@ runs-on: mereka-k8s-heavy-builders  # Class B — Docker builds, Playwright
 
 ---
 
-## Current Audit — All Workflows (updated 2026-03-24)
+## Current Audit — All Workflows (updated 2026-03-27)
 
-All Linux workflows are ARC-first. `codeql.yml` is the only current GitHub-hosted Linux exception,
-because live ARC runs stall during CodeQL bundle initialization; see #1016.
+All Linux workflows are ARC-first. `codeql.yml` now routes back to ARC heavy because the heavy
+runner image carries the pre-bundled CodeQL archive and exports `CODEQL_BUNDLE_PATH`.
 
 Legend:
 - `CONFORM` — uses correct ARC runner label
@@ -142,7 +142,7 @@ Legend:
 | `certificate-branding.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `ci.yml` | all (5 jobs) | `mereka-k8s-runners` | A | CONFORM |
 | `cloud-sql-backup.yml` | all | `mereka-k8s-runners` | A | CONFORM |
-| `codeql.yml` | Analyze | `ubuntu-24.04` | C | EXCEPTION (#1016) |
+| `codeql.yml` | Analyze | `mereka-k8s-heavy-builders` | B | CONFORM |
 | `cross-browser-branding-smoke.yml` | all | `mereka-k8s-heavy-builders` | B | CONFORM |
 | `daily-infrastructure-audit.yml` | all (4 jobs) | `mereka-k8s-runners` | A | CONFORM |
 | `dependency-review.yml` | all | `mereka-k8s-runners` | A | CONFORM |
@@ -195,7 +195,6 @@ Legend:
 
 | Workflow | Exception | Rationale |
 |----------|-----------|-----------|
-| `codeql.yml` | GitHub-hosted (`ubuntu-24.04`) | Temporary exception while ARC CodeQL bundle initialization is too slow to complete reliably; tracked in #1016 |
 | `build-ios-app.yml` | GitHub-hosted (`macos-latest`) | Apple platform — no ARC macOS runners available |
 | `ios-testflight.yml` | GitHub-hosted (`macos-14`) | Apple platform — no ARC macOS runners available |
 
@@ -206,7 +205,7 @@ Legend:
 When adding a new workflow:
 
 1. Set `runs-on: mereka-k8s-runners` (Class A) by default
-2. Use `runs-on: mereka-k8s-heavy-builders` (Class B) only for Docker builds or Playwright E2E
+2. Use `runs-on: mereka-k8s-heavy-builders` (Class B) for Docker builds, Playwright E2E, or workloads that depend on heavy-runner-only runtime assets such as the pre-bundled CodeQL archive
 3. Do not use `ubuntu-*` or `windows-*` runners unless the workflow is explicitly allowlisted as a temporary policy exception with a tracked issue
 4. Use `macos-*` only for Apple platform workflows (`build-ios-app.yml`, `ios-testflight.yml`)
 5. Run `scripts/qa/verify-ci-runner-policy.sh` to confirm compliance

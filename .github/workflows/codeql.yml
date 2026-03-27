@@ -42,10 +42,11 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    # ci:allow-github-hosted -- CodeQL bundle init on ARC runners is too slow to
-    # complete reliably today; tracked in #1016 until the self-hosted bundle path
-    # is restored.
-    runs-on: ubuntu-24.04
+    # ARC heavy runners now ship the pre-bundled CodeQL archive at
+    # /opt/codeql/codeql-bundle-linux64.tar.zst, so restore the job to the
+    # self-hosted runner class that carries that runtime contract.
+    runs-on: mereka-k8s-heavy-builders
+    timeout-minutes: 45
     permissions:
       security-events: write
       contents: read
