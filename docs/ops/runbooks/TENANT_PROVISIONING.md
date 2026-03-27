@@ -540,11 +540,16 @@ Do not patch `ALLOWED_HOSTS` / `CSRF_TRUSTED_ORIGINS` directly on the VPS. Add t
 ### 3. Configure SSO (If Applicable)
 
 ```bash
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --dry-run
+
 ./scripts/tenants/configure-tenant-idp.sh \
   --tenant-slug acme-corp \
   --idp-type saml \
   --metadata-url https://idp.acme.com/metadata
 ```
+
+If you use `onboard-enterprise-tenant.sh`, the mapping sync already runs as step
+`2/6` before IdP configuration.
 
 ### 4. Publish Branding Assets Through the Release Path
 

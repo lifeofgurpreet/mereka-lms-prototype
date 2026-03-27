@@ -144,10 +144,22 @@ ec.identity_provider = "tpa-saml-acme-corp"  # third_party_auth slug
 ec.save()
 ```
 
-### 4. Use `configure-tenant-idp.sh`
+### 4. Reconcile tenant enterprise mapping first
 
-Use `scripts/tenants/configure-tenant-idp.sh` to create/update tenant SAML/OIDC provider config and link
-`EnterpriseCustomer.identity_provider` in one step.
+Before configuring the IdP directly, ensure the tenant's `SiteConfiguration`
+enterprise mapping is already aligned:
+
+```bash
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --dry-run
+```
+
+The full onboarding workflow already does this as step `2/6`.
+
+### 5. Use `configure-tenant-idp.sh`
+
+Use `scripts/tenants/configure-tenant-idp.sh` to create/update tenant SAML/OIDC
+provider config and link `EnterpriseCustomer.identity_provider`. This script no
+longer mutates `SiteConfiguration` enterprise linkage on its own.
 
 ### 5. SP Metadata Endpoint
 
@@ -212,7 +224,11 @@ Authorization URL, Token URL, User Info URL: from IdP discovery endpoint
 
 ### Step 3: Link to EnterpriseCustomer
 
-Use `configure-tenant-idp.sh` (or onboarding script) to create linkage. Runtime uses `EnterpriseCustomerIdentityProvider` when available, with legacy `identity_provider` compatibility.
+First reconcile `SiteConfiguration.site_values["ENTERPRISE_CUSTOMER_UUID"]` via
+`sync-tenant-enterprise-mapping.sh` (or the onboarding workflow step `2/6`).
+Then use `configure-tenant-idp.sh` to create the IdP linkage. Runtime uses
+`EnterpriseCustomerIdentityProvider` when available, with legacy
+`identity_provider` compatibility.
 
 ### Step 4: Enable per-tenant Feature Flag
 

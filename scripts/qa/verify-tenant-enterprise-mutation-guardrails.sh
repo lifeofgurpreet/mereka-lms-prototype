@@ -37,6 +37,17 @@ require_pattern() {
   fi
 }
 
+reject_pattern() {
+  local file="$1"
+  local pattern="$2"
+  local message="$3"
+  if grep -qE "$pattern" "$file"; then
+    fail "$message"
+  else
+    pass "$message"
+  fi
+}
+
 echo "=== Enterprise Mutation Guardrails ==="
 echo
 
@@ -54,6 +65,7 @@ if [[ -f "$SYNC_SCRIPT" ]]; then
   require_pattern "$SYNC_SCRIPT" 'CONFIRM_TOKEN="SYNC_TENANT_ENTERPRISE_MAPPING"' 'sync mapping has explicit confirmation token'
   require_pattern "$SYNC_SCRIPT" 'ALLOW_PROD_APPLY' 'sync mapping has prod apply guard variable'
   require_pattern "$SYNC_SCRIPT" 'CREATE_PREOP_BACKUP' 'sync mapping has pre-op backup control variable'
+  require_pattern "$SYNC_SCRIPT" 'ENTERPRISE_CUSTOMER_UUID' 'sync mapping owns ENTERPRISE_CUSTOMER_UUID reconciliation'
   require_pattern "$SYNC_SCRIPT" 'Refusing --apply without explicit confirmation token' 'sync mapping blocks apply without confirmation token'
   require_pattern "$SYNC_SCRIPT" 'Refusing --apply on prod-like context' 'sync mapping blocks prod-like apply without override'
   require_pattern "$SYNC_SCRIPT" 'velero backup create' 'sync mapping includes Velero pre-op backup action'
@@ -64,9 +76,13 @@ if [[ -f "$IDP_SCRIPT" ]]; then
   require_pattern "$IDP_SCRIPT" 'CONFIRM_TOKEN="CONFIGURE_TENANT_IDP"' 'configure tenant idp has explicit confirmation token'
   require_pattern "$IDP_SCRIPT" 'ALLOW_PROD_APPLY' 'configure tenant idp has prod apply guard variable'
   require_pattern "$IDP_SCRIPT" 'CREATE_PREOP_BACKUP' 'configure tenant idp has pre-op backup control variable'
+  require_pattern "$IDP_SCRIPT" 'sync-tenant-enterprise-mapping\.sh' 'configure tenant idp points operators to canonical mapping sync'
   require_pattern "$IDP_SCRIPT" 'Refusing --apply without explicit confirmation token' 'configure tenant idp blocks apply without confirmation token'
   require_pattern "$IDP_SCRIPT" 'Refusing --apply on prod-like context' 'configure tenant idp blocks prod-like apply without override'
   require_pattern "$IDP_SCRIPT" 'velero backup create' 'configure tenant idp includes Velero pre-op backup action'
+  reject_pattern "$IDP_SCRIPT" 'SiteConfiguration\.objects\.(get_or_create|update_or_create)' 'configure tenant idp does not directly mutate SiteConfiguration'
+  reject_pattern "$IDP_SCRIPT" "site_values\\[[\"']ENTERPRISE_CUSTOMER_UUID[\"']\\]\\s*=" 'configure tenant idp does not own ENTERPRISE_CUSTOMER_UUID writes'
+  reject_pattern "$IDP_SCRIPT" "site_values\\[[\"']ENABLE_ENTERPRISE_INTEGRATION[\"']\\]\\s*=" 'configure tenant idp does not own ENABLE_ENTERPRISE_INTEGRATION writes'
 fi
 
 if [[ -f "$ONBOARD_SCRIPT" ]]; then

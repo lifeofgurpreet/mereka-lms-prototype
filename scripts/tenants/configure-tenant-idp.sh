@@ -228,7 +228,8 @@ if ! kubectl "${context_args[@]}" get deploy lms -n "$NAMESPACE" >/dev/null 2>&1
 fi
 
 kubectl "${context_args[@]}" exec -i -n "$NAMESPACE" deploy/lms -- \
-  env TENANT_SLUG="$TENANT_SLUG" \
+  env ENVIRONMENT="$ENVIRONMENT" \
+      TENANT_SLUG="$TENANT_SLUG" \
       IDP_TYPE="$IDP_TYPE" \
       IDP_SLUG="$IDP_SLUG" \
       DISPLAY_NAME="$DISPLAY_NAME" \
@@ -252,9 +253,9 @@ django.setup()
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from enterprise.models import EnterpriseCustomer
 
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "prod")
 TENANT_SLUG = os.environ["TENANT_SLUG"]
 IDP_TYPE = os.environ["IDP_TYPE"]
 IDP_SLUG = os.environ["IDP_SLUG"]
@@ -301,32 +302,39 @@ if site is None:
 
 print(f"Tenant '{TENANT_SLUG}' resolved to site domain={site.domain} site_id={site.id}")
 
-# Keep SiteConfiguration in sync with tenant-resolution middleware expectations.
-cfg, _ = SiteConfiguration.objects.get_or_create(
-    site=site,
-    defaults={"enabled": True, "site_values": {}},
-)
-site_values = cfg.site_values or {}
-changed_cfg = False
-if str(site_values.get("ENTERPRISE_CUSTOMER_UUID", "")).strip() != str(ec.uuid):
-    site_values["ENTERPRISE_CUSTOMER_UUID"] = str(ec.uuid)
-    changed_cfg = True
-if site_values.get("ENABLE_ENTERPRISE_INTEGRATION") is not True:
-    site_values["ENABLE_ENTERPRISE_INTEGRATION"] = True
-    changed_cfg = True
-if not cfg.enabled:
-    cfg.enabled = True
-    changed_cfg = True
+# SiteConfiguration enterprise mapping is owned by sync-tenant-enterprise-mapping.sh.
+# Keep configure-tenant-idp focused on IdP records and EnterpriseCustomer linkage.
+mapping_check = "ok"
+try:
+    from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 
-if changed_cfg:
+    cfg = SiteConfiguration.objects.filter(site=site).order_by("-id").first()
+    site_values = cfg.site_values or {} if cfg else {}
+    mapped_uuid = str(site_values.get("ENTERPRISE_CUSTOMER_UUID", "")).strip()
+    if cfg is None:
+        mapping_check = "missing-site-config"
+    elif not cfg.enabled:
+        mapping_check = "disabled-site-config"
+    elif mapped_uuid != str(ec.uuid):
+        mapping_check = f"uuid-mismatch:{mapped_uuid or 'unset'}"
+except Exception as exc:
+    mapping_check = f"check-error:{exc}"
+
+if mapping_check != "ok":
+    guidance = f"./scripts/tenants/sync-tenant-enterprise-mapping.sh --env {ENVIRONMENT}"
+    guidance = guidance + (" --dry-run" if DRY_RUN else " --apply")
+    print(
+        "NOTICE: tenant SiteConfiguration enterprise mapping is not aligned; "
+        "configure-tenant-idp.sh no longer mutates ENTERPRISE_CUSTOMER_UUID or ENABLE_ENTERPRISE_INTEGRATION."
+    )
+    print(f"NEXT: run {guidance}")
     if DRY_RUN:
-        print("DRY-RUN: would update SiteConfiguration ENTERPRISE_CUSTOMER_UUID + ENABLE_ENTERPRISE_INTEGRATION")
+        print(f"DRY-RUN: continuing after precondition warning ({mapping_check})")
     else:
-        cfg.site_values = site_values
-        cfg.save(update_fields=["site_values", "enabled"])
-        print("Updated SiteConfiguration with tenant enterprise mapping")
+        print(f"ERROR: precondition failed ({mapping_check})")
+        sys.exit(5)
 else:
-    print("SiteConfiguration already aligned for tenant mapping")
+    print("SiteConfiguration enterprise mapping already aligned")
 
 created = False
 provider_kind = None
