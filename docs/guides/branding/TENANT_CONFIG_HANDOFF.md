@@ -151,21 +151,42 @@ tenants:
     brand_slug: <slug>
 ```
 
-Apply to cluster:
+For production, commit/push this file and let GitOps reconcile it. Use direct cluster apply only for local/dev parity work:
 
 ```bash
+# local/dev parity only
 kubectl apply -f deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml -n mereka-lms
 ```
 
-### Step 6 — Run provision-tenant.sh
+### Step 6 — Run canonical tenant reconciliation
 
-If this is a K8s-managed tenant:
+Reconcile the site and `SiteConfiguration` contract first:
 
 ```bash
-./scripts/tenants/provision-tenant.sh <tenant-domain>
+./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --dry-run
+./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --apply
 ```
 
-### Step 7 — Re-run apply-patches.sh and rebuild MFE
+If this tenant also needs enterprise bootstrap records, provision them separately:
+
+```bash
+./scripts/tenants/provision-tenant.sh --slug <slug> --name "<Brand Name>" --domain <tenant-domain> --dry-run
+./scripts/tenants/provision-tenant.sh --slug <slug> --name "<Brand Name>" --domain <tenant-domain>
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env <prod|dev|staging> --dry-run
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env <prod|dev|staging> --apply
+```
+
+### Step 7 — Publish branding/runtime changes through the canonical build path
+
+Production:
+
+```bash
+# Publish the merged SHA through build-tutor-images.yml, then promote it with
+# release-openedx-gitops.sh using the workflow-emitted release-bundle and
+# build-provenance coordinates.
+```
+
+Local reproduction only:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
@@ -272,11 +293,13 @@ If a SITE_VARIANTS entry causes incorrect branding or a broken render:
 git log --oneline --grep="<tenant-slug>" | head -3
 git revert <commit-sha>
 
-# 2. Re-run patches
+# 2. Production: publish the reverted SHA through build-tutor-images.yml and
+#    promote it with release-openedx-gitops.sh using the workflow-emitted
+#    release-bundle / build-provenance coordinates.
+
+# 3. Local reproduction only:
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./infrastructure/tutor/apply-patches.sh
-
-# 3. Rebuild and restart MFE
 tutor images build mfe
 tutor local restart
 ```

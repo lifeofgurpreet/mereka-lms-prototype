@@ -68,18 +68,15 @@ All scripts must exit 0. Fix any failures before proceeding.
 - Check for any uncommitted changes: `git status`
 - Confirm you are on `main` and up to date: `git pull --ff-only`
 
-### 3. Canonical preflight and dry-run
+### 3. Canonical preflight
 
-The canonical release front door is:
+The canonical preflight front door remains:
 
 ```bash
 ./scripts/infra/canonical-release.sh --check-only
-./scripts/infra/canonical-release.sh --dry-run \
-  --openedx-tag <TAG> --mfe-tag <TAG>
 ```
 
-This wrapper enforces canonical path, branch/worktree expectations, and delegates
-GitOps promotion to `scripts/infra/release-openedx-gitops.sh`.
+This wrapper enforces branch/worktree expectations and validates that the repo is in a safe state before any publish/promotion run.
 
 ### 4. Optional tag creation
 
@@ -98,25 +95,50 @@ This script:
 
 Tag creation is part of release bookkeeping. It is not the canonical deployment step.
 
-### 5. Apply the canonical release
+### 5. Publish the canonical release inputs
+
+Production release truth comes from the governed image workflow, not local Tutor image tags.
 
 ```bash
-CONFIRM_CANONICAL_RELEASE=CANONICAL_RELEASE \
-CONFIRM_PUSH_CANONICAL_RELEASE=PUSH_CANONICAL_RELEASE \
+APP_SHA="$(git rev-parse origin/main)"
+gh workflow run build-tutor-images.yml \
+  --ref main \
+  -f build_openedx=true \
+  -f build_mfe=true \
+  -f update_gitops=false \
+  -f target_environment=production \
+  -f image_tag="${APP_SHA}"
+
+RUN_ID="<build-tutor-images run id>"
+gh run watch "${RUN_ID}"
+gh run download "${RUN_ID}" --name release-bundle --dir "var/release-artifacts/${RUN_ID}"
+gh run download "${RUN_ID}" --name build-provenance --dir "var/release-artifacts/${RUN_ID}"
+```
+
+Treat the workflow-emitted immutable tags/digests plus the `release-bundle` and `build-provenance` artifacts as the authoritative release inputs.
+
+### 6. Apply the canonical release
+
+```bash
+APP_SHA="$(git rev-parse origin/main)"
+CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS \
+CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS \
 ALLOW_PROD_APPLY=1 \
-./scripts/infra/canonical-release.sh \
-  --openedx-tag <TAG> --mfe-tag <TAG> \
-  --apply --commit --push --verify-runtime
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag "${APP_SHA}" --mfe-tag "${APP_SHA}" \
+  --openedx-digest "sha256:<openedx_digest>" \
+  --mfe-digest "sha256:<mfe_digest>" \
+  --require-digests --apply --commit --push --verify-runtime
 ```
 
 This is the canonical production release path.
 
-### 6. GitHub Release metadata
+### 7. GitHub Release metadata
 
 The `release.yml` workflow fires automatically on tag push and creates the GitHub Release metadata.
 Monitor the workflow in GitHub Actions if you used `create-release.sh`.
 
-### 7. ArgoCD Sync
+### 8. ArgoCD Sync
 
 ArgoCD reconciles automatically within ~3 minutes of the GitOps repo updating.
 Do **not** patch resources directly.
@@ -130,7 +152,7 @@ kubectl -n mereka-lms rollout status deployment/cms
 kubectl -n mereka-lms rollout status deployment/mfe
 ```
 
-### 8. Post-Deploy Smoke Test
+### 9. Post-Deploy Smoke Test
 
 ```bash
 # Branding and public health
@@ -148,16 +170,17 @@ If production is unhealthy after a release:
 
 ### Quick Rollback (GitOps)
 
-Re-run the release orchestrator with the **previous known-good tags**:
+Re-run the release orchestrator with the **previous known-good tags and digests**:
 
 ```bash
 PREV_TAG="v1.1.3"   # replace with actual previous tag
 
 ./scripts/infra/release-openedx-gitops.sh \
-  --target-env production \
   --openedx-tag "${PREV_TAG}" \
   --mfe-tag "${PREV_TAG}" \
-  --apply --commit --push --verify-runtime
+  --openedx-digest "sha256:<previous_openedx_digest>" \
+  --mfe-digest "sha256:<previous_mfe_digest>" \
+  --require-digests --apply --commit --push --verify-runtime
 ```
 
 ### Tag-Based Rollback

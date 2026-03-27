@@ -10,7 +10,7 @@ This is the canonical workflow for branding changes in Mereka LMS.
    - **Why**: Plugin handles configuration via Tutor hooks (automatic). Script handles asset sync (manual but required).
 3. No branding release is complete until both source and live gates pass.
 4. Production deploys are GitOps-managed; do not treat direct `kubectl set image` as source-of-truth.
-5. Drift is a defect: fix with rebuild+deploy, not by loosening checks.
+5. Drift is a defect: fix with governed publish + GitOps promotion, not by loosening checks.
 6. Run only one `tutor images build mfe` at a time; parallel runs cause cache contention and slow/fail builds.
 7. `./infrastructure/tutor/apply-patches.sh` is idempotent and required before every MFE/openedx build.
    - **What it does**: Syncs theme assets (logos, fonts, SCSS), sets up theme directories, distributes font files.
@@ -65,40 +65,41 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
 
 ## Deploy Contract (Production)
 
-Preferred deployment command:
+Preferred production promotion command after a successful image publish:
 
 ```bash
 ./scripts/infra/release-openedx-gitops.sh \
   --openedx-tag <OPENEDX_TAG> \
   --mfe-tag <MFE_TAG> \
+  --openedx-digest sha256:<openedx_digest> \
+  --mfe-digest sha256:<mfe_digest> \
+  --require-digests \
   --apply --commit --push --verify-runtime
 ```
 
 1. Run source/live branding gates.
-2. Build/push images (`openedx`, `openedx-mfe` when changed).
-   - Before `tutor images build mfe`, run:
-     `scripts/qa/verify-mfe-build-prereqs.sh`
-   - After `tutor images build mfe`, verify the built image before push:
-     `scripts/qa/verify-mfe-image-branding.sh <image_ref>`
-   - CI now enforces this automatically in `.github/workflows/build-tutor-images.yml`
-     before MFE image tags are pushed.
-3. Update image tags under `deploy/k8s/base`.
-4. Commit/push this repo.
-5. Update GitOps checkout (`/home/gurpreet/projects/k8s/infrastructure`, typically tracking `BBI-K8`; legacy docs may say `infrastructure`) in both files:
-   - `apps/mereka-lms/base/kustomization.yaml` (`?ref=<sha>`)
-   - `apps/mereka-lms/overlays/prod/kustomization.yaml` (openedx/openedx-mfe tags)
-6. Run `./scripts/qa/verify-gitops-image-overrides.sh --check-infra`.
-7. Verify Argo rollout and rerun branding gates.
+2. Publish the merged target SHA through `.github/workflows/build-tutor-images.yml`.
+   - Prefer the automatic push-to-`main` run.
+   - Use `workflow_dispatch` only for deterministic rebuilds with an explicit `image_tag`.
+3. Treat the workflow-emitted immutable tags/digests plus the `release-bundle` and `build-provenance` artifacts as the release inputs.
+4. Promote those exact coordinates through `release-openedx-gitops.sh --require-digests`.
+5. Verify Argo rollout and rerun branding gates.
+
+Local Tutor builds remain valid for debug/dev parity:
+- Before local `tutor images build mfe`, run `scripts/qa/verify-mfe-build-prereqs.sh`
+- After local `tutor images build mfe`, verify the built image before any local/manual use:
+  `scripts/qa/verify-mfe-image-branding.sh <image_ref>`
+- CI enforces the same contract in `.github/workflows/build-tutor-images.yml`
 
 ## Known Failure Patterns And Correct Fixes
 
 1. **LMS/Studio unbranded on live after merge**
    - Cause: old `openedx` image still running.
-   - Fix: rebuild/push `openedx`, bump GitOps ref, rerun `run-branding-gates.sh prod`.
+   - Fix: publish a new `openedx` image through `build-tutor-images.yml`, promote it through GitOps, rerun `run-branding-gates.sh prod`.
 
 2. **MFE looks old while LMS is correct**
    - Cause: MFE CSS is image-baked; no MFE rebuild.
-   - Fix: rebuild/push `openedx-mfe`; enforce `STRICT_MFE_BRANDING_REV=1`.
+   - Fix: publish a new `openedx-mfe` image through `build-tutor-images.yml`, promote it through GitOps, enforce `STRICT_MFE_BRANDING_REV=1`.
 
 3. **Studio token/font drift**
    - Cause: Studio Sass entrypoints not synced into Tutor build context.
@@ -110,7 +111,7 @@ Preferred deployment command:
 
 5. **Footer/logo regressions**
    - Cause: asset sync drift or override CSS not deployed.
-   - Fix: run `sync-brand-assets.sh`, source gate, redeploy image; never patch live pod files.
+   - Fix: run `sync-brand-assets.sh`, pass the source gate, publish the affected image through the governed workflow, promote through GitOps; never patch live pod files.
 
 6. **MFE build flakes on npm network (`ECONNRESET`/`ETIMEDOUT`)**
    - Cause: transient registry/network failures during multi-MFE npm installs.
@@ -382,8 +383,9 @@ If slot injection fails (MFE build error or runtime slot not rendering):
 1. **Immediate**: Revert to CSS-only fallback — SCSS selectors in `mereka.scss` already cover all high-risk surfaces with `RISK: HIGH` tags. No build change needed.
 2. **footer_slot failure**: The `apply-patches.sh` fallback (string replacement) is always active. Verify with `grep 'MerekaFooter' tutor_env/env/plugins/mfe/build/mfe/env.config.jsx`.
 3. **Full rollback**: Set `_PLUGIN_SLOTS_AVAILABLE = False` in `mereka_lms.py` (by ensuring `PLUGIN_SLOTS` import fails gracefully via the existing `try/except ImportError` block).
-4. Rebuild MFE image: `tutor images build mfe`
-5. Verify: `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
+4. **Production rollback**: publish the reverted SHA through `build-tutor-images.yml`, then promote it with `release-openedx-gitops.sh` using the workflow-emitted release coordinates.
+5. **Local reproduction only**: `tutor images build mfe`
+6. Local image verification: `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
 
 ## Related Documents
 
