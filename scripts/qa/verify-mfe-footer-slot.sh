@@ -44,9 +44,9 @@ echo ""
 # 1. Plugin file exists
 echo "--- Plugin Source ---"
 if [ -f "$PLUGIN" ]; then
-  do_pass "mereka_lms.py exists"
+  do_pass "Footer plugin contract sources exist"
 else
-  do_fail "mereka_lms.py not found"
+  do_fail "Footer plugin contract sources not found"
   echo ""
   echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
   exit 1

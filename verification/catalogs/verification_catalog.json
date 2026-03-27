@@ -268,7 +268,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/branding/verify-token-drift.sh",
-      "reference_count": 23,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2220,7 +2220,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-branding-token-integrity.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3145,7 +3145,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-contrast-compliance.sh",
-      "reference_count": 10,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6180,13 +6180,14 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "dev"
+        "dev",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-variant-matrix.sh",
-      "reference_count": 18,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8290,7 +8291,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-footer-fallbacks.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8380,7 +8381,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-footer-slot.sh",
-      "reference_count": 18,
+      "reference_count": 20,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9918,7 +9919,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-no-dom-overrides.sh",
-      "reference_count": 12,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11540,7 +11541,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-plugin-slot-migration-register.sh",
-      "reference_count": 7,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11600,7 +11601,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-plugin-surface-matrix.sh",
-      "reference_count": 5,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11719,7 +11720,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-smoke.sh",
-      "reference_count": 14,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -14784,7 +14785,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-branding-matrix.sh",
-      "reference_count": 7,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14818,7 +14819,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-branding-runtime.sh",
-      "reference_count": 23,
+      "reference_count": 21,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15052,7 +15053,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-footer-variant-lane.sh",
-      "reference_count": 6,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15593,7 +15594,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-visual-contract.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

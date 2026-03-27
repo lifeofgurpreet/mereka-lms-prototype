@@ -53,6 +53,7 @@
     "scripts/qa/verify-enterprise-service-deployment.sh",
     "scripts/qa/verify-enterprise-ui-review.sh",
     "scripts/qa/verify-env-auth-parity.sh",
+    "scripts/qa/verify-footer-variant-matrix.sh",
     "scripts/qa/verify-gitops-image-overrides.sh",
     "scripts/qa/verify-image-freshness.sh",
     "scripts/qa/verify-infisical-env-validation-coverage.sh",

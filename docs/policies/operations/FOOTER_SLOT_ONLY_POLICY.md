@@ -1,58 +1,90 @@
 # Footer Slot-Only Policy
 
 > **Bead**: mereka-lms-115d.19
-> **Last updated**: 2026-02-18
+> **Last updated**: 2026-03-27
 > **Status**: ENFORCED — CI gate active (`footer-slot-only` job)
 
 ---
 
 ## Policy
 
-**Footer customization MUST only be achieved via the FPF (Frontend Plugin Framework) plugin slot `org.openedx.frontend.layout.footer.v1`.**
+**MFE footer customization MUST only be achieved via the FPF (Frontend Plugin Framework) slot `org.openedx.frontend.layout.footer.v1`.**
 
-No raw HTML footer injection, `innerHTML` manipulation, `document.querySelector` footer targeting, or direct footer file rewrites are permitted. All footer customization flows through `MerekaFooter` (defined in `infrastructure/tutor/plugins/mereka_lms.py`) and wired into the MFE via the slot system.
+No raw HTML footer injection, `innerHTML` manipulation, `document.querySelector` footer targeting, or direct footer file rewrites are permitted. The active MFE footer path is:
+
+- footer runtime/component truth in `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js`
+- slot wiring truth in `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py`
+- Tutor build assembly in `infrastructure/tutor/plugins/mereka_lms.py`
+
+The legacy `apply-patches.sh` / `footer-component.sh` path no longer swaps `RenderWidget` or injects `MerekaFooter`. It only syncs build-time assets.
 
 ---
 
 ## Canonical Wiring Path
 
-```
+```text
+_mereka_lms/mfe_runtime_definitions.js
+  └── const MerekaFooter = () => { ... }          ← canonical footer component
+  └── const MEREKA_SITE_VARIANTS = { ... }        ← canonical tenant footer data
+  └── getMerekaVariant(hostname, config)          ← exact + derived-host + fallback resolution
+
+mereka_lms_mfe_slots.py
+  └── PLUGIN_SLOTS.add_items(items)
+      └── org.openedx.frontend.layout.footer.v1
+          ├── Hide default_contents
+          └── Insert MerekaFooter
+
 mereka_lms.py
-  └── PLUGIN_SLOTS.add_item("footer_slot", ...)    ← preferred (FPF slot-driven)
-  └── mfe-env-config patch: MerekaFooter component  ← canonical component definition
-  └── apply-patches.sh: RenderWidget swap           ← registered fallback (see Exception Register)
+  └── assembles/imports the runtime definitions into generated MFE config
+
+footer-component.sh
+  └── asset sync only (copies env.config.jsx + SCSS/fonts into build context)
 ```
 
 ### Primary Path (FPF PLUGIN_SLOTS)
 
-When `tutormfe.hooks.PLUGIN_SLOTS` is available, `mereka_lms.py` registers the footer slot directly:
+The current slot registration is defined in `mereka_lms_mfe_slots.py`:
 
 ```python
-PLUGIN_SLOTS.add_item((
-    "footer_slot",
-    {
-        "keepDefault": False,
-        "plugins": [{
-            "op": "PLUGIN_OPERATIONS.Replace",
-            "widget": {
-                "id": "mereka_footer",
-                "type": "DIRECT_PLUGIN",
-                "RenderWidget": "MerekaFooter",
+items.append(
+    (
+        "all",
+        "org.openedx.frontend.layout.footer.v1",
+        """
+            {
+                op: PLUGIN_OPERATIONS.Hide,
+                widgetId: 'default_contents',
             },
-        }],
-    },
-))
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_footer',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaFooter,
+                },
+            },
+            """,
+    )
+)
+
+PLUGIN_SLOTS.add_items(items)
 ```
 
-### Fallback Path (Registered Exception)
+### Component Path
 
-When `PLUGIN_SLOTS` is not available in the running Tutor/MFE version, `apply-patches.sh` performs a deterministic string swap in `env.config.jsx`:
+The footer component itself lives in `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js` and is compiled into generated `env.config.jsx` at build time:
 
-```python
-updated = updated.replace("RenderWidget: <Footer />", "RenderWidget: <MerekaFooter />")
+```jsx
+const MerekaFooter = () => (
+  <footer className="mereka-footer mereka-footer--v2" role="contentinfo">
+    {/* Zone 1: social row */}
+    {/* Zone 2: nav strip */}
+    {/* Zone 3: column body */}
+    {/* Zone 4: legal row */}
+  </footer>
+);
 ```
-
-This fallback is registered in the Exception Register below. It does not inject raw HTML — it swaps a JSX widget reference inside the existing plugin slot config structure.
 
 ---
 
@@ -65,9 +97,10 @@ The following patterns are explicitly forbidden anywhere in `infrastructure/` or
 | `innerHTML.*footer` | Bypasses slot system, breaks React lifecycle |
 | `document.querySelector.*footer` | Direct DOM mutation, breaks MFE hydration |
 | `document.getElementById.*footer` | Same as above |
-| `sed` targeting `footer.html` directly | File rewrite bypasses Tutor template system |
+| `sed` targeting `footer.html` directly | File rewrite bypasses Tutor/template lifecycle |
 | Raw `<footer>` HTML string written outside JSX | Bypasses slot contract entirely |
-| Writing to footer template path via `echo`/`cat` | Bypasses Tutor template lifecycle |
+| Writing to footer template path via `echo`/`cat` | Bypasses Tutor/template lifecycle |
+| `RenderWidget.*Footer` swap in `apply-patches.sh` | Reintroduces a deprecated fallback path without explicit review |
 
 These patterns are checked by `scripts/qa/verify-footer-slot-only.sh` (AC-FTR-304).
 
@@ -75,18 +108,17 @@ These patterns are checked by `scripts/qa/verify-footer-slot-only.sh` (AC-FTR-30
 
 ## Exception Register
 
-> Temporary exceptions to the slot-only policy. All exceptions require an expiry date and owner.
-> Any exception that reaches its expiry without renewal MUST be removed at the next sprint.
+**No active exceptions.**
 
-| Exception ID | Path | Pattern | Rationale | Owner | Expiry | Rollback |
-|-------------|------|---------|-----------|-------|--------|---------|
-| `FTRE-001` | `infrastructure/tutor/apply-patches.sh` | `updated.replace("RenderWidget: <Footer />", "RenderWidget: <MerekaFooter />")` | Dual-path fallback for Tutor versions where `tutormfe.hooks.PLUGIN_SLOTS` is not yet available. The swap targets a JSX widget reference inside the existing plugin slot config structure — not raw HTML injection. | Mereka platform team | 2026-Q3 | Remove when all deployment targets run Tutor MFE ≥ the version that exposes `PLUGIN_SLOTS`. Set `_PLUGIN_SLOTS_AVAILABLE` guard to always-true. |
-| `FTRE-002` | `infrastructure/tutor/apply-patches.sh` | `updated.replace("import Footer from '@edly-io/indigo-frontend-component-footer';\n", "")` | Removes the default Indigo footer import so `MerekaFooter` can replace it cleanly. Import-removal is not a footer injection — it prevents the default from loading. | Mereka platform team | 2026-Q3 | Remove when Indigo template no longer imports the default footer component, or when PLUGIN_SLOTS `keepDefault: False` suppresses it without import removal. |
+Historical note:
+- Earlier migrations used a temporary `apply-patches.sh` RenderWidget swap while the slot path was being stabilized.
+- That fallback has been removed from the active codebase.
+- If a future emergency exception is introduced, it must be documented here with `Owner`, `Expiry`, and `Rollback`.
 
 ### Exception Renewal Policy
 
-- Exceptions must be reviewed at expiry (2026-Q3 = end of September 2026).
-- Renewal requires: (1) updated rationale, (2) updated expiry, (3) PR approval from platform lead.
+- Any new exception must be temporary, reviewable, and narrowly scoped.
+- Required metadata: `Owner`, `Expiry`, `Rollback`.
 - Expired exceptions that are not renewed must be removed within one sprint.
 
 ---
@@ -100,14 +132,11 @@ document.querySelector('footer').innerHTML = '<div>Mereka footer</div>';
 // BANNED: innerHTML injection
 const el = document.getElementById('site-footer');
 el.innerHTML = footerHtml;
-
-// BANNED: Raw string written to footer.html via shell
-echo '<footer>Mereka</footer>' > tutor_env/env/themes/mereka/lms/templates/footer.html
 ```
 
 ```python
-# BANNED: sed-based footer file rewrite
-os.system("sed -i 's/<footer>.*<\/footer>/MEREKA_FOOTER/' tutor_env/env/.../footer.html")
+# BANNED: direct footer template rewrite
+os.system("sed -i 's/<footer>.*<\\/footer>/MEREKA_FOOTER/' tutor_env/env/.../footer.html")
 ```
 
 ---
@@ -115,19 +144,31 @@ os.system("sed -i 's/<footer>.*<\/footer>/MEREKA_FOOTER/' tutor_env/env/.../foot
 ## What TO Do
 
 ```python
-# CORRECT: Register via PLUGIN_SLOTS (preferred)
-PLUGIN_SLOTS.add_item(("footer_slot", {
-    "keepDefault": False,
-    "plugins": [{"op": "PLUGIN_OPERATIONS.Replace", "widget": {
-        "id": "mereka_footer",
-        "type": "DIRECT_PLUGIN",
-        "RenderWidget": "MerekaFooter",
-    }}],
-}))
+# CORRECT: register footer slot operations via PLUGIN_SLOTS
+PLUGIN_SLOTS.add_items([
+    (
+        "all",
+        "org.openedx.frontend.layout.footer.v1",
+        """
+            {
+                op: PLUGIN_OPERATIONS.Hide,
+                widgetId: 'default_contents',
+            },
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_footer',
+                    type: DIRECT_PLUGIN,
+                    RenderWidget: MerekaFooter,
+                },
+            },
+        """,
+    )
+])
 ```
 
 ```jsx
-// CORRECT: Define MerekaFooter as a React component in env.config.jsx (via mfe-env-config patch)
+// CORRECT: define the footer component in the runtime definitions module
 const MerekaFooter = () => (
   <footer className="mereka-footer mereka-footer--v2" role="contentinfo">
     {/* ... */}
@@ -147,7 +188,7 @@ Run these commands to confirm footer slot-only policy compliance. Results are PA
 ./scripts/qa/verify-footer-slot-only.sh
 ```
 
-Expected output: `0 FAIL` (WARNs for registered exceptions are acceptable).
+Expected output: `0 FAIL / 0 WARN`.
 
 ### Supporting checks
 
@@ -155,39 +196,35 @@ Expected output: `0 FAIL` (WARNs for registered exceptions are acceptable).
 # Footer parity — MFE component + Mako template consistency
 ./scripts/qa/verify-footer-parity.sh
 
-# Slot migration register — confirms footer shows MIGRATED status
-./scripts/qa/verify-plugin-slot-migration-register.sh
-
-# Footer variant matrix — SITE_VARIANTS ↔ docs sync
+# Footer variant matrix — MEREKA_SITE_VARIANTS ↔ docs sync
 ./scripts/qa/verify-footer-variant-matrix.sh
 
 # MFE footer slot wiring
 ./scripts/qa/verify-mfe-footer-slot.sh
 
-# No DOM overrides (broader check including footer)
-./scripts/qa/verify-no-dom-overrides.sh
+# Tenant footer lane truth
+./scripts/qa/verify-tenant-footer-variant-lane.sh
 ```
 
-### Evidence (last verified: 2026-02-18)
+### Evidence (last verified: 2026-03-27)
 
 | Script | Result | Notes |
 |--------|--------|-------|
-| `verify-footer-slot-only.sh` | PASS (0 FAIL, 2 WARN) | WARNs are registered exceptions FTRE-001 and FTRE-002 |
-| `verify-footer-parity.sh` | PASS | MFE MerekaFooter + Mako footer consistent |
-| `verify-plugin-slot-migration-register.sh` | PASS | Footer status: MIGRATED |
-| `verify-footer-variant-matrix.sh` | PASS | 3 production domains in SITE_VARIANTS |
+| `verify-footer-slot-only.sh` | PASS | No active exceptions, no legacy footer swap |
+| `verify-footer-parity.sh` | PASS | MFE footer + LMS/CMS footer surfaces are present and classified |
+| `verify-footer-variant-matrix.sh` | PASS | 3 production domains + derived-host fallback verified |
 | `verify-mfe-footer-slot.sh` | PASS | Slot wiring confirmed |
-| `verify-no-dom-overrides.sh` | PASS | No forbidden DOM overrides |
+| `verify-tenant-footer-variant-lane.sh` | PASS | Operator lane docs aligned with runtime helper |
 
-**Next action**: No action required. Monitor exception register expiry at 2026-Q3.
+**Next action**: Keep policy and verifier aligned with `_mereka_lms/mfe_runtime_definitions.js` and `mereka_lms_mfe_slots.py`. Treat any reintroduced `apply-patches.sh` footer swap as a regression until explicitly reviewed.
 
 ---
 
 ## References
 
-- [`docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md) — Full migration register (Footer row: MIGRATED)
-- [`docs/reference/operations/FOOTER_VARIANT_MATRIX.md`](FOOTER_VARIANT_MATRIX.md) — Per-domain footer config
-- [`infrastructure/tutor/plugins/mereka_lms.py`](../../infrastructure/tutor/plugins/mereka_lms.py) — `MerekaFooter` component + `PLUGIN_SLOTS` registration
-- [`infrastructure/tutor/apply-patches.sh`](../../infrastructure/tutor/apply-patches.sh) — Registered fallback (`FTRE-001`, `FTRE-002`)
-- [`scripts/qa/verify-footer-slot-only.sh`](../../scripts/qa/verify-footer-slot-only.sh) — Policy gate script
-- [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html) — Upstream slot spec
+- [`docs/reference/operations/FOOTER_VARIANT_MATRIX.md`](../../reference/operations/FOOTER_VARIANT_MATRIX.md) — per-domain footer config
+- [`infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js`](../../../infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js) — `MerekaFooter`, `MEREKA_SITE_VARIANTS`, `getMerekaVariant`
+- [`infrastructure/tutor/plugins/mereka_lms_mfe_slots.py`](../../../infrastructure/tutor/plugins/mereka_lms_mfe_slots.py) — footer slot registration
+- [`infrastructure/tutor/patches/footer-component.sh`](../../../infrastructure/tutor/patches/footer-component.sh) — asset sync only
+- [`scripts/qa/verify-footer-slot-only.sh`](../../../scripts/qa/verify-footer-slot-only.sh) — policy gate
+- [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html) — upstream slot spec

@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-workflow-script-references.sh"
+SOURCE_VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-workflow-script-references.sh"
 
 PASS=0
 FAIL=0
@@ -16,6 +16,14 @@ run_case() {
   local expected_marker="$3"
   local setup_fn="$4"
   local cleanup_fn="$5"
+  local temp_root
+  temp_root="$(mktemp -d -t workflow-ref-test.repo.XXXXXX)"
+  mkdir -p "$temp_root/.github/workflows" "$temp_root/scripts/qa"
+  cp "$SOURCE_VERIFY_SCRIPT" "$temp_root/scripts/qa/verify-workflow-script-references.sh"
+
+  VERIFY_SCRIPT="$temp_root/scripts/qa/verify-workflow-script-references.sh"
+  WF_FILE="$temp_root/.github/workflows/workflow-ref-test-temp.yml"
+  TMP_SCRIPT="$temp_root/scripts/qa/workflow-ref-test-temp.sh"
 
   local stdout_file
   local stderr_file
@@ -31,6 +39,7 @@ run_case() {
   set -e
 
   "$cleanup_fn"
+  rm -rf "$temp_root"
 
   if [[ "$status" -ne "$expected_status" ]]; then
     echo "FAIL: $name expected_status=$expected_status observed=$status"
@@ -61,8 +70,9 @@ run_case() {
   rm -f "$stdout_file" "$stderr_file"
 }
 
-WF_FILE="$REPO_ROOT/.github/workflows/workflow-ref-test-temp.yml"
-TMP_SCRIPT="$REPO_ROOT/scripts/qa/workflow-ref-test-temp.sh"
+WF_FILE=""
+TMP_SCRIPT=""
+VERIFY_SCRIPT=""
 
 setup_missing_script() {
   cat >"$WF_FILE" <<'EOF'

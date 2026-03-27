@@ -7,10 +7,10 @@ set -euo pipefail
 # Enforces the footer slot-only policy:
 #   - Footer customization MUST be achieved only via FPF plugin slot (footer.v1)
 #   - Raw HTML footer injection and document.querySelector footer manipulation are banned
-#   - Any remaining fallback path must be documented in the exception register
+#   - No legacy apply-patches footer swap should remain active without an explicit exception
 #
 # Bead: mereka-lms-115d.19
-# Last updated: 2026-02-18
+# Last updated: 2026-03-27
 
 PASS=0
 FAIL=0
@@ -34,8 +34,7 @@ echo ""
 
 # -----------------------------------------------------------------------
 # AC-FTR-301: No raw HTML footer string replacement/rewrite in apply-patches.sh
-# Allowed exception: the known RenderWidget swap (apply-patches.sh line ~1229)
-# is registered in FOOTER_SLOT_ONLY_POLICY.md and is not a raw HTML rewrite.
+# No RenderWidget/footer swap fallback is expected in the current architecture.
 # Banned: sed.*footer (direct sed-based footer file rewrite),
 #         replace.*footer.*html (raw HTML file manipulation),
 #         innerHTML.*footer (DOM innerHTML footer injection)
@@ -63,11 +62,11 @@ else
     pass "AC-FTR-301: No raw footer.html write operations in apply-patches.sh"
   fi
 
-  # The RenderWidget swap is the known registered fallback — it is allowed.
-  # Verify it exists (its presence is expected and documented) but not any new raw HTML injection.
+  # The active architecture is plugin-driven only. A RenderWidget swap indicates
+  # old fallback logic was reintroduced and must be reviewed explicitly.
   RENDER_WIDGET_SWAP=$(grep -c "RenderWidget.*Footer\|Footer.*RenderWidget" "$PATCHES" || true)
   if [[ "$RENDER_WIDGET_SWAP" -gt 0 ]]; then
-    warn "AC-FTR-301: RenderWidget footer swap exists in apply-patches.sh ($RENDER_WIDGET_SWAP occurrence(s)) — this is the registered dual-path fallback (see exception register in FOOTER_SLOT_ONLY_POLICY.md)"
+    fail "AC-FTR-301: Legacy RenderWidget footer swap exists in apply-patches.sh ($RENDER_WIDGET_SWAP occurrence(s)) — current policy expects plugin-only footer wiring"
   fi
 fi
 
@@ -120,9 +119,11 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-FTR-303: Exception register section exists in docs with owner/expiry fields
+# AC-FTR-303: Exception register section exists in docs. If active exceptions
+# are present, they must carry owner/expiry metadata. Otherwise the doc must
+# say there are no active exceptions.
 # -----------------------------------------------------------------------
-echo "AC-FTR-303: Exception register exists with owner and expiry fields"
+echo "AC-FTR-303: Exception register truth is documented"
 
 if [[ ! -f "$POLICY_DOC" ]]; then
   fail "AC-FTR-303: FOOTER_SLOT_ONLY_POLICY.md not found at $POLICY_DOC"
@@ -136,18 +137,22 @@ else
     fail "AC-FTR-303: No exception register section found in FOOTER_SLOT_ONLY_POLICY.md"
   fi
 
-  # Must have owner field documented
-  if grep -qi "Owner\|owner:" "$POLICY_DOC"; then
-    pass "AC-FTR-303: Owner field present in exception register"
+  if grep -qi "No active exceptions" "$POLICY_DOC"; then
+    pass "AC-FTR-303: Exception register explicitly states there are no active footer exceptions"
   else
-    fail "AC-FTR-303: No 'Owner' field found in exception register"
-  fi
+    # Must have owner field documented
+    if grep -qi "Owner\|owner:" "$POLICY_DOC"; then
+      pass "AC-FTR-303: Owner field present in exception register"
+    else
+      fail "AC-FTR-303: No 'Owner' field found in exception register"
+    fi
 
-  # Must have expiry date documented (Q-notation or YYYY-MM-DD)
-  if grep -qE "202[6-9]-Q[1-4]|Expiry|expiry|expires|2026-[0-9]{2}-[0-9]{2}" "$POLICY_DOC"; then
-    pass "AC-FTR-303: Expiry date present in exception register"
-  else
-    fail "AC-FTR-303: No expiry date found in exception register (expected YYYY-QN or YYYY-MM-DD format)"
+    # Must have expiry date documented (Q-notation or YYYY-MM-DD)
+    if grep -qE "202[6-9]-Q[1-4]|Expiry|expiry|expires|2026-[0-9]{2}-[0-9]{2}" "$POLICY_DOC"; then
+      pass "AC-FTR-303: Expiry date present in exception register"
+    else
+      fail "AC-FTR-303: No expiry date found in exception register (expected YYYY-QN or YYYY-MM-DD format)"
+    fi
   fi
 fi
 
@@ -251,6 +256,13 @@ else
     pass "AC-FTR-305: Policy doc uses PASS/WARN/FAIL evidence language"
   else
     warn "AC-FTR-305: Policy doc does not use PASS/WARN/FAIL evidence format — consider adding verification command output evidence"
+  fi
+
+  if grep -q "_mereka_lms/mfe_runtime_definitions.js" "$POLICY_DOC" \
+    && grep -q "mereka_lms_mfe_slots.py" "$POLICY_DOC"; then
+    pass "AC-FTR-305: Policy doc references current canonical footer runtime and slot wiring sources"
+  else
+    fail "AC-FTR-305: Policy doc missing canonical footer source references (_mereka_lms/mfe_runtime_definitions.js + mereka_lms_mfe_slots.py)"
   fi
 fi
 

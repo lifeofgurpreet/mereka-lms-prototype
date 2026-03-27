@@ -410,11 +410,11 @@ if [[ -f "$FOOTER_MATRIX_DOC" ]]; then
     fail "AC-TF-004: FOOTER_VARIANT_MATRIX.md missing 'Adding a New Domain' section"
   fi
 
-  # Check for apply-patches.sh reference (config step)
-  if grep -q "apply-patches.sh" "$FOOTER_MATRIX_DOC"; then
-    pass "AC-TF-004: Matrix doc references apply-patches.sh (config rebuild step)"
+  # Check for the current Tutor config workflow reference.
+  if grep -qE "tutor-config-save\\.sh|tutor config save" "$FOOTER_MATRIX_DOC"; then
+    pass "AC-TF-004: Matrix doc references the Tutor config workflow for host/config changes"
   else
-    warn "AC-TF-004: Matrix doc does not reference apply-patches.sh (advisory)"
+    warn "AC-TF-004: Matrix doc does not reference the Tutor config workflow (advisory)"
   fi
 
   # Check for provision-tenant.sh reference (multi-tenancy config step)

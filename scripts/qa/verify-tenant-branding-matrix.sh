@@ -17,6 +17,7 @@ warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+RUNTIME_DEFS="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
 MATRIX_DOC="$REPO_ROOT/docs/reference/operations/TENANT_BRANDING_MATRIX.md"
@@ -127,9 +128,10 @@ else
     fail "SITE_VARIANTS fallback missing — no variant lookup found"
   fi
 
-  # Verify fallback references dynamic config values (not hardcoded)
-  FALLBACK_LINE=$(grep -E "(MEREKA_)?SITE_VARIANTS\[" "$PLUGIN" || true)
-  if echo "$FALLBACK_LINE" | grep -qE "config\.SITE_NAME|config\.PLATFORM_NAME|siteName"; then
+  # Verify fallback references dynamic config values in the runtime helper.
+  if [[ -f "$RUNTIME_DEFS" ]] \
+    && grep -q "fallbackBrand.*config\\.SITE_NAME" "$RUNTIME_DEFS" \
+    && grep -q "fallbackPlatform.*config\\.PLATFORM_NAME" "$RUNTIME_DEFS"; then
     pass "Fallback references dynamic config values (not hardcoded brand string)"
   else
     warn "Fallback may not reference config.SITE_NAME — review fallback line in plugin"

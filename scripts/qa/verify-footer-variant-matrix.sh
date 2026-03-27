@@ -12,27 +12,8 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
-PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
-PLUGIN_BUNDLE=""
-PLUGIN="$PLUGIN_MAIN"
+RUNTIME_DEFS="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
 MATRIX_DOC="$REPO_ROOT/docs/reference/operations/FOOTER_VARIANT_MATRIX.md"
-
-if mereka_plugin_has_any "$REPO_ROOT"; then
-  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
-  while IFS= read -r plugin_file; do
-    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
-    printf '\n' >>"$PLUGIN_BUNDLE"
-  done < <(mereka_plugin_contract_files "$REPO_ROOT")
-  PLUGIN="$PLUGIN_BUNDLE"
-fi
-
-cleanup() {
-  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
-    rm -f "$PLUGIN_BUNDLE"
-  fi
-}
-trap cleanup EXIT
 
 echo "========================================"
 echo "Footer Variant Matrix Verifier"
@@ -44,24 +25,24 @@ echo ""
 # -----------------------------------------------------------------------
 echo "AC-FTVAR-001: MEREKA_SITE_VARIANTS contains all 3 production domains"
 
-if [[ ! -f "$PLUGIN" ]]; then
-  fail "Plugin file missing: $PLUGIN"
+if [[ ! -f "$RUNTIME_DEFS" ]]; then
+  fail "Canonical footer runtime definitions missing: $RUNTIME_DEFS"
 else
-  pass "Plugin contract source exists: $PLUGIN_MAIN"
+  pass "Canonical footer runtime definitions exist: infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
 
-  if grep -q "'academyv2.mereka.io'" "$PLUGIN"; then
+  if grep -q "'academyv2.mereka.io'" "$RUNTIME_DEFS"; then
     pass "MEREKA_SITE_VARIANTS contains 'academyv2.mereka.io'"
   else
     fail "MEREKA_SITE_VARIANTS missing 'academyv2.mereka.io'"
   fi
 
-  if grep -q "'academy.biji-biji.com'" "$PLUGIN"; then
+  if grep -q "'academy.biji-biji.com'" "$RUNTIME_DEFS"; then
     pass "MEREKA_SITE_VARIANTS contains 'academy.biji-biji.com'"
   else
     fail "MEREKA_SITE_VARIANTS missing 'academy.biji-biji.com'"
   fi
 
-  if grep -q "'skillourfuture.academy.mereka.io'" "$PLUGIN"; then
+  if grep -q "'skillourfuture.academy.mereka.io'" "$RUNTIME_DEFS"; then
     pass "MEREKA_SITE_VARIANTS contains 'skillourfuture.academy.mereka.io'"
   else
     fail "MEREKA_SITE_VARIANTS missing 'skillourfuture.academy.mereka.io'"
@@ -75,9 +56,9 @@ echo ""
 # -----------------------------------------------------------------------
 echo "AC-FTVAR-002: Each variant has required fields (no nulls)"
 
-if [[ -f "$PLUGIN" ]]; then
+if [[ -f "$RUNTIME_DEFS" ]]; then
   # Extract the MEREKA_SITE_VARIANTS block.
-  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
+  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/' "$RUNTIME_DEFS")
 
   # Check brand field present in variants block
   if echo "$VARIANTS_BLOCK" | grep -q "brand:"; then
@@ -96,7 +77,7 @@ if [[ -f "$PLUGIN" ]]; then
   # Check whatsapp field present in variants block or base variant (via spread)
   if echo "$VARIANTS_BLOCK" | grep -q "whatsapp:"; then
     pass "MEREKA_SITE_VARIANTS entries contain 'whatsapp:' field"
-  elif grep -q "MEREKA_BASE_VARIANT" "$PLUGIN" && grep -q "whatsapp:" "$PLUGIN"; then
+  elif grep -q "MEREKA_BASE_VARIANT" "$RUNTIME_DEFS" && grep -q "whatsapp:" "$RUNTIME_DEFS"; then
     pass "MEREKA_SITE_VARIANTS inherits 'whatsapp:' from MEREKA_BASE_VARIANT"
   else
     fail "MEREKA_SITE_VARIANTS entries missing 'whatsapp:' field"
@@ -113,7 +94,7 @@ if [[ -f "$PLUGIN" ]]; then
 extract_variant_field() {
   local domain="$1"
   local field_name="$2"
-  python3 - "$PLUGIN" "$domain" "$field_name" <<'PY'
+  python3 - "$RUNTIME_DEFS" "$domain" "$field_name" <<'PY'
 import re
 import sys
 
@@ -218,6 +199,13 @@ else
     fail "Matrix doc missing 'Config-First Migration Path' section"
   fi
 
+  if grep -q "_mereka_lms/mfe_runtime_definitions.js" "$MATRIX_DOC" \
+    && grep -q "MEREKA_SITE_VARIANTS" "$MATRIX_DOC"; then
+    pass "Matrix doc points to the canonical runtime definitions module and MEREKA_SITE_VARIANTS"
+  else
+    fail "Matrix doc missing canonical runtime definitions reference (_mereka_lms/mfe_runtime_definitions.js + MEREKA_SITE_VARIANTS)"
+  fi
+
   if grep -q "Adding a New Domain" "$MATRIX_DOC"; then
     pass "Matrix doc has 'Adding a New Domain' section"
   else
@@ -232,20 +220,21 @@ echo ""
 # -----------------------------------------------------------------------
 echo "AC-FTVAR-004: Fallback variant for unknown hostnames"
 
-if [[ -f "$PLUGIN" ]]; then
-  # Current architecture resolves exact hostname match first, then stripped MFE hostnames,
-  # then falls back to a deterministic default shell.
-  if grep -q "const exactVariant = MEREKA_SITE_VARIANTS\\[normalizedHostname\\]" "$PLUGIN" \
-    && grep -q "const strippedVariant = MEREKA_SITE_VARIANTS\\[candidate\\] || MEREKA_SITE_VARIANTS\\[devCandidate\\]" "$PLUGIN" \
-    && grep -q "Unknown host fallback" "$PLUGIN"; then
-    pass "Fallback variant exists in getMerekaVariant() (exact match + stripped host lookup + explicit fallback)"
+if [[ -f "$RUNTIME_DEFS" ]]; then
+  # Current architecture resolves canonical LMS hostnames first, then derives
+  # MFE/staging candidates, then falls back to a deterministic default shell.
+  if grep -q "const exactVariant = MEREKA_SITE_VARIANTS\\[normalizedHostname\\]" "$RUNTIME_DEFS" \
+    && grep -q "for (const candidate of deriveVariantCandidates(normalizedHostname))" "$RUNTIME_DEFS" \
+    && grep -q "const variant = MEREKA_SITE_VARIANTS\\[candidate\\]" "$RUNTIME_DEFS" \
+    && grep -q "Unknown host fallback" "$RUNTIME_DEFS"; then
+    pass "Fallback variant exists in getMerekaVariant() (exact match + derived candidate lookup + explicit fallback)"
   else
-    fail "Fallback variant missing — expected exactVariant/strippedVariant lookup with explicit fallback return object"
+    fail "Fallback variant missing — expected exact match, derived candidate lookup, and explicit unknown-host fallback in getMerekaVariant()"
   fi
 
   # Confirm fallback references dynamic config values (SITE_NAME / PLATFORM_NAME).
-  if grep -q "fallbackBrand.*config\\.SITE_NAME" "$PLUGIN" \
-    && grep -q "fallbackPlatform.*config\\.PLATFORM_NAME" "$PLUGIN"; then
+  if grep -q "fallbackBrand.*config\\.SITE_NAME" "$RUNTIME_DEFS" \
+    && grep -q "fallbackPlatform.*config\\.PLATFORM_NAME" "$RUNTIME_DEFS"; then
     pass "Fallback variant uses dynamic config values (config.SITE_NAME / config.PLATFORM_NAME)"
   else
     warn "Fallback variant may not reference config.SITE_NAME/config.PLATFORM_NAME — review getMerekaVariant()"
@@ -255,40 +244,26 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-FTVAR-005: DRY check — no domain strings outside MEREKA_SITE_VARIANTS inside
-# MerekaFooter component body
+# AC-FTVAR-005: DRY check — no domain strings outside MEREKA_SITE_VARIANTS in the
+# canonical footer runtime definitions module.
 # -----------------------------------------------------------------------
 echo "AC-FTVAR-005: DRY check — domain strings confined to MEREKA_SITE_VARIANTS"
 
-if [[ -f "$PLUGIN" ]]; then
+if [[ -f "$RUNTIME_DEFS" ]]; then
   DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
+  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/' "$RUNTIME_DEFS")
 
-  # Locate the line numbers of MerekaFooter and its closing line
-  FOOTER_START=$(grep -nF "const MerekaFooter = ()" "$PLUGIN" | head -1 | cut -d: -f1)
-  # Find the first standalone "};" after the footer start (handle CRLF line endings)
-  FOOTER_END=$(awk -v start="$FOOTER_START" 'NR > start && /^};\r?$/ { print NR; exit }' "$PLUGIN")
+  for domain in "${DOMAINS[@]}"; do
+    TOTAL_COUNT=$(grep -cF "$domain" "$RUNTIME_DEFS" || true)
+    VARIANTS_COUNT=$(echo "$VARIANTS_BLOCK" | grep -cF "$domain" || true)
+    OUTSIDE_COUNT=$((TOTAL_COUNT - VARIANTS_COUNT))
 
-  if [[ -z "$FOOTER_START" || -z "$FOOTER_END" ]]; then
-    fail "Could not locate MerekaFooter function boundaries for DRY check"
-  else
-    # Extract the MerekaFooter body using line numbers (exact, no pattern-stop ambiguity)
-    FOOTER_BODY=$(awk -v s="$FOOTER_START" -v e="$FOOTER_END" 'NR>=s && NR<=e' "$PLUGIN")
-
-    # Extract the MEREKA_SITE_VARIANTS block within that body
-    VARIANTS_BLOCK=$(echo "$FOOTER_BODY" | awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/')
-
-    for domain in "${DOMAINS[@]}"; do
-      TOTAL_COUNT=$(echo "$FOOTER_BODY" | grep -cF "$domain" || true)
-      VARIANTS_COUNT=$(echo "$VARIANTS_BLOCK" | grep -cF "$domain" || true)
-      OUTSIDE_COUNT=$((TOTAL_COUNT - VARIANTS_COUNT))
-
-      if [[ "$OUTSIDE_COUNT" -le 0 ]]; then
-        pass "Domain '${domain}' only appears inside MEREKA_SITE_VARIANTS in MerekaFooter (DRY)"
-      else
-        fail "Domain '${domain}' appears ${OUTSIDE_COUNT} time(s) outside MEREKA_SITE_VARIANTS in MerekaFooter (DRY violation)"
-      fi
-    done
-  fi
+    if [[ "$OUTSIDE_COUNT" -le 0 ]]; then
+      pass "Domain '${domain}' only appears inside MEREKA_SITE_VARIANTS in mfe_runtime_definitions.js (DRY)"
+    else
+      fail "Domain '${domain}' appears ${OUTSIDE_COUNT} time(s) outside MEREKA_SITE_VARIANTS in mfe_runtime_definitions.js (DRY violation)"
+    fi
+  done
 fi
 
 echo ""
