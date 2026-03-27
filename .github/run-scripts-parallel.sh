@@ -12,13 +12,21 @@ SCRIPT_LIST="${1:?Usage: run-scripts-parallel.sh <list-file> [parallelism] [time
 PARALLELISM="${2:-4}"
 TIMEOUT_SECS="${3:-120}"
 RESULTS_DIR="var/ci-results"
+ENTRIES_FILE="${RESULTS_DIR}/entries.tsv"
 
 mkdir -p "$RESULTS_DIR"
 > "${RESULTS_DIR}/summary.txt"
 
 # ── per-script runner (called by xargs -P) ─────────────────────────────────
 run_one() {
-  local entry="$1"
+  local numbered_entry="$1"
+  local index="?"
+  local entry="$numbered_entry"
+  if [[ "$numbered_entry" == *$'\t'* ]]; then
+    index="${numbered_entry%%$'\t'*}"
+    entry="${numbered_entry#*$'\t'}"
+  fi
+
   # Strip inline comments
   local entry_clean="${entry%% #*}"
   entry_clean="${entry_clean## }"
@@ -34,21 +42,25 @@ run_one() {
   local name
   name=$(basename "$script_path" .sh)
   local logfile="${RESULTS_DIR}/${name}.log"
+  local total="${TOTAL_SCRIPTS:-?}"
+  local started_at=$SECONDS
 
   if [[ ! -f "$script_path" ]]; then
-    echo "FAIL ${name} (file not found)"
+    echo "FAIL ${name} [${index}/${total}] (file not found)"
     return 0
   fi
 
+  echo "START ${name} [${index}/${total}]"
+
   # shellcheck disable=SC2086
   if timeout "$TIMEOUT_SECS" bash "$script_path" $extra_args > "$logfile" 2>&1; then
-    echo "PASS ${name}"
+    echo "PASS ${name} [${index}/${total}] (${SECONDS-started_at}s)"
   else
     local rc=$?
     if [[ $rc -eq 124 ]]; then
-      echo "TIMEOUT ${name}"
+      echo "TIMEOUT ${name} [${index}/${total}] (${SECONDS-started_at}s)"
     else
-      echo "FAIL ${name} (exit ${rc})"
+      echo "FAIL ${name} [${index}/${total}] (exit ${rc}, ${SECONDS-started_at}s)"
     fi
   fi
 }
@@ -56,9 +68,16 @@ export -f run_one
 export RESULTS_DIR TIMEOUT_SECS
 
 # ── filter list, run in parallel, tee summary ──────────────────────────────
-grep -v '^\s*$' "$SCRIPT_LIST" | grep -v '^\s*#' | \
-  xargs -P"$PARALLELISM" -I{} bash -c 'run_one "$@"' _ {} | \
-  tee "${RESULTS_DIR}/summary.txt"
+grep -v '^\s*$' "$SCRIPT_LIST" | grep -v '^\s*#' | nl -ba -w1 -s $'\t' > "$ENTRIES_FILE"
+TOTAL_SCRIPTS=$(wc -l < "$ENTRIES_FILE" | tr -d ' ')
+export TOTAL_SCRIPTS
+
+echo "Running ${TOTAL_SCRIPTS} scripts with parallelism ${PARALLELISM} and timeout ${TIMEOUT_SECS}s"
+
+if [[ "$TOTAL_SCRIPTS" -gt 0 ]]; then
+  xargs -d '\n' -P"$PARALLELISM" -I{} bash -c 'run_one "$@"' _ {} < "$ENTRIES_FILE" | \
+    tee "${RESULTS_DIR}/summary.txt"
+fi
 
 # ── aggregate counts ────────────────────────────────────────────────────────
 PASS=$(grep -c "^PASS"    "${RESULTS_DIR}/summary.txt" || true)
