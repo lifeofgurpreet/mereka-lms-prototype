@@ -51,7 +51,7 @@ This table is the canonical decision reference for where branding changes belong
 | **Tenant logo (LMS/Studio)** | Per-tenant | Runtime (no rebuild) | `LOGO_URL` in `TenantSiteConfiguration.mfe_config` or `/theming/asset/` |
 | **Tenant favicon** | Per-tenant | Runtime (no rebuild) | `FAVICON_URL` in `TenantSiteConfiguration.mfe_config` |
 | **Tenant primary domain** | Per-tenant | DNS + Caddy config | Caddy block + Django `Site` model must both be updated |
-| **`PLATFORM_NAME`** | Per-tenant | Runtime (Django admin) | `Sites` → `Site Configuration` → `PLATFORM_NAME` value |
+| **`PLATFORM_NAME`** | Per-tenant | Runtime via multisite registry + `apply-multisite-config.sh` | `site_values.platform_name` in `multisite-sites*.yml`, reconciled into `SiteConfiguration` |
 | **MFE `SITE_NAME`** | Per-tenant | Runtime `SiteConfiguration.site_values["MFE_CONFIG"]` for portal/API truth; image rebuild only for plugin-owned footer fallback | Enterprise portal shell may bootstrap from `env.config.js`, but canonical runtime truth is split across env config, LMS global `MFE_CONFIG`, and per-site `SiteConfiguration` |
 | **MFE `SUPPORT_EMAIL`** | Per-tenant | Runtime `SiteConfiguration.site_values["MFE_CONFIG"]` or plugin-owned fallback rebuild | Do not assume base `enterprise-mfe-env.js` alone proves final runtime value |
 | **LMS SCSS/CSS overrides** | Global | LMS image rebuild | Theme-level; not per-tenant at runtime |
@@ -399,7 +399,8 @@ Host: acme.academyv2.mereka.io
 | **DNS configuration** | Platform Engineering | 1 business day (new domain) |
 | **SSL certificates** | Platform Engineering (automated) | 1 hour (cert-manager auto-issues) |
 | **Theme directory structure** | Platform Engineering | N/A (created during provisioning) |
-| **Database configuration** | Platform Engineering (via provision_tenant) | 1 hour (provisioning script) |
+| **Tenant bootstrap records** | Platform Engineering (`provision-tenant.sh`) | 1 hour (bootstrap script) |
+| **Runtime Site/SiteConfiguration truth** | Platform Engineering (`apply-multisite-config.sh`) | 1 hour (canonical reconcile) |
 | **Asset upload** | Tenant Operations / Design Team | Self-service (ops runbook) |
 | **Verification** | Platform Engineering (automated) | 30 minutes (CI gates) |
 | **Brand pack updates** | Tenant Operations / Design Team | Self-service (zero-downtime workflow) |
@@ -408,7 +409,7 @@ Host: acme.academyv2.mereka.io
 ### Handoff Points
 
 1. **Tenant onboarding**: Design Team → Tenant Ops (brand pack assets)
-2. **Provisioning**: Tenant Ops → Platform Eng (run provision_tenant script)
+2. **Bootstrap + reconcile**: Tenant Ops → Platform Eng (`provision-tenant.sh` then `apply-multisite-config.sh`)
 3. **DNS setup**: Platform Eng → Tenant Ops (A record instructions)
 4. **Brand pack upload**: Tenant Ops (self-service via runbook)
 5. **Verification**: Platform Eng (automated via CI gates)
@@ -591,9 +592,10 @@ Tenant: acme-corp
 **Cause**: CSS specificity conflict or cached CSS.
 
 **Fix**:
-1. Verify database config: `tutor local run lms python manage.py lms shell -c "from openedx_tenant_cache.models import TenantSiteMapping; print(TenantSiteMapping.get_by_slug('acme-corp').site_config.values['primary_color'])"`
-2. Check CSS injection: Inspect element, verify `--primary-color` CSS variable in `:root`
-3. Rebuild MFE (if CSS is image-baked): `tutor images build mfe && tutor k8s restart`
+1. Reconcile runtime config: `./scripts/infra/apply-multisite-config.sh --env prod --dry-run`
+2. Verify tenant color payload: `./scripts/qa/verify-tenant-branding-runtime.sh`
+3. Check CSS injection in the rendered page: verify `--primary-color` is present on `:root`
+4. If the issue is image-owned rather than runtime-owned, ship it through the governed image build and release flow instead of local `tutor` commands
 
 ---
 
@@ -602,9 +604,10 @@ Tenant: acme-corp
 **Cause**: Cache not invalidated.
 
 **Fix**:
-1. Clear Redis cache: `tenant_cache_clear(tenant_uuid)`
-2. Restart LMS pods: `tutor k8s restart`
-3. Verify API response: `curl https://acme.academyv2.mereka.io/api/v1/mfe_config | jq .FOOTER_TEXT`
+1. Re-run `./scripts/infra/apply-multisite-config.sh --env prod --dry-run`
+2. Verify the footer/runtime payload with `./scripts/qa/verify-tenant-branding-runtime.sh`
+3. If the issue is repo-owned footer shell code, fix it in source and ship through the governed image/release path
+4. Verify API response: `curl https://acme.academyv2.mereka.io/api/v1/mfe_config | jq .FOOTER_TEXT`
 
 ---
 

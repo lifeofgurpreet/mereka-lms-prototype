@@ -9,12 +9,11 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 
 ## Overview
 
-Adding a new tenant brand requires changes across four layers:
-
-1. theme assets
-2. tenant footer/runtime data
-3. platform host / tenant config
-4. verification and deployment
+Adding a new tenant brand spans repo-owned brand inputs, runtime
+multisite reconciliation, and post-deploy verification. This guide
+covers the canonical path from "we have a new domain" to "tenant is
+live with correct branding" without falling back to manual
+`SiteConfiguration` edits or ad-hoc image pushes.
 
 The current source of truth for MFE footer branding is:
 
@@ -25,10 +24,12 @@ There is no longer a dual-path `apply-patches.sh` footer fallback to keep in syn
 
 ## Prerequisites
 
-- Domain DNS pointing at the currently active platform ingress
-- Open edX `Site` and `SiteConfiguration` created or planned for the domain
+- Domain DNS planned and routed through the platform domain/GitOps
+  contract
+- Access to `infrastructure/tutor/multisite-sites*.yml`
 - Access to `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js`
-- Access to the normal Tutor config workflow (`./scripts/infra/tutor-config-save.sh`) if host config changes are required
+- Access to `scripts/tenants/provision-tenant.sh` and
+  `scripts/infra/apply-multisite-config.sh`
 
 ---
 
@@ -92,19 +93,65 @@ const MEREKA_SITE_VARIANTS = {
 
 ---
 
-## Step 4: Configure Site / SiteConfiguration
+## Step 4: Bootstrap tenant records and reconcile multisite config
 
-In Django Admin, create or update the `SiteConfiguration` for the domain so the fallback branch has correct platform values:
+Preview the tenant bootstrap first:
 
-```json
-{
-  "SITE_NAME": "Brand Name",
-  "PLATFORM_NAME": "Entity Name",
-  "LMS_BASE_URL": "https://newdomain.example.com"
-}
+```bash
+./scripts/tenants/provision-tenant.sh \
+  --slug <tenant-slug> \
+  --name "<Brand Name>" \
+  --domain <new-domain> \
+  --contact-email <ops@tenant.example> \
+  --country MY \
+  --dry-run
 ```
 
----
+Preview the authoritative multisite reconciliation:
+
+```bash
+./scripts/infra/apply-multisite-config.sh --env prod --dry-run
+```
+
+Apply the bootstrap when the preview is clean:
+
+```bash
+CONFIRM_PROVISION_TENANT=PROVISION_TENANT \
+./scripts/tenants/provision-tenant.sh \
+  --slug <tenant-slug> \
+  --name "<Brand Name>" \
+  --domain <new-domain> \
+  --contact-email <ops@tenant.example> \
+  --country MY
+```
+
+Then reconcile the canonical `Site` + `SiteConfiguration` state from the
+multisite registry:
+
+```bash
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+```
+
+If the tenant needs enterprise SSO, keep that as a separate concern:
+
+```bash
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --dry-run
+CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING=SYNC_TENANT_ENTERPRISE_MAPPING \
+ALLOW_PROD_APPLY=1 \
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --apply
+
+./scripts/tenants/configure-tenant-idp.sh \
+  --tenant-slug <tenant-slug> \
+  --idp-type saml \
+  --metadata-url https://idp.example.com/metadata \
+  --dry-run
+```
+
+Do **not** create or repair tenant `SiteConfiguration` rows by hand in
+Django admin. The canonical repair path is always
+`apply-multisite-config.sh`.
 
 ## Step 5: Configure Hosts / CSRF / Tenant Resolution
 
@@ -123,19 +170,23 @@ If the domain requires explicit tenant resolution, provision a `TenantConfig` re
 
 ---
 
-## Step 6: Rebuild and Deploy
+## Step 6: Ship through the governed build + release path
 
-Because `MEREKA_SITE_VARIANTS` is embedded in the MFE bundle, a new MFE image is required:
+For repo-owned brand changes, use the normal image/release flow:
 
 ```bash
-tutor images build mfe
-tutor local restart mfe
+# Merge the brand/runtime source changes
+# Run the governed build workflow for the required image(s)
+gh workflow run build-tutor-images.yml \
+  -f build_openedx=true \
+  -f build_mfe=true
+
+# Promote via the release/GitOps checklist once artifacts are ready
+# ArgoCD then applies the new image tag and manifests
 ```
 
-For shared environments:
-
-1. build/publish through `.github/workflows/build-tutor-images.yml`
-2. promote the resulting image through the reviewed GitOps path
+Do **not** run local `tutor images build`, hand-push Docker tags, or use
+`kubectl set image` as the normal production path.
 
 ---
 
@@ -154,10 +205,12 @@ Run the tenant/footer verification suite:
 
 ### New domain shows default Open edX branding
 
-1. check the new domain exists in `MEREKA_SITE_VARIANTS`
-2. check `SiteConfiguration` / tenant config for correct `SITE_NAME` / `PLATFORM_NAME`
-3. check the published MFE image actually contains the new bundle change
-4. check the request hostname resolves to the intended tenant domain
+1. re-run `./scripts/infra/apply-multisite-config.sh --env prod --dry-run`
+2. check `infrastructure/tutor/multisite-sites*.yml` has the expected
+   `site_values`
+3. verify `/api/mfe_config/v1` returns the expected tenant values
+4. check `MEREKA_SITE_VARIANTS` has the domain entry when the footer/runtime
+   shell needs a tenant-specific variant
 
 ### Footer shows wrong brand name
 
@@ -176,6 +229,7 @@ Run the tenant/footer verification suite:
 ## References
 
 - [`infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js`](../../../infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js)
+- [`docs/guides/branding/MULTI_TENANT_BRANDING_OPS.md`](../../guides/branding/MULTI_TENANT_BRANDING_OPS.md)
 - [`docs/reference/operations/FOOTER_VARIANT_MATRIX.md`](../../reference/operations/FOOTER_VARIANT_MATRIX.md)
 - [`docs/reference/operations/TENANT_BRANDING_MATRIX.md`](../../reference/operations/TENANT_BRANDING_MATRIX.md)
 - [`scripts/qa/verify-footer-variant-matrix.sh`](../../../scripts/qa/verify-footer-variant-matrix.sh)

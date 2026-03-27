@@ -40,7 +40,8 @@ Layer 1 (lowest):  platform defaults — Mereka Academy defaults in mereka_lms.p
 
 ```
 platform defaults
-  < tenant TenantSiteConfiguration (database record, provisioned by provision_tenant)
+  < tenant bootstrap records from `provision-tenant.sh`
+    < canonical `Site`/`SiteConfiguration` reconciliation from `apply-multisite-config.sh`
     < design tokens (_tokens.scss SCSS variables, CSS custom properties)
       < MFE env.config.jsx SITE_NAME / LOGO_URL / PLATFORM_NAME / FAVICON_URL
         < plugin slot config (footer slot → MerekaFooter with SITE_VARIANTS lookup)
@@ -67,13 +68,18 @@ const variant = SITE_VARIANTS[hostname] || { brand: config.SITE_NAME || 'Mereka 
 
 ### 1.4 Tenant Registry ConfigMap
 
-The canonical registry of active tenants lives at:
+The infra-visible registry of active tenants lives at:
 
 ```
 deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml
 ```
 
-This ConfigMap (`tenant-registry`) is the infrastructure-discoverable source of tenant slugs, primary domains, and alias domains. The canonical source of truth for live config is the `TenantConfig` database record created by `provision_tenant`.
+This ConfigMap (`tenant-registry`) is the infrastructure-discoverable
+projection of active tenants. The canonical source of truth for runtime
+Site + SiteConfiguration state is the multisite registry in
+`infrastructure/tutor/multisite-sites*.yml`, reconciled via
+`./scripts/infra/apply-multisite-config.sh`. Tenant bootstrap records
+still come from `./scripts/tenants/provision-tenant.sh`.
 
 **Current tenants**:
 
@@ -157,12 +163,16 @@ const SITE_VARIANTS = {
 };
 ```
 
-After editing `mereka_lms.py`, rebuild the MFE image or run the apply-patches workflow:
+After editing `mereka_lms.py`, ship the change through the governed build
+and release path:
 ```bash
-export TUTOR_ROOT="$(pwd)/tutor_env"
-./infrastructure/tutor/apply-patches.sh
-tutor images build mfe
+gh workflow run build-tutor-images.yml \
+  -f build_openedx=false \
+  -f build_mfe=true
 ```
+
+Do **not** rely on local `tutor images build mfe` or manual patching on a
+live environment as the normal publication path.
 
 ---
 
@@ -220,20 +230,22 @@ For static overrides needed before provisioning, add a `SITE_VARIANTS` entry (St
      alias_domains: []
    ```
 
-2. Apply the updated ConfigMap to the cluster:
-   ```bash
-   kubectl apply -f deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml
-   ```
+2. Commit that manifest change and let the normal GitOps/release flow
+   publish it. Do **not** `kubectl apply` it by hand for routine tenant
+   onboarding.
 
-3. If the tenant requires secrets (e.g., custom SMTP, SSO client secrets), add ExternalSecret entries in `deploy/k8s/base/secrets/external-secrets.yaml` and back the secrets in Infisical.
+3. If the tenant requires secrets (e.g., custom SMTP, SSO client
+   secrets), add ExternalSecret entries in
+   `deploy/k8s/base/secrets/external-secrets.yaml` and back the secrets in
+   Infisical.
 
 ---
 
-### Step 7: Tenant Provisioning via provision-tenant.sh
+### Step 7: Bootstrap tenant records and reconcile multisite runtime config
 
 **Owner**: Platform Engineering
 
-Run the provisioning script to create the `TenantConfig` database record and Django Site:
+Preview the tenant bootstrap first:
 
 ```bash
 ./scripts/tenants/provision-tenant.sh \
@@ -244,17 +256,57 @@ Run the provisioning script to create the `TenantConfig` database record and Dja
   --country MY
 ```
 
-The script wraps the Django `provision_tenant` management command and:
-- Creates `TenantConfig` and `TenantSiteConfiguration` database records
-- Sets `mfe_config` keys (LOGO_URL, SITE_NAME, PLATFORM_NAME, FAVICON_URL, SUPPORT_EMAIL)
-- Associates the domain with the correct Django `Site`
+Preview the authoritative multisite reconciliation:
 
-For dry-run testing:
 ```bash
-./scripts/tenants/provision-tenant.sh --slug <slug> --name "<name>" --domain <domain> --dry-run
+./scripts/infra/apply-multisite-config.sh --env prod --dry-run
 ```
 
----
+Apply the bootstrap when the preview is clean:
+
+```bash
+CONFIRM_PROVISION_TENANT=PROVISION_TENANT \
+./scripts/tenants/provision-tenant.sh \
+  --slug <tenant-slug> \
+  --name "<Tenant Display Name>" \
+  --domain <tenant-domain> \
+  --contact-email <admin@tenant.com> \
+  --country MY
+```
+
+Then reconcile the canonical `Site` + `SiteConfiguration` state from the
+multisite registry:
+
+```bash
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+```
+
+If the tenant needs enterprise SSO, keep that as a separate concern:
+
+```bash
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --dry-run
+CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING=SYNC_TENANT_ENTERPRISE_MAPPING \
+ALLOW_PROD_APPLY=1 \
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --apply
+
+./scripts/tenants/configure-tenant-idp.sh \
+  --tenant-slug <tenant-slug> \
+  --idp-type saml \
+  --metadata-url https://idp.example.com/metadata \
+  --dry-run
+```
+
+This split is intentional:
+- `provision-tenant.sh` bootstraps tenant records
+- `apply-multisite-config.sh` owns runtime `Site` + `SiteConfiguration`
+  truth
+- `sync-tenant-enterprise-mapping.sh` owns enterprise linkage
+- `configure-tenant-idp.sh` owns IdP setup
+
+Do **not** treat manual Django-admin `SiteConfiguration` edits as the
+normal repair or onboarding path.
 
 ### Step 8: Smoke Test Verification
 
