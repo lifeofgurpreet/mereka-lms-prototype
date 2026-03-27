@@ -320,16 +320,20 @@ kubectl delete namespace test-env
 
 ## Image Updates
 
+Production image authority does not live in `kubectl set image` or
+`kubectl apply -k`. Publish through `.github/workflows/build-tutor-images.yml`,
+promote with `./scripts/infra/release-openedx-gitops.sh --require-digests`, and
+use the commands below to verify or arrest a rollout.
+
 ```bash
-# Update image tag (triggers rolling update)
-kubectl set image deployment/lms \
-  lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:20240212-ulmo-abc1234
-
-# Update via kustomization (recommended)
-kubectl apply -k deploy/k8s/overlays/production
-
-# Verify new image
+# Verify live image after GitOps promotion
 kubectl get deployment lms -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+# Watch rollout progress
+kubectl rollout status deployment/lms
+
+# Break-glass only: undo the most recent rollout
+kubectl rollout undo deployment/lms
 ```
 
 ---

@@ -97,17 +97,18 @@ deploy/k8s/
 
 ### Deploying with Kustomize
 
+Production is not deployed by running `kubectl apply -k` from an operator shell.
+The canonical production path is:
+
+1. Publish images through `.github/workflows/build-tutor-images.yml`
+2. Promote the resulting digests with `./scripts/infra/release-openedx-gitops.sh --require-digests`
+3. Let GitOps reconcile `deploy/k8s/overlays/production`
+
 ```bash
-# Preview what will be deployed (dry-run)
+# Preview the rendered production manifests during investigation
 kubectl kustomize deploy/k8s/overlays/production
 
-# Deploy to production
-kubectl apply -k deploy/k8s/overlays/production
-
-# Deploy to production
-kubectl apply -k deploy/k8s/overlays/production
-
-# Deploy only base (development)
+# Local/development-only direct apply
 kubectl apply -k deploy/k8s/base
 ```
 
@@ -121,19 +122,20 @@ kubectl apply -k deploy/k8s/base
 
 ### Deployment Strategies
 
-**Rolling Update (default)**: Zero-downtime deployments
+**GitOps-managed Rolling Update (default)**: Zero-downtime production deployments
 ```bash
-# Trigger rolling update
-kubectl set image deployment/lms lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:new-tag -n mereka-lms
+# Promote the new release bundle / digests into GitOps
+./scripts/infra/release-openedx-gitops.sh --require-digests
 
-# Watch rollout progress
+# Watch rollout progress after GitOps reconciliation
 kubectl rollout status deployment/lms -n mereka-lms
+kubectl rollout status deployment/cms -n mereka-lms
 
-# Rollback if needed
-kubectl rollout undo deployment/lms -n mereka-lms
-
-# View rollout history
+# View rollout history while diagnosing a bad rollout
 kubectl rollout history deployment/lms -n mereka-lms
+
+# Break-glass only after Git source is corrected
+kubectl rollout undo deployment/lms -n mereka-lms
 ```
 
 **Recreate Strategy** (for stateful services like MySQL, Redis, Elasticsearch):
@@ -144,6 +146,9 @@ kubectl get deployment mysql -n mereka-lms -o jsonpath='{.spec.strategy.type}'
 ```
 
 ### Applying Configuration Changes
+
+These restart commands are for config-only reconciliation after the desired
+state already lives in Git. Do not use them as an image-release path.
 
 ```bash
 # After modifying ConfigMaps or Secrets
@@ -712,11 +717,10 @@ kubectl get events -n mereka-lms --sort-by='.lastTimestamp' | tail -20
 kubectl logs -n mereka-lms deployment/lms --tail=100
 kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms -f
 
-# === DEPLOY ===
-kubectl apply -k deploy/k8s/overlays/production
-kubectl rollout restart deployment/lms -n mereka-lms
+# === RELEASE ===
+./scripts/infra/release-openedx-gitops.sh --require-digests
 kubectl rollout status deployment/lms -n mereka-lms
-kubectl rollout undo deployment/lms -n mereka-lms
+kubectl rollout status deployment/cms -n mereka-lms
 
 # === SCALE ===
 kubectl scale deployment/lms --replicas=3 -n mereka-lms
@@ -724,6 +728,8 @@ kubectl scale deployment/lms --replicas=3 -n mereka-lms
 # === DEBUG ===
 kubectl exec -it -n mereka-lms deployment/lms -- bash
 kubectl describe pod/<pod-name> -n mereka-lms
+kubectl rollout restart deployment/lms -n mereka-lms
+kubectl rollout undo deployment/lms -n mereka-lms
 
 # === FIX ===
 ./scripts/infra/fix-service-selectors.sh
@@ -883,42 +889,37 @@ images:
 
 ### Updating Images
 
-**Update to new git SHA** (immutable deploy):
+**Update to new git SHA** (immutable production deploy):
 ```bash
-# 1. Build and push new image (CI/CD does this)
-# Resulting tag: openedx:abc123def (git SHA)
+# 1. Publish the new images through the governed workflow
+#    .github/workflows/build-tutor-images.yml
+#    Capture the release-bundle + build-provenance artifacts
 
-# 2. Update production kustomization
-cd deploy/k8s/overlays/production
-# Edit kustomization.yaml: newTag: abc123def
+# 2. Promote the digests into the production GitOps overlay
+./scripts/infra/release-openedx-gitops.sh --require-digests
 
-# 3. Verify render
-kubectl kustomize . | grep "image:" | grep openedx
-
-# 4. Deploy
-kubectl apply -k .
-
-# 5. Watch rollout
+# 3. Watch rollout
 kubectl rollout status deployment/lms -n mereka-lms
 kubectl rollout status deployment/cms -n mereka-lms
 ```
 
 **Quick production tag update** (via script):
 ```bash
-# Updates production overlay to use latest production-tagged image
-./scripts/infra/release-openedx-gitops.sh
+# Updates production overlay using the governed release bundle / digests
+./scripts/infra/release-openedx-gitops.sh --require-digests
 ```
 
 **Rollback to previous image**:
 ```bash
-# Check rollout history for previous image
-kubectl rollout history deployment/lms -n mereka-lms
+# Correct the GitOps source back to the last known-good release bundle / digests
+./scripts/infra/release-openedx-gitops.sh --require-digests
 
-# Rollback (uses previous ReplicaSet)
+# Watch the rollback rollout
+kubectl rollout status deployment/lms -n mereka-lms
+kubectl rollout status deployment/cms -n mereka-lms
+
+# Break-glass only if the live rollout must be arrested immediately
 kubectl rollout undo deployment/lms -n mereka-lms
-
-# Or explicit image rollback
-kubectl set image deployment/lms lms=ghcr.io/biji-biji-initiative/mereka-lms/openedx:previous-sha -n mereka-lms
 ```
 
 ### Image Pull Secrets (if needed)

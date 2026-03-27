@@ -72,11 +72,15 @@ kubectl get deployment enterprise-catalog -n mereka-lms
 - Secrets synced to K8s (via ExternalSecrets)
 - OAuth2 clients registered
 
-**Deploy**:
-```bash
-kubectl apply -k deploy/k8s/overlays/production
+Enterprise services are part of the same production release surface as the rest
+of the stack. Do not deploy them with direct `kubectl apply -k` from an
+operator shell. Use the governed publish path in
+`.github/workflows/build-tutor-images.yml`, then promote the digests with
+`./scripts/infra/release-openedx-gitops.sh --require-digests`.
 
-# Verify deployments
+**Verify after promotion**:
+```bash
+# Verify deployments after GitOps reconciliation
 kubectl get deployments -n mereka-lms | grep enterprise
 
 # Expected:
@@ -350,11 +354,12 @@ done
 
 ### Update Service Image
 
+Use the same governed image-publish and GitOps-promotion path as LMS/CMS.
+`kubectl set image` is break-glass only, not the normal production authority.
+
 ```bash
-# Update to new tag
-kubectl set image deployment/enterprise-catalog \
-  enterprise-catalog=ghcr.io/biji-biji-initiative/mereka-lms/enterprise-catalog:v1.2.3 \
-  -n mereka-lms
+# Promote the new enterprise image digests into GitOps
+./scripts/infra/release-openedx-gitops.sh --require-digests
 
 # Watch rollout
 kubectl rollout status deployment/enterprise-catalog -n mereka-lms
