@@ -12,7 +12,8 @@ mkdir -p \
   "$tmpdir/scripts/shared" \
   "$tmpdir/plugins" \
   "$tmpdir/deploy/k8s/base/plugins/mfe/apps/mfe" \
-  "$tmpdir/deploy/k8s/base/apps/openedx/settings/lms"
+  "$tmpdir/deploy/k8s/base/apps/openedx/settings/lms" \
+  "$tmpdir/deploy/k8s/base/apps/openedx/settings/cms"
 
 write_contract_helper() {
   cat >"$tmpdir/scripts/shared/mereka_plugin_contract.sh" <<'EOF'
@@ -92,6 +93,12 @@ SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
+CORS_ALLOW_INSECURE = False
+OAUTH_ENFORCE_SECURE = True
+EOF
+
+  cat >"$tmpdir/deploy/k8s/base/apps/openedx/settings/cms/production.py" <<'EOF'
+CORS_ALLOW_INSECURE = False
 EOF
 }
 
@@ -145,7 +152,41 @@ SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
+CORS_ALLOW_INSECURE = False
+OAUTH_ENFORCE_SECURE = True
 EOF
 run_expect_fail "CSP wildcard https in IMG_SRC is rejected"
+
+cat >"$tmpdir/deploy/k8s/base/apps/openedx/settings/lms/production.py" <<'EOF'
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_REPORT_ONLY = False
+CSP_OBJECT_SRC = ('none',)
+MIDDLEWARE = ["csp.middleware.CSPMiddleware"]
+CSP_INCLUDE_NONCE_IN = ("script-src",)
+_auth_url = "https://auth0.mereka.io"
+CSP_IMG_SRC = (
+    "self",
+    "https://cdn.example.com",
+)
+CSP_MEDIA_SRC = (
+    "self",
+    "blob:",
+)
+CSP_FORM_ACTION = ("'self'",)
+DEFAULT_THROTTLE_RATES = {
+    "login_and_register": "10/minute",
+    "password_reset": "5/hour",
+}
+MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = 5
+MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = 3600
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False
+CORS_ALLOW_INSECURE = True
+OAUTH_ENFORCE_SECURE = False
+EOF
+run_expect_fail "insecure LMS production defaults are rejected"
 
 echo "OK"

@@ -52,6 +52,7 @@ do_warn() {
 PLUGIN_FILE="$PLUGIN_MAIN"
 MFE_CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 PROD_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
+CMS_PROD_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
 
 check_file_exists() {
   local file="$1"
@@ -199,12 +200,19 @@ if [[ -f "$PROD_PY" ]]; then
   check_pattern "$PROD_PY" "SESSION_COOKIE_SECURE = True" "SESSION_COOKIE_SECURE = True in production.py"
   check_pattern "$PROD_PY" "SESSION_COOKIE_HTTPONLY = True" "SESSION_COOKIE_HTTPONLY = True in production.py"
   check_pattern "$PROD_PY" "CSRF_COOKIE_SECURE = True" "CSRF_COOKIE_SECURE = True in production.py"
+  check_pattern "$PROD_PY" "CORS_ALLOW_INSECURE = False" "CORS_ALLOW_INSECURE = False in LMS production.py"
+  check_pattern "$PROD_PY" "OAUTH_ENFORCE_SECURE = True" "OAUTH_ENFORCE_SECURE = True in LMS production.py"
 
   if pattern_present "$PROD_PY" "CSRF_COOKIE_HTTPONLY = False"; then
     do_pass "CSRF_COOKIE_HTTPONLY = False in production.py (required for MFE CSRF token fetch)"
   else
     do_warn "CSRF_COOKIE_HTTPONLY is not explicitly False in production.py"
   fi
+fi
+
+check_file_exists "$CMS_PROD_PY" "Generated CMS production.py"
+if [[ -f "$CMS_PROD_PY" ]]; then
+  check_pattern "$CMS_PROD_PY" "CORS_ALLOW_INSECURE = False" "CORS_ALLOW_INSECURE = False in CMS production.py"
 fi
 
 # ── Summary ────────────────────────────────────────────────────────────────

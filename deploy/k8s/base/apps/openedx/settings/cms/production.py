@@ -408,9 +408,10 @@ FEATURES["ENABLE_CORS_HEADERS"] = True
 # CORS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
-# Base Tutor/container flows still use direct non-TLS access in some local and
-# bootstrap paths. Environment-owned overlays must harden this for live lanes.
-CORS_ALLOW_INSECURE = True
+# Production-mode settings must default to HTTPS-only browser behavior.
+# Local direct-container workflows should use development.py instead of
+# weakening deployed lanes here.
+CORS_ALLOW_INSECURE = False
 # Note: CORS_ALLOW_HEADERS is intentionally not defined here, because it should
 # be consistent across deployments, and is therefore set in edx-platform.
 
