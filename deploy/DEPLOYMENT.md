@@ -9,7 +9,8 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 - **Source of Truth**: `deploy/k8s/base/` contains base Kustomize manifests exported from Tutor
 - **Namespace**: All resources deploy to `mereka-lms` namespace (not `openedx`)
 - **ConfigMaps**: Application configs managed via Kustomize configMapGenerator
-- **Environment Overlays**: Local (kind/VPS) and production (GKE). A legacy overlay directory exists for reference only.
+- **Environment realization**: `local` is applied from this repo. Dev and staging are realized in `bbi-infrastructure` on the shared `rke2-nonprod` cluster.
+- **Prod state**: the GKE prod lane exists in `bbi-infrastructure/apps/mereka-lms/overlays/prod/` but remains parked at zero replicas until dev + staging are green and promotion is explicitly approved.
 
 ## What Was Created
 
@@ -29,9 +30,10 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 │       │   ├── apps/           # 14 config files
 │       │   └── plugins/        # 13 plugin config files
 │       └── overlays/
-│           ├── local/
-│           ├── production/
-│           └── staging/        # Legacy reference only (not used)
+│           ├── local/          # Active app-owned local overlay
+│           ├── rke2-nonprod/   # Reference artifact for dev lane
+│           ├── staging/        # Reference artifact for staging lane on shared rke2-nonprod
+│           └── production/     # Reference artifact for parked GKE prod lane
 └── scripts/
     └── export-k8s-manifests.sh # Re-export script
 ```
@@ -137,21 +139,13 @@ All resources should have `namespace: mereka-lms`
 
 ## Next Steps
 
-### 1. Create Environment Overlays
+### 1. Maintain Environment Contracts
 
-Create overlays for each active environment:
-
-```bash
-# Local development
-mkdir -p deploy/k8s/overlays/local
-# Create kustomization.yaml referencing base
-# Add local-specific patches
-
-# Production
-mkdir -p deploy/k8s/overlays/production
-# Create kustomization.yaml referencing base
-# Add production-specific patches
-```
+- Keep `deploy/k8s/base/` exportable and structurally correct.
+- Keep `deploy/k8s/overlays/local/` usable for local iteration.
+- Keep `deploy/k8s/overlays/{rke2-nonprod,staging,production}/` truthful as
+  reference artifacts, but do not treat them as ArgoCD deploy sources.
+- Make live environment changes in `bbi-infrastructure/apps/mereka-lms/overlays/{dev,staging,prod}/`.
 
 ### 2. Handle Database Initialization
 
@@ -175,8 +169,8 @@ For production:
 In the BBI-K8 repository:
 1. Create `apps/mereka-lms/` directory
 2. Create base/kustomization.yaml referencing this repo
-3. Create overlays for local + production (legacy overlay is reference only)
-4. Add to ArgoCD ApplicationSet
+3. Realize `dev`, `staging`, and `prod` through the GitOps overlays there
+4. Add to ArgoCD ApplicationSet / Application definitions
 
 ## Maintenance
 

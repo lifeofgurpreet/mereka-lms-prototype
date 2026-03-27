@@ -3,8 +3,11 @@
 # @spec: k8s-deployment_spec.md
 # verify-deployment-lanes.sh
 #
-# Verifies that the three active Kustomize overlay lanes are correctly structured
-# and that the deprecated staging overlay is properly marked.
+# Verifies the current deployment-lane truth for this repo:
+# - local is the only app-owned live overlay
+# - dev and staging are distinct environment truths on shared rke2-nonprod
+# - prod exists as a parked GKE lane
+# - non-local overlays in this repo are reference artifacts, not ArgoCD sources
 #
 # See: docs/reference/operations/DEPLOYMENT_LANES.md
 #
@@ -45,9 +48,9 @@ echo "Overlay root: $OVERLAYS_DIR"
 echo ""
 
 # ── 1. Active overlay directories exist ──────────────────────────────────────
-echo "--- Active overlay directories ---"
+echo "--- Overlay directories exist ---"
 
-for lane in local rke2-nonprod production; do
+for lane in local rke2-nonprod staging production; do
   overlay_dir="$OVERLAYS_DIR/$lane"
   if [[ -d "$overlay_dir" ]]; then
     pass "overlay directory exists: deploy/k8s/overlays/$lane/"
@@ -58,9 +61,9 @@ done
 
 # ── 2. Each active overlay has kustomization.yaml ────────────────────────────
 echo ""
-echo "--- Active overlay kustomization.yaml files ---"
+echo "--- Overlay kustomization.yaml files exist ---"
 
-for lane in local rke2-nonprod production; do
+for lane in local rke2-nonprod staging production; do
   kfile="$OVERLAYS_DIR/$lane/kustomization.yaml"
   if [[ -f "$kfile" ]]; then
     pass "kustomization.yaml exists: deploy/k8s/overlays/$lane/kustomization.yaml"
@@ -71,9 +74,9 @@ done
 
 # ── 3. Active overlay kustomization.yaml files reference ../../base ───────────
 echo ""
-echo "--- Active overlays reference ../../base ---"
+echo "--- Overlays reference ../../base ---"
 
-for lane in local rke2-nonprod production; do
+for lane in local rke2-nonprod staging production; do
   kfile="$OVERLAYS_DIR/$lane/kustomization.yaml"
   if [[ ! -f "$kfile" ]]; then
     skip "cannot check base ref (kustomization.yaml missing): $lane"
@@ -86,33 +89,59 @@ for lane in local rke2-nonprod production; do
   fi
 done
 
-# ── 4. Staging overlay exists (historical artifact) ──────────────────────────
+# ── 4. Non-local overlays are reference artifacts, not ArgoCD sources ────────
 echo ""
-echo "--- Deprecated staging overlay ---"
+echo "--- Non-local overlays are reference artifacts ---"
 
-staging_dir="$OVERLAYS_DIR/staging"
-staging_kfile="$staging_dir/kustomization.yaml"
-
-if [[ -d "$staging_dir" ]]; then
-  pass "staging overlay directory exists (historical artifact): deploy/k8s/overlays/staging/"
-else
-  fail "staging overlay directory missing — expected to be retained as historical artifact"
-fi
-
-# ── 5. Staging overlay has deprecation marker ─────────────────────────────────
-if [[ -f "$staging_kfile" ]]; then
-  if grep -qi "DEPRECATED" "$staging_kfile"; then
-    pass "staging kustomization.yaml contains DEPRECATED marker"
-  else
-    fail "staging kustomization.yaml is MISSING a DEPRECATED marker (add '# DEPRECATED:' comment)"
+check_reference_overlay() {
+  local lane="$1"
+  local expected_source="$2"
+  local kfile="$OVERLAYS_DIR/$lane/kustomization.yaml"
+  if [[ ! -f "$kfile" ]]; then
+    skip "cannot check reference overlay contract (missing): $lane"
+    return
   fi
+  if grep -Fq "NOT consumed by ArgoCD" "$kfile"; then
+    pass "$lane overlay is marked as not consumed by ArgoCD"
+  else
+    fail "$lane overlay is missing the 'NOT consumed by ArgoCD' marker"
+  fi
+  if grep -Fq "$expected_source" "$kfile"; then
+    pass "$lane overlay points operators at $expected_source"
+  else
+    fail "$lane overlay does not point to $expected_source"
+  fi
+}
+
+check_reference_overlay rke2-nonprod "apps/mereka-lms/overlays/dev/"
+check_reference_overlay staging "apps/mereka-lms/overlays/staging/"
+check_reference_overlay production "apps/mereka-lms/overlays/prod/"
+
+# ── 5. Topology markers reflect the real lane model ──────────────────────────
+echo ""
+echo "--- Topology markers reflect current truth ---"
+
+if grep -Fq "Shares cluster with dev (rke2-nonprod)" "$OVERLAYS_DIR/staging/kustomization.yaml"; then
+  pass "staging overlay documents shared rke2-nonprod cluster"
 else
-  fail "staging kustomization.yaml not found — cannot verify deprecation marker"
+  fail "staging overlay is missing shared-cluster truth marker"
 fi
 
-# ── 6. No active deploy/release scripts use staging as a deployment target ───
+if grep -Fq "GKE prod is scaled to zero replicas" "$OVERLAYS_DIR/production/kustomization.yaml"; then
+  pass "production overlay documents parked zero-replica GKE state"
+else
+  fail "production overlay is missing parked-prod truth marker"
+fi
+
+if grep -Fq "rke2-nonprod overlay — bbi-infrastructure dev/staging cluster" "$OVERLAYS_DIR/rke2-nonprod/kustomization.yaml"; then
+  pass "rke2-nonprod overlay documents shared dev/staging cluster role"
+else
+  fail "rke2-nonprod overlay is missing shared dev/staging truth marker"
+fi
+
+# ── 6. No active deploy/release scripts use app-repo non-local overlays ─────
 echo ""
-echo "--- No active scripts deploy TO staging ---"
+echo "--- No active scripts deploy non-local overlays from this repo ---"
 
 # Scripts that are known to legitimately reference the staging overlay for
 # read-only contract checking or future-use CLI flags (not active deployment).
@@ -135,9 +164,8 @@ build_exclusion_pattern() {
 
 EXCLUSION_PATTERN="$(build_exclusion_pattern)"
 
-# Scan infra scripts for staging as an active deployment target.
-# A "deployment" usage is one where the script writes to or deploys the staging overlay.
-DEPLOY_STAGING_HITS=0
+# Scan scripts for non-local overlays from this repo as active deployment targets.
+DEPLOY_NONLOCAL_HITS=0
 
 while IFS= read -r -d '' script_file; do
   # Skip known read-only scripts
@@ -146,20 +174,20 @@ while IFS= read -r -d '' script_file; do
     continue
   fi
 
-  # Flag patterns that indicate the script treats staging as an active deploy target
-  if grep -qE '(kubectl apply.*overlays/staging|kustomize build.*overlays/staging|--target-env staging)' \
+  # Flag patterns that indicate the script treats a non-local app-repo overlay as an active deploy target
+  if grep -qE '(kubectl apply.*deploy/k8s/overlays/(rke2-nonprod|staging|production)|kustomize build.*deploy/k8s/overlays/(rke2-nonprod|staging|production))' \
        "$script_file" 2>/dev/null; then
-    fail "script references staging as deployment target: $script_file"
-    DEPLOY_STAGING_HITS=$(( DEPLOY_STAGING_HITS + 1 ))
+    fail "script deploys a non-local app-repo overlay directly: $script_file"
+    DEPLOY_NONLOCAL_HITS=$(( DEPLOY_NONLOCAL_HITS + 1 ))
   fi
 done < <(find "$REPO_ROOT/scripts/infra" "$REPO_ROOT/scripts/qa" \
            -name "*.sh" -print0 2>/dev/null)
 
-if [[ "$DEPLOY_STAGING_HITS" -eq 0 ]]; then
-  pass "no active scripts deploy to staging overlay (excluding known read-only scripts)"
+if [[ "$DEPLOY_NONLOCAL_HITS" -eq 0 ]]; then
+  pass "no active scripts deploy non-local app-repo overlays directly"
 fi
 
-# ── 7. rke2-nonprod has required patch files ──────────────────────────────────
+# ── 7. Reference overlays keep expected patch anchors ─────────────────────────
 echo ""
 echo "--- rke2-nonprod required patches ---"
 
@@ -178,15 +206,43 @@ for patch in "${REQUIRED_PATCHES[@]}"; do
   fi
 done
 
-# ── 8. DEPLOYMENT_LANES.md exists ─────────────────────────────────────────────
+# ── 8. Docs encode current lane truth ─────────────────────────────────────────
 echo ""
 echo "--- Documentation ---"
 
 lanes_doc="$REPO_ROOT/docs/reference/operations/DEPLOYMENT_LANES.md"
 if [[ -f "$lanes_doc" ]]; then
   pass "DEPLOYMENT_LANES.md exists: docs/reference/operations/DEPLOYMENT_LANES.md"
+  if grep -Fq "ArgoCD does not deploy from \`deploy/k8s/overlays/*\`" "$lanes_doc" && \
+     grep -Fq "Non-local deployment is realized in" "$lanes_doc"; then
+    pass "DEPLOYMENT_LANES.md documents ArgoCD ownership boundary"
+  else
+    fail "DEPLOYMENT_LANES.md is missing the ArgoCD ownership boundary"
+  fi
+  if grep -Fq "shared \`rke2-nonprod\`" "$lanes_doc"; then
+    pass "DEPLOYMENT_LANES.md documents shared rke2-nonprod truth"
+  else
+    fail "DEPLOYMENT_LANES.md is missing shared rke2-nonprod truth"
+  fi
+  if grep -Eq 'Parked / explicit promotion only|zero replicas' "$lanes_doc"; then
+    pass "DEPLOYMENT_LANES.md documents parked prod truth"
+  else
+    fail "DEPLOYMENT_LANES.md is missing parked prod truth"
+  fi
 else
   fail "DEPLOYMENT_LANES.md MISSING: docs/reference/operations/DEPLOYMENT_LANES.md"
+fi
+
+deployment_doc="$REPO_ROOT/deploy/DEPLOYMENT.md"
+if [[ -f "$deployment_doc" ]]; then
+  pass "deploy/DEPLOYMENT.md exists"
+  if grep -Fq "Dev and staging are realized in \`bbi-infrastructure\` on the shared \`rke2-nonprod\` cluster." "$deployment_doc"; then
+    pass "deploy/DEPLOYMENT.md documents shared nonprod environment realization"
+  else
+    fail "deploy/DEPLOYMENT.md is missing shared nonprod environment realization"
+  fi
+else
+  fail "deploy/DEPLOYMENT.md missing"
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────

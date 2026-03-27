@@ -2,177 +2,92 @@
 
 **Audience**: Platform engineers and on-call operators.
 
-This document is the canonical reference for the three active Kustomize overlay lanes
-used to deploy Mereka LMS. A fourth overlay (`staging`) exists in the repository but
-is deprecated and kept only for historical reference.
+This document is the canonical environment-truth reference for Mereka LMS.
+Except for `local`, **ArgoCD does not deploy from `deploy/k8s/overlays/*` in this
+repo**. Non-local deployment is realized in
+`bbi-infrastructure/apps/mereka-lms/overlays/{dev,staging,prod}/`.
 
 ---
 
-## Lane Summary
+## Current Truth
 
-| Lane | Overlay path | Cluster | Domain | Secrets store | Status |
-|------|-------------|---------|--------|---------------|--------|
-| **local** | `deploy/k8s/overlays/local` | Kind / Minikube (local) | `localhost` | in-overlay dev literals | Active |
-| **rke2-nonprod** | `deploy/k8s/overlays/rke2-nonprod` | RKE2 VPS (`154.26.132.35`) | `*.academyv2.mereka.dev` | Infisical (`infisical-secret-store-dev`) | Active — canonical non-prod |
-| **production** | `deploy/k8s/overlays/production` | GKE (`bbi-k8`) | `*.academyv2.mereka.io` | GCP Secret Manager (`gcp-secret-manager`) | Active |
-| ~~staging~~ | `deploy/k8s/overlays/staging` | *(never activated)* | *(proposed)* | — | **DEPRECATED** — historical reference only |
+| Lane | Domains | Cluster now | App repo overlay artifact | GitOps source of truth | Status |
+|------|---------|-------------|---------------------------|------------------------|--------|
+| **local** | `localhost` | Kind / Minikube | `deploy/k8s/overlays/local` | N/A | Active |
+| **dev** | `*.academyv2.mereka.dev` | shared `rke2-nonprod` | `deploy/k8s/overlays/rke2-nonprod` | `bbi-infrastructure/apps/mereka-lms/overlays/dev/` | Active |
+| **staging** | `staging.*.mereka.io` | shared `rke2-nonprod` | `deploy/k8s/overlays/staging` | `bbi-infrastructure/apps/mereka-lms/overlays/staging/` | Active on shared cluster; split-ready for a dedicated RKE2 staging cluster later |
+| **prod** | `*.academyv2.mereka.io` | GKE `bbi-k8-cluster` | `deploy/k8s/overlays/production` | `bbi-infrastructure/apps/mereka-lms/overlays/prod/` | Parked / explicit promotion only; keep zero replicas until dev + staging are green and leadership signs off |
 
 ---
 
 ## Promotion Path
 
-```
-local (developer machine)
-  → rke2-nonprod  [canonical non-prod validation gate]
-      → production (GKE)
+```text
+local
+  -> dev      (shared rke2-nonprod)
+  -> staging  (shared rke2-nonprod, separate domains / namespaces / secrets)
+  -> prod     (GKE, parked, explicit promotion only)
 ```
 
-Images travel forward-only. An image tag is promoted by updating the relevant overlay in
-`infrastructure` and merging the PR to main. ArgoCD reconciles within ~3 minutes.
-Never patch clusters directly — see `docs/ops/runbooks/GITOPS_WORKFLOW.md`.
+`dev` and `staging` are different environment truths even though they currently
+share the same cluster. Do not collapse environment truth into current cluster
+placement.
 
 ---
 
-## Lane Details
+## Overlay Roles
 
 ### local
 
-**Purpose**: Rapid iteration on a developer's machine using Kind or Minikube.
+`deploy/k8s/overlays/local` is the only permanently app-owned overlay in this
+repo. Use it for local development and smoke checks.
 
-| Property | Value |
-|----------|-------|
-| Kustomize path | `deploy/k8s/overlays/local` |
-| Namespace | `mereka-lms` |
-| Cluster | Kind (local) |
-| Domain | `localhost` |
-| Secrets | Hardcoded dev literals via `secretGenerator` (never real secrets) |
-| Secret store | None — dev literals only |
-| Replicas | 1 per core service; enterprise services set to 0 (no GCR auth in Kind) |
-| Image pull | Images must be pre-loaded into Kind nodes |
-| Enterprise services | Disabled (count: 0) — GCR auth not available in Kind |
-| Payments gateway | Disabled (count: 0) — image not loaded into Kind |
+### rke2-nonprod
 
-**Key patches**:
-- `patches/domain-env.yaml` — domain overrides for localhost
-- `patches/clustersecretstore-gcp.yaml` — local ClusterSecretStore mock
-- `patches/openedx-secrets-dev.yaml` / `patches/database-secrets-dev.yaml` — dev secret literals
-- `patches/meilisearch-security-context.yaml`
-- `patches/cms-memory-limits.yaml`
+`deploy/k8s/overlays/rke2-nonprod` is a **reference overlay artifact** for the
+current dev lane. It remains in this repo so the base/exported manifest shape,
+image-tag contract, and nonprod patch structure are visible alongside the app.
+ArgoCD does **not** deploy from it directly.
 
----
+### staging
 
-### rke2-nonprod (canonical non-prod)
-
-**Purpose**: Pre-production validation on a real RKE2 cluster. This is the lane where
-images are validated before promotion to GKE production. It mirrors the production
-manifest structure but uses Infisical for secrets and lower replica counts.
-
-| Property | Value |
-|----------|-------|
-| Kustomize path | `deploy/k8s/overlays/rke2-nonprod` |
-| Namespace | `mereka-lms` |
-| Cluster | RKE2 on VPS (`154.26.132.35`) |
-| Domain | `academyv2.mereka.dev` (Cloudflare `*.mereka.dev`) |
-| LMS URL | `https://academyv2.mereka.dev` |
-| Studio URL | `https://studio.academyv2.mereka.dev` |
-| MFE URL | `https://apps.academyv2.mereka.dev` |
-| Secrets | Infisical (`infisical-secret-store-dev` ClusterSecretStore) |
-| Image pull | `ghcr-registry` imagePullSecret (GHCR) |
-| Replicas | 1 per service (cost-optimised) |
-| ArgoCD app | `mereka-lms-dev` (generated by `kustomize-apps.yaml` ApplicationSet) |
-| Workload Identity | Not available on RKE2 — Infisical used instead of GCP SA |
-
-**Key differences from production**:
-- `patches/externalsecrets-infisical.yaml` — switches all ExternalSecrets from
-  `gcp-secret-manager` to `infisical-secret-store-dev` (no Workload Identity on RKE2)
-- `patches/domain-env.yaml` — overrides all domain env vars to `*.academyv2.mereka.dev`
-- Base `apps/caddy/deployment.yaml` uses `strategy.type: Recreate` to avoid
-  RWO rollout deadlocks on single-node RKE2
-- Own ingress resources (`ingress-openedx-lms.yaml`, `-mfe.yaml`, `-studio.yaml`)
-
-**Prerequisites** (must exist on cluster before first deploy):
-1. `ClusterSecretStore` named `infisical-secret-store-dev` in Valid/Ready state
-2. Secret `ghcr-registry` in `mereka-lms` namespace (imagePullSecret for GHCR)
-3. Default ServiceAccount patched with `imagePullSecrets: [{name: ghcr-registry}]`
-   OR each Deployment has `spec.template.spec.imagePullSecrets` set
-
-**ArgoCD SSH note**: RKE2 cluster uses SSH-only to `github.com` (port 443 blocked by Cilium).
-Configure ArgoCD repository with SSH key, not HTTPS.
-
----
+`deploy/k8s/overlays/staging` is a **reference overlay artifact** for the
+current staging lane. It models staging domains and secrets while explicitly
+documenting that staging currently shares `rke2-nonprod` with dev. It is not a
+deprecated fake lane, and it is not a dedicated staging cluster today.
 
 ### production
 
-**Purpose**: Live GKE cluster serving real learners.
-
-| Property | Value |
-|----------|-------|
-| Kustomize path | `deploy/k8s/overlays/production` |
-| Namespace | `mereka-lms` |
-| Cluster | GKE `bbi-k8` (`asia-southeast1-c`) |
-| Domain | `academyv2.mereka.io` |
-| LMS URL | `https://academyv2.mereka.io` |
-| Studio URL | `https://studio.academyv2.mereka.io` |
-| MFE URL | `https://apps.academyv2.mereka.io` |
-| Secrets | GCP Secret Manager (`gcp-secret-manager` ClusterSecretStore, Workload Identity) |
-| Image pull | GKE Workload Identity (no imagePullSecret needed) |
-| Replicas | 2 LMS, 2 lms-worker, 1 CMS, 1 cms-worker |
-| ArgoCD app | `mereka-lms-prod` (standalone Application in `infrastructure`) |
-
-**Key patches**:
-- `patches/resource-limits.yaml` — production CPU/memory limits
-- `patches/remove-legacy-mongodb-service.yaml` — removes local MongoDB (Atlas only)
+`deploy/k8s/overlays/production` is a **reference overlay artifact** for the
+parked GKE prod lane. Keep it structurally aligned with nonprod, but do not
+present it as the default validation target or a live learner-serving lane.
 
 ---
 
-### ~~staging~~ (DEPRECATED)
+## Future Topology
 
-The `deploy/k8s/overlays/staging` directory was created as a placeholder for a planned
-GKE staging lane (a second GKE environment between rke2-nonprod and production). It was
-never activated. As of 2026-02-10 it is deprecated.
-
-**Do not use**: This overlay has stale image tags and no active ArgoCD Application.
-
-**Why it was not activated**: The rke2-nonprod lane provides sufficient pre-production
-validation. A separate GKE staging environment adds cost and operational complexity that
-is not justified at the current scale.
-
-**Historical location**: `deploy/k8s/overlays/staging/kustomization.yaml` — the file
-remains in the repository with a deprecation header. Scripts that reference it do so to
-read its image tag format for contract-verification purposes; they do not deploy to it.
+- `staging` will move to its own RKE2 cluster when the shared nonprod lane is stable.
+- `prod` remains on GKE for now.
+- The long-term target is RKE2 for all lanes, but that future migration does not
+  change the current dev/staging/prod environment truth.
 
 ---
 
-## Parity Review Findings
+## Operator Rules
 
-The parity review (2026-02-25) identified the following ambiguities that led to this
-document being created:
-
-1. **"staging" overloaded**: Multiple docs and scripts used "staging" to mean different
-   things — sometimes the deprecated overlay, sometimes rke2-nonprod (the active non-prod
-   lane), sometimes a proposed-but-never-built GKE staging lane.
-
-2. **STAGING_ACTIVATION.md describes a future GKE lane**: The three-environment promotion
-   path described in `docs/ops/runbooks/STAGING_ACTIVATION.md`
-   (`rke2-nonprod → staging → production`) reflects a possible future state. Today the
-   active promotion path is `rke2-nonprod → production`.
-
-3. **Scripts referencing `deploy/k8s/overlays/staging`**: Scripts such as
-   `verify-gitops-image-overrides.sh` and `release-openedx-gitops.sh` reference the
-   deprecated overlay for image-tag contract checks. This is intentional (the file still
-   carries canonical image tags) but can mislead operators into thinking staging is active.
-
-**Resolution**: This document and `scripts/qa/verify-deployment-lanes.sh` are the
-authoritative source of truth on active lanes. The deprecated staging overlay is clearly
-marked in its `kustomization.yaml` header.
+- Do not treat `deploy/k8s/overlays/{rke2-nonprod,staging,production}` as live
+  ArgoCD sources.
+- Do not describe staging as “deprecated” or “never activated”.
+- Do not describe prod as the default validation lane while it is intentionally parked.
+- If a script needs a live non-local deployment target, it should point operators
+  at the matching `bbi-infrastructure` overlay or cluster runbook, not this repo’s
+  frozen overlay artifact.
 
 ---
 
 ## Related Documentation
 
-- `docs/ops/runbooks/STAGING_ACTIVATION.md` — prerequisites and steps to activate a future
-  GKE staging lane (not currently active)
-- `docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md` — step-by-step deploy procedure
-- `docs/ops/runbooks/GITOPS_WORKFLOW.md` — GitOps rules (never patch directly)
-- `docs/ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md` — rke2-nonprod first-deploy checklist
-- `scripts/qa/verify-deployment-lanes.sh` — automated verification of this document
+- [deploy/k8s/overlays/README.md](../../../deploy/k8s/overlays/README.md)
+- [deploy/DEPLOYMENT.md](../../../deploy/DEPLOYMENT.md)
+- [DEPLOYMENT_CONTRACT.md](../architecture/DEPLOYMENT_CONTRACT.md)
+- `bbi-infrastructure/ENVIRONMENTS.md`

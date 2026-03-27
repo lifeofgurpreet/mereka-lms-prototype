@@ -4119,13 +4119,14 @@
       "env_scope": [
         "dev",
         "nonprod",
+        "prod",
         "staging"
       ],
       "kind": "verify",
       "mutability": "destructive",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-deployment-lanes.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
