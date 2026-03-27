@@ -18,18 +18,15 @@ on:
     inputs:
       target_environment:
         type: choice
-        options: [production, staging]
+        options: [select-environment, production, staging]
 permissions:
   contents: write
 jobs:
+  release-bundle:
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
   update:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.target_environment }}" == "select-environment" ]]; then
-            echo "target_environment must be explicitly selected before generating a release bundle." >&2
-            exit 1
-          fi
       - run: |
           source ./scripts/lib/lane-normalize.sh
           TARGET_ENV_RAW="${{ inputs.target_environment }}"
@@ -76,18 +73,15 @@ on:
     inputs:
       target_environment:
         type: choice
-        options: [production, staging]
+        options: [select-environment, production, staging]
 permissions:
   contents: write
 jobs:
+  release-bundle:
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
   update:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.target_environment }}" == "select-environment" ]]; then
-            echo "target_environment must be explicitly selected before generating a release bundle." >&2
-            exit 1
-          fi
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
       - uses: actions/upload-artifact@v4
@@ -107,21 +101,59 @@ on:
     inputs:
       target_environment:
         type: choice
-        options: [production, staging]
+        options: [select-environment, production, staging]
 permissions:
   contents: write
 jobs:
+  release-bundle:
+    steps:
+      - run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TARGET_ENV="${{ inputs.target_environment }}"
+            if [[ "$TARGET_ENV" == "select-environment" ]]; then
+              echo "target_environment must be explicitly selected before generating a release bundle." >&2
+              exit 1
+            fi
+          fi
   update:
     runs-on: ubuntu-latest
     steps:
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TARGET_ENV="${{ inputs.target_environment }}"
-            if [[ "$TARGET_ENV" == "select-environment" ]]; then
-              TARGET_ENV="production"
-            fi
-          fi
+          source ./scripts/lib/lane-normalize.sh
+          TARGET_ENV_RAW="${{ inputs.target_environment }}"
+          TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV_RAW}")"
+          test -n "$TARGET_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-provenance
+          path: var/ci/build-provenance.json
+EOF
+run_expect_fail "release bundle must skip placeholder manual environment instead of failing inside the job"
+
+# Remove lms-ops call => must fail
+cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
+name: build-tutor-images
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        type: choice
+        options: [select-environment, production, staging]
+permissions:
+  contents: write
+jobs:
+  release-bundle:
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          source ./scripts/lib/lane-normalize.sh
+          TARGET_ENV_RAW="${{ inputs.target_environment }}"
+          TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV_RAW}")"
+          test -n "$TARGET_ENV"
+      - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - uses: actions/upload-artifact@v4
         with:
           name: build-provenance

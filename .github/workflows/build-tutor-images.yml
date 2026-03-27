@@ -1148,7 +1148,10 @@ jobs:
     timeout-minutes: 15
     needs: [build-openedx, build-mfe, slsa-provenance]
     # Run even if SLSA failed — provenance is desirable but must not block releases.
-    if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' }}
+    # Manual proof runs may intentionally leave target_environment at the
+    # placeholder value. Skip release-bundle generation in that case instead of
+    # failing after both images already built and pushed successfully.
+    if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
     permissions:
       contents: read
       id-token: write
@@ -1181,15 +1184,7 @@ jobs:
       - name: Generate release bundle
         id: bundle
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TARGET_ENV="${{ inputs.target_environment }}"
-            if [[ "$TARGET_ENV" == "select-environment" ]]; then
-              echo "target_environment must be explicitly selected before generating a release bundle." >&2
-              exit 1
-            fi
-          else
-            TARGET_ENV="production"
-          fi
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
           ./scripts/infra/generate-release-bundle.sh \
             --output var/ci/release-bundle.json \
             --repo "${{ github.repository }}" \

@@ -11,6 +11,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$REPO_ROOT}"
 BUILD_WF="${BUILD_WF_OVERRIDE:-$REPO_ROOT/.github/workflows/build-tutor-images.yml}"
+RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUILD_WF")"
 
 PASS=0 FAIL=0
 
@@ -33,11 +34,18 @@ else
   fail "target_environment input missing"
 fi
 
-# Manual dispatches must not silently treat the placeholder environment as production.
-if grep -q "target_environment must be explicitly selected before generating a release bundle" "$BUILD_WF"; then
-  pass "workflow_dispatch release bundle requires explicit target_environment"
+# Manual build-proof dispatches must skip release-bundle generation when the
+# placeholder environment is still selected.
+if echo "$RELEASE_BUNDLE_BLOCK" | grep -q "inputs.target_environment != 'select-environment'"; then
+  pass "release bundle job skips placeholder manual environment"
 else
-  fail "workflow_dispatch release bundle missing explicit target_environment guard"
+  fail "release bundle job missing placeholder-environment skip gate"
+fi
+
+if echo "$RELEASE_BUNDLE_BLOCK" | grep -q "target_environment must be explicitly selected before generating a release bundle"; then
+  fail "release bundle job still hard-fails on placeholder manual environment"
+else
+  pass "release bundle job no longer hard-fails on placeholder manual environment"
 fi
 
 # Release-bundle consistency must compare canonical lane names, not raw workflow aliases.

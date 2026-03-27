@@ -309,14 +309,17 @@ else
 fi
 
 if [[ -f "${BUILD_WORKFLOW}" ]]; then
+  RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "${BUILD_WORKFLOW}")"
+
   if grep -q "target_environment:" "${BUILD_WORKFLOW}"; then
     pass "build-tutor-images.yml has target_environment input"
   else
     fail "build-tutor-images.yml missing target_environment input"
   fi
 
-  if grep -q "target_environment must be explicitly selected before generating a release bundle" "${BUILD_WORKFLOW}"; then
-    pass "build-tutor-images.yml requires explicit target_environment before release bundle generation"
+  if grep -q "target_environment must be explicitly selected before generating a release bundle" "${BUILD_WORKFLOW}" \
+    || echo "${RELEASE_BUNDLE_BLOCK}" | grep -q "inputs.target_environment != 'select-environment'"; then
+    pass "build-tutor-images.yml guards placeholder target_environment before release bundle generation"
   else
     fail "build-tutor-images.yml missing explicit target_environment guard before release bundle generation"
   fi
