@@ -6,6 +6,7 @@
     "scripts/infra/canonical-release.sh",
     "scripts/infra/configure-github-authenticated-sso-canary.sh",
     "scripts/infra/ensure-authentik-oidc-redirect-uris.sh",
+    "scripts/infra/fix-mfe-refresh-endpoint-site-config.sh",
     "scripts/infra/generate-build-provenance.sh",
     "scripts/infra/generate-release-bundle.sh",
     "scripts/infra/prune-gcp-snapshots.sh",

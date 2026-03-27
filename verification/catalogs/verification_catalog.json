@@ -1547,7 +1547,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-auth-surfaces.sh",
-      "reference_count": 39,
+      "reference_count": 40,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8165,7 +8165,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-config-contract.sh",
-      "reference_count": 18,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

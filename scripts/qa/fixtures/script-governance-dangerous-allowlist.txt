@@ -17,11 +17,11 @@ scripts/infra/create-atlas-m10-cluster.sh
 scripts/infra/create-release.sh
 scripts/infra/data-retention-jobs.sh
 scripts/infra/decommission-legacy-ecommerce.sh
-scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
 scripts/infra/mongodb-atlas-cutover.sh
 scripts/infra/normalize-mysql-secrets.sh
 scripts/infra/provision-admin-api-key.sh
 scripts/infra/provision-mysql-app-dbs.sh
+scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
 scripts/infra/prune-gcp-snapshots.sh
 scripts/infra/purge-frontend-theme-cache.sh
 scripts/infra/release-openedx-gitops.sh

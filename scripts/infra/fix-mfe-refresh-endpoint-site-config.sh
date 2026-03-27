@@ -1,71 +1,73 @@
 #!/usr/bin/env bash
-# Ensure SiteConfiguration overrides do not force cross-origin login_refresh calls.
+# Retired compatibility shim for the legacy refresh-endpoint SiteConfiguration patcher.
 #
-# Problem:
-# - MFEs fetch REFRESH_ACCESS_TOKEN_ENDPOINT from /api/mfe_config/v1.
-# - In production we historically stored REFRESH_ACCESS_TOKEN_ENDPOINT as an absolute LMS URL
-#   inside SiteConfiguration.site_values["MFE_CONFIG"] per domain.
-# - Many MFE stacks use fetch/Axios with credentials="same-origin" by default, so cross-origin
-#   refresh calls silently drop cookies and users get stuck in login loops.
+# The canonical writer for REFRESH_ACCESS_TOKEN_ENDPOINT is the multisite apply flow:
+#   ./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --dry-run
+#   ./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --apply
 #
-# Fix:
-# - Set REFRESH_ACCESS_TOKEN_ENDPOINT to "/login_refresh" (relative path) for all enabled sites.
-# - The MFE edge (apps.*) must reverse-proxy /login_refresh back to LMS.
+# That flow delegates to scripts/shared/multisite_bootstrap_django.py, which already
+# sets REFRESH_ACCESS_TOKEN_ENDPOINT=/login_refresh in the authoritative SiteConfiguration
+# overlay.
 #
-# Safe: updates a single JSON key under SiteConfiguration.site_values; no secrets are printed.
-
+# Verify the live result with:
+#   ./scripts/qa/verify-auth-surfaces.sh prod
+#   ./scripts/qa/verify-mfe-config-contract.sh --env prod
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$REPO_ROOT/scripts/shared/config.sh"
+CANONICAL_APPLY="${REPO_ROOT}/scripts/infra/apply-multisite-config.sh"
 
-KUBE_CONTEXT="${KUBE_CONTEXT:-$K8S_CONTEXT}"
-NAMESPACE="${NAMESPACE:-$K8S_NAMESPACE}"
+print_help() {
+  cat <<EOF
+Usage: $0 --help
 
-echo "Context: $KUBE_CONTEXT"
-echo "Namespace: $NAMESPACE"
+Retired compatibility shim.
 
-echo "Patching SiteConfiguration MFE_CONFIG.REFRESH_ACCESS_TOKEN_ENDPOINT -> /login_refresh ..."
+This script no longer patches SiteConfiguration directly.
+Use the canonical multisite apply flow instead:
 
-kubectl --context "$KUBE_CONTEXT" -n "$NAMESPACE" exec deploy/lms -- bash -lc '
-set -euo pipefail
-cd /openedx/edx-platform
-CODE=$(cat <<"PY"
-from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+  ./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --dry-run
+  ./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --apply
 
-updated = []
-for sc in SiteConfiguration.objects.filter(enabled=True):
-    sv = sc.site_values or {}
-    mfe = sv.get("MFE_CONFIG") or {}
-    old = mfe.get("REFRESH_ACCESS_TOKEN_ENDPOINT")
-    if old != "/login_refresh":
-        mfe["REFRESH_ACCESS_TOKEN_ENDPOINT"] = "/login_refresh"
-        sv["MFE_CONFIG"] = mfe
-        sc.site_values = sv
-        sc.save()
-        updated.append((sc.site.domain, old))
+The canonical writer already sets:
+  REFRESH_ACCESS_TOKEN_ENDPOINT=/login_refresh
 
-print("updated", len(updated))
-for d, o in updated:
-    print(d, "was", o)
-PY
-)
-./manage.py lms shell -c "$CODE"
-'
+Verify the live result with:
 
-echo ""
-echo "Verifying public MFE config endpoints..."
+  ./scripts/qa/verify-auth-surfaces.sh prod
+  ./scripts/qa/verify-mfe-config-contract.sh --env prod
 
-primary_refresh="$(curl -fsSL "https://${MFE_DOMAIN}/api/mfe_config/v1" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("REFRESH_ACCESS_TOKEN_ENDPOINT",""))')"
-echo "apps.${LMS_DOMAIN} REFRESH_ACCESS_TOKEN_ENDPOINT=$primary_refresh"
+Replacement entrypoint:
+  ${CANONICAL_APPLY}
+EOF
+}
 
-biji_refresh="$(curl -fsSL "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("REFRESH_ACCESS_TOKEN_ENDPOINT",""))')"
-echo "apps.${BIJI_DOMAIN} REFRESH_ACCESS_TOKEN_ENDPOINT=$biji_refresh"
+reject_legacy_invocation() {
+  cat >&2 <<EOF
+ERROR: fix-mfe-refresh-endpoint-site-config.sh is a retired compatibility shim and no longer patches SiteConfiguration directly.
+Legacy invocation: $*
 
-if [[ "$primary_refresh" != "/login_refresh" || "$biji_refresh" != "/login_refresh" ]]; then
-  echo "ERROR: One or more domains still return a non-relative refresh endpoint." >&2
-  exit 1
+Use the canonical multisite apply flow instead:
+  ./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --dry-run
+  ./scripts/infra/apply-multisite-config.sh --env <prod|dev|staging> --apply
+
+Then verify the public MFE config/auth surfaces with:
+  ./scripts/qa/verify-auth-surfaces.sh prod
+  ./scripts/qa/verify-mfe-config-contract.sh --env prod
+EOF
+  exit 2
+}
+
+if [[ $# -eq 0 ]]; then
+  reject_legacy_invocation "(no arguments)"
 fi
 
-echo "OK"
-
+case "$1" in
+  -h|--help)
+    print_help
+    exit 0
+    ;;
+  *)
+    reject_legacy_invocation "$@"
+    ;;
+esac

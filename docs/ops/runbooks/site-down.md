@@ -1018,7 +1018,7 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
      - `REFRESH_ACCESS_TOKEN_ENDPOINT=https://apps.<domain>/login_refresh` **or** `REFRESH_ACCESS_TOKEN_ENDPOINT=/login_refresh`
    - Important: `/api/mfe_config/v1` is backed by `SiteConfiguration.site_values["MFE_CONFIG"]` when enabled.
      If that DB override still has an absolute LMS URL, it will override file-based settings and keep MFEs broken.
-     Use:
+     Reconcile through the canonical multisite apply flow:
      ```bash
      CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
      ALLOW_PROD_APPLY=1 \

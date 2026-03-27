@@ -1711,7 +1711,7 @@ scripts:
 
   - path: scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
     owner: platform-team
-    purpose: Fix Mfe Refresh Endpoint Site Config
+    purpose: Compatibility shim for retired refresh-endpoint SiteConfiguration patch path
     criticality: release-supporting
 
   - path: scripts/infra/fix-service-selectors.sh
