@@ -191,6 +191,7 @@ scripts/qa/test-mfe-slot-operation-compat.sh
 scripts/qa/verify-oidc-cookie-middleware-order.sh
 scripts/qa/verify-jwt-uniqueness.sh
 scripts/qa/verify-design-tokens.sh
+scripts/qa/verify-catalog-discovery.sh
 scripts/qa/verify-design-token-ci.sh
 scripts/qa/verify-design-token-usage.sh
 scripts/qa/verify-token-definitions.sh

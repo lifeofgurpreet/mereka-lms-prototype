@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-T117-001, AC-T117-002, AC-T117-003, AC-T117-004
+# @spec: branding-system_spec.md
 # verify-catalog-discovery.sh
 #
 # T117: Ulmo catalog revamp + Discovery theming audit verification.
@@ -128,6 +130,8 @@ MEREKA_DESIGN_TOKENS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/stati
 HEAD_EXTRA_LMS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html"
 HEAD_EXTRA_COMMON="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates/head-extra.html"
 HEAD_EXTRA_CMS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"
+COURSE_TEMPLATE_LMS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/course.html"
+COURSE_CARD_TEMPLATE_LMS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/discovery/course_card.underscore"
 
 check_file_exists "$TOKENS_CSS" "Canonical token source exists (assets/branding/tokens.css)"
 check_file_exists "$TOKENS_SCSS" "SCSS bridge exists (scss/_tokens.scss)"
@@ -138,6 +142,8 @@ check_file_exists "$MEREKA_DESIGN_TOKENS" "mereka-design-tokens.css exists"
 check_file_exists "$HEAD_EXTRA_LMS" "LMS head-extra.html exists"
 check_file_exists "$HEAD_EXTRA_COMMON" "Common head-extra.html exists"
 check_file_exists "$HEAD_EXTRA_CMS" "CMS head-extra.html exists"
+check_file_exists "$COURSE_TEMPLATE_LMS" "LMS course card template override exists"
+check_file_exists "$COURSE_CARD_TEMPLATE_LMS" "LMS discovery course-card template override exists"
 
 # ─── 2. Token Namespace Consistency ─────────────────────────────────────────
 
@@ -182,6 +188,18 @@ check_contains "$MEREKA_OVERRIDES_LMS" ".course-about .intro-inner-wrapper" "LMS
 
 # Course card styling
 check_contains "$MEREKA_OVERRIDES_LMS" ".course .course-image" "LMS: course card image area styled"
+check_contains "$MEREKA_OVERRIDES_LMS" ".find-courses #discovery-message.search-status-label" "LMS: discovery count is treated as an eyebrow, not a hero"
+check_contains_re "$MEREKA_OVERRIDES_LMS" "text-transform:[[:space:]]*capitalize" "LMS: discovery filters normalize raw facet labels"
+check_contains "$MEREKA_OVERRIDES_LMS" "grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))" "LMS: catalog grid is denser"
+check_contains "$MEREKA_OVERRIDES_LMS" ".course .course-name" "LMS: course metadata is grouped as a vertical stack"
+check_contains "$MEREKA_OVERRIDES_LMS" ".course .course-code" "LMS: internal course code remains tertiary"
+check_contains "$MEREKA_OVERRIDES_LMS" ".course .course-title" "LMS: course title remains the primary card text"
+check_contains "$MEREKA_OVERRIDES_LMS" ".learn-more" "LMS: learn-more CTA remains visually subordinate"
+check_contains "$MEREKA_OVERRIDES_LMS" "@media (max-width: 640px)" "LMS: mobile fallback trims course-code noise"
+check_contains "$COURSE_TEMPLATE_LMS" "View Course" "LMS template CTA says View Course"
+check_contains "$COURSE_CARD_TEMPLATE_LMS" "View Course" "Discovery template CTA says View Course"
+check_contains "$COURSE_TEMPLATE_LMS" "class=\"course-code\" aria-hidden=\"true\"" "LMS template demotes internal course codes"
+check_contains "$COURSE_CARD_TEMPLATE_LMS" "class=\"course-code\" aria-hidden=\"true\"" "Discovery template demotes internal course codes"
 
 # Token usage in catalog CSS (not hard-coded hex for brand values)
 check_contains "$MEREKA_OVERRIDES_LMS" "var(--mereka-shadow-card)" "Catalog CSS uses --mereka-shadow-card token"

@@ -19,7 +19,6 @@
     "scripts/qa/verify-branch-protection.sh",
     "scripts/qa/verify-branding-multi-domain.sh",
     "scripts/qa/verify-caddy-payments-route.sh",
-    "scripts/qa/verify-catalog-discovery.sh",
     "scripts/qa/verify-certificate-issuance.sh",
     "scripts/qa/verify-ci-cd-pipeline.sh",
     "scripts/qa/verify-clean-tree-before-mutation.sh",

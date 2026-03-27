@@ -2463,10 +2463,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
       "env_scope": [
         "dev",
         "prod"
@@ -2475,15 +2479,20 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-catalog-discovery.sh",
-      "reference_count": 3,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
-      "spec_ids": [],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "severity": "high",
+      "spec_ids": [
+        "AC-T117-001",
+        "AC-T117-002",
+        "AC-T117-003",
+        "AC-T117-004"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -17337,7 +17346,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 355,
+    "ci_static_bound": 356,
     "kinds": {
       "verify": 576
     },
@@ -17348,13 +17357,13 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 398,
-      "manual_only": 178
+      "active": 399,
+      "manual_only": 177
     },
     "tiers": {
-      "exploratory_manual": 181,
+      "exploratory_manual": 180,
       "periodic_runtime": 16,
-      "release_blocking": 379
+      "release_blocking": 380
     },
     "total_verify_scripts": 576,
     "workflow_direct_bound": 53

@@ -245,6 +245,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-oidc-cookie-middleware-order.sh
     - script: scripts/qa/verify-jwt-uniqueness.sh
     - script: scripts/qa/verify-design-tokens.sh
+    - script: scripts/qa/verify-catalog-discovery.sh
     - script: scripts/qa/verify-design-token-ci.sh
     - script: scripts/qa/verify-design-token-usage.sh
     - script: scripts/qa/verify-token-definitions.sh
