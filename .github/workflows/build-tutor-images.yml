@@ -1328,7 +1328,9 @@ jobs:
       - name: Validate release bundle consistency gate
         if: ${{ needs.release-bundle.result == 'success' }}
         run: |
-          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          source ./scripts/lib/lane-normalize.sh
+          TARGET_ENV_RAW="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV_RAW}")"
           OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
           MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
           RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
@@ -1382,7 +1384,7 @@ jobs:
                   print(f" - {err}", file=sys.stderr)
               sys.exit(1)
 
-          print("PASS: release-bundle artifact matches workflow commit/environment/digest context")
+          print("PASS: release-bundle artifact matches workflow commit/canonical-environment/digest context")
           PY
 
       - name: Configure git identity

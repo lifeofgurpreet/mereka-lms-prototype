@@ -30,6 +30,11 @@ jobs:
             echo "target_environment must be explicitly selected before generating a release bundle." >&2
             exit 1
           fi
+      - run: |
+          source ./scripts/lib/lane-normalize.sh
+          TARGET_ENV_RAW="${{ inputs.target_environment }}"
+          TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV_RAW}")"
+          test -n "$TARGET_ENV"
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
       - uses: actions/upload-artifact@v4
@@ -63,6 +68,36 @@ run_expect_fail() {
 
 write_pass_fixture
 run_expect_pass "build workflow contract passes with lms-ops proof + envelope upload"
+
+cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
+name: build-tutor-images
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        type: choice
+        options: [production, staging]
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.target_environment }}" == "select-environment" ]]; then
+            echo "target_environment must be explicitly selected before generating a release bundle." >&2
+            exit 1
+          fi
+      - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
+      - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-provenance
+          path: |
+            var/ci/build-provenance.json
+            var/ci/release-gate-envelope.json
+EOF
+run_expect_fail "missing canonical target_environment normalization is rejected"
 
 # Remove lms-ops call => must fail
 cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'

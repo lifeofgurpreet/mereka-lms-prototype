@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../lib/lane-normalize.sh
+source "${REPO_ROOT}/scripts/lib/lane-normalize.sh"
+
 usage() {
   cat <<'EOF'
 Usage: generate-release-bundle.sh \
@@ -68,18 +73,12 @@ if [[ ! "${MFE_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
   echo "Invalid mfe digest: ${MFE_DIGEST}" >&2
   exit 1
 fi
-case "${TARGET_ENV}" in
-  dev|nonprod|staging|production|prod|rke2-nonprod) ;;
-  *)
-    echo "Invalid target environment: ${TARGET_ENV}" >&2
-    exit 1
-    ;;
-esac
-# Normalize to canonical lane names for proof artifacts
-case "${TARGET_ENV}" in
-  rke2-nonprod|nonprod) TARGET_ENV="dev" ;;
-  production) TARGET_ENV="prod" ;;
-esac
+if ! is_valid_target_environment "${TARGET_ENV}"; then
+  echo "Invalid target environment: ${TARGET_ENV}" >&2
+  exit 1
+fi
+# Normalize to canonical lane names for proof artifacts.
+TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV}")"
 
 mkdir -p "$(dirname "${OUTPUT}")"
 

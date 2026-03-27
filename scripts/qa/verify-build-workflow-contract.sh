@@ -40,6 +40,13 @@ else
   fail "workflow_dispatch release bundle missing explicit target_environment guard"
 fi
 
+# Release-bundle consistency must compare canonical lane names, not raw workflow aliases.
+if grep -q "normalize_lane_to_canonical" "$BUILD_WF" && grep -q "scripts/lib/lane-normalize.sh" "$BUILD_WF"; then
+  pass "release bundle consistency gate normalizes target_environment to canonical lane"
+else
+  fail "release bundle consistency gate missing canonical target_environment normalization"
+fi
+
 # Check container registry push target (GHCR only)
 if grep -q "ghcr.io" "$BUILD_WF"; then
   pass "Container registry push target is GHCR"
