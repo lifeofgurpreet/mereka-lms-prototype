@@ -6,12 +6,12 @@ Environment: `mereka-lms-dev`
 
 ## Verdict
 
-Status: `OPEN`
+Status: `CLOSED`
 
-The first repo-owned blocker was fixed in `mereka-lms` PR `#897`, and that generic `mfe`
-fix is now live in dev. The next first blocker is a new repo-owned login redirect defect:
-successful authn MFE login returns the learner deep-route redirect on the LMS host
-(`academyv2.mereka.dev`) instead of the apps MFE host (`apps.academyv2.mereka.dev`).
+This document captures the pre-fix runtime failure observed on 2026-03-13.
+The learner-home handoff defect described below was closed by `mereka-lms` PR `#1145`,
+which seeds `ENABLE_LEARNER_HOME_MFE=true` through the canonical SiteConfiguration
+bootstrap/reconcile paths and updates the route contract accordingly.
 
 ## What Was Freshly Runtime-Proven
 

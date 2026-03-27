@@ -12,6 +12,7 @@ ONBOARD_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "onboard-enterprise-tenant.
 SEED_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "seed-siteconfigs.sh"
 SITE_RECONCILE_COMMON = REPO_ROOT / "scripts" / "tenants" / "lib" / "site-reconcile-common.sh"
 MULTISITE_BOOTSTRAP_DJANGO = REPO_ROOT / "scripts" / "shared" / "multisite_bootstrap_django.py"
+VERIFY_MULTISITE_CONFIG = REPO_ROOT / "scripts" / "qa" / "verify-multisite-config.sh"
 
 
 def bash_eval(command: str) -> str:
@@ -81,3 +82,10 @@ def test_siteconfig_seed_paths_enable_learner_home_mfe() -> None:
     assert '"ENABLE_LEARNER_HOME_MFE": True' in seed_text
     assert '"ENABLE_LEARNER_HOME_MFE": True' in reconcile_text
     assert 'rendered_values["ENABLE_LEARNER_HOME_MFE"] = True' in bootstrap_text
+
+
+def test_multisite_verifier_checks_authenticated_dashboard_handoff() -> None:
+    text = VERIFY_MULTISITE_CONFIG.read_text(encoding="utf-8")
+    assert "SafeCookieData.create" in text
+    assert '"https://${domain}/dashboard"' in text
+    assert 'expected_location="${expected_mfe_base%/}/learner-dashboard/"' in text

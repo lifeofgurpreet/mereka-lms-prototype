@@ -66,7 +66,7 @@ All checks are performed by `verify-rke2-tenant-routes.sh --online`.
 | `https://academyv2.mereka.dev/` | 200 or 302 | LMS homepage — may redirect to login |
 | `https://academyv2.mereka.dev/login` | 200 or 302 | Login page |
 | `https://academyv2.mereka.dev/register` | 200 or 302 | Registration page |
-| `https://academyv2.mereka.dev/dashboard` | 200 or 302 | Redirects to authn if not logged in |
+| `https://academyv2.mereka.dev/dashboard` | 200 or 302 | Redirects to authn if not logged in; authenticated users with a profile hand off to `https://apps.academyv2.mereka.dev/learner-dashboard/` |
 | `https://academyv2.mereka.dev/heartbeat` | 200 | Health check — no auth required |
 | `https://academyv2.mereka.dev/api/user/v1/me` | 401 | User API — auth required |
 | `https://academyv2.mereka.dev/api/courses/v2/` | 200 or 401 | Courses API |

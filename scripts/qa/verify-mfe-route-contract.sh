@@ -274,6 +274,28 @@ for file in "$MFE_OAUTH_FIX_MIDDLEWARE" "$MFE_OAUTH_FIX_VIEW"; do
   fi
 done
 
+for file in \
+  "$REPO_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix/README.md" \
+  "$REPO_ROOT/docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md"; do
+  rel="${file#$REPO_ROOT/}"
+  if [[ ! -f "$file" ]]; then
+    do_warn "MFE OAuth learner-home doc missing: $rel"
+    continue
+  fi
+
+  if grep -q "next=/dashboard" "$file"; then
+    do_fail "MFE OAuth learner-home doc still hardcodes legacy next=/dashboard in $rel"
+  else
+    do_pass "MFE OAuth learner-home doc no longer hardcodes legacy next=/dashboard in $rel"
+  fi
+
+  if grep -q "next=/learner-dashboard/" "$file"; then
+    do_pass "MFE OAuth learner-home doc example uses learner-dashboard redirect in $rel"
+  else
+    do_fail "MFE OAuth learner-home doc example missing learner-dashboard redirect in $rel"
+  fi
+done
+
 echo ""
 
 # =============================================================================

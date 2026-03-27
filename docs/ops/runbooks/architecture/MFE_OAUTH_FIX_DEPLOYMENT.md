@@ -89,8 +89,8 @@ Expected output:
   {
     "id": "oa2-authentik",
     "name": "Mereka",
-    "loginUrl": "/auth/login/oauth2-authentik/?auth_entry=login&next=/dashboard",
-    "registerUrl": "/auth/login/oauth2-authentik/?auth_entry=register&next=/dashboard"
+    "loginUrl": "/auth/login/oauth2-authentik/?auth_entry=login&next=/learner-dashboard/",
+    "registerUrl": "/auth/login/oauth2-authentik/?auth_entry=register&next=/learner-dashboard/"
   }
 ]
 ```

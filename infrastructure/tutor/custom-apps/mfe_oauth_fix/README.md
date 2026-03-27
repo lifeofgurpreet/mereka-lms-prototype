@@ -65,8 +65,8 @@ Expected output:
   {
     "id": "oa2-oidc",
     "name": "Mereka",
-    "loginUrl": "/auth/login/oidc/?auth_entry=login&next=/dashboard",
-    "registerUrl": "/auth/login/oidc/?auth_entry=register&next=/dashboard"
+    "loginUrl": "/auth/login/oidc/?auth_entry=login&next=/learner-dashboard/",
+    "registerUrl": "/auth/login/oidc/?auth_entry=register&next=/learner-dashboard/"
   }
 ]
 ```

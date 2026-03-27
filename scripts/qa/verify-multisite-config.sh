@@ -361,3 +361,93 @@ if missing and strict:
 if bad and strict:
     sys.exit(1)
 PY
+
+echo
+echo "Authenticated learner-home redirect contract:"
+
+AUTH_PROBE_FAIL=0
+set +e
+AUTH_PROBE_ROWS="$(
+  kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" "${LMS_POD}" -- env DOMAINS="${DOMAINS_CSV}" EXPECTED_JSON="${EXPECTED_JSON}" python - <<'PY'
+import json
+import os
+import sys
+
+import django
+
+django.setup()
+
+from common.djangoapps.student.models import UserProfile
+from django.contrib.auth import (
+    BACKEND_SESSION_KEY,
+    HASH_SESSION_KEY,
+    SESSION_KEY,
+)
+from django.contrib.sessions.backends.cache import SessionStore
+from django.contrib.sites.models import Site
+from openedx.core.djangoapps.safe_sessions.middleware import SafeCookieData
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+
+domains = [d.strip() for d in os.environ.get("DOMAINS", "").split(",") if d.strip()]
+expected = json.loads(os.environ.get("EXPECTED_JSON", "{}") or "{}")
+user_profile = (
+    UserProfile.objects.select_related("user")
+    .exclude(user__is_staff=True)
+    .order_by("user__id")
+    .first()
+)
+if user_profile is None:
+    sys.exit(3)
+
+user = user_profile.user
+
+for domain in domains:
+    site = Site.objects.filter(domain=domain).first()
+    cfg = (
+        SiteConfiguration.objects.filter(site=site, enabled=True).order_by("-id").first()
+        if site else None
+    )
+    site_values = cfg.site_values if cfg else {}
+    expected_mfe_base = (expected.get(domain) or {}).get("MFE_BASE_URL", "").rstrip("/")
+    runtime_mfe_base = str(site_values.get("MFE_BASE_URL", "")).rstrip("/")
+
+    session = SessionStore()
+    session[SESSION_KEY] = str(user.pk)
+    session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+    session.save()
+    safe_cookie = str(SafeCookieData.create(session.session_key, user.pk))
+    print(f"{domain}\t{expected_mfe_base}\t{runtime_mfe_base}\t{safe_cookie}")
+PY
+)"
+AUTH_PROBE_STATUS=$?
+set -e
+
+if [[ "$AUTH_PROBE_STATUS" -eq 3 ]]; then
+  echo "WARN: no non-staff learner with a profile exists; skipping authenticated /dashboard redirect probe"
+elif [[ "$AUTH_PROBE_STATUS" -ne 0 ]]; then
+  echo "FAIL: could not mint safe-session cookie for authenticated /dashboard redirect probe"
+  exit 1
+else
+  while IFS=$'\t' read -r domain expected_mfe_base runtime_mfe_base safe_cookie; do
+    [[ -n "${domain:-}" ]] || continue
+    expected_location="${expected_mfe_base%/}/learner-dashboard/"
+    headers="$(
+      curl -k -I -sS \
+        --cookie "sessionid=${safe_cookie}" \
+        "https://${domain}/dashboard" 2>/dev/null | tr -d '\r' || true
+    )"
+    http_code="$(printf '%s\n' "$headers" | awk 'NR==1 {print $2}')"
+    location="$(printf '%s\n' "$headers" | awk 'tolower($1)=="location:" {print $2; exit}')"
+    if [[ "$http_code" == "302" && "$location" == "$expected_location" ]]; then
+      echo "PASS: ${domain} /dashboard redirects authenticated learners to ${expected_location}"
+    else
+      echo "FAIL: ${domain} /dashboard expected authenticated redirect to ${expected_location} but got status=${http_code:-unset} location=${location:-unset} (runtime MFE base=${runtime_mfe_base:-unset})"
+      AUTH_PROBE_FAIL=1
+    fi
+  done <<< "$AUTH_PROBE_ROWS"
+fi
+
+if [[ "$AUTH_PROBE_FAIL" -ne 0 ]]; then
+  exit 1
+fi
