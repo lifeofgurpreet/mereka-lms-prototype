@@ -72,7 +72,7 @@ Mereka Academy operates under multiple organizational brands (Mereka, Biji-Biji 
 - In scope:
   - Django `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` configuration for all domains
   - Session and CSRF cookie domain scoping
-  - SiteConfiguration records in Django admin
+  - SiteConfiguration runtime records reconciled from the multisite registry
   - OIDC provider configuration contract
   - Nginx (LMS backend) and Caddy (K8s ingress) reverse proxy rules
   - Domain addition and removal procedures
@@ -114,7 +114,7 @@ The system MUST support the following domains:
 
 ### SiteConfiguration
 
-- The system MUST create a SiteConfiguration for each domain in Django admin
+- The system MUST reconcile a SiteConfiguration for each domain from the multisite registry via `scripts/infra/apply-multisite-config.sh`
 - Each SiteConfiguration MUST specify the correct domain name
 - Each SiteConfiguration SHOULD override branding if domain-specific customization is needed
 
@@ -169,11 +169,12 @@ The system MUST support the following domains:
 
 **Recovery**:
 ```bash
-# Verify cookie domain in config
-grep SESSION_COOKIE_DOMAIN tutor_env/config.yml
+# Verify cookie domain at runtime
+kubectl exec -n mereka-lms deploy/lms -- \
+  python manage.py lms shell -c "from django.conf import settings; print(settings.SESSION_COOKIE_DOMAIN)"
 
-# Should show: SESSION_COOKIE_DOMAIN: ".academyv2.mereka.io"
-# If missing, add via Tutor patch and restart
+# Should show: None
+# If wrong, fix the LMS settings source, merge, and redeploy the affected image
 ```
 
 ### CSRF Token Rejection
@@ -246,51 +247,46 @@ CORS_ORIGIN_WHITELIST.append('apps.academyv2.mereka.io')
 ### Adding a New Domain
 
 ```bash
-# 1. Add to Tutor config (via patch)
-# Edit infrastructure/tutor/apply-patches.sh
-# Add domain to extra_lms_hosts and extra_csrf_origins
+# 1. Add the tenant/domain to the multisite registry
+# Edit infrastructure/tutor/multisite-sites.yml
 
-# 2. Apply patches
-./infrastructure/tutor/apply-patches.sh
+# 2. Update host acceptance / CSRF sources in repo-owned config
+# (apply-patches/plugin registry changes as needed)
 
-# 3. Rebuild images (picks up nginx/caddy config)
-tutor images build openedx
+# 3. Merge the source-of-truth change
 
-# 4. Restart services
-tutor k8s restart
-
-# 5. Create SiteConfiguration in Django admin
-# Navigate to /admin/site_configuration/siteconfiguration/
-# Create entry with domain name and enabled=True
+# 4. Reconcile Site + SiteConfiguration runtime state
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
 ```
 
 ### Removing a Domain
 
 ```bash
-# 1. Disable in Django admin
-# Set SiteConfiguration enabled=False
+# 1. Remove the domain from the multisite registry / host-acceptance sources
 
-# 2. Remove from apply-patches.sh
-# Delete from extra_lms_hosts and extra_csrf_origins
+# 2. Merge the source-of-truth change
 
-# 3. Apply patches and restart
-./infrastructure/tutor/apply-patches.sh
-tutor k8s restart
+# 3. Reconcile runtime Site + SiteConfiguration from source of truth
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
 ```
 
 ### Rollback
 
 If multi-site config breaks primary domain:
 
-1. Remove custom domains from `extra_lms_hosts` in `apply-patches.sh`
-2. Re-run patches: `./infrastructure/tutor/apply-patches.sh`
-3. Restart: `tutor k8s restart`
+1. Revert the multisite source-of-truth change in git
+2. Merge the rollback under the merge-first protocol
+3. Re-run `./scripts/infra/apply-multisite-config.sh --env prod --apply`
 4. Verify primary domain works: `curl -I https://academyv2.mereka.io`
 
 ## Resolved Questions
 
-1. **Separate SiteConfiguration per domain**: YES — each domain has its own SiteConfiguration record in Django admin, enabling per-domain `SITE_NAME`, `LMS_BASE_URL`, and `MFE_BASE_URL` overrides. Defined in `infrastructure/tutor/multisite-sites.yml`.
-2. **Domain-specific branding**: Handled via `MerekaFooter` SITE_VARIANTS (runtime hostname → brand mapping) and per-tenant `THEME_NAME` in SiteConfiguration. Logo/colors share the `mereka` theme; text/footer vary by domain.
+1. **Separate SiteConfiguration per domain**: YES — each domain has its own SiteConfiguration runtime record, reconciled from `infrastructure/tutor/multisite-sites*.yml` via `scripts/infra/apply-multisite-config.sh`, enabling per-domain `SITE_NAME`, `LMS_BASE_URL`, and `MFE_BASE_URL` overrides.
+2. **Domain-specific branding**: Handled via `MerekaFooter` SITE_VARIANTS (runtime hostname → brand mapping) and per-tenant values reconciled into SiteConfiguration from the canonical multisite registry. Logo/colors share the `mereka` theme; text/footer vary by domain.
 3. **Biji-biji.com branding**: Same `mereka` theme, but MerekaFooter shows "Biji-Biji Academy" brand text and "Biji-Biji Initiative" copyright. See `infrastructure/tutor/plugins/mereka_lms.py` SITE_VARIANTS.
 4. **Separate analytics**: NOT YET — all domains share a single analytics pipeline. Domain-based segmentation can be added later via `http_host` grouping in Prometheus metrics.
 5. **Domain-based rate limiting**: NOT YET — rate limiting is applied globally. Per-domain limits can be added via Caddy `rate_limit` directive if needed.

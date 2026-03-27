@@ -152,16 +152,14 @@ curl https://academy.biji-biji.com | grep -i "biji-biji"
 
 ### Missing Organizations
 ```bash
-# Apply multi-site bootstrap to production
-python scripts/shared/multisite_bootstrap.py \
-  --use-connector \
-  --instance mereka-lms:asia-southeast1:mereka-lms-mysql \
-  --ip-type PRIVATE \
-  --apply
+# Reconcile canonical multisite runtime state in production
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
 ```
 
 ### Missing Sites
-Same as above - multisite_bootstrap.py creates both
+Same as above. `apply-multisite-config.sh` is the canonical writer for Site + SiteConfiguration runtime state.
 
 ### MFE Not Working
 - Check MFE container logs
