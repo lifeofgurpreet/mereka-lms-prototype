@@ -13,7 +13,13 @@
 
 The platform has **deferred** deployment of Aspects (Open edX native analytics) and Superset dashboards indefinitely. This decision gate document tracks the conditions under which we should revisit this decision and provides a framework for evaluating whether to keep the deferral or proceed with deployment.
 
-**Current Recommendation**: **PROCEED** (owner override 2026-02-25)
+**Current Recommendation**: **HOLD SHARED-ENVIRONMENT DEPLOYMENT**
+
+The target architecture is accepted, but rollout remains deferred until the
+decision conditions are met **and** a truthful shared-environment release front
+door exists. Today there is no governed analytics publish/promotion lane, so
+manual Tutor build/push/apply steps cannot honestly be described as the normal
+production operator path.
 
 ---
 
@@ -30,6 +36,7 @@ The platform has **deferred** deployment of Aspects (Open edX native analytics) 
 | **Production Deployment** | Not deployed | No pods in cluster (`kubectl get pods -n mereka-lms \| grep aspects` = empty) |
 | **K8s Manifests** | Exist but inactive | `deploy/k8s/base/plugins/aspects/*.yml` exist but NOT in kustomization |
 | **Analytics Spec** | In progress | `specs/analytics-pipeline_spec.md` status: "in_progress" |
+| **Release Authority** | Missing | No governed analytics publish/promotion front door for shared environments |
 
 ### Infrastructure Already Available
 
@@ -225,6 +232,7 @@ grep '^status:' specs/analytics-pipeline_spec.md  # Should be "approved"
 ### What's Missing
 
 ❌ Docker images (not built)
+❌ Governed shared-environment release front door
 ❌ ClickHouse schema initialization (requires `tutor k8s init`)
 ❌ Production secrets (ClickHouse admin password, Superset secret key)
 ❌ Retention policy implementation (TTL configuration)
@@ -238,16 +246,17 @@ If decision changes to PROCEED:
 
 | Phase | Tasks | Estimated Time |
 |-------|-------|----------------|
-| **Image Build** | `tutor images build aspects aspects-superset` | 30-45 min |
+| **Release Authority** | Define governed rollout lane or explicitly approve legacy/manual bootstrap | 1-2 hours |
+| **Legacy Image Build** | `tutor images build aspects aspects-superset` (only if no governed lane exists yet) | 30-45 min |
 | **Secrets Setup** | Generate passwords, create GCP secrets, sync to K8s | 1 hour |
 | **Schema Init** | `tutor k8s init` (ClickHouse schema + Superset DB) | 30 min |
-| **Deploy** | `tutor k8s start`, verify pods running | 15 min |
+| **Legacy Cluster Bootstrap** | `tutor k8s start`, verify pods running | 15 min |
 | **Retention Config** | Set ClickHouse TTL (90 days) | 30 min |
 | **Backup Setup** | Configure GCS daily backups | 1 hour |
 | **Monitoring** | Add Prometheus alerts, Grafana dashboards | 2 hours |
 | **Smoke Test** | Generate test events, verify dashboards load | 1 hour |
 | **Documentation** | Update runbooks, operational guides | 2 hours |
-| **Total** | | **8-10 hours** |
+| **Total** | | **9-12 hours** |
 
 ---
 
@@ -356,4 +365,4 @@ This document satisfies the following acceptance criteria:
 |------|----------|--------|-------|
 | 2026-02-13 | Platform Team | DEFERRED | Initial deferral (ADR-017) |
 | 2026-02-17 | Platform Team | KEEP DEFERRED | All 5 conditions NOT MET; next review 2026-05-17 |
-| 2026-02-25 | Platform Owner | ACCEPTED | Owner override — deployment approved regardless of gate conditions |
+| 2026-02-25 | Platform Owner | ACCEPTED | Target architecture accepted; shared-environment rollout still requires a truthful release front door and explicit execution plan |

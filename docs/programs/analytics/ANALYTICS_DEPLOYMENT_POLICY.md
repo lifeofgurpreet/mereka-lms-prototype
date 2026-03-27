@@ -31,6 +31,9 @@ The platform requires analytics capabilities for learning insights (enrollments,
 - Kubernetes manifests exist in `deploy/k8s/base/plugins/aspects/` but not applied
 - Analytics spec (`specs/analytics-pipeline_spec.md`) status: "in_progress"
 - No production analytics components running
+- No governed shared-environment analytics publish/promotion lane exists
+  today; local Tutor commands and deprecated manual scripts are not canonical
+  production authority
 
 **Infrastructure monitoring vs Learning analytics**:
 - **Operational monitoring** (Prometheus/Grafana): DEPLOYED and operational
@@ -50,8 +53,10 @@ The platform requires analytics capabilities for learning insights (enrollments,
 
 ## Decision
 
-Aspects is the **target analytics architecture**, but deployment is **deferred** until readiness gates are met.  
-Current policy is no production Aspects deployment until the conditions below are satisfied.
+Aspects is the **target analytics architecture**, but shared-environment rollout
+is **deferred** until readiness gates are met. Current policy is no production
+Aspects deployment until the conditions below are satisfied and a truthful
+shared-environment release authority is defined.
 
 **Rationale**:
 - Core platform requires stabilization before adding analytics stack
@@ -60,6 +65,9 @@ Current policy is no production Aspects deployment until the conditions below ar
 - LMS built-in analytics (Insights) can serve course-level needs in the interim
 - No immediate course creator demand for advanced learning analytics
 - Analytics spec is "in_progress" - feature not production-ready
+- No governed analytics release front door currently exists, so local Tutor
+  build/push/apply mechanics cannot honestly be described as the normal
+  production operator path
 - Team bandwidth better spent on core LMS features and stability
 
 **Interim solution**:
@@ -139,8 +147,28 @@ kubectl get pods -n mereka-lms | grep aspects
 # Expected: No resources found (not deployed)
 ```
 
-### Future Deployment Procedure (when approved)
-When analytics deployment is approved:
+### Future Deployment Boundary (when approved)
+When analytics deployment is approved, shared-environment rollout still needs an
+explicit authority decision before anyone should treat Aspects as a routine
+production release lane.
+
+1. **Define the shared-environment front door first**:
+   - Prefer a governed publish + promotion lane comparable to the rest of the
+     platform.
+   - If that does not exist yet, record any Tutor build/push/apply sequence as
+     a **temporary legacy/manual bootstrap**, not the canonical production path.
+   - Require explicit rollback and evidence capture before using that bootstrap
+     in shared environments.
+
+2. **Keep local Tutor commands in local/debug scope unless explicitly approved
+   as bootstrap**:
+   - `tutor images build ...` remains valid for local parity and dry-run work.
+   - Shared-environment release claims require the front-door decision above.
+
+### Legacy / Manual Bootstrap Sketch (only if explicitly approved)
+If analytics deployment is approved before a governed analytics release lane
+exists, the following sequence remains a legacy/bootstrap worksheet rather than
+the canonical operator path:
 
 1. **Build images** (30-45 minutes):
    ```bash
@@ -149,14 +177,14 @@ When analytics deployment is approved:
    tutor images build aspects aspects-superset
    ```
 
-2. **Deploy to production**:
+2. **Legacy/manual cluster bootstrap**:
    ```bash
    tutor images push all --repository ghcr.io/biji-biji-initiative/mereka-lms
    tutor k8s init  # Initialize ClickHouse schema
    tutor k8s start
    ```
 
-3. **Verify deployment**:
+3. **Verify bootstrap**:
    ```bash
    kubectl get pods -n mereka-lms | grep aspects
    # Expected: clickhouse, superset, superset-worker, ralph pods running

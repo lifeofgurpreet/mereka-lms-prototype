@@ -10,7 +10,14 @@
 
 This contract prevents analytics infrastructure (Aspects/Superset/ClickHouse) from drifting into production deployment without explicit decision gate approval.
 
-**Context**: ADR-017 defers analytics deployment until core platform stability is proven and demand is validated. These guardrails enforce that decision by detecting and blocking accidental analytics infrastructure deployment.
+**Context**: ADR-017 defers analytics deployment until core platform stability is
+proven and demand is validated. These guardrails enforce that decision by
+detecting and blocking accidental analytics infrastructure deployment.
+
+**Release-authority note**: No governed shared-environment analytics publish or
+promotion lane exists today. Until one is introduced, any Tutor
+build/push/apply sequence for Aspects must be treated as a temporary
+legacy/manual bootstrap rather than the normal production operator path.
 
 ## Guardrail Rules
 
@@ -201,20 +208,25 @@ When analytics deployment is approved, follow these steps to formally close the 
 
 ### Phase 2: Infrastructure Preparation
 
-5. **Build Aspects images** (30-45 minutes):
+5. **Define shared-environment release authority**:
+   - Prefer a governed analytics publish + promotion lane before rollout.
+   - If that does not exist yet, explicitly record Tutor build/push/apply as a
+     temporary legacy/manual bootstrap with rollback and evidence requirements.
+
+6. **Build Aspects images** (legacy/manual bootstrap only if still needed):
    ```bash
    source .venv/bin/activate
    export TUTOR_ROOT="$(pwd)/tutor_env"
    tutor images build aspects aspects-superset
    ```
 
-6. **Push images to Artifact Registry**:
+7. **Push images to Artifact Registry** (legacy/manual bootstrap only):
    ```bash
    tutor images push aspects aspects-superset \
      --repository ghcr.io/biji-biji-initiative/mereka-lms
    ```
 
-7. **Update production kustomization**:
+8. **Update production kustomization**:
    ```yaml
    # In deploy/k8s/overlays/production/kustomization.yaml
    images:
@@ -226,7 +238,7 @@ When analytics deployment is approved, follow these steps to formally close the 
        newTag: 3.1.0  # Pin specific version
    ```
 
-8. **Create ClickHouse secrets** (in GCP Secret Manager):
+9. **Create ClickHouse secrets** (in GCP Secret Manager):
    ```bash
    # Generate secure passwords
    CLICKHOUSE_PASSWORD=$(openssl rand -base64 32)
@@ -242,7 +254,7 @@ When analytics deployment is approved, follow these steps to formally close the 
        --project=bbi-k8 --data-file=-
    ```
 
-9. **Update ExternalSecrets mapping**:
+10. **Update ExternalSecrets mapping**:
    ```yaml
    # In deploy/k8s/base/secrets/external-secrets.yaml
    - secretKey: clickhouse-password
@@ -255,7 +267,7 @@ When analytics deployment is approved, follow these steps to formally close the 
 
 ### Phase 3: Deployment
 
-10. **Deploy to production** (staged rollout):
+11. **Deploy to production** (legacy/manual bootstrap only if explicitly approved):
     ```bash
     # Deploy ClickHouse first (data layer)
     kubectl apply -f deploy/k8s/base/plugins/aspects/volumes.yml
@@ -273,14 +285,14 @@ When analytics deployment is approved, follow these steps to formally close the 
     kubectl apply -f deploy/k8s/base/plugins/aspects/jobs.yml -l job-name=superset-init
     ```
 
-11. **Enable Superset ingress** (in Caddy):
+12. **Enable Superset ingress** (legacy/manual bootstrap only):
     ```bash
     # Apply patch to add Superset route to Caddyfile
     # See docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md for full Caddy config
     tutor local restart caddy
     ```
 
-12. **Smoke test**:
+13. **Smoke test**:
     ```bash
     # Verify ClickHouse has data
     kubectl exec -n mereka-lms deploy/clickhouse -- \
@@ -293,13 +305,13 @@ When analytics deployment is approved, follow these steps to formally close the 
 
 ### Phase 4: Verification
 
-13. **Run drift guardrails verifier** (should PASS with deployment active):
+14. **Run drift guardrails verifier** (should PASS with deployment active):
     ```bash
     ./scripts/qa/verify-analytics-drift-guardrails.sh
     # Expected: All checks PASS (decision approved, deployment detected, specs aligned)
     ```
 
-14. **Update capability matrix**:
+15. **Update capability matrix**:
     ```bash
     # Edit docs/reference/operations/CAPABILITY_MATRIX.md
     # Change Aspects row:
@@ -307,7 +319,7 @@ When analytics deployment is approved, follow these steps to formally close the 
     #   Notes: Add deployment date, version info
     ```
 
-15. **Update analytics README**:
+16. **Update analytics README**:
     ```bash
     # Edit docs/concepts/analytics/README.md
     # Remove deferral notice
@@ -317,12 +329,12 @@ When analytics deployment is approved, follow these steps to formally close the 
 
 ### Phase 5: Handoff
 
-16. **Document operational procedures**:
+17. **Document operational procedures**:
     - Follow `docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md` for ongoing operations
     - Set up monitoring alerts (event lag, query performance, disk usage)
     - Schedule first dashboard review meeting with course creators
 
-17. **Commit decision closure**:
+18. **Commit decision closure**:
     ```bash
     git add docs/programs/analytics/ANALYTICS_DEPLOYMENT_POLICY.md
     git add specs/analytics-pipeline_spec.md
