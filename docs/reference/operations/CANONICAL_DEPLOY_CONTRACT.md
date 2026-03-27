@@ -13,45 +13,59 @@ All builds and releases MUST originate from:
 - **Branch**: `main`
 - **Worktree**: a clean worktree rooted at this repository
 - **Validation**: `./scripts/infra/canonical-release.sh --check-only`
+- **Publish path**: a successful `.github/workflows/build-tutor-images.yml` run for the target SHA
+- **Release inputs**: the workflow-emitted immutable tags/digests plus the `release-bundle` and `build-provenance` artifacts
 
-### Build → Tag → Push → GitOps Flow
+### Publish → GitOps Flow
 
 ```bash
 # 0. Preflight (AC-OPS-113, AC-OPS-063)
 ./scripts/infra/canonical-release.sh --check-only
 
-# 1. Build (if cache miss)
-source infrastructure/tutor/tutor-env.sh
-./infrastructure/tutor/apply-patches.sh
-tutor images build openedx -a PIP_COMMAND=pip     # ~30-45min, 12GB+ RAM
-tutor images build mfe                             # ~15-20min
+# 1. Publish images for the merged target SHA.
+# Preferred: use the push-to-main run emitted by the merge itself.
+# Deterministic rebuilds may use workflow_dispatch on main with an explicit image_tag.
+APP_SHA="$(git rev-parse origin/main)"
+gh workflow run build-tutor-images.yml \
+  --ref main \
+  -f build_openedx=true \
+  -f build_mfe=true \
+  -f update_gitops=false \
+  -f target_environment=production \
+  -f image_tag="${APP_SHA}"
 
-# 2. Tag
-OPENEDX_TAG="$(date +%Y%m%d)-openedx-$(git rev-parse --short HEAD)"
-MFE_TAG="$(date +%Y%m%d)-mfe-$(git rev-parse --short HEAD)"
-docker tag docker.io/overhangio/openedx:latest \
-  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
-docker tag docker.io/overhangio/openedx-mfe:latest \
-  ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
+# 2. Wait for the successful run, then download the canonical release artifacts.
+RUN_ID="<build-tutor-images run id>"
+gh run watch "${RUN_ID}"
+gh run download "${RUN_ID}" --name release-bundle --dir "var/release-artifacts/${RUN_ID}"
+gh run download "${RUN_ID}" --name build-provenance --dir "var/release-artifacts/${RUN_ID}"
 
-# 3. Push
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
-docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
+# 3. Use the immutable tags/digests emitted by the workflow summary/artifacts.
+OPENEDX_TAG="${APP_SHA}"
+MFE_TAG="${APP_SHA}"
+OPENEDX_DIGEST="sha256:<openedx_digest>"
+MFE_DIGEST="sha256:<mfe_digest>"
 
-# 4. GitOps update (both repos, dry-run first)
-./scripts/infra/canonical-release.sh --dry-run \
-  --openedx-tag ${OPENEDX_TAG} --mfe-tag ${MFE_TAG}
+# 4. Preview the GitOps rollout from those exact release coordinates.
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag "${OPENEDX_TAG}" \
+  --mfe-tag "${MFE_TAG}" \
+  --openedx-digest "${OPENEDX_DIGEST}" \
+  --mfe-digest "${MFE_DIGEST}" \
+  --require-digests
 
-# 5. Apply + commit + push
-./scripts/infra/canonical-release.sh \
-  --openedx-tag ${OPENEDX_TAG} --mfe-tag ${MFE_TAG} \
-  --apply --commit --push --verify-runtime
+# 5. Apply + commit + push the GitOps rollout
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag "${OPENEDX_TAG}" --mfe-tag "${MFE_TAG}" \
+  --openedx-digest "${OPENEDX_DIGEST}" --mfe-digest "${MFE_DIGEST}" \
+  --require-digests --apply --commit --push --verify-runtime
 
 # 5b. Branding/theme release (optional): include frontend cache purge
 # Requires Cloudflare credentials in env.
-./scripts/infra/canonical-release.sh \
-  --openedx-tag ${OPENEDX_TAG} --mfe-tag ${MFE_TAG} \
-  --apply --commit --push --verify-runtime \
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag "${OPENEDX_TAG}" --mfe-tag "${MFE_TAG}" \
+  --openedx-digest "${OPENEDX_DIGEST}" --mfe-digest "${MFE_DIGEST}" \
+  --require-digests --apply --commit --push --verify-runtime \
   --purge-frontend-cache
 ```
 
@@ -86,13 +100,13 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
 | Static assets (webpack) | Source file hash | Theme/MFE code changes |
 | Tutor patches | `apply-patches.sh` hash | Patch file modification |
 
-### `tutor_env` Image Reuse
+### Local Tutor Builds Are Debug-Only
 
-The `tutor_env/` directory is gitignored. Docker images are cached locally:
-- `docker.io/overhangio/openedx:latest` → local Tutor build output
-- `docker.io/overhangio/openedx-mfe:latest` → local MFE build output
+The `tutor_env/` directory is gitignored and local Tutor builds may still be used for reproduction, cache debugging, or kind parity work.
 
-**Reuse rule**: If `canonical-release.sh --dry-run` shows "cache hit" for a tag, the AR image is identical — skip build.
+Production release truth does **not** come from local `docker.io/overhangio/*` tags. It comes from the successful `build-tutor-images.yml` workflow run, the pushed GHCR digests it resolves, and the signed release artifacts it emits.
+
+**Reuse rule**: If the successful workflow run already produced the exact immutable tag/digest pair required for the rollout, skip rebuilding and reuse that published release coordinate.
 
 **Invalidation rule**: Delete `var/build-cache/` and rebuild when:
 - `apply-patches.sh` content changes
@@ -104,11 +118,10 @@ The `tutor_env/` directory is gitignored. Docker images are cached locally:
 
 | Step | Duration | Artifact Size |
 |------|----------|---------------|
-| `tutor images build openedx` | 30-45 min | ~3.5 GB image |
-| `tutor images build mfe` | 15-20 min | ~800 MB image |
-| `docker push` (openedx) | 5-10 min | ~1.5 GB compressed |
-| `docker push` (mfe) | 2-5 min | ~400 MB compressed |
-| Tag update + commit | <1 min | N/A |
+| `Build Tutor Images` / `Build OpenEdX Image` job | 30-45 min | ~3.5 GB image |
+| `Build Tutor Images` / `Build MFE Image` job | 15-20 min | ~800 MB image |
+| Release bundle + provenance emission | <5 min | small JSON artifacts |
+| GitOps update + commit | <5 min | N/A |
 | ArgoCD sync | 2-5 min | N/A |
 | Runtime convergence | 3-10 min | N/A |
 
@@ -117,23 +130,21 @@ The `tutor_env/` directory is gitignored. Docker images are cached locally:
 | Gate | Name | Command | Expected Output | Abort If |
 |------|------|---------|-----------------|----------|
 | 0 | Preflight | `canonical-release.sh --check-only` | All OK | Any HARD FAIL |
-| 1 | Build | `tutor images build openedx` | Exit 0 | OOM, build error |
-| 2 | Tag | `docker tag ...` | Exit 0 | Wrong source image |
-| 3 | Push | `docker push ...` | Exit 0 | 403 (re-auth) |
-| 4 | Dry-run | `canonical-release.sh --dry-run` | Shows expected diffs | Unexpected files changed |
-| 5 | Apply | `canonical-release.sh --apply --commit --push` | Both repos pushed | Merge conflict |
-| 6 | Verify | `canonical-release.sh --verify-runtime` | Tag matches in cluster | Timeout (10min) |
-| 7 | Smoke | `curl -sI` on all URLs | HTTP 200/302 | Any 502/503 |
+| 1 | Publish | `gh workflow run build-tutor-images.yml ...` | Successful image-build run for target SHA | Build failure, digest missing |
+| 2 | Artifact capture | `gh run download <run-id> --name release-bundle` | Release bundle + provenance downloaded | Bundle missing or inconsistent |
+| 3 | Dry-run | `release-openedx-gitops.sh --openedx-tag ... --mfe-tag ... --openedx-digest ... --mfe-digest ... --require-digests` | Shows expected diffs | Unexpected files changed |
+| 4 | Apply | `release-openedx-gitops.sh ... --apply --commit --push` | Both repos pushed | Merge conflict, push rejected |
+| 5 | Verify | `release-openedx-gitops.sh ... --verify-runtime` | Tag matches in cluster | Timeout (10min) |
+| 6 | Smoke | `curl -sI` on all URLs | HTTP 200/302 | Any 502/503 |
 
 ### Rollback Criteria Per Gate (AC-OPS-052)
 
 | Gate | Rollback Action | Recovery Time |
 |------|----------------|---------------|
 | 0-3 | No state changed; fix and retry | Immediate |
-| 4 | `git checkout -- .` in both repos | Immediate |
-| 5 | `git revert HEAD && git push` in both repos | <2 min |
-| 6 | Same as 5; ArgoCD auto-reverts | <5 min |
-| 7 | Same as 5; investigate root cause | <15 min |
+| 4 | `git revert HEAD && git push` in both repos | <2 min |
+| 5 | Same as 4; ArgoCD auto-reverts | <5 min |
+| 6 | Same as 4; investigate root cause | <15 min |
 
 ## 5. Evidence Naming Convention (AC-OPS-053)
 

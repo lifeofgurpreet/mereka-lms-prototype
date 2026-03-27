@@ -11,6 +11,7 @@ Canonical branding workflow:
 
 Important:
 - Production is GitOps-managed. Direct `kubectl set image` changes are non-durable and will drift.
+- Production branding releases must publish images through `.github/workflows/build-tutor-images.yml` and promote them with `scripts/infra/release-openedx-gitops.sh`. Local `tutor images build ...` runs are for dev parity, local reproduction, or debugging only.
 
 ## Prerequisites
 
@@ -28,6 +29,9 @@ Use this after image build + push is complete:
 ./scripts/infra/release-openedx-gitops.sh \
   --openedx-tag <OPENEDX_TAG> \
   --mfe-tag <MFE_TAG> \
+  --openedx-digest sha256:<openedx_digest> \
+  --mfe-digest sha256:<mfe_digest> \
+  --require-digests \
   --apply --commit --push --verify-runtime
 ```
 
@@ -64,7 +68,7 @@ Important Caddy note for service-domain authn fixes:
 │                         DEPLOYMENT FLOW                              │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│  1. Brand Assets                2. Build                             │
+│  1. Brand Assets             2. Publish via workflow                │
 │  ┌──────────────────┐          ┌──────────────────┐                 │
 │  │ bbbi-mereka-     │   copy   │ infrastructure/  │                 │
 │  │ brand-assets/    │ ───────► │ tutor/themes/    │                 │
@@ -73,22 +77,22 @@ Important Caddy note for service-domain authn fixes:
 │                                         │                            │
 │                                         ▼                            │
 │                                ┌──────────────────┐                 │
-│                                │ tutor images     │                 │
-│                                │ build openedx    │                 │
+│                                │ build-tutor-     │                 │
+│                                │ images.yml       │                 │
 │                                └────────┬─────────┘                 │
 │                                         │                            │
-│  3. Push                                ▼                            │
+│  3. Release metadata                     ▼                            │
 │  ┌──────────────────┐          ┌──────────────────┐                 │
-│  │ asia-southeast1- │ ◄─────── │ docker tag +     │                 │
-│  │ docker.pkg.dev/  │   push   │ docker push      │                 │
-│  │ mereka-lms/      │          └──────────────────┘                 │
+│  │ release-bundle + │ ◄─────── │ GHCR image tags  │                 │
+│  │ build-provenance │  emit    │ + digests        │                 │
+│  │ artifacts        │          └──────────────────┘                 │
 │  └────────┬─────────┘                                               │
 │           │                                                          │
 │  4. GitOps│           5. Verify                                      │
 │           ▼          ┌──────────────────┐                           │
 │  ┌──────────────────┐│ academyv2.mereka.io │                         │
-│  │ commit/push      ││ (production)       │                         │
-│  │ overlay+ref      │└──────────────────┘                           │
+│  │ release-openedx- ││ (production)       │                         │
+│  │ gitops.sh        │└──────────────────┘                           │
 │  └──────────────────┘                                               │
 │                                                                      │
 └─────────────────────────────────────────────────────────────────────┘
@@ -253,7 +257,7 @@ Portability guard (recommended before PR):
 - Custom Mereka footer for MFEs (component injection)
 - Google Fonts stripping from SCSS sources
 
-### Step 4: Build Docker Images
+### Step 4: Publish Images (Canonical Production Path)
 
 Before building, run the branding gates (this is the source-of-truth check that prevents regressions):
 
@@ -269,106 +273,59 @@ BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh
 ```
 
 ```bash
-# Activate environment
+# Publish the merged target SHA through the governed image workflow.
+APP_SHA="$(git rev-parse origin/main)"
+gh workflow run build-tutor-images.yml \
+  --ref main \
+  -f build_openedx=true \
+  -f build_mfe=true \
+  -f update_gitops=false \
+  -f target_environment=production \
+  -f image_tag="${APP_SHA}"
+
+# Wait for the successful run and download the release artifacts.
+RUN_ID="<build-tutor-images run id>"
+gh run watch "${RUN_ID}"
+gh run download "${RUN_ID}" --name release-bundle --dir "var/release-artifacts/${RUN_ID}"
+gh run download "${RUN_ID}" --name build-provenance --dir "var/release-artifacts/${RUN_ID}"
+```
+
+**Production publish discipline:**
+- Prefer the push-to-`main` `build-tutor-images.yml` run for the merged change; use `workflow_dispatch` only for deliberate rebuilds.
+- Use the workflow-emitted immutable tags/digests plus the `release-bundle` and `build-provenance` artifacts as release inputs.
+- Do not hand-tag or hand-push production images from a local shell as the normal path.
+
+### Local reproduction / debugging only
+
+Use local Tutor builds only for debugging, parity checks, or kind workflows:
+
+```bash
 source .venv/bin/activate
 export TUTOR_ROOT="$(pwd)/tutor_env"
-
-# Build OpenEdX image (LMS/CMS/workers)
+./infrastructure/tutor/apply-patches.sh
 tutor images build openedx
-
-# Preflight MFE generated Dockerfile prerequisites
 ./scripts/qa/verify-mfe-build-prereqs.sh
-
-# Build MFE image (if MFE styling changed)
 tutor images build mfe
-
-# Verify built MFE branding contract before push
 ./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
-
-# Verify Kustomize image override contract (prevents transformed-name tag drift)
-./scripts/qa/verify-gitops-image-overrides.sh --check-infra
 ```
 
-**Build discipline:**
-- Run only one `tutor images build mfe` at a time.
-- If npm network errors occur (`ECONNRESET`, `ETIMEDOUT`), rerun the same command after the active run exits; do not launch parallel retries.
-- If MFE build fails with `Can't resolve '@openedx/frontend-plugin-framework'`, rerun
-  `./infrastructure/tutor/apply-patches.sh` before retrying; it patches generated MFE Dockerfiles
-  to inject the required dependency install for Indigo `env.config.jsx`.
-- If authn index points to an unbranded CSS bundle, repair deterministically before push:
-  `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image>`
+Run only one `tutor images build mfe` at a time. If npm network errors occur (`ECONNRESET`, `ETIMEDOUT`), rerun the same command after the active run exits; do not launch parallel retries.
 
-**Build Times:**
-- First build (no cache): 60-90 minutes
-- Subsequent builds (with cache): 10-20 minutes
-
-### Step 5: Authenticate to Artifact Registry
+### Step 5: Promote via GitOps
 
 ```bash
-gcloud auth configure-docker asia-southeast1-docker.pkg.dev
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag "<OPENEDX_TAG>" \
+  --mfe-tag "<MFE_TAG>" \
+  --openedx-digest "sha256:<openedx_digest>" \
+  --mfe-digest "sha256:<mfe_digest>" \
+  --require-digests \
+  --apply --commit --push --verify-runtime
 ```
 
-### Step 6: Tag Images
+This is the canonical production promotion path. It updates the app repo and GitOps repo consistently, enforces digest-aware release integrity, and verifies runtime convergence.
 
-Choose a meaningful tag (e.g., git SHA, date, or release name):
-
-```bash
-# Current production tag (Atlas SRV fix)
-TAG="20260204-dnspython"
-```
-
-```bash
-# OpenEdX image
-docker tag tutor_local/openedx:latest \
-  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${TAG}
-
-# MFE image (if built)
-docker tag tutor_local/openedx-mfe:latest \
-  ghcr.io/biji-biji-initiative/mereka-lms/mfe:${TAG}
-```
-
-### Step 7: Push to Artifact Registry
-
-```bash
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${TAG}
-docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:${TAG}
-```
-
-### Step 8: Update GitOps Sources (Production)
-
-Production is **GitOps-managed** by Argo app `mereka-lms-local` from:
-- repo: `Biji-Biji-Initiative/BBI-K8` (older docs may still mention `infrastructure`)
-- path: `apps/mereka-lms/overlays/prod`
-
-Do not use `kubectl set image` for normal releases.
-
-Fast path: use `scripts/infra/release-openedx-gitops.sh` (section above).
-
-```bash
-# Set repo roots explicitly for the release flow
-APP_REPO="${APP_REPO:-$(pwd)}"
-INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
-
-# 1) Push this repo first (mereka-lms) so the new base ref exists remotely.
-git -C "${APP_REPO}" push
-
-# 2) In GitOps repo checkout, update BOTH:
-#    a) pinned base ref
-#    b) production overlay image tags
-git -C "${INFRA_REPO}" pull --rebase
-$EDITOR "${INFRA_REPO}/apps/mereka-lms/base/kustomization.yaml"
-$EDITOR "${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustomization.yaml"
-
-# 3) Verify no image-tag drift between repos before push.
-./scripts/qa/verify-gitops-image-overrides.sh --check-infra
-
-# 4) Commit + push GitOps repo.
-git -C "${INFRA_REPO}" add apps/mereka-lms/base/kustomization.yaml apps/mereka-lms/overlays/prod/kustomization.yaml
-git -C "${INFRA_REPO}" commit -m "chore: rollout openedx/openedx-mfe tags ${TAG}"
-git -C "${INFRA_REPO}" push
-```
-
-### Step 9: Verify Deployment
+### Step 6: Verify Deployment
 
 ```bash
 # Watch rollout status
@@ -470,18 +427,16 @@ rg -n "openedx-mfe|openedx:" "${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustom
 ## Quick Reference Commands
 
 ```bash
-# Full deployment sequence
+# Canonical production deployment sequence
 ./scripts/branding/sync-brand-assets.sh
-./infrastructure/tutor/apply-patches.sh
-source .venv/bin/activate && export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor images build openedx
-tutor images build mfe
-./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
-docker tag tutor_local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
-docker tag tutor_local/openedx-mfe:latest ghcr.io/biji-biji-initiative/mereka-lms/mfe:TAG
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:TAG
-docker push ghcr.io/biji-biji-initiative/mereka-lms/mfe:TAG
-./scripts/qa/verify-gitops-image-overrides.sh --check-infra
+AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh prod
+APP_SHA="$(git rev-parse origin/main)"
+gh workflow run build-tutor-images.yml --ref main -f build_openedx=true -f build_mfe=true -f update_gitops=false -f target_environment=production -f image_tag="${APP_SHA}"
+RUN_ID="<build-tutor-images run id>"
+gh run watch "${RUN_ID}"
+gh run download "${RUN_ID}" --name release-bundle --dir "var/release-artifacts/${RUN_ID}"
+gh run download "${RUN_ID}" --name build-provenance --dir "var/release-artifacts/${RUN_ID}"
+./scripts/infra/release-openedx-gitops.sh --openedx-tag "${APP_SHA}" --mfe-tag "${APP_SHA}" --openedx-digest "sha256:<openedx_digest>" --mfe-digest "sha256:<mfe_digest>" --require-digests --apply --commit --push --verify-runtime
 
 # Check Argo + live image
 kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n argocd get applications.argoproj.io mereka-lms-local -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision}{"\n"}'

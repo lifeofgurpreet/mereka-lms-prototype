@@ -3,6 +3,12 @@ _Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-07_
 
 This runbook captures the steps to roll out the nightly Open edX stack on Google Cloud in the new `mereka-lms` project. Environment model: **production (GKE)** + **dev (kind/VPS)** only; “staging” bucket names are legacy production labels.
 
+For normal application/image/theme releases, this file is **not** the canonical production rollout path. Use:
+- `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md`
+- `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md`
+
+Keep the Terraform/Tutor bootstrap material below for environment bootstrap or deep recovery. Ongoing production releases must use the governed image-publish workflow plus GitOps promotion.
+
 ## 1. Prerequisites
 
 - Billing enabled for `mereka-lms` (user to attach existing billing account).
@@ -63,13 +69,55 @@ Modules:
 2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
 3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=ghcr.io/biji-biji-initiative/mereka-lms`.
 
-## 4. Build & push images
+## 4. Build & publish images for ongoing releases
 
-1. Authenticate Docker with Artifact Registry:
+Prefer the automatic `push` trigger on `main`. For deterministic rebuilds of an already-merged SHA, dispatch the workflow manually:
+
+```bash
+APP_SHA="$(git rev-parse origin/main)"
+gh workflow run build-tutor-images.yml \
+  --ref main \
+  -f build_openedx=true \
+  -f build_mfe=true \
+  -f update_gitops=false \
+  -f target_environment=production \
+  -f image_tag="${APP_SHA}"
+```
+
+Then wait for the run and download the release artifacts:
+
+```bash
+RUN_ID="<build-tutor-images run id>"
+gh run watch "${RUN_ID}"
+gh run download "${RUN_ID}" --name release-bundle --dir "var/release-artifacts/${RUN_ID}"
+gh run download "${RUN_ID}" --name build-provenance --dir "var/release-artifacts/${RUN_ID}"
+```
+
+Local Tutor builds remain useful for bootstrap/debugging, but they are not the canonical production publish path.
+
+## 5. Deploy to GKE Autopilot
+
+For ongoing application rollouts, promote the published image coordinates through GitOps:
+
+```bash
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag "<OPENEDX_TAG>" \
+  --mfe-tag "<MFE_TAG>" \
+  --openedx-digest "sha256:<openedx_digest>" \
+  --mfe-digest "sha256:<mfe_digest>" \
+  --require-digests \
+  --apply --commit --push --verify-runtime
+```
+
+Use the remaining steps in this section only for cluster bootstrap or deep recovery, not as the normal production release path.
+
+### Bootstrap / deep recovery follow-on
+
+1. Authenticate Docker with Artifact Registry if you are doing a local/bootstrap build:
    ```bash
    gcloud auth configure-docker asia-southeast1-docker.pkg.dev
    ```
-2. Build Tutor images:
+2. Local/bootstrap Tutor image build only:
    ```bash
    source infrastructure/tutor/tutor-env.sh
    ./infrastructure/tutor/apply-patches.sh
@@ -77,8 +125,6 @@ Modules:
    tutor images push all --repository ghcr.io/biji-biji-initiative/mereka-lms
    ```
    (Ensure `MFE_DOCKER_IMAGE` is updated before pushing.)
-
-## 5. Deploy to GKE Autopilot
 
 1. Generate Kubernetes config:
    ```bash
@@ -111,14 +157,14 @@ Modules:
     `velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait`
   - Docs: `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`, `docs/ops/runbooks/DISASTER_RECOVERY.md`
 - Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and Atlas host/user/password inputs for `FORUM_MONGODB_SRV`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
-- Apply the Mereka branding pack after each upgrade:
+- Apply the Mereka branding pack after each upgrade by publishing a governed build and promoting it through GitOps:
   ```bash
   ./scripts/branding/sync-brand-assets.sh
-  tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
-  ./infrastructure/tutor/apply-patches.sh
-  tutor images build openedx && tutor images build mfe
+  AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh prod
+  gh workflow run build-tutor-images.yml --ref main -f build_openedx=true -f build_mfe=true -f update_gitops=false -f target_environment=production -f image_tag="$(git rev-parse origin/main)"
+  ./scripts/infra/release-openedx-gitops.sh --openedx-tag "<OPENEDX_TAG>" --mfe-tag "<MFE_TAG>" --openedx-digest "sha256:<openedx_digest>" --mfe-digest "sha256:<mfe_digest>" --require-digests --apply --commit --push --verify-runtime
   ```
-  The patch step copies the SCSS/fonts into the Indigo MFE build so all micro-frontends share the same palette.
+  The build workflow already performs the required Tutor setup and `apply-patches.sh` step before publishing the image artifacts.
 - Hook monitoring dashboards/alerts (see `docs/reference/operations/MONITORING.md` + JSON templates in `infrastructure/monitoring/`).
 - Review the DR runbook and backup cadence in `docs/ops/runbooks/DISASTER_RECOVERY.md`.
 - Enforce cost guardrails via Terraform budgets. Populate `billing_account_id`, `monthly_budget_myr`, and `budget_thresholds` in `infrastructure/terraform/terraform.tfvars`, then apply:
