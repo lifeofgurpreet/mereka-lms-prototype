@@ -11,12 +11,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-ENV_SCOPE="${ENV_SCOPE:-both}"
+ENV_SCOPE="${ENV_SCOPE:-staging}"
 K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
-K8S_CONTEXT_DEV="${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}"
+K8S_CONTEXT_DEV="${K8S_CONTEXT_DEV:-rke2-nonprod}"
 K8S_CONTEXT_STAGING="${K8S_CONTEXT_STAGING:-rke2-nonprod}"
 K8S_NAMESPACE="${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}"
-K8S_NAMESPACE_DEV="${K8S_NAMESPACE_DEV:-${K8S_NAMESPACE:-mereka-lms}}"
+K8S_NAMESPACE_DEV="${K8S_NAMESPACE_DEV:-mereka-lms-dev}"
 K8S_NAMESPACE_STAGING="${K8S_NAMESPACE_STAGING:-stg-mereka-lms}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 FAIL_ON_LEGACY_MONGODB="${FAIL_ON_LEGACY_MONGODB:-1}"
@@ -62,7 +62,7 @@ Env:
   RUN_AUTHENTICATED_SSO_CANARY=1 Run credentialed browser SSO canary check
   AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1  Fail if canary creds are missing
   RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT=1  Audit Authentik policy exceptions (runtime; enabled by default)
-  RUN_ENTERPRISE_RUNTIME_AUDIT=1  Run enterprise runtime readiness gates in prod/both
+  RUN_ENTERPRISE_RUNTIME_AUDIT=1  Run enterprise runtime readiness gates for the selected lane(s)
   ENTERPRISE_READINESS_TENANT=mereka  Tenant slug used by enterprise SSO readiness gate
   RUN_ENTERPRISE_READINESS_INTEGRITY_AUDIT=1  Run static enterprise readiness integrity guard
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
@@ -313,12 +313,31 @@ run_check "auth + permissions + multisite audit" \
     NAMESPACE_PROD="$K8S_NAMESPACE" NAMESPACE_DEV="$K8S_NAMESPACE_DEV" NAMESPACE_STAGING="$K8S_NAMESPACE_STAGING" \
     ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
 
-if [[ "$RUN_ENTERPRISE_RUNTIME_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ) ]]; then
-  run_check "enterprise service deployment (prod)" \
-    ./scripts/qa/verify-enterprise-service-deployment.sh
+if [[ "$RUN_ENTERPRISE_RUNTIME_AUDIT" == "1" ]]; then
+  enterprise_envs=()
+  case "$ENV_SCOPE" in
+    prod) enterprise_envs=(prod) ;;
+    dev) enterprise_envs=(dev) ;;
+    staging) enterprise_envs=(staging) ;;
+    both) enterprise_envs=(prod dev) ;;
+    all) enterprise_envs=(prod dev staging) ;;
+  esac
 
-  run_check "enterprise SSO readiness (prod)" \
-    ./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --mode cluster --tenant "$ENTERPRISE_READINESS_TENANT"
+  for enterprise_env in "${enterprise_envs[@]}"; do
+    service_args=(--env "$enterprise_env")
+    if [[ "$enterprise_env" == "prod" ]]; then
+      service_args+=(--allow-parked-services)
+    fi
+
+    run_check "enterprise service deployment (${enterprise_env})" \
+      ./scripts/qa/verify-enterprise-service-deployment.sh "${service_args[@]}"
+
+    run_check "enterprise runtime app wiring (${enterprise_env})" \
+      ./scripts/qa/verify-enterprise-runtime-app-wiring.sh --env "$enterprise_env" --strict
+
+    run_check "enterprise SSO readiness (${enterprise_env})" \
+      ./scripts/qa/verify-enterprise-sso-readiness.sh --env "$enterprise_env" --mode cluster --tenant "$ENTERPRISE_READINESS_TENANT"
+  done
 fi
 
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" || "$ENV_SCOPE" == "all" ]]; then

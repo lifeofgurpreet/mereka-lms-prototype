@@ -18,10 +18,16 @@ This guide documents the Enterprise SSO posture for Mereka Academy. It covers:
 **Current auth architecture:**
 
 ```
-Non-enterprise users  →  Authentik OIDC (auth0.mereka.io)  →  LMS
+Non-enterprise users  →  Lane-specific Authentik OIDC  →  LMS
 Enterprise users      →  Per-tenant SAML/OIDC via third_party_auth → LMS
 Platform admins       →  Authentik OIDC + MerekaPlatformAdminMiddleware
 ```
+
+**Current topology truth (March 27, 2026):**
+
+- `dev` and `staging` are separate environment lanes that currently share the `rke2-nonprod` cluster.
+- `prod` remains the parked GKE lane for now and is not the default runtime-proof target.
+- Verifiers must keep environment identity separate from current cluster placement so the later move to dedicated `staging` and `prod` RKE2 clusters is a context change, not a workflow rewrite.
 
 ---
 
@@ -79,9 +85,10 @@ The authn MFE respects `MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"]`. This is current
 
 ---
 
-## Deterministic Onboarding Workflow (Production)
+## Deterministic Onboarding Workflow (Staging-first, then Production)
 
 Use `scripts/tenants/onboard-enterprise-tenant.sh` as the canonical path for onboarding enterprise tenants.
+Run it against `staging` first on `rke2-nonprod`, reuse the same flow for `dev` when iterating quickly, and reserve `prod` hostnames for a later promotion pass after production is intentionally reactivated.
 
 ### 1. Populate SAML Secrets (Operator Action)
 
@@ -100,22 +107,22 @@ printf '%s' "$(cat /tmp/saml-keys/saml-sp-key.pem)" | \
   gcloud secrets create MEREKA_LMS_SAML_SP_PRIVATE_KEY \
     --project bbi-k8 --data-file=-
 
-# 3. ExternalSecrets will auto-sync to K8s within 1 hour, or force:
+# 3. ExternalSecrets will auto-sync to K8s within 1 hour, or force a sync in the target lane:
 kubectl annotate externalsecret enterprise-sso-secrets \
-  -n mereka-lms force-sync=$(date +%s) --overwrite
+  -n stg-mereka-lms force-sync=$(date +%s) --overwrite
 
-# 4. Confirm K8s secret exists
-kubectl get secret enterprise-sso-secrets -n mereka-lms
+# 4. Confirm the K8s secret exists in the target namespace
+kubectl get secret enterprise-sso-secrets -n stg-mereka-lms
 ```
 
 ### 2. Configure SAMLProviderConfig in Django Admin
 
 For each enterprise tenant:
 
-1. Log in to Django Admin: `https://academyv2.mereka.io/admin/`
+1. Log in to Django Admin: `https://staging.academyv2.mereka.io/admin/`
 2. Navigate to: **Third Party Auth > SAML Provider Configs > Add**
 3. Fields to set:
-   - **Site**: `academyv2.mereka.io`
+   - **Site**: `staging.academyv2.mereka.io`
    - **Backend name**: `tpa-saml`
    - **Enabled**: Yes
    - **Slug**: `{tenant-slug}` (e.g. `acme-corp`)
@@ -147,7 +154,7 @@ Use `scripts/tenants/configure-tenant-idp.sh` to create/update tenant SAML/OIDC 
 Once a `SAMLProviderConfig` exists, the LMS automatically serves SP metadata at:
 
 ```
-https://academyv2.mereka.io/auth/saml/metadata.xml
+https://staging.academyv2.mereka.io/auth/saml/metadata.xml
 ```
 
 Share this URL with the enterprise IT team. They configure it as the "Service Provider" in their IdP.
@@ -179,13 +186,13 @@ This is gated behind `ENABLE_SCIM_PROVISIONING` feature flag.
 - IdP signing certificate (or metadata URL)
 
 **Provide to the enterprise IT team:**
-- SP Entity ID: `https://academyv2.mereka.io/auth/saml/sp-metadata/{tenant-slug}` (or the global `/auth/saml/metadata.xml`)
-- SP ACS URL: `https://academyv2.mereka.io/auth/complete/tpa-saml/?next=/`
+- SP Entity ID: `https://staging.academyv2.mereka.io/auth/saml/sp-metadata/{tenant-slug}` (or the global `/auth/saml/metadata.xml`)
+- SP ACS URL: `https://staging.academyv2.mereka.io/auth/complete/tpa-saml/?next=/`
 - SP Certificate: contents of `SAML_SP_PUBLIC_CERT` from `enterprise-sso-secrets`
 
 ### Step 2: Create SAMLProviderConfig (SAML) or OAuth2ProviderConfig (OIDC)
 
-Via Django Admin at `https://academyv2.mereka.io/admin/third_party_auth/`.
+Via Django Admin at `https://staging.academyv2.mereka.io/admin/third_party_auth/`.
 
 **For SAML:**
 ```
@@ -219,11 +226,11 @@ Or via Waffle flag if implemented.
 ### Step 5: Verify
 
 ```bash
-# Run the verification script
-./scripts/qa/verify-enterprise-sso-readiness.sh --tenant acme-corp --env prod
+# Run the verification script in staging first
+./scripts/qa/verify-enterprise-sso-readiness.sh --tenant acme-corp --env staging
 
 # Manually test the login URL
-curl -L https://academyv2.mereka.io/enterprise/login/acme-corp
+curl -L https://staging.academyv2.mereka.io/enterprise/login/acme-corp
 # Should redirect to the enterprise IdP login page
 ```
 
@@ -238,14 +245,21 @@ MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"] = False
 
 ---
 
-## Dev Environment (rke2-nonprod / academyv2.mereka.dev)
+## Non-Prod Runtime Lanes (current shared `rke2-nonprod`)
 
-The dev environment (rke2-nonprod cluster, `*.mereka.dev`) can be used to test enterprise SSO before production. Key differences:
+Today, `dev` and `staging` share the `rke2-nonprod` cluster, but they remain distinct lanes with different namespaces, domains, overlays, and verification intent. Build and proof workflows should preserve that separation so each lane can move to its own cluster later without semantic drift.
 
-- LMS URL: `https://academyv2.mereka.dev`
-- SP metadata: `https://academyv2.mereka.dev/auth/saml/metadata.xml`
-- ACS URL: `https://academyv2.mereka.dev/auth/complete/tpa-saml/`
-- Dev ExternalSecret uses same `gcp-secret-manager` ClusterSecretStore, same `bbi-k8` GCP project
+| Lane | Current cluster | Namespace | LMS URL | Primary use |
+|---|---|---|---|---|
+| `staging` | `rke2-nonprod` | `stg-mereka-lms` | `https://staging.academyv2.mereka.io` | Main runtime-proof lane for enterprise/auth changes |
+| `dev` | `rke2-nonprod` | `mereka-lms-dev` | `https://academyv2.mereka.dev` | Fast iteration before staging proof |
+| `prod` | GKE (parked) | `mereka-lms` | `https://academyv2.mereka.io` | Explicit opt-in only |
+
+Common non-prod reference points:
+
+- Staging SP metadata: `https://staging.academyv2.mereka.io/auth/saml/metadata.xml`
+- Dev SP metadata: `https://academyv2.mereka.dev/auth/saml/metadata.xml`
+- Both non-prod lanes currently use the same `gcp-secret-manager` ClusterSecretStore and `bbi-k8` GCP project.
 
 For testing without a real enterprise IdP, use a free SAML IdP simulator such as:
 - [samltool.com](https://www.samltool.com/idp.php) (browser-based)
@@ -274,7 +288,7 @@ The `OAuth2ProviderConfig` or `SAMLProviderConfig` for the site is disabled. In 
 
 Check LMS pod logs for SAML assertion errors:
 ```bash
-kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=100 | grep -i saml
+kubectl logs -n <lane-namespace> -l app.kubernetes.io/name=lms --tail=100 | grep -i saml
 ```
 
 Common causes:
@@ -295,7 +309,7 @@ Check that `ENABLE_THIRD_PARTY_AUTH=True` in LMS settings and that the `SAMLProv
 
 Enterprise SSO runtime checks require populated SAML/OIDC secrets. Verify status and sync:
 ```bash
-kubectl get externalsecret enterprise-sso-secrets -n mereka-lms -o yaml | grep -A5 "status:"
+kubectl get externalsecret enterprise-sso-secrets -n <lane-namespace> -o yaml | grep -A5 "status:"
 ```
 
 A `SecretSyncedError` condition indicates the GCP secret does not exist.

@@ -39,11 +39,11 @@
 #   # Repo-only checks (no cluster needed — fastest):
 #   ./scripts/qa/verify-enterprise-sso-readiness.sh --mode repo
 #
+#   # Full check against staging cluster:
+#   ./scripts/qa/verify-enterprise-sso-readiness.sh --env staging
+#
 #   # Full check against dev cluster:
 #   ./scripts/qa/verify-enterprise-sso-readiness.sh --env dev
-#
-#   # Full check against prod cluster:
-#   ./scripts/qa/verify-enterprise-sso-readiness.sh --env prod
 #
 #   # Per-tenant check:
 #   ./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --tenant acme-corp
@@ -62,13 +62,15 @@ source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 # Argument parsing
 # ---------------------------------------------------------------------------
 TENANT=""
-ENV="prod"
+ENV="staging"
 MODE="all"       # repo | cluster | all
-NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
-NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
-NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
-CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
-CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+NAMESPACE="${NAMESPACE:-mereka-lms}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-mereka-lms}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-mereka-lms-dev}}"
+NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-rke2-nonprod}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 NAMESPACE_OVERRIDE=""
 
 usage() {
@@ -78,7 +80,7 @@ Usage: $0 [OPTIONS]
 Verify Enterprise SSO Phase 0 readiness (auth-sso-enterprise_spec.md AC-043).
 
 OPTIONS:
-  --env {prod|dev}          Target environment (default: prod)
+  --env {prod|dev|staging}  Target environment (default: staging)
   --tenant SLUG             Tenant slug for per-tenant checks (optional)
   --mode {repo|cluster|all} Scope of checks (default: all)
   -n, --namespace NS        Kubernetes namespace (default: $NAMESPACE)
@@ -86,6 +88,7 @@ OPTIONS:
 
 EXAMPLES:
   $0 --mode repo              # Static checks only, no kubectl
+  $0 --env staging            # Full check against staging (rke2-nonprod)
   $0 --env dev                # Full check against dev (rke2-nonprod)
   $0 --env prod --tenant acme-corp
 EOF
@@ -107,8 +110,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENV" != "prod" && "$ENV" != "dev" ]]; then
-  echo "Invalid --env: $ENV (expected prod|dev)" >&2
+if [[ "$ENV" != "prod" && "$ENV" != "dev" && "$ENV" != "staging" ]]; then
+  echo "Invalid --env: $ENV (expected prod|dev|staging)" >&2
   exit 1
 fi
 
@@ -120,19 +123,29 @@ fi
 # ---------------------------------------------------------------------------
 # K8s context and URL selection
 # ---------------------------------------------------------------------------
-if [[ "$ENV" == "prod" ]]; then
-  KUBE_CTX="$CONTEXT_PROD"
-  if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
-    NAMESPACE="$NAMESPACE_PROD"
-  fi
-  LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
-else
-  KUBE_CTX="$CONTEXT_DEV"
-  if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
-    NAMESPACE="$NAMESPACE_DEV"
-  fi
-  LMS_URL="https://${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
-fi
+case "$ENV" in
+  prod)
+    KUBE_CTX="$CONTEXT_PROD"
+    if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
+      NAMESPACE="$NAMESPACE_PROD"
+    fi
+    LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
+    ;;
+  dev)
+    KUBE_CTX="$CONTEXT_DEV"
+    if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
+      NAMESPACE="$NAMESPACE_DEV"
+    fi
+    LMS_URL="https://${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
+    ;;
+  staging)
+    KUBE_CTX="$CONTEXT_STAGING"
+    if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
+      NAMESPACE="$NAMESPACE_STAGING"
+    fi
+    LMS_URL="https://${STAGING_LMS_DOMAIN:-staging.academyv2.mereka.io}"
+    ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Counters and helpers

@@ -11,7 +11,7 @@
 #
 # Usage:
 #   ./scripts/qa/verify-enterprise-runtime-app-wiring.sh --env prod --strict
-#   ./scripts/qa/verify-enterprise-runtime-app-wiring.sh --env dev --context kind-dev
+#   ./scripts/qa/verify-enterprise-runtime-app-wiring.sh --env dev --context rke2-nonprod
 # Exit 0 = PASS
 # Exit 1 = FAIL
 # Exit 2 = INDETERMINATE (lane/runtime truth unavailable)
@@ -20,15 +20,15 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-ENV="prod"
+ENV="staging"
 MODE="standard" # standard|strict
-NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
-NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
-NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+NAMESPACE="${NAMESPACE:-mereka-lms}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-mereka-lms}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-mereka-lms-dev}}"
 NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
-CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
-CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
-CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-rke2-nonprod}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 KUBE_CONTEXT_OVERRIDE=""
 NAMESPACE_OVERRIDE=""
 

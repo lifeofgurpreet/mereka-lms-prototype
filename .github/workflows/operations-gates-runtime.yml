@@ -9,7 +9,7 @@ on:
       env_scope:
         description: "Environment scope for auth/multisite checks"
         required: false
-        default: "both"
+        default: "staging"
         type: choice
         options:
           - prod
@@ -33,7 +33,7 @@ on:
         default: false
         type: boolean
       run_enterprise_runtime_audit:
-        description: "Run enterprise service + SSO runtime gates (prod/both only)"
+        description: "Run enterprise service, runtime wiring, and SSO gates for the selected lane(s)"
         required: false
         default: true
         type: boolean
@@ -55,7 +55,7 @@ jobs:
 
       - name: Public auth surface checks (no cluster access)
         env:
-          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'both' }}
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'staging' }}
         run: |
           ./scripts/qa/verify-auth-surfaces.sh "$INPUT_ENV_SCOPE"
 
@@ -74,7 +74,7 @@ jobs:
       - name: Optional credentialed SSO canary (no cluster access) - run
         if: ${{ (github.event.inputs.run_authenticated_sso_canary == 'true') || (vars.RUN_AUTHENTICATED_SSO_CANARY == 'true') }}
         env:
-          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'both' }}
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'staging' }}
           SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
@@ -137,7 +137,7 @@ jobs:
       - name: Run consolidated operations gate
         if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         env:
-          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'both' }}
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'staging' }}
           INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
           INPUT_RUN_ALERT_ROUTING_AUDIT: ${{ github.event.inputs.run_alert_routing_audit || 'true' }}
           INPUT_RUN_AUTHENTICATED_SSO_CANARY: ${{ github.event.inputs.run_authenticated_sso_canary || vars.RUN_AUTHENTICATED_SSO_CANARY || 'false' }}

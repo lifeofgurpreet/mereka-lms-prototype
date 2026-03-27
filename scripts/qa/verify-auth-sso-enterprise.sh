@@ -3,12 +3,12 @@
 # @covers AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-020, AC-021, AC-022, AC-023, AC-024, AC-025, AC-026, AC-027, AC-028, AC-029, AC-030, AC-031, AC-032, AC-033, AC-034, AC-035, AC-036, AC-037, AC-038, AC-039, AC-040, AC-041, AC-042, AC-043, AC-044, AC-045
 #
 # Comprehensive verification of the Authentication & SSO Enterprise Integration spec.
-# Static checks run against repo files and the bbi-infrastructure production overlay.
+# Static checks run against repo files and the selected bbi-infrastructure environment overlay.
 # Runtime ACs (live SAML/OIDC flows, MFA challenges, session timeout enforcement,
 # JIT provisioning, SCIM, role mapping) are marked SKIP.
 #
 # Usage:
-#   ./scripts/qa/verify-auth-sso-enterprise.sh [--skip-cluster] [--env staging|dev|prod] [--namespace NS] [--help]
+#   ./scripts/qa/verify-auth-sso-enterprise.sh [--skip-cluster] [--env staging|dev|prod] [--namespace NS] [--context CTX] [--help]
 #
 set -euo pipefail
 
@@ -20,8 +20,16 @@ WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
 SKIP_CLUSTER=false
-ENV_TARGET="prod"
+ENV_TARGET="staging"
 NAMESPACE_OVERRIDE=""
+CONTEXT_OVERRIDE=""
+
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-mereka-lms}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-mereka-lms-dev}}"
+NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-rke2-nonprod}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -37,6 +45,10 @@ while [[ $# -gt 0 ]]; do
       NAMESPACE_OVERRIDE="${2:?--namespace requires an argument}"
       shift 2
       ;;
+    --context)
+      CONTEXT_OVERRIDE="${2:?--context requires an argument}"
+      shift 2
+      ;;
     --help)
       cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
@@ -45,14 +57,15 @@ Verify Authentication & SSO Enterprise Integration spec compliance (45 ACs).
 
 OPTIONS:
     --skip-cluster          Skip checks requiring live kubectl access
-    --env staging|dev|prod  Select domain variables for the target environment (default: prod)
-    --namespace NS          Override kubectl namespace (default: mereka-lms, or stg-mereka-lms for staging)
+    --env staging|dev|prod  Select the target environment (default: staging)
+    --namespace NS          Override kubectl namespace for the selected environment
+    --context CTX           Override kubectl context for the selected environment
     --help                  Show this help message
 
 EXAMPLES:
     $(basename "$0")
-    $(basename "$0") --env staging --namespace stg-mereka-lms
-    $(basename "$0") --env dev --namespace mereka-lms
+    $(basename "$0") --env staging --namespace stg-mereka-lms --context rke2-nonprod
+    $(basename "$0") --env dev --namespace mereka-lms-dev --context rke2-nonprod
     $(basename "$0") --skip-cluster
 EOF
       exit 0
@@ -64,22 +77,30 @@ EOF
   esac
 done
 
-# Resolve environment-specific domain variables
+# Resolve environment identity separately from current cluster placement.
+# Dev and staging currently share rke2-nonprod, but they remain distinct lanes
+# with separate namespaces, domains, and overlays.
 case "$ENV_TARGET" in
   staging)
     _LMS_DOMAIN="$STAGING_LMS_DOMAIN"
     _AUTHENTIK_DOMAIN="$STAGING_AUTHENTIK_DOMAIN"
-    _DEFAULT_NAMESPACE="stg-mereka-lms"
+    _DEFAULT_NAMESPACE="$NAMESPACE_STAGING"
+    _DEFAULT_CONTEXT="$CONTEXT_STAGING"
+    _OVERLAY_PATH_SUFFIX="apps/mereka-lms/overlays/staging/patches/production-staging.py"
     ;;
   dev)
     _LMS_DOMAIN="$DEV_LMS_DOMAIN"
     _AUTHENTIK_DOMAIN="$DEV_AUTHENTIK_DOMAIN"
-    _DEFAULT_NAMESPACE="mereka-lms"
+    _DEFAULT_NAMESPACE="$NAMESPACE_DEV"
+    _DEFAULT_CONTEXT="$CONTEXT_DEV"
+    _OVERLAY_PATH_SUFFIX="apps/mereka-lms/overlays/dev/patches/production-dev.py"
     ;;
   prod)
     _LMS_DOMAIN="$LMS_DOMAIN"
     _AUTHENTIK_DOMAIN="$AUTHENTIK_DOMAIN"
-    _DEFAULT_NAMESPACE="mereka-lms"
+    _DEFAULT_NAMESPACE="$NAMESPACE_PROD"
+    _DEFAULT_CONTEXT="$CONTEXT_PROD"
+    _OVERLAY_PATH_SUFFIX="apps/mereka-lms/overlays/prod/patches/production-prod.py"
     ;;
   *)
     echo "Unknown --env value: $ENV_TARGET (must be staging, dev, or prod)" >&2
@@ -89,6 +110,8 @@ esac
 
 # --namespace flag overrides the environment default
 _NAMESPACE="${NAMESPACE_OVERRIDE:-$_DEFAULT_NAMESPACE}"
+KUBE_CTX="${CONTEXT_OVERRIDE:-$_DEFAULT_CONTEXT}"
+OVERLAY_LABEL="${ENV_TARGET} overlay"
 
 # Counters
 PASS=0
@@ -99,14 +122,22 @@ pass_() { PASS=$((PASS + 1)); printf "PASS: %s\n" "$1"; }
 fail_() { FAIL=$((FAIL + 1)); printf "FAIL: %s\n" "$1"; }
 skip_() { SKIP=$((SKIP + 1)); printf "SKIP: %s\n" "$1"; }
 
+# Helpers
+kube() { kubectl --context "$KUBE_CTX" "$@"; }
+
+cluster_available() {
+  command -v kubectl &>/dev/null || return 1
+  kube cluster-info &>/dev/null 2>&1
+}
+
 # Key file paths
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 BBI_INFRA_ROOT="${BBI_INFRA_PATH:-}"
 if [[ -z "$BBI_INFRA_ROOT" ]]; then
   for candidate in \
+    "${HOME}/projects/k8s/bbi-infrastructure" \
     "${WORKSPACE_ROOT}/bbi-infrastructure" \
     "${WORKSPACE_ROOT}/infrastructure" \
-    "${HOME}/projects/k8s/bbi-infrastructure" \
     "${HOME}/projects/k8s/infrastructure"; do
     if [[ -d "$candidate" ]]; then
       BBI_INFRA_ROOT="$candidate"
@@ -114,7 +145,7 @@ if [[ -z "$BBI_INFRA_ROOT" ]]; then
     fi
   done
 fi
-BBI_PROD="${BBI_INFRA_ROOT}/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+OVERLAY_PATH="${BBI_INFRA_ROOT:+${BBI_INFRA_ROOT}/${_OVERLAY_PATH_SUFFIX}}"
 EXTERNAL_SECRETS="$REPO_ROOT/deploy/k8s/base/secrets/external-secrets.yaml"
 SAML_KEYGEN="$REPO_ROOT/scripts/tenants/generate-saml-keypair.sh"
 MFA_SCRIPT="$REPO_ROOT/scripts/infra/ensure-authentik-admin-mfa.sh"
@@ -127,7 +158,9 @@ echo "Date:      $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "Repo:      $REPO_ROOT"
 echo "Env:       $ENV_TARGET"
 echo "Namespace: $_NAMESPACE"
+echo "Context:   $KUBE_CTX"
 echo "LMS domain: $_LMS_DOMAIN"
+echo "Overlay:   ${OVERLAY_PATH:-not found}"
 echo "Cluster checks: $(if $SKIP_CLUSTER; then echo SKIPPED; else echo ENABLED; fi)"
 echo
 
@@ -158,20 +191,20 @@ else
 fi
 
 # AC-004: Authentik default OIDC preserved at /auth/login/oidc/
-if [ -f "$BBI_PROD" ]; then
-  if grep -q 'MerekaOpenIdConnectAuthPKCE' "$BBI_PROD" && \
-     grep -q 'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT' "$BBI_PROD" && \
-     grep -q 'auth0.mereka.io' "$BBI_PROD"; then
-    pass_ "AC-004: Authentik OIDC provider configured (MerekaOpenIdConnectAuthPKCE + auth0.mereka.io)"
+if [ -f "$OVERLAY_PATH" ]; then
+  if grep -q 'MerekaOpenIdConnectAuthPKCE' "$OVERLAY_PATH" && \
+     grep -q 'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT' "$OVERLAY_PATH" && \
+     grep -q "$_AUTHENTIK_DOMAIN" "$OVERLAY_PATH"; then
+    pass_ "AC-004: Authentik OIDC provider configured in ${OVERLAY_LABEL} (MerekaOpenIdConnectAuthPKCE + ${_AUTHENTIK_DOMAIN})"
   else
-    fail_ "AC-004: Authentik OIDC provider not properly configured in production overlay"
+    fail_ "AC-004: Authentik OIDC provider not properly configured in ${OVERLAY_LABEL}"
   fi
 else
-  fail_ "AC-004: Production overlay not found at $BBI_PROD"
+  fail_ "AC-004: ${OVERLAY_LABEL} not found at $OVERLAY_PATH"
 fi
 
 # Also check OIDC backend name is "oidc"
-if [ -f "$BBI_PROD" ] && grep -q 'name = "oidc"' "$BBI_PROD"; then
+if [ -f "$OVERLAY_PATH" ] && grep -q 'name = "oidc"' "$OVERLAY_PATH"; then
   pass_ "AC-004: OIDC backend name is 'oidc' (accessible via /auth/login/oidc/)"
 else
   fail_ "AC-004: OIDC backend name not set to 'oidc'"
@@ -251,19 +284,19 @@ skip_ "AC-011: OIDC ID token iss/aud claim validation (requires live IdP)"
 skip_ "AC-012: Expired OIDC token rejection (requires live IdP)"
 
 # AC-013: PKCE in OIDC authorization request
-if [ -f "$BBI_PROD" ]; then
-  if grep -q 'DEFAULT_USE_PKCE = True' "$BBI_PROD" && \
-     grep -q 'PKCE_DEFAULT_CODE_CHALLENGE_METHOD = "S256"' "$BBI_PROD"; then
+if [ -f "$OVERLAY_PATH" ]; then
+  if grep -q 'DEFAULT_USE_PKCE = True' "$OVERLAY_PATH" && \
+     grep -q 'PKCE_DEFAULT_CODE_CHALLENGE_METHOD = "S256"' "$OVERLAY_PATH"; then
     pass_ "AC-013: OIDC PKCE enabled (DEFAULT_USE_PKCE=True, S256)"
   else
     fail_ "AC-013: OIDC PKCE not configured (DEFAULT_USE_PKCE or S256 missing)"
   fi
 else
-  fail_ "AC-013: Production overlay not found"
+  fail_ "AC-013: ${OVERLAY_LABEL} not found"
 fi
 
 # AC-013 continued: BaseOAuth2PKCE is inherited
-if [ -f "$BBI_PROD" ] && grep -q 'BaseOAuth2PKCE' "$BBI_PROD"; then
+if [ -f "$OVERLAY_PATH" ] && grep -q 'BaseOAuth2PKCE' "$OVERLAY_PATH"; then
   pass_ "AC-013: MerekaOpenIdConnectAuthPKCE inherits BaseOAuth2PKCE"
 else
   fail_ "AC-013: BaseOAuth2PKCE inheritance not found"
@@ -325,22 +358,22 @@ skip_ "AC-023: Concurrent session limit enforcement (requires live session testi
 skip_ "AC-024: Session ID regeneration after authentication (requires live auth flow)"
 
 # Static: session cookie security settings
-if [ -f "$BBI_PROD" ]; then
+if [ -f "$OVERLAY_PATH" ]; then
   SESSION_OK=true
-  if grep -q 'SESSION_COOKIE_SECURE = True' "$BBI_PROD"; then
+  if grep -q 'SESSION_COOKIE_SECURE = True' "$OVERLAY_PATH"; then
     pass_ "AC-019..AC-024 (prereq): SESSION_COOKIE_SECURE = True"
   else
     fail_ "AC-019..AC-024 (prereq): SESSION_COOKIE_SECURE not True"
     SESSION_OK=false
   fi
-  if grep -q 'SESSION_COOKIE_SAMESITE' "$BBI_PROD"; then
+  if grep -q 'SESSION_COOKIE_SAMESITE' "$OVERLAY_PATH"; then
     pass_ "AC-019..AC-024 (prereq): SESSION_COOKIE_SAMESITE configured"
   else
     fail_ "AC-019..AC-024 (prereq): SESSION_COOKIE_SAMESITE not configured"
     SESSION_OK=false
   fi
   # Session data stored server-side in Redis (spec requirement)
-  if grep -q 'redis' "$BBI_PROD"; then
+  if grep -q 'redis' "$OVERLAY_PATH"; then
     pass_ "AC-019..AC-024 (prereq): Redis referenced for session/cache backend"
   else
     skip_ "AC-019..AC-024 (prereq): Redis reference not found in overlay (may be in base)"
@@ -365,9 +398,9 @@ skip_ "AC-027: PendingEnterpriseCustomerUser resolution on first login (requires
 
 # AC-028: No staff/superuser auto-escalation from IdP
 # Static: verify SOCIAL_AUTH_PIPELINE does not set is_staff or is_superuser
-if [ -f "$BBI_PROD" ]; then
+if [ -f "$OVERLAY_PATH" ]; then
   # The pipeline should NOT contain any step that sets is_staff/is_superuser
-  PIPELINE_CONTENT=$(grep -A20 'SOCIAL_AUTH_PIPELINE' "$BBI_PROD" 2>/dev/null || true)
+  PIPELINE_CONTENT=$(grep -A20 'SOCIAL_AUTH_PIPELINE' "$OVERLAY_PATH" 2>/dev/null || true)
   if [ -n "$PIPELINE_CONTENT" ]; then
     if echo "$PIPELINE_CONTENT" | grep -qi 'is_staff\|is_superuser\|set_staff\|grant_staff'; then
       fail_ "AC-028: SOCIAL_AUTH_PIPELINE contains staff/superuser escalation step"
@@ -375,12 +408,12 @@ if [ -f "$BBI_PROD" ]; then
       pass_ "AC-028: SOCIAL_AUTH_PIPELINE does not auto-escalate to staff/superuser"
     fi
   else
-    skip_ "AC-028: SOCIAL_AUTH_PIPELINE not found in production overlay"
+    skip_ "AC-028: SOCIAL_AUTH_PIPELINE not found in ${OVERLAY_LABEL}"
   fi
 fi
 
 # AC-028 continued: Platform admin allowlist is the only path to staff/superuser
-if [ -f "$BBI_PROD" ] && grep -q 'MerekaPlatformAdminMiddleware' "$BBI_PROD"; then
+if [ -f "$OVERLAY_PATH" ] && grep -q 'MerekaPlatformAdminMiddleware' "$OVERLAY_PATH"; then
   pass_ "AC-028: MerekaPlatformAdminMiddleware is hard backstop for staff/superuser"
 else
   fail_ "AC-028: MerekaPlatformAdminMiddleware not found"
@@ -419,35 +452,35 @@ skip_ "AC-033: Auto-revocation from enterprise_admin on missing claim (requires 
 skip_ "AC-034: enterprise_openedx_operator not assignable from IdP claims (requires live flow)"
 
 # AC-035: Platform admin allowlist (MerekaPlatformAdminMiddleware)
-if [ -f "$BBI_PROD" ]; then
+if [ -f "$OVERLAY_PATH" ]; then
   AC035_OK=true
-  if grep -q 'class MerekaPlatformAdminMiddleware' "$BBI_PROD"; then
+  if grep -q 'class MerekaPlatformAdminMiddleware' "$OVERLAY_PATH"; then
     pass_ "AC-035: MerekaPlatformAdminMiddleware class defined"
   else
     fail_ "AC-035: MerekaPlatformAdminMiddleware class not found"
     AC035_OK=false
   fi
-  if grep -q 'MEREKA_PLATFORM_ADMIN_EMAILS' "$BBI_PROD"; then
+  if grep -q 'MEREKA_PLATFORM_ADMIN_EMAILS' "$OVERLAY_PATH"; then
     pass_ "AC-035: MEREKA_PLATFORM_ADMIN_EMAILS env var referenced"
   else
     fail_ "AC-035: MEREKA_PLATFORM_ADMIN_EMAILS not referenced"
     AC035_OK=false
   fi
-  if grep -q 'is_staff = True' "$BBI_PROD" && \
-     grep -q 'is_superuser = True' "$BBI_PROD"; then
+  if grep -q 'is_staff = True' "$OVERLAY_PATH" && \
+     grep -q 'is_superuser = True' "$OVERLAY_PATH"; then
     pass_ "AC-035: Middleware enforces is_staff=True and is_superuser=True"
   else
     fail_ "AC-035: Middleware missing staff/superuser enforcement"
     AC035_OK=false
   fi
   # Independent of IdP claims
-  if grep -q 'email in _platform_admin_emails()' "$BBI_PROD"; then
+  if grep -q 'email in _platform_admin_emails()' "$OVERLAY_PATH"; then
     pass_ "AC-035: Admin check is by email allowlist, independent of IdP claims"
   else
     fail_ "AC-035: Admin check not based on email allowlist"
   fi
 else
-  fail_ "AC-035: Production overlay not found"
+  fail_ "AC-035: ${OVERLAY_LABEL} not found"
 fi
 
 echo
@@ -487,8 +520,8 @@ if [ -f "$LMS_SETTINGS" ] && grep -qi 'ratelimit\|rate_limit\|RATE_LIMIT\|MAX_FA
   pass_ "AC-039: Rate limiting configuration found in base LMS settings"
   RATE_LIMIT_FOUND=true
 fi
-if [ -f "$BBI_PROD" ] && grep -qi 'ratelimit\|rate_limit\|RATE_LIMIT\|MAX_FAILED_LOGIN' "$BBI_PROD"; then
-  pass_ "AC-039: Rate limiting configuration found in production overlay"
+if [ -f "$OVERLAY_PATH" ] && grep -qi 'ratelimit\|rate_limit\|RATE_LIMIT\|MAX_FAILED_LOGIN' "$OVERLAY_PATH"; then
+  pass_ "AC-039: Rate limiting configuration found in ${OVERLAY_LABEL}"
   RATE_LIMIT_FOUND=true
 fi
 if ! $RATE_LIMIT_FOUND; then
@@ -496,21 +529,21 @@ if ! $RATE_LIMIT_FOUND; then
 fi
 
 # AC-040: Redirect URL validation
-if [ -f "$BBI_PROD" ]; then
+if [ -f "$OVERLAY_PATH" ]; then
   AC040_OK=true
-  if grep -q 'LOGIN_REDIRECT_WHITELIST' "$BBI_PROD"; then
-    pass_ "AC-040: LOGIN_REDIRECT_WHITELIST configured in production overlay"
+  if grep -q 'LOGIN_REDIRECT_WHITELIST' "$OVERLAY_PATH"; then
+    pass_ "AC-040: LOGIN_REDIRECT_WHITELIST configured in ${OVERLAY_LABEL}"
   else
     fail_ "AC-040: LOGIN_REDIRECT_WHITELIST not found"
     AC040_OK=false
   fi
-  if grep -q 'SOCIAL_AUTH_SANITIZE_REDIRECTS = True' "$BBI_PROD"; then
+  if grep -q 'SOCIAL_AUTH_SANITIZE_REDIRECTS = True' "$OVERLAY_PATH"; then
     pass_ "AC-040: SOCIAL_AUTH_SANITIZE_REDIRECTS = True"
   else
     fail_ "AC-040: SOCIAL_AUTH_SANITIZE_REDIRECTS not True"
     AC040_OK=false
   fi
-  if grep -q 'SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS' "$BBI_PROD"; then
+  if grep -q 'SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS' "$OVERLAY_PATH"; then
     pass_ "AC-040: SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS configured"
   else
     fail_ "AC-040: SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS not found"
@@ -524,21 +557,21 @@ if [ -f "$LMS_SETTINGS" ] && grep -q 'LOGIN_REDIRECT_WHITELIST' "$LMS_SETTINGS";
 fi
 
 # AC-041: HTTPS enforcement
-if [ -f "$BBI_PROD" ]; then
+if [ -f "$OVERLAY_PATH" ]; then
   AC041_OK=true
-  if grep -q 'SESSION_COOKIE_SECURE = True' "$BBI_PROD"; then
+  if grep -q 'SESSION_COOKIE_SECURE = True' "$OVERLAY_PATH"; then
     pass_ "AC-041: SESSION_COOKIE_SECURE = True (HTTPS cookies)"
   else
     fail_ "AC-041: SESSION_COOKIE_SECURE not True"
     AC041_OK=false
   fi
-  if grep -q 'CSRF_COOKIE_SECURE = True' "$BBI_PROD"; then
+  if grep -q 'CSRF_COOKIE_SECURE = True' "$OVERLAY_PATH"; then
     pass_ "AC-041: CSRF_COOKIE_SECURE = True (HTTPS cookies)"
   else
     fail_ "AC-041: CSRF_COOKIE_SECURE not True"
     AC041_OK=false
   fi
-  if grep -q 'SOCIAL_AUTH_REDIRECT_IS_HTTPS = True' "$BBI_PROD"; then
+  if grep -q 'SOCIAL_AUTH_REDIRECT_IS_HTTPS = True' "$OVERLAY_PATH"; then
     pass_ "AC-041: SOCIAL_AUTH_REDIRECT_IS_HTTPS = True"
   else
     fail_ "AC-041: SOCIAL_AUTH_REDIRECT_IS_HTTPS not True"
@@ -610,14 +643,14 @@ echo
 echo "--- OIDC / SSO Infrastructure ---"
 
 # OIDC backend in AUTHENTICATION_BACKENDS
-if [ -f "$BBI_PROD" ] && grep -q 'AUTHENTICATION_BACKENDS' "$BBI_PROD"; then
-  pass_ "AC-004 (infra): AUTHENTICATION_BACKENDS customized in production overlay"
+if [ -f "$OVERLAY_PATH" ] && grep -q 'AUTHENTICATION_BACKENDS' "$OVERLAY_PATH"; then
+  pass_ "AC-004 (infra): AUTHENTICATION_BACKENDS customized in ${OVERLAY_LABEL}"
 else
   fail_ "AC-004 (infra): AUTHENTICATION_BACKENDS not customized"
 fi
 
 # SOCIAL_AUTH_PIPELINE includes essential steps
-if [ -f "$BBI_PROD" ]; then
+if [ -f "$OVERLAY_PATH" ]; then
   PIPELINE_CHECKS=(
     "social_core.pipeline.social_auth.social_details"
     "social_core.pipeline.social_auth.social_uid"
@@ -629,7 +662,7 @@ if [ -f "$BBI_PROD" ]; then
   )
   PIPELINE_ALL_OK=true
   for step in "${PIPELINE_CHECKS[@]}"; do
-    if grep -q "$step" "$BBI_PROD"; then
+    if grep -q "$step" "$OVERLAY_PATH"; then
       pass_ "AC-004 (pipeline): $step present"
     else
       fail_ "AC-004 (pipeline): $step missing"
@@ -639,12 +672,12 @@ if [ -f "$BBI_PROD" ]; then
 fi
 
 # StudioSSOBypassMiddleware
-if [ -f "$BBI_PROD" ] && grep -q 'class StudioSSOBypassMiddleware' "$BBI_PROD"; then
+if [ -f "$OVERLAY_PATH" ] && grep -q 'class StudioSSOBypassMiddleware' "$OVERLAY_PATH"; then
   pass_ "AC-004 (infra): StudioSSOBypassMiddleware defined"
 else
   fail_ "AC-004 (infra): StudioSSOBypassMiddleware not defined"
 fi
-if [ -f "$BBI_PROD" ] && grep -q '/oauth2/authorize' "$BBI_PROD"; then
+if [ -f "$OVERLAY_PATH" ] && grep -q '/oauth2/authorize' "$OVERLAY_PATH"; then
   pass_ "AC-004 (infra): StudioSSOBypassMiddleware detects /oauth2/authorize"
 else
   fail_ "AC-004 (infra): /oauth2/authorize detection not found"
@@ -664,37 +697,37 @@ echo
 ###########################################################################
 echo "--- Auth Middleware Stack ---"
 
-if [ -f "$BBI_PROD" ]; then
+if [ -f "$OVERLAY_PATH" ]; then
   # MerekaPlatformAdminMiddleware in MIDDLEWARE
-  if grep -q '"lms.envs.tutor.production.MerekaPlatformAdminMiddleware"' "$BBI_PROD"; then
+  if grep -q '"lms.envs.tutor.production.MerekaPlatformAdminMiddleware"' "$OVERLAY_PATH"; then
     pass_ "AC-035 (middleware): MerekaPlatformAdminMiddleware in MIDDLEWARE list"
   else
     fail_ "AC-035 (middleware): MerekaPlatformAdminMiddleware not in MIDDLEWARE list"
   fi
 
   # MerekaCookieDomainMiddleware in MIDDLEWARE
-  if grep -q '"lms.envs.tutor.production.MerekaCookieDomainMiddleware"' "$BBI_PROD"; then
+  if grep -q '"lms.envs.tutor.production.MerekaCookieDomainMiddleware"' "$OVERLAY_PATH"; then
     pass_ "Session (middleware): MerekaCookieDomainMiddleware in MIDDLEWARE"
   else
     fail_ "Session (middleware): MerekaCookieDomainMiddleware not in MIDDLEWARE"
   fi
 
   # MerekaForwardedHeadersMiddleware at position 0
-  if grep -q 'MIDDLEWARE.insert(0, _forwarded_headers_middleware)' "$BBI_PROD"; then
+  if grep -q 'MIDDLEWARE.insert(0, _forwarded_headers_middleware)' "$OVERLAY_PATH"; then
     pass_ "AC-041 (middleware): MerekaForwardedHeadersMiddleware at position 0"
   else
     fail_ "AC-041 (middleware): MerekaForwardedHeadersMiddleware not at position 0"
   fi
 
   # StudioSSOBypassMiddleware at position 1
-  if grep -q 'MIDDLEWARE.insert(1, _sso_bypass_middleware)' "$BBI_PROD"; then
+  if grep -q 'MIDDLEWARE.insert(1, _sso_bypass_middleware)' "$OVERLAY_PATH"; then
     pass_ "AC-004 (middleware): StudioSSOBypassMiddleware at position 1"
   else
     fail_ "AC-004 (middleware): StudioSSOBypassMiddleware not at position 1"
   fi
 
   # Cookie middleware ordered before session middleware
-  if grep -q 'cookie_index > session_index' "$BBI_PROD"; then
+  if grep -q 'cookie_index > session_index' "$OVERLAY_PATH"; then
     pass_ "Session (middleware): Cookie middleware ordered before session middleware"
   else
     fail_ "Session (middleware): Cookie/session middleware ordering not enforced"
@@ -791,41 +824,43 @@ echo "--- Live Cluster Checks ---"
 
 if $SKIP_CLUSTER; then
   skip_ "Cluster: All cluster checks skipped (--skip-cluster)"
+elif ! cluster_available; then
+  skip_ "Cluster: kubectl context '$KUBE_CTX' unavailable — skipping all cluster checks"
 else
   # Check enterprise-sso-secrets K8s secret exists
-  if kubectl get secret enterprise-sso-secrets -n "$_NAMESPACE" &>/dev/null; then
-    pass_ "Cluster: enterprise-sso-secrets K8s secret exists (ns=$_NAMESPACE)"
+  if kube get secret enterprise-sso-secrets -n "$_NAMESPACE" &>/dev/null; then
+    pass_ "Cluster: enterprise-sso-secrets K8s secret exists (ctx=$KUBE_CTX ns=$_NAMESPACE)"
   else
-    skip_ "Cluster: enterprise-sso-secrets K8s secret not found in ns=$_NAMESPACE (may not exist on this env)"
+    skip_ "Cluster: enterprise-sso-secrets K8s secret not found in ctx=$KUBE_CTX ns=$_NAMESPACE (may not exist on this env)"
   fi
 
   # Check ExternalSecret sync status
-  ES_STATUS=$(kubectl get externalsecret enterprise-sso-secrets -n "$_NAMESPACE" -o jsonpath='{.status.conditions[0].status}' 2>/dev/null || echo "NotFound")
+  ES_STATUS=$(kube get externalsecret enterprise-sso-secrets -n "$_NAMESPACE" -o jsonpath='{.status.conditions[0].status}' 2>/dev/null || echo "NotFound")
   if [ "$ES_STATUS" = "True" ]; then
-    pass_ "Cluster: enterprise-sso-secrets ExternalSecret synced (status=True, ns=$_NAMESPACE)"
+    pass_ "Cluster: enterprise-sso-secrets ExternalSecret synced (ctx=$KUBE_CTX status=True ns=$_NAMESPACE)"
   elif [ "$ES_STATUS" = "NotFound" ]; then
-    skip_ "Cluster: enterprise-sso-secrets ExternalSecret not found in ns=$_NAMESPACE (may not exist on this env)"
+    skip_ "Cluster: enterprise-sso-secrets ExternalSecret not found in ctx=$KUBE_CTX ns=$_NAMESPACE (may not exist on this env)"
   else
-    fail_ "Cluster: enterprise-sso-secrets ExternalSecret not synced (status=$ES_STATUS, ns=$_NAMESPACE)"
+    fail_ "Cluster: enterprise-sso-secrets ExternalSecret not synced (ctx=$KUBE_CTX status=$ES_STATUS ns=$_NAMESPACE)"
   fi
 
   # Check third_party_auth in LMS pod INSTALLED_APPS
-  LMS_POD=$(kubectl get pods -n "$_NAMESPACE" -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  LMS_POD=$(kube get pods -n "$_NAMESPACE" -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
   if [ -n "$LMS_POD" ]; then
-    TPA_CHECK=$(kubectl exec -n "$_NAMESPACE" "$LMS_POD" -- python -c "
+    TPA_CHECK=$(kube exec -n "$_NAMESPACE" "$LMS_POD" -- python -c "
 import django; django.setup()
 from django.conf import settings
 print('third_party_auth' if any('third_party_auth' in a for a in settings.INSTALLED_APPS) else 'missing')
 " 2>/dev/null || echo "error")
     if [ "$TPA_CHECK" = "third_party_auth" ]; then
-      pass_ "Cluster: third_party_auth in INSTALLED_APPS (live LMS pod, ns=$_NAMESPACE)"
+      pass_ "Cluster: third_party_auth in INSTALLED_APPS (ctx=$KUBE_CTX ns=$_NAMESPACE)"
     elif [ "$TPA_CHECK" = "missing" ]; then
-      fail_ "Cluster: third_party_auth NOT in INSTALLED_APPS (live LMS pod, ns=$_NAMESPACE)"
+      fail_ "Cluster: third_party_auth NOT in INSTALLED_APPS (ctx=$KUBE_CTX ns=$_NAMESPACE)"
     else
-      skip_ "Cluster: Could not check INSTALLED_APPS in LMS pod (ns=$_NAMESPACE)"
+      skip_ "Cluster: Could not check INSTALLED_APPS in LMS pod (ctx=$KUBE_CTX ns=$_NAMESPACE)"
     fi
   else
-    skip_ "Cluster: No LMS pod found in ns=$_NAMESPACE"
+    skip_ "Cluster: No LMS pod found in ctx=$KUBE_CTX ns=$_NAMESPACE"
   fi
 
   # Check SAML metadata endpoint

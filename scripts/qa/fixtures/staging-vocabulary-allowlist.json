@@ -51,6 +51,7 @@
     "scripts/qa/verify-enterprise-frontend-config-contract.sh",
     "scripts/qa/verify-enterprise-runtime-app-wiring.sh",
     "scripts/qa/verify-enterprise-service-deployment.sh",
+    "scripts/qa/verify-enterprise-sso-readiness.sh",
     "scripts/qa/verify-enterprise-ui-review.sh",
     "scripts/qa/verify-env-auth-parity.sh",
     "scripts/qa/verify-footer-variant-matrix.sh",

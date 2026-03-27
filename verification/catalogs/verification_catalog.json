@@ -1462,6 +1462,7 @@
       "ci_entrypoints": [],
       "env_scope": [
         "dev",
+        "nonprod",
         "prod",
         "staging"
       ],
@@ -5502,9 +5503,12 @@
       "cadence": "scheduled_or_post_deploy",
       "canonical": true,
       "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_entrypoints": [
+        "operations_gate"
+      ],
       "env_scope": [
         "dev",
+        "nonprod",
         "prod",
         "staging"
       ],
@@ -5512,7 +5516,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-enterprise-runtime-app-wiring.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -5587,6 +5591,7 @@
       ],
       "env_scope": [
         "dev",
+        "nonprod",
         "prod",
         "staging"
       ],
@@ -5623,13 +5628,14 @@
       "env_scope": [
         "dev",
         "nonprod",
-        "prod"
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-enterprise-sso-readiness.sh",
-      "reference_count": 14,
+      "reference_count": 15,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
