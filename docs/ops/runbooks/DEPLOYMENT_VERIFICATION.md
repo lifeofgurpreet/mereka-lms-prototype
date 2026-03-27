@@ -53,31 +53,24 @@ Every K8s deployment now has **automated verification** to catch issues before t
 
 ## Workflow
 
-### Manual Deployment
+### Governed Deployment Verification
 ```bash
-# 1. Apply changes
-kubectl apply -k deploy/k8s/overlays/production/
+# 1. Promote the release through the canonical GitOps path
+./scripts/infra/release-openedx-gitops.sh --require-digests
 
 # 2. Check rollout
 kubectl rollout status deployment/lms -n mereka-lms
+kubectl rollout status deployment/cms -n mereka-lms
 
-# 3. Verify (automatic via hook, or manual)
+# 3. Verify
 ./scripts/infra/verify-deployment.sh mereka-lms
 ```
 
 ### Automatic (via Hook)
-```bash
-# Just run kubectl apply - hook handles verification
-kubectl apply -k deploy/k8s/overlays/production/
-
-# Hook output will show:
-# 🔍 Running post-deployment verification for namespace: mereka-lms
-# ==> Checking pod status...
-# ✓ All pods running
-# ==> Checking deployments...
-# ✓ All deployments ready
-# ...
-```
+The verification hook should run after the governed release path updates the
+production GitOps source of truth. Do not trigger production verification by
+running `kubectl apply -k deploy/k8s/overlays/production/` from an operator
+shell.
 
 ## Verification Checklist
 

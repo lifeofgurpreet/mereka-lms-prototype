@@ -150,11 +150,7 @@ Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployme
 
 2. **Find the previous stable image**:
    ```bash
-   # Check git history for kustomization.yaml changes
-   cd deploy/k8s/overlays/production
-   git log --oneline -20 kustomization.yaml
-
-   # Or check Artifact Registry for recent tags
+   # Check Artifact Registry for recent tags
    gcloud artifacts docker images list \
      ghcr.io/biji-biji-initiative/mereka-lms/openedx \
      --include-tags --limit=10 --sort-by=~UPDATE_TIME
@@ -174,25 +170,13 @@ Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployme
    # Must show: Phase: Completed
    ```
 
-4. **Update kustomization.yaml with previous image tag**:
+4. **Prepare the governed rollback target**:
+   - Capture the prior known-good tag / digest that production must return to.
+   - Use that release metadata as the input for the governed rollback in the next step.
+
+5. **Apply the rollback through GitOps**:
    ```bash
-   cd deploy/k8s/overlays/production
-
-   # Edit kustomization.yaml
-   vim kustomization.yaml
-   ```
-
-   Change:
-   ```yaml
-   images:
-     - name: docker.io/overhangio/openedx
-       newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-       newTag: 20260208-mfe-discussions-pass4-c17df16  # <- Previous stable tag
-   ```
-
-5. **Apply the rollback**:
-   ```bash
-   kubectl apply -k deploy/k8s/overlays/production
+   ./scripts/infra/release-openedx-gitops.sh --require-digests
    ```
 
 6. **Monitor the rollout**:
@@ -215,24 +199,15 @@ Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployme
 
    All should return `200` or `302` (not 5xx).
 
-8. **Commit the rollback**:
-   ```bash
-   git add kustomization.yaml
-   git commit -m "rollback: revert to stable image 20260208-mfe-discussions-pass4-c17df16
-
-   Rollback from failed deployment b988d63 due to [REASON].
-
-   Verified via pre-rollback backup and endpoint health checks.
-
-   Co-Authored-By: Claude <noreply@anthropic.com>"
-   git push origin main
-   ```
+8. **Persist the rollback in GitOps**:
+   - Ensure the prior known-good tag / digest is committed in the GitOps source of truth.
+   - If you used `kubectl rollout undo` as a break-glass step, follow it immediately with the governed rollback above or ArgoCD will re-deploy the bad image.
 
 ---
 
 ### Alternative: Kubectl Rollout Undo (Quick Emergency Only)
 
-If you need immediate rollback and cannot edit kustomization.yaml:
+If you need immediate rollback and cannot wait for the governed GitOps rollback:
 
 ```bash
 # Rollback LMS to previous revision
@@ -246,7 +221,7 @@ kubectl rollout undo deployment/lms-worker -n mereka-lms
 kubectl rollout undo deployment/cms-worker -n mereka-lms
 ```
 
-**CRITICAL**: This is a **temporary fix only**. You MUST follow up with a Git commit to `kustomization.yaml` or the next ArgoCD sync will re-deploy the broken image.
+**CRITICAL**: This is a **temporary fix only**. You MUST follow up with the governed GitOps rollback or the next ArgoCD sync will re-deploy the broken image.
 
 ---
 
@@ -258,18 +233,10 @@ MFEs are deployed separately. If the issue is MFE-specific:
 # Check current MFE image
 kubectl get deployment mfe -n mereka-lms -o jsonpath='{.spec.template.spec.containers[0].image}'
 
-# Update kustomization.yaml with previous MFE tag
-cd deploy/k8s/overlays/production
-vim kustomization.yaml
+# Promote the previous known-good MFE digests through GitOps
+./scripts/infra/release-openedx-gitops.sh --require-digests
 
-# Change:
-images:
-  - name: docker.io/overhangio/openedx-mfe
-    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: <previous-mfe-tag>
-
-# Apply
-kubectl apply -k deploy/k8s/overlays/production
+# Watch rollout
 kubectl rollout status deployment/mfe -n mereka-lms --timeout=300s
 ```
 
@@ -725,9 +692,7 @@ kubectl rollout undo deployment/lms -n mereka-lms
 kubectl rollout undo deployment/cms -n mereka-lms
 
 # GitOps rollback (preferred)
-cd deploy/k8s/overlays/production
-vim kustomization.yaml  # Change image tags
-kubectl apply -k .
+./scripts/infra/release-openedx-gitops.sh --require-digests
 kubectl rollout status deployment/lms -n mereka-lms --timeout=300s
 
 # Check rollout history

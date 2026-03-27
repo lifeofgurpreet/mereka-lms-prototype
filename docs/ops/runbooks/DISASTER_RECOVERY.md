@@ -270,10 +270,9 @@ gh workflow run dr-evidence-bundle.yml
      --include-namespaces mereka-lms,authentik,infisical,n8n
    ```
 
-5. **Restore configuration from Git**:
-   ```bash
-   kubectl apply -k deploy/k8s/overlays/production
-   ```
+5. **Restore configuration from GitOps**:
+   - Re-establish the GitOps control plane and let it reconcile the production source of truth.
+   - If a specific Open edX image must be corrected during recovery, use `./scripts/infra/release-openedx-gitops.sh --require-digests` instead of direct `kubectl apply -k`.
 
 6. **Force ExternalSecrets resync** and verify secrets:
    ```bash
