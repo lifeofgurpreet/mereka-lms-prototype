@@ -12,6 +12,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKFLOW_FILE="$REPO_ROOT/.github/workflows/operations-gates-runtime.yml"
 # The SSO canary job lives in smoke-authenticated.yml (merged from authenticated-sso-canary.yml)
 CANARY_WORKFLOW_FILE="$REPO_ROOT/.github/workflows/smoke-authenticated.yml"
+CANARY_SCRIPT="$REPO_ROOT/scripts/qa/verify-authenticated-sso-canary.sh"
 REPO_SLUG="${REPO_SLUG:-Biji-Biji-Initiative/mereka-lms}"
 STRICT="${STRICT:-0}"
 
@@ -111,9 +112,19 @@ check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_PASSWORD_DEV" 
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_EMAIL_STAGING" "canary workflow staging studio canary email wiring"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_PASSWORD_STAGING" "canary workflow staging studio canary password wiring"
 check_workflow_regex "$CANARY_WORKFLOW_FILE" '^[[:space:]]+- staging$' "canary workflow dispatch includes staging scope"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "default: 'staging'" "canary workflow default env scope is staging"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "github.event.inputs.env_scope || 'staging'" "canary workflow fallback env scope is staging"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" 'scope="${INPUT_ENV_SCOPE:-staging}"' "authenticated smoke resolver defaults to staging"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY" "canary workflow REQUIRE_STUDIO_CANARY flag present"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "sso-canary" "canary workflow sso-canary job defined"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "verify-authenticated-sso-canary.sh" "canary workflow invokes canary script"
+
+if [[ ! -f "$CANARY_SCRIPT" ]]; then
+  echo "FAIL canary script not found: $CANARY_SCRIPT" >&2
+  failures=$((failures + 1))
+else
+  check_workflow_pattern "$CANARY_SCRIPT" 'ENV_SCOPE="staging"' "canary script default env scope is staging"
+fi
 
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   secret_names="$(gh secret list --repo "$REPO_SLUG" | awk '{print $1}')"

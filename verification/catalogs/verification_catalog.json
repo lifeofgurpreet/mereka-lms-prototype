@@ -1609,7 +1609,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-authenticated-sso-canary.sh",
-      "reference_count": 26,
+      "reference_count": 28,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -1632,13 +1632,13 @@
         "ci_static"
       ],
       "env_scope": [
-        "global"
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-authenticated-ui-smoke.sh",
-      "reference_count": 5,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

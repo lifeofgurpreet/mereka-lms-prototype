@@ -39,6 +39,7 @@
     "scripts/qa/verify-auth-hardening.sh",
     "scripts/qa/verify-auth-surfaces.sh",
     "scripts/qa/verify-authenticated-sso-canary.sh",
+    "scripts/qa/verify-authenticated-ui-smoke.sh",
     "scripts/qa/verify-build-provenance.sh",
     "scripts/qa/verify-configmap-hash-suffixes.sh",
     "scripts/qa/verify-content-libraries-advanced.sh",

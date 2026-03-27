@@ -10,19 +10,19 @@ on:
         required: false
         default: ''
       env_scope:
-        description: 'SSO canary environment scope'
+        description: 'Authenticated proof environment scope'
         required: false
-        default: 'prod'
+        default: 'staging'
         type: choice
         options:
-          - prod
-          - dev
           - staging
+          - dev
+          - prod
           - both
           - all
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.env_scope || 'prod' }}
+  group: ${{ github.workflow }}-${{ github.event.inputs.env_scope || 'staging' }}
   cancel-in-progress: false
 
 permissions: {}
@@ -44,7 +44,7 @@ jobs:
       - name: Resolve authenticated smoke target and credentials
         id: resolve-smoke
         env:
-          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'prod' }}
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'staging' }}
           INPUT_TARGET: ${{ github.event.inputs.target || '' }}
           SMOKE_SSO_USERNAME: ${{ secrets.SMOKE_SSO_USERNAME }}
           SMOKE_SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
@@ -57,12 +57,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          scope="${INPUT_ENV_SCOPE:-prod}"
+          scope="${INPUT_ENV_SCOPE:-staging}"
           requested_target="${INPUT_TARGET:-}"
           run_smoke=1
 
           case "$scope" in
-            ""|prod)
+            ""|staging)
+              default_target="https://staging.academyv2.mereka.io"
+              username="${SSO_CANARY_EMAIL_STAGING:-}"
+              password="${SSO_CANARY_PASSWORD_STAGING:-}"
+              lms_domain="staging.academyv2.mereka.io"
+              studio_domain="staging.studio.academyv2.mereka.io"
+              mfe_domain="staging.apps.academyv2.mereka.io"
+              ;;
+            prod)
               default_target="https://academyv2.mereka.io"
               username="${SMOKE_SSO_USERNAME:-${SSO_CANARY_EMAIL_PROD:-}}"
               password="${SMOKE_SSO_PASSWORD:-${SSO_CANARY_PASSWORD_PROD:-}}"
@@ -77,14 +85,6 @@ jobs:
               lms_domain="academyv2.mereka.dev"
               studio_domain="studio.academyv2.mereka.dev"
               mfe_domain="apps.academyv2.mereka.dev"
-              ;;
-            staging)
-              default_target="https://staging.academyv2.mereka.io"
-              username="${SSO_CANARY_EMAIL_STAGING:-}"
-              password="${SSO_CANARY_PASSWORD_STAGING:-}"
-              lms_domain="staging.academyv2.mereka.io"
-              studio_domain="staging.studio.academyv2.mereka.io"
-              mfe_domain="staging.apps.academyv2.mereka.io"
               ;;
             both|all)
               run_smoke=0
@@ -105,6 +105,7 @@ jobs:
 
           {
             echo "run_smoke=$run_smoke"
+            echo "resolved_scope=$scope"
             echo "smoke_target=$target"
             echo "lms_domain=$lms_domain"
             echo "studio_domain=$studio_domain"
@@ -157,7 +158,7 @@ jobs:
           STAGING_LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
           STAGING_STUDIO_DOMAIN: ${{ steps.resolve-smoke.outputs.studio_domain }}
           STAGING_MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
-          ENV_SCOPE: ${{ inputs.env_scope }}
+          ENV_SCOPE: ${{ steps.resolve-smoke.outputs.resolved_scope }}
         run: ./scripts/qa/visual-regression-test.sh --env "${ENV_SCOPE}" --authenticated
 
       - name: Sanitize smoke test artifacts
@@ -204,7 +205,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   # SSO Canary — previously authenticated-sso-canary.yml (merged here).
   # Uses Python Playwright to test the full OIDC/Authentik SSO roundtrip
-  # against LMS + Studio on prod and/or dev, with per-env credentials.
+  # against LMS + Studio on staging by default, with dev/prod only when explicitly requested.
   # ──────────────────────────────────────────────────────────────────────────
   sso-canary:
     name: SSO Canary
@@ -234,7 +235,7 @@ jobs:
 
       - name: Run SSO canary
         env:
-          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'prod' }}
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'staging' }}
           SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}

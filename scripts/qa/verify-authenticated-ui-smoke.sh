@@ -164,18 +164,41 @@ if [[ -f "$CI_WORKFLOW" ]]; then
     fail "CI workflow missing workflow_dispatch trigger"
   fi
 
-  # Check for SSO secrets
-  if grep -q "SSO_USERNAME" "$CI_WORKFLOW" && grep -q "SSO_PASSWORD" "$CI_WORKFLOW"; then
-    pass "CI workflow references SSO secrets (SSO_USERNAME, SSO_PASSWORD)"
+  # Check for staging-first default scope
+  if grep -q "default: 'staging'" "$CI_WORKFLOW" && grep -q "github.event.inputs.env_scope || 'staging'" "$CI_WORKFLOW"; then
+    pass "CI workflow defaults env_scope to staging"
   else
-    fail "CI workflow does not reference SSO secrets"
+    fail "CI workflow does not default env_scope to staging"
   fi
 
-  # Check for proper secret interpolation
-  if grep -q '\${{ secrets\..*SSO_USERNAME' "$CI_WORKFLOW" && grep -q '\${{ secrets\..*SSO_PASSWORD' "$CI_WORKFLOW"; then
-    pass "CI workflow uses proper GitHub secrets interpolation"
+  # Check for staging target resolution
+  if grep -q 'scope="${INPUT_ENV_SCOPE:-staging}"' "$CI_WORKFLOW" && grep -q 'default_target="https://staging.academyv2.mereka.io"' "$CI_WORKFLOW"; then
+    pass "CI workflow resolves staging as the default authenticated smoke target"
   else
-    fail "CI workflow does not use proper GitHub secrets interpolation"
+    fail "CI workflow does not resolve staging as the default authenticated smoke target"
+  fi
+
+  # Check for dedicated smoke secret wiring plus staging canary fallback
+  if grep -q "SMOKE_SSO_USERNAME" "$CI_WORKFLOW" && grep -q "SMOKE_SSO_PASSWORD" "$CI_WORKFLOW" && \
+     grep -q "SSO_CANARY_EMAIL_STAGING" "$CI_WORKFLOW" && grep -q "SSO_CANARY_PASSWORD_STAGING" "$CI_WORKFLOW"; then
+    pass "CI workflow wires dedicated smoke secrets and staging canary fallback"
+  else
+    fail "CI workflow does not wire dedicated smoke secrets and staging canary fallback"
+  fi
+
+  # Check for resolved credential injection
+  if grep -q 'steps.resolve-smoke.outputs.sso_username' "$CI_WORKFLOW" && \
+     grep -q 'steps.resolve-smoke.outputs.sso_password' "$CI_WORKFLOW"; then
+    pass "CI workflow injects resolved smoke credentials into downstream steps"
+  else
+    fail "CI workflow does not inject resolved smoke credentials into downstream steps"
+  fi
+
+  # Check for resolved scope propagation into visual regression
+  if grep -q 'resolved_scope' "$CI_WORKFLOW" && grep -q 'steps.resolve-smoke.outputs.resolved_scope' "$CI_WORKFLOW"; then
+    pass "CI workflow propagates the resolved env scope into visual regression"
+  else
+    fail "CI workflow does not propagate the resolved env scope into visual regression"
   fi
 
   # Check for Playwright installation

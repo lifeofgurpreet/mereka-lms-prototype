@@ -12,9 +12,9 @@
 # credentials in process lists or logs.
 #
 # Usage:
-#   ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
-#   ./scripts/qa/verify-authenticated-sso-canary.sh --env dev
 #   ./scripts/qa/verify-authenticated-sso-canary.sh --env staging
+#   ./scripts/qa/verify-authenticated-sso-canary.sh --env dev
+#   ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
 #   REQUIRE_SECRETS=0 ./scripts/qa/verify-authenticated-sso-canary.sh --env both
 #   REQUIRE_SECRETS=0 ./scripts/qa/verify-authenticated-sso-canary.sh --env all
 #
@@ -40,7 +40,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-ENV_SCOPE="prod" # prod|dev|staging|both|all
+ENV_SCOPE="staging" # staging|dev|prod|both|all
 REQUIRE_SECRETS="${REQUIRE_SECRETS:-1}"
 REQUIRE_STUDIO_CANARY="${REQUIRE_STUDIO_CANARY:-0}"
 RUN_OIDC_CANARY="${RUN_OIDC_CANARY:-1}"
@@ -54,7 +54,7 @@ mkdir -p "$OUT_DIR"
 
 usage() {
   cat <<'USAGE_EOF'
-Usage: ./scripts/qa/verify-authenticated-sso-canary.sh [--env prod|dev|staging|both|all]
+Usage: ./scripts/qa/verify-authenticated-sso-canary.sh [--env staging|dev|prod|both|all]
 
 Env:
   REQUIRE_SECRETS=1                            Fail when primary creds are missing (default: 1)
