@@ -21,35 +21,34 @@ missing `django_site` + `SiteConfiguration` or is mapped to the wrong tenant).
 
 The fix involves:
 
-1. **Updated multisite configuration** - Ensure every served LMS domain has a `Site` + `SiteConfiguration` entry.
-   Biji is a separate microsite, but it can still share the same theme.
-2. **Created deployment script** - New script to apply multisite configuration to production database
-3. **Updated documentation** - Aligned configuration files with the correct branding strategy
+1. **Canonical multisite definitions** - Ensure every served LMS domain has a `Site` + `SiteConfiguration`
+   entry in the repo-owned definitions.
+2. **Canonical apply flow** - Apply those definitions through one operator front door instead of invoking
+   helper scripts directly.
+3. **Updated documentation** - Align runbooks with the same canonical apply path and branding strategy.
 
 ## Changes Made
 
-### 1. Updated Multisite Bootstrap Script
+### 1. Canonical Multisite Definitions
 
-File: `scripts/shared/multisite_bootstrap.py`
+File: `infrastructure/tutor/multisite-sites.yml`
 
-**Changes**:
-- Added `MEREKA` organization definition
-- Added site configuration for `academyv2.mereka.io` (main domain)
-- Ensured `academy.biji-biji.com` is its own microsite:
+**Contract**:
+- Every served LMS domain must exist in the repo-owned multisite definitions.
+- `academy.biji-biji.com` remains its own microsite:
   - `platform_name: "Biji-Biji Academy"`
   - `site_name: "Biji-Biji Academy"`
-  - `THEME_NAME: "mereka"` (shared theme)
+  - `THEME_NAME: "mereka"` (shared theme unless and until a dedicated tenant theme is introduced)
   - `course_org_filter: ["BIJIBIJI"]`
 
-### 2. Created Deployment Script
+### 2. Canonical Deployment Script
 
 File: `scripts/infra/apply-multisite-config.sh`
 
-A new script that:
-- Finds the LMS pod in the target namespace
-- Copies the multisite bootstrap script to the pod
-- Executes it against the production database
-- Supports dry-run mode for safety
+This is the canonical operator front door. It:
+- selects the repo-owned multisite definitions for `prod`, `dev`, or `staging`
+- runs the in-cluster Django multisite reconciliation helper through a guarded flow
+- supports `--dry-run` by default and explicit confirmation for `--apply`
 
 **Usage**:
 ```bash
@@ -63,11 +62,11 @@ A new script that:
 ./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --namespace production --env prod --apply
 ```
 
-### 3. Updated Configuration File
+### 3. Updated Documentation
 
-File: `infrastructure/tutor/multisite-sites.yml`
-
-Aligned with the multisite bootstrap script to ensure consistency across documentation.
+Runbooks and operator notes should point at `scripts/infra/apply-multisite-config.sh`
+as the canonical entrypoint. The Django helper is an implementation detail, not an
+operator-facing repair path.
 
 ## Deployment Instructions
 
@@ -241,8 +240,8 @@ print('Database connection successful!')
 ## References
 
 - **Multisite Documentation**: `docs/concepts/architecture/multi-tenancy-overview.md`
-- **Multisite Bootstrap Script**: `scripts/shared/multisite_bootstrap.py`
-- **Deployment Script**: `scripts/infra/apply-multisite-config.sh`
+- **Canonical Multisite Definitions**: `infrastructure/tutor/multisite-sites.yml`
+- **Canonical Deployment Script**: `scripts/infra/apply-multisite-config.sh`
 - **Configuration File**: `infrastructure/tutor/multisite-sites.yml`
 - **Django Sites Framework**: https://docs.djangoproject.com/en/3.2/ref/contrib/sites/
 - **Open edX Site Configuration**: https://github.com/openedx/edx-platform/tree/master/openedx/core/djangoapps/site_configuration

@@ -152,14 +152,25 @@ curl https://academy.biji-biji.com | grep -i "biji-biji"
 
 ### Missing Organizations
 ```bash
-# Reconcile canonical multisite runtime state in production
-CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+# Preview canonical multisite reconciliation first
+./scripts/infra/apply-multisite-config.sh \
+  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+  --env prod \
+  --dry-run
+
+# Apply only through the canonical multisite front door
 ALLOW_PROD_APPLY=1 \
-./scripts/infra/apply-multisite-config.sh --env prod --apply
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+./scripts/infra/apply-multisite-config.sh \
+  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+  --env prod \
+  --apply
 ```
 
 ### Missing Sites
-Same as above. `apply-multisite-config.sh` is the canonical writer for Site + SiteConfiguration runtime state.
+Same as above. Do not invoke the bootstrap helper directly; use the canonical
+`scripts/infra/apply-multisite-config.sh` flow so the repo definitions and the
+runtime write path stay aligned.
 
 ### MFE Not Working
 - Check MFE container logs

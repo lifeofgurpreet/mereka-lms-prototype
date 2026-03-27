@@ -57,7 +57,8 @@ These were done directly on the cluster and are NOT yet committed into repo sour
    - Then re-apply via the normal patch flow.
 
 3) Make OIDC provider config creation repeatable.
-   - Add to `scripts/shared/multisite_bootstrap.py` or a new script:
+   - Add to the canonical multisite apply flow (`scripts/infra/apply-multisite-config.sh`
+     backed by the Django multisite reconciliation helper), not to an ad-hoc runtime script:
      - Create one `OAuth2ProviderConfig` per site.
    - Clean up duplicate entries for `academyv2.mereka.io`.
 
