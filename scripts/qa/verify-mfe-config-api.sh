@@ -7,14 +7,16 @@
 #   1. LMS settings include MFE_CONFIG with required baseline keys
 #      (FAVICON_URL, LOGO_URL, LOGO_WHITE_URL, LOGO_TRADEMARK_URL)
 #   2. The Caddy MFE config proxies /api/mfe_config/v1* to lms:8000
-#   3. The canonical multisite apply script exists and is executable
-#   4. The canonical apply flow delegates to multisite_bootstrap_django.py,
+#   3. The retired provision-mfe compatibility shim exists and points to the
+#      canonical multisite apply flow
+#   4. The canonical multisite apply script exists and is executable
+#   5. The canonical apply flow delegates to multisite_bootstrap_django.py,
 #      the helper exists on disk, and the multisite registry covers the known
 #      tenant domains including MFE_BASE_URL entries
 #
 # Optional live-cluster checks (run when kubectl is available):
-#   5. /api/mfe_config/v1 returns JSON on each tenant LMS domain
-#   6. Per-tenant SITE_NAME and LMS_BASE_URL match expected values
+#   6. /api/mfe_config/v1 returns JSON on each tenant LMS domain
+#   7. Per-tenant SITE_NAME and LMS_BASE_URL match expected values
 #
 # Usage:
 #   ./scripts/qa/verify-mfe-config-api.sh
@@ -181,12 +183,36 @@ fi
 
 echo ""
 
-# ─── Check 3: Canonical apply script exists and is executable ────────────────
-echo "--- Check 3: Canonical multisite apply script ---"
+# ─── Check 3: Retired provision-mfe compatibility shim ───────────────────────
+echo "--- Check 3: Retired provision-mfe compatibility shim ---"
 
+PROVISION_SCRIPT="${REPO_ROOT}/scripts/tenants/provision-mfe-config.sh"
 APPLY_SCRIPT="${REPO_ROOT}/scripts/infra/apply-multisite-config.sh"
 DJANGO_BOOTSTRAP="${REPO_ROOT}/scripts/shared/multisite_bootstrap_django.py"
 MULTISITE_REGISTRY="${REPO_ROOT}/infrastructure/tutor/multisite-sites.yml"
+
+if [[ -f "$PROVISION_SCRIPT" ]]; then
+  pass "provision-mfe-config.sh exists"
+
+  if [[ -x "$PROVISION_SCRIPT" ]]; then
+    pass "provision-mfe-config.sh is executable"
+  else
+    fail "provision-mfe-config.sh is not executable (run: chmod +x $PROVISION_SCRIPT)"
+  fi
+
+  if grep -q "Retired compatibility shim" "$PROVISION_SCRIPT" && grep -q "apply-multisite-config.sh" "$PROVISION_SCRIPT"; then
+    pass "provision-mfe-config.sh is retired and points to canonical multisite apply flow"
+  else
+    fail "provision-mfe-config.sh does not advertise the canonical multisite apply flow"
+  fi
+else
+  fail "provision-mfe-config.sh not found at $PROVISION_SCRIPT"
+fi
+
+echo ""
+
+# ─── Check 4: Canonical apply script exists and is executable ────────────────
+echo "--- Check 4: Canonical multisite apply script ---"
 
 if [[ -f "$APPLY_SCRIPT" ]]; then
   pass "apply-multisite-config.sh exists"
@@ -208,8 +234,8 @@ fi
 
 echo ""
 
-# ─── Check 4: Canonical apply flow covers the known tenant domains ───────────
-echo "--- Check 4: Canonical apply flow and multisite registry coverage ---"
+# ─── Check 5: Canonical apply flow covers the known tenant domains ───────────
+echo "--- Check 5: Canonical apply flow and multisite registry coverage ---"
 
 EXPECTED_TENANTS=(mereka biji-biji skillourfuture)
 EXPECTED_DOMAINS=(
@@ -250,8 +276,8 @@ fi
 
 echo ""
 
-# ─── Check 5 & 6: Optional live-cluster checks ────────────────────────────────
-echo "--- Check 5-6: Live /api/mfe_config/v1 endpoint checks ---"
+# ─── Check 6 & 7: Optional live-cluster checks ────────────────────────────────
+echo "--- Check 6-7: Live /api/mfe_config/v1 endpoint checks ---"
 
 KUBECTL_LIVE=0
 if [[ $LIVE_MODE -eq 1 ]]; then
@@ -322,7 +348,12 @@ sys.exit(1)
         pass "Tenant '$tenant': LMS_BASE_URL=https://${domain}"
       else
         fail "Tenant '$tenant': LMS_BASE_URL mismatch or canonical multisite config not applied"
-        echo "       Inspect: ./scripts/infra/apply-multisite-config.sh --env $([[ \"$LIVE_ENV\" == \"production\" ]] && echo prod || echo \"$LIVE_ENV\") --dry-run"
+        case "$LIVE_ENV" in
+          production) APPLY_ENV="prod" ;;
+          profiles-dev) APPLY_ENV="dev" ;;
+          *) APPLY_ENV="$LIVE_ENV" ;;
+        esac
+        echo "       Run: ./scripts/infra/apply-multisite-config.sh --env ${APPLY_ENV} --dry-run"
         echo "       Then apply through the canonical multisite path with the required confirmation guards."
       fi
     elif [[ "$HTTP_STATUS" == "000" ]]; then

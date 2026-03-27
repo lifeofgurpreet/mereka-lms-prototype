@@ -61,10 +61,9 @@ Your first job is to work from a clean branch/worktree off `origin/main`, then s
 - `scripts/qa/run-multisite-governance-gates.sh`
 - `scripts/qa/verify-mfe-config-contract.sh`
 - `scripts/tenants/verify-staging-tenant-proof.sh`
-- `scripts/shared/multisite_bootstrap.py`
+- `scripts/infra/apply-multisite-config.sh`
 - `scripts/shared/multisite_bootstrap_django.py`
 - `scripts/tenants/lib/site-reconcile-common.sh`
-- `scripts/tenants/provision-mfe-config.sh`
 - `.github/workflows/operations-gates-runtime.yml`
 - `.github/workflows/smoke-authenticated.yml`
 

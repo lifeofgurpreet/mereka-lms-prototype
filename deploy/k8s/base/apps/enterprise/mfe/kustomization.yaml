@@ -38,5 +38,5 @@ configMapGenerator:
   # a single MFE deployment serves all tenants via slug routing (ADR-024).
   # Phase D1 (#207): mfe_config_api wired — per-tenant overrides are now
   # delivered via SiteConfiguration.site_values["MFE_CONFIG"] at runtime.
-  # Provision with: scripts/tenants/provision-mfe-config.sh --tenant <name>
+  # Reconcile with: scripts/infra/apply-multisite-config.sh --env <prod|dev|staging>
   # Verify with:    scripts/qa/verify-mfe-config-api.sh

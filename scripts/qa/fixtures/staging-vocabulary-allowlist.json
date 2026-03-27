@@ -100,6 +100,7 @@
     "scripts/tenants/lib/runtime-proof-common.sh",
     "scripts/tenants/lib/site-reconcile-common.sh",
     "scripts/tenants/onboard-enterprise-tenant.sh",
+    "scripts/tenants/provision-mfe-config.sh",
     "scripts/tenants/repair-enterprise-schema.sh",
     "scripts/tenants/seed-staging-sites.sh",
     "scripts/tenants/sync-tenant-enterprise-mapping.sh",

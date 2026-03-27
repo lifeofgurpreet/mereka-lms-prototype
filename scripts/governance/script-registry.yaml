@@ -1530,7 +1530,7 @@ scripts:
 
   - path: scripts/tenants/provision-mfe-config.sh
     owner: platform-team
-    purpose: Provision MFE configuration for tenants
+    purpose: Compatibility shim for retired per-tenant MFE config repair path
     criticality: release-supporting
 
   - path: scripts/tenants/provision-tenant.sh
