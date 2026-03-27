@@ -163,11 +163,15 @@ Follow this checklist when onboarding a 4th (or nth) branded domain:
 - [ ] **7. SSL certificate** — for multi-level subdomains (`x.y.mereka.io`), use DNS-only
   (gray cloud) + Let's Encrypt. See `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`.
 
-- [ ] **8. Rebuild and redeploy MFE**:
-  ```bash
-  tutor images build mfe
-  tutor local restart mfe
-  ```
+- [ ] **8. Publish updated footer variant assets**:
+  - Local validation:
+    ```bash
+    tutor images build mfe
+    tutor local restart mfe
+    ```
+  - Production:
+    - publish the updated MFE image through `.github/workflows/build-tutor-images.yml`
+    - promote the resulting digests with `./scripts/infra/release-openedx-gitops.sh --require-digests`
 
 - [ ] **9. Run verification**:
   ```bash

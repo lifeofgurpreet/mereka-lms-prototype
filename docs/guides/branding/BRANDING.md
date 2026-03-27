@@ -250,15 +250,17 @@ The target approach uses `tutormfe.hooks.PLUGIN_SLOTS` to register a **Direct pl
 **Operator workflow** for slot-based customization:
 1. **Discover slot** — `grep -r "PluginSlot" node_modules/@openedx/*/src/`
 2. **Inject config** — add `PLUGIN_SLOTS` entry in `mereka_lms.py`
-3. **Rebuild image** — `tutor images build mfe`
-4. **Deploy** — `tutor k8s restart mfe`
-5. **Verify** — confirm component renders on all MFE routes
+3. **Validate locally** — `tutor images build mfe`
+4. **Publish for production** — run `.github/workflows/build-tutor-images.yml`
+5. **Promote for production** — `./scripts/infra/release-openedx-gitops.sh --require-digests`
+6. **Verify** — confirm component renders on all MFE routes
 
 **Verification**: `./scripts/qa/verify-mfe-footer-slot.sh` (16 PASS — checks plugin definition, slot registration, fallback wiring, FPF dependency)
 
 See `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` § "Plugin-First Migration" for full migration steps and available slots.
 
-- To bake the branding into Tutor's production MFE image: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
+- For local reproduction / parity checks: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
+- For production: publish the updated MFE image through `.github/workflows/build-tutor-images.yml`, then promote it with `./scripts/infra/release-openedx-gitops.sh --require-digests`.
 - Always run `./infrastructure/tutor/apply-patches.sh` immediately before `tutor images build mfe` (ensures idempotent theming copy and npm retry/timeouts).
 - Never run parallel `tutor images build mfe` commands; a single active build is the supported path.
 
@@ -382,11 +384,14 @@ tutor images build openedx
    ```
 
 2. **Production MFE image not rebuilt**:
-   ```bash
-   ./infrastructure/tutor/apply-patches.sh
-   tutor images build mfe
-   kubectl rollout restart deployment/mfe -n mereka-lms
-   ```
+   - Local reproduction:
+     ```bash
+     ./infrastructure/tutor/apply-patches.sh
+     tutor images build mfe
+     ```
+   - Production repair:
+     - publish the updated MFE image through `.github/workflows/build-tutor-images.yml`
+     - promote the resulting digests with `./scripts/infra/release-openedx-gitops.sh --require-digests`
 
 ### Branding Health Check Fails
 

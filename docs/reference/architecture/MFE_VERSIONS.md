@@ -107,7 +107,7 @@ Follow these steps to upgrade Tutor, Open edX, or MFE versions:
    # Update Tutor version
    pip install "tutor[full]==<new-version>" "tutor-mfe==<new-version>"
 
-   # Rebuild MFEs
+   # Validate MFEs locally
    tutor images build mfe
 
    # Apply patches
@@ -183,6 +183,11 @@ After upgrading Tutor/Open edX, verify these contracts:
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor images build mfe
 ```
+
+This command is for local validation and parity checks. Production rollout of the
+updated MFE bundle should publish through `.github/workflows/build-tutor-images.yml`
+and promote the resulting digests with
+`./scripts/infra/release-openedx-gitops.sh --require-digests`.
 
 ### Build Output
 - **Registry**: `ghcr.io/biji-biji-initiative/mereka-lms`
