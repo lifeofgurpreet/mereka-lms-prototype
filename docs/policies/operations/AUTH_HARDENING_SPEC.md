@@ -106,7 +106,7 @@ LMS/CMS also include multisite hardening middleware:
       `SiteConfiguration.site_values["MFE_CONFIG"]` and can override file-based settings.
       If this override still contains an absolute LMS refresh endpoint, MFEs will regress even if
       the repo settings are correct. Fix with:
-      - `./scripts/infra/fix-mfe-refresh-endpoint-site-config.sh`
+      - `CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG ALLOW_PROD_APPLY=1 ./scripts/infra/apply-multisite-config.sh --env prod --apply`
   - This catches “stale config” and cookie posture regressions before they become user-visible SSO failures.
 
 - `scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`

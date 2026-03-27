@@ -1020,7 +1020,9 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
      If that DB override still has an absolute LMS URL, it will override file-based settings and keep MFEs broken.
      Use:
      ```bash
-     ./scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
+     CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+     ALLOW_PROD_APPLY=1 \
+     ./scripts/infra/apply-multisite-config.sh --env prod --apply
      ```
 2. Ensure the MFE origin exposes `/login_refresh` and reverse-proxies to LMS:
    - Implemented via MFE Caddy reverse-proxy (see `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`).
