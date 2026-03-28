@@ -496,10 +496,12 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
         self.assertEqual(resp.headers, {})
 
     @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_apply_tenant_branding_overlay')
     @patch.object(ms, '_mfe_base_url_for_host')
-    def test_rewrites_mfe_config_urls_to_tenant_mfe(self, mock_mfe, mock_patch):
+    def test_rewrites_mfe_config_urls_to_tenant_mfe(self, mock_mfe, mock_branding, mock_patch):
         """MFE config deep routes should follow the branded tenant apps host."""
         mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+        mock_branding.side_effect = lambda request, payload: payload
 
         def get_response(request):
             return self._FakeJsonResponse(
@@ -547,10 +549,12 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
         self.assertEqual(resp.headers["Content-Length"], str(len(resp.content)))
 
     @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_apply_tenant_branding_overlay')
     @patch.object(ms, '_mfe_base_url_for_host')
-    def test_mfe_config_keeps_already_tenant_correct_urls(self, mock_mfe, mock_patch):
+    def test_mfe_config_keeps_already_tenant_correct_urls(self, mock_mfe, mock_branding, mock_patch):
         """Tenant-correct MFE config values should not be touched."""
         mock_mfe.return_value = "https://apps.staging.skillourfuture.academy.mereka.io"
+        mock_branding.side_effect = lambda request, payload: payload
         original_payload = {
             "AUTHN_MICROFRONTEND_URL": "https://apps.staging.skillourfuture.academy.mereka.io/authn",
             "COURSE_AUTHORING_MICROFRONTEND_URL": "https://apps.staging.skillourfuture.academy.mereka.io/authoring",
@@ -572,6 +576,55 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
         payload = json.loads(resp.content.decode("utf-8"))
         self.assertEqual(payload, original_payload)
         self.assertEqual(resp.headers, {})
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_apply_tenant_branding_overlay')
+    @patch.object(ms, '_mfe_base_url_for_host')
+    def test_mfe_config_applies_tenant_branding_overlay(self, mock_mfe, mock_branding, mock_patch):
+        """Tenant branding values should be overlaid after tenant URL rewriting."""
+        mock_mfe.return_value = "https://apps.biji-biji.academyv2.mereka.dev"
+
+        def branding_overlay(request, payload):
+            payload = dict(payload)
+            payload.update(
+                {
+                    "SITE_NAME": "Biji-Biji Academy",
+                    "PRIMARY_COLOR": "#000000",
+                    "SECONDARY_COLOR": "#4b5563",
+                    "ACCENT_COLOR": "#374151",
+                    "TEXT_ON_PRIMARY": "#ffffff",
+                }
+            )
+            return payload
+
+        mock_branding.side_effect = branding_overlay
+
+        def get_response(request):
+            return self._FakeJsonResponse(
+                {
+                    "BASE_URL": "apps.academyv2.mereka.dev",
+                    "AUTHN_MICROFRONTEND_URL": "https://apps.academyv2.mereka.dev/authn",
+                }
+            )
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request(
+            "apps.biji-biji.academyv2.mereka.dev",
+            path="/api/mfe_config/v1",
+        )
+        resp = mw(req)
+
+        payload = json.loads(resp.content.decode("utf-8"))
+        self.assertEqual(payload["BASE_URL"], "apps.academyv2.mereka.dev")
+        self.assertEqual(
+            payload["AUTHN_MICROFRONTEND_URL"],
+            "https://apps.biji-biji.academyv2.mereka.dev/authn",
+        )
+        self.assertEqual(payload["SITE_NAME"], "Biji-Biji Academy")
+        self.assertEqual(payload["PRIMARY_COLOR"], "#000000")
+        self.assertEqual(payload["SECONDARY_COLOR"], "#4b5563")
+        self.assertEqual(payload["ACCENT_COLOR"], "#374151")
+        self.assertEqual(payload["TEXT_ON_PRIMARY"], "#ffffff")
 
 
 class TestDomainFromEnvValue(unittest.TestCase):

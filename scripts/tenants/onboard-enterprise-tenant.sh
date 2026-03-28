@@ -210,6 +210,8 @@ if [[ "$RUN_INTEGRITY_GUARD" -eq 1 ]]; then
   echo ""
 fi
 
+CANONICAL_BRANDING_FILE="$REPO_ROOT/scripts/tenants/${SLUG}-branding.json"
+
 provision_cmd=(
   "$REPO_ROOT/scripts/tenants/provision-tenant.sh"
   --context "$K8S_CONTEXT_EFFECTIVE"
@@ -219,6 +221,7 @@ provision_cmd=(
 )
 [[ -n "$CONTACT_EMAIL" ]] && provision_cmd+=(--contact-email "$CONTACT_EMAIL")
 [[ -n "$COUNTRY" ]] && provision_cmd+=(--country "$COUNTRY")
+[[ -f "$CANONICAL_BRANDING_FILE" ]] && provision_cmd+=(--branding-file "$CANONICAL_BRANDING_FILE")
 [[ "$DRY_RUN" -eq 1 ]] && provision_cmd+=(--dry-run)
 
 mapping_cmd=(
@@ -256,6 +259,7 @@ fi
 [[ "$DRY_RUN" -eq 1 ]] && idp_cmd+=(--dry-run) || idp_cmd+=(--apply)
 
 branding_cmd=("$REPO_ROOT/scripts/tenants/sync-tenant-branding.sh" --slug "$SLUG")
+[[ -f "$CANONICAL_BRANDING_FILE" ]] && branding_cmd+=(--branding-file "$CANONICAL_BRANDING_FILE")
 [[ "$DRY_RUN" -eq 1 ]] && branding_cmd+=(--dry-run)
 
 echo "[1/6] Provision/reconcile tenant"

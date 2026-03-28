@@ -6,10 +6,12 @@ Management command to provision a new tenant.
 """
 import uuid
 import logging
+from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.sites.models import Site
 from django.db import transaction
+from django.core.management import call_command
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ class Command(BaseCommand):
         parser.add_argument('--contact-email', default='', help='Admin contact email')
         parser.add_argument('--country', default='', help='ISO 3166-1 country code')
         parser.add_argument('--enterprise-uuid', default='', help='Existing EnterpriseCustomer UUID (auto-generated if empty)')
+        parser.add_argument('--branding-file', default='', help='Canonical branding JSON file to apply after provisioning')
 
     def handle(self, *args, **options):
         slug = options['slug']
@@ -32,6 +35,7 @@ class Command(BaseCommand):
         contact_email = options['contact_email']
         country = options['country']
         enterprise_uuid_str = options['enterprise_uuid']
+        branding_file = options['branding_file']
 
         # Step 0: Validate slug format
         self._validate_slug(slug)
@@ -73,12 +77,16 @@ class Command(BaseCommand):
             # Step 10: Ensure branding directory
             self._ensure_branding_directory(slug)
 
+        # Step 11: Apply canonical branding payload if provided
+        self._apply_branding_if_requested(slug, branding_file)
+
         # Step 11: Summary
         self.stdout.write(self.style.SUCCESS(f'\n=== Provisioning Summary for {name} ==='))
         self.stdout.write(f'  Enterprise UUID: {enterprise_uuid}')
         self.stdout.write(f'  Site:            {domain} ({"created" if site_created else "already exists"})')
         self.stdout.write(f'  Mapping:         {"created" if mapping_created else "already exists"}')
         self.stdout.write(f'  Configuration:   {"created" if config_created else "already exists"}')
+        self.stdout.write(f'  Branding:        {"applied" if branding_file else "not applied"}')
         self.stdout.write(self.style.SUCCESS('\nTenant provisioned successfully.'))
 
     def _validate_slug(self, slug):
@@ -291,3 +299,20 @@ class Command(BaseCommand):
 
         status = 'Created' if created else 'Already exists'
         self.stdout.write(f'  [10/11] Branding directory ({slug}/): {status}')
+
+    def _apply_branding_if_requested(self, slug, branding_file):
+        """Step 11: Apply canonical branding payload when provided."""
+        if not branding_file:
+            self.stdout.write('  [11/11] Tenant branding: Skipped (no branding file provided)')
+            return
+
+        branding_path = Path(branding_file)
+        if not branding_path.is_file():
+            raise CommandError(f"Branding file not found: {branding_file}")
+
+        self.stdout.write(f'  [11/11] Tenant branding: Applying {branding_path}')
+        call_command(
+            'apply_tenant_branding',
+            tenant_slug=slug,
+            branding_file=str(branding_path),
+        )

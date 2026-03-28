@@ -8,11 +8,15 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SHARED_CONFIG = REPO_ROOT / "scripts" / "shared" / "config.sh"
 SYNC_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "sync-tenant-enterprise-mapping.sh"
+SYNC_BRANDING_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "sync-tenant-branding.sh"
 ONBOARD_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "onboard-enterprise-tenant.sh"
+PROVISION_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "provision-tenant.sh"
 SEED_SCRIPT = REPO_ROOT / "scripts" / "tenants" / "seed-siteconfigs.sh"
 SITE_RECONCILE_COMMON = REPO_ROOT / "scripts" / "tenants" / "lib" / "site-reconcile-common.sh"
 MULTISITE_BOOTSTRAP_DJANGO = REPO_ROOT / "scripts" / "shared" / "multisite_bootstrap_django.py"
 VERIFY_MULTISITE_CONFIG = REPO_ROOT / "scripts" / "qa" / "verify-multisite-config.sh"
+BIJI_BRANDING = REPO_ROOT / "scripts" / "tenants" / "biji-biji-branding.json"
+SKILLOURFUTURE_BRANDING = REPO_ROOT / "scripts" / "tenants" / "skillourfuture-branding.json"
 
 
 def bash_eval(command: str) -> str:
@@ -89,3 +93,44 @@ def test_multisite_verifier_checks_authenticated_dashboard_handoff() -> None:
     assert "SafeCookieData.create" in text
     assert '"https://${domain}/dashboard"' in text
     assert 'expected_location="${expected_mfe_base%/}/learner-dashboard/"' in text
+
+
+def test_sync_branding_prefers_canonical_repo_payloads() -> None:
+    text = SYNC_BRANDING_SCRIPT.read_text(encoding="utf-8")
+    assert 'CANONICAL_BRANDING_FILE="$REPO_ROOT/scripts/tenants/${SLUG}-branding.json"' in text
+    assert 'BRANDING_FILE="$CANONICAL_BRANDING_FILE"' in text
+
+
+def test_provision_and_onboard_thread_canonical_branding_file() -> None:
+    provision_text = PROVISION_SCRIPT.read_text(encoding="utf-8")
+    onboard_text = ONBOARD_SCRIPT.read_text(encoding="utf-8")
+    assert '--branding-file' in provision_text
+    assert 'CANONICAL_BRANDING_FILE="$REPO_ROOT/scripts/tenants/${SLUG}-branding.json"' in provision_text
+    assert 'CANONICAL_BRANDING_FILE="$REPO_ROOT/scripts/tenants/${SLUG}-branding.json"' in onboard_text
+    assert 'provision_cmd+=(--branding-file "$CANONICAL_BRANDING_FILE")' in onboard_text
+    assert 'branding_cmd+=(--branding-file "$CANONICAL_BRANDING_FILE")' in onboard_text
+
+
+def test_canonical_branding_payloads_exist_for_active_dev_tenants() -> None:
+    biji = json.loads(BIJI_BRANDING.read_text(encoding="utf-8"))
+    skill = json.loads(SKILLOURFUTURE_BRANDING.read_text(encoding="utf-8"))
+
+    assert biji["slug"] == "biji-biji"
+    assert biji["name"] == "Biji-Biji Academy"
+    assert biji["domain"] == "biji-biji.academyv2.mereka.dev"
+    assert biji["colors"]["primary"] == "#000000"
+    assert biji["colors"]["secondary"] == "#4b5563"
+    assert biji["colors"]["accent"] == "#374151"
+    assert biji["colors"]["text_on_primary"] == "#ffffff"
+    assert biji["logos"]["logo_url"] == "/theme/logo-horizontal.png"
+    assert biji["footer"]["contact_email"] == "admin@biji-biji.com"
+
+    assert skill["slug"] == "skillourfuture"
+    assert skill["name"] == "Skill Our Future"
+    assert skill["domain"] == "skillourfuture.academyv2.mereka.dev"
+    assert skill["colors"]["primary"] == "#450b7f"
+    assert skill["colors"]["secondary"] == "#82c3c7"
+    assert skill["colors"]["accent"] == "#0063ac"
+    assert skill["colors"]["text_on_primary"] == "#ffffff"
+    assert skill["logos"]["logo_url"] == "/theme/logo-horizontal.png"
+    assert skill["footer"]["contact_email"] == "admin@mereka.io"

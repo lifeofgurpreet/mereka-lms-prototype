@@ -2341,7 +2341,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-workflow-contract.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6083,7 +6083,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-parity.sh",
-      "reference_count": 20,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6174,7 +6174,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-footer-slot-only.sh",
-      "reference_count": 8,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6203,7 +6203,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-variant-matrix.sh",
-      "reference_count": 20,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15644,7 +15644,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-visual-contract.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15823,7 +15823,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-token-drift.sh",
-      "reference_count": 15,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -9,6 +9,9 @@
 # Usage:
 #   ./scripts/tenants/sync-tenant-branding.sh --slug acme-corp [--dry-run]
 #
+# Canonical branding payloads can live at:
+#   scripts/tenants/{slug}-branding.json
+#
 # Tenant assets are expected at:
 #   infrastructure/tutor/themes/mereka/tenants/{slug}/
 #
@@ -75,8 +78,15 @@ THEME_BASE="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 TENANTS_BASE="${BASE_DIR:-$THEME_BASE/tenants}"
 TENANT_DIR="$TENANTS_BASE/$SLUG"
 
+CANONICAL_BRANDING_FILE="$REPO_ROOT/scripts/tenants/${SLUG}-branding.json"
+TENANT_BRANDING_FILE="$TENANT_DIR/branding.json"
+
 if [[ -z "$BRANDING_FILE" ]]; then
-  BRANDING_FILE="$TENANT_DIR/branding.json"
+  if [[ -f "$CANONICAL_BRANDING_FILE" ]]; then
+    BRANDING_FILE="$CANONICAL_BRANDING_FILE"
+  else
+    BRANDING_FILE="$TENANT_BRANDING_FILE"
+  fi
 fi
 
 echo "=== Tenant Branding Sync ==="
@@ -256,7 +266,7 @@ else
   echo "Next steps:"
   echo "  1. Add logo files to: $LOGO_DIR/"
   echo "  2. (Optional) Add CSS overrides to: $CSS_DIR/"
-  echo "  3. (Optional) Add branding.json to: $TENANT_DIR/"
+  echo "  3. (Optional) Add branding.json to: $TENANT_DIR/ or scripts/tenants/${SLUG}-branding.json"
   echo "  4. Run collectstatic to deploy: tutor local run lms collectstatic --noinput"
   echo "  5. Verify branding at the tenant's domain"
 fi

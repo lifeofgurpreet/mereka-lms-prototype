@@ -362,6 +362,24 @@ def _rewrite_mfe_config_payload_to_tenant_mfe(host: str, payload: dict[str, Any]
     return rewritten
 
 
+def _apply_tenant_branding_overlay(request, payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Overlay TenantSiteConfiguration branding values onto runtime MFE config.
+    """
+    try:
+        from openedx_tenant_cache.branding import inject_mfe_branding
+    except Exception:
+        return payload
+
+    try:
+        branded = inject_mfe_branding(request, dict(payload))
+    except Exception:
+        _log.exception("MerekaMFEConfigBrandingOverlayFailed")
+        return payload
+
+    return branded if isinstance(branded, dict) else payload
+
+
 class MerekaLoginRedirectMiddleware:
     """
     Rewrite LMS auth redirects to the tenant's MFE surface.
@@ -395,7 +413,7 @@ class MerekaLoginRedirectMiddleware:
             return self._rewrite_login_session_response(host, response)
 
         if path in _MFE_CONFIG_PATHS:
-            return self._rewrite_mfe_config_response(host, response)
+            return self._rewrite_mfe_config_response(request, host, response)
 
         if path != "/login":
             return response
@@ -445,7 +463,7 @@ class MerekaLoginRedirectMiddleware:
         _log.info("MerekaLoginSessionRedirect: %s -> %s (host=%s)", redirect_url, new_redirect, host)
         return response
 
-    def _rewrite_mfe_config_response(self, host: str, response):
+    def _rewrite_mfe_config_response(self, request, host: str, response):
         if getattr(response, "status_code", 0) != 200:
             return response
         if not hasattr(response, "content"):
@@ -459,6 +477,7 @@ class MerekaLoginRedirectMiddleware:
             return response
 
         rewritten = _rewrite_mfe_config_payload_to_tenant_mfe(host, payload)
+        rewritten = _apply_tenant_branding_overlay(request, rewritten)
         if rewritten == payload:
             return response
 

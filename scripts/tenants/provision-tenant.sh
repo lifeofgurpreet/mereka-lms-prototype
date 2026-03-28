@@ -32,6 +32,7 @@ DOMAIN=""
 CONTACT_EMAIL=""
 COUNTRY=""
 ENTERPRISE_UUID=""
+BRANDING_FILE=""
 DRY_RUN=0
 NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 CONTEXT_OVERRIDE=""
@@ -50,6 +51,7 @@ usage() {
   echo "  --contact-email     Primary contact email"
   echo "  --country           ISO 3166-1 alpha-2 country code (e.g. 'MY')"
   echo "  --enterprise-uuid   Existing EnterpriseCustomer UUID (auto-generated if empty)"
+  echo "  --branding-file     Canonical branding payload to apply during provisioning"
   echo "  --from-env          Load configuration from .env file (e.g. scripts/tenants/mereka-tenant.env)"
   echo "  --context NAME      kubectl context override (optional)"
   echo "  --dry-run           Show what would be done without executing"
@@ -69,6 +71,7 @@ while [[ $# -gt 0 ]]; do
     --contact-email) CONTACT_EMAIL="$2"; shift 2 ;;
     --country) COUNTRY="$2"; shift 2 ;;
     --enterprise-uuid) ENTERPRISE_UUID="$2"; shift 2 ;;
+    --branding-file) BRANDING_FILE="$2"; shift 2 ;;
     --context) CONTEXT_OVERRIDE="$2"; shift 2 ;;
     --from-env)
       # Load from .env file
@@ -104,6 +107,11 @@ if ! echo "$SLUG" | grep -qE '^[a-z0-9][a-z0-9_-]*$'; then
   exit 1
 fi
 
+CANONICAL_BRANDING_FILE="$REPO_ROOT/scripts/tenants/${SLUG}-branding.json"
+if [[ -z "$BRANDING_FILE" && -f "$CANONICAL_BRANDING_FILE" ]]; then
+  BRANDING_FILE="$CANONICAL_BRANDING_FILE"
+fi
+
 echo "=== Tenant Provisioning ==="
 echo ""
 echo "  Slug:             $SLUG"
@@ -112,6 +120,7 @@ echo "  Domain:           $DOMAIN"
 echo "  Contact:          ${CONTACT_EMAIL:-<none>}"
 echo "  Country:          ${COUNTRY:-<none>}"
 echo "  Enterprise UUID:  ${ENTERPRISE_UUID:-<auto-generate>}"
+echo "  Branding file:    ${BRANDING_FILE:-<none>}"
 echo ""
 
 if [[ $DRY_RUN -eq 1 ]]; then
@@ -124,6 +133,7 @@ if [[ $DRY_RUN -eq 1 ]]; then
   [[ -n "$CONTACT_EMAIL" ]] && echo "    --contact-email '$CONTACT_EMAIL' \\"
   [[ -n "$COUNTRY" ]] && echo "    --country '$COUNTRY' \\"
   [[ -n "$ENTERPRISE_UUID" ]] && echo "    --enterprise-uuid '$ENTERPRISE_UUID' \\"
+  [[ -n "$BRANDING_FILE" ]] && echo "    --branding-file '$BRANDING_FILE' \\"
   echo ""
   echo "Post-provisioning steps:"
   echo "  1. Add DNS record: $DOMAIN → LMS load balancer"
@@ -181,6 +191,7 @@ if command -v kubectl &>/dev/null && kubectl "${context_args[@]}" get namespace 
   [[ -n "$CONTACT_EMAIL" ]] && CMD_ARGS="$CMD_ARGS --contact-email '$CONTACT_EMAIL'"
   [[ -n "$COUNTRY" ]] && CMD_ARGS="$CMD_ARGS --country '$COUNTRY'"
   [[ -n "$ENTERPRISE_UUID" ]] && CMD_ARGS="$CMD_ARGS --enterprise-uuid '$ENTERPRISE_UUID'"
+  [[ -n "$BRANDING_FILE" ]] && CMD_ARGS="$CMD_ARGS --branding-file '$BRANDING_FILE'"
 
   # Run the management command
   kubectl "${context_args[@]}" exec -n "$NAMESPACE" "$TARGET_POD" -- \
@@ -195,6 +206,7 @@ elif command -v tutor &>/dev/null; then
   [[ -n "$CONTACT_EMAIL" ]] && CMD_ARGS="$CMD_ARGS --contact-email $CONTACT_EMAIL"
   [[ -n "$COUNTRY" ]] && CMD_ARGS="$CMD_ARGS --country $COUNTRY"
   [[ -n "$ENTERPRISE_UUID" ]] && CMD_ARGS="$CMD_ARGS --enterprise-uuid $ENTERPRISE_UUID"
+  [[ -n "$BRANDING_FILE" ]] && CMD_ARGS="$CMD_ARGS --branding-file \"$BRANDING_FILE\""
 
   tutor local run lms bash -c "python manage.py lms provision_tenant $CMD_ARGS"
 
@@ -210,6 +222,10 @@ echo "Next steps:"
 echo "  1. Add DNS: $DOMAIN → LMS load balancer IP"
 echo "  2. Update ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS in LMS settings"
 echo "  3. Configure tenant SSO (if applicable)"
-echo "  4. Deploy branding assets to themes/mereka/tenants/$SLUG/"
+if [[ -n "$BRANDING_FILE" ]]; then
+  echo "  4. Canonical branding applied from: $BRANDING_FILE"
+else
+  echo "  4. Add canonical branding payload: scripts/tenants/${SLUG}-branding.json"
+fi
 echo "  5. Create enterprise catalog and subscription plans"
 echo "  6. Verify isolation: ./scripts/qa/verify-tenant-isolation-patterns.sh"

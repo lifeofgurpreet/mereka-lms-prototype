@@ -1,0 +1,21 @@
+{
+  "slug": "biji-biji",
+  "name": "Biji-Biji Academy",
+  "domain": "biji-biji.academyv2.mereka.dev",
+  "colors": {
+    "primary": "#000000",
+    "secondary": "#4b5563",
+    "accent": "#374151",
+    "text_on_primary": "#ffffff"
+  },
+  "logos": {
+    "logo_url": "/theme/logo-horizontal.png",
+    "logo_square_url": "/theme/logo.png",
+    "logo_white_url": "/theme/logo-horizontal-white.png",
+    "favicon_url": "/theme/favicon.ico"
+  },
+  "footer": {
+    "text": "© Biji-Biji Academy",
+    "contact_email": "admin@biji-biji.com"
+  }
+}

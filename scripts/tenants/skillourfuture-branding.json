@@ -1,0 +1,21 @@
+{
+  "slug": "skillourfuture",
+  "name": "Skill Our Future",
+  "domain": "skillourfuture.academyv2.mereka.dev",
+  "colors": {
+    "primary": "#450b7f",
+    "secondary": "#82c3c7",
+    "accent": "#0063ac",
+    "text_on_primary": "#ffffff"
+  },
+  "logos": {
+    "logo_url": "/theme/logo-horizontal.png",
+    "logo_square_url": "/theme/logo.png",
+    "logo_white_url": "/theme/logo-horizontal-white.png",
+    "favicon_url": "/theme/favicon.ico"
+  },
+  "footer": {
+    "text": "© Skill Our Future",
+    "contact_email": "admin@mereka.io"
+  }
+}
