@@ -139,11 +139,11 @@ check_build_pipeline() {
     fail "[AC-011] OpenEdX branding verification step missing from build"
   fi
 
-  # AC-011: Branding verification step exists in MFE build
+  # AC-011: Branding verification step exists in workflow for MFE image
   if grep -q 'Verify MFE image branding contract' "$BUILD_WF"; then
-    pass "[AC-011] MFE branding verification step exists in build"
+    pass "[AC-011] MFE branding verification step exists in workflow"
   else
-    fail "[AC-011] MFE branding verification step missing from build"
+    fail "[AC-011] MFE branding verification step missing from workflow"
   fi
 
   # AC-011: Branding verification log uploaded as artifact
@@ -178,6 +178,12 @@ check_build_pipeline() {
     fail "[AC-009] OpenEdX build missing canonical build-openedx-image helper"
   fi
 
+  if grep -q 'scripts/infra/build-mfe-image.sh' "$BUILD_WF"; then
+    pass "[AC-011] MFE build routes through the canonical build-mfe-image helper"
+  else
+    fail "[AC-011] MFE build missing canonical build-mfe-image helper"
+  fi
+
   # AC-011: MFE build sets NODE_OPTIONS for memory
   if grep -q 'max-old-space-size=6144' "$BUILD_WF"; then
     pass "[AC-011] MFE build sets NODE_OPTIONS memory limit (6144MB)"
@@ -207,14 +213,11 @@ check_registry() {
     fail "[AC-009] Images do not target correct registry (expected ghcr.io/biji-biji-initiative/mereka-lms)"
   fi
 
-  # AC-009: Both openedx and mfe images are pushed
-  local openedx_push mfe_push
-  openedx_push=$(grep -c 'docker push.*openedx:' "$BUILD_WF" 2>/dev/null || echo "0")
-  mfe_push=$(grep -c 'docker push.*mfe:' "$BUILD_WF" 2>/dev/null || echo "0")
-  if [[ "$openedx_push" -ge 1 && "$mfe_push" -ge 1 ]]; then
-    pass "[AC-009] Both openedx and mfe images are pushed to registry"
+  # AC-009: Both openedx and mfe image lanes route through canonical push-first helpers
+  if grep -q 'scripts/infra/build-openedx-image.sh' "$BUILD_WF" && grep -q 'scripts/infra/build-mfe-image.sh' "$BUILD_WF"; then
+    pass "[AC-009] Both openedx and mfe images route through canonical push-first helpers"
   else
-    fail "[AC-009] Missing image pushes (openedx=$openedx_push, mfe=$mfe_push)"
+    fail "[AC-009] Missing canonical push-first image helpers for openedx and mfe"
   fi
 
   # AC-009: Images tagged with short SHA too

@@ -22,6 +22,12 @@ set -euo pipefail
 echo "ok"
 EOF
 chmod +x "$tmpdir/scripts/infra/build-openedx-image.sh"
+cat >"$tmpdir/scripts/infra/build-mfe-image.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "ok"
+EOF
+chmod +x "$tmpdir/scripts/infra/build-mfe-image.sh"
 cat >"$tmpdir/scripts/qa/verify-openedx-image-branding.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -51,6 +57,7 @@ on:
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
       - 'scripts/infra/build-openedx-image.sh'
+      - 'scripts/infra/build-mfe-image.sh'
       - 'scripts/infra/release-openedx-gitops.sh'
       - 'scripts/infra/resolve-image-digest.sh'
       - 'scripts/lib/lane-normalize.sh'
@@ -121,8 +128,16 @@ jobs:
     steps:
       - name: Verify MFE build cache health
         run: echo ok
-      - name: Tag and push image
-        run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/mfe:sha"
+      - name: Build MFE image
+        run: |
+          ./scripts/infra/build-mfe-image.sh \
+            --context-dir tutor_env/env/plugins/mfe/build/mfe \
+            --dockerfile tutor_env/env/plugins/mfe/build/mfe/Dockerfile \
+            --image-repo ghcr.io/biji-biji-initiative/mereka-lms/mfe \
+            --primary-tag sha \
+            --secondary-tag shortsha \
+            --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/mfe:mereka-brand \
+            --mutable-tag mereka-brand
       - name: Resolve pushed mfe digest
         id: digest
         run: echo "digest=sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" >> "$GITHUB_OUTPUT"
@@ -157,6 +172,24 @@ jobs:
     needs: [build-mfe]
     if: ${{ needs.build-mfe.result == 'success' }}
     steps:
+      - name: Verify MFE image branding contract
+        run: scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-image-branding.log
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+      - name: Upload MFE branding verification log
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfe-branding-contract-log
+          path: var/ci/verify-mfe-image-branding.log
+      - name: Verify MFE runtime contract (image)
+        run: scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-runtime-contract.log
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+      - name: Upload MFE runtime contract log
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfe-runtime-contract-log
+          path: var/ci/verify-mfe-runtime-contract.log
       - name: Generate SBOM for MFE image
         run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${MFE_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
         env:
@@ -313,6 +346,85 @@ text = text.replace(
 p.write_text(text)
 PY
 run_expect_fail "direct tutor images build openedx call is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace("      - 'scripts/infra/build-mfe-image.sh'\n", "")
+p.write_text(text)
+PY
+run_expect_fail "missing MFE push-first helper trigger coverage is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Build MFE image\n'
+    '        run: |\n'
+    '          ./scripts/infra/build-mfe-image.sh \\\n'
+    '            --context-dir tutor_env/env/plugins/mfe/build/mfe \\\n'
+    '            --dockerfile tutor_env/env/plugins/mfe/build/mfe/Dockerfile \\\n'
+    '            --image-repo ghcr.io/biji-biji-initiative/mereka-lms/mfe \\\n'
+    '            --primary-tag sha \\\n'
+    '            --secondary-tag shortsha \\\n'
+    '            --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/mfe:mereka-brand \\\n'
+    '            --mutable-tag mereka-brand\n',
+    '      - name: Build MFE image\n'
+    '        run: tutor images build mfe\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "direct tutor images build mfe call is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Verify MFE image branding contract\n'
+    '        run: scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-image-branding.log\n'
+    '        env:\n'
+    '          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}\n'
+    '      - name: Upload MFE branding verification log\n'
+    '        uses: actions/upload-artifact@v4\n'
+    '        with:\n'
+    '          name: mfe-branding-contract-log\n'
+    '          path: var/ci/verify-mfe-image-branding.log\n',
+    '',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing canonical MFE post-push branding verification is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Verify MFE runtime contract (image)\n'
+    '        run: scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-runtime-contract.log\n'
+    '        env:\n'
+    '          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}\n'
+    '      - name: Upload MFE runtime contract log\n'
+    '        uses: actions/upload-artifact@v4\n'
+    '        with:\n'
+    '          name: mfe-runtime-contract-log\n'
+    '          path: var/ci/verify-mfe-runtime-contract.log\n',
+    '',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing canonical MFE post-push runtime verification is rejected"
 
 # Reintroduce broad scripts/infra glob => must fail
 write_pass_fixture

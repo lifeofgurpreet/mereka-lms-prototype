@@ -177,24 +177,24 @@ if [[ -f "$PLUGIN" ]]; then
     fi
 
     # Check for brand: either directly or inherited via ...MEREKA_BASE_VARIANT
-    if echo "$DOMAIN_BLOCK" | grep -qE "brand: '[^']+'" ; then
+    if grep -qE "brand: '[^']+'" <<<"$DOMAIN_BLOCK" ; then
       pass "Domain '${domain}' has non-empty brand value"
     else
       fail "Domain '${domain}' missing or empty brand value"
     fi
 
     # Check copyrightHolder: either directly or inherited
-    if echo "$DOMAIN_BLOCK" | grep -qE "copyrightHolder: '[^']+'" ; then
+    if grep -qE "copyrightHolder: '[^']+'" <<<"$DOMAIN_BLOCK" ; then
       pass "Domain '${domain}' has non-empty copyrightHolder value"
     else
       fail "Domain '${domain}' missing or empty copyrightHolder value"
     fi
 
     # Check whatsapp: directly on domain block or inherited from MEREKA_BASE_VARIANT
-    if echo "$DOMAIN_BLOCK" | grep -qE "whatsapp: '[0-9]+'" ; then
+    if grep -qE "whatsapp: '[0-9]+'" <<<"$DOMAIN_BLOCK" ; then
       pass "Domain '${domain}' has non-empty whatsapp number"
-    elif echo "$DOMAIN_BLOCK" | grep -qF "...MEREKA_BASE_VARIANT" && \
-         echo "$BASE_VARIANT_BLOCK" | grep -qE "whatsapp: '[0-9]+'" ; then
+    elif grep -qF "...MEREKA_BASE_VARIANT" <<<"$DOMAIN_BLOCK" && \
+         grep -qE "whatsapp: '[0-9]+'" <<<"$BASE_VARIANT_BLOCK" ; then
       pass "Domain '${domain}' inherits whatsapp from MEREKA_BASE_VARIANT"
     else
       fail "Domain '${domain}' missing or empty whatsapp value"

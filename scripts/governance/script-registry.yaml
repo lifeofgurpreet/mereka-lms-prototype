@@ -862,6 +862,32 @@ scripts:
     proof_command: "bash scripts/infra/build-openedx-image.sh --help"
     criticality: release-blocking
 
+  - path: scripts/infra/build-mfe-image.sh
+    owner: platform-team
+    purpose: >
+      Builds and pushes the rendered Tutor MFE image directly from the
+      generated Tutor build context using buildx, preserving immutable tags
+      plus the governed cache strategy without depending on a daemon-loaded
+      image.
+    inputs:
+      - --context-dir PATH
+      - --dockerfile PATH
+      - --image-repo REPO
+      - --primary-tag TAG
+      - --secondary-tag TAG
+      - --cache-ref IMAGE:TAG
+      - --mutable-tag TAG (optional)
+    outputs:
+      - pushed image tags in remote registry
+      - stdout/stderr build log
+      - exit code
+    side_effects:
+      - Pushes image tags to GHCR
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/build-mfe-image.sh --help"
+    criticality: release-blocking
+
   - path: scripts/infra/install-cosign.sh
     owner: platform-team
     purpose: >

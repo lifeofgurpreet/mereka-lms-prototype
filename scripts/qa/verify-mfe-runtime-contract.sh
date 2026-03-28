@@ -204,9 +204,8 @@ if [[ -n "$IMAGE_REF" ]]; then
   echo
 
   if ! docker image inspect "$IMAGE_REF" >/dev/null 2>&1; then
-    echo "ERROR: Image not found locally: $IMAGE_REF" >&2
-    echo "  Pull or build the image before running this check." >&2
-    exit 1
+    echo "Pulling image for runtime verification: $IMAGE_REF"
+    docker pull "$IMAGE_REF" >/dev/null
   fi
 
 # Run all image checks in a single container invocation to avoid repeated

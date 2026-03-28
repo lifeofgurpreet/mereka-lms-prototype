@@ -125,6 +125,7 @@ required_trigger_paths=(
   "scripts/infra/generate-build-provenance.sh"
   "scripts/infra/generate-release-bundle.sh"
   "scripts/infra/build-openedx-image.sh"
+  "scripts/infra/build-mfe-image.sh"
   "scripts/infra/release-openedx-gitops.sh"
   "scripts/infra/resolve-image-digest.sh"
   "scripts/lib/lane-normalize.sh"
@@ -152,6 +153,12 @@ if [[ -x "$REPO_ROOT/scripts/infra/build-openedx-image.sh" ]]; then
   pass "build-openedx-image helper exists"
 else
   fail "build-openedx-image helper missing or not executable"
+fi
+
+if [[ -x "$REPO_ROOT/scripts/infra/build-mfe-image.sh" ]]; then
+  pass "build-mfe-image helper exists"
+else
+  fail "build-mfe-image helper missing or not executable"
 fi
 
 if [[ -x "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" ]]; then
@@ -284,6 +291,48 @@ if [[ "$SCAN_MFE_BLOCK" == *'${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs
   pass "MFE post-push scan uses resolved pushed digest"
 else
   fail "MFE post-push scan missing resolved digest image ref"
+fi
+
+if [[ "$SCAN_MFE_BLOCK" == *'Verify MFE image branding contract'* && "$SCAN_MFE_BLOCK" == *'scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}"'* ]]; then
+  pass "MFE branding verification runs post-push via canonical registry-image helper"
+else
+  fail "MFE branding verification missing canonical post-push helper call"
+fi
+
+if [[ "$SCAN_MFE_BLOCK" == *'Verify MFE runtime contract (image)'* && "$SCAN_MFE_BLOCK" == *'scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}"'* ]]; then
+  pass "MFE runtime verification runs post-push via canonical registry-image helper"
+else
+  fail "MFE runtime verification missing canonical post-push helper call"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *'Verify MFE image branding contract'* ]]; then
+  fail "MFE branding verification still runs inside the heavy build job"
+else
+  pass "MFE heavy build job no longer performs branding verification"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *'Verify MFE runtime contract (image)'* ]]; then
+  fail "MFE image runtime verification still runs inside the heavy build job"
+else
+  pass "MFE heavy build job no longer performs image runtime verification"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *'./scripts/infra/build-mfe-image.sh'* ]]; then
+  pass "MFE build uses the canonical push-first helper"
+else
+  fail "MFE build missing canonical push-first helper"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *'tutor images build mfe'* ]]; then
+  fail "MFE build still calls tutor images build mfe directly"
+else
+  pass "MFE build no longer calls tutor images build mfe directly"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *'MFE_LOCAL_IMAGE'* ]]; then
+  fail "MFE build still depends on a local daemon image"
+else
+  pass "MFE build no longer depends on a local daemon image"
 fi
 
 if [[ "$RELEASE_BUNDLE_BLOCK" == *"scan-openedx-image"* && "$RELEASE_BUNDLE_BLOCK" == *"scan-mfe-image"* ]]; then

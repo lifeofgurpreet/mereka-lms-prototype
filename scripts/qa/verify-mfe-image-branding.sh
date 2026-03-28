@@ -17,7 +17,7 @@ EOF
 }
 
 if [[ $# -eq 0 ]]; then
-  echo "SKIP: No image_ref provided (requires a locally-present built Docker image)"
+  echo "SKIP: No image_ref provided"
   echo "  Usage: $0 <image_ref> [expected_mfe_branding_rev]"
   exit 0
 fi
@@ -35,8 +35,8 @@ if [[ -z "$EXPECTED_REV" && -f "$MFE_THEME_SCSS" ]]; then
 fi
 
 if ! docker image inspect "$IMAGE_REF" >/dev/null 2>&1; then
-  echo "ERROR: Image not found locally: $IMAGE_REF" >&2
-  exit 1
+  echo "Pulling image for branding verification: $IMAGE_REF"
+  docker pull "$IMAGE_REF" >/dev/null
 fi
 
 echo "Verifying MFE image branding: $IMAGE_REF"

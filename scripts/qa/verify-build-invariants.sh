@@ -89,12 +89,16 @@ fi
 # --- Invariant 4: GHA cache read/write MUST be enabled for both image builds ---
 if grep -q -- '--cache-from=type=gha' <<<"$MFE_BLOCK" && grep -q -- '--cache-to=type=gha,mode=max' <<<"$MFE_BLOCK"; then
   do_pass "INV-4a: MFE build has GHA cache read/write flags"
+elif grep -q 'build-mfe-image.sh' <<<"$MFE_BLOCK"; then
+  do_pass "INV-4a: MFE build inherits GHA cache read/write via the canonical push-first helper"
 else
   do_fail "INV-4a: MFE build is missing GHA cache read/write flags"
 fi
 
 if grep -q -- '--cache-from=type=gha' <<<"$OPENEDX_BLOCK" && grep -q -- '--cache-to=type=gha,mode=max' <<<"$OPENEDX_BLOCK"; then
   do_pass "INV-4b: OpenEdX build has GHA cache read/write flags"
+elif grep -q 'build-openedx-image.sh' <<<"$OPENEDX_BLOCK"; then
+  do_pass "INV-4b: OpenEdX build inherits GHA cache read/write via the canonical push-first helper"
 else
   do_fail "INV-4b: OpenEdX build is missing GHA cache read/write flags"
 fi
@@ -123,6 +127,18 @@ if grep -q -- '--cache-from=type=registry' <<<"$MFE_BLOCK"; then
   do_pass "INV-5b: MFE build has registry cache reuse wired"
 else
   do_fail "INV-5b: MFE build is missing registry cache reuse"
+fi
+
+if grep -q 'build-mfe-image.sh' <<<"$MFE_BLOCK" && ! grep -q 'tutor images build mfe' <<<"$MFE_BLOCK"; then
+  do_pass "INV-5e: MFE build uses the repo-owned push-first helper"
+else
+  do_fail "INV-5e: MFE build must use the repo-owned push-first helper instead of tutor images build mfe"
+fi
+
+if grep -q 'MFE_LOCAL_IMAGE' <<<"$MFE_BLOCK"; then
+  do_fail "INV-5f: MFE build still depends on a local daemon image"
+else
+  do_pass "INV-5f: MFE build no longer depends on a local daemon image"
 fi
 
 # --- Invariant 6: mereka-brand tag MUST be pushed on main ---

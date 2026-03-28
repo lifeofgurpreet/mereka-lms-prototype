@@ -26,6 +26,7 @@ on:
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
       - 'scripts/infra/build-openedx-image.sh'
+      - 'scripts/infra/build-mfe-image.sh'
       - 'scripts/infra/release-openedx-gitops.sh'
       - 'scripts/infra/resolve-image-digest.sh'
       - 'scripts/lib/lane-normalize.sh'
@@ -645,6 +646,12 @@ jobs:
 
           # Cache strategy: same as openedx build (see D4 comments above).
           CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand"
+          TAG="${{ inputs.image_tag || github.sha }}"
+          SHORT_SHA="${GITHUB_SHA::8}"
+          MUTABLE_ARGS=()
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            MUTABLE_ARGS=(--mutable-tag mereka-brand)
+          fi
 
           BUILD_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           (
@@ -655,12 +662,15 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          if ! timeout 110m tutor images build mfe \
-            --no-registry-cache \
-            -d "--cache-from=type=gha" \
-            -d "--cache-to=type=gha,mode=max" \
-            -d "--cache-from=type=registry,ref=${CACHE_REF}" \
-            -a BUILDKIT_INLINE_CACHE=1 2>&1 | tee var/ci/build-mfe.log; then
+          if ! timeout 110m ./scripts/infra/build-mfe-image.sh \
+            --context-dir "${TUTOR_ROOT}/env/plugins/mfe/build/mfe" \
+            --dockerfile "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/Dockerfile" \
+            --image-repo "${{ env.REGISTRY }}/mfe" \
+            --primary-tag "${TAG}" \
+            --secondary-tag "${SHORT_SHA}" \
+            --cache-ref "${CACHE_REF}" \
+            "${MUTABLE_ARGS[@]}" \
+            2>&1 | tee var/ci/build-mfe.log; then
             echo "MFE image build timed out or failed after timeout guard" >&2
             exit 1
           fi
@@ -669,22 +679,6 @@ jobs:
           BUILD_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           echo "BUILD_START=${BUILD_START}" >> var/ci/build-mfe-timing.env
           echo "BUILD_END=${BUILD_END}" >> var/ci/build-mfe-timing.env
-
-          # Tutor 21 with buildx names MFE images docker.io/overhangio/openedx-mfe:*
-          # instead of tutor_local/openedx-mfe:latest. Retag for downstream steps.
-          MFE_LOCAL_IMAGE="tutor_local/openedx-mfe:latest"
-          TUTOR_MFE_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '(^|docker.io/)overhangio/openedx-mfe:' | head -1 || true)"
-          if [[ -n "$TUTOR_MFE_IMAGE" && -z "$(docker images -q "$MFE_LOCAL_IMAGE" 2>/dev/null)" ]]; then
-            echo "Retagging $TUTOR_MFE_IMAGE → $MFE_LOCAL_IMAGE"
-            docker tag "$TUTOR_MFE_IMAGE" "$MFE_LOCAL_IMAGE"
-          fi
-          if [[ -z "$(docker images -q "$MFE_LOCAL_IMAGE" 2>/dev/null)" ]]; then
-            echo "::error::Tutor build completed without a loadable local MFE image" >&2
-            echo "Available MFE images after build:" >&2
-            docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'openedx-mfe' >&2 || true
-            exit 1
-          fi
-          echo "MFE_LOCAL_IMAGE=$MFE_LOCAL_IMAGE" >> "$GITHUB_ENV"
 
       - name: Verify MFE build cache health
         if: always()
@@ -768,54 +762,18 @@ jobs:
             echo "::warning::${FAILURES} cache health check(s) failed for MFE build"
           fi
 
-      - name: Verify MFE image branding contract
+      - name: Verify generated MFE runtime contract
         run: |
           mkdir -p var/ci
-          EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' infrastructure/tutor/themes/mereka/mfe/mereka.scss | head -n 1)"
-          scripts/qa/verify-mfe-image-branding.sh "${MFE_LOCAL_IMAGE}" "${EXPECTED_MFE_BRANDING_REV}" \
-            | tee var/ci/verify-mfe-image-branding.log
-
-      - name: Verify MFE runtime contract (image)
-        run: |
-          mkdir -p var/ci
-          scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_LOCAL_IMAGE}" \
-            | tee var/ci/verify-mfe-runtime-contract.log
+          scripts/qa/verify-mfe-runtime-contract.sh \
+            --generated-env-config "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/env.config.jsx" \
+            | tee var/ci/verify-mfe-generated-runtime-contract.log
 
       - name: Generate image metadata
         id: meta
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
           echo "tags=${{ env.REGISTRY }}/mfe:${TAG}" >> $GITHUB_OUTPUT
-
-      - name: Log in to GHCR
-        env:
-          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
-        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
-      - name: Tag and push image
-        run: |
-          TAG="${{ inputs.image_tag || github.sha }}"
-          SHORT_SHA="${GITHUB_SHA::8}"
-
-          docker tag "${MFE_LOCAL_IMAGE}" ${{ env.REGISTRY }}/mfe:${TAG}
-          docker tag "${MFE_LOCAL_IMAGE}" ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
-
-          docker push ${{ env.REGISTRY }}/mfe:${TAG}
-          docker push ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
-
-          # Retain mutable mereka-brand as a compatibility/debug alias only.
-          # Dev promotion now consumes immutable tags + digests via the
-          # infra-owned bbi-infrastructure promotion workflows.
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            docker tag "${MFE_LOCAL_IMAGE}" ${{ env.REGISTRY }}/mfe:mereka-brand
-            docker push ${{ env.REGISTRY }}/mfe:mereka-brand
-            echo "**Mutable tag:** \`mereka-brand\` (compatibility alias only; dev promotion is infra-owned)" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "### MFE Image Built ✅" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** \`${{ env.REGISTRY }}/mfe:${TAG}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Immutable tags:** \`${TAG}\`, \`${SHORT_SHA}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Resolve pushed mfe digest
         id: digest
@@ -828,22 +786,21 @@ jobs:
             exit 1
           fi
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "### MFE Image Built ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${REF}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Immutable tags:** \`${TAG}\`, \`${GITHUB_SHA::8}\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "**Mutable tag:** \`mereka-brand\` (compatibility alias only; dev promotion is infra-owned)" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "**MFE digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload MFE branding verification log
+      - name: Upload generated MFE runtime contract log
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
-          name: mfe-branding-contract-log
-          path: var/ci/verify-mfe-image-branding.log
-          retention-days: 3
-
-      - name: Upload MFE runtime contract log
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
-        if: always()
-        with:
-          name: mfe-runtime-contract-log
-          path: var/ci/verify-mfe-runtime-contract.log
+          name: mfe-generated-runtime-contract-log
+          path: var/ci/verify-mfe-generated-runtime-contract.log
           retention-days: 3
 
   scan-openedx-image:
@@ -987,6 +944,39 @@ jobs:
         env:
           GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Verify MFE image branding contract
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' infrastructure/tutor/themes/mereka/mfe/mereka.scss | head -n 1)"
+          scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" "${EXPECTED_MFE_BRANDING_REV}" \
+            | tee var/ci/verify-mfe-image-branding.log
+
+      - name: Upload MFE branding verification log
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: mfe-branding-contract-log
+          path: var/ci/verify-mfe-image-branding.log
+          retention-days: 3
+
+      - name: Verify MFE runtime contract (image)
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" \
+            | tee var/ci/verify-mfe-runtime-contract.log
+
+      - name: Upload MFE runtime contract log
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: mfe-runtime-contract-log
+          path: var/ci/verify-mfe-runtime-contract.log
+          retention-days: 3
 
       - name: Generate SBOM for MFE image
         continue-on-error: true  # Non-blocking: SBOM is informational, should not block image delivery
