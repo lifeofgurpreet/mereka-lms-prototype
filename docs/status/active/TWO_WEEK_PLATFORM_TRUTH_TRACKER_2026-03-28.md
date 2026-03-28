@@ -1,5 +1,5 @@
 # Two-Week Platform Truth Tracker
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T07:42:37Z • Status: active_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T08:51:31Z • Status: active_
 
 This is the execution board for the current 14-day platform-truth window. It is intentionally cross-repo and cross-surface: app CI truth, infra promotion truth, live runtime truth, and status/handoff truth all belong here when they are still active and verifiable.
 
@@ -16,6 +16,7 @@ The board is not a wish list. It is the current control point: what is already c
 ## Current verified state
 
 - Recently merged in `mereka-lms`:
+  - `#1169` `fix(ci): bound non-blocking SBOM scans` merged `2026-03-28T07:51:48Z` at `4a05e894ad0d62423fd6b782e434e9b1d68e168f`
   - `#1168` `docs(ci): align build workflow with infra-owned promotion` merged `2026-03-28T07:15:44Z`
   - `#1166` `fix(runtime): bridge tenant palette into public MFE shell` merged `2026-03-28T06:34:31Z` at `21dad0731a07d1b1e1203247ea7d9a54397d454a`
   - `#1165` `docs(status): close audit epic and refresh platform truth` merged `2026-03-28T06:10:36Z`
@@ -23,6 +24,8 @@ The board is not a wish list. It is the current control point: what is already c
   - `#1160` `test(smoke): require both public MFE config surfaces` merged `2026-03-28T05:27:42Z`
   - `#1157` `feat(footer): share public footer content source` merged `2026-03-28T04:48:23Z`
 - Recently merged in `bbi-infrastructure`:
+  - `#2168` `chore(mereka-lms): promote dev images to 4a05e894ad0d62423fd6b782e434e9b1d68e168f` merged `2026-03-28T08:43:12Z` at `60a49e2490d469398dde54f346db1106917864c8`
+  - `#2167` `fix(mereka-lms): set prod MFE host override` merged `2026-03-28T08:46:44Z` at `be096402b4d47c49e69dceb4e628eda3404c543a`
   - `#2165` `fix(mereka-lms): backfill prod mfe config urls` merged `2026-03-28T07:33:40Z`
   - `#2164` `feat(ci): emit dev promotion proof artifact` merged `2026-03-28T05:10:13Z`
   - `#2163` `feat(proof): emit mereka-lms runtime realization json` merged `2026-03-28T04:54:00Z`
@@ -35,17 +38,18 @@ The board is not a wish list. It is the current control point: what is already c
   - `#843` is closed by `#1153`
   - `#1164` remains open as the active successor issue for tenant runtime palette proof
 - Active open app PRs:
-  - `#1169` `fix(ci): bound non-blocking SBOM scans`
-    - head: `9ab426423128323826480e16da38ae8c8308a11b`
-    - current check boundary: only `Static Validation Precheck` still pending
-    - review boundary: GitHub still reports `REVIEW_REQUIRED`
   - `#1156` Dependabot bump; not part of the platform-truth program
 - Active merged-follow-through lane:
-  - `#1166` is merged in repo truth, but the post-merge `Build Tutor Images` run for its merge commit is still active:
-    - run: `23679457112`
-    - head: `21dad0731a07d1b1e1203247ea7d9a54397d454a`
-    - active jobs: `Build OpenEdX Image`, `Build MFE Image`
-  - no infra dev-promotion PR or workflow run exists yet for source SHA `21dad0731a07d1b1e1203247ea7d9a54397d454a`
+  - `#1166` is merged in repo truth
+  - `#1169` is merged in repo truth and its main build completed successfully on `4a05e894ad0d62423fd6b782e434e9b1d68e168f`
+  - `#2168` is merged in infra truth, so the dev-promotion PR creation step is no longer open debt
+  - the blocker moved to live runtime availability after promotion:
+    - `https://academyv2.mereka.dev/` → `502`
+    - `https://biji-biji.academyv2.mereka.dev/` → `502`
+    - `https://skillourfuture.academyv2.mereka.dev/` → `502`
+    - `https://apps.academyv2.mereka.dev/` → `302 Location: https://academyv2.mereka.dev`
+    - `https://apps.biji-biji.academyv2.mereka.dev/` → `302 Location: https://academyv2.mereka.dev`
+    - `https://apps.skillourfuture.academyv2.mereka.dev/` → `302 Location: https://academyv2.mereka.dev`
 - Nonprod MFE-config parity is closed in runtime truth:
   - `bash scripts/qa/verify-mfe-config-contract.sh --env dev` passes
   - `bash scripts/qa/verify-mfe-config-contract.sh --env staging` passes
@@ -75,48 +79,56 @@ The board is not a wish list. It is the current control point: what is already c
 
 The program is no longer queue-bound. The active control point is narrower and more operational:
 
-1. finish `#1169` cleanly
-2. carry merged `#1166` through build -> infra promotion -> runtime realization
-3. rerun tenant-host proof after deployment movement and keep `#1164` open until that proof exists
-4. keep nonprod MFE-config parity represented truthfully as closed
-5. classify prod public-host `502` behavior as a separate availability outage, not as reopened config-contract debt
+1. treat post-promotion dev public-host `502` behavior as the immediate runtime blocker
+2. rerun tenant-host proof only after dev availability returns and keep `#1164` open until that proof exists
+3. keep nonprod MFE-config parity represented truthfully as closed
+4. keep prod public-host `502` behavior classified separately from the dev tenant-palette lane
+5. keep the tracker downstream of live runtime truth instead of repo-only milestones
 
 ## Two-week execution board
 
-### T-01 — Finish `#1169` and retire the build-workflow hardening lane
+### T-01 — Restore or classify dev runtime availability after merged promotion
 
 Priority: `P0`
-Owner surfaces: `mereka-lms`
+Owner surfaces: infra/runtime with `mereka-lms` follow-through
 
 Current truth:
 
-- `#1169` is the only active platform-truth app PR.
-- The branch itself is clean and locally validated.
-- The remaining boundary is CI completion plus GitHub review requirement, not source uncertainty.
+- `#1166` is merged in app repo truth.
+- `#1169` is merged and its build completed successfully on `4a05e894ad0d62423fd6b782e434e9b1d68e168f`.
+- `#2168` is merged in infra truth, so dev promotion creation is complete.
+- live dev public hosts are currently failing broadly:
+  - `academyv2.mereka.dev` → `502`
+  - `biji-biji.academyv2.mereka.dev` → `502`
+  - `skillourfuture.academyv2.mereka.dev` → `502`
 
 Done when:
 
-- `#1169` merges on a truthful head
-- post-merge `main` is green for its affected workflow set
-- the build-workflow hardening lane is retired from the board
+- the dev public-host failure boundary is explicit and stable
+- either dev availability is restored or the outage is handed to the correct runtime owner with exact evidence
+- the tenant-palette lane is no longer blocked by generic host unavailability
 
 Verification commands:
 
 ```bash
-gh pr checks 1169 --repo Biji-Biji-Initiative/mereka-lms
-gh pr view 1169 --repo Biji-Biji-Initiative/mereka-lms --json headRefOid,mergeable,url
-bash scripts/qa/verify-build-workflow-contract.sh
-bash scripts/qa/test-verify-build-workflow-contract.sh
-bash scripts/qa/verify-verification-catalog.sh
-git diff --check
+for u in \
+  https://academyv2.mereka.dev \
+  https://biji-biji.academyv2.mereka.dev \
+  https://skillourfuture.academyv2.mereka.dev
+do
+  curl -I -sS "$u" | sed -n '1,8p'
+done
+
+gh pr view 2168 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,mergeCommit,url
+gh issue view 1164 --repo Biji-Biji-Initiative/mereka-lms --json state,url
 ```
 
 Notes:
 
-- Do not invent new workflow edits unless the fresh rerun produces a concrete failure.
-- If only CodeQL hangs again after every other lane is green, treat that as runner-side evidence, not as a source regression.
+- Do not reopen source work just because runtime is currently down.
+- Promotion completion is not the same as runtime closure.
 
-### T-02 — Carry merged `#1166` through build, promotion, and real tenant-host proof
+### T-02 — Close `#1164` only with tenant-host runtime proof
 
 Priority: `P0`
 Owner surfaces: `mereka-lms` -> `bbi-infrastructure` -> live runtime
@@ -124,45 +136,41 @@ Owner surfaces: `mereka-lms` -> `bbi-infrastructure` -> live runtime
 Current truth:
 
 - `#1166` is merged in repo truth.
-- Its merge-commit build run `23679457112` is still in progress.
-- No dev-promotion PR or workflow run exists yet for source SHA `21dad0731a07d1b1e1203247ea7d9a54397d454a`.
-- `#1164` remains open because runtime proof on non-default tenant hosts has not yet been re-run after deployment movement.
+- `#2168` is merged in infra truth.
+- `#1164` remains open because the runtime proof on non-default tenant hosts is still blocked by live dev host availability and has not yet passed.
 
 Done when:
 
-- build run `23679457112` completes successfully
-- the resulting infra promotion step is explicit and reviewable
-- live deployment actually moves to the merged images
+- live dev availability is back
 - the tenant-host browser/API proof passes on at least one non-default tenant host
 - `#1164` closes only after that runtime evidence exists
 
 Verification commands:
 
 ```bash
-gh run view 23679457112 --repo Biji-Biji-Initiative/mereka-lms --json status,conclusion,jobs,url,headSha
-gh pr list --repo Biji-Biji-Initiative/bbi-infrastructure --state open --search '21dad073 in:title' --json number,title,url
-gh run list --repo Biji-Biji-Initiative/bbi-infrastructure --workflow promote-dev-image.yml --limit 20
-
 python3 - <<'PY'
 import json, urllib.request
-for url in [
-    'https://staging.academy.biji-biji.com/api/mfe_config/v1',
-    'https://apps.staging.academy.biji-biji.com/api/mfe_config/v1',
-    'https://staging.skillourfuture.academy.mereka.io/api/mfe_config/v1',
-    'https://apps.staging.skillourfuture.academy.mereka.io/api/mfe_config/v1',
+for label, url in [
+    ('biji-biji-lms', 'https://biji-biji.academyv2.mereka.dev/api/mfe_config/v1'),
+    ('biji-biji-apps', 'https://apps.biji-biji.academyv2.mereka.dev/api/mfe_config/v1?mfe=authn'),
+    ('skillourfuture-lms', 'https://skillourfuture.academyv2.mereka.dev/api/mfe_config/v1'),
+    ('skillourfuture-apps', 'https://apps.skillourfuture.academyv2.mereka.dev/api/mfe_config/v1?mfe=authn'),
 ]:
     payload = json.load(urllib.request.urlopen(url))
-    print(url, {k: payload.get(k) for k in ['SITE_NAME','PRIMARY_COLOR','SECONDARY_COLOR','ACCENT_COLOR','TEXT_ON_PRIMARY']})
+    print(label, {k: payload.get(k) for k in ['SITE_NAME','PRIMARY_COLOR','SECONDARY_COLOR','ACCENT_COLOR','TEXT_ON_PRIMARY','PARAGON_THEME']})
 PY
 
-cd tests/e2e && npx playwright test tests/tenant-palette-bridge.spec.ts --list
-git diff --check
+cd tests/e2e
+BASE_URL=https://biji-biji.academyv2.mereka.dev EXPECTED_SITE_NAME='Biji-Biji Academy (Dev)' \
+  npx playwright test tests/tenant-palette-bridge.spec.ts --project chromium
+BASE_URL=https://skillourfuture.academyv2.mereka.dev EXPECTED_SITE_NAME='Skill Our Future (Dev)' \
+  npx playwright test tests/tenant-palette-bridge.spec.ts --project chromium
 ```
 
 Notes:
 
-- This lane is no longer a source-implementation lane.
-- The remaining boundary is realization and runtime proof.
+- This lane is no longer blocked by source merge or promotion-PR creation.
+- Do not close it from repo truth alone.
 
 ### T-03 — Keep nonprod MFE-config parity explicitly closed
 
@@ -282,9 +290,9 @@ These are real, but they are not first in line while the lanes above are still o
 
 ## Do not claim this program closed unless all of these are true
 
-- `#1169` is merged and post-merge `main` is clean
+- `#1169` is merged and post-merge `main` build truth is complete
 - merged `#1166` has crossed build -> promotion -> live runtime realization
 - `#1164` is closed only after tenant-host runtime proof exists
 - nonprod MFE-config parity remains represented as closed and guarded
-- prod public-host `502` behavior is either resolved or explicitly handed off as a separate availability lane
+- current dev and prod public-host availability blockers are either resolved or explicitly handed off as separate runtime lanes
 - active trackers still match the actual repo, infra, and runtime state

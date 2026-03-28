@@ -14,11 +14,11 @@ Start by reading:
 Read the relevant PRs/issues directly:
 
 7. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1169`
-8. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1168`
-9. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1166`
-10. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/1164`
-11. `https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2165`
-12. `https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2164`
+8. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1166`
+9. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/1164`
+10. `https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2168`
+11. `https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2167`
+12. `https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2165`
 
 ## Mission
 
@@ -36,7 +36,6 @@ Do not use the dirty root worktree.
 
 Use only:
 
-- `/tmp/mereka-build-sbom-guard` for `#1169`
 - `/tmp/mereka-tenant-palette-bridge` for `#1166` follow-through and tenant-host runtime proof
 - `/tmp/mereka-two-week-tracker` for tracker refreshes
 
@@ -44,40 +43,50 @@ Use only:
 
 The active work is now:
 
-1. finish `#1169`
-2. carry merged `#1166` through build -> promotion -> runtime realization
-3. keep `#1164` open until tenant-host runtime proof exists
-4. keep nonprod MFE-config parity represented as closed
-5. keep the prod `502` behavior classified as availability/outage work, not as a reopened MFE-config contract bug
+1. treat post-promotion dev runtime availability as the immediate blocker
+2. keep `#1164` open until tenant-host runtime proof exists
+3. keep nonprod MFE-config parity represented as closed
+4. keep the prod `502` behavior classified as availability/outage work, not as a reopened MFE-config contract bug
 
 ## Immediate first tasks
 
-### First lane: `#1169`
+### First lane: dev runtime availability after merged promotion
 
-Work in `/tmp/mereka-build-sbom-guard`.
+Work in `/tmp/mereka-tenant-palette-bridge` unless the evidence forces an infra/runtime handoff.
 
 Run:
 
-1. `gh pr checks 1169 --repo Biji-Biji-Initiative/mereka-lms`
-2. `gh pr view 1169 --repo Biji-Biji-Initiative/mereka-lms --json headRefOid,mergeable,url`
-3. if CI is green, merge it
-4. if CI fails, fix only the concrete failure boundary
+1. `gh pr view 2168 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,mergeCommit,url`
+2. probe the live dev hosts directly:
+   - `https://academyv2.mereka.dev`
+   - `https://biji-biji.academyv2.mereka.dev`
+   - `https://skillourfuture.academyv2.mereka.dev`
+3. if they are still `502`, treat runtime availability as the blocker and report it explicitly
+4. do not pretend tenant-palette proof moved just because promotion merged
 
-Do not invent another workflow change unless the fresh rerun gives you a real failure.
+### Second lane: close `#1164` only with tenant-host proof
 
-### Second lane: merged `#1166`
+Only after dev public-host availability is back, rerun the tenant-host probes and browser proof:
 
-Work in `/tmp/mereka-tenant-palette-bridge`.
+```bash
+python3 - <<'PY'
+import json, urllib.request
+for label, url in [
+    ('biji-biji-lms', 'https://biji-biji.academyv2.mereka.dev/api/mfe_config/v1'),
+    ('biji-biji-apps', 'https://apps.biji-biji.academyv2.mereka.dev/api/mfe_config/v1?mfe=authn'),
+    ('skillourfuture-lms', 'https://skillourfuture.academyv2.mereka.dev/api/mfe_config/v1'),
+    ('skillourfuture-apps', 'https://apps.skillourfuture.academyv2.mereka.dev/api/mfe_config/v1?mfe=authn'),
+]:
+    payload = json.load(urllib.request.urlopen(url))
+    print(label, {k: payload.get(k) for k in ['SITE_NAME','PRIMARY_COLOR','SECONDARY_COLOR','ACCENT_COLOR','TEXT_ON_PRIMARY','PARAGON_THEME']})
+PY
 
-Start with:
-
-1. `gh run view 23679457112 --repo Biji-Biji-Initiative/mereka-lms --json status,conclusion,jobs,url,headSha`
-2. `gh pr list --repo Biji-Biji-Initiative/bbi-infrastructure --state open --search '21dad073 in:title' --json number,title,url`
-3. `gh run list --repo Biji-Biji-Initiative/bbi-infrastructure --workflow promote-dev-image.yml --limit 20`
-
-If build completion has not yet created a promotion PR/run, keep watching the handoff instead of pretending the runtime lane moved.
-
-Only after deployment movement is real, rerun the tenant-host probes and browser proof.
+cd tests/e2e
+BASE_URL=https://biji-biji.academyv2.mereka.dev EXPECTED_SITE_NAME='Biji-Biji Academy (Dev)' \
+  npx playwright test tests/tenant-palette-bridge.spec.ts --project chromium
+BASE_URL=https://skillourfuture.academyv2.mereka.dev EXPECTED_SITE_NAME='Skill Our Future (Dev)' \
+  npx playwright test tests/tenant-palette-bridge.spec.ts --project chromium
+```
 
 ### Third lane: prod anomaly
 
@@ -97,8 +106,9 @@ Do not reopen the old nonprod MFE-config parity bug because of this.
 ## Non-negotiable rules
 
 - Do not collapse repo truth, infra truth, and runtime truth into one sentence.
-- Do not close `#1164` because `#1166` is merged.
+- Do not close `#1164` because `#1166` and `#2168` are merged.
 - Do not rediscover already-closed queue debt unless fresh evidence proves regression.
+- Do not reopen `#1169`; it is merged.
 - Do not describe the prod outage as an `/api/mfe_config/v1` bug unless the broad `502` surface disappears and a narrower boundary remains.
 - Do not widen `#1169` into general CI cleanup.
 - Do not widen merged `#1166` into a new source-implementation lane unless runtime proof shows the merge was insufficient.
@@ -122,8 +132,8 @@ Every handoff note must include:
 
 ## Minimum acceptable success for this handoff
 
-- `#1169` is merged or reduced to one concrete failing boundary
-- merged `#1166` has crossed into a visible build/promotion/runtime path
+- `#1169` remains closed
+- merged `#1166` has crossed into a visible build/promotion/runtime path and the current runtime blocker is explicit
 - `#1164` remains open until tenant-host runtime proof exists
 - nonprod MFE-config parity remains represented as closed
 - the prod outage remains correctly classified as availability work
