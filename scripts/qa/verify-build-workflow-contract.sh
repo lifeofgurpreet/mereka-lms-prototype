@@ -124,6 +124,7 @@ required_trigger_paths=(
   "scripts/infra/install-cosign.sh"
   "scripts/infra/generate-build-provenance.sh"
   "scripts/infra/generate-release-bundle.sh"
+  "scripts/infra/build-openedx-image.sh"
   "scripts/infra/release-openedx-gitops.sh"
   "scripts/infra/resolve-image-digest.sh"
   "scripts/lib/lane-normalize.sh"
@@ -145,6 +146,12 @@ if [[ -f "$REPO_ROOT/scripts/infra/resolve-build-scope.sh" ]]; then
   pass "resolve-build-scope helper exists"
 else
   fail "resolve-build-scope helper missing"
+fi
+
+if [[ -x "$REPO_ROOT/scripts/infra/build-openedx-image.sh" ]]; then
+  pass "build-openedx-image helper exists"
+else
+  fail "build-openedx-image helper missing or not executable"
 fi
 
 if [[ -x "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" ]]; then
@@ -285,19 +292,36 @@ else
   fail "release bundle missing post-push scan dependencies"
 fi
 
-# OpenEdX cache-health reporting must match the canonical strategy: registry +
-# inline cache only while the docker driver is required for a loadable local
-# image export.
-if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache exporters intentionally absent for OpenEdX build"* ]]; then
-  pass "OpenEdX cache health reports the canonical non-GHA strategy"
+# OpenEdX cache-health reporting must match the canonical push-first strategy:
+# docker-container + GHA cache read/write + registry fallback.
+if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache read/write is enabled for OpenEdX build"* ]]; then
+  pass "OpenEdX cache health reports the canonical GHA-backed strategy"
 else
-  fail "OpenEdX cache health missing canonical non-GHA strategy messaging"
+  fail "OpenEdX cache health missing canonical GHA-backed strategy messaging"
 fi
 
-if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache read/write flags NOT found in build command"* ]]; then
-  fail "OpenEdX cache health still reports missing GHA flags as a failure"
+if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache exporters intentionally absent for OpenEdX build"* ]]; then
+  fail "OpenEdX cache health still reports the stale non-GHA strategy"
 else
-  pass "OpenEdX cache health no longer treats absent GHA exporters as a failure"
+  pass "OpenEdX cache health no longer treats GHA cache exporters as forbidden"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'./scripts/infra/build-openedx-image.sh'* ]]; then
+  pass "OpenEdX build uses the canonical push-first helper"
+else
+  fail "OpenEdX build missing canonical push-first helper"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'tutor images build openedx'* ]]; then
+  fail "OpenEdX build still calls tutor images build openedx directly"
+else
+  pass "OpenEdX build no longer calls tutor images build openedx directly"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'OPENEDX_LOCAL_IMAGE'* ]]; then
+  fail "OpenEdX build still depends on a local daemon image"
+else
+  pass "OpenEdX build no longer depends on a local daemon image"
 fi
 
 # Workflow wording must not claim mutable-tag auto-deploy ownership anymore.

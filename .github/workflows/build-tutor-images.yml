@@ -25,6 +25,7 @@ on:
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
+      - 'scripts/infra/build-openedx-image.sh'
       - 'scripts/infra/release-openedx-gitops.sh'
       - 'scripts/infra/resolve-image-digest.sh'
       - 'scripts/lib/lane-normalize.sh'
@@ -343,12 +344,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
-          # OpenEdX still needs Tutor's local-daemon export so the workflow can
-          # retag and publish the built image. Branding verification now runs
-          # post-push against the registry digest, but the build itself still
-          # stays on the reliable docker driver until Tutor no longer depends
-          # on output=type=docker.
-          driver: docker
+          # OpenEdX now builds from the rendered Tutor context via the repo-owned
+          # build-openedx-image.sh helper. That removes the last local-image
+          # dependency from this lane, so we can use docker-container and first-
+          # class GHA cache exporters like the MFE build.
+          driver: docker-container
 
       - name: Fix DinD network MTU
         run: |
@@ -384,14 +384,18 @@ jobs:
           export DOCKER_BUILDKIT=1
           mkdir -p var/ci
 
-          # Cache strategy (D4 — build cache realization):
-          #   --no-registry-cache: skip upstream overhangio cache refs (can't push)
-          #   -d --cache-from:     pull our last GHCR image's inline cache metadata
-          #   -a BUILDKIT_INLINE_CACHE=1: embed cache metadata in built image
-          #
-          # On first run (bootstrap), cache-from silently misses. After push,
-          # subsequent builds reuse matching layers via inline cache metadata.
+          # Cache strategy:
+          #   --cache-from=type=gha            first-class shared BuildKit cache
+          #   --cache-to=type=gha,mode=max    persist cache state between runs
+          #   --cache-from=type=registry      secondary warm path from last push
+          #   BUILDKIT_INLINE_CACHE=1         preserve registry fallback metadata
           CACHE_REF="${{ env.REGISTRY }}/openedx:mereka-brand"
+          TAG="${{ inputs.image_tag || github.sha }}"
+          SHORT_SHA="${GITHUB_SHA::8}"
+          MUTABLE_ARGS=()
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            MUTABLE_ARGS=(--mutable-tag mereka-brand)
+          fi
 
           BUILD_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           (
@@ -402,10 +406,15 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          if ! timeout 170m tutor images build openedx \
-            --no-registry-cache \
-            -d "--cache-from=type=registry,ref=${CACHE_REF}" \
-            -a BUILDKIT_INLINE_CACHE=1 2>&1 | tee var/ci/build-openedx.log; then
+          if ! timeout 170m ./scripts/infra/build-openedx-image.sh \
+            --context-dir "${TUTOR_ROOT}/env/build/openedx" \
+            --dockerfile "${TUTOR_ROOT}/env/build/openedx/Dockerfile" \
+            --image-repo "${{ env.REGISTRY }}/openedx" \
+            --primary-tag "${TAG}" \
+            --secondary-tag "${SHORT_SHA}" \
+            --cache-ref "${CACHE_REF}" \
+            "${MUTABLE_ARGS[@]}" \
+            2>&1 | tee var/ci/build-openedx.log; then
             echo "OpenedX image build timed out or failed after timeout guard" >&2
             exit 1
           fi
@@ -414,22 +423,6 @@ jobs:
           BUILD_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           echo "BUILD_START=${BUILD_START}" >> var/ci/build-openedx-timing.env
           echo "BUILD_END=${BUILD_END}" >> var/ci/build-openedx-timing.env
-
-          # Tutor 21 with buildx names images docker.io/overhangio/openedx:*
-          # Retag for downstream steps (branding verify, SBOM, Trivy, push).
-          OPENEDX_LOCAL_IMAGE="tutor_local/openedx:latest"
-          TUTOR_IMAGE="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '(^|docker.io/)overhangio/openedx:' | head -1 || true)"
-          if [[ -n "$TUTOR_IMAGE" && -z "$(docker images -q "$OPENEDX_LOCAL_IMAGE" 2>/dev/null)" ]]; then
-            echo "Retagging $TUTOR_IMAGE → $OPENEDX_LOCAL_IMAGE"
-            docker tag "$TUTOR_IMAGE" "$OPENEDX_LOCAL_IMAGE"
-          fi
-          if [[ -z "$(docker images -q "$OPENEDX_LOCAL_IMAGE" 2>/dev/null)" ]]; then
-            echo "::error::Tutor build completed without a loadable local OpenEdX image" >&2
-            echo "Available OpenEdX images after build:" >&2
-            docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'openedx' >&2 || true
-            exit 1
-          fi
-          echo "OPENEDX_LOCAL_IMAGE=$OPENEDX_LOCAL_IMAGE" >> "$GITHUB_ENV"
 
       - name: Verify OpenEdX build cache health
         if: always()
@@ -452,11 +445,11 @@ jobs:
             FAILURES=$((FAILURES + 1))
           fi
 
-          if grep -q 'cache-from=type=gha' "$LOG" || grep -q 'cache-to=type=gha,mode=max' "$LOG"; then
-            SUMMARY="${SUMMARY}\n❌ GHA cache exporters unexpectedly present for OpenEdX build"
-            FAILURES=$((FAILURES + 1))
+          if grep -q 'cache-from=type=gha' "$LOG" && grep -q 'cache-to=type=gha,mode=max' "$LOG"; then
+            SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
           else
-            SUMMARY="${SUMMARY}\n✅ GHA cache exporters intentionally absent for OpenEdX build (docker driver + local image export)"
+            SUMMARY="${SUMMARY}\n❌ GHA cache read/write flags NOT found in OpenEdX build command"
+            FAILURES=$((FAILURES + 1))
           fi
 
           # 2. Check cache manifest was imported
@@ -520,36 +513,6 @@ jobs:
           echo "tags=${{ env.REGISTRY }}/openedx:${TAG}" >> $GITHUB_OUTPUT
           echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
 
-      - name: Log in to GHCR
-        env:
-          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
-        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
-      - name: Tag and push image
-        run: |
-          TAG="${{ inputs.image_tag || github.sha }}"
-          SHORT_SHA="${GITHUB_SHA::8}"
-
-          docker tag "${OPENEDX_LOCAL_IMAGE}" ${{ env.REGISTRY }}/openedx:${TAG}
-          docker tag "${OPENEDX_LOCAL_IMAGE}" ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
-
-          docker push ${{ env.REGISTRY }}/openedx:${TAG}
-          docker push ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
-
-          # Retain mutable mereka-brand as a compatibility/debug alias only.
-          # Dev promotion now consumes immutable tags + digests via the
-          # infra-owned bbi-infrastructure promotion workflows.
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            docker tag "${OPENEDX_LOCAL_IMAGE}" ${{ env.REGISTRY }}/openedx:mereka-brand
-            docker push ${{ env.REGISTRY }}/openedx:mereka-brand
-            echo "**Mutable tag:** \`mereka-brand\` (compatibility alias only; dev promotion is infra-owned)" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "### OpenEdX Image Built ✅" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** \`${{ env.REGISTRY }}/openedx:${TAG}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Immutable tags:** \`${TAG}\`, \`${SHORT_SHA}\`" >> $GITHUB_STEP_SUMMARY
-
       - name: Resolve pushed openedx digest
         id: digest
         run: |
@@ -561,6 +524,13 @@ jobs:
             exit 1
           fi
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "### OpenEdX Image Built ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${REF}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Immutable tags:** \`${TAG}\`, \`${GITHUB_SHA::8}\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "**Mutable tag:** \`mereka-brand\` (compatibility alias only; dev promotion is infra-owned)" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
   build-mfe:

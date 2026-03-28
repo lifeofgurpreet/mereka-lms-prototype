@@ -16,6 +16,12 @@ set -euo pipefail
 printf 'build_openedx=true\nbuild_mfe=true\nscope_label=both\n' >> "$1"
 EOF
 chmod +x "$tmpdir/scripts/infra/resolve-build-scope.sh"
+cat >"$tmpdir/scripts/infra/build-openedx-image.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "ok"
+EOF
+chmod +x "$tmpdir/scripts/infra/build-openedx-image.sh"
 cat >"$tmpdir/scripts/qa/verify-openedx-image-branding.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -44,6 +50,7 @@ on:
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
+      - 'scripts/infra/build-openedx-image.sh'
       - 'scripts/infra/release-openedx-gitops.sh'
       - 'scripts/infra/resolve-image-digest.sh'
       - 'scripts/lib/lane-normalize.sh'
@@ -90,9 +97,17 @@ jobs:
     steps:
       - name: Verify OpenEdX build cache health
         run: |
-          SUMMARY="${SUMMARY}\n✅ GHA cache exporters intentionally absent for OpenEdX build (docker driver + local image export)"
-      - name: Tag and push image
-        run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
+          SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
+      - name: Build OpenEdX image
+        run: |
+          ./scripts/infra/build-openedx-image.sh \
+            --context-dir tutor_env/env/build/openedx \
+            --dockerfile tutor_env/env/build/openedx/Dockerfile \
+            --image-repo ghcr.io/biji-biji-initiative/mereka-lms/openedx \
+            --primary-tag sha \
+            --secondary-tag shortsha \
+            --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand \
+            --mutable-tag mereka-brand
       - name: Resolve pushed openedx digest
         id: digest
         run: echo "digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" >> "$GITHUB_OUTPUT"
@@ -264,6 +279,41 @@ p.write_text(text)
 PY
 run_expect_fail "missing canonical OpenEdX post-push branding verification is rejected"
 
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace("      - 'scripts/infra/build-openedx-image.sh'\n", "")
+p.write_text(text)
+PY
+run_expect_fail "missing OpenEdX push-first helper trigger coverage is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Build OpenEdX image\n'
+    '        run: |\n'
+    '          ./scripts/infra/build-openedx-image.sh \\\n'
+    '            --context-dir tutor_env/env/build/openedx \\\n'
+    '            --dockerfile tutor_env/env/build/openedx/Dockerfile \\\n'
+    '            --image-repo ghcr.io/biji-biji-initiative/mereka-lms/openedx \\\n'
+    '            --primary-tag sha \\\n'
+    '            --secondary-tag shortsha \\\n'
+    '            --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand \\\n'
+    '            --mutable-tag mereka-brand\n',
+    '      - name: Build OpenEdX image\n'
+    '        run: tutor images build openedx\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "direct tutor images build openedx call is rejected"
+
 # Reintroduce broad scripts/infra glob => must fail
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
@@ -341,10 +391,10 @@ text = p.read_text()
 text = text.replace(
     '      - name: Verify OpenEdX build cache health\n'
     '        run: |\n'
-    '          SUMMARY="${SUMMARY}\\n✅ GHA cache exporters intentionally absent for OpenEdX build (docker driver + local image export)"\n',
+    '          SUMMARY="${SUMMARY}\\n✅ GHA cache read/write is enabled for OpenEdX build"\n',
     '      - name: Verify OpenEdX build cache health\n'
     '        run: |\n'
-    '          SUMMARY="${SUMMARY}\\n❌ GHA cache read/write flags NOT found in build command"\n',
+    '          SUMMARY="${SUMMARY}\\n❌ GHA cache read/write flags NOT found in OpenEdX build command"\n',
 )
 p.write_text(text)
 PY

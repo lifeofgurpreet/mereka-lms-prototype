@@ -172,6 +172,12 @@ check_build_pipeline() {
     fail "[AC-009] apply-patches.sh not called in both build jobs (found $patch_count)"
   fi
 
+  if grep -q 'scripts/infra/build-openedx-image.sh' "$BUILD_WF"; then
+    pass "[AC-009] OpenEdX build routes through the canonical build-openedx-image helper"
+  else
+    fail "[AC-009] OpenEdX build missing canonical build-openedx-image helper"
+  fi
+
   # AC-011: MFE build sets NODE_OPTIONS for memory
   if grep -q 'max-old-space-size=6144' "$BUILD_WF"; then
     pass "[AC-011] MFE build sets NODE_OPTIONS memory limit (6144MB)"

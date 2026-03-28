@@ -64,13 +64,12 @@ else
 fi
 
 # --- Invariant 2: Each Tutor image job MUST use the right buildx driver ---
-# OpenEdX still depends on a loadable local-daemon image after the build, so it
-# stays on the docker driver until Tutor no longer exports output=type=docker.
-# MFE can use docker-container safely and gets first-class GHA cache reuse there.
-if grep -q "driver: docker$" <<<"$OPENEDX_BLOCK"; then
-  do_pass "INV-2a: OpenEdX build uses docker driver for reliable local image export"
+# OpenEdX and MFE both use docker-container once the OpenEdX lane stops
+# depending on a daemon-loaded image for downstream verification/push.
+if grep -q "driver: docker-container$" <<<"$OPENEDX_BLOCK"; then
+  do_pass "INV-2a: OpenEdX build uses docker-container for first-class GHA cache"
 else
-  do_fail "INV-2a: OpenEdX build must use docker driver while Tutor still depends on local-daemon export"
+  do_fail "INV-2a: OpenEdX build must use docker-container after the repo-owned push-first front door lands"
 fi
 
 if grep -q "driver: docker-container$" <<<"$MFE_BLOCK"; then
@@ -87,19 +86,17 @@ else
   do_pass "INV-3: No deprecated --cache-to-registry flag"
 fi
 
-# --- Invariant 4: GHA cache read/write MUST stay scoped to the MFE build ---
-# The MFE build benefits from BuildKit's persistent GHA cache path. OpenEdX
-# currently must not use it because the docker-container export path regressed.
+# --- Invariant 4: GHA cache read/write MUST be enabled for both image builds ---
 if grep -q -- '--cache-from=type=gha' <<<"$MFE_BLOCK" && grep -q -- '--cache-to=type=gha,mode=max' <<<"$MFE_BLOCK"; then
   do_pass "INV-4a: MFE build has GHA cache read/write flags"
 else
   do_fail "INV-4a: MFE build is missing GHA cache read/write flags"
 fi
 
-if grep -q -- '--cache-from=type=gha' <<<"$OPENEDX_BLOCK" || grep -q -- '--cache-to=type=gha,mode=max' <<<"$OPENEDX_BLOCK"; then
-  do_fail "INV-4b: OpenEdX build must not use GHA cache exporters while local-daemon export is required"
+if grep -q -- '--cache-from=type=gha' <<<"$OPENEDX_BLOCK" && grep -q -- '--cache-to=type=gha,mode=max' <<<"$OPENEDX_BLOCK"; then
+  do_pass "INV-4b: OpenEdX build has GHA cache read/write flags"
 else
-  do_pass "INV-4b: OpenEdX build correctly avoids GHA cache exporters"
+  do_fail "INV-4b: OpenEdX build is missing GHA cache read/write flags"
 fi
 
 # --- Invariant 5: Registry cache reuse MUST be wired for both image builds ---
@@ -108,6 +105,18 @@ if grep -q -- '--cache-from=type=registry' <<<"$OPENEDX_BLOCK"; then
   do_pass "INV-5a: OpenEdX build has registry cache reuse wired"
 else
   do_fail "INV-5a: OpenEdX build is missing registry cache reuse"
+fi
+
+if grep -q 'build-openedx-image.sh' <<<"$OPENEDX_BLOCK" && ! grep -q 'tutor images build openedx' <<<"$OPENEDX_BLOCK"; then
+  do_pass "INV-5c: OpenEdX build uses the repo-owned push-first helper"
+else
+  do_fail "INV-5c: OpenEdX build must use the repo-owned push-first helper instead of tutor images build openedx"
+fi
+
+if grep -q 'OPENEDX_LOCAL_IMAGE' <<<"$OPENEDX_BLOCK"; then
+  do_fail "INV-5d: OpenEdX build still depends on a local daemon image"
+else
+  do_pass "INV-5d: OpenEdX build no longer depends on a local daemon image"
 fi
 
 if grep -q -- '--cache-from=type=registry' <<<"$MFE_BLOCK"; then
