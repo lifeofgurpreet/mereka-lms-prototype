@@ -116,11 +116,33 @@ Every browser proof pass should capture:
 
 - root `/`
 - one learner-owned protected route that exercises runtime API calls
+  - first governed route: `/dashboard`
 
 ### Enterprise admin
 
 - root `/`
 - one admin route that exercises enterprise service fan-out (`enterprise-catalog`, `enterprise-access`, or `enterprise-subsidy`)
+  - first governed route: `/admin/analytics/`
+
+## First Governed Execution Lane
+
+The first repo-owned execution lane for this plan is the authenticated SSO canary:
+
+- script: `scripts/qa/verify-authenticated-sso-canary.sh`
+- workflow: `.github/workflows/smoke-authenticated.yml`
+
+### Current Route / State Matrix
+
+| Surface | Route | Auth state | Expected pass semantics |
+|---|---|---|---|
+| Enterprise learner portal root | `https://learner.<env-host>/` | authenticated | remains on learner host and renders a coherent shell (no login bounce / no blank shell) |
+| Enterprise learner deep route | `https://learner.<env-host>/dashboard` | authenticated | remains on learner host and renders a coherent default or negative state |
+| Enterprise admin portal root | `https://admin.<env-host>/` | authenticated | remains on admin host and renders a coherent shell (no login bounce / no blank shell) |
+| Enterprise admin deep route | `https://admin.<env-host>/admin/analytics/` | authenticated | remains on admin host and renders a coherent default or negative state |
+
+### Environment-Aware Skip Rule
+
+If an enterprise host is not live for a lane yet (for example DNS does not resolve), the authenticated canary records that as a skip for the enterprise browser extension rather than a false route failure. A live host that resolves but serves a broken runtime surface is still a failure.
 
 ## Failure Classes To Capture
 

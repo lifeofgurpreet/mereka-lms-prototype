@@ -1610,7 +1610,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-authenticated-sso-canary.sh",
-      "reference_count": 28,
+      "reference_count": 29,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

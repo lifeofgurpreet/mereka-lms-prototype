@@ -8,6 +8,8 @@
 # - LMS callback (/auth/complete/oidc/) results in a real logged-in browser session
 # - Session can access a logged-in API endpoint
 # - Learner dashboard resolves to the branded MFE shell, not an unbranded or broken fallback
+# - Enterprise learner/admin portal roots stay on the intended hosts after auth
+# - One enterprise learner deep route and one enterprise admin deep route resolve coherently when available
 #
 # Secrets are read from environment variables only (never CLI args), to avoid leaking
 # credentials in process lists or logs.
@@ -25,8 +27,11 @@
 #   RUN_OIDC_CANARY=1                           Run primary OIDC canary flow (default: 1)
 #   RUN_STUDIO_CANARY=1                         Run Studio OIDC canary flow (default: 1)
 #   RUN_LOCAL_LOGIN_CANARY=0                    Also run native /authn/login credential canary (default: 0)
+#   RUN_ENTERPRISE_BROWSER_PROOF=1              Extend primary canary with enterprise root/deep-route proof when hosts are live
 #   REQUIRE_LOCAL_CANARY=0                      Fail when local-login creds are missing (default: 0)
 #   SSO_CANARY_TIMEOUT_SECONDS=180              Per-run timeout
+#   SSO_CANARY_ENTERPRISE_ADMIN_ROUTE=/admin/analytics/  Enterprise admin route to prove after auth
+#   SSO_CANARY_ENTERPRISE_LEARNER_ROUTE=/dashboard       Enterprise learner route to prove after auth
 #   SSO_CANARY_EMAIL[_PROD|_DEV|_STAGING]      Primary canary email
 #   SSO_CANARY_PASSWORD[_PROD|_DEV|_STAGING]   Primary canary password
 #   SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV|_STAGING]    Optional Studio-access canary email (staff)
@@ -47,9 +52,12 @@ REQUIRE_STUDIO_CANARY="${REQUIRE_STUDIO_CANARY:-0}"
 RUN_OIDC_CANARY="${RUN_OIDC_CANARY:-1}"
 RUN_STUDIO_CANARY="${RUN_STUDIO_CANARY:-1}"
 RUN_LOCAL_LOGIN_CANARY="${RUN_LOCAL_LOGIN_CANARY:-0}"
+RUN_ENTERPRISE_BROWSER_PROOF="${RUN_ENTERPRISE_BROWSER_PROOF:-1}"
 REQUIRE_LOCAL_CANARY="${REQUIRE_LOCAL_CANARY:-0}"
 SSO_CANARY_TIMEOUT_SECONDS="${SSO_CANARY_TIMEOUT_SECONDS:-180}"
 SSO_CANARY_DEBUG="${SSO_CANARY_DEBUG:-0}"
+SSO_CANARY_ENTERPRISE_ADMIN_ROUTE="${SSO_CANARY_ENTERPRISE_ADMIN_ROUTE:-/admin/analytics/}"
+SSO_CANARY_ENTERPRISE_LEARNER_ROUTE="${SSO_CANARY_ENTERPRISE_LEARNER_ROUTE:-/dashboard}"
 OUT_DIR="${OUT_DIR:-$REPO_ROOT/var/auth-sso-canary}"
 mkdir -p "$OUT_DIR"
 
@@ -63,8 +71,11 @@ Env:
   RUN_OIDC_CANARY=1                            Run primary OIDC canary flow (default: 1)
   RUN_STUDIO_CANARY=1                          Run Studio OIDC canary flow (default: 1)
   RUN_LOCAL_LOGIN_CANARY=0                     Also run native /authn/login credential canary (default: 0)
+  RUN_ENTERPRISE_BROWSER_PROOF=1               Extend primary canary with enterprise root/deep-route proof when hosts are live
   REQUIRE_LOCAL_CANARY=0                       Fail when local-login creds are missing (default: 0)
   SSO_CANARY_TIMEOUT_SECONDS=180               Per-run timeout (seconds)
+  SSO_CANARY_ENTERPRISE_ADMIN_ROUTE=/admin/analytics/  Enterprise admin route to prove after auth
+  SSO_CANARY_ENTERPRISE_LEARNER_ROUTE=/dashboard       Enterprise learner route to prove after auth
   SSO_CANARY_EMAIL[_PROD|_DEV|_STAGING]       Primary canary email
   SSO_CANARY_PASSWORD[_PROD|_DEV|_STAGING]    Primary canary password
   SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV|_STAGING]     Optional Studio-access canary email (staff)
@@ -108,6 +119,8 @@ run_playwright_canary() {
   local run_id="$7"
   local require_studio_access="$8" # 0|1
   local login_flow="${9:-oidc}" # oidc|local
+  local enterprise_admin_domain="${10:-}"
+  local enterprise_learner_domain="${11:-}"
   local ignore_https_errors_raw="${SSO_CANARY_IGNORE_HTTPS_ERRORS:-auto}"
   local ignore_https_errors="0"
   case "$ignore_https_errors_raw" in
@@ -139,6 +152,11 @@ run_playwright_canary() {
     CANARY_RUN_ID="$run_id" \
     CANARY_REQUIRE_STUDIO_ACCESS="$require_studio_access" \
     CANARY_LOGIN_FLOW="$login_flow" \
+    CANARY_ENTERPRISE_ADMIN_DOMAIN="$enterprise_admin_domain" \
+    CANARY_ENTERPRISE_LEARNER_DOMAIN="$enterprise_learner_domain" \
+    CANARY_ENTERPRISE_ADMIN_ROUTE="$SSO_CANARY_ENTERPRISE_ADMIN_ROUTE" \
+    CANARY_ENTERPRISE_LEARNER_ROUTE="$SSO_CANARY_ENTERPRISE_LEARNER_ROUTE" \
+    CANARY_RUN_ENTERPRISE_BROWSER_PROOF="$RUN_ENTERPRISE_BROWSER_PROOF" \
     CANARY_IGNORE_HTTPS_ERRORS="$ignore_https_errors" \
     OUT_DIR="$OUT_DIR" \
     SSO_CANARY_DEBUG="$SSO_CANARY_DEBUG" \
@@ -146,22 +164,34 @@ run_playwright_canary() {
 import os
 import re
 from pathlib import Path
+from urllib.parse import urlparse
 from playwright.sync_api import Error as PWError, TimeoutError as PWTimeout, sync_playwright
 
 env_name = os.environ["CANARY_ENV_NAME"]
 lms_domain = os.environ["CANARY_LMS_DOMAIN"]
 studio_domain = os.environ["CANARY_STUDIO_DOMAIN"]
 mfe_domain = os.environ["CANARY_MFE_DOMAIN"]
+enterprise_admin_domain = os.environ.get("CANARY_ENTERPRISE_ADMIN_DOMAIN", "").strip()
+enterprise_learner_domain = os.environ.get("CANARY_ENTERPRISE_LEARNER_DOMAIN", "").strip()
 email = os.environ["CANARY_EMAIL"]
 password = os.environ["CANARY_PASSWORD"]
 require_studio_access = os.environ.get("CANARY_REQUIRE_STUDIO_ACCESS", "0") == "1"
 login_flow = os.environ.get("CANARY_LOGIN_FLOW", "oidc").strip().lower()
+run_enterprise_browser_proof = os.environ.get("CANARY_RUN_ENTERPRISE_BROWSER_PROOF", "1") == "1"
 if login_flow not in {"oidc", "local"}:
     login_flow = "oidc"
 debug = os.environ.get("SSO_CANARY_DEBUG", "0") == "1"
 out_dir = Path(os.environ["OUT_DIR"])
 run_id = os.environ["CANARY_RUN_ID"]
 ignore_https_errors = os.environ.get("CANARY_IGNORE_HTTPS_ERRORS", "0") == "1"
+enterprise_admin_route = os.environ.get("CANARY_ENTERPRISE_ADMIN_ROUTE", "/admin/analytics/").strip() or "/admin/analytics/"
+enterprise_learner_route = os.environ.get("CANARY_ENTERPRISE_LEARNER_ROUTE", "/dashboard").strip() or "/dashboard"
+
+def normalize_route(route: str) -> str:
+    return route if route.startswith("/") else f"/{route}"
+
+enterprise_admin_route = normalize_route(enterprise_admin_route)
+enterprise_learner_route = normalize_route(enterprise_learner_route)
 
 _http_trace = []
 _studio_cookie_names = set()
@@ -191,9 +221,12 @@ def _redact_set_cookie(header_value: str) -> str:
         segs = [s.strip() for s in p.split(";")]
         if segs and "=" in segs[0]:
             name = segs[0].split("=", 1)[0]
-            segs[0] = f"{name}=<redacted>"
+        segs[0] = f"{name}=<redacted>"
         redacted_parts.append("; ".join(segs))
     return ", ".join(redacted_parts)
+
+def current_host(url: str) -> str:
+    return (urlparse(url).netloc or "").lower()
 
 def fail(msg: str, page=None, code: int = 1) -> None:
     # Emit useful diagnostics without leaking secrets.
@@ -242,6 +275,78 @@ def assert_not_auth_error_page(page, phase: str) -> None:
         fail(f"{phase}: Open edX authorization denied after callback", page=page)
     if "your account is disabled" in body:
         fail(f"{phase}: Open edX reports account disabled (check OIDC user password state)", page=page)
+
+def get_body_text(page) -> str:
+    try:
+        return " ".join(page.locator("body").inner_text(timeout=5000).split()).lower()
+    except Exception:
+        return ""
+
+def probe_enterprise_host_availability(request_context, host: str, phase: str) -> bool:
+    url = f"https://{host}/"
+    try:
+        resp = request_context.get(url, fail_on_status_code=False, max_redirects=0)
+    except Exception as exc:
+        msg = str(exc).lower()
+        if "name or service not known" in msg or "name_not_resolved" in msg or "name not resolved" in msg:
+            log(f"SKIP {phase}: host unavailable ({exc})")
+            return False
+        fail(f"{phase}: host probe failed url={url} err={exc}")
+    if resp.status >= 500:
+        fail(f"{phase}: host probe returned HTTP {resp.status} url={url}")
+    return True
+
+def assert_enterprise_surface(page, phase: str, url: str, expected_host: str, *, allow_negative_state: bool = False) -> None:
+    if debug:
+        log(f"goto={url}")
+    page.goto(url, wait_until="domcontentloaded", timeout=60000)
+    page.wait_for_load_state("domcontentloaded", timeout=60000)
+    try:
+        page.wait_for_load_state("networkidle", timeout=10000)
+    except Exception:
+        pass
+
+    final_url = page.url or ""
+    final_host = current_host(final_url)
+    if final_host != expected_host.lower():
+        fail(f"{phase}: wrong_host final_url={final_url} expected_host={expected_host}", page=page)
+    if "/authn/login" in final_url or "/enterprise/proxy-login/" in final_url:
+        fail(f"{phase}: redirected back into auth entrypoint final_url={final_url}", page=page)
+
+    body = get_body_text(page)
+    if "page not found" in body or "oops, sorry we can't find that page" in body or re.search(r"\b404\b", body):
+        fail(f"{phase}: route resolved to not-found state final_url={final_url}", page=page)
+    if "welcome back" in body and "sign in" in body and page.locator("input").count() >= 2:
+        fail(f"{phase}: rendered login surface instead of authenticated enterprise surface final_url={final_url}", page=page)
+
+    if page.locator("#root").count() <= 0:
+        fail(f"{phase}: missing #root application shell final_url={final_url}", page=page)
+
+    inputs = page.locator("input").count()
+    buttons = page.locator("button").count()
+    links = page.locator("a[href]").count()
+    interactive = inputs + buttons + links
+
+    negative_markers = (
+        "not authorized",
+        "access denied",
+        "forbidden",
+        "unauthorized",
+        "no data",
+        "no results",
+        "no learners",
+        "no subscriptions",
+        "no courses",
+        "empty state",
+    )
+    if allow_negative_state and any(marker in body for marker in negative_markers):
+        log(f"OK {phase} final_url={final_url} state=coherent-negative")
+        return
+
+    if not body and interactive == 0:
+        fail(f"{phase}: blank enterprise shell final_url={final_url}", page=page)
+
+    log(f"OK {phase} final_url={final_url} interactive={interactive}")
 
 def wait_for_app_return(page) -> None:
     attempts = 0
@@ -729,6 +834,38 @@ with sync_playwright() as p:
         assert_not_auth_error_page(page, "mfe_learner_dashboard")
         assert_dashboard_branding(page, "mfe_learner_dashboard")
 
+        if run_enterprise_browser_proof:
+            if enterprise_learner_domain and probe_enterprise_host_availability(context.request, enterprise_learner_domain, "enterprise_learner_root_probe"):
+                assert_enterprise_surface(
+                    page,
+                    "enterprise_learner_root",
+                    f"https://{enterprise_learner_domain}/",
+                    enterprise_learner_domain,
+                )
+                assert_enterprise_surface(
+                    page,
+                    "enterprise_learner_deep_route",
+                    f"https://{enterprise_learner_domain}{enterprise_learner_route}",
+                    enterprise_learner_domain,
+                    allow_negative_state=True,
+                )
+
+            if enterprise_admin_domain and probe_enterprise_host_availability(context.request, enterprise_admin_domain, "enterprise_admin_root_probe"):
+                assert_enterprise_surface(
+                    page,
+                    "enterprise_admin_root",
+                    f"https://{enterprise_admin_domain}/",
+                    enterprise_admin_domain,
+                    allow_negative_state=True,
+                )
+                assert_enterprise_surface(
+                    page,
+                    "enterprise_admin_deep_route",
+                    f"https://{enterprise_admin_domain}{enterprise_admin_route}",
+                    enterprise_admin_domain,
+                    allow_negative_state=True,
+                )
+
         if debug:
             log(f"goto={studio_url}")
         page.goto(studio_url, wait_until="domcontentloaded", timeout=60000)
@@ -776,12 +913,32 @@ with sync_playwright() as p:
 PY
   then
     failures=$((failures + 1))
-  fi
+    fi
+}
+
+enterprise_admin_domain_for_env() {
+  local env_name="$1"
+  case "$env_name" in
+    prod) printf '%s' "${ENTERPRISE_ADMIN_DOMAIN:-}" ;;
+    staging) printf '%s' "${STAGING_ENTERPRISE_ADMIN_DOMAIN:-}" ;;
+    dev) printf '%s' "${DEV_ENTERPRISE_ADMIN_DOMAIN:-}" ;;
+    *) printf '%s' "" ;;
+  esac
+}
+
+enterprise_learner_domain_for_env() {
+  local env_name="$1"
+  case "$env_name" in
+    prod) printf '%s' "${ENTERPRISE_PORTAL_DOMAIN:-}" ;;
+    staging) printf '%s' "${STAGING_ENTERPRISE_PORTAL_DOMAIN:-}" ;;
+    dev) printf '%s' "${DEV_ENTERPRISE_PORTAL_DOMAIN:-}" ;;
+    *) printf '%s' "" ;;
+  esac
 }
 
 run_primary_env() {
   local env_name="$1"
-  local lms_domain studio_domain mfe_domain email password
+  local lms_domain studio_domain mfe_domain email password enterprise_admin_domain enterprise_learner_domain
 
   if [[ "$env_name" == "prod" ]]; then
     lms_domain="$LMS_DOMAIN"
@@ -803,6 +960,9 @@ run_primary_env() {
     password="${SSO_CANARY_PASSWORD_DEV:-${SSO_CANARY_PASSWORD:-}}"
   fi
 
+  enterprise_admin_domain="$(enterprise_admin_domain_for_env "$env_name")"
+  enterprise_learner_domain="$(enterprise_learner_domain_for_env "$env_name")"
+
   if [[ -z "${email:-}" || -z "${password:-}" ]]; then
     if [[ "$REQUIRE_SECRETS" == "1" ]]; then
       echo "FAIL $env_name: missing SSO canary credentials (set SSO_CANARY_EMAIL[_${env_name^^}] and SSO_CANARY_PASSWORD[_${env_name^^}])" >&2
@@ -822,7 +982,9 @@ run_primary_env() {
     "$password" \
     "$(date -u +%Y%m%dT%H%M%SZ)-${env_name}" \
     "0" \
-    "oidc"
+    "oidc" \
+    "$enterprise_admin_domain" \
+    "$enterprise_learner_domain"
 }
 
 run_studio_env() {

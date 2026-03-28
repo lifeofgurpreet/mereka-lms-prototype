@@ -40,3 +40,20 @@ def test_authenticated_sso_canary_wiring_audit_checks_staging_first_defaults() -
     assert "github.event.inputs.env_scope || 'staging'" in workflow
     assert 'scope="${INPUT_ENV_SCOPE:-staging}"' in workflow
     assert "steps.resolve-smoke.outputs.resolved_scope" in workflow
+
+
+def test_authenticated_sso_canary_includes_enterprise_browser_proof_contract() -> None:
+    audit_script = (REPO_ROOT / "scripts/qa/audit-authenticated-sso-canary-wiring.sh").read_text(encoding="utf-8")
+    canary_script = (REPO_ROOT / "scripts/qa/verify-authenticated-sso-canary.sh").read_text(encoding="utf-8")
+
+    assert "canary script enables enterprise browser proof by default" in audit_script
+    assert "canary script default enterprise admin deep route" in audit_script
+    assert "canary script default enterprise learner deep route" in audit_script
+    assert "canary script resolves enterprise admin domains from shared config" in audit_script
+    assert "canary script resolves enterprise learner domains from shared config" in audit_script
+    assert 'RUN_ENTERPRISE_BROWSER_PROOF="${RUN_ENTERPRISE_BROWSER_PROOF:-1}"' in canary_script
+    assert 'SSO_CANARY_ENTERPRISE_ADMIN_ROUTE="${SSO_CANARY_ENTERPRISE_ADMIN_ROUTE:-/admin/analytics/}"' in canary_script
+    assert 'SSO_CANARY_ENTERPRISE_LEARNER_ROUTE="${SSO_CANARY_ENTERPRISE_LEARNER_ROUTE:-/dashboard}"' in canary_script
+    assert "ENTERPRISE_ADMIN_DOMAIN" in canary_script
+    assert "ENTERPRISE_PORTAL_DOMAIN" in canary_script
+    assert "enterprise/proxy-login/" in canary_script

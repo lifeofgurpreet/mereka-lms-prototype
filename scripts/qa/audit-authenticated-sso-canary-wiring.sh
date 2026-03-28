@@ -124,6 +124,12 @@ if [[ ! -f "$CANARY_SCRIPT" ]]; then
   failures=$((failures + 1))
 else
   check_workflow_pattern "$CANARY_SCRIPT" 'ENV_SCOPE="staging"' "canary script default env scope is staging"
+  check_workflow_pattern "$CANARY_SCRIPT" 'RUN_ENTERPRISE_BROWSER_PROOF="${RUN_ENTERPRISE_BROWSER_PROOF:-1}"' "canary script enables enterprise browser proof by default"
+  check_workflow_pattern "$CANARY_SCRIPT" 'SSO_CANARY_ENTERPRISE_ADMIN_ROUTE="${SSO_CANARY_ENTERPRISE_ADMIN_ROUTE:-/admin/analytics/}"' "canary script default enterprise admin deep route"
+  check_workflow_pattern "$CANARY_SCRIPT" 'SSO_CANARY_ENTERPRISE_LEARNER_ROUTE="${SSO_CANARY_ENTERPRISE_LEARNER_ROUTE:-/dashboard}"' "canary script default enterprise learner deep route"
+  check_workflow_pattern "$CANARY_SCRIPT" 'ENTERPRISE_ADMIN_DOMAIN' "canary script resolves enterprise admin domains from shared config"
+  check_workflow_pattern "$CANARY_SCRIPT" 'ENTERPRISE_PORTAL_DOMAIN' "canary script resolves enterprise learner domains from shared config"
+  check_workflow_pattern "$CANARY_SCRIPT" 'enterprise/proxy-login/' "canary script rejects LMS enterprise proxy-login bounce after auth"
 fi
 
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
