@@ -85,6 +85,10 @@ _copy_lines = "\n".join(
     for app in _CUSTOM_APPS
 )
 _install_lines = "\n".join(f"RUN pip install -e /openedx/{app}" for app in _CUSTOM_APPS)
+_runtime_copy_lines = "\n".join(
+    f"COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}"
+    for app in _CUSTOM_APPS
+)
 
 _register_env_patch(
     "openedx-dockerfile-post-python-requirements",
@@ -111,6 +115,18 @@ RUN pip install django-ratelimit==4.1.0
 
 # Install pymongo SRV extras for MongoDB Atlas
 RUN pip install "pymongo[srv]"
+""",
+)
+
+_register_env_patch(
+    "openedx-dockerfile-final",
+    f"""
+# Carry editable-install source trees into the final runtime image.
+# The venv already contains .egg-link/.pth metadata pointing at these paths.
+# Without these COPYs, the runtime image keeps editable-install metadata but
+# drops the source directories those imports resolve against.
+{_runtime_copy_lines}
+COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy
 """,
 )
 

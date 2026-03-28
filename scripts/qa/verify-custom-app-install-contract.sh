@@ -87,8 +87,13 @@ else:
 for marker in (
     '_copy_lines = "\\n".join(',
     '_install_lines = "\\n".join(',
+    '_runtime_copy_lines = "\\n".join(',
     "{_copy_lines}",
     "{_install_lines}",
+    "{_runtime_copy_lines}",
+    "openedx-dockerfile-final",
+    "COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}",
+    "COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy",
 ):
     if marker in src:
         ok(f"Dockerfile patch contains contract marker: {marker}")

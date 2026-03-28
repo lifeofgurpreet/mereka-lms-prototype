@@ -19,10 +19,21 @@ _CUSTOM_APPS = ["openedx_demo_app"]
 
 _copy_lines = "\n".join(["COPY demo"])
 _install_lines = "\n".join(["RUN pip install -e /openedx/custom-apps/openedx_demo_app"])
+_runtime_copy_lines = "\n".join(
+    [
+        "COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}"
+    ]
+)
 
 PATCH_TEXT = """
 {_copy_lines}
 {_install_lines}
+"""
+
+FINAL_PATCH_NAME = "openedx-dockerfile-final"
+FINAL_PATCH = """
+{_runtime_copy_lines}
+COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy
 """
 EOF_PATCH
 
@@ -51,6 +62,48 @@ else
   cat /tmp/test-custom-app-install-pass.log
   exit 1
 fi
+
+python3 - <<'PY'
+from pathlib import Path
+
+path = Path("infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py")
+src = path.read_text()
+path.write_text(src.replace('FINAL_PATCH_NAME = "openedx-dockerfile-final"\n', ''))
+PY
+if ./scripts/qa/verify-custom-app-install-contract.sh >/tmp/test-custom-app-runtime-copy-fail.log 2>&1; then
+  echo "Expected fail when final-stage runtime carryover marker is missing."
+  cat /tmp/test-custom-app-runtime-copy-fail.log
+  exit 1
+fi
+
+if ! rg -q "openedx-dockerfile-final" /tmp/test-custom-app-runtime-copy-fail.log; then
+  echo "Expected failure output to mention missing openedx-dockerfile-final contract."
+  cat /tmp/test-custom-app-runtime-copy-fail.log
+  exit 1
+fi
+
+cat > "$tmpdir/infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py" <<'EOF_PATCH'
+_CUSTOM_APPS = ["openedx_demo_app"]
+
+_copy_lines = "\n".join(["COPY demo"])
+_install_lines = "\n".join(["RUN pip install -e /openedx/custom-apps/openedx_demo_app"])
+_runtime_copy_lines = "\n".join(
+    [
+        "COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}"
+    ]
+)
+
+PATCH_TEXT = """
+{_copy_lines}
+{_install_lines}
+"""
+
+FINAL_PATCH_NAME = "openedx-dockerfile-final"
+FINAL_PATCH = """
+{_runtime_copy_lines}
+COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy
+"""
+EOF_PATCH
 
 rm -f infrastructure/tutor/custom-apps/openedx_demo_app/setup.py
 if ./scripts/qa/verify-custom-app-install-contract.sh >/tmp/test-custom-app-install-fail.log 2>&1; then
