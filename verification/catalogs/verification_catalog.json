@@ -8174,7 +8174,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-config-contract.sh",
-      "reference_count": 19,
+      "reference_count": 21,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9573,7 +9573,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-multisite-config.sh",
-      "reference_count": 28,
+      "reference_count": 30,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -15823,7 +15823,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-token-drift.sh",
-      "reference_count": 14,
+      "reference_count": 15,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16579,7 +16579,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-verification-catalog.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

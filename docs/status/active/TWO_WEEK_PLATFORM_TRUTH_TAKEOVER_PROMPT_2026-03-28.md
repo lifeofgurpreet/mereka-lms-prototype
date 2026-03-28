@@ -34,32 +34,28 @@ The queue is no longer the problem.
 
 The system is currently concentrated around:
 
-1. confirming `#1148` stays closed on truthful post-merge evidence
-2. fixing the live LMS-host MFE config API null-key gap without confusing it with the healthy apps-host verifier surface
-3. keeping the promotion boundary boring and explicit
+1. restoring `mereka-lms` `main` to green after `#1149`
+2. following through the merged `bbi-infrastructure#2160` proof result without pretending the failed cluster audit is closed
+3. merging `mereka-lms#1150` so the partially repaired MFE config lane stays contract-honest
 4. cleaning the remaining frontend source-of-truth drift after runtime truth is repaired
-
-Current active runtime-fix PR:
-
-- `bbi-infrastructure#2158` `fix(mereka-lms): backfill MFE config URLs in env overlays`
 
 ## Immediate first task
 
-Start with `T-02` from the tracker unless fresh evidence proves another lane is now more urgent.
+Start with `T-01b` from the tracker unless fresh evidence proves another lane is now more urgent.
 
 Current verified first move:
 
-1. verify `#1148` post-merge state and `#842` closure
-2. work from `/tmp/bbi-mfe-config-fix` and `bbi-infrastructure#2158` for the runtime contract repair
-3. keep `/tmp/mereka-two-week-tracker` ready for tracker truth updates if the control point changes again
+1. work from `/tmp/mereka-two-week-tracker` and regenerate `verification/catalogs/verification_catalog.json`
+2. get the app-repo follow-up green so `mereka-lms` `main` returns to green
+3. then classify the `#2160` merge result correctly from the merge commit evidence instead of treating it as operationally closed
 
 ## Non-negotiable rules
 
 - Do not collapse repo truth, infra truth, and runtime truth into one sentence.
 - Do not close an issue because the source looks right if runtime proof is part of the acceptance boundary.
 - Do not rediscover already-closed queue debt unless new evidence shows regression.
-- Do not assume the MFE config API gap is owned by infra or app until the diff proves the owner.
-- Do not describe the apps-host and LMS-host `/api/mfe_config/v1` surfaces as if they are currently identical.
+- Do not describe the MFE config lane as fully repaired; the three original null keys are fixed, but account/profile/login parity is still open.
+- Do not ignore a red `main` branch in the app repo while claiming the tracker is current.
 - Do not widen the now-merged `#1148` lane into general enterprise cleanup.
 - Do not leave the tracker ahead of reality.
 
@@ -81,15 +77,18 @@ Every handoff note must include:
 
 ## Working order for the next agent
 
-1. `T-01` confirm `#1148` remains closed on post-merge truth
-2. `T-02` repair the live LMS-host MFE config API contract truth
-3. `T-03` prove the next promotion path from build digest to live runtime
-4. `T-04` work `#843` only after `T-02` is no longer open
+1. `T-01b` restore app main to green after the tracker merge
+2. `T-03` treat `#2160` as merged-but-not-operationally-closed and carry the failed cluster-audit truth forward honestly
+3. `T-02` merge `#1150` so the partially repaired nonprod MFE config contract stays guarded
+4. `T-04` work `#843` through `#1153` after the red-main and active infra PR lanes are drained
 5. `T-05` refresh trackers/handoffs after truth advances, not before
 
 ## Minimum acceptable success for this program handoff
 
 - `#1148` is merged cleanly
-- the live dev LMS-host MFE config API no longer returns `None` for learner/account/discussions MFE URLs, or the supported contract surface has been explicitly narrowed and documented
+- dev and staging LMS-host/apps-host MFE config surfaces stay non-null for learner/account/discussions URLs
+- the remaining account/profile/login parity gap is either fixed or explicitly still the active runtime defect
+- `mereka-lms` `main` is green again after the tracker/docs follow-up
+- `bbi-infrastructure#2160` is merged and its merge commit has an explicit post-merge proof result that is classified truthfully
 - the next promotion proof bundle explicitly covers build digest -> overlay -> Argo -> live runtime
 - the active tracker still matches the real state without narrative drift
