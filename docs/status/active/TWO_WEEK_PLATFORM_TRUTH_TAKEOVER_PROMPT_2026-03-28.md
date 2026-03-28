@@ -1,83 +1,112 @@
 # Two-Week Platform Truth Takeover Prompt
 
-You are taking over the `mereka-lms` two-week platform-truth lane.
+You are taking over the active `mereka-lms` platform-truth lane.
 
 Start by reading:
 
 1. `docs/status/active/TWO_WEEK_PLATFORM_TRUTH_TRACKER_2026-03-28.md`
 2. `docs/status/active/README.md`
-3. `docs/status/active/UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md`
-4. `docs/status/active/DEV_STAGING_TRUTH_TRACKER_2026-03-25.md`
+3. `scripts/qa/verify-build-workflow-contract.sh`
+4. `scripts/qa/test-verify-build-workflow-contract.sh`
 5. `scripts/qa/verify-mfe-config-contract.sh`
-6. `scripts/qa/verify-tenant-visual-contract.sh`
+6. `tests/e2e/tests/tenant-palette-bridge.spec.ts`
 
-If you need the closed proof lanes for context, also read:
+Read the relevant PRs/issues directly:
 
-7. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1148`
-8. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1158`
-9. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1165`
-10. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/842`
-11. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/843`
-12. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/834`
-
-If you need the active successor implementation lane context, also read:
-
-13. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/1164`
+7. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1169`
+8. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1168`
+9. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1166`
+10. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/1164`
+11. `https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2165`
+12. `https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2164`
 
 ## Mission
 
-Keep the next two weeks of platform work truthful across all three planes:
+Keep the remaining platform work truthful across all three planes:
 
 - app repo truth
 - infra/promotion truth
 - live runtime truth
 
-The objective is not "keep the queue busy." The objective is "finish the remaining lanes in the right order, with proof that survives handoff."
+The objective is not to keep opening new lanes. The objective is to close the current control point in the right order and leave evidence that survives handoff.
+
+## Clean worktrees
+
+Do not use the dirty root worktree.
+
+Use only:
+
+- `/tmp/mereka-build-sbom-guard` for `#1169`
+- `/tmp/mereka-tenant-palette-bridge` for `#1166` follow-through and tenant-host runtime proof
+- `/tmp/mereka-two-week-tracker` for tracker refreshes
 
 ## Current control point
 
-The queue is no longer the problem. `#1158`, `#1165`, and `#1166` are merged, `#834` is closed, `#1167` is the active tracker-refresh doc lane, and `#1164` is intentionally still open until live tenant-host proof exists.
+The active work is now:
 
-The system is currently concentrated around:
+1. finish `#1169`
+2. carry merged `#1166` through build -> promotion -> runtime realization
+3. keep `#1164` open until tenant-host runtime proof exists
+4. keep nonprod MFE-config parity represented as closed
+5. keep the prod `502` behavior classified as availability/outage work, not as a reopened MFE-config contract bug
 
-1. carrying merged `#1166` through post-merge main and deployment truthfully
-2. keeping `#1164` open until live tenant-host runtime proof exists
-3. keeping the repaired nonprod MFE-config parity lane represented as closed
-4. keeping closed enterprise/frontend ownership lanes retired unless fresh evidence reopens them
-5. keeping the current board aligned with reality as merges land quickly
+## Immediate first tasks
 
-Use the clean clones only:
+### First lane: `#1169`
 
-- `/tmp/mereka-tenant-palette-bridge` for `#1166` follow-through and live-proof commands
-- `/tmp/mereka-two-week-tracker` for tracker/closeout doc follow-ups
+Work in `/tmp/mereka-build-sbom-guard`.
 
-## Immediate first task
+Run:
 
-Start with `T-01` from the tracker unless fresh evidence proves another lane is now more urgent.
+1. `gh pr checks 1169 --repo Biji-Biji-Initiative/mereka-lms`
+2. `gh pr view 1169 --repo Biji-Biji-Initiative/mereka-lms --json headRefOid,mergeable,url`
+3. if CI is green, merge it
+4. if CI fails, fix only the concrete failure boundary
 
-Current verified first move:
+Do not invent another workflow change unless the fresh rerun gives you a real failure.
 
-1. treat `#1166` as merged repo truth, not an open PR lane
-2. verify post-merge `main` and deployment movement for `#1166`
-3. run the targeted tenant-host proof once the merged change is actually live
-4. keep `/tmp/mereka-two-week-tracker` aligned with the new control point and `#1167` truthful
-5. keep `#1164` open until that runtime proof exists
+### Second lane: merged `#1166`
+
+Work in `/tmp/mereka-tenant-palette-bridge`.
+
+Start with:
+
+1. `gh run view 23679457112 --repo Biji-Biji-Initiative/mereka-lms --json status,conclusion,jobs,url,headSha`
+2. `gh pr list --repo Biji-Biji-Initiative/bbi-infrastructure --state open --search '21dad073 in:title' --json number,title,url`
+3. `gh run list --repo Biji-Biji-Initiative/bbi-infrastructure --workflow promote-dev-image.yml --limit 20`
+
+If build completion has not yet created a promotion PR/run, keep watching the handoff instead of pretending the runtime lane moved.
+
+Only after deployment movement is real, rerun the tenant-host probes and browser proof.
+
+### Third lane: prod anomaly
+
+Treat prod as a separate availability lane.
+
+The current verified boundary is broad public-host failure:
+
+- `https://academyv2.mereka.io/` → `502`
+- `https://academyv2.mereka.io/api/mfe_config/v1` → `502`
+- `https://apps.academyv2.mereka.io/` → `502`
+- `https://apps.academyv2.mereka.io/api/mfe_config/v1?mfe=authn` → `502`
+- `https://studio.academyv2.mereka.io/` → `502`
+- `https://preview.academyv2.mereka.io/` → `502`
+
+Do not reopen the old nonprod MFE-config parity bug because of this.
 
 ## Non-negotiable rules
 
 - Do not collapse repo truth, infra truth, and runtime truth into one sentence.
-- Do not close an issue because the source looks right if runtime proof is part of the acceptance boundary.
-- Do not rediscover already-closed queue debt unless new evidence shows regression.
-- Do not describe the MFE-config lane as open runtime breakage if fresh live probes show parity is repaired.
-- Do not misclassify the `Post-Deploy E2E Gate` failure as an app-runtime defect; the proven root cause is workflow checkout ordering and the fix is already merged in `#1154`.
-- Do not widen the now-merged `#1148`, `#1153`, `#1158`, or `#1165` lanes into general cleanup.
-- Do not reopen `#1157` or `#1159` casually; both are no longer active merge lanes.
-- Do not close `#1164` before live tenant-host runtime proof is recorded.
+- Do not close `#1164` because `#1166` is merged.
+- Do not rediscover already-closed queue debt unless fresh evidence proves regression.
+- Do not describe the prod outage as an `/api/mfe_config/v1` bug unless the broad `502` surface disappears and a narrower boundary remains.
+- Do not widen `#1169` into general CI cleanup.
+- Do not widen merged `#1166` into a new source-implementation lane unless runtime proof shows the merge was insufficient.
 - Do not leave the tracker ahead of reality.
 
 ## Required proof discipline
 
-When you report a lane, always name which plane you are talking about:
+Every report must name its plane:
 
 - `repo_truth`
 - `pr_truth`
@@ -88,22 +117,14 @@ Every handoff note must include:
 
 1. exact current head or merged commit
 2. exact commands run
-3. exact failure boundary if still open
+3. exact remaining blocker
 4. exact done criteria still missing
 
-## Working order for the next agent
+## Minimum acceptable success for this handoff
 
-1. `T-01` keep merged `#1166` truthful through post-merge and runtime proof
-2. `T-02` keep `#1164` open until live tenant-host proof exists
-3. `T-03` keep the repaired MFE-config parity lane explicit and verifier-backed
-4. `T-04` keep merged infra proof-chain lanes explicit
-5. `T-05` keep the tracker and retired lanes truthful
-
-## Minimum acceptable success for this program handoff
-
-- `#1166` is merged, post-merge `main` is clean, and runtime proof is recorded
-- `#1164` stays open until live tenant-host runtime proof exists
-- `#1158` and `#1165` remain represented as merged truth, not active lanes
-- infra `#2164` remains represented as merged proof-chain truth
-- infra `#2158` remains represented as the merged nonprod MFE-config repair
-- the tracker still matches the real repo, infra, and runtime state without narrative drift
+- `#1169` is merged or reduced to one concrete failing boundary
+- merged `#1166` has crossed into a visible build/promotion/runtime path
+- `#1164` remains open until tenant-host runtime proof exists
+- nonprod MFE-config parity remains represented as closed
+- the prod outage remains correctly classified as availability work
+- the active tracker still matches the actual system state
