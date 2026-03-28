@@ -263,11 +263,25 @@ test.describe('Critical path — Mereka Academy', () => {
     // Course home should render without a hard error
     const pageText = await page.locator('body').innerText().catch(() => '');
     expect(pageText).not.toMatch(/500 internal server error/i);
+    await expect(page.locator('.mereka-learning-course-header').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('.mereka-learning-course-header__signal').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('.mereka-learning-course-tabs-hint').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('.mereka-course-outline-sidebar').first()).toBeVisible({ timeout: 15_000 });
+
+    // Progress view should also preserve the branded enrolled-shell companion surfaces
+    const progressUrl = `${mfeBase}/learning/course/${COURSE_ID}/progress`;
+    await page.goto(progressUrl, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await expect(page.locator('.mereka-progress-certificate-status').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('.mereka-progress-related-links-hint').first()).toBeVisible({ timeout: 15_000 });
 
     // Navigate to courseware (first unit)
     const coursewareUrl = `${mfeBase}/learning/course/${COURSE_ID}/courseware`;
     await page.goto(coursewareUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle').catch(() => {});
+    await expect(page.locator('.mereka-learning-unit-title-hint, .mereka-learning-sequence-navigation-hint').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Look for video player containers: Open edX video XBlock, Mux, or generic <video>
     const videoContainer = page.locator(
@@ -316,6 +330,10 @@ test.describe('Critical path — Mereka Academy', () => {
       test.skip(true, `Not enrolled in ${COURSE_ID} — skipping forum test`);
       return;
     }
+
+    await expect(
+      page.locator('.mereka-learning-notifications-discussions-sidebar-hint, .mereka-learning-notifications-discussions-sidebar-trigger-hint').first()
+    ).toBeVisible({ timeout: 15_000 });
 
     // Check for the new post / add thread button — selector varies by MFE version
     const newPostButton = page.locator(

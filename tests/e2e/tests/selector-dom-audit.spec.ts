@@ -27,6 +27,19 @@ const ROUTE_SPECIFIC_BRANDING_SELECTORS: Array<{ pattern: RegExp; selectors: str
     selectors: [
       '.mereka-learning-course-header .mereka-shell-kicker',
       '.mereka-learning-course-header__actions',
+      '.mereka-learning-course-header__signal-list',
+    ],
+  },
+  {
+    pattern: /\/progress\//,
+    selectors: [
+      '.mereka-progress-certificate-status',
+    ],
+  },
+  {
+    pattern: /\/discussion\//,
+    selectors: [
+      '.mereka-learning-notifications-discussions-sidebar-hint, .mereka-learning-notifications-discussions-sidebar-trigger-hint',
     ],
   },
 ];

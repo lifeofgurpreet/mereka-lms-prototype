@@ -195,54 +195,11 @@ const getMerekaShellCopy = (variant) => {
   const brand = variant && variant.brand ? variant.brand : 'Mereka Academy';
   return {
     authn: {
-      login: {
-        eyebrow: 'Learning workspace',
-        title: 'Welcome back',
-        subtitle: `Sign in to continue with ${brand}.`,
-        supportCtaLabel: 'Support',
-        trustNote: 'Secure access for your active learning environment.',
-        signals: [
-          'Resume active programs',
-          'Keep progress and certificates in view',
-          'Get support without losing context',
-        ],
-        utilityLinks: [
-          { mode: 'register', label: 'Create account' },
-          { mode: 'reset', label: 'Reset password' },
-        ],
-      },
-      register: {
-        eyebrow: 'New learner setup',
-        title: `Create your ${brand} account`,
-        subtitle: `Join ${brand} to start guided learning, track milestones, and keep your progress in one place.`,
-        supportCtaLabel: 'See support options',
-        trustNote: 'One account unlocks courses, support, and proof of learning across your pathway.',
-        signals: [
-          'Start with a clear path',
-          'Track progress and certificates',
-          'Move from curiosity to applied work faster',
-        ],
-        utilityLinks: [
-          { mode: 'login', label: 'Already have an account?' },
-          { mode: 'reset', label: 'Need to reset instead?' },
-        ],
-      },
-      reset: {
-        eyebrow: 'Access recovery',
-        title: `Recover your ${brand} access`,
-        subtitle: `Reset your password and get back into ${brand} without losing your learning history, milestones, or support context.`,
-        supportCtaLabel: 'Support',
-        trustNote: 'We keep your courses, certificates, and active support lane attached to one secure identity.',
-        signals: [
-          'Reset securely with your email',
-          'Return to active programs faster',
-          'Keep progress and certificates intact',
-        ],
-        utilityLinks: [
-          { mode: 'login', label: 'Back to sign in' },
-          { mode: 'register', label: 'Create account' },
-        ],
-      },
+      eyebrow: 'Learning workspace',
+      title: 'Welcome back',
+      subtitle: `Sign in to continue with ${brand}.`,
+      supportCtaLabel: 'Support',
+      trustNote: 'Secure access for your active learning environment.',
     },
     dashboard: {
       eyebrow: 'Learning cockpit',
@@ -260,24 +217,109 @@ const getMerekaShellCopy = (variant) => {
   };
 };
 
-const getMerekaAuthnPath = (mode) => {
-  const pathByMode = {
-    login: '/authn/login',
-    register: '/authn/register',
-    reset: '/authn/reset',
+const getLearningCourseContext = () => {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const match = pathname.match(/\/learning\/course\/([^/]+)/);
+  const encodedCourseId = match ? match[1] : '';
+  const basePath = encodedCourseId ? `/learning/course/${encodedCourseId}` : '';
+
+  return {
+    pathname,
+    encodedCourseId,
+    basePath,
+    homeHref: basePath ? `${basePath}/home` : getLearnerHomeHref(),
+    coursewareHref: basePath ? `${basePath}/courseware` : getLearnerHomeHref(),
+    discussionHref: basePath ? `${basePath}/discussion/posts` : getLearnerHomeHref(),
+    progressHref: basePath ? `${basePath}/progress` : getLearnerHomeHref(),
+    isCourseware: /\/courseware(?:\/|$)/.test(pathname),
+    isDiscussion: /\/discussion(?:\/|$)/.test(pathname),
+    isProgress: /\/progress(?:\/|$)/.test(pathname),
   };
-  return pathByMode[mode] || pathByMode.login;
 };
 
-const getMerekaAuthnMode = () => {
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  if (pathname.startsWith('/authn/register')) {
-    return 'register';
-  }
-  if (pathname.startsWith('/authn/reset')) {
-    return 'reset';
-  }
-  return 'login';
+const getLearningShellModel = (config) => {
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const shellCopy = getMerekaShellCopy(variant);
+  const courseContext = getLearningCourseContext();
+  const activeSurfaceLabel = courseContext.isProgress
+    ? 'Progress in focus'
+    : courseContext.isDiscussion
+      ? 'Discussion in focus'
+      : courseContext.isCourseware
+        ? 'Courseware in focus'
+        : 'Course home in focus';
+  const routeGuide = [
+    {
+      label: 'Course home',
+      meta: 'Reset your bearings and review the full learning plan.',
+      href: courseContext.homeHref,
+    },
+    {
+      label: 'Courseware',
+      meta: 'Stay inside the active sequence and keep moving.',
+      href: courseContext.coursewareHref,
+    },
+    {
+      label: 'Discussion',
+      meta: 'Ask questions or reflect without losing context.',
+      href: courseContext.discussionHref,
+    },
+    {
+      label: 'Progress',
+      meta: 'See grade signals and what needs attention next.',
+      href: courseContext.progressHref,
+    },
+  ];
+
+  return {
+    variant,
+    shellCopy,
+    courseContext,
+    activeSurfaceLabel,
+    routeGuide,
+    primaryAction: courseContext.isProgress
+      ? { href: courseContext.coursewareHref, label: 'Return to learning' }
+      : { href: courseContext.progressHref, label: 'View progress' },
+    secondaryAction: {
+      href: variant.helpUrl || '/help/',
+      label: shellCopy.learning.supportCtaLabel,
+      external: true,
+    },
+  };
+};
+
+const getLearningCompanionModel = (config) => {
+  const shellModel = getLearningShellModel(config);
+  const baseUrl = getMerekaBaseUrl(config);
+
+  return {
+    ...shellModel,
+    catalogHref: getCatalogHref(baseUrl),
+    supportLinks: [
+      {
+        label: 'Course home',
+        meta: 'Re-center on the plan before the next move.',
+        href: shellModel.courseContext.homeHref,
+      },
+      {
+        label: 'Open discussion',
+        meta: 'Bring blockers into the conversation early.',
+        href: shellModel.courseContext.discussionHref,
+      },
+      {
+        label: 'Help centre',
+        meta: 'Escalate support without losing momentum.',
+        href: shellModel.secondaryAction.href,
+        external: true,
+      },
+    ],
+    exitSignals: [
+      'Review progress before you leave this course.',
+      'Return to learning if one more unit will unlock momentum.',
+      'Queue the next course instead of ending the session cold.',
+    ],
+  };
 };
 
 const getLogoHref = () => getLearnerHomeHref();
@@ -573,54 +615,31 @@ const MerekaAuthnLoginBranding = () => {
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
   const shellCopy = getMerekaShellCopy(variant);
-  const authnMode = getMerekaAuthnMode();
-  const authnCopy = shellCopy.authn[authnMode] || shellCopy.authn.login;
-  const helpUrl = (typeof variant?.helpUrl === 'string' && variant.helpUrl) ? variant.helpUrl : 'https://help.mereka.io/';
 
   return (
-    <div
-      className={`mereka-authn-login-branding mereka-authn-login-branding--${authnMode} mereka-shell-panel mereka-shell-panel--authn`}
-    >
-      <p className="mereka-shell-kicker mereka-authn-login-branding__eyebrow">{authnCopy.eyebrow}</p>
-      <a href={getLogoHref()} className="mereka-authn-login-branding__logo">
+    <div className="mereka-authn-login-branding mereka-shell-panel mereka-shell-panel--authn">
+      <p className="mereka-shell-kicker mereka-authn-login-branding__eyebrow">{shellCopy.authn.eyebrow}</p>
+      <a href="/" className="mereka-authn-login-branding__logo">
         <img
           src={getMerekaThemeAssetUrl(config, variant.logoUrl)}
           alt={`${variant.brand} logo`}
           className="mereka-authn-login-branding__logo-img"
         />
       </a>
-      <h2 className="mereka-authn-login-branding__title">{authnCopy.title}</h2>
+      <h2 className="mereka-authn-login-branding__title">{shellCopy.authn.title}</h2>
       <p className="mereka-authn-login-branding__subtitle">
-        {authnCopy.subtitle}
+        {shellCopy.authn.subtitle}
       </p>
-      <div className="mereka-authn-login-branding__route-links">
-        {(authnCopy.utilityLinks || []).map(({ mode, label }) => (
-          <a
-            key={mode}
-            href={getMerekaAuthnPath(mode)}
-            className="mereka-authn-login-branding__route-link"
-          >
-            {label}
-          </a>
-        ))}
-      </div>
-      <ul className="mereka-authn-login-branding__signals list-unstyled">
-        {authnCopy.signals.map(signal => (
-          <li key={signal} className="mereka-authn-login-branding__signal">
-            {signal}
-          </li>
-        ))}
-      </ul>
       <div className="mereka-authn-login-branding__actions">
         <a
-          href={helpUrl}
+          href={variant.helpUrl}
           className="mereka-shell-link mereka-shell-link--quiet"
           target="_blank"
           rel="noopener noreferrer"
         >
-          {authnCopy.supportCtaLabel}
+          {shellCopy.authn.supportCtaLabel}
         </a>
-        <span className="mereka-authn-login-branding__trust-note">{authnCopy.trustNote}</span>
+        <span className="mereka-authn-login-branding__trust-note">{shellCopy.authn.trustNote}</span>
       </div>
     </div>
   );
@@ -980,21 +999,41 @@ const MerekaDashboardModalHint = () => {
 // Wired into org.openedx.frontend.learning.course_outline_sidebar.v1.
 const MerekaCourseOutlineSidebar = () => {
   const config = getConfig();
-  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
-  const shellCopy = getMerekaShellCopy(variant);
-  const helpPath = variant.helpUrl || '/help/';
+  const {
+    routeGuide,
+    primaryAction,
+    secondaryAction,
+  } = getLearningShellModel(config);
 
   return (
     <aside className="mereka-course-outline-sidebar mereka-shell-panel mb-3">
       <div className="mereka-shell-panel__content">
-        <p className="mereka-shell-kicker">{shellCopy.learning.eyebrow}</p>
-        <h3 className="mereka-course-outline-sidebar__title h6 mb-2">{variant.brand} course hub</h3>
+        <p className="mereka-shell-kicker">Session guide</p>
+        <h3 className="mereka-course-outline-sidebar__title h6 mb-2">Keep the next move obvious</h3>
         <p className="mereka-course-outline-sidebar__body mb-3">
-          Keep pacing, support, and the next decision close while you move through each unit.
+          The learning shell keeps navigation, support, and progress close so you can stay inside the work instead of hunting through menus.
         </p>
-        <a href={helpPath} className="mereka-shell-link mereka-shell-link--quiet" target="_blank" rel="noopener noreferrer">
-          Visit help centre
-        </a>
+        <div className="mereka-course-outline-sidebar__journey">
+          {routeGuide.slice(0, 3).map((item) => (
+            <a key={item.label} href={item.href} className="mereka-course-outline-sidebar__journey-link">
+              <span className="mereka-course-outline-sidebar__journey-label">{item.label}</span>
+              <span className="mereka-course-outline-sidebar__journey-meta">{item.meta}</span>
+            </a>
+          ))}
+        </div>
+        <div className="mereka-course-outline-sidebar__actions">
+          <a href={primaryAction.href} className="mereka-shell-link">
+            {primaryAction.label}
+          </a>
+          <a
+            href={secondaryAction.href}
+            className="mereka-shell-link mereka-shell-link--quiet"
+            target={secondaryAction.external ? '_blank' : undefined}
+            rel={secondaryAction.external ? 'noopener noreferrer' : undefined}
+          >
+            {secondaryAction.label}
+          </a>
+        </div>
       </div>
     </aside>
   );
@@ -1004,23 +1043,46 @@ const MerekaCourseOutlineSidebar = () => {
 // Wired into org.openedx.frontend.layout.header_learning.v1.
 const MerekaLearningCourseHeader = () => {
   const config = getConfig();
-  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
-  const shellCopy = getMerekaShellCopy(variant);
+  const {
+    routeGuide,
+    shellCopy,
+    activeSurfaceLabel,
+    primaryAction,
+    secondaryAction,
+  } = getLearningShellModel(config);
 
   return (
     <div className="mereka-learning-course-header mereka-shell-panel mb-3">
-      <div className="mereka-shell-panel__content">
+      <div className="mereka-learning-course-header__content mereka-shell-panel__content">
         <p className="mereka-shell-kicker">{shellCopy.learning.eyebrow}</p>
-        <p className="mereka-learning-course-header__title mb-1">{shellCopy.learning.title}</p>
-        <p className="mereka-learning-course-header__text mb-0">{shellCopy.learning.subtitle}</p>
+        <div className="mereka-learning-course-header__hero">
+          <p className="mereka-learning-course-header__title mb-1">{shellCopy.learning.title}</p>
+          <p className="mereka-learning-course-header__text mb-0">{shellCopy.learning.subtitle}</p>
+        </div>
         <div className="mereka-learning-course-header__meta">
-          <span className="mereka-badge">Focus mode</span>
-          <span className="mereka-learning-course-header__status">Stay oriented, keep your pace visible, and move forward deliberately.</span>
+          <span className="mereka-badge">Guided flow</span>
+          <span className="mereka-learning-course-header__status">{activeSurfaceLabel}</span>
+        </div>
+        <div className="mereka-learning-course-header__signal-list">
+          {routeGuide.map((item) => (
+            <a key={item.label} href={item.href} className="mereka-learning-course-header__signal">
+              <span className="mereka-learning-course-header__signal-label">{item.label}</span>
+              <span className="mereka-learning-course-header__signal-meta">{item.meta}</span>
+            </a>
+          ))}
         </div>
       </div>
       <div className="mereka-learning-course-header__actions">
-        <a href={variant.helpUrl} className="mereka-shell-link mereka-shell-link--quiet" target="_blank" rel="noopener noreferrer">
-          {shellCopy.learning.supportCtaLabel}
+        <a href={primaryAction.href} className="mereka-shell-link">
+          {primaryAction.label}
+        </a>
+        <a
+          href={secondaryAction.href}
+          className="mereka-shell-link mereka-shell-link--quiet"
+          target={secondaryAction.external ? '_blank' : undefined}
+          rel={secondaryAction.external ? 'noopener noreferrer' : undefined}
+        >
+          {secondaryAction.label}
         </a>
       </div>
     </div>
@@ -1032,7 +1094,12 @@ const MerekaLearningCourseHeader = () => {
 const MerekaLearningCourseTabsHint = () => {
   return (
     <div className="mereka-learning-course-tabs-hint mb-2">
-      <span>Track your progress, discussions, and key dates in one place.</span>
+      <span className="mereka-badge">Command deck</span>
+      <div className="mereka-learning-course-tabs-hint__list">
+        <span className="mereka-learning-course-tabs-hint__item">Learn without losing your place</span>
+        <span className="mereka-learning-course-tabs-hint__item">Check progress at the right moment</span>
+        <span className="mereka-learning-course-tabs-hint__item">Jump into discussion when you need help</span>
+      </div>
     </div>
   );
 };
@@ -1043,9 +1110,9 @@ const MerekaLearningCourseBreadcrumbsHint = ({ courseId }) => {
   const safeCourseId = typeof courseId === 'string' ? courseId : '';
   return (
     <div className="mereka-learning-course-breadcrumbs-hint mb-2">
-      <span className="mereka-badge me-2">Course</span>
+      <span className="mereka-badge me-2">Pathway</span>
       <span className="small text-muted">
-        {safeCourseId ? `ID: ${safeCourseId}` : 'Track your pathway and continue with confidence.'}
+        {safeCourseId ? 'This course is anchored and ready to continue.' : 'Track your pathway and continue with confidence.'}
       </span>
     </div>
   );
@@ -1059,7 +1126,7 @@ const MerekaLearningLearnerToolsHint = ({ enrollmentMode, isStaff }) => {
     <div className="mereka-learning-learner-tools-hint mb-2">
       <span className="mereka-badge me-2">Learner tools</span>
       <span className="small text-muted">
-        Mode: {mode}{isStaff ? ' · Staff utilities enabled' : ''}
+        Mode: {mode}{isStaff ? ' · Staff utilities enabled' : ' · Keep notes, dates, and support close to the lesson.'}
       </span>
     </div>
   );
@@ -1068,13 +1135,21 @@ const MerekaLearningLearnerToolsHint = ({ enrollmentMode, isStaff }) => {
 // Learning progress course-grade slot helper.
 // Wired into org.openedx.frontend.learning.progress_tab_course_grade.v1.
 const MerekaProgressCourseGradeHint = ({ courseId }) => {
+  const config = getConfig();
+  const { courseContext } = getLearningCompanionModel(config);
   const safeCourseId = typeof courseId === 'string' ? courseId : '';
   return (
     <div className="mereka-progress-course-grade-hint mb-2">
-      <span className="mereka-badge me-2">Grade</span>
-      <span className="small text-muted">
-        Keep progressing in {safeCourseId || 'your active course'} to strengthen outcomes.
-      </span>
+      <span className="mereka-badge">Progress pulse</span>
+      <div className="mereka-progress-course-grade-hint__content">
+        <span className="mereka-progress-course-grade-hint__title">Keep this course moving</span>
+        <span className="mereka-progress-course-grade-hint__meta">
+          Keep progressing in {safeCourseId || 'your active course'} so momentum turns into completed work.
+        </span>
+      </div>
+      <a href={courseContext.coursewareHref} className="mereka-shell-link mereka-shell-link--quiet">
+        Return to learning
+      </a>
     </div>
   );
 };
@@ -1083,12 +1158,24 @@ const MerekaProgressCourseGradeHint = ({ courseId }) => {
 // Wired into org.openedx.frontend.learning.progress_tab_related_links.v1.
 const MerekaProgressRelatedLinksHint = () => {
   const config = getConfig();
-  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
-  const helpPath = variant.helpUrl || '/help/';
+  const { supportLinks } = getLearningCompanionModel(config);
   return (
     <div className="mereka-progress-related-links-hint mb-2">
-      <span className="mereka-badge me-2">Resources</span>
-      <a href={helpPath} className="small">Need support? Visit the help centre.</a>
+      <span className="mereka-badge">Support lane</span>
+      <div className="mereka-progress-related-links-hint__links">
+        {supportLinks.map((item) => (
+          <a
+            key={item.label}
+            href={item.href}
+            className="mereka-progress-related-links-hint__link"
+            target={item.external ? '_blank' : undefined}
+            rel={item.external ? 'noopener noreferrer' : undefined}
+          >
+            <span className="mereka-progress-related-links-hint__label">{item.label}</span>
+            <span className="mereka-progress-related-links-hint__meta">{item.meta}</span>
+          </a>
+        ))}
+      </div>
     </div>
   );
 };
@@ -1096,13 +1183,21 @@ const MerekaProgressRelatedLinksHint = () => {
 // Learning progress grade-breakdown slot helper.
 // Wired into org.openedx.frontend.learning.progress_tab_grade_breakdown.v1.
 const MerekaProgressGradeBreakdownHint = ({ courseId }) => {
+  const config = getConfig();
+  const { courseContext } = getLearningCompanionModel(config);
   const safeCourseId = typeof courseId === 'string' ? courseId : '';
   return (
     <div className="mereka-progress-grade-breakdown-hint mb-2">
-      <span className="mereka-badge me-2">Grade details</span>
-      <span className="small text-muted">
-        {safeCourseId ? `Review assessment trends for ${safeCourseId}.` : 'Review assessment trends and retry weak areas.'}
-      </span>
+      <span className="mereka-badge">Grade details</span>
+      <div className="mereka-progress-grade-breakdown-hint__content">
+        <span className="mereka-progress-grade-breakdown-hint__title">Use the evidence, not guesswork</span>
+        <span className="mereka-progress-grade-breakdown-hint__meta">
+          {safeCourseId ? 'Review assessment trends and decide what to revisit next.' : 'Review assessment trends and retry weak areas.'}
+        </span>
+      </div>
+      <a href={courseContext.homeHref} className="mereka-shell-link mereka-shell-link--quiet">
+        Course home
+      </a>
     </div>
   );
 };
@@ -1113,8 +1208,8 @@ const MerekaLearningUnitTitleHint = ({ unit }) => {
   const title = unit && typeof unit.title === 'string' ? unit.title : '';
   return (
     <div className="mereka-learning-unit-title-hint mb-2">
-      <span className="mereka-badge me-2">Unit</span>
-      {title ? <span className="small text-muted">{title}</span> : null}
+      <span className="mereka-badge me-2">Now learning</span>
+      <span className="small text-muted">{title || 'Stay on this unit until the next step is clear.'}</span>
     </div>
   );
 };
@@ -1125,9 +1220,9 @@ const MerekaLearningSequenceNavigationHint = ({ unitId }) => {
   const safeUnitId = typeof unitId === 'string' ? unitId : '';
   return (
     <div className="mereka-learning-sequence-navigation-hint mb-2">
-      <span className="mereka-badge me-2">Navigation</span>
+      <span className="mereka-badge me-2">Next move</span>
       <span className="small text-muted">
-        {safeUnitId ? `Current unit: ${safeUnitId}` : 'Move through each unit step by step.'}
+        {safeUnitId ? 'Use the sequence controls to move forward deliberately.' : 'Move through each unit step by step.'}
       </span>
     </div>
   );
@@ -1269,7 +1364,7 @@ const MerekaLearningNotificationTrayHint = () => {
 const MerekaLearningNotificationsDiscussionsSidebarTriggerHint = () => {
   return (
     <span className="mereka-learning-notifications-discussions-sidebar-trigger-hint mereka-badge">
-      Discussions
+      Community lane
     </span>
   );
 };
@@ -1277,10 +1372,35 @@ const MerekaLearningNotificationsDiscussionsSidebarTriggerHint = () => {
 // Learning discussions/sidebar slot helper.
 // Wired into org.openedx.frontend.learning.notifications_discussions_sidebar.v1.
 const MerekaLearningNotificationsDiscussionsSidebarHint = () => {
+  const config = getConfig();
+  const { courseContext, supportLinks } = getLearningCompanionModel(config);
   return (
-    <div className="mereka-learning-notifications-discussions-sidebar-hint mb-2">
-      <span className="mereka-badge me-2">Community</span>
-      <span className="small text-muted">Join discussions and track replies in one panel.</span>
+    <div className="mereka-learning-notifications-discussions-sidebar-hint mereka-shell-panel mb-2">
+      <div className="mereka-learning-notifications-discussions-sidebar-hint__content mereka-shell-panel__content">
+        <p className="mereka-shell-kicker">Community lane</p>
+        <p className="mereka-learning-notifications-discussions-sidebar-hint__title mb-1">
+          Ask early and keep blockers visible
+        </p>
+        <p className="mereka-learning-notifications-discussions-sidebar-hint__body mb-0">
+          Use discussion and support as part of the learning flow, not as a separate rescue path after momentum is already gone.
+        </p>
+        <div className="mereka-learning-notifications-discussions-sidebar-hint__links">
+          {supportLinks.slice(0, 2).map((item) => (
+            <a key={item.label} href={item.href} className="mereka-learning-notifications-discussions-sidebar-hint__link">
+              <span className="mereka-learning-notifications-discussions-sidebar-hint__label">{item.label}</span>
+              <span className="mereka-learning-notifications-discussions-sidebar-hint__meta">{item.meta}</span>
+            </a>
+          ))}
+        </div>
+        <div className="mereka-learning-notifications-discussions-sidebar-hint__actions">
+          <a href={courseContext.discussionHref} className="mereka-shell-link">
+            Open discussions
+          </a>
+          <a href={supportLinks[2].href} className="mereka-shell-link mereka-shell-link--quiet" target="_blank" rel="noopener noreferrer">
+            Help centre
+          </a>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1289,11 +1409,19 @@ const MerekaLearningNotificationsDiscussionsSidebarHint = () => {
 // Wired into org.openedx.frontend.learning.course_exit_view_courses.v1.
 const MerekaLearningCourseExitViewCoursesHint = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
-  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const { variant, catalogHref } = getLearningCompanionModel(config);
   return (
-    <div className="mereka-learning-course-exit-view-courses-hint mb-2">
-      <a href={getCatalogHref(baseUrl)} className="small">Browse more courses from {variant.brand}.</a>
+    <div className="mereka-learning-course-exit-view-courses-hint mereka-dashboard-modal-hint mb-2">
+      <span className="mereka-badge">Keep exploring</span>
+      <p className="mereka-learning-course-exit-view-courses-hint__title mb-1">
+        Turn this session into the next commitment
+      </p>
+      <p className="mereka-learning-course-exit-view-courses-hint__body mb-0">
+        Browse more courses from {variant.brand} while your current momentum is still warm.
+      </p>
+      <a href={catalogHref} className="mereka-shell-link mt-3">
+        Browse courses
+      </a>
     </div>
   );
 };
@@ -1301,44 +1429,98 @@ const MerekaLearningCourseExitViewCoursesHint = () => {
 // Learning course-exit dashboard-footnote slot helper.
 // Wired into org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1.
 const MerekaLearningCourseExitDashboardFootnoteLinkHint = () => {
+  const config = getConfig();
+  const { primaryAction } = getLearningCompanionModel(config);
   return (
-    <div className="mereka-learning-course-exit-dashboard-footnote-link-hint mb-2">
-      <a href={getLearnerHomeHref()} className="small">Return to your learning home for next actions.</a>
+    <div className="mereka-learning-course-exit-dashboard-footnote-link-hint mereka-dashboard-modal-hint mb-2">
+      <span className="mereka-badge">Session close</span>
+      <p className="mereka-learning-course-exit-dashboard-footnote-link-hint__title mb-1">
+        Leave with the next move already chosen
+      </p>
+      <p className="mereka-learning-course-exit-dashboard-footnote-link-hint__body mb-0">
+        Return to your learner home or jump straight back into the course while the session is still active.
+      </p>
+      <div className="mereka-learning-course-exit-dashboard-footnote-link-hint__actions">
+        <a href={getLearnerHomeHref()} className="mereka-shell-link mereka-shell-link--quiet">
+          Learning home
+        </a>
+        <a href={primaryAction.href} className="mereka-shell-link">
+          {primaryAction.label}
+        </a>
+      </div>
     </div>
   );
 };
 
-const MerekaAuthnContextMetaItem = ({ label, value }) => (
+// Learning progress certificate status branding and context card.
+// Wired into org.openedx.frontend.learning.progress_certificate_status.v1.
+const MerekaLearningShellContextMetaItem = ({ label, value }) => (
   <li className="mereka-additional-profile-fields__item">
     <span className="mereka-additional-profile-fields__label">{label}</span>
     <strong className="mereka-additional-profile-fields__value">{value}</strong>
   </li>
 );
 
-const MerekaAuthnContextCard = ({ className, eyebrow, title, body, meta }) => (
+const MerekaLearningShellContextCard = ({
+  className,
+  eyebrow,
+  title,
+  body,
+  meta,
+  actions,
+}) => (
   <section className={className}>
-    <div className="mereka-shell-panel__content">
-      <p className="mereka-shell-kicker mb-2">{eyebrow}</p>
+    <div className="mereka-progress-certificate-status__content mereka-shell-panel__content">
+      <p className="mereka-shell-kicker">{eyebrow}</p>
       <p className="mereka-progress-certificate-status__title mb-1">{title}</p>
       {body ? <p className="mereka-progress-certificate-status__body mb-0">{body}</p> : null}
       {meta}
     </div>
+    {actions ? (
+      <div className="mereka-progress-certificate-status__actions">
+        {actions}
+      </div>
+    ) : null}
   </section>
 );
 
-// Learning progress certificate status branding and context card.
-// Wired into org.openedx.frontend.learning.progress_certificate_status.v1.
 const MerekaProgressCertificateStatus = ({ courseId }) => {
   const config = getConfig();
-  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const {
+    variant,
+    primaryAction,
+    catalogHref,
+    exitSignals,
+  } = getLearningCompanionModel(config);
   const safeCourseId = typeof courseId === 'string' ? courseId : '';
+  const signals = (
+    <div className="mereka-progress-certificate-status__signals">
+      {exitSignals.map((signal) => (
+        <div key={signal} className="mereka-progress-certificate-status__signal">
+          {signal}
+        </div>
+      ))}
+    </div>
+  );
+  const actions = (
+    <>
+      <a href={primaryAction.href} className="mereka-shell-link">
+        {primaryAction.label}
+      </a>
+      <a href={catalogHref} className="mereka-shell-link mereka-shell-link--quiet">
+        Explore next courses
+      </a>
+    </>
+  );
 
   return (
-    <MerekaAuthnContextCard
+    <MerekaLearningShellContextCard
       className="mereka-progress-certificate-status mereka-shell-panel my-3"
       eyebrow="Progress snapshot"
       title="Keep your learning streak active"
       body={`${variant.brand} Learning${safeCourseId ? ` course ${safeCourseId}` : ''} is active. Keep completing units to unlock your certificate with confidence.`}
+      meta={signals}
+      actions={actions}
     />
   );
 };
@@ -1347,7 +1529,7 @@ const MerekaProgressCertificateStatus = ({ courseId }) => {
 // Wired into org.openedx.frontend.account.id_verification_page.v1.
 const MerekaAccountIdVerificationHint = () => {
   return (
-    <MerekaAuthnContextCard
+    <MerekaLearningShellContextCard
       className="mereka-account-id-verification-hint mereka-progress-certificate-status mereka-shell-panel mb-2"
       eyebrow="Identity check"
       title="Verification supports certificate release"
@@ -1364,14 +1546,14 @@ const MerekaAdditionalProfileFields = () => {
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   const profileMeta = (
     <ul className="mereka-additional-profile-fields__list list-unstyled mb-0 mt-3">
-      <MerekaAuthnContextMetaItem label="Organization" value={variant.brand} />
-      <MerekaAuthnContextMetaItem label="Job title" value="Pending admin sync" />
-      <MerekaAuthnContextMetaItem label="Department" value="Pending admin sync" />
+      <MerekaLearningShellContextMetaItem label="Organization" value={variant.brand} />
+      <MerekaLearningShellContextMetaItem label="Job title" value="Pending admin sync" />
+      <MerekaLearningShellContextMetaItem label="Department" value="Pending admin sync" />
     </ul>
   );
 
   return (
-    <MerekaAuthnContextCard
+    <MerekaLearningShellContextCard
       className="mereka-additional-profile-fields mereka-progress-certificate-status mereka-shell-panel mb-3"
       eyebrow="Profile setup"
       title="Enterprise profile details"

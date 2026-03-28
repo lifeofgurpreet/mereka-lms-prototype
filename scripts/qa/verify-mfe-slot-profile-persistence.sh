@@ -81,10 +81,12 @@ else
   fail "Slot-to-component binding markers for additional profile fields missing"
 fi
 
-if rg -qF "Enterprise profile details" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaAuthnContextMetaItem label=\"Organization\" value={variant.brand} />" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaAuthnContextMetaItem label=\"Job title\" value=\"Pending admin sync\" />" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaAuthnContextMetaItem label=\"Department\" value=\"Pending admin sync\" />" "$PLUGIN_FILE"; then
+if rg -qF "const MerekaLearningShellContextCard = ({" "$PLUGIN_FILE" \
+  && rg -qF "const MerekaLearningShellContextMetaItem = ({ label, value }) => (" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-additional-profile-fields mereka-progress-certificate-status mereka-shell-panel mb-3\"" "$PLUGIN_FILE" \
+  && rg -qF "<MerekaLearningShellContextMetaItem label=\"Organization\" value={variant.brand} />" "$PLUGIN_FILE" \
+  && rg -qF "<MerekaLearningShellContextMetaItem label=\"Job title\" value=\"Pending admin sync\" />" "$PLUGIN_FILE" \
+  && rg -qF "<MerekaLearningShellContextMetaItem label=\"Department\" value=\"Pending admin sync\" />" "$PLUGIN_FILE"; then
   pass "Additional profile field UI markers present via canonical context-card meta rows"
 else
   fail "Additional profile field UI markers missing"

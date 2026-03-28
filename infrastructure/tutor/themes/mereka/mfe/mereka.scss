@@ -453,119 +453,52 @@ label {
 
 /* RISK: LOW — plugin-slot class names owned by this repo; not coupled to upstream DOM internals */
 .mereka-authn-login-branding {
-  display: grid;
-  gap: 1rem;
   margin-bottom: 1rem;
-  padding: clamp(1.1rem, 2vw, 1.6rem);
-  border: 1px solid rgba(35, 112, 114, 0.14);
-  border-radius: 1.5rem;
-  background:
-    radial-gradient(circle at top, rgba(35, 112, 114, 0.12), transparent 58%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 249, 255, 0.92));
-  box-shadow: 0 24px 56px rgba(18, 39, 66, 0.14);
-  text-align: center;
-}
-
-.mereka-authn-login-branding--register {
-  background:
-    radial-gradient(circle at top, rgba(171, 59, 120, 0.16), transparent 58%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(253, 244, 250, 0.94));
-}
-
-.mereka-authn-login-branding--reset {
-  background:
-    radial-gradient(circle at top, rgba(41, 92, 173, 0.18), transparent 58%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 247, 255, 0.94));
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  text-align: left;
 }
 
 .mereka-authn-login-branding__eyebrow {
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .mereka-authn-login-branding__logo {
   display: inline-flex;
+  margin-bottom: 1.25rem;
 }
 
 .mereka-authn-login-branding__logo-img {
-  max-width: min(320px, 75%);
-  max-height: 72px;
+  max-width: min(320px, 100%);
+  max-height: 76px;
   width: 100%;
   object-fit: contain;
 }
 
 .mereka-authn-login-branding__title {
-  margin-top: 0.5rem;
-  margin-bottom: 0.35rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--mereka-color-ink-900);
 }
 
 .mereka-authn-login-branding__subtitle {
-  margin: 0 auto;
-  color: var(--mereka-color-ink-700);
-  max-width: 34rem;
-}
-
-.mereka-authn-login-branding__route-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.65rem;
-}
-
-.mereka-authn-login-branding__route-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.35rem;
-  padding: 0.55rem 0.9rem;
-  border: 1px solid rgba(18, 39, 66, 0.1);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  color: var(--mereka-color-ink-900);
-  font-size: var(--pgn-typography-font-size-sm);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.mereka-authn-login-branding__route-link:hover,
-.mereka-authn-login-branding__route-link:focus {
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--mereka-color-ink-900);
-  text-decoration: none;
-  box-shadow: 0 10px 24px rgba(18, 39, 66, 0.1);
-}
-
-.mereka-authn-login-branding__signals {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
   margin: 0;
-}
-
-.mereka-authn-login-branding__signal {
-  min-height: 100%;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid rgba(18, 39, 66, 0.08);
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.78);
-  color: var(--mereka-color-ink-900);
-  font-size: var(--pgn-typography-font-size-sm);
-  font-weight: 600;
-  line-height: 1.45;
+  color: var(--mereka-color-ink-700);
+  font-size: 0.98rem;
+  line-height: 1.7;
+  max-width: 34rem;
 }
 
 .mereka-authn-login-branding__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
 }
 
 .mereka-authn-login-branding__trust-note {
-  max-width: 22rem;
-  color: var(--mereka-color-ink-700);
-  font-size: var(--pgn-typography-font-size-sm);
-  line-height: 1.45;
+  color: var(--mereka-color-ink-500);
+  font-size: 0.82rem;
 }
 
 /* RISK: LOW — studio footer class names are slot-owned by this repo */
@@ -589,23 +522,69 @@ label {
   color: var(--mereka-color-ink-700);
 }
 
-/* RISK: LOW — slot-owned class used by progress certificate widget */
 .mereka-progress-certificate-status {
-  padding: 1.1rem 1.2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(15rem, 0.85fr);
+  gap: 1.15rem 1.5rem;
+  padding: clamp(1.2rem, 2vw, 1.6rem);
 }
 
-.mereka-progress-certificate-status__title {
+.mereka-progress-certificate-status__content {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.mereka-progress-certificate-status__title,
+.mereka-course-outline-sidebar__title,
+.mereka-progress-course-grade-hint__title,
+.mereka-progress-grade-breakdown-hint__title,
+.mereka-learning-notifications-discussions-sidebar-hint__title,
+.mereka-learning-course-exit-view-courses-hint__title,
+.mereka-learning-course-exit-dashboard-footnote-link-hint__title {
   color: var(--mereka-color-ink-900);
   font-weight: 700;
 }
 
-.mereka-progress-certificate-status__body {
+.mereka-progress-certificate-status__body,
+.mereka-course-outline-sidebar__body,
+.mereka-progress-course-grade-hint__meta,
+.mereka-progress-grade-breakdown-hint__meta,
+.mereka-learning-notifications-discussions-sidebar-hint__body,
+.mereka-learning-course-exit-view-courses-hint__body,
+.mereka-learning-course-exit-dashboard-footnote-link-hint__body {
   color: var(--mereka-color-ink-700);
-  font-size: 0.92rem;
-  line-height: 1.65;
 }
 
-/* RISK: LOW — slot-owned learner-dashboard header surface */
+.mereka-progress-certificate-status__body {
+  font-size: 0.92rem;
+}
+
+.mereka-progress-certificate-status__signals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+}
+
+.mereka-progress-certificate-status__signal {
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--mereka-color-ink-900);
+  line-height: 1.55;
+}
+
+.mereka-progress-certificate-status__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-self: stretch;
+}
+
+.mereka-progress-certificate-status__actions .mereka-shell-link {
+  width: 100%;
+}
+
 .mereka-dashboard-header-slot {
   display: flex;
   flex-wrap: wrap;
@@ -623,7 +602,6 @@ label {
   gap: 0.75rem;
 }
 
-/* RISK: LOW — slot-owned learner-dashboard course-card accent */
 .mereka-course-card-accent {
   display: flex;
   align-items: center;
@@ -686,7 +664,6 @@ label {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 248, 255, 0.94));
 }
 
-/* RISK: LOW — profile certificate card styling scoped to .profile-page. */
 .profile-page .certificate {
   border-radius: var(--mereka-mfe-card-radius);
   border: 1px solid var(--mereka-mfe-border);
@@ -698,73 +675,194 @@ label {
 .profile-page .certificate h4, .profile-page .certificate h5 { color: var(--mereka-color-ink-900); }
 .profile-page .certificate .small, .profile-page .certificate .x-small { color: var(--mereka-color-ink-700); }
 
-/* RISK: LOW — slot-owned learning header and tabs helper surfaces */
 .mereka-learning-course-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem 1.25rem;
-  padding: clamp(1.1rem, 2vw, 1.45rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(16rem, 0.85fr);
+  gap: 1.25rem 1.5rem;
+  padding: clamp(1.4rem, 3vw, 2rem);
+}
+
+.mereka-learning-course-header__content {
+  display: grid;
+  gap: 1rem;
+}
+
+.mereka-learning-course-header__hero {
+  display: grid;
+  gap: 0.45rem;
 }
 
 .mereka-learning-course-header__title {
   color: var(--mereka-color-ink-900);
   font-family: var(--mereka-font-heading, "Lato", sans-serif);
-  font-size: 1rem;
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
   font-weight: 700;
+  line-height: 1.08;
 }
 
 .mereka-learning-course-header__text {
   color: var(--mereka-color-ink-700);
-  max-width: 36rem;
+  max-width: 40rem;
 }
 
 .mereka-learning-course-header__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem;
-  margin-top: 0.9rem;
+  gap: 0.75rem;
 }
 
 .mereka-learning-course-header__status {
   color: var(--mereka-color-ink-700);
-  font-size: 0.82rem;
+}
+
+.mereka-learning-course-header__signal-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+  gap: 0.85rem;
+}
+
+.mereka-learning-course-header__signal,
+.mereka-course-outline-sidebar__journey-link,
+.mereka-progress-related-links-hint__link,
+.mereka-learning-notifications-discussions-sidebar-hint__link {
+  display: grid;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--mereka-color-ink-900);
+  text-decoration: none;
+}
+
+.mereka-learning-course-header__signal {
+  gap: 0.22rem;
+  padding: 0.9rem 1rem;
+}
+
+.mereka-learning-course-header__signal-label,
+.mereka-course-outline-sidebar__journey-label,
+.mereka-progress-related-links-hint__label,
+.mereka-learning-notifications-discussions-sidebar-hint__label {
+  font-weight: 700;
 }
 
 .mereka-learning-course-header__actions {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-self: stretch;
+}
+
+.mereka-learning-course-header__actions .mereka-shell-link {
+  width: 100%;
 }
 
 .mereka-course-outline-sidebar {
-  padding: 1rem 1.1rem;
+  padding: clamp(1.2rem, 2vw, 1.5rem);
 }
 
-.mereka-course-outline-sidebar__title {
-  color: var(--mereka-color-ink-900);
+.mereka-course-outline-sidebar__journey {
+  display: grid;
+  gap: 0.75rem;
 }
 
-.mereka-course-outline-sidebar__body {
-  color: var(--mereka-color-ink-700);
-  font-size: 0.92rem;
-  line-height: 1.65;
+.mereka-course-outline-sidebar__journey-link,
+.mereka-progress-related-links-hint__link,
+.mereka-learning-notifications-discussions-sidebar-hint__link {
+  gap: 0.2rem;
+  padding: 0.85rem 0.95rem;
 }
 
 .mereka-learning-course-tabs-hint {
-  padding: 0.5rem 0.75rem;
-  border-left: 3px solid var(--mereka-color-teal);
-  background: rgba(35, 112, 114, 0.08);
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(35, 112, 114, 0.16);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
   color: var(--mereka-color-ink-700);
   font-size: var(--pgn-typography-font-size-sm);
 }
 
-.mereka-authoring-course-unit-sidebar-hint {
-  border: 1px solid var(--mereka-mfe-border);
-  background: var(--mereka-mfe-surface-muted);
+.mereka-learning-course-tabs-hint__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
 }
 
+.mereka-learning-course-tabs-hint__item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(26, 22, 35, 0.05);
+  color: var(--mereka-color-ink-900);
+}
+
+.mereka-learning-course-breadcrumbs-hint,
+.mereka-learning-learner-tools-hint,
+.mereka-progress-course-grade-hint,
+.mereka-progress-related-links-hint,
+.mereka-progress-grade-breakdown-hint,
+.mereka-learning-unit-title-hint,
+.mereka-learning-sequence-navigation-hint,
+.mereka-learning-course-home-section-outline-hint,
+.mereka-learning-course-recommendations-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.mereka-progress-course-grade-hint__content,
+.mereka-progress-grade-breakdown-hint__content {
+  display: grid;
+  gap: 0.18rem;
+  flex: 1 1 18rem;
+}
+
+.mereka-progress-related-links-hint,
+.mereka-learning-notifications-discussions-sidebar-hint,
+.mereka-learning-course-exit-view-courses-hint,
+.mereka-learning-course-exit-dashboard-footnote-link-hint {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.mereka-progress-related-links-hint__links,
+.mereka-learning-notifications-discussions-sidebar-hint__links {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mereka-learning-notifications-discussions-sidebar-hint {
+  padding: clamp(1.15rem, 2vw, 1.45rem);
+}
+
+.mereka-learning-notifications-discussions-sidebar-hint__content {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.mereka-course-outline-sidebar__actions,
+.mereka-learning-notifications-discussions-sidebar-hint__actions,
+.mereka-learning-course-exit-dashboard-footnote-link-hint__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.mereka-course-outline-sidebar__actions {
+  margin-top: 1rem;
+}
+
+.mereka-authoring-course-unit-sidebar-hint,
 .mereka-authoring-course-outline-sidebar-hint {
   border: 1px solid var(--mereka-mfe-border);
   background: var(--mereka-mfe-surface-muted);
@@ -831,27 +929,8 @@ label {
   text-align: right;
 }
 
-/* Authn/login/register surfaces */
-/* [class*="auth-page"] removed 2026-02-18 (bead 115d.18). */
-/* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
-/* per SELECTOR_HARDENING_POLICY: class-based attribute selectors are preferred over data-testid for production CSS */
-/* [class*="authn"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
+/* .page__account-settings is intentionally slot-owned in this shell; audit notes live in git history. */
 
-/* Account/settings surfaces */
-/* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
-
-/* .page__account-settings removed 2026-02-28: account styling is now slot-owned
- * via org.openedx.frontend.account.id_verification_page.v1 and
- * org.openedx.frontend.account.additional_profile_fields.v1.
- */
-
-/* [class*="learner-dashboard"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
-/* [class*="learning"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
-
-/* [class*="discussion"] singular removed 2026-02-18 (bead 115d.18). */
-/* [class*="discussions"] plural removed 2026-02-28 (dead selector audit, no live DOM matches). */
-
-/* RISK: LOW — responsive navbar padding; degrades to desktop padding only */
 @media (max-width: 768px) {
   .navbar {
     padding: var(--mereka-mfe-navbar-mobile-padding);
@@ -866,22 +945,38 @@ label {
   }
 
   .mereka-authn-login-branding__eyebrow,
-  .mereka-authn-login-branding__route-links,
   .mereka-authn-login-branding__actions {
     justify-content: center;
-  }
-
-  .mereka-authn-login-branding__signals {
-    grid-template-columns: 1fr;
   }
 
   .mereka-no-courses-view {
     text-align: center;
   }
 
+  .mereka-learning-course-header {
+    grid-template-columns: 1fr;
+  }
+
+  .mereka-learning-course-header__signal-list {
+    grid-template-columns: 1fr;
+  }
+
   .mereka-learning-course-header__meta,
+  .mereka-course-outline-sidebar__actions,
+  .mereka-learning-notifications-discussions-sidebar-hint__actions,
+  .mereka-learning-course-exit-dashboard-footnote-link-hint__actions,
   .mereka-dashboard-header-slot__actions,
   .mereka-no-courses-view__actions {
     justify-content: center;
+  }
+
+  .mereka-progress-certificate-status {
+    grid-template-columns: 1fr;
+  }
+
+  .mereka-learning-course-header__actions .mereka-shell-link,
+  .mereka-course-outline-sidebar__actions .mereka-shell-link,
+  .mereka-progress-certificate-status__actions .mereka-shell-link {
+    width: 100%;
   }
 }
