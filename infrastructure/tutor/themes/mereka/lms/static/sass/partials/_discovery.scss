@@ -5,7 +5,12 @@
 // discovery presentation.
 
 .find-courses {
-  background: var(--mereka-color-surface-primary);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(45, 137, 139, 0.1), transparent 24rem),
+    radial-gradient(circle at 100% 0%, rgba(171, 59, 120, 0.11), transparent 26rem),
+    linear-gradient(180deg, rgba(252, 252, 253, 0.98), rgba(241, 245, 252, 0.94)),
+    var(--mereka-color-surface-primary);
+  padding-bottom: clamp(1.5rem, 3vw, 3rem);
 }
 
 .find-courses .courses-container {
@@ -23,6 +28,7 @@
   gap: 0.75rem;
   padding: 1.05rem 1.15rem 0.95rem;
   margin-bottom: 1.25rem;
+  backdrop-filter: blur(16px);
 }
 
 .find-courses #discovery-message.search-status-label {
@@ -85,6 +91,7 @@
   border: 1px solid rgba(26, 22, 35, 0.08);
   box-shadow: var(--mereka-shadow-card);
   padding: 1.05rem 1.15rem 1.1rem;
+  backdrop-filter: blur(16px);
 }
 
 .find-courses .search-facets h2,
@@ -114,6 +121,7 @@
   border: 1px solid rgba(26, 22, 35, 0.08);
   box-shadow: var(--mereka-shadow-card);
   padding: 0.95rem 1.1rem;
+  backdrop-filter: blur(16px);
 }
 
 .find-courses #filter-bar .filters-inner {
@@ -249,9 +257,9 @@
 }
 
 .find-courses .courses-listing {
-  margin-top: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.15rem;
+  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.4rem;
 }
 
 .find-courses .courses-listing li,
@@ -264,90 +272,201 @@
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 24px 54px rgba(26, 22, 35, 0.12);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.find-courses .course:hover,
+.find-courses .course:focus-within {
+  transform: translateY(-4px);
+  border-color: rgba(45, 137, 139, 0.2);
+  box-shadow: 0 32px 62px rgba(26, 22, 35, 0.16);
 }
 
 .find-courses .course .course-image {
-  min-height: 164px;
+  min-height: 216px;
 }
 
 .find-courses .course .course-image .cover-image {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
   position: relative;
+  overflow: hidden;
+}
+
+.find-courses .course .course-image .cover-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10, 8, 14, 0.06), rgba(10, 8, 14, 0.62)),
+    radial-gradient(circle at top left, rgba(45, 137, 139, 0.2), transparent 48%);
+  pointer-events: none;
 }
 
 .find-courses .course .course-image img {
-  min-height: 164px;
+  display: block;
+  width: 100%;
+  min-height: 216px;
+  object-fit: cover;
+  transition: transform 240ms ease;
+}
+
+.find-courses .course:hover .course-image img,
+.find-courses .course:focus-within .course-image img {
+  transform: scale(1.05);
+}
+
+.find-courses .course .course-badge-row {
+  position: absolute;
+  inset: 1rem 1rem auto;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.find-courses .course .course-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 2rem;
+  padding: 0.36rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  box-shadow: 0 18px 30px rgba(10, 8, 14, 0.18);
+}
+
+.find-courses .course .course-badge--org {
+  max-width: calc(100% - 7rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.find-courses .course .course-badge--code {
+  background: rgba(10, 8, 14, 0.58);
 }
 
 .find-courses .course .course-info {
-  padding: 1.15rem 1.15rem 1.25rem;
+  padding: 1.3rem 1.3rem 1.35rem;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.8rem;
+  min-height: 100%;
+}
+
+.find-courses .course .course-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.8rem;
+  justify-content: space-between;
+}
+
+.find-courses .course .course-kicker {
+  display: inline-flex;
+  align-items: center;
+  color: var(--mereka-color-ink-700);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .find-courses .course .course-name {
+  display: flex;
+  flex-direction: column;
   gap: 0.3rem;
+  margin: 0;
 }
 
 .find-courses .course .course-title {
-  font-size: 1.08rem !important;
+  font-family: var(--mereka-font-heading);
+  font-size: clamp(1.28rem, 2.2vw, 1.7rem) !important;
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--mereka-color-ink-900);
 }
 
 .find-courses .course .course-organization {
   color: var(--mereka-color-teal) !important;
-  font-size: 0.78rem !important;
+  font-size: 0.76rem !important;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   margin-bottom: 0 !important;
   display: inline-flex !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-transform: capitalize !important;
+  text-transform: uppercase !important;
 }
 
-.find-courses .course .course-code {
-  align-self: flex-start;
-  background: rgba(26, 22, 35, 0.05);
-  padding: 0.2rem 0.55rem !important;
-  border-radius: 999px !important;
+.find-courses .course .course-guidance {
+  margin: 0;
+  color: var(--mereka-color-ink-700);
+  font-size: 0.96rem;
+  line-height: 1.65;
+}
+
+.find-courses .course .course-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-top: auto;
 }
 
 .find-courses .course .course-date {
   color: var(--mereka-color-ink-500);
   font-size: 0.86rem;
   line-height: 1.35;
-  margin-top: auto;
-  padding-top: 0.9rem;
-  border-top: 1px solid rgba(26, 22, 35, 0.08);
-}
-
-.find-courses .course .course-image .cover-image .learn-more {
-  position: absolute;
-  bottom: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  white-space: nowrap;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0;
+  max-width: 16rem;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .find-courses .learn-more {
-  color: var(--mereka-color-ink-900) !important;
-  background: rgba(255, 255, 255, 0.94) !important;
-  border: 1px solid rgba(26, 22, 35, 0.1) !important;
-  padding: 0.45rem 0.8rem !important;
+  color: #fff !important;
+  background: var(--mereka-gradient-primary) !important;
+  border: 0 !important;
+  padding: 0.78rem 1.1rem !important;
   border-radius: 999px !important;
-  font-weight: 700;
-  font-size: 0.76rem !important;
+  font-weight: 800;
+  font-size: 0.78rem !important;
   letter-spacing: 0.08em;
   text-transform: uppercase !important;
-  box-shadow: 0 10px 20px rgba(26, 22, 35, 0.12) !important;
+  box-shadow: 0 14px 28px rgba(45, 137, 139, 0.2) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
 }
 
 .find-courses .learn-more:hover,
 .find-courses .learn-more:focus {
-  box-shadow: 0 14px 24px rgba(45, 137, 139, 0.16) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 18px 30px rgba(45, 137, 139, 0.26) !important;
 }
 
 .course-info,
@@ -737,11 +856,29 @@
 
   .find-courses .course .course-image,
   .find-courses .course .course-image img {
-    min-height: 138px;
+    min-height: 184px;
   }
 
-  .find-courses .course .course-code {
-    display: none;
+  .find-courses .course .course-badge-row {
+    inset: 0.8rem 0.8rem auto;
+  }
+
+  .find-courses .course .course-badge--org {
+    max-width: 100%;
+  }
+
+  .find-courses .course .course-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .find-courses .course .course-date {
+    max-width: none;
+  }
+
+  .find-courses .learn-more {
+    justify-content: center;
+    width: 100%;
   }
 
   .course-info .intro-inner-wrapper,

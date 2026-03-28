@@ -41,6 +41,21 @@ test.describe('Unauthenticated smoke — LMS', () => {
     expect(await metricCards.count()).toBeGreaterThanOrEqual(3);
   });
 
+  test('LMS course catalog responds 200 with premium discovery cards', async ({ page, baseURL }) => {
+    const response = await page.goto(`${baseURL}/courses`, { waitUntil: 'domcontentloaded' });
+    expect(response?.status()).toBe(200);
+
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await expect(page.locator('#discovery-form')).toHaveCount(1);
+    await expect(page.locator('.search-facets')).toHaveCount(1);
+
+    const firstCard = page.locator('.courses-listing .course-card-premium').first();
+    await expect(firstCard).toBeVisible({ timeout: 20_000 });
+    await expect(firstCard.locator('.course-badge-row')).toHaveCount(1);
+    await expect(firstCard.locator('.course-guidance')).toHaveCount(1);
+    await expect(firstCard.locator('.learn-more')).toContainText(/Explore Course/i);
+  });
+
   test('LMS heartbeat returns 200', async ({ request, baseURL }) => {
     const response = await request.get(`${baseURL}/heartbeat`);
     expect(response.status()).toBe(200);
