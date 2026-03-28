@@ -1,5 +1,5 @@
 # Two-Week Platform Truth Tracker
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T03:45:19Z • Status: active_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T04:43:00Z • Status: active_
 
 This is the execution board for the next 14 days. It is intentionally cross-repo and cross-surface: app CI truth, infra promotion truth, live runtime truth, and frontend source-of-truth cleanup all belong here when they are still active and verifiable.
 
@@ -23,6 +23,7 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
   - `#1152` `docs(status): refresh platform truth control point` merged `2026-03-28T02:29:33Z`
   - `#1153` `docs(branding): clarify runtime shim ownership` merged `2026-03-28T02:45:35Z`
   - `#1154` `fix(ci): checkout post-deploy gate policy` merged `2026-03-28T03:30:07Z`
+  - `#1155` `docs(status): refresh platform truth control point` merged `2026-03-28T03:48:07Z`
 - Recently merged in `bbi-infrastructure`:
   - `#2155` `feat(promotion): infra-owned dev image promotion for mereka-lms` merged `2026-03-27T13:08:26Z`
   - `#2157` `fix(ci): route dev promotion through pull requests` merged `2026-03-27T13:36:43Z`
@@ -33,19 +34,31 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
   - `#842` is closed by `#1148`
   - `#843` is closed by `#1153`
 - Active app PR lanes:
-  - none on the platform-truth board
+  - `#1157` `feat(footer): share public footer content source`
+  - head: `65917cf2cccdbd57304d46b60f22a8abeeaee597`
+  - current state: heavy CI tail only, no known failing job
+  - `#1158` `docs(branding): align tenant runtime contract`
+  - head: `2bd0eeb30d8c0b153fff792dd8bbf32e30f38058`
+  - current state: rerun started cleanly after a narrow verification-catalog refresh
+  - `#1159` `docs(tenant-branding): align palette truth`
+  - head: `252e6ccd10f1aefd1cd27aaf425fb9c0211b49a5`
+  - current state: draft follow-on lane for the narrower tenant palette truth boundary
+  - `#1160` `test(smoke): require both public mfe config surfaces`
+  - head: `e284572e5ac1de6a47461d4c8a5bf45e688fdcdb`
+  - current state: new proof-hardening lane; CI just started
 - Active docs PR lane:
-  - `#1155` `docs(status): refresh platform truth control point`
-  - only open PR in `mereka-lms`
+  - none; `#1155` is merged
 - Active infra PR lanes:
   - none on the platform-truth board; `#2162` is already merged
+- Non-board open PRs:
+  - `#1156` Dependabot bump; not part of the platform-truth program
 - Live dev runtime is on the current promoted image set:
   - `openedx` deployments use `4aba20f30871938d59594fbf70e2ca99e389da5a@sha256:299bd93755f7e4e93da9f0ef38a725343508a33a862bc97d8dd02f23f1320b8f`
   - `mfe` uses `4aba20f30871938d59594fbf70e2ca99e389da5a@sha256:ddd93e8603d96d3a639f89c281a00785fa822537f1feb3eadd45d69fcfc7449d`
-- The LMS-host/apps-host MFE-config parity gap is repaired live on nonprod:
+- The LMS/apps MFE-config parity gap is repaired live on nonprod:
   - `bash scripts/qa/verify-mfe-config-contract.sh --env dev` passes
   - `bash scripts/qa/verify-mfe-config-contract.sh --env staging` passes
-  - live dev and staging LMS-host/apps-host public surfaces now return non-null values for the governed learner/account/profile/login key family
+  - live dev and staging LMS/apps public surfaces now return non-null values for the governed learner/account/profile/login key family
 - The promotion boundary is materially stronger than it was 24 hours ago:
   - `bbi-infrastructure/.github/workflows/promote-dev-image.yml` is merged
   - `bbi-infrastructure/.github/workflows/promote-image.yml` already exists as the broader governed promotion surface
@@ -77,61 +90,33 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
 
 ## Current control point
 
-The system is no longer blocked by stale queue debt or unclear runner ownership. The remaining risk is concentrated in four places:
+The system is no longer blocked by stale queue debt or unclear runner ownership. `#1155` is merged, live LMS/apps MFE-config parity is repaired, `#843` is closed, `#1157` is the active footer-source merge lane, and `#1158` is the first truthful tenant-branding follow-on lane.
 
-1. merge `mereka-lms#1155` so the active-status docs stop lagging behind reality
-2. open the next real implementation lane: shared footer content source across LMS and MFE surfaces
-3. open the MFE-config contract truth lane so the live parity repair is backed by an explicit contract and verifier
-4. leave the already-closed enterprise/frontend ownership lanes retired unless fresh evidence reopens them
+The remaining risk is concentrated in five places:
+
+1. land `#1157` so the footer source of truth is shared across LMS and MFE surfaces
+2. land `#1158` and `#1159` so the tenant-branding docs/schema/verifier stop over-claiming current runtime behavior
+3. land `#1160` so the browser smoke lane hard-requires both public MFE-config surfaces
+4. only then open the real runtime injection lane from a truthful baseline
+5. keep the promotion proof chain explicit from build digest -> infra PR -> Argo realization -> live runtime
+6. leave the already-closed MFE-config and enterprise/frontend ownership lanes retired unless fresh evidence reopens them
 
 ## Two-week execution board
 
-### T-01 — Merge `#1155` and refresh the control-plane docs to current reality
+### T-01 — Land `#1157` for the shared footer content source
 
 Priority: `P0`
 Owner surfaces: `mereka-lms`
 
 Current truth:
 
-- `#1154` is merged and the post-merge `main` runs are clean.
-- `#1155` is the remaining open docs lane in `mereka-lms`.
-- the tracker is one control point behind unless it absorbs the latest queue state.
+- `#1155` is merged, so the docs control-point loop is already closed.
+- `#1157` is the active app PR lane in `mereka-lms`.
+- live LMS/apps MFE-config parity is already repaired and should stay a guardrail, not the blocker for this lane.
 
 Done when:
 
-- `#1155` is rebased onto current `main`
-- the tracker names `#1154` as merged, not open
-- the tracker points at the next actual implementation lanes rather than stale queue repair
-
-Verification commands:
-
-```bash
-gh pr list --repo Biji-Biji-Initiative/mereka-lms --state open --limit 10
-gh pr view 1155 --repo Biji-Biji-Initiative/mereka-lms --json headRefOid,mergeStateStatus,statusCheckRollup,url
-git diff --check
-```
-
-Notes:
-
-- Docs stay downstream of reality.
-- The tracker should now reflect a drained app queue, not a still-open repair queue.
-
-### T-02 — Open the shared footer content source lane
-
-Priority: `P0`
-Owner surfaces: `mereka-lms`
-
-Current truth:
-
-- there is still real duplicate footer content ownership between LMS Mako and the MFE footer implementation
-- current public MFE footer content lives in `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js`
-- current LMS footer content lives independently in `infrastructure/tutor/themes/mereka/lms/templates/footer.html`
-- both surfaces render correctly today, but future copy/legal/nav changes still require multiple edits
-- the smallest credible repair is a shared footer payload exposed on the existing Django↔MFE config bridge while keeping the current DOM/class names stable
-
-Done when:
-
-- one canonical public-footer payload exists for both LMS and MFE surfaces
+- the shared footer content source is the single source of truth for LMS and MFE public footer content
 - the current LMS footer and `MerekaFooter` render from the same content source
 - current footer DOM/classnames remain compatible with existing CSS/verifiers
 
@@ -148,41 +133,115 @@ git diff --check
 Notes:
 
 - Keep CMS/Studio and enterprise footer surfaces out of the first repair unless they can consume the same payload with no extra routing/build work.
-- This is now the clearest remaining implementation lane after the queue repair work.
+- The footer-source lane replaces the old queue-repair framing.
 
-### T-03 — Open the MFE-config contract truth lane
+### T-02 — Land `#1158` and `#1159` to align the tenant-branding runtime contract
 
-Priority: `P1`
+Priority: `P0`
 Owner surfaces: `mereka-lms`
 
 Current truth:
 
-- live dev/staging parity for the governed learner/account/profile/login key family is repaired
-- the remaining work is to make the contract explicit, stable, and verifier-backed
-- `scripts/qa/verify-mfe-config-contract.sh` is the right lane boundary for this work
-- the public API should not regress back to implicit or half-populated key exposure
+- `#1158` is the first truthful repair for the broad tenant-branding runtime contract.
+- `#1159` is the narrower follow-on lane for the palette-specific truth boundary.
+- the repo had conflicting canonical claims:
+  - `docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md` said `palette.*` maps directly to plugin-injected runtime CSS variables and `font_source_url` is injected into the MFE head
+  - other repo truth already said tenant-specific runtime colour/token injection is not implemented as a live guarantee
+  - `scripts/qa/verify-tenant-branding-runtime.sh` treated missing brand-color tokens as informational only
+- that means the first repair is contract alignment, not pretending the runtime injector already exists
 
 Done when:
 
-- the canonical contract for learner/account/discussions-facing MFE config keys is explicit
-- the verifier hard-fails if the governed keys regress
-- the live API stays truthful on dev and staging for the approved key family
+- `#1158` merges on a truthful head
+- `#1159` either merges or is explicitly retired as redundant
+- the docs/schema/verifier all describe the same current tenant-branding runtime model
+- the next runtime injector lane can start from a truthful baseline instead of contradictory docs
+
+Verification commands:
+
+```bash
+bash scripts/qa/verify-multitenant-brand-platform.sh
+bash scripts/qa/verify-tenant-branding-contract.sh
+bash scripts/qa/verify-tenant-token-switching.sh
+git diff --check
+```
+
+Notes:
+
+- This lane does not implement the runtime injector yet.
+- Its purpose is to stop lying about what current runtime tenant theming does.
+
+### T-03 — Open the real tenant CSS runtime injection lane from the repaired contract
+
+Priority: `P0`
+Owner surfaces: `mereka-lms`
+
+Current truth:
+
+- `#1158` is the contract-truth first move.
+- current governed runtime still does not prove live per-tenant `palette.*` -> `--mereka-color-*` injection.
+- generated tenant token assets exist and are verified offline, but that is not the same thing as live runtime injection.
+
+Done when:
+
+- the canonical runtime owner of tenant palette values is explicit
+- a real runtime injection path exists for the documented `palette.*` contract, or the docs/spec are deliberately narrowed further
+- the relevant verifier surface hard-fails on drift between documented and implemented tenant palette behavior
+
+Verification commands:
+
+```bash
+rg -n "TenantConfig\\.palette|palette\\.(primary|secondary|accent|background|text)|--mereka-color-primary|--mereka-color-secondary|--mereka-color-accent|--mereka-color-background|--mereka-color-text" infrastructure deploy scripts tests -S
+bash scripts/qa/verify-token-drift.sh
+bash scripts/qa/verify-branding-css.sh
+git diff --check
+```
+
+Notes:
+
+- Do not claim the runtime contract is real until the runtime path exists.
+
+### T-04 — Keep the repaired MFE-config parity and promotion proof explicit
+
+Priority: `P1`
+Owner surfaces: split between `mereka-lms` and `bbi-infrastructure`
+
+Current truth:
+
+- live dev and staging LMS/apps MFE-config parity is repaired
+- current `main` already checks both public surfaces in `scripts/qa/verify-mfe-config-contract.sh`
+- `#1160` is now open to tighten the residual Playwright smoke gap from `apps || LMS` to `apps && LMS`
+- the broader promotion boundary is materially stronger after `#2155`, `#2157`, `#2161`, and `#2162`
+- the remaining value is not another redesign; it is keeping the proof chain explicit on the next real promotion
+
+Done when:
+
+- the repaired MFE-config lane stays guarded without being misclassified as still broken
+- `#1160` merges or its exact scope is absorbed elsewhere without losing the `both public surfaces must pass` guarantee
+- the next promotion proof bundle names each step explicitly:
+  - built digest
+  - infra PR / overlay mutation
+  - Argo desired-state move
+  - live deployment image move
+  - runtime verifier pass
 
 Verification commands:
 
 ```bash
 bash scripts/qa/verify-mfe-config-contract.sh --env dev
 bash scripts/qa/verify-mfe-config-contract.sh --env staging
-bash scripts/qa/verify-multisite-config.sh dev --context rke2-nonprod --namespace mereka-lms-dev
-git diff --check
+gh pr view 2155 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,url
+gh pr view 2157 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,url
+gh pr view 2161 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,url
+gh pr view 2162 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,url
+kubectl get deploy -n mereka-lms-dev lms cms lms-worker cms-worker mfe -o jsonpath='{range .items[*]}{.metadata.name}{"="}{.spec.template.spec.containers[0].image}{"\n"}{end}'
 ```
 
 Notes:
 
-- Treat this as a runtime contract lane, not a docs lane.
-- Do not assume ownership until the diff proves where the missing values belong.
+- Keep this lane in maintenance/proof mode unless fresh evidence reopens a runtime defect.
 
-### T-04 — Keep the closed enterprise/frontend ownership lanes retired unless they regress
+### T-05 — Keep the closed enterprise/frontend ownership lanes retired unless they regress
 
 Priority: `P1`
 Owner surfaces: `mereka-lms`
@@ -190,8 +249,9 @@ Owner surfaces: `mereka-lms`
 Current truth:
 
 - `#1148` is merged and `#842` is closed.
-- `#1153` is merged and `#843` is closed.
-- no active implementation PR is currently needed on either lane.
+- `#843` is closed.
+- the MFE-config parity lane is repaired and verifier-backed on current `main`.
+- no active implementation PR is currently needed on any of those closed lanes.
 
 Done when:
 
@@ -205,6 +265,7 @@ bash scripts/qa/verify-token-drift.sh
 bash scripts/qa/verify-branding-css.sh
 gh issue view 842 --repo Biji-Biji-Initiative/mereka-lms --json state,url
 gh issue view 843 --repo Biji-Biji-Initiative/mereka-lms --json state,url
+git diff --check
 ```
 
 Notes:
@@ -231,9 +292,11 @@ These are real, but they should not displace the two-week critical path above.
 ## Do not claim this program closed unless all of these are true
 
 - `#1148` is merged and `#842` is no longer open debt
-- live dev and staging LMS-host/apps-host public MFE-config surfaces stay aligned for the governed learner/account/profile/login keys, and `#1150` keeps that parity durable in repo truth
+- live dev and staging LMS/apps public MFE-config surfaces stay aligned for the governed learner/account/profile/login keys, and `#1150` keeps that parity durable in repo truth
 - `#1154` is merged and its post-merge `main` runs close cleanly
 - the `#2161` false-negative is closed by `#2162` and its merge-commit follow-through is clean
-- the shared footer content source lane is opened and described as a single-source repair rather than a vague drift warning
+- `#1157` is the active footer-source lane and is described as a single-source repair rather than a vague drift warning
+- `#1158` is explicitly tracked as the contract-truth first move for tenant runtime theming
+- the next tenant palette/runtime lane is described from implementation evidence, not aspiration
 - `#843` remains closed unless new frontend ownership drift appears
 - the active trackers still match the actual repo, infra, and runtime state
