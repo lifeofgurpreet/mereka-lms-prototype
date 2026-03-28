@@ -12,6 +12,8 @@ on:
       - 'deploy/k8s/base/apps/openedx/**'
       - 'infrastructure/tutor/**'
       - 'assets/branding/**'
+      - 'infrastructure/tutor/apply-patches.sh'
+      - 'infrastructure/tutor/patches/**'
       - 'scripts/infra/**'
       - 'scripts/lib/**'
       - 'scripts/qa/verify-build-provenance.sh'
@@ -128,6 +130,73 @@ jobs:
               ]);
             await core.summary.write();
 
+  resolve-build-scope:
+    name: Resolve Build Scope
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 10
+    needs: cancel-superseded-queued-main-builds
+    permissions:
+      contents: read
+    outputs:
+      build_openedx: ${{ steps.scope.outputs.build_openedx }}
+      build_mfe: ${{ steps.scope.outputs.build_mfe }}
+      scope_label: ${{ steps.scope.outputs.scope_label }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Resolve build scope
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_BUILD_OPENEDX: ${{ inputs.build_openedx }}
+          INPUT_BUILD_MFE: ${{ inputs.build_mfe }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+          PUSH_HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            build_openedx="${INPUT_BUILD_OPENEDX}"
+            build_mfe="${INPUT_BUILD_MFE}"
+            scope_label="manual"
+            {
+              echo "build_openedx=${build_openedx}"
+              echo "build_mfe=${build_mfe}"
+              echo "scope_label=${scope_label}"
+            } >> "$GITHUB_OUTPUT"
+
+            {
+              echo "### Build Scope"
+              echo "- Scope label: \`${scope_label}\`"
+              echo "- Build OpenEdX: \`${build_openedx}\`"
+              echo "- Build MFE: \`${build_mfe}\`"
+              echo
+              echo "- Source: workflow_dispatch inputs"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          base_sha="$PUSH_BASE_SHA"
+          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
+            base_sha="$(git rev-parse HEAD^)"
+          fi
+
+          git diff --name-only "$base_sha" "$PUSH_HEAD_SHA" > var/ci/build-scope-files.txt
+
+          ./scripts/infra/resolve-build-scope.sh \
+            --github-output "$GITHUB_OUTPUT" \
+            --summary-file var/ci/build-scope-summary.md \
+            < var/ci/build-scope-files.txt
+
+          {
+            echo "### Build Scope"
+            echo "- Diff range: \`${base_sha}..${PUSH_HEAD_SHA}\`"
+            cat var/ci/build-scope-summary.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
   lint:
     name: Lint & Validate
     runs-on: mereka-k8s-runners
@@ -171,8 +240,8 @@ jobs:
     # Keep outer timeout comfortably above inner image-build timeout (170m)
     # so pre/post-build checks and artifact upload have recovery headroom.
     timeout-minutes: 200
-    needs: lint
-    if: ${{ github.event_name == 'push' || inputs.build_openedx }}
+    needs: [resolve-build-scope, lint]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' }}
     permissions:
       contents: read
       packages: write
@@ -614,8 +683,8 @@ jobs:
       group: build-mfe-${{ github.ref == 'refs/heads/main' && github.ref || github.run_id }}
       cancel-in-progress: false
     timeout-minutes: 120
-    needs: lint
-    if: ${{ github.event_name == 'push' || inputs.build_mfe }}
+    needs: [resolve-build-scope, lint]
+    if: ${{ needs.resolve-build-scope.outputs.build_mfe == 'true' }}
     permissions:
       contents: read
       packages: write

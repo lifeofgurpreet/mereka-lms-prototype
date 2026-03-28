@@ -1266,6 +1266,26 @@ scripts:
     proof_command: "bash scripts/ci/preflight-check.sh 2>&1 | head -20"
     criticality: release-blocking
 
+  - path: scripts/infra/resolve-build-scope.sh
+    owner: platform-team
+    purpose: >
+      Conservatively classifies changed paths into Open edX-only, MFE-only, or
+      shared build scope so the Tutor image workflow skips unnecessary image
+      builds without silently dropping required ones.
+    inputs:
+      - file paths via argv or stdin
+      - --github-output <path> (optional)
+      - --summary-file <path> (optional)
+    outputs:
+      - stdout (scope summary markdown)
+      - optional GitHub output file (build_openedx, build_mfe, scope_label)
+      - optional summary markdown file
+    side_effects: none
+    dry_run: true  # read-only classifier
+    lanes: [dev, staging, prod]
+    proof_command: "printf 'infrastructure/tutor/themes/mereka/mfe/mereka.scss\n' | bash scripts/infra/resolve-build-scope.sh | head -5"
+    criticality: release-blocking
+
   # ── Tutor Configuration ──────────────────────────────────────────────────────
 
   - path: scripts/infra/tutor-config-save.sh

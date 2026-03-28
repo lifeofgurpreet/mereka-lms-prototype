@@ -14,6 +14,7 @@ BUILD_WF="${BUILD_WF_OVERRIDE:-$REPO_ROOT/.github/workflows/build-tutor-images.y
 RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUILD_WF")"
 UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
 OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Verify OpenEdX image branding contract/p' "$BUILD_WF")"
+RESOLVE_SCOPE_BLOCK="$(sed -n '/^  resolve-build-scope:/,/^  lint:/p' "$BUILD_WF")"
 
 PASS=0 FAIL=0
 
@@ -97,6 +98,8 @@ fi
 
 # Workflow path filter must include release/build scripts it executes.
 required_trigger_paths=(
+  "infrastructure/tutor/apply-patches.sh"
+  "infrastructure/tutor/patches/**"
   "scripts/infra/**"
   "scripts/lib/**"
   "scripts/qa/verify-build-provenance.sh"
@@ -109,6 +112,36 @@ for trigger_path in "${required_trigger_paths[@]}"; do
     fail "workflow path filter missing $trigger_path"
   fi
 done
+
+if [[ -f "$REPO_ROOT/scripts/infra/resolve-build-scope.sh" ]]; then
+  pass "resolve-build-scope helper exists"
+else
+  fail "resolve-build-scope helper missing"
+fi
+
+if [[ "$RESOLVE_SCOPE_BLOCK" == *"./scripts/infra/resolve-build-scope.sh"* ]]; then
+  pass "workflow resolves push build scope via canonical helper"
+else
+  fail "workflow missing canonical resolve-build-scope helper call"
+fi
+
+if [[ "$RESOLVE_SCOPE_BLOCK" == *"fetch-depth: 0"* ]]; then
+  pass "build-scope resolver uses full git history for diff safety"
+else
+  fail "build-scope resolver missing fetch-depth: 0"
+fi
+
+if grep -q "needs.resolve-build-scope.outputs.build_openedx == 'true'" "$BUILD_WF"; then
+  pass "build-openedx job is gated by resolved build scope"
+else
+  fail "build-openedx job missing resolved build-scope gate"
+fi
+
+if grep -q "needs.resolve-build-scope.outputs.build_mfe == 'true'" "$BUILD_WF"; then
+  pass "build-mfe job is gated by resolved build scope"
+else
+  fail "build-mfe job missing resolved build-scope gate"
+fi
 
 # App-owned proof must route through lms-ops in build workflow
 if grep -qE '\./bin/lms-ops[[:space:]]+proof' "$BUILD_WF"; then

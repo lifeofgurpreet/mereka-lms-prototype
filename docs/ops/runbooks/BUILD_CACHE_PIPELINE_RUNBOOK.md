@@ -84,10 +84,19 @@ lint ──┬──► build-openedx ──► slsa-provenance
 `slsa-provenance` runs on `ubuntu-24.04` (GitHub-hosted) after both build jobs.
 
 **Triggers**:
-- `push` to `main` on paths: `infrastructure/tutor/**`, `assets/branding/**`, or the
-  workflow file itself
+- `push` to `main` on governed Tutor/build paths. Push runs now resolve a
+  conservative build scope first:
+  - obvious Open edX-only changes build only `build-openedx`
+  - obvious MFE-only changes build only `build-mfe`
+  - shared or ambiguous changes still build both images
 - `workflow_dispatch` (manual) with inputs: `build_openedx`, `build_mfe`,
   `update_gitops`, `target_environment`, `openedx_runner`, `image_tag`
+
+**Important**:
+- `workflow_dispatch` remains the canonical dual-image release/proof path when
+  you need both digests and the `release-bundle` artifact.
+- partial `push` builds are an iteration-speed optimization, not a substitute
+  for the explicit release/promotion lane.
 
 ---
 
