@@ -35,31 +35,31 @@ runs:
         resolve_from_manifest() {
           local path="$1"
           python3 - "$path" <<'PY'
-from pathlib import Path
-import json
-import sys
+        from pathlib import Path
+        import json
+        import sys
 
-path = Path(sys.argv[1])
-data = json.loads(path.read_text(encoding="utf-8"))
+        path = Path(sys.argv[1])
+        data = json.loads(path.read_text(encoding="utf-8"))
 
-if path.name == "package-lock.json":
-    packages = data.get("packages", {})
-    root = packages.get("", {})
-    deps = {}
-    deps.update(root.get("dependencies", {}))
-    deps.update(root.get("devDependencies", {}))
-    version = deps.get("@playwright/test") or deps.get("playwright")
-else:
-    deps = {}
-    deps.update(data.get("dependencies", {}))
-    deps.update(data.get("devDependencies", {}))
-    version = deps.get("@playwright/test") or deps.get("playwright")
+        if path.name == "package-lock.json":
+            packages = data.get("packages", {})
+            root = packages.get("", {})
+            deps = {}
+            deps.update(root.get("dependencies", {}))
+            deps.update(root.get("devDependencies", {}))
+            version = deps.get("@playwright/test") or deps.get("playwright")
+        else:
+            deps = {}
+            deps.update(data.get("dependencies", {}))
+            deps.update(data.get("devDependencies", {}))
+            version = deps.get("@playwright/test") or deps.get("playwright")
 
-if not version:
-    raise SystemExit(1)
+        if not version:
+            raise SystemExit(1)
 
-print(version)
-PY
+        print(version)
+        PY
         }
 
         version="${INPUT_VERSION:-}"
@@ -114,10 +114,10 @@ PY
         set -euo pipefail
         cd "${RUNNER_TEMP}/playwright-node"
         executable_path="$(node - <<'NODE'
-const { chromium } = require('playwright');
-process.stdout.write(chromium.executablePath());
-NODE
-)"
+        const { chromium } = require('playwright');
+        process.stdout.write(chromium.executablePath());
+        NODE
+        )"
 
         if [[ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" && -x "$executable_path" ]]; then
           echo "Using cached Playwright Chromium at $executable_path"
@@ -133,10 +133,10 @@ NODE
         npx playwright install chromium
 
         repaired_executable_path="$(node - <<'NODE'
-const { chromium } = require('playwright');
-process.stdout.write(chromium.executablePath());
-NODE
-)"
+        const { chromium } = require('playwright');
+        process.stdout.write(chromium.executablePath());
+        NODE
+        )"
 
         if [[ ! -x "$repaired_executable_path" ]]; then
           echo "ERROR: Playwright Chromium executable not found after install: $repaired_executable_path" >&2

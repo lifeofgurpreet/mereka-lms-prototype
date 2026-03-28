@@ -265,6 +265,8 @@ fi
 echo "--- 11. setup-playwright action resolves local Playwright version ---"
 if [[ ! -f "$SETUP_ACTION_FILE" ]]; then
   fail "setup-playwright action missing: ${SETUP_ACTION_FILE}"
+elif ! python3 -c "import yaml; yaml.safe_load(open('$SETUP_ACTION_FILE', encoding='utf-8'))" 2>/dev/null; then
+  fail "setup-playwright action manifest is not parseable YAML"
 elif grep -Fq "default: ''" "$SETUP_ACTION_FILE" \
   && grep -Fq "Resolved Playwright version" "$SETUP_ACTION_FILE" \
   && grep -Fq "chromium.executablePath()" "$SETUP_ACTION_FILE" \
