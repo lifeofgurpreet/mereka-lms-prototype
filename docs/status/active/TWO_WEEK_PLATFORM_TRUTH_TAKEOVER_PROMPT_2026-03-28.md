@@ -9,19 +9,20 @@ Start by reading:
 3. `docs/status/active/UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md`
 4. `docs/status/active/DEV_STAGING_TRUTH_TRACKER_2026-03-25.md`
 5. `scripts/qa/verify-mfe-config-contract.sh`
-6. `scripts/qa/verify-post-deploy-gate.sh`
+6. `scripts/qa/verify-tenant-visual-contract.sh`
 
 If you need the closed proof lanes for context, also read:
 
 7. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1148`
-8. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1153`
-9. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/842`
-10. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/843`
-11. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/834`
+8. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1158`
+9. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1165`
+10. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/842`
+11. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/843`
+12. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/834`
 
-If you need the successor implementation lane context, also read:
+If you need the active successor implementation lane context, also read:
 
-12. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/1164`
+13. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/1164`
 
 ## Mission
 
@@ -35,19 +36,19 @@ The objective is not "keep the queue busy." The objective is "finish the remaini
 
 ## Current control point
 
-The queue is no longer the problem. `#1157`, `#1158`, `#1160`, `#1161`, `#1162`, and infra `#2164` are merged, live LMS/apps MFE-config parity is repaired, `#842` / `#843` are closed, and `#834` is closed with successor work in `#1164`.
+The queue is no longer the problem. `#1158`, `#1165`, and `#1166` are merged, `#834` is closed, `#1167` is the active tracker-refresh doc lane, and `#1164` is intentionally still open until live tenant-host proof exists.
 
 The system is currently concentrated around:
 
-1. landing `#1158` as the tenant-branding contract-truth cleanup
-2. keep `#834` documented as closed truthfully instead of keeping the audit epic open as a catch-all
-3. keeping merged infra `#2164` represented truthfully as part of the promotion-proof chain
-4. keeping the repaired MFE-config parity explicit and verifier-backed
-5. leaving the closed enterprise/frontend ownership lanes retired unless fresh evidence reopens them
+1. carrying merged `#1166` through post-merge main and deployment truthfully
+2. keeping `#1164` open until live tenant-host runtime proof exists
+3. keeping the repaired nonprod MFE-config parity lane represented as closed
+4. keeping closed enterprise/frontend ownership lanes retired unless fresh evidence reopens them
+5. keeping the current board aligned with reality as merges land quickly
 
 Use the clean clones only:
 
-- `/tmp/mereka-tenant-runtime-contract` for the tenant-branding runtime-contract lane on `#1158`
+- `/tmp/mereka-tenant-palette-bridge` for `#1166` follow-through and live-proof commands
 - `/tmp/mereka-two-week-tracker` for tracker/closeout doc follow-ups
 
 ## Immediate first task
@@ -56,11 +57,11 @@ Start with `T-01` from the tracker unless fresh evidence proves another lane is 
 
 Current verified first move:
 
-1. pick up `#1158` in `/tmp/mereka-tenant-runtime-contract` so the tenant-branding docs/schema/verifier stop over-claiming runtime CSS token injection
-2. keep `/tmp/mereka-two-week-tracker` aligned with the current control point and document `#834` as closed truthfully
-3. treat `#1160` as merged proof-chain reality, not an active queue item
-4. treat `#2164` as merged proof-chain reality, not an active queue item
-5. treat `#1159` as closed unless a narrow, deliberate follow-on is still needed after `#1158`
+1. treat `#1166` as merged repo truth, not an open PR lane
+2. verify post-merge `main` and deployment movement for `#1166`
+3. run the targeted tenant-host proof once the merged change is actually live
+4. keep `/tmp/mereka-two-week-tracker` aligned with the new control point and `#1167` truthful
+5. keep `#1164` open until that runtime proof exists
 
 ## Non-negotiable rules
 
@@ -69,9 +70,9 @@ Current verified first move:
 - Do not rediscover already-closed queue debt unless new evidence shows regression.
 - Do not describe the MFE-config lane as open runtime breakage if fresh live probes show parity is repaired.
 - Do not misclassify the `Post-Deploy E2E Gate` failure as an app-runtime defect; the proven root cause is workflow checkout ordering and the fix is already merged in `#1154`.
-- Do not widen the now-merged `#1148` or `#1153` lanes into general cleanup.
+- Do not widen the now-merged `#1148`, `#1153`, `#1158`, or `#1165` lanes into general cleanup.
 - Do not reopen `#1157` or `#1159` casually; both are no longer active merge lanes.
-- Do not jump straight to the runtime palette successor before `#1158` is settled and `#834` is closed.
+- Do not close `#1164` before live tenant-host runtime proof is recorded.
 - Do not leave the tracker ahead of reality.
 
 ## Required proof discipline
@@ -92,20 +93,17 @@ Every handoff note must include:
 
 ## Working order for the next agent
 
-1. `T-01` land `#1158`
-2. `T-02` keep `#834` documented as closed and keep `#1164` explicit as the successor lane
-3. `T-03` keep merged infra `#2164` explicit in the promotion proof chain
-4. `T-04` keep the repaired MFE-config parity explicit and verifier-backed
+1. `T-01` keep merged `#1166` truthful through post-merge and runtime proof
+2. `T-02` keep `#1164` open until live tenant-host proof exists
+3. `T-03` keep the repaired MFE-config parity lane explicit and verifier-backed
+4. `T-04` keep merged infra proof-chain lanes explicit
 5. `T-05` keep the tracker and retired lanes truthful
 
 ## Minimum acceptable success for this program handoff
 
-- `#1158` is merged and removes contradictory tenant-branding runtime claims before injector work starts
-- the `#1160` merge preserves the repaired LMS/apps MFE-config parity in the browser smoke lane, not only the dedicated contract verifier
+- `#1166` is merged, post-merge `main` is clean, and runtime proof is recorded
+- `#1164` stays open until live tenant-host runtime proof exists
+- `#1158` and `#1165` remain represented as merged truth, not active lanes
 - infra `#2164` remains represented as merged proof-chain truth
-- dev and staging LMS/apps MFE-config surfaces stay aligned for the governed learner/account/profile/login keys
-- the `#2161` false-negative is closed by `#2162`, and `#2163` / `#2164` extend the proof chain cleanly
-- the repaired MFE-config parity remains explicit and verifier-backed
-- the shared footer content source lane remains retired unless fresh evidence reopens it
-- the next promotion proof bundle still covers build digest -> overlay -> Argo -> live runtime
-- the active tracker still matches the real state without narrative drift
+- infra `#2158` remains represented as the merged nonprod MFE-config repair
+- the tracker still matches the real repo, infra, and runtime state without narrative drift
