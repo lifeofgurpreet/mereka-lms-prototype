@@ -128,11 +128,26 @@ fi
 echo ""
 echo "--- Blocking Gate Structure ---"
 
+GATE_CHECK_BLOCK="$(awk '
+  /^  gate-check:$/ { in_gate=1 }
+  in_gate && /^  [A-Za-z0-9_-]+:$/ && $0 != "  gate-check:" { exit }
+  in_gate { print }
+' "$WORKFLOW_FILE")"
+
+CHECKOUT_STEP_LINE="$(printf '%s\n' "$GATE_CHECK_BLOCK" | nl -ba | awk '/actions\/checkout@/ { print $1; exit }')"
+DETERMINE_STEP_LINE="$(printf '%s\n' "$GATE_CHECK_BLOCK" | nl -ba | awk '/name: Determine run conditions/ { print $1; exit }')"
+
 # Must have a pre-flight check that skips on failed deploy
 if grep -q "should_run" "$WORKFLOW_FILE"; then
   pass "Pre-flight gate check output present (skips on failed deploy)"
 else
   fail "Missing pre-flight gate check — gate may run against a broken deploy"
+fi
+
+if [[ -n "$CHECKOUT_STEP_LINE" ]] && [[ -n "$DETERMINE_STEP_LINE" ]] && [[ "$CHECKOUT_STEP_LINE" -lt "$DETERMINE_STEP_LINE" ]]; then
+  pass "gate-check checks out the repo before reading runtime proof policy"
+else
+  fail "gate-check does not checkout the repo before Determine run conditions"
 fi
 
 # Must post a commit status

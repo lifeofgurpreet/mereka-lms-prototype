@@ -36,6 +36,11 @@ concurrency:
 permissions:
   statuses: write
 jobs:
+  gate-check:
+    steps:
+      - uses: actions/checkout@v4
+      - name: Determine run conditions
+        run: echo "set should_run output"
   e2e:
     timeout-minutes: 30
     steps:
@@ -88,6 +93,36 @@ run_expect_pass "offline gate wiring fixture passes"
 cat >"$tmpdir/.github/workflows/post-deploy-e2e.yml" <<'EOF'
 name: post-deploy-e2e
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        default: "staging"
+concurrency:
+  group: post-deploy-e2e-${{ github.event.inputs.environment || 'production' }}
+permissions:
+  statuses: write
+jobs:
+  gate-check:
+    steps:
+      - name: Determine run conditions
+        run: echo "set should_run output"
+  e2e:
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "https://staging.academyv2.mereka.io"
+      - run: echo "Resolve E2E credential source via SSO_CANARY_EMAIL_PROD and SSO_CANARY_PASSWORD_PROD"
+      - run: echo "npm-cache-dependency-path: tests/e2e/package-lock.json"
+      - run: echo "post commit status to /statuses/ using needs.gate-check.outputs.status_context"
+      - run: echo "verify-prod-parked-state.sh"
+      - run: echo "critical login enroll video forum certificate paths"
+      - uses: actions/upload-artifact@v4
+EOF
+run_expect_fail "missing gate-check checkout is rejected"
+
+cat >"$tmpdir/.github/workflows/post-deploy-e2e.yml" <<'EOF'
+name: post-deploy-e2e
+on:
   workflow_run:
     workflows: ["deploy"]
     types: [completed]
@@ -96,6 +131,11 @@ concurrency:
 permissions:
   statuses: write
 jobs:
+  gate-check:
+    steps:
+      - uses: actions/checkout@v4
+      - name: Determine run conditions
+        run: echo "set should_run output"
   e2e:
     timeout-minutes: 30
     steps:
