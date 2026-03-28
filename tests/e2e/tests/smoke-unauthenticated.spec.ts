@@ -52,7 +52,10 @@ test.describe('Unauthenticated smoke — LMS', () => {
     const firstCard = page.locator('.courses-listing .course-card-premium').first();
     await expect(firstCard).toBeVisible({ timeout: 20_000 });
     await expect(firstCard.locator('.course-badge-row')).toHaveCount(1);
+    await expect(firstCard.locator('.course-visual-copy')).toHaveCount(1);
     await expect(firstCard.locator('.course-guidance')).toHaveCount(1);
+    await expect(firstCard.locator('.course-decision-grid')).toHaveCount(1);
+    await expect(firstCard.locator('.course-footer-copy')).toHaveCount(1);
     await expect(firstCard.locator('.learn-more')).toContainText(/Explore Course/i);
   });
 
