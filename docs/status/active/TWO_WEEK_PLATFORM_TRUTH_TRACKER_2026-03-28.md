@@ -1,5 +1,5 @@
 # Two-Week Platform Truth Tracker
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T04:43:00Z • Status: active_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T05:02:01Z • Status: active_
 
 This is the execution board for the next 14 days. It is intentionally cross-repo and cross-surface: app CI truth, infra promotion truth, live runtime truth, and frontend source-of-truth cleanup all belong here when they are still active and verifiable.
 
@@ -16,6 +16,8 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
 ## Current verified state
 
 - Recently merged in `mereka-lms`:
+  - `#1157` `feat(footer): share public footer content source` merged `2026-03-28T04:48:23Z`
+  - `#1161` `docs(status): refresh platform truth tracker` merged `2026-03-28T04:51:25Z`
   - `#1148` `test(runtime): add enterprise deep-route browser proof` merged `2026-03-28T01:03:07Z`
   - `#1149` `docs(status): add two-week platform truth tracker` merged `2026-03-28T01:13:14Z`
   - `#1150` `test(runtime): verify LMS and MFE config surfaces stay aligned` merged `2026-03-28T03:13:32Z`
@@ -25,6 +27,7 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
   - `#1154` `fix(ci): checkout post-deploy gate policy` merged `2026-03-28T03:30:07Z`
   - `#1155` `docs(status): refresh platform truth control point` merged `2026-03-28T03:48:07Z`
 - Recently merged in `bbi-infrastructure`:
+  - `#2163` `feat(proof): emit mereka-lms runtime realization json` merged `2026-03-28T04:54:00Z`
   - `#2155` `feat(promotion): infra-owned dev image promotion for mereka-lms` merged `2026-03-27T13:08:26Z`
   - `#2157` `fix(ci): route dev promotion through pull requests` merged `2026-03-27T13:36:43Z`
   - `#2161` `feat(ci): prove impacted mereka-lms runtime realization` merged `2026-03-28T02:56:10Z`
@@ -34,31 +37,29 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
   - `#842` is closed by `#1148`
   - `#843` is closed by `#1153`
 - Active app PR lanes:
-  - `#1157` `feat(footer): share public footer content source`
-  - head: `65917cf2cccdbd57304d46b60f22a8abeeaee597`
-  - current state: heavy CI tail only, no known failing job
   - `#1158` `docs(branding): align tenant runtime contract`
-  - head: `2bd0eeb30d8c0b153fff792dd8bbf32e30f38058`
-  - current state: rerun started cleanly after a narrow verification-catalog refresh
-  - `#1159` `docs(tenant-branding): align palette truth`
-  - head: `252e6ccd10f1aefd1cd27aaf425fb9c0211b49a5`
-  - current state: draft follow-on lane for the narrower tenant palette truth boundary
+  - head: `6c26fccb6b5b2508e1d94afaec60f12be4e103cd`
+  - current state: refreshed on top of current `main`; queued/in-progress CI, no live failing job
   - `#1160` `test(smoke): require both public mfe config surfaces`
-  - head: `e284572e5ac1de6a47461d4c8a5bf45e688fdcdb`
-  - current state: new proof-hardening lane; CI just started
-- Active docs PR lane:
-  - none; `#1155` is merged
+  - head: `d60f37cffafed997ecefa896625441093f8d4c39`
+  - current state: refreshed on top of current `main`; only CI/CodeQL tail remains
+- Closed non-merge app lane:
+  - `#1159` `docs(tenant-branding): align palette truth`
+  - closed `2026-03-28T04:55:58Z`
+  - current state: retired as a separate lane; any still-useful palette-truth deltas must be absorbed deliberately, not merged blindly
 - Active infra PR lanes:
-  - none on the platform-truth board; `#2162` is already merged
+  - `#2164` `feat(ci): emit dev promotion proof artifact`
+  - head: `cd5242e2df6cdbf0d9f7604fbadd563480e7a1f9`
+  - current state: auto-merge armed; waiting on `policy-guards`
 - Non-board open PRs:
   - `#1156` Dependabot bump; not part of the platform-truth program
 - Live dev runtime is on the current promoted image set:
   - `openedx` deployments use `4aba20f30871938d59594fbf70e2ca99e389da5a@sha256:299bd93755f7e4e93da9f0ef38a725343508a33a862bc97d8dd02f23f1320b8f`
   - `mfe` uses `4aba20f30871938d59594fbf70e2ca99e389da5a@sha256:ddd93e8603d96d3a639f89c281a00785fa822537f1feb3eadd45d69fcfc7449d`
 - The LMS/apps MFE-config parity gap is repaired live on nonprod:
+  - live `https://academyv2.mereka.dev/api/mfe_config/v1` and `https://apps.academyv2.mereka.dev/api/mfe_config/v1?mfe=authn` both return non-null governed learner/account/profile/login key families
   - `bash scripts/qa/verify-mfe-config-contract.sh --env dev` passes
   - `bash scripts/qa/verify-mfe-config-contract.sh --env staging` passes
-  - live dev and staging LMS/apps public surfaces now return non-null values for the governed learner/account/profile/login key family
 - The promotion boundary is materially stronger than it was 24 hours ago:
   - `bbi-infrastructure/.github/workflows/promote-dev-image.yml` is merged
   - `bbi-infrastructure/.github/workflows/promote-image.yml` already exists as the broader governed promotion surface
@@ -90,34 +91,31 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
 
 ## Current control point
 
-The system is no longer blocked by stale queue debt or unclear runner ownership. `#1155` is merged, live LMS/apps MFE-config parity is repaired, `#843` is closed, `#1157` is the active footer-source merge lane, and `#1158` is the first truthful tenant-branding follow-on lane.
+The system is no longer blocked by stale queue debt or unclear runner ownership. `#1157` is merged, `#1161` is merged, live LMS/apps MFE-config parity is repaired, `#842` and `#843` are closed, and the active queue is down to `#1158`, `#1160`, and infra `#2164`.
 
-The remaining risk is concentrated in five places:
+The remaining risk is concentrated in four places:
 
-1. land `#1157` so the footer source of truth is shared across LMS and MFE surfaces
-2. land `#1158` and `#1159` so the tenant-branding docs/schema/verifier stop over-claiming current runtime behavior
-3. land `#1160` so the browser smoke lane hard-requires both public MFE-config surfaces
-4. only then open the real runtime injection lane from a truthful baseline
-5. keep the promotion proof chain explicit from build digest -> infra PR -> Argo realization -> live runtime
-6. leave the already-closed MFE-config and enterprise/frontend ownership lanes retired unless fresh evidence reopens them
+1. land `#1158` so the tenant-branding docs/schema/verifier stop over-claiming current runtime behavior
+2. land `#1160` so the browser smoke lane hard-requires both public MFE-config surfaces
+3. finish `#2164` so dev promotion emits its own proof artifact and extends the build -> infra -> runtime chain
+4. leave the already-closed MFE-config and enterprise/frontend ownership lanes retired unless fresh evidence reopens them
 
 ## Two-week execution board
 
-### T-01 — Land `#1157` for the shared footer content source
+### T-01 — Keep the shared footer source landed and retired unless it regresses
 
 Priority: `P0`
 Owner surfaces: `mereka-lms`
 
 Current truth:
 
-- `#1155` is merged, so the docs control-point loop is already closed.
-- `#1157` is the active app PR lane in `mereka-lms`.
-- live LMS/apps MFE-config parity is already repaired and should stay a guardrail, not the blocker for this lane.
+- `#1157` merged at `2026-03-28T04:48:23Z`.
+- The footer source of truth is now shared across LMS and MFE public footer content.
+- This is no longer an active implementation lane unless fresh evidence shows regression.
 
 Done when:
 
-- the shared footer content source is the single source of truth for LMS and MFE public footer content
-- the current LMS footer and `MerekaFooter` render from the same content source
+- current `main` keeps the shared footer content source intact
 - current footer DOM/classnames remain compatible with existing CSS/verifiers
 
 Verification commands:
@@ -132,18 +130,17 @@ git diff --check
 
 Notes:
 
-- Keep CMS/Studio and enterprise footer surfaces out of the first repair unless they can consume the same payload with no extra routing/build work.
-- The footer-source lane replaces the old queue-repair framing.
+- Do not reopen this lane without new source/runtime evidence.
 
-### T-02 — Land `#1158` and `#1159` to align the tenant-branding runtime contract
+### T-02 — Land `#1158` and retire `#1159` as a separate lane
 
 Priority: `P0`
 Owner surfaces: `mereka-lms`
 
 Current truth:
 
-- `#1158` is the first truthful repair for the broad tenant-branding runtime contract.
-- `#1159` is the narrower follow-on lane for the palette-specific truth boundary.
+- `#1158` is the active truthful repair for the tenant-branding runtime contract.
+- `#1159` is closed and should not be treated as an independent active lane anymore.
 - the repo had conflicting canonical claims:
   - `docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md` said `palette.*` maps directly to plugin-injected runtime CSS variables and `font_source_url` is injected into the MFE head
   - other repo truth already said tenant-specific runtime colour/token injection is not implemented as a live guarantee
@@ -153,7 +150,7 @@ Current truth:
 Done when:
 
 - `#1158` merges on a truthful head
-- `#1159` either merges or is explicitly retired as redundant
+- any still-useful palette-truth refinements are absorbed deliberately instead of reviving `#1159` wholesale
 - the docs/schema/verifier all describe the same current tenant-branding runtime model
 - the next runtime injector lane can start from a truthful baseline instead of contradictory docs
 
@@ -171,22 +168,23 @@ Notes:
 - This lane does not implement the runtime injector yet.
 - Its purpose is to stop lying about what current runtime tenant theming does.
 
-### T-03 — Open the real tenant CSS runtime injection lane from the repaired contract
+### T-03 — Finish the remaining proof lanes before opening any new runtime injector
 
 Priority: `P0`
 Owner surfaces: `mereka-lms`
 
 Current truth:
 
-- `#1158` is the contract-truth first move.
+- `#1158` is still the contract-truth first move.
+- `#1160` is still open to harden the browser smoke lane on both public MFE-config surfaces.
+- `#2164` is still open to harden dev promotion evidence.
 - current governed runtime still does not prove live per-tenant `palette.*` -> `--mereka-color-*` injection.
-- generated tenant token assets exist and are verified offline, but that is not the same thing as live runtime injection.
 
 Done when:
 
-- the canonical runtime owner of tenant palette values is explicit
-- a real runtime injection path exists for the documented `palette.*` contract, or the docs/spec are deliberately narrowed further
-- the relevant verifier surface hard-fails on drift between documented and implemented tenant palette behavior
+- `#1158`, `#1160`, and `#2164` are all merged
+- the tracker reflects that narrower queue truth
+- only then is a new runtime injector lane worth opening
 
 Verification commands:
 
@@ -211,13 +209,16 @@ Current truth:
 - live dev and staging LMS/apps MFE-config parity is repaired
 - current `main` already checks both public surfaces in `scripts/qa/verify-mfe-config-contract.sh`
 - `#1160` is now open to tighten the residual Playwright smoke gap from `apps || LMS` to `apps && LMS`
-- the broader promotion boundary is materially stronger after `#2155`, `#2157`, `#2161`, and `#2162`
+- `#2163` is merged and emits machine-readable runtime realization JSON
+- `#2164` is the remaining dev-promotion artifact lane
+- the broader promotion boundary is materially stronger after `#2155`, `#2157`, `#2161`, `#2162`, and `#2163`
 - the remaining value is not another redesign; it is keeping the proof chain explicit on the next real promotion
 
 Done when:
 
 - the repaired MFE-config lane stays guarded without being misclassified as still broken
 - `#1160` merges or its exact scope is absorbed elsewhere without losing the `both public surfaces must pass` guarantee
+- `#2164` merges so dev promotion emits its own machine-readable proof artifact
 - the next promotion proof bundle names each step explicitly:
   - built digest
   - infra PR / overlay mutation
@@ -241,7 +242,7 @@ Notes:
 
 - Keep this lane in maintenance/proof mode unless fresh evidence reopens a runtime defect.
 
-### T-05 — Keep the closed enterprise/frontend ownership lanes retired unless they regress
+### T-05 — Keep trackers and retired lanes truthful
 
 Priority: `P1`
 Owner surfaces: `mereka-lms`
@@ -250,13 +251,14 @@ Current truth:
 
 - `#1148` is merged and `#842` is closed.
 - `#843` is closed.
+- `#1157` is merged.
 - the MFE-config parity lane is repaired and verifier-backed on current `main`.
-- no active implementation PR is currently needed on any of those closed lanes.
+- the tracker in `main` was already stale again after `#1161`, which is why this follow-up exists.
 
 Done when:
 
-- the tracker stops treating these as active queue items
-- they reopen only if fresh runtime or source-of-truth evidence appears
+- the tracker stops treating closed or merged lanes as if they were still open
+- retired lanes reopen only if fresh runtime or source-of-truth evidence appears
 
 Verification commands:
 
