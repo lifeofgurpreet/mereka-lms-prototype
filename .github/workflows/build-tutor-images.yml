@@ -29,6 +29,7 @@ on:
       - 'scripts/infra/resolve-image-digest.sh'
       - 'scripts/lib/lane-normalize.sh'
       - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-openedx-image-branding.sh'
       - 'scripts/qa/verify-release-bundle.sh'
       - 'scripts/qa/verify-mfe-image-branding.sh'
       - 'scripts/qa/verify-mfe-runtime-contract.sh'
@@ -342,12 +343,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
-          # OpenEdX still needs a loadable local image for downstream branding,
-          # retag/push steps, and post-build runtime checks. The docker-container + GHA cache
-          # path regressed on main with "failed to solve: DeadlineExceeded: no
-          # active session" during Tutor's final local-daemon export, so keep
-          # this job on the reliable docker driver until the build no longer
-          # depends on output=type=docker.
+          # OpenEdX still needs Tutor's local-daemon export so the workflow can
+          # retag and publish the built image. Branding verification now runs
+          # post-push against the registry digest, but the build itself still
+          # stays on the reliable docker driver until Tutor no longer depends
+          # on output=type=docker.
           driver: docker
 
       - name: Fix DinD network MTU
@@ -513,33 +513,6 @@ jobs:
             echo "::warning::${FAILURES} cache health check(s) failed for OpenEdX build"
           fi
 
-      - name: Verify OpenEdX image branding contract
-        continue-on-error: true  # Non-blocking until FE-003 (LMS SCSS entry point) is resolved
-        run: |
-          # Since ADR-012 eliminated runtime CSS overlays, branding CSS must be
-          # baked into the image. Verify the branded CSS file exists and the
-          # branding revision marker is present.
-          mkdir -p var/ci
-          EXPECTED_LMS_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css | head -n 1)"
-          echo "Expected LMS branding rev: ${EXPECTED_LMS_BRANDING_REV:-<none>}"
-
-          # Extract staticfiles.json from the built image to verify collectstatic ran
-          docker run --rm "${OPENEDX_LOCAL_IMAGE}" \
-            python -c "import json; data=json.load(open('/openedx/staticfiles/staticfiles.json')); css=data['paths'].get('mereka/css/mereka-overrides.css','MISSING'); print(f'CSS hash: {css}')" \
-            | tee var/ci/verify-openedx-image-branding.log
-
-          # Verify the hashed CSS file actually exists in the image
-          HASHED_CSS="$(docker run --rm "${OPENEDX_LOCAL_IMAGE}" \
-            python -c "import json; data=json.load(open('/openedx/staticfiles/staticfiles.json')); print(data['paths'].get('mereka/css/mereka-overrides.css','MISSING'))")"
-          if [[ "$HASHED_CSS" == "MISSING" ]]; then
-            echo "FAIL: mereka-overrides.css not found in staticfiles.json" | tee -a var/ci/verify-openedx-image-branding.log
-            exit 1
-          fi
-          docker run --rm "${OPENEDX_LOCAL_IMAGE}" \
-            test -f "/openedx/staticfiles/${HASHED_CSS}" \
-            && echo "PASS: /openedx/staticfiles/${HASHED_CSS} exists" | tee -a var/ci/verify-openedx-image-branding.log \
-            || { echo "FAIL: /openedx/staticfiles/${HASHED_CSS} missing" | tee -a var/ci/verify-openedx-image-branding.log; exit 1; }
-
       - name: Generate image metadata
         id: meta
         run: |
@@ -589,14 +562,6 @@ jobs:
           fi
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload OpenEdX branding verification log
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
-        if: always()
-        with:
-          name: openedx-branding-contract-log
-          path: var/ci/verify-openedx-image-branding.log
-          retention-days: 3
 
   build-mfe:
     name: Build MFE Image
@@ -927,6 +892,24 @@ jobs:
         env:
           GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Verify OpenEdX image branding contract
+        continue-on-error: true  # Non-blocking until FE-003 (LMS SCSS entry point) is resolved
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          EXPECTED_LMS_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*\"([^\"]+)\".*/\1/p' infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css | head -n 1)"
+          scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" "${EXPECTED_LMS_BRANDING_REV}" \
+            | tee var/ci/verify-openedx-image-branding.log
+
+      - name: Upload OpenEdX branding verification log
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: openedx-branding-contract-log
+          path: var/ci/verify-openedx-image-branding.log
+          retention-days: 3
 
       - name: Generate SBOM for OpenEdX image
         continue-on-error: true  # Non-blocking: SBOM is informational, should not block image delivery

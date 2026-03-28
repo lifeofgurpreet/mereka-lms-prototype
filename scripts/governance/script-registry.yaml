@@ -305,6 +305,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-enterprise-observability.sh
     - script: scripts/qa/verify-idempotency.sh
     - script: scripts/qa/verify-tutor-branding-render.sh
+    - script: scripts/qa/verify-openedx-image-branding.sh
     - script: scripts/qa/verify-mfe-image-branding.sh
     - script: scripts/qa/verify-airtable-readiness.sh
     - script: scripts/qa/verify-kajabi-export.sh

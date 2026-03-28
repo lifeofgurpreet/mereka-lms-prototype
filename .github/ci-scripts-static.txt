@@ -250,6 +250,7 @@ scripts/qa/verify-analytics-key-elimination.sh
 scripts/qa/verify-enterprise-observability.sh
 scripts/qa/verify-idempotency.sh
 scripts/qa/verify-tutor-branding-render.sh
+scripts/qa/verify-openedx-image-branding.sh
 scripts/qa/verify-mfe-image-branding.sh
 scripts/qa/verify-airtable-readiness.sh
 scripts/qa/verify-kajabi-export.sh

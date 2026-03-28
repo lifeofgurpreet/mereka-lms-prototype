@@ -153,11 +153,10 @@ check_build_pipeline() {
     fail "[AC-011] Branding verification log artifacts missing"
   fi
 
-  # AC-009: Tutor version pinned in build dependency file (loaded by setup-python-env action)
-  # Updated to Tutor 21.0.0 (Ulmo) from 18.2.2 (Redwood) — 2026-03-06
+  # AC-009: Tutor versions must stay pinned in the shared requirements file
   if [[ -f "requirements-tutor.txt" ]] \
-    && grep -q 'tutor\[full\]==21.0.0' requirements-tutor.txt \
-    && grep -q 'tutor-mfe==21.0.0' requirements-tutor.txt \
+    && grep -Eq '^tutor\[full\]==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
+    && grep -Eq '^tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
     && grep -q "requirements-file: 'requirements-tutor.txt'" "$BUILD_WF"; then
     pass "[AC-009] Tutor version pinned via requirements-tutor.txt and wired into build workflow"
   else
@@ -474,6 +473,7 @@ check_gitops() {
   if [[ -f "$CI_STATIC_LIST" ]]; then
     local required_scripts=(
       "verify-build-workflow-contract.sh"
+      "verify-openedx-image-branding.sh"
       "verify-release-automation.sh"
       "verify-release-workflow-invocation.sh"
       "verify-release-dry-run-contract.sh"

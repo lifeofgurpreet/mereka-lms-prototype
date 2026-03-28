@@ -10885,6 +10885,36 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
+        "ci_static",
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "ci_static",
+        "workflow_direct"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "frontend-platform",
+      "path": "scripts/qa/verify-openedx-image-branding.sh",
+      "reference_count": 7,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-011"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
         "ci_static"
       ],
       "ci_entrypoints": [
@@ -17347,27 +17377,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 356,
+    "ci_static_bound": 357,
     "kinds": {
-      "verify": 576
+      "verify": 577
     },
     "mutability": {
       "destructive": 9,
       "mutating": 18,
-      "read-only": 549
+      "read-only": 550
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 399,
+      "active": 400,
       "manual_only": 177
     },
     "tiers": {
       "exploratory_manual": 180,
       "periodic_runtime": 16,
-      "release_blocking": 380
+      "release_blocking": 381
     },
-    "total_verify_scripts": 576,
-    "workflow_direct_bound": 53
+    "total_verify_scripts": 577,
+    "workflow_direct_bound": 54
   },
   "version": "1"
 }

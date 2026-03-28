@@ -13,7 +13,7 @@ REPO_ROOT="${REPO_ROOT_OVERRIDE:-$REPO_ROOT}"
 BUILD_WF="${BUILD_WF_OVERRIDE:-$REPO_ROOT/.github/workflows/build-tutor-images.yml}"
 RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUILD_WF")"
 UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
-OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Verify OpenEdX image branding contract/p' "$BUILD_WF")"
+OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Generate image metadata/p' "$BUILD_WF")"
 RESOLVE_SCOPE_BLOCK="$(sed -n '/^  resolve-build-scope:/,/^  lint:/p' "$BUILD_WF")"
 BUILD_OPENEDX_BLOCK="$(sed -n '/^  build-openedx:/,/^  build-mfe:/p' "$BUILD_WF")"
 BUILD_MFE_BLOCK="$(sed -n '/^  build-mfe:/,/^  scan-openedx-image:/p' "$BUILD_WF")"
@@ -128,6 +128,7 @@ required_trigger_paths=(
   "scripts/infra/resolve-image-digest.sh"
   "scripts/lib/lane-normalize.sh"
   "scripts/qa/verify-build-provenance.sh"
+  "scripts/qa/verify-openedx-image-branding.sh"
   "scripts/qa/verify-release-bundle.sh"
   "scripts/qa/verify-mfe-image-branding.sh"
   "scripts/qa/verify-mfe-runtime-contract.sh"
@@ -144,6 +145,12 @@ if [[ -f "$REPO_ROOT/scripts/infra/resolve-build-scope.sh" ]]; then
   pass "resolve-build-scope helper exists"
 else
   fail "resolve-build-scope helper missing"
+fi
+
+if [[ -x "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" ]]; then
+  pass "verify-openedx-image-branding helper exists"
+else
+  fail "verify-openedx-image-branding helper missing or not executable"
 fi
 
 if [[ "$RESOLVE_SCOPE_BLOCK" == *"./scripts/infra/resolve-build-scope.sh"* ]]; then
@@ -252,6 +259,18 @@ if [[ "$SCAN_OPENEDX_BLOCK" == *'${{ env.REGISTRY }}/openedx@${{ needs.build-ope
   pass "OpenEdX post-push scan uses resolved pushed digest"
 else
   fail "OpenEdX post-push scan missing resolved digest image ref"
+fi
+
+if [[ "$SCAN_OPENEDX_BLOCK" == *'Verify OpenEdX image branding contract'* && "$SCAN_OPENEDX_BLOCK" == *'scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}"'* ]]; then
+  pass "OpenEdX branding verification runs post-push via canonical registry-image helper"
+else
+  fail "OpenEdX branding verification missing canonical post-push helper call"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'Verify OpenEdX image branding contract'* ]]; then
+  fail "OpenEdX branding verification still runs inside the heavy build job"
+else
+  pass "OpenEdX heavy build job no longer performs branding verification"
 fi
 
 if [[ "$SCAN_MFE_BLOCK" == *'${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}'* ]]; then

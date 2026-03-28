@@ -9,12 +9,19 @@ tmpdir="$(mktemp -d -t verify-build-workflow-contract.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p "$tmpdir/.github/workflows" "$tmpdir/scripts/infra"
+mkdir -p "$tmpdir/scripts/qa"
 cat >"$tmpdir/scripts/infra/resolve-build-scope.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 printf 'build_openedx=true\nbuild_mfe=true\nscope_label=both\n' >> "$1"
 EOF
 chmod +x "$tmpdir/scripts/infra/resolve-build-scope.sh"
+cat >"$tmpdir/scripts/qa/verify-openedx-image-branding.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "ok"
+EOF
+chmod +x "$tmpdir/scripts/qa/verify-openedx-image-branding.sh"
 
 write_pass_fixture() {
   cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
@@ -41,6 +48,7 @@ on:
       - 'scripts/infra/resolve-image-digest.sh'
       - 'scripts/lib/lane-normalize.sh'
       - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-openedx-image-branding.sh'
       - 'scripts/qa/verify-release-bundle.sh'
       - 'scripts/qa/verify-mfe-image-branding.sh'
       - 'scripts/qa/verify-mfe-runtime-contract.sh'
@@ -83,8 +91,6 @@ jobs:
       - name: Verify OpenEdX build cache health
         run: |
           SUMMARY="${SUMMARY}\n✅ GHA cache exporters intentionally absent for OpenEdX build (docker driver + local image export)"
-      - name: Verify OpenEdX image branding contract
-        run: echo ok
       - name: Tag and push image
         run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
       - name: Resolve pushed openedx digest
@@ -111,6 +117,15 @@ jobs:
     needs: [build-openedx]
     if: ${{ needs.build-openedx.result == 'success' }}
     steps:
+      - name: Verify OpenEdX image branding contract
+        run: scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" | tee var/ci/verify-openedx-image-branding.log
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+      - name: Upload OpenEdX branding verification log
+        uses: actions/upload-artifact@v4
+        with:
+          name: openedx-branding-contract-log
+          path: var/ci/verify-openedx-image-branding.log
       - name: Generate SBOM for OpenEdX image
         run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
         env:
@@ -231,6 +246,23 @@ text = text.replace("      - 'scripts/infra/resolve-build-scope.sh'\n", "")
 p.write_text(text)
 PY
 run_expect_fail "missing exact helper path coverage is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Verify OpenEdX image branding contract\n'
+    '        run: scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" | tee var/ci/verify-openedx-image-branding.log\n'
+    '        env:\n'
+    '          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}\n',
+    '',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing canonical OpenEdX post-push branding verification is rejected"
 
 # Reintroduce broad scripts/infra glob => must fail
 write_pass_fixture
