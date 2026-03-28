@@ -100,6 +100,10 @@ the same ownership role.
    - `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js` owns shell composition and copy
    - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` owns authored shell styling
    - LMS templates under `lms/templates/` adapt that shell for legacy surfaces and should not invent a second shell language
+6. Public LMS discovery ownership is route-specific:
+   - `lms/static/sass/partials/_discovery.scss` owns `/courses` and `/courses/<id>/about`
+   - `lms/templates/discovery/course_card.underscore` owns the course-card markup contract
+   - `common/static/css/mereka-overrides.css` must not carry discovery/course-about presentation
 
 If you need to change token values, start in `tokens.css`. If you need to change
 runtime override selectors, change the curated parts of

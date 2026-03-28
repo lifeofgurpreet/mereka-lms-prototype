@@ -1,0 +1,493 @@
+// Public discovery + browse-to-enroll ownership.
+//
+// These LMS-authored rules own /courses and /courses/<id>/about shells.
+// Runtime override CSS should carry shared brand shims, not route-specific
+// discovery presentation.
+
+.find-courses {
+  background: var(--mereka-color-surface-primary);
+}
+
+.find-courses .courses-container {
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 0;
+}
+
+.find-courses #discovery-form.wrapper-search-context {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.05rem 1.15rem 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.find-courses #discovery-message.search-status-label {
+  align-self: start;
+  color: var(--mereka-color-ink-700);
+  font-size: 0.9rem !important;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.find-courses #discovery-form .wrapper-search-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.find-courses #discovery-input.discovery-input {
+  flex: 1 1 260px;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.14);
+  background: rgba(251, 250, 251, 0.92);
+  padding: 0.8rem 1rem;
+  font-size: 0.97rem;
+}
+
+.find-courses #discovery-input.discovery-input:focus {
+  outline: none;
+  border-color: rgba(45, 137, 139, 0.65);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.15);
+  background: #fff;
+}
+
+.find-courses button.discovery-submit,
+.find-courses .discovery-submit.button {
+  border-radius: 999px;
+  border: 0;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.8rem 1rem;
+  min-width: 3.1rem;
+  background: var(--mereka-gradient-primary);
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.find-courses button.discovery-submit:hover,
+.find-courses button.discovery-submit:focus,
+.find-courses .discovery-submit.button:hover,
+.find-courses .discovery-submit.button:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+.find-courses .search-facets {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.05rem 1.15rem 1.1rem;
+}
+
+.find-courses .search-facets h2,
+.find-courses .search-facets h3 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.find-courses .search-facets a,
+.find-courses .search-facets button {
+  border-radius: 999px;
+}
+
+.find-courses #filter-bar,
+.find-courses .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.find-courses #filter-bar.filters {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 0.95rem 1.1rem;
+}
+
+.find-courses #filter-bar .filters-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.find-courses #filter-bar .facet-list,
+.find-courses .search-facets .facet-list {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.find-courses #filter-bar li,
+.find-courses .filter-bar li {
+  list-style: none;
+}
+
+.find-courses #filter-bar a,
+.find-courses .filter-bar a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: rgba(251, 250, 251, 0.92);
+  color: var(--mereka-color-ink-900);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem !important;
+  line-height: 1.2 !important;
+  text-transform: capitalize !important;
+}
+
+.find-courses #filter-bar a:hover,
+.find-courses #filter-bar a:focus,
+.find-courses .filter-bar a:hover,
+.find-courses .filter-bar a:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.find-courses .discovery-button,
+.find-courses .facet-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: rgba(251, 250, 251, 0.92);
+  color: var(--mereka-color-ink-900);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.92rem !important;
+  line-height: 1.2 !important;
+  text-transform: capitalize !important;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.find-courses .discovery-button:hover,
+.find-courses .discovery-button:focus,
+.find-courses .facet-option:hover,
+.find-courses .facet-option:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.find-courses .facet-option.selected {
+  background: var(--mereka-gradient-primary);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 12px 25px rgba(45, 137, 139, 0.18);
+}
+
+.find-courses .facet-option .count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(26, 22, 35, 0.08);
+  color: var(--mereka-color-ink-700);
+  font-size: 0.8em;
+}
+
+.find-courses .facet-option.selected .count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.find-courses #clear-all-filters.clear-filters {
+  margin-left: auto;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: #fff;
+  color: var(--mereka-color-ink-900);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.find-courses #clear-all-filters.clear-filters:hover,
+.find-courses #clear-all-filters.clear-filters:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.find-courses .search-facets .header-search-facets,
+.find-courses .search-facets .header-facet {
+  font-family: var(--mereka-font-heading);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--mereka-color-ink-900);
+}
+
+.find-courses .search-facets .header-facet {
+  margin: 0.9rem 0 0.65rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.find-courses .search-facets .toggle {
+  margin-top: 0.75rem;
+}
+
+.find-courses .courses-listing {
+  margin-top: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.15rem;
+}
+
+.find-courses .courses-listing li,
+.find-courses .courses-listing-item {
+  display: flex;
+  min-width: 0;
+}
+
+.find-courses .course {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.find-courses .course .course-image {
+  min-height: 164px;
+}
+
+.find-courses .course .course-image .cover-image {
+  aspect-ratio: 16 / 9;
+  position: relative;
+}
+
+.find-courses .course .course-image img {
+  min-height: 164px;
+}
+
+.find-courses .course .course-info {
+  padding: 1.15rem 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.find-courses .course .course-name {
+  gap: 0.3rem;
+}
+
+.find-courses .course .course-title {
+  font-size: 1.08rem !important;
+}
+
+.find-courses .course .course-organization {
+  color: var(--mereka-color-teal) !important;
+  font-size: 0.78rem !important;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0 !important;
+  display: inline-flex !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize !important;
+}
+
+.find-courses .course .course-code {
+  align-self: flex-start;
+  background: rgba(26, 22, 35, 0.05);
+  padding: 0.2rem 0.55rem !important;
+  border-radius: 999px !important;
+}
+
+.find-courses .course .course-date {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.86rem;
+  line-height: 1.35;
+  margin-top: auto;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+}
+
+.find-courses .course .course-image .cover-image .learn-more {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.find-courses .learn-more {
+  color: var(--mereka-color-ink-900) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid rgba(26, 22, 35, 0.1) !important;
+  padding: 0.45rem 0.8rem !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+  font-size: 0.76rem !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase !important;
+  box-shadow: 0 10px 20px rgba(26, 22, 35, 0.12) !important;
+}
+
+.find-courses .learn-more:hover,
+.find-courses .learn-more:focus {
+  box-shadow: 0 14px 24px rgba(45, 137, 139, 0.16) !important;
+}
+
+.course-info,
+.course-about {
+  background: var(--mereka-color-surface-primary);
+}
+
+.course-info .container,
+.course-about .container,
+.course-about .main-container,
+.course-info .main-container {
+  padding-top: 1.5rem;
+}
+
+.course-info header,
+.course-about header,
+.course-info .intro-inner-wrapper,
+.course-about .intro-inner-wrapper {
+  background: #fff;
+  border-radius: 28px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  overflow: hidden;
+}
+
+.course-info .intro-inner-wrapper,
+.course-about .intro-inner-wrapper {
+  padding: 2rem;
+  position: relative;
+}
+
+.course-info .intro-inner-wrapper::before,
+.course-about .intro-inner-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(45, 137, 139, 0.14), transparent 55%),
+    radial-gradient(circle at 80% 0%, rgba(171, 59, 120, 0.12), transparent 60%),
+    radial-gradient(circle at 90% 80%, rgba(41, 92, 173, 0.12), transparent 55%);
+  pointer-events: none;
+}
+
+.course-info .intro-inner-wrapper > *,
+.course-about .intro-inner-wrapper > * {
+  position: relative;
+}
+
+.course-info .intro-inner-wrapper h1,
+.course-about .intro-inner-wrapper h1,
+.course-info .intro-inner-wrapper .course-title,
+.course-about .intro-inner-wrapper .course-title {
+  font-family: var(--mereka-font-heading);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--mereka-color-ink-900);
+}
+
+.course-about .course-sidebar,
+.course-info .course-sidebar,
+.course-about .course-sidebar-primary,
+.course-info .course-sidebar-primary {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.25rem;
+}
+
+.course-about .register,
+.course-about .enroll-btn,
+.course-about .enroll-btn button,
+.course-about .enroll-btn a,
+.course-info .register,
+.course-info .enroll-btn,
+.course-info .enroll-btn button,
+.course-info .enroll-btn a {
+  border-radius: 999px;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  font-weight: 800;
+  border: 0;
+  padding: 0.85rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 12px 25px rgba(45, 137, 139, 0.18);
+}
+
+.course-about .register:hover,
+.course-about .register:focus,
+.course-info .register:hover,
+.course-info .register:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+.course-about .course-summary,
+.course-info .course-summary,
+.course-about .course-description,
+.course-info .course-description {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.5rem;
+}
+
+.course-about .course-summary h2,
+.course-about .course-description h2,
+.course-info .course-summary h2,
+.course-info .course-description h2 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 800;
+}
+
+.course-about .course-staff,
+.course-info .course-staff {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .find-courses #discovery-form.wrapper-search-context,
+  .find-courses .search-facets,
+  .find-courses #filter-bar.filters {
+    border-radius: 20px;
+    padding-inline: 0.95rem;
+  }
+
+  .find-courses .courses-listing {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .find-courses .course .course-image,
+  .find-courses .course .course-image img {
+    min-height: 138px;
+  }
+
+  .find-courses .course .course-code {
+    display: none;
+  }
+}

@@ -46,6 +46,23 @@ require_contains() {
   fi
 }
 
+require_absent() {
+  local label="$1"
+  local path="$2"
+  local needle="$3"
+  if [[ ! -f "$path" ]]; then
+    echo "  ✗ $label (missing file: $path)"
+    failures=1
+    return
+  fi
+  if grep -q -- "$needle" "$path"; then
+    echo "  ✗ $label (unexpected runtime selector: $needle)"
+    failures=1
+  else
+    echo "  ✓ $label"
+  fi
+}
+
 echo "Verifying runtime override CSS..."
 echo "Branding level: ${BRANDING_LEVEL}"
 echo ""
@@ -85,7 +102,6 @@ require_contains "Footer logo width is constrained" "$COMMON_CSS" "width: 120px;
 if [[ "$BRANDING_LEVEL" == "deep" ]]; then
   echo ""
   echo "Deep surface signals..."
-  require_contains "Course listing styling present" "$COMMON_CSS" ".courses-listing"
   require_contains "Courseware styling present" "$COMMON_CSS" ".courseware"
   require_contains "Sequence nav styling present" "$COMMON_CSS" ".sequence-nav"
   require_contains "XBlock styling present" "$COMMON_CSS" ".xblock"
@@ -99,6 +115,9 @@ if [[ "$BRANDING_LEVEL" == "deep" ]]; then
   require_contains "Studio outline title typography present" "$COMMON_CSS" ".outline-item-title"
   require_contains "Studio outline action pill styling present" "$COMMON_CSS" ".action-button"
   require_contains "Studio add-component CTA styling present" "$COMMON_CSS" ".add-xblock-component"
+  require_absent "Discovery route shell not owned by runtime overrides" "$COMMON_CSS" ".find-courses #discovery-form.wrapper-search-context"
+  require_absent "Course about shell not owned by runtime overrides" "$COMMON_CSS" ".course-about .intro-inner-wrapper"
+  require_absent "Course info shell not owned by runtime overrides" "$COMMON_CSS" ".course-info .intro-inner-wrapper"
 fi
 
 echo ""

@@ -61,6 +61,7 @@ MFE_SCSS="$THEME_DIR/mfe/mereka.scss"
 COMMON_CSS="$THEME_DIR/common/static/css/mereka-overrides.css"
 LMS_CSS="$THEME_DIR/lms/static/css/mereka-overrides.css"
 CMS_CSS="$THEME_DIR/cms/static/css/mereka-overrides.css"
+LMS_DISCOVERY_SCSS="$THEME_DIR/lms/static/sass/partials/_discovery.scss"
 AUDIT_DOC="$REPO_ROOT/docs/reference/architecture/CSS_SCOPING_AUDIT.md"
 
 echo -e "${BLUE}=== CSS Scoping Audit Gate ===${NC}"
@@ -238,8 +239,8 @@ echo ""
 # ─────────────────────────────────────────────────────────────────────────────
 # AC-CSS-SCOPE-004: Page-scope prefixes are present for LMS discovery + dashboard
 #
-# Verifies that the key page-scoped rule sets (.find-courses, .dashboard,
-# .courseware) are all present — they act as the safe alternative to global rules.
+# Verifies that shared runtime overrides still keep shared LMS page scopes while
+# discovery/course-about ownership lives in the dedicated LMS discovery partial.
 # ─────────────────────────────────────────────────────────────────────────────
 echo -e "${BLUE}## AC-CSS-SCOPE-004: Page-scope prefixes present (discovery + dashboard + courseware)${NC}"
 
@@ -250,7 +251,7 @@ for css_file in "$LMS_CSS" "$COMMON_CSS"; do
     continue
   fi
 
-  for page_scope in ".find-courses" ".dashboard" ".courseware" ".course-info" ".course-about"; do
+  for page_scope in ".dashboard" ".courseware"; do
     if grep -qF "$page_scope" "$css_file"; then
       do_pass "AC-CSS-SCOPE-004: $page_scope scope present in $fname"
     else
@@ -258,6 +259,18 @@ for css_file in "$LMS_CSS" "$COMMON_CSS"; do
     fi
   done
 done
+
+if [[ ! -f "$LMS_DISCOVERY_SCSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: LMS discovery partial missing at lms/static/sass/partials/_discovery.scss"
+else
+  for page_scope in ".find-courses" ".course-info" ".course-about"; do
+    if grep -qF "$page_scope" "$LMS_DISCOVERY_SCSS"; then
+      do_pass "AC-CSS-SCOPE-004: $page_scope scope present in lms/static/sass/partials/_discovery.scss"
+    else
+      do_fail "AC-CSS-SCOPE-004: $page_scope scope missing from lms/static/sass/partials/_discovery.scss"
+    fi
+  done
+fi
 
 # MFE-specific: enforce current selector reality from dead-selector audit
 if [[ ! -f "$MFE_SCSS" ]]; then

@@ -164,6 +164,9 @@ TOKENS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 FONTS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_fonts.scss"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 LMS_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/theme.scss"
+LMS_MAIN_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/lms-main-v1.scss"
+LMS_DISCOVERY_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/partials/_discovery.scss"
+LMS_DISCOVERY_TEMPLATE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/discovery/course_card.underscore"
 CMS_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass/theme.scss"
 CMS_HEAD_EXTRA_TEMPLATE="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"
 CMS_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
@@ -174,6 +177,12 @@ check_file "Shared fonts" "$FONTS_SCSS"
 check_contains "Theme imports fonts" "$THEME_SCSS" '@import "fonts";'
 check_contains "Theme imports tokens" "$THEME_SCSS" '@import "tokens";'
 check_contains "LMS theme imports shared tokens" "$LMS_THEME_SCSS" '@import "../../../scss/theme";'
+check_contains "LMS main imports discovery partial" "$LMS_MAIN_SCSS" "@import 'partials/discovery';"
+check_file "LMS discovery partial" "$LMS_DISCOVERY_SCSS"
+check_contains "LMS discovery partial styles discovery route" "$LMS_DISCOVERY_SCSS" '.find-courses'
+check_contains "LMS discovery partial styles course-about route" "$LMS_DISCOVERY_SCSS" '.course-about'
+check_contains "Discovery card template keeps CTA inside cover image" "$LMS_DISCOVERY_TEMPLATE" '<div class="cover-image">'
+check_contains "Discovery card template renders View Course inside cover image" "$LMS_DISCOVERY_TEMPLATE" 'class="learn-more"'
 check_contains "CMS theme imports shared tokens" "$CMS_THEME_SCSS" '@import "../../../scss/theme";'
 check_file "CMS runtime overrides CSS" "$CMS_OVERRIDE_CSS"
 check_contains "CMS head-extra links runtime overrides" "$CMS_HEAD_EXTRA_TEMPLATE" "mereka/css/mereka-overrides.css"

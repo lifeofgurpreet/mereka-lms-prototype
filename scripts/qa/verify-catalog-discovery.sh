@@ -127,6 +127,7 @@ MEREKA_OVERRIDES_COMMON="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/st
 MEREKA_OVERRIDES_LMS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
 MEREKA_OVERRIDES_CMS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
 MEREKA_DESIGN_TOKENS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css"
+LMS_DISCOVERY_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/partials/_discovery.scss"
 HEAD_EXTRA_LMS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html"
 HEAD_EXTRA_COMMON="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates/head-extra.html"
 HEAD_EXTRA_CMS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"
@@ -139,6 +140,7 @@ check_file_exists "$MEREKA_OVERRIDES_COMMON" "Common mereka-overrides.css exists
 check_file_exists "$MEREKA_OVERRIDES_LMS" "LMS mereka-overrides.css exists"
 check_file_exists "$MEREKA_OVERRIDES_CMS" "CMS mereka-overrides.css exists"
 check_file_exists "$MEREKA_DESIGN_TOKENS" "mereka-design-tokens.css exists"
+check_file_exists "$LMS_DISCOVERY_SCSS" "LMS discovery partial exists"
 check_file_exists "$HEAD_EXTRA_LMS" "LMS head-extra.html exists"
 check_file_exists "$HEAD_EXTRA_COMMON" "Common head-extra.html exists"
 check_file_exists "$HEAD_EXTRA_CMS" "CMS head-extra.html exists"
@@ -172,44 +174,45 @@ check_contains "$MEREKA_OVERRIDES_LMS" "--mereka-branding-rev" "LMS overrides ha
 
 section "3. Catalog CSS Surface Coverage"
 
-# Find-courses page styling
-check_contains "$MEREKA_OVERRIDES_LMS" ".find-courses" "LMS: .find-courses styled"
-check_contains "$MEREKA_OVERRIDES_LMS" "#discovery-form" "LMS: #discovery-form search box styled"
-check_contains "$MEREKA_OVERRIDES_LMS" ".discovery-input" "LMS: search input field styled"
-check_contains "$MEREKA_OVERRIDES_LMS" ".discovery-submit" "LMS: search submit button styled"
-check_contains "$MEREKA_OVERRIDES_LMS" ".search-facets" "LMS: search facets panel styled"
-check_contains "$MEREKA_OVERRIDES_LMS" ".courses-listing" "LMS: courses listing grid styled"
+# The authored discovery surface is LMS-only SCSS, not runtime override CSS.
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses" "LMS discovery partial styles .find-courses"
+check_contains "$LMS_DISCOVERY_SCSS" "#discovery-form.wrapper-search-context" "LMS discovery partial styles the search shell"
+check_contains "$LMS_DISCOVERY_SCSS" ".discovery-input" "LMS discovery partial styles search input"
+check_contains "$LMS_DISCOVERY_SCSS" ".discovery-submit.button" "LMS discovery partial styles submit button"
+check_contains "$LMS_DISCOVERY_SCSS" ".search-facets" "LMS discovery partial styles search facets panel"
+check_contains "$LMS_DISCOVERY_SCSS" ".courses-listing" "LMS discovery partial styles catalog grid"
 
 # Course-about page styling
-check_contains "$MEREKA_OVERRIDES_LMS" ".course-about" "LMS: .course-about styled"
-check_contains "$MEREKA_OVERRIDES_LMS" ".course-about .register" "LMS: course-about enroll button styled"
-check_contains "$MEREKA_OVERRIDES_LMS" ".course-about .course-sidebar" "LMS: course-about sidebar styled"
-check_contains "$MEREKA_OVERRIDES_LMS" ".course-about .intro-inner-wrapper" "LMS: course-about hero header styled"
+check_contains "$LMS_DISCOVERY_SCSS" ".course-about" "LMS discovery partial styles .course-about"
+check_contains "$LMS_DISCOVERY_SCSS" ".course-about .register" "LMS discovery partial styles enroll CTA"
+check_contains "$LMS_DISCOVERY_SCSS" ".course-about .course-sidebar" "LMS discovery partial styles course-about sidebar"
+check_contains "$LMS_DISCOVERY_SCSS" ".course-about .intro-inner-wrapper" "LMS discovery partial styles course-about hero"
 
 # Course card styling
-check_contains "$MEREKA_OVERRIDES_LMS" ".course .course-image" "LMS: course card image area styled"
-check_contains "$MEREKA_OVERRIDES_LMS" ".find-courses #discovery-message.search-status-label" "LMS: discovery count is treated as an eyebrow, not a hero"
-check_contains_re "$MEREKA_OVERRIDES_LMS" "text-transform:[[:space:]]*capitalize" "LMS: discovery filters normalize raw facet labels"
-check_contains "$MEREKA_OVERRIDES_LMS" "grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))" "LMS: catalog grid is denser"
-check_contains "$MEREKA_OVERRIDES_LMS" ".course .course-name" "LMS: course metadata is grouped as a vertical stack"
-check_contains "$MEREKA_OVERRIDES_LMS" ".course .course-code" "LMS: internal course code remains tertiary"
-check_contains "$MEREKA_OVERRIDES_LMS" ".course .course-title" "LMS: course title remains the primary card text"
-check_contains "$MEREKA_OVERRIDES_LMS" ".learn-more" "LMS: learn-more CTA remains visually subordinate"
-check_contains "$MEREKA_OVERRIDES_LMS" "@media (max-width: 640px)" "LMS: mobile fallback trims course-code noise"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-image" "LMS discovery partial styles course card image area"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses #discovery-message.search-status-label" "LMS discovery count is treated as an eyebrow, not a hero"
+check_contains_re "$LMS_DISCOVERY_SCSS" "text-transform:[[:space:]]*capitalize" "LMS discovery filters normalize raw facet labels"
+check_contains "$LMS_DISCOVERY_SCSS" "grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))" "LMS discovery grid is dense without collapsing cards"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-name" "LMS discovery groups course metadata as a vertical stack"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-code" "LMS discovery keeps internal course code tertiary"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-title" "LMS discovery keeps course title primary"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .learn-more" "LMS discovery styles CTA as an image-overlay pill"
+check_contains "$LMS_DISCOVERY_SCSS" "@media (max-width: 640px)" "LMS discovery partial carries the mobile fallback"
 check_contains "$COURSE_TEMPLATE_LMS" "View Course" "LMS template CTA says View Course"
 check_contains "$COURSE_CARD_TEMPLATE_LMS" "View Course" "Discovery template CTA says View Course"
 check_contains "$COURSE_TEMPLATE_LMS" "class=\"course-code\" aria-hidden=\"true\"" "LMS template demotes internal course codes"
 check_contains "$COURSE_CARD_TEMPLATE_LMS" "class=\"course-code\" aria-hidden=\"true\"" "Discovery template demotes internal course codes"
+check_contains "$COURSE_CARD_TEMPLATE_LMS" "<div class=\"cover-image\">" "Discovery template keeps CTA inside cover image"
 
 # Token usage in catalog CSS (not hard-coded hex for brand values)
-check_contains "$MEREKA_OVERRIDES_LMS" "var(--mereka-shadow-card)" "Catalog CSS uses --mereka-shadow-card token"
-check_contains "$MEREKA_OVERRIDES_LMS" "var(--mereka-gradient-primary)" "Catalog CSS uses --mereka-gradient-primary token"
-check_contains "$MEREKA_OVERRIDES_LMS" "var(--mereka-font-heading)" "Catalog CSS uses --mereka-font-heading token"
-check_contains "$MEREKA_OVERRIDES_LMS" "var(--mereka-color-surface-primary)" "Catalog CSS uses --mereka-color-surface-primary token"
+check_contains "$LMS_DISCOVERY_SCSS" "var(--mereka-shadow-card)" "Catalog CSS uses --mereka-shadow-card token"
+check_contains "$LMS_DISCOVERY_SCSS" "var(--mereka-gradient-primary)" "Catalog CSS uses --mereka-gradient-primary token"
+check_contains "$LMS_DISCOVERY_SCSS" "var(--mereka-font-heading)" "Catalog CSS uses --mereka-font-heading token"
+check_contains "$LMS_DISCOVERY_SCSS" "var(--mereka-color-surface-primary)" "Catalog CSS uses --mereka-color-surface-primary token"
 
-# Common overrides should mirror LMS
-check_contains "$MEREKA_OVERRIDES_COMMON" ".find-courses" "Common: .find-courses styled"
-check_contains "$MEREKA_OVERRIDES_COMMON" ".course-about" "Common: .course-about styled"
+# Common overrides should stay out of authored discovery ownership.
+check_not_contains "$MEREKA_OVERRIDES_COMMON" ".find-courses #discovery-form.wrapper-search-context" "Common overrides do not own discovery shell"
+check_not_contains "$MEREKA_OVERRIDES_COMMON" ".course-about .intro-inner-wrapper" "Common overrides do not own course-about hero"
 
 # ─── 4. Head-Extra CSS Injection ────────────────────────────────────────────
 
