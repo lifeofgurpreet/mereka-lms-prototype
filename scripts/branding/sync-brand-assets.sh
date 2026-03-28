@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # @covers AC-007
 # @spec: branding-system_spec.md
+# Propagation boundary: this script regenerates token outputs and syncs copied
+# assets/runtime CSS. It does not make `head-extra.html` a second styling
+# authority; those templates remain thin runtime shims.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -56,7 +59,8 @@ cp "$SRC_FONTS"/*.woff2 "$CMS_FONT_DIR"/
 cp "$SRC_FONTS"/*.woff2 "$MFE_FONT_DIR"/
 
 # Regenerate all token layers from canonical source. This keeps generated
-# markers intact while synchronizing SCSS + CSS consumers.
+# markers intact while synchronizing SCSS + CSS consumers without changing
+# `head-extra.html` ownership boundaries.
 if [[ ! -x "$TOKEN_GENERATOR" ]]; then
   echo "Missing token generator script: $TOKEN_GENERATOR" >&2
   exit 1

@@ -15,6 +15,14 @@ WARN=0
 pass() { PASS=$((PASS + 1)); echo "PASS: $*"; }
 fail() { FAIL=$((FAIL + 1)); echo "FAIL: $*"; }
 warn() { WARN=$((WARN + 1)); echo "WARN: $*"; }
+slot_present() {
+  local needle="${1:?slot id required}"
+  local candidate
+  for candidate in "${slot_ids[@]}"; do
+    [[ "$candidate" == "$needle" ]] && return 0
+  done
+  return 1
+}
 
 mapfile -t plugin_contract_files < <(mereka_plugin_contract_files "$REPO_ROOT")
 if [[ "${#plugin_contract_files[@]}" -eq 0 ]]; then
@@ -74,7 +82,7 @@ legacy_retired_ids=(
 )
 
 for legacy_id in "${legacy_retired_ids[@]}"; do
-  if printf '%s\n' "${slot_ids[@]}" | grep -qx "$legacy_id"; then
+  if slot_present "$legacy_id"; then
     fail "Retired legacy slot is still wired: $legacy_id"
   else
     pass "Retired legacy slot not wired: $legacy_id"
@@ -107,7 +115,7 @@ required_core_slots=(
 )
 
 for slot_id in "${required_core_slots[@]}"; do
-  if printf '%s\n' "${slot_ids[@]}" | grep -qx "$slot_id"; then
+  if slot_present "$slot_id"; then
     pass "Core slot wired: $slot_id"
   else
     fail "Core slot missing: $slot_id"

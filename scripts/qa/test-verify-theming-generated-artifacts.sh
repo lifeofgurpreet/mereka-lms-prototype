@@ -10,12 +10,15 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p \
   "$tmpdir/scripts/branding" \
-  "$tmpdir/docs/concepts/architecture" \
   "$tmpdir/docs/reference/architecture" \
+  "$tmpdir/deploy/k8s/base/apps/openedx/theme" \
   "$tmpdir/infrastructure/tutor/themes/mereka/scss" \
   "$tmpdir/infrastructure/tutor/themes/mereka/common/static/css" \
+  "$tmpdir/infrastructure/tutor/themes/mereka/common/templates" \
   "$tmpdir/infrastructure/tutor/themes/mereka/lms/static/css" \
+  "$tmpdir/infrastructure/tutor/themes/mereka/lms/templates" \
   "$tmpdir/infrastructure/tutor/themes/mereka/cms/static/css" \
+  "$tmpdir/infrastructure/tutor/themes/mereka/cms/templates" \
   "$tmpdir/infrastructure/tutor/themes/mereka/mfe/theme"
 
 cat >"$tmpdir/scripts/branding/generate-tokens-from-canonical.sh" <<'EOF'
@@ -40,6 +43,15 @@ Run `generate-tokens-from-canonical.sh --check`.
 
 ## Exit Criteria
 - Drift checks pass.
+
+## Runtime Shim Ownership
+- `head-extra.html` remains loader-only.
+
+## Head-Extra Runtime Shims
+- `deploy/k8s/base/apps/openedx/theme/head-extra.html`
+- `infrastructure/tutor/themes/mereka/common/templates/head-extra.html`
+- `infrastructure/tutor/themes/mereka/lms/templates/head-extra.html`
+- `infrastructure/tutor/themes/mereka/cms/templates/head-extra.html`
 EOF
 
 cat >"$tmpdir/infrastructure/tutor/themes/mereka/scss/_tokens.scss" <<'EOF'
@@ -70,6 +82,30 @@ done
 
 cat >"$tmpdir/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css" <<'EOF'
 /* core payload */
+EOF
+
+cat >"$tmpdir/infrastructure/tutor/themes/mereka/README.md" <<'EOF'
+# Mereka Theme
+
+## Canonical Ownership
+- generated token artifacts are owned by the branding generators
+- `head-extra.html` files are runtime loader shims
+EOF
+
+cat >"$tmpdir/deploy/k8s/base/apps/openedx/theme/head-extra.html" <<'EOF'
+<!-- runtime loader shim -->
+EOF
+
+cat >"$tmpdir/infrastructure/tutor/themes/mereka/common/templates/head-extra.html" <<'EOF'
+<!-- runtime shim only -->
+EOF
+
+cat >"$tmpdir/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html" <<'EOF'
+<!-- runtime shim copy -->
+EOF
+
+cat >"$tmpdir/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html" <<'EOF'
+<!-- runtime shim only -->
 EOF
 
 run_expect_fail() {

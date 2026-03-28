@@ -113,6 +113,18 @@ echo "[4/4] Contract doc cross-reference"
 require_contains "$CONTRACT_DOC" "build-tokens.sh --check" "contract doc includes runtime drift command"
 require_contains "$CONTRACT_DOC" "generate-tokens-from-canonical.sh --check" "contract doc includes canonical drift command"
 require_contains "$CONTRACT_DOC" "Exit Criteria" "contract doc defines transition exit criteria"
+require_contains "$CONTRACT_DOC" "Runtime Shim Ownership" "contract doc defines runtime shim ownership"
+require_contains "$CONTRACT_DOC" "head-extra.html" "contract doc names head-extra runtime shims"
+
+echo
+echo "[5/5] Runtime shim ownership clarity"
+README_DOC="$REPO_ROOT/infrastructure/tutor/themes/mereka/README.md"
+require_contains "$README_DOC" "Canonical Ownership" "theme README defines canonical ownership"
+require_contains "$README_DOC" "runtime loader shims" "theme README describes head-extra as runtime shim"
+require_contains "$REPO_ROOT/deploy/k8s/base/apps/openedx/theme/head-extra.html" "runtime loader shim" "deploy head-extra documents loader-only role"
+require_contains "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates/head-extra.html" "runtime shim only" "common head-extra documents runtime shim role"
+require_contains "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html" "runtime shim copy" "lms head-extra documents runtime shim role"
+require_contains "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html" "runtime shim only" "cms head-extra documents runtime shim role"
 
 echo
 echo "Summary: PASS=${PASS} FAIL=${FAIL}"

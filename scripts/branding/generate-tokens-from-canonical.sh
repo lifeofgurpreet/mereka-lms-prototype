@@ -10,6 +10,8 @@
 #   - infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css
 #
 # Idempotent: running when everything is in sync produces no diff.
+# Ownership boundary: this script owns token generation only. It does not own
+# `head-extra.html` loader semantics or footer/runtime content decisions.
 #
 # Usage:
 #   ./scripts/branding/generate-tokens-from-canonical.sh          # update files

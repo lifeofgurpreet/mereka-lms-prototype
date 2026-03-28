@@ -144,7 +144,7 @@ else
 
     ROUTE_FAIL=0
     for dir in $EXPECTED_DIRS; do
-      if echo "$CADDY_DIRS" | grep -Fqx "$dir"; then
+      if grep -Fqx -- "$dir" <<< "$CADDY_DIRS"; then
         pass_msg "AC-FRONT-013: route $dir present in Caddyfile"
       else
         fail_msg "AC-FRONT-013: route $dir expected by branding verifier is missing from Caddyfile"
@@ -177,7 +177,7 @@ else
     # Cross-check: warn about any Caddyfile MFE dirs not covered by verify-mfe-branding.sh
     while IFS= read -r caddy_dir; do
       [ -z "$caddy_dir" ] && continue
-      if ! echo "$EXPECTED_DIRS" | grep -Fwq "$caddy_dir"; then
+      if ! grep -Fwq -- "$caddy_dir" <<< "$EXPECTED_DIRS"; then
         warn_msg "AC-FRONT-013: Caddyfile has MFE dir '$caddy_dir' not in branding verifier expected list"
       fi
     done <<< "$CADDY_DIRS"

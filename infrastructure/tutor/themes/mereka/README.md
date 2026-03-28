@@ -26,7 +26,7 @@ infrastructure/tutor/themes/mereka/
 │   │   ├── fonts/               # Poppins + Lato WOFF2 (shared by LMS/Studio)
 │   │   └── images/              # Logos, favicons (all variants)
 │   └── templates/
-│       └── head-extra.html      # Injected into <head> (fonts, tokens CSS)
+│       └── head-extra.html      # Common runtime shim (fonts + prebuilt runtime CSS)
 ├── lms/
 │   ├── static/
 │   │   ├── css/mereka-overrides.css  # LMS-specific CSS overrides
@@ -41,7 +41,7 @@ infrastructure/tutor/themes/mereka/
 │   │           └── _custom.scss      # Custom LMS rules
 │   └── templates/
 │       ├── footer.html           # LMS footer template
-│       ├── head-extra.html       # LMS <head> injection
+│       ├── head-extra.html       # LMS runtime shim copy
 │       ├── header/brand.html     # Header logo/brand block
 │       └── index_overlay.html    # Homepage hero overlay
 ├── cms/
@@ -55,7 +55,7 @@ infrastructure/tutor/themes/mereka/
 │   │       └── theme.scss               # CMS theme SCSS
 │   └── templates/
 │       ├── footer.html           # CMS footer template
-│       ├── head-extra.html       # CMS <head> injection
+│       ├── head-extra.html       # CMS runtime shim copy
 │       └── widgets/footer.html   # CMS widget footer
 ├── mfe/                          # MFE-specific brand assets
 │   ├── fonts/                    # Font copies for MFE builds
@@ -76,6 +76,32 @@ The LMS and CMS **require** specific SCSS entry points for `compile-sass --theme
 - **CMS**: `cms/static/sass/studio-main-v1.scss` (and `-rtl` variant)
 
 Without these files, `compile-sass` silently skips the theme. The `mereka_lms.py` plugin creates them if missing via the `openedx-dockerfile-pre-assets` hook.
+
+## Canonical Ownership
+
+The current theming stack has multiple runtime surfaces, but they do not share
+the same ownership role.
+
+1. `assets/branding/tokens.css` is the canonical design-token source.
+2. `scripts/branding/generate-tokens-from-canonical.sh` owns deterministic
+   generation of:
+   - `scss/_tokens.scss`
+   - `common/static/css/mereka-design-tokens.css`
+   - the generated token blocks inside `mereka-overrides.css`
+3. `scripts/branding/sync-brand-assets.sh` is the propagation step:
+   - it regenerates token outputs
+   - it syncs assets
+   - it mirrors `common/static/css/mereka-overrides.css` into LMS/CMS runtime copies
+4. `head-extra.html` templates are runtime loader shims only:
+   - they preload fonts
+   - they load prebuilt runtime CSS
+   - they are not a token or override source of truth
+
+If you need to change token values, start in `tokens.css`. If you need to change
+runtime override selectors, change the curated parts of
+`common/static/css/mereka-overrides.css` and then sync it. If you need to change
+how CSS/fonts are loaded, update the relevant `head-extra.html` runtime shims
+without turning them into a second styling authority.
 
 ## Using With Tutor (LMS/Studio)
 
@@ -110,5 +136,5 @@ The current approach (SCSS overrides + build-time injection) will be superseded 
 ## Keeping Assets In Sync
 
 1. Drop updated fonts/logos/favicons into `assets/branding/`.
-2. Run `./scripts/branding/sync-brand-assets.sh` (or `make branding-sync`) to refresh the theme copies.
+2. Run `./scripts/branding/sync-brand-assets.sh` (or `make branding-sync`) to regenerate token outputs and refresh the theme copies.
 3. Commit both locations so MFEs (which read from `assets/branding/`) and LMS/Studio (which serve from theme directories) stay consistent.

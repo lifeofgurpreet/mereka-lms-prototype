@@ -17,6 +17,7 @@ This contract removes ambiguity around which files are source-of-truth, which ar
 | MFE runtime light baseline | `infrastructure/tutor/themes/mereka/mfe/theme/light.min.css` | **Generated** | `scripts/branding/build-tokens.sh` | **Disallowed** |
 | MFE runtime brand-light delta | `infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand-light.min.css` | **Generated** | `scripts/branding/build-tokens.sh` | **Disallowed** |
 | MFE Paragon baseline | `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css` | **Vendored baseline artifact** | `scripts/branding/build-tokens.sh` | Disallowed unless refreshed via script |
+| Runtime loader shims | `deploy/k8s/base/apps/openedx/theme/head-extra.html`, `infrastructure/tutor/themes/mereka/{common,lms,cms}/templates/head-extra.html` | **Hand-maintained runtime shim** | Manual, mirrored intentionally across surfaces | Allowed only for loader semantics; token values and override rules do not belong here |
 
 ## CI Drift Gates
 
@@ -41,6 +42,26 @@ These checks fail when generated files diverge from deterministic regeneration.
 - Files marked generated in this contract MUST NOT be edited by hand.
 - Regenerate with scripts, then commit outputs.
 - Any PR that edits generated artifacts without corresponding source change + regeneration evidence is invalid.
+
+## Runtime Shim Ownership
+
+`head-extra.html` exists in more than one place because the runtime lookup paths
+and delivery surfaces differ. Those files are not token sources of truth. They
+must stay thin and only do loader work:
+
+- preload fonts
+- load prebuilt runtime CSS
+- carry narrowly documented surface-specific preload differences
+
+They MUST NOT become a second authority for:
+
+- token values
+- runtime override selectors
+- arbitrary frontend hotfix logic
+
+Token truth still starts at `assets/branding/tokens.css`. Runtime override truth
+still lives in generated + curated `mereka-overrides.css` outputs governed by
+the branding scripts.
 
 ## Exit Criteria
 

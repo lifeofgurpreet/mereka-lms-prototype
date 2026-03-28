@@ -8,6 +8,12 @@ Theme hook injected by `lms/templates/main.html` via:
 Important: this file is looked up through the mako engine's default namespace
 resolution, which may not always include `lms/templates/` in the lookup order.
 Keeping a copy under `common/templates/` makes the include reliable.
+
+This file is a runtime shim only. It preloads fonts and loads the already-built
+runtime override CSS. It is not the source of truth for token values or brand
+rules. Functional loader changes here must be mirrored deliberately to the LMS
+and CMS copies, while documented surface-specific preload differences are
+allowed.
 """
 %>
 

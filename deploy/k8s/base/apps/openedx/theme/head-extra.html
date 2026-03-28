@@ -7,8 +7,18 @@ Theme hook for LMS pages.
 edx-platform `lms/templates/main.html` loads this file via:
   <%static:optional_include_mako file="head-extra.html" is_theming_enabled="True" />
 
-We use it to load brand typography + color overrides without requiring a full
-recompile of the core Indigo CSS bundle.
+This is a runtime loader shim, not the canonical token source. Its job is
+limited to:
+  - preloading brand fonts
+  - loading the prebuilt `mereka-overrides.css` runtime stylesheet
+
+Canonical token and override ownership lives in:
+  - `assets/branding/tokens.css`
+  - `scripts/branding/generate-tokens-from-canonical.sh`
+  - `scripts/branding/sync-brand-assets.sh`
+
+Do not hand-add token values, color definitions, or unrelated hotfix logic
+here. Keep this file thin and loader-only.
 """
 %>
 
@@ -40,4 +50,3 @@ recompile of the core Indigo CSS bundle.
   type="text/css"
   media="all"
 />
-
