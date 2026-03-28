@@ -175,6 +175,48 @@ const getCatalogHref = (baseUrl) => {
   return baseUrl ? `${baseUrl}/courses` : '/courses';
 };
 
+const getMerekaBaseUrl = (config) => {
+  return (config && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\/$/, '');
+};
+
+const getMerekaThemeAssetUrl = (config, assetPath) => {
+  const normalizedPath = typeof assetPath === 'string' ? assetPath.trim() : '';
+  const baseUrl = getMerekaBaseUrl(config);
+  if (!normalizedPath) {
+    return '';
+  }
+  if (!normalizedPath.startsWith('/')) {
+    return normalizedPath;
+  }
+  return baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
+};
+
+const getMerekaShellCopy = (variant) => {
+  const brand = variant && variant.brand ? variant.brand : 'Mereka Academy';
+  return {
+    authn: {
+      eyebrow: 'Learning workspace',
+      title: 'Welcome back',
+      subtitle: `Sign in to continue with ${brand}.`,
+      supportCtaLabel: 'Support',
+      trustNote: 'Secure access for your active learning environment.',
+    },
+    dashboard: {
+      eyebrow: 'Learning cockpit',
+      title: `Welcome back to ${brand}`,
+      subtitle: 'Resume your work, explore what is next, and keep momentum across every active pathway.',
+      primaryCtaLabel: 'Explore courses',
+      secondaryCtaLabel: 'Support',
+    },
+    learning: {
+      eyebrow: 'In session',
+      title: `${brand} learning flow`,
+      subtitle: 'Stay oriented, keep your progress visible, and reach support without breaking context.',
+      supportCtaLabel: 'Get help',
+    },
+  };
+};
+
 const getLogoHref = () => getLearnerHomeHref();
 
 const withMerekaMenuItems = (widget, menuItems = []) => {
@@ -433,15 +475,19 @@ const withMerekaStudioHeaderSearchButton = (widget) => {
 // Wired into org.openedx.frontend.layout.header_logo.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaHeaderLogo = () => {
   const config = getConfig();
-  const baseUrl = (typeof config !== 'undefined' && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\/$/, '');
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
   const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false;
   const selectedLogo = isMobileViewport && variant.mobileLogoUrl ? variant.mobileLogoUrl : variant.logoUrl;
+  const shellCopy = getMerekaShellCopy(variant);
 
   return (
     <a href={getLogoHref()} aria-label={`${variant.brand} learning home`} className="mereka-header-logo">
-      <img src={baseUrl ? `${baseUrl}${selectedLogo}` : selectedLogo} alt={`${variant.brand} logo`} />
+      <img src={getMerekaThemeAssetUrl(config, selectedLogo)} alt={`${variant.brand} logo`} />
+      <span className="mereka-header-logo__lockup">
+        <span className="mereka-header-logo__brand">{variant.brand}</span>
+        <span className="mereka-header-logo__meta">{shellCopy.learning.eyebrow}</span>
+      </span>
     </a>
   );
 };
@@ -463,20 +509,33 @@ const MerekaAuthnLoginBranding = () => {
   const config = getConfig();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
+  const shellCopy = getMerekaShellCopy(variant);
 
   return (
-    <div className="mereka-authn-login-branding">
+    <div className="mereka-authn-login-branding mereka-shell-panel mereka-shell-panel--authn">
+      <p className="mereka-shell-kicker mereka-authn-login-branding__eyebrow">{shellCopy.authn.eyebrow}</p>
       <a href="/" className="mereka-authn-login-branding__logo">
         <img
-          src={variant.logoUrl}
+          src={getMerekaThemeAssetUrl(config, variant.logoUrl)}
           alt={`${variant.brand} logo`}
           className="mereka-authn-login-branding__logo-img"
         />
       </a>
-      <h2 className="mereka-authn-login-branding__title">Welcome back</h2>
+      <h2 className="mereka-authn-login-branding__title">{shellCopy.authn.title}</h2>
       <p className="mereka-authn-login-branding__subtitle">
-        Sign in to continue with your {variant.brand} workspace.
+        {shellCopy.authn.subtitle}
       </p>
+      <div className="mereka-authn-login-branding__actions">
+        <a
+          href={variant.helpUrl}
+          className="mereka-shell-link mereka-shell-link--quiet"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {shellCopy.authn.supportCtaLabel}
+        </a>
+        <span className="mereka-authn-login-branding__trust-note">{shellCopy.authn.trustNote}</span>
+      </div>
     </div>
   );
 };
@@ -710,13 +769,25 @@ const MerekaNoCoursesView = () => {
 // Wired into org.openedx.frontend.learner_dashboard.course_list.v1.
 const MerekaDashboardHeader = () => {
   const config = getConfig();
+  const baseUrl = getMerekaBaseUrl(config);
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const shellCopy = getMerekaShellCopy(variant);
 
   return (
-    <section className="mereka-dashboard-header-slot mb-3">
-      <p className="mereka-badge mb-2">Mereka Learning</p>
-      <h2 className="h4 mb-1">Welcome back to {variant.brand}</h2>
-      <p className="mb-0 small text-muted">Pick up where you left off and keep your momentum.</p>
+    <section className="mereka-dashboard-header-slot mereka-shell-panel mb-3">
+      <div className="mereka-shell-panel__content">
+        <p className="mereka-shell-kicker">{shellCopy.dashboard.eyebrow}</p>
+        <h2 className="h4 mb-2">{shellCopy.dashboard.title}</h2>
+        <p className="mereka-shell-panel__lead mb-0">{shellCopy.dashboard.subtitle}</p>
+      </div>
+      <div className="mereka-dashboard-header-slot__actions">
+        <a href={getCatalogHref(baseUrl)} className="mereka-shell-link">
+          {shellCopy.dashboard.primaryCtaLabel}
+        </a>
+        <a href={variant.helpUrl} className="mereka-shell-link mereka-shell-link--quiet" target="_blank" rel="noopener noreferrer">
+          {shellCopy.dashboard.secondaryCtaLabel}
+        </a>
+      </div>
     </section>
   );
 };
@@ -777,13 +848,20 @@ const MerekaCourseOutlineSidebar = () => {
 const MerekaLearningCourseHeader = () => {
   const config = getConfig();
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const shellCopy = getMerekaShellCopy(variant);
 
   return (
-    <div className="mereka-learning-course-header mb-3">
-      <span className="mereka-badge">Learning</span>
-      <p className="mereka-learning-course-header__text mb-0">
-        You are learning with {variant.brand}.
-      </p>
+    <div className="mereka-learning-course-header mereka-shell-panel mb-3">
+      <div className="mereka-shell-panel__content">
+        <p className="mereka-shell-kicker">{shellCopy.learning.eyebrow}</p>
+        <p className="mereka-learning-course-header__title mb-1">{shellCopy.learning.title}</p>
+        <p className="mereka-learning-course-header__text mb-0">{shellCopy.learning.subtitle}</p>
+      </div>
+      <div className="mereka-learning-course-header__actions">
+        <a href={variant.helpUrl} className="mereka-shell-link mereka-shell-link--quiet" target="_blank" rel="noopener noreferrer">
+          {shellCopy.learning.supportCtaLabel}
+        </a>
+      </div>
     </div>
   );
 };
@@ -1120,7 +1198,7 @@ const MerekaAdditionalProfileFields = () => {
 // Wired into org.openedx.frontend.layout.footer.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaFooter = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const baseUrl = getMerekaBaseUrl(config);
   const currentYear = new Date().getFullYear();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
@@ -1130,7 +1208,7 @@ const MerekaFooter = () => {
   const footerMarketplace = footerSections.marketplace || {};
   const footerLegal = footerContent.legal || {};
   const logoPath = variant.logoUrl || '/theme/logo-horizontal.svg';
-  const logoUrl = baseUrl ? `${baseUrl}${logoPath}` : logoPath;
+  const logoUrl = getMerekaThemeAssetUrl(config, logoPath);
   const socialLinks = footerContent.socialLinks;
   const navLinks = [
     ...footerContent.navLinks,

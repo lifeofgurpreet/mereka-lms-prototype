@@ -49,6 +49,7 @@ h6,
   border-bottom: 1px solid var(--mereka-mfe-navbar-divider, rgba(26, 22, 35, 0.08));
   box-shadow: var(--mereka-mfe-navbar-shadow);
   padding: var(--mereka-mfe-navbar-padding);
+  backdrop-filter: saturate(140%) blur(14px);
 }
 
 /* RISK: MEDIUM — header logo slot override class from runtime plugin component.
@@ -58,12 +59,37 @@ h6,
 .mereka-header-logo {
   display: inline-flex;
   align-items: center;
+  gap: 0.875rem;
+  color: inherit;
+  text-decoration: none;
 }
 
 .mereka-header-logo img {
   display: block;
   height: var(--mereka-mfe-navbar-logo-height);
   width: auto;
+  flex-shrink: 0;
+}
+
+.mereka-header-logo__lockup {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.mereka-header-logo__brand {
+  color: var(--mereka-color-ink-900);
+  font-family: var(--mereka-font-heading, "Lato", sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.mereka-header-logo__meta {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 /* RISK: MEDIUM — Bootstrap nav-link / dropdown-toggle; degrades visually on rename */
@@ -257,21 +283,133 @@ label {
   letter-spacing: var(--mereka-mfe-badge-letter-spacing);
 }
 
-/* RISK: LOW — plugin-slot class names owned by this repo; not coupled to upstream DOM internals */
-.mereka-authn-login-branding { margin-bottom: 1rem; text-align: center; }
+.mereka-shell-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.85rem;
+  color: var(--mereka-color-teal);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
 
-.mereka-authn-login-branding__logo { display: inline-flex; }
+.mereka-shell-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(148, 209, 228, 0.2), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.94));
+  box-shadow: 0 24px 64px rgba(26, 22, 35, 0.08);
+}
+
+.mereka-shell-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(171, 59, 120, 0.14), transparent 72%);
+  pointer-events: none;
+}
+
+.mereka-shell-panel__content {
+  position: relative;
+  z-index: 1;
+}
+
+.mereka-shell-panel__lead {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.mereka-shell-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  background-image: var(--mereka-mfe-gradient);
+  color: var(--pgn-color-white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 14px 30px rgba(41, 92, 173, 0.18);
+}
+
+.mereka-shell-link:hover,
+.mereka-shell-link:focus {
+  color: var(--pgn-color-white);
+  text-decoration: none;
+  box-shadow: 0 18px 36px rgba(35, 112, 114, 0.24);
+}
+
+.mereka-shell-link--quiet {
+  background: rgba(26, 22, 35, 0.04);
+  color: var(--mereka-color-ink-900);
+  box-shadow: none;
+}
+
+.mereka-shell-link--quiet:hover,
+.mereka-shell-link--quiet:focus {
+  background: rgba(26, 22, 35, 0.08);
+  color: var(--mereka-color-ink-900);
+}
+
+/* RISK: LOW — plugin-slot class names owned by this repo; not coupled to upstream DOM internals */
+.mereka-authn-login-branding {
+  margin-bottom: 1rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  text-align: left;
+}
+
+.mereka-authn-login-branding__eyebrow {
+  justify-content: flex-start;
+}
+
+.mereka-authn-login-branding__logo {
+  display: inline-flex;
+  margin-bottom: 1.25rem;
+}
 
 .mereka-authn-login-branding__logo-img {
-  max-width: min(320px, 75%);
-  max-height: 72px;
+  max-width: min(320px, 100%);
+  max-height: 76px;
   width: 100%;
   object-fit: contain;
 }
 
-.mereka-authn-login-branding__title { margin-top: 1rem; margin-bottom: 0.35rem; }
+.mereka-authn-login-branding__title {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--mereka-color-ink-900);
+}
 
-.mereka-authn-login-branding__subtitle { margin: 0; color: var(--mereka-color-ink-700); }
+.mereka-authn-login-branding__subtitle {
+  margin: 0;
+  color: var(--mereka-color-ink-700);
+  font-size: 0.98rem;
+  line-height: 1.7;
+  max-width: 34rem;
+}
+
+.mereka-authn-login-branding__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.mereka-authn-login-branding__trust-note {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.82rem;
+}
 
 /* RISK: LOW — studio footer class names are slot-owned by this repo */
 .mereka-studio-footer__inner {
@@ -302,10 +440,20 @@ label {
 
 /* RISK: LOW — slot-owned learner-dashboard header surface */
 .mereka-dashboard-header-slot {
-  padding: 1rem;
-  border: 1px solid var(--mereka-mfe-border);
-  border-radius: var(--mereka-mfe-card-radius);
-  background: var(--mereka-mfe-surface-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.mereka-dashboard-header-slot__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 /* RISK: LOW — slot-owned learner-dashboard course-card accent */
@@ -352,15 +500,29 @@ label {
 /* RISK: LOW — slot-owned learning header and tabs helper surfaces */
 .mereka-learning-course-header {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--mereka-mfe-border);
-  border-radius: var(--mereka-mfe-card-radius);
-  background: var(--mereka-mfe-surface-muted);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+  padding: 1rem 1.25rem;
 }
 
-.mereka-learning-course-header__text { color: var(--mereka-color-ink-700); }
+.mereka-learning-course-header__title {
+  color: var(--mereka-color-ink-900);
+  font-family: var(--mereka-font-heading, "Lato", sans-serif);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.mereka-learning-course-header__text {
+  color: var(--mereka-color-ink-700);
+  max-width: 36rem;
+}
+
+.mereka-learning-course-header__actions {
+  position: relative;
+  z-index: 1;
+}
 
 .mereka-learning-course-tabs-hint {
   padding: 0.5rem 0.75rem;
@@ -433,5 +595,18 @@ label {
 @media (max-width: 768px) {
   .navbar {
     padding: var(--mereka-mfe-navbar-mobile-padding);
+  }
+
+  .mereka-header-logo__lockup {
+    display: none;
+  }
+
+  .mereka-authn-login-branding {
+    text-align: center;
+  }
+
+  .mereka-authn-login-branding__eyebrow,
+  .mereka-authn-login-branding__actions {
+    justify-content: center;
   }
 }

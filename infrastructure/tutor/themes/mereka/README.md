@@ -96,6 +96,10 @@ the same ownership role.
    - they preload fonts
    - they load prebuilt runtime CSS
    - they are not a token or override source of truth
+5. MFE shell ownership is split by responsibility, not by route:
+   - `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js` owns shell composition and copy
+   - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` owns authored shell styling
+   - LMS templates under `lms/templates/` adapt that shell for legacy surfaces and should not invent a second shell language
 
 If you need to change token values, start in `tokens.css`. If you need to change
 runtime override selectors, change the curated parts of

@@ -7,6 +7,29 @@ const SELECTOR_AUDIT_PATH = (process.env.SELECTOR_AUDIT_PATH ?? '/authn/login').
 const SELECTOR_AUDIT_ROUTES = parseCsv(process.env.SELECTOR_AUDIT_ROUTES ?? SELECTOR_AUDIT_PATH)
   .map(normalizeRoutePath);
 const SELECTOR_AUDIT_SELECTORS = parseCsv(process.env.SELECTOR_AUDIT_SELECTORS ?? '');
+const ROUTE_SPECIFIC_BRANDING_SELECTORS: Array<{ pattern: RegExp; selectors: string[] }> = [
+  {
+    pattern: /\/authn\//,
+    selectors: [
+      '.mereka-authn-login-branding__eyebrow',
+      '.mereka-authn-login-branding__actions',
+    ],
+  },
+  {
+    pattern: /\/learner-dashboard\/?$/,
+    selectors: [
+      '.mereka-dashboard-header-slot .mereka-shell-kicker',
+      '.mereka-dashboard-header-slot__actions',
+    ],
+  },
+  {
+    pattern: /\/(course|learning)\//,
+    selectors: [
+      '.mereka-learning-course-header .mereka-shell-kicker',
+      '.mereka-learning-course-header__actions',
+    ],
+  },
+];
 
 function getMfeBaseUrl(lmsBaseUrl: string): string {
   const parsed = new URL(lmsBaseUrl);
@@ -28,6 +51,13 @@ function normalizeRoutePath(route: string): string {
 
 function getRouteArtifactSuffix(route: string): string {
   return route.replace(/[^a-zA-Z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'root';
+}
+
+function getRequiredRouteSelectors(routePath: string, currentUrl: string): string[] {
+  const target = `${routePath} ${currentUrl}`;
+  return ROUTE_SPECIFIC_BRANDING_SELECTORS
+    .filter(({ pattern }) => pattern.test(target))
+    .flatMap(({ selectors }) => selectors);
 }
 
 async function safeCountSelector(page: Page, selector: string): Promise<number> {
@@ -250,11 +280,26 @@ test('runtime selector DOM audit on configured MFE surfaces', async ({ page, bas
       && pageTextLength < 300
       && (hasThemeBrandStylesheet || hasThemeBrandLink);
 
-    if (!allowBlankShellBypass && !allowHydratingAuthnShell && !allowLowSignalBrandedShell) {
+    const shouldAssertStrongShell = !allowBlankShellBypass
+      && !allowHydratingAuthnShell
+      && !allowLowSignalBrandedShell;
+
+    if (shouldAssertStrongShell) {
       expect(
         trackedSelectorHits,
         `Expected at least ${MIN_TRACKED_SELECTOR_HITS} tracked selectors on ${targetUrl}; counts=${JSON.stringify(trackedCounts)} ${failureHint}`,
       ).toBeGreaterThanOrEqual(MIN_TRACKED_SELECTOR_HITS);
+    }
+
+    if (shouldAssertStrongShell) {
+      const routeSpecificSelectors = getRequiredRouteSelectors(routePath, page.url());
+      for (const selector of routeSpecificSelectors) {
+        const count = await safeCountSelector(page, selector);
+        expect(
+          count,
+          `Expected shell selector ${selector} on ${targetUrl}; currentUrl=${page.url()}`,
+        ).toBeGreaterThan(0);
+      }
     }
 
     routeResults.push({

@@ -205,10 +205,11 @@ else
 fi
 
 # LMS_BASE_URL prefix on asset path (avoids 404 on sub-path deployments)
-if grep -qF "baseUrl ? \`\${baseUrl}\${selectedLogo}\` : selectedLogo" "$PLUGIN_FILE"; then
-  do_pass "Logo src includes LMS_BASE_URL prefix for sub-path deployments"
+if grep -qF "getMerekaThemeAssetUrl(config, selectedLogo)" "$PLUGIN_FILE" || \
+   grep -qF "baseUrl ? \`\${baseUrl}\${selectedLogo}\` : selectedLogo" "$PLUGIN_FILE"; then
+  do_pass "Logo src includes LMS_BASE_URL-aware asset resolution for sub-path deployments"
 else
-  do_fail "Logo src missing LMS_BASE_URL prefix — may cause 404 on sub-path deployments"
+  do_fail "Logo src missing LMS_BASE_URL-aware asset resolution — may cause 404 on sub-path deployments"
 fi
 
 # ── CSS class convention (AC-SLOT-017) ───────────────────────────────────────
