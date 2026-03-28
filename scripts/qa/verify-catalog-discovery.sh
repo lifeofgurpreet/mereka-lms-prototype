@@ -187,6 +187,10 @@ check_contains "$LMS_DISCOVERY_SCSS" ".course-about" "LMS discovery partial styl
 check_contains "$LMS_DISCOVERY_SCSS" ".course-about .register" "LMS discovery partial styles enroll CTA"
 check_contains "$LMS_DISCOVERY_SCSS" ".course-about .course-sidebar" "LMS discovery partial styles course-about sidebar"
 check_contains "$LMS_DISCOVERY_SCSS" ".course-about .intro-inner-wrapper" "LMS discovery partial styles course-about hero"
+check_contains "$LMS_DISCOVERY_SCSS" "grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 24rem)" "LMS discovery partial gives course-about a two-column conversion layout"
+check_contains "$LMS_DISCOVERY_SCSS" ".course-about .social-sharing" "LMS discovery partial styles course-about social sharing cluster"
+check_contains "$LMS_DISCOVERY_SCSS" ".course-about .important-dates-item" "LMS discovery partial styles course-about metadata cards"
+check_contains "$LMS_DISCOVERY_SCSS" "position: sticky" "LMS discovery partial keeps the course-about sidebar sticky on desktop"
 
 # Course card styling
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-image" "LMS discovery partial styles course card image area"

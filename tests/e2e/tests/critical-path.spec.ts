@@ -189,6 +189,12 @@ test.describe('Critical path — Mereka Academy', () => {
     // The page must load without a 404/500
     expect(page.url()).toContain('/courses/');
 
+    const courseHero = page.locator('.course-profile .intro-inner-wrapper').first();
+    await expect(courseHero).toBeVisible({ timeout: 20_000 });
+
+    const courseSummary = page.locator('.course-sidebar .course-summary').first();
+    await expect(courseSummary).toBeVisible({ timeout: 20_000 });
+
     // Enroll / access button — text varies: "Enroll Now", "View Course", "Access Course"
     const enrollButton = page.locator(
       'button, a',
