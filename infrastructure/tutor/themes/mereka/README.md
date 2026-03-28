@@ -105,6 +105,15 @@ the same ownership role.
    - `lms/templates/discovery/course_card.underscore` owns the course-card markup contract
    - `common/static/css/mereka-overrides.css` must not carry discovery/course-about presentation
 
+For the logged-out LMS landing experience, ownership is intentionally split by
+surface rather than by convenience:
+
+5. `lms/templates/index_overlay.html` owns the homepage shell structure and copy.
+6. `lms/static/sass/partials/_homepage.scss` owns the logged-out LMS homepage and
+   discovery-card presentation.
+7. `scss/theme.scss` should stay shared and generic; it must not become a second
+   authority for LMS-only homepage/card selectors.
+
 If you need to change token values, start in `tokens.css`. If you need to change
 runtime override selectors, change the curated parts of
 `common/static/css/mereka-overrides.css` and then sync it. If you need to change

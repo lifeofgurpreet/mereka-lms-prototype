@@ -1,0 +1,520 @@
+// Canonical public LMS shell for the logged-out homepage and course discovery.
+// This partial owns the visual language for the hero, discovery container, and
+// public course cards. Keep generic cross-surface helpers in shared theme.scss.
+
+.home > header {
+  position: relative;
+  background:
+    radial-gradient(circle at top right, rgba(171, 59, 120, 0.22), transparent 32%),
+    radial-gradient(circle at bottom left, rgba(35, 112, 114, 0.18), transparent 28%),
+    linear-gradient(140deg, #fff7fb 0%, #f8f5ff 38%, #eef9fb 100%);
+  box-shadow: none;
+  overflow: visible;
+  padding: 0;
+}
+
+.home > header::before {
+  content: "";
+  position: absolute;
+  inset: 1.25rem;
+  border-radius: 2.25rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.58));
+  border: 1px solid rgba(171, 59, 120, 0.08);
+  box-shadow: 0 30px 90px rgba(25, 22, 35, 0.08);
+  pointer-events: none;
+}
+
+.home > header .outer-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: none;
+  padding: clamp(1.5rem, 3vw, 2.75rem);
+  margin: 0;
+}
+
+.home > header .title {
+  float: none;
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  min-height: 0;
+}
+
+.home > header .title .course-search,
+.home > header .heading-group {
+  float: none;
+  width: 100%;
+  margin: 0;
+}
+
+.mereka-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.9fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: stretch;
+}
+
+.mereka-hero__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: clamp(1rem, 2vw, 2rem) 0;
+}
+
+.mereka-hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  margin: 0;
+  color: var(--mereka-color-magenta, #ab3b78) !important;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.mereka-hero .eyebrow::before {
+  content: "";
+  width: 2.75rem;
+  height: 1px;
+  background: linear-gradient(90deg, var(--mereka-color-teal, #237072), rgba(35, 112, 114, 0));
+}
+
+.mereka-hero h1 {
+  margin: 0;
+  max-width: 12ch;
+  color: var(--mereka-color-ink-900, #16131c);
+  font-size: clamp(3.1rem, 5.4vw, 5.3rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.mereka-hero .lede {
+  margin: 0;
+  max-width: 42rem;
+  color: var(--mereka-color-ink-700, #4a494a);
+  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  line-height: 1.65;
+}
+
+.mereka-hero__signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mereka-hero__signal {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(35, 112, 114, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--mereka-color-ink-700, #4a494a);
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(25, 22, 35, 0.05);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero-actions .btn {
+  min-height: 3.35rem;
+  padding: 0.9rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.hero-actions .btn-primary {
+  border: none;
+  background: linear-gradient(135deg, var(--mereka-color-magenta, #ab3b78), #ca4e8d);
+  box-shadow: 0 18px 32px rgba(171, 59, 120, 0.24);
+}
+
+.hero-actions .btn-primary:hover,
+.hero-actions .btn-primary:focus {
+  box-shadow: 0 22px 40px rgba(171, 59, 120, 0.32);
+}
+
+.hero-actions .btn-outline-primary {
+  border: 1.5px solid rgba(35, 112, 114, 0.22);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--mereka-color-teal, #237072);
+}
+
+.hero-actions .btn-outline-primary:hover,
+.hero-actions .btn-outline-primary:focus {
+  background: rgba(35, 112, 114, 0.08);
+  color: var(--mereka-color-teal, #237072);
+}
+
+.mereka-hero__spotlight {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  padding: clamp(1.4rem, 2.2vw, 2rem);
+  border-radius: 2rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(250, 248, 252, 0.82)),
+    linear-gradient(135deg, rgba(171, 59, 120, 0.12), rgba(35, 112, 114, 0.08));
+  border: 1px solid rgba(171, 59, 120, 0.1);
+  box-shadow: 0 28px 80px rgba(25, 22, 35, 0.08);
+  overflow: hidden;
+}
+
+.mereka-hero__spotlight::after {
+  content: "";
+  position: absolute;
+  inset: auto -15% -35% auto;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(35, 112, 114, 0.14), transparent 68%);
+  pointer-events: none;
+}
+
+.mereka-hero__spotlight-label {
+  margin: 0;
+  color: var(--mereka-color-ink-500, #6a6670);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mereka-hero__spotlight h2 {
+  margin: 0;
+  color: var(--mereka-color-ink-900, #16131c);
+  font-size: clamp(1.6rem, 2.2vw, 2.3rem);
+  line-height: 1.05;
+}
+
+.mereka-hero__spotlight-copy {
+  margin: 0;
+  color: var(--mereka-color-ink-700, #4a494a);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.mereka-hero__spotlight-list {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mereka-hero__spotlight-list li {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(35, 112, 114, 0.1);
+}
+
+.mereka-hero__spotlight-list strong {
+  color: var(--mereka-color-ink-900, #16131c);
+  font-size: 0.98rem;
+}
+
+.mereka-hero__spotlight-list span {
+  color: var(--mereka-color-ink-700, #5e5b63);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero-metrics li {
+  min-width: 0;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: rgba(25, 22, 35, 0.035);
+}
+
+.hero-metrics .metric {
+  display: block;
+  color: var(--mereka-color-ink-900, #16131c);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hero-metrics .label {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--mereka-color-ink-500, #6a6670);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home > header .title .course-search {
+  margin-top: 1.75rem;
+}
+
+.home > header .course-search {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(35, 112, 114, 0.12);
+  border-radius: 1.75rem;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 18px 40px rgba(25, 22, 35, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.courses-container {
+  margin-top: 3.25rem;
+  padding: clamp(2rem, 3vw, 3rem);
+  border-radius: 2.25rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 247, 251, 0.92));
+  box-shadow: 0 26px 70px rgba(25, 22, 35, 0.1);
+}
+
+.course-heading-area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.course-heading-area h2 {
+  margin-bottom: 0.35rem;
+  color: var(--mereka-color-ink-900, #16131c);
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  line-height: 1;
+}
+
+.course-heading-area p {
+  max-width: 40rem;
+  margin: 0;
+  color: var(--mereka-color-ink-700, #5e5b63);
+  font-size: 1rem;
+}
+
+.courses-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.75rem;
+  padding: 0;
+}
+
+.courses-listing li,
+.courses-listing-item {
+  list-style: none;
+}
+
+// Match stock Open edX discovery specificity so the public course-card shell
+// does not depend on downstream runtime overrides to keep the grid intact.
+.home .courses-container .courses .courses-listing .courses-listing-item,
+.find-courses .courses-container .courses .courses-listing .courses-listing-item,
+.university-profile .courses-container .courses .courses-listing .courses-listing-item,
+.courses-container .courses:not(.no-course-discovery) .courses-listing .courses-listing-item,
+.courses-container .courses.no-course-discovery .courses-listing .courses-listing-item {
+  float: none;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  margin-right: 0;
+}
+
+.home .courses-container .courses .courses-listing .courses-listing-item > .course,
+.find-courses .courses-container .courses .courses-listing .courses-listing-item > .course,
+.university-profile .courses-container .courses .courses-listing .courses-listing-item > .course,
+.courses-container .courses:not(.no-course-discovery) .courses-listing .courses-listing-item > .course,
+.courses-container .courses.no-course-discovery .courses-listing .courses-listing-item > .course {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+}
+
+.course {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 246, 250, 0.98));
+  border: 1px solid rgba(25, 22, 35, 0.08);
+  border-radius: 1.85rem;
+  box-shadow: 0 22px 60px rgba(25, 22, 35, 0.08);
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.course::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.3rem;
+  background: linear-gradient(90deg, var(--mereka-color-magenta, #ab3b78), var(--mereka-color-teal, #237072));
+}
+
+.course:hover,
+.course:focus-within {
+  transform: translateY(-6px);
+  border-color: rgba(171, 59, 120, 0.18);
+  box-shadow: 0 34px 90px rgba(25, 22, 35, 0.14);
+}
+
+.course .course-image,
+.course .course-image .cover-image {
+  position: relative;
+  min-height: 210px;
+}
+
+.course .course-image .cover-image {
+  background: linear-gradient(135deg, rgba(35, 112, 114, 0.18), rgba(171, 59, 120, 0.2));
+  overflow: hidden;
+}
+
+.course .course-image .cover-image::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 52%;
+  background: linear-gradient(180deg, rgba(18, 16, 22, 0), rgba(18, 16, 22, 0.48));
+  pointer-events: none;
+}
+
+.course .course-image .cover-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+// Match the stock selector chain so the CTA never falls back to opacity: 0.
+.courses-container .courses .course .course-image .cover-image .learn-more {
+  opacity: 1;
+  position: absolute;
+  top: auto;
+  bottom: 1rem;
+  left: 1rem;
+  transform: none;
+  z-index: 2;
+  width: auto;
+  height: auto;
+  border-radius: 999px;
+  box-sizing: border-box;
+}
+
+.course .course-info {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.5rem;
+}
+
+.course .course-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.course .course-code {
+  color: var(--mereka-color-teal, #237072);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.course .course-title {
+  margin: 0;
+  color: var(--mereka-color-ink-900, #16131c);
+  font-size: 1.32rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.course .course-organization {
+  color: var(--mereka-color-ink-700, #5e5b63);
+  font-size: 0.96rem;
+  margin: 0;
+}
+
+.learn-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--mereka-color-ink-900, #16131c);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(18, 16, 22, 0.18);
+}
+
+.learn-more:hover,
+.learn-more:focus {
+  background: #fff;
+  color: var(--mereka-color-magenta, #ab3b78);
+  text-decoration: none;
+}
+
+.course-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  margin-top: auto;
+  padding: 0.55rem 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(35, 112, 114, 0.08);
+  color: var(--mereka-color-ink-700, #4a494a);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 1100px) {
+  .mereka-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .mereka-hero__copy {
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .home > header::before {
+    inset: 0.75rem;
+    border-radius: 1.5rem;
+  }
+
+  .hero-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .course-heading-area {
+    align-items: flex-start;
+  }
+}

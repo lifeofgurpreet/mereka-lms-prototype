@@ -26,13 +26,19 @@ function getMfeBaseUrl(lmsBaseUrl: string): string {
 }
 
 test.describe('Unauthenticated smoke — LMS', () => {
-  test('LMS homepage responds 200', async ({ page, baseURL }) => {
+  test('LMS homepage responds 200 with branded hero shell', async ({ page, baseURL }) => {
     const response = await page.goto(baseURL!, { waitUntil: 'domcontentloaded' });
     expect(response?.status()).toBe(200);
 
-    // Page should contain the site name or a recognizable LMS element
-    const body = await page.locator('body').innerText();
-    expect(body.length).toBeGreaterThan(100);
+    await expect(page.locator('.mereka-hero')).toHaveCount(1);
+    await expect(page.locator('.mereka-hero__spotlight')).toHaveCount(1);
+    await expect(page.locator('.hero-actions .btn')).toHaveCount(2);
+
+    const signalChips = page.locator('.mereka-hero__signal');
+    expect(await signalChips.count()).toBeGreaterThanOrEqual(3);
+
+    const metricCards = page.locator('.hero-metrics li');
+    expect(await metricCards.count()).toBeGreaterThanOrEqual(3);
   });
 
   test('LMS heartbeat returns 200', async ({ request, baseURL }) => {

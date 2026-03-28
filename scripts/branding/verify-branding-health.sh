@@ -167,6 +167,9 @@ LMS_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/th
 LMS_MAIN_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/lms-main-v1.scss"
 LMS_DISCOVERY_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/partials/_discovery.scss"
 LMS_DISCOVERY_TEMPLATE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/discovery/course_card.underscore"
+LMS_CUSTOM_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/partials/_custom.scss"
+LMS_HOMEPAGE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/partials/_homepage.scss"
+LMS_INDEX_OVERLAY="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/index_overlay.html"
 CMS_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass/theme.scss"
 CMS_HEAD_EXTRA_TEMPLATE="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"
 CMS_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
@@ -183,6 +186,17 @@ check_contains "LMS discovery partial styles discovery route" "$LMS_DISCOVERY_SC
 check_contains "LMS discovery partial styles course-about route" "$LMS_DISCOVERY_SCSS" '.course-about'
 check_contains "Discovery card template keeps CTA inside cover image" "$LMS_DISCOVERY_TEMPLATE" '<div class="cover-image">'
 check_contains "Discovery card template renders View Course inside cover image" "$LMS_DISCOVERY_TEMPLATE" 'class="learn-more"'
+check_file "LMS homepage shell partial" "$LMS_HOMEPAGE_SCSS"
+check_contains "LMS custom SCSS imports homepage shell partial" "$LMS_CUSTOM_SCSS" '@import "homepage";'
+check_contains "Homepage overlay exposes spotlight shell" "$LMS_INDEX_OVERLAY" 'mereka-hero__spotlight'
+check_contains "Homepage overlay exposes signal chips" "$LMS_INDEX_OVERLAY" 'mereka-hero__signal'
+check_contains "Homepage overlay exposes primary CTA cluster" "$LMS_INDEX_OVERLAY" 'hero-actions'
+check_contains "Homepage shell styles spotlight panel" "$LMS_HOMEPAGE_SCSS" '.mereka-hero__spotlight'
+check_contains "Homepage shell styles signal chips" "$LMS_HOMEPAGE_SCSS" '.mereka-hero__signal'
+check_contains "Homepage shell styles public course cards" "$LMS_HOMEPAGE_SCSS" '.course::before'
+check_selector_absent_noncomment "Shared theme avoids LMS homepage shell selectors" "$THEME_SCSS" '.mereka-hero'
+check_selector_absent_noncomment "Shared theme avoids LMS homepage metrics selectors" "$THEME_SCSS" '.hero-metrics'
+check_selector_absent_noncomment "Shared theme avoids LMS logged-out header selectors" "$THEME_SCSS" '.home.style-logout header'
 check_contains "CMS theme imports shared tokens" "$CMS_THEME_SCSS" '@import "../../../scss/theme";'
 check_file "CMS runtime overrides CSS" "$CMS_OVERRIDE_CSS"
 check_contains "CMS head-extra links runtime overrides" "$CMS_HEAD_EXTRA_TEMPLATE" "mereka/css/mereka-overrides.css"

@@ -1,61 +1,7 @@
 // Custom LMS-only style overrides should remain minimal.
 // Keep additional overrides in theming files as needed.
 
-// ──────────────────────────────────────────────────────────────────────
-// Homepage hero: cancel stock grey header background + restore full-width
-//
-// build-lms-v1 (added via b16996c7) sets on .home>header:
-//   background-color: #9c9c9c  ← grey banner replacing Mereka hero
-//   overflow: hidden
-// And constrains the wrappers:
-//   .outer-wrapper { max-width:1200px; padding:60px; margin:0 auto }
-//   .title { float:left; width:65% }
-//
-// The theme.scss Mereka hero is scoped to .home.style-logout header but
-// the actual Open edX HTML uses body.ltr + section.home > header — so
-// .home.style-logout never fires. The stock grey wins instead.
-//
-// Fix: cancel the grey + float constraints so the Mereka hero renders
-// full-width on a light background. Text colours also adjusted from
-// white (designed for dark gradient bg) to Mereka ink.
-// ──────────────────────────────────────────────────────────────────────
-
-.home > header {
-  background-color: var(--mereka-color-surface-primary, #fbfafb);
-  background-image: none;
-  box-shadow: none;
-  overflow: visible;
-  padding: 0;
-}
-
-.home > header .outer-wrapper {
-  max-width: none;
-  padding: 2rem;
-  margin: 0;
-}
-
-.home > header .title {
-  float: none;
-  width: 100%;
-  margin-right: 0;
-  margin-left: 0;
-  // Cancel the stock white-card treatment on .title
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
-  min-height: 0;
-}
-
-.home > header .title .course-search {
-  float: none;
-  width: 100%;
-  margin-left: 0;
-}
-
-.home > header .heading-group {
-  float: none;
-  width: 100%;
-}
+@import "homepage";
 
 // ──────────────────────────────────────────────────────────────────────
 // Global header: cancel build-lms-v1 border-bottom separator line
@@ -120,53 +66,6 @@
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// .mereka-hero text colours: theme.scss uses white (for the dark gradient
-// card that never fires). Override to Mereka ink on the now-light bg.
-//
-// Eyebrow note: build-lms-v1 has
-//   body:not(.courseware) .home > header .title > .heading-group p
-//   at specificity 0,4,3 → sets color: #000, overriding our 0,2,0 rule.
-// Fix: !important beats the stock high-specificity rule.
-// ──────────────────────────────────────────────────────────────────────
-
-.mereka-hero .eyebrow {
-  color: var(--mereka-color-magenta, #ab3b78) !important;
-}
-
-.mereka-hero h1 {
-  color: var(--mereka-color-ink-900, #000);
-}
-
-.mereka-hero .lede {
-  color: var(--mereka-color-ink-700, #4a494a);
-}
-
-// ──────────────────────────────────────────────────────────────────────
-// Course grid: cancel stock float-based responsive layout
-//
-// build-lms-v1 imports stock Open edX CSS that applies float:left +
-// display:block + fixed percentage widths on .courses-listing-item at
-// various media breakpoints (.home, .find-courses, .university-profile
-// contexts). These rules break the CSS Grid layout defined in
-// mereka-overrides.css (.courses-listing { display: grid; ... }).
-//
-// Fix: override the float/display/width back to grid-friendly values
-// at the same or higher specificity.
-// ──────────────────────────────────────────────────────────────────────
-
-// Use the exact stock selector contexts to ensure specificity match.
-.home .courses-container .courses .courses-listing .courses-listing-item,
-.find-courses .courses-container .courses .courses-listing .courses-listing-item,
-.university-profile .courses-container .courses .courses-listing .courses-listing-item,
-.courses-container .courses:not(.no-course-discovery) .courses-listing .courses-listing-item,
-.courses-container .courses.no-course-discovery .courses-listing .courses-listing-item {
-  float: none !important;
-  display: flex !important;
-  width: 100% !important;
-  margin-right: 0 !important;
-}
-
-// ──────────────────────────────────────────────────────────────────────
 // Nav .main flex layout: cancel build-lms-v1 float/margin override
 //
 // build-lms-v1 at @media (min-width: 992px) sets specificity 0,3,0:
@@ -191,37 +90,6 @@
     float: none;
     margin: 0;
   }
-}
-
-// ──────────────────────────────────────────────────────────────────────
-// Course card .learn-more overlay: cancel stock position + opacity defaults
-//
-// Stock build-lms-v1 sets at specificity 0,6,0:
-//   top: 55px; opacity: 0; width: 200px; height: 50px; border-radius: 3px
-//   (a hover-only rectangular block near the top of the image)
-//
-// Our intent: an always-visible pill at bottom-center of the cover image.
-//
-// Fix: use the identical 0,6,0 selector so this rule wins by cascade order
-// (it appears later in lms-main-v1.css — _custom.scss is always last).
-// Cancel every stock property that breaks the pill appearance/position.
-// ──────────────────────────────────────────────────────────────────────
-
-.courses-container .courses .course .course-image .cover-image .learn-more {
-  opacity: 1;
-  position: absolute;
-  // position: cancel stock top:55px, restore bottom-center placement
-  top: auto;
-  bottom: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  white-space: nowrap;
-  // shape: cancel stock 200×50 rectangle, restore pill
-  width: auto;
-  height: auto;
-  border-radius: 999px;
-  box-sizing: border-box;
 }
 
 // ──────────────────────────────────────────────────────────────────────

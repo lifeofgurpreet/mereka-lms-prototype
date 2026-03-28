@@ -420,6 +420,31 @@ check_homepage_brand_logo() {
   fi
 }
 
+check_homepage_shell_markers() {
+  local base_domain=$1
+  local label=$2
+  local html ts
+
+  ts="$(date +%s)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${base_domain}/?nocache=${ts}" 2>/dev/null || true)"
+
+  if [[ -z "$html" ]]; then
+    printf "✗ %s (homepage HTML unavailable)\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
+
+  for marker in "mereka-hero" "mereka-hero__spotlight" "mereka-hero__signal" "hero-actions"; do
+    if [[ "$html" != *"$marker"* ]]; then
+      printf "✗ %s (missing homepage shell marker: %s)\n" "$label" "$marker" >&2
+      failures=$((failures + 1))
+      return
+    fi
+  done
+
+  printf "✓ %s\n" "$label"
+}
+
 check_studio_brand_css() {
   local studio_host=$1
   local label=$2
@@ -661,6 +686,7 @@ check_studio_footer_whitelist "${STUDIO_HOST}" "Studio footer white-label (no 'P
 
 # Homepage must actually be using brand logo content (not stock Open edX).
 check_homepage_brand_logo "${BASE_DOMAIN}" "Homepage logo matches brand assets"
+check_homepage_shell_markers "${BASE_DOMAIN}" "Homepage renders canonical shell markers"
 check_forum_heartbeat "${FORUM_HOST}"
 check_forum_landing "${FORUM_HOST}"
 check_ecommerce_landing "${ECOMMERCE_HOST}"
@@ -672,6 +698,7 @@ for host in "${EXTRA_HOSTS[@]}"; do
   check_http "https://${host}/" "Microsite ${host} reachable"
   check_homepage_brand_fonts "${host}" "Microsite ${host} uses local brand fonts (no Google fonts)"
   check_homepage_brand_logo "${host}" "Microsite ${host} logo matches brand assets"
+  check_homepage_shell_markers "${host}" "Microsite ${host} renders canonical homepage shell markers"
 done
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then
