@@ -238,28 +238,62 @@ fi
 echo ""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# AC-CSS-SCOPE-004: Page-scope prefixes are present for LMS discovery + dashboard
+# AC-CSS-SCOPE-004: Page-scope ownership is route-specific and canonical
 #
-# Verifies that shared runtime overrides still keep shared LMS page scopes while
-# discovery/course-about ownership lives in the dedicated LMS discovery partial.
+# Verifies that:
+#   - learner dashboard card shell lives in the dedicated LMS custom partial
+#   - shared theme/runtime layers do not re-own that learner dashboard shell
+#   - discovery/course-about ownership still lives in the dedicated discovery partial
 # ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}## AC-CSS-SCOPE-004: Page-scope prefixes present (discovery + dashboard + courseware)${NC}"
+echo -e "${BLUE}## AC-CSS-SCOPE-004: Route-specific page-scope ownership${NC}"
 
-for css_file in "$LMS_CSS" "$COMMON_CSS"; do
-  fname="$(basename "$(dirname "$css_file")")/$(basename "$css_file")"
-  if [[ ! -f "$css_file" ]]; then
-    do_skip "AC-CSS-SCOPE-004: $fname not found"
-    continue
+if [[ ! -f "$COMMON_CSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: common/static/css/mereka-overrides.css missing"
+else
+  if grep -qF ".dashboard .notice" "$COMMON_CSS"; then
+    do_pass "AC-CSS-SCOPE-004: Shared runtime overrides keep dashboard utility/notices scope"
+  else
+    do_fail "AC-CSS-SCOPE-004: Shared runtime overrides lost dashboard utility/notices scope"
   fi
 
-  for page_scope in ".dashboard" ".courseware"; do
-    if grep -qF "$page_scope" "$css_file"; then
-      do_pass "AC-CSS-SCOPE-004: $page_scope scope present in $fname"
+  for learner_shell in ".dashboard .listing-courses {" ".dashboard .course .enter-course"; do
+    if grep -qF "$learner_shell" "$COMMON_CSS"; then
+      do_fail "AC-CSS-SCOPE-004: Shared runtime overrides still own learner dashboard shell [$learner_shell]"
     else
-      do_fail "AC-CSS-SCOPE-004: $page_scope scope missing from $fname"
+      do_pass "AC-CSS-SCOPE-004: Shared runtime overrides do not own learner dashboard shell [$learner_shell]"
     fi
   done
-done
+fi
+
+if [[ ! -f "$THEME_SCSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: scss/theme.scss missing"
+else
+  for learner_shell in ".dashboard .listing-courses {" ".dashboard .course .enter-course"; do
+    if grep -qF "$learner_shell" "$THEME_SCSS"; then
+      do_fail "AC-CSS-SCOPE-004: Shared theme.scss still owns learner dashboard shell [$learner_shell]"
+    else
+      do_pass "AC-CSS-SCOPE-004: Shared theme.scss does not own learner dashboard shell [$learner_shell]"
+    fi
+  done
+
+  if grep -qF ".courseware" "$THEME_SCSS"; then
+    do_pass "AC-CSS-SCOPE-004: Shared theme.scss still carries cross-surface courseware scope"
+  else
+    do_fail "AC-CSS-SCOPE-004: Shared theme.scss lost cross-surface courseware scope"
+  fi
+fi
+
+if [[ ! -f "$LMS_CUSTOM_SCSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: LMS custom partial missing at lms/static/sass/partials/_custom.scss"
+else
+  for learner_shell in ".dashboard .listing-courses {" ".dashboard .course .enter-course" ".dashboard .course .course-title"; do
+    if grep -qF "$learner_shell" "$LMS_CUSTOM_SCSS"; then
+      do_pass "AC-CSS-SCOPE-004: Learner dashboard shell selector [$learner_shell] present in _custom.scss"
+    else
+      do_fail "AC-CSS-SCOPE-004: Learner dashboard shell selector [$learner_shell] missing from _custom.scss"
+    fi
+  done
+fi
 
 if [[ ! -f "$LMS_DISCOVERY_SCSS" ]]; then
   do_fail "AC-CSS-SCOPE-004: LMS discovery partial missing at lms/static/sass/partials/_discovery.scss"
@@ -313,6 +347,18 @@ else
       do_fail "AC-CSS-SCOPE-004: Dashboard shell owner [$owner_selector] missing from lms/static/sass/partials/_custom.scss"
     fi
   done
+
+  if grep -qF "content-visibility: auto" "$LMS_CUSTOM_SCSS"; then
+    do_pass "AC-CSS-SCOPE-004: Dashboard shell owner uses offscreen render skipping in lms/static/sass/partials/_custom.scss"
+  else
+    do_fail "AC-CSS-SCOPE-004: Dashboard shell owner missing offscreen render skipping in lms/static/sass/partials/_custom.scss"
+  fi
+
+  if grep -qF "contain-intrinsic-size: 24rem" "$LMS_CUSTOM_SCSS"; then
+    do_pass "AC-CSS-SCOPE-004: Dashboard shell owner reserves stable intrinsic size in lms/static/sass/partials/_custom.scss"
+  else
+    do_fail "AC-CSS-SCOPE-004: Dashboard shell owner missing intrinsic size reservation in lms/static/sass/partials/_custom.scss"
+  fi
 fi
 
 if [[ -f "$THEME_SCSS" ]]; then

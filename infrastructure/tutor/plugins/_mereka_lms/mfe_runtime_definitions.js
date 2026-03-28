@@ -826,6 +826,31 @@ const MerekaDashboardHeader = () => {
   );
 };
 
+const MerekaDashboardMicroShell = ({
+  eyebrow,
+  title,
+  body,
+  badge,
+  className = '',
+}) => {
+  const shellClassName = ['mereka-dashboard-micro-shell', 'mereka-shell-panel', className].filter(Boolean).join(' ');
+
+  return (
+    <div className={shellClassName}>
+      <div className="mereka-shell-panel__content">
+        {eyebrow ? <p className="mereka-shell-kicker mb-1">{eyebrow}</p> : null}
+        <div className="mereka-dashboard-micro-shell__header">
+          <div className="mereka-dashboard-micro-shell__copy">
+            <p className="mereka-dashboard-micro-shell__title mb-0">{title}</p>
+            {body ? <p className="mereka-dashboard-micro-shell__body mb-0">{body}</p> : null}
+          </div>
+          {badge ? <span className="mereka-badge mereka-dashboard-micro-shell__badge">{badge}</span> : null}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Learner-dashboard course-card banner accent slot.
 // Wired into org.openedx.frontend.learner_dashboard.course_card_banner.v1.
 const MerekaCourseCardAccent = ({ cardId }) => {
@@ -842,9 +867,12 @@ const MerekaCourseCardAccent = ({ cardId }) => {
 // Wired into org.openedx.frontend.learner_dashboard.course_card_action.v1.
 const MerekaCourseCardActionHint = () => {
   return (
-    <div className="mereka-course-card-action-hint">
-      <span>Keep your weekly learning streak active.</span>
-    </div>
+    <MerekaDashboardMicroShell
+      title="Keep your weekly learning streak active"
+      body="A short, deliberate session this week keeps momentum visible."
+      badge="Momentum"
+      className="mereka-course-card-action-hint mereka-dashboard-micro-shell--inline"
+    />
   );
 };
 
@@ -852,10 +880,13 @@ const MerekaCourseCardActionHint = () => {
 // Wired into org.openedx.frontend.learner_dashboard.dashboard_modal.v1.
 const MerekaDashboardModalHint = () => {
   return (
-    <div className="mereka-dashboard-modal-hint">
-      <p className="mereka-badge mb-2">Mereka update</p>
-      <p className="small mb-0">New curated pathways are available for your active learning goals.</p>
-    </div>
+    <MerekaDashboardMicroShell
+      eyebrow="Mereka update"
+      title="New curated pathways are available"
+      body="Review the latest pathways aligned to your active learning goals before you leave the dashboard."
+      badge="Update"
+      className="mereka-dashboard-modal-hint"
+    />
   );
 };
 

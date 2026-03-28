@@ -132,8 +132,11 @@
 .courses-listing-item,
 .dashboard .listing-courses li {
   display: flex;
+  list-style: none;
   min-width: 0;
   list-style: none;
+  content-visibility: auto;
+  contain-intrinsic-size: 24rem;
 }
 
 .courses-listing li > .course,
@@ -169,6 +172,8 @@
 .dashboard .listing-courses .course-item {
   margin: 0;
   width: 100%;
+  content-visibility: auto;
+  contain-intrinsic-size: 24rem;
 }
 
 .dashboard .my-courses .course-item .course-container {
@@ -186,6 +191,10 @@
   overflow: hidden;
   background: var(--pgn-color-white);
   transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.dashboard .my-courses .course-item .course:hover {
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
 }
 
 .dashboard .my-courses .course-item .wrapper-course-image,
@@ -323,6 +332,12 @@
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .dashboard .my-courses .course-item .course:hover {
+    transform: translateY(-4px);
+  }
+}
+
 // Course image: minimum height + placeholder gradient so empty-thumbnail cards
 // don't collapse. Applies to both listing cards and dashboard cards.
 .course .course-image,
@@ -423,9 +438,69 @@
 
 // Details text panel: flex-grow to fill remaining space.
 .dashboard .main-container .my-courses .course .details .wrapper-course-details {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  justify-content: flex-start;
   padding: 1.25rem;
   min-width: 0;
+}
+
+.dashboard .course .wrapper-course-details {
+  padding: 1.25rem 1.5rem 0;
+}
+
+.dashboard .course .course-title {
+  color: var(--mereka-color-ink-900);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashboard .course .info-university {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.dashboard .course .enter-course {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--mereka-gradient-primary);
+  color: var(--pgn-color-white);
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard .course .enter-course:hover,
+.dashboard .course .enter-course:focus {
+  box-shadow: 0 18px 32px rgba(35, 112, 114, 0.25);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dashboard .course .enter-course:hover,
+  .dashboard .course .enter-course:focus {
+    transform: translateY(-1px);
+  }
+}
+
+.dashboard .course .course-info {
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 0.75rem 1.5rem 1rem;
+  color: var(--mereka-color-ink-500);
+  font-size: 0.9rem;
 }
 
 // On mobile: stack vertically.

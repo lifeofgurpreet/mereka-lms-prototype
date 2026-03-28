@@ -104,6 +104,10 @@ the same ownership role.
    - `lms/static/sass/partials/_discovery.scss` owns `/courses` and `/courses/<id>/about`
    - `lms/templates/discovery/course_card.underscore` owns the course-card markup contract
    - `common/static/css/mereka-overrides.css` must not carry discovery/course-about presentation
+7. Learner LMS dashboard ownership is route-specific:
+   - `lms/static/sass/partials/_custom.scss` owns learner dashboard card/list/CTA presentation
+   - `scss/theme.scss` must not carry learner dashboard card/list selectors
+   - `common/static/css/mereka-overrides.css` keeps only shared dashboard utilities and must not carry learner dashboard card shell/layout rules
 
 For the logged-out LMS landing experience, ownership is intentionally split by
 surface rather than by convenience:

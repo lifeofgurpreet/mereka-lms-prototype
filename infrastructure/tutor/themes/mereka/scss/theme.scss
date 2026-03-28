@@ -283,9 +283,9 @@
   margin-right: 0.75rem;
 }
 
-/* Learner dashboard card/list/image shell is LMS-owned in
-   lms/static/sass/partials/_custom.scss. Keep shared theme.scss focused on
-   cross-surface tokens and primitives. */
+/* Learner dashboard card/listing shell is LMS-route-specific. Keep shared
+   theme.scss limited to cross-surface primitives; the canonical shell lives in
+   lms/static/sass/partials/_custom.scss. */
 
 .dashboard .course .course-info {
   border-top: 1px solid rgba(26, 22, 35, 0.08);

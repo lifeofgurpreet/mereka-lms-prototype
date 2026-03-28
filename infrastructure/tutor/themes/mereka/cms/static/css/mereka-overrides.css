@@ -286,7 +286,7 @@ body:not(.courseware) button.btn.btn-primary:focus {
    lms/static/sass/partials/_discovery.scss. Keep runtime overrides focused
    on shared brand shims and legacy chrome. */
 
-/* Learner dashboard card/list/image shell is LMS-owned in
+/* Learner dashboard card/list/image shell and CTA styling are LMS-owned in
    lms/static/sass/partials/_custom.scss. Runtime override copies keep only
    shared dashboard notices/utilities below. */
 

@@ -265,6 +265,16 @@ else
   fail "Source contract: learning sequence navigation slot markers missing"
 fi
 
+if rg -qF "const MerekaDashboardMicroShell = ({" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-course-card-action-hint mereka-dashboard-micro-shell--inline\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-dashboard-modal-hint\"" "$PLUGIN_FILE" \
+  && rg -qF ".mereka-dashboard-micro-shell" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss" \
+  && rg -qF ".mereka-dashboard-micro-shell--inline" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"; then
+  pass "Source contract: dashboard action and modal slots reuse canonical micro-shell"
+else
+  fail "Source contract: dashboard micro-shell canonical reuse markers missing"
+fi
+
 if rg -qF "org.openedx.frontend.account.additional_profile_fields.v1" "$PLUGIN_FILE" \
   && rg -qF "mereka_additional_profile_fields" "$PLUGIN_FILE"; then
   pass "Source contract: account additional profile fields slot markers present"

@@ -108,6 +108,8 @@ if [[ "$BRANDING_LEVEL" == "deep" ]]; then
   require_contains "XBlock discussion styling present" "$COMMON_CSS" ".discussion-module"
   require_contains "XBlock video styling present" "$COMMON_CSS" ".video"
   require_contains "Dashboard notice styling present" "$COMMON_CSS" ".dashboard .notice"
+  require_absent "Learner dashboard grid shell not owned by runtime overrides" "$COMMON_CSS" ".dashboard .listing-courses {"
+  require_absent "Learner dashboard CTA not owned by runtime overrides" "$COMMON_CSS" ".dashboard .course .enter-course"
   require_contains "Studio wrapper styling present" "$COMMON_CSS" ".wrapper-content"
   require_contains "Studio create-course CTA styling present" "$COMMON_CSS" ".action-create-course"
   require_contains "Studio create-library CTA styling present" "$COMMON_CSS" ".action-create-library"

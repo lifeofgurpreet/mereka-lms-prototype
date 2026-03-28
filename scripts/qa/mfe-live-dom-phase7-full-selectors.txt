@@ -21,6 +21,13 @@
 .mereka-badge
 .mereka-dashboard-header-slot
 .mereka-dashboard-header-slot__actions
+.mereka-dashboard-micro-shell
+.mereka-dashboard-micro-shell--inline
+.mereka-dashboard-micro-shell__header
+.mereka-dashboard-micro-shell__copy
+.mereka-dashboard-micro-shell__title
+.mereka-dashboard-micro-shell__body
+.mereka-dashboard-micro-shell__badge
 .mereka-dashboard-modal-hint
 .mereka-course-card-accent
 .mereka-course-card-accent__meta
