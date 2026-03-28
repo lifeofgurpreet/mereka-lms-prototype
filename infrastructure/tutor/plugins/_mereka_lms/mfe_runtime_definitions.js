@@ -729,17 +729,34 @@ const MerekaLearnerSidebarWidget = () => {
   const config = getConfig();
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const shellCopy = getMerekaShellCopy(variant);
   const learnerHomePath = getLearnerHomeHref();
   const coursesPath = getCatalogHref(baseUrl);
   const helpPath = variant.helpUrl || '/help/';
+  const quickLinks = [
+    { href: learnerHomePath, label: 'Learning home', meta: 'Resume active pathways' },
+    { href: coursesPath, label: 'Course catalog', meta: 'Browse new learning options' },
+    { href: helpPath, label: 'Support', meta: 'Get help without losing context' },
+  ];
 
   return (
-    <div className="mereka-learner-sidebar-widget">
-      <p className="h5 mb-2">{variant.brand} quick links</p>
-      <a href={learnerHomePath} className="d-block mb-1">Learning home</a>
-      <a href={coursesPath} className="d-block mb-1">Course catalog</a>
-      <a href={helpPath} className="d-block">Support</a>
-    </div>
+    <aside className="mereka-learner-sidebar-widget mereka-shell-panel">
+      <div className="mereka-shell-panel__content">
+        <p className="mereka-shell-kicker">{shellCopy.dashboard.eyebrow}</p>
+        <h3 className="mereka-learner-sidebar-widget__title h5 mb-2">{variant.brand} quick links</h3>
+        <p className="mereka-shell-panel__lead mb-3">
+          Keep your next action visible while moving between the dashboard, catalog, and support.
+        </p>
+        <div className="mereka-learner-sidebar-widget__links">
+          {quickLinks.map((link) => (
+            <a key={link.label} href={link.href} className="mereka-learner-sidebar-widget__link">
+              <span className="mereka-learner-sidebar-widget__label">{link.label}</span>
+              <span className="mereka-learner-sidebar-widget__meta">{link.meta}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </aside>
   );
 };
 
@@ -748,20 +765,37 @@ const MerekaLearnerSidebarWidget = () => {
 const MerekaNoCoursesView = () => {
   const config = getConfig();
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const shellCopy = getMerekaShellCopy(variant);
   const discoverPath = getCatalogHref(baseUrl);
   const helpPath = variant.helpUrl || '/help/';
+  const noCourseSignals = [
+    'Start with curated pathways tailored to your goals.',
+    'Return here anytime to keep momentum visible.',
+    'Reach support fast if you need enrollment help.',
+  ];
 
   return (
-    <div className="mereka-no-courses-view p-4 text-center">
-      <h2 className="h4 mb-3">Welcome to your learner dashboard</h2>
-      <p className="mereka-no-courses-view__message mb-3">
-        Your dashboard is ready, but you are not enrolled in any courses yet.
-      </p>
-      <div className="mereka-no-courses-view__actions">
-        <a href={discoverPath} className="btn btn-brand me-2 mb-2">Browse course catalog</a>
-        <a href={helpPath} className="btn btn-outline-primary mb-2">Get support</a>
+    <section className="mereka-no-courses-view mereka-shell-panel">
+      <div className="mereka-shell-panel__content">
+        <p className="mereka-shell-kicker">{shellCopy.dashboard.eyebrow}</p>
+        <h2 className="h3 mb-3">Your {variant.brand} dashboard is ready</h2>
+        <p className="mereka-no-courses-view__message mb-4">
+          You are not enrolled in any courses yet, but your learner space is ready for the next pathway you start.
+        </p>
+        <ul className="mereka-no-courses-view__signals list-unstyled mb-4">
+          {noCourseSignals.map((signal) => (
+            <li key={signal} className="mereka-no-courses-view__signal">
+              {signal}
+            </li>
+          ))}
+        </ul>
+        <div className="mereka-no-courses-view__actions">
+          <a href={discoverPath} className="btn btn-primary me-2 mb-2">Browse course catalog</a>
+          <a href={helpPath} className="btn btn-outline-primary mb-2">Get support</a>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
@@ -830,15 +864,21 @@ const MerekaDashboardModalHint = () => {
 const MerekaCourseOutlineSidebar = () => {
   const config = getConfig();
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const shellCopy = getMerekaShellCopy(variant);
   const helpPath = variant.helpUrl || '/help/';
 
   return (
-    <aside className="mereka-course-outline-sidebar mb-3 border rounded p-3">
-      <h3 className="h6 mb-2">{variant.brand} Course Hub</h3>
-      <p className="small text-muted mb-3">
-        Use this area to find support resources while learning.
-      </p>
-      <a href={helpPath} className="d-inline-block">Help centre</a>
+    <aside className="mereka-course-outline-sidebar mereka-shell-panel mb-3">
+      <div className="mereka-shell-panel__content">
+        <p className="mereka-shell-kicker">{shellCopy.learning.eyebrow}</p>
+        <h3 className="mereka-course-outline-sidebar__title h6 mb-2">{variant.brand} course hub</h3>
+        <p className="mereka-course-outline-sidebar__body mb-3">
+          Keep pacing, support, and the next decision close while you move through each unit.
+        </p>
+        <a href={helpPath} className="mereka-shell-link mereka-shell-link--quiet" target="_blank" rel="noopener noreferrer">
+          Visit help centre
+        </a>
+      </div>
     </aside>
   );
 };
@@ -856,6 +896,10 @@ const MerekaLearningCourseHeader = () => {
         <p className="mereka-shell-kicker">{shellCopy.learning.eyebrow}</p>
         <p className="mereka-learning-course-header__title mb-1">{shellCopy.learning.title}</p>
         <p className="mereka-learning-course-header__text mb-0">{shellCopy.learning.subtitle}</p>
+        <div className="mereka-learning-course-header__meta">
+          <span className="mereka-badge">Focus mode</span>
+          <span className="mereka-learning-course-header__status">Stay oriented, keep your pace visible, and move forward deliberately.</span>
+        </div>
       </div>
       <div className="mereka-learning-course-header__actions">
         <a href={variant.helpUrl} className="mereka-shell-link mereka-shell-link--quiet" target="_blank" rel="noopener noreferrer">
@@ -1155,11 +1199,14 @@ const MerekaProgressCertificateStatus = ({ courseId }) => {
   const safeCourseId = typeof courseId === 'string' ? courseId : '';
 
   return (
-    <div className="mereka-progress-certificate-status my-3 p-3 rounded">
-      <p className="mb-1 fw-semibold">Progress snapshot</p>
-      <p className="mb-0 small text-muted">
-        {variant.brand} Learning —{safeCourseId ? ` course ${safeCourseId}` : ''} is active. Keep completing units to unlock your certificate.
-      </p>
+    <div className="mereka-progress-certificate-status mereka-shell-panel my-3">
+      <div className="mereka-shell-panel__content">
+        <p className="mereka-shell-kicker">Progress snapshot</p>
+        <p className="mereka-progress-certificate-status__title mb-1">Keep your learning streak active</p>
+        <p className="mereka-progress-certificate-status__body mb-0">
+          {variant.brand} Learning{safeCourseId ? ` course ${safeCourseId}` : ''} is active. Keep completing units to unlock your certificate with confidence.
+        </p>
+      </div>
     </div>
   );
 };
