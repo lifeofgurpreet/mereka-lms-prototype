@@ -135,6 +135,12 @@ else
   else
     warn "AC-MB-001: schema has no examples — consider adding at least one"
   fi
+
+  if grep -q 'PRIMARY_COLOR/SECONDARY_COLOR' "$BRAND_SCHEMA" && grep -q 'not a guaranteed live plugin-injected --mereka-color-\* runtime surface today' "$BRAND_SCHEMA"; then
+    pass "AC-MB-001: schema distinguishes runtime MFE color keys from direct runtime CSS-var injection"
+  else
+    fail "AC-MB-001: schema still blurs runtime MFE color keys and direct CSS-var injection"
+  fi
 fi
 
 # Django model has branding_config field
@@ -187,6 +193,14 @@ if [[ -f "$BRAND_PLATFORM_DOC" ]]; then
     pass "AC-MB-002: missing-field fallback behaviour documented"
   else
     fail "AC-MB-002: missing-field fallback not documented in platform doc"
+  fi
+
+  if grep -q 'sync-tenant-branding.sh' "$BRAND_PLATFORM_DOC" \
+    && grep -q 'PRIMARY_COLOR' "$BRAND_PLATFORM_DOC" \
+    && grep -q 'remains future work' "$BRAND_PLATFORM_DOC"; then
+    pass "AC-MB-002: platform doc distinguishes generated tenant tokens, runtime MFE color keys, and future CSS-var injection"
+  else
+    fail "AC-MB-002: platform doc still blurs generated tenant tokens, runtime MFE color keys, and future CSS-var injection"
   fi
 
   # Validation at provisioning documented

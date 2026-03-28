@@ -59,17 +59,21 @@ Schema version: `1.0`
 
 All values must be absolute `https://` URLs. The LMS serves theme assets under `/theming/asset/mereka/`.
 
-### Palette (CSS Token Mapping)
+### Palette (Tenant Token Inputs)
 
-Each palette key maps directly to a CSS custom property injected by the plugin:
+The `palette` object is the canonical tenant colour input, but it still does
+not have a single direct runtime injector for tenant-specific
+`--mereka-color-*` values in the public MFE shell.
 
-| Config key | CSS variable | Used by |
-|------------|--------------|---------|
-| `palette.primary` | `--mereka-color-primary` | Buttons, links, active states |
-| `palette.secondary` | `--mereka-color-secondary` | Hover states, accents |
-| `palette.accent` | `--mereka-color-accent` | CTA highlights |
-| `palette.background` | `--mereka-color-background` | Page background |
-| `palette.text` | `--mereka-color-text` | Body text (must pass WCAG AA contrast) |
+What exists today:
+
+| Consumer | Current behaviour | Proof surface |
+|----------|-------------------|---------------|
+| Generated tenant token overrides | `scripts/tenants/sync-tenant-branding.sh` can generate `tenants/{slug}/css/tokens.css` that bridges tenant colours into `--mereka-color-*` and Paragon token names | `scripts/qa/verify-tenant-token-switching.sh` |
+| Runtime MFE config overlay | `apply_tenant_branding.py` and `inject_mfe_branding()` expose `PRIMARY_COLOR`, `SECONDARY_COLOR`, `ACCENT_COLOR`, and `TEXT_ON_PRIMARY` via `/api/mfe_config/v1` | `scripts/qa/verify-tenant-branding-runtime.sh` |
+
+Direct runtime injection of tenant-specific `--mereka-color-*` values into the
+public MFE shell remains future work.
 
 All values must be 6-digit hex: `^#[0-9a-fA-F]{6}$`.
 
@@ -83,7 +87,10 @@ All values must be 6-digit hex: `^#[0-9a-fA-F]{6}$`.
 }
 ```
 
-`font_source_url` is loaded via a `<link>` tag injected into the MFE head. Only `https://` sources are permitted (CSP compliance).
+`font_source_url` is schema-level metadata only today. The current runtime does
+not automatically inject a `<link>` tag into the MFE head, so tenants still use
+the compiled/shared font stack unless a future runtime font loader is added.
+Only `https://` sources are permitted when that runtime loader exists.
 
 ### Footer Fields
 
@@ -143,7 +150,7 @@ Open edX upstream defaults
 | `footer.copyright_holder` missing | Defaults to `"Mereka (M) Sdn. Bhd."` |
 | `display_name` missing | Falls back to `SiteConfiguration.SITE_NAME` or platform default `"Mereka Academy"` |
 | `legal_doc_urls.*` missing | No legal links rendered in footer (no broken links) |
-| `typography.font_source_url` missing | System font stack used; no external font loaded |
+| `typography.font_source_url` missing | System font stack used; current runtime does not auto-load external fonts anyway |
 
 ### Validation at Provisioning
 
@@ -233,7 +240,8 @@ A global brand leak occurs when one tenant's brand identity (logo URL, colour to
 |-------|-------------|-----------------|
 | MFE config (`/api/mfe_config/v1`) | Wrong `LOGO_URL`, `SITE_NAME`, or `LMS_BASE_URL` for the requesting domain | `verify-tenant-branding-runtime.sh` |
 | SITE_VARIANTS map | Hard-coded domain strings outside the `SITE_VARIANTS` block in `mereka_lms.py` | `verify-footer-variant-matrix.sh` (AC-FTVAR-005 DRY check) |
-| CSS token injection | Wrong `--mereka-color-*` values for tenant palette | Design token validation in CI |
+| Generated tenant token overrides | Wrong generated `--mereka-color-*` bridge values for a tenant brand pack | `verify-tenant-token-switching.sh` |
+| MFE runtime color keys | Wrong `PRIMARY_COLOR` / `SECONDARY_COLOR` / `ACCENT_COLOR` values on `/api/mfe_config/v1` | `verify-tenant-branding-runtime.sh` |
 | Footer plugin slot | Copyright text, WhatsApp number, social links from wrong tenant | `verify-footer-variant-matrix.sh` (AC-FTVAR-002) |
 | Django `SiteConfiguration` | `SITE_NAME` set globally instead of per-site | `verify-multisite-config.sh` |
 

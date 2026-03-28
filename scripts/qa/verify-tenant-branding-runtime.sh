@@ -267,13 +267,13 @@ verify_domain_config() {
     fi
   fi
 
-  # Brand color tokens are Phase 2 (branding_config population)
-  # Not a failure or warning — just informational
-  if echo "$response" | grep -qE '"--mereka-color-|"BRAND_(PRIMARY|SECONDARY|ACCENT)"'; then
+  # Runtime tenant colors are currently exposed as MFE config color keys.
+  # Direct runtime --mereka-color-* shell injection is not claimed here.
+  if echo "$response" | grep -qE '"(PRIMARY_COLOR|SECONDARY_COLOR|ACCENT_COLOR|TEXT_ON_PRIMARY)"'; then
     has_brand_colors=1
-    echo -e "  ${CYAN}[INFO]${NC} Brand color tokens present for ${domain}"
+    echo -e "  ${CYAN}[INFO]${NC} Runtime MFE color keys present for ${domain}"
   else
-    echo -e "  ${CYAN}[INFO]${NC} Brand color tokens not yet configured for ${domain} (Phase 2 scope)"
+    echo -e "  ${CYAN}[INFO]${NC} Runtime MFE color keys not present for ${domain}"
   fi
 
   # Footer variant contract check (AC-TBR-103)

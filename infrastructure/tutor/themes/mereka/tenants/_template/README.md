@@ -63,6 +63,7 @@ _template/
 3. **Custom CSS** (`css/custom.css`)
    - Tenant-specific CSS overrides
    - Use CSS custom properties (`--mereka-color-*`) from design tokens
+   - Generated `css/tokens.css` is a tenant asset, not a runtime-injected guarantee today
 
 ## branding.json Schema
 
@@ -81,6 +82,7 @@ See `specs/standards/brand-pack-schema.json` for the complete JSON Schema.
 - `colors.secondary`: Secondary brand color
 - `colors.accent`: Accent color
 - `colors.text_on_primary`: Text color for primary background
+- `colors.*` currently drive generated tenant token assets, not a guaranteed live runtime injector
 - `logos.logo_square_url`: Path to square logo
 - `logos.logo_white_url`: Path to white logo
 - `footer.text`: Custom footer text

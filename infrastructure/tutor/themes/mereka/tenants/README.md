@@ -24,9 +24,10 @@ tenants/
 
 1. **Static assets** are stored in this directory, organized by tenant slug
 2. **SiteConfiguration** stores JSON overlays with URLs pointing to these assets
-3. **MFE** reads SiteConfiguration at runtime for tenant-specific logos and colors
+3. **MFE** reads SiteConfiguration at runtime for tenant-specific logos and basic branding metadata
 4. `scripts/tenants/sync-tenant-branding.sh` generates `css/tokens.css` from `branding.json`
-5. **Tenant branding changes do NOT require image rebuild** — assets are deployed via `collectstatic`
+5. `css/tokens.css` is a generated tenant asset; it is not automatically injected into the live runtime today
+6. **Tenant branding changes do NOT require image rebuild** for asset and SiteConfiguration updates — assets are deployed via `collectstatic`
 
 ## Adding a New Tenant
 
@@ -36,6 +37,7 @@ tenants/
 4. Create a `TenantSiteConfiguration` with `mfe_config` pointing to the assets
 5. Run `./scripts/tenants/sync-tenant-branding.sh --slug {slug}` to generate `css/tokens.css`
 6. Run `collectstatic` to deploy assets
+7. Do not assume generated tenant token CSS is live unless a runtime loader is explicitly present
 
 ## Default Branding
 

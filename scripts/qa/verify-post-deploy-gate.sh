@@ -134,8 +134,8 @@ GATE_CHECK_BLOCK="$(awk '
   in_gate { print }
 ' "$WORKFLOW_FILE")"
 
-CHECKOUT_STEP_LINE="$(printf '%s\n' "$GATE_CHECK_BLOCK" | nl -ba | awk '/actions\/checkout@/ { print $1; exit }')"
-DETERMINE_STEP_LINE="$(printf '%s\n' "$GATE_CHECK_BLOCK" | nl -ba | awk '/name: Determine run conditions/ { print $1; exit }')"
+CHECKOUT_STEP_LINE="$(printf '%s\n' "$GATE_CHECK_BLOCK" | awk '/actions\/checkout@/ { print NR; exit }')"
+DETERMINE_STEP_LINE="$(printf '%s\n' "$GATE_CHECK_BLOCK" | awk '/name: Determine run conditions/ { print NR; exit }')"
 
 # Must have a pre-flight check that skips on failed deploy
 if grep -q "should_run" "$WORKFLOW_FILE"; then

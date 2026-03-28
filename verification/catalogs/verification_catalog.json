@@ -15584,7 +15584,7 @@
       "mutability": "mutating",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-token-switching.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

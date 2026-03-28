@@ -51,7 +51,7 @@
     },
     "palette": {
       "type": "object",
-      "description": "CSS custom property values injected as --mereka-color-* tokens. All must be 6-digit hex.",
+      "description": "Tenant palette inputs used by sync-tenant-branding.sh to generate tenant token overrides and by runtime branding to expose PRIMARY_COLOR/SECONDARY_COLOR style MFE config keys. They are not a guaranteed live plugin-injected --mereka-color-* runtime surface today. All values must be 6-digit hex.",
       "additionalProperties": false,
       "properties": {
         "primary": {
@@ -83,7 +83,7 @@
     },
     "typography": {
       "type": "object",
-      "description": "Font stack applied globally via @font-face or Google Fonts link.",
+      "description": "Font metadata reserved for future runtime font loading. Current runtime keeps the shared compiled font stack unless an explicit loader is added.",
       "additionalProperties": false,
       "properties": {
         "font_family": {
@@ -100,7 +100,7 @@
           "type": "string",
           "format": "uri",
           "pattern": "^https://",
-          "description": "URL to load the font (Google Fonts stylesheet URL or self-hosted HTTPS path)."
+          "description": "URL for a future runtime font loader (Google Fonts stylesheet URL or self-hosted HTTPS path). Not auto-injected today."
         }
       }
     },
