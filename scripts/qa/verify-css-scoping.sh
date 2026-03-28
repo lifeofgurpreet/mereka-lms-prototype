@@ -62,6 +62,7 @@ COMMON_CSS="$THEME_DIR/common/static/css/mereka-overrides.css"
 LMS_CSS="$THEME_DIR/lms/static/css/mereka-overrides.css"
 CMS_CSS="$THEME_DIR/cms/static/css/mereka-overrides.css"
 LMS_DISCOVERY_SCSS="$THEME_DIR/lms/static/sass/partials/_discovery.scss"
+LMS_CUSTOM_SCSS="$THEME_DIR/lms/static/sass/partials/_custom.scss"
 AUDIT_DOC="$REPO_ROOT/docs/reference/architecture/CSS_SCOPING_AUDIT.md"
 
 echo -e "${BLUE}=== CSS Scoping Audit Gate ===${NC}"
@@ -292,6 +293,50 @@ else
       do_pass "AC-CSS-SCOPE-004: Dead MFE scope [$dead_scope] absent from active selectors"
     else
       do_fail "AC-CSS-SCOPE-004: Dead MFE scope [$dead_scope] still present in active selectors (${dead_count} occurrence(s))"
+    fi
+  done
+fi
+
+echo ""
+
+if [[ ! -f "$LMS_CUSTOM_SCSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: LMS custom partial missing at lms/static/sass/partials/_custom.scss"
+else
+  for owner_selector in \
+    ".dashboard .listing-courses" \
+    ".dashboard .my-courses .course-item .course" \
+    ".dashboard .course .enter-course"
+  do
+    if grep -qF "$owner_selector" "$LMS_CUSTOM_SCSS"; then
+      do_pass "AC-CSS-SCOPE-004: Dashboard shell owner [$owner_selector] present in lms/static/sass/partials/_custom.scss"
+    else
+      do_fail "AC-CSS-SCOPE-004: Dashboard shell owner [$owner_selector] missing from lms/static/sass/partials/_custom.scss"
+    fi
+  done
+fi
+
+if [[ -f "$THEME_SCSS" ]]; then
+  for demoted_selector in \
+    ".dashboard .listing-courses" \
+    ".dashboard .course .enter-course"
+  do
+    if grep -qF "$demoted_selector" "$THEME_SCSS"; then
+      do_fail "AC-CSS-SCOPE-004: Shared theme still owns dashboard shell selector [$demoted_selector]"
+    else
+      do_pass "AC-CSS-SCOPE-004: Shared theme does not own dashboard shell selector [$demoted_selector]"
+    fi
+  done
+fi
+
+if [[ -f "$COMMON_CSS" ]]; then
+  for demoted_selector in \
+    ".dashboard .listing-courses .course-item .course" \
+    ".dashboard .listing-courses .course-item .wrapper-course-details"
+  do
+    if grep -qF "$demoted_selector" "$COMMON_CSS"; then
+      do_fail "AC-CSS-SCOPE-004: Runtime override still owns dashboard shell selector [$demoted_selector]"
+    else
+      do_pass "AC-CSS-SCOPE-004: Runtime override does not own dashboard shell selector [$demoted_selector]"
     fi
   done
 fi
