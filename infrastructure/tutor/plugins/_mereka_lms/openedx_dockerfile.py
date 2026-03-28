@@ -56,9 +56,13 @@ _register_env_patch(
 # Install custom apps and dependencies
 # IMPORTANT: Every app referenced via INSTALLED_APPS in LMS/CMS settings MUST
 # appear here. Run scripts/qa/verify-custom-app-drift.sh to detect mismatches.
-_CUSTOM_APPS = [
+#
+# Cache policy:
+# - Stable apps build first so infrequent changes stay maximally reusable.
+# - High-churn apps build last so UI/tenant iteration does not invalidate the
+#   whole custom-app layer stack behind them.
+_STABLE_CUSTOM_APPS = [
     "credentials_vc_issuer",
-    "mfe_oauth_fix",
     "openedx_advanced_xblocks",
     "openedx_assessment_bulk",
     "openedx_content_libraries",
@@ -72,7 +76,6 @@ _CUSTOM_APPS = [
     "openedx_ora2_operations",
     "openedx_prometheus",
     "openedx_push_notifications",
-    "openedx_tenant_cache",
     "openedx_timed_exams",
     "openedx_video_analytics",
     "openedx_video_pipeline",
@@ -80,22 +83,48 @@ _CUSTOM_APPS = [
     "openedx_xqueue_graders",
 ]
 
-_copy_lines = "\n".join(
-    f"COPY --chown=app:app ./infrastructure/tutor/custom-apps/{app} /openedx/{app}"
-    for app in _CUSTOM_APPS
-)
-_install_lines = "\n".join(f"RUN pip install -e /openedx/{app}" for app in _CUSTOM_APPS)
-_runtime_copy_lines = "\n".join(
-    f"COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}"
-    for app in _CUSTOM_APPS
-)
+_HIGH_CHURN_CUSTOM_APPS = [
+    "mfe_oauth_fix",
+    "openedx_tenant_cache",
+]
+
+_CUSTOM_APPS = [*_STABLE_CUSTOM_APPS, *_HIGH_CHURN_CUSTOM_APPS]
+
+
+def _render_copy_lines(apps: list[str]) -> str:
+    return "\n".join(
+        f"COPY --chown=app:app ./infrastructure/tutor/custom-apps/{app} /openedx/{app}"
+        for app in apps
+    )
+
+
+def _render_install_lines(apps: list[str]) -> str:
+    return "\n".join(f"RUN pip install -e /openedx/{app}" for app in apps)
+
+
+def _render_runtime_copy_lines(apps: list[str]) -> str:
+    return "\n".join(
+        f"COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}"
+        for app in apps
+    )
+
+
+_stable_copy_lines = _render_copy_lines(_STABLE_CUSTOM_APPS)
+_stable_install_lines = _render_install_lines(_STABLE_CUSTOM_APPS)
+_high_churn_copy_lines = _render_copy_lines(_HIGH_CHURN_CUSTOM_APPS)
+_high_churn_install_lines = _render_install_lines(_HIGH_CHURN_CUSTOM_APPS)
+_runtime_copy_lines = _render_runtime_copy_lines(_CUSTOM_APPS)
 
 _register_env_patch(
     "openedx-dockerfile-post-python-requirements",
     f"""
-# Copy and install ALL custom apps (keep in sync with settings and custom-apps/)
-{_copy_lines}
-{_install_lines}
+# Copy and install stable custom apps first for cache reuse.
+{_stable_copy_lines}
+{_stable_install_lines}
+
+# Copy and install high-churn custom apps last to reduce invalidation blast radius.
+{_high_churn_copy_lines}
+{_high_churn_install_lines}
 
 # Copy and install mereka_tenancy multi-tenancy plugin
 # NOTE: Installed to /openedx/plugins/ instead of /openedx/ to enable proper namespacing

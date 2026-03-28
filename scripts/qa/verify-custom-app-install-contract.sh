@@ -57,24 +57,55 @@ print("")
 src = dockerfile.read_text(encoding="utf-8")
 tree = ast.parse(src, filename=str(dockerfile))
 
-custom_apps: list[str] | None = None
-for node in tree.body:
-    if isinstance(node, ast.Assign):
-        for target in node.targets:
-            if isinstance(target, ast.Name) and target.id == "_CUSTOM_APPS":
-                if isinstance(node.value, (ast.List, ast.Tuple)):
-                    values: list[str] = []
-                    for elt in node.value.elts:
-                        if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
-                            values.append(elt.value)
-                    custom_apps = values
-                break
 
-if not custom_apps:
-    fail("Unable to parse _CUSTOM_APPS from openedx_dockerfile.py")
+def eval_string_list(node: ast.AST, env: dict[str, list[str]]) -> list[str]:
+    if isinstance(node, ast.List):
+        values: list[str] = []
+        for elt in node.elts:
+            if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                values.append(elt.value)
+            elif isinstance(elt, ast.Starred) and isinstance(elt.value, ast.Name):
+                if elt.value.id not in env:
+                    raise ValueError(f"Unknown starred list reference: {elt.value.id}")
+                values.extend(env[elt.value.id])
+            else:
+                raise ValueError(f"Unsupported list element: {ast.dump(elt)}")
+        return values
+    if isinstance(node, ast.Tuple):
+        return eval_string_list(ast.List(elts=list(node.elts)), env)
+    if isinstance(node, ast.Name):
+        if node.id not in env:
+            raise ValueError(f"Unknown list reference: {node.id}")
+        return list(env[node.id])
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        return eval_string_list(node.left, env) + eval_string_list(node.right, env)
+    raise ValueError(f"Unsupported list expression: {ast.dump(node)}")
+
+
+lists: dict[str, list[str]] = {}
+for node in tree.body:
+    if not isinstance(node, ast.Assign):
+        continue
+    for target in node.targets:
+        if not isinstance(target, ast.Name):
+            continue
+        if target.id.endswith("_CUSTOM_APPS"):
+            try:
+                lists[target.id] = eval_string_list(node.value, lists)
+            except ValueError as exc:
+                fail(f"Unable to parse {target.id}: {exc}")
+
+stable_custom_apps = lists.get("_STABLE_CUSTOM_APPS")
+high_churn_custom_apps = lists.get("_HIGH_CHURN_CUSTOM_APPS")
+custom_apps = lists.get("_CUSTOM_APPS")
+
+if stable_custom_apps is None or high_churn_custom_apps is None or custom_apps is None:
+    fail("Unable to parse stable/high-churn/_CUSTOM_APPS lists from openedx_dockerfile.py")
     print(f"\nSummary: PASS={passes} FAIL={fails}")
     raise SystemExit(1)
 
+ok(f"Parsed _STABLE_CUSTOM_APPS list ({len(stable_custom_apps)} entries)")
+ok(f"Parsed _HIGH_CHURN_CUSTOM_APPS list ({len(high_churn_custom_apps)} entries)")
 ok(f"Parsed _CUSTOM_APPS list ({len(custom_apps)} entries)")
 
 dupes = sorted({name for name in custom_apps if custom_apps.count(name) > 1})
@@ -84,12 +115,33 @@ if dupes:
 else:
     ok("_CUSTOM_APPS has no duplicates")
 
+group_overlap = sorted(set(stable_custom_apps) & set(high_churn_custom_apps))
+if group_overlap:
+    for name in group_overlap:
+        fail(f"Custom app appears in both stable and high-churn groups: {name}")
+else:
+    ok("Stable and high-churn groups do not overlap")
+
+if custom_apps != stable_custom_apps + high_churn_custom_apps:
+    fail("_CUSTOM_APPS does not preserve stable-first then high-churn ordering")
+else:
+    ok("_CUSTOM_APPS preserves stable-first then high-churn ordering")
+
 for marker in (
-    '_copy_lines = "\\n".join(',
-    '_install_lines = "\\n".join(',
-    '_runtime_copy_lines = "\\n".join(',
-    "{_copy_lines}",
-    "{_install_lines}",
+    "_STABLE_CUSTOM_APPS = [",
+    "_HIGH_CHURN_CUSTOM_APPS = [",
+    "_CUSTOM_APPS = [*_STABLE_CUSTOM_APPS, *_HIGH_CHURN_CUSTOM_APPS]",
+    "_stable_copy_lines = _render_copy_lines(_STABLE_CUSTOM_APPS)",
+    "_stable_install_lines = _render_install_lines(_STABLE_CUSTOM_APPS)",
+    "_high_churn_copy_lines = _render_copy_lines(_HIGH_CHURN_CUSTOM_APPS)",
+    "_high_churn_install_lines = _render_install_lines(_HIGH_CHURN_CUSTOM_APPS)",
+    "_runtime_copy_lines = _render_runtime_copy_lines(_CUSTOM_APPS)",
+    "# Copy and install stable custom apps first for cache reuse.",
+    "# Copy and install high-churn custom apps last to reduce invalidation blast radius.",
+    "{_stable_copy_lines}",
+    "{_stable_install_lines}",
+    "{_high_churn_copy_lines}",
+    "{_high_churn_install_lines}",
     "{_runtime_copy_lines}",
     "openedx-dockerfile-final",
     "COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}",
