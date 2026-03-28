@@ -138,30 +138,61 @@ test.describe('Unauthenticated smoke — security headers', () => {
 });
 
 test.describe('Unauthenticated smoke — API contracts', () => {
-  test('/api/mfe_config/v1 returns valid JSON', async ({ request, baseURL }) => {
+  test('/api/mfe_config/v1 returns valid JSON and stays consistent across public surfaces', async ({ request, baseURL }) => {
     const mfeBase = getMfeBaseUrl(baseURL!);
-    const response = await request.get(`${mfeBase}/api/mfe_config/v1`, {
+    const mfeResponse = await request.get(`${mfeBase}/api/mfe_config/v1?mfe=authn`, {
+      failOnStatusCode: false,
+    });
+    const lmsResponse = await request.get(`${baseURL}/api/mfe_config/v1`, {
       failOnStatusCode: false,
     });
 
-    // mfe_config endpoint may be on MFE host or LMS host
-    if (response.status() === 404) {
-      // Try LMS host
-      const lmsResponse = await request.get(`${baseURL}/api/mfe_config/v1`, {
-        failOnStatusCode: false,
-      });
-      if (lmsResponse.status() === 200) {
-        const body = await lmsResponse.json();
-        expect(body).toBeDefined();
-        expect(typeof body).toBe('object');
+    const hasMfeSurface = mfeResponse.status() === 200;
+    const hasLmsSurface = lmsResponse.status() === 200;
+
+    expect(
+      hasMfeSurface || hasLmsSurface,
+      'at least one public MFE config surface should return 200',
+    ).toBe(true);
+
+    const criticalKeys = [
+      'LEARNER_HOME_MICROFRONTEND_URL',
+      'ACCOUNT_MICROFRONTEND_URL',
+      'ACCOUNT_SETTINGS_URL',
+      'DISCUSSIONS_MICROFRONTEND_URL',
+      'ACCOUNT_PROFILE_URL',
+      'PROFILE_MICROFRONTEND_URL',
+      'LEARNING_BASE_URL',
+      'LOGIN_REDIRECT_URL',
+    ];
+    let mfeBody: Record<string, unknown> | null = null;
+    let lmsBody: Record<string, unknown> | null = null;
+
+    if (hasMfeSurface) {
+      mfeBody = await mfeResponse.json();
+      expect(mfeBody).toBeDefined();
+      expect(typeof mfeBody).toBe('object');
+
+      for (const key of criticalKeys) {
+        expect(mfeBody[key], `MFE surface missing ${key}`).toBeTruthy();
       }
-      return;
     }
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
-    expect(body).toBeDefined();
-    expect(typeof body).toBe('object');
+    if (hasLmsSurface) {
+      lmsBody = await lmsResponse.json();
+      expect(lmsBody).toBeDefined();
+      expect(typeof lmsBody).toBe('object');
+
+      for (const key of criticalKeys) {
+        expect(lmsBody[key], `LMS surface missing ${key}`).toBeTruthy();
+      }
+    }
+
+    if (hasMfeSurface && hasLmsSurface) {
+      for (const key of criticalKeys) {
+        expect(lmsBody![key], `surface mismatch for ${key}`).toBe(mfeBody![key]);
+      }
+    }
   });
 
   test('/api/enrollment/v1/enrollment returns 401 unauthenticated', async ({ request, baseURL }) => {
