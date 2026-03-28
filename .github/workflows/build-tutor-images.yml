@@ -367,11 +367,11 @@ jobs:
             FAILURES=$((FAILURES + 1))
           fi
 
-          if grep -q 'cache-from=type=gha' "$LOG" && grep -q 'cache-to=type=gha,mode=max' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
-          else
-            SUMMARY="${SUMMARY}\n❌ GHA cache read/write flags NOT found in build command"
+          if grep -q 'cache-from=type=gha' "$LOG" || grep -q 'cache-to=type=gha,mode=max' "$LOG"; then
+            SUMMARY="${SUMMARY}\n❌ GHA cache exporters unexpectedly present for OpenEdX build"
             FAILURES=$((FAILURES + 1))
+          else
+            SUMMARY="${SUMMARY}\n✅ GHA cache exporters intentionally absent for OpenEdX build (docker driver + local image export)"
           fi
 
           # 2. Check cache manifest was imported

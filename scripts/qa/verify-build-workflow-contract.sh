@@ -13,6 +13,7 @@ REPO_ROOT="${REPO_ROOT_OVERRIDE:-$REPO_ROOT}"
 BUILD_WF="${BUILD_WF_OVERRIDE:-$REPO_ROOT/.github/workflows/build-tutor-images.yml}"
 RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUILD_WF")"
 UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
+OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Verify OpenEdX image branding contract/p' "$BUILD_WF")"
 
 PASS=0 FAIL=0
 
@@ -135,6 +136,21 @@ if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "docker:\${MFE_LOCAL_IMAG
   pass "MFE SBOM generation has a timeout guard"
 else
   fail "MFE SBOM generation missing timeout guard"
+fi
+
+# OpenEdX cache-health reporting must match the canonical strategy: registry +
+# inline cache only while the docker driver is required for a loadable local
+# image export.
+if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache exporters intentionally absent for OpenEdX build"* ]]; then
+  pass "OpenEdX cache health reports the canonical non-GHA strategy"
+else
+  fail "OpenEdX cache health missing canonical non-GHA strategy messaging"
+fi
+
+if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache read/write flags NOT found in build command"* ]]; then
+  fail "OpenEdX cache health still reports missing GHA flags as a failure"
+else
+  pass "OpenEdX cache health no longer treats absent GHA exporters as a failure"
 fi
 
 # Workflow wording must not claim mutable-tag auto-deploy ownership anymore.

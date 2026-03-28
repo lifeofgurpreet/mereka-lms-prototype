@@ -38,7 +38,12 @@ permissions:
 jobs:
   build-openedx:
     steps:
+      - name: Verify OpenEdX build cache health
+        run: |
+          SUMMARY="${SUMMARY}\n✅ GHA cache exporters intentionally absent for OpenEdX build (docker driver + local image export)"
       - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+      - name: Verify OpenEdX image branding contract
+        run: echo ok
   build-mfe:
     steps:
       - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
@@ -225,6 +230,25 @@ jobs:
             var/ci/release-gate-envelope.json
 EOF
 run_expect_fail "update-gitops must not auto-run on push to main"
+
+# Reintroduce stale OpenEdX cache-health messaging => must fail
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Verify OpenEdX build cache health\n'
+    '        run: |\n'
+    '          SUMMARY="${SUMMARY}\\n✅ GHA cache exporters intentionally absent for OpenEdX build (docker driver + local image export)"\n',
+    '      - name: Verify OpenEdX build cache health\n'
+    '        run: |\n'
+    '          SUMMARY="${SUMMARY}\\n❌ GHA cache read/write flags NOT found in build command"\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "stale OpenEdX cache-health messaging is rejected"
 
 # Reintroduce stale mutable-tag auto-deploy wording => must fail
 write_pass_fixture
