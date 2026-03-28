@@ -469,8 +469,22 @@ jobs:
           rm /tmp/syft-install.sh
           # Use docker: source explicitly so syft reads from the local Docker daemon
           # (anchore/sbom-action fails on ARC DinD runners because it can't resolve local images)
-          "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" \
+          # Bound informational SBOM generation so a syft stall cannot occupy
+          # the main image-build lane indefinitely.
+          set +e
+          timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" \
             -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+          sbom_status=$?
+          set -e
+          if [[ "$sbom_status" -eq 0 ]]; then
+            exit 0
+          fi
+          if [[ "$sbom_status" -eq 124 ]]; then
+            echo "OpenEdX SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
+          else
+            echo "OpenEdX SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
+          fi
+          exit "$sbom_status"
 
       - name: Upload OpenEdX SBOM
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
@@ -852,8 +866,22 @@ jobs:
           sh /tmp/syft-install.sh -b "$HOME/.local/bin"
           rm /tmp/syft-install.sh
           # Use docker: source explicitly so syft reads from the local Docker daemon
-          "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" \
+          # Bound informational SBOM generation so a syft stall cannot occupy
+          # the main image-build lane indefinitely.
+          set +e
+          timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" \
             -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
+          sbom_status=$?
+          set -e
+          if [[ "$sbom_status" -eq 0 ]]; then
+            exit 0
+          fi
+          if [[ "$sbom_status" -eq 124 ]]; then
+            echo "MFE SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
+          else
+            echo "MFE SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
+          fi
+          exit "$sbom_status"
 
       - name: Upload MFE SBOM
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0

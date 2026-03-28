@@ -123,6 +123,20 @@ else
   fail "build workflow missing release-gate envelope artifact upload"
 fi
 
+# Informational SBOM generation must be bounded so it cannot occupy the main
+# image-build lane indefinitely.
+if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "docker:\${OPENEDX_LOCAL_IMAGE}"' "$BUILD_WF"; then
+  pass "OpenEdX SBOM generation has a timeout guard"
+else
+  fail "OpenEdX SBOM generation missing timeout guard"
+fi
+
+if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "docker:\${MFE_LOCAL_IMAGE}"' "$BUILD_WF"; then
+  pass "MFE SBOM generation has a timeout guard"
+else
+  fail "MFE SBOM generation missing timeout guard"
+fi
+
 # Workflow wording must not claim mutable-tag auto-deploy ownership anymore.
 if grep -q "dev auto-deploy" "$BUILD_WF" || grep -q "auto-deploys via ArgoCD" "$BUILD_WF"; then
   fail "build workflow still claims mutable-tag dev auto-deploy semantics"

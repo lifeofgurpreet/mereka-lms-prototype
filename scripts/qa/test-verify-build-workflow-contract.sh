@@ -36,6 +36,12 @@ on:
 permissions:
   contents: write
 jobs:
+  build-openedx:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+  build-mfe:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
   release-bundle:
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
   update-gitops:
@@ -95,6 +101,12 @@ on:
 permissions:
   contents: write
 jobs:
+  build-openedx:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+  build-mfe:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
   release-bundle:
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
   update-gitops:
@@ -138,6 +150,12 @@ on:
 permissions:
   contents: write
 jobs:
+  build-openedx:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+  build-mfe:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
   release-bundle:
     steps:
       - run: |
@@ -180,6 +198,12 @@ on:
 permissions:
   contents: write
 jobs:
+  build-openedx:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+  build-mfe:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
   release-bundle:
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
   update-gitops:
@@ -231,6 +255,12 @@ on:
 permissions:
   contents: write
 jobs:
+  build-openedx:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+  build-mfe:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
   release-bundle:
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
   update-gitops:
@@ -261,5 +291,20 @@ text = text.replace("      - 'scripts/infra/**'\n", "")
 p.write_text(text)
 PY
 run_expect_fail "missing script trigger path coverage is rejected"
+
+# Remove SBOM timeout guard => must fail
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
+    '      - run: "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "OpenEdX SBOM generation must stay timeout-guarded"
 
 echo "OK"
