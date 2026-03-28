@@ -123,6 +123,13 @@ else
   fail "build workflow missing release-gate envelope artifact upload"
 fi
 
+# Workflow wording must not claim mutable-tag auto-deploy ownership anymore.
+if grep -q "dev auto-deploy" "$BUILD_WF" || grep -q "auto-deploys via ArgoCD" "$BUILD_WF"; then
+  fail "build workflow still claims mutable-tag dev auto-deploy semantics"
+else
+  pass "build workflow no longer claims mutable-tag dev auto-deploy semantics"
+fi
+
 echo ""
 echo "=== Results: $PASS PASS / $FAIL FAIL ==="
 [[ $FAIL -gt 0 ]] && exit 1

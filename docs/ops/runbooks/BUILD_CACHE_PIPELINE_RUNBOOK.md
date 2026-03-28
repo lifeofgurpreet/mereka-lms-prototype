@@ -77,7 +77,7 @@ Four jobs, executed in this order:
 ```
 lint ──┬──► build-openedx ──► slsa-provenance
        └──► build-mfe     ──┘
-                               update-gitops (if enabled)
+                               update-gitops (manual bridge, if enabled)
 ```
 
 `build-openedx` and `build-mfe` run in parallel on `mereka-k8s-heavy-builders`.
@@ -110,11 +110,13 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${TAG}
 docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${SHORT_SHA}
 ```
 
-### Mutable tag: `mereka-brand` (main push only)
+### Mutable tag: `mereka-brand` (main push only, compatibility alias)
 
-On `push` to `main`, an additional mutable `mereka-brand` tag is pushed. The
-rke2-nonprod dev overlay's ArgoCD application points at this tag for continuous
-deployment.
+On `push` to `main`, an additional mutable `mereka-brand` tag is pushed as a
+compatibility/debug alias. It is no longer the canonical dev deployment
+contract. Dev promotion now happens through the infra-owned
+`bbi-infrastructure/.github/workflows/promote-dev-image.yml` workflow, which
+consumes immutable tags/digests and writes the overlay PR explicitly.
 
 ```bash
 # Only on: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -152,6 +154,13 @@ docker tag  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OLD_SHA} \
             ghcr.io/biji-biji-initiative/mereka-lms/openedx:${NEW_SHA_OR_LABEL}
 docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${NEW_SHA_OR_LABEL}
 ```
+
+### Promotion boundary
+
+- `build-tutor-images.yml` owns build outputs, digests, and signed release artifacts.
+- `update-gitops` is a guarded manual bridge job, not the default dev path.
+- Standard dev/staging/prod promotion is infra-owned in `bbi-infrastructure`
+  (`promote-dev-image.yml` / `promote-image.yml`).
 
 ---
 

@@ -103,7 +103,7 @@ Triggered by:
 Options:
 - `build_openedx` - Build LMS/CMS/worker image
 - `build_mfe` - Build micro-frontends image
-- `update_gitops` - Update GitOps tags after build
+- `update_gitops` - Manual cross-repo GitOps bridge after build
 - `target_environment` - GitOps target environment (`select-environment` default; must be explicitly selected when `update_gitops=true`)
 - `deploy_to_staging` - **Legacy input name** retained for backwards compatibility
 - `image_tag` - Custom tag (default: git SHA)
@@ -120,6 +120,7 @@ Tag immutability:
 - Workflow publishes only immutable tags (`<image_tag>` and short SHA).
 - Workflow does **not** publish mutable `:latest` tags to Artifact Registry.
 - Workflow resolves pushed image digests and exposes them as job outputs.
+- The compatibility alias `mereka-brand` may still be published on `main`, but it is not the canonical dev deployment contract.
 
 Release safety gates:
 - Before MFE push, workflow runs `scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest <expected_rev>`.
@@ -150,6 +151,14 @@ TAG="your-tag-or-sha"
 ```
 
 Do not use direct `kubectl set image` for normal rollouts; production is ArgoCD/GitOps managed.
+
+Standard dev/staging/prod promotion is infra-owned:
+- `bbi-infrastructure/.github/workflows/promote-dev-image.yml`
+- `bbi-infrastructure/.github/workflows/promote-image.yml`
+
+`build-tutor-images.yml` remains the app-owned build/proof surface. Its
+`update_gitops=true` path is a guarded manual bridge job, not the default dev
+promotion path.
 
 When using `build-tutor-images.yml` with `update_gitops=true`:
 - Set both `build_openedx=true` and `build_mfe=true`.

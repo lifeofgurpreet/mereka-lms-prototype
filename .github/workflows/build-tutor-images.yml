@@ -28,7 +28,7 @@ on:
         type: boolean
         default: true
       update_gitops:
-        description: 'Update GitOps after build'
+        description: 'Manual cross-repo GitOps bridge after build (guarded; not the standard dev promotion path)'
         type: boolean
         default: false
       target_environment:
@@ -556,12 +556,13 @@ jobs:
           docker push ${{ env.REGISTRY }}/openedx:${TAG}
           docker push ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
 
-          # Push mutable mereka-brand tag so the dev overlay (rke2-nonprod)
-          # auto-deploys via ArgoCD when a new image lands on main.
+          # Retain mutable mereka-brand as a compatibility/debug alias only.
+          # Dev promotion now consumes immutable tags + digests via the
+          # infra-owned bbi-infrastructure promotion workflows.
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             docker tag "${OPENEDX_LOCAL_IMAGE}" ${{ env.REGISTRY }}/openedx:mereka-brand
             docker push ${{ env.REGISTRY }}/openedx:mereka-brand
-            echo "**Mutable tag:** \`mereka-brand\` (dev auto-deploy)" >> $GITHUB_STEP_SUMMARY
+            echo "**Mutable tag:** \`mereka-brand\` (compatibility alias only; dev promotion is infra-owned)" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "### OpenEdX Image Built ✅" >> $GITHUB_STEP_SUMMARY
@@ -937,12 +938,13 @@ jobs:
           docker push ${{ env.REGISTRY }}/mfe:${TAG}
           docker push ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
 
-          # Push mutable mereka-brand tag so the dev overlay (rke2-nonprod)
-          # auto-deploys via ArgoCD when a new image lands on main.
+          # Retain mutable mereka-brand as a compatibility/debug alias only.
+          # Dev promotion now consumes immutable tags + digests via the
+          # infra-owned bbi-infrastructure promotion workflows.
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             docker tag "${MFE_LOCAL_IMAGE}" ${{ env.REGISTRY }}/mfe:mereka-brand
             docker push ${{ env.REGISTRY }}/mfe:mereka-brand
-            echo "**Mutable tag:** \`mereka-brand\` (dev auto-deploy)" >> $GITHUB_STEP_SUMMARY
+            echo "**Mutable tag:** \`mereka-brand\` (compatibility alias only; dev promotion is infra-owned)" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "### MFE Image Built ✅" >> $GITHUB_STEP_SUMMARY
@@ -1234,11 +1236,12 @@ jobs:
           retention-days: 90
 
   update-gitops:
-    name: Update GitOps
+    name: Manual GitOps Bridge
     runs-on: mereka-k8s-runners
     needs: [build-openedx, build-mfe, release-bundle]
     # Push to main builds images and proof only.
-    # GitOps mutation is explicit/manual so parked prod never advances implicitly.
+    # Any GitOps mutation here is an explicit/manual bridge. The standard
+    # dev/staging/prod promotion path is infra-owned in bbi-infrastructure.
     if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
     environment: ${{ inputs.target_environment }}
     permissions:

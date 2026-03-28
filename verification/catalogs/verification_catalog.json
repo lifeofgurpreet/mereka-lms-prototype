@@ -9633,7 +9633,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-multitenant-brand-platform.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11681,7 +11681,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-gate.sh",
-      "reference_count": 11,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14768,7 +14768,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-branding-contract.sh",
-      "reference_count": 17,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14869,7 +14869,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-branding-runtime.sh",
-      "reference_count": 24,
+      "reference_count": 23,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15584,7 +15584,7 @@
       "mutability": "mutating",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-token-switching.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15644,7 +15644,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-visual-contract.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -202,6 +202,20 @@ jobs:
 EOF
 run_expect_fail "update-gitops must not auto-run on push to main"
 
+# Reintroduce stale mutable-tag auto-deploy wording => must fail
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace('      - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"\n',
+                    '      - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"\n'
+                    '      - run: echo "Mutable tag means dev auto-deploys via ArgoCD"\n')
+p.write_text(text)
+PY
+run_expect_fail "stale mutable-tag auto-deploy wording is rejected"
+
 # Remove lms-ops call => must fail
 cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
 name: build-tutor-images
