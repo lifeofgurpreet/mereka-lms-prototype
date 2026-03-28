@@ -35,6 +35,14 @@ echo "ok"
 EOF
 chmod +x "$tmpdir/scripts/qa/verify-openedx-image-branding.sh"
 
+cat >"$tmpdir/scripts/infra/prepare-tutor-build-context.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+test "${1:-}" = "--target"
+test -n "${2:-}"
+EOF
+chmod +x "$tmpdir/scripts/infra/prepare-tutor-build-context.sh"
+
 write_pass_fixture() {
   cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
 name: build-tutor-images
@@ -52,6 +60,7 @@ on:
       - 'infrastructure/tutor/themes/**'
       - 'infrastructure/tutor/brand-*/**'
       - 'assets/branding/**'
+      - 'scripts/infra/prepare-tutor-build-context.sh'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/generate-build-provenance.sh'
@@ -102,6 +111,7 @@ jobs:
     outputs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
+      - run: ./scripts/infra/prepare-tutor-build-context.sh --target openedx
       - name: Verify OpenEdX build cache health
         run: |
           SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
@@ -126,6 +136,7 @@ jobs:
     outputs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
+      - run: ./scripts/infra/prepare-tutor-build-context.sh --target mfe
       - name: Verify MFE build cache health
         run: echo ok
       - name: Build MFE image
@@ -269,6 +280,17 @@ text = text.replace(
 p.write_text(text)
 PY
 run_expect_fail "missing canonical target_environment normalization is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace("./scripts/infra/prepare-tutor-build-context.sh --target openedx", "./infrastructure/tutor/apply-patches.sh")
+p.write_text(text)
+PY
+run_expect_fail "direct apply-patches build call is rejected"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'

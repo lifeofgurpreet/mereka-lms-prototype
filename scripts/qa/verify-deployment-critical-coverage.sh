@@ -255,21 +255,21 @@ if [[ -f "$GAP_REPORT" ]]; then
   REPORT_CONTENT="$(cat "$GAP_REPORT" | tr -d '\r' || true)"
 
   # Check for command output section
-  if echo "$REPORT_CONTENT" | grep -qi "command output\|## Command\|### Command"; then
+  if grep -qi "command output\|## Command\|### Command" <<<"$REPORT_CONTENT"; then
     pass_check "Gap report includes command outputs section"
   else
     fail_check "Gap report missing command outputs section"
   fi
 
   # Check for owner mapping
-  if echo "$REPORT_CONTENT" | grep -qi "owner\|domain"; then
+  if grep -qi "owner\|domain" <<<"$REPORT_CONTENT"; then
     pass_check "Gap report includes owner/domain mapping"
   else
     fail_check "Gap report missing owner/domain mapping"
   fi
 
   # Check for coverage table (should have | characters indicating markdown table)
-  TABLE_LINES="$(echo "$REPORT_CONTENT" | grep -c '^|' || true)"
+  TABLE_LINES="$(grep -c '^|' <<<"$REPORT_CONTENT" || true)"
   if [[ "$TABLE_LINES" -ge 7 ]]; then
     pass_check "Gap report contains coverage table (${TABLE_LINES} table rows)"
   else

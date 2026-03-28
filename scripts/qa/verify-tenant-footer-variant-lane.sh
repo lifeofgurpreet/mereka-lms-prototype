@@ -122,14 +122,14 @@ else
 
   # brand: is per-entry; whatsapp: and copyrightHolder: may be in MEREKA_BASE_VARIANT (spread)
   for field in "brand:" "copyrightHolder:" "whatsapp:"; do
-    if echo "$VARIANTS_BLOCK" | grep -q "$field" || grep -q "$field" "$PLUGIN_FILE"; then
+    if grep -q "$field" <<<"$VARIANTS_BLOCK" || grep -q "$field" "$PLUGIN_FILE"; then
       pass "AC-TF-001: SITE_VARIANTS entries have required field '${field%:}'"
     else
       fail "AC-TF-001: SITE_VARIANTS entries missing required field '${field%:}'"
     fi
   done
 
-  if echo "$VARIANTS_BLOCK" | grep -qE ": null|: undefined"; then
+  if grep -qE ": null|: undefined" <<<"$VARIANTS_BLOCK"; then
     fail "AC-TF-001: SITE_VARIANTS contains null or undefined values (non-deterministic)"
   else
     pass "AC-TF-001: No null/undefined values in SITE_VARIANTS (all fields deterministic)"
@@ -140,7 +140,7 @@ else
   # Extract the multi-line block for each domain and check for brand:.
   for domain in "${PRODUCTION_DOMAINS[@]}"; do
     DOMAIN_BLOCK=$(awk "/'${domain}':/,/^\s*\},?$/" "$PLUGIN_FILE" | head -20 || true)
-    if echo "$DOMAIN_BLOCK" | grep -q "brand: '"; then
+    if grep -q "brand: '" <<<"$DOMAIN_BLOCK"; then
       pass "AC-TF-001: Domain '${domain}' has deterministic non-empty brand value"
     else
       fail "AC-TF-001: Domain '${domain}' missing deterministic brand value"
@@ -201,7 +201,7 @@ if [[ -f "$PLUGIN_FILE" ]]; then
 
   # config object is used for fallback (makes the fallback path traceable via MFE config endpoint)
   FALLBACK_LINE=$(grep -E "SITE_VARIANTS\[hostname\]|getMerekaVariant|fallbackBrand|fallbackPlatform" "$PLUGIN_FILE" | head -5 || true)
-  if echo "$FALLBACK_LINE" | grep -qE "config\.SITE_NAME|config\.PLATFORM_NAME|fallbackBrand|fallbackPlatform"; then
+  if grep -qE "config\.SITE_NAME|config\.PLATFORM_NAME|fallbackBrand|fallbackPlatform" <<<"$FALLBACK_LINE"; then
     pass "AC-TF-002: Fallback variant reads from MFE config (traceable via /api/mfe_config/v1)"
   else
     warn "AC-TF-002: Fallback variant may not reference config.SITE_NAME — traceability advisory"

@@ -107,19 +107,18 @@ fi
 section "Workflow Orchestration Verification"
 
 echo "Checking tutor-apply Makefile target chains commands correctly..."
-if grep -A 3 "^tutor-apply:" Makefile | grep -q "tutor config save" && \
-   grep -A 3 "^tutor-apply:" Makefile | grep -q "apply-patches.sh" && \
+if grep -A 3 "^tutor-apply:" Makefile | grep -q "./scripts/infra/tutor-config-save.sh" && \
    grep -A 3 "^tutor-apply:" Makefile | grep -q "tutor local restart"; then
-  pass "tutor-apply chains: config save → apply-patches → restart"
+  pass "tutor-apply chains: tutor-config-save front door → restart"
 else
-  fail "tutor-apply does not chain commands correctly (expected: config save → apply-patches → restart)"
+  fail "tutor-apply does not chain commands correctly (expected: tutor-config-save front door → restart)"
 fi
 
-echo "Checking tutor-config-save.sh calls apply-patches.sh..."
-if grep -q "apply-patches.sh" scripts/infra/tutor-config-save.sh; then
-  pass "tutor-config-save.sh calls apply-patches.sh"
+echo "Checking tutor-config-save.sh calls prepare-tutor-build-context.sh..."
+if grep -q "prepare-tutor-build-context.sh" scripts/infra/tutor-config-save.sh; then
+  pass "tutor-config-save.sh calls prepare-tutor-build-context.sh"
 else
-  fail "tutor-config-save.sh does NOT call apply-patches.sh"
+  fail "tutor-config-save.sh does NOT call prepare-tutor-build-context.sh"
 fi
 
 echo "Checking tutor-config-save.sh calls verify-tutor-config.sh..."

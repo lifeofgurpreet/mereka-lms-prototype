@@ -296,8 +296,8 @@ if [[ -f "$MAKEFILE" ]]; then
     test -f "$CONFIG_SAVE"
 
   if [[ -f "$CONFIG_SAVE" ]]; then
-    check "AC-TCR-012" "Wrapper calls apply-patches.sh" \
-      grep -q "apply-patches" "$CONFIG_SAVE"
+    check "AC-TCR-012" "Wrapper calls canonical build-context prep" \
+      grep -q "prepare-tutor-build-context" "$CONFIG_SAVE"
 
     check "AC-TCR-012" "Wrapper calls verification" \
       grep -q "verify" "$CONFIG_SAVE"

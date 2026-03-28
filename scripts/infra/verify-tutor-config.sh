@@ -385,7 +385,7 @@ else
 
   echo ""
   echo -e "${YELLOW}Fix by running:${NC}"
-  echo "  ./infrastructure/tutor/apply-patches.sh"
+  echo "  ./scripts/infra/prepare-tutor-build-context.sh --target all"
   echo ""
 
   exit 1

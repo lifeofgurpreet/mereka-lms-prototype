@@ -17,12 +17,9 @@ if grep -q "10\.97\.0\." tutor_env/config.yml; then
   echo
 
   echo "1. Fixing Superset database host..."
-  tutor config save --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse
+  ./scripts/infra/tutor-config-save.sh --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse
 
-  echo "2. Applying patches..."
-  ./infrastructure/tutor/apply-patches.sh
-
-  echo "3. Restarting Superset services..."
+  echo "2. Restarting Superset services..."
   tutor local restart superset superset-worker superset-worker-beat
 
   echo

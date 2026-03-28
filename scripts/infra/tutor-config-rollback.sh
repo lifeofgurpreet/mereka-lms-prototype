@@ -131,19 +131,19 @@ restore_backup() {
   fi
   echo ""
 
-  # Re-apply patches
-  echo -e "${BLUE}Step 2: Re-applying patches...${NC}"
-  PATCHES_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-  if [[ -x "$PATCHES_SCRIPT" ]]; then
-    if "$PATCHES_SCRIPT"; then
-      echo -e "${GREEN}✓ Patches applied${NC}"
+  # Re-prepare Tutor build context
+  echo -e "${BLUE}Step 2: Re-preparing Tutor build context...${NC}"
+  PREP_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
+  if [[ -x "$PREP_SCRIPT" ]]; then
+    if "$PREP_SCRIPT" --target all; then
+      echo -e "${GREEN}✓ Tutor build context prepared${NC}"
     else
-      echo -e "${RED}✗ Patches failed — check output above${NC}" >&2
+      echo -e "${RED}✗ Tutor build context preparation failed — check output above${NC}" >&2
       exit 1
     fi
   else
-    echo -e "${YELLOW}⚠ apply-patches.sh not found or not executable${NC}"
-    echo "  Expected: $PATCHES_SCRIPT"
+    echo -e "${YELLOW}⚠ prepare-tutor-build-context.sh not found or not executable${NC}"
+    echo "  Expected: $PREP_SCRIPT"
   fi
   echo ""
 

@@ -153,23 +153,29 @@ check_build_pipeline() {
     fail "[AC-011] Branding verification log artifacts missing"
   fi
 
-  # AC-009: Tutor versions must stay pinned in the shared requirements file
+  # AC-009: Tutor versions are pinned in the canonical requirements file and
+  # the workflow consumes that file instead of baking microversions into YAML.
   if [[ -f "requirements-tutor.txt" ]] \
-    && grep -Eq '^tutor\[full\]==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
-    && grep -Eq '^tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
+    && grep -Eq '^tutor\[full\]==[0-9]+\.[0-9]+\.[0-9]+' requirements-tutor.txt \
+    && grep -Eq '^tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+' requirements-tutor.txt \
     && grep -q "requirements-file: 'requirements-tutor.txt'" "$BUILD_WF"; then
     pass "[AC-009] Tutor version pinned via requirements-tutor.txt and wired into build workflow"
   else
     fail "[AC-009] Tutor version pinning contract missing (requirements-tutor.txt + workflow wiring)"
   fi
 
-  # AC-009: apply-patches.sh called after config save
-  local patch_count
-  patch_count=$(grep -c 'apply-patches.sh' "$BUILD_WF" 2>/dev/null || echo "0")
-  if [[ "$patch_count" -ge 2 ]]; then
-    pass "[AC-009] apply-patches.sh called in both openedx and mfe build jobs"
+  # AC-009: Canonical target-aware build-context prep is used in both build jobs.
+  if grep -q 'prepare-tutor-build-context.sh --target openedx' "$BUILD_WF" && \
+     grep -q 'prepare-tutor-build-context.sh --target mfe' "$BUILD_WF"; then
+    pass "[AC-009] target-aware build-context prep called in both openedx and mfe build jobs"
   else
-    fail "[AC-009] apply-patches.sh not called in both build jobs (found $patch_count)"
+    fail "[AC-009] target-aware build-context prep missing from one or both build jobs"
+  fi
+
+  if grep -q '\./infrastructure/tutor/apply-patches.sh' "$BUILD_WF"; then
+    fail "[AC-009] build workflow still calls apply-patches.sh directly"
+  else
+    pass "[AC-009] build workflow no longer calls apply-patches.sh directly"
   fi
 
   if grep -q 'scripts/infra/build-openedx-image.sh' "$BUILD_WF"; then

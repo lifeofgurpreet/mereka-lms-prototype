@@ -2,7 +2,7 @@
 # @covers AC-001
 # @spec: tutor-configuration_spec.md
 # Safe wrapper for 'tutor config save'
-# Automatically applies patches and verifies configuration
+# Automatically prepares Tutor build context and verifies configuration
 #
 # Usage: ./scripts/infra/tutor-config-save.sh [tutor config save args]
 #
@@ -91,26 +91,26 @@ else
   exit $EXIT_CODE
 fi
 
-# Apply patches
+# Prepare Tutor build context
 echo ""
-echo -e "${BLUE}Step 2: Applying custom patches${NC}"
+echo -e "${BLUE}Step 2: Preparing Tutor build context${NC}"
 echo ""
 
-PATCHES_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-if [[ ! -x "$PATCHES_SCRIPT" ]]; then
-  echo -e "${RED}ERROR: Patches script not found or not executable${NC}"
-  echo "  Expected: $PATCHES_SCRIPT"
+PREP_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
+if [[ ! -x "$PREP_SCRIPT" ]]; then
+  echo -e "${RED}ERROR: Canonical build-context script not found or not executable${NC}"
+  echo "  Expected: $PREP_SCRIPT"
   echo ""
   exit 1
 fi
 
-if "$PATCHES_SCRIPT"; then
+if "$PREP_SCRIPT" --target all; then
   echo ""
-  echo -e "${GREEN}✓ Patches applied successfully${NC}"
+  echo -e "${GREEN}✓ Tutor build context prepared successfully${NC}"
 else
   EXIT_CODE=$?
   echo ""
-  echo -e "${RED}✗ Patches failed (exit code: $EXIT_CODE)${NC}"
+  echo -e "${RED}✗ Tutor build context preparation failed (exit code: $EXIT_CODE)${NC}"
   echo ""
   if [[ -f "$BACKUP_FILE" ]]; then
     read -rp "Restore backup? [Y/n] " response
@@ -143,7 +143,7 @@ if [[ -x "$VERIFY_SCRIPT" ]]; then
     echo ""
     echo -e "${RED}✗ Verification failed (exit code: $EXIT_CODE)${NC}"
     echo ""
-    echo "Some patches may not have been applied correctly."
+    echo "Some build-context mutations may not have been applied correctly."
     echo ""
     read -rp "Continue anyway? [y/N] " response
     case "$response" in

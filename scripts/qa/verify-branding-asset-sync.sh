@@ -281,7 +281,7 @@ echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC}
 if [[ $FAIL -gt 0 ]]; then
   echo
   echo "Action required: Re-sync branding assets and rebuild images."
-  echo "  1. Run: ./infrastructure/tutor/apply-patches.sh"
+  echo "  1. Run: ./scripts/infra/prepare-tutor-build-context.sh --target openedx"
   echo "  2. Build: tutor images build openedx"
   echo "  3. Verify: grep -r 'fonts.googleapis.com' tutor_env/env/build/openedx/"
   exit 1

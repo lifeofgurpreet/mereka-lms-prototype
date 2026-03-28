@@ -152,7 +152,7 @@ echo "  ✓ Python syntax valid"
 echo "  ✓ Bash syntax valid"
 echo
 echo "Next Steps:"
-echo "  1. Apply patches: ./infrastructure/tutor/apply-patches.sh"
+echo "  1. Prepare build context: ./scripts/infra/prepare-tutor-build-context.sh --target openedx"
 echo "  2. Rebuild image: tutor images build openedx (takes 30-45 min)"
 echo "  3. Restart services: tutor local restart (or kubectl rollout restart)"
 echo "  4. Test endpoint: curl http://localhost/metrics"

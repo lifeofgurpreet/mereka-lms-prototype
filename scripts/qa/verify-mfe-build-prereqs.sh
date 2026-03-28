@@ -173,7 +173,7 @@ else
     failures=1
   else
     echo "  ! generated Dockerfile missing (skipping runtime contract)"
-    echo "    Run ./infrastructure/tutor/apply-patches.sh to regenerate Tutor build artifacts."
+    echo "    Run ./scripts/infra/prepare-tutor-build-context.sh --target mfe to regenerate Tutor build artifacts."
   fi
 fi
 
@@ -186,7 +186,7 @@ fi
 echo "✗ MFE build prerequisites check failed."
 echo ""
 echo "Fixes:"
-echo "  1. Run: ./infrastructure/tutor/apply-patches.sh"
+echo "  1. Run: ./scripts/infra/prepare-tutor-build-context.sh --target mfe"
 echo "  2. Re-run: ./scripts/qa/verify-mfe-build-prereqs.sh"
 echo "  3. Then run branding gates: ./scripts/branding/run-branding-gates.sh prod"
 exit 1

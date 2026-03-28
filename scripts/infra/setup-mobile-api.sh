@@ -55,8 +55,8 @@ if [ "$ENV_TYPE" = "local" ]; then
   fi
   
   if [ "${NEEDS_RESTART:-false}" = "true" ]; then
-    echo "Applying patches..."
-    ./infrastructure/tutor/apply-patches.sh
+    echo "Preparing Tutor build context..."
+    ./scripts/infra/prepare-tutor-build-context.sh --target all
     echo "Restarting services..."
     tutor local restart
   fi

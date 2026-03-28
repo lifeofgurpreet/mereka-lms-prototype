@@ -23,7 +23,7 @@ tutor-restart: ## Restart Tutor local environment
 	source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && tutor local restart
 
 tutor-apply: ## Apply Tutor patches after config changes
-	source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && tutor config save && ./infrastructure/tutor/apply-patches.sh && tutor local restart
+	source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && ./scripts/infra/tutor-config-save.sh && tutor local restart
 
 tutor-verify: ## Verify Tutor config patches applied correctly
 	@echo "Verifying Tutor configuration patches..."

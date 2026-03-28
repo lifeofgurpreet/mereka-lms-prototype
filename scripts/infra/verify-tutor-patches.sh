@@ -7,7 +7,7 @@
 # Usage:
 #   ./scripts/infra/verify-tutor-patches.sh          # Normal output
 #   ./scripts/infra/verify-tutor-patches.sh --json   # JSON output
-#   ./scripts/infra/verify-tutor-patches.sh --fix    # Run apply-patches.sh on failure
+#   ./scripts/infra/verify-tutor-patches.sh --fix    # Re-prepare Tutor build context on failure
 
 set -euo pipefail
 
@@ -267,7 +267,7 @@ else:
     # Remediation
     if failed_checks > 0:
         print(f"{YELLOW}Remediation:{NC}")
-        print("  1. Run: ./infrastructure/tutor/apply-patches.sh")
+        print("  1. Run: ./scripts/infra/prepare-tutor-build-context.sh --target all")
         print("  2. Re-run this verification script\n")
         print("Or use --fix flag to auto-apply patches:")
         print("  scripts/infra/verify-tutor-patches.sh --fix\n")
@@ -281,8 +281,8 @@ VERIFICATION_EXIT_CODE=$?
 
 # Auto-fix if requested and there are failures
 if [[ "$AUTO_FIX" == "true" && $VERIFICATION_EXIT_CODE -ne 0 ]]; then
-  echo -e "${YELLOW}Auto-fix requested. Running apply-patches.sh...${NC}"
-  "$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+  echo -e "${YELLOW}Auto-fix requested. Running prepare-tutor-build-context.sh...${NC}"
+  "$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh" --target all
   echo ""
   echo -e "${GREEN}Patches applied. Re-running verification...${NC}"
   echo ""

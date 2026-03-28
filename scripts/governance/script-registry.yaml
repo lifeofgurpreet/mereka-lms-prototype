@@ -1340,20 +1340,41 @@ scripts:
 
   # ── Tutor Configuration ──────────────────────────────────────────────────────
 
+  - path: scripts/infra/prepare-tutor-build-context.sh
+    owner: platform-team
+    purpose: >
+      Canonical front door for mutating rendered Tutor build context. Delegates
+      to infrastructure/tutor/apply-patches.sh with an explicit target so CI
+      and local workflows can prepare only the required build surfaces.
+    inputs:
+      - --target all|openedx|mfe (optional; defaults to all)
+      - MEREKA_BUILD_TARGET (optional env override)
+    outputs:
+      - rendered Tutor build context for the selected target
+      - stdout (target-scoped preparation summary)
+    side_effects:
+      - Mutates rendered Tutor environment/build files through the canonical
+        apply-patches implementation
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/prepare-tutor-build-context.sh --help 2>&1 | head -5"
+    criticality: release-supporting
+
   - path: scripts/infra/tutor-config-save.sh
     owner: platform-team
     purpose: >
-      Safe wrapper for 'tutor config save'. Automatically applies patches and
-      verifies configuration. Use this instead of bare 'tutor config save'.
+      Safe wrapper for 'tutor config save'. Automatically prepares the Tutor
+      build context via the canonical target-scoped front door and verifies the
+      rendered configuration. Use this instead of bare 'tutor config save'.
     inputs:
       - TUTOR_ROOT (required env var)
       - tutor config save args (passed through)
     outputs:
       - tutor_env/ directory (regenerated)
-      - stdout (patch application summary)
+      - stdout (build-context preparation summary)
     side_effects:
       - Regenerates tutor_env/ from scratch (overwrites rendered files)
-      - Applies all infrastructure patches
+      - Re-prepares rendered Tutor build context for all targets
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/tutor-config-save.sh --help 2>&1 | head -5"

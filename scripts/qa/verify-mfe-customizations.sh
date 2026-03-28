@@ -211,7 +211,7 @@ fi
 echo ""
 
 if [[ "$FAIL" -gt 0 ]]; then
-  echo "  RESULT: FAIL — run ./infrastructure/tutor/apply-patches.sh to re-apply patches"
+  echo "  RESULT: FAIL — run ./scripts/infra/prepare-tutor-build-context.sh --target mfe to re-prepare the MFE build context"
   echo "  See docs/ops/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md for full maintenance guide."
   exit 1
 else

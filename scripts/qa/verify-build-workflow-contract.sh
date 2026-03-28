@@ -118,8 +118,7 @@ required_trigger_paths=(
   "infrastructure/tutor/themes/**"
   "infrastructure/tutor/brand-*/**"
   "assets/branding/**"
-  "infrastructure/tutor/apply-patches.sh"
-  "infrastructure/tutor/patches/**"
+  "scripts/infra/prepare-tutor-build-context.sh"
   "scripts/infra/resolve-build-scope.sh"
   "scripts/infra/install-cosign.sh"
   "scripts/infra/generate-build-provenance.sh"
@@ -167,6 +166,12 @@ else
   fail "verify-openedx-image-branding helper missing or not executable"
 fi
 
+if [[ -f "$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh" ]]; then
+  pass "prepare-tutor-build-context helper exists"
+else
+  fail "prepare-tutor-build-context helper missing"
+fi
+
 if [[ "$RESOLVE_SCOPE_BLOCK" == *"./scripts/infra/resolve-build-scope.sh"* ]]; then
   pass "workflow resolves push build scope via canonical helper"
 else
@@ -189,6 +194,24 @@ if grep -q "needs.resolve-build-scope.outputs.build_mfe == 'true'" "$BUILD_WF"; 
   pass "build-mfe job is gated by resolved build scope"
 else
   fail "build-mfe job missing resolved build-scope gate"
+fi
+
+if grep -q './scripts/infra/prepare-tutor-build-context.sh --target openedx' "$BUILD_WF"; then
+  pass "build-openedx job uses canonical target-aware build-context prep"
+else
+  fail "build-openedx job missing canonical target-aware build-context prep"
+fi
+
+if grep -q './scripts/infra/prepare-tutor-build-context.sh --target mfe' "$BUILD_WF"; then
+  pass "build-mfe job uses canonical target-aware build-context prep"
+else
+  fail "build-mfe job missing canonical target-aware build-context prep"
+fi
+
+if grep -q '\./infrastructure/tutor/apply-patches.sh' "$BUILD_WF"; then
+  fail "workflow still calls apply-patches.sh directly in build jobs"
+else
+  pass "workflow no longer calls apply-patches.sh directly in build jobs"
 fi
 
 required_trigger_exclusions=(

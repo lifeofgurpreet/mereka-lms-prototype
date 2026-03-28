@@ -5,7 +5,7 @@
 #   - .gitignore blocks tutor_env/config.yml
 #   - Pre-commit hook exists and is configured
 #   - tutor-config-save.sh creates backups before config save
-#   - apply-patches.sh is called after config save
+#   - prepare-tutor-build-context.sh is called after config save
 #   - verify-tutor-config.sh validates patches
 #
 # Usage: ./scripts/qa/verify-tutor-config-safety.sh
@@ -46,26 +46,30 @@ TUTOR_HOOK="$REPO_ROOT/.githooks/pre-tutor-config"
 check "pre-tutor-config hook exists" test -f "$TUTOR_HOOK"
 check "pre-tutor-config hook is executable" test -x "$TUTOR_HOOK"
 check "pre-tutor-config hook warns about config.yml secrets" grep -q "config.yml" "$TUTOR_HOOK"
-check "pre-tutor-config hook prompts for apply-patches.sh" grep -q "apply-patches.sh" "$TUTOR_HOOK"
+check "pre-tutor-config hook prompts for canonical build-context prep" grep -Eq "apply-patches\\.sh|prepare-tutor-build-context\\.sh" "$TUTOR_HOOK"
 echo ""
 
 # --- tutor-config-save.sh safety ---
 echo "--- tutor-config-save.sh ---"
 SAVE_SCRIPT="$REPO_ROOT/scripts/infra/tutor-config-save.sh"
+PREP_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
 check "tutor-config-save.sh exists" test -f "$SAVE_SCRIPT"
 check "tutor-config-save.sh is executable" test -x "$SAVE_SCRIPT"
 check "tutor-config-save.sh uses set -euo pipefail" grep -q "set -euo pipefail" "$SAVE_SCRIPT"
 check "tutor-config-save.sh creates timestamped backup" grep -q "backup.*date" "$SAVE_SCRIPT"
-check "tutor-config-save.sh calls apply-patches.sh" grep -q "apply-patches.sh" "$SAVE_SCRIPT"
+check "prepare-tutor-build-context.sh exists" test -f "$PREP_SCRIPT"
+check "prepare-tutor-build-context.sh is executable" test -x "$PREP_SCRIPT"
+check "tutor-config-save.sh calls prepare-tutor-build-context.sh" grep -q "prepare-tutor-build-context.sh" "$SAVE_SCRIPT"
 check "tutor-config-save.sh calls verify-tutor-config.sh" grep -q "verify-tutor-config" "$SAVE_SCRIPT"
 check "tutor-config-save.sh restores backup on failure" grep -q "Restoring backup" "$SAVE_SCRIPT"
 echo ""
 
-# --- apply-patches.sh ---
+# --- apply-patches.sh compatibility ---
 echo "--- apply-patches.sh ---"
 PATCHES_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 check "apply-patches.sh exists" test -f "$PATCHES_SCRIPT"
 check "apply-patches.sh is executable" test -x "$PATCHES_SCRIPT"
+check "apply-patches.sh supports target-aware compatibility" grep -q -- "--target" "$PATCHES_SCRIPT"
 echo ""
 
 # --- verify-tutor-config.sh ---

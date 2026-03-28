@@ -23,11 +23,10 @@ source infrastructure/tutor/tutor-env.sh
 After any `tutor config save` or plugin change:
 
 ```bash
-tutor config save --env-only        # regenerates tutor_env/env
-./infrastructure/tutor/apply-patches.sh        # keeps MySQL flags, forum env, Dockerfiles, etc.
+./scripts/infra/tutor-config-save.sh --env-only
 ```
 
-> **Why?** Tutor rewrites rendered templates each time you save. The patch script re-applies our Node patches, theme pointers, and forum/env adjustments.
+> **Why?** Tutor rewrites rendered templates each time you save. The canonical wrapper regenerates config, re-prepares the Tutor build context, and runs verification in one path.
 
 ## 3. Start / Stop Cycle
 
@@ -35,7 +34,7 @@ First boot (runs migrations + init jobs):
 
 ```bash
 tutor local launch -I --skip-build
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 Daily use:

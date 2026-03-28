@@ -262,7 +262,7 @@ if [[ $FAIL -gt 0 ]]; then
   echo
   echo "Action required: Fix branding configuration for multi-domain support."
   echo "  1. Ensure all domains configured: ${PRODUCTION_DOMAINS[*]}"
-  echo "  2. Run: ./infrastructure/tutor/apply-patches.sh"
+  echo "  2. Run: ./scripts/infra/prepare-tutor-build-context.sh --target all"
   echo "  3. Verify: ./scripts/branding/verify-branding-health.sh"
   exit 1
 fi
