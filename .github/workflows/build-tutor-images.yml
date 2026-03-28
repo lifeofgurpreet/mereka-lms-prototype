@@ -9,16 +9,32 @@ on:
     branches:
       - main
     paths:
-      - 'deploy/k8s/base/apps/openedx/**'
-      - 'infrastructure/tutor/**'
+      - 'requirements-tutor.txt'
+      - '.github/actions/setup-python-env/**'
+      - 'infrastructure/tutor/config.example.yml'
+      - 'infrastructure/tutor/apply-patches.sh'
+      - 'infrastructure/tutor/patches/**'
+      - 'infrastructure/tutor/custom-apps/**'
+      - 'infrastructure/tutor/plugins/**'
+      - 'infrastructure/tutor/themes/**'
+      - 'infrastructure/tutor/brand-*/**'
       - 'assets/branding/**'
       - 'infrastructure/tutor/apply-patches.sh'
       - 'infrastructure/tutor/patches/**'
-      - 'scripts/infra/**'
-      - 'scripts/lib/**'
+      - 'scripts/infra/resolve-build-scope.sh'
+      - 'scripts/infra/install-cosign.sh'
+      - 'scripts/infra/generate-build-provenance.sh'
+      - 'scripts/infra/generate-release-bundle.sh'
+      - 'scripts/infra/release-openedx-gitops.sh'
+      - 'scripts/infra/resolve-image-digest.sh'
+      - 'scripts/lib/lane-normalize.sh'
       - 'scripts/qa/verify-build-provenance.sh'
       - 'scripts/qa/verify-release-bundle.sh'
+      - 'scripts/qa/verify-mfe-image-branding.sh'
+      - 'scripts/qa/verify-mfe-runtime-contract.sh'
       - '.github/workflows/build-tutor-images.yml'
+      - '!infrastructure/tutor/**/*.md'
+      - '!infrastructure/tutor/mfe-build/**'
   workflow_dispatch:
     inputs:
       build_openedx:

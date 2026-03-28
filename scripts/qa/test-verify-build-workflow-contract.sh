@@ -23,16 +23,30 @@ on:
   push:
     branches: [main]
     paths:
-      - 'deploy/k8s/base/apps/openedx/**'
-      - 'infrastructure/tutor/**'
-      - 'assets/branding/**'
+      - 'requirements-tutor.txt'
+      - '.github/actions/setup-python-env/**'
+      - 'infrastructure/tutor/config.example.yml'
       - 'infrastructure/tutor/apply-patches.sh'
       - 'infrastructure/tutor/patches/**'
-      - 'scripts/infra/**'
-      - 'scripts/lib/**'
+      - 'infrastructure/tutor/custom-apps/**'
+      - 'infrastructure/tutor/plugins/**'
+      - 'infrastructure/tutor/themes/**'
+      - 'infrastructure/tutor/brand-*/**'
+      - 'assets/branding/**'
+      - 'scripts/infra/resolve-build-scope.sh'
+      - 'scripts/infra/install-cosign.sh'
+      - 'scripts/infra/generate-build-provenance.sh'
+      - 'scripts/infra/generate-release-bundle.sh'
+      - 'scripts/infra/release-openedx-gitops.sh'
+      - 'scripts/infra/resolve-image-digest.sh'
+      - 'scripts/lib/lane-normalize.sh'
       - 'scripts/qa/verify-build-provenance.sh'
       - 'scripts/qa/verify-release-bundle.sh'
+      - 'scripts/qa/verify-mfe-image-branding.sh'
+      - 'scripts/qa/verify-mfe-runtime-contract.sh'
       - '.github/workflows/build-tutor-images.yml'
+      - '!infrastructure/tutor/**/*.md'
+      - '!infrastructure/tutor/mfe-build/**'
   workflow_dispatch:
     inputs:
       build_openedx:
@@ -175,7 +189,6 @@ run_expect_fail() {
 
 write_pass_fixture
 run_expect_pass "build workflow contract passes with scope-aware routing and post-push scan jobs"
-
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
 from pathlib import Path
@@ -214,12 +227,77 @@ from pathlib import Path
 import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
-text = text.replace(
-    "    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}\n",
-    "    if: ${{ always() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment')) }}\n",
-)
+text = text.replace("      - 'scripts/infra/resolve-build-scope.sh'\n", "")
 p.write_text(text)
 PY
+run_expect_fail "missing exact helper path coverage is rejected"
+
+# Reintroduce broad scripts/infra glob => must fail
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+needle = "      - 'scripts/infra/install-cosign.sh'\n"
+text = text.replace(needle, needle + "      - 'scripts/infra/**'\n", 1)
+p.write_text(text)
+PY
+run_expect_fail "broad scripts/infra trigger glob is rejected"
+
+# Drop the doc/provenance exclusion => must fail
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace("      - '!infrastructure/tutor/**/*.md'\n", "")
+p.write_text(text)
+PY
+run_expect_fail "missing tutor markdown exclusion is rejected"
+
+# Reintroduce push-to-main auto-deploy => must fail
+cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
+name: build-tutor-images
+on:
+  workflow_dispatch:
+    inputs:
+      update_gitops:
+        type: boolean
+        default: false
+      target_environment:
+        type: choice
+        options: [select-environment, production, staging]
+permissions:
+  contents: write
+jobs:
+  build-openedx:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+  build-mfe:
+    steps:
+      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
+  release-bundle:
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+  update-gitops:
+    runs-on: ubuntu-latest
+    if: ${{ always() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment')) }}
+    steps:
+      - run: |
+          source ./scripts/lib/lane-normalize.sh
+          TARGET_ENV_RAW="${{ inputs.target_environment }}"
+          TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV_RAW}")"
+          test -n "$TARGET_ENV"
+      - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
+      - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-provenance
+          path: |
+            var/ci/build-provenance.json
+            var/ci/release-gate-envelope.json
+EOF
 run_expect_fail "update-gitops must not auto-run on push to main"
 
 write_pass_fixture
@@ -272,7 +350,7 @@ from pathlib import Path
 import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
-text = text.replace("      - 'scripts/infra/**'\n", "")
+text = text.replace("      - 'scripts/qa/verify-mfe-runtime-contract.sh'\n", "")
 p.write_text(text)
 PY
 run_expect_fail "missing script trigger path coverage is rejected"

@@ -24,6 +24,10 @@ PASS=0 FAIL=0
 
 pass() { echo "  PASS  $1"; PASS=$((PASS + 1)); }
 fail() { echo "  FAIL  $1"; FAIL=$((FAIL + 1)); }
+path_filter_has_entry() {
+  local entry="$1"
+  grep -qF -- "      - '$entry'" "$BUILD_WF"
+}
 
 echo "=== Build Workflow Contract ==="
 
@@ -100,17 +104,36 @@ else
   fail "permissions block missing"
 fi
 
-# Workflow path filter must include release/build scripts it executes.
+# Workflow path filter must include the exact image-bearing paths and helper
+# scripts the workflow executes. Broad globs here create expensive build fan-out
+# for docs/proof-only changes.
 required_trigger_paths=(
+  "requirements-tutor.txt"
+  ".github/actions/setup-python-env/**"
+  "infrastructure/tutor/config.example.yml"
   "infrastructure/tutor/apply-patches.sh"
   "infrastructure/tutor/patches/**"
-  "scripts/infra/**"
-  "scripts/lib/**"
+  "infrastructure/tutor/custom-apps/**"
+  "infrastructure/tutor/plugins/**"
+  "infrastructure/tutor/themes/**"
+  "infrastructure/tutor/brand-*/**"
+  "assets/branding/**"
+  "infrastructure/tutor/apply-patches.sh"
+  "infrastructure/tutor/patches/**"
+  "scripts/infra/resolve-build-scope.sh"
+  "scripts/infra/install-cosign.sh"
+  "scripts/infra/generate-build-provenance.sh"
+  "scripts/infra/generate-release-bundle.sh"
+  "scripts/infra/release-openedx-gitops.sh"
+  "scripts/infra/resolve-image-digest.sh"
+  "scripts/lib/lane-normalize.sh"
   "scripts/qa/verify-build-provenance.sh"
   "scripts/qa/verify-release-bundle.sh"
+  "scripts/qa/verify-mfe-image-branding.sh"
+  "scripts/qa/verify-mfe-runtime-contract.sh"
 )
 for trigger_path in "${required_trigger_paths[@]}"; do
-  if grep -qF -- "$trigger_path" "$BUILD_WF"; then
+  if path_filter_has_entry "$trigger_path"; then
     pass "workflow path filter includes $trigger_path"
   else
     fail "workflow path filter missing $trigger_path"
@@ -146,6 +169,32 @@ if grep -q "needs.resolve-build-scope.outputs.build_mfe == 'true'" "$BUILD_WF"; 
 else
   fail "build-mfe job missing resolved build-scope gate"
 fi
+
+required_trigger_exclusions=(
+  "!infrastructure/tutor/**/*.md"
+  "!infrastructure/tutor/mfe-build/**"
+)
+for trigger_exclusion in "${required_trigger_exclusions[@]}"; do
+  if path_filter_has_entry "$trigger_exclusion"; then
+    pass "workflow path filter excludes $trigger_exclusion"
+  else
+    fail "workflow path filter missing exclusion $trigger_exclusion"
+  fi
+done
+
+broad_trigger_globs=(
+  "deploy/k8s/base/apps/openedx/**"
+  "infrastructure/tutor/**"
+  "scripts/infra/**"
+  "scripts/lib/**"
+)
+for broad_glob in "${broad_trigger_globs[@]}"; do
+  if path_filter_has_entry "$broad_glob"; then
+    fail "workflow path filter still includes broad trigger glob $broad_glob"
+  else
+    pass "workflow path filter avoids broad trigger glob $broad_glob"
+  fi
+done
 
 # App-owned proof must route through lms-ops in build workflow
 if grep -qE '\./bin/lms-ops[[:space:]]+proof' "$BUILD_WF"; then

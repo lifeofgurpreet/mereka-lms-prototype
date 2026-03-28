@@ -8467,7 +8467,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-image-branding.sh",
-      "reference_count": 24,
+      "reference_count": 26,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8733,7 +8733,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-runtime-contract.sh",
-      "reference_count": 4,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
