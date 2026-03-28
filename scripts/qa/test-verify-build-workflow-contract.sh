@@ -62,20 +62,77 @@ jobs:
   build-openedx:
     needs: [resolve-build-scope, lint]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' }}
+    runs-on: mereka-k8s-heavy-builders
+    outputs:
+      image_digest: ${{ steps.digest.outputs.digest }}
     steps:
       - name: Verify OpenEdX build cache health
         run: |
           SUMMARY="${SUMMARY}\n✅ GHA cache exporters intentionally absent for OpenEdX build (docker driver + local image export)"
-      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
       - name: Verify OpenEdX image branding contract
         run: echo ok
+      - name: Tag and push image
+        run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
+      - name: Resolve pushed openedx digest
+        id: digest
+        run: echo "digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" >> "$GITHUB_OUTPUT"
+
   build-mfe:
     needs: [resolve-build-scope, lint]
     if: ${{ needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    runs-on: mereka-k8s-heavy-builders
+    outputs:
+      image_digest: ${{ steps.digest.outputs.digest }}
     steps:
-      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
+      - name: Verify MFE build cache health
+        run: echo ok
+      - name: Tag and push image
+        run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/mfe:sha"
+      - name: Resolve pushed mfe digest
+        id: digest
+        run: echo "digest=sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" >> "$GITHUB_OUTPUT"
+
+  scan-openedx-image:
+    runs-on: mereka-k8s-runners
+    needs: [build-openedx]
+    if: ${{ needs.build-openedx.result == 'success' }}
+    steps:
+      - name: Generate SBOM for OpenEdX image
+        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+      - name: Install Trivy CLI
+        run: echo install trivy
+      - name: Scan OpenEdX image for vulnerabilities
+        run: trivy image "${OPENEDX_IMAGE_REF}"
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+
+  scan-mfe-image:
+    runs-on: mereka-k8s-runners
+    needs: [build-mfe]
+    if: ${{ needs.build-mfe.result == 'success' }}
+    steps:
+      - name: Generate SBOM for MFE image
+        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${MFE_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+      - name: Install Trivy CLI
+        run: echo install trivy
+      - name: Scan MFE image for vulnerabilities
+        run: trivy image "${MFE_IMAGE_REF}"
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+
+  slsa-provenance:
+    needs: [build-openedx, build-mfe]
+    steps:
+      - run: echo provenance
+
   release-bundle:
+    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+
   update-gitops:
     runs-on: ubuntu-latest
     if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
@@ -117,7 +174,7 @@ run_expect_fail() {
 }
 
 write_pass_fixture
-run_expect_pass "build workflow contract passes with canonical scope routing"
+run_expect_pass "build workflow contract passes with scope-aware routing and post-push scan jobs"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
@@ -144,8 +201,8 @@ import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
-    "  release-bundle:\n    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}\n",
-    "  release-bundle:\n    steps:\n      - run: |\n          if [[ \"${{ github.event_name }}\" == \"workflow_dispatch\" ]]; then\n            TARGET_ENV=\"${{ inputs.target_environment }}\"\n            if [[ \"$TARGET_ENV\" == \"select-environment\" ]]; then\n              echo \"target_environment must be explicitly selected before generating a release bundle.\" >&2\n              exit 1\n            fi\n          fi\n",
+    "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}\n",
+    "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n    steps:\n      - run: |\n          if [[ \"${{ github.event_name }}\" == \"workflow_dispatch\" ]]; then\n            TARGET_ENV=\"${{ inputs.target_environment }}\"\n            if [[ \"$TARGET_ENV\" == \"select-environment\" ]]; then\n              echo \"target_environment must be explicitly selected before generating a release bundle.\" >&2\n              exit 1\n            fi\n          fi\n",
 )
 p.write_text(text)
 PY
@@ -241,6 +298,21 @@ text = text.replace("    if: ${{ needs.resolve-build-scope.outputs.build_openedx
 p.write_text(text)
 PY
 run_expect_fail "openedx build must stay gated by resolved scope"
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Generate SBOM for OpenEdX image\n'
+    '        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
+    '      - name: Generate SBOM for OpenEdX image\n'
+    '        run: "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "OpenEdX post-push SBOM generation must stay timeout-guarded"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
@@ -249,12 +321,43 @@ import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
-    '      - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
-    '      - run: "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
+    '      - name: Generate SBOM for OpenEdX image\n'
+    '        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n'
+    '        env:\n'
+    '          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}\n'
+    '      - name: Install Trivy CLI\n'
+    '        run: echo install trivy\n'
+    '      - name: Scan OpenEdX image for vulnerabilities\n'
+    '        run: trivy image "${OPENEDX_IMAGE_REF}"\n'
+    '        env:\n'
+    '          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}\n',
+    '',
+)
+text = text.replace(
+    '      - name: Verify OpenEdX image branding contract\n'
+    '        run: echo ok\n',
+    '      - name: Verify OpenEdX image branding contract\n'
+    '        run: echo ok\n'
+    '      - name: Generate SBOM for OpenEdX image\n'
+    '        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
 )
 p.write_text(text)
 PY
-run_expect_fail "OpenEdX SBOM generation must stay timeout-guarded"
+run_expect_fail "OpenEdX heavy build job must not host post-push scan steps"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n",
+    "  release-bundle:\n    needs: [build-openedx, build-mfe, slsa-provenance]\n",
+)
+p.write_text(text)
+PY
+run_expect_fail "release bundle must wait for post-push scan jobs"
 
 scope_output="$(printf 'infrastructure/tutor/themes/mereka/mfe/mereka.scss\n' | bash "$ROOT_DIR/scripts/infra/resolve-build-scope.sh")"
 [[ "$scope_output" == *'Scope label: `mfe-only`'* ]] || { echo "FAIL classifier should treat MFE theme changes as mfe-only" >&2; exit 1; }

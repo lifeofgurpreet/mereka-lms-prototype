@@ -327,7 +327,7 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
           # OpenEdX still needs a loadable local image for downstream branding,
-          # SBOM, Trivy, and retag/push steps. The docker-container + GHA cache
+          # retag/push steps, and post-build runtime checks. The docker-container + GHA cache
           # path regressed on main with "failed to solve: DeadlineExceeded: no
           # active session" during Tutor's final local-daemon export, so keep
           # this job on the reliable docker driver until the build no longer
@@ -523,98 +523,6 @@ jobs:
             test -f "/openedx/staticfiles/${HASHED_CSS}" \
             && echo "PASS: /openedx/staticfiles/${HASHED_CSS} exists" | tee -a var/ci/verify-openedx-image-branding.log \
             || { echo "FAIL: /openedx/staticfiles/${HASHED_CSS} missing" | tee -a var/ci/verify-openedx-image-branding.log; exit 1; }
-
-      - name: Generate SBOM for OpenEdX image
-        continue-on-error: true  # Non-blocking: SBOM is informational, should not block image push
-        run: |
-          mkdir -p var/ci
-          # Install syft v1.42.1 — checksum computed 2026-03-05
-          SYFT_VERSION="v1.42.1"
-          SYFT_INSTALL_SHA="01d0d15aff461f1bc54d1716feb4824341918c4f37e1b6a5a0c0caee2251be67"
-          curl -sSfL "https://raw.githubusercontent.com/anchore/syft/${SYFT_VERSION}/install.sh" \
-            -o /tmp/syft-install.sh
-          echo "${SYFT_INSTALL_SHA}  /tmp/syft-install.sh" | sha256sum -c -
-          sh /tmp/syft-install.sh -b "$HOME/.local/bin"
-          rm /tmp/syft-install.sh
-          # Use docker: source explicitly so syft reads from the local Docker daemon
-          # (anchore/sbom-action fails on ARC DinD runners because it can't resolve local images)
-          # Bound informational SBOM generation so a syft stall cannot occupy
-          # the main image-build lane indefinitely.
-          set +e
-          timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_LOCAL_IMAGE}" \
-            -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
-          sbom_status=$?
-          set -e
-          if [[ "$sbom_status" -eq 0 ]]; then
-            exit 0
-          fi
-          if [[ "$sbom_status" -eq 124 ]]; then
-            echo "OpenEdX SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
-          else
-            echo "OpenEdX SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
-          fi
-          exit "$sbom_status"
-
-      - name: Upload OpenEdX SBOM
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
-        if: always()
-        with:
-          name: sbom-openedx
-          path: var/ci/sbom-openedx.cdx.json
-          retention-days: 90
-
-      - name: Install Trivy CLI
-        run: |
-          # trivy v0.69.3 — checksum computed 2026-03-05
-          TRIVY_VERSION="v0.69.3"
-          TRIVY_INSTALL_SHA="e00df553be558995b994758bc8995956554a16937f456dc6615b0cc411bfec7a"
-          mkdir -p "$HOME/.local/bin"
-          curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_VERSION}/contrib/install.sh" \
-            -o /tmp/trivy-install.sh
-          echo "${TRIVY_INSTALL_SHA}  /tmp/trivy-install.sh" | sha256sum -c -
-          sh /tmp/trivy-install.sh -b "$HOME/.local/bin"
-          rm /tmp/trivy-install.sh
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      - name: Scan OpenEdX image for vulnerabilities
-        continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
-        run: |
-          mkdir -p var/ci
-          trivy image \
-            --format json \
-            --output var/ci/trivy-openedx.json \
-            --ignorefile .trivyignore \
-            --severity CRITICAL,HIGH \
-            "${OPENEDX_LOCAL_IMAGE}"
-
-          # Fail the build if any CRITICAL vulns are present
-          CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-openedx.json)
-          echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
-
-          # Emit human-readable HIGH summary for the artifact
-          jq -r '
-            ["Severity","PkgName","VulnerabilityID","Title"],
-            ((.Results // [])[] | .Vulnerabilities // []
-              | .[]
-              | select(.Severity == "HIGH")
-              | [.Severity, .PkgName, .VulnerabilityID, (.Title // "-")])
-            | @tsv' var/ci/trivy-openedx.json \
-            > var/ci/trivy-openedx-high-summary.txt || true
-
-          if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
-            echo "FAIL: ${CRITICAL_COUNT} CRITICAL vulnerabilities found in openedx image." >&2
-            jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
-              var/ci/trivy-openedx.json >&2
-            exit 1
-          fi
-
-      - name: Upload Trivy OpenEdX scan results
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
-        if: always()
-        with:
-          name: trivy-openedx-scan
-          path: var/ci/trivy-openedx*
-          retention-days: 3
 
       - name: Generate image metadata
         id: meta
@@ -922,97 +830,6 @@ jobs:
           scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_LOCAL_IMAGE}" \
             | tee var/ci/verify-mfe-runtime-contract.log
 
-      - name: Generate SBOM for MFE image
-        continue-on-error: true  # Non-blocking: SBOM is informational, should not block image push
-        run: |
-          mkdir -p var/ci
-          # Install syft v1.42.1 — checksum computed 2026-03-05
-          SYFT_VERSION="v1.42.1"
-          SYFT_INSTALL_SHA="01d0d15aff461f1bc54d1716feb4824341918c4f37e1b6a5a0c0caee2251be67"
-          curl -sSfL "https://raw.githubusercontent.com/anchore/syft/${SYFT_VERSION}/install.sh" \
-            -o /tmp/syft-install.sh
-          echo "${SYFT_INSTALL_SHA}  /tmp/syft-install.sh" | sha256sum -c -
-          sh /tmp/syft-install.sh -b "$HOME/.local/bin"
-          rm /tmp/syft-install.sh
-          # Use docker: source explicitly so syft reads from the local Docker daemon
-          # Bound informational SBOM generation so a syft stall cannot occupy
-          # the main image-build lane indefinitely.
-          set +e
-          timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" \
-            -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
-          sbom_status=$?
-          set -e
-          if [[ "$sbom_status" -eq 0 ]]; then
-            exit 0
-          fi
-          if [[ "$sbom_status" -eq 124 ]]; then
-            echo "MFE SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
-          else
-            echo "MFE SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
-          fi
-          exit "$sbom_status"
-
-      - name: Upload MFE SBOM
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
-        if: always()
-        with:
-          name: sbom-mfe
-          path: var/ci/sbom-mfe.cdx.json
-          retention-days: 90
-
-      - name: Install Trivy CLI
-        run: |
-          # trivy v0.69.3 — checksum computed 2026-03-05
-          TRIVY_VERSION="v0.69.3"
-          TRIVY_INSTALL_SHA="e00df553be558995b994758bc8995956554a16937f456dc6615b0cc411bfec7a"
-          mkdir -p "$HOME/.local/bin"
-          curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_VERSION}/contrib/install.sh" \
-            -o /tmp/trivy-install.sh
-          echo "${TRIVY_INSTALL_SHA}  /tmp/trivy-install.sh" | sha256sum -c -
-          sh /tmp/trivy-install.sh -b "$HOME/.local/bin"
-          rm /tmp/trivy-install.sh
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      - name: Scan MFE image for vulnerabilities
-        continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
-        run: |
-          mkdir -p var/ci
-          trivy image \
-            --format json \
-            --output var/ci/trivy-mfe.json \
-            --ignorefile .trivyignore \
-            --severity CRITICAL,HIGH \
-            "${MFE_LOCAL_IMAGE}"
-
-          # Fail the build if any CRITICAL vulns are present
-          CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-mfe.json)
-          echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
-
-          # Emit human-readable HIGH summary for the artifact
-          jq -r '
-            ["Severity","PkgName","VulnerabilityID","Title"],
-            ((.Results // [])[] | .Vulnerabilities // []
-              | .[]
-              | select(.Severity == "HIGH")
-              | [.Severity, .PkgName, .VulnerabilityID, (.Title // "-")])
-            | @tsv' var/ci/trivy-mfe.json \
-            > var/ci/trivy-mfe-high-summary.txt || true
-
-          if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
-            echo "FAIL: ${CRITICAL_COUNT} CRITICAL vulnerabilities found in mfe image." >&2
-            jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
-              var/ci/trivy-mfe.json >&2
-            exit 1
-          fi
-
-      - name: Upload Trivy MFE scan results
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
-        if: always()
-        with:
-          name: trivy-mfe-scan
-          path: var/ci/trivy-mfe*
-          retention-days: 3
-
       - name: Generate image metadata
         id: meta
         run: |
@@ -1076,6 +893,220 @@ jobs:
         with:
           name: mfe-runtime-contract-log
           path: var/ci/verify-mfe-runtime-contract.log
+          retention-days: 3
+
+  scan-openedx-image:
+    name: Post-push OpenEdX Scan
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 45
+    needs: [build-openedx]
+    if: ${{ needs.build-openedx.result == 'success' }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Generate SBOM for OpenEdX image
+        continue-on-error: true  # Non-blocking: SBOM is informational, should not block image delivery
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          # Install syft v1.42.1 — checksum computed 2026-03-05
+          SYFT_VERSION="v1.42.1"
+          SYFT_INSTALL_SHA="01d0d15aff461f1bc54d1716feb4824341918c4f37e1b6a5a0c0caee2251be67"
+          curl -sSfL "https://raw.githubusercontent.com/anchore/syft/${SYFT_VERSION}/install.sh" \
+            -o /tmp/syft-install.sh
+          echo "${SYFT_INSTALL_SHA}  /tmp/syft-install.sh" | sha256sum -c -
+          sh /tmp/syft-install.sh -b "$HOME/.local/bin"
+          rm /tmp/syft-install.sh
+          set +e
+          timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" \
+            -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+          sbom_status=$?
+          set -e
+          if [[ "$sbom_status" -eq 0 ]]; then
+            exit 0
+          fi
+          if [[ "$sbom_status" -eq 124 ]]; then
+            echo "OpenEdX registry SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
+          else
+            echo "OpenEdX registry SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
+          fi
+          exit "$sbom_status"
+
+      - name: Upload OpenEdX SBOM
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: sbom-openedx
+          path: var/ci/sbom-openedx.cdx.json
+          retention-days: 90
+
+      - name: Install Trivy CLI
+        run: |
+          # trivy v0.69.3 — checksum computed 2026-03-05
+          TRIVY_VERSION="v0.69.3"
+          TRIVY_INSTALL_SHA="e00df553be558995b994758bc8995956554a16937f456dc6615b0cc411bfec7a"
+          mkdir -p "$HOME/.local/bin"
+          curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_VERSION}/contrib/install.sh" \
+            -o /tmp/trivy-install.sh
+          echo "${TRIVY_INSTALL_SHA}  /tmp/trivy-install.sh" | sha256sum -c -
+          sh /tmp/trivy-install.sh -b "$HOME/.local/bin"
+          rm /tmp/trivy-install.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Scan OpenEdX image for vulnerabilities
+        continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          trivy image \
+            --format json \
+            --output var/ci/trivy-openedx.json \
+            --ignorefile .trivyignore \
+            --severity CRITICAL,HIGH \
+            "${OPENEDX_IMAGE_REF}"
+
+          CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-openedx.json)
+          echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
+
+          jq -r '
+            ["Severity","PkgName","VulnerabilityID","Title"],
+            ((.Results // [])[] | .Vulnerabilities // []
+              | .[]
+              | select(.Severity == "HIGH")
+              | [.Severity, .PkgName, .VulnerabilityID, (.Title // "-")])
+            | @tsv' var/ci/trivy-openedx.json \
+            > var/ci/trivy-openedx-high-summary.txt || true
+
+          if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
+            echo "FAIL: ${CRITICAL_COUNT} CRITICAL vulnerabilities found in openedx image." >&2
+            jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
+              var/ci/trivy-openedx.json >&2
+            exit 1
+          fi
+
+      - name: Upload Trivy OpenEdX scan results
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: trivy-openedx-scan
+          path: var/ci/trivy-openedx*
+          retention-days: 3
+
+  scan-mfe-image:
+    name: Post-push MFE Scan
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 45
+    needs: [build-mfe]
+    if: ${{ needs.build-mfe.result == 'success' }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Generate SBOM for MFE image
+        continue-on-error: true  # Non-blocking: SBOM is informational, should not block image delivery
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          # Install syft v1.42.1 — checksum computed 2026-03-05
+          SYFT_VERSION="v1.42.1"
+          SYFT_INSTALL_SHA="01d0d15aff461f1bc54d1716feb4824341918c4f37e1b6a5a0c0caee2251be67"
+          curl -sSfL "https://raw.githubusercontent.com/anchore/syft/${SYFT_VERSION}/install.sh" \
+            -o /tmp/syft-install.sh
+          echo "${SYFT_INSTALL_SHA}  /tmp/syft-install.sh" | sha256sum -c -
+          sh /tmp/syft-install.sh -b "$HOME/.local/bin"
+          rm /tmp/syft-install.sh
+          set +e
+          timeout 20m "$HOME/.local/bin/syft" scan "registry:${MFE_IMAGE_REF}" \
+            -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
+          sbom_status=$?
+          set -e
+          if [[ "$sbom_status" -eq 0 ]]; then
+            exit 0
+          fi
+          if [[ "$sbom_status" -eq 124 ]]; then
+            echo "MFE registry SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
+          else
+            echo "MFE registry SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
+          fi
+          exit "$sbom_status"
+
+      - name: Upload MFE SBOM
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: sbom-mfe
+          path: var/ci/sbom-mfe.cdx.json
+          retention-days: 90
+
+      - name: Install Trivy CLI
+        run: |
+          # trivy v0.69.3 — checksum computed 2026-03-05
+          TRIVY_VERSION="v0.69.3"
+          TRIVY_INSTALL_SHA="e00df553be558995b994758bc8995956554a16937f456dc6615b0cc411bfec7a"
+          mkdir -p "$HOME/.local/bin"
+          curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_VERSION}/contrib/install.sh" \
+            -o /tmp/trivy-install.sh
+          echo "${TRIVY_INSTALL_SHA}  /tmp/trivy-install.sh" | sha256sum -c -
+          sh /tmp/trivy-install.sh -b "$HOME/.local/bin"
+          rm /tmp/trivy-install.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Scan MFE image for vulnerabilities
+        continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          trivy image \
+            --format json \
+            --output var/ci/trivy-mfe.json \
+            --ignorefile .trivyignore \
+            --severity CRITICAL,HIGH \
+            "${MFE_IMAGE_REF}"
+
+          CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-mfe.json)
+          echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
+
+          jq -r '
+            ["Severity","PkgName","VulnerabilityID","Title"],
+            ((.Results // [])[] | .Vulnerabilities // []
+              | .[]
+              | select(.Severity == "HIGH")
+              | [.Severity, .PkgName, .VulnerabilityID, (.Title // "-")])
+            | @tsv' var/ci/trivy-mfe.json \
+            > var/ci/trivy-mfe-high-summary.txt || true
+
+          if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
+            echo "FAIL: ${CRITICAL_COUNT} CRITICAL vulnerabilities found in mfe image." >&2
+            jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
+              var/ci/trivy-mfe.json >&2
+            exit 1
+          fi
+
+      - name: Upload Trivy MFE scan results
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: trivy-mfe-scan
+          path: var/ci/trivy-mfe*
           retention-days: 3
 
   slsa-provenance:
@@ -1249,7 +1280,7 @@ jobs:
     name: Generate Release Bundle
     runs-on: mereka-k8s-runners
     timeout-minutes: 15
-    needs: [build-openedx, build-mfe, slsa-provenance]
+    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]
     # Run even if SLSA failed — provenance is desirable but must not block releases.
     # Manual proof runs may intentionally leave target_environment at the
     # placeholder value. Skip release-bundle generation in that case instead of

@@ -15,6 +15,10 @@ RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUI
 UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
 OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Verify OpenEdX image branding contract/p' "$BUILD_WF")"
 RESOLVE_SCOPE_BLOCK="$(sed -n '/^  resolve-build-scope:/,/^  lint:/p' "$BUILD_WF")"
+BUILD_OPENEDX_BLOCK="$(sed -n '/^  build-openedx:/,/^  build-mfe:/p' "$BUILD_WF")"
+BUILD_MFE_BLOCK="$(sed -n '/^  build-mfe:/,/^  scan-openedx-image:/p' "$BUILD_WF")"
+SCAN_OPENEDX_BLOCK="$(sed -n '/^  scan-openedx-image:/,/^  scan-mfe-image:/p' "$BUILD_WF")"
+SCAN_MFE_BLOCK="$(sed -n '/^  scan-mfe-image:/,/^  slsa-provenance:/p' "$BUILD_WF")"
 
 PASS=0 FAIL=0
 
@@ -158,17 +162,59 @@ else
 fi
 
 # Informational SBOM generation must be bounded so it cannot occupy the main
-# image-build lane indefinitely.
-if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "docker:\${OPENEDX_LOCAL_IMAGE}"' "$BUILD_WF"; then
-  pass "OpenEdX SBOM generation has a timeout guard"
+# image-build lane indefinitely, and it must run off the heavy builders.
+if [[ "$BUILD_OPENEDX_BLOCK" == *"Generate SBOM for OpenEdX image"* || "$BUILD_OPENEDX_BLOCK" == *"Scan OpenEdX image for vulnerabilities"* || "$BUILD_OPENEDX_BLOCK" == *"Install Trivy CLI"* ]]; then
+  fail "OpenEdX image scanning still runs inside the heavy build job"
 else
-  fail "OpenEdX SBOM generation missing timeout guard"
+  pass "OpenEdX heavy build job no longer performs SBOM/Trivy scanning"
 fi
 
-if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "docker:\${MFE_LOCAL_IMAGE}"' "$BUILD_WF"; then
-  pass "MFE SBOM generation has a timeout guard"
+if [[ "$BUILD_MFE_BLOCK" == *"Generate SBOM for MFE image"* || "$BUILD_MFE_BLOCK" == *"Scan MFE image for vulnerabilities"* || "$BUILD_MFE_BLOCK" == *"Install Trivy CLI"* ]]; then
+  fail "MFE image scanning still runs inside the heavy build job"
 else
-  fail "MFE SBOM generation missing timeout guard"
+  pass "MFE heavy build job no longer performs SBOM/Trivy scanning"
+fi
+
+if [[ "$SCAN_OPENEDX_BLOCK" == *"runs-on: mereka-k8s-runners"* && "$SCAN_OPENEDX_BLOCK" == *"needs: [build-openedx]"* ]]; then
+  pass "OpenEdX post-push scan runs on standard runners after build-openedx"
+else
+  fail "OpenEdX post-push scan job missing canonical runner or dependency"
+fi
+
+if [[ "$SCAN_MFE_BLOCK" == *"runs-on: mereka-k8s-runners"* && "$SCAN_MFE_BLOCK" == *"needs: [build-mfe]"* ]]; then
+  pass "MFE post-push scan runs on standard runners after build-mfe"
+else
+  fail "MFE post-push scan job missing canonical runner or dependency"
+fi
+
+if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "registry:\${OPENEDX_IMAGE_REF}"' "$BUILD_WF"; then
+  pass "OpenEdX post-push SBOM generation has a timeout guard"
+else
+  fail "OpenEdX post-push SBOM generation missing timeout guard"
+fi
+
+if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "registry:\${MFE_IMAGE_REF}"' "$BUILD_WF"; then
+  pass "MFE post-push SBOM generation has a timeout guard"
+else
+  fail "MFE post-push SBOM generation missing timeout guard"
+fi
+
+if [[ "$SCAN_OPENEDX_BLOCK" == *'${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}'* ]]; then
+  pass "OpenEdX post-push scan uses resolved pushed digest"
+else
+  fail "OpenEdX post-push scan missing resolved digest image ref"
+fi
+
+if [[ "$SCAN_MFE_BLOCK" == *'${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}'* ]]; then
+  pass "MFE post-push scan uses resolved pushed digest"
+else
+  fail "MFE post-push scan missing resolved digest image ref"
+fi
+
+if [[ "$RELEASE_BUNDLE_BLOCK" == *"scan-openedx-image"* && "$RELEASE_BUNDLE_BLOCK" == *"scan-mfe-image"* ]]; then
+  pass "release bundle waits for post-push scan artifact jobs"
+else
+  fail "release bundle missing post-push scan dependencies"
 fi
 
 # OpenEdX cache-health reporting must match the canonical strategy: registry +
